@@ -1,0 +1,7 @@
+# extended list of dependencies dor development and run lint and tests
+check-manifest
+coverage
+codecov
+pytest>=3.0.5
+pytest-cov
+pytest-flake8

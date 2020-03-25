@@ -1,0 +1,3 @@
+torch>=1.1
+pytorch-lightning>=0.7.1
+torchvision>=0.4.0
