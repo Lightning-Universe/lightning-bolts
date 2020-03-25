@@ -1,0 +1,11 @@
+sphinx>=2.0
+recommonmark  # fails with badges
+# m2r  # fails with multi-line text
+nbsphinx
+pandoc
+docutils
+sphinxcontrib-fulltoc
+sphinxcontrib-mockautodoc
+# pip_shims
+sphinx-autodoc-typehints
+sphinx-paramlinks

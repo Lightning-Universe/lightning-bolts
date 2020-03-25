@@ -20,6 +20,8 @@ references:
      command: |
        python --version ; pip --version ; pip list
        coverage run --source lightning_bolts -m py.test lightning_bolts tests -v --doctest-modules --junitxml=test-reports/pytest_junit.xml
+       coverage report
+       codecov
      no_output_timeout: 30m
 
   install_pkg: &install_pkg
@@ -54,7 +56,7 @@ references:
        pip install -r requirements.txt --user
        sudo pip install -r docs/requirements.txt
        # sphinx-apidoc -o ./docs/source ./pytorch_lightning **/test_* --force --follow-links
-       cd docs; make clean ; make html --debug --jobs 2 SPHINXOPTS="-W"
+       cd docs; make clean ; make html --debug --jobs 2
 
 jobs:
 
@@ -100,5 +102,5 @@ workflows:
     jobs:
       - Formatting
       - Testing
-      #- Build-Docs
+      - Build-Docs
       - Install-pkg
