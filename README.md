@@ -1,1 +1,1 @@
-# lightning-bolts
+# PyTorchLightning Bolts
