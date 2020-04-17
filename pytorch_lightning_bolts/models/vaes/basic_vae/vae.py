@@ -19,7 +19,8 @@ class VAE(pl.LightningModule):
         self.hparams = hparams
 
         if encoder is None:
-            self.encoder = Encoder(hidden_dim=hparams.hidden_dim, latent_dim=hparams.latent_dim, input_width=28, input_height=28)
+            self.encoder = Encoder(hidden_dim=hparams.hidden_dim, latent_dim=hparams.latent_dim,
+                                   input_width=hparams.input_width, input_height=hparams.input_height)
         else:
             self.encoder = encoder
 
@@ -138,6 +139,8 @@ class VAE(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--hidden_dim', type=int, default=128, help='dimension of itermediate layers before embedding')
         parser.add_argument('--latent_dim', type=int, default=32, help='dimension of latent variables z')
+        parser.add_argument('--input_width', type=int, default=28, help='input image width - 28 for MNIST')
+        parser.add_argument('--input_height', type=int, default=28, help='input image height - 28 for MNIST')
         return parser
 
 
