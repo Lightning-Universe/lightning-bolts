@@ -17,15 +17,18 @@ class VAE(pl.LightningModule):
     def __init__(self, hparams, encoder=None, decoder=None, prior='gaussian', approx_posterior='gaussian'):
         super().__init__(self)
         self.hparams = hparams
+        hidden_dim = hparams.hidden_dim if hasattr(hparams, 'hidden_dim') else 128
+        latent_dim = hparams.latent_dim if hasattr(hparams, 'latent_dim') else 32
+        input_width = hparams.input_width if hasattr(hparams, 'input_width') else 28
+        input_height = hparams.input_height if hasattr(hparams, 'input_height') else 28
 
         if encoder is None:
-            self.encoder = Encoder(hidden_dim=hparams.hidden_dim, latent_dim=hparams.latent_dim,
-                                   input_width=hparams.input_width, input_height=hparams.input_height)
+            self.encoder = Encoder(hidden_dim, latent_dim, input_width, input_height)
         else:
             self.encoder = encoder
 
         if decoder is None:
-            self.decoder = Decoder(hidden_dim=hparams.hidden_dim, latent_dim=hparams.latent_dim)
+            self.decoder = Decoder(hidden_dim, latent_dim)
         else:
             self.decoder = decoder
 
@@ -137,7 +140,7 @@ class VAE(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--hidden_dim', type=int, default=128, help='dimension of itermediate layers before embedding')
+        #parser.add_argument('--hidden_dim', type=int, default=128, help='dimension of itermediate layers before embedding for default encoder/decoder')
         parser.add_argument('--latent_dim', type=int, default=32, help='dimension of latent variables z')
         parser.add_argument('--input_width', type=int, default=28, help='input image width - 28 for MNIST')
         parser.add_argument('--input_height', type=int, default=28, help='input image height - 28 for MNIST')
