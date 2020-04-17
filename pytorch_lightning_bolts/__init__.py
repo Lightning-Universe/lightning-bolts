@@ -1,12 +1,8 @@
 """Root package info."""
 
-<<<<<<< HEAD:pytorch_lightning_bolts/__init__.py
-__version__ = '0.1.0-dev2'
-=======
 import os
 
-__version__ = '0.0.1dev'
->>>>>>> 9ee57f6484a8be75909243bc854ce165e945ebdb:pytorch_lightning_bolts/__init__.py
+__version__ = '0.0.1dev3'
 __author__ = 'PyTorchLightning et al.'
 __author_email__ = 'name@pytorchlightning.ai'
 __license__ = 'TBD'
