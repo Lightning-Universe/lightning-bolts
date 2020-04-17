@@ -21,6 +21,7 @@ class VAE(pl.LightningModule):
         latent_dim = hparams.latent_dim if hasattr(hparams, 'latent_dim') else 32
         input_width = hparams.input_width if hasattr(hparams, 'input_width') else 28
         input_height = hparams.input_height if hasattr(hparams, 'input_height') else 28
+        self.batch_size = hparams.input_height if hasattr(hparams, 'batch_size') else 32
 
         if encoder is None:
             self.encoder = Encoder(hidden_dim, latent_dim, input_width, input_height)
@@ -126,15 +127,15 @@ class VAE(pl.LightningModule):
         self.mnist_test = MNIST(os.getcwd(), train=False, download=True, transform=transforms.ToTensor())
 
     def train_dataloader(self):
-        loader = DataLoader(self.mnist_train, batch_size=32)
+        loader = DataLoader(self.mnist_train, batch_size=self.batch_size)
         return loader
 
     def val_dataloader(self):
-        loader = DataLoader(self.mnist_test, batch_size=32)
+        loader = DataLoader(self.mnist_test, batch_size=self.batch_size)
         return loader
 
     def test_dataloader(self):
-        loader = DataLoader(self.mnist_test, batch_size=32)
+        loader = DataLoader(self.mnist_test, batch_size=self.batch_size)
         return loader
 
     @staticmethod
@@ -144,6 +145,7 @@ class VAE(pl.LightningModule):
         parser.add_argument('--latent_dim', type=int, default=32, help='dimension of latent variables z')
         parser.add_argument('--input_width', type=int, default=28, help='input image width - 28 for MNIST')
         parser.add_argument('--input_height', type=int, default=28, help='input image height - 28 for MNIST')
+        parser.add_argument('--batch_size', type=int, default=32)
         return parser
 
 
