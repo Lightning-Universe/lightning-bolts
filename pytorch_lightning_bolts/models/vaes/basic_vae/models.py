@@ -10,11 +10,12 @@ class Encoder(torch.nn.Module):
   """
   def __init__(self, hidden_dim, latent_dim):
     super().__init__()
+    self.hidden_dim = hidden_dim
     self.latent_dim = latent_dim
     self.c1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)
     self.c2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
     self.c3 = nn.Conv2d(32, 32, kernel_size=3, stride=2, padding=1)
-    self.fc1 = DenseBlock(6272, hidden_dim)
+    self.fc1 = DenseBlock(1, hidden_dim)
     self.fc2 = DenseBlock(hidden_dim, hidden_dim)
     self.mu_fc = nn.Linear(hidden_dim, latent_dim)
     self.sigma_fc = nn.Linear(hidden_dim, latent_dim)
@@ -25,6 +26,11 @@ class Encoder(torch.nn.Module):
     x = F.relu(self.c2(x))
     x = F.relu(self.c3(x))
     x = x.view(x.size(0), -1)
+
+    if self.fc1.in_dim == 1:
+      self.fc1 = DenseBlock(x.size(-1), self.hidden_dim)
+      self.fc1.to(x.device)
+
     x = self.fc1(x)
     x = self.fc2(x)
     # generate mu
@@ -62,10 +68,11 @@ class Decoder(torch.nn.Module):
 
 class DenseBlock(nn.Module):
     def __init__(self, in_dim, out_dim, drop_p=0.2):
-      super(DenseBlock, self).__init__()
+      super().__init__()
       self.drop_p = drop_p
       self.fc1 = nn.Linear(in_dim, out_dim)
       self.fc_bn  = nn.BatchNorm1d(out_dim)
+      self.in_dim = in_dim
 
     def forward(self, x):
       x = self.fc1(x)
