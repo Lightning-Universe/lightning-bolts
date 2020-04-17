@@ -29,7 +29,7 @@ class VAE(pl.LightningModule):
             self.encoder = encoder
 
         if decoder is None:
-            self.decoder = Decoder(hidden_dim, latent_dim)
+            self.decoder = Decoder(hidden_dim, latent_dim, input_width, input_height)
         else:
             self.decoder = decoder
 
