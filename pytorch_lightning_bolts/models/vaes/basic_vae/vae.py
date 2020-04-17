@@ -16,14 +16,15 @@ class VAE(pl.LightningModule):
 
     def __init__(self, hparams, encoder=None, decoder=None, prior='gaussian', approx_posterior='gaussian'):
         super().__init__(self)
+        self.hparams = hparams
 
         if encoder is None:
-            self.encoder = Encoder(hidden_dim=128, latent_dim=32)
+            self.encoder = Encoder(hidden_dim=hparams.hidden_dim, latent_dim=hparams.latent_dim, input_width=28, input_height=28)
         else:
             self.encoder = encoder
 
         if decoder is None:
-            self.decoder = Decoder(hidden_dim=128, latent_dim=32)
+            self.decoder = Decoder(hidden_dim=hparams.hidden_dim, latent_dim=hparams.latent_dim)
         else:
             self.decoder = decoder
 
@@ -135,7 +136,8 @@ class VAE(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--encoder_layers', type=int, default=12)
+        parser.add_argument('--hidden_dim', type=int, default=128, help='dimension of itermediate layers before embedding')
+        parser.add_argument('--latent_dim', type=int, default=32, help='dimension of latent variables z')
         return parser
 
 
