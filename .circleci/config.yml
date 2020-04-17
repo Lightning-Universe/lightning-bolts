@@ -19,7 +19,7 @@ references:
      name: Testing
      command: |
        python --version ; pip --version ; pip list
-       coverage run --source lightning_bolts -m py.test lightning_bolts tests -v --doctest-modules --junitxml=test-reports/pytest_junit.xml
+       coverage run --source pytorch_lightning_bolts -m py.test pytorch_lightning_bolts tests -v --doctest-modules --junitxml=test-reports/pytest_junit.xml
        coverage report
        codecov
      no_output_timeout: 30m
@@ -29,13 +29,14 @@ references:
       name: Install package
       command: |
         virtualenv vEnv ; source vEnv/bin/activate
-        pip install --editable . ; cd .. & python -c "import lightning_bolts ; print(lightning_bolts.__version__)"
+        pip install --editable . ; cd .. & python -c "import pytorch_lightning_bolts ; print(pytorch_lightning_bolts.__version__)"
         deactivate ; rm -rf vEnv
 
   create_pkg: &create_pkg
     run:
       name: Create package
       command: |
+        python setup.py check --metadata --strict
         sudo pip install twine==1.13.0
         python setup.py sdist
         twine check dist/*
@@ -49,14 +50,14 @@ references:
        flake8
 
   make_docs: &make_docs
-   run:
-     name: Make Documentation
-     command: |
-       # sudo apt-get install pandoc
-       pip install -r requirements.txt --user
-       sudo pip install -r docs/requirements.txt
-       # sphinx-apidoc -o ./docs/source ./pytorch_lightning **/test_* --force --follow-links
-       cd docs; make clean ; make html --debug --jobs 2
+    run:
+      name: Make Documentation
+      command: |
+        # sudo apt-get install pandoc
+        pip install -r requirements.txt --user
+        sudo pip install -r docs/requirements.txt
+        # sphinx-apidoc -o ./docs/source ./pytorch_lightning **/test_* --force --follow-links
+        cd docs; make clean ; make html --debug --jobs 2 SPHINXOPTS="-W"
 
 jobs:
 

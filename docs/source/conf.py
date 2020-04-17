@@ -20,18 +20,18 @@ PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 PATH_ROOT = os.path.join(PATH_HERE, '..', '..')
 sys.path.insert(0, os.path.abspath(PATH_ROOT))
 
-import lightning_bolts  # noqa: E402
+import pytorch_lightning_bolts  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
 project = 'PyTorchLightning-Bolts'
-copyright = lightning_bolts.__copyright__
-author = lightning_bolts.__author__
+copyright = pytorch_lightning_bolts.__copyright__
+author = pytorch_lightning_bolts.__author__
 
 # The short X.Y version
-version = lightning_bolts.__version__
+version = pytorch_lightning_bolts.__version__
 # The full version, including alpha/beta/rc tags
-release = lightning_bolts.__version__
+release = pytorch_lightning_bolts.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -98,7 +98,7 @@ language = None
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = [
-    'lightning_bolts.rst',
+    'pytorch_lightning_bolts.rst',
     'modules.rst',
 ]
 
@@ -206,7 +206,7 @@ todo_include_todos = True
 # and commit them to my repo after making changes to my code.
 
 PACKAGES = [
-    lightning_bolts.__name__,
+    pytorch_lightning_bolts.__name__,
 ]
 
 

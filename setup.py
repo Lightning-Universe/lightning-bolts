@@ -10,7 +10,7 @@ from setuptools import setup, find_packages
 
 PATH_ROOT = os.path.dirname(__file__)
 
-import lightning_bolts  # noqa: E402
+import pytorch_lightning_bolts  # noqa: E402
 
 
 def load_requirements(path_dir=PATH_ROOT, comment_char='#'):
@@ -32,14 +32,14 @@ def load_requirements(path_dir=PATH_ROOT, comment_char='#'):
 # the goal of the project is simplicity for researchers, don't want to add too much
 # engineer specific practices
 setup(
-    name='lightning-bolts',
-    version=lightning_bolts.__version__,
-    description=lightning_bolts.__docs__,
-    author=lightning_bolts.__author__,
-    author_email=lightning_bolts.__author_email__,
-    url=lightning_bolts.__homepage__,
-    download_url='https://github.com/PyTorchLightning/lightning-bolts',
-    license=lightning_bolts.__license__,
+    name='pytorch-lightning-bolts',
+    version=pytorch_lightning_bolts.__version__,
+    description=pytorch_lightning_bolts.__docs__,
+    author=pytorch_lightning_bolts.__author__,
+    author_email=pytorch_lightning_bolts.__author_email__,
+    url=pytorch_lightning_bolts.__homepage__,
+    download_url='https://github.com/PyTorchLightning/pytorch-lightning-bolts',
+    license=pytorch_lightning_bolts.__license__,
     packages=find_packages(exclude=['tests']),
 
     long_description=open('README.md', encoding='utf-8').read(),
@@ -53,9 +53,9 @@ setup(
     install_requires=load_requirements(PATH_ROOT),
 
     project_urls={
-        "Bug Tracker": "https://github.com/PyTorchLightning/lightning-bolts/issues",
+        "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",
         "Documentation": "https://lightning-bolts.rtfd.io/en/latest/",
-        "Source Code": "https://github.com/PyTorchLightning/lightning-bolts",
+        "Source Code": "https://github.com/PyTorchLightning/pytorch-lightning-bolts",
     },
 
     classifiers=[
