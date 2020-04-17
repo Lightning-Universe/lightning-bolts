@@ -14,7 +14,7 @@ import pytorch_lightning as pl
 
 class VAE(pl.LightningModule):
 
-    def __init__(self, hparams, encoder=None, decoder=None, prior='gaussian', approx_posterior='gaussian'):
+    def __init__(self, hparams=None, encoder=None, decoder=None, prior='gaussian', approx_posterior='gaussian'):
         super().__init__(self)
         self.hparams = hparams
         hidden_dim = hparams.hidden_dim if hasattr(hparams, 'hidden_dim') else 128
