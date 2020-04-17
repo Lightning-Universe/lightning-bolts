@@ -140,7 +140,7 @@ class VAE(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        #parser.add_argument('--hidden_dim', type=int, default=128, help='dimension of itermediate layers before embedding for default encoder/decoder')
+        parser.add_argument('--hidden_dim', type=int, default=128, help='dimension of itermediate layers before embedding for default encoder/decoder')
         parser.add_argument('--latent_dim', type=int, default=32, help='dimension of latent variables z')
         parser.add_argument('--input_width', type=int, default=28, help='input image width - 28 for MNIST')
         parser.add_argument('--input_height', type=int, default=28, help='input image height - 28 for MNIST')
