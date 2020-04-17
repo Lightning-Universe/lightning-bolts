@@ -1,3 +1,0 @@
-"""
-Collection of PyTorchLightning loggers
-"""
