@@ -15,7 +15,7 @@
 
 You can install this package directly via pip
 ```bash
-pip install https://github.com/PyTorchLightning/lightning-bolts/archive/master.zip
+pip install https://github.com/PyTorchLightning/pytorch-lightning-bolts/archive/master.zip
 ```
 or clone repository locally and call
 ```bash
