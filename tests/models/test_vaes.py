@@ -15,5 +15,3 @@ def test_error_on_no_train_step(tmpdir):
     loss = trainer.callback_metrics['loss']
 
     assert loss <= 285, 'vae failed'
-
-
