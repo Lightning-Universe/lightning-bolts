@@ -33,6 +33,11 @@ version = pytorch_lightning_bolts.__version__
 # The full version, including alpha/beta/rc tags
 release = pytorch_lightning_bolts.__version__
 
+# Options for the linkcode extension
+# ----------------------------------
+github_user = 'PyTorchLightning'
+github_repo = project
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -251,12 +256,6 @@ MOCK_MANUAL_PACKAGES = [
 autodoc_mock_imports = MOCK_REQUIRE_PACKAGES + MOCK_MANUAL_PACKAGES
 # for mod_name in MOCK_REQUIRE_PACKAGES:
 #     sys.modules[mod_name] = mock.Mock()
-
-
-# Options for the linkcode extension
-# ----------------------------------
-github_user = 'PyTorchLightning'
-github_repo = project
 
 
 # Resolve function
