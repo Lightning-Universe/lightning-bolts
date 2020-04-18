@@ -108,7 +108,7 @@ class VAE(pl.LightningModule):
             'pxz': pxz
         }
 
-    def validation_end(self, outputs):
+    def validation_epoch_end(self, outputs):
         avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
         recon_loss = torch.stack([x['val_recon_loss'] for x in outputs]).mean()
         kl_loss = torch.stack([x['val_kl_div'] for x in outputs]).mean()
