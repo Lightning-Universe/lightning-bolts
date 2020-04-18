@@ -63,7 +63,7 @@ class VAE(pl.LightningModule):
     def _run_step(self, batch):
         x, _ = batch
         mu, log_var = self.encoder(x)
-        std = torch.exp(log_var/2)
+        std = torch.exp(log_var / 2)
 
         P = self.get_prior(mu, std)
         Q = self.get_approx_posterior(mu, std)
