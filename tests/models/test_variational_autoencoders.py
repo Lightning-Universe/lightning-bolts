@@ -1,6 +1,6 @@
 import pytorch_lightning as pl
 
-from ptl_bolts.models.variational_autoencoders import VAE
+from ptl_bolts.models.VAEs import VAE
 from tests import reset_seed
 
 

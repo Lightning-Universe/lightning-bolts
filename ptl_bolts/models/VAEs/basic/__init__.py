@@ -20,7 +20,7 @@ Use as a feature extractor
 For certain projects that require a VAE architecture you could use this as
 a module inside the larger system.
 
->>> from ptl_bolts.models.variational_autoencoders import VAE
+>>> from ptl_bolts.models.VAEs import VAE
 >>> import pytorch_lightning as pl
 
 >>> class YourResearchModel(pl.LightningModule):
@@ -45,7 +45,7 @@ For production or predictions, load weights, freeze the model and use as needed.
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.variational_autoencoders import VAE
+    from pytorch_lightning_bolts.models.VAEs import VAE
 
     vae = VAE.load_from_checkpoint(PATH)
     vae.freeze()
@@ -60,7 +60,7 @@ Here's an example on how to train this model from scratch
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.variational_autoencoders import VAE
+    from pytorch_lightning_bolts.models.VAEs import VAE
     import pytorch_lightning as pl
 
     vae = VAE()
@@ -76,7 +76,7 @@ For example to change the prior and posterior you could do this
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.variational_autoencoders import VAE
+    from pytorch_lightning_bolts.models.VAEs import VAE
 
     class MyVAEFlavor(VAE):
 
@@ -96,7 +96,7 @@ To change the encoder or decoder you could do this
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.variational_autoencoders import VAE
+    from pytorch_lightning_bolts.models.VAEs import VAE
 
     class MyVAEFlavor(VAE):
 
