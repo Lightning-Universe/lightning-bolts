@@ -1,5 +1,8 @@
 # VAE Template
-This is a basic template for implementing a Variational Autoencoder in PyTorch Lightning. A default encoder and decoder have been provided but can easily be replaced by custom functions. 
+This is a basic template for implementing a Variational Autoencoder in PyTorch Lightning. 
+
+A default encoder and decoder have been provided but can easily be replaced by custom models. 
+
 This template uses the MNIST dataset but image data of any dimension can be fed in as long as the image width and image height are even values. 
 For other types of data, such as sound, it will be necessary to change the Encoder and Decoder.
 
