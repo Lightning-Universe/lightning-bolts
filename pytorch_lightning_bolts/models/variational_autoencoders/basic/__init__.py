@@ -4,11 +4,13 @@ This is a basic template for implementing a Variational Autoencoder in PyTorch L
 
 A default encoder and decoder have been provided but can easily be replaced by custom models.
 
-This template uses the MNIST dataset but image data of any dimension can be fed in as long as the image width and image height are even values.
+This template uses the MNIST dataset but image data of any dimension can be fed in as long as the image
+ width and image height are even values.
 For other types of data, such as sound, it will be necessary to change the Encoder and Decoder.
 
 The default encoder and decoder are both convolutional with a 128-dimensional hidden layer and
-a 32-dimensional latent space. The model also assumes a Gaussian prior and a Gaussian approximate posterior distribution.
+a 32-dimensional latent space. The model also assumes a Gaussian prior and a Gaussian approximate
+ posterior distribution.
 
 ## How to use
 

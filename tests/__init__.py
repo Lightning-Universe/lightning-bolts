@@ -1,5 +1,6 @@
-import numpy as np
 import os
+
+import numpy as np
 import torch
 
 # generate a list of random seeds for each test
