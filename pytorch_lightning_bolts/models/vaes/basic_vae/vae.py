@@ -43,7 +43,7 @@ class VAE(pl.LightningModule):
     def forward(self, z):
         return self.decoder(z)
 
-    def _run_step(self, batch, batch_idx):
+    def _run_step(self, batch):
         x, _ = batch
         mu, log_var = self.encoder(x)
         std = torch.exp(log_var/2)
@@ -76,7 +76,7 @@ class VAE(pl.LightningModule):
         return loss, reconstruction_loss, kl_divergence, pxz
 
     def training_step(self, batch, batch_idx):
-        loss, reconstruction_loss, kl_divergence, pxz = self._run_step(batch, batch_idx)
+        loss, reconstruction_loss, kl_divergence, pxz = self._run_step(batch)
 
         tensorboard_logs = {
             'train_elbo_loss': loss,
@@ -87,7 +87,7 @@ class VAE(pl.LightningModule):
         return {'loss': loss, 'log': tensorboard_logs}
 
     def validation_step(self, batch, batch_idx):
-        loss, reconstruction_loss, kl_divergence, pxz = self._run_step(batch, batch_idx)
+        loss, reconstruction_loss, kl_divergence, pxz = self._run_step(batch)
 
         return {'val_loss': loss, 'reconstruction_loss': reconstruction_loss, 'kl_divergence': kl_divergence, 'pxz': pxz}
 
@@ -103,7 +103,7 @@ class VAE(pl.LightningModule):
         return {'avg_val_loss': avg_loss, 'log': tensorboard_logs}
 
     def test_step(self, batch, batch_idx):
-        loss, reconstruction_loss, kl_divergence, pxz = self._run_step(batch, batch_idx)
+        loss, reconstruction_loss, kl_divergence, pxz = self._run_step(batch)
 
         return {'test_loss': loss, 'reconstruction_loss': reconstruction_loss, 'kl_divergence': kl_divergence,
                 'pxz': pxz}
@@ -143,8 +143,8 @@ class VAE(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--hidden_dim', type=int, default=128, help='dimension of itermediate layers before embedding for default encoder/decoder')
         parser.add_argument('--latent_dim', type=int, default=32, help='dimension of latent variables z')
-        parser.add_argument('--input_width', type=int, default=28, help='input image width - 28 for MNIST')
-        parser.add_argument('--input_height', type=int, default=28, help='input image height - 28 for MNIST')
+        parser.add_argument('--input_width', type=int, default=28, help='input image width - 28 for MNIST (must be even)')
+        parser.add_argument('--input_height', type=int, default=28, help='input image height - 28 for MNIST (must be even)')
         parser.add_argument('--batch_size', type=int, default=32)
         return parser
 
