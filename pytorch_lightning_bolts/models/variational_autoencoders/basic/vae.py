@@ -167,7 +167,7 @@ class VAE(pl.LightningModule):
         return loader
 
     @staticmethod
-    def add_model_specific_args(parent_parser):
+    def add_model_specific_args(parent_parser):  # pragma: no cover
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--hidden_dim', type=int, default=128,
                             help='itermediate layers dimension before embedding for default encoder/decoder')
