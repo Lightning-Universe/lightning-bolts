@@ -93,7 +93,6 @@ if __LIGHTNING_BOLT_SETUP__:
     sys.stdout.write(f'Partial import of `{__name__}` during the build process.\n')  # pragma: no-cover
     # We are not importing the rest of the lightning during the build process, as it may not be compiled yet
 else:
-    from ptl_bolts.models.mnist_template import LitMNISTModel
 
     __all__ = [
         'LitMNISTModel'

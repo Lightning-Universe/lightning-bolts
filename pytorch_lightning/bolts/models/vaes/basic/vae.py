@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import torch
-from ptl_bolts.models.VAEs.basic.components import Encoder, Decoder
+from pytorch_lightning import Encoder, Decoder
 from torch import distributions
 from torch.nn import functional as F
 from torch.utils.data import DataLoader

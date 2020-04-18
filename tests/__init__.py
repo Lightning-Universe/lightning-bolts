@@ -3,6 +3,8 @@ import os
 import numpy as np
 import torch
 
+TEST_ROOT = os.path.dirname(__file__)
+PACKAGE_ROOT = os.path.dirname(TEST_ROOT)
 # generate a list of random seeds for each test
 ROOT_SEED = 1234
 

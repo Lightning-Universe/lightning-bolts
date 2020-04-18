@@ -1,6 +1,6 @@
 import pytorch_lightning as pl
 
-from ptl_bolts.models.VAEs import VAE
+from pytorch_lightning.bolts.models import vaes
 from tests import reset_seed
 
 

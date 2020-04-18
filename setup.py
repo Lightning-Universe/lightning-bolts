@@ -16,7 +16,7 @@ except ImportError:
 PATH_ROOT = os.path.dirname(__file__)
 builtins.__LIGHTNING_BOLT_SETUP__ = True
 
-import ptl_bolts  # noqa: E402
+import pytorch_lightning.bolts  # noqa: E402
 
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
@@ -26,14 +26,15 @@ import ptl_bolts  # noqa: E402
 # engineer specific practices
 setup(
     name='pytorch-lightning-bolts',
-    version=ptl_bolts.__version__,
-    description=ptl_bolts.__docs__,
-    author=ptl_bolts.__author__,
-    author_email=ptl_bolts.__author_email__,
-    url=ptl_bolts.__homepage__,
+    version=pytorch_lightning.bolts.__version__,
+    description=pytorch_lightning.bolts.__docs__,
+    author=pytorch_lightning.bolts.__author__,
+    author_email=pytorch_lightning.bolts.__author_email__,
+    url=pytorch_lightning.bolts.__homepage__,
     download_url='https://github.com/PyTorchLightning/pytorch-lightning-bolts',
-    license=ptl_bolts.__license__,
-    packages=find_packages(exclude=['tests']),
+    license=pytorch_lightning.bolts.__license__,
+    packages=find_packages(exclude=['tests', 'docs']),
+    namespace_packages=['pytorch_lightning'],
 
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
@@ -47,7 +48,7 @@ setup(
 
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",
-        "Documentation": "https://lightning-bolts.rtfd.io/en/latest/",
+        "Documentation": "https://pytorch-lightning-bolts.rtfd.io/en/latest/",
         "Source Code": "https://github.com/PyTorchLightning/pytorch-lightning-bolts",
     },
 
@@ -70,5 +71,6 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 )
