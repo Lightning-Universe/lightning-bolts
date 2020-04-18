@@ -5,7 +5,7 @@ import pytest
 from pytorch_lightning_bolts.models.vaes import VAE
 
 
-def test_error_on_no_train_step(tmpdir):
+def test_vae(tmpdir):
     """ Test that an error is thrown when no `training_step()` is defined """
     tutils.reset_seed()
 

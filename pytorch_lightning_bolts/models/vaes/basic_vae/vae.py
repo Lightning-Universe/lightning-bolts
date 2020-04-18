@@ -22,7 +22,7 @@ class VAE(pl.LightningModule):
             prior='gaussian',
             approx_posterior='gaussian'
     ):
-        super().__init__(self)
+        super().__init__()
         self.hparams = hparams
         hidden_dim = hparams.hidden_dim if hasattr(hparams, 'hidden_dim') else 128
         latent_dim = hparams.latent_dim if hasattr(hparams, 'latent_dim') else 32
