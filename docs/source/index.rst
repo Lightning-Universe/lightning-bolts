@@ -23,8 +23,6 @@ Indices and tables
 .. toctree::
    :hidden:
 
-   pytorch_lightning_bolts.mnist_template
-
    pytorch_lightning_bolts.models
    pytorch_lightning_bolts.callbacks
    pytorch_lightning_bolts.loggers
