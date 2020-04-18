@@ -48,7 +48,7 @@ class LitMNISTModel(pl.LightningModule):
         y_hat = self(x)
         return {'val_loss': F.cross_entropy(y_hat, y)}
 
-    def validation_end(self, outputs):
+    def validation_epoch_end(self, outputs):
         avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
         tensorboard_logs = {'val_loss': avg_loss}
         progress_bar_metrics = tensorboard_logs
