@@ -15,10 +15,13 @@ import sys
 import glob
 import shutil
 import inspect
+import builtins
 
 PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 PATH_ROOT = os.path.join(PATH_HERE, '..', '..')
 sys.path.insert(0, os.path.abspath(PATH_ROOT))
+
+builtins.__LIGHTNING_BOLT_SETUP__ = True
 
 import pytorch_lightning_bolts  # noqa: E402
 
@@ -43,7 +46,7 @@ github_repo = project
 
 # If your documentation needs a minimal Sphinx version, state it here.
 
-needs_sphinx = '1.7'
+needs_sphinx = '2.2'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
