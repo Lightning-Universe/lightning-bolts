@@ -98,7 +98,7 @@ class LitMNISTModel(pl.LightningModule):
         return loader
 
     @staticmethod
-    def add_model_specific_args(parent_parser):  # pragma: no cover
+    def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--batch_size', type=int, default=32)
         parser.add_argument('--hidden_dim', type=int, default=128)
@@ -106,7 +106,7 @@ class LitMNISTModel(pl.LightningModule):
         return parser
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
 
     # args
     parser = ArgumentParser()

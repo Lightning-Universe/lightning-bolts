@@ -9,8 +9,14 @@ def test_vae(tmpdir):
     reset_seed()
 
     vae = VAE()
-    trainer = pl.Trainer(train_percent_check=0.01, val_percent_check=0.1, max_epochs=1)
+    trainer = pl.Trainer(
+        train_percent_check=0.01,
+        val_percent_check=0.1,
+        max_epochs=1,
+        test_percent_check=0.01
+    )
     trainer.fit(vae)
+    trainer.test()
     loss = trainer.callback_metrics['loss']
 
     assert loss <= 350, 'vae failed'
