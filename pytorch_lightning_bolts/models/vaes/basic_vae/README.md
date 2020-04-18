@@ -84,15 +84,21 @@ trainer.fit(vae)
 
 ```bash
 cd pytorch_lightning_bolts/models/vaes/basic_vae
-
-python vae.py --hidden_dim 128 --latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12
+python vae.py
 ```
 
 The vae.py script accepts the following arguments:
 ```bash
+optional arguments:
 --hidden_dim        if using default encoder/decoder - dimension of itermediate (dense) layers before embedding
 --latent_dim        dimension of latent variables z 
 --input_width       input image width (must be even) - 28 for MNIST 
 --input_height      input image height (must be even) - 28 for MNIST
---batch_size        
+--batch_size       
+
+any arguments from pl.Trainer - e.g max_epochs, gpus
+```
+For example:
+```bash
+python vae.py --hidden_dim 128 --latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12
 ```
