@@ -27,18 +27,18 @@ sys.path.insert(0, os.path.abspath(PATH_ROOT))
 
 builtins.__LIGHTNING_BOLT_SETUP__ = True
 
-import pytorch_lightning_bolts  # noqa: E402
+import ptl_bolts  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
 project = 'PyTorchLightning-Bolts'
-copyright = pytorch_lightning_bolts.__copyright__
-author = pytorch_lightning_bolts.__author__
+copyright = ptl_bolts.__copyright__
+author = ptl_bolts.__author__
 
 # The short X.Y version
-version = pytorch_lightning_bolts.__version__
+version = ptl_bolts.__version__
 # The full version, including alpha/beta/rc tags
-release = pytorch_lightning_bolts.__version__
+release = ptl_bolts.__version__
 
 # Options for the linkcode extension
 # ----------------------------------
@@ -128,7 +128,7 @@ language = None
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = [
-    'pytorch_lightning_bolts.rst',
+    'ptl_bolts.rst',
     'modules.rst',
 ]
 
@@ -247,7 +247,7 @@ todo_include_todos = True
 # and commit them to my repo after making changes to my code.
 
 PACKAGES = [
-    pytorch_lightning_bolts.__name__,
+    ptl_bolts.__name__,
 ]
 
 

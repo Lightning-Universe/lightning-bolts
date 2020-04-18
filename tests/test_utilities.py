@@ -1,6 +1,6 @@
 import os
 
-from pytorch_lightning_bolts import PACKAGE_ROOT
+from ptl_bolts import PACKAGE_ROOT
 
 
 def test_paths():

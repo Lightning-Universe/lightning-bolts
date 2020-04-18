@@ -11,7 +11,7 @@ Fit as follows
 
 ```python
 import pytorch_lightning as pl
-from pytorch_lightning_bolts import LitMNISTModel
+from ptl_bolts import LitMNISTModel
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
@@ -36,7 +36,7 @@ then it makes sense to define the datasets outside of the LightningModule.
 ```python
 import os
 import pytorch_lightning as pl
-from pytorch_lightning_bolts import LitMNISTModel
+from ptl_bolts import LitMNISTModel
 from argparse import ArgumentParser
 from torchvision.datasets import MNIST
 from torch.utils.data import DataLoader, random_split

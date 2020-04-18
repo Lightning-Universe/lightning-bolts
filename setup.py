@@ -16,20 +16,7 @@ except ImportError:
 PATH_ROOT = os.path.dirname(__file__)
 builtins.__LIGHTNING_BOLT_SETUP__ = True
 
-import pytorch_lightning_bolts  # noqa: E402
-
-
-def load_requirements(path_dir=PATH_ROOT, comment_char='#'):
-    with open(os.path.join(path_dir, 'requirements.txt'), 'r') as file:
-        lines = [ln.strip() for ln in file.readlines()]
-    reqs = []
-    for ln in lines:
-        # filer all comments
-        if comment_char in ln:
-            ln = ln[:ln.index(comment_char)]
-        if ln:  # if requirement is not empty
-            reqs.append(ln)
-    return reqs
+import ptl_bolts  # noqa: E402
 
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
@@ -39,13 +26,13 @@ def load_requirements(path_dir=PATH_ROOT, comment_char='#'):
 # engineer specific practices
 setup(
     name='pytorch-lightning-bolts',
-    version=pytorch_lightning_bolts.__version__,
-    description=pytorch_lightning_bolts.__docs__,
-    author=pytorch_lightning_bolts.__author__,
-    author_email=pytorch_lightning_bolts.__author_email__,
-    url=pytorch_lightning_bolts.__homepage__,
+    version=ptl_bolts.__version__,
+    description=ptl_bolts.__docs__,
+    author=ptl_bolts.__author__,
+    author_email=ptl_bolts.__author_email__,
+    url=ptl_bolts.__homepage__,
     download_url='https://github.com/PyTorchLightning/pytorch-lightning-bolts',
-    license=pytorch_lightning_bolts.__license__,
+    license=ptl_bolts.__license__,
     packages=find_packages(exclude=['tests']),
 
     long_description=open('README.md', encoding='utf-8').read(),
@@ -56,7 +43,7 @@ setup(
     keywords=['deep learning', 'pytorch', 'AI'],
     python_requires='>=3.6',
     setup_requires=[],
-    install_requires=load_requirements(PATH_ROOT),
+    install_requires=['torch>=1.1', 'pytorch-lightning>=0.7.1'],
 
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",
