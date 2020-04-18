@@ -11,14 +11,14 @@ This template uses the MNIST dataset but image data of any dimension can be fed 
  to change the Encoder and Decoder.
 
 The default encoder and decoder are both convolutional with a 128-dimensional hidden layer and
- a 32-dimensional latent space. The model also assumes a Gaussian prior and a Gaussian approximate
- posterior distribution.
+ a 32-dimensional latent space. The model accepts arguments for these dimensions (see example below)
+ if you want to use the default encoder + decoder but with different hidden layer and latent layer dimensions.
+ The model also assumes a Gaussian prior and a Gaussian approximate posterior distribution.
 
-How to use
-----------
-
-To use in your project or as a feature extractor:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Use as a feature extractor
+--------------------------
+For certain projects that require a VAE architecture you could use this as
+a module inside the larger system.
 
 >>> from pytorch_lightning_bolts.models.variational_autoencoders import VAE
 >>> import pytorch_lightning as pl
@@ -39,8 +39,9 @@ To use in your project or as a feature extractor:
 ...        return x
 
 
-To use in production or for predictions:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Use in production of for inference
+----------------------------------
+For production or predictions, load weights, freeze the model and use as needed.
 
 .. code-block:: python
 
@@ -53,8 +54,9 @@ To use in production or for predictions:
     predictions = vae(z)
 
 
-To train the VAE on its own:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Train from scratch
+------------------
+Here's an example on how to train this model from scratch
 
 .. code-block:: python
 
@@ -66,8 +68,11 @@ To train the VAE on its own:
     trainer.fit(vae)
 
 
-To use as template for research (example of modifying only the prior):
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Use for research
+----------------
+To use the VAE for research, modify any relevant part you need.
+
+For example to change the prior and posterior you could do this
 
 .. code-block:: python
 
@@ -75,30 +80,37 @@ To use as template for research (example of modifying only the prior):
 
     class MyVAEFlavor(VAE):
 
-        def get_posterior(self, mu, std):
-            # do something other than the default
-            # P = self.get_distribution(self.prior, loc=torch.zeros_like(mu), scale=torch.ones_like(std))
+        def init_prior(self, z_mu, z_std):
+            P = MyPriorDistribution
+            # default is standard normal
+            # P = distributions.normal.Normal(loc=torch.zeros_like(z_mu), scale=torch.ones_like(z_std))
             return P
 
+        def init_posterior(self, z_mu, z_std):
+            Q = MyPosteriorDistribution
+            # default is normal(z_mu, z_sigma)
+            # Q = distributions.normal.Normal(loc=z_mu, scale=z_std)
+            return Q
 
-Or pass in your own encoders and decoders:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+To change the encoder or decoder you could do this
 
 .. code-block:: python
 
     from pytorch_lightning_bolts.models.variational_autoencoders import VAE
-    import pytorch_lightning as pl
 
-    encoder = MyEncoder()
-    decoder = MyDecoder()
+    class MyVAEFlavor(VAE):
 
-    vae = VAE(encoder=encoder, decoder=decoder)
-    trainer = pl.Trainer(gpus=1)
-    trainer.fit(vae)
+        def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
+            encoder = MyEncoder(...)
+            return encoder
+
+        def init_decoder(self, hidden_dim, latent_dim, input_width, input_height):
+            decoder = MyDecoder(...)
+            return decoder
 
 
-Train the VAE from the command line:
-------------------------------------
+Train VAE from the command line
+-------------------------------
 
 .. code-block:: bash
 
