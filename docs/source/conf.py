@@ -15,7 +15,11 @@ import sys
 import glob
 import shutil
 import inspect
+import re
+# import m2r
 import builtins
+
+import pt_lightning_sphinx_theme
 
 PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 PATH_ROOT = os.path.join(PATH_HERE, '..', '..')
@@ -42,6 +46,23 @@ github_user = 'PyTorchLightning'
 github_repo = project
 
 
+# -- Project documents -------------------------------------------------------
+
+# export the documentation
+with open('intro.rst', 'w') as fp:
+    fp.write(pytorch_lightning_bolts.__long_doc__)
+
+# export the READme
+with open(os.path.join(PATH_ROOT, 'README.md'), 'r') as fp:
+    readme = fp.read()
+# TODO: temp fix removing SVG badges and GIF, because PDF cannot show them
+readme = re.sub(r'(\[!\[.*\))', '', readme)
+readme = re.sub(r'(!\[.*.gif\))', '', readme)
+for dir_name in (os.path.basename(p) for p in glob.glob(os.path.join(PATH_ROOT, '*')) if os.path.isdir(p)):
+    readme = readme.replace('](%s/' % dir_name, '](%s/%s/' % (PATH_ROOT, dir_name))
+with open('readme.md', 'w') as fp:
+    fp.write(readme)
+
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -64,6 +85,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'recommonmark',
     'sphinx.ext.autosectionlabel',
+    # 'm2r',
     'nbsphinx',
     'sphinx_autodoc_typehints',
     'sphinx_paramlinks',
@@ -119,19 +141,25 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'pt_lightning_sphinx_theme'
+html_theme_path = [pt_lightning_sphinx_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 
 html_theme_options = {
+    'pytorch_project': pytorch_lightning_bolts.__homepage__,
+    'canonical_url': pytorch_lightning_bolts.__homepage__,
+    'collapse_navigation': False,
+    'display_version': True,
+    'logo_only': False,
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []  # '_static'
+html_static_path = ['_templates']  # '_static'
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
@@ -176,7 +204,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, project, project + ' Documentation', author, project,
-     'One line description of project.', 'Miscellaneous'),
+     'The lightweight PyTorch wrapper for ML researchers. Scale your models. Write less boilerplate.',
+     'Miscellaneous'),
 ]
 
 # -- Options for Epub output -------------------------------------------------
@@ -199,7 +228,11 @@ epub_exclude_files = ['search.html']
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'torch': ('https://pytorch.org/docs/stable/', None),
+    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+}
 
 # -- Options for todo extension ----------------------------------------------
 
@@ -309,7 +342,7 @@ autodoc_default_options = {
     'methods': None,
     # 'attributes': None,
     'special-members': '__call__',
-    # 'exclude-members': '__weakref__',
+    'exclude-members': '_abc_impl',
     'show-inheritance': True,
     'private-members': True,
     'noindex': True,
