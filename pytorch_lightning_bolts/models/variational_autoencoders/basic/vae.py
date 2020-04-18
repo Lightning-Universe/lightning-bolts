@@ -16,10 +16,6 @@ class VAE(pl.LightningModule):
     def __init__(
             self,
             hparams=None,
-            encoder=None,
-            decoder=None,
-            prior='gaussian',
-            approx_posterior='gaussian'
     ):
         super().__init__()
         self.hparams = hparams
@@ -29,90 +25,93 @@ class VAE(pl.LightningModule):
         input_height = hparams.input_height if hasattr(hparams, 'input_height') else 28
         self.batch_size = hparams.input_height if hasattr(hparams, 'batch_size') else 32
 
-        if encoder is None:
-            self.encoder = Encoder(hidden_dim, latent_dim, input_width, input_height)
-        else:
-            self.encoder = encoder
+        self.encoder = self.init_encoder(hidden_dim, latent_dim, input_width, input_height)
+        self.decoder = self.init_decoder(hidden_dim, latent_dim, input_width, input_height)
 
-        if decoder is None:
-            self.decoder = Decoder(hidden_dim, latent_dim, input_width, input_height)
-        else:
-            self.decoder = decoder
+    def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
+        encoder = Encoder(hidden_dim, latent_dim, input_width, input_height)
+        return encoder
 
-        self.prior = prior
-        self.approx_posterior = approx_posterior
+    def init_decoder(self, hidden_dim, latent_dim, input_width, input_height):
+        decoder = Decoder(hidden_dim, latent_dim, input_width, input_height)
+        return decoder
 
-    def get_distribution(self, name, **params):
-        if name == 'gaussian':
-            return distributions.normal.Normal(**params)
+    def get_prior(self, z_mu, z_std):
+        # Prior ~ Normal(0,1)
+        P = distributions.normal.Normal(loc=torch.zeros_like(z_mu), scale=torch.ones_like(z_std))
+        return P
+
+    def get_approx_posterior(self, z_mu, z_std):
+        # Approx Posterior ~ Normal(mu, sigma)
+        Q = distributions.normal.Normal(loc=z_mu, scale=z_std)
+        return Q
+
+    def elbo_loss(self, x, P, Q):
+        # Reconstruction loss
+        z = Q.rsample()
+        pxz = self(z)
+        recon_loss = F.binary_cross_entropy(pxz, x, reduction='none')
+        # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
+        # multivariate gaussian
+        recon_loss = recon_loss.sum(dim=-1)
+
+        # KL divergence loss
+        log_qz = Q.log_prob(z)
+        log_pz = P.log_prob(z)
+        kl_div = (log_qz - log_pz).sum(dim=1)
+
+        # ELBO = reconstruction + KL
+        loss = recon_loss + kl_div
+
+        # average over batch
+        loss = loss.mean()
+        recon_loss = recon_loss.mean()
+        kl_div = kl_div.mean()
+
+        return loss, recon_loss, kl_div, pxz
 
     def forward(self, z):
         return self.decoder(z)
 
-    def get_prior(self, mu, std):
-        # Prior ~ Normal(0,1)
-        P = self.get_distribution(self.prior, loc=torch.zeros_like(mu), scale=torch.ones_like(std))
-        return P
-
-    def get_approx_posterior(self, mu, std):
-        # Approx Posterior ~ Normal(mu, sigma)
-        Q = self.get_distribution(self.approx_posterior, loc=mu, scale=std)
-        return Q
-
     def _run_step(self, batch):
         x, _ = batch
-        mu, log_var = self.encoder(x)
-        std = torch.exp(log_var / 2)
+        z_mu, z_log_var = self.encoder(x)
+        z_std = torch.exp(z_log_var / 2)
 
-        P = self.get_prior(mu, std)
-        Q = self.get_approx_posterior(mu, std)
+        P = self.get_prior(z_mu, z_std)
+        Q = self.get_approx_posterior(z_mu, z_std)
 
-        z = Q.rsample()
-        pxz = self(z)
-
-        # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
-        # multivariate gaussian
         x = x.view(x.size(0), -1)
-        reconstruction_loss = F.binary_cross_entropy(pxz, x, reduction='none')
-        reconstruction_loss = reconstruction_loss.sum(dim=-1)
 
-        log_qz = Q.log_prob(z)
-        log_pz = P.log_prob(z)
-        kl_divergence = (log_qz - log_pz).sum(dim=1)
+        loss, recon_loss, kl_div, pxz = self.elbo_loss(x, P, Q)
 
-        # ELBO = reconstruction + KL
-        loss = reconstruction_loss + kl_divergence
-
-        # average loss over batch
-        loss = loss.mean()
-
-        return loss, reconstruction_loss, kl_divergence, pxz
+        return loss, recon_loss, kl_div, pxz
 
     def training_step(self, batch, batch_idx):
-        loss, reconstruction_loss, kl_divergence, pxz = self._run_step(batch)
+        loss, recon_loss, kl_div, pxz = self._run_step(batch)
 
         tensorboard_logs = {
             'train_elbo_loss': loss,
-            'train_recon_loss': reconstruction_loss.mean(),
-            'train_kl_loss': kl_divergence.mean()
+            'train_recon_loss': recon_loss,
+            'train_kl_loss': kl_div
         }
 
         return {'loss': loss, 'log': tensorboard_logs}
 
     def validation_step(self, batch, batch_idx):
-        loss, reconstruction_loss, kl_divergence, pxz = self._run_step(batch)
+        loss, recon_loss, kl_div, pxz = self._run_step(batch)
 
         return {
             'val_loss': loss,
-            'reconstruction_loss': reconstruction_loss,
-            'kl_divergence': kl_divergence,
+            'val_recon_loss': recon_loss,
+            'val_kl_div': kl_div,
             'pxz': pxz
         }
 
     def validation_end(self, outputs):
         avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
-        recon_loss = torch.stack([x['reconstruction_loss'] for x in outputs]).mean()
-        kl_loss = torch.stack([x['kl_divergence'] for x in outputs]).mean()
+        recon_loss = torch.stack([x['val_recon_loss'] for x in outputs]).mean()
+        kl_loss = torch.stack([x['val_kl_div'] for x in outputs]).mean()
 
         tensorboard_logs = {'val_elbo_loss': avg_loss,
                             'val_recon_loss': recon_loss,
@@ -124,19 +123,19 @@ class VAE(pl.LightningModule):
         }
 
     def test_step(self, batch, batch_idx):
-        loss, reconstruction_loss, kl_divergence, pxz = self._run_step(batch)
+        loss, recon_loss, kl_div, pxz = self._run_step(batch)
 
         return {
             'test_loss': loss,
-            'reconstruction_loss': reconstruction_loss,
-            'kl_divergence': kl_divergence,
+            'test_recon_loss': recon_loss,
+            'test_kl_div': kl_div,
             'pxz': pxz
         }
 
     def test_epoch_end(self, outputs):
         avg_loss = torch.stack([x['test_loss'] for x in outputs]).mean()
-        recon_loss = torch.stack([x['reconstruction_loss'] for x in outputs]).mean()
-        kl_loss = torch.stack([x['kl_divergence'] for x in outputs]).mean()
+        recon_loss = torch.stack([x['test_recon_loss'] for x in outputs]).mean()
+        kl_loss = torch.stack([x['test_kl_div'] for x in outputs]).mean()
 
         tensorboard_logs = {'test_elbo_loss': avg_loss,
                             'test_recon_loss': recon_loss,
