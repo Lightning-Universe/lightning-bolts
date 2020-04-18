@@ -1,5 +1,7 @@
 """
-# VAE Template
+VAE Template
+============
+
 This is a basic template for implementing a Variational Autoencoder in PyTorch Lightning.
 
 A default encoder and decoder have been provided but can easily be replaced by custom models.
@@ -9,12 +11,14 @@ This template uses the MNIST dataset but image data of any dimension can be fed 
 For other types of data, such as sound, it will be necessary to change the Encoder and Decoder.
 
 The default encoder and decoder are both convolutional with a 128-dimensional hidden layer and
-a 32-dimensional latent space. The model also assumes a Gaussian prior and a Gaussian approximate
+ a 32-dimensional latent space. The model also assumes a Gaussian prior and a Gaussian approximate
  posterior distribution.
 
-## How to use
+How to use
+----------
 
-##### To use in your project or as a feature extractor:
+To use in your project or as a feature extractor:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 >>> from pytorch_lightning_bolts.models.variational_autoencoders import VAE
 >>> import pytorch_lightning as pl
@@ -35,8 +39,8 @@ a 32-dimensional latent space. The model also assumes a Gaussian prior and a Gau
 ...        return x
 
 
-
-##### To use in production or for predictions:
+To use in production or for predictions:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -49,7 +53,8 @@ a 32-dimensional latent space. The model also assumes a Gaussian prior and a Gau
     predictions = vae(z)
 
 
-##### To train the VAE on its own:
+To train the VAE on its own:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -61,7 +66,8 @@ a 32-dimensional latent space. The model also assumes a Gaussian prior and a Gau
     trainer.fit(vae)
 
 
-##### To use as template for research (example of modifying only the prior):
+To use as template for research (example of modifying only the prior):
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -75,7 +81,8 @@ a 32-dimensional latent space. The model also assumes a Gaussian prior and a Gau
             return P
 
 
-##### Or pass in your own encoders and decoders:
+Or pass in your own encoders and decoders:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -90,7 +97,8 @@ a 32-dimensional latent space. The model also assumes a Gaussian prior and a Gau
     trainer.fit(vae)
 
 
-### Train the VAE from the command line:
+Train the VAE from the command line:
+------------------------------------
 
 .. code-block:: bash
 
@@ -98,17 +106,17 @@ a 32-dimensional latent space. The model also assumes a Gaussian prior and a Gau
     python vae.py
 
 
-The vae.py script accepts the following arguments:
-```bash
-optional arguments:
---hidden_dim        if using default encoder/decoder - dimension of itermediate (dense) layers before embedding
---latent_dim        dimension of latent variables z
---input_width       input image width (must be even) - 28 for MNIST
---input_height      input image height (must be even) - 28 for MNIST
---batch_size
+The vae.py script accepts the following arguments::
 
-any arguments from pl.Trainer - e.g max_epochs, gpus
-```
+    optional arguments:
+    --hidden_dim        if using default encoder/decoder - dimension of itermediate (dense) layers before embedding
+    --latent_dim        dimension of latent variables z
+    --input_width       input image width (must be even) - 28 for MNIST
+    --input_height      input image height (must be even) - 28 for MNIST
+    --batch_size
+
+    any arguments from pl.Trainer - e.g max_epochs, gpus
+
 For example::
 
     python vae.py --hidden_dim 128 --latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12
