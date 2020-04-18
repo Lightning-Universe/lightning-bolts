@@ -43,16 +43,23 @@ class VAE(pl.LightningModule):
     def forward(self, z):
         return self.decoder(z)
 
+    def get_prior(self, mu, std):
+        # Prior ~ Normal(0,1)
+        P = self.get_distribution(self.prior, loc=torch.zeros_like(mu), scale=torch.ones_like(std))
+        return P
+
+    def get_approx_posterior(self, mu, std):
+        # Approx Posterior ~ Normal(mu, sigma)
+        Q = self.get_distribution(self.approx_posterior, loc=mu, scale=std)
+        return Q
+
     def _run_step(self, batch):
         x, _ = batch
         mu, log_var = self.encoder(x)
         std = torch.exp(log_var/2)
 
-        # Prior ~ Normal(0,1)
-        P = self.get_distribution(self.prior, loc=torch.zeros_like(mu), scale=torch.ones_like(std))
-
-        # Approx Posterior ~ Normal(mu, sigma)
-        Q = self.get_distribution(self.approx_posterior, loc=mu, scale=std)
+        P = self.get_prior(mu, std)
+        Q = self.get_approx_posterior(mu, std)
 
         z = Q.rsample()
         pxz = self(z)
@@ -151,8 +158,10 @@ class VAE(pl.LightningModule):
 
 if __name__ == '__main__':
     parser = ArgumentParser()
+    parser = pl.Trainer.add_argparse_args(parser)
     parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args()
 
     vae = VAE(args)
-    pl.Trainer(fast_dev_run=True).fit(vae)
+    trainer = pl.Trainer.from_argparse_args(args)
+    trainer.fit(vae)
