@@ -15,7 +15,10 @@ import sys
 import glob
 import shutil
 import inspect
+# import m2r
 import builtins
+
+import pt_lightning_sphinx_theme
 
 PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 PATH_ROOT = os.path.join(PATH_HERE, '..', '..')
@@ -64,6 +67,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'recommonmark',
     'sphinx.ext.autosectionlabel',
+    # 'm2r',
     'nbsphinx',
     'sphinx_autodoc_typehints',
     'sphinx_paramlinks',
@@ -119,13 +123,19 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'pt_lightning_sphinx_theme'
+html_theme_path = [pt_lightning_sphinx_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 
 html_theme_options = {
+    'pytorch_project': pytorch_lightning_bolts.__homepage__,
+    'canonical_url': pytorch_lightning_bolts.__homepage__,
+    'collapse_navigation': False,
+    'display_version': True,
+    'logo_only': False,
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -176,7 +186,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, project, project + ' Documentation', author, project,
-     'One line description of project.', 'Miscellaneous'),
+     'The lightweight PyTorch wrapper for ML researchers. Scale your models. Write less boilerplate.',
+     'Miscellaneous'),
 ]
 
 # -- Options for Epub output -------------------------------------------------
@@ -199,7 +210,11 @@ epub_exclude_files = ['search.html']
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'torch': ('https://pytorch.org/docs/stable/', None),
+    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+}
 
 # -- Options for todo extension ----------------------------------------------
 
@@ -309,7 +324,7 @@ autodoc_default_options = {
     'methods': None,
     # 'attributes': None,
     'special-members': '__call__',
-    # 'exclude-members': '__weakref__',
+    'exclude-members': '_abc_impl',
     'show-inheritance': True,
     'private-members': True,
     'noindex': True,
