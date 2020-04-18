@@ -2,7 +2,7 @@ import tests.base.utils as tutils
 import pytorch_lightning as pl
 import pytest
 
-from pytorch_lightning_bolts.models.vaes import VAE
+from pytorch_lightning_bolts.models.variational_autoencoders import VAE
 
 
 def test_vae(tmpdir):

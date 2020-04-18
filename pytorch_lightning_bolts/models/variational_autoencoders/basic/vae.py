@@ -1,15 +1,14 @@
 import os
-
 from argparse import ArgumentParser
-import torch
-from torch.nn import functional as F
-from torch.utils.data import DataLoader
-from torchvision.datasets import MNIST
-from torchvision import transforms
-from torch import distributions
-from pytorch_lightning_bolts.models.vaes.basic_vae.models import Encoder, Decoder
 
 import pytorch_lightning as pl
+import torch
+from pytorch_lightning_bolts.models.variational_autoencoders.basic.models import Encoder, Decoder
+from torch import distributions
+from torch.nn import functional as F
+from torch.utils.data import DataLoader
+from torchvision import transforms
+from torchvision.datasets import MNIST
 
 
 class VAE(pl.LightningModule):
