@@ -25,6 +25,6 @@ Indices and tables
    :hidden:
 
    readme
-   pytorch_lightning_bolts.models
-   pytorch_lightning_bolts.callbacks
-   pytorch_lightning_bolts.loggers
+   pytorch_lightning.bolts.models
+   pytorch_lightning.bolts.callbacks
+   pytorch_lightning.bolts.loggers

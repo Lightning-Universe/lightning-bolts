@@ -19,7 +19,7 @@ references:
      name: Testing
      command: |
        python --version ; pip --version ; pip list
-       coverage run --source pytorch_lightning_bolts -m py.test pytorch_lightning_bolts tests -v --doctest-modules --junitxml=test-reports/pytest_junit.xml
+       coverage run --source pytorch_lightning -m py.test pytorch_lightning tests -v --doctest-modules --junitxml=test-reports/pytest_junit.xml
        coverage report
        codecov
      no_output_timeout: 30m
@@ -29,7 +29,9 @@ references:
       name: Install package
       command: |
         virtualenv vEnv ; source vEnv/bin/activate
-        pip install --editable . ; cd .. & python -c "import pytorch_lightning_bolts ; print(pytorch_lightning_bolts.__version__)"
+        pip install --editable .
+        cd .. & python -c "import pytorch_lightning ; print(pytorch_lightning.__version__)"
+        cd .. & python -c "import pytorch_lightning.bolts ; print(pytorch_lightning.bolts.__version__)"
         deactivate ; rm -rf vEnv
 
   create_pkg: &create_pkg

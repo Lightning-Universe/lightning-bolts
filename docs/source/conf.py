@@ -50,7 +50,7 @@ github_repo = project
 
 # export the documentation
 with open('intro.rst', 'w') as fp:
-    fp.write(pytorch_lightning_bolts.__long_doc__)
+    fp.write(pytorch_lightning.bolts.__long_doc__)
 
 # export the READme
 with open(os.path.join(PATH_ROOT, 'README.md'), 'r') as fp:
@@ -149,8 +149,8 @@ html_theme_path = [pt_lightning_sphinx_theme.get_html_theme_path()]
 # documentation.
 
 html_theme_options = {
-    'pytorch_project': pytorch_lightning_bolts.__homepage__,
-    'canonical_url': pytorch_lightning_bolts.__homepage__,
+    'pytorch_project': pytorch_lightning.bolts.__homepage__,
+    'canonical_url': pytorch_lightning.bolts.__homepage__,
     'collapse_navigation': False,
     'display_version': True,
     'logo_only': False,
