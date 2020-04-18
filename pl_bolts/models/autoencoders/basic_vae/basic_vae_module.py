@@ -6,6 +6,8 @@ import torchvision
 from pytorch_lightning import LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
+import kornia as K
+import torch.nn as nn
 
 import pl_bolts
 from pl_bolts.datamodules import MNISTDataModule
@@ -72,6 +74,16 @@ class VAE(LightningModule):
 
         if pretrained:
             self.load_pretrained(pretrained)
+
+        # define augmentations pipeline
+        self.transforms = nn.Sequential(
+            K.augmentation.RandomVerticalFlip(p=0.5, return_transform=True),
+            K.augmentation.RandomAffine(
+                [-45., 45.], [0., 0.5], [0.5, 1.5], [0., 0.5],
+                return_transform=True
+            ),
+        )
+        self.transforms.eval()
 
     def __init_system(self):
         self.encoder = self.init_encoder()
@@ -153,8 +165,12 @@ class VAE(LightningModule):
     def forward(self, z):
         return self.decoder(z)
 
-    def _run_step(self, batch):
+    def _run_step(self, batch, apply_transforms: bool = False):
         x, _ = batch
+
+        if apply_transforms:
+            x, trans = self.transforms(x)
+
         z_mu, z_log_var = self.encoder(x)
         z_std = torch.exp(z_log_var / 2)
 
@@ -168,7 +184,7 @@ class VAE(LightningModule):
         return loss, recon_loss, kl_div, pxz
 
     def training_step(self, batch, batch_idx):
-        loss, recon_loss, kl_div, pxz = self._run_step(batch)
+        loss, recon_loss, kl_div, pxz = self._run_step(batch, apply_transforms=True)
 
         tensorboard_logs = {
             'train_elbo_loss': loss,
