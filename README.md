@@ -6,19 +6,64 @@
 [![Documentation Status](https://readthedocs.org/projects/lightning-bolts/badge/?version=latest)](https://lightning-bolts.readthedocs.io/en/latest/?badge=latest)
 [![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://join.slack.com/t/pytorch-lightning/shared_invite/enQtODU5ODIyNTUzODQwLTFkMDg5Mzc1MDBmNjEzMDgxOTVmYTdhYjA1MDdmODUyOTg2OGQ1ZWZkYTQzODhhNzdhZDA3YmNhMDhlMDY4YzQ)
 
+## Install
+```pip install pytorch-lightning-bolts```
+
 ## What is it?
+Bolts is a collection of useful models and templates to bootstrap your DL research even faster.
+It's designed to work  with PyTorch Lightning
 
+## Example
+```python
 
-## What is the relation to PTLightning?
+from pytorch_lightning_bolts.vaes import VAE
+from pytorch_lightning_bolts.gans import CycleGAN
+from pytorch_lightning import Trainer
 
+vae = VAE()
+gan = CycleGAN()
 
-## How to install
+# train VAE
+vae_trainer = Trainer()
+vae_trainer.fit(vae)
 
-You can install this package directly via pip
-```bash
-pip install https://github.com/PyTorchLightning/pytorch-lightning-bolts/archive/master.zip
+# train GAN
+gan_trainer = Trainer()
+gan_trainer.fit(gan)
 ```
-or clone repository locally and call
-```bash
-python setup.py install
+
+## How to add a model
+This repository is meant for model contributions from the community.
+To add a model, you can start with the MNIST template (or any other model in the repo).
+
+Please organize the functions of your lightning module.
+
+```python
+class MyModule(pl.LightningModule):
+    
+    # model
+    def __init__(self):
+    
+    # computations
+    def forward(self, x):
+    
+    # training loop
+    def training_step(self, batch, batch_idx):
+    
+    # validation loop
+    def validation_step(self, batch, batch_idx):
+    def validation_end(self, outputs):
+     
+    # test loop
+    def test_step(self, batch, batch_idx):
+    def test_epoch_end(self, outputs):
+    
+    # optimizer
+    def configure_optimizers(self):
+    
+    # data
+    def prepare_data(self):
+    def train_dataloader(self):
+    def val_dataloader(self):
+    def test_dataloader(self):
 ```

@@ -1,6 +1,7 @@
 """Root package info."""
 
 import os
+from pytorch_lightning_bolts.mnist_template import LitMNISTModel
 
 __version__ = '0.1.0-dev5'
 __author__ = 'PyTorchLightning et al.'
