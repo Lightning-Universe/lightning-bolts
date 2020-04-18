@@ -1,11 +1,14 @@
 # VAE Template
-Use this as a
+This is a basic template for implementing a Variational Autoencoder in PyTorch Lightning. A default encoder and decoder have been provided but can easily be replaced by custom functions. 
+This template uses the MNIST dataset but image data of any dimension can be fed in as long as the image width and image height are even values. 
+For other types of data, such as sound, it will be necessary to change the Encoder and Decoder.
 
-
+The default encoder and decoder are both convolutional with a 128-dimensional hidden layer and
+a 32-dimensional latent space. The model also assumes a Gaussian prior and a Gaussian approximate posterior distribution.
 
 ## How to use
 
-To use in project or as a feature extractor
+##### To use in your project or as a feature extractor:
 ```python
 from pytorch_lightning_bolts.models.vaes import VAE
 import pytorch_lightning as pl
@@ -26,7 +29,8 @@ class YourResearchModel(pl.LightningModule):
         return x
 ```
 
-To use in production or for predictions 
+
+##### To use in production or for predictions:
 ```python
 from pytorch_lightning_bolts.models.vaes import VAE
 
@@ -37,7 +41,7 @@ z = ... # z ~ N(0, 1)
 predictions = vae(z)
 ```
 
-To train the VAE on its own
+##### To train the VAE on its own:
 ```python
 from pytorch_lightning_bolts.models.vaes import VAE
 import pytorch_lightning as pl
@@ -47,15 +51,9 @@ trainer = pl.Trainer(gpus=1)
 trainer.fit(vae)
 ```
 
-Train the VAE from the command line
 
-```bash
-cd pytorch_lightning_bolts/models/vaes/basic_vae
 
-python vae.py --hidden_dim 128 --latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12
-```
-
-To use as template for research (example of modifying only the prior)
+##### To use as template for research (example of modifying only the prior):
 ```python
 from pytorch_lightning_bolts.models.vaes import VAE
 
@@ -68,7 +66,7 @@ class MyVAEFlavor(VAE):
         return P
 ```
 
-Or pass in your own encoders and decoders
+##### Or pass in your own encoders and decoders:
 
 ```python
 from pytorch_lightning_bolts.models.vaes import VAE
@@ -80,4 +78,21 @@ decoder = MyDecoder()
 vae = VAE(encoder=encoder, decoder=decoder)
 trainer = pl.Trainer(gpus=1)
 trainer.fit(vae)
+```
+
+### Train the VAE from the command line:
+
+```bash
+cd pytorch_lightning_bolts/models/vaes/basic_vae
+
+python vae.py --hidden_dim 128 --latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12
+```
+
+The vae.py script accepts the following arguments:
+```bash
+--hidden_dim        if using default encoder/decoder - dimension of itermediate (dense) layers before embedding
+--latent_dim        dimension of latent variables z 
+--input_width       input image width (must be even) - 28 for MNIST 
+--input_height      input image height (must be even) - 28 for MNIST
+--batch_size        
 ```
