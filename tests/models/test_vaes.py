@@ -14,4 +14,4 @@ def test_vae(tmpdir):
     trainer.fit(vae)
     loss = trainer.callback_metrics['loss']
 
-    assert loss <= 285, 'vae failed'
+    assert loss <= 315, 'vae failed'
