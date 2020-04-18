@@ -189,5 +189,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     vae = VAE(args)
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = pl.Trainer(train_percent_check=0.01, val_percent_check=0.1, max_epochs=1)
     trainer.fit(vae)
+    print(trainer.callback_metrics)
