@@ -94,7 +94,7 @@ class DenseBlock(nn.Module):
         super().__init__()
         self.drop_p = drop_p
         self.fc1 = nn.Linear(in_dim, out_dim)
-        self.fc_bn  = nn.BatchNorm1d(out_dim)
+        self.fc_bn = nn.BatchNorm1d(out_dim)
         self.in_dim = in_dim
 
     def forward(self, x):

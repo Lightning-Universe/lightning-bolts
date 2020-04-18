@@ -14,7 +14,14 @@ import pytorch_lightning as pl
 
 class VAE(pl.LightningModule):
 
-    def __init__(self, hparams=None, encoder=None, decoder=None, prior='gaussian', approx_posterior='gaussian'):
+    def __init__(
+            self,
+            hparams=None,
+            encoder=None,
+            decoder=None,
+            prior='gaussian',
+            approx_posterior='gaussian'
+    ):
         super().__init__(self)
         self.hparams = hparams
         hidden_dim = hparams.hidden_dim if hasattr(hparams, 'hidden_dim') else 128
@@ -96,7 +103,12 @@ class VAE(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         loss, reconstruction_loss, kl_divergence, pxz = self._run_step(batch)
 
-        return {'val_loss': loss, 'reconstruction_loss': reconstruction_loss, 'kl_divergence': kl_divergence, 'pxz': pxz}
+        return {
+            'val_loss': loss,
+            'reconstruction_loss': reconstruction_loss,
+            'kl_divergence': kl_divergence,
+            'pxz': pxz
+        }
 
     def validation_end(self, outputs):
         avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
@@ -107,13 +119,20 @@ class VAE(pl.LightningModule):
                             'val_recon_loss': recon_loss,
                             'val_kl_loss': kl_loss}
 
-        return {'avg_val_loss': avg_loss, 'log': tensorboard_logs}
+        return {
+            'avg_val_loss': avg_loss,
+            'log': tensorboard_logs
+        }
 
     def test_step(self, batch, batch_idx):
         loss, reconstruction_loss, kl_divergence, pxz = self._run_step(batch)
 
-        return {'test_loss': loss, 'reconstruction_loss': reconstruction_loss, 'kl_divergence': kl_divergence,
-                'pxz': pxz}
+        return {
+            'test_loss': loss,
+            'reconstruction_loss': reconstruction_loss,
+            'kl_divergence': kl_divergence,
+            'pxz': pxz
+        }
 
     def test_epoch_end(self, outputs):
         avg_loss = torch.stack([x['test_loss'] for x in outputs]).mean()
@@ -124,7 +143,10 @@ class VAE(pl.LightningModule):
                             'test_recon_loss': recon_loss,
                             'test_kl_loss': kl_loss}
 
-        return {'avg_test_loss': avg_loss, 'log': tensorboard_logs}
+        return {
+            'avg_test_loss': avg_loss,
+            'log': tensorboard_logs
+        }
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=0.001)
@@ -148,10 +170,14 @@ class VAE(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--hidden_dim', type=int, default=128, help='dimension of itermediate layers before embedding for default encoder/decoder')
-        parser.add_argument('--latent_dim', type=int, default=32, help='dimension of latent variables z')
-        parser.add_argument('--input_width', type=int, default=28, help='input image width - 28 for MNIST (must be even)')
-        parser.add_argument('--input_height', type=int, default=28, help='input image height - 28 for MNIST (must be even)')
+        parser.add_argument('--hidden_dim', type=int, default=128,
+                            help='itermediate layers dimension before embedding for default encoder/decoder')
+        parser.add_argument('--latent_dim', type=int, default=32,
+                            help='dimension of latent variables z')
+        parser.add_argument('--input_width', type=int, default=28,
+                            help='input image width - 28 for MNIST (must be even)')
+        parser.add_argument('--input_height', type=int, default=28,
+                            help='input image height - 28 for MNIST (must be even)')
         parser.add_argument('--batch_size', type=int, default=32)
         return parser
 
