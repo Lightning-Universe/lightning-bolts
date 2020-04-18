@@ -5,10 +5,16 @@ from io import open
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 
+try:
+    import builtins
+except ImportError:
+    import __builtin__ as builtins
+
 # https://packaging.python.org/guides/single-sourcing-package-version/
 # http://blog.ionelmc.ro/2014/05/25/python-packaging/
 
 PATH_ROOT = os.path.dirname(__file__)
+builtins.__LIGHTNING_BOLT_SETUP__ = True
 
 import pytorch_lightning_bolts  # noqa: E402
 
