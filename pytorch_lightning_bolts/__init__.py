@@ -22,9 +22,9 @@ Example
 
     from pytorch_lightning_bolts.vaes import VAE
     from pytorch_lightning import Trainer
-    
+
     vae = VAE()
-    
+
     # train VAE
     trainer = Trainer()
     trainer.fit(vae)
