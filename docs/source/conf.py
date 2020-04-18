@@ -45,6 +45,20 @@ github_user = 'PyTorchLightning'
 github_repo = project
 
 
+# -- Project documents -------------------------------------------------------
+
+# export the documentation
+with open('intro.rst', 'w') as fp:
+    fp.write(pytorch_lightning_bolts.__long_doc__)
+
+# export the READme
+with open(os.path.join(PATH_ROOT, 'README.md'), 'r') as fp:
+    readme = fp.read()
+for dir_name in (os.path.basename(p) for p in glob.glob(os.path.join(PATH_ROOT, '*')) if os.path.isdir(p)):
+    readme = readme.replace('](%s/' % dir_name, '](%s/%s/' % (PATH_ROOT, dir_name))
+with open('readme.md', 'w') as fp:
+    fp.write(readme)
+
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -141,7 +155,7 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []  # '_static'
+html_static_path = ['_templates']  # '_static'
 
 # -- Options for HTMLHelp output ---------------------------------------------
 

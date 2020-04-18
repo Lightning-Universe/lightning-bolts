@@ -6,10 +6,11 @@
 PyTorchLightning-Bolts's documentation
 ======================================
 
+.. include:: intro.rst
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
 
 
 Indices and tables
@@ -23,6 +24,7 @@ Indices and tables
 .. toctree::
    :hidden:
 
+   readme
    pytorch_lightning_bolts.models
    pytorch_lightning_bolts.callbacks
    pytorch_lightning_bolts.loggers
