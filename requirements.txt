@@ -2,5 +2,7 @@ pytorch-lightning>=0.8.1
 torch>=1.4
 torchvision>=0.5
 scikit-learn>=0.23
+torchvision>=0.4.0
+kornia>=0.2.0
 opencv-python
 test_tube
