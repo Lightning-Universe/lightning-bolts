@@ -5,7 +5,7 @@ from pytorch_lightning_bolts import LitMNISTModel
 from tests import reset_seed
 
 
-def test_vae(tmpdir):
+def test_mnist(tmpdir):
     """ Test that an error is thrown when no `training_step()` is defined """
     reset_seed()
 
@@ -15,4 +15,4 @@ def test_vae(tmpdir):
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
 
-    assert loss <= 0.5, 'mnist failed'
+    assert loss <= 2.0, 'mnist failed'
