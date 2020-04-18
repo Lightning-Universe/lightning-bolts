@@ -189,9 +189,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     vae = VAE(args)
-    trainer = pl.Trainer(train_percent_check=0.01,
-                         val_percent_check=0.1,
-                         max_epochs=1,
-                         progress_bar_refresh_rate=0)
+    trainer = pl.Trainer()
     trainer.fit(vae)
-    print(trainer.callback_metrics)
