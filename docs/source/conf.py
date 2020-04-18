@@ -253,7 +253,7 @@ PACKAGES = [
 
 def run_apidoc(_):
     for pkg in PACKAGES:
-        argv = ['-e', '-o', PATH_HERE, os.path.join(PATH_HERE, PATH_ROOT, pkg),
+        argv = ['-e', '-o', PATH_HERE, os.path.join(PATH_HERE, PATH_ROOT, pkg.replace('.', os.path.sep)),
                 '**/test_*', '--force', '--private', '--module-first']
         # Sphinx 1.7+
         from sphinx.ext import apidoc

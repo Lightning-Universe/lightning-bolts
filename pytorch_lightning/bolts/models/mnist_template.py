@@ -72,15 +72,15 @@ trainer.test(test_dataloaders=test_loader)
 import os
 from argparse import ArgumentParser
 
-import pytorch_lightning as pl
 import torch
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms
 from torchvision.datasets import MNIST
+from pytorch_lightning import LightningModule, Trainer
 
 
-class LitMNISTModel(pl.LightningModule):
+class LitMNISTModel(LightningModule):
 
     def __init__(self, hparams):
         super().__init__()
@@ -182,5 +182,5 @@ if __name__ == '__main__':  # pragma: no cover
     # model
     model = LitMNISTModel(hparams=args)
 
-    trainer = pl.Trainer()
+    trainer = Trainer()
     trainer.fit(model)
