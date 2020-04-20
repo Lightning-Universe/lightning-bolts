@@ -36,7 +36,7 @@ gan_trainer.fit(gan)
 This repository is meant for model contributions from the community.
 To add a model, you can start with the MNIST template (or any other model in the repo).
 
-Please organize the functions of your lightning module.
+Please organize the functions of your lightning module in this order.
 
 ```python
 class MyModule(pl.LightningModule):
