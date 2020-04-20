@@ -60,7 +60,7 @@ val_loader = DataLoader(mnist_val, batch_size=args.batch_size)
 mnist_test = MNIST(os.getcwd(), train=False, download=True, transform=transforms.ToTensor())
 test_loader = DataLoader(mnist_test, batch_size=args.batch_size)
 
-trainer = pl.Trainer(num_sanity_val_steps=)
+trainer = pl.Trainer()
 trainer.fit(model, train_dataloader=train_loader, val_dataloaders=val_loader)
 
 # when  training completes you can  run test set
