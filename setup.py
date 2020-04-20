@@ -36,15 +36,15 @@ setup(
     packages=find_packages(exclude=['tests', 'docs']),
     namespace_packages=['pytorch_lightning'],
 
-    long_description=open('README.md', encoding='utf-8').read(),
+    long_description=pytorch_lightning.bolts.__long_doc__,
     long_description_content_type='text/markdown',
     include_package_data=True,
     zip_safe=False,
 
     keywords=['deep learning', 'pytorch', 'AI'],
     python_requires='>=3.6',
-    setup_requires=[],
-    install_requires=['torch>=1.1', 'pytorch-lightning>=0.7.1'],
+    setup_requires=['pytorch-lightning>=0.7.1'],
+    install_requires=['pytorch-lightning>=0.7.1'],
 
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",

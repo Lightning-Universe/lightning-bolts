@@ -11,7 +11,7 @@ from torchvision.datasets import MNIST
 from pytorch_lightning import LightningModule, Trainer
 
 
-class VAE(LightningModule):
+class BasicVAE(LightningModule):
 
     def __init__(
             self,
@@ -183,9 +183,9 @@ class VAE(LightningModule):
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
-    parser = VAE.add_model_specific_args(parser)
+    parser = BasicVAE.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    vae = VAE(args)
+    vae = BasicVAE(args)
     trainer = Trainer()
     trainer.fit(vae)
