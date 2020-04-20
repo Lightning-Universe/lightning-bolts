@@ -25,19 +25,19 @@ the relevant parts to your research.
 
     from pytorch_lightning_bolts.vaes import VAE
     from pytorch_lightning import Trainer
-    
+
     class MyVAE(VAE):
         def get_prior(self, z_mu, z_std):
             return torch.distributions.normal.Normal(z_mu, z_std)
-        
+    
         def get_encoder(self, hidden_dim, latent_dim):
             return MyEncoder(hidden_dim, latent_dim):
-    
+
     # train VAE
     vae = MyVAE()
     trainer = Trainer()
     trainer.fit(vae)
-    
+
 Transfer learning
 -----------------
 Or use bolts to do transfer learning
@@ -46,23 +46,23 @@ Or use bolts to do transfer learning
 
     from pytorch_lightning_bolts.vaes import VAE
     from pytorch_lightning import Trainer, LightningModule
-    
+
     class ImageEnhancer(LightningModule):
         def __init__(self):
             self.vae = VAE.load_from_checkpoint(PATH).freeze()
             self.fine_tune_model = torch.nn.Linear(1024, 1000)
-        
+
         def forward(self, z):
             generated = self.vae(z)
             out = self.fine_tune_model(generated)
             return out
-            
+
         def training_step(self, batch, batch_idx):
             x, y = batch
             z = torch.distributions.normal.Normal(torch.zeros_like(x), torch.ones_like(x)).rsample()
             out = self(z)
             loss = some_loss(out)
-            
+
             return {'loss': loss}
     
     # train VAE
