@@ -3,7 +3,7 @@
 [![CircleCI](https://circleci.com/gh/PyTorchLightning/pytorch-lightning-bolts/tree/master.svg?style=svg)](https://circleci.com/gh/PyTorchLightning/pytorch-lightning-bolts/tree/master)
 [![codecov](https://codecov.io/gh/PyTorchLightning/pytorch-lightning-bolts/branch/master/graph/badge.svg)](https://codecov.io/gh/PyTorchLightning/pytorch-lightning-bolts)
 [![CodeFactor](https://www.codefactor.io/repository/github/pytorchlightning/pytorch-lightning-bolts/badge)](https://www.codefactor.io/repository/github/pytorchlightning/pytorch-lightning-bolts)
-[![Documentation Status](https://readthedocs.org/projects/lightning-bolts/badge/?version=latest)](https://lightning-bolts.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/pytorch-lightning-bolts/badge/?version=latest)](https://pytorch-lightning-bolts.readthedocs.io/en/latest/)
 [![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://join.slack.com/t/pytorch-lightning/shared_invite/enQtODU5ODIyNTUzODQwLTFkMDg5Mzc1MDBmNjEzMDgxOTVmYTdhYjA1MDdmODUyOTg2OGQ1ZWZkYTQzODhhNzdhZDA3YmNhMDhlMDY4YzQ)
 
 ## Install
@@ -36,9 +36,11 @@ gan_trainer.fit(gan)
 This repository is meant for model contributions from the community.
 To add a model, you can start with the MNIST template (or any other model in the repo).
 
-Please organize the functions of your lightning module.
+Please organize the functions of your lightning module in this order.
 
 ```python
+import pytorch_lightning as pl
+
 class MyModule(pl.LightningModule):
     
     # model
