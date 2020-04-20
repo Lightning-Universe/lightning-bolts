@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 from argparse import Namespace
 
-from pytorch_lightning_bolts import LitMNISTModel
+from pytorch_lightning import LitMNISTModel
 from tests import reset_seed
 
 

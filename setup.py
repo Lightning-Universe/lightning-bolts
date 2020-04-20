@@ -16,7 +16,7 @@ except ImportError:
 PATH_ROOT = os.path.dirname(__file__)
 builtins.__LIGHTNING_BOLT_SETUP__ = True
 
-import pytorch_lightning_bolts  # noqa: E402
+import pytorch_lightning  # noqa: E402
 
 
 def load_requirements(path_dir=PATH_ROOT, comment_char='#'):
@@ -39,13 +39,13 @@ def load_requirements(path_dir=PATH_ROOT, comment_char='#'):
 # engineer specific practices
 setup(
     name='pytorch-lightning-bolts',
-    version=pytorch_lightning_bolts.__version__,
-    description=pytorch_lightning_bolts.__docs__,
-    author=pytorch_lightning_bolts.__author__,
-    author_email=pytorch_lightning_bolts.__author_email__,
-    url=pytorch_lightning_bolts.__homepage__,
+    version=pytorch_lightning.__version__,
+    description=pytorch_lightning.__docs__,
+    author=pytorch_lightning.__author__,
+    author_email=pytorch_lightning.__author_email__,
+    url=pytorch_lightning.__homepage__,
     download_url='https://github.com/PyTorchLightning/pytorch-lightning-bolts',
-    license=pytorch_lightning_bolts.__license__,
+    license=pytorch_lightning.__license__,
     packages=find_packages(exclude=['tests']),
 
     long_description=open('README.md', encoding='utf-8').read(),

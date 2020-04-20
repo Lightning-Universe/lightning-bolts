@@ -27,18 +27,18 @@ sys.path.insert(0, os.path.abspath(PATH_ROOT))
 
 builtins.__LIGHTNING_BOLT_SETUP__ = True
 
-import pytorch_lightning_bolts  # noqa: E402
+import pytorch_lightning  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
 project = 'PyTorchLightning-Bolts'
-copyright = pytorch_lightning_bolts.__copyright__
-author = pytorch_lightning_bolts.__author__
+copyright = pytorch_lightning.__copyright__
+author = pytorch_lightning.__author__
 
 # The short X.Y version
-version = pytorch_lightning_bolts.__version__
+version = pytorch_lightning.__version__
 # The full version, including alpha/beta/rc tags
-release = pytorch_lightning_bolts.__version__
+release = pytorch_lightning.__version__
 
 # Options for the linkcode extension
 # ----------------------------------
@@ -50,7 +50,7 @@ github_repo = project
 
 # export the documentation
 with open('intro.rst', 'w') as fp:
-    fp.write(pytorch_lightning_bolts.__long_doc__)
+    fp.write(pytorch_lightning.__long_doc__)
 
 # export the READme
 with open(os.path.join(PATH_ROOT, 'README.md'), 'r') as fp:
@@ -149,8 +149,8 @@ html_theme_path = [pt_lightning_sphinx_theme.get_html_theme_path()]
 # documentation.
 
 html_theme_options = {
-    'pytorch_project': pytorch_lightning_bolts.__homepage__,
-    'canonical_url': pytorch_lightning_bolts.__homepage__,
+    'pytorch_project': pytorch_lightning.__homepage__,
+    'canonical_url': pytorch_lightning.__homepage__,
     'collapse_navigation': False,
     'display_version': True,
     'logo_only': False,
@@ -247,7 +247,7 @@ todo_include_todos = True
 # and commit them to my repo after making changes to my code.
 
 PACKAGES = [
-    pytorch_lightning_bolts.__name__,
+    pytorch_lightning.__name__,
 ]
 
 

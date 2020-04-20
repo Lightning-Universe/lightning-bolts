@@ -20,7 +20,7 @@ Use as a feature extractor
 For certain projects that require a VAE architecture you could use this as
 a module inside the larger system.
 
->>> from pytorch_lightning_bolts.models.variational_autoencoders import VAE
+>>> from pytorch_lightning.models.variational_autoencoders import VAE
 >>> import pytorch_lightning as pl
 
 >>> class YourResearchModel(pl.LightningModule):
