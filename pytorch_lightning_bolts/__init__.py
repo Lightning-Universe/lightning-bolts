@@ -29,7 +29,7 @@ the relevant parts to your research.
     class MyVAE(VAE):
         def get_prior(self, z_mu, z_std):
             return torch.distributions.normal.Normal(z_mu, z_std)
-    
+
         def get_encoder(self, hidden_dim, latent_dim):
             return MyEncoder(hidden_dim, latent_dim):
 
@@ -64,7 +64,7 @@ Or use bolts to do transfer learning
             loss = some_loss(out)
 
             return {'loss': loss}
-    
+
     # train VAE
     vae = ImageEnhancer()
     trainer = Trainer()
