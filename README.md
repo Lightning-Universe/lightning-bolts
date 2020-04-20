@@ -39,6 +39,8 @@ To add a model, you can start with the MNIST template (or any other model in the
 Please organize the functions of your lightning module in this order.
 
 ```python
+import pytorch_lightning as pl
+
 class MyModule(pl.LightningModule):
     
     # model
