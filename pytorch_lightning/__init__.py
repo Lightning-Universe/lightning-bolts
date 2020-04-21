@@ -60,6 +60,11 @@ else:
         'Callback',
         'data_loader'
     ]
+
+    try:
+        from pytorch_lightning import bolts
+    except ImportError:
+        pass
     # __call__ = __all__
 
 __import__('pkg_resources').declare_namespace(__name__)
