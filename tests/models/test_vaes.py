@@ -19,4 +19,4 @@ def test_vae(tmpdir):
     trainer.test()
     loss = trainer.callback_metrics['loss']
 
-    assert loss <= 350, 'vae failed'
+    assert loss <= 350, 'VAE failed'
