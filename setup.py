@@ -2,6 +2,7 @@
 
 import os
 from io import open
+
 # Always prefer setuptools over distutils
 from setuptools import setup, find_namespace_packages
 
@@ -17,8 +18,33 @@ PATH_ROOT = os.path.dirname(__file__)
 builtins.__LIGHTNING_BOLT_SETUP__ = True
 builtins.__LIGHTNING_SETUP__ = True
 
-from pytorch_lightning import bolts  # noqa: E402
+import sys
 
+# remove local path to force loading global models
+removed_locals = False
+if '' in sys.path:
+    sys.path.remove('')
+    removed_locals = True
+import pytorch_lightning
+
+# read init content
+with open(os.path.join(pytorch_lightning.__path__[0], '__init__.py'), 'r') as f:
+    init_content = f.read()
+
+# delete previously loaded lightning
+del pytorch_lightning
+sys.modules.pop('pytorch_lightning', None)
+
+# re-add locals to path
+if removed_locals:
+    sys.path = [''] + sys.path
+
+# overwrite init
+with open(os.path.join(os.path.abspath(PATH_ROOT),
+                       'pytorch_lightning', '__init__.py'), 'w') as f:
+    f.write(init_content)
+
+from pytorch_lightning import bolts  # noqa: E402
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
 # keep the meta-data here for simplicity in reading this file... it's not obvious
