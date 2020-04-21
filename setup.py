@@ -43,8 +43,8 @@ setup(
 
     keywords=['deep learning', 'pytorch', 'AI'],
     python_requires='>=3.6',
-    setup_requires=['pytorch-lightning>=0.7.1'],
-    install_requires=['pytorch-lightning>=0.7.1'],
+    setup_requires=['pytorch-lightning>=0.7.4rc2'],
+    install_requires=['pytorch-lightning>=0.7.4rc2'],
 
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",
