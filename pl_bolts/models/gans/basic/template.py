@@ -55,10 +55,10 @@ class BasicGAN(LightningModule):
         # generate images
         self.generated_imgs = self(z)
 
-        # ground truth result (ie: all reals)
-        all_fake_labels = torch.ones(x.size(0), 1)
-        all_fake_labels = all_fake_labels.type_as(x)
-        g_loss = self.generator_loss(all_fake_labels)
+        # ground truth result (ie: all real)
+        real = torch.ones(x.size(0), 1)
+        real = real.type_as(x)
+        g_loss = self.generator_loss(real)
 
         tqdm_dict = {'g_loss': g_loss}
         output = OrderedDict({
@@ -68,9 +68,9 @@ class BasicGAN(LightningModule):
         })
         return output
 
-    def generator_loss(self, all_fake_labels):
+    def generator_loss(self, real):
         # adversarial loss is binary cross-entropy
-        g_loss = self.adversarial_loss(self.discriminator(self.generated_imgs), all_fake_labels)
+        g_loss = self.adversarial_loss(self.discriminator(self.generated_imgs), real)
         return g_loss
 
     def discriminator_loss(self, x):
