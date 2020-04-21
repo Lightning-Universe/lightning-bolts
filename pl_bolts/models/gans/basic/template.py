@@ -16,84 +16,104 @@ class BasicGAN(LightningModule):
     def __init__(self, hparams):
         super().__init__()
         self.hparams = hparams
-        input_width = hparams.input_width if hasattr(hparams, 'input_width') else 28
-        input_height = hparams.input_height if hasattr(hparams, 'input_height') else 28
-        input_channels = hparams.input_channels if hasattr(hparams, 'input_channels') else 3
 
         # networks
-        image_shape = (input_channels, input_width, input_height)
-        self.generator = Generator(latent_dim=hparams.latent_dim, img_shape=image_shape)
-        self.discriminator = Discriminator(img_shape=image_shape)
+        self.generator = self.init_generator(self.hparams)
+        self.discriminator = self.init_discriminator(self.hparams)
 
         # cache for generated images
         self.generated_imgs = None
         self.last_imgs = None
 
+    def init_generator(self, hparams):
+        image_shape = (hparams.input_channels, hparams.input_width, hparams.input_height)
+        generator = Generator(latent_dim=hparams.latent_dim, img_shape=image_shape)
+        return generator
+
+    def init_discriminator(self, hparams):
+        image_shape = (hparams.input_channels, hparams.input_width, hparams.input_height)
+        discriminator = Discriminator(img_shape=image_shape)
+        return discriminator
+
     def forward(self, z):
+        """
+        Allows infernce to be about generating images
+        x = gan(z)
+        :param z:
+        :return:
+        """
         return self.generator(z)
 
     def adversarial_loss(self, y_hat, y):
         return F.binary_cross_entropy(y_hat, y)
 
+    def generator_step(self, x):
+        # sample noise
+        z = torch.randn(x.shape[0], self.hparams.latent_dim)
+        z = z.type_as(x)
+
+        # generate images
+        self.generated_imgs = self(z)
+
+        # ground truth result (ie: all reals)
+        all_fake_labels = torch.ones(x.size(0), 1)
+        all_fake_labels = all_fake_labels.type_as(x)
+        g_loss = self.generator_loss(all_fake_labels)
+
+        tqdm_dict = {'g_loss': g_loss}
+        output = OrderedDict({
+            'loss': g_loss,
+            'progress_bar': tqdm_dict,
+            'log': tqdm_dict
+        })
+        return output
+
+    def generator_loss(self, all_fake_labels):
+        # adversarial loss is binary cross-entropy
+        g_loss = self.adversarial_loss(self.discriminator(self.generated_imgs), all_fake_labels)
+        return g_loss
+
+    def discriminator_loss(self, x):
+        # how well can it label as real?
+        valid = torch.ones(x.size(0), 1)
+        valid = valid.type_as(x)
+
+        real_loss = self.adversarial_loss(self.discriminator(x), valid)
+
+        # how well can it label as fake?
+        fake = torch.zeros(x.size(0), 1)
+        fake = fake.type_as(fake)
+
+        fake_loss = self.adversarial_loss(
+            self.discriminator(self.generated_imgs.detach()), fake)
+
+        # discriminator loss is the average of these
+        d_loss = (real_loss + fake_loss) / 2
+        return d_loss
+
+    def discriminator_step(self, x):
+        # Measure discriminator's ability to classify real from generated samples
+        d_loss = self.discriminator_loss(x)
+
+        tqdm_dict = {'d_loss': d_loss}
+        output = OrderedDict({
+            'loss': d_loss,
+            'progress_bar': tqdm_dict,
+            'log': tqdm_dict
+        })
+        return output
+
     def training_step(self, batch, batch_idx, optimizer_idx):
-        imgs, _ = batch
-        self.last_imgs = imgs
+        x, _ = batch
+        self.last_imgs = x
 
         # train generator
         if optimizer_idx == 0:
-            # sample noise
-            z = torch.randn(imgs.shape[0], self.hparams.latent_dim)
-            z = z.type_as(imgs)
-
-            # generate images
-            self.generated_imgs = self(z)
-
-            # log sampled images
-            # sample_imgs = self.generated_imgs[:6]
-            # grid = torchvision.utils.make_grid(sample_imgs)
-            # self.logger.experiment.add_image('generated_images', grid, 0)
-
-            # ground truth result (ie: all fake)
-            # put on GPU because we created this tensor inside training_loop
-            valid = torch.ones(imgs.size(0), 1)
-            valid = valid.type_as(imgs)
-
-            # adversarial loss is binary cross-entropy
-            g_loss = self.adversarial_loss(self.discriminator(self.generated_imgs), valid)
-            tqdm_dict = {'g_loss': g_loss}
-            output = OrderedDict({
-                'loss': g_loss,
-                'progress_bar': tqdm_dict,
-                'log': tqdm_dict
-            })
-            return output
+            return self.generator_step(x)
 
         # train discriminator
         if optimizer_idx == 1:
-            # Measure discriminator's ability to classify real from generated samples
-
-            # how well can it label as real?
-            valid = torch.ones(imgs.size(0), 1)
-            valid = valid.type_as(imgs)
-
-            real_loss = self.adversarial_loss(self.discriminator(imgs), valid)
-
-            # how well can it label as fake?
-            fake = torch.zeros(imgs.size(0), 1)
-            fake = fake.type_as(fake)
-
-            fake_loss = self.adversarial_loss(
-                self.discriminator(self.generated_imgs.detach()), fake)
-
-            # discriminator loss is the average of these
-            d_loss = (real_loss + fake_loss) / 2
-            tqdm_dict = {'d_loss': d_loss}
-            output = OrderedDict({
-                'loss': d_loss,
-                'progress_bar': tqdm_dict,
-                'log': tqdm_dict
-            })
-            return output
+            return self.discriminator_step(x)
 
     def configure_optimizers(self):
         lr = self.hparams.learning_rate
