@@ -19,7 +19,7 @@ references:
      name: Testing
      command: |
        python --version ; pip --version ; pip list
-       coverage run --source pytorch_lightning -m py.test pytorch_lightning tests -v --doctest-modules --junitxml=test-reports/pytest_junit.xml
+       coverage run --source pl_bolts -m py.test pl_bolts tests -v --doctest-modules --junitxml=test-reports/pytest_junit.xml
        coverage report
        codecov
      no_output_timeout: 30m
@@ -30,8 +30,6 @@ references:
       command: |
         virtualenv vEnv ; source vEnv/bin/activate
         pip install -r requirements.txt
-        # TODO: remove this once we got a release with namespace packages
-        pip install git+https://github.com/PyTorchLightning/pytorch-lightning
         pip install dist/*
         cd .. & python -c "import pytorch_lightning ; print(pytorch_lightning.__version__)"
         cd .. & python -c "import pl_bolts ; print(pl_bolts.__version__)"

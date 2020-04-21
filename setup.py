@@ -16,7 +16,7 @@ except ImportError:
 PATH_ROOT = os.path.dirname(__file__)
 builtins.__LIGHTNING_BOLT_SETUP__ = True
 
-import pl_bolts
+import pl_bolts  # noqa: E402
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
 # keep the meta-data here for simplicity in reading this file... it's not obvious
