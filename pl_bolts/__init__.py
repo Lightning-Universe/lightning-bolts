@@ -94,7 +94,7 @@ if __LIGHTNING_BOLT_SETUP__:
     # We are not importing the rest of the lightning during the build process, as it may not be compiled yet
 else:
 
-    from pl_bolts import LitMNISTModel
+    from pl_bolts.models.mnist_template import LitMNISTModel
 
     __all__ = [
         'LitMNISTModel'
