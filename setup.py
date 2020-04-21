@@ -36,7 +36,7 @@ setup(
     license=bolts.__license__,
     packages=find_namespace_packages(exclude=['tests', 'docs']),
 
-    long_description=pytorch_lightning.bolts.__long_doc__,
+    long_description=bolts.__long_doc__,
     long_description_content_type='text/markdown',
     include_package_data=True,
     zip_safe=False,
