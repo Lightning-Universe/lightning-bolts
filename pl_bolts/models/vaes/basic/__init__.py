@@ -47,7 +47,7 @@ For production or predictions, load weights, freeze the model and use as needed.
 
 .. code-block:: python
 
-    from pytorch_lightning.pl_bolts.models.vaes.template import VAE
+    from pl_bolts.models.vaes.template import VAE
 
     vae = VAE.load_from_checkpoint(PATH)
     vae.freeze()
@@ -62,7 +62,7 @@ Here's an example on how to train this model from scratch
 
 .. code-block:: python
 
-    from pytorch_lightning.pl_bolts.models.vaes.template import VAE
+    from pl_bolts.models.vaes.template import VAE
     import pytorch_lightning as pl
 
     vae = VAE()
@@ -78,7 +78,7 @@ For example to change the prior and posterior you could do this
 
 .. code-block:: python
 
-    from pytorch_lightning.pl_bolts.models.vaes.template import VAE
+    from pl_bolts.models.vaes.template import VAE
 
     class MyVAEFlavor(VAE):
 
@@ -98,7 +98,7 @@ To change the encoder or decoder you could do this
 
 .. code-block:: python
 
-    from pytorch_lightning.pl_bolts.models.vaes.template import VAE
+    from pl_bolts.models.vaes.template import VAE
 
     class MyVAEFlavor(VAE):
 
@@ -116,7 +116,7 @@ Train VAE from the command line
 
 .. code-block:: bash
 
-    cd pytorch_lightning/pl_bolts/models/vaes/basic_vae
+    cd pl_bolts/models/vaes/basic_vae
     python template.py
 
 

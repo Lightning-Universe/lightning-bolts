@@ -5,7 +5,8 @@ Use this template to bootstrap your models.
 
 You can use this model in two ways:
 
-## Research use
+Research use
+------------
 For research, it's recommended you define the dataloaders inside
 the Lightning Module.
 
@@ -14,7 +15,7 @@ Fit as follows
 .. code-block:: python
 
     import pytorch_lightning as pl
-    from pytorch_lightning import LitMNISTModel
+    from pl_bolts.models import LitMNISTModel
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
@@ -40,7 +41,7 @@ then it makes sense to define the datasets outside of the LightningModule.
 
     import os
     import pytorch_lightning as pl
-    from pytorch_lightning import LitMNISTModel
+    from pl_bolts.models import LitMNISTModel
     from argparse import ArgumentParser
     from torchvision.datasets import MNIST
     from torch.utils.data import DataLoader, random_split
