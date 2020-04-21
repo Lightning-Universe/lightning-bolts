@@ -29,7 +29,7 @@ references:
       name: Install package
       command: |
         virtualenv vEnv ; source vEnv/bin/activate
-        pip install -r requirements.txt --user
+        pip install -r requirements.txt
         # TODO: remove this once we got a release with namespace packages
         pip install git+https://github.com/PyTorchLightning/pytorch-lightning
         pip install --editable .
