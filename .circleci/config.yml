@@ -31,7 +31,7 @@ references:
         virtualenv vEnv ; source vEnv/bin/activate
         pip install -r requirements.txt
         pip install dist/*
-        cd .. & python -c "import pytorch_lightning ; print(pytorch_lightning.__version__)"
+        cd .. & python -c "import pytorch_lightning as pl ; print(pl.__version__)"
         cd .. & python -c "import pl_bolts ; print(pl_bolts.__version__)"
         deactivate ; rm -rf vEnv
 

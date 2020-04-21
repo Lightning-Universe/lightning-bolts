@@ -2,13 +2,14 @@ import os
 from argparse import ArgumentParser
 
 import torch
-from pl_bolts.models.vaes import Encoder, Decoder
+from pytorch_lightning import LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
-from pytorch_lightning import LightningModule, Trainer
+
+from pl_bolts.models.vaes.basic.components import Encoder, Decoder
 
 
 class BasicVAE(LightningModule):

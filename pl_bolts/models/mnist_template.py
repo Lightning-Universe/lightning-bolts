@@ -1,5 +1,6 @@
 """
-# MNIST Template
+MNIST Template
+==============
 Use this template to bootstrap your models.
 
 You can use this model in two ways:
@@ -10,74 +11,75 @@ the Lightning Module.
 
 Fit as follows
 
-```python
-import pytorch_lightning as pl
-from pytorch_lightning import LitMNISTModel
-from argparse import ArgumentParser
+.. code-block:: python
 
-parser = ArgumentParser()
-parser = LitMNISTModel.add_model_specific_args(parser)
-args = parser.parse_args()
+    import pytorch_lightning as pl
+    from pytorch_lightning import LitMNISTModel
+    from argparse import ArgumentParser
 
-# model
-model = LitMNISTModel(hparams=args)
+    parser = ArgumentParser()
+    parser = LitMNISTModel.add_model_specific_args(parser)
+    args = parser.parse_args()
 
-# train
-trainer = pl.Trainer()
-trainer.fit(model)
+    # model
+    model = LitMNISTModel(hparams=args)
 
-# when  training completes you can  run test set
-trainer.test()
-```
+    # train
+    trainer = pl.Trainer()
+    trainer.fit(model)
 
-## Production  use
+    # when  training completes you can  run test set
+    trainer.test()
+
+Production  use
+---------------
 If you want to use this for production, feature extractor or similar use,
 then it makes sense to define the datasets outside of the LightningModule.
 
-```python
-import os
-import pytorch_lightning as pl
-from pytorch_lightning import LitMNISTModel
-from argparse import ArgumentParser
-from torchvision.datasets import MNIST
-from torch.utils.data import DataLoader, random_split
-from torchvision import transforms
+.. code-block:: python
 
-parser = ArgumentParser()
-parser = LitMNISTModel.add_model_specific_args(parser)
-args = parser.parse_args()
+    import os
+    import pytorch_lightning as pl
+    from pytorch_lightning import LitMNISTModel
+    from argparse import ArgumentParser
+    from torchvision.datasets import MNIST
+    from torch.utils.data import DataLoader, random_split
+    from torchvision import transforms
 
-# model
-model = LitMNISTModel(hparams=args)
+    parser = ArgumentParser()
+    parser = LitMNISTModel.add_model_specific_args(parser)
+    args = parser.parse_args()
 
-# Train / val split
-train_dataset = MNIST(os.getcwd(), train=True, download=True, transform=transforms.ToTensor())
-mnist_train, mnist_val = random_split(train_dataset, [55000, 5000])
+    # model
+    model = LitMNISTModel(hparams=args)
 
-train_loader = DataLoader(mnist_train, batch_size=args.batch_size)
-val_loader = DataLoader(mnist_val, batch_size=args.batch_size)
+    # Train / val split
+    train_dataset = MNIST(os.getcwd(), train=True, download=True, transform=transforms.ToTensor())
+    mnist_train, mnist_val = random_split(train_dataset, [55000, 5000])
 
-# test split
-mnist_test = MNIST(os.getcwd(), train=False, download=True, transform=transforms.ToTensor())
-test_loader = DataLoader(mnist_test, batch_size=args.batch_size)
+    train_loader = DataLoader(mnist_train, batch_size=args.batch_size)
+    val_loader = DataLoader(mnist_val, batch_size=args.batch_size)
 
-trainer = pl.Trainer()
-trainer.fit(model, train_dataloader=train_loader, val_dataloaders=val_loader)
+    # test split
+    mnist_test = MNIST(os.getcwd(), train=False, download=True, transform=transforms.ToTensor())
+    test_loader = DataLoader(mnist_test, batch_size=args.batch_size)
 
-# when  training completes you can  run test set
-trainer.test(test_dataloaders=test_loader)
+    trainer = pl.Trainer()
+    trainer.fit(model, train_dataloader=train_loader, val_dataloaders=val_loader)
 
-```
+    # when  training completes you can  run test set
+    trainer.test(test_dataloaders=test_loader)
+
 """
 import os
 from argparse import ArgumentParser
 
 import torch
+from pytorch_lightning import LightningModule, Trainer
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms
 from torchvision.datasets import MNIST
-from pytorch_lightning import LightningModule, Trainer
 
 
 class LitMNISTModel(LightningModule):

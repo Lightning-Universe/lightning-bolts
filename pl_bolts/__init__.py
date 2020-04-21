@@ -23,7 +23,7 @@ the relevant parts to your research.
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.vaes import VAE
+    from pl_bolts.models import VAE
     from pytorch_lightning import Trainer
 
     class MyVAE(VAE):
@@ -40,11 +40,11 @@ the relevant parts to your research.
 
 Transfer learning
 -----------------
-Or use pl_bolts to do transfer learning
+Or use bolts to do transfer learning
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.vaes import VAE
+    from pl_bolts.models import VAE
     from pytorch_lightning import Trainer, LightningModule
 
     class ImageEnhancer(LightningModule):
