@@ -2,7 +2,7 @@ import os
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning.bolts.models.vaes.basic.components import Encoder, Decoder
+from pl_bolts.models.vaes import Encoder, Decoder
 from torch import distributions
 from torch.nn import functional as F
 from torch.utils.data import DataLoader

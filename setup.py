@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
 import os
-from io import open
 
 # Always prefer setuptools over distutils
-from setuptools import setup, find_namespace_packages
+from setuptools import setup, find_packages
 
 try:
     import builtins
@@ -16,35 +15,8 @@ except ImportError:
 
 PATH_ROOT = os.path.dirname(__file__)
 builtins.__LIGHTNING_BOLT_SETUP__ = True
-builtins.__LIGHTNING_SETUP__ = True
 
-import sys
-
-# remove local path to force loading global models
-removed_locals = False
-if '' in sys.path:
-    sys.path.remove('')
-    removed_locals = True
-import pytorch_lightning
-
-# read init content
-with open(os.path.join(pytorch_lightning.__path__[0], '__init__.py'), 'r') as f:
-    init_content = f.read()
-
-# delete previously loaded lightning
-del pytorch_lightning
-sys.modules.pop('pytorch_lightning', None)
-
-# re-add locals to path
-if removed_locals:
-    sys.path = [''] + sys.path
-
-# overwrite init
-with open(os.path.join(os.path.abspath(PATH_ROOT),
-                       'pytorch_lightning', '__init__.py'), 'w') as f:
-    f.write(init_content)
-
-from pytorch_lightning import bolts  # noqa: E402
+import pl_bolts
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
 # keep the meta-data here for simplicity in reading this file... it's not obvious
@@ -53,24 +25,24 @@ from pytorch_lightning import bolts  # noqa: E402
 # engineer specific practices
 setup(
     name='pytorch-lightning-bolts',
-    version=bolts.__version__,
-    description=bolts.__docs__,
-    author=bolts.__author__,
-    author_email=bolts.__author_email__,
-    url=bolts.__homepage__,
+    version=pl_bolts.__version__,
+    description=pl_bolts.__docs__,
+    author=pl_bolts.__author__,
+    author_email=pl_bolts.__author_email__,
+    url=pl_bolts.__homepage__,
     download_url='https://github.com/PyTorchLightning/pytorch-lightning-bolts',
-    license=bolts.__license__,
-    packages=find_namespace_packages(exclude=['tests', 'docs']),
+    license=pl_bolts.__license__,
+    packages=find_packages(exclude=['tests', 'docs']),
 
-    long_description=bolts.__long_doc__,
+    long_description=pl_bolts.__long_doc__,
     long_description_content_type='text/markdown',
     include_package_data=True,
     zip_safe=False,
 
     keywords=['deep learning', 'pytorch', 'AI'],
     python_requires='>=3.6',
-    setup_requires=['pytorch-lightning>=0.7.4rc2'],
-    install_requires=['pytorch-lightning>=0.7.4rc2'],
+    setup_requires=[],
+    install_requires=['pytorch-lightning>=0.7.1'],
 
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",

@@ -34,7 +34,7 @@ references:
         pip install git+https://github.com/PyTorchLightning/pytorch-lightning
         pip install dist/*
         cd .. & python -c "import pytorch_lightning ; print(pytorch_lightning.__version__)"
-        cd .. & python -c "from pytorch_lightning import bolts ; print(bolts.__version__)"
+        cd .. & python -c "import pl_bolts ; print(pl_bolts.__version__)"
         deactivate ; rm -rf vEnv
 
   create_pkg: &create_pkg
@@ -45,7 +45,7 @@ references:
         sudo pip install twine==1.13.0
         python setup.py sdist
         twine check dist/*
-        # python setup.py clean
+        python setup.py clean
 
   format: &format
    run:

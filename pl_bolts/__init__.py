@@ -2,7 +2,7 @@
 
 import os
 
-__version__ = '0.1.0-dev5'
+__version__ = '0.1.0-dev6'
 __author__ = 'PyTorchLightning et al.'
 __author_email__ = 'name@pytorchlightning.ai'
 __license__ = 'TBD'
@@ -17,7 +17,7 @@ It's designed to work  with PyTorch Lightning
 
 Subclass Example
 ----------------
-Use bolts models to remove boilerplate for common approaches and architectures.
+Use `pl_bolts` models to remove boilerplate for common approaches and architectures.
 Because it uses LightningModules under the hood, you just need to overwrite
 the relevant parts to your research.
 
@@ -40,7 +40,7 @@ the relevant parts to your research.
 
 Transfer learning
 -----------------
-Or use bolts to do transfer learning
+Or use pl_bolts to do transfer learning
 
 .. code-block:: python
 
@@ -94,7 +94,7 @@ if __LIGHTNING_BOLT_SETUP__:
     # We are not importing the rest of the lightning during the build process, as it may not be compiled yet
 else:
 
-    from pytorch_lightning.bolts.models.mnist_template import LitMNISTModel
+    from pl_bolts import LitMNISTModel
 
     __all__ = [
         'LitMNISTModel'
