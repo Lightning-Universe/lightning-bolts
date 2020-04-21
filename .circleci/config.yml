@@ -29,6 +29,8 @@ references:
       name: Install package
       command: |
         virtualenv vEnv ; source vEnv/bin/activate
+        # TODO: remove this once we got a release with namespace packages
+        pip install git+https://github.com/PyTorchLightning/pytorch-lightning
         pip install --editable .
         cd .. & python -c "import pytorch_lightning ; print(pytorch_lightning.__version__)"
         cd .. & python -c "import pytorch_lightning.bolts ; print(pytorch_lightning.bolts.__version__)"
