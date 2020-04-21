@@ -22,13 +22,8 @@ import pl_bolts  # noqa: E402
 def load_requirements(path_dir=PATH_ROOT, comment_char='#'):
     with open(os.path.join(path_dir, 'requirements.txt'), 'r') as file:
         lines = [ln.strip() for ln in file.readlines()]
-    reqs = []
-    for ln in lines:
-        # filer all comments
-        if comment_char in ln:
-            ln = ln[:ln.index(comment_char)]
-        if ln:  # if requirement is not empty
-            reqs.append(ln)
+    reqs = [ln[:ln.index(comment_char)] if comment_char in ln else ln for ln in lines]
+    reqs = [ln for ln in reqs if ln]
     return reqs
 
 
