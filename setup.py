@@ -18,6 +18,7 @@ builtins.__LIGHTNING_BOLT_SETUP__ = True
 
 import pl_bolts  # noqa: E402
 
+
 def load_requirements(path_dir=PATH_ROOT, comment_char='#'):
     with open(os.path.join(path_dir, 'requirements.txt'), 'r') as file:
         lines = [ln.strip() for ln in file.readlines()]
