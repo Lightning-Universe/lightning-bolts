@@ -20,23 +20,25 @@ Use as a feature extractor
 For certain projects that require a VAE architecture you could use this as
 a module inside the larger system.
 
->>> from pytorch_lightning_bolts.models.variational_autoencoders import VAE
->>> import pytorch_lightning as pl
+.. code-block:: python
 
->>> class YourResearchModel(pl.LightningModule):
-...    def __init__(self):
-...        self.vae = VAE.load_from_checkpoint(PATH)
-...        self.vae.freeze()
-...
-...        self.some_other_model = MyModel()
-...
-...    def forward(self, z):
-...        # generate a sample from z ~ N(0,1)
-...        x = self.vae(z)
-...
-...        # do stuff with sample
-...        x = self.some_other_model(x)
-...        return x
+    from pytorch_lightning. import VAE
+    import pytorch_lightning as pl
+
+    class YourResearchModel(pl.LightningModule):
+        def __init__(self):
+            self.vae = VAE.load_from_checkpoint(PATH)
+            self.vae.freeze()
+
+            self.some_other_model = MyModel()
+
+        def forward(self, z):
+            # generate a sample from z ~ N(0,1)
+            x = self.vae(z)
+
+            # do stuff with sample
+            x = self.some_other_model(x)
+            return x
 
 
 Use in production of for inference
@@ -45,7 +47,7 @@ For production or predictions, load weights, freeze the model and use as needed.
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.variational_autoencoders import VAE
+    from pl_bolts.models.vaes.template import VAE
 
     vae = VAE.load_from_checkpoint(PATH)
     vae.freeze()
@@ -60,7 +62,7 @@ Here's an example on how to train this model from scratch
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.variational_autoencoders import VAE
+    from pl_bolts.models.vaes.template import VAE
     import pytorch_lightning as pl
 
     vae = VAE()
@@ -76,7 +78,7 @@ For example to change the prior and posterior you could do this
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.variational_autoencoders import VAE
+    from pl_bolts.models.vaes.template import VAE
 
     class MyVAEFlavor(VAE):
 
@@ -96,7 +98,7 @@ To change the encoder or decoder you could do this
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.variational_autoencoders import VAE
+    from pl_bolts.models.vaes.template import VAE
 
     class MyVAEFlavor(VAE):
 
@@ -114,11 +116,11 @@ Train VAE from the command line
 
 .. code-block:: bash
 
-    cd pytorch_lightning_bolts/models/vaes/basic_vae
-    python vae.py
+    cd pl_bolts/models/vaes/basic_vae
+    python template.py
 
 
-The vae.py script accepts the following arguments::
+The template.py script accepts the following arguments::
 
     optional arguments:
     --hidden_dim        if using default encoder/decoder - dimension of itermediate (dense) layers before embedding
@@ -131,6 +133,6 @@ The vae.py script accepts the following arguments::
 
 For example::
 
-    python vae.py --hidden_dim 128 --latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12
+    python template.py --hidden_dim 128 --latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12
 
 """

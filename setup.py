@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from io import open
+
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 
@@ -16,19 +16,14 @@ except ImportError:
 PATH_ROOT = os.path.dirname(__file__)
 builtins.__LIGHTNING_BOLT_SETUP__ = True
 
-import pytorch_lightning_bolts  # noqa: E402
+import pl_bolts  # noqa: E402
 
 
 def load_requirements(path_dir=PATH_ROOT, comment_char='#'):
     with open(os.path.join(path_dir, 'requirements.txt'), 'r') as file:
         lines = [ln.strip() for ln in file.readlines()]
-    reqs = []
-    for ln in lines:
-        # filer all comments
-        if comment_char in ln:
-            ln = ln[:ln.index(comment_char)]
-        if ln:  # if requirement is not empty
-            reqs.append(ln)
+    reqs = [ln[:ln.index(comment_char)] if comment_char in ln else ln for ln in lines]
+    reqs = [ln for ln in reqs if ln]
     return reqs
 
 
@@ -39,16 +34,16 @@ def load_requirements(path_dir=PATH_ROOT, comment_char='#'):
 # engineer specific practices
 setup(
     name='pytorch-lightning-bolts',
-    version=pytorch_lightning_bolts.__version__,
-    description=pytorch_lightning_bolts.__docs__,
-    author=pytorch_lightning_bolts.__author__,
-    author_email=pytorch_lightning_bolts.__author_email__,
-    url=pytorch_lightning_bolts.__homepage__,
+    version=pl_bolts.__version__,
+    description=pl_bolts.__docs__,
+    author=pl_bolts.__author__,
+    author_email=pl_bolts.__author_email__,
+    url=pl_bolts.__homepage__,
     download_url='https://github.com/PyTorchLightning/pytorch-lightning-bolts',
-    license=pytorch_lightning_bolts.__license__,
-    packages=find_packages(exclude=['tests']),
+    license=pl_bolts.__license__,
+    packages=find_packages(exclude=['tests', 'docs']),
 
-    long_description=open('README.md', encoding='utf-8').read(),
+    long_description=pl_bolts.__long_doc__,
     long_description_content_type='text/markdown',
     include_package_data=True,
     zip_safe=False,
@@ -60,7 +55,7 @@ setup(
 
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",
-        "Documentation": "https://lightning-bolts.rtfd.io/en/latest/",
+        "Documentation": "https://pytorch-lightning-bolts.rtfd.io/en/latest/",
         "Source Code": "https://github.com/PyTorchLightning/pytorch-lightning-bolts",
     },
 
@@ -83,5 +78,6 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 )

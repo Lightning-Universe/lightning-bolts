@@ -2,7 +2,7 @@
 
 import os
 
-__version__ = '0.1.0-dev5'
+__version__ = '0.1.0-dev6'
 __author__ = 'PyTorchLightning et al.'
 __author_email__ = 'name@pytorchlightning.ai'
 __license__ = 'TBD'
@@ -17,13 +17,13 @@ It's designed to work  with PyTorch Lightning
 
 Subclass Example
 ----------------
-Use bolts models to remove boilerplate for common approaches and architectures.
+Use `pl_bolts` models to remove boilerplate for common approaches and architectures.
 Because it uses LightningModules under the hood, you just need to overwrite
 the relevant parts to your research.
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.vaes import VAE
+    from pl_bolts.models import VAE
     from pytorch_lightning import Trainer
 
     class MyVAE(VAE):
@@ -44,7 +44,7 @@ Or use bolts to do transfer learning
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.vaes import VAE
+    from pl_bolts.models import VAE
     from pytorch_lightning import Trainer, LightningModule
 
     class ImageEnhancer(LightningModule):
@@ -93,7 +93,8 @@ if __LIGHTNING_BOLT_SETUP__:
     sys.stdout.write(f'Partial import of `{__name__}` during the build process.\n')  # pragma: no-cover
     # We are not importing the rest of the lightning during the build process, as it may not be compiled yet
 else:
-    from pytorch_lightning_bolts.models.mnist_template import LitMNISTModel
+
+    from pl_bolts.models.mnist_template import LitMNISTModel
 
     __all__ = [
         'LitMNISTModel'

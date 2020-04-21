@@ -1,6 +1,6 @@
 import pytorch_lightning as pl
 
-from pytorch_lightning_bolts.models.variational_autoencoders import VAE
+from pl_bolts.models import BasicVAE
 from tests import reset_seed
 
 
@@ -8,7 +8,7 @@ def test_vae(tmpdir):
     """ Test that an error is thrown when no `training_step()` is defined """
     reset_seed()
 
-    vae = VAE()
+    vae = BasicVAE()
     trainer = pl.Trainer(
         train_percent_check=0.01,
         val_percent_check=0.1,

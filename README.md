@@ -16,8 +16,8 @@ It's designed to work  with PyTorch Lightning
 ## Example
 ```python
 
-from pytorch_lightning_bolts.vaes import VAE
-from pytorch_lightning_bolts.gans import CycleGAN
+from pl_bolts.models import VAE
+from pl_bolts.models import CycleGAN
 from pytorch_lightning import Trainer
 
 vae = VAE()

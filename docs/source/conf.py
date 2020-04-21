@@ -27,18 +27,18 @@ sys.path.insert(0, os.path.abspath(PATH_ROOT))
 
 builtins.__LIGHTNING_BOLT_SETUP__ = True
 
-import pytorch_lightning_bolts  # noqa: E402
+import pl_bolts  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
 project = 'PyTorchLightning-Bolts'
-copyright = pytorch_lightning_bolts.__copyright__
-author = pytorch_lightning_bolts.__author__
+copyright = pl_bolts.__copyright__
+author = pl_bolts.__author__
 
 # The short X.Y version
-version = pytorch_lightning_bolts.__version__
+version = pl_bolts.__version__
 # The full version, including alpha/beta/rc tags
-release = pytorch_lightning_bolts.__version__
+release = pl_bolts.__version__
 
 # Options for the linkcode extension
 # ----------------------------------
@@ -50,7 +50,7 @@ github_repo = project
 
 # export the documentation
 with open('intro.rst', 'w') as fp:
-    fp.write(pytorch_lightning_bolts.__long_doc__)
+    fp.write(pl_bolts.__long_doc__)
 
 # export the READme
 with open(os.path.join(PATH_ROOT, 'README.md'), 'r') as fp:
@@ -128,7 +128,7 @@ language = None
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = [
-    'pytorch_lightning_bolts.rst',
+    'pl_bolts.rst',
     'modules.rst',
 ]
 
@@ -149,8 +149,8 @@ html_theme_path = [pt_lightning_sphinx_theme.get_html_theme_path()]
 # documentation.
 
 html_theme_options = {
-    'pytorch_project': pytorch_lightning_bolts.__homepage__,
-    'canonical_url': pytorch_lightning_bolts.__homepage__,
+    'pytorch_project': pl_bolts.__homepage__,
+    'canonical_url': pl_bolts.__homepage__,
     'collapse_navigation': False,
     'display_version': True,
     'logo_only': False,
@@ -247,7 +247,7 @@ todo_include_todos = True
 # and commit them to my repo after making changes to my code.
 
 PACKAGES = [
-    pytorch_lightning_bolts.__name__,
+    pl_bolts.__name__,
 ]
 
 

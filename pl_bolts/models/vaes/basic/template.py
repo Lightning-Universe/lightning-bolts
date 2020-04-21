@@ -1,17 +1,18 @@
 import os
 from argparse import ArgumentParser
 
-import pytorch_lightning as pl
 import torch
-from pytorch_lightning_bolts.models.variational_autoencoders.basic.components import Encoder, Decoder
+from pytorch_lightning import LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
 
+from pl_bolts.models.vaes.basic.components import Encoder, Decoder
 
-class VAE(pl.LightningModule):
+
+class BasicVAE(LightningModule):
 
     def __init__(
             self,
@@ -182,10 +183,10 @@ class VAE(pl.LightningModule):
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser = pl.Trainer.add_argparse_args(parser)
-    parser = VAE.add_model_specific_args(parser)
+    parser = Trainer.add_argparse_args(parser)
+    parser = BasicVAE.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    vae = VAE(args)
-    trainer = pl.Trainer()
+    vae = BasicVAE(args)
+    trainer = Trainer()
     trainer.fit(vae)
