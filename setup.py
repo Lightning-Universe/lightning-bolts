@@ -3,7 +3,7 @@
 import os
 from io import open
 # Always prefer setuptools over distutils
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 
 try:
     import builtins
@@ -15,8 +15,9 @@ except ImportError:
 
 PATH_ROOT = os.path.dirname(__file__)
 builtins.__LIGHTNING_BOLT_SETUP__ = True
+builtins.__LIGHTNING_SETUP__ = True
 
-import pytorch_lightning.bolts  # noqa: E402
+from pytorch_lightning import bolts  # noqa: E402
 
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
@@ -26,15 +27,14 @@ import pytorch_lightning.bolts  # noqa: E402
 # engineer specific practices
 setup(
     name='pytorch-lightning-bolts',
-    version=pytorch_lightning.bolts.__version__,
-    description=pytorch_lightning.bolts.__docs__,
-    author=pytorch_lightning.bolts.__author__,
-    author_email=pytorch_lightning.bolts.__author_email__,
-    url=pytorch_lightning.bolts.__homepage__,
+    version=bolts.__version__,
+    description=bolts.__docs__,
+    author=bolts.__author__,
+    author_email=bolts.__author_email__,
+    url=bolts.__homepage__,
     download_url='https://github.com/PyTorchLightning/pytorch-lightning-bolts',
-    license=pytorch_lightning.bolts.__license__,
-    packages=find_packages(exclude=['tests', 'docs']),
-    namespace_packages=['pytorch_lightning'],
+    license=bolts.__license__,
+    packages=find_namespace_packages(exclude=['tests', 'docs']),
 
     long_description=pytorch_lightning.bolts.__long_doc__,
     long_description_content_type='text/markdown',
