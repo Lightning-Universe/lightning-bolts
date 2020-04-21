@@ -21,7 +21,10 @@ builtins.__LIGHTNING_SETUP__ = True
 import sys
 
 # remove local path to force loading global models
-sys.path.remove('')
+removed_locals = False
+if '' in sys.path:
+    sys.path.remove('')
+    removed_locals = True
 import pytorch_lightning
 
 # read init content
@@ -33,7 +36,8 @@ del pytorch_lightning
 sys.modules.pop('pytorch_lightning', None)
 
 # re-add locals to path
-sys.path = [''] + sys.path
+if removed_locals:
+    sys.path = [''] + sys.path
 
 # overwrite init
 with open(os.path.join(os.path.abspath(PATH_ROOT),
