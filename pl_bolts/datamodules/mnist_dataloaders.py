@@ -31,8 +31,7 @@ class MNISTDataLoaders(BoltDataLoaders):
         return loader
 
     def get_transforms(self):
-        mnist_transforms = transforms.Compose(
-            [transforms.ToTensor(),
-             transforms.Normalize([0.5], [0.5])]
-        )
+        mnist_transforms = transforms.Compose([
+            transforms.ToTensor()
+        ])
         return mnist_transforms

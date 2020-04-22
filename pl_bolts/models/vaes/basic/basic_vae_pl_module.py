@@ -16,17 +16,23 @@ class BasicVAE(LightningModule):
             hparams=None,
     ):
         super().__init__()
+        # attach hparams to log hparams to the loggers (like tensorboard)
+        self.__check_hparams(hparams)
         self.hparams = hparams
+
         self.dataloaders = MNISTDataLoaders(save_path=os.getcwd())
 
-        hidden_dim = hparams.hidden_dim if hasattr(hparams, 'hidden_dim') else 128
-        latent_dim = hparams.latent_dim if hasattr(hparams, 'latent_dim') else 32
-        input_width = hparams.input_width if hasattr(hparams, 'input_width') else 28
-        input_height = hparams.input_height if hasattr(hparams, 'input_height') else 28
-        self.batch_size = hparams.input_height if hasattr(hparams, 'batch_size') else 32
+        self.encoder = self.init_encoder(self.hidden_dim, self.latent_dim,
+                                         self.input_width, self.input_height)
+        self.decoder = self.init_decoder(self.hidden_dim, self.latent_dim,
+                                         self.input_width, self.input_height)
 
-        self.encoder = self.init_encoder(hidden_dim, latent_dim, input_width, input_height)
-        self.decoder = self.init_decoder(hidden_dim, latent_dim, input_width, input_height)
+    def __check_hparams(self, hparams):
+        self.hidden_dim = hparams.hidden_dim if hasattr(hparams, 'hidden_dim') else 128
+        self.latent_dim = hparams.latent_dim if hasattr(hparams, 'latent_dim') else 32
+        self.input_width = hparams.input_width if hasattr(hparams, 'input_width') else 28
+        self.input_height = hparams.input_height if hasattr(hparams, 'input_height') else 28
+        self.batch_size = hparams.input_height if hasattr(hparams, 'batch_size') else 32
 
     def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
         encoder = Encoder(hidden_dim, latent_dim, input_width, input_height)
