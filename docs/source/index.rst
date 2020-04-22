@@ -17,21 +17,21 @@ PyTorchLightning-Bolts documentation
 
 .. toctree::
    :maxdepth: 2
-   :name: docs
+   :name: models
    :caption: Models
 
    pl_bolts.models
 
 .. toctree::
    :maxdepth: 2
-   :name: docs
+   :name: callbacks
    :caption: Callbacks
 
    pl_bolts.callbacks
 
 .. toctree::
    :maxdepth: 2
-   :name: docs
+   :name: loggers
    :caption: Loggers
 
    pl_bolts.loggers
