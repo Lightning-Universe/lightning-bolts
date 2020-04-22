@@ -128,8 +128,8 @@ language = None
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = [
-    'pl_bolts.rst',
-    'modules.rst',
+    'api/pl_bolts.rst',
+    'api/modules.rst',
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -253,8 +253,13 @@ PACKAGES = [
 
 def run_apidoc(_):
     for pkg in PACKAGES:
-        argv = ['-e', '-o', PATH_HERE, os.path.join(PATH_HERE, PATH_ROOT, pkg),
-                '**/test_*', '--force', '--private', '--module-first']
+        argv = ['-e',
+                '-o', os.path.join(PATH_HERE, 'api'),
+                os.path.join(PATH_HERE, PATH_ROOT, pkg),
+                '**/test_*',
+                '--force',
+                '--private',
+                '--module-first']
         # Sphinx 1.7+
         from sphinx.ext import apidoc
         apidoc.main(argv)
