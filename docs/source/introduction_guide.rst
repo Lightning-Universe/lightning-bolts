@@ -1,33 +1,23 @@
-"""
-VAE Template
-============
+Introduction Guide
+==================
+Bolts is designed to bootstrap research from prebuilt Lightning models
 
-This is a basic template for implementing a Variational Autoencoder in PyTorch Lightning.
+There are many ways to use bolts models. Here we describe a few.
 
-A default encoder and decoder have been provided but can easily be replaced by custom models.
-
-This template uses the MNIST dataset but image data of any dimension can be fed in as long as the image
- width and image height are even values. For other types of data, such as sound, it will be necessary
- to change the Encoder and Decoder.
-
-The default encoder and decoder are both convolutional with a 128-dimensional hidden layer and
- a 32-dimensional latent space. The model accepts arguments for these dimensions (see example below)
- if you want to use the default encoder + decoder but with different hidden layer and latent layer dimensions.
- The model also assumes a Gaussian prior and a Gaussian approximate posterior distribution.
 
 Use as a feature extractor
 --------------------------
-For certain projects that require a VAE architecture you could use this as
+For certain projects that require an architecture you could use this as
 a module inside the larger system.
 
 .. code-block:: python
 
-    from pytorch_lightning. import VAE
+    from pl_bolts.models.autoencoders import BasicVAE
     import pytorch_lightning as pl
 
     class YourResearchModel(pl.LightningModule):
         def __init__(self):
-            self.vae = VAE.load_from_checkpoint(PATH)
+            self.vae = BasicVAE.load_from_checkpoint(PATH)
             self.vae.freeze()
 
             self.some_other_model = MyModel()
@@ -41,15 +31,15 @@ a module inside the larger system.
             return x
 
 
-Use in production of for inference
+Use in production or for inference
 ----------------------------------
 For production or predictions, load weights, freeze the model and use as needed.
 
 .. code-block:: python
 
-    from pl_bolts.models.vaes.template import VAE
+    from pl_bolts.models.autoencoders import BasicVAE
 
-    vae = VAE.load_from_checkpoint(PATH)
+    vae = BasicVAE.load_from_checkpoint(PATH)
     vae.freeze()
 
     z = ... # z ~ N(0, 1)
@@ -62,25 +52,25 @@ Here's an example on how to train this model from scratch
 
 .. code-block:: python
 
-    from pl_bolts.models.vaes.template import VAE
+    from pl_bolts.models.autoencoders import BasicVAE
     import pytorch_lightning as pl
 
-    vae = VAE()
+    vae = BasicVAE()
     trainer = pl.Trainer(gpus=1)
     trainer.fit(vae)
 
 
 Use for research
 ----------------
-To use the VAE for research, modify any relevant part you need.
+To use a model for research, modify any relevant part you need.
 
 For example to change the prior and posterior you could do this
 
 .. code-block:: python
 
-    from pl_bolts.models.vaes.template import VAE
+    from pl_bolts.models.autoencoders import BasicVAE
 
-    class MyVAEFlavor(VAE):
+    class MyVAEFlavor(BasicVAE):
 
         def init_prior(self, z_mu, z_std):
             P = MyPriorDistribution
@@ -94,13 +84,13 @@ For example to change the prior and posterior you could do this
             # Q = distributions.normal.Normal(loc=z_mu, scale=z_std)
             return Q
 
-To change the encoder or decoder you could do this
+To change parts of the model (for instance, the encoder or decoder) you could do this
 
 .. code-block:: python
 
-    from pl_bolts.models.vaes.template import VAE
+    from pl_bolts.models.autoencoders import BasicVAE
 
-    class MyVAEFlavor(VAE):
+    class MyVAEFlavor(BasicVAE):
 
         def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
             encoder = MyEncoder(...)
@@ -111,16 +101,15 @@ To change the encoder or decoder you could do this
             return decoder
 
 
-Train VAE from the command line
--------------------------------
+Train the model from the command line
+--------------------------------------
 
 .. code-block:: bash
 
-    cd pl_bolts/models/vaes/basic_vae
-    python template.py
+    cd pl_bolts/models/autoencoders/basic_vae
+    python basic_vae_pl_module.py
 
-
-The template.py script accepts the following arguments::
+Each script accepts Argparse arguments. For instance, the VAE accepts the following arguments::
 
     optional arguments:
     --hidden_dim        if using default encoder/decoder - dimension of itermediate (dense) layers before embedding
@@ -133,6 +122,6 @@ The template.py script accepts the following arguments::
 
 For example::
 
-    python template.py --hidden_dim 128 --latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12
+    python basic_vae_pl_module.py --hidden_dim 128 --latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12
 
 """

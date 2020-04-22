@@ -6,7 +6,6 @@ from tests import reset_seed
 
 
 def test_mnist(tmpdir):
-    """ Test that an error is thrown when no `training_step()` is defined """
     reset_seed()
 
     params = {'hidden_dim': 128, 'batch_size': 32, 'learning_rate': 0.001}

@@ -5,11 +5,8 @@ import torch
 from pytorch_lightning import LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
-from torch.utils.data import DataLoader
-from torchvision import transforms
-from torchvision.datasets import MNIST
-
-from pl_bolts.models.vaes.basic.components import Encoder, Decoder
+from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
+from pl_bolts.datamodules import MNISTDataLoaders
 
 
 class BasicVAE(LightningModule):
@@ -19,15 +16,23 @@ class BasicVAE(LightningModule):
             hparams=None,
     ):
         super().__init__()
+        # attach hparams to log hparams to the loggers (like tensorboard)
+        self.__check_hparams(hparams)
         self.hparams = hparams
-        hidden_dim = hparams.hidden_dim if hasattr(hparams, 'hidden_dim') else 128
-        latent_dim = hparams.latent_dim if hasattr(hparams, 'latent_dim') else 32
-        input_width = hparams.input_width if hasattr(hparams, 'input_width') else 28
-        input_height = hparams.input_height if hasattr(hparams, 'input_height') else 28
-        self.batch_size = hparams.input_height if hasattr(hparams, 'batch_size') else 32
 
-        self.encoder = self.init_encoder(hidden_dim, latent_dim, input_width, input_height)
-        self.decoder = self.init_decoder(hidden_dim, latent_dim, input_width, input_height)
+        self.dataloaders = MNISTDataLoaders(save_path=os.getcwd())
+
+        self.encoder = self.init_encoder(self.hidden_dim, self.latent_dim,
+                                         self.input_width, self.input_height)
+        self.decoder = self.init_decoder(self.hidden_dim, self.latent_dim,
+                                         self.input_width, self.input_height)
+
+    def __check_hparams(self, hparams):
+        self.hidden_dim = hparams.hidden_dim if hasattr(hparams, 'hidden_dim') else 128
+        self.latent_dim = hparams.latent_dim if hasattr(hparams, 'latent_dim') else 32
+        self.input_width = hparams.input_width if hasattr(hparams, 'input_width') else 28
+        self.input_height = hparams.input_height if hasattr(hparams, 'input_height') else 28
+        self.batch_size = hparams.input_height if hasattr(hparams, 'batch_size') else 32
 
     def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
         encoder = Encoder(hidden_dim, latent_dim, input_width, input_height)
@@ -52,6 +57,7 @@ class BasicVAE(LightningModule):
         z = Q.rsample()
         pxz = self(z)
         recon_loss = F.binary_cross_entropy(pxz, x, reduction='none')
+
         # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
         # multivariate gaussian
         recon_loss = recon_loss.sum(dim=-1)
@@ -151,20 +157,16 @@ class BasicVAE(LightningModule):
         return torch.optim.Adam(self.parameters(), lr=0.001)
 
     def prepare_data(self):
-        self.mnist_train = MNIST(os.getcwd(), train=True, download=True, transform=transforms.ToTensor())
-        self.mnist_test = MNIST(os.getcwd(), train=False, download=True, transform=transforms.ToTensor())
+        self.dataloaders.prepare_data()
 
     def train_dataloader(self):
-        loader = DataLoader(self.mnist_train, batch_size=self.batch_size)
-        return loader
+        return self.dataloaders.train_dataloader(self.batch_size)
 
     def val_dataloader(self):
-        loader = DataLoader(self.mnist_test, batch_size=self.batch_size)
-        return loader
+        return self.dataloaders.val_dataloader(self.batch_size)
 
     def test_dataloader(self):
-        loader = DataLoader(self.mnist_test, batch_size=self.batch_size)
-        return loader
+        return self.dataloaders.test_dataloader(self.batch_size)
 
     @staticmethod
     def add_model_specific_args(parent_parser):

@@ -16,12 +16,12 @@ It's designed to work  with PyTorch Lightning
 ## Example
 ```python
 
-from pl_bolts.models import BasicVAE
-from pl_bolts.models import CycleGAN
+from pl_bolts.models.autoencoders import BasicVAE
+from pl_bolts.models.gans import BasicGAN
 from pytorch_lightning import Trainer
 
 vae = BasicVAE()
-gan = CycleGAN()
+gan = BasicGAN()
 
 # train VAE
 vae_trainer = Trainer()
