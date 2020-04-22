@@ -31,7 +31,9 @@ class BasicGAN(LightningModule):
         self.input_height = hparams.input_height if hasattr(hparams, 'input_height') else 28
         self.latent_dim = hparams.latent_dim if hasattr(hparams, 'latent_dim') else 32
         self.batch_size = hparams.batch_size if hasattr(hparams, 'batch_size') else 32
-
+        self.b1 = hparams.b1 if hasattr(hparams, 'b1') else 0.5
+        self.b2 = hparams.b2 if hasattr(hparams, 'b2') else 0.999
+        self.learning_rate = hparams.learning_rate if hasattr(hparams, 'learning_rate') else 0.0002
         self.img_dim = (self.input_channels, self.input_width, self.input_height)
 
     def init_generator(self, img_dim):
@@ -123,9 +125,9 @@ class BasicGAN(LightningModule):
             return self.discriminator_step(x)
 
     def configure_optimizers(self):
-        lr = self.hparams.learning_rate
-        b1 = self.hparams.b1
-        b2 = self.hparams.b2
+        lr = self.learning_rate
+        b1 = self.b1
+        b2 = self.b2
 
         opt_g = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
