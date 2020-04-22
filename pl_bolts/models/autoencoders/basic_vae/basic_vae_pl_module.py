@@ -5,7 +5,7 @@ import torch
 from pytorch_lightning import LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
-from pl_bolts.models.autoencoders.basic.components import Encoder, Decoder
+from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
 from pl_bolts.datamodules import MNISTDataLoaders
 
 
