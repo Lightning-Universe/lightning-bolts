@@ -1,1 +1,1 @@
-from pl_bolts.datamodules.MNISTDataModule import MNISTDataModule
+from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders

@@ -12,7 +12,7 @@ from pl_bolts.models.vaes.basic.components import Encoder, Decoder
 from pl_bolts.datamodules import MNISTDataModule
 
 
-class BasicVAE(MNISTDataModule, LightningModule):
+class BasicVAE(LightningModule):
 
     def __init__(
             self,
@@ -149,6 +149,10 @@ class BasicVAE(MNISTDataModule, LightningModule):
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=0.001)
+
+    def prepare_data(self):
+        MNISTDataModule.prepare_data()
+
 
     @staticmethod
     def add_model_specific_args(parent_parser):

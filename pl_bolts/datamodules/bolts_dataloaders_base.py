@@ -4,10 +4,11 @@ from torch.utils.data import DataLoader
 from typing import List, Union
 
 
-class BoltDataModule(ABC):
+class BoltDataLoaders(ABC):
 
+    @staticmethod
     @abstractmethod
-    def prepare_data(self):
+    def prepare_data(self, *args, **kwargs):
         """
         Use this to download and prepare data.
         In distributed (GPU, TPU), this will only be called once.
@@ -29,8 +30,9 @@ class BoltDataModule(ABC):
                     cache_imagenet()
         """
 
+    @staticmethod
     @abstractmethod
-    def train_dataloader(self) -> DataLoader:
+    def train_dataloader(self, *args, **kwargs) -> DataLoader:
         """
         Implement a PyTorch DataLoader for training.
 
@@ -69,8 +71,9 @@ class BoltDataModule(ABC):
         """
         rank_zero_warn('`train_dataloader` must be implemented to be used with the Lightning Trainer')
 
+    @staticmethod
     @abstractmethod
-    def val_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
+    def val_dataloader(self, *args, **kwargs) -> Union[DataLoader, List[DataLoader]]:
         r"""
         Implement one or multiple PyTorch DataLoaders for validation.
 
@@ -122,8 +125,9 @@ class BoltDataModule(ABC):
             will have an argument ``dataset_idx`` which matches the order here.
         """
 
+    @staticmethod
     @abstractmethod
-    def test_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
+    def test_dataloader(self, *args, **kwargs) -> Union[DataLoader, List[DataLoader]]:
         r"""
         Implement one or multiple PyTorch DataLoaders for testing.
 
