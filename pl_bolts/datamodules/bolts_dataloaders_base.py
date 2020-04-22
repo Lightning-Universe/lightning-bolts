@@ -4,9 +4,8 @@ from torch.utils.data import DataLoader
 from typing import List, Union
 
 
-class BoltDataLoaders(ABC):
+class BoltDataLoaders(object):
 
-    @staticmethod
     @abstractmethod
     def prepare_data(self, *args, **kwargs):
         """
@@ -30,7 +29,6 @@ class BoltDataLoaders(ABC):
                     cache_imagenet()
         """
 
-    @staticmethod
     @abstractmethod
     def train_dataloader(self, *args, **kwargs) -> DataLoader:
         """
@@ -71,7 +69,6 @@ class BoltDataLoaders(ABC):
         """
         rank_zero_warn('`train_dataloader` must be implemented to be used with the Lightning Trainer')
 
-    @staticmethod
     @abstractmethod
     def val_dataloader(self, *args, **kwargs) -> Union[DataLoader, List[DataLoader]]:
         r"""
@@ -125,7 +122,6 @@ class BoltDataLoaders(ABC):
             will have an argument ``dataset_idx`` which matches the order here.
         """
 
-    @staticmethod
     @abstractmethod
     def test_dataloader(self, *args, **kwargs) -> Union[DataLoader, List[DataLoader]]:
         r"""

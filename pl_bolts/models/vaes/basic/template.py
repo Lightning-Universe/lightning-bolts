@@ -5,11 +5,8 @@ import torch
 from pytorch_lightning import LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
-from torch.utils.data import DataLoader
-from torchvision import transforms
-from torchvision.datasets import MNIST
 from pl_bolts.models.vaes.basic.components import Encoder, Decoder
-from pl_bolts.datamodules import MNISTDataModule
+from pl_bolts.datamodules import MNISTDataLoaders
 
 
 class BasicVAE(LightningModule):
@@ -20,6 +17,8 @@ class BasicVAE(LightningModule):
     ):
         super().__init__()
         self.hparams = hparams
+        self.dataloaders = MNISTDataLoaders(save_path=os.getcwd())
+
         hidden_dim = hparams.hidden_dim if hasattr(hparams, 'hidden_dim') else 128
         latent_dim = hparams.latent_dim if hasattr(hparams, 'latent_dim') else 32
         input_width = hparams.input_width if hasattr(hparams, 'input_width') else 28
@@ -52,6 +51,7 @@ class BasicVAE(LightningModule):
         z = Q.rsample()
         pxz = self(z)
         recon_loss = F.binary_cross_entropy(pxz, x, reduction='none')
+
         # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
         # multivariate gaussian
         recon_loss = recon_loss.sum(dim=-1)
@@ -151,7 +151,16 @@ class BasicVAE(LightningModule):
         return torch.optim.Adam(self.parameters(), lr=0.001)
 
     def prepare_data(self):
-        MNISTDataModule.prepare_data()
+        self.dataloaders.prepare_data()
+
+    def train_dataloader(self):
+        return self.dataloaders.train_dataloader(self.batch_size)
+
+    def val_dataloader(self):
+        return self.dataloaders.val_dataloader(self.batch_size)
+
+    def test_dataloader(self):
+        return self.dataloaders.test_dataloader(self.batch_size)
 
 
     @staticmethod

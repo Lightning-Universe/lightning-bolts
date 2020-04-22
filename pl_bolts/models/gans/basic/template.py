@@ -1,17 +1,19 @@
+import os
 from argparse import ArgumentParser
 from collections import OrderedDict
 import torch
-from pytorch_lightning import Trainer, LightningModule
 from torch.nn import functional as F
+from pytorch_lightning import Trainer, LightningModule
 from pl_bolts.models.gans.basic.components import Generator, Discriminator
-from pl_bolts.datamodules import MNISTDataModule
+from pl_bolts.datamodules import MNISTDataLoaders
 
 
-class BasicGAN(MNISTDataModule, LightningModule):
+class BasicGAN(LightningModule):
 
     def __init__(self, hparams):
         super().__init__()
         self.hparams = hparams
+        self.dataloaders = MNISTDataLoaders(save_path=os.getcwd())
 
         # networks
         self.generator = self.init_generator(self.hparams)
@@ -120,11 +122,17 @@ class BasicGAN(MNISTDataModule, LightningModule):
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
         return [opt_g, opt_d], []
 
+    def prepare_data(self):
+        self.dataloaders.prepare_data()
+
+    def train_dataloader(self):
+        return self.dataloaders.train_dataloader(self.hparams.batch_size)
+
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--hidden_dim', type=int, default=128,
-                            help='itermediate layers dimension before embedding for default encoder/decoder')
+                            help='generator embedding dim')
         parser.add_argument('--input_width', type=int, default=28,
                             help='input image width - 28 for MNIST (must be even)')
         parser.add_argument('--input_channels', type=int, default=1,
