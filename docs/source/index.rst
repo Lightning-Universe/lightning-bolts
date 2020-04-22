@@ -9,8 +9,32 @@ PyTorchLightning-Bolts documentation
 .. include:: intro.rst
 
 .. toctree::
+   :maxdepth: 1
+   :name: start
+   :caption: Start here
+
+   introduction_guide
+
+.. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :name: docs
+   :caption: Models
+
+   pl_bolts.models
+
+.. toctree::
+   :maxdepth: 2
+   :name: docs
+   :caption: Callbacks
+
+   pl_bolts.callbacks
+
+.. toctree::
+   :maxdepth: 2
+   :name: docs
+   :caption: Loggers
+
+   pl_bolts.loggers
 
 
 Indices and tables
