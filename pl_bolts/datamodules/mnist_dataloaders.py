@@ -15,13 +15,13 @@ class MNISTDataLoaders(BoltDataLoaders):
 
     def train_dataloader(self, batch_size, val_split=5000):
         dataset = MNIST(self.save_path, train=True, download=False, transform=self.get_transforms())
-        mnist_train, _ = random_split(dataset, [60000-val_split, val_split])
+        mnist_train, _ = random_split(dataset, [60000 - val_split, val_split])
         loader = DataLoader(mnist_train, batch_size=batch_size, shuffle=True)
         return loader
 
     def val_dataloader(self, batch_size, val_split=5000):
         dataset = MNIST(self.save_path, train=True, download=True, transform=self.get_transforms())
-        _, mnist_val = random_split(dataset, [60000-val_split, val_split])
+        _, mnist_val = random_split(dataset, [60000 - val_split, val_split])
         loader = DataLoader(mnist_val, batch_size=batch_size, shuffle=False)
         return loader
 

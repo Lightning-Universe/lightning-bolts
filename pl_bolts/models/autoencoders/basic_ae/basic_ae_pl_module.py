@@ -111,7 +111,6 @@ class BasicAE(LightningModule):
     def test_dataloader(self):
         return self.dataloaders.test_dataloader(self.batch_size)
 
-
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
