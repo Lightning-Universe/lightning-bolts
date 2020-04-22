@@ -130,6 +130,7 @@ language = None
 exclude_patterns = [
     'api/pl_bolts.rst',
     'api/modules.rst',
+    'api/pl_bolts.datamodules.*',
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
