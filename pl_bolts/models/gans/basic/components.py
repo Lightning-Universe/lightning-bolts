@@ -47,4 +47,3 @@ class Discriminator(nn.Module):
         validity = self.model(img_flat)
 
         return validity
-
