@@ -10,27 +10,36 @@ from pl_bolts.datamodules import MNISTDataLoaders
 
 class BasicGAN(LightningModule):
 
-    def __init__(self, hparams):
+    def __init__(self, hparams=None):
         super().__init__()
+        self.__check_hparams(hparams)
         self.hparams = hparams
+
         self.dataloaders = MNISTDataLoaders(save_path=os.getcwd())
 
         # networks
-        self.generator = self.init_generator(self.hparams)
-        self.discriminator = self.init_discriminator(self.hparams)
+        self.generator = self.init_generator(self.img_dim)
+        self.discriminator = self.init_discriminator(self.img_dim)
 
         # cache for generated images
         self.generated_imgs = None
         self.last_imgs = None
 
-    def init_generator(self, hparams):
-        image_shape = (hparams.input_channels, hparams.input_width, hparams.input_height)
-        generator = Generator(latent_dim=hparams.latent_dim, img_shape=image_shape)
+    def __check_hparams(self, hparams):
+        self.input_channels = hparams.input_channels if hasattr(hparams, 'input_channels') else 1
+        self.input_width = hparams.input_width if hasattr(hparams, 'input_width') else 28
+        self.input_height = hparams.input_height if hasattr(hparams, 'input_height') else 28
+        self.latent_dim = hparams.latent_dim if hasattr(hparams, 'latent_dim') else 32
+        self.batch_size = hparams.batch_size if hasattr(hparams, 'batch_size') else 32
+
+        self.img_dim = (self.input_channels, self.input_width, self.input_height)
+
+    def init_generator(self, img_dim):
+        generator = Generator(latent_dim=self.latent_dim, img_shape=img_dim)
         return generator
 
-    def init_discriminator(self, hparams):
-        image_shape = (hparams.input_channels, hparams.input_width, hparams.input_height)
-        discriminator = Discriminator(img_shape=image_shape)
+    def init_discriminator(self, img_dim):
+        discriminator = Discriminator(img_shape=img_dim)
         return discriminator
 
     def forward(self, z):
@@ -126,13 +135,11 @@ class BasicGAN(LightningModule):
         self.dataloaders.prepare_data()
 
     def train_dataloader(self):
-        return self.dataloaders.train_dataloader(self.hparams.batch_size)
+        return self.dataloaders.train_dataloader(self.batch_size)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--hidden_dim', type=int, default=128,
-                            help='generator embedding dim')
         parser.add_argument('--input_width', type=int, default=28,
                             help='input image width - 28 for MNIST (must be even)')
         parser.add_argument('--input_channels', type=int, default=1,
@@ -145,7 +152,7 @@ class BasicGAN(LightningModule):
         parser.add_argument('--b2', type=float, default=0.999,
                             help="adam: decay of first order momentum of gradient")
         parser.add_argument('--latent_dim', type=int, default=100,
-                            help="dimensionality of the latent space")
+                            help="generator embedding dim")
         parser.add_argument('--batch_size', type=int, default=64, help="size of the batches")
 
         return parser
