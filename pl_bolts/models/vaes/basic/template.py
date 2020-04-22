@@ -8,11 +8,11 @@ from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
-
 from pl_bolts.models.vaes.basic.components import Encoder, Decoder
+from pl_bolts.datamodules import MNISTDataModule
 
 
-class BasicVAE(LightningModule):
+class BasicVAE(MNISTDataModule, LightningModule):
 
     def __init__(
             self,
@@ -149,22 +149,6 @@ class BasicVAE(LightningModule):
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=0.001)
-
-    def prepare_data(self):
-        self.mnist_train = MNIST(os.getcwd(), train=True, download=True, transform=transforms.ToTensor())
-        self.mnist_test = MNIST(os.getcwd(), train=False, download=True, transform=transforms.ToTensor())
-
-    def train_dataloader(self):
-        loader = DataLoader(self.mnist_train, batch_size=self.batch_size)
-        return loader
-
-    def val_dataloader(self):
-        loader = DataLoader(self.mnist_test, batch_size=self.batch_size)
-        return loader
-
-    def test_dataloader(self):
-        loader = DataLoader(self.mnist_test, batch_size=self.batch_size)
-        return loader
 
     @staticmethod
     def add_model_specific_args(parent_parser):

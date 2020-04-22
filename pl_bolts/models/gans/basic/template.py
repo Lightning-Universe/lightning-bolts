@@ -1,17 +1,13 @@
-import os
 from argparse import ArgumentParser
-
 from collections import OrderedDict
 import torch
 from pytorch_lightning import Trainer, LightningModule
 from torch.nn import functional as F
-from torch.utils.data import DataLoader
-from torchvision import transforms
-from torchvision.datasets import MNIST
 from pl_bolts.models.gans.basic.components import Generator, Discriminator
+from pl_bolts.datamodules import MNISTDataModule
 
 
-class BasicGAN(LightningModule):
+class BasicGAN(MNISTDataModule, LightningModule):
 
     def __init__(self, hparams):
         super().__init__()
@@ -123,12 +119,6 @@ class BasicGAN(LightningModule):
         opt_g = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
         return [opt_g, opt_d], []
-
-    def train_dataloader(self):
-        transform = transforms.Compose([transforms.ToTensor(),
-                                        transforms.Normalize([0.5], [0.5])])
-        dataset = MNIST(os.getcwd(), train=True, download=True, transform=transform)
-        return DataLoader(dataset, batch_size=self.hparams.batch_size)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
