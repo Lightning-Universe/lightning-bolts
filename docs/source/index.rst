@@ -20,28 +20,28 @@ PyTorchLightning-Bolts documentation
    :name: api
    :caption: Python API
 
-   api/pl_bolts.datamodules
+   datamodules
 
 .. toctree::
    :maxdepth: 2
    :name: models
    :caption: Models
 
-   api/pl_bolts.models
+   models
 
 .. toctree::
    :maxdepth: 2
    :name: callbacks
    :caption: Callbacks
 
-   api/pl_bolts.callbacks
+   callbacks
 
 .. toctree::
    :maxdepth: 2
    :name: loggers
    :caption: Loggers
 
-   api/pl_bolts.loggers
+   loggers
 
 
 Indices and tables
