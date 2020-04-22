@@ -22,12 +22,12 @@ a module inside the larger system.
 
 .. code-block:: python
 
-    from pytorch_lightning. import VAE
+    from pl_bolts.models.autoencoders import BasicVAE
     import pytorch_lightning as pl
 
     class YourResearchModel(pl.LightningModule):
         def __init__(self):
-            self.vae = VAE.load_from_checkpoint(PATH)
+            self.vae = BasicVAE.load_from_checkpoint(PATH)
             self.vae.freeze()
 
             self.some_other_model = MyModel()
@@ -47,9 +47,9 @@ For production or predictions, load weights, freeze the model and use as needed.
 
 .. code-block:: python
 
-    from pl_bolts.models.vaes.template import VAE
+    from pl_bolts.models.autoencoders import BasicVAE
 
-    vae = VAE.load_from_checkpoint(PATH)
+    vae = BasicVAE.load_from_checkpoint(PATH)
     vae.freeze()
 
     z = ... # z ~ N(0, 1)
@@ -62,10 +62,10 @@ Here's an example on how to train this model from scratch
 
 .. code-block:: python
 
-    from pl_bolts.models.vaes.template import VAE
+    from pl_bolts.models.autoencoders import BasicVAE
     import pytorch_lightning as pl
 
-    vae = VAE()
+    vae = BasicVAE()
     trainer = pl.Trainer(gpus=1)
     trainer.fit(vae)
 
@@ -78,9 +78,9 @@ For example to change the prior and posterior you could do this
 
 .. code-block:: python
 
-    from pl_bolts.models.vaes.template import VAE
+    from pl_bolts.models.autoencoders import BasicVAE
 
-    class MyVAEFlavor(VAE):
+    class MyVAEFlavor(BasicVAE):
 
         def init_prior(self, z_mu, z_std):
             P = MyPriorDistribution
@@ -98,9 +98,9 @@ To change the encoder or decoder you could do this
 
 .. code-block:: python
 
-    from pl_bolts.models.vaes.template import VAE
+    from pl_bolts.models.autoencoders import BasicVAE
 
-    class MyVAEFlavor(VAE):
+    class MyVAEFlavor(BasicVAE):
 
         def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
             encoder = MyEncoder(...)
