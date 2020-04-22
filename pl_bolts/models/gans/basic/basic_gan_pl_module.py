@@ -58,7 +58,7 @@ class BasicGAN(LightningModule):
 
     def generator_step(self, x):
         # sample noise
-        z = torch.randn(x.shape[0], self.hparams.latent_dim)
+        z = torch.randn(x.shape[0], self.latent_dim)
         z = z.type_as(x)
 
         # generate images
