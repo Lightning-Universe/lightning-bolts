@@ -122,6 +122,6 @@ Each script accepts Argparse arguments. For instance, the VAE accepts the follow
 
 For example::
 
-    python template.py --hidden_dim 128 --latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12
+    python basic_vae_pl_module.py --hidden_dim 128 --latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12
 
 """
