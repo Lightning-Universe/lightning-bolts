@@ -17,6 +17,13 @@ PyTorchLightning-Bolts documentation
 
 .. toctree::
    :maxdepth: 2
+   :name: api
+   :caption: Python API
+
+   pl_bolts.datamodules
+
+.. toctree::
+   :maxdepth: 2
    :name: models
    :caption: Models
 
