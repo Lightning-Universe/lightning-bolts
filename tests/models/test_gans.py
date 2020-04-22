@@ -8,6 +8,6 @@ def test_gan(tmpdir):
     reset_seed()
 
     model = BasicGAN()
-    trainer = pl.Trainer(train_percent_check=0.01)
+    trainer = pl.Trainer(train_percent_check=0.01, max_epochs=1)
     trainer.fit(model)
     trainer.test()
