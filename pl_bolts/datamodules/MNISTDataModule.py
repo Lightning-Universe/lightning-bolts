@@ -1,20 +1,12 @@
 import os
-from argparse import ArgumentParser
-
-from collections import OrderedDict
-import torch
-from pytorch_lightning import Trainer, LightningModule
-from torch.nn import functional as F
-from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
-from pl_bolts.models.gans.basic.components import Generator, Discriminator
 from torch.utils.data import DataLoader, random_split
+from pl_bolts.datamodules.bolts_datamodule import BoltDataModule
 
 
-class MNISTDataModule(object):
+class MNISTDataModule(BoltDataModule):
     def prepare_data(self):
-        # download only
         MNIST(os.getcwd(), train=True, download=True, transform=transforms.ToTensor())
         MNIST(os.getcwd(), train=False, download=True, transform=transforms.ToTensor())
 
