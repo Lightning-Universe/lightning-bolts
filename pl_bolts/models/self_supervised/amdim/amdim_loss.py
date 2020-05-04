@@ -135,11 +135,11 @@ class AMDIMLossNCE(nn.Module):
             # make mask
             if h not in self.masks:
                 mask = self.feat_size_w_mask(h)
-                mask = mask.cuda(m1.device.index)
+                mask = mask.type_as(r5_x1)
                 self.masks[h] = mask
 
         masks_r5 = self.masks[h]
-        masks_r5 = masks_r5.cuda(r5_x1.device.index)
+        masks_r5 = masks_r5.type_as(r5_x1)
 
         return masks_r5
 
@@ -180,7 +180,7 @@ class AMDIMLossNCE(nn.Module):
         # make masking matrix to help compute nce costs
         # (b x b) zero matrix with 1s in the diag
         diag_mat = torch.eye(batch_size)
-        diag_mat = diag_mat.cuda(r1_x1.device.index)
+        diag_mat = diag_mat.type_as(r1_x1)
 
         # -----------------
         # NCE COSTS

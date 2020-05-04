@@ -199,7 +199,7 @@ class AMDIM(pl.LightningModule):
         return loader
 
     @staticmethod
-    def add_model_specific_args(parent_parser, root_dir):
+    def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
 
         # CIFAR 10
@@ -325,7 +325,7 @@ class AMDIM(pl.LightningModule):
 
         # data
 
-        parser.add_argument('--data_dir', default=f'{root_dir}', type=str)
+        parser.add_argument('--data_dir', type=str)
         return parser
 
 
