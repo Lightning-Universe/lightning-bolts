@@ -200,12 +200,7 @@ class AMDIMSelfSupervised(pl.LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser, root_dir):
-        parser = ArgumentParser(strategy=parent_parser.strategy, parents=[parent_parser], add_help=False)
-
-        parser.set_defaults(early_stop_metric='val_nce')
-        parser.set_defaults(model_save_monitor_value='val_nce')
-        parser.set_defaults(model_save_monitor_mode='min')
-        parser.set_defaults(early_stop_mode='min')
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
 
         # CIFAR 10
         cf_root_lr = 2e-4
