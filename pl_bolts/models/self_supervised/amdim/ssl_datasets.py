@@ -212,6 +212,7 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
         return X, Y
 
+
 class UnlabeledImagenet(ImageNet):
 
     def __init__(self, root, split='train', nb_imgs_per_val_class=50, nb_classes=-1, nb_imgs_per_class=-1, download=False, **kwargs):
