@@ -88,8 +88,10 @@ class AMDIMSelfSupervised(pl.LightningModule):
         # FULL LOSS
         total_loss = unsupervised_loss
 
+        tensorboard_logs = {'train_nce_loss': total_loss}
         result = {
-            'loss': total_loss
+            'loss': total_loss,
+            'log': tensorboard_logs
         }
 
         return result
@@ -113,22 +115,14 @@ class AMDIMSelfSupervised(pl.LightningModule):
         }
         return result
 
-    def validation_end(self, outputs):
+    def validation_epoch_end(self, outputs):
         val_nce = 0
         for output in outputs:
             val_nce += output['val_nce']
 
         val_nce = val_nce / len(outputs)
-        return {'val_nce': val_nce}
-
-    # def optimizer_step(self, epoch_nb, batch_nb, optimizer, optimizer_i, closure):
-    #     if self.trainer.global_step < 500:
-    #         lr_scale = min(1., float(self.trainer.global_step + 1) / 500.)
-    #         for pg in optimizer.param_groups:
-    #             pg['lr'] = lr_scale * self.hparams.learning_rate
-    #
-    #     optimizer.step()
-    #     optimizer.zero_grad()
+        tensorboard_logs = {'val_nce': val_nce}
+        return {'val_loss': val_nce, 'log': tensorboard_logs}
 
     def configure_optimizers(self):
         opt = optim.Adam(
@@ -208,9 +202,6 @@ class AMDIMSelfSupervised(pl.LightningModule):
     def add_model_specific_args(parent_parser, root_dir):
         parser = ArgumentParser(strategy=parent_parser.strategy, parents=[parent_parser], add_help=False)
 
-        parser.set_defaults(nb_hopt_trials=1000)
-        parser.set_defaults(min_nb_epochs=1000)
-        parser.set_defaults(max_nb_epochs=1100)
         parser.set_defaults(early_stop_metric='val_nce')
         parser.set_defaults(model_save_monitor_value='val_nce')
         parser.set_defaults(model_save_monitor_mode='min')
