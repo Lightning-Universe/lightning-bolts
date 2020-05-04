@@ -1,8 +1,8 @@
-from fisherman.models.submodels import amdim_nets as amdim_utils
 from torchvision.datasets import STL10
 from fisherman.models.lda_extensions.lda_datasets import STL10Mixed, CIFAR10Mixed
 from torch.utils.data import DataLoader, random_split
 from fisherman.models.lda_extensions.lda_datasets import UnlabeledImagenet
+from pl_bolts.models.self_supervised.amdim import amdim_transforms
 
 
 class AMDIMPretraining():
@@ -11,14 +11,14 @@ class AMDIMPretraining():
     """
     @staticmethod
     def cifar10_train(dataset_root):
-        train_transform = amdim_utils.TransformsC10()
+        train_transform = amdim_transforms.TransformsC10()
         dataset = CIFAR10Mixed(root=dataset_root, split='train', transform=train_transform, download=True)
 
         return dataset
 
     @staticmethod
     def stl_train(dataset_root):
-        train_transform = amdim_utils.TransformsSTL10()
+        train_transform = amdim_transforms.TransformsSTL10()
         dataset = STL10(root=dataset_root, split='unlabeled', transform=train_transform, download=True)
         tng_split, val_split = random_split(dataset, [95000, 5000])
 
@@ -26,7 +26,7 @@ class AMDIMPretraining():
 
     @staticmethod
     def imagenet_train(dataset_root, nb_classes):
-        train_transform = amdim_utils.TransformsImageNet128()
+        train_transform = amdim_transforms.TransformsImageNet128()
         dataset = UnlabeledImagenet(dataset_root,
                                     nb_classes=nb_classes,
                                     split='train',
@@ -36,7 +36,7 @@ class AMDIMPretraining():
 
     @staticmethod
     def cifar10_val(dataset_root):
-        train_transform = amdim_utils.TransformsC10()
+        train_transform = amdim_transforms.TransformsC10()
         dataset = CIFAR10Mixed(root=dataset_root, split='val', transform=train_transform, download=True)
 
         return dataset
@@ -49,7 +49,7 @@ class AMDIMPretraining():
 
     @staticmethod
     def imagenet_val(dataset_root, nb_classes):
-        train_transform = amdim_utils.TransformsImageNet128()
+        train_transform = amdim_transforms.TransformsImageNet128()
         dataset = UnlabeledImagenet(dataset_root,
                                     nb_classes=nb_classes,
                                     split='val',
@@ -63,7 +63,7 @@ class AMDIMPatchesPretraining():
     """
     @staticmethod
     def cifar10_train(dataset_root, patch_size, patch_overlap):
-        train_transform = amdim_utils.TransformsC10Patches(
+        train_transform = amdim_transforms.TransformsC10Patches(
             patch_size=patch_size,
             patch_overlap=patch_overlap)
         dataset = CIFAR10Mixed(root=dataset_root, split='train', transform=train_transform, download=True)
@@ -72,7 +72,7 @@ class AMDIMPatchesPretraining():
 
     @staticmethod
     def stl_train(dataset_root, patch_size, patch_overlap):
-        train_transform = amdim_utils.TransformsSTL10Patches(
+        train_transform = amdim_transforms.TransformsSTL10Patches(
             patch_size=patch_size,
             overlap=patch_overlap
         )
@@ -83,7 +83,7 @@ class AMDIMPatchesPretraining():
 
     @staticmethod
     def imagenet_train(dataset_root, nb_classes, patch_size, patch_overlap):
-        train_transform = amdim_utils.TransformsImageNet128Patches(
+        train_transform = amdim_transforms.TransformsImageNet128Patches(
             patch_size=patch_size,
             overlap=patch_overlap
         )
@@ -95,7 +95,7 @@ class AMDIMPatchesPretraining():
 
     @staticmethod
     def cifar10_val(dataset_root, patch_size, patch_overlap):
-        train_transform = amdim_utils.TransformsC10Patches(
+        train_transform = amdim_transforms.TransformsC10Patches(
             patch_size=patch_size,
             patch_overlap=patch_overlap)
         dataset = CIFAR10Mixed(root=dataset_root, split='val', transform=train_transform, download=True)
@@ -109,7 +109,7 @@ class AMDIMPatchesPretraining():
 
     @staticmethod
     def imagenet_val(dataset_root, nb_classes, patch_size, patch_overlap):
-        train_transform = amdim_utils.TransformsImageNet128Patches(
+        train_transform = amdim_transforms.TransformsImageNet128Patches(
             patch_size=patch_size,
             overlap=patch_overlap
         )
