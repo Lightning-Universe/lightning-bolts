@@ -136,3 +136,4 @@ MNIST
 
 # Lightning logs
 lightning_logs
+datasets

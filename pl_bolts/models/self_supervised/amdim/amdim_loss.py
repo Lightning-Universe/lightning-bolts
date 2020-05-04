@@ -22,7 +22,7 @@ class AMDIMLossNCE(nn.Module):
         for i in range(w):
             for j in range(w):
                 masks_r5[i, j, 0, i, j] = 1
-        masks_r5 = torch.tensor(masks_r5).type(torch.uint8)
+        masks_r5 = torch.tensor(masks_r5).type(torch.bool)
         masks_r5 = masks_r5.reshape(-1, 1, w, w)
         return masks_r5
 

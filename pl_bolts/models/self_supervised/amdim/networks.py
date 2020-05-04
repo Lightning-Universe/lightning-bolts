@@ -255,6 +255,7 @@ class NopNet(nn.Module):
             x = x / x_norms
         return x
 
+
 class FakeRKHSConvNet(nn.Module):
     def __init__(self, n_input, n_output, use_bn=False):
         super(FakeRKHSConvNet, self).__init__()
