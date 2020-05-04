@@ -12,7 +12,7 @@ from fisherman.utils.debugging import ForkedPdb
 from fisherman.models.lda_extensions.lda_datasets import UnlabeledImagenet
 from sklearn.utils import shuffle
 
-from fisherman.models.submodels import amdim_nets as amdim_utils
+from pl_bolts.models.self_supervised.amdim.networks import Encoder
 from fisherman.utils.datasets import AMDIMPretraining
 
 
@@ -25,7 +25,7 @@ class AMDIMSelfSupervised(pl.LightningModule):
 
         dummy_batch = torch.zeros((2, 3, hparams.image_height, hparams.image_height))
 
-        self.encoder = amdim_utils.Encoder(
+        self.encoder = Encoder(
             dummy_batch,
             num_channels=3,
             ndf=hparams.ndf,
