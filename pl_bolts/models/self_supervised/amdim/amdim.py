@@ -142,14 +142,14 @@ class AMDIM(pl.LightningModule):
 
     def train_dataloader(self):
         if self.hparams.dataset_name == 'CIFAR10':
-            dataset = AMDIMPretraining.cifar10_train(self.hparams.cifar10_root)
+            dataset = AMDIMPretraining.cifar10_train(self.hparams.data_dir)
 
         if self.hparams.dataset_name == 'stl_10':
-            self.tng_split, self.val_split = AMDIMPretraining.stl_train(self.hparams.stl10_data_files)
+            self.tng_split, self.val_split = AMDIMPretraining.stl_train(self.hparams.data_dir)
             dataset = self.tng_split
 
         if self.hparams.dataset_name == 'imagenet_128':
-            dataset = AMDIMPretraining.imagenet_train(self.hparams.imagenet_data_files_tng, self.hparams.nb_classes)
+            dataset = AMDIMPretraining.imagenet_train(self.hparams.data_dir, self.hparams.nb_classes)
 
         # DDP
         dist_sampler = None
@@ -172,13 +172,13 @@ class AMDIM(pl.LightningModule):
 
     def val_dataloader(self):
         if self.hparams.dataset_name == 'CIFAR10':
-            dataset = AMDIMPretraining.cifar10_val(self.hparams.cifar10_root)
+            dataset = AMDIMPretraining.cifar10_val(self.hparams.data_dir)
 
         if self.hparams.dataset_name == 'stl_10':
             dataset = self.val_split
 
         if self.hparams.dataset_name == 'imagenet_128':
-            dataset = AMDIMPretraining.imagenet_val(self.hparams.imagenet_data_files_tng, self.hparams.nb_classes)
+            dataset = AMDIMPretraining.imagenet_val(self.hparams.data_dir, self.hparams.nb_classes)
 
         # DDP
         dist_sampler = None
@@ -321,30 +321,18 @@ class AMDIM(pl.LightningModule):
         parser.add_argument('--dataset_name', type=str, default=dataset['dataset_name'])
         parser.add_argument('--batch_size', type=int, default=dataset['batch_size'],
                             help='input batch size (default: 200)')
-        parser.add_argument('--learning_rate', type=float, default=0.0002, options=dataset['lr_options'], tunable=True)
-        # data
-        parser.add_argument('--voc_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.add_argument('--cifar10_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.add_argument('--cifar100_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.add_argument('--svhn_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.add_argument('--stl10_data_files', default=f'{root_dir}/fisherman/datasets/stl10', type=str, tunable=False)
-        parser.add_argument('--imagenet_data_files_tng', default=f'{root_dir}/fisherman/datasets/imagenet/train', type=str)
-        parser.add_argument('--imagenet_data_files_test', default=f'{root_dir}/fisherman/datasets/imagenet/test', type=str)
-        parser.add_argument('--imagenet_data_files_val', default=f'{root_dir}/fisherman/datasets/imagenet/val', type=str)
-        parser.add_argument('--imagenet_data_files_debug',
-                        default='/Users/someUser/Developer/nyu/fisherman/fisherman/datasets/imagenet/debug', type=str)
+        parser.add_argument('--learning_rate', type=float, default=0.0002)
 
+        # data
+
+        parser.add_argument('--data_dir', default=f'{root_dir}', type=str)
         return parser
 
 
 if __name__ == '__main__':
-    import os, sys
-
-    root_dir = os.path.split(os.path.dirname(sys.modules['__main__'].__file__))[0]
-
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
-    parser = AMDIM.add_model_specific_args(parser, root_dir)
+    parser = AMDIM.add_model_specific_args(parser)
 
     args = parser.parse_args()
 
