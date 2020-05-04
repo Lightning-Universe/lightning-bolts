@@ -1,8 +1,7 @@
 from torchvision.datasets import STL10
-from fisherman.models.lda_extensions.lda_datasets import STL10Mixed, CIFAR10Mixed
-from torch.utils.data import DataLoader, random_split
-from fisherman.models.lda_extensions.lda_datasets import UnlabeledImagenet
+from torch.utils.data import random_split
 from pl_bolts.models.self_supervised.amdim import amdim_transforms
+from pl_bolts.models.self_supervised.amdim.ssl_datasets import CIFAR10Mixed, UnlabeledImagenet
 
 
 class AMDIMPretraining():
