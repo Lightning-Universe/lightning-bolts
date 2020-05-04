@@ -304,7 +304,7 @@ class AMDIM(pl.LightningModule):
         dataset = cifar_10
 
         # dataset options
-        parser.opt_list('--nb_classes', default=dataset['nb_classes'], type=int, options=[10], tunable=False)
+        parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int)
 
         # network params
         parser.add_argument('--tclip', type=float, default=20.0, help='soft clipping range for NCE scores')
@@ -321,28 +321,24 @@ class AMDIM(pl.LightningModule):
         parser.add_argument('--dataset_name', type=str, default=dataset['dataset_name'])
         parser.add_argument('--batch_size', type=int, default=dataset['batch_size'],
                             help='input batch size (default: 200)')
-        parser.opt_list('--learning_rate', type=float, default=0.0002, options=dataset['lr_options'], tunable=True)
+        parser.add_argument('--learning_rate', type=float, default=0.0002, options=dataset['lr_options'], tunable=True)
         # data
-        parser.opt_list('--voc_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.opt_list('--cifar10_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.opt_list('--cifar100_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.opt_list('--svhn_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.opt_list('--stl10_data_files', default=f'{root_dir}/fisherman/datasets/stl10', type=str, tunable=False)
-        parser.opt_list('--imagenet_data_files_tng', default=f'{root_dir}/fisherman/datasets/imagenet/train', type=str,
-                        tunable=False)
-        parser.opt_list('--imagenet_data_files_test', default=f'{root_dir}/fisherman/datasets/imagenet/test', type=str,
-                        tunable=False)
-        parser.opt_list('--imagenet_data_files_val', default=f'{root_dir}/fisherman/datasets/imagenet/val', type=str,
-                        tunable=False)
-        parser.opt_list('--imagenet_data_files_debug',
-                        default='/Users/someUser/Developer/nyu/fisherman/fisherman/datasets/imagenet/debug', type=str,
-                        tunable=False)
+        parser.add_argument('--voc_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
+        parser.add_argument('--cifar10_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
+        parser.add_argument('--cifar100_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
+        parser.add_argument('--svhn_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
+        parser.add_argument('--stl10_data_files', default=f'{root_dir}/fisherman/datasets/stl10', type=str, tunable=False)
+        parser.add_argument('--imagenet_data_files_tng', default=f'{root_dir}/fisherman/datasets/imagenet/train', type=str)
+        parser.add_argument('--imagenet_data_files_test', default=f'{root_dir}/fisherman/datasets/imagenet/test', type=str)
+        parser.add_argument('--imagenet_data_files_val', default=f'{root_dir}/fisherman/datasets/imagenet/val', type=str)
+        parser.add_argument('--imagenet_data_files_debug',
+                        default='/Users/someUser/Developer/nyu/fisherman/fisherman/datasets/imagenet/debug', type=str)
 
         return parser
 
 
 if __name__ == '__main__':
-    import os
+    import os, sys
 
     root_dir = os.path.split(os.path.dirname(sys.modules['__main__'].__file__))[0]
 
