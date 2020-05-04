@@ -8,7 +8,7 @@ from pl_bolts.models.self_supervised.amdim import AMDIMEncoder, AMDIMLossNCE
 from pl_bolts.models.self_supervised.amdim.amdim_datasets import AMDIMPretraining
 
 
-class AMDIMSelfSupervised(pl.LightningModule):
+class AMDIM(pl.LightningModule):
 
     def __init__(self, hparams):
         super().__init__()
@@ -301,7 +301,7 @@ class AMDIMSelfSupervised(pl.LightningModule):
 
         # dataset = cifar_10
         # dataset = stl_10
-        dataset = imagenet_128_large
+        dataset = cifar_10
 
         # dataset options
         parser.opt_list('--nb_classes', default=dataset['nb_classes'], type=int, options=[10], tunable=False)
@@ -339,3 +339,16 @@ class AMDIMSelfSupervised(pl.LightningModule):
                         tunable=False)
 
         return parser
+
+
+if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser = pl.Trainer.add_argparse_args(parser)
+    parser = AMDIM.add_model_specific_args(parser)
+
+    args = parser.parse_args()
+
+    model = AMDIM(args)
+    trainer = pl.Trainer()
+    trainer.fit(model)
+
