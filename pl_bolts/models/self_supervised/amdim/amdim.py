@@ -1,19 +1,11 @@
+from argparse import ArgumentParser
 import torch
 import torch.optim as optim
-from torchvision.datasets import STL10, CIFAR10, CIFAR100, SVHN, ImageNet
-from fisherman.models.lda_extensions.lda_datasets import STL10Mixed, CIFAR10Mixed
-from torch.utils.data import DataLoader, random_split
-import torch.nn.functional as F
-from test_tube import HyperOptArgumentParser
+from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 from torch.optim.lr_scheduler import MultiStepLR
-import pdb
-from fisherman.utils.debugging import ForkedPdb
-from fisherman.models.lda_extensions.lda_datasets import UnlabeledImagenet
-from sklearn.utils import shuffle
-
-from pl_bolts.models.self_supervised.amdim.networks import Encoder
-from fisherman.utils.datasets import AMDIMPretraining
+from pl_bolts.models.self_supervised.amdim import AMDIMEncoder, AMDIMLossNCE
+from pl_bolts.models.self_supervised.amdim.amdim_datasets import AMDIMPretraining
 
 
 class AMDIMSelfSupervised(pl.LightningModule):
@@ -25,7 +17,7 @@ class AMDIMSelfSupervised(pl.LightningModule):
 
         dummy_batch = torch.zeros((2, 3, hparams.image_height, hparams.image_height))
 
-        self.encoder = Encoder(
+        self.encoder = AMDIMEncoder(
             dummy_batch,
             num_channels=3,
             ndf=hparams.ndf,
@@ -37,7 +29,7 @@ class AMDIMSelfSupervised(pl.LightningModule):
         self.encoder.init_weights()
 
         # the loss has learnable parameters
-        self.nce_loss = amdim_utils.LossMultiNCE(tclip=self.hparams.tclip)
+        self.nce_loss = AMDIMLossNCE(tclip=self.hparams.tclip)
 
         self.tng_split = None
         self.val_split = None
@@ -214,7 +206,7 @@ class AMDIMSelfSupervised(pl.LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser, root_dir):
-        parser = HyperOptArgumentParser(strategy=parent_parser.strategy, parents=[parent_parser])
+        parser = ArgumentParser(strategy=parent_parser.strategy, parents=[parent_parser], add_help=False)
 
         parser.set_defaults(nb_hopt_trials=1000)
         parser.set_defaults(min_nb_epochs=1000)

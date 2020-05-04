@@ -3,13 +3,13 @@ from torch import nn
 import numpy as np
 
 
-class LossMultiNCE(nn.Module):
+class AMDIMLossNCE(nn.Module):
     '''
     Input is fixed as r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2.
     '''
 
     def __init__(self, tclip=10.):
-        super(LossMultiNCE, self).__init__()
+        super().__init__()
         # construct masks for sampling source features from 5x5 layer
         # (b, 1, 5, 5)
 
