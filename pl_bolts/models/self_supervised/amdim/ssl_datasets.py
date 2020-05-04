@@ -1,7 +1,8 @@
 import numpy as np
-from torchvision.datasets import CIFAR10, VisionDataset
+from torchvision.datasets import CIFAR10, VisionDataset, ImageNet
 from sklearn.utils import shuffle
 import math
+import os
 
 
 class SSLDatasetMixin(VisionDataset):
@@ -210,3 +211,107 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
         Y = np.concatenate(Y, axis=0)
 
         return X, Y
+
+class UnlabeledImagenet(ImageNet):
+
+    def __init__(self, root, split='train', nb_imgs_per_val_class=50, nb_classes=-1, nb_imgs_per_class=-1, download=False, **kwargs):
+        """
+        Official train set gets split into train, val. (using nb_imgs_per_val_class for each class).
+        Official validation becomes test set
+
+        Within each class, we further allow limiting the number of samples per class (for semi-sup lng)
+
+        :param root:
+        :param split:
+        :param nb_imgs_per_val_class:
+        :param nb_imgs_per_class:
+        :param download:
+        :param kwargs:
+        """
+        root = self.root = os.path.expanduser(root)
+
+        # [train], [val] --> [train, val], [test]
+        original_split = split
+        if split == 'train' or split == 'val':
+            split = 'train'
+
+        if split == 'test':
+            split = 'val'
+
+        self.split = split
+
+        if download:
+            self.download()
+        wnid_to_classes = self._load_meta_file()[0]
+
+        super(ImageNet, self).__init__(self.split_folder, **kwargs)
+        self.root = root
+
+        # shuffle images first
+        self.imgs = shuffle(self.imgs, random_state=1234)
+
+        # partition train set into [train, val]
+        if split == 'train':
+            train, val = self.partition_train_set(self.imgs, nb_imgs_per_val_class)
+            if original_split == 'train':
+                self.imgs = train
+            if original_split == 'val':
+                self.imgs = val
+
+        # limit the number of images per class
+        if nb_imgs_per_class != -1:
+            clean_imgs = []
+            cts = {x:0 for x in range(len(self.classes))}
+            for img_name, idx in self.imgs:
+                if cts[idx] < nb_imgs_per_class:
+                    clean_imgs.append((img_name, idx))
+                    cts[idx] += 1
+
+            self.imgs = clean_imgs
+
+        # limit the number of classes
+        if nb_classes != -1:
+            # choose the classes at random (but deterministic)
+            ok_classes = shuffle(list(range(nb_classes)), random_state=1234)
+            ok_classes = ok_classes[:nb_classes]
+            ok_classes = set(ok_classes)
+
+            clean_imgs = []
+            for img_name, idx in self.imgs:
+                if idx in ok_classes:
+                    clean_imgs.append((img_name, idx))
+
+            self.imgs = clean_imgs
+
+        # shuffle again for final exit
+        self.imgs = shuffle(self.imgs, random_state=1234)
+
+        # list of class_nbs for each image
+        idcs = [idx for _, idx in self.imgs]
+
+        self.wnids = self.classes
+        self.wnid_to_idx = {wnid: idx for idx, wnid in zip(idcs, self.wnids)}
+        self.classes = [wnid_to_classes[wnid] for wnid in self.wnids]
+        self.class_to_idx = {cls: idx
+                             for clss, idx in zip(self.classes, idcs)
+                             for cls in clss}
+
+        # update the root data
+        self.samples = self.imgs
+        self.targets = [s[1] for s in self.imgs]
+
+        print('samples: ', len(self.samples))
+
+    def partition_train_set(self, imgs, nb_imgs_in_val):
+        val = []
+        train = []
+
+        cts = {x: 0 for x in range(len(self.classes))}
+        for img_name, idx in imgs:
+            if cts[idx] < nb_imgs_in_val:
+                val.append((img_name, idx))
+                cts[idx] += 1
+            else:
+                train.append((img_name, idx))
+
+        return train, val
