@@ -12,7 +12,7 @@ from fisherman.utils.debugging import ForkedPdb
 from fisherman.models.lda_extensions.lda_datasets import UnlabeledImagenet
 from sklearn.utils import shuffle
 
-from pl_bolts.models.self_supervised.amdim.networks import Encoder
+from pl_bolts.models.self_supervised.amdim import AMDIMEncoder, AMDIMLossNCE
 from fisherman.utils.datasets import AMDIMPretraining
 
 
@@ -25,7 +25,7 @@ class AMDIMSelfSupervised(pl.LightningModule):
 
         dummy_batch = torch.zeros((2, 3, hparams.image_height, hparams.image_height))
 
-        self.encoder = Encoder(
+        self.encoder = AMDIMEncoder(
             dummy_batch,
             num_channels=3,
             ndf=hparams.ndf,
@@ -37,7 +37,7 @@ class AMDIMSelfSupervised(pl.LightningModule):
         self.encoder.init_weights()
 
         # the loss has learnable parameters
-        self.nce_loss = amdim_utils.LossMultiNCE(tclip=self.hparams.tclip)
+        self.nce_loss = AMDIMLossNCE(tclip=self.hparams.tclip)
 
         self.tng_split = None
         self.val_split = None

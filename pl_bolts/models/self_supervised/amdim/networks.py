@@ -5,10 +5,10 @@ import torch
 import numpy as np
 
 
-class Encoder(nn.Module):
+class AMDIMEncoder(nn.Module):
     def __init__(self, dummy_batch, num_channels=3, ndf=64, n_rkhs=512,
                 n_depth=3, encoder_size=32, use_bn=False):
-        super(Encoder, self).__init__()
+        super().__init__()
         # NDF = encoder hidden feat size
         # RKHS = output dim
         self.ndf = ndf
