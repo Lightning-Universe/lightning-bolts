@@ -4,11 +4,13 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 from torch.optim.lr_scheduler import MultiStepLR
-from pl_bolts.models.self_supervised.amdim import AMDIMEncoder, AMDIMLossNCE
+from pl_bolts.models.self_supervised.amdim import AMDIMEncoder
+from pl_bolts.metrics.self_supervised.losses import AMDIMLossNCE
 from pl_bolts.models.self_supervised.amdim.amdim_datasets import AMDIMPretraining
+import os
 
 
-class AMDIMSelfSupervised(pl.LightningModule):
+class AMDIM(pl.LightningModule):
 
     def __init__(self, hparams):
         super().__init__()
@@ -88,8 +90,10 @@ class AMDIMSelfSupervised(pl.LightningModule):
         # FULL LOSS
         total_loss = unsupervised_loss
 
+        tensorboard_logs = {'train_nce_loss': total_loss}
         result = {
-            'loss': total_loss
+            'loss': total_loss,
+            'log': tensorboard_logs
         }
 
         return result
@@ -113,22 +117,14 @@ class AMDIMSelfSupervised(pl.LightningModule):
         }
         return result
 
-    def validation_end(self, outputs):
+    def validation_epoch_end(self, outputs):
         val_nce = 0
         for output in outputs:
             val_nce += output['val_nce']
 
         val_nce = val_nce / len(outputs)
-        return {'val_nce': val_nce}
-
-    # def optimizer_step(self, epoch_nb, batch_nb, optimizer, optimizer_i, closure):
-    #     if self.trainer.global_step < 500:
-    #         lr_scale = min(1., float(self.trainer.global_step + 1) / 500.)
-    #         for pg in optimizer.param_groups:
-    #             pg['lr'] = lr_scale * self.hparams.learning_rate
-    #
-    #     optimizer.step()
-    #     optimizer.zero_grad()
+        tensorboard_logs = {'val_nce': val_nce}
+        return {'val_loss': val_nce, 'log': tensorboard_logs}
 
     def configure_optimizers(self):
         opt = optim.Adam(
@@ -148,19 +144,14 @@ class AMDIMSelfSupervised(pl.LightningModule):
 
     def train_dataloader(self):
         if self.hparams.dataset_name == 'CIFAR10':
-            dataset = AMDIMPretraining.cifar10_train(self.hparams.cifar10_root)
+            dataset = AMDIMPretraining.cifar10_train(self.hparams.data_dir)
 
         if self.hparams.dataset_name == 'stl_10':
-            self.tng_split, self.val_split = AMDIMPretraining.stl_train(self.hparams.stl10_data_files)
+            self.tng_split, self.val_split = AMDIMPretraining.stl_train(self.hparams.data_dir)
             dataset = self.tng_split
 
         if self.hparams.dataset_name == 'imagenet_128':
-            dataset = AMDIMPretraining.imagenet_train(self.hparams.imagenet_data_files_tng, self.hparams.nb_classes)
-
-        # DDP
-        dist_sampler = None
-        if self.trainer.use_ddp or self.trainer.use_ddp2:
-            dist_sampler = torch.utils.data.distributed.DistributedSampler(dataset)
+            dataset = AMDIMPretraining.imagenet_train(self.hparams.data_dir, self.hparams.nb_classes)
 
         # LOADER
         loader = DataLoader(
@@ -169,27 +160,18 @@ class AMDIMSelfSupervised(pl.LightningModule):
             pin_memory=True,
             drop_last=True,
             num_workers=16,
-            sampler=dist_sampler
         )
-
-        print(len(loader), len(dataset), 'train')
-
         return loader
 
     def val_dataloader(self):
         if self.hparams.dataset_name == 'CIFAR10':
-            dataset = AMDIMPretraining.cifar10_val(self.hparams.cifar10_root)
+            dataset = AMDIMPretraining.cifar10_val(self.hparams.data_dir)
 
         if self.hparams.dataset_name == 'stl_10':
             dataset = self.val_split
 
         if self.hparams.dataset_name == 'imagenet_128':
-            dataset = AMDIMPretraining.imagenet_val(self.hparams.imagenet_data_files_tng, self.hparams.nb_classes)
-
-        # DDP
-        dist_sampler = None
-        if self.trainer.use_ddp or self.trainer.use_ddp2:
-            dist_sampler = torch.utils.data.distributed.DistributedSampler(dataset)
+            dataset = AMDIMPretraining.imagenet_val(self.hparams.data_dir, self.hparams.nb_classes)
 
         # LOADER
         loader = DataLoader(
@@ -198,23 +180,12 @@ class AMDIMSelfSupervised(pl.LightningModule):
             pin_memory=True,
             drop_last=True,
             num_workers=16,
-            sampler=dist_sampler
         )
-        print(len(loader), len(dataset), 'val')
-
         return loader
 
     @staticmethod
-    def add_model_specific_args(parent_parser, root_dir):
-        parser = ArgumentParser(strategy=parent_parser.strategy, parents=[parent_parser], add_help=False)
-
-        parser.set_defaults(nb_hopt_trials=1000)
-        parser.set_defaults(min_nb_epochs=1000)
-        parser.set_defaults(max_nb_epochs=1100)
-        parser.set_defaults(early_stop_metric='val_nce')
-        parser.set_defaults(model_save_monitor_value='val_nce')
-        parser.set_defaults(model_save_monitor_mode='min')
-        parser.set_defaults(early_stop_mode='min')
+    def add_model_specific_args(parent_parser):
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
 
         # CIFAR 10
         cf_root_lr = 2e-4
@@ -315,10 +286,10 @@ class AMDIMSelfSupervised(pl.LightningModule):
 
         # dataset = cifar_10
         # dataset = stl_10
-        dataset = imagenet_128_large
+        dataset = cifar_10
 
         # dataset options
-        parser.opt_list('--nb_classes', default=dataset['nb_classes'], type=int, options=[10], tunable=False)
+        parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int)
 
         # network params
         parser.add_argument('--tclip', type=float, default=20.0, help='soft clipping range for NCE scores')
@@ -335,21 +306,21 @@ class AMDIMSelfSupervised(pl.LightningModule):
         parser.add_argument('--dataset_name', type=str, default=dataset['dataset_name'])
         parser.add_argument('--batch_size', type=int, default=dataset['batch_size'],
                             help='input batch size (default: 200)')
-        parser.opt_list('--learning_rate', type=float, default=0.0002, options=dataset['lr_options'], tunable=True)
-        # data
-        parser.opt_list('--voc_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.opt_list('--cifar10_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.opt_list('--cifar100_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.opt_list('--svhn_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.opt_list('--stl10_data_files', default=f'{root_dir}/fisherman/datasets/stl10', type=str, tunable=False)
-        parser.opt_list('--imagenet_data_files_tng', default=f'{root_dir}/fisherman/datasets/imagenet/train', type=str,
-                        tunable=False)
-        parser.opt_list('--imagenet_data_files_test', default=f'{root_dir}/fisherman/datasets/imagenet/test', type=str,
-                        tunable=False)
-        parser.opt_list('--imagenet_data_files_val', default=f'{root_dir}/fisherman/datasets/imagenet/val', type=str,
-                        tunable=False)
-        parser.opt_list('--imagenet_data_files_debug',
-                        default='/Users/someUser/Developer/nyu/fisherman/fisherman/datasets/imagenet/debug', type=str,
-                        tunable=False)
+        parser.add_argument('--learning_rate', type=float, default=0.0002)
 
+        # data
+        parser.add_argument('--data_dir', default=os.getcwd(),type=str)
         return parser
+
+
+if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser = pl.Trainer.add_argparse_args(parser)
+    parser = AMDIM.add_model_specific_args(parser)
+
+    args = parser.parse_args()
+
+    model = AMDIM(args)
+    trainer = pl.Trainer(fast_dev_run=True)
+    trainer.fit(model)
+

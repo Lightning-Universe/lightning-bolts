@@ -1,59 +1,12 @@
 from torchvision import transforms
-from PIL import Image
-import numpy as np
 
 
-class RandomTranslateWithReflect:
-    '''
-    Translate image randomly
-    Translate vertically and horizontally by n pixels where
-    n is integer drawn uniformly independently for each axis
-    from [-max_translation, max_translation].
-    Fill the uncovered blank area with reflect padding.
-    '''
-
-    def __init__(self, max_translation):
-        self.max_translation = max_translation
-
-    def __call__(self, old_image):
-        xtranslation, ytranslation = np.random.randint(-self.max_translation,
-                                                       self.max_translation + 1,
-                                                       size=2)
-        xpad, ypad = abs(xtranslation), abs(ytranslation)
-        xsize, ysize = old_image.size
-
-        flipped_lr = old_image.transpose(Image.FLIP_LEFT_RIGHT)
-        flipped_tb = old_image.transpose(Image.FLIP_TOP_BOTTOM)
-        flipped_both = old_image.transpose(Image.ROTATE_180)
-
-        new_image = Image.new("RGB", (xsize + 2 * xpad, ysize + 2 * ypad))
-
-        new_image.paste(old_image, (xpad, ypad))
-
-        new_image.paste(flipped_lr, (xpad + xsize - 1, ypad))
-        new_image.paste(flipped_lr, (xpad - xsize + 1, ypad))
-
-        new_image.paste(flipped_tb, (xpad, ypad + ysize - 1))
-        new_image.paste(flipped_tb, (xpad, ypad - ysize + 1))
-
-        new_image.paste(flipped_both, (xpad - xsize + 1, ypad - ysize + 1))
-        new_image.paste(flipped_both, (xpad + xsize - 1, ypad - ysize + 1))
-        new_image.paste(flipped_both, (xpad - xsize + 1, ypad + ysize - 1))
-        new_image.paste(flipped_both, (xpad + xsize - 1, ypad + ysize - 1))
-
-        new_image = new_image.crop((xpad - xtranslation,
-                                    ypad - ytranslation,
-                                    xpad + xsize - xtranslation,
-                                    ypad + ysize - ytranslation))
-        return new_image
-
-
-class TransformsC10:
+class CPCTransformsC10:
     '''
     Apply the same input transform twice, with independent randomness.
     '''
 
-    def __init__(self):
+    def __init__(self, patch_size=8):
         # flipping image along vertical axis
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
         # image augmentation functions
@@ -70,26 +23,27 @@ class TransformsC10:
             col_jitter,
             rnd_gray,
             transforms.ToTensor(),
-            normalize
+            normalize,
+            Patchify(patch_size=patch_size, overlap_size=patch_size//2),
         ])
         # transform for testing
         self.test_transform = transforms.Compose([
             transforms.ToTensor(),
-            normalize
+            normalize,
+            Patchify(patch_size=patch_size, overlap_size=patch_size//2),
         ])
 
     def __call__(self, inp):
         inp = self.flip_lr(inp)
         out1 = self.train_transform(inp)
-        out2 = self.train_transform(inp)
-        return out1, out2
+        return out1
 
-class TransformsSTL10:
+class CPCTransformsSTL10Patches:
     '''
     Apply the same input transform twice, with independent randomness.
     '''
 
-    def __init__(self):
+    def __init__(self, patch_size, overlap):
         # flipping image along vertical axis
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
         normalize = transforms.Normalize(mean=(0.43, 0.42, 0.39), std=(0.27, 0.26, 0.27))
@@ -101,12 +55,12 @@ class TransformsSTL10:
             transforms.RandomResizedCrop(64, scale=(0.3, 1.0), ratio=(0.7, 1.4),
                                          interpolation=3)
 
-        self.test_transform = transforms.Compose(
-            [
+        self.test_transform = transforms.Compose([
             transforms.Resize(70, interpolation=3),
             transforms.CenterCrop(64),
             transforms.ToTensor(),
-            normalize
+            normalize,
+            Patchify(patch_size=patch_size, overlap_size=overlap)
         ])
 
         self.train_transform = transforms.Compose([
@@ -114,20 +68,21 @@ class TransformsSTL10:
             col_jitter,
             rnd_gray,
             transforms.ToTensor(),
-            normalize
+            normalize,
+            Patchify(patch_size=patch_size, overlap_size=overlap)
         ])
 
     def __call__(self, inp):
         inp = self.flip_lr(inp)
         out1 = self.train_transform(inp)
-        out2 = self.train_transform(inp)
-        return out1, out2
+        return out1
 
-class TransformsImageNet128:
+
+class CPCTransformsImageNet128Patches:
     '''
     ImageNet dataset, for use with 128x128 full image encoder.
     '''
-    def __init__(self):
+    def __init__(self, patch_size, overlap):
         # image augmentation functions
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
         rand_crop = \
@@ -140,6 +95,7 @@ class TransformsImageNet128:
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225]),
+            Patchify(patch_size=patch_size, overlap_size=overlap),
         ])
         self.test_transform = transforms.Compose([
             transforms.Resize(146, interpolation=3),
@@ -156,5 +112,4 @@ class TransformsImageNet128:
     def __call__(self, inp):
         inp = self.flip_lr(inp)
         out1 = self.train_transform(inp)
-        out2 = self.train_transform(inp)
-        return out1, out2
+        return out1
