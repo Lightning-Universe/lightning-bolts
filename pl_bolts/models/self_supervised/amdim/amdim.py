@@ -342,9 +342,13 @@ class AMDIM(pl.LightningModule):
 
 
 if __name__ == '__main__':
+    import os
+
+    root_dir = os.path.split(os.path.dirname(sys.modules['__main__'].__file__))[0]
+
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
-    parser = AMDIM.add_model_specific_args(parser)
+    parser = AMDIM.add_model_specific_args(parser, root_dir)
 
     args = parser.parse_args()
 
