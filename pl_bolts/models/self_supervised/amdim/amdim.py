@@ -6,6 +6,7 @@ import pytorch_lightning as pl
 from torch.optim.lr_scheduler import MultiStepLR
 from pl_bolts.models.self_supervised.amdim import AMDIMEncoder, AMDIMLossNCE
 from pl_bolts.models.self_supervised.amdim.amdim_datasets import AMDIMPretraining
+import os
 
 
 class AMDIM(pl.LightningModule):
@@ -151,11 +152,6 @@ class AMDIM(pl.LightningModule):
         if self.hparams.dataset_name == 'imagenet_128':
             dataset = AMDIMPretraining.imagenet_train(self.hparams.data_dir, self.hparams.nb_classes)
 
-        # DDP
-        dist_sampler = None
-        if self.trainer.use_ddp or self.trainer.use_ddp2:
-            dist_sampler = torch.utils.data.distributed.DistributedSampler(dataset)
-
         # LOADER
         loader = DataLoader(
             dataset=dataset,
@@ -163,11 +159,7 @@ class AMDIM(pl.LightningModule):
             pin_memory=True,
             drop_last=True,
             num_workers=16,
-            sampler=dist_sampler
         )
-
-        print(len(loader), len(dataset), 'train')
-
         return loader
 
     def val_dataloader(self):
@@ -180,11 +172,6 @@ class AMDIM(pl.LightningModule):
         if self.hparams.dataset_name == 'imagenet_128':
             dataset = AMDIMPretraining.imagenet_val(self.hparams.data_dir, self.hparams.nb_classes)
 
-        # DDP
-        dist_sampler = None
-        if self.trainer.use_ddp or self.trainer.use_ddp2:
-            dist_sampler = torch.utils.data.distributed.DistributedSampler(dataset)
-
         # LOADER
         loader = DataLoader(
             dataset=dataset,
@@ -192,10 +179,7 @@ class AMDIM(pl.LightningModule):
             pin_memory=True,
             drop_last=True,
             num_workers=16,
-            sampler=dist_sampler
         )
-        print(len(loader), len(dataset), 'val')
-
         return loader
 
     @staticmethod
@@ -324,8 +308,7 @@ class AMDIM(pl.LightningModule):
         parser.add_argument('--learning_rate', type=float, default=0.0002)
 
         # data
-
-        parser.add_argument('--data_dir', type=str)
+        parser.add_argument('--data_dir', default=os.getcwd(),type=str)
         return parser
 
 
@@ -337,6 +320,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model = AMDIM(args)
-    trainer = pl.Trainer()
+    trainer = pl.Trainer(fast_dev_run=True)
     trainer.fit(model)
 
