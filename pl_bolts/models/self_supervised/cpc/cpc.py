@@ -1,10 +1,16 @@
 import torch
 import torch.optim as optim
-from torchvision.datasets import STL10, CIFAR10, CIFAR100, SVHN, ImageNet
+from torchvision.datasets import STL10, CIFAR10
 from torch.utils.data import DataLoader, random_split
 import pytorch_lightning as pl
 from torch.optim.lr_scheduler import MultiStepLR
-from pl_bolts.models.self_supervised.losses import CPCV1LossNCE
+from pl_bolts.metrics.self_supervised.losses import CPCV1LossNCE
+from pl_bolts.models.self_supervised.cpc.cpc_networks import CPCResNet101, MaskedConv2d
+from pl_bolts.models.self_supervised.cpc import cpc_transforms
+from pl_bolts.models.self_supervised.amdim.ssl_datasets import UnlabeledImagenet
+from argparse import ArgumentParser
+from pl_bolts import metrics
+
 import math
 
 
@@ -122,13 +128,11 @@ class CPCV1(pl.LightningModule):
         }
         return result
 
-    def validation_end(self, outputs):
-        val_nce = 0
-        for output in outputs:
-            val_nce += output['val_nce']
+    def validation_epoch_end(self, outputs):
+        val_nce = metrics.mean(outputs, 'val_nce')
 
-        val_nce = val_nce / len(outputs)
-        return {'val_nce': val_nce}
+        log = {'val_nce_loss': val_nce}
+        return {'val_loss': val_nce, 'log': log}
 
     def optimizer_step(self, epoch_nb, batch_nb, optimizer, optimizer_i):
         if self.trainer.global_step < 500:
@@ -155,15 +159,10 @@ class CPCV1(pl.LightningModule):
 
         return [opt], [lr_scheduler]
 
-    @pl.data_loader
-    def tng_dataloader(self):
+    def train_dataloader(self):
         if self.hparams.dataset_name == 'CIFAR10':
-            train_transform = amdim_utils.CPCTransformsC10()
+            train_transform = cpc_transforms.CPCTransformsC10()
             dataset = CIFAR10(root=self.hparams.cifar10_root, train=True, transform=train_transform, download=True)
-
-            dist_sampler = None
-            if self.trainer.use_ddp:
-                dist_sampler = torch.utils.data.distributed.DistributedSampler(dataset)
 
             loader = DataLoader(
                 dataset=dataset,
@@ -171,20 +170,15 @@ class CPCV1(pl.LightningModule):
                 pin_memory=True,
                 drop_last=True,
                 num_workers=16,
-                sampler=dist_sampler
             )
 
             return loader
 
         if self.hparams.dataset_name == 'stl_10':
-            train_transform = amdim_utils.CPCTransformsSTL10Patches(patch_size=self.hparams.patch_size, overlap=self.hparams.patch_overlap)
+            train_transform = cpc_transforms.CPCTransformsSTL10Patches(patch_size=self.hparams.patch_size, overlap=self.hparams.patch_overlap)
             dataset = STL10(root=self.hparams.stl10_data_files, split='unlabeled', transform=train_transform, download=True)
 
             self.tng_split, self.val_split = random_split(dataset, [95000, 5000])
-
-            dist_sampler = None
-            if self.trainer.use_ddp:
-                dist_sampler = torch.utils.data.distributed.DistributedSampler(self.tng_split)
 
             loader = DataLoader(
                 dataset=dataset,
@@ -192,42 +186,31 @@ class CPCV1(pl.LightningModule):
                 pin_memory=True,
                 drop_last=True,
                 num_workers=16,
-                sampler=dist_sampler
             )
 
             return loader
 
         if self.hparams.dataset_name == 'imagenet_128':
-            train_transform = amdim_utils.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
+            train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
             dataset = UnlabeledImagenet(self.hparams.imagenet_data_files_tng,
                                         nb_classes=self.hparams.nb_classes,
                                         split='train',
                                         transform=train_transform)
 
-            dist_sampler = None
-            if self.trainer.use_ddp:
-                dist_sampler = torch.utils.data.distributed.DistributedSampler(dataset)
-
             loader = DataLoader(
                 dataset=dataset,
                 batch_size=self.hparams.batch_size,
                 pin_memory=True,
                 drop_last=True,
                 num_workers=16,
-                sampler=dist_sampler
             )
 
             return loader
 
-    @pl.data_loader
     def val_dataloader(self):
         if self.hparams.dataset_name == 'CIFAR10':
-            train_transform = amdim_utils.CPCTransformsC10()
+            train_transform = cpc_transforms.CPCTransformsC10()
             dataset = CIFAR10(root=self.hparams.cifar10_root, train=False, transform=train_transform, download=True)
-
-            dist_sampler = None
-            if self.trainer.use_ddp:
-                dist_sampler = torch.utils.data.distributed.DistributedSampler(dataset)
 
             loader = DataLoader(
                 dataset=dataset,
@@ -235,37 +218,27 @@ class CPCV1(pl.LightningModule):
                 pin_memory=True,
                 drop_last=True,
                 num_workers=16,
-                sampler=dist_sampler
             )
 
             return loader
 
         if self.hparams.dataset_name == 'stl_10':
-            dist_sampler = None
-            if self.trainer.use_ddp:
-                dist_sampler = torch.utils.data.distributed.DistributedSampler(self.val_split)
-
             loader = DataLoader(
                 dataset=self.val_split,
                 batch_size=self.hparams.batch_size,
                 pin_memory=True,
                 drop_last=True,
                 num_workers=16,
-                sampler=dist_sampler
             )
 
             return loader
 
         if self.hparams.dataset_name == 'imagenet_128':
-            train_transform = amdim_utils.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
+            train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
             dataset = UnlabeledImagenet(self.hparams.imagenet_data_files_val,
                                         nb_classes=self.hparams.nb_classes,
                                         split='val',
                                         transform=train_transform)
-
-            dist_sampler = None
-            if self.trainer.use_ddp:
-                dist_sampler = torch.utils.data.distributed.DistributedSampler(dataset)
 
             loader = DataLoader(
                 dataset=dataset,
@@ -273,22 +246,13 @@ class CPCV1(pl.LightningModule):
                 pin_memory=True,
                 drop_last=True,
                 num_workers=16,
-                sampler=dist_sampler
             )
 
             return loader
 
     @staticmethod
-    def add_model_specific_args(parent_parser, root_dir):
-        parser = HyperOptArgumentParser(strategy=parent_parser.strategy, parents=[parent_parser])
-
-        parser.set_defaults(nb_hopt_trials=1000)
-        parser.set_defaults(min_nb_epochs=1000)
-        parser.set_defaults(max_nb_epochs=1100)
-        parser.set_defaults(early_stop_metric='val_nce')
-        parser.set_defaults(model_save_monitor_value='val_nce')
-        parser.set_defaults(model_save_monitor_mode='min')
-        parser.set_defaults(early_stop_mode='min')
+    def add_model_specific_args(parent_parser):
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
 
         # CIFAR 10
         patch_size = 8
@@ -358,25 +322,27 @@ class CPCV1(pl.LightningModule):
         dataset = imagenet_128
 
         # dataset options
-        parser.opt_list('--nb_classes', default=dataset['nb_classes'], type=int, options=[10], tunable=False)
-        parser.opt_list('--patch_size', default=dataset['patch_size'], type=int, options=[10], tunable=False)
-        parser.opt_list('--patch_overlap', default=dataset['patch_overlap'], type=int, options=[10], tunable=False)
+        parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int, options=[10], tunable=False)
+        parser.add_argument('--patch_size', default=dataset['patch_size'], type=int, options=[10], tunable=False)
+        parser.add_argument('--patch_overlap', default=dataset['patch_overlap'], type=int, options=[10], tunable=False)
 
         # trainin params
         resnets = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d', 'resnext101_32x8d', 'wide_resnet50_2', 'wide_resnet101_2']
         parser.add_argument('--dataset_name', type=str, default=dataset['dataset_name'])
-        parser.opt_list('--batch_size', type=int, default=dataset['batch_size'], options=[120, 140], help='input batch size (default: 200)', tunable=False)
-        parser.opt_list('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'], tunable=True)
+        parser.add_argument('--batch_size', type=int, default=dataset['batch_size'], options=[120, 140], help='input batch size (default: 200)', tunable=False)
+        parser.add_argument('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'], tunable=True)
 
         # data
-        parser.opt_list('--voc_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.opt_list('--cifar10_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.opt_list('--cifar100_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.opt_list('--svhn_root', default=f'{root_dir}/fisherman/datasets', type=str, tunable=False)
-        parser.opt_list('--stl10_data_files', default=f'{root_dir}/fisherman/datasets/stl10', type=str, tunable=False)
-        parser.opt_list('--imagenet_data_files_tng', default=f'{root_dir}/fisherman/datasets/imagenet/train', type=str, tunable=False)
-        parser.opt_list('--imagenet_data_files_test', default=f'{root_dir}/fisherman/datasets/imagenet/test', type=str, tunable=False)
-        parser.opt_list('--imagenet_data_files_val', default=f'{root_dir}/fisherman/datasets/imagenet/val', type=str, tunable=False)
-        parser.opt_list('--imagenet_data_files_debug', default='/Users/someUser/Developer/nyu/fisherman/fisherman/datasets/imagenet/debug', type=str, tunable=False)
-
+        parser.add_argument('--data_dir', default=f'./', type=str, tunable=False)
         return parser
+
+if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser = pl.Trainer.add_argparse_args(parser)
+    parser = CPCV1.add_model_specific_args(parser)
+
+    args = parser.parse_args()
+
+    model = CPCV1(args)
+    trainer = pl.Trainer(fast_dev_run=True)
+    trainer.fit(model)
