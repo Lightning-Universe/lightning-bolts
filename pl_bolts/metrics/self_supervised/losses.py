@@ -78,7 +78,7 @@ class CPCV1LossNCE(nn.Module):
         # (b, dim, w. h)
         batch_size, emb_dim, h, w = Z.size()
 
-        diag_mat = torch.eye(batch_size)
+        diag_mat = torch.eye(batch_size, device=Z.device)
         diag_mat = diag_mat.type_as(Z)
         diag_mat = diag_mat.float()
 
