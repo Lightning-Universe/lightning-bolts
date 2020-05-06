@@ -248,11 +248,7 @@ class CPCV1(pl.LightningModule):
             'nb_classes': 10,
             'patch_overlap': patch_size // 2,
             'lr_options': [
-                #     2e-4 * (1 / 16), 2e-4 * (1 / 8),
-                # 2e-4 * (1 / 4), 2e-4 * (1 / 2),
                 2e-5,
-                # 2e-4 * 2, 2e-4 * 4,
-                #     2e-4 * 8, 2e-4 * 16
             ]
         }
 
