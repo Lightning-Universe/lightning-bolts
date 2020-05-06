@@ -322,6 +322,7 @@ class CPCV1(pl.LightningModule):
 
 
 if __name__ == '__main__':
+
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
     parser = CPCV1.add_model_specific_args(parser)
