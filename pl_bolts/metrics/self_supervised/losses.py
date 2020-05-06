@@ -79,8 +79,8 @@ class CPCV1LossNCE(nn.Module):
         batch_size, emb_dim, h, w = Z.size()
 
         diag_mat = torch.eye(batch_size, device=Z.device)
-        diag_mat = diag_mat.type_as(Z)
-        diag_mat = diag_mat.float()
+        # diag_mat = diag_mat.type_as(Z)
+        # diag_mat = diag_mat.float()
 
         losses = []
         # calculate loss for each k
