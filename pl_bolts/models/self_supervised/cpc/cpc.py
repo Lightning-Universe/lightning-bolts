@@ -1,18 +1,10 @@
 import torch
 import torch.optim as optim
 from torchvision.datasets import STL10, CIFAR10, CIFAR100, SVHN, ImageNet
-from fisherman.models.submodels.std_resnet import MaskedConv2d
-from fisherman.models.submodels.cpc_nets import CPCResNet101
 from torch.utils.data import DataLoader, random_split
-import torch.nn.functional as F
-from test_tube import HyperOptArgumentParser
 import pytorch_lightning as pl
 from torch.optim.lr_scheduler import MultiStepLR
-import pdb
-from fisherman.utils.debugging import ForkedPdb
-from fisherman.models.lda_extensions.lda_datasets import UnlabeledImagenet
-
-from fisherman.models.submodels import amdim_nets as amdim_utils
+from pl_bolts.models.self_supervised.losses import CPCV1LossNCE
 import math
 
 
@@ -43,7 +35,7 @@ class CPCV1(pl.LightningModule):
         self.W_list = torch.nn.ModuleDict(self.W_list)
 
         # loss (has cached sampling layers, no params)
-        self.nce_loss = amdim_utils.CPCLossNCE()
+        self.nce_loss = CPCV1LossNCE()
 
         self.tng_split = None
         self.val_split = None
