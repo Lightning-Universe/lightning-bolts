@@ -81,8 +81,7 @@ class CPCV1(pl.LightningModule):
         img_1, _ = batch
 
         # Latent features
-        Z = self.forward(img_1.half())
-        Z = Z.half()
+        Z = self.forward(img_1)
 
         # generate the context vars
         C = self.context_network(Z)
@@ -93,8 +92,6 @@ class CPCV1(pl.LightningModule):
         # NCE LOSS
         loss = self.nce_loss(Z, C, self.W_list)
         unsupervised_loss = loss
-        if self.trainer.use_amp:
-            unsupervised_loss = unsupervised_loss.half()
 
         # ------------------
         # FULL LOSS
@@ -108,16 +105,12 @@ class CPCV1(pl.LightningModule):
     def validation_step(self, batch, batch_nb):
         img_1, labels = batch
 
-        if self.trainer.use_amp:
-            img_1 = img_1.half()
-
         # generate features
         # Latent features
         Z = self.forward(img_1)
-        Z = Z.half()
 
         # generate the context vars
-        C = self.context_network(Z.half())
+        C = self.context_network(Z)
 
         # NCE LOSS
         loss = self.nce_loss(Z, C, self.W_list)
@@ -133,15 +126,6 @@ class CPCV1(pl.LightningModule):
 
         log = {'val_nce_loss': val_nce}
         return {'val_loss': val_nce, 'log': log}
-
-    def optimizer_step(self, epoch_nb, batch_nb, optimizer, optimizer_i):
-        if self.trainer.global_step < 500:
-            lr_scale = min(1., float(self.trainer.global_step + 1) / 500.)
-            for pg in optimizer.param_groups:
-                pg['lr'] = lr_scale * self.hparams.learning_rate
-
-        optimizer.step()
-        optimizer.zero_grad()
 
     def configure_optimizers(self):
         opt = optim.Adam(
@@ -162,7 +146,7 @@ class CPCV1(pl.LightningModule):
     def train_dataloader(self):
         if self.hparams.dataset_name == 'CIFAR10':
             train_transform = cpc_transforms.CPCTransformsC10()
-            dataset = CIFAR10(root=self.hparams.cifar10_root, train=True, transform=train_transform, download=True)
+            dataset = CIFAR10(root=self.hparams.data_dir, train=True, transform=train_transform, download=True)
 
             loader = DataLoader(
                 dataset=dataset,
@@ -176,7 +160,7 @@ class CPCV1(pl.LightningModule):
 
         if self.hparams.dataset_name == 'stl_10':
             train_transform = cpc_transforms.CPCTransformsSTL10Patches(patch_size=self.hparams.patch_size, overlap=self.hparams.patch_overlap)
-            dataset = STL10(root=self.hparams.stl10_data_files, split='unlabeled', transform=train_transform, download=True)
+            dataset = STL10(root=self.hparams.data_dir, split='unlabeled', transform=train_transform, download=True)
 
             self.tng_split, self.val_split = random_split(dataset, [95000, 5000])
 
@@ -192,7 +176,7 @@ class CPCV1(pl.LightningModule):
 
         if self.hparams.dataset_name == 'imagenet_128':
             train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
-            dataset = UnlabeledImagenet(self.hparams.imagenet_data_files_tng,
+            dataset = UnlabeledImagenet(self.hparams.data_dir,
                                         nb_classes=self.hparams.nb_classes,
                                         split='train',
                                         transform=train_transform)
@@ -210,7 +194,7 @@ class CPCV1(pl.LightningModule):
     def val_dataloader(self):
         if self.hparams.dataset_name == 'CIFAR10':
             train_transform = cpc_transforms.CPCTransformsC10()
-            dataset = CIFAR10(root=self.hparams.cifar10_root, train=False, transform=train_transform, download=True)
+            dataset = CIFAR10(root=self.hparams.data_dir, train=False, transform=train_transform, download=True)
 
             loader = DataLoader(
                 dataset=dataset,
@@ -235,7 +219,7 @@ class CPCV1(pl.LightningModule):
 
         if self.hparams.dataset_name == 'imagenet_128':
             train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
-            dataset = UnlabeledImagenet(self.hparams.imagenet_data_files_val,
+            dataset = UnlabeledImagenet(self.hparams.data_dir,
                                         nb_classes=self.hparams.nb_classes,
                                         split='val',
                                         transform=train_transform)
@@ -317,24 +301,25 @@ class CPCV1(pl.LightningModule):
             ]
         }
 
-        # dataset = cifar_10
+        dataset = cifar_10
         # dataset = stl_10
-        dataset = imagenet_128
+        # dataset = imagenet_128
 
         # dataset options
-        parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int, options=[10], tunable=False)
-        parser.add_argument('--patch_size', default=dataset['patch_size'], type=int, options=[10], tunable=False)
-        parser.add_argument('--patch_overlap', default=dataset['patch_overlap'], type=int, options=[10], tunable=False)
+        parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int)
+        parser.add_argument('--patch_size', default=dataset['patch_size'], type=int)
+        parser.add_argument('--patch_overlap', default=dataset['patch_overlap'], type=int)
 
         # trainin params
         resnets = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d', 'resnext101_32x8d', 'wide_resnet50_2', 'wide_resnet101_2']
         parser.add_argument('--dataset_name', type=str, default=dataset['dataset_name'])
-        parser.add_argument('--batch_size', type=int, default=dataset['batch_size'], options=[120, 140], help='input batch size (default: 200)', tunable=False)
-        parser.add_argument('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'], tunable=True)
+        parser.add_argument('--batch_size', type=int, default=dataset['batch_size'])
+        parser.add_argument('--learning_rate', type=float, default=0.0001)
 
         # data
-        parser.add_argument('--data_dir', default=f'./', type=str, tunable=False)
+        parser.add_argument('--data_dir', default=f'./', type=str)
         return parser
+
 
 if __name__ == '__main__':
     parser = ArgumentParser()

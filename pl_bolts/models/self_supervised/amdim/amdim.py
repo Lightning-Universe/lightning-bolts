@@ -83,9 +83,6 @@ class AMDIM(pl.LightningModule):
         loss_1t5, loss_1t7, loss_5t5, lgt_reg = self.nce_loss(r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2)
         unsupervised_loss = loss_1t5 + loss_1t7 + loss_5t5 + lgt_reg
 
-        # if self.trainer.use_amp:
-        # unsupervised_loss = unsupervised_loss.half()
-
         # ------------------
         # FULL LOSS
         total_loss = unsupervised_loss
@@ -100,10 +97,6 @@ class AMDIM(pl.LightningModule):
 
     def validation_step(self, batch, batch_nb):
         [img_1, img_2], labels = batch
-
-        if self.trainer.use_amp:
-            img_1 = img_1.half()
-            img_2 = img_2.half()
 
         # generate features
         r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2 = self.forward(img_1, img_2)
