@@ -116,6 +116,7 @@ class CPCResNet101(nn.Module):
 
         return x
 
+
 class LNBottleneck(nn.Module):
 
     def __init__(self, sample_batch, inplanes, planes, stride=1, downsample_conv=None, groups=1,
