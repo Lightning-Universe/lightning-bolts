@@ -1,1 +1,1 @@
-from pl_bolts.models.self_supervised.cpc.cpc import CPCV1
+from pl_bolts.models.self_supervised.cpc.cpc import CPCV2
