@@ -31,7 +31,10 @@ class CPCV2(pl.LightningModule):
 
         # context network (C vectors)
         c, h = self.__compute_final_nb_c(hparams.patch_size)
-        self.context_network = MaskedConv2d(c)
+        self.context_network = PixelCNN(c)
+
+        self.target_dim = 64
+        self.target_cnn = torch.nn.Conv2d(c, self.target_dim, kernel_size=1)
 
         # W transforms (k > 0)
         self.W_list = {}
@@ -104,6 +107,18 @@ class CPCV2(pl.LightningModule):
 
         # generate the context vars
         C = self.context_network(Z)
+
+        # generate targets
+        targets = self.target_cnn(C)
+        b, _, col_dim, row_dim = targets.shape
+        targets = targets.reshape(-1, target_dim)
+
+        for i in range(steps_to_ignore, steps_to_predict):
+            col_dim = col_dim - i - 1
+            total_elements = b * col_dim * row_dim
+            print('a')
+        print(C)
+        pass
 
 
     def validation_step(self, batch, batch_nb):
@@ -322,11 +337,6 @@ class CPCV2(pl.LightningModule):
 
 
 if __name__ == '__main__':
-    p = PixelCNN(4096)
-
-    x = torch.rand(3, 4096, 7, 7)
-    out = p(x)
-
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
     parser = CPCV2.add_model_specific_args(parser)
