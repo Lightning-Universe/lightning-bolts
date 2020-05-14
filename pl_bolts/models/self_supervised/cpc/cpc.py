@@ -2,6 +2,7 @@ import torch
 import torch.optim as optim
 from torchvision.datasets import STL10, CIFAR10
 from torch.utils.data import DataLoader, random_split
+from torch.nn import functional as F
 import pytorch_lightning as pl
 from torch.optim.lr_scheduler import MultiStepLR
 from pl_bolts.metrics.self_supervised.losses import CPCV2LossInfoNCE
@@ -35,17 +36,7 @@ class CPCV2(pl.LightningModule):
 
         self.target_dim = 64
         self.target_cnn = torch.nn.Conv2d(c, self.target_dim, kernel_size=1)
-
-        # W transforms (k > 0)
-        self.W_list = {}
-        for k in range(1, h):
-            w = torch.nn.Linear(c, c)
-            self.W_list[str(k)] = w
-
-        self.W_list = torch.nn.ModuleDict(self.W_list)
-
-        # loss (has cached sampling layers, no params)
-        self.nce_loss = CPCV2LossInfoNCE()
+        self.info_nce_pred_cnn = torch.nn.Conv2d(c, self.target_dim, kernel_size=1)
 
         self.tng_split = None
         self.val_split = None
@@ -87,17 +78,11 @@ class CPCV2(pl.LightningModule):
         # Latent features
         Z = self.forward(img_1)
 
-
-        # ------------------
-        # NCE LOSS
+        # infoNCE loss
         loss = self.info_nce_loss(Z)
-        unsupervised_loss = loss
 
-        # ------------------
-        # FULL LOSS
-        total_loss = unsupervised_loss
         result = {
-            'loss': total_loss
+            'loss': loss
         }
 
         return result
@@ -110,16 +95,27 @@ class CPCV2(pl.LightningModule):
 
         # generate targets
         targets = self.target_cnn(C)
-        b, _, col_dim, row_dim = targets.shape
+        batch_dim, _, col_dim, row_dim = targets.shape
         targets = targets.reshape(-1, target_dim)
 
         for i in range(steps_to_ignore, steps_to_predict):
-            col_dim = col_dim - i - 1
-            total_elements = b * col_dim * row_dim
-            print('a')
-        print(C)
-        pass
+            col_dim_i = col_dim - i - 1
+            total_elements = batch_dim * col_dim_i * row_dim
 
+            preds_i = self.info_nce_pred_cnn(C)
+            preds_i = preds_i[:, :, :-(i + 1), :] * emb_scale
+            preds_i = preds_i.reshape(-1, target_dim)
+
+            logits = torch.mm(preds_i, targets.transpose(1, 0))
+            b = torch.range(0, total_elements-1) / (col_dim_i * row_dim)
+            col = torch.range(0, total_elements-1) % (col_dim_i * row_dim)
+            labels = b * col_dim * row_dim + (i + 1) * row_dim + col
+
+            logits = F.log_softmax(logits, dim=1)
+            nll = F.nll_loss(logits, labels) # < ----------------- FAIL HERE labels has a range [0, 134]
+            loss += nll.mean()
+
+        return loss
 
     def validation_step(self, batch, batch_nb):
         img_1, labels = batch
