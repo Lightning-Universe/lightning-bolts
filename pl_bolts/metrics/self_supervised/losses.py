@@ -3,7 +3,7 @@ from torch import nn
 import numpy as np
 
 
-class CPCV1LossNCE(nn.Module):
+class CPCV2LossInfoNCE(nn.Module):
     def __init__(self, tclip=10.):
         super().__init__()
         self.masks_r5 = self.feat_size_5_mask()

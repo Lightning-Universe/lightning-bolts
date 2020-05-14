@@ -4,12 +4,13 @@ from torchvision.datasets import STL10, CIFAR10
 from torch.utils.data import DataLoader, random_split
 import pytorch_lightning as pl
 from torch.optim.lr_scheduler import MultiStepLR
-from pl_bolts.metrics.self_supervised.losses import CPCV1LossNCE
+from pl_bolts.metrics.self_supervised.losses import CPCV2LossInfoNCE
 from pl_bolts.models.self_supervised.cpc.cpc_networks import CPCResNet101, MaskedConv2d
 from pl_bolts.models.self_supervised.cpc import cpc_transforms
 from pl_bolts.models.self_supervised.amdim.ssl_datasets import UnlabeledImagenet
 from argparse import ArgumentParser
 from pl_bolts import metrics
+from pl_bolts.models.vision import PixelCNN
 
 import math
 
@@ -41,7 +42,7 @@ class CPCV2(pl.LightningModule):
         self.W_list = torch.nn.ModuleDict(self.W_list)
 
         # loss (has cached sampling layers, no params)
-        self.nce_loss = CPCV1LossNCE()
+        self.nce_loss = CPCV2LossInfoNCE()
 
         self.tng_split = None
         self.val_split = None
@@ -83,14 +84,10 @@ class CPCV2(pl.LightningModule):
         # Latent features
         Z = self.forward(img_1)
 
-        # generate the context vars
-        C = self.context_network(Z)
-
-        # apply masked context network
 
         # ------------------
         # NCE LOSS
-        loss = self.nce_loss(Z, C, self.W_list)
+        loss = self.info_nce_loss(Z)
         unsupervised_loss = loss
 
         # ------------------
@@ -101,6 +98,13 @@ class CPCV2(pl.LightningModule):
         }
 
         return result
+
+    def info_nce_loss(self, Z, target_dim=64, emb_scale=0.1, steps_to_ignore=2, steps_to_predict= 3):
+        loss = 0.0
+
+        # generate the context vars
+        C = self.context_network(Z)
+
 
     def validation_step(self, batch, batch_nb):
         img_1, labels = batch
@@ -318,6 +322,10 @@ class CPCV2(pl.LightningModule):
 
 
 if __name__ == '__main__':
+    p = PixelCNN(4096)
+
+    x = torch.rand(3, 4096, 7, 7)
+    out = p(x)
 
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
