@@ -14,7 +14,7 @@ from pl_bolts import metrics
 import math
 
 
-class CPCV1(pl.LightningModule):
+class CPCV2(pl.LightningModule):
 
     # ------------------------------
     # INIT
@@ -321,10 +321,10 @@ if __name__ == '__main__':
 
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
-    parser = CPCV1.add_model_specific_args(parser)
+    parser = CPCV2.add_model_specific_args(parser)
 
     args = parser.parse_args()
 
-    model = CPCV1(args)
+    model = CPCV2(args)
     trainer = pl.Trainer(fast_dev_run=True)
     trainer.fit(model)
