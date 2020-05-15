@@ -162,10 +162,16 @@ class CPCV2(pl.LightningModule):
 
         return [opt], [lr_scheduler]
 
+    def prepare_data(self):
+        if self.hparams.dataset_name == 'CIFAR10':
+            train_transform = cpc_transforms.CPCTransformsC10()
+            CIFAR10(root=self.hparams.data_dir, train=True, transform=train_transform, download=True)
+            CIFAR10(root=self.hparams.data_dir, train=False, transform=train_transform, download=True)
+
     def train_dataloader(self):
         if self.hparams.dataset_name == 'CIFAR10':
             train_transform = cpc_transforms.CPCTransformsC10()
-            dataset = CIFAR10(root=self.hparams.data_dir, train=True, transform=train_transform, download=True)
+            dataset = CIFAR10(root=self.hparams.data_dir, train=True, transform=train_transform, download=False)
 
             loader = DataLoader(
                 dataset=dataset,
@@ -213,7 +219,7 @@ class CPCV2(pl.LightningModule):
     def val_dataloader(self):
         if self.hparams.dataset_name == 'CIFAR10':
             train_transform = cpc_transforms.CPCTransformsC10()
-            dataset = CIFAR10(root=self.hparams.data_dir, train=False, transform=train_transform, download=True)
+            dataset = CIFAR10(root=self.hparams.data_dir, train=False, transform=train_transform, download=False)
 
             loader = DataLoader(
                 dataset=dataset,
