@@ -18,7 +18,7 @@ import math
 pl.seed_everything(123)
 
 
-class InfoNCE(nn.Module):
+class InfoNCE(pl.LightningModule):
 
     def __init__(self, num_input_channels, target_dim=64, embed_scale=0.1):
         super().__init__()
@@ -50,9 +50,10 @@ class InfoNCE(nn.Module):
 
             logits = torch.mm(preds_i, targets.transpose(1, 0))
 
-            b1 = torch.arange(n) // ((h - i - 1) * w)
-            c1 = torch.arange(n) % ((h - i - 1) * w)
+            b1 = torch.arange(n, device=self.device) // ((h - i - 1) * w)
+            c1 = torch.arange(n, device=self.device) % ((h - i - 1) * w)
             labels = b1 * h * w + (i + 1) * w + c1
+            import pdb;pdb.set_trace()
             loss += nn.functional.cross_entropy(logits, labels)
 
         return loss
