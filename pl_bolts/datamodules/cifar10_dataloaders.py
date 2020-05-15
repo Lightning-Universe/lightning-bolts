@@ -61,7 +61,7 @@ class CIFAR10DataLoaders(BoltDataLoaders):
         ])
         return mnist_transforms
 
-    def add_default_normalize(self, user_transforms, train):
+    def add_default_normalize(self, user_transforms):
         normalize = transform_lib.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616))
         user_transforms.transforms.append(normalize)
 
