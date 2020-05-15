@@ -1,6 +1,7 @@
 import torch
 import torch.optim as optim
 from torch import nn
+from pl_bolts.datamodules import CIFAR10DataLoaders
 from torchvision.datasets import STL10, CIFAR10
 from torch.utils.data import DataLoader, random_split
 from torch.nn import functional as F
@@ -68,6 +69,7 @@ class CPCV2(pl.LightningModule):
         super().__init__()
 
         self.hparams = hparams
+        self.dataset = self.get_dataset(hparams.dataset)
 
         # encoder network (Z vectors)
         dummy_batch = torch.zeros((2, 3, hparams.patch_size, hparams.patch_size))
@@ -77,8 +79,9 @@ class CPCV2(pl.LightningModule):
         c, h = self.__compute_final_nb_c(hparams.patch_size)
         self.info_nce = InfoNCE(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
-        self.tng_split = None
-        self.val_split = None
+    def get_dataset(self, name):
+        if name == 'cifar10':
+            return CIFAR10DataLoaders()
 
     def __compute_final_nb_c(self, patch_size):
         dummy_batch = torch.zeros((2*49, 3, patch_size, patch_size))
@@ -158,7 +161,7 @@ class CPCV2(pl.LightningModule):
             eps=1e-7
         )
 
-        if self.hparams.dataset_name == 'CIFAR10': # Dataset.C100, Dataset.STL10
+        if self.hparams.dataset == 'cifar10': # Dataset.C100, Dataset.STL10
             lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
         else:
             lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
@@ -166,14 +169,16 @@ class CPCV2(pl.LightningModule):
         return [opt], [lr_scheduler]
 
     def prepare_data(self):
-        if self.hparams.dataset_name == 'CIFAR10':
+        if self.hparams.dataset == 'cifar10':
             train_transform = cpc_transforms.CPCTransformsC10()
             CIFAR10(root=self.hparams.data_dir, train=True, transform=train_transform, download=True)
             CIFAR10(root=self.hparams.data_dir, train=False, transform=train_transform, download=True)
 
     def train_dataloader(self):
-        if self.hparams.dataset_name == 'CIFAR10':
+        if self.hparams.dataset == 'cifar10':
             train_transform = cpc_transforms.CPCTransformsC10()
+            return self.dataset.train_dataloader(self.hparams.batch_size)
+
             dataset = CIFAR10(root=self.hparams.data_dir, train=True, transform=train_transform, download=False)
 
             loader = DataLoader(
@@ -269,7 +274,7 @@ class CPCV2(pl.LightningModule):
         # CIFAR 10
         patch_size = 8
         cifar_10 = {
-            'dataset_name': 'CIFAR10',
+            'dataset': 'CIFAR10',
             'depth': 10,
             'patch_size': patch_size,
             'batch_size': 200,
@@ -283,7 +288,7 @@ class CPCV2(pl.LightningModule):
         # stl-10
         patch_size = 16
         stl_10 = {
-            'dataset_name': 'stl_10',
+            'dataset': 'stl_10',
             'depth': 8,
             'patch_size': patch_size,
             'batch_size': 200,
@@ -310,7 +315,7 @@ class CPCV2(pl.LightningModule):
         # imagenet_128
         patch_size = 32
         imagenet_128 = {
-            'dataset_name': 'imagenet_128',
+            'dataset': 'imagenet_128',
             'depth': 10,
             'patch_size': patch_size,
             'batch_size': 60,
@@ -335,8 +340,7 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--patch_overlap', default=dataset['patch_overlap'], type=int)
 
         # trainin params
-        resnets = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d', 'resnext101_32x8d', 'wide_resnet50_2', 'wide_resnet101_2']
-        parser.add_argument('--dataset_name', type=str, default=dataset['dataset_name'])
+        parser.add_argument('--dataset', type=str, default=dataset['dataset'])
         parser.add_argument('--batch_size', type=int, default=dataset['batch_size'])
         parser.add_argument('--learning_rate', type=float, default=0.0001)
 
