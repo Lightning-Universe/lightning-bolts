@@ -119,7 +119,8 @@ class CPCV2(pl.LightningModule):
 
         log = {'val_nce_loss': loss}
         result = {
-            'loss': log
+            'loss': loss,
+            'log': log
         }
 
         return result
