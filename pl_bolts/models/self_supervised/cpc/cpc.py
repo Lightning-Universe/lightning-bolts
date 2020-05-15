@@ -31,7 +31,6 @@ class InfoNCE(pl.LightningModule):
 
     def forward(self, Z, steps_to_ignore=2, steps_to_predict=3):
         loss = 0.0
-        import pdb; pdb.set_trace()
 
         # generate the context vectors
         C = self.context_cnn(Z)
