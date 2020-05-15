@@ -31,6 +31,7 @@ class InfoNCE(nn.Module):
 
     def forward(self, Z, steps_to_ignore=2, steps_to_predict=3):
         loss = 0.0
+        import pdb; pdb.set_trace()
 
         # generate the context vectors
         C = self.context_cnn(Z)
@@ -105,7 +106,6 @@ class CPCV2(pl.LightningModule):
 
         # Z are the latent vars
         Z = self.encoder(img_1)
-        import pdb; pdb.set_trace()
         Z = self.__recover_z_shape(Z, b)
 
         return Z
