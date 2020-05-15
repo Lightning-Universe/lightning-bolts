@@ -14,7 +14,11 @@ from pl_bolts import metrics
 from pl_bolts.models.vision import PixelCNN
 
 import math
-pl.seed_everything(123)
+
+__all__ = [
+    'InfoNCE',
+    'CPCV2'
+]
 
 
 class InfoNCE(pl.LightningModule):
@@ -60,9 +64,6 @@ class InfoNCE(pl.LightningModule):
 
 class CPCV2(pl.LightningModule):
 
-    # ------------------------------
-    # INIT
-    # ------------------------------
     def __init__(self, hparams):
         super().__init__()
 
@@ -98,9 +99,6 @@ class CPCV2(pl.LightningModule):
 
         return Z
 
-    # ------------------------------
-    # FWD
-    # ------------------------------
     def forward(self, img_1):
         # put all patches on the batch dim for simultaneous processing
         b, p, c, w, h = img_1.size()
@@ -121,7 +119,7 @@ class CPCV2(pl.LightningModule):
         # infoNCE loss
         loss = self.info_nce(Z)
 
-        log = {'val_nce_loss': loss}
+        log = {'train_nce_loss': loss}
         result = {
             'loss': loss,
             'log': log
@@ -159,9 +157,9 @@ class CPCV2(pl.LightningModule):
             eps=1e-7
         )
 
-        if self.hparams.dataset == 'cifar10': # Dataset.C100, Dataset.STL10
+        if self.hparams.dataset in ['cifar10', 'stl10']:
             lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
-        else:
+        elif self.hparams.dataset == 'imagenet128':
             lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
 
         return [opt], [lr_scheduler]
@@ -175,7 +173,7 @@ class CPCV2(pl.LightningModule):
             loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
             return loader
 
-        if self.hparams.dataset == 'stl_10':
+        if self.hparams.dataset == 'stl10':
             train_transform = cpc_transforms.CPCTransformsSTL10Patches(patch_size=self.hparams.patch_size, overlap=self.hparams.patch_overlap)
             dataset = STL10(root=self.hparams.data_dir, split='unlabeled', transform=train_transform, download=True)
 
@@ -191,7 +189,7 @@ class CPCV2(pl.LightningModule):
 
             return loader
 
-        if self.hparams.dataset == 'imagenet_128':
+        if self.hparams.dataset == 'imagenet128':
             train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
             dataset = UnlabeledImagenet(self.hparams.data_dir,
                                         nb_classes=self.hparams.nb_classes,
@@ -214,7 +212,7 @@ class CPCV2(pl.LightningModule):
             loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
             return loader
 
-        if self.hparams.dataset == 'stl_10':
+        if self.hparams.dataset == 'stl10':
             loader = DataLoader(
                 dataset=self.val_split,
                 batch_size=self.hparams.batch_size,
@@ -225,7 +223,7 @@ class CPCV2(pl.LightningModule):
 
             return loader
 
-        if self.hparams.dataset == 'imagenet_128':
+        if self.hparams.dataset == 'imagenet128':
             train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
             dataset = UnlabeledImagenet(self.hparams.data_dir,
                                         nb_classes=self.hparams.nb_classes,
@@ -244,7 +242,8 @@ class CPCV2(pl.LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser):
-        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        from test_tube import HyperOptArgumentParser
+        parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
 
         # CIFAR 10
         patch_size = 8
@@ -256,14 +255,17 @@ class CPCV2(pl.LightningModule):
             'nb_classes': 10,
             'patch_overlap': patch_size // 2,
             'lr_options': [
-                2e-5,
+                2e-4,
+                2e-3,
+                4e-3,
+                1e-2,
             ]
         }
 
         # stl-10
         patch_size = 16
-        stl_10 = {
-            'dataset': 'stl_10',
+        stl10 = {
+            'dataset': 'stl10',
             'depth': 8,
             'patch_size': patch_size,
             'batch_size': 200,
@@ -287,10 +289,10 @@ class CPCV2(pl.LightningModule):
             ]
         }
 
-        # imagenet_128
+        # imagenet128
         patch_size = 32
-        imagenet_128 = {
-            'dataset': 'imagenet_128',
+        imagenet128 = {
+            'dataset': 'imagenet128',
             'depth': 10,
             'patch_size': patch_size,
             'batch_size': 60,
@@ -306,8 +308,8 @@ class CPCV2(pl.LightningModule):
         }
 
         dataset = cifar_10
-        # dataset = stl_10
-        # dataset = imagenet_128
+        # dataset = stl10
+        # dataset = imagenet128
 
         # dataset options
         parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int)
@@ -317,7 +319,7 @@ class CPCV2(pl.LightningModule):
         # trainin params
         parser.add_argument('--dataset', type=str, default=dataset['dataset'])
         parser.add_argument('--batch_size', type=int, default=dataset['batch_size'])
-        parser.add_argument('--learning_rate', type=float, default=0.0001)
+        parser.opt_list('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'], tunable=True)
 
         # data
         parser.add_argument('--data_dir', default=f'/home/waf251/media/falcon_kcgscratch1/datasets', type=str)

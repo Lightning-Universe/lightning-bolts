@@ -141,3 +141,4 @@ datasets
 *-batches-py
 simclr.py
 .DS_Store
+.*_submit.py
