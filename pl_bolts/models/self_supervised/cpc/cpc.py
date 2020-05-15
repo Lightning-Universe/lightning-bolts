@@ -341,7 +341,7 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--learning_rate', type=float, default=0.0001)
 
         # data
-        parser.add_argument('--data_dir', default=f'./', type=str)
+        parser.add_argument('--data_dir', default=f'/home/waf251/media/falcon_kcgscratch1/datasets', type=str)
         return parser
 
 
