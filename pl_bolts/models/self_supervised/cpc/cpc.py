@@ -4,12 +4,9 @@ from torch import nn
 from pl_bolts.datamodules import CIFAR10DataLoaders
 from torchvision.datasets import STL10, CIFAR10
 from torch.utils.data import DataLoader, random_split
-from torchvision import transforms
-from torch.nn import functional as F
 import pytorch_lightning as pl
 from torch.optim.lr_scheduler import MultiStepLR
-from pl_bolts.metrics.self_supervised.losses import CPCV2LossInfoNCE
-from pl_bolts.models.self_supervised.cpc.cpc_networks import CPCResNet101, MaskedConv2d
+from pl_bolts.models.self_supervised.cpc.cpc_networks import CPCResNet101
 from pl_bolts.models.self_supervised.cpc import cpc_transforms
 from pl_bolts.models.self_supervised.amdim.ssl_datasets import UnlabeledImagenet
 from argparse import ArgumentParser
