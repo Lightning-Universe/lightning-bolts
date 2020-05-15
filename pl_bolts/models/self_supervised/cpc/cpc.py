@@ -335,7 +335,6 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--patch_overlap', default=dataset['patch_overlap'], type=int)
 
         # trainin params
-        resnets = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d', 'resnext101_32x8d', 'wide_resnet50_2', 'wide_resnet101_2']
         parser.add_argument('--dataset_name', type=str, default=dataset['dataset_name'])
         parser.add_argument('--batch_size', type=int, default=dataset['batch_size'])
         parser.add_argument('--learning_rate', type=float, default=0.0001)

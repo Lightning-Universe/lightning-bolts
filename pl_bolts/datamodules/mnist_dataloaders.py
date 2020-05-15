@@ -1,4 +1,4 @@
-from torchvision import transforms
+from torchvision import transforms as transform_lib
 from torchvision.datasets import MNIST
 from torch.utils.data import DataLoader, random_split
 from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders
@@ -6,32 +6,47 @@ from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders
 
 class MNISTDataLoaders(BoltDataLoaders):
 
-    def __init__(self, save_path):
+    def __init__(self, save_path, val_split=5000):
+        super().__init__()
         self.save_path = save_path
+        self.val_split = val_split
+
+    @property
+    def train_length(self):
+        return 60000
 
     def prepare_data(self):
-        MNIST(self.save_path, train=True, download=True, transform=transforms.ToTensor())
-        MNIST(self.save_path, train=False, download=True, transform=transforms.ToTensor())
+        MNIST(self.save_path, train=True, download=True, transform=transform_lib.ToTensor())
+        MNIST(self.save_path, train=False, download=True, transform=transform_lib.ToTensor())
 
-    def train_dataloader(self, batch_size, val_split=5000):
-        dataset = MNIST(self.save_path, train=True, download=False, transform=self.get_transforms())
-        mnist_train, _ = random_split(dataset, [60000 - val_split, val_split])
+    def train_dataloader(self, batch_size, transforms=None, use_default_normalize=True):
+        if transforms is None:
+            transforms = self.get_transforms()
+
+        dataset = MNIST(self.save_path, train=True, download=False, transform=transforms)
+        mnist_train, _ = random_split(dataset, [self.train_length - self.val_split, self.val_split])
         loader = DataLoader(mnist_train, batch_size=batch_size, shuffle=True)
         return loader
 
-    def val_dataloader(self, batch_size, val_split=5000):
-        dataset = MNIST(self.save_path, train=True, download=True, transform=self.get_transforms())
-        _, mnist_val = random_split(dataset, [60000 - val_split, val_split])
+    def val_dataloader(self, batch_size,transforms=None, use_default_normalize=True):
+        if transforms is None:
+            transforms = self.get_transforms()
+
+        dataset = MNIST(self.save_path, train=True, download=True, transform=transforms)
+        _, mnist_val = random_split(dataset, [self.train_length - self.val_split, self.val_split])
         loader = DataLoader(mnist_val, batch_size=batch_size, shuffle=False)
         return loader
 
-    def test_dataloader(self, batch_size):
-        dataset = MNIST(self.save_path, train=False, download=False, transform=self.get_transforms())
+    def test_dataloader(self, batch_size, transforms=None, use_default_normalize=True):
+        if transforms is None:
+            transforms = self.get_transforms()
+
+        dataset = MNIST(self.save_path, train=False, download=False, transform=transforms)
         loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
         return loader
 
-    def get_transforms(self):
-        mnist_transforms = transforms.Compose([
-            transforms.ToTensor()
+    def default_transforms(self):
+        mnist_transforms = transform_lib.Compose([
+            transform_lib.ToTensor()
         ])
         return mnist_transforms
