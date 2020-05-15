@@ -22,7 +22,7 @@ class MNISTDataLoaders(BoltDataLoaders):
 
     def train_dataloader(self, batch_size, transforms=None, use_default_normalize=True):
         if transforms is None:
-            transforms = self.get_transforms()
+            transforms = self._default_transforms()
 
         dataset = MNIST(self.save_path, train=True, download=False, transform=transforms)
         dataset_train, _ = random_split(dataset, [self.train_length - self.val_split, self.val_split])
@@ -38,7 +38,7 @@ class MNISTDataLoaders(BoltDataLoaders):
 
     def val_dataloader(self, batch_size,transforms=None, use_default_normalize=True):
         if transforms is None:
-            transforms = self.get_transforms()
+            transforms = self._default_transforms()
 
         dataset = MNIST(self.save_path, train=True, download=True, transform=transforms)
         _, dataset_val = random_split(dataset, [self.train_length - self.val_split, self.val_split])
@@ -54,7 +54,7 @@ class MNISTDataLoaders(BoltDataLoaders):
 
     def test_dataloader(self, batch_size, transforms=None, use_default_normalize=True):
         if transforms is None:
-            transforms = self.get_transforms()
+            transforms = self._default_transforms()
 
         dataset = MNIST(self.save_path, train=False, download=False, transform=transforms)
         loader = DataLoader(
@@ -67,7 +67,7 @@ class MNISTDataLoaders(BoltDataLoaders):
         )
         return loader
 
-    def default_transforms(self):
+    def _default_transforms(self):
         mnist_transforms = transform_lib.Compose([
             transform_lib.ToTensor()
         ])
