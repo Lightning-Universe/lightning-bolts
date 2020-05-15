@@ -52,7 +52,7 @@ class InfoNCE(pl.LightningModule):
             b1 = torch.arange(n) // ((h - i - 1) * w)
             c1 = torch.arange(n, device=self.device) % ((h - i - 1) * w)
             labels = b1 * h * w + (i + 1) * w + c1
-            labels = labels.type_as(logits)
+            labels = labels.type_as(logits).long()
 
             loss += nn.functional.cross_entropy(logits, labels)
 
