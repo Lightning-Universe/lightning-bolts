@@ -36,7 +36,7 @@ class CIFAR10DataLoaders(BoltDataLoaders):
         )
         return loader
 
-    def val_dataloader(self, batch_size,transforms=None, add_normalize=False):
+    def val_dataloader(self, batch_size, transforms=None, add_normalize=False):
         if transforms is None:
             transforms = self._default_transforms()
 
