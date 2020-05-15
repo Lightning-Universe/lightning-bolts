@@ -215,16 +215,17 @@ class CPCV2(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         from test_tube import HyperOptArgumentParser
         parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
+        parser.add_argument('--dataset', type=str, default='cifar10')
 
-        # CIFAR 10
-        patch_size = 8
+        (args, _) = parser.parse_known_args()
+
         cifar_10 = {
             'dataset': 'cifar10',
             'depth': 10,
-            'patch_size': patch_size,
+            'patch_size': 8,
             'batch_size': 200,
             'nb_classes': 10,
-            'patch_overlap': patch_size // 2,
+            'patch_overlap': 8 // 2,
             'lr_options': [
                 2e-4,
                 2e-3,
@@ -233,42 +234,29 @@ class CPCV2(pl.LightningModule):
             ]
         }
 
-        # stl-10
-        patch_size = 16
         stl10 = {
             'dataset': 'stl10',
             'depth': 8,
-            'patch_size': patch_size,
+            'patch_size': 16,
             'batch_size': 200,
             'nb_classes': 10,
-            'patch_overlap': patch_size // 2,
+            'patch_overlap': 16 // 2,
             'lr_options': [
-                # 2e-7,
-                # 2e-4*(1/4),
-                # 2e-4*(1/2),
                 2e-6,
                 2e-5,
                 2e-4,
                 2e-3,
                 2e-2
-                # 2e-4*2,
-                # 3e-4,
-                # 2e-4*3,
-                # 2e-4*4,
-                # 8e-4,
-                # 2e-4 * 8, 2e-4 * 16
             ]
         }
 
-        # imagenet128
-        patch_size = 32
         imagenet128 = {
             'dataset': 'imagenet128',
             'depth': 10,
-            'patch_size': patch_size,
+            'patch_size': 32,
             'batch_size': 60,
             'nb_classes': 1000,
-            'patch_overlap': patch_size // 2,
+            'patch_overlap': 32 // 2,
             'lr_options': [
                 2e-6,
                 2e-5,
@@ -278,17 +266,20 @@ class CPCV2(pl.LightningModule):
             ]
         }
 
-        dataset = cifar_10
-        # dataset = stl10
-        # dataset = imagenet128
+        DATASETS = {
+            'cifar10': cifar_10,
+            'stl10': stl10,
+            'imagenet128': imagenet128
+        }
+
+        dataset = DATASETS[args.dataset]
 
         # dataset options
         parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int)
         parser.add_argument('--patch_size', default=dataset['patch_size'], type=int)
         parser.add_argument('--patch_overlap', default=dataset['patch_overlap'], type=int)
 
-        # trainin params
-        parser.add_argument('--dataset', type=str, default=dataset['dataset'])
+        # training params
         parser.add_argument('--batch_size', type=int, default=dataset['batch_size'])
         parser.opt_list('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'], tunable=True)
 
