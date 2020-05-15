@@ -20,7 +20,7 @@ class CIFAR10DataLoaders(BoltDataLoaders):
         CIFAR10(self.save_path, train=True, download=True, transform=transform_lib.ToTensor())
         CIFAR10(self.save_path, train=False, download=True, transform=transform_lib.ToTensor())
 
-    def train_dataloader(self, batch_size, transforms=None, add_normalize=True):
+    def train_dataloader(self, batch_size, transforms=None, add_normalize=False):
         if transforms is None:
             transforms = self.get_transforms()
 
@@ -34,28 +34,30 @@ class CIFAR10DataLoaders(BoltDataLoaders):
             batch_size=batch_size,
             shuffle=True,
             num_workers=self.num_workers,
-            drop_last=True
+            drop_last=True,
+            pin_memory=True
         )
         return loader
 
-    def val_dataloader(self, batch_size,transforms=None, add_normalize=True):
+    def val_dataloader(self, batch_size,transforms=None, add_normalize=False):
         if transforms is None:
             transforms = self.get_transforms()
 
         if add_normalize:
             self.add_default_normalize(transforms)
 
-        dataset = CIFAR10(self.save_path, train=True, download=True, transform=transforms)
+        dataset = CIFAR10(self.save_path, train=True, download=False, transform=transforms)
         _, dataset_val = random_split(dataset, [self.train_length - self.val_split, self.val_split])
         loader = DataLoader(
             dataset_val,
             batch_size=batch_size,
             shuffle=False,
-            num_workers=self.num_workers
+            num_workers=self.num_workers,
+            pin_memory=True
         )
         return loader
 
-    def test_dataloader(self, batch_size, transforms=None, add_normalize=True):
+    def test_dataloader(self, batch_size, transforms=None, add_normalize=False):
         if transforms is None:
             transforms = self.get_transforms()
 
@@ -68,7 +70,8 @@ class CIFAR10DataLoaders(BoltDataLoaders):
             batch_size=batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drop_last=True
+            drop_last=True,
+            pin_memory=True
         )
         return loader
 

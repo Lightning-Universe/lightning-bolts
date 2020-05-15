@@ -2,7 +2,7 @@ from torchvision import transforms
 from pl_bolts.transforms.self_supervised import RandomTranslateWithReflect, Patchify
 
 
-class CPCTransformsC10:
+class CPCTransformsCIFAR10:
     '''
     Apply the same input transform twice, with independent randomness.
     '''
