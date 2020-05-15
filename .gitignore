@@ -139,3 +139,5 @@ lightning_logs
 datasets
 *.gz
 *-batches-py
+simclr.py
+.DS_Store

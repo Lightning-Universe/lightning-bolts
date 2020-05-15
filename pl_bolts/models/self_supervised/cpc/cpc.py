@@ -1,5 +1,6 @@
 import torch
 import torch.optim as optim
+from torch import nn
 from torchvision.datasets import STL10, CIFAR10
 from torch.utils.data import DataLoader, random_split
 from torch.nn import functional as F
@@ -14,6 +15,48 @@ from pl_bolts import metrics
 from pl_bolts.models.vision import PixelCNN
 
 import math
+pl.seed_everything(123)
+
+
+class InfoNCE(pl.LightningModule):
+
+    def __init__(self, num_input_channels, target_dim=64, embed_scale=0.1):
+        super().__init__()
+        self.target_dim = target_dim
+        self.embed_scale = embed_scale
+
+        self.target_cnn = torch.nn.Conv2d(num_input_channels, self.target_dim, kernel_size=1)
+        self.pred_cnn = torch.nn.Conv2d(num_input_channels, self.target_dim, kernel_size=1)
+        self.context_cnn = PixelCNN(num_input_channels)
+
+    def forward(self, Z, steps_to_ignore=2, steps_to_predict=3):
+        loss = 0.0
+
+        # generate the context vectors
+        C = self.context_cnn(Z)
+
+        # generate targets
+        targets = self.target_cnn(C)
+        b, c, h, w = targets.shape
+        targets = targets.permute(0, 2, 3, 1).contiguous().reshape([-1, c])
+
+        for i in range(steps_to_ignore, steps_to_predict):
+            n = b * (h - i - 1) * w
+
+            preds_i = self.pred_cnn(C)
+            preds_i = preds_i[:, :, :-(i + 1), :] * self.embed_scale
+            preds_i = preds_i.permute(0, 2, 3, 1).contiguous().reshape([-1, self.target_dim])
+
+            logits = torch.mm(preds_i, targets.transpose(1, 0))
+
+            b1 = torch.arange(n) // ((h - i - 1) * w)
+            c1 = torch.arange(n, device=self.device) % ((h - i - 1) * w)
+            labels = b1 * h * w + (i + 1) * w + c1
+            labels = labels.type_as(logits).long()
+
+            loss += nn.functional.cross_entropy(logits, labels)
+
+        return loss
 
 
 class CPCV2(pl.LightningModule):
@@ -30,13 +73,9 @@ class CPCV2(pl.LightningModule):
         dummy_batch = torch.zeros((2, 3, hparams.patch_size, hparams.patch_size))
         self.encoder = CPCResNet101(dummy_batch)
 
-        # context network (C vectors)
+        # info nce loss
         c, h = self.__compute_final_nb_c(hparams.patch_size)
-        self.context_network = PixelCNN(c)
-
-        self.target_dim = 64
-        self.target_cnn = torch.nn.Conv2d(c, self.target_dim, kernel_size=1)
-        self.info_nce_pred_cnn = torch.nn.Conv2d(c, self.target_dim, kernel_size=1)
+        self.info_nce = InfoNCE(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
         self.tng_split = None
         self.val_split = None
@@ -76,61 +115,31 @@ class CPCV2(pl.LightningModule):
         img_1, _ = batch
 
         # Latent features
-        Z = self.forward(img_1)
+        Z = self(img_1)
 
         # infoNCE loss
-        loss = self.info_nce_loss(Z)
+        loss = self.info_nce(Z)
 
+        log = {'val_nce_loss': loss}
         result = {
-            'loss': loss
+            'loss': loss,
+            'log': log
         }
 
         return result
-
-    def info_nce_loss(self, Z, target_dim=64, emb_scale=0.1, steps_to_ignore=2, steps_to_predict= 3):
-        loss = 0.0
-
-        # generate the context vars
-        C = self.context_network(Z)
-
-        # generate targets
-        targets = self.target_cnn(C)
-        batch_dim, _, col_dim, row_dim = targets.shape
-        targets = targets.reshape(-1, target_dim)
-
-        for i in range(steps_to_ignore, steps_to_predict):
-            col_dim_i = col_dim - i - 1
-            total_elements = batch_dim * col_dim_i * row_dim
-
-            preds_i = self.info_nce_pred_cnn(C)
-            preds_i = preds_i[:, :, :-(i + 1), :] * emb_scale
-            preds_i = preds_i.reshape(-1, target_dim)
-
-            logits = torch.mm(preds_i, targets.transpose(1, 0))
-            b = torch.arange(total_elements) / (col_dim_i * row_dim)
-            col = torch.arange(total_elements) % (col_dim_i * row_dim)
-            labels = b * col_dim * row_dim + (i + 1) * row_dim + col
-
-            loss += F.cross_entropy(logits, labels)
-
-        return loss
 
     def validation_step(self, batch, batch_nb):
         img_1, labels = batch
 
         # generate features
         # Latent features
-        Z = self.forward(img_1)
+        Z = self(img_1)
 
-        # generate the context vars
-        C = self.context_network(Z)
-
-        # NCE LOSS
-        loss = self.nce_loss(Z, C, self.W_list)
-        unsupervised_loss = loss
+        # infoNCE loss
+        loss = self.info_nce(Z)
 
         result = {
-            'val_nce': unsupervised_loss
+            'val_nce': loss
         }
         return result
 
@@ -156,10 +165,16 @@ class CPCV2(pl.LightningModule):
 
         return [opt], [lr_scheduler]
 
+    def prepare_data(self):
+        if self.hparams.dataset_name == 'CIFAR10':
+            train_transform = cpc_transforms.CPCTransformsC10()
+            CIFAR10(root=self.hparams.data_dir, train=True, transform=train_transform, download=True)
+            CIFAR10(root=self.hparams.data_dir, train=False, transform=train_transform, download=True)
+
     def train_dataloader(self):
         if self.hparams.dataset_name == 'CIFAR10':
             train_transform = cpc_transforms.CPCTransformsC10()
-            dataset = CIFAR10(root=self.hparams.data_dir, train=True, transform=train_transform, download=True)
+            dataset = CIFAR10(root=self.hparams.data_dir, train=True, transform=train_transform, download=False)
 
             loader = DataLoader(
                 dataset=dataset,
@@ -207,7 +222,7 @@ class CPCV2(pl.LightningModule):
     def val_dataloader(self):
         if self.hparams.dataset_name == 'CIFAR10':
             train_transform = cpc_transforms.CPCTransformsC10()
-            dataset = CIFAR10(root=self.hparams.data_dir, train=False, transform=train_transform, download=True)
+            dataset = CIFAR10(root=self.hparams.data_dir, train=False, transform=train_transform, download=False)
 
             loader = DataLoader(
                 dataset=dataset,
@@ -326,7 +341,7 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--learning_rate', type=float, default=0.0001)
 
         # data
-        parser.add_argument('--data_dir', default=f'./', type=str)
+        parser.add_argument('--data_dir', default=f'/home/waf251/media/falcon_kcgscratch1/datasets', type=str)
         return parser
 
 
@@ -338,5 +353,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model = CPCV2(args)
-    trainer = pl.Trainer(fast_dev_run=True)
+    trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
