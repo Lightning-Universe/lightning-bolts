@@ -28,8 +28,8 @@ class CIFAR10DataLoaders(BoltDataLoaders):
             self.add_default_normalize(transforms, train=True)
 
         dataset = CIFAR10(self.save_path, train=True, download=False, transform=transforms)
-        mnist_train, _ = random_split(dataset, [self.train_length - self.val_split, self.val_split])
-        loader = DataLoader(mnist_train, batch_size=batch_size, shuffle=True, num_workers=self.num_workers)
+        dataset_train, _ = random_split(dataset, [self.train_length - self.val_split, self.val_split])
+        loader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=self.num_workers)
         return loader
 
     def val_dataloader(self, batch_size,transforms=None, add_normalize=True):
@@ -37,11 +37,11 @@ class CIFAR10DataLoaders(BoltDataLoaders):
             transforms = self.get_transforms()
 
         if add_normalize:
-            transforms = self.add_default_normalize(transforms, train=False)
+            self.add_default_normalize(transforms)
 
         dataset = CIFAR10(self.save_path, train=True, download=True, transform=transforms)
-        _, mnist_val = random_split(dataset, [self.train_length - self.val_split, self.val_split])
-        loader = DataLoader(mnist_val, batch_size=batch_size, shuffle=False, num_workers=self.num_workers)
+        _, dataset_val = random_split(dataset, [self.train_length - self.val_split, self.val_split])
+        loader = DataLoader(dataset_val, batch_size=batch_size, shuffle=False, num_workers=self.num_workers)
         return loader
 
     def test_dataloader(self, batch_size, transforms=None, add_normalize=True):
@@ -49,7 +49,7 @@ class CIFAR10DataLoaders(BoltDataLoaders):
             transforms = self.get_transforms()
 
         if add_normalize:
-            transforms = self.add_default_normalize(transforms, train=False)
+            self.add_default_normalize(transforms)
 
         dataset = CIFAR10(self.save_path, train=False, download=False, transform=transforms)
         loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=self.num_workers)
@@ -64,14 +64,3 @@ class CIFAR10DataLoaders(BoltDataLoaders):
     def add_default_normalize(self, user_transforms):
         normalize = transform_lib.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616))
         user_transforms.transforms.append(normalize)
-
-
-if __name__ == '__main__':
-    transform = transform_lib.Compose([
-        transform_lib.ToTensor(),
-    ])
-
-    a = CIFAR10DataLoaders('/Users/williamfalcon/Developer/opensource/pytorch-lightning-bolts/datasets')
-    a.train_dataloader(32, transform)
-
-
