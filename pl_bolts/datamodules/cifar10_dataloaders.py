@@ -24,9 +24,6 @@ class CIFAR10DataLoaders(BoltDataLoaders):
         if transforms is None:
             transforms = self._default_transforms()
 
-        if add_normalize:
-            self._add_default_normalize(transforms)
-
         dataset = CIFAR10(self.save_path, train=True, download=False, transform=transforms)
         dataset_train, _ = random_split(dataset, [self.train_length - self.val_split, self.val_split])
         loader = DataLoader(
@@ -43,9 +40,6 @@ class CIFAR10DataLoaders(BoltDataLoaders):
         if transforms is None:
             transforms = self._default_transforms()
 
-        if add_normalize:
-            self._add_default_normalize(transforms)
-
         dataset = CIFAR10(self.save_path, train=True, download=False, transform=transforms)
         _, dataset_val = random_split(dataset, [self.train_length - self.val_split, self.val_split])
         loader = DataLoader(
@@ -61,9 +55,6 @@ class CIFAR10DataLoaders(BoltDataLoaders):
         if transforms is None:
             transforms = self._default_transforms()
 
-        if add_normalize:
-            self._add_default_normalize(transforms)
-
         dataset = CIFAR10(self.save_path, train=False, download=False, transform=transforms)
         loader = DataLoader(
             dataset,
@@ -77,10 +68,11 @@ class CIFAR10DataLoaders(BoltDataLoaders):
 
     def _default_transforms(self):
         mnist_transforms = transform_lib.Compose([
-            transform_lib.ToTensor()
+            transform_lib.ToTensor(),
+            self.normalize_transform()
         ])
         return mnist_transforms
 
-    def _add_default_normalize(self, user_transforms):
+    def normalize_transform(self):
         normalize = transform_lib.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616))
-        user_transforms.transforms.append(normalize)
+        return normalize
