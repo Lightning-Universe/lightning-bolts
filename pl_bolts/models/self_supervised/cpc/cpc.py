@@ -50,10 +50,11 @@ class InfoNCE(pl.LightningModule):
 
             logits = torch.mm(preds_i, targets.transpose(1, 0))
 
-            b1 = torch.arange(n, device=self.device) // ((h - i - 1) * w)
+            b1 = torch.arange(n) // ((h - i - 1) * w)
             c1 = torch.arange(n, device=self.device) % ((h - i - 1) * w)
             labels = b1 * h * w + (i + 1) * w + c1
-            import pdb;pdb.set_trace()
+            labels = labels.type_as(logits)
+
             loss += nn.functional.cross_entropy(logits, labels)
 
         return loss
@@ -76,7 +77,6 @@ class CPCV2(pl.LightningModule):
         # info nce loss
         c, h = self.__compute_final_nb_c(hparams.patch_size)
         self.info_nce = InfoNCE(num_input_channels=c, target_dim=64, embed_scale=0.1)
-        self.info_nce.device = self.device
 
         self.tng_split = None
         self.val_split = None
