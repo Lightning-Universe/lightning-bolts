@@ -21,12 +21,9 @@ class STL10DataLoaders(BoltDataLoaders):
         STL10(self.save_path, split='train', download=True, transform=transform_lib.ToTensor())
         STL10(self.save_path, split='test', download=True, transform=transform_lib.ToTensor())
 
-    def train_dataloader_mixed(self, batch_size, transforms=None, add_normalize=False):
+    def train_dataloader_mixed(self, batch_size, transforms=None):
         if transforms is None:
             transforms = self._default_transforms()
-
-        if add_normalize:
-            self._add_default_normalize(transforms)
 
         dataset = STL10(self.save_path, split='train+unlabeled', download=False, transform=transforms)
         loader = DataLoader(
@@ -39,12 +36,9 @@ class STL10DataLoaders(BoltDataLoaders):
         )
         return loader
 
-    def val_dataloader_unlabeled(self, batch_size,transforms=None, add_normalize=False):
+    def val_dataloader_unlabeled(self, batch_size,transforms=None):
         if transforms is None:
             transforms = self._default_transforms()
-
-        if add_normalize:
-            self._add_default_normalize(transforms)
 
         dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
         _, dataset_val = random_split(dataset, [self.train_length - self.val_split, self.val_split])
@@ -91,6 +85,7 @@ class STL10DataLoaders(BoltDataLoaders):
     def test_dataloader(self, batch_size, transforms=None):
         if transforms is None:
             transforms = self._default_transforms()
+
         dataset = STL10(self.save_path, split='test', download=False, transform=transforms)
         loader = DataLoader(
             dataset,
