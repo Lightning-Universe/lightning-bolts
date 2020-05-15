@@ -107,13 +107,11 @@ class CPCV2(pl.LightningModule):
             preds_i = preds_i.reshape(-1, target_dim)
 
             logits = torch.mm(preds_i, targets.transpose(1, 0))
-            b = torch.range(0, total_elements-1) / (col_dim_i * row_dim)
-            col = torch.range(0, total_elements-1) % (col_dim_i * row_dim)
+            b = torch.arange(total_elements) / (col_dim_i * row_dim)
+            col = torch.arange(total_elements) % (col_dim_i * row_dim)
             labels = b * col_dim * row_dim + (i + 1) * row_dim + col
 
-            logits = F.log_softmax(logits, dim=1)
-            nll = F.nll_loss(logits, labels) # < ----------------- FAIL HERE labels has a range [0, 134]
-            loss += nll.mean()
+            loss += F.cross_entropy(logits, labels)
 
         return loss
 
