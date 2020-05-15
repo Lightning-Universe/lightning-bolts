@@ -15,6 +15,7 @@ from pl_bolts import metrics
 from pl_bolts.models.vision import PixelCNN
 
 import math
+pl.seed_everything(123)
 
 
 class InfoNCE(nn.Module):
