@@ -12,10 +12,6 @@ class STL10DataLoaders(BoltDataLoaders):
         self.val_split = val_split
         self.num_workers = num_workers
 
-    @property
-    def train_length(self):
-        return 50000
-
     def prepare_data(self):
         STL10(self.save_path, split='unlabeled', download=True, transform=transform_lib.ToTensor())
         STL10(self.save_path, split='train', download=True, transform=transform_lib.ToTensor())
@@ -41,7 +37,8 @@ class STL10DataLoaders(BoltDataLoaders):
             transforms = self._default_transforms()
 
         dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
-        _, dataset_val = random_split(dataset, [self.train_length - self.val_split, self.val_split])
+        train_length = len(dataset)
+        _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
             dataset_val,
             batch_size=batch_size,
@@ -51,12 +48,13 @@ class STL10DataLoaders(BoltDataLoaders):
         )
         return loader
 
-    def train_dataloader_unlabeled(self, batch_size, transforms=None):
+    def train_dataloader(self, batch_size, transforms=None):
         if transforms is None:
             transforms = self._default_transforms()
 
         dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
-        dataset_train, _ = random_split(dataset, [self.train_length - self.val_split, self.val_split])
+        train_length = len(dataset)
+        dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
             dataset_train,
             batch_size=batch_size,

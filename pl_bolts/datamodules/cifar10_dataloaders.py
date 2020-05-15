@@ -12,10 +12,6 @@ class CIFAR10DataLoaders(BoltDataLoaders):
         self.val_split = val_split
         self.num_workers = num_workers
 
-    @property
-    def train_length(self):
-        return 50000
-
     def prepare_data(self):
         CIFAR10(self.save_path, train=True, download=True, transform=transform_lib.ToTensor())
         CIFAR10(self.save_path, train=False, download=True, transform=transform_lib.ToTensor())
@@ -25,7 +21,8 @@ class CIFAR10DataLoaders(BoltDataLoaders):
             transforms = self._default_transforms()
 
         dataset = CIFAR10(self.save_path, train=True, download=False, transform=transforms)
-        dataset_train, _ = random_split(dataset, [self.train_length - self.val_split, self.val_split])
+        train_length = len(dataset)
+        dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
             dataset_train,
             batch_size=batch_size,
@@ -41,7 +38,8 @@ class CIFAR10DataLoaders(BoltDataLoaders):
             transforms = self._default_transforms()
 
         dataset = CIFAR10(self.save_path, train=True, download=False, transform=transforms)
-        _, dataset_val = random_split(dataset, [self.train_length - self.val_split, self.val_split])
+        train_length = len(dataset)
+        _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
             dataset_val,
             batch_size=batch_size,
@@ -74,5 +72,8 @@ class CIFAR10DataLoaders(BoltDataLoaders):
         return mnist_transforms
 
     def normalize_transform(self):
-        normalize = transform_lib.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616))
+        normalize = transform_lib.Normalize(
+            mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
+            std=[x / 255.0 for x in [63.0, 62.1, 66.7]]
+        )
         return normalize
