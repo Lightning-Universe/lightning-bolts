@@ -105,6 +105,7 @@ class CPCV2(pl.LightningModule):
 
         # Z are the latent vars
         Z = self.encoder(img_1)
+        import pdb; pdb.set_trace()
         Z = self.__recover_z_shape(Z, b)
 
         return Z
@@ -113,7 +114,7 @@ class CPCV2(pl.LightningModule):
         img_1, _ = batch
 
         # Latent features
-        Z = self.forward(img_1)
+        Z = self(img_1)
 
         # infoNCE loss
         loss = self.info_nce(Z)
@@ -131,7 +132,7 @@ class CPCV2(pl.LightningModule):
 
         # generate features
         # Latent features
-        Z = self.forward(img_1)
+        Z = self(img_1)
 
         # infoNCE loss
         loss = self.info_nce(Z)
