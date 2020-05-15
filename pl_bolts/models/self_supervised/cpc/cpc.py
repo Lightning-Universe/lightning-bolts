@@ -319,7 +319,7 @@ class CPCV2(pl.LightningModule):
         # trainin params
         parser.add_argument('--dataset', type=str, default=dataset['dataset'])
         parser.add_argument('--batch_size', type=int, default=dataset['batch_size'])
-        parser.opt_list('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'])
+        parser.opt_list('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'], tunable=True)
 
         # data
         parser.add_argument('--data_dir', default=f'/home/waf251/media/falcon_kcgscratch1/datasets', type=str)
