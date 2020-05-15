@@ -350,5 +350,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model = CPCV2(args)
-    trainer = pl.Trainer(fast_dev_run=True)
+    trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
