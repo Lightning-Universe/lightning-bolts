@@ -29,7 +29,13 @@ class CIFAR10DataLoaders(BoltDataLoaders):
 
         dataset = CIFAR10(self.save_path, train=True, download=False, transform=transforms)
         dataset_train, _ = random_split(dataset, [self.train_length - self.val_split, self.val_split])
-        loader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=self.num_workers)
+        loader = DataLoader(
+            dataset_train,
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=self.num_workers,
+            drop_last=True
+        )
         return loader
 
     def val_dataloader(self, batch_size,transforms=None, add_normalize=True):
@@ -41,7 +47,12 @@ class CIFAR10DataLoaders(BoltDataLoaders):
 
         dataset = CIFAR10(self.save_path, train=True, download=True, transform=transforms)
         _, dataset_val = random_split(dataset, [self.train_length - self.val_split, self.val_split])
-        loader = DataLoader(dataset_val, batch_size=batch_size, shuffle=False, num_workers=self.num_workers)
+        loader = DataLoader(
+            dataset_val,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=self.num_workers
+        )
         return loader
 
     def test_dataloader(self, batch_size, transforms=None, add_normalize=True):
@@ -52,7 +63,13 @@ class CIFAR10DataLoaders(BoltDataLoaders):
             self.add_default_normalize(transforms)
 
         dataset = CIFAR10(self.save_path, train=False, download=False, transform=transforms)
-        loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=self.num_workers)
+        loader = DataLoader(
+            dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
+            drop_last=True
+        )
         return loader
 
     def default_transforms(self):
