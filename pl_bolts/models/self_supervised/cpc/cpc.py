@@ -119,7 +119,7 @@ class CPCV2(pl.LightningModule):
         # infoNCE loss
         loss = self.info_nce(Z)
 
-        log = {'val_nce_loss': loss}
+        log = {'train_nce_loss': loss}
         result = {
             'loss': loss,
             'log': log
