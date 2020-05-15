@@ -243,7 +243,8 @@ class CPCV2(pl.LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser):
-        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        from test_tube import HyperOptArgumentParser
+        parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
 
         # CIFAR 10
         patch_size = 8
@@ -319,7 +320,7 @@ class CPCV2(pl.LightningModule):
         # trainin params
         parser.add_argument('--dataset', type=str, default=dataset['dataset'])
         parser.add_argument('--batch_size', type=int, default=dataset['batch_size'])
-        parser.add_argument('--learning_rate', type=float, default=0.0001)
+        parser.opt_list('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'])
 
         # data
         parser.add_argument('--data_dir', default=f'/home/waf251/media/falcon_kcgscratch1/datasets', type=str)
