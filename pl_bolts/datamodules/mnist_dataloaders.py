@@ -25,7 +25,8 @@ class MNISTDataLoaders(BoltDataLoaders):
             transforms = self._default_transforms()
 
         dataset = MNIST(self.save_path, train=True, download=False, transform=transforms)
-        dataset_train, _ = random_split(dataset, [self.train_length - self.val_split, self.val_split])
+        train_length = len(dataset)
+        dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
             dataset_train,
             batch_size=batch_size,
@@ -41,7 +42,8 @@ class MNISTDataLoaders(BoltDataLoaders):
             transforms = self._default_transforms()
 
         dataset = MNIST(self.save_path, train=True, download=True, transform=transforms)
-        _, dataset_val = random_split(dataset, [self.train_length - self.val_split, self.val_split])
+        train_length = len(dataset)
+        _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
             dataset_val,
             batch_size=batch_size,

@@ -12,10 +12,6 @@ class CIFAR10DataLoaders(BoltDataLoaders):
         self.val_split = val_split
         self.num_workers = num_workers
 
-    @property
-    def train_length(self):
-        return 50000
-
     def prepare_data(self):
         CIFAR10(self.save_path, train=True, download=True, transform=transform_lib.ToTensor())
         CIFAR10(self.save_path, train=False, download=True, transform=transform_lib.ToTensor())
@@ -25,7 +21,8 @@ class CIFAR10DataLoaders(BoltDataLoaders):
             transforms = self._default_transforms()
 
         dataset = CIFAR10(self.save_path, train=True, download=False, transform=transforms)
-        dataset_train, _ = random_split(dataset, [self.train_length - self.val_split, self.val_split])
+        train_length = len(dataset)
+        dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
             dataset_train,
             batch_size=batch_size,
@@ -41,7 +38,8 @@ class CIFAR10DataLoaders(BoltDataLoaders):
             transforms = self._default_transforms()
 
         dataset = CIFAR10(self.save_path, train=True, download=False, transform=transforms)
-        _, dataset_val = random_split(dataset, [self.train_length - self.val_split, self.val_split])
+        train_length = len(dataset)
+        _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
             dataset_val,
             batch_size=batch_size,
