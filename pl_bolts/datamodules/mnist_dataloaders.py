@@ -31,7 +31,8 @@ class MNISTDataLoaders(BoltDataLoaders):
             batch_size=batch_size,
             shuffle=True,
             num_workers=self.num_workers,
-            drop_last=True
+            drop_last=True,
+            pin_memory=True
         )
         return loader
 
@@ -46,7 +47,8 @@ class MNISTDataLoaders(BoltDataLoaders):
             batch_size=batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drop_last=True
+            drop_last=True,
+            pin_memory=True
         )
         return loader
 
@@ -60,7 +62,8 @@ class MNISTDataLoaders(BoltDataLoaders):
             batch_size=batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drop_last=True
+            drop_last=True,
+            pin_memory=True
         )
         return loader
 

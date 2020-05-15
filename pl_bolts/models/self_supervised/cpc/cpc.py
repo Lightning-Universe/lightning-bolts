@@ -4,6 +4,7 @@ from torch import nn
 from pl_bolts.datamodules import CIFAR10DataLoaders
 from torchvision.datasets import STL10, CIFAR10
 from torch.utils.data import DataLoader, random_split
+from torchvision import transforms
 from torch.nn import functional as F
 import pytorch_lightning as pl
 from torch.optim.lr_scheduler import MultiStepLR
@@ -81,7 +82,7 @@ class CPCV2(pl.LightningModule):
 
     def get_dataset(self, name):
         if name == 'cifar10':
-            return CIFAR10DataLoaders()
+            return CIFAR10DataLoaders(self.hparams.data_dir)
 
     def __compute_final_nb_c(self, patch_size):
         dummy_batch = torch.zeros((2*49, 3, patch_size, patch_size))
@@ -169,29 +170,15 @@ class CPCV2(pl.LightningModule):
         return [opt], [lr_scheduler]
 
     def prepare_data(self):
-        if self.hparams.dataset == 'cifar10':
-            train_transform = cpc_transforms.CPCTransformsC10()
-            CIFAR10(root=self.hparams.data_dir, train=True, transform=train_transform, download=True)
-            CIFAR10(root=self.hparams.data_dir, train=False, transform=train_transform, download=True)
+        self.dataset.prepare_data()
 
     def train_dataloader(self):
         if self.hparams.dataset == 'cifar10':
-            train_transform = cpc_transforms.CPCTransformsC10()
-            return self.dataset.train_dataloader(self.hparams.batch_size)
-
-            dataset = CIFAR10(root=self.hparams.data_dir, train=True, transform=train_transform, download=False)
-
-            loader = DataLoader(
-                dataset=dataset,
-                batch_size=self.hparams.batch_size,
-                pin_memory=True,
-                drop_last=True,
-                num_workers=16,
-            )
-
+            train_transform = cpc_transforms.CPCTransformsCIFAR10().train_transform
+            loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
             return loader
 
-        if self.hparams.dataset_name == 'stl_10':
+        if self.hparams.dataset == 'stl_10':
             train_transform = cpc_transforms.CPCTransformsSTL10Patches(patch_size=self.hparams.patch_size, overlap=self.hparams.patch_overlap)
             dataset = STL10(root=self.hparams.data_dir, split='unlabeled', transform=train_transform, download=True)
 
@@ -207,7 +194,7 @@ class CPCV2(pl.LightningModule):
 
             return loader
 
-        if self.hparams.dataset_name == 'imagenet_128':
+        if self.hparams.dataset == 'imagenet_128':
             train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
             dataset = UnlabeledImagenet(self.hparams.data_dir,
                                         nb_classes=self.hparams.nb_classes,
@@ -225,21 +212,12 @@ class CPCV2(pl.LightningModule):
             return loader
 
     def val_dataloader(self):
-        if self.hparams.dataset_name == 'CIFAR10':
-            train_transform = cpc_transforms.CPCTransformsC10()
-            dataset = CIFAR10(root=self.hparams.data_dir, train=False, transform=train_transform, download=False)
-
-            loader = DataLoader(
-                dataset=dataset,
-                batch_size=self.hparams.batch_size,
-                pin_memory=True,
-                drop_last=True,
-                num_workers=16,
-            )
-
+        if self.hparams.dataset == 'cifar10':
+            test_transform = cpc_transforms.CPCTransformsCIFAR10().test_transform
+            loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
             return loader
 
-        if self.hparams.dataset_name == 'stl_10':
+        if self.hparams.dataset == 'stl_10':
             loader = DataLoader(
                 dataset=self.val_split,
                 batch_size=self.hparams.batch_size,
@@ -250,7 +228,7 @@ class CPCV2(pl.LightningModule):
 
             return loader
 
-        if self.hparams.dataset_name == 'imagenet_128':
+        if self.hparams.dataset == 'imagenet_128':
             train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
             dataset = UnlabeledImagenet(self.hparams.data_dir,
                                         nb_classes=self.hparams.nb_classes,
@@ -274,7 +252,7 @@ class CPCV2(pl.LightningModule):
         # CIFAR 10
         patch_size = 8
         cifar_10 = {
-            'dataset': 'CIFAR10',
+            'dataset': 'cifar10',
             'depth': 10,
             'patch_size': patch_size,
             'batch_size': 200,
