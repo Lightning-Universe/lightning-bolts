@@ -1,7 +1,7 @@
 import torch
 import torch.optim as optim
 from torch import nn
-from pl_bolts.datamodules import CIFAR10DataLoaders
+from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from torchvision.datasets import STL10, CIFAR10
 from torch.utils.data import DataLoader, random_split
 import pytorch_lightning as pl
@@ -81,6 +81,8 @@ class CPCV2(pl.LightningModule):
     def get_dataset(self, name):
         if name == 'cifar10':
             return CIFAR10DataLoaders(self.hparams.data_dir)
+        elif name == 'stl10':
+            return STL10DataLoaders(self.hparams.data_dir)
 
     def __compute_final_nb_c(self, patch_size):
         dummy_batch = torch.zeros((2*49, 3, patch_size, patch_size))
@@ -170,58 +172,34 @@ class CPCV2(pl.LightningModule):
     def train_dataloader(self):
         if self.hparams.dataset == 'cifar10':
             train_transform = cpc_transforms.CPCTransformsCIFAR10().train_transform
-            loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
-            return loader
 
-        if self.hparams.dataset == 'stl10':
-            train_transform = cpc_transforms.CPCTransformsSTL10Patches(patch_size=self.hparams.patch_size, overlap=self.hparams.patch_overlap)
-            dataset = STL10(root=self.hparams.data_dir, split='unlabeled', transform=train_transform, download=True)
-
-            self.tng_split, self.val_split = random_split(dataset, [95000, 5000])
-
-            loader = DataLoader(
-                dataset=dataset,
-                batch_size=self.hparams.batch_size,
-                pin_memory=True,
-                drop_last=True,
-                num_workers=16,
+        elif self.hparams.dataset == 'stl10':
+            stl10_transform = cpc_transforms.CPCTransformsSTL10Patches(
+                patch_size=self.hparams.patch_size,
+                overlap=self.hparams.patch_overlap
             )
+            train_transform = stl10_transform.train_transform
 
-            return loader
-
-        if self.hparams.dataset == 'imagenet128':
+        elif self.hparams.dataset == 'imagenet128':
             train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
             dataset = UnlabeledImagenet(self.hparams.data_dir,
                                         nb_classes=self.hparams.nb_classes,
                                         split='train',
                                         transform=train_transform)
 
-            loader = DataLoader(
-                dataset=dataset,
-                batch_size=self.hparams.batch_size,
-                pin_memory=True,
-                drop_last=True,
-                num_workers=16,
-            )
-
-            return loader
+        loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
+        return loader
 
     def val_dataloader(self):
         if self.hparams.dataset == 'cifar10':
             test_transform = cpc_transforms.CPCTransformsCIFAR10().test_transform
-            loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
-            return loader
 
         if self.hparams.dataset == 'stl10':
-            loader = DataLoader(
-                dataset=self.val_split,
-                batch_size=self.hparams.batch_size,
-                pin_memory=True,
-                drop_last=True,
-                num_workers=16,
+            stl10_transform = cpc_transforms.CPCTransformsSTL10Patches(
+                patch_size=self.hparams.patch_size,
+                overlap=self.hparams.patch_overlap
             )
-
-            return loader
+            test_transform = stl10_transform.test_transform
 
         if self.hparams.dataset == 'imagenet128':
             train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
@@ -230,15 +208,8 @@ class CPCV2(pl.LightningModule):
                                         split='val',
                                         transform=train_transform)
 
-            loader = DataLoader(
-                dataset=dataset,
-                batch_size=self.hparams.batch_size,
-                pin_memory=True,
-                drop_last=True,
-                num_workers=16,
-            )
-
-            return loader
+        loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
+        return loader
 
     @staticmethod
     def add_model_specific_args(parent_parser):

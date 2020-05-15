@@ -39,6 +39,7 @@ class CPCTransformsCIFAR10:
         out1 = self.train_transform(inp)
         return out1
 
+
 class CPCTransformsSTL10Patches:
     '''
     Apply the same input transform twice, with independent randomness.
