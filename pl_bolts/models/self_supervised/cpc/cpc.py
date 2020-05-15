@@ -76,6 +76,7 @@ class CPCV2(pl.LightningModule):
         # info nce loss
         c, h = self.__compute_final_nb_c(hparams.patch_size)
         self.info_nce = InfoNCE(num_input_channels=c, target_dim=64, embed_scale=0.1)
+        self.info_nce.device = self.device
 
         self.tng_split = None
         self.val_split = None
