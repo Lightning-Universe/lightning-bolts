@@ -1,10 +1,10 @@
 from torchvision import transforms as transform_lib
-from torchvision.datasets import CIFAR10
+from torchvision.datasets import STL10
 from torch.utils.data import DataLoader, random_split
 from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders
 
 
-class CIFAR10DataLoaders(BoltDataLoaders):
+class STL10DataLoaders(BoltDataLoaders):
 
     def __init__(self, save_path, val_split=5000, num_workers=16):
         super().__init__()
@@ -17,17 +17,36 @@ class CIFAR10DataLoaders(BoltDataLoaders):
         return 50000
 
     def prepare_data(self):
-        CIFAR10(self.save_path, train=True, download=True, transform=transform_lib.ToTensor())
-        CIFAR10(self.save_path, train=False, download=True, transform=transform_lib.ToTensor())
+        STL10(self.save_path, split='unlabeled', download=True, transform=transform_lib.ToTensor())
+        STL10(self.save_path, split='train', download=True, transform=transform_lib.ToTensor())
+        STL10(self.save_path, split='test', download=True, transform=transform_lib.ToTensor())
 
-    def train_dataloader(self, batch_size, transforms=None, add_normalize=False):
+    def train_dataloader_mixed(self, batch_size, transforms=None, add_normalize=False):
         if transforms is None:
             transforms = self._default_transforms()
 
         if add_normalize:
             self._add_default_normalize(transforms)
 
-        dataset = CIFAR10(self.save_path, train=True, download=False, transform=transforms)
+        dataset = STL10(self.save_path, split='train+unlabeled', download=False, transform=transforms)
+        loader = DataLoader(
+            dataset,
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=self.num_workers,
+            drop_last=True,
+            pin_memory=True
+        )
+        return loader
+
+    def train_dataloader_unlabeled(self, batch_size, transforms=None, add_normalize=False):
+        if transforms is None:
+            transforms = self._default_transforms()
+
+        if add_normalize:
+            self._add_default_normalize(transforms)
+
+        dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
         dataset_train, _ = random_split(dataset, [self.train_length - self.val_split, self.val_split])
         loader = DataLoader(
             dataset_train,
@@ -39,14 +58,14 @@ class CIFAR10DataLoaders(BoltDataLoaders):
         )
         return loader
 
-    def val_dataloader(self, batch_size,transforms=None, add_normalize=False):
+    def val_dataloader_unlabeled(self, batch_size,transforms=None, add_normalize=False):
         if transforms is None:
             transforms = self._default_transforms()
 
         if add_normalize:
             self._add_default_normalize(transforms)
 
-        dataset = CIFAR10(self.save_path, train=True, download=False, transform=transforms)
+        dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
         _, dataset_val = random_split(dataset, [self.train_length - self.val_split, self.val_split])
         loader = DataLoader(
             dataset_val,
@@ -64,7 +83,7 @@ class CIFAR10DataLoaders(BoltDataLoaders):
         if add_normalize:
             self._add_default_normalize(transforms)
 
-        dataset = CIFAR10(self.save_path, train=False, download=False, transform=transforms)
+        dataset = STL10(self.save_path, split='test', download=False, transform=transforms)
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
