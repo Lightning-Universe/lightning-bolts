@@ -51,6 +51,7 @@ class InfoNCE(pl.LightningModule):
             preds_i = preds_i.permute(0, 2, 3, 1).contiguous().reshape([-1, self.target_dim])
 
             logits = torch.mm(preds_i, targets.transpose(1, 0))
+            logits = nn.functional.sigmoid(logits)
 
             b1 = torch.arange(n) // ((h - i - 1) * w)
             c1 = torch.arange(n, device=self.device) % ((h - i - 1) * w)
