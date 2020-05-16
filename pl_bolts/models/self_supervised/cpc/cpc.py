@@ -32,33 +32,59 @@ class InfoNCE(pl.LightningModule):
         self.pred_cnn = torch.nn.Conv2d(num_input_channels, self.target_dim, kernel_size=1)
         self.context_cnn = PixelCNN(num_input_channels)
 
-    def forward(self, Z, steps_to_ignore=2, steps_to_predict=3):
-        loss = 0.0
-
-        # generate the context vectors
-        C = self.context_cnn(Z)
-
-        # generate targets
-        targets = self.target_cnn(C)
+    def compute_loss_h(self, context, targets, steps_to_ignore, steps_to_predict):
         b, c, h, w = targets.shape
         targets = targets.permute(0, 2, 3, 1).contiguous().reshape([-1, c])
-
+        loss = 0.
         for i in range(steps_to_ignore, steps_to_predict):
+            preds = self.pred_cnn(context)
+            preds = preds[:, :, :-(i+1), :] * self.embed_scale
+            preds = preds.permute(0, 2, 3, 1).contiguous().reshape([-1, self.target_dim])
+            logits = torch.matmul(preds, targets.transpose(-1, -2))
             n = b * (h - i - 1) * w
 
-            preds_i = self.pred_cnn(C)
-            preds_i = preds_i[:, :, :-(i + 1), :] * self.embed_scale
-            preds_i = preds_i.permute(0, 2, 3, 1).contiguous().reshape([-1, self.target_dim])
-
-            logits = torch.mm(preds_i, targets.transpose(1, 0))
-
             b1 = torch.arange(n) // ((h - i - 1) * w)
-            c1 = torch.arange(n, device=self.device) % ((h - i - 1) * w)
+            c1 = torch.arange(n) % ((h - i - 1) * w)
             labels = b1 * h * w + (i + 1) * w + c1
             labels = labels.type_as(logits).long()
 
             loss += nn.functional.cross_entropy(logits, labels)
+        return loss
 
+    def compute_loss_w(self, context, targets, steps_to_ignore, steps_to_predict):
+
+        b, c, h, w = targets.shape
+        targets = targets.permute(0, 2, 3, 1).contiguous().reshape([-1, c])
+        loss = 0.
+        for i in range(steps_to_ignore, steps_to_predict):
+            preds = self.pred_cnn(context)
+            preds = preds[:, :, :, :-(i+1)] * self.embed_scale
+            preds = preds.permute(0, 2, 3, 1).contiguous().reshape([-1, self.target_dim])
+            logits = torch.matmul(preds, targets.transpose(-1, -2))
+            n = b * h * (w - i - 1)
+
+            b1 = torch.arange(n) // ((w - i - 1) * h)
+            c1 = torch.arange(n) % ((w - i - 1) * h)
+            labels = b1 * h * w + (i + 1) * h + c1
+            labels = labels.type_as(logits).long()
+
+            loss += nn.functional.cross_entropy(logits, labels)
+        return loss
+
+    def forward(self, Z):
+        loss = 0.
+
+        context = self.context_cnn(Z)
+        targets = self.target_cnn(Z)
+
+        _, _, h, w = Z.shape
+        for steps_to_ignore in range(h-1):
+            for steps_to_predict in range(steps_to_ignore + 1, h):
+                loss += self.compute_loss_h(context, targets, steps_to_ignore, steps_to_predict)
+
+        for steps_to_ignore in range(w-1):
+            for steps_to_predict in range(steps_to_ignore + 1, w):
+                loss += self.compute_loss_w(context, targets, steps_to_ignore, steps_to_predict)
         return loss
 
 
@@ -226,11 +252,11 @@ class CPCV2(pl.LightningModule):
             'dataset': 'cifar10',
             'depth': 10,
             'patch_size': 8,
-            'batch_size': 200,
+            'batch_size': 104,
             'nb_classes': 10,
             'patch_overlap': 8 // 2,
             'lr_options': [
-                2e-4,
+                1e-4,
                 2e-3,
                 4e-3,
                 1e-2,
