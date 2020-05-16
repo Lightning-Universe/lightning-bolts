@@ -188,6 +188,7 @@ class CPCV2(pl.LightningModule):
                                         transform=train_transform)
 
         loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
+        loader.num_workers = 0
         return loader
 
     def val_dataloader(self):
@@ -209,6 +210,8 @@ class CPCV2(pl.LightningModule):
                                         transform=train_transform)
 
         loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
+        loader.num_workers = 0
+
         return loader
 
     @staticmethod
