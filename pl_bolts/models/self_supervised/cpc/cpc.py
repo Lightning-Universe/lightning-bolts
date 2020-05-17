@@ -2,8 +2,6 @@ import torch
 import torch.optim as optim
 from torch import nn
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
-from torchvision.datasets import STL10, CIFAR10
-from torch.utils.data import DataLoader, random_split
 import pytorch_lightning as pl
 from torch.optim.lr_scheduler import MultiStepLR
 from pl_bolts.models.self_supervised.cpc.cpc_networks import CPCResNet101
