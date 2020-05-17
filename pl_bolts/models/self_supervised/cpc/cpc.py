@@ -252,7 +252,7 @@ class CPCV2(pl.LightningModule):
             'dataset': 'cifar10',
             'depth': 10,
             'patch_size': 8,
-            'batch_size': 200,
+            'batch_size': 104,
             'nb_classes': 10,
             'patch_overlap': 8 // 2,
             'lr_options': [
