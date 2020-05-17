@@ -1,1 +1,1 @@
-from pl_bolts.metrics.aggregation import mean
+from pl_bolts.metrics.aggregation import mean, accuracy

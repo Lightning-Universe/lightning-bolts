@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 import torch.optim as optim
 from torch import nn
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
@@ -10,6 +11,7 @@ from pl_bolts.models.self_supervised.amdim.ssl_datasets import UnlabeledImagenet
 from argparse import ArgumentParser
 from pl_bolts import metrics
 from pl_bolts.models.vision import PixelCNN
+from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 
 import math
 
@@ -92,6 +94,7 @@ class CPCV2(pl.LightningModule):
         super().__init__()
 
         self.hparams = hparams
+        self.online_evaluator = self.hparams.online_ft
         self.dataset = self.get_dataset(hparams.dataset)
 
         # encoder network (Z vectors)
@@ -101,6 +104,16 @@ class CPCV2(pl.LightningModule):
         # info nce loss
         c, h = self.__compute_final_nb_c(hparams.patch_size)
         self.info_nce = InfoNCE(num_input_channels=c, target_dim=64, embed_scale=0.1)
+
+        if self.online_evaluator:
+            z_dim = c * h* h
+            num_classes = self.dataset.num_classes
+            self.non_linear_evaluator = SSLEvaluator(
+                n_input=z_dim,
+                n_classes=num_classes,
+                p=0.2,
+                n_hidden=1024
+            )
 
     def get_dataset(self, name):
         if name == 'cifar10':
@@ -132,20 +145,32 @@ class CPCV2(pl.LightningModule):
 
         # Z are the latent vars
         Z = self.encoder(img_1)
+
+        # (?) -> (b, -1, nb_feats, nb_feats)
         Z = self.__recover_z_shape(Z, b)
 
         return Z
 
     def training_step(self, batch, batch_nb):
-        img_1, _ = batch
+        img_1, y = batch
 
         # Latent features
         Z = self(img_1)
 
         # infoNCE loss
-        loss = self.info_nce(Z)
+        nce_loss = self.info_nce(Z)
+        loss = nce_loss
+        log = {'train_nce_loss': nce_loss}
 
-        log = {'train_nce_loss': loss}
+        # don't use the training signal, just finetune the MLP to see how we're doing downstream
+        if self.online_evaluator:
+            z_in = Z.detach()
+            z_in = z_in.reshape(Z.size(0), -1)
+            mlp_preds = self.non_linear_evaluator(z_in)
+            mlp_loss = F.cross_entropy(mlp_preds, y)
+            loss = nce_loss + mlp_loss
+            log['train_mlp_loss'] = mlp_loss
+
         result = {
             'loss': loss,
             'log': log
@@ -161,17 +186,29 @@ class CPCV2(pl.LightningModule):
         Z = self(img_1)
 
         # infoNCE loss
-        loss = self.info_nce(Z)
+        nce_loss = self.info_nce(Z)
+        result = {'val_nce': nce_loss}
 
-        result = {
-            'val_nce': loss
-        }
+        if self.online_evaluator:
+            z_in = Z.reshape(Z.size(0), -1)
+            mlp_preds = self.non_linear_evaluator(z_in)
+            mlp_loss = F.cross_entropy(mlp_preds, labels)
+            acc = metrics.accuracy(mlp_preds, labels)
+            result['mlp_acc'] = acc
+            result['mlp_loss'] = mlp_loss
+
         return result
 
     def validation_epoch_end(self, outputs):
         val_nce = metrics.mean(outputs, 'val_nce')
 
         log = {'val_nce_loss': val_nce}
+        if self.online_evaluator:
+            mlp_acc = metrics.mean(outputs, 'mlp_acc')
+            mlp_loss = metrics.mean(outputs, 'mlp_loss')
+            log['val_mlp_acc'] = mlp_acc
+            log['val_mlp_loss'] = mlp_loss
+
         return {'val_loss': val_nce, 'log': log}
 
     def configure_optimizers(self):
@@ -240,6 +277,7 @@ class CPCV2(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         from test_tube import HyperOptArgumentParser
         parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
+        parser.add_argument('--online_ft', action='store_true')
         parser.add_argument('--dataset', type=str, default='cifar10')
 
         (args, _) = parser.parse_known_args()
