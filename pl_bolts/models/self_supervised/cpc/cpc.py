@@ -90,11 +90,11 @@ class InfoNCE(pl.LightningModule):
 
 class CPCV2(pl.LightningModule):
 
-    def __init__(self, hparams, online_evaluator=False):
+    def __init__(self, hparams):
         super().__init__()
 
         self.hparams = hparams
-        self.online_evaluator = online_evaluator
+        self.online_evaluator = self.hparams.online_ft
         self.dataset = self.get_dataset(hparams.dataset)
 
         # encoder network (Z vectors)
@@ -105,7 +105,7 @@ class CPCV2(pl.LightningModule):
         c, h = self.__compute_final_nb_c(hparams.patch_size)
         self.info_nce = InfoNCE(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
-        if online_evaluator:
+        if self.online_evaluator:
             z_dim = c * h* h
             num_classes = self.dataset.num_classes
             self.non_linear_evaluator = SSLEvaluator(
@@ -347,6 +347,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    model = CPCV2(args, online_evaluator=args.online_ft)
+    model = CPCV2(args)
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
