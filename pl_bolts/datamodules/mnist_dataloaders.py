@@ -13,8 +13,8 @@ class MNISTDataLoaders(BoltDataLoaders):
         self.num_workers = num_workers
 
     @property
-    def train_length(self):
-        return 60000
+    def num_classes(self):
+        return 10
 
     def prepare_data(self):
         MNIST(self.save_path, train=True, download=True, transform=transform_lib.ToTensor())

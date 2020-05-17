@@ -12,6 +12,10 @@ class CIFAR10DataLoaders(BoltDataLoaders):
         self.val_split = val_split
         self.num_workers = num_workers
 
+    @property
+    def num_classes(self):
+        return 10
+
     def prepare_data(self):
         CIFAR10(self.save_path, train=True, download=True, transform=transform_lib.ToTensor())
         CIFAR10(self.save_path, train=False, download=True, transform=transform_lib.ToTensor())
