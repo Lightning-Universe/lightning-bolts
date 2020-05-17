@@ -164,7 +164,6 @@ class CPCV2(pl.LightningModule):
 
         # don't use the training signal, just finetune the MLP to see how we're doing downstream
         if self.online_evaluator:
-            import pdb; pdb.set_trace()
             z_in = Z.detach()
             z_in = z_in.reshape(Z.size(0), -1)
             mlp_preds = self.non_linear_evaluator(z_in)
