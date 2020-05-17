@@ -190,7 +190,7 @@ class CPCV2(pl.LightningModule):
         elif self.hparams.dataset == 'imagenet128':
             lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
 
-        return [opt], [lr_scheduler]
+        return [opt] # , [lr_scheduler]
 
     def prepare_data(self):
         self.dataset.prepare_data()
