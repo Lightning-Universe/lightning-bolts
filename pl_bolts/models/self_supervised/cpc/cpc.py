@@ -190,7 +190,7 @@ class CPCV2(pl.LightningModule):
         elif self.hparams.dataset == 'imagenet128':
             lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
 
-        return [opt], [lr_scheduler]
+        return [opt] # , [lr_scheduler]
 
     def prepare_data(self):
         self.dataset.prepare_data()
@@ -214,7 +214,6 @@ class CPCV2(pl.LightningModule):
                                         transform=train_transform)
 
         loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
-        loader.num_workers = 0
         return loader
 
     def val_dataloader(self):
@@ -236,7 +235,6 @@ class CPCV2(pl.LightningModule):
                                         transform=train_transform)
 
         loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
-        loader.num_workers = 0
 
         return loader
 
@@ -252,7 +250,7 @@ class CPCV2(pl.LightningModule):
             'dataset': 'cifar10',
             'depth': 10,
             'patch_size': 8,
-            'batch_size': 104,
+            'batch_size': 72,
             'nb_classes': 10,
             'patch_overlap': 8 // 2,
             'lr_options': [
