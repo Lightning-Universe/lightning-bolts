@@ -1,9 +1,9 @@
 from torch import nn
 
 
-class MLPClassifier(nn.Module):
+class SSLEvaluator(nn.Module):
     def __init__(self, n_input, n_classes, n_hidden=512, p=0.1):
-        super(MLPClassifier, self).__init__()
+        super(SSLEvaluator, self).__init__()
         self.n_input = n_input
         self.n_classes = n_classes
         self.n_hidden = n_hidden
