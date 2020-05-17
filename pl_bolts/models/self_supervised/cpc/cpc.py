@@ -186,17 +186,29 @@ class CPCV2(pl.LightningModule):
         Z = self(img_1)
 
         # infoNCE loss
-        loss = self.info_nce(Z)
+        nce_loss = self.info_nce(Z)
+        result = {'val_nce': nce_loss}
 
-        result = {
-            'val_nce': loss
-        }
+        if self.online_evaluator:
+            z_in = Z.reshape(Z.size(0), -1)
+            mlp_preds = self.non_linear_evaluator(z_in)
+            mlp_loss = F.cross_entropy(mlp_preds, y)
+            acc = metrics.accuracy(mlp_preds, labels)
+            result['mlp_acc'] = acc
+            result['mlp_loss'] = mlp_loss
+
         return result
 
     def validation_epoch_end(self, outputs):
         val_nce = metrics.mean(outputs, 'val_nce')
 
         log = {'val_nce_loss': val_nce}
+        if self.online_evaluator:
+            mlp_acc = metrics.mean(outputs, 'mlp_acc')
+            mlp_loss = metrics.mean(outputs, 'mlp_loss')
+            log['val_mlp_acc'] = mlp_acc
+            log['val_mlp_loss'] = mlp_loss
+
         return {'val_loss': val_nce, 'log': log}
 
     def configure_optimizers(self):
