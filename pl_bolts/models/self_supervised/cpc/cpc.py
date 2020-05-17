@@ -192,7 +192,7 @@ class CPCV2(pl.LightningModule):
         if self.online_evaluator:
             z_in = Z.reshape(Z.size(0), -1)
             mlp_preds = self.non_linear_evaluator(z_in)
-            mlp_loss = F.cross_entropy(mlp_preds, y)
+            mlp_loss = F.cross_entropy(mlp_preds, labels)
             acc = metrics.accuracy(mlp_preds, labels)
             result['mlp_acc'] = acc
             result['mlp_loss'] = mlp_loss
