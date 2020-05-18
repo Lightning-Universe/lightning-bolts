@@ -1,8 +1,13 @@
+"""
+CPC V2
+======
+"""
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch import nn
-from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders, SSLImagenetDataLoaders
+from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
+from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
 import pytorch_lightning as pl
 from torch.optim.lr_scheduler import MultiStepLR
 from pl_bolts.models.self_supervised.cpc.cpc_networks import CPCResNet101
@@ -97,7 +102,7 @@ class CPCV2(pl.LightningModule):
         self.info_nce = InfoNCE(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
         if self.online_evaluator:
-            z_dim = c * h* h
+            z_dim = c * h * h
             num_classes = self.dataset.num_classes
             self.non_linear_evaluator = SSLEvaluator(
                 n_input=z_dim,
@@ -221,7 +226,7 @@ class CPCV2(pl.LightningModule):
         elif self.hparams.dataset == 'imagenet128':
             lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
 
-        return [opt] # , [lr_scheduler]
+        return [opt]  # , [lr_scheduler]
 
     def prepare_data(self):
         self.dataset.prepare_data()
@@ -340,7 +345,7 @@ class CPCV2(pl.LightningModule):
         parser.opt_list('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'], tunable=True)
 
         # data
-        parser.add_argument('--data_dir', default=f'/home/waf251/media/falcon_kcgscratch1/datasets', type=str)
+        parser.add_argument('--data_dir', default=f'./', type=str)
         return parser
 
 

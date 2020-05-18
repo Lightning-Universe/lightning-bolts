@@ -116,10 +116,9 @@ class CPCV2LossInfoNCE(nn.Module):
 
 
 class AMDIMLossNCE(nn.Module):
-    '''
-    Input is fixed as r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2.
-    '''
-
+    """
+    Computes the NCE loss across views
+    """
     def __init__(self, tclip=10.):
         super().__init__()
         # construct masks for sampling source features from 5x5 layer
@@ -139,17 +138,19 @@ class AMDIMLossNCE(nn.Module):
         return masks_r5
 
     def nce_loss(self, r_src, r_trg, mask_mat):
-        '''
+        """
         Compute the NCE scores for predicting r_src->r_trg.
+
         Input:
           r_src    : (batch_size, emb_dim)
           r_trg    : (emb_dim, n_batch * w* h) (ie: nb_feat_vectors x embedding_dim)
           mask_mat : (n_batch_gpu, n_batch)
+
         Output:
           raw_scores : (n_batch_gpu, n_locs)
           nce_scores : (n_batch_gpu, n_locs)
           lgt_reg    : scalar
-        '''
+        """
 
         # RKHS = embedding dim
         batch_size, emb_dim = r_src.size()
@@ -256,12 +257,12 @@ class AMDIMLossNCE(nn.Module):
         return masks_r5
 
     def forward(self, r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2):
-        '''
+        """
         Compute nce infomax costs for various combos of source/target layers.
         Compute costs in both directions, i.e. from/to both images (x1, x2).
         rK_x1 are features from source image x1.
         rK_x2 are features from source image x2.
-        '''
+        """
 
         # masks_r5 = self.build_mask_cache(r5_x1)
         masks_r5 = self.masks_r5
@@ -332,9 +333,9 @@ class AMDIMLossNCE(nn.Module):
 
 
 def tanh_clip(x, clip_val=10.):
-    '''
+    """
     soft clip values to the range [-clip_val, +clip_val]
-    '''
+    """
     if clip_val is not None:
         x_clip = clip_val * torch.tanh((1. / clip_val) * x)
     else:

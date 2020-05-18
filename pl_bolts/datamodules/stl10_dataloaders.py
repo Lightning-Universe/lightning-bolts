@@ -32,7 +32,7 @@ class STL10DataLoaders(BoltDataLoaders):
         )
         return loader
 
-    def val_dataloader(self, batch_size,transforms=None):
+    def val_dataloader(self, batch_size, transforms=None):
         if transforms is None:
             transforms = self._default_transforms()
 
@@ -65,7 +65,7 @@ class STL10DataLoaders(BoltDataLoaders):
         )
         return loader
 
-    def val_dataloader_unlabeled(self, batch_size,transforms=None):
+    def val_dataloader_unlabeled(self, batch_size, transforms=None):
         if transforms is None:
             transforms = self._default_transforms()
 

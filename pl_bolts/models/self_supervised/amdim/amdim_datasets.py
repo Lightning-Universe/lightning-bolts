@@ -32,7 +32,6 @@ class AMDIMPretraining():
                                     transform=train_transform)
         return dataset
 
-
     @staticmethod
     def cifar10_val(dataset_root):
         train_transform = amdim_transforms.TransformsC10()
@@ -44,7 +43,6 @@ class AMDIMPretraining():
     def stl_val(dataset_root):
         # VAL COMES FROM CALLING STL_TRAIN
         return None
-
 
     @staticmethod
     def imagenet_val(dataset_root, nb_classes):

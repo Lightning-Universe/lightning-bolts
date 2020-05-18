@@ -7,7 +7,7 @@ import numpy as np
 
 class AMDIMEncoder(nn.Module):
     def __init__(self, dummy_batch, num_channels=3, ndf=64, n_rkhs=512,
-                n_depth=3, encoder_size=32, use_bn=False):
+                 n_depth=3, encoder_size=32, use_bn=False):
         super().__init__()
         # NDF = encoder hidden feat size
         # RKHS = output dim
@@ -186,6 +186,7 @@ class ConvResBlock(nn.Module):
         # run forward pass through the list of ConvResNxN layers
         x_out = self.layer_list(x)
         return x_out
+
 
 class ConvResNxN(nn.Module):
     def __init__(self, n_in, n_out, width, stride, pad, use_bn=False):

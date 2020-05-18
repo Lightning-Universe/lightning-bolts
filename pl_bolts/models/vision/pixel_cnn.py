@@ -23,7 +23,8 @@ class PixelCNN(nn.Module):
         act1 = nn.ReLU()
         c2 = nn.Conv2d(in_channels=self.hidden_channels, out_channels=self.hidden_channels, kernel_size=(1, 3))
         pad = nn.ConstantPad2d((0, 0, 1, 0, 0, 0, 0, 0), 1)
-        c3 = nn.Conv2d(in_channels=self.hidden_channels, out_channels=self.hidden_channels, kernel_size=(2, 1), padding=(0, 1))
+        c3 = nn.Conv2d(in_channels=self.hidden_channels, out_channels=self.hidden_channels,
+                       kernel_size=(2, 1), padding=(0, 1))
         act2 = nn.ReLU()
         c4 = nn.Conv2d(in_channels=self.hidden_channels, out_channels=input_channels, kernel_size=(1, 1))
 

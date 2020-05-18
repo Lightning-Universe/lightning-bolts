@@ -40,9 +40,12 @@ class CPCResNet101(nn.Module):
         sample_batch = self.maxpool(sample_batch)
 
         self.layer1, sample_batch = self._make_layer(sample_batch, LNBottleneck, 64, blocks=3)
-        self.layer2, sample_batch = self._make_layer(sample_batch, LNBottleneck, 128, blocks=4, stride=2, dilate=replace_stride_with_dilation[0])
-        self.layer3, sample_batch = self._make_layer(sample_batch, LNBottleneck, 512, blocks=46, stride=2, dilate=replace_stride_with_dilation[1], expansion=8)
-        self.layer4, sample_batch = self._make_layer(sample_batch, LNBottleneck, 512, blocks=3, stride=2, dilate=replace_stride_with_dilation[2])
+        self.layer2, sample_batch = self._make_layer(sample_batch, LNBottleneck, 128, blocks=4,
+                                                     stride=2, dilate=replace_stride_with_dilation[0])
+        self.layer3, sample_batch = self._make_layer(sample_batch, LNBottleneck, 512, blocks=46,
+                                                     stride=2, dilate=replace_stride_with_dilation[1], expansion=8)
+        self.layer4, sample_batch = self._make_layer(sample_batch, LNBottleneck, 512, blocks=3,
+                                                     stride=2, dilate=replace_stride_with_dilation[2])
         # self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
         for m in self.modules():
@@ -75,15 +78,15 @@ class CPCResNet101(nn.Module):
 
         layers = []
         layer = block(sample_batch, self.inplanes, planes, stride, downsample, self.groups,
-                            self.base_width, previous_dilation, norm_layer, expansion)
+                      self.base_width, previous_dilation, norm_layer, expansion)
 
         sample_batch = layer(sample_batch)
         layers.append(layer)
         self.inplanes = planes * expansion
         for _ in range(1, blocks):
             layer = block(sample_batch, self.inplanes, planes, groups=self.groups,
-                                base_width=self.base_width, dilation=self.dilation,
-                                norm_layer=norm_layer, expansion=expansion)
+                          base_width=self.base_width, dilation=self.dilation,
+                          norm_layer=norm_layer, expansion=expansion)
             sample_batch = layer(sample_batch)
             layers.append(layer)
 
@@ -171,6 +174,7 @@ class LNBottleneck(nn.Module):
 
         return out
 
+
 class BasicBlock(nn.Module):
     expansion = 1
 
@@ -218,6 +222,7 @@ class MaskedConv2d(torch.nn.Module):
         self.conv = torch.nn.Conv2d(in_channels=c, out_channels=c, kernel_size=3)
 
     def forward(self, x):
+
         # pad top and sides so conv only accounts for things above it
         x = F.pad(x, pad=[1, 1, 2, 0])
 

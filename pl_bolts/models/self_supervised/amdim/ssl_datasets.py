@@ -1,5 +1,6 @@
 import numpy as np
 from torchvision.datasets import CIFAR10, VisionDataset, ImageNet
+from torchvision.datasets.imagenet import load_meta_file
 from sklearn.utils import shuffle
 import math
 import os
@@ -38,7 +39,6 @@ class SSLDatasetMixin(VisionDataset):
         val_x = np.stack(val_x)
         train_x = np.stack(train_x)
         return val_x, val_y, train_x, train_y
-
 
     def select_nb_imgs_per_class(self, examples, labels, nb_imgs_in_val):
         """
@@ -85,6 +85,7 @@ class SSLDatasetMixin(VisionDataset):
         y = list(y)
 
         return x, y
+
 
 class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
@@ -218,7 +219,7 @@ class UnlabeledImagenet(ImageNet):
                  num_classes=-1,
                  num_imgs_per_class=-1,
                  num_imgs_per_class_val_split=50,
-                 download=False, **kwargs):
+                 **kwargs):
         """
         Official train set gets split into train, val. (using nb_imgs_per_val_class for each class).
         Official validation becomes test set
@@ -244,10 +245,7 @@ class UnlabeledImagenet(ImageNet):
             split = 'val'
 
         self.split = split
-
-        if download:
-            self.download()
-        wnid_to_classes = self._load_meta_file()[0]
+        wnid_to_classes = load_meta_file(root)[0]
 
         super(ImageNet, self).__init__(self.split_folder, **kwargs)
         self.root = root
@@ -267,7 +265,7 @@ class UnlabeledImagenet(ImageNet):
         if split in ['train', 'test']:
             if num_imgs_per_class != -1:
                 clean_imgs = []
-                cts = {x:0 for x in range(len(self.classes))}
+                cts = {x: 0 for x in range(len(self.classes))}
                 for img_name, idx in self.imgs:
                     if cts[idx] < num_imgs_per_class:
                         clean_imgs.append((img_name, idx))
