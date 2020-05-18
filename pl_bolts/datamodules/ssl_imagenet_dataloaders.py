@@ -10,8 +10,6 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
     def __init__(self,
                  save_path,
                  nb_imgs_per_train_class=-1,
-                 nb_imgs_per_val_class=50,
-                 val_split=5000,
                  num_workers=16):
 
         super().__init__()
@@ -29,19 +27,16 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
         UnlabeledImagenet(self.save_path, split='train', download=True, transform=transform_lib.ToTensor())
         UnlabeledImagenet(self.save_path, split='test', download=True, transform=transform_lib.ToTensor())
 
-    def train_dataloader(self, batch_size, transforms=None, add_normalize=False):
+    def train_dataloader(self, batch_size, num_images_per_class=-1, transforms=None, add_normalize=False):
         if transforms is None:
             transforms = self._default_transforms()
 
         dataset = UnlabeledImagenet(self.save_path,
-                                    nb_imgs_per_train_class=self.nb_imgs_per_train_class,
+                                    num_imgs_per_class=num_images_per_class,
                                     split='train',
                                     transform=transforms)
-
-        train_length = len(dataset)
-        dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
-            dataset_train,
+            dataset,
             batch_size=batch_size,
             shuffle=True,
             num_workers=self.num_workers,
@@ -50,20 +45,16 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
         )
         return loader
 
-    def val_dataloader(self, batch_size, transforms=None, add_normalize=False):
+    def val_dataloader(self, batch_size, num_images_per_class=50, transforms=None, add_normalize=False):
         if transforms is None:
             transforms = self._default_transforms()
 
         dataset = UnlabeledImagenet(self.save_path,
-                                    nb_imgs_per_val_class=self.nb_imgs_per_val_class,
+                                    num_imgs_per_class_val_split=num_images_per_class,
                                     split='val',
                                     transform=transforms)
-
-        dataset = CIFAR10(self.save_path, train=True, download=False, transform=transforms)
-        train_length = len(dataset)
-        _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
-            dataset_val,
+            dataset,
             batch_size=batch_size,
             shuffle=False,
             num_workers=self.num_workers,
@@ -71,11 +62,14 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
         )
         return loader
 
-    def test_dataloader(self, batch_size, transforms=None, add_normalize=False):
+    def test_dataloader(self, batch_size, num_images_per_class, transforms=None, add_normalize=False):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = CIFAR10(self.save_path, train=False, download=False, transform=transforms)
+        dataset = UnlabeledImagenet(self.save_path,
+                                    num_imgs_per_class=num_images_per_class,
+                                    split='test',
+                                    transform=transforms)
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
