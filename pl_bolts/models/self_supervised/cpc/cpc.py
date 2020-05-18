@@ -2,17 +2,15 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch import nn
-from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
+from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders, SSLImagenetDataLoaders
 import pytorch_lightning as pl
 from torch.optim.lr_scheduler import MultiStepLR
 from pl_bolts.models.self_supervised.cpc.cpc_networks import CPCResNet101
 from pl_bolts.models.self_supervised.cpc import cpc_transforms
-from pl_bolts.models.self_supervised.amdim.ssl_datasets import UnlabeledImagenet
 from argparse import ArgumentParser
 from pl_bolts import metrics
 from pl_bolts.models.vision import PixelCNN
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-import os
 
 import math
 
@@ -113,6 +111,11 @@ class CPCV2(pl.LightningModule):
             return CIFAR10DataLoaders(self.hparams.data_dir)
         elif name == 'stl10':
             return STL10DataLoaders(self.hparams.data_dir)
+        elif name == 'imagenet128':
+            return SSLImagenetDataLoaders(self.hparams.data_dir)
+        else:
+            raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
+                                    f'your own \'')
 
     def __compute_final_nb_c(self, patch_size):
         dummy_batch = torch.zeros((2*49, 3, patch_size, patch_size))
@@ -235,11 +238,11 @@ class CPCV2(pl.LightningModule):
             train_transform = stl10_transform.train_transform
 
         elif self.hparams.dataset == 'imagenet128':
-            train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
-            dataset = UnlabeledImagenet(self.hparams.data_dir,
-                                        nb_classes=self.hparams.nb_classes,
-                                        split='train',
-                                        transform=train_transform)
+            train_transform = cpc_transforms.CPCTransformsImageNet128Patches(
+                self.hparams.patch_size,
+                overlap=self.hparams.patch_overlap
+            )
+            train_transform = train_transform.train_transform
 
         loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
@@ -256,16 +259,13 @@ class CPCV2(pl.LightningModule):
             test_transform = stl10_transform.test_transform
 
         if self.hparams.dataset == 'imagenet128':
-            folders = os.listdir(self.hparams.data_dir)
-            val_file
-            train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
-            dataset = UnlabeledImagenet(self.hparams.data_dir,
-                                        nb_classes=self.hparams.nb_classes,
-                                        split='val',
-                                        transform=train_transform)
+            test_transform = cpc_transforms.CPCTransformsImageNet128Patches(
+                self.hparams.patch_size,
+                overlap=self.hparams.patch_overlap
+            )
+            test_transform = test_transform.test_transform
 
         loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
-
         return loader
 
     @staticmethod
