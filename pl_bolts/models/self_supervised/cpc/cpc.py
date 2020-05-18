@@ -239,11 +239,11 @@ class CPCV2(pl.LightningModule):
             train_transform = stl10_transform.train_transform
 
         elif self.hparams.dataset == 'imagenet128':
-            train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
-            dataset = UnlabeledImagenet(self.hparams.data_dir,
-                                        nb_classes=self.hparams.nb_classes,
-                                        split='train',
-                                        transform=train_transform)
+            train_transform = cpc_transforms.CPCTransformsImageNet128Patches(
+                self.hparams.patch_size,
+                overlap=self.hparams.patch_overlap
+            )
+            train_transform = train_transform.train_transform
 
         loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
@@ -260,14 +260,13 @@ class CPCV2(pl.LightningModule):
             test_transform = stl10_transform.test_transform
 
         if self.hparams.dataset == 'imagenet128':
-            train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
-            dataset = UnlabeledImagenet(self.hparams.data_dir,
-                                        nb_classes=self.hparams.nb_classes,
-                                        split='val',
-                                        transform=train_transform)
+            test_transform = cpc_transforms.CPCTransformsImageNet128Patches(
+                self.hparams.patch_size,
+                overlap=self.hparams.patch_overlap
+            )
+            test_transform = test_transform.test_transform
 
         loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
-
         return loader
 
     @staticmethod
