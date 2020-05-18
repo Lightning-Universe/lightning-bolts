@@ -180,7 +180,6 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
         return final_batches_x, final_batches_y
 
-
     def __generate_half_labeled_batches(self, smaller_set_X, smaller_set_Y,
                                         larger_set_X, larger_set_Y,
                                         batch_size):
@@ -215,17 +214,22 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
 class UnlabeledImagenet(ImageNet):
 
-    def __init__(self, root, split='train', nb_imgs_per_val_class=50, nb_classes=-1, nb_imgs_per_class=-1, download=False, **kwargs):
+    def __init__(self, root, split='train',
+                 num_classes=-1,
+                 num_imgs_per_class=-1,
+                 num_imgs_per_class_val_split=50,
+                 download=False, **kwargs):
         """
         Official train set gets split into train, val. (using nb_imgs_per_val_class for each class).
         Official validation becomes test set
 
         Within each class, we further allow limiting the number of samples per class (for semi-sup lng)
 
-        :param root:
+        :param root: path of dataset
         :param split:
-        :param nb_imgs_per_val_class:
-        :param nb_imgs_per_class:
+        :param num_classes: Sets the limit of classes
+        :param num_imgs_per_class: Limits the number of images per class
+        :param num_imgs_per_class_val_split: How many images per class to generate the val split
         :param download:
         :param kwargs:
         """
@@ -253,28 +257,29 @@ class UnlabeledImagenet(ImageNet):
 
         # partition train set into [train, val]
         if split == 'train':
-            train, val = self.partition_train_set(self.imgs, nb_imgs_per_val_class)
+            train, val = self.partition_train_set(self.imgs, num_imgs_per_class_val_split)
             if original_split == 'train':
                 self.imgs = train
             if original_split == 'val':
                 self.imgs = val
 
-        # limit the number of images per class
-        if nb_imgs_per_class != -1:
-            clean_imgs = []
-            cts = {x:0 for x in range(len(self.classes))}
-            for img_name, idx in self.imgs:
-                if cts[idx] < nb_imgs_per_class:
-                    clean_imgs.append((img_name, idx))
-                    cts[idx] += 1
+        # limit the number of images in train or test set since the limit was already applied to the val set
+        if split in ['train', 'test']:
+            if num_imgs_per_class != -1:
+                clean_imgs = []
+                cts = {x:0 for x in range(len(self.classes))}
+                for img_name, idx in self.imgs:
+                    if cts[idx] < num_imgs_per_class:
+                        clean_imgs.append((img_name, idx))
+                        cts[idx] += 1
 
-            self.imgs = clean_imgs
+                self.imgs = clean_imgs
 
         # limit the number of classes
-        if nb_classes != -1:
+        if num_classes != -1:
             # choose the classes at random (but deterministic)
-            ok_classes = shuffle(list(range(nb_classes)), random_state=1234)
-            ok_classes = ok_classes[:nb_classes]
+            ok_classes = shuffle(list(range(num_classes)), random_state=1234)
+            ok_classes = ok_classes[:num_classes]
             ok_classes = set(ok_classes)
 
             clean_imgs = []
@@ -300,8 +305,6 @@ class UnlabeledImagenet(ImageNet):
         # update the root data
         self.samples = self.imgs
         self.targets = [s[1] for s in self.imgs]
-
-        print('samples: ', len(self.samples))
 
     def partition_train_set(self, imgs, nb_imgs_in_val):
         val = []
