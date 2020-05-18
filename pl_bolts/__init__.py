@@ -44,7 +44,13 @@ if __LIGHTNING_BOLT_SETUP__:
 else:
 
     from pl_bolts.models.mnist_pl_module import LitMNISTModel
+    from pl_bolts import models, metrics, loggers, callbacks, datamodules, transforms
 
     __all__ = [
-        'LitMNISTModel'
+        'LitMNISTModel',
+        'models',
+        'metrics',
+        'loggers',
+        'callbacks',
+        'datamodules'
     ]
