@@ -218,7 +218,7 @@ class UnlabeledImagenet(ImageNet):
                  num_classes=-1,
                  num_imgs_per_class=-1,
                  num_imgs_per_class_val_split=50,
-                 download=False, **kwargs):
+                 **kwargs):
         """
         Official train set gets split into train, val. (using nb_imgs_per_val_class for each class).
         Official validation becomes test set
@@ -244,9 +244,6 @@ class UnlabeledImagenet(ImageNet):
             split = 'val'
 
         self.split = split
-
-        if download:
-            self.download()
         wnid_to_classes = self._load_meta_file()[0]
 
         super(ImageNet, self).__init__(self.split_folder, **kwargs)
