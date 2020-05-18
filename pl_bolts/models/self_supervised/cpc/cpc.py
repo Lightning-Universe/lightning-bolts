@@ -6,7 +6,8 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch import nn
-from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders, SSLImagenetDataLoaders
+from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
+from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
 import pytorch_lightning as pl
 from torch.optim.lr_scheduler import MultiStepLR
 from pl_bolts.models.self_supervised.cpc.cpc_networks import CPCResNet101
