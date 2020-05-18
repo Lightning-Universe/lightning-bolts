@@ -12,6 +12,7 @@ from argparse import ArgumentParser
 from pl_bolts import metrics
 from pl_bolts.models.vision import PixelCNN
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
+import os
 
 import math
 
@@ -255,6 +256,8 @@ class CPCV2(pl.LightningModule):
             test_transform = stl10_transform.test_transform
 
         if self.hparams.dataset == 'imagenet128':
+            folders = os.listdir(self.hparams.data_dir)
+            val_file
             train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
             dataset = UnlabeledImagenet(self.hparams.data_dir,
                                         nb_classes=self.hparams.nb_classes,
@@ -282,11 +285,8 @@ class CPCV2(pl.LightningModule):
             'nb_classes': 10,
             'patch_overlap': 8 // 2,
             'lr_options': [
-                # 1e-4,
-                # 5e-5,
-                # 1e-5,
+                1e-5,
                 2e-5
-                # 1e-6,
             ]
         }
 
