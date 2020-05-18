@@ -257,7 +257,6 @@ class CPCV2(pl.LightningModule):
 
         if self.hparams.dataset == 'imagenet128':
             folders = os.listdir(self.hparams.data_dir)
-            val_file
             train_transform = cpc_transforms.CPCTransformsImageNet128Patches(self.hparams.patch_size, overlap=self.hparams.patch_overlap)
             dataset = UnlabeledImagenet(self.hparams.data_dir,
                                         nb_classes=self.hparams.nb_classes,
