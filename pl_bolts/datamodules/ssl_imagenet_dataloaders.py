@@ -29,8 +29,8 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
                                     f'folder contains a subfolder with {split} in the name')
 
     def prepare_data(self):
-        UnlabeledImagenet(self.data_dir, split='train', transform=transform_lib.ToTensor())
-        UnlabeledImagenet(self.data_dir, split='test', transform=transform_lib.ToTensor())
+        # imagenet cannot be downloaded... must provide path to folder with the train/val splits
+        pass
 
     def train_dataloader(self, batch_size, num_images_per_class=-1, transforms=None, add_normalize=False):
         if transforms is None:
