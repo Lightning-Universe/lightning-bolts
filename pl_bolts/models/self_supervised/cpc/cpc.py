@@ -60,26 +60,6 @@ class InfoNCE(pl.LightningModule):
         loss = nn.functional.cross_entropy(logits, labels)
         return loss
 
-    def compute_loss_w(self, context, targets, steps_to_ignore, steps_to_predict):
-
-        b, c, h, w = targets.shape
-        targets = targets.permute(0, 2, 3, 1).contiguous().reshape([-1, c])
-        loss = 0.
-        for i in range(steps_to_ignore, steps_to_predict):
-            preds = self.pred_cnn(context)
-            preds = preds[:, :, :, :-(i+1)] * self.embed_scale
-            preds = preds.permute(0, 2, 3, 1).contiguous().reshape([-1, self.target_dim])
-            logits = torch.matmul(preds, targets.transpose(-1, -2))
-            n = b * h * (w - i - 1)
-
-            b1 = torch.arange(n) // ((w - i - 1) * h)
-            c1 = torch.arange(n) % ((w - i - 1) * h)
-            labels = b1 * h * w + (i + 1) * h + c1
-            labels = labels.type_as(logits).long()
-
-            loss += nn.functional.cross_entropy(logits, labels)
-        return loss
-
     def forward(self, Z):
         losses = []
 
@@ -87,6 +67,7 @@ class InfoNCE(pl.LightningModule):
         targets = self.target_cnn(Z)
 
         _, _, h, w = Z.shape
+
         # future prediction
         preds = self.pred_cnn(context)
         for steps_to_ignore in range(h-1):
@@ -301,10 +282,10 @@ class CPCV2(pl.LightningModule):
             'nb_classes': 10,
             'patch_overlap': 8 // 2,
             'lr_options': [
-                1e-4,
-                2e-3,
-                4e-3,
-                1e-2,
+                # 1e-4,
+                5e-5,
+                1e-5,
+                1e-6,
             ]
         }
 
