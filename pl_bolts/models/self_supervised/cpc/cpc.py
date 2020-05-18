@@ -11,7 +11,6 @@ from argparse import ArgumentParser
 from pl_bolts import metrics
 from pl_bolts.models.vision import PixelCNN
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-import os
 
 import math
 
