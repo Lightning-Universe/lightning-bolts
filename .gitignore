@@ -142,3 +142,5 @@ datasets
 simclr.py
 .DS_Store
 .*_submit.py
+
+source/api/
