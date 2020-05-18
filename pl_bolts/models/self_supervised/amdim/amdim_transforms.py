@@ -38,6 +38,7 @@ class TransformsC10:
         out2 = self.train_transform(inp)
         return out1, out2
 
+
 class TransformsSTL10:
     '''
     Apply the same input transform twice, with independent randomness.
@@ -57,11 +58,11 @@ class TransformsSTL10:
 
         self.test_transform = transforms.Compose(
             [
-            transforms.Resize(70, interpolation=3),
-            transforms.CenterCrop(64),
-            transforms.ToTensor(),
-            normalize
-        ])
+                transforms.Resize(70, interpolation=3),
+                transforms.CenterCrop(64),
+                transforms.ToTensor(),
+                normalize
+            ])
 
         self.train_transform = transforms.Compose([
             rand_crop,
@@ -76,6 +77,7 @@ class TransformsSTL10:
         out1 = self.train_transform(inp)
         out2 = self.train_transform(inp)
         return out1, out2
+
 
 class TransformsImageNet128:
     '''

@@ -39,7 +39,6 @@ class SSLDatasetMixin(VisionDataset):
         train_x = np.stack(train_x)
         return val_x, val_y, train_x, train_y
 
-
     def select_nb_imgs_per_class(self, examples, labels, nb_imgs_in_val):
         """
         Splits a dataset into two parts.
@@ -85,6 +84,7 @@ class SSLDatasetMixin(VisionDataset):
         y = list(y)
 
         return x, y
+
 
 class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
@@ -267,7 +267,7 @@ class UnlabeledImagenet(ImageNet):
         if split in ['train', 'test']:
             if num_imgs_per_class != -1:
                 clean_imgs = []
-                cts = {x:0 for x in range(len(self.classes))}
+                cts = {x: 0 for x in range(len(self.classes))}
                 for img_name, idx in self.imgs:
                     if cts[idx] < num_imgs_per_class:
                         clean_imgs.append((img_name, idx))

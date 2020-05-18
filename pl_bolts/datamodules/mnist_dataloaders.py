@@ -37,7 +37,7 @@ class MNISTDataLoaders(BoltDataLoaders):
         )
         return loader
 
-    def val_dataloader(self, batch_size,transforms=None, use_default_normalize=True):
+    def val_dataloader(self, batch_size, transforms=None, use_default_normalize=True):
         if transforms is None:
             transforms = self._default_transforms()
 

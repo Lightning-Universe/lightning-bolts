@@ -302,7 +302,7 @@ class AMDIM(pl.LightningModule):
         parser.add_argument('--learning_rate', type=float, default=0.0002)
 
         # data
-        parser.add_argument('--data_dir', default=os.getcwd(),type=str)
+        parser.add_argument('--data_dir', default=os.getcwd(), type=str)
         return parser
 
 
@@ -316,4 +316,3 @@ if __name__ == '__main__':
     model = AMDIM(args)
     trainer = pl.Trainer(fast_dev_run=True)
     trainer.fit(model)
-

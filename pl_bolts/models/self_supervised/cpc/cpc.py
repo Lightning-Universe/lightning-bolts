@@ -97,7 +97,7 @@ class CPCV2(pl.LightningModule):
         self.info_nce = InfoNCE(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
         if self.online_evaluator:
-            z_dim = c * h* h
+            z_dim = c * h * h
             num_classes = self.dataset.num_classes
             self.non_linear_evaluator = SSLEvaluator(
                 n_input=z_dim,
@@ -221,7 +221,7 @@ class CPCV2(pl.LightningModule):
         elif self.hparams.dataset == 'imagenet128':
             lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
 
-        return [opt] # , [lr_scheduler]
+        return [opt]  # , [lr_scheduler]
 
     def prepare_data(self):
         self.dataset.prepare_data()
