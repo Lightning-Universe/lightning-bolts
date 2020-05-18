@@ -284,7 +284,8 @@ class CPCV2(pl.LightningModule):
             'lr_options': [
                 # 1e-4,
                 # 5e-5,
-                1e-5,
+                # 1e-5,
+                2e-5
                 # 1e-6,
             ]
         }
