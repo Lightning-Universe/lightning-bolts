@@ -26,13 +26,13 @@ class CPCTransformsCIFAR10:
             rnd_gray,
             transforms.ToTensor(),
             normalize,
-            Patchify(patch_size=patch_size, overlap_size=patch_size//2),
+            Patchify(patch_size=patch_size, overlap_size=patch_size // 2),
         ])
         # transform for testing
         self.test_transform = transforms.Compose([
             transforms.ToTensor(),
             normalize,
-            Patchify(patch_size=patch_size, overlap_size=patch_size//2),
+            Patchify(patch_size=patch_size, overlap_size=patch_size // 2),
         ])
 
     def __call__(self, inp):
@@ -85,6 +85,7 @@ class CPCTransformsImageNet128Patches:
     '''
     ImageNet dataset, for use with 128x128 full image encoder.
     '''
+
     def __init__(self, patch_size, overlap):
         # image augmentation functions
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)

@@ -10,6 +10,7 @@ class AMDIMPretraining():
     """"
     For pretraining we use the train transform for both train and val.
     """
+
     @staticmethod
     def cifar10_train(dataset_root):
         train_transform = amdim_transforms.TransformsC10()
@@ -60,6 +61,7 @@ class AMDIMPatchesPretraining():
     """"
     For pretraining we use the train transform for both train and val.
     """
+
     @staticmethod
     def cifar10_train(dataset_root, patch_size, patch_overlap):
         train_transform = amdim_transforms.TransformsC10Patches(

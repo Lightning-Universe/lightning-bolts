@@ -222,7 +222,6 @@ class MaskedConv2d(torch.nn.Module):
         self.conv = torch.nn.Conv2d(in_channels=c, out_channels=c, kernel_size=3)
 
     def forward(self, x):
-
         # pad top and sides so conv only accounts for things above it
         x = F.pad(x, pad=[1, 1, 2, 0])
 

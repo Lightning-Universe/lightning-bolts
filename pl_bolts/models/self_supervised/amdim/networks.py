@@ -147,7 +147,7 @@ class Conv3x3(nn.Module):
     def __init__(self, n_in, n_out, n_kern, n_stride, n_pad,
                  use_bn=True, pad_mode='constant'):
         super(Conv3x3, self).__init__()
-        assert(pad_mode in ['constant', 'reflect'])
+        assert (pad_mode in ['constant', 'reflect'])
         self.n_pad = (n_pad, n_pad, n_pad, n_pad)
         self.pad_mode = pad_mode
         self.conv = nn.Conv2d(n_in, n_out, n_kern, n_stride, 0,
@@ -252,7 +252,7 @@ class NopNet(nn.Module):
 
     def forward(self, x):
         if self.norm_dim is not None:
-            x_norms = torch.sum(x**2., dim=self.norm_dim, keepdim=True)
+            x_norms = torch.sum(x ** 2., dim=self.norm_dim, keepdim=True)
             x_norms = torch.sqrt(x_norms + 1e-6)
             x = x / x_norms
         return x

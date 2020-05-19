@@ -9,7 +9,6 @@ import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
-from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from torch import nn
 from torch.optim.lr_scheduler import MultiStepLR
 
@@ -17,6 +16,7 @@ from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
+from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 from pl_bolts.models.vision import PixelCNN
 
@@ -46,7 +46,7 @@ class InfoNCE(pl.LightningModule):
 
         # select the future (south) targets to predict
         # selects all of the ones south of the current source
-        preds_i = preds[:, :, :-(i+1), :] * self.embed_scale
+        preds_i = preds[:, :, :-(i + 1), :] * self.embed_scale
 
         # (b, c, h, w) -> (b*w*h, c) (all features)
         # this ordering matches the targets
@@ -75,7 +75,7 @@ class InfoNCE(pl.LightningModule):
 
         # future prediction
         preds = self.pred_cnn(context)
-        for steps_to_ignore in range(h-1):
+        for steps_to_ignore in range(h - 1):
             for i in range(steps_to_ignore + 1, h):
                 loss = self.compute_loss_h(targets, preds, i)
                 if not torch.isnan(loss):
@@ -124,7 +124,7 @@ class CPCV2(pl.LightningModule):
                                     f'your own \'')
 
     def __compute_final_nb_c(self, patch_size):
-        dummy_batch = torch.zeros((2*49, 3, patch_size, patch_size))
+        dummy_batch = torch.zeros((2 * 49, 3, patch_size, patch_size))
         dummy_batch = self.encoder(dummy_batch)
         dummy_batch = self.__recover_z_shape(dummy_batch, 2)
         b, c, h, w = dummy_batch.size()

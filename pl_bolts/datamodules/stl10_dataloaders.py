@@ -1,6 +1,7 @@
+from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
 from torchvision.datasets import STL10
-from torch.utils.data import DataLoader, random_split
+
 from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 

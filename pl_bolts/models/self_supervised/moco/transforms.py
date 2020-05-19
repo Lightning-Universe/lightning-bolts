@@ -13,6 +13,7 @@ class Moco2CIFAR10Transforms:
     https://arxiv.org/pdf/2003.04297.pdf
 
     """
+
     def __init__(self):
         # image augmentation functions
         self.train_transform = transforms.Compose([
@@ -50,6 +51,7 @@ class Moco2STL10Transforms:
     https://arxiv.org/pdf/2003.04297.pdf
 
     """
+
     def __init__(self):
         # image augmentation functions
         self.train_augmentation = transforms.Compose([
@@ -87,6 +89,7 @@ class Moco2Imagenet128Transforms:
     https://arxiv.org/pdf/2003.04297.pdf
 
     """
+
     def __init__(self):
         # image augmentation functions
         self.train_transform = transforms.Compose([

@@ -84,6 +84,7 @@ class TransformsImageNet128:
     '''
     ImageNet dataset, for use with 128x128 full image encoder.
     '''
+
     def __init__(self):
         # image augmentation functions
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)

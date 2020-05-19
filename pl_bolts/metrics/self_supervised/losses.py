@@ -1,6 +1,6 @@
+import numpy as np
 import torch
 from torch import nn
-import numpy as np
 
 
 class CPCV2LossInfoNCE(nn.Module):
@@ -88,14 +88,14 @@ class CPCV2LossInfoNCE(nn.Module):
 
         Z_neg = Z.permute(1, 0, 2, 3).reshape(emb_dim, -1)
 
-        for i in range(0, h-1):
+        for i in range(0, h - 1):
             for j in range(0, w):
                 cij = C[:, :, i, j]
 
                 # make predictions far and non-overlapping
                 min_k_dist = 2
 
-                for k in range(i+min_k_dist, h):
+                for k in range(i + min_k_dist, h):
                     Wk = W_list[str(k)]
 
                     z_hat_ik_j = Wk(cij)
@@ -119,6 +119,7 @@ class AMDIMLossNCE(nn.Module):
     """
     Computes the NCE loss across views
     """
+
     def __init__(self, tclip=10.):
         super().__init__()
         # construct masks for sampling source features from 5x5 layer
@@ -175,8 +176,8 @@ class AMDIMLossNCE(nn.Module):
         # -----------------------
         # STABILITY TRICKS
         # trick 1: weighted regularization term
-        raw_scores = raw_scores / emb_dim**0.5
-        lgt_reg = 5e-2 * (raw_scores**2).mean()
+        raw_scores = raw_scores / emb_dim ** 0.5
+        lgt_reg = 5e-2 * (raw_scores ** 2).mean()
 
         # trick 2: tanh clip
         raw_scores = tanh_clip(raw_scores, clip_val=self.tclip).float()
