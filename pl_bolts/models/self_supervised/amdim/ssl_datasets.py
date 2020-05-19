@@ -336,6 +336,7 @@ class UnlabeledImagenet(ImageNet):
                                     'http://www.image-net.org/challenges/LSVRC/2012/downloads')
 
         parse_devkit_archive(devkit_dir)
+        print(f'meta.bin generated at {devkit_dir}/meta.bin')
 
 
 def parse_devkit_archive(root, file=None):
