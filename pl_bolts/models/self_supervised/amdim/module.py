@@ -8,7 +8,7 @@ from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
 
 from pl_bolts.metrics.self_supervised.losses import AMDIMLossNCE
-from pl_bolts.models.self_supervised.amdim import AMDIMEncoder
+from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 
 
