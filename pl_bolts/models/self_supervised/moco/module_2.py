@@ -1,8 +1,10 @@
 import pytorch_lightning as pl
 import torch
 from torch import nn
+import torch.nn.functional as F
 
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
+from pl_bolts.metrics import precision_at_k
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
 from pl_bolts.models.self_supervised.moco.transforms import \
     Moco2Imagenet128Transforms, Moco2CIFAR10Transforms, Moco2STL10Transforms
@@ -28,6 +30,21 @@ class Moco(pl.LightningModule):
                                     f'your own \'')
 
         return dataloaders
+
+    def training_step(self, batch, batch_idx):
+        (img_1, img_2), _ = batch
+
+        output, target = self.model(im_q=img_1, im_k=img_2)
+        loss = F.cross_entropy(output, target)
+
+        acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))
+
+        log = {
+            'train_loss': loss,
+            'train_acc1': acc1,
+            'train_acc5': acc5
+        }
+        return {'loss': loss, 'log': log}
 
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(self.parameters(), self.hparams.lr,
