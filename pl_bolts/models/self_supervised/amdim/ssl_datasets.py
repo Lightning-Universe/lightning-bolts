@@ -335,7 +335,7 @@ class UnlabeledImagenet(ImageNet):
                                     'ILSVRC2012_devkit_t12.tar.gz. Download from here:'
                                     'http://www.image-net.org/challenges/LSVRC/2012/downloads')
 
-        parse_devkit_archive(devkit_path)
+        parse_devkit_archive(devkit_dir)
 
 
 def parse_devkit_archive(root, file=None):
