@@ -37,7 +37,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
         for split in ['train', 'val']:
             files = os.listdir(os.path.join(self.data_dir, split))
             if 'meta.bin' not in files:
-                m = f"""
+                raise FileNotFoundError("""
                 no meta.bin present. Imagenet is no longer automatically downloaded by PyTorch.
                 To get imagenet:
                 1. download yourself from http://www.image-net.org/challenges/LSVRC/2012/downloads
@@ -50,8 +50,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
                 from pl_bolts.models.self_supervised.amdim.ssl_datasets import UnlabeledImagenet
                 path = '/path/to/folder/with/ILSVRC2012_devkit_t12.tar.gz/'
                 UnlabeledImagenet.generate_meta_bins(path)
-                """
-                raise FileNotFoundError(m)
+                """)
 
     def train_dataloader(self, batch_size, num_images_per_class=-1, transforms=None, add_normalize=False):
         if transforms is None:

@@ -1,3 +1,4 @@
 pytorch-lightning>=0.7.1
 torchvision>=0.5
 scikit-learn>=0.23
+test_tube

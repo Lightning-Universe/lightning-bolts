@@ -346,7 +346,7 @@ class CPCV2(pl.LightningModule):
         parser.opt_list('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'], tunable=True)
 
         # data
-        parser.add_argument('--data_dir', default=f'./', type=str)
+        parser.add_argument('--data_dir', default='.', type=str)
         return parser
 
 
