@@ -12,5 +12,5 @@ Submodules
 
 .. toctree::
 
-   pl_bolts.models.autoencoders.basic_ae.basic_ae_pl_module
+   pl_bolts.models.autoencoders.basic_ae.basic_ae_module
    pl_bolts.models.autoencoders.basic_ae.components
