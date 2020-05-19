@@ -19,7 +19,10 @@ class MocoV2(pl.LightningModule):
     def __init__(self,
                  base_encoder,
                  emb_dim=128,
-                 num_negatives=65536, encoder_momentum=0.999, softmax_temperature=0.07, use_mlp=False):
+                 num_negatives=65536,
+                 encoder_momentum=0.999,
+                 softmax_temperature=0.07,
+                 use_mlp=False):
         super().__init__()
         """
         emb_dim: feature dimension (default: 128)
