@@ -1,10 +1,11 @@
-import torch
-from torch import nn
 import pytorch_lightning as pl
-from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
-from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
+import torch
 from pl_bolts.models.self_supervised.moco.moco_transforms import \
     Moco2Imagenet128Transforms, Moco2CIFAR10Transforms, Moco2STL10Transforms
+from torch import nn
+
+from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
+from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
 
 
 class Moco(pl.LightningModule):

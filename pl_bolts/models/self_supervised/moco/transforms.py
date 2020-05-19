@@ -1,8 +1,10 @@
+import random
+
+from PIL import ImageFilter
 from torchvision import transforms
+
 from pl_bolts.transforms.dataset_normalizations import \
     imagenet_normalization, cifar10_normalization, stl10_normalization
-from PIL import ImageFilter
-import random
 
 
 class Moco2CIFAR10Transforms:

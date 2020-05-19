@@ -1,13 +1,15 @@
+import os
 from argparse import ArgumentParser
+
+import pytorch_lightning as pl
 import torch
 import torch.optim as optim
-from torch.utils.data import DataLoader
-import pytorch_lightning as pl
 from torch.optim.lr_scheduler import MultiStepLR
-from pl_bolts.models.self_supervised.amdim import AMDIMEncoder
+from torch.utils.data import DataLoader
+
 from pl_bolts.metrics.self_supervised.losses import AMDIMLossNCE
+from pl_bolts.models.self_supervised.amdim import AMDIMEncoder
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
-import os
 
 
 class AMDIM(pl.LightningModule):
