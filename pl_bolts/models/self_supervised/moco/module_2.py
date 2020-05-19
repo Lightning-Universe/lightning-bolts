@@ -1,6 +1,6 @@
 import pytorch_lightning as pl
 import torch
-from pl_bolts.models.self_supervised.moco.moco_transforms import \
+from pl_bolts.models.self_supervised.moco.transforms import \
     Moco2Imagenet128Transforms, Moco2CIFAR10Transforms, Moco2STL10Transforms
 from torch import nn
 

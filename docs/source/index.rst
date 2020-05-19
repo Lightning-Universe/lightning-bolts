@@ -17,10 +17,24 @@ PyTorchLightning-Bolts documentation
 
 .. toctree::
    :maxdepth: 2
-   :name: api
-   :caption: Python API
+   :name: callbacks
+   :caption: Callbacks
+
+   callbacks
+
+.. toctree::
+   :maxdepth: 2
+   :name: datamodules
+   :caption: DataModules
 
    datamodules
+
+.. toctree::
+   :maxdepth: 2
+   :name: loggers
+   :caption: Loggers
+
+   loggers
 
 .. toctree::
    :maxdepth: 2
@@ -31,17 +45,10 @@ PyTorchLightning-Bolts documentation
 
 .. toctree::
    :maxdepth: 2
-   :name: callbacks
-   :caption: Callbacks
+   :name: transforms
+   :caption: Transforms
 
-   callbacks
-
-.. toctree::
-   :maxdepth: 2
-   :name: loggers
-   :caption: Loggers
-
-   loggers
+   transforms
 
 
 Indices and tables

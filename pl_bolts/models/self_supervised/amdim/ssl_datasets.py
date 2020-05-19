@@ -346,8 +346,10 @@ class UnlabeledImagenet(ImageNet):
 
 
 def parse_devkit_archive(root, file=None):
-    """Parse the devkit archive of the ImageNet2012 classification dataset and save
+    """
+    Parse the devkit archive of the ImageNet2012 classification dataset and save
     the meta information in a binary file.
+
     Args:
         root (str): Root directory containing the devkit archive
         file (str, optional): Name of devkit archive. Defaults to

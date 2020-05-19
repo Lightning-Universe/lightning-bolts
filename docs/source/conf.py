@@ -131,6 +131,7 @@ exclude_patterns = [
     'api/pl_bolts.rst',
     'api/modules.rst',
     'api/pl_bolts.datamodules.*',
+    'api/pl_bolts.metrics.*'
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
