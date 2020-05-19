@@ -19,7 +19,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
     def num_classes(self):
         return 1000
 
-    def _resolve_data_subfolder(self, data_dir, split):
+    def _verify_splits(self, data_dir, split):
         dirs = os.listdir(data_dir)
 
         if split not in dirs:
@@ -28,24 +28,27 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
 
     def prepare_data(self):
         # imagenet cannot be downloaded... must provide path to folder with the train/val splits
-        train_dir = self._resolve_data_subfolder(self.data_dir, 'train')
-        files = os.listdir(train_dir)
-        if 'meta.bin' not in files:
-            m = """
-            no meta.bin present. Imagenet is no longer automatically downloaded by PyTorch.
-            To get imagenet:
-            1. download yourself from http://www.image-net.org/challenges/LSVRC/2012/downloads
-            2. download the devkit (ILSVRC2012_devkit_t12.tar.gz)
-            3. generate the meta.bin file using the devkit
-            4. copy the meta.bin file into both train and val split folders
-            
-            To generate the meta.bin do the following:
-            
-            from pl_bolts.models.self_supervised.amdim.ssl_datasets import UnlabeledImagenet
-            path = '/path/to/folder/with/ILSVRC2012_devkit_t12.tar.gz/'
-            UnlabeledImagenet.generate_meta_bins(path)    
-            """
-            raise FileNotFoundError(m)
+        self._verify_splits(self.data_dir, 'train')
+        self._verify_splits(self.data_dir, 'val')
+
+        for split in ['train', 'val']:
+            files = os.listdir(os.path.join(self.data_dir, split))
+            if 'meta.bin' not in files:
+                m = f"""
+                no meta.bin present. Imagenet is no longer automatically downloaded by PyTorch.
+                To get imagenet:
+                1. download yourself from http://www.image-net.org/challenges/LSVRC/2012/downloads
+                2. download the devkit (ILSVRC2012_devkit_t12.tar.gz)
+                3. generate the meta.bin file using the devkit
+                4. copy the meta.bin file into both train and val split folders
+                
+                To generate the meta.bin do the following:
+                
+                from pl_bolts.models.self_supervised.amdim.ssl_datasets import UnlabeledImagenet
+                path = '/path/to/folder/with/ILSVRC2012_devkit_t12.tar.gz/'
+                UnlabeledImagenet.generate_meta_bins(path)    
+                """
+                raise FileNotFoundError(m)
 
     def train_dataloader(self, batch_size, num_images_per_class=-1, transforms=None, add_normalize=False):
         if transforms is None:
