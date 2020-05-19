@@ -27,11 +27,12 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
                                     f'folder contains a subfolder named {split}')
 
     def prepare_data(self):
-        # imagenet cannot be downloaded... must provide path to folder with the train/val splits
+        # imagenet cannot be downloaded... must provide path to folder with the train/val/test splits
         self._verify_splits(self.data_dir, 'train')
         self._verify_splits(self.data_dir, 'val')
+        self._verify_splits(self.data_dir, 'test')
 
-        for split in ['train', 'val']:
+        for split in ['train', 'val', 'test']:
             files = os.listdir(os.path.join(self.data_dir, split))
             if 'meta.bin' not in files:
                 m = f"""
