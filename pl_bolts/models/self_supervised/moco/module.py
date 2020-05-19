@@ -6,6 +6,8 @@ import pytorch_lightning as pl
 import torch
 from torch import nn
 import torch.nn.functional as F
+import torchvision
+from argparse import Namespace
 
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from pl_bolts.metrics import precision_at_k
@@ -17,7 +19,7 @@ from pl_bolts.models.self_supervised.moco.transforms import \
 class MocoV2(pl.LightningModule):
 
     def __init__(self,
-                 base_encoder,
+                 base_encoder='resnet50',
                  emb_dim=128,
                  num_negatives=65536,
                  encoder_momentum=0.999,
@@ -31,22 +33,22 @@ class MocoV2(pl.LightningModule):
         softmax_temperature: softmax temperature (default: 0.07)
         """
         super().__init__()
-        self.hparams = {
+        self.hparams = Namespace(**{
             'emb_dim': emb_dim,
             'num_negatives': num_negatives,
             'encoder_momentum': encoder_momentum,
             'softmax_temperature': softmax_temperature,
             'use_mlp': use_mlp
-        }
+        })
 
         self.K = num_negatives
         self.m = encoder_momentum
         self.T = softmax_temperature
+        self.emb_dim = emb_dim
 
         # create the encoders
         # num_classes is the output fc dimension
-        self.encoder_q = base_encoder(num_classes=emb_dim)
-        self.encoder_k = base_encoder(num_classes=emb_dim)
+        self.encoder_q, self.encoder_k = self.init_encoders(base_encoder)
 
         if use_mlp:  # hack: brute-force replacement
             dim_mlp = self.encoder_q.fc.weight.shape[1]
@@ -62,6 +64,17 @@ class MocoV2(pl.LightningModule):
         self.queue = nn.functional.normalize(self.queue, dim=0)
 
         self.register_buffer("queue_ptr", torch.zeros(1, dtype=torch.long))
+
+    def init_encoders(self, base_encoder):
+        """
+        Override to add your own encoders
+        """
+
+        template_model = getattr(torchvision.models, base_encoder)
+        encoder_q = template_model(num_classes=self.emb_dim)
+        encoder_k = template_model(num_classes=self.emb_dim)
+
+        return encoder_q, encoder_k
 
     @torch.no_grad()
     def _momentum_update_key_encoder(self):
@@ -209,8 +222,11 @@ class MocoV2(pl.LightningModule):
         }
         return {'loss': loss, 'log': log}
 
+    def validation_step(self, batch, batch_idx):
+        pass
+
     def configure_optimizers(self):
-        optimizer = torch.optim.SGD(self.parameters(), self.hparams.lr,
+        optimizer = torch.optim.SGD(self.parameters(), self.lr,
                                     momentum=self.hparams.momentum,
                                     weight_decay=self.hparams.weight_decay)
         return optimizer
@@ -263,3 +279,7 @@ def concat_all_gather(tensor):
 
 if __name__ == '__main__':
     model = MocoV2()
+
+    trainer = pl.Trainer(fast_dev_run=True)
+    trainer.fit(model)
+    print('')
