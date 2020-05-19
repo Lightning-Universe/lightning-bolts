@@ -29,6 +29,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
                                     f'folder contains a subfolder with {split} in the name')
 
     def prepare_data(self):
+
         # imagenet cannot be downloaded... must provide path to folder with the train/val splits
         pass
 
@@ -36,9 +37,9 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dir = self._resolve_data_subfolder(self.data_dir, 'train')
+        data_dir = self._resolve_data_subfolder(self.data_dir, 'train')
 
-        dataset = UnlabeledImagenet(dir,
+        dataset = UnlabeledImagenet(data_dir,
                                     num_imgs_per_class=num_images_per_class,
                                     split='train',
                                     transform=transforms)
@@ -56,8 +57,8 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dir = self._resolve_data_subfolder(self.data_dir, 'train')
-        dataset = UnlabeledImagenet(dir,
+        data_dir = self._resolve_data_subfolder(self.data_dir, 'train')
+        dataset = UnlabeledImagenet(data_dir,
                                     num_imgs_per_class_val_split=num_images_per_class,
                                     split='val',
                                     transform=transforms)
@@ -73,9 +74,9 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
     def test_dataloader(self, batch_size, num_images_per_class, transforms=None, add_normalize=False):
         if transforms is None:
             transforms = self._default_transforms()
-        dir = self._resolve_data_subfolder(self.data_dir, 'val')
+        data_dir = self._resolve_data_subfolder(self.data_dir, 'val')
 
-        dataset = UnlabeledImagenet(dir,
+        dataset = UnlabeledImagenet(data_dir,
                                     num_imgs_per_class=num_images_per_class,
                                     split='test',
                                     transform=transforms)
