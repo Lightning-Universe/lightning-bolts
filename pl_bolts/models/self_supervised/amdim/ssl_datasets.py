@@ -13,7 +13,7 @@ import numpy as np
 import torch
 from sklearn.utils import shuffle
 from torch._six import PY3
-from torchvision.datasets import CIFAR10, VisionDataset, ImageNet
+from torchvision.datasets import CIFAR10, ImageNet
 from torchvision.datasets.imagenet import load_meta_file
 
 

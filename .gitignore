@@ -145,3 +145,5 @@ simclr.py
 .*_submit.py
 
 source/api/
+test-reports
+tests/test-reports/
