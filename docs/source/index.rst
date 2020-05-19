@@ -66,3 +66,4 @@ Indices and tables
    api/pl_bolts.models
    api/pl_bolts.callbacks
    api/pl_bolts.loggers
+   api/pl_bolts.transforms
