@@ -1,3 +1,7 @@
+"""
+Adapted from: https://github.com/facebookresearch/moco
+# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+"""
 import pytorch_lightning as pl
 import torch
 from torch import nn
@@ -98,20 +102,6 @@ class Moco(pl.LightningModule):
         idx_this = idx_shuffle.view(num_gpus, -1)[gpu_idx]
 
         return x_gather[idx_this], idx_unshuffle
-
-    # utils
-    @torch.no_grad()
-    def concat_all_gather(tensor):
-        """
-        Performs all_gather operation on the provided tensors.
-        *** Warning ***: torch.distributed.all_gather has no gradient.
-        """
-        tensors_gather = [torch.ones_like(tensor)
-                          for _ in range(torch.distributed.get_world_size())]
-        torch.distributed.all_gather(tensors_gather, tensor, async_op=False)
-
-        output = torch.cat(tensors_gather, dim=0)
-        return output
 
     @torch.no_grad()
     def _batch_unshuffle_ddp(self, x, idx_unshuffle):
@@ -243,5 +233,17 @@ class Moco(pl.LightningModule):
         loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
 
-    def training_step(self, batch, batch_idx):
-        criterion = nn.CrossEntropyLoss()
+
+# utils
+@torch.no_grad()
+def concat_all_gather(tensor):
+    """
+    Performs all_gather operation on the provided tensors.
+    *** Warning ***: torch.distributed.all_gather has no gradient.
+    """
+    tensors_gather = [torch.ones_like(tensor)
+                      for _ in range(torch.distributed.get_world_size())]
+    torch.distributed.all_gather(tensors_gather, tensor, async_op=False)
+
+    output = torch.cat(tensors_gather, dim=0)
+    return output
