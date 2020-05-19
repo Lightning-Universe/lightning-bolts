@@ -1,11 +1,13 @@
 import os
 from argparse import ArgumentParser
 from collections import OrderedDict
+
 import torch
-from torch.nn import functional as F
 from pytorch_lightning import Trainer, LightningModule
-from pl_bolts.models.gans.basic.components import Generator, Discriminator
+from torch.nn import functional as F
+
 from pl_bolts.datamodules import MNISTDataLoaders
+from pl_bolts.models.gans.basic.components import Generator, Discriminator
 
 
 class BasicGAN(LightningModule):

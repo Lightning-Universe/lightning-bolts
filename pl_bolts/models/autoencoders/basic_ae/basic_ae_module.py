@@ -4,9 +4,10 @@ from argparse import ArgumentParser
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from torch.nn import functional as F
-from pl_bolts.models.autoencoders.basic_vae.components import Decoder
-from pl_bolts.models.autoencoders.basic_ae.components import AEEncoder
+
 from pl_bolts.datamodules import MNISTDataLoaders
+from pl_bolts.models.autoencoders.basic_ae.components import AEEncoder
+from pl_bolts.models.autoencoders.basic_vae.components import Decoder
 
 
 class BasicAE(LightningModule):

@@ -1,18 +1,19 @@
-import numpy as np
-from contextlib import contextmanager
-import tempfile
+import gzip
+import hashlib
+import math
+import os
 import shutil
 import tarfile
+import tempfile
 import zipfile
-import hashlib
+from contextlib import contextmanager
+
+import numpy as np
 import torch
-import gzip
+from sklearn.utils import shuffle
 from torch._six import PY3
 from torchvision.datasets import CIFAR10, VisionDataset, ImageNet
 from torchvision.datasets.imagenet import load_meta_file
-from sklearn.utils import shuffle
-import math
-import os
 
 
 class SSLDatasetMixin(VisionDataset):
