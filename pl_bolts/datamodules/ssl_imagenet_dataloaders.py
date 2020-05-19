@@ -23,7 +23,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
         dirs = os.listdir(data_dir)
         try:
             dir = [x for x in dirs if split in x][0]
-            return dir
+            return os.path.join(data_dir, dir)
         except Exception as e:
             raise FileNotFoundError(f'a {split} Imagenet split was not found in {data_dir}, make sure the'
                                     f'folder contains a subfolder with {split} in the name')
