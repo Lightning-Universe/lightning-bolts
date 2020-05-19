@@ -6,6 +6,7 @@ import shutil
 import tarfile
 import tempfile
 import zipfile
+from abc import ABC
 from contextlib import contextmanager
 
 import numpy as np
@@ -16,8 +17,10 @@ from torchvision.datasets import CIFAR10, VisionDataset, ImageNet
 from torchvision.datasets.imagenet import load_meta_file
 
 
-class SSLDatasetMixin(VisionDataset):
-    def generate_train_val_split(self, examples, labels, pct_val):
+class SSLDatasetMixin(ABC):
+
+    @classmethod
+    def generate_train_val_split(cls, examples, labels, pct_val):
         """
         Splits dataset uniformly across classes
         :param examples:
@@ -50,7 +53,8 @@ class SSLDatasetMixin(VisionDataset):
         train_x = np.stack(train_x)
         return val_x, val_y, train_x, train_y
 
-    def select_nb_imgs_per_class(self, examples, labels, nb_imgs_in_val):
+    @classmethod
+    def select_nb_imgs_per_class(cls, examples, labels, nb_imgs_in_val):
         """
         Splits a dataset into two parts.
         The labeled split has nb_imgs_in_val per class
@@ -83,7 +87,8 @@ class SSLDatasetMixin(VisionDataset):
 
         return labeled, labeled_y
 
-    def deterministic_shuffle(self, x, y):
+    @classmethod
+    def deterministic_shuffle(cls, x, y):
         n = len(x)
         idxs = list(range(0, n))
         idxs = shuffle(idxs, random_state=1234)
