@@ -17,8 +17,6 @@ class Moco(pl.LightningModule):
         pass
 
     def get_dataset(self, name):
-        dataloaders = None
-
         if name == 'cifar10':
             dataloaders = CIFAR10DataLoaders(self.hparams.data_dir)
         elif name == 'stl10':
