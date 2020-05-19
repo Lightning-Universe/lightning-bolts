@@ -1,7 +1,8 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+from typing import List, Union
+
 from pytorch_lightning.utilities import rank_zero_warn
 from torch.utils.data import DataLoader
-from typing import List, Union
 
 
 class BoltDataLoaders(object):

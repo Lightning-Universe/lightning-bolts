@@ -70,6 +70,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/source/api/
 
 # PyBuilder
 target/
@@ -136,3 +137,13 @@ MNIST
 
 # Lightning logs
 lightning_logs
+datasets
+*.gz
+*-batches-py
+simclr.py
+.DS_Store
+.*_submit.py
+
+source/api/
+test-reports
+tests/test-reports/

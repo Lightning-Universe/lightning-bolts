@@ -8,6 +8,7 @@ class AEEncoder(torch.nn.Module):
     Takes as input an image, uses a CNN to extract features which
     get split into a mu and sigma vector
     """
+
     def __init__(self, hidden_dim, latent_dim, input_width, input_height):
         super().__init__()
         self.hidden_dim = hidden_dim
