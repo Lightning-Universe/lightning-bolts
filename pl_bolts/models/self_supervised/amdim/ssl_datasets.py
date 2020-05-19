@@ -335,7 +335,6 @@ class UnlabeledImagenet(ImageNet):
                                     'http://www.image-net.org/challenges/LSVRC/2012/downloads')
 
 
-
 def parse_devkit_archive(root, file=None):
     """Parse the devkit archive of the ImageNet2012 classification dataset and save
     the meta information in a binary file.
