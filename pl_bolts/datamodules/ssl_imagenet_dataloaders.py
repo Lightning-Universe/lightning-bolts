@@ -21,12 +21,10 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
 
     def _resolve_data_subfolder(self, data_dir, split):
         dirs = os.listdir(data_dir)
-        try:
-            dir = [x for x in dirs if split in x][0]
-            return os.path.join(data_dir, dir)
-        except Exception as e:
+
+        if split not in dirs:
             raise FileNotFoundError(f'a {split} Imagenet split was not found in {data_dir}, make sure the'
-                                    f'folder contains a subfolder with {split} in the name')
+                                    f'folder contains a subfolder named {split}')
 
     def prepare_data(self):
         # imagenet cannot be downloaded... must provide path to folder with the train/val splits
