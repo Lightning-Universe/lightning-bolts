@@ -2,6 +2,7 @@ from torchvision import transforms as transform_lib
 from torchvision.datasets import STL10
 from torch.utils.data import DataLoader, random_split
 from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders
+from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 
 
 class STL10DataLoaders(BoltDataLoaders):
@@ -98,10 +99,6 @@ class STL10DataLoaders(BoltDataLoaders):
     def _default_transforms(self):
         mnist_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
-            self.normalize_transform()
+            stl10_normalization()
         ])
         return mnist_transforms
-
-    def normalize_transform(self):
-        normalize = transform_lib.Normalize(mean=(0.43, 0.42, 0.39), std=(0.27, 0.26, 0.27))
-        return normalize

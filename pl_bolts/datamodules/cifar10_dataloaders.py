@@ -2,6 +2,7 @@ from torchvision import transforms as transform_lib
 from torchvision.datasets import CIFAR10
 from torch.utils.data import DataLoader, random_split
 from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders
+from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 
 
 class CIFAR10DataLoaders(BoltDataLoaders):
@@ -71,13 +72,6 @@ class CIFAR10DataLoaders(BoltDataLoaders):
     def _default_transforms(self):
         mnist_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
-            self.normalize_transform()
+            cifar10_normalization()
         ])
         return mnist_transforms
-
-    def normalize_transform(self):
-        normalize = transform_lib.Normalize(
-            mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
-            std=[x / 255.0 for x in [63.0, 62.1, 66.7]]
-        )
-        return normalize

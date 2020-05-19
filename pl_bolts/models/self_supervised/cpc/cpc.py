@@ -242,7 +242,7 @@ class CPCV2(pl.LightningModule):
             )
             train_transform = stl10_transform.train_transform
 
-        elif self.hparams.dataset == 'imagenet128':
+        if self.hparams.dataset == 'imagenet128':
             train_transform = cpc_transforms.CPCTransformsImageNet128Patches(
                 self.hparams.patch_size,
                 overlap=self.hparams.patch_overlap

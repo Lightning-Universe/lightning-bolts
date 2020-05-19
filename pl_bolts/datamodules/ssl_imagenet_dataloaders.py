@@ -3,6 +3,7 @@ from torchvision import transforms as transform_lib
 from torch.utils.data import DataLoader
 from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders
 from pl_bolts.models.self_supervised.amdim.ssl_datasets import UnlabeledImagenet
+from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 
 
 class SSLImagenetDataLoaders(BoltDataLoaders):
@@ -107,11 +108,6 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
     def _default_transforms(self):
         mnist_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
-            self.normalize_transform()
+            imagenet_normalization()
         ])
         return mnist_transforms
-
-    def normalize_transform(self):
-        normalize = transform_lib.Normalize(mean=[0.485, 0.456, 0.406],
-                                            std=[0.229, 0.224, 0.225]),
-        return normalize
