@@ -64,4 +64,3 @@ class Moco(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         criterion = nn.CrossEntropyLoss()
-
