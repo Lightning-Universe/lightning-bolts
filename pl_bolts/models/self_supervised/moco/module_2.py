@@ -17,15 +17,19 @@ class Moco(pl.LightningModule):
         pass
 
     def get_dataset(self, name):
+        dataloaders = None
+
         if name == 'cifar10':
-            return CIFAR10DataLoaders(self.hparams.data_dir)
+            dataloaders = CIFAR10DataLoaders(self.hparams.data_dir)
         elif name == 'stl10':
-            return STL10DataLoaders(self.hparams.data_dir)
+            dataloaders = STL10DataLoaders(self.hparams.data_dir)
         elif name == 'imagenet128':
-            return SSLImagenetDataLoaders(self.hparams.data_dir)
+            dataloaders = SSLImagenetDataLoaders(self.hparams.data_dir)
         else:
             raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
                                     f'your own \'')
+
+        return dataloaders
 
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(self.parameters(), self.hparams.lr,

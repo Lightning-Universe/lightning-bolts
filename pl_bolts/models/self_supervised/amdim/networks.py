@@ -277,7 +277,6 @@ class FakeRKHSConvNet(nn.Module):
                 eye_mask[i, i, 0, 0] = 1
             self.shortcut.weight.data.uniform_(-0.01, 0.01)
             self.shortcut.weight.data.masked_fill_(torch.tensor(eye_mask), 1.)
-        return
 
     def init_weights(self, init_scale=1.):
         # initialize first conv in res branch
