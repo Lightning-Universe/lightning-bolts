@@ -327,6 +327,14 @@ class UnlabeledImagenet(ImageNet):
 
         return train, val
 
+    @classmethod
+    def generate_meta_bins(cls, devkit_path):
+        if 'ILSVRC2012_devkit_t12.tar.gz' not in devkit_path:
+            raise FileNotFoundError('devkit_path must point to the devkit file'
+                                    'ILSVRC2012_devkit_t12.tar.gz. Download from here:'
+                                    'http://www.image-net.org/challenges/LSVRC/2012/downloads')
+
+
 
 def parse_devkit_archive(root, file=None):
     """Parse the devkit archive of the ImageNet2012 classification dataset and save
