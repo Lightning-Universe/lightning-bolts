@@ -27,18 +27,17 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
                                     f'folder contains a subfolder named {split}')
 
     def prepare_data(self):
-        # imagenet cannot be downloaded... must provide path to folder with the train/val/test splits
+        # imagenet cannot be downloaded... must provide path to folder with the train/val splits
         self._verify_splits(self.data_dir, 'train')
         self._verify_splits(self.data_dir, 'val')
-        self._verify_splits(self.data_dir, 'test')
 
-        for split in ['train', 'val', 'test']:
+        for split in ['train', 'val']:
             files = os.listdir(os.path.join(self.data_dir, split))
             if 'meta.bin' not in files:
                 m = f"""
                 no meta.bin present. Imagenet is no longer automatically downloaded by PyTorch.
                 To get imagenet:
-                1. download yourself from http://www.image-net.org/challenges/LSVRC/2012/downloads (train, val, test)
+                1. download yourself from http://www.image-net.org/challenges/LSVRC/2012/downloads
                 2. download the devkit (ILSVRC2012_devkit_t12.tar.gz)
                 3. generate the meta.bin file using the devkit
                 4. copy the meta.bin file into both train and val split folders
