@@ -9,14 +9,14 @@ import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
-from pl_bolts.models.self_supervised.cpc.cpc_networks import CPCResNet101
+from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from torch import nn
 from torch.optim.lr_scheduler import MultiStepLR
 
 from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
-from pl_bolts.models.self_supervised.cpc import cpc_transforms
+from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 from pl_bolts.models.vision import PixelCNN
 
