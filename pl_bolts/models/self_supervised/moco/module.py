@@ -14,29 +14,38 @@ from pl_bolts.models.self_supervised.moco.transforms import \
     Moco2Imagenet128Transforms, Moco2CIFAR10Transforms, Moco2STL10Transforms
 
 
-class Moco(pl.LightningModule):
+class MocoV2(pl.LightningModule):
 
-    def __init__(self, hparams, base_encoder, dim=128, K=65536, m=0.999, T=0.07, mlp=False):
+    def __init__(self,
+                 base_encoder,
+                 emb_dim=128,
+                 num_negatives=65536, encoder_momentum=0.999, softmax_temperature=0.07, use_mlp=False):
         super().__init__()
         """
-        dim: feature dimension (default: 128)
-        K: queue size; number of negative keys (default: 65536)
-        m: moco momentum of updating key encoder (default: 0.999)
-        T: softmax temperature (default: 0.07)
+        emb_dim: feature dimension (default: 128)
+        num_negatives: queue size; number of negative keys (default: 65536)
+        encoder_momentum: moco momentum of updating key encoder (default: 0.999)
+        softmax_temperature: softmax temperature (default: 0.07)
         """
         super().__init__()
-        self.hparams = hparams
+        self.hparams = {
+            'emb_dim': emb_dim,
+            'num_negatives': num_negatives,
+            'encoder_momentum': encoder_momentum,
+            'softmax_temperature': softmax_temperature,
+            'use_mlp': use_mlp
+        }
 
-        self.K = K
-        self.m = m
-        self.T = T
+        self.K = num_negatives
+        self.m = encoder_momentum
+        self.T = softmax_temperature
 
         # create the encoders
         # num_classes is the output fc dimension
-        self.encoder_q = base_encoder(num_classes=dim)
-        self.encoder_k = base_encoder(num_classes=dim)
+        self.encoder_q = base_encoder(num_classes=emb_dim)
+        self.encoder_k = base_encoder(num_classes=emb_dim)
 
-        if mlp:  # hack: brute-force replacement
+        if use_mlp:  # hack: brute-force replacement
             dim_mlp = self.encoder_q.fc.weight.shape[1]
             self.encoder_q.fc = nn.Sequential(nn.Linear(dim_mlp, dim_mlp), nn.ReLU(), self.encoder_q.fc)
             self.encoder_k.fc = nn.Sequential(nn.Linear(dim_mlp, dim_mlp), nn.ReLU(), self.encoder_k.fc)
@@ -46,7 +55,7 @@ class Moco(pl.LightningModule):
             param_k.requires_grad = False  # not update by gradient
 
         # create the queue
-        self.register_buffer("queue", torch.randn(dim, K))
+        self.register_buffer("queue", torch.randn(emb_dim, num_negatives))
         self.queue = nn.functional.normalize(self.queue, dim=0)
 
         self.register_buffer("queue_ptr", torch.zeros(1, dtype=torch.long))
@@ -247,3 +256,7 @@ def concat_all_gather(tensor):
 
     output = torch.cat(tensors_gather, dim=0)
     return output
+
+
+if __name__ == '__main__':
+    model = MocoV2()
