@@ -24,6 +24,12 @@ class MocoV2(pl.LightningModule):
                  num_negatives=65536,
                  encoder_momentum=0.999,
                  softmax_temperature=0.07,
+                 lr=0.03,
+                 momentum=0.9,
+                 weight_decay=1e-4,
+                 dataset='cifar10',
+                 data_dir='./',
+                 batch_size=256,
                  use_mlp=False):
         super().__init__()
         """
@@ -38,13 +44,20 @@ class MocoV2(pl.LightningModule):
             'num_negatives': num_negatives,
             'encoder_momentum': encoder_momentum,
             'softmax_temperature': softmax_temperature,
-            'use_mlp': use_mlp
+            'use_mlp': use_mlp,
+            'lr': lr,
+            'momentum': momentum,
+            'weight_decay': weight_decay,
+            'dataset': dataset,
+            'data_dir': data_dir,
+            'batch_size': batch_size
         })
 
         self.K = num_negatives
         self.m = encoder_momentum
         self.T = softmax_temperature
         self.emb_dim = emb_dim
+        self.dataset = self.get_dataset(dataset)
 
         # create the encoders
         # num_classes is the output fc dimension
@@ -207,6 +220,9 @@ class MocoV2(pl.LightningModule):
 
         return dataloaders
 
+    def prepare_data(self):
+        self.dataset.prepare_data()
+
     def training_step(self, batch, batch_idx):
         (img_1, img_2), _ = batch
 
@@ -226,12 +242,10 @@ class MocoV2(pl.LightningModule):
         pass
 
     def configure_optimizers(self):
-        optimizer = torch.optim.SGD(self.parameters(), self.lr,
+        optimizer = torch.optim.SGD(self.parameters(), self.hparams.lr,
                                     momentum=self.hparams.momentum,
                                     weight_decay=self.hparams.weight_decay)
         return optimizer
-
-    # TODO: implement training
 
     def train_dataloader(self):
         if self.hparams.dataset == 'cifar10':
@@ -261,6 +275,15 @@ class MocoV2(pl.LightningModule):
         loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
 
+    @staticmethod
+    def add_model_specific_args(parent_parser):
+        from test_tube import HyperOptArgumentParser
+        parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
+        parser.add_argument('--online_ft', action='store_true')
+        parser.add_argument('--dataset', type=str, default='cifar10')
+
+        return parser
+
 
 # utils
 @torch.no_grad()
@@ -278,8 +301,17 @@ def concat_all_gather(tensor):
 
 
 if __name__ == '__main__':
-    model = MocoV2()
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
 
-    trainer = pl.Trainer(fast_dev_run=True)
+    # trainer args
+    parser = pl.Trainer.add_argparse_args(parser)
+
+    # model args
+    parser = MocoV2.add_model_specific_args(parser)
+    args = parser.parse_args()
+
+    model = MocoV2(**args)
+
+    trainer = pl.Trainer.from_argparse_args(args, fast_dev_run=True)
     trainer.fit(model)
-    print('')
