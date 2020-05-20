@@ -10,7 +10,7 @@ import torchvision
 from argparse import Namespace
 
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
-from pl_bolts.metrics import precision_at_k
+from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
 from pl_bolts.models.self_supervised.moco.transforms import \
     Moco2Imagenet128Transforms, Moco2CIFAR10Transforms, Moco2STL10Transforms
@@ -244,7 +244,31 @@ class MocoV2(pl.LightningModule):
         return {'loss': loss, 'log': log}
 
     def validation_step(self, batch, batch_idx):
-        pass
+        img_1, target = batch
+
+        output = self.encoder_q(img_1)
+        loss = F.cross_entropy(output, target.long())
+
+        acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))
+
+        results = {
+            'val_loss': loss,
+            'val_acc1': acc1,
+            'val_acc5': acc5
+        }
+        return results
+
+    def validation_epoch_end(self, outputs):
+        val_loss = mean(outputs, 'val_loss')
+        val_acc1 = mean(outputs, 'val_acc1')
+        val_acc5 = mean(outputs, 'val_acc5')
+
+        log = {
+            'val_loss': val_loss,
+            'val_acc1': val_acc1,
+            'val_acc5': val_acc5
+        }
+        return {'val_loss': val_loss, 'log': log}
 
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(self.parameters(), self.hparams.lr,
@@ -326,5 +350,5 @@ if __name__ == '__main__':
 
     model = MocoV2(**args.__dict__)
 
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = pl.Trainer.from_argparse_args(args, fast_dev_run=True)
     trainer.fit(model)
