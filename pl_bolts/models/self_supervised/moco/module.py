@@ -148,7 +148,8 @@ class MocoV2(pl.LightningModule):
         logits /= self.T
 
         # labels: positive key indicators
-        labels = torch.zeros(logits.shape[0], dtype=torch.long).cuda()
+        labels = torch.zeros(logits.shape[0], dtype=torch.long)
+        labels = labels.type_as(logits)
 
         # dequeue and enqueue
         self._dequeue_and_enqueue(k)
