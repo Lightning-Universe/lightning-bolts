@@ -326,5 +326,5 @@ if __name__ == '__main__':
 
     model = MocoV2(**args.__dict__)
 
-    trainer = pl.Trainer.from_argparse_args(args, fast_dev_run=True)
+    trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
