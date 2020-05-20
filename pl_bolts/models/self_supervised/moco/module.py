@@ -161,7 +161,7 @@ class MocoV2(pl.LightningModule):
 
         return x_gather[idx_this]
 
-    def forward(self, im_q, im_k):
+    def forward(self, img_q, img_k):
         """
         Input:
             im_q: a batch of query images
@@ -171,7 +171,7 @@ class MocoV2(pl.LightningModule):
         """
 
         # compute query features
-        q = self.encoder_q(im_q)  # queries: NxC
+        q = self.encoder_q(img_q)  # queries: NxC
         q = nn.functional.normalize(q, dim=1)
 
         # compute key features
@@ -179,7 +179,7 @@ class MocoV2(pl.LightningModule):
             self._momentum_update_key_encoder()  # update the key encoder
 
             # shuffle for making use of BN
-            im_k, idx_unshuffle = self._batch_shuffle_ddp(im_k)
+            im_k, idx_unshuffle = self._batch_shuffle_ddp(img_k)
 
             k = self.encoder_k(im_k)  # keys: NxC
             k = nn.functional.normalize(k, dim=1)
@@ -227,7 +227,7 @@ class MocoV2(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         (img_1, img_2), _ = batch
 
-        output, target = self.model(im_q=img_1, im_k=img_2)
+        output, target = self(img_q=img_1, img_k=img_2)
         loss = F.cross_entropy(output, target)
 
         acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))
@@ -250,15 +250,13 @@ class MocoV2(pl.LightningModule):
 
     def train_dataloader(self):
         if self.hparams.dataset == 'cifar10':
-            train_transform = Moco2CIFAR10Transforms().train_transform
+            train_transform = Moco2CIFAR10Transforms()
 
         elif self.hparams.dataset == 'stl10':
-            stl10_transform = Moco2STL10Transforms()
-            train_transform = stl10_transform.train_transform
+            train_transform = Moco2STL10Transforms()
 
         elif self.hparams.dataset == 'imagenet128':
             train_transform = Moco2Imagenet128Transforms()
-            train_transform = train_transform.train_transform
 
         loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader

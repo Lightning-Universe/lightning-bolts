@@ -41,8 +41,8 @@ class Moco2CIFAR10Transforms:
         ])
 
     def __call__(self, inp):
-        q = self.train_augmentation(inp)
-        k = self.train_augmentation(inp)
+        q = self.train_transform(inp)
+        k = self.train_transform(inp)
         return q, k
 
 
@@ -55,7 +55,7 @@ class Moco2STL10Transforms:
 
     def __init__(self):
         # image augmentation functions
-        self.train_augmentation = transforms.Compose([
+        self.train_transform = transforms.Compose([
             transforms.RandomResizedCrop(64, scale=(0.2, 1.)),
             transforms.RandomApply([
                 transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
@@ -80,8 +80,8 @@ class Moco2STL10Transforms:
         ])
 
     def __call__(self, inp):
-        q = self.train_augmentation(inp)
-        k = self.train_augmentation(inp)
+        q = self.train_transform(inp)
+        k = self.train_transform(inp)
         return q, k
 
 
@@ -119,8 +119,8 @@ class Moco2Imagenet128Transforms:
         ])
 
     def __call__(self, inp):
-        q = self.train_augmentation(inp)
-        k = self.train_augmentation(inp)
+        q = self.train_transform(inp)
+        k = self.train_transform(inp)
         return q, k
 
 
