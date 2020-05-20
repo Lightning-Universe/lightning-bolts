@@ -232,7 +232,7 @@ class MocoV2(pl.LightningModule):
         (img_1, img_2), _ = batch
 
         output, target = self(img_q=img_1, img_k=img_2)
-        loss = F.cross_entropy(output, target)
+        loss = F.cross_entropy(output.float(), target.long())
 
         acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))
 
