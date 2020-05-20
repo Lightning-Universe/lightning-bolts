@@ -300,15 +300,15 @@ class CPCV2(pl.LightningModule):
             'dataset': 'stl10',
             'depth': 8,
             'patch_size': 16,
-            'batch_size': 200,
+            'batch_size': 108,
             'nb_classes': 10,
             'patch_overlap': 16 // 2,
             'lr_options': [
-                2e-6,
+                # 2e-6,
                 2e-5,
                 2e-4,
-                2e-3,
-                2e-2
+                # 2e-3,
+                # 2e-2
             ]
         }
 
