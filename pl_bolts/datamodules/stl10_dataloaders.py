@@ -14,6 +14,10 @@ class STL10DataLoaders(BoltDataLoaders):
         self.val_split = val_split
         self.num_workers = num_workers
 
+    @property
+    def num_classes(self):
+        return 10
+
     def prepare_data(self):
         STL10(self.save_path, split='unlabeled', download=True, transform=transform_lib.ToTensor())
         STL10(self.save_path, split='train', download=True, transform=transform_lib.ToTensor())
