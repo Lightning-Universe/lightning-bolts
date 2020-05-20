@@ -30,7 +30,8 @@ class MocoV2(pl.LightningModule):
                  dataset='cifar10',
                  data_dir='./',
                  batch_size=256,
-                 use_mlp=False):
+                 use_mlp=False,
+                 *args, **kwargs):
         super().__init__()
         """
         emb_dim: feature dimension (default: 128)
@@ -272,15 +273,25 @@ class MocoV2(pl.LightningModule):
         elif self.hparams.dataset == 'imagenet128':
             train_transform = Moco2Imagenet128Transforms().train_transform
 
-        loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
+        loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
 
     @staticmethod
     def add_model_specific_args(parent_parser):
         from test_tube import HyperOptArgumentParser
         parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--online_ft', action='store_true')
+        parser.add_argument('--base_encoder', type=str, default='resnet50')
+        parser.add_argument('--emb_dim', type=int, default=128)
+        parser.add_argument('--num_negatives', type=int, default=65536)
+        parser.add_argument('--encoder_momentum', type=float, default=0.999)
+        parser.add_argument('--softmax_temperature', type=float, default=0.07)
+        parser.add_argument('--lr', type=float, default=0.03)
+        parser.add_argument('--momentum', type=float, default=0.9)
+        parser.add_argument('--weight_decay', type=float, default=1e-4)
         parser.add_argument('--dataset', type=str, default='cifar10')
+        parser.add_argument('--data_dir', type=str, default='./')
+        parser.add_argument('--batch_size', type=int, default=256)
+        parser.add_argument('--use_mlp', action='store_true')
 
         return parser
 
@@ -311,7 +322,7 @@ if __name__ == '__main__':
     parser = MocoV2.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    model = MocoV2(**args)
+    model = MocoV2(**args.__dict__)
 
     trainer = pl.Trainer.from_argparse_args(args, fast_dev_run=True)
     trainer.fit(model)

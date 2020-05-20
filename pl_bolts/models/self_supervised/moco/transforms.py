@@ -41,8 +41,9 @@ class Moco2CIFAR10Transforms:
         ])
 
     def __call__(self, inp):
-        out1 = self.train_augmentation(inp)
-        return out1
+        q = self.train_augmentation(inp)
+        k = self.train_augmentation(inp)
+        return q, k
 
 
 class Moco2STL10Transforms:
@@ -79,8 +80,9 @@ class Moco2STL10Transforms:
         ])
 
     def __call__(self, inp):
-        out1 = self.train_augmentation(inp)
-        return out1
+        q = self.train_augmentation(inp)
+        k = self.train_augmentation(inp)
+        return q, k
 
 
 class Moco2Imagenet128Transforms:
@@ -117,8 +119,9 @@ class Moco2Imagenet128Transforms:
         ])
 
     def __call__(self, inp):
-        out1 = self.train_augmentation(inp)
-        return out1
+        q = self.train_augmentation(inp)
+        k = self.train_augmentation(inp)
+        return q, k
 
 
 class GaussianBlur(object):
