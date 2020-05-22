@@ -302,6 +302,15 @@ class CPCV2(pl.LightningModule):
             'patch_size': 16,
             'batch_size': 108,
             'nb_classes': 10,
+            'bs_options': [
+                512,
+                256,
+                200,
+                152,
+                136,
+                104,
+                96
+            ],
             'patch_overlap': 16 // 2,
             'lr_options': [
                 # 2e-6,
@@ -342,7 +351,7 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--patch_overlap', default=dataset['patch_overlap'], type=int)
 
         # training params
-        parser.add_argument('--batch_size', type=int, default=dataset['batch_size'])
+        parser.opt_list('--batch_size', type=int, default=dataset['batch_size'], options=dataset['bs_options'])
         parser.opt_list('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'], tunable=True)
 
         # data
