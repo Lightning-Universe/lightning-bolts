@@ -351,8 +351,8 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--patch_overlap', default=dataset['patch_overlap'], type=int)
 
         # training params
-        parser.opt_list('--batch_size', type=int, default=dataset['batch_size'], options=dataset['bs_options'])
-        parser.opt_list('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'], tunable=True)
+        parser.opt_list('--batch_size', type=int, default=dataset['batch_size'], options=dataset['bs_options'], tunable=False)
+        parser.opt_list('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'], tunable=False)
 
         # data
         parser.add_argument('--data_dir', default='.', type=str)
