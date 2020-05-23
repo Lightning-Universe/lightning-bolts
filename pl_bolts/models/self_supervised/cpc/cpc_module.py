@@ -276,8 +276,7 @@ class CPCV2(pl.LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser):
-        from test_tube import HyperOptArgumentParser
-        parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true')
         parser.add_argument('--dataset', type=str, default='cifar10')
 
@@ -351,8 +350,8 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--patch_overlap', default=dataset['patch_overlap'], type=int)
 
         # training params
-        parser.opt_list('--batch_size', type=int, default=dataset['batch_size'], options=dataset['bs_options'], tunable=False)
-        parser.opt_list('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'], tunable=False)
+        parser.add_argument('--batch_size', type=int, default=dataset['batch_size'])
+        parser.add_argument('--learning_rate', type=float, default=0.0001)
 
         # data
         parser.add_argument('--data_dir', default='.', type=str)
