@@ -367,6 +367,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     args.gpus = 1
+    args.distributed_backend = None
 
     model = CPCV2(args)
     trainer = pl.Trainer.from_argparse_args(args)
