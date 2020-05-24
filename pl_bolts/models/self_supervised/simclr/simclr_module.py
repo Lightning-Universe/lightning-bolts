@@ -127,6 +127,7 @@ class SimCLR(pl.LightningModule):
             optimizer, step_size=self.hparams.step, gamma=self.hparams.gamma)
         return [optimizer], [scheduler]
 
+
 def create_argparser():
     parser = ArgumentParser()
     # Data
