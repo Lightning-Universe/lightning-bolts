@@ -12,6 +12,26 @@ from torchvision.models import densenet
 from pl_bolts.optimizers import LARS
 
 
+def nt_xent_loss(out_1, out_2, temperature):
+    out = torch.cat([out_1, out_2], dim=0)
+    n_samples = len(out)
+
+    # Full similarity matrix
+    cov = torch.mm(out, out.t().contiguous())
+    sim = torch.exp(cov / temperature)
+
+    # Negative similarity
+    mask = ~torch.eye(n_samples, device=sim.device).bool()
+    neg = sim.masked_select(mask).view(n_samples, -1).sum(dim=-1)
+
+    # Positive similarity :
+    pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
+    pos = torch.cat([pos, pos], dim=0)
+    loss = -torch.log(pos / neg).mean()
+
+    return loss
+
+
 class EncoderModel(nn.Module):
     def __init__(self):
         super().__init__()
@@ -37,22 +57,6 @@ class Projection(nn.Module):
     def forward(self, x):
         x = self.model(x)
         return F.normalize(x, dim=1)
-
-
-def nt_xent(out_1, out_2, temperature):
-    out = torch.cat([out_1, out_2], dim=0)
-    n_samples = len(out)
-    # Full similarity matrix
-    cov = torch.mm(out, out.t().contiguous())
-    sim = torch.exp(cov / temperature)
-    # Negative similarity
-    mask = ~torch.eye(n_samples, device=sim.device).bool()
-    neg = sim.masked_select(mask).view(n_samples, -1).sum(dim=-1)
-    # Positive similarity :
-    pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
-    pos = torch.cat([pos, pos], dim=0)
-    loss = -torch.log(pos / neg).mean()
-    return loss
 
 
 class SimCLR(pl.LightningModule):
@@ -156,7 +160,7 @@ def main(args):
         hparams=args,
         encoder=EncoderModel(),
         projection=Projection(),
-        loss_func=nt_xent,
+        loss_func=nt_xent_loss,
         temperature=args.temp,
         transform_list=list(args.trans.split(','))
     )
