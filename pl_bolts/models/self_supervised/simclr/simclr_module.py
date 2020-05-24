@@ -1,8 +1,5 @@
-from argparse import ArgumentParser
-from pathlib import Path
 import pytorch_lightning as pl
 import torch
-from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import nn
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import StepLR
@@ -42,16 +39,25 @@ class Projection(nn.Module):
 
 
 class SimCLR(pl.LightningModule):
-    def __init__(self, hparams, encoder, projection, loss_func, temperature, transform_list):
+    def __init__(self, hparams, temperature, transform_list):
         super().__init__()
 
-        self.dataset = self.get_dataset(hparams.dataset)
         self.hparams = hparams
-        self.encoder = encoder
-        self.projection = projection
-        self.loss_func = loss_func
         self.temp = temperature
+        self.dataset = self.get_dataset(hparams.dataset)
+        self.loss_func = self.init_loss()
+        self.encoder = self.init_encoder()
+        self.projection = self.init_projection()
         self.transform_list = transform_list
+
+    def init_loss(self):
+        return nt_xent_loss
+
+    def init_encoder(self):
+        return EncoderModel()
+
+    def init_projection(self):
+        return Projection()
 
     def get_dataset(self, name):
         if name == 'cifar10':
