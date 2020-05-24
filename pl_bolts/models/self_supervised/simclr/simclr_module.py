@@ -39,16 +39,14 @@ class Projection(nn.Module):
 
 
 class SimCLR(pl.LightningModule):
-    def __init__(self, hparams, temperature, transform_list):
+    def __init__(self, dataset, temperature):
         super().__init__()
 
-        self.hparams = hparams
         self.temp = temperature
-        self.dataset = self.get_dataset(hparams.dataset)
+        self.dataset = self.get_dataset(dataset)
         self.loss_func = self.init_loss()
         self.encoder = self.init_encoder()
         self.projection = self.init_projection()
-        self.transform_list = transform_list
 
     def init_loss(self):
         return nt_xent_loss
