@@ -2,30 +2,29 @@ from argparse import ArgumentParser
 from pathlib import Path
 import pytorch_lightning as pl
 import torch
-import torchnet as tnt
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import nn
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import StepLR
 from torch.utils.data.dataloader import DataLoader
-import densenet
-from data import Dataset, toPIL, create_transform
-from optim import LARS
+from torchvision.models import densenet
+
+from pl_bolts.optimizers import LARS
 
 
 class EncoderModel(nn.Module):
     def __init__(self):
         super().__init__()
-        # self.model = xrv.models.DenseNet(num_classes=1).cuda()
         self.model = densenet.densenet121(densenet.ModelCfg(), num_classes=1)
         del self.model.classifier
+
     def forward(self, x):
         features = self.model.features(x)
         out = F.relu(features, inplace=True)
         out = F.adaptive_avg_pool2d(out, (1, 1)).view(features.size(0), -1)
         return out
-    
-    
+
+
 class Projection(nn.Module):
     def __init__(self, input_dim=1024, output_dim=128):
         super().__init__()
@@ -34,11 +33,12 @@ class Projection(nn.Module):
             nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
             nn.Linear(512, output_dim, bias=True))
+
     def forward(self, x):
         x = self.model(x)
         return F.normalize(x, dim=1)
-    
-    
+
+
 def nt_xent(out_1, out_2, temperature):
     out = torch.cat([out_1, out_2], dim=0)
     n_samples = len(out)
@@ -64,8 +64,7 @@ class SimCLR(pl.LightningModule):
         self.loss_func = loss_func
         self.temp = temperature
         self.transform_list = transform_list
-        self.lossmeter = tnt.meter.AverageValueMeter()
-        
+
     def forward(self, x):
         h = self.encoder(x)
         z = self.projection(h)
@@ -106,20 +105,6 @@ class SimCLR(pl.LightningModule):
         return dict(val_loss=self.lossmeter.mean, log=logs)
 
     def create_dataloader(self, metafile):
-        data = CheX_Dataset(
-            Path(self.hparams.root),
-            Path(self.hparams.root) / self.hparams.dataset / metafile,
-            transform=toPIL,
-        )
-        # sampler = None if self.hparams.gpus == 1 else DistributedSampler(data)
-        sampler = None
-        transform = create_transform(self.transform_list)
-        return DataLoader(
-            Dataset(data, transform, transform),
-            batch_size=self.hparams.bsz,
-            sampler=sampler,
-            num_workers=10,
-        )
 
     def train_dataloader(self):
         return self.create_dataloader(metafile='train.csv')
