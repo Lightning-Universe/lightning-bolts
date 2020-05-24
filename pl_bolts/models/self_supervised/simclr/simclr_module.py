@@ -154,28 +154,21 @@ class SimCLR(pl.LightningModule):
         return parser
 
 
-def main(args):
-    print('Args:', args)
-    model = SimCLR(
-        hparams=args,
-        encoder=EncoderModel(),
-        projection=Projection(),
-        loss_func=nt_xent_loss,
-        temperature=args.temp,
-        transform_list=list(args.trans.split(','))
-    )
-    checkpoint = ModelCheckpoint(
-        filepath=Path(args.expdir) / 'checkpoints', save_top_k=100)
-    trainer = pl.Trainer(
-        distributed_backend='ddp',
-        gpus=args.gpus,
-        default_save_path=args.expdir,
-        checkpoint_callback=checkpoint
-    )
-    trainer.fit(model)
-
+    # model = SimCLR(
+    #     hparams=args,
+    #     encoder=EncoderModel(),
+    #     projection=Projection(),
+    #     loss_func=nt_xent_loss,
+    #     temperature=args.temp,
+    #     transform_list=list(args.trans.split(','))
+    # )
 
 if __name__ == '__main__':
-    parser = create_argparser()
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+    parser = pl.Trainer.add_argparse_args(parser)
+    parser = SimCLR.add_model_specific_args(parser)
     args = parser.parse_args()
-    main(args)
+
+    model = SimCLR(args)
+    trainer = pl.Trainer.from_argparse_args(parser)
