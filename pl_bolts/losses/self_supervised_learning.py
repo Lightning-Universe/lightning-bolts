@@ -6,6 +6,9 @@ from pl_bolts.models.vision import PixelCNN
 
 
 def nt_xent_loss(out_1, out_2, temperature):
+    """
+    Loss used in SimCLR
+    """
     out = torch.cat([out_1, out_2], dim=0)
     n_samples = len(out)
 
