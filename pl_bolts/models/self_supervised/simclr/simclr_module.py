@@ -9,6 +9,8 @@ from torch.optim.lr_scheduler import StepLR
 from torchvision.models import densenet
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.optimizers import LARS
+from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
+from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
 
 
 class EncoderModel(nn.Module):
@@ -41,6 +43,8 @@ class Projection(nn.Module):
 class SimCLR(pl.LightningModule):
     def __init__(self, hparams, encoder, projection, loss_func, temperature, transform_list):
         super().__init__()
+
+        self.dataset = self.get_dataset(hparams.dataset)
         self.hparams = hparams
         self.encoder = encoder
         self.projection = projection
@@ -48,13 +52,21 @@ class SimCLR(pl.LightningModule):
         self.temp = temperature
         self.transform_list = transform_list
 
+    def get_dataset(self, name):
+        if name == 'cifar10':
+            return CIFAR10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+        elif name == 'stl10':
+            return STL10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+        elif name == 'imagenet128':
+            return SSLImagenetDataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+        else:
+            raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
+                                    f'your own \'')
+
     def forward(self, x):
         h = self.encoder(x)
         z = self.projection(h)
         return h, z
-    
-    def on_epoch_start(self):
-        self.lossmeter.reset()
 
     def training_step(self, batch, batch_idx):
         h1, z1 = self.forward(batch['PA'])
@@ -87,14 +99,50 @@ class SimCLR(pl.LightningModule):
         print('\nLogs: ', logs)
         return dict(val_loss=self.lossmeter.mean, log=logs)
 
-    def create_dataloader(self, metafile):
-        pass
+    def prepare_data(self):
+        self.dataset.prepare_data()
 
     def train_dataloader(self):
-        return self.create_dataloader(metafile='train.csv')
+        if self.hparams.dataset == 'cifar10':
+            train_transform = cpc_transforms.CPCTransformsCIFAR10().train_transform
+
+        elif self.hparams.dataset == 'stl10':
+            stl10_transform = cpc_transforms.CPCTransformsSTL10Patches(
+                patch_size=self.hparams.patch_size,
+                overlap=self.hparams.patch_overlap
+            )
+            train_transform = stl10_transform.train_transform
+
+        if self.hparams.dataset == 'imagenet128':
+            train_transform = cpc_transforms.CPCTransformsImageNet128Patches(
+                self.hparams.patch_size,
+                overlap=self.hparams.patch_overlap
+            )
+            train_transform = train_transform.train_transform
+
+        loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
+        return loader
 
     def val_dataloader(self):
-        return self.create_dataloader(metafile='valid.csv')
+        if self.hparams.dataset == 'cifar10':
+            test_transform = cpc_transforms.CPCTransformsCIFAR10().test_transform
+
+        if self.hparams.dataset == 'stl10':
+            stl10_transform = cpc_transforms.CPCTransformsSTL10Patches(
+                patch_size=self.hparams.patch_size,
+                overlap=self.hparams.patch_overlap
+            )
+            test_transform = stl10_transform.test_transform
+
+        if self.hparams.dataset == 'imagenet128':
+            test_transform = cpc_transforms.CPCTransformsImageNet128Patches(
+                self.hparams.patch_size,
+                overlap=self.hparams.patch_overlap
+            )
+            test_transform = test_transform.test_transform
+
+        loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
+        return loader
 
     def configure_optimizers(self):
         if self.hparams.optim == 'adam':
@@ -110,27 +158,31 @@ class SimCLR(pl.LightningModule):
             optimizer, step_size=self.hparams.step, gamma=self.hparams.gamma)
         return [optimizer], [scheduler]
 
+    @staticmethod
+    def add_model_specific_args(parent_parser):
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        parser.add_argument('--online_ft', action='store_true')
+        parser.add_argument('--dataset', type=str, default='cifar10')
 
-def create_argparser():
-    parser = ArgumentParser()
-    # Data
-    parser.add_argument('--root', type=str, default='/datasets01/covid19/032820/CheXpert')
-    # Training
-    parser.add_argument('--expdir', type=str, default='simclrlogs')
-    parser.add_argument('--dataset', type=str, default='CheXpert-v1.0')
-    parser.add_argument('--optim', choices=['adam', 'lars'], default='adam')
-    parser.add_argument('--bsz', type=int, default=16)
-    parser.add_argument('--lr', type=float, default=0.0001)
-    parser.add_argument('--mom', type=float, default=0.9)
-    parser.add_argument('--eta', type=float, default=0.001)
-    parser.add_argument('--step', type=float, default=30)
-    parser.add_argument('--gamma', type=float, default=0.5)
-    parser.add_argument('--wd', type=float, default=0.0005)
-    parser.add_argument('--gpus', type=int, default=8)
-    # Model
-    parser.add_argument('--temp', type=float, default=0.5)
-    parser.add_argument('--trans', type=str, default='randcrop,flip')
-    return parser
+        # Data
+        parser.add_argument('--data_dir', type=str, default='.')
+
+        # Training
+        parser.add_argument('--expdir', type=str, default='simclrlogs')
+        parser.add_argument('--dataset', type=str, default='CheXpert-v1.0')
+        parser.add_argument('--optim', choices=['adam', 'lars'], default='adam')
+        parser.add_argument('--bsz', type=int, default=16)
+        parser.add_argument('--lr', type=float, default=0.0001)
+        parser.add_argument('--mom', type=float, default=0.9)
+        parser.add_argument('--eta', type=float, default=0.001)
+        parser.add_argument('--step', type=float, default=30)
+        parser.add_argument('--gamma', type=float, default=0.5)
+        parser.add_argument('--wd', type=float, default=0.0005)
+        parser.add_argument('--gpus', type=int, default=8)
+        # Model
+        parser.add_argument('--temp', type=float, default=0.5)
+        parser.add_argument('--trans', type=str, default='randcrop,flip')
+        return parser
 
 
 def main(args):
