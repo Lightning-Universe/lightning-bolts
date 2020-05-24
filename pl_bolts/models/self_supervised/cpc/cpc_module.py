@@ -9,7 +9,6 @@ import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
-from torch import nn
 from torch.optim.lr_scheduler import MultiStepLR
 
 from pl_bolts import metrics
@@ -18,71 +17,11 @@ from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-from pl_bolts.models.vision import PixelCNN
+from pl_bolts.losses.self_supervised_learning import InfoNCE
 
 __all__ = [
-    'InfoNCE',
     'CPCV2'
 ]
-
-
-class InfoNCE(pl.LightningModule):
-
-    def __init__(self, num_input_channels, target_dim=64, embed_scale=0.1):
-        super().__init__()
-        self.target_dim = target_dim
-        self.embed_scale = embed_scale
-
-        self.target_cnn = torch.nn.Conv2d(num_input_channels, self.target_dim, kernel_size=1)
-        self.pred_cnn = torch.nn.Conv2d(num_input_channels, self.target_dim, kernel_size=1)
-        self.context_cnn = PixelCNN(num_input_channels)
-
-    def compute_loss_h(self, targets, preds, i):
-        b, c, h, w = targets.shape
-
-        # (b, c, h, w) -> (num_vectors, emb_dim)
-        # every vector (c-dim) is a target
-        targets = targets.permute(0, 2, 3, 1).contiguous().reshape([-1, c])
-
-        # select the future (south) targets to predict
-        # selects all of the ones south of the current source
-        preds_i = preds[:, :, :-(i + 1), :] * self.embed_scale
-
-        # (b, c, h, w) -> (b*w*h, c) (all features)
-        # this ordering matches the targets
-        preds_i = preds_i.permute(0, 2, 3, 1).contiguous().reshape([-1, self.target_dim])
-
-        # calculate the strength scores
-        logits = torch.matmul(preds_i, targets.transpose(-1, -2))
-
-        # generate the labels
-        n = b * (h - i - 1) * w
-        b1 = torch.arange(n) // ((h - i - 1) * w)
-        c1 = torch.arange(n) % ((h - i - 1) * w)
-        labels = b1 * h * w + (i + 1) * w + c1
-        labels = labels.type_as(logits).long()
-
-        loss = nn.functional.cross_entropy(logits, labels)
-        return loss
-
-    def forward(self, Z):
-        losses = []
-
-        context = self.context_cnn(Z)
-        targets = self.target_cnn(Z)
-
-        _, _, h, w = Z.shape
-
-        # future prediction
-        preds = self.pred_cnn(context)
-        for steps_to_ignore in range(h - 1):
-            for i in range(steps_to_ignore + 1, h):
-                loss = self.compute_loss_h(targets, preds, i)
-                if not torch.isnan(loss):
-                    losses.append(loss)
-
-        loss = torch.stack(losses).sum()
-        return loss
 
 
 class CPCV2(pl.LightningModule):

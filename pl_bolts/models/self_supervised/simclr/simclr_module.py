@@ -6,30 +6,10 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import nn
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import StepLR
-from torch.utils.data.dataloader import DataLoader
 from torchvision.models import densenet
+from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 
 from pl_bolts.optimizers import LARS
-
-
-def nt_xent_loss(out_1, out_2, temperature):
-    out = torch.cat([out_1, out_2], dim=0)
-    n_samples = len(out)
-
-    # Full similarity matrix
-    cov = torch.mm(out, out.t().contiguous())
-    sim = torch.exp(cov / temperature)
-
-    # Negative similarity
-    mask = ~torch.eye(n_samples, device=sim.device).bool()
-    neg = sim.masked_select(mask).view(n_samples, -1).sum(dim=-1)
-
-    # Positive similarity :
-    pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
-    pos = torch.cat([pos, pos], dim=0)
-    loss = -torch.log(pos / neg).mean()
-
-    return loss
 
 
 class EncoderModel(nn.Module):
