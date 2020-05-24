@@ -11,6 +11,7 @@ from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.optimizers import LARS
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
+from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLRDataTransform
 
 
 class EncoderModel(nn.Module):
@@ -103,44 +104,12 @@ class SimCLR(pl.LightningModule):
         self.dataset.prepare_data()
 
     def train_dataloader(self):
-        if self.hparams.dataset == 'cifar10':
-            train_transform = cpc_transforms.CPCTransformsCIFAR10().train_transform
-
-        elif self.hparams.dataset == 'stl10':
-            stl10_transform = cpc_transforms.CPCTransformsSTL10Patches(
-                patch_size=self.hparams.patch_size,
-                overlap=self.hparams.patch_overlap
-            )
-            train_transform = stl10_transform.train_transform
-
-        if self.hparams.dataset == 'imagenet128':
-            train_transform = cpc_transforms.CPCTransformsImageNet128Patches(
-                self.hparams.patch_size,
-                overlap=self.hparams.patch_overlap
-            )
-            train_transform = train_transform.train_transform
-
+        train_transform = SimCLRDataTransform(input_height=self.input_height)
         loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
 
     def val_dataloader(self):
-        if self.hparams.dataset == 'cifar10':
-            test_transform = cpc_transforms.CPCTransformsCIFAR10().test_transform
-
-        if self.hparams.dataset == 'stl10':
-            stl10_transform = cpc_transforms.CPCTransformsSTL10Patches(
-                patch_size=self.hparams.patch_size,
-                overlap=self.hparams.patch_overlap
-            )
-            test_transform = stl10_transform.test_transform
-
-        if self.hparams.dataset == 'imagenet128':
-            test_transform = cpc_transforms.CPCTransformsImageNet128Patches(
-                self.hparams.patch_size,
-                overlap=self.hparams.patch_overlap
-            )
-            test_transform = test_transform.test_transform
-
+        test_transform = SimCLRDataTransform(input_height=self.input_height).test_transform
         loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
         return loader
 

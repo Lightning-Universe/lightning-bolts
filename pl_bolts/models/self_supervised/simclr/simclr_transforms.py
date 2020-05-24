@@ -4,16 +4,22 @@ import cv2
 
 
 class SimCLRDataTransform(object):
-    def __init__(self, input_width, s=1):
+    def __init__(self, input_height, s=1):
         self.s = s
-        self.width = input_width
+        self.input_height = input_height
         color_jitter = transforms.ColorJitter(0.8 * self.s, 0.8 * self.s, 0.8 * self.s, 0.2 * self.s)
-        data_transforms = transforms.Compose([transforms.RandomResizedCrop(size=self.width),
+        data_transforms = transforms.Compose([transforms.RandomResizedCrop(size=self.input_height),
                                               transforms.RandomHorizontalFlip(),
                                               transforms.RandomApply([color_jitter], p=0.8),
                                               transforms.RandomGrayscale(p=0.2),
-                                              GaussianBlur(kernel_size=int(0.1 * self.width)),
+                                              GaussianBlur(kernel_size=int(0.1 * self.input_height)),
                                               transforms.ToTensor()])
+
+        self.test_transform = transforms.Compose([
+            transforms.Resize(input_height+10, interpolation=3),
+            transforms.CenterCrop(input_height),
+            transforms.ToTensor(),
+        ])
 
         self.transform = data_transforms
 
