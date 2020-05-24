@@ -105,6 +105,7 @@ class SimCLR(pl.LightningModule):
         return dict(val_loss=self.lossmeter.mean, log=logs)
 
     def create_dataloader(self, metafile):
+        pass
 
     def train_dataloader(self):
         return self.create_dataloader(metafile='train.csv')
