@@ -39,7 +39,7 @@ class Projection(nn.Module):
 
 
 class SimCLR(pl.LightningModule):
-    def __init__(self, dataset, temperature):
+    def __init__(self, dataset, temperature=0.5):
         super().__init__()
 
         self.temp = temperature
@@ -142,16 +142,14 @@ class SimCLR(pl.LightningModule):
 
         # Training
         parser.add_argument('--expdir', type=str, default='simclrlogs')
-        parser.add_argument('--dataset', type=str, default='CheXpert-v1.0')
         parser.add_argument('--optim', choices=['adam', 'lars'], default='adam')
-        parser.add_argument('--bsz', type=int, default=16)
+        parser.add_argument('--batch_size', type=int, default=2)
         parser.add_argument('--lr', type=float, default=0.0001)
         parser.add_argument('--mom', type=float, default=0.9)
         parser.add_argument('--eta', type=float, default=0.001)
         parser.add_argument('--step', type=float, default=30)
         parser.add_argument('--gamma', type=float, default=0.5)
         parser.add_argument('--wd', type=float, default=0.0005)
-        parser.add_argument('--gpus', type=int, default=8)
         # Model
         parser.add_argument('--temp', type=float, default=0.5)
         parser.add_argument('--trans', type=str, default='randcrop,flip')

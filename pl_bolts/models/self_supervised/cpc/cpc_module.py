@@ -305,6 +305,7 @@ if __name__ == '__main__':
     parser = CPCV2.add_model_specific_args(parser)
 
     args = parser.parse_args()
+    args.gpu = 1
 
     model = CPCV2(args)
     trainer = pl.Trainer.from_argparse_args(args)
