@@ -221,6 +221,7 @@ class CPCV2(pl.LightningModule):
 
         (args, _) = parser.parse_known_args()
 
+        # v100@32GB batch_size = 200
         cifar_10 = {
             'dataset': 'cifar10',
             'depth': 10,
@@ -234,6 +235,7 @@ class CPCV2(pl.LightningModule):
             ]
         }
 
+        # v100@32GB batch_size = 200
         stl10 = {
             'dataset': 'stl10',
             'depth': 8,
@@ -305,7 +307,7 @@ if __name__ == '__main__':
     parser = CPCV2.add_model_specific_args(parser)
 
     args = parser.parse_args()
-    args.gpu = 1
+    args.gpus = 1
 
     model = CPCV2(args)
     trainer = pl.Trainer.from_argparse_args(args)
