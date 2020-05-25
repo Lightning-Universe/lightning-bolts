@@ -243,13 +243,7 @@ class CPCV2(pl.LightningModule):
             'batch_size': 108,
             'nb_classes': 10,
             'bs_options': [
-                512,
-                256,
-                200,
-                152,
-                136,
-                104,
-                96
+                176
             ],
             'patch_overlap': 16 // 2,
             'lr_options': [
@@ -302,6 +296,7 @@ class CPCV2(pl.LightningModule):
 
 
 if __name__ == '__main__':
+    pl.seed_everything(1234)
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
     parser = CPCV2.add_model_specific_args(parser)
