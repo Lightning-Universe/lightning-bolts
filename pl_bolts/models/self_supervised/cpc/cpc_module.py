@@ -277,7 +277,7 @@ class CPCV2(pl.LightningModule):
             ],
             'patch_overlap': 16 // 2,
             'lr_options': [
-                2e-5,
+                3e-5,
             ]
         }
 
