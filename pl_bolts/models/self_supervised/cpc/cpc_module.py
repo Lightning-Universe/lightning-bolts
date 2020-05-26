@@ -133,7 +133,13 @@ class CPCV2(pl.LightningModule):
         return result
 
     def validation_step(self, batch, batch_nb):
-        img_1, labels = batch
+        # in STL10 we pass in both lab+unl for online ft
+        if self.hparams.dataset == 'stl10':
+            labeled_batch = batch[1]
+            unlabeled_batch = batch[0]
+            batch = unlabeled_batch
+
+        img_1, y = batch
 
         # generate features
         # Latent features
@@ -144,10 +150,14 @@ class CPCV2(pl.LightningModule):
         result = {'val_nce': nce_loss}
 
         if self.online_evaluator:
+            if self.hparams.dataset == 'stl10':
+                img_1, y = labeled_batch
+                Z = self(img_1)
+
             z_in = Z.reshape(Z.size(0), -1)
             mlp_preds = self.non_linear_evaluator(z_in)
-            mlp_loss = F.cross_entropy(mlp_preds, labels)
-            acc = metrics.accuracy(mlp_preds, labels)
+            mlp_loss = F.cross_entropy(mlp_preds, y)
+            acc = metrics.accuracy(mlp_preds, y)
             result['mlp_acc'] = acc
             result['mlp_loss'] = mlp_loss
 
