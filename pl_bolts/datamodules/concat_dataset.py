@@ -6,7 +6,12 @@ class ConcatDataset(torch.utils.data.Dataset):
         self.datasets = datasets
 
     def __getitem__(self, i):
-        return tuple(d[i] for d in self.datasets)
+        result = []
+        for dataset in self.datasets:
+            cycled_i = i % len(dataset)
+            result.append(dataset[cycled_i])
+
+        return tuple(result)
 
     def __len__(self):
-        return min(len(d) for d in self.datasets)
+        return max(len(d) for d in self.datasets)
