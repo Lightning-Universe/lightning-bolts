@@ -238,7 +238,7 @@ class CPCV2(pl.LightningModule):
         # v100@32GB batch_size = 176
         stl10 = {
             'dataset': 'stl10',
-            'depth': 8,
+            'depth': 12,
             'patch_size': 16,
             'batch_size': 108,
             'nb_classes': 10,

@@ -27,7 +27,9 @@ class STL10DataLoaders(BoltDataLoaders):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = STL10(self.save_path, split='train+unlabeled', download=False, transform=transforms)
+        unlabeled_dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
+        labeled_dataset = STL10(self.save_path, split='train', download=False, transform=transforms)
+
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
