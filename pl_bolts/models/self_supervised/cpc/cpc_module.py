@@ -9,7 +9,6 @@ import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
-from torch import nn
 from torch.optim.lr_scheduler import MultiStepLR
 
 from pl_bolts import metrics
@@ -18,71 +17,11 @@ from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-from pl_bolts.models.vision import PixelCNN
+from pl_bolts.losses.self_supervised_learning import InfoNCE
 
 __all__ = [
-    'InfoNCE',
     'CPCV2'
 ]
-
-
-class InfoNCE(pl.LightningModule):
-
-    def __init__(self, num_input_channels, target_dim=64, embed_scale=0.1):
-        super().__init__()
-        self.target_dim = target_dim
-        self.embed_scale = embed_scale
-
-        self.target_cnn = torch.nn.Conv2d(num_input_channels, self.target_dim, kernel_size=1)
-        self.pred_cnn = torch.nn.Conv2d(num_input_channels, self.target_dim, kernel_size=1)
-        self.context_cnn = PixelCNN(num_input_channels)
-
-    def compute_loss_h(self, targets, preds, i):
-        b, c, h, w = targets.shape
-
-        # (b, c, h, w) -> (num_vectors, emb_dim)
-        # every vector (c-dim) is a target
-        targets = targets.permute(0, 2, 3, 1).contiguous().reshape([-1, c])
-
-        # select the future (south) targets to predict
-        # selects all of the ones south of the current source
-        preds_i = preds[:, :, :-(i + 1), :] * self.embed_scale
-
-        # (b, c, h, w) -> (b*w*h, c) (all features)
-        # this ordering matches the targets
-        preds_i = preds_i.permute(0, 2, 3, 1).contiguous().reshape([-1, self.target_dim])
-
-        # calculate the strength scores
-        logits = torch.matmul(preds_i, targets.transpose(-1, -2))
-
-        # generate the labels
-        n = b * (h - i - 1) * w
-        b1 = torch.arange(n) // ((h - i - 1) * w)
-        c1 = torch.arange(n) % ((h - i - 1) * w)
-        labels = b1 * h * w + (i + 1) * w + c1
-        labels = labels.type_as(logits).long()
-
-        loss = nn.functional.cross_entropy(logits, labels)
-        return loss
-
-    def forward(self, Z):
-        losses = []
-
-        context = self.context_cnn(Z)
-        targets = self.target_cnn(Z)
-
-        _, _, h, w = Z.shape
-
-        # future prediction
-        preds = self.pred_cnn(context)
-        for steps_to_ignore in range(h - 1):
-            for i in range(steps_to_ignore + 1, h):
-                loss = self.compute_loss_h(targets, preds, i)
-                if not torch.isnan(loss):
-                    losses.append(loss)
-
-        loss = torch.stack(losses).sum()
-        return loss
 
 
 class CPCV2(pl.LightningModule):
@@ -114,11 +53,11 @@ class CPCV2(pl.LightningModule):
 
     def get_dataset(self, name):
         if name == 'cifar10':
-            return CIFAR10DataLoaders(self.hparams.data_dir)
+            return CIFAR10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'stl10':
-            return STL10DataLoaders(self.hparams.data_dir)
+            return STL10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'imagenet128':
-            return SSLImagenetDataLoaders(self.hparams.data_dir)
+            return SSLImagenetDataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         else:
             raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
                                     f'your own \'')
@@ -154,6 +93,12 @@ class CPCV2(pl.LightningModule):
         return Z
 
     def training_step(self, batch, batch_nb):
+        # in STL10 we pass in both lab+unl for online ft
+        if self.hparams.dataset == 'stl10':
+            labeled_batch = batch[1]
+            unlabeled_batch = batch[0]
+            batch = unlabeled_batch
+
         img_1, y = batch
 
         # Latent features
@@ -166,7 +111,14 @@ class CPCV2(pl.LightningModule):
 
         # don't use the training signal, just finetune the MLP to see how we're doing downstream
         if self.online_evaluator:
-            z_in = Z.detach()
+            if self.hparams.dataset == 'stl10':
+                img_1, y = labeled_batch
+                with torch.no_grad():
+                    Z = self(img_1)
+
+                    # just in case... no grads into unsupervised part!
+                    z_in = Z.detach()
+
             z_in = z_in.reshape(Z.size(0), -1)
             mlp_preds = self.non_linear_evaluator(z_in)
             mlp_loss = F.cross_entropy(mlp_preds, y)
@@ -181,7 +133,14 @@ class CPCV2(pl.LightningModule):
         return result
 
     def validation_step(self, batch, batch_nb):
-        img_1, labels = batch
+
+        # in STL10 we pass in both lab+unl for online ft
+        if self.hparams.dataset == 'stl10':
+            labeled_batch = batch[1]
+            unlabeled_batch = batch[0]
+            batch = unlabeled_batch
+
+        img_1, y = batch
 
         # generate features
         # Latent features
@@ -192,10 +151,14 @@ class CPCV2(pl.LightningModule):
         result = {'val_nce': nce_loss}
 
         if self.online_evaluator:
+            if self.hparams.dataset == 'stl10':
+                img_1, y = labeled_batch
+                Z = self(img_1)
+
             z_in = Z.reshape(Z.size(0), -1)
             mlp_preds = self.non_linear_evaluator(z_in)
-            mlp_loss = F.cross_entropy(mlp_preds, labels)
-            acc = metrics.accuracy(mlp_preds, labels)
+            mlp_loss = F.cross_entropy(mlp_preds, y)
+            acc = metrics.accuracy(mlp_preds, y)
             result['mlp_acc'] = acc
             result['mlp_loss'] = mlp_loss
 
@@ -233,6 +196,7 @@ class CPCV2(pl.LightningModule):
         self.dataset.prepare_data()
 
     def train_dataloader(self):
+        loader = None
         if self.hparams.dataset == 'cifar10':
             train_transform = cpc_transforms.CPCTransformsCIFAR10().train_transform
 
@@ -242,6 +206,7 @@ class CPCV2(pl.LightningModule):
                 overlap=self.hparams.patch_overlap
             )
             train_transform = stl10_transform.train_transform
+            loader = self.dataset.train_dataloader_mixed(self.hparams.batch_size, transforms=train_transform)
 
         if self.hparams.dataset == 'imagenet128':
             train_transform = cpc_transforms.CPCTransformsImageNet128Patches(
@@ -250,10 +215,12 @@ class CPCV2(pl.LightningModule):
             )
             train_transform = train_transform.train_transform
 
-        loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
+        if loader is None:
+            loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
 
     def val_dataloader(self):
+        loader = None
         if self.hparams.dataset == 'cifar10':
             test_transform = cpc_transforms.CPCTransformsCIFAR10().test_transform
 
@@ -263,6 +230,7 @@ class CPCV2(pl.LightningModule):
                 overlap=self.hparams.patch_overlap
             )
             test_transform = stl10_transform.test_transform
+            loader = self.dataset.val_dataloader_mixed(self.hparams.batch_size, transforms=test_transform)
 
         if self.hparams.dataset == 'imagenet128':
             test_transform = cpc_transforms.CPCTransformsImageNet128Patches(
@@ -271,18 +239,20 @@ class CPCV2(pl.LightningModule):
             )
             test_transform = test_transform.test_transform
 
-        loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
+        if loader is None:
+            loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
+
         return loader
 
     @staticmethod
     def add_model_specific_args(parent_parser):
-        from test_tube import HyperOptArgumentParser
-        parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true')
         parser.add_argument('--dataset', type=str, default='cifar10')
 
         (args, _) = parser.parse_known_args()
 
+        # v100@32GB batch_size = 200
         cifar_10 = {
             'dataset': 'cifar10',
             'depth': 10,
@@ -296,28 +266,19 @@ class CPCV2(pl.LightningModule):
             ]
         }
 
+        # v100@32GB batch_size = 176
         stl10 = {
             'dataset': 'stl10',
-            'depth': 8,
+            'depth': 12,
             'patch_size': 16,
             'batch_size': 108,
             'nb_classes': 10,
             'bs_options': [
-                512,
-                256,
-                200,
-                152,
-                136,
-                104,
-                96
+                176
             ],
             'patch_overlap': 16 // 2,
             'lr_options': [
-                # 2e-6,
-                2e-5,
-                2e-4,
-                # 2e-3,
-                # 2e-2
+                3e-5,
             ]
         }
 
@@ -351,15 +312,18 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--patch_overlap', default=dataset['patch_overlap'], type=int)
 
         # training params
-        parser.opt_list('--batch_size', type=int, default=dataset['batch_size'], options=dataset['bs_options'], tunable=False)
-        parser.opt_list('--learning_rate', type=float, default=0.0001, options=dataset['lr_options'], tunable=False)
+        parser.add_argument('--batch_size', type=int, default=dataset['batch_size'])
+        parser.add_argument('--learning_rate', type=float, default=0.0001)
 
         # data
         parser.add_argument('--data_dir', default='.', type=str)
+        parser.add_argument('--num_workers', default=0, type=int)
+
         return parser
 
 
 if __name__ == '__main__':
+    pl.seed_everything(1234)
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
     parser = CPCV2.add_model_specific_args(parser)

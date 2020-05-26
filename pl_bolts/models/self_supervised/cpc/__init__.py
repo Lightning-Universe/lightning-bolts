@@ -1,1 +1,1 @@
-from pl_bolts.models.self_supervised.cpc.module import CPCV2, InfoNCE
+from pl_bolts.models.self_supervised.cpc.cpc_module import CPCV2, InfoNCE

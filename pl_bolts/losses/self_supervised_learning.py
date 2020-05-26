@@ -1,123 +1,98 @@
-import numpy as np
 import torch
 from torch import nn
+import numpy as np
+
+from pl_bolts.models.vision import PixelCNN
 
 
-class CPCV2LossInfoNCE(nn.Module):
-    def __init__(self, tclip=10.):
+def nt_xent_loss(out_1, out_2, temperature):
+    """
+    Loss used in SimCLR
+    """
+    out = torch.cat([out_1, out_2], dim=0)
+    n_samples = len(out)
+
+    # Full similarity matrix
+    cov = torch.mm(out, out.t().contiguous())
+    sim = torch.exp(cov / temperature)
+
+    # Negative similarity
+    mask = ~torch.eye(n_samples, device=sim.device).bool()
+    neg = sim.masked_select(mask).view(n_samples, -1).sum(dim=-1)
+
+    # Positive similarity :
+    pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
+    pos = torch.cat([pos, pos], dim=0)
+    loss = -torch.log(pos / neg).mean()
+
+    return loss
+
+
+class InfoNCE(nn.Module):
+    """
+    Loss used in CPC
+    """
+
+    def __init__(self, num_input_channels, target_dim=64, embed_scale=0.1):
         super().__init__()
-        self.masks_r5 = self.feat_size_5_mask()
+        self.target_dim = target_dim
+        self.embed_scale = embed_scale
 
-    def feat_size_5_mask(self):
-        masks_r5 = np.zeros((5, 5, 1, 5, 5))
-        for i in range(5):
-            for j in range(5):
-                masks_r5[i, j, 0, i, j] = 1
-        masks_r5 = torch.tensor(masks_r5).type(torch.float)
-        masks_r5 = masks_r5.reshape(-1, 1, 5, 5)
-        return nn.Parameter(masks_r5, requires_grad=False)
+        self.target_cnn = torch.nn.Conv2d(num_input_channels, self.target_dim, kernel_size=1)
+        self.pred_cnn = torch.nn.Conv2d(num_input_channels, self.target_dim, kernel_size=1)
+        self.context_cnn = PixelCNN(num_input_channels)
 
-    def nce_loss(self, anchor, pos_scores, negative_samples, mask_mat):
+    def compute_loss_h(self, targets, preds, i):
+        b, c, h, w = targets.shape
 
-        # RKHS = embedding dim
-        pos_scores = pos_scores.float()
-        batch_size, emb_dim = anchor.size()
-        nb_feat_vectors = negative_samples.size(1) // batch_size
+        # (b, c, h, w) -> (num_vectors, emb_dim)
+        # every vector (c-dim) is a target
+        targets = targets.permute(0, 2, 3, 1).contiguous().reshape([-1, c])
 
-        # (b, b) -> (b, b, nb_feat_vectors)
-        # all zeros with ones in diagonal tensor... (ie: b1 b1 are all 1s, b1 b2 are all zeros)
-        mask_pos = mask_mat.unsqueeze(dim=2).expand(-1, -1, nb_feat_vectors).float()
+        # select the future (south) targets to predict
+        # selects all of the ones south of the current source
+        preds_i = preds[:, :, :-(i + 1), :] * self.embed_scale
 
-        # negative mask
-        mask_neg = 1. - mask_pos
+        # (b, c, h, w) -> (b*w*h, c) (all features)
+        # this ordering matches the targets
+        preds_i = preds_i.permute(0, 2, 3, 1).contiguous().reshape([-1, self.target_dim])
 
-        # -------------------------------
-        # ALL SCORES COMPUTATION
-        # (b, dim) x (dim, nb_feats*b) -> (b, b, nb_feats)
-        # vector for each img in batch times all the vectors of all images in batch
-        raw_scores = torch.mm(anchor, negative_samples)
-        raw_scores = raw_scores.reshape(batch_size, batch_size, nb_feat_vectors).float()
+        # calculate the strength scores
+        logits = torch.matmul(preds_i, targets.transpose(-1, -2))
 
-        # ----------------------
-        # EXTRACT NEGATIVE SCORES
-        # (batch_size, batch_size, nb_feat_vectors)
-        neg_scores = (mask_neg * raw_scores)
+        # generate the labels
+        n = b * (h - i - 1) * w
+        b1 = torch.arange(n) // ((h - i - 1) * w)
+        c1 = torch.arange(n) % ((h - i - 1) * w)
+        labels = b1 * h * w + (i + 1) * w + c1
+        labels = labels.type_as(logits).long()
 
-        # (batch_size, batch_size * nb_feat_vectors) -> (batch_size, batch_size, nb_feat_vectors)
-        neg_scores = neg_scores.reshape(batch_size, -1)
-        mask_neg = mask_neg.reshape(batch_size, -1)
+        loss = nn.functional.cross_entropy(logits, labels)
+        return loss
 
-        # ---------------------
-        # STABLE SOFTMAX
-        # (n_batch_gpu, 1)
-        neg_maxes = torch.max(neg_scores, dim=1, keepdim=True)[0]
-
-        # DENOMINATOR
-        # sum over only negative samples (none from the diagonal)
-        neg_sumexp = (mask_neg * torch.exp(neg_scores - neg_maxes)).sum(dim=1, keepdim=True)
-        all_logsumexp = torch.log(torch.exp(pos_scores - neg_maxes) + neg_sumexp)
-
-        # NUMERATOR
-        # compute numerators for the NCE log-softmaxes
-        pos_shiftexp = pos_scores - neg_maxes
-
-        # FULL NCE
-        nce_scores = pos_shiftexp - all_logsumexp
-        nce_scores = -nce_scores.mean()
-
-        return nce_scores
-
-    def forward(self, Z, C, W_list):
-        """
-
-        :param Z: latent vars (b*patches, emb_dim, h, w)
-        :param C: context var (b*patches, emb_dim, h, w)
-        :param W_list: list of k-1 W projections
-        :return:
-        """
-        # (b, dim, w. h)
-        batch_size, emb_dim, h, w = Z.size()
-
-        # diag_mat = torch.eye(batch_size, device=Z.device)
-        diag_mat = torch.eye(batch_size)
-        diag_mat = diag_mat.type_as(Z)
-        diag_mat = diag_mat.float()
-
+    def forward(self, Z):
         losses = []
-        # calculate loss for each k
 
-        Z_neg = Z.permute(1, 0, 2, 3).reshape(emb_dim, -1)
+        context = self.context_cnn(Z)
+        targets = self.target_cnn(Z)
 
-        for i in range(0, h - 1):
-            for j in range(0, w):
-                cij = C[:, :, i, j]
+        _, _, h, w = Z.shape
 
-                # make predictions far and non-overlapping
-                min_k_dist = 2
-
-                for k in range(i + min_k_dist, h):
-                    Wk = W_list[str(k)]
-
-                    z_hat_ik_j = Wk(cij)
-
-                    zikj = Z[:, :, k, j]
-
-                    # BATCH DOT PRODUCT
-                    # (b, d) x (b, d) -> (b, 1)
-                    pos_scores = torch.bmm(z_hat_ik_j.unsqueeze(1), zikj.unsqueeze(2))
-                    pos_scores = pos_scores.squeeze(-1).squeeze(-1)
-
-                    loss = self.nce_loss(z_hat_ik_j, pos_scores, Z_neg, diag_mat)
+        # future prediction
+        preds = self.pred_cnn(context)
+        for steps_to_ignore in range(h - 1):
+            for i in range(steps_to_ignore + 1, h):
+                loss = self.compute_loss_h(targets, preds, i)
+                if not torch.isnan(loss):
                     losses.append(loss)
 
-        losses = torch.stack(losses)
-        loss = losses.mean()
+        loss = torch.stack(losses).sum()
         return loss
 
 
 class AMDIMLossNCE(nn.Module):
     """
-    Computes the NCE loss across views
+    Loss used in AMDIM
     """
 
     def __init__(self, tclip=10.):
