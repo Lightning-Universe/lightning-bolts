@@ -9,10 +9,11 @@ from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 
 class STL10DataLoaders(BoltDataLoaders):
 
-    def __init__(self, save_path, val_split=5000, num_workers=16):
+    def __init__(self, save_path, unlabeled_val_split=5000, train_val_split=500, num_workers=16):
         super().__init__()
         self.save_path = save_path
-        self.val_split = val_split
+        self.unlabeled_val_split = unlabeled_val_split
+        self.train_val_split = train_val_split
         self.num_workers = num_workers
 
     @property
@@ -24,12 +25,34 @@ class STL10DataLoaders(BoltDataLoaders):
         STL10(self.save_path, split='train', download=True, transform=transform_lib.ToTensor())
         STL10(self.save_path, split='test', download=True, transform=transform_lib.ToTensor())
 
+    def train_dataloader(self, batch_size, transforms=None):
+        if transforms is None:
+            transforms = self._default_transforms()
+
+        dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
+        train_length = len(dataset)
+        dataset_train, _ = random_split(dataset, [train_length - self.unlabeled_val_split, self.unlabeled_val_split])
+        loader = DataLoader(
+            dataset_train,
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=self.num_workers,
+            drop_last=True,
+            pin_memory=True
+        )
+        return loader
+
     def train_dataloader_mixed(self, batch_size, transforms=None):
         if transforms is None:
             transforms = self._default_transforms()
 
-        unlabeled_dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
+        dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
+        unlabeled_length = len(dataset)
+        unlabeled_dataset, _ = random_split(dataset, [unlabeled_length - self.unlabeled_val_split, self.unlabeled_val_split])
+
         labeled_dataset = STL10(self.save_path, split='train', download=False, transform=transforms)
+        labeled_length = len(labeled_dataset)
+        labeled_dataset, _ = random_split(dataset, [labeled_length - self.train_val_split, self.train_val_split])
 
         dataset = ConcatDataset(unlabeled_dataset, labeled_dataset)
         loader = DataLoader(
@@ -48,7 +71,7 @@ class STL10DataLoaders(BoltDataLoaders):
 
         dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
-        _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
+        _, dataset_val = random_split(dataset, [train_length - self.unlabeled_val_split, self.unlabeled_val_split])
         loader = DataLoader(
             dataset_val,
             batch_size=batch_size,
@@ -58,17 +81,24 @@ class STL10DataLoaders(BoltDataLoaders):
         )
         return loader
 
-    def train_dataloader(self, batch_size, transforms=None):
+    def val_dataloader_mixed(self, batch_size, transforms=None):
         if transforms is None:
             transforms = self._default_transforms()
 
         dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
-        train_length = len(dataset)
-        dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
+        unlabeled_length = len(dataset)
+        _, unlabeled_dataset = random_split(dataset,
+                                            [unlabeled_length - self.unlabeled_val_split, self.unlabeled_val_split])
+
+        labeled_dataset = STL10(self.save_path, split='train', download=False, transform=transforms)
+        labeled_length = len(labeled_dataset)
+        _, labeled_dataset = random_split(dataset, [labeled_length - self.train_val_split, self.train_val_split])
+
+        dataset = ConcatDataset(unlabeled_dataset, labeled_dataset)
         loader = DataLoader(
-            dataset_train,
+            dataset,
             batch_size=batch_size,
-            shuffle=True,
+            shuffle=False,
             num_workers=self.num_workers,
             drop_last=True,
             pin_memory=True
