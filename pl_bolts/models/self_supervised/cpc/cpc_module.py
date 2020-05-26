@@ -209,6 +209,7 @@ class CPCV2(pl.LightningModule):
         return loader
 
     def val_dataloader(self):
+        loader = None
         if self.hparams.dataset == 'cifar10':
             test_transform = cpc_transforms.CPCTransformsCIFAR10().test_transform
 
@@ -218,6 +219,7 @@ class CPCV2(pl.LightningModule):
                 overlap=self.hparams.patch_overlap
             )
             test_transform = stl10_transform.test_transform
+            loader = self.dataset.val_dataloader_mixed(self.hparams.batch_size, transforms=test_transform)
 
         if self.hparams.dataset == 'imagenet128':
             test_transform = cpc_transforms.CPCTransformsImageNet128Patches(
@@ -226,7 +228,9 @@ class CPCV2(pl.LightningModule):
             )
             test_transform = test_transform.test_transform
 
-        loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
+        if loader is None:
+            loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
+
         return loader
 
     @staticmethod
