@@ -93,6 +93,7 @@ class CPCV2(pl.LightningModule):
         return Z
 
     def training_step(self, batch, batch_nb):
+        import pdb; pdb.set_trace()
         img_1, y = batch
 
         # Latent features
@@ -172,6 +173,7 @@ class CPCV2(pl.LightningModule):
         self.dataset.prepare_data()
 
     def train_dataloader(self):
+        loader = None
         if self.hparams.dataset == 'cifar10':
             train_transform = cpc_transforms.CPCTransformsCIFAR10().train_transform
 
@@ -181,6 +183,7 @@ class CPCV2(pl.LightningModule):
                 overlap=self.hparams.patch_overlap
             )
             train_transform = stl10_transform.train_transform
+            loader = self.dataset.train_dataloader_mixed(self.hparams.batch_size, transforms=train_transform)
 
         if self.hparams.dataset == 'imagenet128':
             train_transform = cpc_transforms.CPCTransformsImageNet128Patches(
@@ -189,7 +192,8 @@ class CPCV2(pl.LightningModule):
             )
             train_transform = train_transform.train_transform
 
-        loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
+        if loader is not None:
+            loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
 
     def val_dataloader(self):
