@@ -133,7 +133,6 @@ class CPCV2(pl.LightningModule):
         return result
 
     def validation_step(self, batch, batch_nb):
-        import pdb; pdb.set_trace()
 
         # in STL10 we pass in both lab+unl for online ft
         if self.hparams.dataset == 'stl10':
