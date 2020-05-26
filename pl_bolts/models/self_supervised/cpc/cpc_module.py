@@ -192,7 +192,7 @@ class CPCV2(pl.LightningModule):
             )
             train_transform = train_transform.train_transform
 
-        if loader is not None:
+        if loader is None:
             loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
 
