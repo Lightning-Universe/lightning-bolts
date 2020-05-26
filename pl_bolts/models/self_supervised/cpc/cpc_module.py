@@ -112,7 +112,7 @@ class CPCV2(pl.LightningModule):
         # don't use the training signal, just finetune the MLP to see how we're doing downstream
         if self.online_evaluator:
             if self.hparams.dataset == 'stl10':
-                img_1, labels = labeled_batch
+                img_1, y = labeled_batch
                 with torch.no_grad():
                     Z = self(img_1)
 
