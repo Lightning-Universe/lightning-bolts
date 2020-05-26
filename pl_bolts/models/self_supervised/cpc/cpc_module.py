@@ -94,8 +94,7 @@ class CPCV2(pl.LightningModule):
 
     def training_step(self, batch, batch_nb):
         # in STL10 we pass in both lab+unl for online ft
-        import pdb; pdb.set_trace()
-        if self.dataset == 'stl10':
+        if self.hparams.dataset == 'stl10':
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -112,7 +111,7 @@ class CPCV2(pl.LightningModule):
 
         # don't use the training signal, just finetune the MLP to see how we're doing downstream
         if self.online_evaluator:
-            if self.dataset == 'stl10':
+            if self.hparams.dataset == 'stl10':
                 img_1, labels = labeled_batch
                 with torch.no_grad:
                     Z = self(img_1)
