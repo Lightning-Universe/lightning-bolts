@@ -31,7 +31,7 @@ class STL10DataLoaders(BoltDataLoaders):
         unlabeled_dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
         labeled_dataset = STL10(self.save_path, split='train', download=False, transform=transforms)
 
-        dataset = ConcatDataset([unlabeled_dataset, labeled_dataset])
+        dataset = ConcatDataset(unlabeled_dataset, labeled_dataset)
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
