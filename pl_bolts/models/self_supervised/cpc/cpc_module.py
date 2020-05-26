@@ -93,7 +93,12 @@ class CPCV2(pl.LightningModule):
         return Z
 
     def training_step(self, batch, batch_nb):
-        import pdb; pdb.set_trace()
+        # in STL10 we pass in both lab+unl for online ft
+        if self.dataset == 'stl10':
+            labeled_batch = batch[1]
+            unlabeled_batch = batch[0]
+            batch = unlabeled_batch
+
         img_1, y = batch
 
         # Latent features
@@ -106,6 +111,11 @@ class CPCV2(pl.LightningModule):
 
         # don't use the training signal, just finetune the MLP to see how we're doing downstream
         if self.online_evaluator:
+            if self.dataset == 'stl10':
+                img_1, labels = labeled_batch
+                Z = self(img_1)
+
+            # no grads into unsupervised part!
             z_in = Z.detach()
             z_in = z_in.reshape(Z.size(0), -1)
             mlp_preds = self.non_linear_evaluator(z_in)
