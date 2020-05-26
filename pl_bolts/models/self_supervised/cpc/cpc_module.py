@@ -94,6 +94,7 @@ class CPCV2(pl.LightningModule):
 
     def training_step(self, batch, batch_nb):
         # in STL10 we pass in both lab+unl for online ft
+        import pdb; pdb.set_trace()
         if self.dataset == 'stl10':
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
