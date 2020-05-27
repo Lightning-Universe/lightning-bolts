@@ -2,6 +2,8 @@
 Layer-wise adaptive rate scaling for SGD in PyTorch!
 Adapted from: https://github.com/noahgolmant/pytorch-lars/blob/master/lars.py
 """
+from typing import Iterable
+
 import torch
 from torch.optim.optimizer import Optimizer
 
@@ -12,20 +14,18 @@ class _RequiredParameter(object):
         return "<required parameter>"
 
 
-required = _RequiredParameter()
+REQUIRED = _RequiredParameter()
 
 
 class LARS(Optimizer):
     r"""Implements layer-wise adaptive rate scaling for SGD.
 
     Args:
-        params (iterable): iterable of parameters to optimize or dicts defining
-            parameter groups
-        lr (float): base learning rate (\gamma_0)
-        momentum (float, optional): momentum factor (default: 0) ("m")
-        weight_decay (float, optional): weight decay (L2 penalty) (default: 0)
-            ("\beta")
-        eta (float, optional): LARS coefficient
+        params: iterable of parameters to optimize or dicts defining parameter groups
+        lr: base learning rate (\gamma_0)
+        momentum: momentum factor (default: 0) ("m")
+        weight_decay: weight decay (L2 penalty) (default: 0) ("\beta")
+        eta: LARS coefficient
         max_epoch: maximum training epoch to determine polynomial LR decay.
 
     Based on Algorithm 1 of the following paper by You, Gitman, and Ginsburg.
@@ -39,9 +39,14 @@ class LARS(Optimizer):
         loss_fn(model(input), target).backward()
         optimizer.step()
     """
-    def __init__(self, params, lr=required, momentum=.9,
-                 weight_decay=.0005, eta=0.001, max_epoch=200):
-        if lr is not required and lr < 0.0:
+    def __init__(self,
+                 params: Iterable,
+                 lr: float = REQUIRED,
+                 momentum: float = .9,
+                 weight_decay: float = 0.0005,
+                 eta: float = 0.001,
+                 max_epoch: int = 200):
+        if lr is not REQUIRED and lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
         if momentum < 0.0:
             raise ValueError(f"Invalid momentum value: {momentum}")
