@@ -86,7 +86,7 @@ jobs:
       #   TOXENV: py${{ matrix.python-version }}
       run: |
         # tox --sitepackages
-        coverage run --source pl_grid -m py.test pl_grid tests -v --doctest-modules --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
+        coverage run --source pl_bolts -m py.test pl_bolts tests -v --doctest-modules --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@master
@@ -102,6 +102,7 @@ jobs:
         python setup.py check --metadata --strict
         python setup.py sdist
         twine check dist/*
+
     #- name: Try install package
     #  if: ! startsWith(matrix.os, 'windows')
     #  run: |
