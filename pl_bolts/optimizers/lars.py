@@ -17,6 +17,7 @@ required = _RequiredParameter()
 
 class LARS(Optimizer):
     r"""Implements layer-wise adaptive rate scaling for SGD.
+
     Args:
         params (iterable): iterable of parameters to optimize or dicts defining
             parameter groups
@@ -26,14 +27,17 @@ class LARS(Optimizer):
             ("\beta")
         eta (float, optional): LARS coefficient
         max_epoch: maximum training epoch to determine polynomial LR decay.
+
     Based on Algorithm 1 of the following paper by You, Gitman, and Ginsburg.
     Large Batch Training of Convolutional Networks:
         https://arxiv.org/abs/1708.03888
+
     Example:
-        >>> optimizer = LARS(model.parameters(), lr=0.1, eta=1e-3)
-        >>> optimizer.zero_grad()
-        >>> loss_fn(model(input), target).backward()
-        >>> optimizer.step()
+
+        optimizer = LARS(model.parameters(), lr=0.1, eta=1e-3)
+        optimizer.zero_grad()
+        loss_fn(model(input), target).backward()
+        optimizer.step()
     """
     def __init__(self, params, lr=required, momentum=.9,
                  weight_decay=.0005, eta=0.001, max_epoch=200):
