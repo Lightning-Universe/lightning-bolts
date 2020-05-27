@@ -56,7 +56,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = UnlabeledImagenet(os.path.join(self.data_dir, 'train'),
+        dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class=num_images_per_class,
                                     split='train',
                                     transform=transforms)
@@ -74,7 +74,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = UnlabeledImagenet(os.path.join(self.data_dir, 'val'),
+        dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class_val_split=num_images_per_class,
                                     split='val',
                                     transform=transforms)
@@ -91,7 +91,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = UnlabeledImagenet(os.path.join(self.data_dir, 'test'),
+        dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class=num_images_per_class,
                                     split='test',
                                     transform=transforms)
