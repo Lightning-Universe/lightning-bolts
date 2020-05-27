@@ -83,6 +83,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         if transforms is None:
             transforms = self._default_transforms()
 
+        import pdb; pdb.set_trace()
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class_val_split=num_images_per_class,
                                     meta_root=self.meta_root,
