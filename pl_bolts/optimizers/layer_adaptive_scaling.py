@@ -42,14 +42,13 @@ class LARS(Optimizer):
     def __init__(self, params, lr=required, momentum=.9,
                  weight_decay=.0005, eta=0.001, max_epoch=200):
         if lr is not required and lr < 0.0:
-            raise ValueError("Invalid learning rate: {}".format(lr))
+            raise ValueError(f"Invalid learning rate: {lr}")
         if momentum < 0.0:
-            raise ValueError("Invalid momentum value: {}".format(momentum))
+            raise ValueError(f"Invalid momentum value: {momentum}")
         if weight_decay < 0.0:
-            raise ValueError("Invalid weight_decay value: {}"
-                             .format(weight_decay))
+            raise ValueError(f"Invalid weight_decay value: {weight_decay}")
         if eta < 0.0:
-            raise ValueError("Invalid LARS coefficient value: {}".format(eta))
+            raise ValueError(f"Invalid LARS coefficient value: {eta}")
 
         self.epoch = 0
         defaults = dict(lr=lr, momentum=momentum,
@@ -95,15 +94,13 @@ class LARS(Optimizer):
                 global_lr = lr * decay
 
                 # Compute local learning rate for this layer
-                local_lr = eta * weight_norm / \
-                    (grad_norm + weight_decay * weight_norm)
+                local_lr = eta * weight_norm / (grad_norm + weight_decay * weight_norm)
 
                 # Update the momentum term
                 actual_lr = local_lr * global_lr
 
                 if 'momentum_buffer' not in param_state:
-                    buf = param_state['momentum_buffer'] = \
-                            torch.zeros_like(p.data)
+                    buf = param_state['momentum_buffer'] = torch.zeros_like(p.data)
                 else:
                     buf = param_state['momentum_buffer']
                 buf.mul_(momentum).add_(actual_lr, d_p + weight_decay * p.data)

@@ -5,7 +5,7 @@ from torch.nn import functional as F
 from torch.optim.lr_scheduler import StepLR
 from torchvision.models import densenet
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
-from pl_bolts.optimizers import LARS
+from pl_bolts.optimizers.layer_adaptive_scaling import LARS
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLRDataTransform
@@ -155,7 +155,6 @@ class SimCLR(pl.LightningModule):
         parser.add_argument('--trans', type=str, default='randcrop,flip')
         return parser
 
-
     # model = SimCLR(
     #     hparams=args,
     #     encoder=EncoderModel(),
@@ -164,6 +163,7 @@ class SimCLR(pl.LightningModule):
     #     temperature=args.temp,
     #     transform_list=list(args.trans.split(','))
     # )
+
 
 if __name__ == '__main__':
     from argparse import ArgumentParser

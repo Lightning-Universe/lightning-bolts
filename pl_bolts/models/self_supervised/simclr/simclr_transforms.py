@@ -16,7 +16,7 @@ class SimCLRDataTransform(object):
                                               transforms.ToTensor()])
 
         self.test_transform = transforms.Compose([
-            transforms.Resize(input_height+10, interpolation=3),
+            transforms.Resize(input_height + 10, interpolation=3),
             transforms.CenterCrop(input_height),
             transforms.ToTensor(),
         ])

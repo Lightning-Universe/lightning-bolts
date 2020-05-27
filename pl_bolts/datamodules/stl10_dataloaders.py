@@ -31,7 +31,9 @@ class STL10DataLoaders(BoltDataLoaders):
 
         dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
-        dataset_train, _ = random_split(dataset, [train_length - self.unlabeled_val_split, self.unlabeled_val_split])
+        dataset_train, _ = random_split(dataset,
+                                        [train_length - self.unlabeled_val_split,
+                                         self.unlabeled_val_split])
         loader = DataLoader(
             dataset_train,
             batch_size=batch_size,
@@ -46,14 +48,20 @@ class STL10DataLoaders(BoltDataLoaders):
         if transforms is None:
             transforms = self._default_transforms()
 
-        unlabeled_dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
+        unlabeled_dataset = STL10(self.save_path,
+                                  split='unlabeled',
+                                  download=False,
+                                  transform=transforms)
         unlabeled_length = len(unlabeled_dataset)
         unlabeled_dataset, _ = random_split(unlabeled_dataset,
-                                            [unlabeled_length - self.unlabeled_val_split, self.unlabeled_val_split])
+                                            [unlabeled_length - self.unlabeled_val_split,
+                                             self.unlabeled_val_split])
 
         labeled_dataset = STL10(self.save_path, split='train', download=False, transform=transforms)
         labeled_length = len(labeled_dataset)
-        labeled_dataset, _ = random_split(labeled_dataset, [labeled_length - self.train_val_split, self.train_val_split])
+        labeled_dataset, _ = random_split(labeled_dataset,
+                                          [labeled_length - self.train_val_split,
+                                           self.train_val_split])
 
         dataset = ConcatDataset(unlabeled_dataset, labeled_dataset)
         loader = DataLoader(
@@ -72,7 +80,9 @@ class STL10DataLoaders(BoltDataLoaders):
 
         dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
-        _, dataset_val = random_split(dataset, [train_length - self.unlabeled_val_split, self.unlabeled_val_split])
+        _, dataset_val = random_split(dataset,
+                                      [train_length - self.unlabeled_val_split,
+                                       self.unlabeled_val_split])
         loader = DataLoader(
             dataset_val,
             batch_size=batch_size,
@@ -86,14 +96,20 @@ class STL10DataLoaders(BoltDataLoaders):
         if transforms is None:
             transforms = self._default_transforms()
 
-        unlabeled_dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
+        unlabeled_dataset = STL10(self.save_path,
+                                  split='unlabeled',
+                                  download=False,
+                                  transform=transforms)
         unlabeled_length = len(unlabeled_dataset)
         _, unlabeled_dataset = random_split(unlabeled_dataset,
-                                            [unlabeled_length - self.unlabeled_val_split, self.unlabeled_val_split])
+                                            [unlabeled_length - self.unlabeled_val_split,
+                                             self.unlabeled_val_split])
 
         labeled_dataset = STL10(self.save_path, split='train', download=False, transform=transforms)
         labeled_length = len(labeled_dataset)
-        _, labeled_dataset = random_split(labeled_dataset, [labeled_length - self.train_val_split, self.train_val_split])
+        _, labeled_dataset = random_split(labeled_dataset,
+                                          [labeled_length - self.train_val_split,
+                                           self.train_val_split])
 
         dataset = ConcatDataset(unlabeled_dataset, labeled_dataset)
         loader = DataLoader(
