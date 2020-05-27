@@ -47,7 +47,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
 
                 To generate the meta.bin do the following:
 
-                from pl_bolts.models.self_supervised.amdim.ssl_datasets import UnlabeledImagenet
+                from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
                 path = '/path/to/folder/with/ILSVRC2012_devkit_t12.tar.gz/'
                 UnlabeledImagenet.generate_meta_bins(path)
                 """)
