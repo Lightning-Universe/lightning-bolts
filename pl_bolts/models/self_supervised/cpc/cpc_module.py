@@ -252,7 +252,7 @@ class CPCV2(pl.LightningModule):
 
         (args, _) = parser.parse_known_args()
 
-        # v100@32GB batch_size = 200
+        # v100@32GB batch_size = 186
         cifar_10 = {
             'dataset': 'cifar10',
             'depth': 10,
@@ -262,7 +262,6 @@ class CPCV2(pl.LightningModule):
             'patch_overlap': 8 // 2,
             'lr_options': [
                 1e-5,
-                2e-5
             ]
         }
 
