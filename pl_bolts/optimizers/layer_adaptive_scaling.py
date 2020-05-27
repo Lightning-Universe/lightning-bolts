@@ -2,7 +2,7 @@
 Layer-wise adaptive rate scaling for SGD in PyTorch!
 Adapted from: https://github.com/noahgolmant/pytorch-lars/blob/master/lars.py
 """
-from typing import Iterable
+from typing import Iterable, Callable
 
 import torch
 from torch.optim.optimizer import Optimizer
@@ -28,9 +28,9 @@ class LARS(Optimizer):
         eta: LARS coefficient
         max_epoch: maximum training epoch to determine polynomial LR decay.
 
-    Based on Algorithm 1 of the following paper by You, Gitman, and Ginsburg.
-    Large Batch Training of Convolutional Networks:
-        https://arxiv.org/abs/1708.03888
+    Reference:
+        Based on Algorithm 1 of the following paper by You, Gitman, and Ginsburg.
+        Large Batch Training of Convolutional Networks: https://arxiv.org/abs/1708.03888
 
     Example:
 
@@ -38,6 +38,7 @@ class LARS(Optimizer):
         optimizer.zero_grad()
         loss_fn(model(input), target).backward()
         optimizer.step()
+
     """
     def __init__(self,
                  params: Iterable,
@@ -61,13 +62,13 @@ class LARS(Optimizer):
                         eta=eta, max_epoch=max_epoch)
         super(LARS, self).__init__(params, defaults)
 
-    def step(self, epoch=None, closure=None):
+    def step(self, epoch=None, closure: Callable = None):
         """Performs a single optimization step.
+
         Arguments:
-            closure (callable, optional): A closure that reevaluates the model
-                and returns the loss.
+            closure: A closure that reevaluates the model and returns the loss.
             epoch: current epoch to calculate polynomial LR decay schedule.
-                   if None, uses self.epoch and increments it.
+                if None, uses self.epoch and increments it.
         """
         loss = None
         if closure is not None:
