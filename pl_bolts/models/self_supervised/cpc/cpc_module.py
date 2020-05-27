@@ -285,7 +285,7 @@ class CPCV2(pl.LightningModule):
             'dataset': 'imagenet128',
             'depth': 10,
             'patch_size': 32,
-            'batch_size': 52,
+            'batch_size': 48,
             'nb_classes': 1000,
             'patch_overlap': 32 // 2,
             'lr_options': [
