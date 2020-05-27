@@ -29,6 +29,7 @@ jobs:
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     timeout-minutes: 15
+
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -85,9 +86,7 @@ jobs:
       #   TOXENV: py${{ matrix.python-version }}
       run: |
         # tox --sitepackages
-        # flake8 .
-        coverage run --source pytorch_lightning -m py.test pytorch_lightning tests -v --doctest-modules --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
-        coverage report
+        coverage run --source pl_grid -m py.test pl_grid tests -v --doctest-modules --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@master
