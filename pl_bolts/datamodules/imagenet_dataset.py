@@ -46,7 +46,8 @@ class UnlabeledImagenet(ImageNet):
             split = 'val'
 
         self.split = split
-        wnid_to_classes = load_meta_file(root)[0]
+        split_root = os.path.join(root, split)
+        wnid_to_classes = load_meta_file(split_root)[0]
 
         super(ImageNet, self).__init__(self.split_folder, **kwargs)
         self.root = root

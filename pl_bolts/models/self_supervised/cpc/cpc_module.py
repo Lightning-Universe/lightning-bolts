@@ -116,8 +116,8 @@ class CPCV2(pl.LightningModule):
                 with torch.no_grad():
                     Z = self(img_1)
 
-                    # just in case... no grads into unsupervised part!
-                    z_in = Z.detach()
+            # just in case... no grads into unsupervised part!
+            z_in = Z.detach()
 
             z_in = z_in.reshape(Z.size(0), -1)
             mlp_preds = self.non_linear_evaluator(z_in)
@@ -252,7 +252,7 @@ class CPCV2(pl.LightningModule):
 
         (args, _) = parser.parse_known_args()
 
-        # v100@32GB batch_size = 200
+        # v100@32GB batch_size = 186
         cifar_10 = {
             'dataset': 'cifar10',
             'depth': 10,
@@ -262,7 +262,6 @@ class CPCV2(pl.LightningModule):
             'patch_overlap': 8 // 2,
             'lr_options': [
                 1e-5,
-                2e-5
             ]
         }
 
@@ -286,15 +285,11 @@ class CPCV2(pl.LightningModule):
             'dataset': 'imagenet128',
             'depth': 10,
             'patch_size': 32,
-            'batch_size': 60,
+            'batch_size': 48,
             'nb_classes': 1000,
             'patch_overlap': 32 // 2,
             'lr_options': [
-                2e-6,
                 2e-5,
-                2e-4,
-                2e-3,
-                2e-2
             ]
         }
 
