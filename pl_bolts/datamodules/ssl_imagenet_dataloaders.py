@@ -90,9 +90,8 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
     def test_dataloader(self, batch_size, num_images_per_class, transforms=None, add_normalize=False):
         if transforms is None:
             transforms = self._default_transforms()
-        data_dir = self._resolve_data_subfolder(self.data_dir, 'val')
 
-        dataset = UnlabeledImagenet(data_dir,
+        dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class=num_images_per_class,
                                     split='test',
                                     transform=transforms)
