@@ -9,6 +9,7 @@ from pl_bolts.optimizers import LARS
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLRDataTransform
+from pl_bolts.metrics import mean
 
 
 class EncoderModel(nn.Module):
@@ -84,8 +85,10 @@ class SimCLR(pl.LightningModule):
         return h, z
 
     def training_step(self, batch, batch_idx):
-        h1, z1 = self.forward(batch['PA'])
-        h2, z2 = self.forward(batch['PA2'])
+        (img_1, img_2), y = batch
+        h1, z1 = self.forward(img_1)
+        h2, z2 = self.forward(img_2)
+
         # return h1, z1, h2, z2
         loss = self.loss_func(z1, z2, self.temp)
         logs = {'loss': loss.item()}
@@ -100,19 +103,19 @@ class SimCLR(pl.LightningModule):
     #     print(f'Rank = {rank}', [z2.shape for z2 in z2s])
 
     def validation_step(self, batch, batch_idx):
-        h1, z1 = self.forward(batch['PA'])
-        h2, z2 = self.forward(batch['PA2'])
+        (img_1, img_2), y = batch
+        h1, z1 = self.forward(img_1)
+        h2, z2 = self.forward(img_2)
         loss = self.loss_func(z1, z2, self.temp)
         logs = {'val_loss': loss.item()}
-        self.lossmeter.add(loss.item(), h1.shape[0])
-        return dict(loss=loss, log=logs)
+        return dict(val_loss=loss, log=logs)
 
     def validation_epoch_end(self, outputs: list):
+        val_loss = mean(outputs, 'val_loss')
         logs = dict(
-            val_loss=self.lossmeter.mean,
+            val_loss=val_loss,
         )
-        print('\nLogs: ', logs)
-        return dict(val_loss=self.lossmeter.mean, log=logs)
+        return dict(val_loss=val_loss, log=logs)
 
     def prepare_data(self):
         self.dataset.prepare_data()
@@ -123,7 +126,7 @@ class SimCLR(pl.LightningModule):
         return loader
 
     def val_dataloader(self):
-        test_transform = SimCLRDataTransform(input_height=self.input_height).test_transform
+        test_transform = SimCLRDataTransform(input_height=self.input_height, test=True)
         loader = self.dataset.val_dataloader(self.batch_size, transforms=test_transform)
         return loader
 

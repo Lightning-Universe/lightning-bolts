@@ -4,8 +4,9 @@ import cv2
 
 
 class SimCLRDataTransform(object):
-    def __init__(self, input_height, s=1):
+    def __init__(self, input_height, s=1, test=False):
         self.s = s
+        self.test = test
         self.input_height = input_height
         color_jitter = transforms.ColorJitter(0.8 * self.s, 0.8 * self.s, 0.8 * self.s, 0.2 * self.s)
         data_transforms = transforms.Compose([transforms.RandomResizedCrop(size=self.input_height),
@@ -21,11 +22,12 @@ class SimCLRDataTransform(object):
             transforms.ToTensor(),
         ])
 
-        self.transform = data_transforms
+        self.train_transform = data_transforms
 
     def __call__(self, sample):
-        xi = self.transform(sample)
-        xj = self.transform(sample)
+        transform = self.train_transform if self.test else self.test_transform
+        xi = transform(sample)
+        xj = transform(sample)
         return xi, xj
 
 
