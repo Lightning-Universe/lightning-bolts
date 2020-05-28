@@ -14,7 +14,7 @@ from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLRDataT
 class EncoderModel(nn.Module):
     def __init__(self):
         super().__init__()
-        self.model = densenet.densenet121(densenet.ModelCfg(), num_classes=1)
+        self.model = densenet.densenet121(pretrained=False, num_classes=1)
         del self.model.classifier
 
     def forward(self, x):
@@ -39,10 +39,20 @@ class Projection(nn.Module):
 
 
 class SimCLR(pl.LightningModule):
-    def __init__(self, dataset, temperature=0.5):
+    def __init__(self, dataset, data_dir, lr, wd, input_height, batch_size,
+                 num_workers=0, optimizer='adam', step=30, gamma=0.5, temperature=0.5, **kwargs):
         super().__init__()
 
+        self.batch_size = batch_size
+        self.input_height = input_height
+        self.gamma = gamma
+        self.step = step
+        self.optimizer = optimizer
+        self.wd = wd
+        self.lr = lr
         self.temp = temperature
+        self.data_dir = data_dir
+        self.num_workers = num_workers
         self.dataset = self.get_dataset(dataset)
         self.loss_func = self.init_loss()
         self.encoder = self.init_encoder()
@@ -59,11 +69,11 @@ class SimCLR(pl.LightningModule):
 
     def get_dataset(self, name):
         if name == 'cifar10':
-            return CIFAR10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            return CIFAR10DataLoaders(self.data_dir, num_workers=self.num_workers)
         elif name == 'stl10':
-            return STL10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            return STL10DataLoaders(self.data_dir, num_workers=self.num_workers)
         elif name == 'imagenet128':
-            return SSLImagenetDataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            return SSLImagenetDataLoaders(self.data_dir, num_workers=self.num_workers)
         else:
             raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
                                     f'your own \'')
@@ -109,26 +119,26 @@ class SimCLR(pl.LightningModule):
 
     def train_dataloader(self):
         train_transform = SimCLRDataTransform(input_height=self.input_height)
-        loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
+        loader = self.dataset.train_dataloader(self.batch_size, transforms=train_transform)
         return loader
 
     def val_dataloader(self):
         test_transform = SimCLRDataTransform(input_height=self.input_height).test_transform
-        loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
+        loader = self.dataset.val_dataloader(self.batch_size, transforms=test_transform)
         return loader
 
     def configure_optimizers(self):
-        if self.hparams.optim == 'adam':
+        if self.optimizer == 'adam':
             optimizer = torch.optim.Adam(
-                self.parameters(), self.hparams.lr, weight_decay=self.hparams.wd)
-        elif self.hparams.optim == 'lars':
+                self.parameters(), self.lr, weight_decay=self.wd)
+        elif self.optimizer == 'lars':
             optimizer = LARS(
-                self.parameters(), lr=self.hparams.lr, momentum=self.hparams.mom,
-                weight_decay=self.hparams.wd, eta=self.hparams.eta)
+                self.parameters(), lr=self.lr, momentum=self.mom,
+                weight_decay=self.wd, eta=self.eta)
         else:
-            raise ValueError(f'Invalid optimizer: {self.hparams.optim}')
+            raise ValueError(f'Invalid optimizer: {self.optimizer}')
         scheduler = StepLR(
-            optimizer, step_size=self.hparams.step, gamma=self.hparams.gamma)
+            optimizer, step_size=self.step, gamma=self.gamma)
         return [optimizer], [scheduler]
 
     @staticmethod
@@ -136,6 +146,10 @@ class SimCLR(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true')
         parser.add_argument('--dataset', type=str, default='cifar10')
+
+        (args, _) = parser.parse_known_args()
+        height = {'cifar10': 32, 'stl10':96, 'imagenet128': 224}[args.dataset]
+        parser.add_argument('--input_height', type=int, default=height)
 
         # Data
         parser.add_argument('--data_dir', type=str, default='.')
@@ -172,5 +186,6 @@ if __name__ == '__main__':
     parser = SimCLR.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    model = SimCLR(args)
-    trainer = pl.Trainer.from_argparse_args(parser)
+    model = SimCLR(**vars(args))
+    trainer = pl.Trainer.from_argparse_args(args)
+    trainer.fit(model)
