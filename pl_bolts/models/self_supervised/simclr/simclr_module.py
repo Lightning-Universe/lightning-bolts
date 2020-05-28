@@ -187,7 +187,7 @@ class SimCLR(pl.LightningModule):
             log['val_mlp_acc'] = mlp_acc
             log['val_mlp_loss'] = mlp_loss
 
-        return dict(val_loss=val_loss, log=log)
+        return dict(val_loss=val_loss, log=log, progress_bar={'val_acc': log['val_mlp_acc']})
 
     def prepare_data(self):
         self.dataset.prepare_data()
