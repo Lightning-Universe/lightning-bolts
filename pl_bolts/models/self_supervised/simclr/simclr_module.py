@@ -249,6 +249,8 @@ class SimCLR(pl.LightningModule):
         # Model
         parser.add_argument('--temp', type=float, default=0.5)
         parser.add_argument('--trans', type=str, default='randcrop,flip')
+        parser.add_argument('--num_workers', default=8, type=int)
+
         return parser
 
 
