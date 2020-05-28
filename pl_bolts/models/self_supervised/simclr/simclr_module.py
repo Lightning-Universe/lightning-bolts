@@ -239,9 +239,9 @@ class SimCLR(pl.LightningModule):
 
         # Training
         parser.add_argument('--expdir', type=str, default='simclrlogs')
-        parser.add_argument('--optim', choices=['adam', 'lars'], default='adam')
+        parser.add_argument('--optim', choices=['adam', 'lars'], default='lars')
         parser.add_argument('--batch_size', type=int, default=128)
-        parser.add_argument('--lr', type=float, default=0.00001)
+        parser.add_argument('--lr', type=float, default=0.00006)
         parser.add_argument('--mom', type=float, default=0.9)
         parser.add_argument('--eta', type=float, default=0.001)
         parser.add_argument('--step', type=float, default=30)
@@ -253,16 +253,6 @@ class SimCLR(pl.LightningModule):
         parser.add_argument('--num_workers', default=8, type=int)
 
         return parser
-
-    # model = SimCLR(
-    #     hparams=args,
-    #     encoder=EncoderModel(),
-    #     projection=Projection(),
-    #     loss_func=nt_xent_loss,
-    #     temperature=args.temp,
-    #     transform_list=list(args.trans.split(','))
-    # )
-
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
