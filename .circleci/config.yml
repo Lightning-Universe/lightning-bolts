@@ -53,14 +53,13 @@ references:
        flake8
 
   make_docs: &make_docs
-    run:
-      name: Make Documentation
-      command: |
-        # sudo apt-get install pandoc
-        pip install -r requirements.txt --user
-        sudo pip install -r docs/requirements.txt
-        # sphinx-apidoc -o ./docs/source ./pytorch_lightning **/test_* --force --follow-links
-        cd docs; make clean ; make html --debug --jobs 2 SPHINXOPTS="-W"
+   run:
+     name: Make Documentation
+     command: |
+       # First run the same pipeline as Read-The-Docs
+       sudo apt-get update && sudo apt-get install -y cmake
+       sudo pip install -r docs/requirements.txt
+       cd docs; make clean; make html --debug --jobs 2 SPHINXOPTS="-W"
 
 jobs:
 

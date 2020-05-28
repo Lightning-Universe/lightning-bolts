@@ -1,0 +1,122 @@
+name: CI testing
+
+# see: https://help.github.com/en/actions/reference/events-that-trigger-workflows
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the master branch
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      # max-parallel: 6
+      matrix:
+        # PyTorch 1.5 is failing on Win and bolts requires torchvision>=0.5
+        os: [ubuntu-18.04, macOS-10.15]  # , windows-2019
+        python-version: [3.6, 3.7, 3.8]
+        requires: ['minimal', 'latest']
+        # exclude:
+        #   # excludes PT 1.3 as it is missing on pypi
+        #   - python-version: 3.8
+        #     requires: 'minimal'
+
+    # Timeout: https://stackoverflow.com/a/59076067/4521646
+    timeout-minutes: 15
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    # Github Actions: Run step on specific OS: https://stackoverflow.com/a/57948488/4521646
+    - name: Setup macOS
+      if: runner.os == 'macOS'
+      run: |
+        brew install libomp  # https://github.com/pytorch/pytorch/issues/20030
+
+    #- name: Setup Windows
+    #  if: runner.os == 'windows'
+    #  run: |
+    #    python -c "lines = open('requirements.txt').readlines() + ['torch<1.5\n']; open('requirements.txt', 'w').writelines(lines)"
+
+    - name: Set min. dependencies
+      if: matrix.requires == 'minimal'
+      run: |
+        python -c "req = open('requirements.txt').read().replace('>', '=') ; open('requirements.txt', 'w').write(req)"
+
+    # Note: This uses an internal pip API and may not always work
+    # https://github.com/actions/cache/blob/master/examples.md#multiple-oss-in-a-workflow
+    - name: Get pip cache
+      id: pip-cache
+      run: |
+        python -c "from pip._internal.locations import USER_CACHE_DIR; print('::set-output name=dir::' + USER_CACHE_DIR)"
+
+    - name: Cache pip
+      uses: actions/cache@v1
+      with:
+        path: ${{ steps.pip-cache.outputs.dir }}
+        key: ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}-pip-
+
+    - name: Install dependencies
+      run: |
+        # python -m pip install --upgrade --user pip
+        pip install -r requirements.txt -U -f https://download.pytorch.org/whl/torch_stable.html -q
+        pip install -r ./tests/requirements.txt -q
+        # pip install tox coverage
+        python --version
+        pip --version
+        pip list
+      shell: bash
+
+    - name: Cache datasets
+      uses: actions/cache@v1
+      with:
+        path: tests/Datasets # This path is specific to Ubuntu
+        # Look to see if there is a cache hit for the corresponding requirements file
+        key: mnist-dataset
+
+    - name: Tests
+      # env:
+      #   TOXENV: py${{ matrix.python-version }}
+      run: |
+        # tox --sitepackages
+        coverage run --source pl_bolts -m py.test pl_bolts tests -v --doctest-modules --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
+
+    - name: Upload pytest test results
+      uses: actions/upload-artifact@master
+      with:
+        name: pytest-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}
+        path: junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
+      # Use always() to always run this step to publish test results when there are test failures
+      if: always()
+
+    - name: Package Setup
+      run: |
+        check-manifest
+        python setup.py check --metadata --strict
+        python setup.py sdist
+        twine check dist/*
+
+    #- name: Try install package
+    #  if: ! startsWith(matrix.os, 'windows')
+    #  run: |
+    #    virtualenv vEnv ; source vEnv/bin/activate
+    #    pip install --editable . ; cd .. & python -c "import pytorch_lightning ; print(pytorch_lightning.__version__)"
+    #    deactivate ; rm -rf vEnv
+
+    - name: Statistics
+      if: success()
+      run: |
+         coverage report

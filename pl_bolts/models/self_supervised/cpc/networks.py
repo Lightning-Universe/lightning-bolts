@@ -23,8 +23,8 @@ class CPCResNet101(nn.Module):
             # the 2x2 stride with a dilated convolution instead
             replace_stride_with_dilation = [False, False, False]
         if len(replace_stride_with_dilation) != 3:
-            raise ValueError("replace_stride_with_dilation should be None "
-                             "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
+            raise ValueError("replace_stride_with_dilation should be None"
+                             f" or a 3-element tuple, got {replace_stride_with_dilation}")
         self.groups = groups
         self.base_width = width_per_group
         self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
