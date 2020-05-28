@@ -113,8 +113,9 @@ class CPCV2(pl.LightningModule):
         if self.online_evaluator:
             if self.hparams.dataset == 'stl10':
                 img_1, y = labeled_batch
-                with torch.no_grad():
-                    Z = self(img_1)
+
+            with torch.no_grad():
+                Z = self(img_1)
 
             # just in case... no grads into unsupervised part!
             z_in = Z.detach()
