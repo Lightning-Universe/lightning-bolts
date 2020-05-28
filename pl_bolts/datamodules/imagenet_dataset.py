@@ -134,9 +134,9 @@ class UnlabeledImagenet(ImageNet):
 
 def _verify_archive(root, file, md5):
     if not _check_integrity(os.path.join(root, file), md5):
-        msg = ("The archive {} is not present in the root directory or is corrupted. "
-               "You need to download it externally and place it in {}.")
-        raise RuntimeError(msg.format(file, root))
+        raise RuntimeError(
+            f"The archive {file} is not present in the root directory or is corrupted."
+            f" You need to download it externally and place it in {root}.")
 
 
 def _check_integrity(fpath, md5=None):
@@ -240,7 +240,7 @@ def extract_archive(from_path, to_path=None, remove_finished=False):
         with zipfile.ZipFile(from_path, 'r') as z:
             z.extractall(to_path)
     else:
-        raise ValueError("Extraction of {} not supported".format(from_path))
+        raise ValueError(f"Extraction of {from_path} not supported")
 
     if remove_finished:
         os.remove(from_path)

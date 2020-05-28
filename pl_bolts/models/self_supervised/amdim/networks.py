@@ -19,7 +19,7 @@ class AMDIMEncoder(nn.Module):
         self.encoder_size = encoder_size
 
         # encoding block for local features
-        print('Using a {}x{} encoder'.format(encoder_size, encoder_size))
+        print(f'Using a {encoder_size}x{encoder_size} encoder')
         if encoder_size == 32:
             self.layer_list = nn.ModuleList([
                 Conv3x3(num_channels, ndf, 3, 1, 0, False),
@@ -58,8 +58,7 @@ class AMDIMEncoder(nn.Module):
                 MaybeBatchNorm2d(n_rkhs, True, True)
             ])
         else:
-            raise RuntimeError("Could not build encoder."
-                               "Encoder size {} is not supported".format(encoder_size))
+            raise RuntimeError(f"Could not build encoder. Encoder size {encoder_size} is not supported")
         self._config_modules(
             dummy_batch,
             output_widths=[1, 5, 7],
