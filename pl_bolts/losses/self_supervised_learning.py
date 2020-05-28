@@ -1,6 +1,6 @@
+import numpy as np
 import torch
 from torch import nn
-import numpy as np
 
 from pl_bolts.models.vision import PixelCNN
 

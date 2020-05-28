@@ -1,6 +1,6 @@
-import torchvision.transforms as transforms
-import numpy as np
 import cv2
+import numpy as np
+import torchvision.transforms as transforms
 
 
 class SimCLRDataTransform(object):

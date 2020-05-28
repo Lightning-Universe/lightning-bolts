@@ -1,5 +1,6 @@
-from pytorch_lightning import Callback
 import math
+
+from pytorch_lightning import Callback
 
 
 class MocoLRScheduler(Callback):

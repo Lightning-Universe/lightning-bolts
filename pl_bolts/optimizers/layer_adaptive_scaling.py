@@ -10,6 +10,7 @@ from torch.optim.optimizer import Optimizer
 
 class _RequiredParameter(object):
     """Singleton class representing a required parameter for an Optimizer."""
+
     def __repr__(self):
         return "<required parameter>"
 
@@ -40,6 +41,7 @@ class LARS(Optimizer):
         optimizer.step()
 
     """
+
     def __init__(self,
                  params: Iterable,
                  lr: float = REQUIRED,

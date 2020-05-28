@@ -2,16 +2,17 @@
 Adapted from: https://github.com/facebookresearch/moco
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 """
-import pytorch_lightning as pl
-import torch
-from torch import nn
-import torch.nn.functional as F
-import torchvision
 from argparse import Namespace
 
+import pytorch_lightning as pl
+import torch
+import torch.nn.functional as F
+import torchvision
+from torch import nn
+
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
-from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
+from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.models.self_supervised.moco.transforms import \
     Moco2Imagenet128Transforms, Moco2CIFAR10Transforms, Moco2STL10Transforms
 
@@ -339,6 +340,7 @@ def concat_all_gather(tensor):
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
+
     parser = ArgumentParser()
 
     # trainer args

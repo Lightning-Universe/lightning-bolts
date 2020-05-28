@@ -18,5 +18,4 @@ if __name__ == '__main__':
     parser.add_argument('world_size', default=str)
     parser.add_argument('local_rank', default=str)
 
-
 # grid train main.py --local --world_size 16 --local_gpus '0,1,2,3' --node_rank 0

@@ -14,10 +14,10 @@ from torch.optim.lr_scheduler import MultiStepLR
 from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
+from pl_bolts.losses.self_supervised_learning import InfoNCE
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-from pl_bolts.losses.self_supervised_learning import InfoNCE
 
 __all__ = [
     'CPCV2'
