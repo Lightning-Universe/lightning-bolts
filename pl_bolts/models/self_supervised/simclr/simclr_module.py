@@ -127,7 +127,7 @@ class SimCLR(pl.LightningModule):
         return loader
 
     def val_dataloader(self):
-        test_transform = SimCLRDataTransform(input_height=self.input_height, test=True)
+        test_transform = SimCLRDataTransform(input_height=self.input_height).test_transform
         loader = self.dataset.val_dataloader(self.batch_size, transforms=test_transform)
         return loader
 
