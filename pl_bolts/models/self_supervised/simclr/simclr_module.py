@@ -152,7 +152,7 @@ class SimCLR(pl.LightningModule):
         parser.add_argument('--dataset', type=str, default='cifar10')
 
         (args, _) = parser.parse_known_args()
-        height = {'cifar10': 32, 'stl10':96, 'imagenet128': 224}[args.dataset]
+        height = {'cifar10': 32, 'stl10': 96, 'imagenet128': 224}[args.dataset]
         parser.add_argument('--input_height', type=int, default=height)
 
         # Data
