@@ -239,8 +239,8 @@ class SimCLR(pl.LightningModule):
         # Training
         parser.add_argument('--expdir', type=str, default='simclrlogs')
         parser.add_argument('--optim', choices=['adam', 'lars'], default='adam')
-        parser.add_argument('--batch_size', type=int, default=32)
-        parser.add_argument('--lr', type=float, default=0.0001)
+        parser.add_argument('--batch_size', type=int, default=128)
+        parser.add_argument('--lr', type=float, default=0.00001)
         parser.add_argument('--mom', type=float, default=0.9)
         parser.add_argument('--eta', type=float, default=0.001)
         parser.add_argument('--step', type=float, default=30)
