@@ -254,6 +254,7 @@ class SimCLR(pl.LightningModule):
 
         return parser
 
+
 if __name__ == '__main__':
     from argparse import ArgumentParser
 
