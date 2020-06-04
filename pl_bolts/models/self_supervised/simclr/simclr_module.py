@@ -181,13 +181,15 @@ class SimCLR(pl.LightningModule):
             val_loss=val_loss,
         )
 
+        progress_bar = {}
         if self.online_evaluator:
             mlp_acc = mean(outputs, 'mlp_acc')
             mlp_loss = mean(outputs, 'mlp_loss')
             log['val_mlp_acc'] = mlp_acc
             log['val_mlp_loss'] = mlp_loss
+            progress_bar['val_acc'] = mlp_acc
 
-        return dict(val_loss=val_loss, log=log, progress_bar={'val_acc': log['val_mlp_acc']})
+        return dict(val_loss=val_loss, log=log, progress_bar=progress_bar)
 
     def prepare_data(self):
         self.dataset.prepare_data()
