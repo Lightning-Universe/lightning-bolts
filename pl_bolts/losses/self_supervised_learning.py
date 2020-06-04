@@ -184,7 +184,7 @@ class AMDIMContrastiveTask(nn.Module):
 
     def __init__(self, strategy='1:1', tclip=10.):
         """
-        Implementes the contrastive task of AMDIM in addition to the ablation tasks.
+        Implements the contrastive task of AMDIM in addition to the ablation tasks.
 
         Args:
             strategy:  which pair of positive and anchor maps to compare '1:1', '1:5,1:7,5:5', '1:1,5:5,7:7', '1:random'
@@ -194,8 +194,7 @@ class AMDIMContrastiveTask(nn.Module):
         self.strategy = strategy
 
         self.masks = {}
-
-
+        self.nce_loss = AmdimNceLoss()
 
     def feat_size_w_mask(self, w):
         masks_r5 = np.zeros((w, w, 1, w, w))
