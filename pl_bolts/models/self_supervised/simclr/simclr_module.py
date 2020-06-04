@@ -4,6 +4,7 @@ from torch import nn
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import StepLR
 from torchvision.models import densenet
+from argparse import Namespace
 
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
@@ -49,8 +50,9 @@ class SimCLR(pl.LightningModule):
                  online_ft=False, num_workers=0, optimizer='adam',
                  step=30, gamma=0.5, temperature=0.5, **kwargs):
         super().__init__()
-        self.hparams = {
-            'lr':lr,
+
+        self.hparams = Namespace(**{
+            'lr': lr,
             'step': step,
             'gamma': gamma,
             'temperature': temperature,
@@ -62,7 +64,7 @@ class SimCLR(pl.LightningModule):
             'online_ft': online_ft,
             'num_workers': num_workers,
             'optimizer': optimizer
-        }
+        })
 
         self.online_evaluator = online_ft
         self.batch_size = batch_size
