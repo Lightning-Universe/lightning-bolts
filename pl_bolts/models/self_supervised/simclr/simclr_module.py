@@ -49,6 +49,20 @@ class SimCLR(pl.LightningModule):
                  online_ft=False, num_workers=0, optimizer='adam',
                  step=30, gamma=0.5, temperature=0.5, **kwargs):
         super().__init__()
+        self.hparams = {
+            'lr':lr,
+            'step': step,
+            'gamma': gamma,
+            'temperature': temperature,
+            'dataset': dataset,
+            'data_dir': data_dir,
+            'wd': wd,
+            'input_height': input_height,
+            'batch_size': batch_size,
+            'online_ft': online_ft,
+            'num_workers': num_workers,
+            'optimizer': optimizer
+        }
 
         self.online_evaluator = online_ft
         self.batch_size = batch_size
