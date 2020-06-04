@@ -72,7 +72,7 @@ class AMDIM(pl.LightningModule):
 
         return result
 
-    def training_end(self, outputs):
+    def training_epoch_end(self, outputs):
         r1_x1 = outputs['r1_x1']
         r5_x1 = outputs['r5_x1']
         r7_x1 = outputs['r7_x1']
