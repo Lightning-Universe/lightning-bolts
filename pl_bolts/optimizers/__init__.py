@@ -1,1 +1,1 @@
-from pl_bolts.optimizers.lars import LARS
+from pl_bolts.optimizers.layer_adaptive_scaling import LARS

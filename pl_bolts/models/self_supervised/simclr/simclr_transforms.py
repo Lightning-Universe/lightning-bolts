@@ -1,6 +1,6 @@
-import torchvision.transforms as transforms
-import numpy as np
 import cv2
+import numpy as np
+import torchvision.transforms as transforms
 
 
 class SimCLRDataTransform(object):
@@ -17,7 +17,7 @@ class SimCLRDataTransform(object):
                                               transforms.ToTensor()])
 
         self.test_transform = transforms.Compose([
-            transforms.Resize(input_height+10, interpolation=3),
+            transforms.Resize(input_height + 10, interpolation=3),
             transforms.CenterCrop(input_height),
             transforms.ToTensor(),
         ])

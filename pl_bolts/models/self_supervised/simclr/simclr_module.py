@@ -4,14 +4,15 @@ from torch import nn
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import StepLR
 from torchvision.models import densenet
-from pl_bolts.losses.self_supervised_learning import nt_xent_loss
-from pl_bolts.optimizers import LARS
+
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
+from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLRDataTransform
-from pl_bolts.metrics import mean
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 from pl_bolts import metrics
+from pl_bolts.metrics import mean
+from pl_bolts.optimizers.layer_adaptive_scaling import LARS
 
 
 class EncoderModel(nn.Module):
@@ -230,7 +231,7 @@ class SimCLR(pl.LightningModule):
         parser.add_argument('--dataset', type=str, default='cifar10')
 
         (args, _) = parser.parse_known_args()
-        height = {'cifar10': 32, 'stl10':96, 'imagenet128': 224}[args.dataset]
+        height = {'cifar10': 32, 'stl10': 96, 'imagenet128': 224}[args.dataset]
         parser.add_argument('--input_height', type=int, default=height)
 
         # Data
@@ -250,11 +251,12 @@ class SimCLR(pl.LightningModule):
         parser.add_argument('--temp', type=float, default=0.5)
         parser.add_argument('--trans', type=str, default='randcrop,flip')
         parser.add_argument('--num_workers', default=8, type=int)
-
         return parser
+
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
+
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
     parser = SimCLR.add_model_specific_args(parser)
