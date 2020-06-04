@@ -90,22 +90,8 @@ class InfoNCE(nn.Module):
         return loss
 
 
-class AMDIMContrastiveTask(nn.Module):
-
-    def __init__(self, strategy='1:1', tclip=10.):
-        """
-        Implementes the contrastive task of AMDIM in addition to the ablation tasks.
-
-        Args:
-            strategy:  which pair of positive and anchor maps to compare '1:1', '1:5,1:7,5:5', '1:1,5:5,7:7', '1:random'
-        """
-        super().__init__()
-        self.tclip = tclip
-        self.strategy = strategy
-
-        self.masks = {}
-
-    def nce_loss(self, r_src, r_trg, mask_mat):
+class AmdimNceLoss(nn.Module):
+    def forward(self, anchor_representations, positive_representations, mask_mat):
         """
         Compute the NCE scores for predicting r_src->r_trg.
         Input:
@@ -118,6 +104,9 @@ class AMDIMContrastiveTask(nn.Module):
           nce_scores : (n_batch_gpu, n_locs)
           lgt_reg    : scalar
         """
+        r_src = anchor_representations
+        r_trg = positive_representations
+
         # RKHS = embedding dim
         batch_size, emb_dim = r_src.size()
         nb_feat_vectors = r_trg.size(1) // batch_size
@@ -140,8 +129,8 @@ class AMDIMContrastiveTask(nn.Module):
         # -----------------------
         # STABILITY TRICKS
         # trick 1: weighted regularization term
-        raw_scores = raw_scores / emb_dim**0.5
-        lgt_reg = 5e-2 * (raw_scores**2.).mean()
+        raw_scores = raw_scores / emb_dim ** 0.5
+        lgt_reg = 5e-2 * (raw_scores ** 2.).mean()
 
         # trick 2: tanh clip
         raw_scores = tanh_clip(raw_scores, clip_val=self.tclip)
@@ -189,6 +178,24 @@ class AMDIMContrastiveTask(nn.Module):
         nce_scores = -nce_scores.mean()
 
         return nce_scores, lgt_reg
+
+
+class AMDIMContrastiveTask(nn.Module):
+
+    def __init__(self, strategy='1:1', tclip=10.):
+        """
+        Implementes the contrastive task of AMDIM in addition to the ablation tasks.
+
+        Args:
+            strategy:  which pair of positive and anchor maps to compare '1:1', '1:5,1:7,5:5', '1:1,5:5,7:7', '1:random'
+        """
+        super().__init__()
+        self.tclip = tclip
+        self.strategy = strategy
+
+        self.masks = {}
+
+
 
     def feat_size_w_mask(self, w):
         masks_r5 = np.zeros((w, w, 1, w, w))
