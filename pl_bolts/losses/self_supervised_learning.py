@@ -90,33 +90,24 @@ class InfoNCE(nn.Module):
         return loss
 
 
-class AMDIMLossNCE(nn.Module):
-    """
-    Loss used in AMDIM
-    """
+class AMDIMContrastiveTask(nn.Module):
 
-    def __init__(self, tclip=10.):
+    def __init__(self, strategy='1:1', tclip=10.):
+        """
+        Implementes the contrastive task of AMDIM in addition to the ablation tasks.
+
+        Args:
+            strategy:  which pair of positive and anchor maps to compare '1:1', '1:5,1:7,5:5', '1:1,5:5,7:7', '1:random'
+        """
         super().__init__()
-        # construct masks for sampling source features from 5x5 layer
-        # (b, 1, 5, 5)
+        self.tclip = tclip
+        self.strategy = strategy
 
-        self.tclip = torch.tensor(tclip)
-        self.masks_r5 = nn.Parameter(self.feat_size_w_mask(5), requires_grad=False)
         self.masks = {}
-
-    def feat_size_w_mask(self, w):
-        masks_r5 = np.zeros((w, w, 1, w, w))
-        for i in range(w):
-            for j in range(w):
-                masks_r5[i, j, 0, i, j] = 1
-        masks_r5 = torch.tensor(masks_r5).type(torch.bool)
-        masks_r5 = masks_r5.reshape(-1, 1, w, w)
-        return masks_r5
 
     def nce_loss(self, r_src, r_trg, mask_mat):
         """
         Compute the NCE scores for predicting r_src->r_trg.
-
         Input:
           r_src    : (batch_size, emb_dim)
           r_trg    : (emb_dim, n_batch * w* h) (ie: nb_feat_vectors x embedding_dim)
@@ -127,7 +118,6 @@ class AMDIMLossNCE(nn.Module):
           nce_scores : (n_batch_gpu, n_locs)
           lgt_reg    : scalar
         """
-
         # RKHS = embedding dim
         batch_size, emb_dim = r_src.size()
         nb_feat_vectors = r_trg.size(1) // batch_size
@@ -137,7 +127,6 @@ class AMDIMLossNCE(nn.Module):
         mask_pos = mask_mat.unsqueeze(dim=2).expand(-1, -1, nb_feat_vectors).float()
 
         # negative mask
-        # one = torch.ones_like(mask_pos)
         mask_neg = 1. - mask_pos
 
         # -------------------------------
@@ -145,27 +134,28 @@ class AMDIMLossNCE(nn.Module):
         # compute src->trg raw scores for batch
         # (b, dim) x (dim, nb_feats*b) -> (b, b, nb_feats)
         # vector for each img in batch times all the vectors of all images in batch
-        raw_scores = torch.mm(r_src, r_trg)
-        raw_scores = raw_scores.reshape(batch_size, batch_size, nb_feat_vectors).float()
+        raw_scores = torch.mm(r_src, r_trg).float()
+        raw_scores = raw_scores.reshape(batch_size, batch_size, nb_feat_vectors)
 
         # -----------------------
         # STABILITY TRICKS
         # trick 1: weighted regularization term
-        raw_scores = raw_scores / emb_dim ** 0.5
-        lgt_reg = 5e-2 * (raw_scores ** 2).mean()
+        raw_scores = raw_scores / emb_dim**0.5
+        lgt_reg = 5e-2 * (raw_scores**2.).mean()
 
         # trick 2: tanh clip
-        raw_scores = tanh_clip(raw_scores, clip_val=self.tclip).float()
+        raw_scores = tanh_clip(raw_scores, clip_val=self.tclip)
 
-        # pos_scores includes scores for all the positive samples
-        # neg_scores includes scores for all the negative samples, with
-        # scores for positive samples set to the min score (-self.tclip here)
-
+        '''
+        pos_scores includes scores for all the positive samples
+        neg_scores includes scores for all the negative samples, with
+        scores for positive samples set to the min score (-self.tclip here)
+        '''
         # ----------------------
         # EXTRACT POSITIVE SCORES
         # use the index mask to pull all the diagonals which are b1 x b1
         # (batch_size, nb_feat_vectors)
-        pos_scores = (mask_pos * raw_scores).sum(dim=1).float()
+        pos_scores = (mask_pos * raw_scores).sum(dim=1)
 
         # ----------------------
         # EXTRACT NEGATIVE SCORES
@@ -190,15 +180,24 @@ class AMDIMLossNCE(nn.Module):
         neg_sumexp = (mask_neg * torch.exp(neg_scores - neg_maxes)).sum(dim=1, keepdim=True)
         all_logsumexp = torch.log(torch.exp(pos_scores - neg_maxes) + neg_sumexp)
 
-        # FULL NCE
         # NUMERATOR
         # compute numerators for the NCE log-softmaxes
         pos_shiftexp = pos_scores - neg_maxes
 
+        # FULL NCE
         nce_scores = pos_shiftexp - all_logsumexp
-        nce_scores = -nce_scores.mean().float()
+        nce_scores = -nce_scores.mean()
 
         return nce_scores, lgt_reg
+
+    def feat_size_w_mask(self, w):
+        masks_r5 = np.zeros((w, w, 1, w, w))
+        for i in range(w):
+            for j in range(w):
+                masks_r5[i, j, 0, i, j] = 1
+        masks_r5 = torch.tensor(masks_r5, device=w.device).type(torch.uint8)
+        masks_r5 = masks_r5.reshape(-1, 1, w, w)
+        return masks_r5
 
     def _sample_src_ftr(self, r_cnv, masks):
         # get feature dimensions
@@ -208,67 +207,90 @@ class AMDIMLossNCE(nn.Module):
         if masks is not None:
             # subsample from conv-ish r_cnv to get a single vector
             mask_idx = torch.randint(0, masks.size(0), (n_batch,))
-            r_cnv = torch.masked_select(r_cnv, masks[mask_idx]).float()
+            mask = masks[mask_idx]
+            mask = mask.cuda(r_cnv.device.index)
+            r_cnv = torch.masked_select(r_cnv, mask)
 
         # flatten features for use as globals in glb->lcl nce cost
         r_vec = r_cnv.reshape(n_batch, feat_dim)
         return r_vec
 
-    def build_mask_cache(self, r5_x1):
-        # cache masks
-        batch_size, emb_dim, h, w = r5_x1.size()
-        if len(self.masks) == 0:
-            m1 = r5_x1
-
-            # make mask
-            if h not in self.masks:
-                mask = self.feat_size_w_mask(h)
-                mask = mask.type_as(r5_x1)
-                self.masks[h] = mask
-
-        masks_r5 = self.masks[h]
-        masks_r5 = masks_r5.type_as(r5_x1)
-
-        return masks_r5
-
-    def forward(self, r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2):
-        """
-        Compute nce infomax costs for various combos of source/target layers.
-        Compute costs in both directions, i.e. from/to both images (x1, x2).
-        rK_x1 are features from source image x1.
-        rK_x2 are features from source image x2.
-        """
-
-        # masks_r5 = self.build_mask_cache(r5_x1)
-        masks_r5 = self.masks_r5
-
+    def contrastive_task_77(self, x1_maps, x2_maps):
         # (b, dim, w. h)
+        batch_size, emb_dim, h, w = x1_maps[0].size()
+
+        mask = self.masks[h]
+
+        # -----------------
+        # SOURCE VECTORS
+        # 1 feature vector per image per feature map location
+        # img1 -> img2
+        r1_src_x1 = self._sample_src_ftr(x1_maps[0], mask)
+        r1_src_x2 = self._sample_src_ftr(x2_maps[0], mask)
+
+        # pick which map to use for negative samples
+        x2_tgt = x2_maps[0]
+        x1_tgt = x1_maps[0]
+
+        # adjust the maps for neg samples
+        x2_tgt = x2_tgt.permute(1, 0, 2, 3).reshape(emb_dim, -1)
+        x1_tgt = x1_tgt.permute(1, 0, 2, 3).reshape(emb_dim, -1)
+
+        # make masking matrix to help compute nce costs
+        # (b x b) zero matrix with 1s in the diag
+        diag_mat = torch.eye(batch_size)
+        diag_mat = diag_mat.cuda(r1_src_x1.device.index)
+
+        # -----------------
+        # NCE COSTS
+        # compute costs for 1->5 prediction
+        # use last layer to predict the layer with (5x5 features)
+        loss_fwd, regularizer_fwd = self.nce_loss(r1_src_x1, x2_tgt, diag_mat)  # img 1
+        loss_back, regularizer_back = self.nce_loss(r1_src_x2, x1_tgt, diag_mat)  # img 1
+
+        # ------------------
+        # FINAL LOSS MEAN
+        # loss mean
+        loss = 0.5 * (loss_fwd + loss_back)
+        loss = loss.mean()
+
+        regularizer = 0.5 * (regularizer_fwd + regularizer_back)
+        regularizer = regularizer.mean()
+        return loss, regularizer
+
+    def contrastive_task_15_17_55(self, x1_maps, x2_maps):
+        r1_x1, r5_x1, r7_x1 = x1_maps
+        r1_x2, r5_x2, r7_x2 = x2_maps
+
         batch_size, emb_dim, _, _ = r1_x1.size()
 
         # -----------------
         # SOURCE VECTORS
         # 1 feature vector per image per feature map location
         # img 1
-        r1_src_1 = self._sample_src_ftr(r1_x1, None)
-        r5_src_1 = self._sample_src_ftr(r5_x1, masks_r5)
+        b_1, e_1, h_1, w_1 = r1_x1.size()
+        mask_1 = self.masks[h_1]
+        r1_src_1 = self._sample_src_ftr(r1_x1, mask_1)
+        r1_src_2 = self._sample_src_ftr(r1_x2, mask_1)
 
-        # img 2
-        r1_src_2 = self._sample_src_ftr(r1_x2, None)
-        r5_src_2 = self._sample_src_ftr(r5_x2, masks_r5)
+        b_5, e_5, h_5, w_5 = r5_x1.size()
+        mask_5 = self.masks[h_5]
+        r5_src_1 = self._sample_src_ftr(r5_x1, mask_5)
+        r5_src_2 = self._sample_src_ftr(r5_x2, mask_5)
 
         # -----------------
         # TARGET VECTORS
         # before shape: (n_batch, emb_dim, w, h)
         r5_trg_1 = r5_x1.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-        r7_trg_1 = r7_x1.permute(1, 0, 2, 3).reshape(emb_dim, -1)
         r5_trg_2 = r5_x2.permute(1, 0, 2, 3).reshape(emb_dim, -1)
+        r7_trg_1 = r7_x1.permute(1, 0, 2, 3).reshape(emb_dim, -1)
         r7_trg_2 = r7_x2.permute(1, 0, 2, 3).reshape(emb_dim, -1)
         # after shape: (emb_dim, n_batch * w * h)
 
         # make masking matrix to help compute nce costs
         # (b x b) zero matrix with 1s in the diag
         diag_mat = torch.eye(batch_size)
-        diag_mat = diag_mat.type_as(r1_x1)
+        diag_mat = diag_mat.cuda(r1_x1.device.index)
 
         # -----------------
         # NCE COSTS
@@ -304,7 +326,164 @@ class AMDIMLossNCE(nn.Module):
         loss_1t7 = loss_1t7.mean()
         loss_5t5 = loss_5t5.mean()
         regularizer = regularizer.mean()
-        return loss_1t5, loss_1t7, loss_5t5, regularizer
+        return loss_1t5 + loss_1t7 + loss_5t5, regularizer
+
+    def contrastive_task_11_55_77(self, x1_maps, x2_maps):
+        r1_x1, r5_x1, r7_x1 = x1_maps
+        r1_x2, r5_x2, r7_x2 = x2_maps
+
+        batch_size, emb_dim, _, _ = r1_x1.size()
+
+        # -----------------
+        # SOURCE VECTORS
+        # 1 feature vector per image per feature map location
+        # img 1
+        b_1, e_1, h_1, w_1 = r1_x1.size()
+        mask_1 = self.masks[h_1]
+        r1_src_1 = self._sample_src_ftr(r1_x1, mask_1)
+        r1_src_2 = self._sample_src_ftr(r1_x2, mask_1)
+
+        # img 2
+        b_5, e_5, h_5, w_5 = r5_x1.size()
+        mask_5 = self.masks[h_5]
+        r5_src_1 = self._sample_src_ftr(r5_x1, mask_5)
+        r5_src_2 = self._sample_src_ftr(r5_x2, mask_5)
+
+        b_7, e_7, h_7, w_7 = r7_x1.size()
+        mask_7 = self.masks[h_7]
+        r7_src_1 = self._sample_src_ftr(r7_x1, mask_7)
+        r7_src_2 = self._sample_src_ftr(r7_x2, mask_7)
+
+        # -----------------
+        # TARGET VECTORS
+        # before shape: (n_batch, emb_dim, w, h)
+        r1_trg_1 = r1_x1.permute(1, 0, 2, 3).reshape(emb_dim, -1)
+        r5_trg_1 = r5_x1.permute(1, 0, 2, 3).reshape(emb_dim, -1)
+        r7_trg_1 = r7_x1.permute(1, 0, 2, 3).reshape(emb_dim, -1)
+
+        r1_trg_2 = r1_x2.permute(1, 0, 2, 3).reshape(emb_dim, -1)
+        r5_trg_2 = r5_x2.permute(1, 0, 2, 3).reshape(emb_dim, -1)
+        r7_trg_2 = r7_x2.permute(1, 0, 2, 3).reshape(emb_dim, -1)
+        # after shape: (emb_dim, n_batch * w * h)
+
+        # make masking matrix to help compute nce costs
+        # (b x b) zero matrix with 1s in the diag
+        diag_mat = torch.eye(batch_size)
+        diag_mat = diag_mat.cuda(r1_x1.device.index)
+
+        # -----------------
+        # NCE COSTS
+        # compute costs for 1->1 prediction
+        # use last layer to predict the layer with (5x5 features)
+        loss_1t1_1, regularizer_1t1_1 = self.nce_loss(r1_src_1, r1_trg_2, diag_mat)  # img 1
+        loss_1t1_2, regularizer_1t1_2 = self.nce_loss(r1_src_2, r1_trg_1, diag_mat)  # img 2
+
+        # compute costs for 5->5 prediction
+        # use last layer to predict the layer with (7x7 features)
+        loss_5t5_1, regularizer_1t7_1 = self.nce_loss(r5_src_1, r5_trg_2, diag_mat)  # img 1
+        loss_5t5_2, regularizer_1t7_2 = self.nce_loss(r5_src_2, r5_trg_1, diag_mat)  # img 2
+
+        # compute costs for 7->7 prediction
+        # use (5x5) layer to predict the (5x5) layer
+        loss_7t7_1, regularizer_7t7_1 = self.nce_loss(r7_src_1, r7_trg_2, diag_mat)  # img 1
+        loss_7t7_2, regularizer_7t7_2 = self.nce_loss(r7_src_2, r7_trg_1, diag_mat)  # img 2
+
+        # combine costs for optimization
+        loss_1t1 = 0.5 * (loss_1t1_1 + loss_1t1_2)
+        loss_5t5 = 0.5 * (loss_5t5_1 + loss_5t5_2)
+        loss_7t7 = 0.5 * (loss_7t7_1 + loss_7t7_2)
+
+        # regularizer
+        regularizer = 0.5 * (regularizer_1t1_1 + regularizer_1t1_2 +
+                             regularizer_1t7_1 + regularizer_1t7_2 +
+                             regularizer_7t7_1 + regularizer_7t7_2)
+
+        # ------------------
+        # FINAL LOSS MEAN
+        # loss mean
+        loss_1t1 = loss_1t1.mean()
+        loss_5t5 = loss_5t5.mean()
+        loss_7t7 = loss_7t7.mean()
+        regularizer = regularizer.mean()
+        return loss_1t1 + loss_5t5 + loss_7t7, regularizer
+
+    def contrastive_task_1_random(self, x1_maps, x2_maps):
+        r1_x1, r5_x1, r7_x1 = x1_maps
+        r1_x2, r5_x2, r7_x2 = x2_maps
+
+        batch_size, emb_dim, _, _ = r1_x1.size()
+
+        # -----------------
+        # SOURCE VECTORS
+        # 1 feature vector per image per feature map location
+        # img 1
+        b_1, e_1, h_1, w_1 = r1_x1.size()
+        mask_1 = self.masks[h_1]
+
+        r1_src_1 = self._sample_src_ftr(r1_x1, mask_1)
+        r1_src_2 = self._sample_src_ftr(r1_x2, mask_1)
+
+        # pick the target map
+        target_map_idx = np.random.randint(0, len(x2_maps), 1)[0]
+        target_map_x2 = x2_maps[target_map_idx]
+        target_map_x1 = x1_maps[target_map_idx]
+
+        # -----------------
+        # TARGET VECTORS
+        # before shape: (n_batch, emb_dim, w, h)
+        target_map_x2 = target_map_x2.permute(1, 0, 2, 3).reshape(emb_dim, -1)
+        target_map_x1 = target_map_x1.permute(1, 0, 2, 3).reshape(emb_dim, -1)
+
+        # make masking matrix to help compute nce costs
+        # (b x b) zero matrix with 1s in the diag
+        diag_mat = torch.eye(batch_size)
+        diag_mat = diag_mat.cuda(r1_x1.device.index)
+
+        # -----------------
+        # NCE COSTS
+        # compute costs for 1->5 prediction
+        # use last layer to predict the layer with (5x5 features)
+        loss_1tR_1, regularizer_1t5_1 = self.nce_loss(r1_src_1, target_map_x2, diag_mat)  # img 1
+        loss_1tR_2, regularizer_1t5_2 = self.nce_loss(r1_src_2, target_map_x1, diag_mat)  # img 2
+
+        # combine costs for optimization
+        loss_1tR = 0.5 * (loss_1tR_1 + loss_1tR_2)
+
+        # regularizer
+        regularizer = 0.5 * (regularizer_1t5_1 + regularizer_1t5_2)
+
+        # ------------------
+        # FINAL LOSS MEAN
+        # loss mean
+        loss_1tR = loss_1tR.mean()
+        regularizer = regularizer.mean()
+        return loss_1tR, regularizer
+
+    def forward(self, x1_maps, x2_maps):
+        """
+        Compute nce infomax costs for various combos of source/target layers.
+        Compute costs in both directions, i.e. from/to both images (x1, x2).
+        rK_x1 are features from source image x1.
+        rK_x2 are features from source image x2.
+        """
+        # cache masks
+        if len(self.masks) == 0:
+            for m1, m2 in zip(x1_maps, x2_maps):
+                batch_size, emb_dim, h, w = m1.size()
+
+                # make mask
+                if h not in self.masks:
+                    mask = self.feat_size_w_mask(h)
+                    self.masks[h] = mask
+
+        if self.strategy == '1:1':
+            return self.one_one_loss(x1_maps, x2_maps)
+        elif self.strategy == '1:5,1:7,5:5':
+            return self.contrastive_task_11_55_77(x1_maps, x2_maps)
+        elif self.strategy == '1:1,5:5,7:7':
+            return self.contrastive_task_11_55_77(x1_maps, x2_maps)
+        elif self.strategy == '1:random':
+            return self.contrastive_task_1_random(x1_maps, x2_maps)
 
 
 def tanh_clip(x, clip_val=10.):
