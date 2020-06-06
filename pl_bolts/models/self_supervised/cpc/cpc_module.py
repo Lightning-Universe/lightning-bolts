@@ -33,9 +33,7 @@ class CPCV2(pl.LightningModule):
         self.online_evaluator = self.hparams.online_ft
         self.dataset = self.get_dataset(hparams.dataset)
 
-        # encoder network (Z vectors)
-        dummy_batch = torch.zeros((2, 3, hparams.patch_size, hparams.patch_size))
-        self.encoder = CPCResNet101(dummy_batch)
+        self.encoder = self.init_encoder()
 
         # info nce loss
         c, h = self.__compute_final_nb_c(hparams.patch_size)
@@ -50,6 +48,11 @@ class CPCV2(pl.LightningModule):
                 p=0.2,
                 n_hidden=1024
             )
+
+    def init_encoder(self):
+        # encoder network (Z vectors)
+        dummy_batch = torch.zeros((2, 3, self.hparams.patch_size, self.hparams.patch_size))
+        return CPCResNet101(dummy_batch)
 
     def get_dataset(self, name):
         if name == 'cifar10':
