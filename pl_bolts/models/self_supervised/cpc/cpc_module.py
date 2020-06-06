@@ -19,6 +19,7 @@ from pl_bolts.losses.self_supervised_learning import InfoNCE
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
+from pl_bolts.utils import torchvision_ssl_encoder
 
 __all__ = [
     'CPCV2'
@@ -56,25 +57,8 @@ class CPCV2(pl.LightningModule):
         encoder_name = self.hparams.encoder
         if encoder_name == 'cpc_encoder':
             return CPCResNet101(dummy_batch)
-        if encoder_name == 'resnet18':
-            net = getattr(models, encoder_name)
-            return CPCResNet101(dummy_batch)
-        if encoder_name == 'resnet34':
-            return CPCResNet101(dummy_batch)
-        if encoder_name == 'resnet50':
-            return CPCResNet101(dummy_batch)
-        if encoder_name == 'resnet101':
-            return CPCResNet101(dummy_batch)
-        if encoder_name == 'resnet152':
-            return CPCResNet101(dummy_batch)
-        if encoder_name == 'resnext50_32x4d':
-            return CPCResNet101(dummy_batch)
-        if encoder_name == 'resnext101_32x8d':
-            return CPCResNet101(dummy_batch)
-        if encoder_name == 'wide_resnet50_2':
-            return CPCResNet101(dummy_batch)
-        if encoder_name == 'wide_resnet101_2':
-            return CPCResNet101(dummy_batch)
+        else:
+            return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=self.hparams.amdim_task)
 
     def get_dataset(self, name):
         if name == 'cifar10':
@@ -90,6 +74,11 @@ class CPCV2(pl.LightningModule):
     def __compute_final_nb_c(self, patch_size):
         dummy_batch = torch.zeros((2 * 49, 3, patch_size, patch_size))
         dummy_batch = self.encoder(dummy_batch)
+
+        # other encoders return a list
+        if self.hparams.encoder != 'cpc_encoder':
+            dummy_batch = dummy_batch[0]
+
         dummy_batch = self.__recover_z_shape(dummy_batch, 2)
         b, c, h, w = dummy_batch.size()
         return c, h
@@ -111,6 +100,10 @@ class CPCV2(pl.LightningModule):
 
         # Z are the latent vars
         Z = self.encoder(img_1)
+
+        # non cpc resnets return a list
+        if self.hparams.encoder != 'cpc_encoder':
+            Z = Z[0]
 
         # (?) -> (b, -1, nb_feats, nb_feats)
         Z = self.__recover_z_shape(Z, b)
@@ -274,6 +267,7 @@ class CPCV2(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true')
+        parser.add_argument('--amdim_task', action='store_true')
         parser.add_argument('--dataset', type=str, default='cifar10')
 
         (args, _) = parser.parse_known_args()
@@ -329,7 +323,7 @@ class CPCV2(pl.LightningModule):
 
         resnets = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
                    'wide_resnet50_2', 'wide_resnet101_2']
-        parser.add_argument('--encoder', default='cpc_encoder', type=int)
+        parser.add_argument('--encoder', default='cpc_encoder', type=str)
 
         # dataset options
         parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int)
