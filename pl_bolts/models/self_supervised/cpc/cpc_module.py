@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import torch
+from torchvision import models
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
@@ -50,9 +51,30 @@ class CPCV2(pl.LightningModule):
             )
 
     def init_encoder(self):
-        # encoder network (Z vectors)
         dummy_batch = torch.zeros((2, 3, self.hparams.patch_size, self.hparams.patch_size))
-        return CPCResNet101(dummy_batch)
+
+        encoder_name = self.hparams.encoder
+        if encoder_name == 'cpc_encoder':
+            return CPCResNet101(dummy_batch)
+        if encoder_name == 'resnet18':
+            net = getattr(models, encoder_name)
+            return CPCResNet101(dummy_batch)
+        if encoder_name == 'resnet34':
+            return CPCResNet101(dummy_batch)
+        if encoder_name == 'resnet50':
+            return CPCResNet101(dummy_batch)
+        if encoder_name == 'resnet101':
+            return CPCResNet101(dummy_batch)
+        if encoder_name == 'resnet152':
+            return CPCResNet101(dummy_batch)
+        if encoder_name == 'resnext50_32x4d':
+            return CPCResNet101(dummy_batch)
+        if encoder_name == 'resnext101_32x8d':
+            return CPCResNet101(dummy_batch)
+        if encoder_name == 'wide_resnet50_2':
+            return CPCResNet101(dummy_batch)
+        if encoder_name == 'wide_resnet101_2':
+            return CPCResNet101(dummy_batch)
 
     def get_dataset(self, name):
         if name == 'cifar10':
@@ -304,6 +326,10 @@ class CPCV2(pl.LightningModule):
         }
 
         dataset = DATASETS[args.dataset]
+
+        resnets = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
+                   'wide_resnet50_2', 'wide_resnet101_2']
+        parser.add_argument('--encoder', default='cpc_encoder', type=int)
 
         # dataset options
         parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int)
