@@ -20,6 +20,7 @@ class UnlabeledImagenet(ImageNet):
                  num_classes=-1,
                  num_imgs_per_class=-1,
                  num_imgs_per_class_val_split=50,
+                 meta_root=None,
                  **kwargs):
         """
         Official train set gets split into train, val. (using nb_imgs_per_val_class for each class).
@@ -47,7 +48,8 @@ class UnlabeledImagenet(ImageNet):
 
         self.split = split
         split_root = os.path.join(root, split)
-        wnid_to_classes = load_meta_file(split_root)[0]
+        meta_root = meta_root if meta_root is not None else split_root
+        wnid_to_classes = load_meta_file(meta_root)[0]
 
         super(ImageNet, self).__init__(self.split_folder, **kwargs)
         self.root = root

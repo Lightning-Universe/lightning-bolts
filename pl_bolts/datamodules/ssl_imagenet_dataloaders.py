@@ -12,11 +12,13 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
 
     def __init__(self,
                  data_dir,
+                 meta_root=None,
                  num_workers=16):
 
         super().__init__()
         self.data_dir = data_dir
         self.num_workers = num_workers
+        self.meta_root = meta_root
 
     @property
     def num_classes(self):
@@ -58,6 +60,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class=num_images_per_class,
+                                    meta_root=self.meta_root,
                                     split='train',
                                     transform=transforms)
         loader = DataLoader(
@@ -76,6 +79,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class_val_split=num_images_per_class,
+                                    meta_root=self.meta_root,
                                     split='val',
                                     transform=transforms)
         loader = DataLoader(
@@ -93,6 +97,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class=num_images_per_class,
+                                    meta_root=self.meta_root,
                                     split='test',
                                     transform=transforms)
         loader = DataLoader(

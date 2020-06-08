@@ -66,7 +66,9 @@ class CPCV2(pl.LightningModule):
         elif name == 'stl10':
             return STL10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'imagenet128':
-            return SSLImagenetDataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            return SSLImagenetDataLoaders(self.hparams.data_dir,
+                                          meta_root=self.hparams.meta_root,
+                                          num_workers=self.hparams.num_workers)
         else:
             raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
                                     f'your own \'')
@@ -336,6 +338,7 @@ class CPCV2(pl.LightningModule):
 
         # data
         parser.add_argument('--data_dir', default='.', type=str)
+        parser.add_argument('--meta_root', default='.', type=str)
         parser.add_argument('--num_workers', default=0, type=int)
 
         return parser
