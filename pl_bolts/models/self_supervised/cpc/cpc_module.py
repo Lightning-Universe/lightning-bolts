@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import torch
+from torchvision import models
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
@@ -18,6 +19,7 @@ from pl_bolts.losses.self_supervised_learning import InfoNCE
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
+from pl_bolts.utils import torchvision_ssl_encoder
 
 __all__ = [
     'CPCV2'
@@ -33,9 +35,7 @@ class CPCV2(pl.LightningModule):
         self.online_evaluator = self.hparams.online_ft
         self.dataset = self.get_dataset(hparams.dataset)
 
-        # encoder network (Z vectors)
-        dummy_batch = torch.zeros((2, 3, hparams.patch_size, hparams.patch_size))
-        self.encoder = CPCResNet101(dummy_batch)
+        self.encoder = self.init_encoder()
 
         # info nce loss
         c, h = self.__compute_final_nb_c(hparams.patch_size)
@@ -51,13 +51,24 @@ class CPCV2(pl.LightningModule):
                 n_hidden=1024
             )
 
+    def init_encoder(self):
+        dummy_batch = torch.zeros((2, 3, self.hparams.patch_size, self.hparams.patch_size))
+
+        encoder_name = self.hparams.encoder
+        if encoder_name == 'cpc_encoder':
+            return CPCResNet101(dummy_batch)
+        else:
+            return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=self.hparams.amdim_task)
+
     def get_dataset(self, name):
         if name == 'cifar10':
             return CIFAR10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'stl10':
             return STL10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'imagenet128':
-            return SSLImagenetDataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            return SSLImagenetDataLoaders(self.hparams.data_dir,
+                                          meta_root=self.hparams.meta_root,
+                                          num_workers=self.hparams.num_workers)
         else:
             raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
                                     f'your own \'')
@@ -65,6 +76,11 @@ class CPCV2(pl.LightningModule):
     def __compute_final_nb_c(self, patch_size):
         dummy_batch = torch.zeros((2 * 49, 3, patch_size, patch_size))
         dummy_batch = self.encoder(dummy_batch)
+
+        # other encoders return a list
+        if self.hparams.encoder != 'cpc_encoder':
+            dummy_batch = dummy_batch[0]
+
         dummy_batch = self.__recover_z_shape(dummy_batch, 2)
         b, c, h, w = dummy_batch.size()
         return c, h
@@ -86,6 +102,10 @@ class CPCV2(pl.LightningModule):
 
         # Z are the latent vars
         Z = self.encoder(img_1)
+
+        # non cpc resnets return a list
+        if self.hparams.encoder != 'cpc_encoder':
+            Z = Z[0]
 
         # (?) -> (b, -1, nb_feats, nb_feats)
         Z = self.__recover_z_shape(Z, b)
@@ -249,6 +269,7 @@ class CPCV2(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true')
+        parser.add_argument('--amdim_task', action='store_true')
         parser.add_argument('--dataset', type=str, default='cifar10')
 
         (args, _) = parser.parse_known_args()
@@ -302,6 +323,10 @@ class CPCV2(pl.LightningModule):
 
         dataset = DATASETS[args.dataset]
 
+        resnets = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
+                   'wide_resnet50_2', 'wide_resnet101_2']
+        parser.add_argument('--encoder', default='cpc_encoder', type=str)
+
         # dataset options
         parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int)
         parser.add_argument('--patch_size', default=dataset['patch_size'], type=int)
@@ -313,6 +338,7 @@ class CPCV2(pl.LightningModule):
 
         # data
         parser.add_argument('--data_dir', default='.', type=str)
+        parser.add_argument('--meta_root', default='.', type=str)
         parser.add_argument('--num_workers', default=0, type=int)
 
         return parser
@@ -325,6 +351,7 @@ if __name__ == '__main__':
     parser = CPCV2.add_model_specific_args(parser)
 
     args = parser.parse_args()
+    args.online_ft = True
 
     model = CPCV2(args)
     trainer = pl.Trainer.from_argparse_args(args)

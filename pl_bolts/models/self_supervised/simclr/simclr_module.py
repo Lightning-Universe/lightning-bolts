@@ -4,6 +4,7 @@ from torch import nn
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import StepLR
 from torchvision.models import densenet
+from argparse import Namespace
 
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
@@ -49,6 +50,21 @@ class SimCLR(pl.LightningModule):
                  online_ft=False, num_workers=0, optimizer='adam',
                  step=30, gamma=0.5, temperature=0.5, **kwargs):
         super().__init__()
+
+        self.hparams = Namespace(**{
+            'lr': lr,
+            'step': step,
+            'gamma': gamma,
+            'temperature': temperature,
+            'dataset': dataset,
+            'data_dir': data_dir,
+            'wd': wd,
+            'input_height': input_height,
+            'batch_size': batch_size,
+            'online_ft': online_ft,
+            'num_workers': num_workers,
+            'optimizer': optimizer
+        })
 
         self.online_evaluator = online_ft
         self.batch_size = batch_size
@@ -181,13 +197,15 @@ class SimCLR(pl.LightningModule):
             val_loss=val_loss,
         )
 
+        progress_bar = {}
         if self.online_evaluator:
             mlp_acc = mean(outputs, 'mlp_acc')
             mlp_loss = mean(outputs, 'mlp_loss')
             log['val_mlp_acc'] = mlp_acc
             log['val_mlp_loss'] = mlp_loss
+            progress_bar['val_acc'] = mlp_acc
 
-        return dict(val_loss=val_loss, log=log, progress_bar={'val_acc': log['val_mlp_acc']})
+        return dict(val_loss=val_loss, log=log, progress_bar=progress_bar)
 
     def prepare_data(self):
         self.dataset.prepare_data()
