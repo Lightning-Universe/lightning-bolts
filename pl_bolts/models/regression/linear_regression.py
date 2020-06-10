@@ -86,6 +86,9 @@ class LinearRegression(LightningModule):
 
 if __name__ == '__main__':  # pragma: no cover
     # create dataset
+    from sklearn.datasets import make_regression
+    X, y = make_regression()
+    dataset = SKLearnDataset(X, y)
 
     # args
     parser = ArgumentParser()
@@ -98,4 +101,4 @@ if __name__ == '__main__':  # pragma: no cover
     batch =(torch.randn(5, 7), torch.rand(5))
     model.training_step(batch, 3)
     trainer = Trainer()
-    trainer.fit(model)
+    trainer.fit(model, dataset.train_dataloader(), dataset.val_dataloader())
