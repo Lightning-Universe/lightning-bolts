@@ -312,7 +312,7 @@ class MocoV2(pl.LightningModule):
         parser.add_argument('--num_negatives', type=int, default=65536)
         parser.add_argument('--encoder_momentum', type=float, default=0.999)
         parser.add_argument('--softmax_temperature', type=float, default=0.07)
-        parser.add_argument('--lr', type=float, default=0.03)
+        parser.add_argument('--learning_rate', type=float, default=0.03)
         parser.add_argument('--momentum', type=float, default=0.9)
         parser.add_argument('--weight_decay', type=float, default=1e-4)
         parser.add_argument('--dataset', type=str, default='cifar10')
