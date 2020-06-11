@@ -215,11 +215,11 @@ class MocoV2(pl.LightningModule):
 
     def get_dataset(self, name):
         if name == 'cifar10':
-            dataloaders = CIFAR10DataLoaders(self.hparams.data_dir)
+            dataloaders = CIFAR10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'stl10':
-            dataloaders = STL10DataLoaders(self.hparams.data_dir)
+            dataloaders = STL10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'imagenet128':
-            dataloaders = SSLImagenetDataLoaders(self.hparams.data_dir)
+            dataloaders = SSLImagenetDataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         else:
             raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
                                     f'your own \'')
@@ -309,6 +309,7 @@ class MocoV2(pl.LightningModule):
         parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--base_encoder', type=str, default='resnet50')
         parser.add_argument('--emb_dim', type=int, default=128)
+        parser.add_argument('--num_workers', type=int, default=8)
         parser.add_argument('--num_negatives', type=int, default=65536)
         parser.add_argument('--encoder_momentum', type=float, default=0.999)
         parser.add_argument('--softmax_temperature', type=float, default=0.07)
