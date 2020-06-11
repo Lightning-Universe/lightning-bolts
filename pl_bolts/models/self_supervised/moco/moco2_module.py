@@ -49,7 +49,7 @@ class MocoV2(pl.LightningModule):
             'softmax_temperature': softmax_temperature,
             'use_mlp': use_mlp,
             'lr': lr,
-            'num_workers': num_workers
+            'num_workers': num_workers,
             'momentum': momentum,
             'weight_decay': weight_decay,
             'dataset': dataset,
