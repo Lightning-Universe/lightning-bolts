@@ -32,6 +32,7 @@ class MocoV2(pl.LightningModule):
                  data_dir='./',
                  batch_size=256,
                  use_mlp=False,
+                 num_workers=8,
                  *args, **kwargs):
         super().__init__()
         """
@@ -48,6 +49,7 @@ class MocoV2(pl.LightningModule):
             'softmax_temperature': softmax_temperature,
             'use_mlp': use_mlp,
             'lr': lr,
+            'num_workers': num_workers
             'momentum': momentum,
             'weight_decay': weight_decay,
             'dataset': dataset,
