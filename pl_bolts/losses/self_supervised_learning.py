@@ -79,6 +79,7 @@ class InfoNCE(nn.Module):
         _, _, h, w = Z.shape
 
         # future prediction
+        import pdb; pdb.set_trace()
         preds = self.pred_cnn(context)
         for steps_to_ignore in range(h - 1):
             for i in range(steps_to_ignore + 1, h):
