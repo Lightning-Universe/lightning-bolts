@@ -25,7 +25,7 @@ class MocoV2(pl.LightningModule):
                  num_negatives=65536,
                  encoder_momentum=0.999,
                  softmax_temperature=0.07,
-                 lr=0.03,
+                 learning_rate=0.03,
                  momentum=0.9,
                  weight_decay=1e-4,
                  dataset='cifar10',
@@ -48,7 +48,7 @@ class MocoV2(pl.LightningModule):
             'encoder_momentum': encoder_momentum,
             'softmax_temperature': softmax_temperature,
             'use_mlp': use_mlp,
-            'lr': lr,
+            'learning_rate': learning_rate,
             'num_workers': num_workers,
             'momentum': momentum,
             'weight_decay': weight_decay,
@@ -274,7 +274,7 @@ class MocoV2(pl.LightningModule):
         return {'val_loss': val_loss, 'log': log}
 
     def configure_optimizers(self):
-        optimizer = torch.optim.SGD(self.parameters(), self.hparams.lr,
+        optimizer = torch.optim.SGD(self.parameters(), self.hparams.learning_rate,
                                     momentum=self.hparams.momentum,
                                     weight_decay=self.hparams.weight_decay)
         return optimizer
