@@ -69,7 +69,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
             shuffle=True,
             num_workers=self.num_workers,
             drop_last=True,
-            pin_memory=True
+            pin_memory=False
         )
         return loader
 
@@ -87,7 +87,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
             batch_size=batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            pin_memory=True
+            pin_memory=False
         )
         return loader
 
@@ -106,7 +106,7 @@ class SSLImagenetDataLoaders(BoltDataLoaders):
             shuffle=False,
             num_workers=self.num_workers,
             drop_last=True,
-            pin_memory=True
+            pin_memory=False
         )
         return loader
 
