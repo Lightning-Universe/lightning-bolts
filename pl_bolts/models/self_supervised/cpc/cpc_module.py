@@ -195,7 +195,7 @@ class CPCV2(pl.LightningModule):
             log['val_mlp_acc'] = mlp_acc
             log['val_mlp_loss'] = mlp_loss
 
-        return {'val_loss': val_nce, 'log': log}
+        return {'val_loss': val_nce, 'log': log, 'progress_bar': log}
 
     def configure_optimizers(self):
         opt = optim.Adam(
