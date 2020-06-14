@@ -65,6 +65,7 @@ class InfoNCE(nn.Module):
         b1 = torch.arange(n) // ((h - i - 1) * w)
         c1 = torch.arange(n) % ((h - i - 1) * w)
         labels = b1 * h * w + (i + 1) * w + c1
+        import pdb; pdb.set_trace()
         labels = labels.type_as(logits).long()
 
         loss = nn.functional.cross_entropy(logits, labels)
@@ -79,7 +80,6 @@ class InfoNCE(nn.Module):
         _, _, h, w = Z.shape
 
         # future prediction
-        import pdb; pdb.set_trace()
         preds = self.pred_cnn(context)
         for steps_to_ignore in range(h - 1):
             for i in range(steps_to_ignore + 1, h):
