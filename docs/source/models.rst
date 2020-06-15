@@ -4,9 +4,5 @@
 Bolts Models
 ============
 
-.. automodule:: pl_bolts.models
+.. automodule:: pl_bolts.models.autoencoders
    :noindex:
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:
