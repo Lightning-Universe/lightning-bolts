@@ -94,10 +94,10 @@ class AmdimNceLoss(nn.Module):
     def forward(self, anchor_representations, positive_representations, mask_mat):
         """
         Compute the NCE scores for predicting r_src->r_trg.
-        Input:
-          r_src    : (batch_size, emb_dim)
-          r_trg    : (emb_dim, n_batch * w* h) (ie: nb_feat_vectors x embedding_dim)
-          mask_mat : (n_batch_gpu, n_batch)
+        Args:
+          anchor_representations   : (batch_size, emb_dim)
+          positive_representations : (emb_dim, n_batch * w* h) (ie: nb_feat_vectors x embedding_dim)
+          mask_mat                 : (n_batch_gpu, n_batch)
 
         Output:
           raw_scores : (n_batch_gpu, n_locs)
