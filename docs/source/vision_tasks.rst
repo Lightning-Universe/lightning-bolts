@@ -32,5 +32,5 @@ Corresponds $m_{i} \in M^a$ vs $m_{j} \in M^+$
     loss = task(map_i, map_j)
 
 
-.. autoclass:: pl_bolts.losses.self_supervised_learning.AmdimNCELoss
+.. autoclass:: pl_bolts.losses.self_supervised_learning.AMDIMContrastiveTask
     :noindex:
