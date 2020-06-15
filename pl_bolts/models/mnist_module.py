@@ -154,16 +154,16 @@ class LitMNISTModel(LightningModule):
         MNIST(os.getcwd(), train=False, download=True, transform=transforms.ToTensor())
 
     def train_dataloader(self):
-        loader = DataLoader(self.mnist_train, batch_size=self.hparams.batch_size)
+        loader = DataLoader(self.mnist_train, batch_size=self.hparams.batch_size, num_workers=4)
         return loader
 
     def val_dataloader(self):
-        loader = DataLoader(self.mnist_val, batch_size=self.hparams.batch_size)
+        loader = DataLoader(self.mnist_val, batch_size=self.hparams.batch_size, num_workers=4)
         return loader
 
     def test_dataloader(self):
         test_dataset = MNIST(os.getcwd(), train=False, download=True, transform=transforms.ToTensor())
-        loader = DataLoader(test_dataset, batch_size=self.hparams.batch_size)
+        loader = DataLoader(test_dataset, batch_size=self.hparams.batch_size, num_workers=4)
         return loader
 
     @staticmethod
