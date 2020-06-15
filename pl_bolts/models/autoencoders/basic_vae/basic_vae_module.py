@@ -20,7 +20,6 @@ class VAE(LightningModule):
             input_height=28,
             batch_size=32,
             learning_rate=0.001,
-            hparams=None,
             **kwargs
     ):
         super().__init__()
@@ -189,6 +188,6 @@ if __name__ == '__main__':
     parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    vae = VAE(args)
+    vae = VAE(**vars(args))
     trainer = Trainer()
     trainer.fit(vae)
