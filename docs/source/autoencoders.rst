@@ -136,7 +136,23 @@ Use the VAE like so.
 
     from pytorch_lightning.models.autoencoders import VAE
 
+    model = VAE()
+    trainer = Trainer()
+    trainer.fit(model)
+
 You can override any part of this VAE to build your own variation.
+
+.. code-block:: python
+
+    from pytorch_lightning_bolts.models.vaes import VAE
+
+    class MyVAEFlavor(VAE):
+
+        def get_posterior(self, mu, std):
+            # do something other than the default
+            # P = self.get_distribution(self.prior, loc=torch.zeros_like(mu), scale=torch.ones_like(std))
+
+            return P
 
 .. autoclass:: pl_bolts.models.autoencoders.VAE
    :noindex:
