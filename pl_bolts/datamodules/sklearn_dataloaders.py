@@ -1,9 +1,21 @@
 from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders
 from torch.utils.data import Dataset, DataLoader, random_split
-from sklearn.model_selection import train_test_split
+
 
 class SklearnDataset(Dataset):
     def __init__(self, X, y, X_transform=None, y_transform=None):
+        """
+        Mapping between numpy (or sklearn) datasets to PyTorch datasets.
+
+        Example::
+
+                from sklearn.datasets import load_boston
+
+                X, y = load_boston(return_X_y=True)
+                dataset = SklearnDataset(X, y)
+
+                loader = Dataloader(dataset, shuffle=True)
+        """
         self.X = X
         self.Y = y
         self.X_transform = X_transform
@@ -25,24 +37,24 @@ class SklearnDataset(Dataset):
         return x, y
 
 
-# assumes you have a big X and Y and does the train/val/test split for you
 class SklearnDataLoaders(BoltDataLoaders):
-    def __init__(self, X, y, val_split=0.15, test_split=0.15, X_transform=None, y_transform=None, num_workers=16,
-                 shuffle=True, random_seed=0):
+    def __init__(self, X, y, val_split=0.15, test_split=0.15, X_transform=None, y_transform=None, num_workers=2):
         self.X = X
         self.Y = y
-        self.val_split = val_split
-        self.test_split = test_split
-        self.X_transform = X_transform
-        self.y_transform = y_transform
         self.num_workers = num_workers
+
+        # Do transforms
+        if X_transform:
+            self.X = X_transform(X)
+        if y_transform:
+            self.Y = y_transform(y)
 
         # Split X, y into train/validation/test
         dataset_size = len(X)
-        indices = list(range(dataset_size))
         val_size = int(np.floor(val_split * dataset_size))
         test_size = int(np.floor(test_split * dataset_size))
 
+        #TODO: figure out setting seed!
         self.dataset_train, self.dataset_val, self.dataset_test = random_split((X, y),
                                                                                [dataset_size - val_size - test_size,
                                                                                 val_size,
