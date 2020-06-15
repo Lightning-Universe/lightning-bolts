@@ -10,7 +10,7 @@ from test_tube import HyperOptArgumentParser
 from torchvision.models.detection import FasterRCNN
 from torchvision.models.detection.rpn import AnchorGenerator
 
-from pl_bolts.models.autoencoders import BasicAE
+from pl_bolts.models.autoencoders import AE
 
 
 class BBFasterRCNN(LightningModule):
@@ -23,7 +23,7 @@ class BBFasterRCNN(LightningModule):
         # ------------------
         # PRE-TRAINED MODEL
         # ------------------
-        ae = BasicAE.load_from_checkpoint(pretrained_path)
+        ae = AE.load_from_checkpoint(pretrained_path)
         ae.freeze()
 
         self.backbone = ae.encoder

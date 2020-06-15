@@ -10,7 +10,7 @@ from pl_bolts.models.autoencoders.basic_ae.components import AEEncoder
 from pl_bolts.models.autoencoders.basic_vae.components import Decoder
 
 
-class BasicAE(LightningModule):
+class AE(LightningModule):
 
     def __init__(
             self,
@@ -128,9 +128,9 @@ class BasicAE(LightningModule):
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
-    parser = BasicAE.add_model_specific_args(parser)
+    parser = AE.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    ae = BasicAE(**vars(args))
+    ae = AE(**vars(args))
     trainer = Trainer()
     trainer.fit(ae)

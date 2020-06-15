@@ -1,6 +1,6 @@
 import pytorch_lightning as pl
 
-from pl_bolts.models.autoencoders import VAE, BasicAE
+from pl_bolts.models.autoencoders import VAE, AE
 from tests import reset_seed
 
 
@@ -19,7 +19,7 @@ def test_vae(tmpdir):
 def test_ae(tmpdir):
     reset_seed()
 
-    model = BasicAE()
+    model = AE()
     trainer = pl.Trainer(fast_dev_run=True)
     trainer.fit(model)
     trainer.test()

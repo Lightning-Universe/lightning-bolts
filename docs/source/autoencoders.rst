@@ -117,10 +117,33 @@ any arguments from pl.Trainer - e.g max_epochs, gpus
 
 Autoencoders
 ------------
+The following is a collection of auto-encoders.
 
 Basic AE
 ^^^^^^^^
-.. autoclass:: pl_bolts.models.autoencoders.BasicAE
+This is the simplest autoencoder. You can use it like so
+
+.. code-block:: python
+
+    from pytorch_lightning.models.autoencoders import AE
+
+    model = AE()
+    trainer = Trainer()
+    trainer.fit(model)
+
+You can override any part of this AE to build your own variation.
+
+.. code-block:: python
+
+    from pytorch_lightning_bolts.models.autoencoders import VAE
+
+    class MyVAEFlavor(VAE):
+
+        def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
+            encoder = YourSuperFancyEncoder(...)
+            return encoder
+
+.. autoclass:: pl_bolts.models.autoencoders.AE
    :noindex:
 
 ---------------
