@@ -14,26 +14,24 @@ class VAE(LightningModule):
 
     def __init__(
             self,
+            hidden_dim=128,
+            latent_dim=32,
+            input_width=28,
+            input_height=28,
+            batch_size=32,
+            learning_rate=0.001,
             hparams=None,
+            **kwargs
     ):
         super().__init__()
-        # attach hparams to log hparams to the loggers (like tensorboard)
-        self.__check_hparams(hparams)
-        self.hparams = hparams
+        self.save_hyperparameters()
 
         self.dataloaders = MNISTDataLoaders(save_path=os.getcwd())
 
-        self.encoder = self.init_encoder(self.hidden_dim, self.latent_dim,
-                                         self.input_width, self.input_height)
-        self.decoder = self.init_decoder(self.hidden_dim, self.latent_dim,
-                                         self.input_width, self.input_height)
-
-    def __check_hparams(self, hparams):
-        self.hidden_dim = hparams.hidden_dim if hasattr(hparams, 'hidden_dim') else 128
-        self.latent_dim = hparams.latent_dim if hasattr(hparams, 'latent_dim') else 32
-        self.input_width = hparams.input_width if hasattr(hparams, 'input_width') else 28
-        self.input_height = hparams.input_height if hasattr(hparams, 'input_height') else 28
-        self.batch_size = hparams.input_height if hasattr(hparams, 'batch_size') else 32
+        self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim,
+                                         self.hparams.input_width, self.hparams.input_height)
+        self.decoder = self.init_decoder(self.hparams.hidden_dim, self.hparams.latent_dim,
+                                         self.hparams.input_width, self.hparams.input_height)
 
     def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
         encoder = Encoder(hidden_dim, latent_dim, input_width, input_height)
@@ -155,19 +153,19 @@ class VAE(LightningModule):
         }
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=0.001)
+        return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
     def prepare_data(self):
         self.dataloaders.prepare_data()
 
     def train_dataloader(self):
-        return self.dataloaders.train_dataloader(self.batch_size)
+        return self.dataloaders.train_dataloader(self.hparams.batch_size)
 
     def val_dataloader(self):
-        return self.dataloaders.val_dataloader(self.batch_size)
+        return self.dataloaders.val_dataloader(self.hparams.batch_size)
 
     def test_dataloader(self):
-        return self.dataloaders.test_dataloader(self.batch_size)
+        return self.dataloaders.test_dataloader(self.hparams.batch_size)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -181,6 +179,7 @@ class VAE(LightningModule):
         parser.add_argument('--input_height', type=int, default=28,
                             help='input image height - 28 for MNIST (must be even)')
         parser.add_argument('--batch_size', type=int, default=32)
+        parser.add_argument('--learning_rate', type=float, default=1e-3)
         return parser
 
 
