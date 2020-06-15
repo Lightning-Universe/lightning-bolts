@@ -91,7 +91,7 @@ class CPCTask(nn.Module):
         return loss
 
 
-class AmdimNceLoss(nn.Module):
+class AmdimNCELoss(nn.Module):
     def forward(self, anchor_representations, positive_representations, mask_mat):
         """
         Compute the NCE scores for predicting r_src->r_trg.
