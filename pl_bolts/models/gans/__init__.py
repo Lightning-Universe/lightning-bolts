@@ -1,6 +1,4 @@
 """
-GANs
-====
 Here's a collection of GANs
 
 """

@@ -1,12 +1,10 @@
 """
-Self-supervised
-===============
 These models have been pre-trained using self-supervised learning. The models can also be used without pre-training
 and overwritten for your own research.
 
 Here's an example for using these as pretrained models.
 
-.. code_block ::
+.. code-block ::
 
     from pl_bolts.models.self_supervised import CPCV2
 

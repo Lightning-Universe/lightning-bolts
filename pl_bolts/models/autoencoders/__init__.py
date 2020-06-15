@@ -1,6 +1,4 @@
 """
-Autoencoders
-============
 Here are a VAE and GAN
 
 """

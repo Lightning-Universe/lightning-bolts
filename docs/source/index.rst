@@ -48,7 +48,9 @@ PyTorchLightning-Bolts documentation
    :name: models
    :caption: Models
 
-   models
+   autoencoders
+   gans
+   self_supervised_models
 
 .. toctree::
    :maxdepth: 2
