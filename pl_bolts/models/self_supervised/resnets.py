@@ -112,6 +112,7 @@ class Bottleneck(nn.Module):
 
         return out
 
+
 class BottleneckBN(nn.Module):
     expansion = 4
 
@@ -434,12 +435,12 @@ class ResNet101_Xpanded(nn.Module):
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(BottleneckBN, 64*expansion, layers[0])
-        self.layer2 = self._make_layer(BottleneckBN, 128*expansion, layers[1], stride=2,
+        self.layer1 = self._make_layer(BottleneckBN, 64 * expansion, layers[0])
+        self.layer2 = self._make_layer(BottleneckBN, 128 * expansion, layers[1], stride=2,
                                        dilate=replace_stride_with_dilation[0])
-        self.layer3 = self._make_layer(BottleneckBN, 256*expansion, layers[2], stride=2,
+        self.layer3 = self._make_layer(BottleneckBN, 256 * expansion, layers[2], stride=2,
                                        dilate=replace_stride_with_dilation[1])
-        self.layer4 = self._make_layer(BottleneckBN, 512*expansion, layers[3], stride=2,
+        self.layer4 = self._make_layer(BottleneckBN, 512 * expansion, layers[3], stride=2,
                                        dilate=replace_stride_with_dilation[2])
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * BottleneckBN.expansion * expansion, num_classes)
