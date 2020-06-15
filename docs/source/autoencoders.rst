@@ -135,9 +135,9 @@ You can override any part of this AE to build your own variation.
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.autoencoders import VAE
+    from pytorch_lightning_bolts.models.autoencoders import AE
 
-    class MyVAEFlavor(VAE):
+    class MyAEFlavor(AE):
 
         def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
             encoder = YourSuperFancyEncoder(...)
