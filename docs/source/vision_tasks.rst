@@ -68,3 +68,11 @@ Other strategies available are: '1:1,5:5,7:7', '1:random'
 .. autoclass:: pl_bolts.losses.self_supervised_learning.AMDIMContrastiveTask
     :noindex:
 
+
+CPCContrastiveTask
+^^^^^^^^^^^^^^^^^^
+This is the predictive task from CPC (v2).
+In this task
+
+.. autoclass:: pl_bolts.losses.self_supervised_learning.AMDIMContrastiveTask
+    :noindex:

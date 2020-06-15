@@ -28,7 +28,7 @@ def nt_xent_loss(out_1, out_2, temperature):
     return loss
 
 
-class InfoNCE(nn.Module):
+class CPCTask(nn.Module):
     """
     Loss used in CPC
     """

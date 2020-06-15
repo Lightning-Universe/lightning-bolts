@@ -15,7 +15,7 @@ from torch.optim.lr_scheduler import MultiStepLR
 from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
-from pl_bolts.losses.self_supervised_learning import InfoNCE
+from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
@@ -39,7 +39,7 @@ class CPCV2(pl.LightningModule):
 
         # info nce loss
         c, h = self.__compute_final_nb_c(hparams.patch_size)
-        self.info_nce = InfoNCE(num_input_channels=c, target_dim=64, embed_scale=0.1)
+        self.info_nce = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
         if self.online_evaluator:
             z_dim = c * h * h
