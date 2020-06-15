@@ -154,22 +154,23 @@ class LitMNISTModel(LightningModule):
         MNIST(os.getcwd(), train=False, download=True, transform=transforms.ToTensor())
 
     def train_dataloader(self):
-        loader = DataLoader(self.mnist_train, batch_size=self.hparams.batch_size, num_workers=4)
+        loader = DataLoader(self.mnist_train, batch_size=self.hparams.batch_size, num_workers=self.num_workers)
         return loader
 
     def val_dataloader(self):
-        loader = DataLoader(self.mnist_val, batch_size=self.hparams.batch_size, num_workers=4)
+        loader = DataLoader(self.mnist_val, batch_size=self.hparams.batch_size, num_workers=self.num_workers)
         return loader
 
     def test_dataloader(self):
         test_dataset = MNIST(os.getcwd(), train=False, download=True, transform=transforms.ToTensor())
-        loader = DataLoader(test_dataset, batch_size=self.hparams.batch_size, num_workers=4)
+        loader = DataLoader(test_dataset, batch_size=self.hparams.batch_size, num_workers=self.num_workers)
         return loader
 
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--batch_size', type=int, default=32)
+        parser.add_argument('--num_workers', type=int, default=4)
         parser.add_argument('--hidden_dim', type=int, default=128)
         parser.add_argument('--learning_rate', type=float, default=0.0001)
         return parser
