@@ -12,10 +12,13 @@ from pl_bolts.models.gans.basic.components import Generator, Discriminator
 
 class BasicGAN(LightningModule):
 
-    def __init__(self, hparams=None):
+    def __init__(self, input_channels=1, input_width=28, input_height=28, latent_dim=32, batch_size=32, b1=0.5, b2=0.999, learning_rate=0.0002):
         super().__init__()
-        self.__check_hparams(hparams)
-        self.hparams = hparams
+
+        # makes self.hparams under the hood and saves to ckpt
+        self.save_hyperparameters()
+
+        self.img_dim = (self.hparams.input_channels, self.hparams.input_width, self.hparams.input_height)
 
         self.dataloaders = MNISTDataLoaders(save_path=os.getcwd())
 
@@ -27,19 +30,8 @@ class BasicGAN(LightningModule):
         self.generated_imgs = None
         self.last_imgs = None
 
-    def __check_hparams(self, hparams):
-        self.input_channels = hparams.input_channels if hasattr(hparams, 'input_channels') else 1
-        self.input_width = hparams.input_width if hasattr(hparams, 'input_width') else 28
-        self.input_height = hparams.input_height if hasattr(hparams, 'input_height') else 28
-        self.latent_dim = hparams.latent_dim if hasattr(hparams, 'latent_dim') else 32
-        self.batch_size = hparams.batch_size if hasattr(hparams, 'batch_size') else 32
-        self.b1 = hparams.b1 if hasattr(hparams, 'b1') else 0.5
-        self.b2 = hparams.b2 if hasattr(hparams, 'b2') else 0.999
-        self.learning_rate = hparams.learning_rate if hasattr(hparams, 'learning_rate') else 0.0002
-        self.img_dim = (self.input_channels, self.input_width, self.input_height)
-
     def init_generator(self, img_dim):
-        generator = Generator(latent_dim=self.latent_dim, img_shape=img_dim)
+        generator = Generator(latent_dim=self.hparams.latent_dim, img_shape=img_dim)
         return generator
 
     def init_discriminator(self, img_dim):
@@ -127,9 +119,9 @@ class BasicGAN(LightningModule):
             return self.discriminator_step(x)
 
     def configure_optimizers(self):
-        lr = self.learning_rate
-        b1 = self.b1
-        b2 = self.b2
+        lr = self.hparams.learning_rate
+        b1 = self.hparams.b1
+        b2 = self.hparams.b2
 
         opt_g = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
