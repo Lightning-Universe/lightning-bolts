@@ -28,17 +28,33 @@ __all__ = [
 
 class CPCV2(pl.LightningModule):
 
-    def __init__(self, hparams):
+    def __init__(self,
+                 encoder='cpc_encoder',
+                 patch_size=8,
+                 patch_overlap=4,
+                 online_ft=True,
+                 amdim_task=False,
+                 dataset='cifar10',
+                 num_workers=4,
+                 learning_rate=1e-4,
+                 data_dir='',
+                 meta_root='',
+                 batch_size=32,
+                 **kwargs):
+
         super().__init__()
+        self.save_hyperparameters()
 
-        self.hparams = hparams
         self.online_evaluator = self.hparams.online_ft
-        self.dataset = self.get_dataset(hparams.dataset)
+        self.dataset = self.get_dataset(self.hparams.dataset)
 
-        self.encoder = self.init_encoder()
+        # init encoder
+        self.encoder = encoder
+        if isinstance(encoder, str):
+            self.encoder = self.init_encoder()
 
         # info nce loss
-        c, h = self.__compute_final_nb_c(hparams.patch_size)
+        c, h = self.__compute_final_nb_c(self.hparams.patch_size)
         self.info_nce = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
         if self.online_evaluator:
@@ -328,7 +344,6 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--encoder', default='cpc_encoder', type=str)
 
         # dataset options
-        parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int)
         parser.add_argument('--patch_size', default=dataset['patch_size'], type=int)
         parser.add_argument('--patch_overlap', default=dataset['patch_overlap'], type=int)
 
@@ -353,6 +368,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args.online_ft = True
 
-    model = CPCV2(args)
+    model = CPCV2()
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
