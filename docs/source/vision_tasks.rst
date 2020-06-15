@@ -72,7 +72,17 @@ Other strategies available are: '1:1,5:5,7:7', '1:random'
 CPCContrastiveTask
 ^^^^^^^^^^^^^^^^^^
 This is the predictive task from CPC (v2).
-In this task
+
+.. code-block::
+
+    task = CPCTask(num_input_channels=32)
+
+    # (batch, channels, rows, cols)
+    # this should be thought of as 49 feature vectors, each with 32 dims
+    Z = torch.random.rand(3, 32, 7, 7)
+
+    loss = task(Z)
+
 
 .. autoclass:: pl_bolts.losses.self_supervised_learning.CPCTask
     :noindex:
