@@ -18,7 +18,7 @@ To use in your project or as a feature extractor:
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.vaes import VAE
+    from pytorch_lightning_bolts.models.autoencoders import VAE
     import pytorch_lightning as pl
 
     class YourResearchModel(pl.LightningModule):
@@ -40,7 +40,7 @@ To use in production or for predictions:
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.vaes import VAE
+    from pytorch_lightning_bolts.models.autoencoders import VAE
 
     vae = VAE.load_from_checkpoint(PATH)
     vae.freeze()
@@ -54,7 +54,7 @@ You can train the VAE on its own:
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.vaes import VAE
+    from pytorch_lightning_bolts.models.autoencoders import VAE
     import pytorch_lightning as pl
 
     vae = VAE()
@@ -65,7 +65,7 @@ You can also use as template for research (example of modifying only the prior):
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.vaes import VAE
+    from pytorch_lightning_bolts.models.autoencoders import VAE
 
     class MyVAEFlavor(VAE):
 
@@ -79,7 +79,7 @@ Or pass in your own encoders and decoders:
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.vaes import VAE
+    from pytorch_lightning_bolts.models.autoencoders import VAE
     import pytorch_lightning as pl
 
     encoder = MyEncoder()
@@ -93,7 +93,7 @@ Train the VAE from the command line:
 
 .. code-block:: python
 
-    cd pytorch_lightning_bolts/models/vaes/basic_vae
+    cd pytorch_lightning_bolts/models/autoencoders/basic_vae
     python vae.py
 
 The vae.py script accepts the following arguments:
@@ -144,7 +144,7 @@ You can override any part of this VAE to build your own variation.
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.vaes import VAE
+    from pytorch_lightning_bolts.models.autoencoders import VAE
 
     class MyVAEFlavor(VAE):
 
