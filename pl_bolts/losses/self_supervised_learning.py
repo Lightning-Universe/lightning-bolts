@@ -91,7 +91,7 @@ class InfoNCE(nn.Module):
         return loss
 
 
-class AmdimNCELoss(nn.Module):
+class AmdimNceLoss(nn.Module):
     def forward(self, anchor_representations, positive_representations, mask_mat):
         """
         Compute the NCE scores for predicting r_src->r_trg.
@@ -195,7 +195,7 @@ class AMDIMContrastiveTask(nn.Module):
         self.strategy = strategy
 
         self.masks = {}
-        self.nce_loss = AmdimNCELoss()
+        self.nce_loss = AmdimNceLoss()
 
     def feat_size_w_mask(self, w):
         masks_r5 = np.zeros((w, w, 1, w, w))

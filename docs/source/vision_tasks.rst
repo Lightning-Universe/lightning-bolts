@@ -11,7 +11,10 @@ Here is a collection of common tasks
 
 AMDIMContrastiveTask
 ^^^^^^^^^^^^^^^^^^^^
-This is the contrastive task from AMDIM. In this task, we take in two sets of feature maps
+Implementation modified from the `original repo <https://github.com/Philip-Bachman/amdim-public>`_.
+This is the contrastive task from AMDIM (`Philip Bachman, R Devon Hjelm, William Buchwalter <https://arxiv.org/abs/1906.00910>`_).
+
+In this task, we take in two sets of feature maps
 (in this case from a positive $x^+$ and anchor example $x^a$) $M^a = \{m_1, m_2, ..., m_i\}, M^+ = \{m_1, m_2, ..., m_j\}$.
 
 The task compares feature maps across spatial locations within the network. Here are the supported possibilities:
@@ -64,3 +67,4 @@ Other strategies available are: '1:1,5:5,7:7', '1:random'
 
 .. autoclass:: pl_bolts.losses.self_supervised_learning.AMDIMContrastiveTask
     :noindex:
+
