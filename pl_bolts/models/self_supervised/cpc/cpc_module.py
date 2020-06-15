@@ -267,8 +267,7 @@ class CPCV2(pl.LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser):
-        from test_tube import HyperOptArgumentParser
-        parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true')
         parser.add_argument('--amdim_task', action='store_true')
         parser.add_argument('--dataset', type=str, default='cifar10')
