@@ -12,7 +12,16 @@ from pl_bolts.models.gans.basic.components import Generator, Discriminator
 
 class BasicGAN(LightningModule):
 
-    def __init__(self, input_channels=1, input_width=28, input_height=28, latent_dim=32, batch_size=32, b1=0.5, b2=0.999, learning_rate=0.0002):
+    def __init__(self,
+                 input_channels=1,
+                 input_width=28,
+                 input_height=28,
+                 latent_dim=32,
+                 batch_size=32,
+                 b1=0.5,
+                 b2=0.999,
+                 learning_rate=0.0002,
+                 **kwargs):
         super().__init__()
 
         # makes self.hparams under the hood and saves to ckpt
@@ -160,6 +169,6 @@ if __name__ == '__main__':
     parser = BasicGAN.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    gan = BasicGAN(args)
+    gan = BasicGAN(**vars(args))
     trainer = Trainer()
     trainer.fit(gan)
