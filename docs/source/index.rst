@@ -72,3 +72,4 @@ Indices and tables
    api/pl_bolts.loggers
    api/pl_bolts.optimizers
    api/pl_bolts.transforms
+   api/pl_bolts.utils

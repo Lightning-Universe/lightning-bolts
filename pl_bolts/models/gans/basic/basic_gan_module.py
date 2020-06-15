@@ -93,7 +93,7 @@ class BasicGAN(LightningModule):
 
         # how well can it label as fake?
         fake = torch.zeros(x.size(0), 1)
-        fake = fake.type_as(fake)
+        fake = fake.type_as(x)
 
         fake_loss = self.adversarial_loss(
             self.discriminator(self.generated_imgs.detach()), fake)
