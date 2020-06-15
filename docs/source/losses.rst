@@ -1,5 +1,6 @@
 Losses
 ======
+This package lists common losses across research domains
 
 -------------
 
