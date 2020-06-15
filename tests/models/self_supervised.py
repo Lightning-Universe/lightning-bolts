@@ -21,6 +21,3 @@ def test_cpcv2(tmpdir):
     loss = trainer.callback_metrics['loss']
 
     assert loss > 0
-
-
-test_cpcv2('')
