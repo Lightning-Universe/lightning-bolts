@@ -74,5 +74,5 @@ CPCContrastiveTask
 This is the predictive task from CPC (v2).
 In this task
 
-.. autoclass:: pl_bolts.losses.self_supervised_learning.AMDIMContrastiveTask
+.. autoclass:: pl_bolts.losses.self_supervised_learning.CPCTask
     :noindex:
