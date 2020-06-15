@@ -113,6 +113,8 @@ any arguments from pl.Trainer - e.g max_epochs, gpus
 
     python vae.py --hidden_dim 128 --latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12
 
+---------------
+
 Autoencoders
 ------------
 
@@ -121,12 +123,20 @@ Basic AE
 .. autoclass:: pl_bolts.models.autoencoders.BasicAE
    :noindex:
 
+---------------
 
 Variational Autoencoders
 ------------------------
 
 Basic VAE
 ^^^^^^^^^
+Use the VAE like so.
 
-.. autoclass:: pl_bolts.models.autoencoders.BasicVAE
+.. code-block:: python
+
+    from pytorch_lightning.models.autoencoders import VAE
+
+You can override any part of this VAE to build your own variation.
+
+.. autoclass:: pl_bolts.models.autoencoders.VAE
    :noindex:

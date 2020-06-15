@@ -10,7 +10,7 @@ from pl_bolts.datamodules import MNISTDataLoaders
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
 
 
-class BasicVAE(LightningModule):
+class VAE(LightningModule):
 
     def __init__(
             self,
@@ -187,9 +187,9 @@ class BasicVAE(LightningModule):
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
-    parser = BasicVAE.add_model_specific_args(parser)
+    parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    vae = BasicVAE(args)
+    vae = VAE(args)
     trainer = Trainer()
     trainer.fit(vae)
