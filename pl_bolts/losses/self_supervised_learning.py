@@ -68,7 +68,6 @@ class CPCTask(nn.Module):
         labels = labels.to(logits.device)
         labels = labels.long()
 
-        import pdb;pdb.set_trace()
         loss = nn.functional.cross_entropy(logits, labels)
         return loss
 
