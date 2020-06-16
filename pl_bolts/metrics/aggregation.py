@@ -3,11 +3,7 @@ import torch
 
 def mean(res, key):
     # recursive mean for multilevel dicts
-    try:
-        val = torch.stack([x[key] if isinstance(x, dict) else mean(x, key) for x in res]).mean()
-    except Exception as e:
-        import pdb; pdb.set_trace()
-    return val
+    return torch.stack([x[key] if isinstance(x, dict) else mean(x, key) for x in res]).mean()
 
 
 def accuracy(preds, labels):
