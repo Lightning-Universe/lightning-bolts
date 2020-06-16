@@ -88,9 +88,6 @@ class CPCTask(nn.Module):
                     losses.append(loss)
 
         loss = torch.stack(losses).sum()
-        if torch.isnan(loss):
-            import pdb; pdb.set_trace()
-
         return loss
 
 

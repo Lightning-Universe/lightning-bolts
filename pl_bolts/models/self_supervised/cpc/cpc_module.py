@@ -184,6 +184,7 @@ class CPCV2(pl.LightningModule):
         Z = self(img_1)
 
         # infoNCE loss
+        import pdb; pdb.set_trace()
         nce_loss = self.info_nce(Z)
         result = {'val_nce': nce_loss}
 
