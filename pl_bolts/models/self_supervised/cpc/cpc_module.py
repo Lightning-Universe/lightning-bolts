@@ -368,6 +368,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args.online_ft = True
 
-    model = CPCV2()
+    model = CPCV2(**vars(args))
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
