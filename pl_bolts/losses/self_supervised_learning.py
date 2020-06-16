@@ -69,6 +69,8 @@ class CPCTask(nn.Module):
         labels = labels.long()
 
         loss = nn.functional.cross_entropy(logits, labels)
+        if torch.isnan(loss):
+            print(logits, labels)
         return loss
 
     def forward(self, Z):
