@@ -195,7 +195,7 @@ class AMDIMContrastiveTask(nn.Module):
         self.strategy = strategy
 
         self.masks = {}
-        self.nce_loss = AmdimNceLoss()
+        self.nce_loss = AmdimNCELoss()
 
     def feat_size_w_mask(self, w):
         masks_r5 = np.zeros((w, w, 1, w, w))
