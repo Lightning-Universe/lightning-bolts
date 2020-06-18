@@ -8,7 +8,7 @@ def test_vae(tmpdir):
     reset_seed()
 
     model = VAE()
-    trainer = pl.Trainer(fast_dev_run=True)
+    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model)
     trainer.test()
     loss = trainer.callback_metrics['loss']
@@ -20,6 +20,6 @@ def test_ae(tmpdir):
     reset_seed()
 
     model = AE()
-    trainer = pl.Trainer(fast_dev_run=True)
+    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model)
     trainer.test()

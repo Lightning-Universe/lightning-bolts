@@ -10,7 +10,7 @@ def test_mnist(tmpdir):
 
     model = LitMNISTModel()
     trainer = pl.Trainer(train_percent_check=0.01, val_percent_check=0.01, max_epochs=1,
-                         test_percent_check=0.01)
+                         test_percent_check=0.01, default_root_dir=tmpdir)
     trainer.fit(model)
     trainer.test()
     loss = trainer.callback_metrics['loss']
