@@ -17,7 +17,7 @@ def test_cpcv2(tmpdir):
     model = CPCV2(hparams)
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model)
-    trainer.test()
+    trainer.test(model)
     loss = trainer.callback_metrics['loss']
 
     assert loss > 0

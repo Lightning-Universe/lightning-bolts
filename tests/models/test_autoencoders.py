@@ -22,4 +22,4 @@ def test_ae(tmpdir):
     model = AE()
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model)
-    trainer.test()
+    trainer.test(model)

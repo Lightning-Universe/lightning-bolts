@@ -12,7 +12,7 @@ def test_mnist(tmpdir):
     trainer = pl.Trainer(train_percent_check=0.01, val_percent_check=0.01, max_epochs=1,
                          test_percent_check=0.01, default_root_dir=tmpdir)
     trainer.fit(model)
-    trainer.test()
+    trainer.test(model)
     loss = trainer.callback_metrics['loss']
 
     assert loss <= 2.0, 'mnist failed'
