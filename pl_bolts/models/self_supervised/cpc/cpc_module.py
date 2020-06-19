@@ -15,7 +15,7 @@ from torch.optim.lr_scheduler import MultiStepLR
 from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
-from pl_bolts.losses.self_supervised_learning import InfoNCE
+from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
@@ -28,18 +28,34 @@ __all__ = [
 
 class CPCV2(pl.LightningModule):
 
-    def __init__(self, hparams):
+    def __init__(self,
+                 encoder='cpc_encoder',
+                 patch_size=8,
+                 patch_overlap=4,
+                 online_ft=True,
+                 amdim_task=False,
+                 dataset='cifar10',
+                 num_workers=4,
+                 learning_rate=1e-4,
+                 data_dir='',
+                 meta_root='',
+                 batch_size=32,
+                 **kwargs):
+
         super().__init__()
+        self.save_hyperparameters()
 
-        self.hparams = hparams
         self.online_evaluator = self.hparams.online_ft
-        self.dataset = self.get_dataset(hparams.dataset)
+        self.dataset = self.get_dataset(self.hparams.dataset)
 
-        self.encoder = self.init_encoder()
+        # init encoder
+        self.encoder = encoder
+        if isinstance(encoder, str):
+            self.encoder = self.init_encoder()
 
         # info nce loss
-        c, h = self.__compute_final_nb_c(hparams.patch_size)
-        self.info_nce = InfoNCE(num_input_channels=c, target_dim=64, embed_scale=0.1)
+        c, h = self.__compute_final_nb_c(self.hparams.patch_size)
+        self.info_nce = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
         if self.online_evaluator:
             z_dim = c * h * h
@@ -195,7 +211,7 @@ class CPCV2(pl.LightningModule):
             log['val_mlp_acc'] = mlp_acc
             log['val_mlp_loss'] = mlp_loss
 
-        return {'val_loss': val_nce, 'log': log}
+        return {'val_loss': val_nce, 'log': log, 'progress_bar': log}
 
     def configure_optimizers(self):
         opt = optim.Adam(
@@ -328,7 +344,6 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--encoder', default='cpc_encoder', type=str)
 
         # dataset options
-        parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int)
         parser.add_argument('--patch_size', default=dataset['patch_size'], type=int)
         parser.add_argument('--patch_overlap', default=dataset['patch_overlap'], type=int)
 
@@ -353,6 +368,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args.online_ft = True
 
-    model = CPCV2(args)
+    model = CPCV2(**vars(args))
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)

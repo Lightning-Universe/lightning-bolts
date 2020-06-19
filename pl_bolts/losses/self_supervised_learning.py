@@ -28,7 +28,7 @@ def nt_xent_loss(out_1, out_2, temperature):
     return loss
 
 
-class InfoNCE(nn.Module):
+class CPCTask(nn.Module):
     """
     Loss used in CPC
     """
@@ -65,7 +65,8 @@ class InfoNCE(nn.Module):
         b1 = torch.arange(n) // ((h - i - 1) * w)
         c1 = torch.arange(n) % ((h - i - 1) * w)
         labels = b1 * h * w + (i + 1) * w + c1
-        labels = labels.type_as(logits).long()
+        labels = labels.to(logits.device)
+        labels = labels.long()
 
         loss = nn.functional.cross_entropy(logits, labels)
         return loss
@@ -90,7 +91,7 @@ class InfoNCE(nn.Module):
         return loss
 
 
-class AmdimNceLoss(nn.Module):
+class AmdimNCELoss(nn.Module):
     def forward(self, anchor_representations, positive_representations, mask_mat):
         """
         Compute the NCE scores for predicting r_src->r_trg.
@@ -194,7 +195,7 @@ class AMDIMContrastiveTask(nn.Module):
         self.strategy = strategy
 
         self.masks = {}
-        self.nce_loss = AmdimNceLoss()
+        self.nce_loss = AmdimNCELoss()
 
     def feat_size_w_mask(self, w):
         masks_r5 = np.zeros((w, w, 1, w, w))

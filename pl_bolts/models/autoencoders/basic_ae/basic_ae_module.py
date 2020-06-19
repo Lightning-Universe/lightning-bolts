@@ -10,30 +10,27 @@ from pl_bolts.models.autoencoders.basic_ae.components import AEEncoder
 from pl_bolts.models.autoencoders.basic_vae.components import Decoder
 
 
-class BasicAE(LightningModule):
+class AE(LightningModule):
 
     def __init__(
             self,
-            hparams=None,
+            hidden_dim=128,
+            latent_dim=32,
+            input_width=28,
+            input_height=28,
+            batch_size=32,
+            learning_rate=0.001,
+            **kwargs
     ):
         super().__init__()
-        # attach hparams to log hparams to the loggers (like tensorboard)
-        self.__check_hparams(hparams)
-        self.hparams = hparams
+        self.save_hyperparameters()
 
         self.dataloaders = MNISTDataLoaders(save_path=os.getcwd())
 
-        self.encoder = self.init_encoder(self.hidden_dim, self.latent_dim,
-                                         self.input_width, self.input_height)
-        self.decoder = self.init_decoder(self.hidden_dim, self.latent_dim,
-                                         self.input_width, self.input_height)
-
-    def __check_hparams(self, hparams):
-        self.hidden_dim = hparams.hidden_dim if hasattr(hparams, 'hidden_dim') else 128
-        self.latent_dim = hparams.latent_dim if hasattr(hparams, 'latent_dim') else 32
-        self.input_width = hparams.input_width if hasattr(hparams, 'input_width') else 28
-        self.input_height = hparams.input_height if hasattr(hparams, 'input_height') else 28
-        self.batch_size = hparams.batch_size if hasattr(hparams, 'batch_size') else 32
+        self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim,
+                                         self.hparams.input_width, self.hparams.input_height)
+        self.decoder = self.init_decoder(self.hparams.hidden_dim, self.hparams.latent_dim,
+                                         self.hparams.input_width, self.hparams.input_height)
 
     def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
         encoder = AEEncoder(hidden_dim, latent_dim, input_width, input_height)
@@ -98,19 +95,19 @@ class BasicAE(LightningModule):
         }
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=0.001)
+        return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
     def prepare_data(self):
         self.dataloaders.prepare_data()
 
     def train_dataloader(self):
-        return self.dataloaders.train_dataloader(self.batch_size)
+        return self.dataloaders.train_dataloader(self.hparams.batch_size)
 
     def val_dataloader(self):
-        return self.dataloaders.val_dataloader(self.batch_size)
+        return self.dataloaders.val_dataloader(self.hparams.batch_size)
 
     def test_dataloader(self):
-        return self.dataloaders.test_dataloader(self.batch_size)
+        return self.dataloaders.test_dataloader(self.hparams.batch_size)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -124,15 +121,16 @@ class BasicAE(LightningModule):
         parser.add_argument('--input_height', type=int, default=28,
                             help='input image height - 28 for MNIST (must be even)')
         parser.add_argument('--batch_size', type=int, default=32)
+        parser.add_argument('--learning_rate', type=float, default=1e-3)
         return parser
 
 
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
-    parser = BasicAE.add_model_specific_args(parser)
+    parser = AE.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    ae = BasicAE(args)
+    ae = AE(**vars(args))
     trainer = Trainer()
     trainer.fit(ae)

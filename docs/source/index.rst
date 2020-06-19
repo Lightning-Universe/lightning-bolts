@@ -31,6 +31,13 @@ PyTorchLightning-Bolts documentation
 
 .. toctree::
    :maxdepth: 2
+   :name: losses
+   :caption: Losses
+
+   losses
+
+.. toctree::
+   :maxdepth: 2
    :name: loggers
    :caption: Loggers
 
@@ -41,7 +48,9 @@ PyTorchLightning-Bolts documentation
    :name: models
    :caption: Models
 
-   models
+   autoencoders
+   gans
+   self_supervised_models
 
 .. toctree::
    :maxdepth: 2
@@ -49,6 +58,13 @@ PyTorchLightning-Bolts documentation
    :caption: Transforms
 
    transforms
+
+.. toctree::
+   :maxdepth: 2
+   :name: ssl
+   :caption: Self-supervised learning
+
+   vision_tasks
 
 
 Indices and tables
