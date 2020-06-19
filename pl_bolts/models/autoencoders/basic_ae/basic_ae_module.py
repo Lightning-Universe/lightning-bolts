@@ -20,12 +20,13 @@ class AE(LightningModule):
             input_height=28,
             batch_size=32,
             learning_rate=0.001,
+            data_dir='',
             **kwargs
     ):
         super().__init__()
         self.save_hyperparameters()
 
-        self.dataloaders = MNISTDataLoaders(save_path=os.getcwd())
+        self.dataloaders = MNISTDataLoaders(save_path=data_dir)
 
         self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim,
                                          self.hparams.input_width, self.hparams.input_height)
@@ -122,6 +123,7 @@ class AE(LightningModule):
                             help='input image height - 28 for MNIST (must be even)')
         parser.add_argument('--batch_size', type=int, default=32)
         parser.add_argument('--learning_rate', type=float, default=1e-3)
+        parser.add_argument('--data_dir', type=str, default='')
         return parser
 
 
