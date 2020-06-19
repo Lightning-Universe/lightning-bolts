@@ -7,34 +7,20 @@ from argparse import Namespace, ArgumentParser
 def test_cpcv2(tmpdir):
     reset_seed()
 
-    parser = ArgumentParser()
-    parser = CPCV2.add_model_specific_args(parser)
-    hparams = parser.parse_args(args=[])
-    hparams.batch_size = 2
-    hparams.data_dir = tmpdir
-    hparams.meta_root = tmpdir
-
-    model = CPCV2(hparams)
-    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    model = CPCV2()
+    trainer = pl.Trainer(overfit_batches=1, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
 
     assert loss > 0
+
 
 def test_amdim(tmpdir):
     reset_seed()
 
-    parser = ArgumentParser()
-    parser = CPCV2.add_model_specific_args(parser)
-    hparams = parser.parse_args(args=[])
-    hparams.batch_size = 2
-    hparams.data_dir = tmpdir
-    hparams.meta_root = tmpdir
-
     model = AMDIM()
-    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer = pl.Trainer(overfit_batches=1, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
 
     assert loss > 0
-
