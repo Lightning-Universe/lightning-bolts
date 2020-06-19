@@ -8,7 +8,7 @@ def test_cpcv2(tmpdir):
     reset_seed()
 
     model = CPCV2()
-    trainer = pl.Trainer(overfit_batches=1, default_root_dir=tmpdir)
+    trainer = pl.Trainer(overfit_batches=2, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
 
@@ -19,7 +19,7 @@ def test_amdim(tmpdir):
     reset_seed()
 
     model = AMDIM()
-    trainer = pl.Trainer(overfit_batches=1, default_root_dir=tmpdir)
+    trainer = pl.Trainer(overfit_batches=2, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
 
