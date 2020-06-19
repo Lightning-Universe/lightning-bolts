@@ -156,7 +156,7 @@ class LitMNISTModel(LightningModule):
 
     def val_dataloader(self):
         dataset = MNIST(self.hparams.data_dir, train=True, download=False, transform=transforms.ToTensor())
-        _ , mnist_val = random_split(dataset, [55000, 5000])
+        _, mnist_val = random_split(dataset, [55000, 5000])
         loader = DataLoader(mnist_val, batch_size=self.hparams.batch_size, num_workers=self.hparams.num_workers)
         return loader
 
