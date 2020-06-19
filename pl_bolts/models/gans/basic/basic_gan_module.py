@@ -21,6 +21,7 @@ class BasicGAN(LightningModule):
                  b1=0.5,
                  b2=0.999,
                  learning_rate=0.0002,
+                 data_dir='',
                  **kwargs):
         super().__init__()
 
@@ -29,7 +30,7 @@ class BasicGAN(LightningModule):
 
         self.img_dim = (self.hparams.input_channels, self.hparams.input_width, self.hparams.input_height)
 
-        self.dataloaders = MNISTDataLoaders(save_path=os.getcwd())
+        self.dataloaders = MNISTDataLoaders(save_path=data_dir)
 
         # networks
         self.generator = self.init_generator(self.img_dim)
@@ -159,6 +160,7 @@ class BasicGAN(LightningModule):
         parser.add_argument('--latent_dim', type=int, default=100,
                             help="generator embedding dim")
         parser.add_argument('--batch_size', type=int, default=64, help="size of the batches")
+        parser.add_argument('--data_dir', type=str, default='')
 
         return parser
 
