@@ -47,6 +47,7 @@ PyTorchLightning-Bolts documentation
 
    autoencoders
    gans
+   rl
    self_supervised_models
 
 .. toctree::
