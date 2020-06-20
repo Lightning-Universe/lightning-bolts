@@ -75,6 +75,7 @@ The following models are based on Policy gradient
 
 Policy Gradient
 ^^^^^^^^^^^^^^^
+TODO: add description
 
 .. autoclass:: pl_bolts.models.rl.PolicyGradient
    :noindex:
