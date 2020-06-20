@@ -15,29 +15,64 @@ from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
 class AMDIM(pl.LightningModule):
 
     def __init__(self,
-                 image_height=32,
-                 ndf=320,
-                 n_rkhs=1280,
-                 n_depth=10,
-                 use_bn=0,
-                 tclip=20.0,
-                 learning_rate=2e-4,
-                 data_dir='',
-                 nb_classes=10,
-                 batch_size=200,
+                 image_channels: int = 3,
+                 image_height: int = 32,
+                 encoder_feature_dim: int = 320,
+                 embedding_fx_dim: int = 1280,
+                 conv_block_depth: int = 10,
+                 use_bn: bool = False,
+                 tclip: int = 20.0,
+                 learning_rate: int = 2e-4,
+                 data_dir: str = '',
+                 num_classes: int = 10,
+                 batch_size: int = 200,
                  **kwargs
                  ):
+        """
+        Implementation of `AMDIM <https://arxiv.org/abs/1906.00910.>`_
+        Original Authors: Philip Bachman, R Devon Hjelm, William Buchwalter.
+
+        Model implemented by: `William Falcon <https://github.com/williamFalcon>`_
+        This code is adapted to Lightning using the original author repo (`the original repo <https://github.com/Philip-Bachman/amdim-public>`_).
+
+        Args:
+            image_channels: 3
+            image_height: pixels
+            encoder_feature_dim: Called `ndf` in the paper, this is the representation size for the encoder.
+            embedding_fx_dim: Output dim of the embedding function (`nrkhs` in the paper)
+                (Reproducing Kernel Hilbert Spaces).
+            conv_block_depth: Depth of each encoder block,
+            use_bn: If true will use batchnorm.
+            tclip: soft clipping non-linearity to the scores after computing the regularization term
+                and before computing the log-softmax. This is the 'second trick' used in the paper
+            learning_rate: The learning rate
+            data_dir: Where to store data
+            num_classes: How many classes in the dataset
+            batch_size: The batch size
+
+        Example:
+
+            >>> from pl_bolts.models.self_supervised import AMDIM
+            ...
+            >>> model = AMDIM()
+
+        Train::
+
+            trainer = Trainer()
+            trainer.fit(model)
+
+        """
         super().__init__()
         self.save_hyperparameters()
 
-        dummy_batch = torch.zeros((2, 3, self.hparams.image_height, self.hparams.image_height))
+        dummy_batch = torch.zeros((2, image_channels, self.hparams.image_height, self.hparams.image_height))
 
         self.encoder = AMDIMEncoder(
             dummy_batch,
-            num_channels=3,
-            ndf=self.hparams.ndf,
-            n_rkhs=self.hparams.n_rkhs,
-            n_depth=self.hparams.n_depth,
+            num_channels=self.hparams.image_channels,
+            encoder_feature_dim=self.hparams.encoder_feature_dim,
+            embedding_fx_dim=self.hparams.embedding_fx_dim,
+            conv_block_depth=self.hparams.conv_block_depth,
             encoder_size=self.hparams.image_height,
             use_bn=self.hparams.use_bn
         )
@@ -295,15 +330,15 @@ class AMDIM(pl.LightningModule):
         dataset = cifar_10
 
         # dataset options
-        parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int)
+        parser.add_argument('--num_classes', default=dataset['nb_classes'], type=int)
 
         # network params
         parser.add_argument('--tclip', type=float, default=20.0, help='soft clipping range for NCE scores')
         parser.add_argument('--use_bn', type=int, default=0)
-        parser.add_argument('--ndf', type=int, default=dataset['ndf'], help='feature width for encoder')
-        parser.add_argument('--n_rkhs', type=int, default=dataset['n_rkhs'],
+        parser.add_argument('--encoder_feature_dim', type=int, default=dataset['ndf'], help='feature size for encoder')
+        parser.add_argument('--embedding_fx_dim', type=int, default=dataset['n_rkhs'],
                             help='number of dimensions in fake RKHS embeddings')
-        parser.add_argument('--n_depth', type=int, default=dataset['depth'])
+        parser.add_argument('--conv_block_depth', type=int, default=dataset['depth'])
         parser.add_argument('--image_height', type=int, default=dataset['image_height'])
 
         # trainin params
@@ -327,5 +362,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model = AMDIM(**vars(args))
-    trainer = pl.Trainer(fast_dev_run=True)
+    trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)

@@ -7,13 +7,16 @@ from torch import nn
 
 
 class AMDIMEncoder(nn.Module):
-    def __init__(self, dummy_batch, num_channels=3, ndf=64, n_rkhs=512,
-                 n_depth=3, encoder_size=32, use_bn=False):
+    def __init__(self, dummy_batch, num_channels=3, encoder_feature_dim=64, embedding_fx_dim=512,
+                 conv_block_depth=3, encoder_size=32, use_bn=False):
         super().__init__()
         # NDF = encoder hidden feat size
         # RKHS = output dim
-        self.ndf = ndf
-        self.n_rkhs = n_rkhs
+        n_depth = conv_block_depth
+        ndf = encoder_feature_dim
+        self.ndf = encoder_feature_dim
+        n_rkhs = embedding_fx_dim
+        self.n_rkhs = embedding_fx_dim
         self.use_bn = use_bn
         self.dim2layer = None
         self.encoder_size = encoder_size
