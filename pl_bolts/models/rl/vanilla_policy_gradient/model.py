@@ -24,8 +24,8 @@ from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.common.wrappers import ToTensor
 
 
-class VPGLightning(pl.LightningModule):
-    """ VPG Model """
+class PolicyGradient(pl.LightningModule):
+    """ PolicyGradient Model """
 
     def __init__(self, hparams: argparse.Namespace) -> None:
         super().__init__()

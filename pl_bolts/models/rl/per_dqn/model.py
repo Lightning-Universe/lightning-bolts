@@ -12,10 +12,10 @@ from torch.utils.data import DataLoader
 from pl_bolts.models.rl.common.agents import ValueAgent
 from pl_bolts.models.rl.common.experience import ExperienceSource, PrioRLDataset
 from pl_bolts.models.rl.common.memory import PERBuffer
-from pl_bolts.models.rl.dqn.model import DQNLightning
+from pl_bolts.models.rl.dqn.model import DQN
 
 
-class PERDQNLightning(DQNLightning):
+class PERDQN(DQN):
     """ PER DQN Model """
 
     def __init__(self, hparams):

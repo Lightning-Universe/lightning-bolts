@@ -7,10 +7,10 @@ master/Chapter08/03_dqn_double.py
 from typing import Tuple
 import torch
 import torch.nn as nn
-from pl_bolts.models.rl.dqn.model import DQNLightning
+from pl_bolts.models.rl.dqn.model import DQN
 
 
-class DoubleDQNLightning(DQNLightning):
+class DoubleDQN(DQN):
     """ Double DQN Model """
 
     def loss(self, batch: Tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:
