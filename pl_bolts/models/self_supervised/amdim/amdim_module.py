@@ -35,6 +35,17 @@ class AMDIM(pl.LightningModule):
         Model implemented by: `William Falcon <https://github.com/williamFalcon>`_
         This code is adapted to Lightning using the original author repo (`the original repo <https://github.com/Philip-Bachman/amdim-public>`_).
 
+        Example:
+
+            >>> from pl_bolts.models.self_supervised import AMDIM
+            ...
+            >>> model = AMDIM()
+
+        Train::
+
+            trainer = Trainer()
+            trainer.fit(model)
+
         Args:
             image_channels: 3
             image_height: pixels
@@ -49,18 +60,6 @@ class AMDIM(pl.LightningModule):
             data_dir: Where to store data
             num_classes: How many classes in the dataset
             batch_size: The batch size
-
-        Example:
-
-            >>> from pl_bolts.models.self_supervised import AMDIM
-            ...
-            >>> model = AMDIM()
-
-        Train::
-
-            trainer = Trainer()
-            trainer.fit(model)
-
         """
         super().__init__()
         self.save_hyperparameters()
