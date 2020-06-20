@@ -1,6 +1,7 @@
 """
 N Step Deep Q-network
-This example is based on: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter08/05_dqn_prio_replay.py
+This example is based on: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/
+blob/master/Chapter08/05_dqn_prio_replay.py
 """
 
 from collections import OrderedDict
