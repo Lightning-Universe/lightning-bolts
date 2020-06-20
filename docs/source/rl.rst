@@ -31,13 +31,17 @@ DQN model introduced in `Playing Atari with Deep Reinforcement Learning <https:/
 Paper authors: Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves, Ioannis Antonoglou, Daan Wierstra, Martin Riedmiller.
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
-Example::
 
-    from pl_bolts.models.rl import DQN
+Example:
 
-    model = DQN()
+    >>> from pl_bolts.models.rl import DQN
+    ...
+    >>> dqn = DQN()
+
+Train::
+
     trainer = Trainer()
-    trainer.fit(model)
+    trainer.fit(dqn)
 
 .. autoclass:: pl_bolts.models.rl.DQN
    :noindex:
@@ -48,13 +52,17 @@ Double DQN model introduced in TODO
 Paper authors: TODO
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
+
 Example::
 
-    from pl_bolts.models.rl import TODO
+    >>> from pl_bolts.models.rl import DoubleDQN
+    ...
+    >>> ddqn = DoubleDQN()
 
-    model = TODO
+Train::
+
     trainer = Trainer()
-    trainer.fit(model)
+    trainer.fit(ddqn)
 
 .. autoclass:: pl_bolts.models.rl.DoubleDQN
    :noindex:
@@ -67,3 +75,8 @@ The following models are based on Policy gradient
 
 Policy Gradient
 ^^^^^^^^^^^^^^^
+TODO: add description
+
+.. autoclass:: pl_bolts.models.rl.PolicyGradient
+   :noindex:
+
