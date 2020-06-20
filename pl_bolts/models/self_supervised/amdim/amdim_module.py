@@ -29,8 +29,8 @@ class AMDIM(pl.LightningModule):
                  **kwargs
                  ):
         """
-        Implementation of `AMDIM <https://arxiv.org/abs/1906.00910.>`_
-        Original Authors: Philip Bachman, R Devon Hjelm, William Buchwalter.
+        PyTorch Lightning implementation of `AMDIM <https://arxiv.org/abs/1906.00910.>`_
+        Paper authors: Philip Bachman, R Devon Hjelm, William Buchwalter.
 
         Model implemented by: `William Falcon <https://github.com/williamFalcon>`_
         This code is adapted to Lightning using the original author repo (`the original repo <https://github.com/Philip-Bachman/amdim-public>`_).

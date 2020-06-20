@@ -20,6 +20,7 @@ from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 from pl_bolts.utils import torchvision_ssl_encoder
+from typing import Union
 
 __all__ = [
     'CPCV2'
@@ -29,18 +30,48 @@ __all__ = [
 class CPCV2(pl.LightningModule):
 
     def __init__(self,
-                 encoder='cpc_encoder',
-                 patch_size=8,
-                 patch_overlap=4,
-                 online_ft=True,
-                 amdim_task=False,
-                 dataset='cifar10',
-                 num_workers=4,
-                 learning_rate=1e-4,
-                 data_dir='',
-                 meta_root='',
-                 batch_size=32,
+                 encoder: Union[str, torch.nn.Module, pl.LightningModule] ='cpc_encoder',
+                 patch_size: int = 8,
+                 patch_overlap: int = 4,
+                 online_ft: int = True,
+                 task: str = 'cpc',
+                 dataset: str = 'cifar10',
+                 num_workers: int = 4,
+                 learning_rate: int = 1e-4,
+                 data_dir: str = '',
+                 meta_root: str = '',
+                 batch_size: int = 32,
                  **kwargs):
+        """
+        PyTorch Lightning implementation of `Data-Efficient Image Recognition with Contrastive Predictive Coding <https://arxiv.org/abs/1905.09272>`_
+        Paper authors: (Olivier J. Hénaff, Aravind Srinivas, Jeffrey De Fauw, Ali Razavi, Carl Doersch, S. M. Ali Eslami, Aaron van den Oord).
+
+        Model implemented by: `William Falcon <https://github.com/williamFalcon>`_, `Tullie Murrel <https://github.com/tullie>`_
+
+        Args:
+            encoder: A string for any of the resnets in torchvision, or the original CPC encoder, or a custon nn.Module encoder
+            patch_size: How big to make the image patches
+            patch_overlap: How much overlap should each patch have.
+            online_ft: Enable a 1024-unit MLP to fine-tune online
+            task: Which self-supervised task to use ('cpc', 'amdim', etc...)
+            dataset: Dataset name
+            num_workers: num dataloader worksers
+            learning_rate: what learning rate to use
+            data_dir: where to store data
+            meta_root: path to the imagenet meta.bin file (if not inside your imagenet folder)
+            batch_size: batch size
+
+        Example:
+
+            >>> from pl_bolts.models.self_supervised import CPCV2
+            ...
+            >>> model = CPCV2()
+
+        Train::
+
+            trainer = Trainer()
+            trainer.fit(model)
+        """
 
         super().__init__()
         self.save_hyperparameters()
@@ -285,7 +316,7 @@ class CPCV2(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true')
-        parser.add_argument('--amdim_task', action='store_true')
+        parser.add_argument('--task', type=str, default='cpc')
         parser.add_argument('--dataset', type=str, default='cifar10')
 
         (args, _) = parser.parse_known_args()
