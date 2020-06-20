@@ -8,8 +8,6 @@ Contrastive Learning
 --------------------
 The following models perform contrastive learning.
 
------------------
-
 CPC (V2)
 ^^^^^^^^
 
