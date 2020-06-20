@@ -7,11 +7,14 @@ Basic GAN
 This is a basic GAN.
 
 
-Example::
+Example:
 
-    from pytorch_lightning.models.gans import BasicGAN
+    >>> from pytorch_lightning.models.gans import BasicGAN
+    ...
+    >>> gan = BasicGAN()
 
-    gan = BasicGAN()
+Train::
+
     trainer = Trainer()
     trainer.fit(gan)
 
