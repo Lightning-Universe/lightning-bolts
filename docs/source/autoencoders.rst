@@ -3,7 +3,7 @@ Autoencoder Models
 These are off-the-shelf autoencoder which can be used for resarch or as feature extractors.
 
 Pretrained models
-------------------
+-----------------
 This is a basic template for implementing a Variational Autoencoder in PyTorch Lightning.
 
 A default encoder and decoder have been provided but can easily be replaced by custom models.
@@ -18,7 +18,7 @@ To use in your project or as a feature extractor:
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.autoencoders import VAE
+    from pl_bolts.models.autoencoders import VAE
     import pytorch_lightning as pl
 
     class YourResearchModel(pl.LightningModule):
@@ -40,7 +40,7 @@ To use in production or for predictions:
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.autoencoders import VAE
+    from pl_bolts.models.autoencoders import VAE
 
     vae = VAE.load_from_checkpoint(PATH)
     vae.freeze()
@@ -54,7 +54,7 @@ You can train the VAE on its own:
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.autoencoders import VAE
+    from pl_bolts.models.autoencoders import VAE
     import pytorch_lightning as pl
 
     vae = VAE()
@@ -65,7 +65,7 @@ You can also use as template for research (example of modifying only the prior):
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.autoencoders import VAE
+    from pl_bolts.models.autoencoders import VAE
 
     class MyVAEFlavor(VAE):
 
@@ -79,7 +79,7 @@ Or pass in your own encoders and decoders:
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.autoencoders import VAE
+    from pl_bolts.models.autoencoders import VAE
     import pytorch_lightning as pl
 
     encoder = MyEncoder()
@@ -135,7 +135,7 @@ You can override any part of this AE to build your own variation.
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.autoencoders import AE
+    from pl_bolts.models.autoencoders import AE
 
     class MyAEFlavor(AE):
 
@@ -167,7 +167,7 @@ You can override any part of this VAE to build your own variation.
 
 .. code-block:: python
 
-    from pytorch_lightning_bolts.models.autoencoders import VAE
+    from pl_bolts.models.autoencoders import VAE
 
     class MyVAEFlavor(VAE):
 

@@ -1,35 +1,22 @@
-import os
-from argparse import ArgumentParser
-
 import torch
 from torch import nn
-import pytorch_lightning as pl
-from pytorch_lightning import LightningModule, Trainer
 from torch.nn import functional as F
+import pytorch_lightning as pl
+
 from pl_bolts.datamodules.sklearn_dataloaders import SklearnDataLoaders
 
 
-class LinearRegression(LightningModule):
+class LinearRegression(pl.LightningModule):
 
-    def __init__(self, input_dim=None, bias=True, learning_rate=1e-3):
+    def __init__(self, input_dim=None, bias=True, learning_rate=0.05, **kwargs):
         super().__init__()
         self.save_hyperparameters()
 
-        if input_dim is not None:
-            self.linear = nn.Linear(self.hparams.input_dim, out_features=1, bias=bias)
-            self.linear.to(self.device)
-        else:
-            self.linear = None
+        self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=1, bias=bias).double()
 
     def forward(self, x):
-        # infer feature dimension at run time if not specified
-        if self.hparams.input_dim is None:
-            self.hparams.input_dim = x.size()[-1]
-            self.linear = nn.Linear(self.hparams.input_dim, out_features=1, bias=self.hparams.bias)
-            self.linear.to(self.device)
-
-        x = self.linear(x)
-        return x
+        y_hat = self.linear(x)
+        return y_hat
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -74,16 +61,7 @@ class LinearRegression(LightningModule):
         }
 
     def configure_optimizers(self):
-        return torch.optim.SGD(self.parameters(), lr=self.hparams.learning_rate)
-
-#    def train_dataloader(self):
-#        return SklearnDataLoaders.train_dataloader(self.hparams.batch_size)
-#
-#    def val_dataloader(self):
-#        return SklearnDataLoaders.val_dataloader(self.hparams.batch_size)
-#
-#    def test_dataloader(self):
-#        return SklearnDataLoaders.test_dataloader(self.hparams.batch_size)
+        return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -91,31 +69,28 @@ class LinearRegression(LightningModule):
         parser.add_argument('--learning_rate', type=float, default=0.0001)
         parser.add_argument('--input_dim', type=int, default=None)
         parser.add_argument('--bias', default='store_true')
-        parser.add_argument('--batch_size', type=int, default=32)
+        parser.add_argument('--batch_size', type=int, default=16)
         return parser
 
 
 if __name__ == '__main__':  # pragma: no cover
+    from argparse import ArgumentParser
     pl.seed_everything(1234)
 
     # create dataset
-    # from sklearn.datasets import make_regression
-    # X, y = make_regression()
-    # dataset = SKLearnDataset(X, y)
+    from sklearn.datasets import load_boston
+    X, y = load_boston(return_X_y=True) #these are numpy arrays
+    loaders = SklearnDataLoaders(X, y)
 
     # args
     parser = ArgumentParser()
     parser = LinearRegression.add_model_specific_args(parser)
+    parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
-    train = SklearnDataLoaders.train_dataloader(batch_size)
-    val = SklearnDataLoaders.val_dataloader(batch_size)
-    #test = SklearnDataLoaders.test_dataloader(batch_size)
-    
     # model
     model = LinearRegression(**vars(args))
 
-    #batch =(torch.randn(5, 7), torch.rand(5))
-    #model.training_step(batch, 3)
-    trainer = Trainer()
-    trainer.fit(model, train, val)
+    # train
+    trainer = pl.Trainer.from_argparse_args(args)
+    trainer.fit(model, loaders.train_dataloader(args.batch_size), loaders.val_dataloader(args.batch_size))

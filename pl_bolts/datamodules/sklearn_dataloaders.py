@@ -1,23 +1,25 @@
 from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders
-from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data import Dataset, DataLoader
 from sklearn.utils import shuffle as sk_shuffle
-from sklearn.model_selection import train_test_split
 import math
-import numpy as np
+
 
 class SklearnDataset(Dataset):
     def __init__(self, X, y, X_transform=None, y_transform=None):
         """
         Mapping between numpy (or sklearn) datasets to PyTorch datasets.
 
-        Example::
 
-                from sklearn.datasets import load_boston
+        Example:
+            >>> from sklearn.datasets import load_boston
+            >>> from pl_bolts.datamodules import SklearnDataset
+            >>> from torch.utils.data import DataLoader
+            >>>
+            >>> X, y = load_boston(return_X_y=True)
+            >>> dataset = SklearnDataset(X, y)
+            >>> len(dataset)
+            506
 
-                X, y = load_boston(return_X_y=True)
-                dataset = SklearnDataset(X, y)
-
-                loader = Dataloader(dataset, shuffle=True)
         """
         self.X = X
         self.Y = y
@@ -48,7 +50,6 @@ class SklearnDataLoaders(BoltDataLoaders):
         self.num_workers = num_workers
 
         # shuffle x and y
-        #self.X, self.y = X, y
         if shuffle:
             X, y = sk_shuffle(X, y, random_state=random_state)
 
@@ -69,20 +70,16 @@ class SklearnDataLoaders(BoltDataLoaders):
             x_val, y_val = x_split[:val_size], y_split[:val_size]
             x_split, y_split = x_split[val_size:], y_split[val_size:]
 
-        #self.x_val, self.y_val = x_val, y_val
-
         # if don't have x_test, y_test create split from X
         if x_test is None and y_test is None:
             test_size = int(math.floor(test_split * len(x_split)))
             x_test, y_test = x_split[test_size:], y_split[test_size:]
 
-        #self.x_test, self.y_test = x_test, y_test
-
         self.train_dataset = SklearnDataset(X, y)
         self.val_dataset = SklearnDataset(x_val, y_val)
         self.test_dataset = SklearnDataset(x_test, y_test)
 
-    def train_dataloader(self, batch_size=32):
+    def train_dataloader(self, batch_size: int = 32):
         loader = DataLoader(
             self.train_dataset,
             batch_size=batch_size,
@@ -93,7 +90,7 @@ class SklearnDataLoaders(BoltDataLoaders):
         )
         return loader
 
-    def val_dataloader(self, batch_size=32):
+    def val_dataloader(self, batch_size: int = 32):
         loader = DataLoader(
             self.val_dataset,
             batch_size=batch_size,
