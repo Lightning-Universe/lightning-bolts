@@ -46,38 +46,58 @@ class Projection(nn.Module):
 
 
 class SimCLR(pl.LightningModule):
-    def __init__(self, dataset, data_dir, lr, wd, input_height, batch_size,
-                 online_ft=False, num_workers=0, optimizer='adam',
-                 step=30, gamma=0.5, temperature=0.5, **kwargs):
+    def __init__(self,
+                 dataset='cifar10',
+                 data_dir='',
+                 learning_rate=0.00006,
+                 wd=0.0005,
+                 input_height=32,
+                 batch_size=128,
+                 online_ft=False,
+                 num_workers=4,
+                 optimizer='adam',
+                 step=30,
+                 gamma=0.5,
+                 temperature=0.5,
+                 **kwargs):
+        """
+        PyTorch Lightning implementation of `SIMCLR <https://arxiv.org/abs/2002.05709.>`_
+        Paper authors: Ting Chen, Simon Kornblith, Mohammad Norouzi, Geoffrey Hinton.
+
+        Model implemented by:
+
+            - `William Falcon <https://github.com/williamFalcon>`_
+            - `Tullie Murrel <https://github.com/tullie>`_
+
+        Example:
+
+            >>> from pl_bolts.models.self_supervised import SimCLR
+            ...
+            >>> model = SimCLR()
+
+        Train::
+
+            trainer = Trainer()
+            trainer.fit(model)
+
+        Args:
+            image_channels: 3
+            image_height: pixels
+            encoder_feature_dim: Called `ndf` in the paper, this is the representation size for the encoder.
+            embedding_fx_dim: Output dim of the embedding function (`nrkhs` in the paper)
+                (Reproducing Kernel Hilbert Spaces).
+            conv_block_depth: Depth of each encoder block,
+            use_bn: If true will use batchnorm.
+            tclip: soft clipping non-linearity to the scores after computing the regularization term
+                and before computing the log-softmax. This is the 'second trick' used in the paper
+            learning_rate: The learning rate
+            data_dir: Where to store data
+            num_classes: How many classes in the dataset
+            batch_size: The batch size
+        """
         super().__init__()
+        self.save_hyperparameters()
 
-        self.hparams = Namespace(**{
-            'lr': lr,
-            'step': step,
-            'gamma': gamma,
-            'temperature': temperature,
-            'dataset': dataset,
-            'data_dir': data_dir,
-            'wd': wd,
-            'input_height': input_height,
-            'batch_size': batch_size,
-            'online_ft': online_ft,
-            'num_workers': num_workers,
-            'optimizer': optimizer
-        })
-
-        self.online_evaluator = online_ft
-        self.batch_size = batch_size
-        self.input_height = input_height
-        self.gamma = gamma
-        self.step = step
-        self.optimizer = optimizer
-        self.wd = wd
-        self.lr = lr
-        self.temp = temperature
-        self.data_dir = data_dir
-        self.num_workers = num_workers
-        self.dataset_name = dataset
         self.dataset = self.get_dataset(dataset)
         self.loss_func = self.init_loss()
         self.encoder = self.init_encoder()
@@ -214,32 +234,32 @@ class SimCLR(pl.LightningModule):
         train_transform = SimCLRDataTransform(input_height=self.input_height)
 
         if self.dataset_name == 'stl10':
-            loader = self.dataset.train_dataloader_mixed(self.batch_size, transforms=train_transform)
+            loader = self.dataset.train_dataloader_mixed(self.hparams.batch_size, transforms=train_transform)
         else:
-            loader = self.dataset.train_dataloader(self.batch_size, transforms=train_transform)
+            loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
 
     def val_dataloader(self):
         test_transform = SimCLRDataTransform(input_height=self.input_height, test=True)
 
         if self.dataset_name == 'stl10':
-            loader = self.dataset.val_dataloader_mixed(self.batch_size, transforms=test_transform)
+            loader = self.dataset.val_dataloader_mixed(self.hparams.batch_size, transforms=test_transform)
         else:
-            loader = self.dataset.val_dataloader(self.batch_size, transforms=test_transform)
+            loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
         return loader
 
     def configure_optimizers(self):
         if self.optimizer == 'adam':
             optimizer = torch.optim.Adam(
-                self.parameters(), self.lr, weight_decay=self.wd)
+                self.parameters(), self.hparams.learning_rate, weight_decay=self.hparams.wd)
         elif self.optimizer == 'lars':
             optimizer = LARS(
-                self.parameters(), lr=self.lr, momentum=self.mom,
-                weight_decay=self.wd, eta=self.eta)
+                self.parameters(), lr=self.hparams.learning_rate, momentum=self.hparams.mom,
+                weight_decay=self.hparams.wd, eta=self.hparams.eta)
         else:
             raise ValueError(f'Invalid optimizer: {self.optimizer}')
         scheduler = StepLR(
-            optimizer, step_size=self.step, gamma=self.gamma)
+            optimizer, step_size=self.hparams.step, gamma=self.hparams.gamma)
         return [optimizer], [scheduler]
 
     @staticmethod
@@ -259,7 +279,7 @@ class SimCLR(pl.LightningModule):
         parser.add_argument('--expdir', type=str, default='simclrlogs')
         parser.add_argument('--optim', choices=['adam', 'lars'], default='lars')
         parser.add_argument('--batch_size', type=int, default=128)
-        parser.add_argument('--lr', type=float, default=0.00006)
+        parser.add_argument('--learning_rate', type=float, default=0.00006)
         parser.add_argument('--mom', type=float, default=0.9)
         parser.add_argument('--eta', type=float, default=0.001)
         parser.add_argument('--step', type=float, default=30)
