@@ -9,6 +9,8 @@ For the non-differentiable models, you can benefit from distributed training
 
 can be plugged into any deep learning pipeline - because we make it work withh differentiable models
 
+---------------
+
 Linear Regression
 -----------------
 TODO
