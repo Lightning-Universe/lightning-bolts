@@ -52,7 +52,7 @@ Example::
 Datamodules have two advantages:
 
 1. You can guarantee that the exact same train, val and test splits can be used across models.
-2. You can parametrize your model to be dataset agnostic.
+2. You can parameterize your model to be dataset agnostic.
 
 Example::
 
