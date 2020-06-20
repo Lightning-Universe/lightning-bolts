@@ -2,13 +2,25 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 import pytorch_lightning as pl
+from torch.optim.optimizer import Optimizer
 
 from pl_bolts.datamodules.sklearn_dataloaders import SklearnDataLoaders
 
 
 class LinearRegression(pl.LightningModule):
 
-    def __init__(self, input_dim=None, bias=True, learning_rate=0.05, **kwargs):
+    def __init__(self, input_dim: int, bias=True, learning_rate=0.05, optimizer:Optimizer = 'adam',**kwargs):
+        """
+        Linear regression model implementing
+        $$min_{W} ||(Wx + b) - y ||_2^2 $$
+
+        Args:
+            input_dim: number of dimensions of the input (1+)
+            bias: If false, will not use $$+b$$
+            learning_rate: learning_rate for the optimizer
+            optimizer: the optimizer to use (default='adam')
+
+        """
         super().__init__()
         self.save_hyperparameters()
 
@@ -61,7 +73,8 @@ class LinearRegression(pl.LightningModule):
         }
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
+        optimizer_class = getattr(torch.optim, self.hparams.optimizer)
+        return optimizer_class(self.parameters(), lr=self.hparams.learning_rate)
 
     @staticmethod
     def add_model_specific_args(parent_parser):

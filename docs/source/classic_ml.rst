@@ -13,7 +13,7 @@ can be plugged into any deep learning pipeline - because we make it work withh d
 
 Linear Regression
 -----------------
-TODO
+
 
 .. code-block:: python
 
