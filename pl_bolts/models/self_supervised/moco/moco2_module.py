@@ -36,31 +36,34 @@ class MocoV2(pl.LightningModule):
                  *args, **kwargs):
         super().__init__()
         """
-        emb_dim: feature dimension (default: 128)
-        num_negatives: queue size; number of negative keys (default: 65536)
-        encoder_momentum: moco momentum of updating key encoder (default: 0.999)
-        softmax_temperature: softmax temperature (default: 0.07)
+        PyTorch Lightning implementation of `SIMCLR <https://arxiv.org/abs/2002.05709.>`_
+        Paper authors: Ting Chen, Simon Kornblith, Mohammad Norouzi, Geoffrey Hinton.
+
+        Model implemented by:
+
+            - `William Falcon <https://github.com/williamFalcon>`_
+            - `Tullie Murrel <https://github.com/tullie>`_
+
+        Example:
+
+            >>> from pl_bolts.models.self_supervised import MocoV2
+            ...
+            >>> model = MocoV2()
+
+        Train::
+
+            trainer = Trainer()
+            trainer.fit(model)
+
+        Args:
+            emb_dim: feature dimension (default: 128)
+            num_negatives: queue size; number of negative keys (default: 65536)
+            encoder_momentum: moco momentum of updating key encoder (default: 0.999)
+            softmax_temperature: softmax temperature (default: 0.07)
         """
         super().__init__()
-        self.hparams = Namespace(**{
-            'emb_dim': emb_dim,
-            'num_negatives': num_negatives,
-            'encoder_momentum': encoder_momentum,
-            'softmax_temperature': softmax_temperature,
-            'use_mlp': use_mlp,
-            'learning_rate': learning_rate,
-            'num_workers': num_workers,
-            'momentum': momentum,
-            'weight_decay': weight_decay,
-            'dataset': dataset,
-            'data_dir': data_dir,
-            'batch_size': batch_size
-        })
+        self.save_hyperparameters()
 
-        self.K = num_negatives
-        self.m = encoder_momentum
-        self.T = softmax_temperature
-        self.emb_dim = emb_dim
         self.dataset = self.get_dataset(dataset)
 
         # create the encoders

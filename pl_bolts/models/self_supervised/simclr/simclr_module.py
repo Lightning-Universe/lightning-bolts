@@ -81,19 +81,8 @@ class SimCLR(pl.LightningModule):
             trainer.fit(model)
 
         Args:
-            image_channels: 3
-            image_height: pixels
-            encoder_feature_dim: Called `ndf` in the paper, this is the representation size for the encoder.
-            embedding_fx_dim: Output dim of the embedding function (`nrkhs` in the paper)
-                (Reproducing Kernel Hilbert Spaces).
-            conv_block_depth: Depth of each encoder block,
-            use_bn: If true will use batchnorm.
-            tclip: soft clipping non-linearity to the scores after computing the regularization term
-                and before computing the log-softmax. This is the 'second trick' used in the paper
-            learning_rate: The learning rate
-            data_dir: Where to store data
-            num_classes: How many classes in the dataset
-            batch_size: The batch size
+            todo
+
         """
         super().__init__()
         self.save_hyperparameters()

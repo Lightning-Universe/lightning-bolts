@@ -20,7 +20,7 @@ CPC (V2)
 .. autoclass:: pl_bolts.models.self_supervised.CPCV2
    :noindex:
 
-SIMCLR
+SimCLR
 ^^^^^^
 
 .. autoclass:: pl_bolts.models.self_supervised.SimCLR
