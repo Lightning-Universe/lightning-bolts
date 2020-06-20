@@ -22,6 +22,9 @@ Example::
     cifar10_model = LitModel(CIFAR10DataLoaders())
 
 
+Build your own DataModule
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Use this to build your own consistent train, validation, test splits.
 
 Example::
@@ -66,6 +69,9 @@ Example::
         def test_dataloader(self):
             return self.dm.test_dataloader()
 
+
+DataLoaders class
+^^^^^^^^^^^^^^^^^
 
 .. autoclass:: pl_bolts.datamodules.bolts_dataloaders_base.BoltDataLoaders
    :noindex:
