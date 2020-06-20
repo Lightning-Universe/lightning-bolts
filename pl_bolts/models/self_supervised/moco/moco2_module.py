@@ -34,7 +34,6 @@ class MocoV2(pl.LightningModule):
                  use_mlp=False,
                  num_workers=8,
                  *args, **kwargs):
-        super().__init__()
         """
         PyTorch Lightning implementation of `SIMCLR <https://arxiv.org/abs/2002.05709.>`_
         Paper authors: Ting Chen, Simon Kornblith, Mohammad Norouzi, Geoffrey Hinton.
@@ -61,6 +60,7 @@ class MocoV2(pl.LightningModule):
             encoder_momentum: moco momentum of updating key encoder (default: 0.999)
             softmax_temperature: softmax temperature (default: 0.07)
         """
+
         super().__init__()
         self.save_hyperparameters()
 
