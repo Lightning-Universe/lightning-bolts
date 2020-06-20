@@ -44,7 +44,7 @@ Example::
 
 Double DQN
 ^^^^^^^^^^^^^^^^^^^^
-DQN model introduced in TODO
+Double DQN model introduced in TODO
 Paper authors: TODO
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
@@ -58,6 +58,8 @@ Example::
 
 .. autoclass:: pl_bolts.models.rl.DoubleDQN
    :noindex:
+
+--------------
 
 Policy Gradient Models
 ----------------------
