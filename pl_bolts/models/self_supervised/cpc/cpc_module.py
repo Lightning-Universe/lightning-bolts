@@ -31,7 +31,7 @@ __all__ = [
 class CPCV2(pl.LightningModule):
 
     def __init__(self,
-                 encoder: Union[str, torch.nn.Module, pytorch_lightning.LightningModule] ='cpc_encoder',
+                 encoder: Union[str, torch.nn.Module, pl.LightningModule] ='cpc_encoder',
                  patch_size: int = 8,
                  patch_overlap: int = 4,
                  online_ft: int = True,
