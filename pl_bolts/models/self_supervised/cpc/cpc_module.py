@@ -48,6 +48,7 @@ class CPCV2(pl.LightningModule):
         Paper authors: (Olivier J. Hénaff, Aravind Srinivas, Jeffrey De Fauw, Ali Razavi, Carl Doersch, S. M. Ali Eslami, Aaron van den Oord).
 
         Model implemented by:
+
             - `William Falcon <https://github.com/williamFalcon>`_
             - `Tullie Murrel <https://github.com/tullie>`_
 
