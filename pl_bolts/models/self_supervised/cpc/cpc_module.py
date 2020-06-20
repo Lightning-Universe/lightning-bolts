@@ -49,6 +49,17 @@ class CPCV2(pl.LightningModule):
 
         Model implemented by: `William Falcon <https://github.com/williamFalcon>`_, `Tullie Murrel <https://github.com/tullie>`_
 
+        Example:
+
+            >>> from pl_bolts.models.self_supervised import CPCV2
+            ...
+            >>> model = CPCV2()
+
+        Train::
+
+            trainer = Trainer()
+            trainer.fit(model)
+
         Args:
             encoder: A string for any of the resnets in torchvision, or the original CPC encoder, or a custon nn.Module encoder
             patch_size: How big to make the image patches
@@ -61,17 +72,6 @@ class CPCV2(pl.LightningModule):
             data_dir: where to store data
             meta_root: path to the imagenet meta.bin file (if not inside your imagenet folder)
             batch_size: batch size
-
-        Example:
-
-            >>> from pl_bolts.models.self_supervised import CPCV2
-            ...
-            >>> model = CPCV2()
-
-        Train::
-
-            trainer = Trainer()
-            trainer.fit(model)
         """
 
         super().__init__()
