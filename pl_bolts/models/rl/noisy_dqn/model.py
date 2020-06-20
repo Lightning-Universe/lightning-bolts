@@ -7,10 +7,10 @@ from typing import Tuple
 import torch
 
 from pl_bolts.models.rl.common.networks import NoisyCNN
-from pl_bolts.models.rl.dqn.model import DQNLightning
+from pl_bolts.models.rl.dqn.model import DQN
 
 
-class NoisyDQNLightning(DQNLightning):
+class NoisyDQN(DQN):
     """ Noisy DQN Model """
 
     def build_networks(self) -> None:

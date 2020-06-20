@@ -6,10 +6,10 @@ from collections import deque
 from typing import List, Tuple
 
 import numpy as np
-from gym import Env
 from torch.utils.data import IterableDataset
 from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.memory import Experience, Buffer
+from gym import Env
 
 
 class RLDataset(IterableDataset):

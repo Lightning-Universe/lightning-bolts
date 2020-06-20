@@ -5,9 +5,6 @@
 
 PyTorchLightning-Bolts documentation
 ====================================
-
-.. include:: intro.rst
-
 .. toctree::
    :maxdepth: 1
    :name: start
@@ -50,6 +47,7 @@ PyTorchLightning-Bolts documentation
 
    autoencoders
    gans
+   rl
    self_supervised_models
 
 .. toctree::

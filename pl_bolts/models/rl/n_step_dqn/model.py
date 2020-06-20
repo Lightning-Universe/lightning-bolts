@@ -10,10 +10,10 @@ from pl_bolts.models.rl.common import wrappers
 from pl_bolts.models.rl.common.agents import ValueAgent
 from pl_bolts.models.rl.common.experience import NStepExperienceSource
 from pl_bolts.models.rl.common.memory import ReplayBuffer
-from pl_bolts.models.rl.dqn.model import DQNLightning
+from pl_bolts.models.rl.dqn.model import DQN
 
 
-class NStepDQNLightning(DQNLightning):
+class NStepDQN(DQN):
     """ NStep DQN Model """
 
     def __init__(self, hparams: argparse.Namespace) -> None:
