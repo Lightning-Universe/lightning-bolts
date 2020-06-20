@@ -2,25 +2,32 @@ from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders
 from torch.utils.data import Dataset, DataLoader
 from sklearn.utils import shuffle as sk_shuffle
 import math
+import numpy as np
+from typing import Any
 
 
 class SklearnDataset(Dataset):
-    def __init__(self, X, y, X_transform=None, y_transform=None):
+    def __init__(self, X: np.ndarray, y: np.ndarray, X_transform: Any = None, y_transform: Any = None):
         """
         Mapping between numpy (or sklearn) datasets to PyTorch datasets.
 
+        Args:
+            X: Numpy ndarray
+            y: Numpy ndarray
+            X_transform: Any transform that works with Numpy arrays
+            y_transform: Any transform that works with Numpy arrays
 
         Example:
             >>> from sklearn.datasets import load_boston
             >>> from pl_bolts.datamodules import SklearnDataset
-            >>> from torch.utils.data import DataLoader
-            >>>
+            ...
             >>> X, y = load_boston(return_X_y=True)
             >>> dataset = SklearnDataset(X, y)
             >>> len(dataset)
             506
 
         """
+        super().__init__()
         self.X = X
         self.Y = y
         self.X_transform = X_transform
@@ -45,8 +52,39 @@ class SklearnDataset(Dataset):
 class SklearnDataLoaders(BoltDataLoaders):
 
     def __init__(self, X, y, x_val=None, y_val=None, x_test=None, y_test=None, val_split=0.15, test_split=0.15, num_workers=2, random_state=1234, shuffle=True):
-        super().__init__()
+        """
+        Automatically generates the train, validation and test splits for a Numpy dataset. They are set up as
+        dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
 
+        Example:
+            >>> from sklearn.datasets import load_boston
+            >>> from pl_bolts.datamodules import SklearnDataLoaders
+            ...
+            >>> X, y = load_boston(return_X_y=True)
+            >>> loaders = SklearnDataLoaders(X, y)
+            ...
+            >>> # train set
+            >>> train_loader = loaders.train_dataloader(batch_size=32)
+            >>> len(train_loader.dataset)
+            355
+            >>> len(train_loader)
+            11
+            >>> # validation set
+            >>> val_loader = loaders.val_dataloader(batch_size=32)
+            >>> len(val_loader.dataset)
+            75
+            >>> len(val_loader)
+            2
+            >>> # test set
+            >>> test_loader = loaders.test_dataloader(batch_size=32)
+            >>> len(test_loader.dataset)
+            38
+            >>> len(test_loader)
+            1
+
+        """
+
+        super().__init__()
         self.num_workers = num_workers
 
         # shuffle x and y
