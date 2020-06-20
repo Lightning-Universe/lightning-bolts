@@ -18,7 +18,7 @@ class LinearRegression(pl.LightningModule):
             input_dim: number of dimensions of the input (1+)
             bias: If false, will not use $$+b$$
             learning_rate: learning_rate for the optimizer
-            optimizer: the optimizer to use (default='adam')
+            optimizer: the optimizer to use (default='Adam')
 
         """
         super().__init__()
