@@ -5,6 +5,23 @@ Bolts Datamodules
 =================
 Class for standardizing the prepare_data, train, validation and test dataloaders for a dataset.
 
+Datamodules have two advantages:
+
+1. You can guarantee that the exact same train, val and test splits can be used across models.
+2. You can parameterize your model to be dataset agnostic.
+
+Example::
+
+    from pl_bolts.datamodules import STL10DataLoaders, CIFAR10DataLoaders
+
+    # use the same dataset on different models (with exactly the same splits)
+    stl10_model = LitModel(STL10DataLoaders())
+    stl10_model = CoolModel(STL10DataLoaders())
+
+    # or make your model dataset agnostic
+    cifar10_model = LitModel(CIFAR10DataLoaders())
+
+
 Use this to build your own consistent train, validation, test splits.
 
 Example::
@@ -48,22 +65,6 @@ Example::
 
         def test_dataloader(self):
             return self.dm.test_dataloader()
-
-Datamodules have two advantages:
-
-1. You can guarantee that the exact same train, val and test splits can be used across models.
-2. You can parameterize your model to be dataset agnostic.
-
-Example::
-
-    from pl_bolts.datamodules import STL10DataLoaders, CIFAR10DataLoaders
-
-    # use the same dataset on different models (with exactly the same splits)
-    stl10_model = LitModel(STL10DataLoaders())
-    stl10_model = CoolModel(STL10DataLoaders())
-
-    # or make your model dataset agnostic
-    cifar10_model = LitModel(CIFAR10DataLoaders())
 
 
 .. autoclass:: pl_bolts.datamodules.bolts_dataloaders_base.BoltDataLoaders
