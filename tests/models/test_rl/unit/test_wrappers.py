@@ -11,7 +11,6 @@ class TestToTensor(TestCase):
     def setUp(self) -> None:
         self.env = ToTensor(gym.make("CartPole-v0"))
 
-
     def test_wrapper(self):
         state = self.env.reset()
         self.assertIsInstance(state, torch.Tensor)

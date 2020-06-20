@@ -151,7 +151,6 @@ class TestPrioReplayBuffer(TestCase):
         self.assertEqual(len(indices), batch_size)
         self.assertEqual(len(weights), batch_size)
 
-
         # states
         states = batch[0]
         self.assertEqual(states.shape, (batch_size, 32, 32))

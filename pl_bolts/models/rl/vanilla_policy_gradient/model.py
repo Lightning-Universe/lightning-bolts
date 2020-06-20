@@ -1,6 +1,7 @@
 """
 Vanilla Policy Gradient
-This example is based on: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/04_cartpole_pg.py
+This example is based on: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/
+master/Chapter11/04_cartpole_pg.py
 """
 from copy import deepcopy
 from itertools import chain

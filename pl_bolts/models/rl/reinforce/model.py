@@ -1,6 +1,7 @@
 """
 REINFORCE
-This example is based on: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/02_cartpole_reinforce.py
+This example is based on: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/
+master/Chapter11/02_cartpole_reinforce.py
 """
 import argparse
 from collections import OrderedDict

@@ -58,4 +58,3 @@ class TestPolicyAgent(TestCase):
         action = policy_agent(self.state, self.device)
         self.assertIsInstance(action, int)
         self.assertEqual(action, 1)
-

@@ -38,7 +38,7 @@ class TestVPG(TestCase):
 
     def test_calc_q_vals(self):
         rewards = [torch.tensor(1), torch.tensor(1), torch.tensor(1), torch.tensor(1)]
-        gt_qvals = np.array([ 1.4652743,   0.49497533, -0.4851246,  -1.4751246 ])
+        gt_qvals = np.array([1.4652743, 0.49497533, -0.4851246, -1.4751246])
 
         qvals = self.model.calc_qvals(rewards)
         qvals = torch.stack(qvals).numpy()

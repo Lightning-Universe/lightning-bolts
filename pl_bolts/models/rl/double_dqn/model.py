@@ -1,6 +1,7 @@
 """
 Double Deep Q-network (DDQN)
-This example is based on https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter08/03_dqn_double.py
+This example is based on https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/
+master/Chapter08/03_dqn_double.py
 """
 
 from typing import Tuple

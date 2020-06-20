@@ -94,4 +94,3 @@ class TestReinforce(TestCase):
         qvals = self.model.calc_qvals(rewards)
 
         self.assertEqual(gt_qvals, qvals)
-

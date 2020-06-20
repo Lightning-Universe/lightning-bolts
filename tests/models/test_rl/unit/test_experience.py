@@ -7,7 +7,8 @@ import torch
 from torch.utils.data import DataLoader
 
 from pl_bolts.models.rl.common.agents import Agent
-from pl_bolts.models.rl.common.experience import EpisodicExperienceStream, RLDataset, ExperienceSource, NStepExperienceSource
+from pl_bolts.models.rl.common.experience import EpisodicExperienceStream, RLDataset, ExperienceSource, \
+    NStepExperienceSource
 from pl_bolts.models.rl.common.memory import Experience
 from pl_bolts.models.rl.common.wrappers import ToTensor
 
@@ -162,6 +163,3 @@ class TestRLDataset(TestCase):
             self.assertEqual(sample_batched[2].shape, torch.Size([32]))
             self.assertEqual(sample_batched[3].shape, torch.Size([32]))
             self.assertEqual(sample_batched[4].shape, torch.Size([32, 4, 84, 84]))
-
-
-
