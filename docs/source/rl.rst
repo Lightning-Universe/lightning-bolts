@@ -30,6 +30,7 @@ Deep-Q-Network (DQN)
 DQN model introduced in `Playing Atari with Deep Reinforcement Learning <https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf>`_.
 Paper authors: Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves, Ioannis Antonoglou, Daan Wierstra, Martin Riedmiller.
 
+Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 Example::
 
     from pl_bolts.models.rl import DQN
@@ -40,3 +41,4 @@ Example::
 
 .. autoclass:: pl_bolts.models.rl.DQN
    :noindex:
+
