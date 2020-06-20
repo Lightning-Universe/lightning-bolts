@@ -84,7 +84,7 @@ from torchvision.datasets import MNIST
 
 
 class LitMNISTModel(LightningModule):
-    def __init__(self, hidden_dim=128, learning_rate=1e-3, batch_size=32, num_workers=4):
+    def __init__(self, hidden_dim=128, learning_rate=1e-3, batch_size=32, num_workers=4, data_dir=''):
         super().__init__()
         self.save_hyperparameters()
 
@@ -146,19 +146,18 @@ class LitMNISTModel(LightningModule):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
     def prepare_data(self):
-        # download data once. better than putting in the dataloader methods
-        # will only download on GPU 0 with N gpus
-        train_dataset = MNIST(os.getcwd(), train=True, download=True, transform=transforms.ToTensor())
-        self.mnist_train, self.mnist_val = random_split(train_dataset, [55000, 5000])
-
-        MNIST(os.getcwd(), train=False, download=True, transform=transforms.ToTensor())
+        MNIST(self.hparams.data_dir, train=True, download=True, transform=transforms.ToTensor())
 
     def train_dataloader(self):
-        loader = DataLoader(self.mnist_train, batch_size=self.hparams.batch_size, num_workers=self.hparams.num_workers)
+        dataset = MNIST(self.hparams.data_dir, train=True, download=False, transform=transforms.ToTensor())
+        mnist_train, _ = random_split(dataset, [55000, 5000])
+        loader = DataLoader(mnist_train, batch_size=self.hparams.batch_size, num_workers=self.hparams.num_workers)
         return loader
 
     def val_dataloader(self):
-        loader = DataLoader(self.mnist_val, batch_size=self.hparams.batch_size, num_workers=self.hparams.num_workers)
+        dataset = MNIST(self.hparams.data_dir, train=True, download=False, transform=transforms.ToTensor())
+        _, mnist_val = random_split(dataset, [55000, 5000])
+        loader = DataLoader(mnist_val, batch_size=self.hparams.batch_size, num_workers=self.hparams.num_workers)
         return loader
 
     def test_dataloader(self):
@@ -172,6 +171,7 @@ class LitMNISTModel(LightningModule):
         parser.add_argument('--batch_size', type=int, default=32)
         parser.add_argument('--num_workers', type=int, default=4)
         parser.add_argument('--hidden_dim', type=int, default=128)
+        parser.add_argument('--data_dir', type=str, default='')
         parser.add_argument('--learning_rate', type=float, default=0.0001)
         return parser
 

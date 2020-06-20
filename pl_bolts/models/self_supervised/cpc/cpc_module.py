@@ -235,14 +235,14 @@ class CPCV2(pl.LightningModule):
     def train_dataloader(self):
         loader = None
         if self.hparams.dataset == 'cifar10':
-            train_transform = cpc_transforms.CPCTransformsCIFAR10().train_transform
+            train_transform = cpc_transforms.CPCTransformsCIFAR10()
 
         elif self.hparams.dataset == 'stl10':
             stl10_transform = cpc_transforms.CPCTransformsSTL10Patches(
                 patch_size=self.hparams.patch_size,
                 overlap=self.hparams.patch_overlap
             )
-            train_transform = stl10_transform.train_transform
+            train_transform = stl10_transform
             loader = self.dataset.train_dataloader_mixed(self.hparams.batch_size, transforms=train_transform)
 
         if self.hparams.dataset == 'imagenet128':
@@ -250,7 +250,7 @@ class CPCV2(pl.LightningModule):
                 self.hparams.patch_size,
                 overlap=self.hparams.patch_overlap
             )
-            train_transform = train_transform.train_transform
+            train_transform = train_transform
 
         if loader is None:
             loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)

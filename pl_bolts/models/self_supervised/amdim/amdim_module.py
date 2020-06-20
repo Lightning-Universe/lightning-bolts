@@ -14,21 +14,32 @@ from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
 
 class AMDIM(pl.LightningModule):
 
-    def __init__(self, hparams):
+    def __init__(self,
+                 image_height=32,
+                 ndf=320,
+                 n_rkhs=1280,
+                 n_depth=10,
+                 use_bn=0,
+                 tclip=20.0,
+                 learning_rate=2e-4,
+                 data_dir='',
+                 nb_classes=10,
+                 batch_size=200,
+                 **kwargs
+                 ):
         super().__init__()
+        self.save_hyperparameters()
 
-        self.hparams = hparams
-
-        dummy_batch = torch.zeros((2, 3, hparams.image_height, hparams.image_height))
+        dummy_batch = torch.zeros((2, 3, self.hparams.image_height, self.hparams.image_height))
 
         self.encoder = AMDIMEncoder(
             dummy_batch,
             num_channels=3,
-            ndf=hparams.ndf,
-            n_rkhs=hparams.n_rkhs,
-            n_depth=hparams.n_depth,
-            encoder_size=hparams.image_height,
-            use_bn=hparams.use_bn
+            ndf=self.hparams.ndf,
+            n_rkhs=self.hparams.n_rkhs,
+            n_depth=self.hparams.n_depth,
+            encoder_size=self.hparams.image_height,
+            use_bn=self.hparams.use_bn
         )
         self.encoder.init_weights()
 
@@ -72,7 +83,7 @@ class AMDIM(pl.LightningModule):
 
         return result
 
-    def training_epoch_end(self, outputs):
+    def training_step_end(self, outputs):
         r1_x1 = outputs['r1_x1']
         r5_x1 = outputs['r5_x1']
         r7_x1 = outputs['r7_x1']
@@ -82,8 +93,8 @@ class AMDIM(pl.LightningModule):
 
         # ------------------
         # NCE LOSS
-        loss_1t5, loss_1t7, loss_5t5, lgt_reg = self.nce_loss(r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2)
-        unsupervised_loss = loss_1t5 + loss_1t7 + loss_5t5 + lgt_reg
+        loss, lgt_reg = self.nce_loss((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
+        unsupervised_loss = loss + lgt_reg
 
         # ------------------
         # FULL LOSS
@@ -104,8 +115,8 @@ class AMDIM(pl.LightningModule):
         r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2 = self.forward(img_1, img_2)
 
         # NCE LOSS
-        loss_1t5, loss_1t7, loss_5t5, lgt_reg = self.nce_loss(r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2)
-        unsupervised_loss = loss_1t5 + loss_1t7 + loss_5t5 + lgt_reg
+        loss, lgt_reg = self.nce_loss((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
+        unsupervised_loss = loss + lgt_reg
 
         result = {
             'val_nce': unsupervised_loss
@@ -315,6 +326,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    model = AMDIM(args)
+    model = AMDIM(**vars(args))
     trainer = pl.Trainer(fast_dev_run=True)
     trainer.fit(model)

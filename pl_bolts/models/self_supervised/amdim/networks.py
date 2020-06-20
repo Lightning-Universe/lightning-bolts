@@ -271,7 +271,7 @@ class FakeRKHSConvNet(nn.Module):
                                   stride=1, padding=0, bias=True)
         # when possible, initialize shortcut to be like identity
         if n_output >= n_input:
-            eye_mask = np.zeros((n_output, n_input, 1, 1), dtype=np.uint8)
+            eye_mask = np.zeros((n_output, n_input, 1, 1), dtype=np.bool)
             for i in range(n_input):
                 eye_mask[i, i, 0, 0] = 1
             self.shortcut.weight.data.uniform_(-0.01, 0.01)
