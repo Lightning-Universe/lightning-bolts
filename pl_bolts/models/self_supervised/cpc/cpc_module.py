@@ -47,7 +47,9 @@ class CPCV2(pl.LightningModule):
         PyTorch Lightning implementation of `Data-Efficient Image Recognition with Contrastive Predictive Coding <https://arxiv.org/abs/1905.09272>`_
         Paper authors: (Olivier J. Hénaff, Aravind Srinivas, Jeffrey De Fauw, Ali Razavi, Carl Doersch, S. M. Ali Eslami, Aaron van den Oord).
 
-        Model implemented by: `William Falcon <https://github.com/williamFalcon>`_, `Tullie Murrel <https://github.com/tullie>`_
+        Model implemented by:
+            - `William Falcon <https://github.com/williamFalcon>`_
+            - `Tullie Murrel <https://github.com/tullie>`_
 
         Example:
 
