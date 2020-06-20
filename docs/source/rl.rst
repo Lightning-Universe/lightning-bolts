@@ -52,13 +52,17 @@ Double DQN model introduced in TODO
 Paper authors: TODO
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
+
 Example::
 
-    from pl_bolts.models.rl import TODO
+    >>> from pl_bolts.models.rl import DoubleDQN
+    ...
+    >>> ddqn = DoubleDQN()
 
-    model = TODO
+Train::
+
     trainer = Trainer()
-    trainer.fit(model)
+    trainer.fit(ddqn)
 
 .. autoclass:: pl_bolts.models.rl.DoubleDQN
    :noindex:
@@ -71,3 +75,7 @@ The following models are based on Policy gradient
 
 Policy Gradient
 ^^^^^^^^^^^^^^^
+
+.. autoclass:: pl_bolts.models.rl.PolicyGradient
+   :noindex:
+
