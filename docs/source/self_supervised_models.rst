@@ -8,16 +8,16 @@ Contrastive Learning
 --------------------
 The following models perform contrastive learning.
 
-CPC (V2)
-^^^^^^^^
-
-.. autoclass:: pl_bolts.models.self_supervised.CPCV2
-   :noindex:
-
 AMDIM
 ^^^^^
 
 .. autoclass:: pl_bolts.models.self_supervised.AMDIM
+   :noindex:
+
+CPC (V2)
+^^^^^^^^
+
+.. autoclass:: pl_bolts.models.self_supervised.CPCV2
    :noindex:
 
 SIMCLR
