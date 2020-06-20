@@ -1,6 +1,9 @@
 from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders
 from torch.utils.data import Dataset, DataLoader, random_split
-
+from sklearn.utils import shuffle as sk_shuffle
+from sklearn.model_selection import train_test_split
+import math
+import numpy as np
 
 class SklearnDataset(Dataset):
     def __init__(self, X, y, X_transform=None, y_transform=None):
@@ -38,31 +41,50 @@ class SklearnDataset(Dataset):
 
 
 class SklearnDataLoaders(BoltDataLoaders):
-    def __init__(self, X, y, val_split=0.15, test_split=0.15, X_transform=None, y_transform=None, num_workers=2):
-        self.X = X
-        self.Y = y
+
+    def __init__(self, X, y, x_val=None, y_val=None, x_test=None, y_test=None, val_split=0.15, test_split=0.15, num_workers=2, random_state=1234, shuffle=True):
+        super().__init__()
+
         self.num_workers = num_workers
 
-        # Do transforms
-        if X_transform:
-            self.X = X_transform(X)
-        if y_transform:
-            self.Y = y_transform(y)
+        # shuffle x and y
+        #self.X, self.y = X, y
+        if shuffle:
+            X, y = sk_shuffle(X, y, random_state=random_state)
 
-        # Split X, y into train/validation/test
-        dataset_size = len(X)
-        val_size = int(np.floor(val_split * dataset_size))
-        test_size = int(np.floor(test_split * dataset_size))
+        val_split = 0 if x_val is not None or y_val is not None else val_split
+        test_split = 0 if x_test is not None or y_test is not None else test_split
 
-        #TODO: figure out setting seed!
-        self.dataset_train, self.dataset_val, self.dataset_test = random_split((X, y),
-                                                                               [dataset_size - val_size - test_size,
-                                                                                val_size,
-                                                                                test_size])
+        hold_out_split = val_split + test_split
+        if hold_out_split > 0:
+            val_split = val_split / hold_out_split
+            test_split = test_split / hold_out_split
+            hold_out_size = math.floor(len(X) * hold_out_split)
+            x_split, y_split = X[: hold_out_size], y[: hold_out_size]
+            X, y = X[hold_out_size:], y[hold_out_size:]
 
-    def train_dataloader(self, batch_size):
+        # if don't have x_val and y_val create split from X
+        if x_val is None and y_val is None:
+            val_size = int(math.floor(val_split * len(x_split)))
+            x_val, y_val = x_split[:val_size], y_split[:val_size]
+            x_split, y_split = x_split[val_size:], y_split[val_size:]
+
+        #self.x_val, self.y_val = x_val, y_val
+
+        # if don't have x_test, y_test create split from X
+        if x_test is None and y_test is None:
+            test_size = int(math.floor(test_split * len(x_split)))
+            x_test, y_test = x_split[test_size:], y_split[test_size:]
+
+        #self.x_test, self.y_test = x_test, y_test
+
+        self.train_dataset = SklearnDataset(X, y)
+        self.val_dataset = SklearnDataset(x_val, y_val)
+        self.test_dataset = SklearnDataset(x_test, y_test)
+
+    def train_dataloader(self, batch_size=32):
         loader = DataLoader(
-            self.dataset_train,
+            self.train_dataset,
             batch_size=batch_size,
             shuffle=True,
             num_workers=self.num_workers,
@@ -71,9 +93,9 @@ class SklearnDataLoaders(BoltDataLoaders):
         )
         return loader
 
-    def val_dataloader(self, batch_size):
+    def val_dataloader(self, batch_size=32):
         loader = DataLoader(
-            self.dataset_val,
+            self.val_dataset,
             batch_size=batch_size,
             shuffle=False,
             num_workers=self.num_workers,
@@ -82,9 +104,9 @@ class SklearnDataLoaders(BoltDataLoaders):
         )
         return loader
 
-    def test_dataloader(self, batch_size):
+    def test_dataloader(self, batch_size=32):
         loader = DataLoader(
-            self.dataset_test,
+            self.test_dataset,
             batch_size=batch_size,
             shuffle=False,
             num_workers=self.num_workers,
@@ -92,3 +114,5 @@ class SklearnDataLoaders(BoltDataLoaders):
             pin_memory=True
         )
         return loader
+
+
