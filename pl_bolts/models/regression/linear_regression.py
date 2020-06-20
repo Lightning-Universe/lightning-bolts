@@ -9,7 +9,7 @@ from pl_bolts.datamodules.sklearn_dataloaders import SklearnDataLoaders
 
 class LinearRegression(pl.LightningModule):
 
-    def __init__(self, input_dim: int, bias=True, learning_rate=0.05, optimizer:Optimizer = 'adam',**kwargs):
+    def __init__(self, input_dim: int, bias=True, learning_rate=0.05, optimizer:Optimizer = 'Adam',**kwargs):
         """
         Linear regression model implementing
         $$min_{W} ||(Wx + b) - y ||_2^2 $$
@@ -83,6 +83,7 @@ class LinearRegression(pl.LightningModule):
         parser.add_argument('--input_dim', type=int, default=None)
         parser.add_argument('--bias', default='store_true')
         parser.add_argument('--batch_size', type=int, default=16)
+        parser.add_argument('--optimizer', type=str, default='Adam')
         return parser
 
 
