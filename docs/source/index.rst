@@ -46,6 +46,7 @@ PyTorchLightning-Bolts documentation
    :caption: Models
 
    autoencoders
+   classic_ml
    gans
    rl
    self_supervised_models

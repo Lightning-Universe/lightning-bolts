@@ -5,6 +5,7 @@ from torchvision.datasets import MNIST
 from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders
 
 
+
 class MNISTDataLoaders(BoltDataLoaders):
 
     def __init__(self, save_path, val_split=5000, num_workers=16):
