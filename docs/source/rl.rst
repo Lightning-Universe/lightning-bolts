@@ -42,3 +42,26 @@ Example::
 .. autoclass:: pl_bolts.models.rl.DQN
    :noindex:
 
+Double DQN
+^^^^^^^^^^^^^^^^^^^^
+DQN model introduced in TODO
+Paper authors: TODO
+
+Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
+Example::
+
+    from pl_bolts.models.rl import TODO
+
+    model = TODO
+    trainer = Trainer()
+    trainer.fit(model)
+
+.. autoclass:: pl_bolts.models.rl.DoubleDQN
+   :noindex:
+
+Policy Gradient Models
+----------------------
+The following models are based on Policy gradient
+
+Policy Gradient
+^^^^^^^^^^^^^^^
