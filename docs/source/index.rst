@@ -5,9 +5,6 @@
 
 PyTorchLightning-Bolts documentation
 ====================================
-
-.. include:: intro.rst
-
 .. toctree::
    :maxdepth: 1
    :name: start
