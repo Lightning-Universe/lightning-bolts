@@ -6,6 +6,7 @@ import torchvision
 from pytorch_lightning import LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
+from torchvision.models.utils import load_state_dict_from_url
 
 from pl_bolts.datamodules import MNISTDataLoaders
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
@@ -18,8 +19,8 @@ class VAE(LightningModule):
             hidden_dim=128,
             latent_dim=32,
             input_channels=3,
-            input_width=28,
-            input_height=28,
+            input_width=224,
+            input_height=224,
             batch_size=32,
             learning_rate=0.001,
             data_dir='',
@@ -30,6 +31,7 @@ class VAE(LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
+        # use mnist as the default module
         self.datamodule = datamodule
         if datamodule is None:
             self.datamodule = MNISTDataLoaders(save_path=data_dir)
@@ -38,7 +40,12 @@ class VAE(LightningModule):
         self.decoder = self.init_decoder()
 
         if pretrained:
-            self.load_from_checkpoint()
+            self.load_pretrained()
+
+    def load_pretrained(self):
+        ckpt_url = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/version_0/checkpoints/epoch%3D2.ckpt'
+        model = VAE.load_from_checkpoint(ckpt_url)
+        self.load_state_dict(model.state_dict())
 
     def init_encoder(self):
         encoder = Encoder(
@@ -208,10 +215,10 @@ class VAE(LightningModule):
                             help='itermediate layers dimension before embedding for default encoder/decoder')
         parser.add_argument('--latent_dim', type=int, default=32,
                             help='dimension of latent variables z')
-        parser.add_argument('--input_width', type=int, default=28,
-                            help='input image width - 28 for MNIST (must be even)')
-        parser.add_argument('--input_height', type=int, default=28,
-                            help='input image height - 28 for MNIST (must be even)')
+        parser.add_argument('--input_width', type=int, default=224,
+                            help='input width (used Imagenet downsampled size)')
+        parser.add_argument('--input_height', type=int, default=224,
+                            help='input width (used Imagenet downsampled size)')
         parser.add_argument('--input_channels', type=int, default=3,
                             help='number of input channels')
         parser.add_argument('--batch_size', type=int, default=32)
@@ -241,6 +248,6 @@ if __name__ == '__main__':
         args.image_height = datamodule.size()[2]
         args.input_channels = datamodule.size()[0]
 
-    vae = VAE(**vars(args), datamodule=datamodule)
+    vae = VAE(**vars(args), pretrained=True)
     trainer = Trainer.from_argparse_args(args)
     trainer.fit(vae)

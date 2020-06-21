@@ -7,7 +7,7 @@ from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataModule
 
 class MNISTDataLoaders(BoltDataModule):
 
-    def __init__(self, save_path, val_split=5000, num_workers=16):
+    def __init__(self, save_path='.', val_split=5000, num_workers=16):
         super().__init__()
         self.save_path = save_path
         self.val_split = val_split
