@@ -222,7 +222,7 @@ class BoltDataModule(object):
         return parser
 
     @classmethod
-    def from_argparse_args(cls, args: Union[Namespace, ArgumentParser], **kwargs) -> `BoltDataModule`:
+    def from_argparse_args(cls, args: Union[Namespace, ArgumentParser], **kwargs):
         """
         Create an instance from CLI arguments.
 
