@@ -6,14 +6,17 @@ Sklearn Datamodules
 Utilities to map sklearn or numpy datasets to PyTorch Dataloaders with automatic data splits and GPU/TPU support.
 
 
-Example:
+Example::
 
-    >>> from sklearn.datasets import load_boston
-    >>> from pl_bolts.datamodules import SklearnDataset
-    ...
-    >>> X, y = load_boston(return_X_y=True)
-    >>> dataset = SklearnDataset(X, y)
-    506
+    from sklearn.datasets import load_boston
+    from pl_bolts.datamodules import SklearnDataLoaders
+
+    X, y = load_boston(return_X_y=True)
+    loaders = SklearnDataLoaders(X, y)
+
+    train_loader = loaders.train_dataloader(batch_size=32)
+    val_loader = loaders.val_dataloader(batch_size=32)
+    test_loader = loaders.test_dataloader(batch_size=32)
 
 Sklearn Dataset
 ---------------
