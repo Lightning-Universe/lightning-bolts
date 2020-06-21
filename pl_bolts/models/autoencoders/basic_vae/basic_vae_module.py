@@ -23,6 +23,7 @@ class VAE(LightningModule):
             learning_rate=0.001,
             data_dir='',
             datamodule=None,
+            pretrained=False,
             **kwargs
     ):
         super().__init__()
@@ -34,6 +35,9 @@ class VAE(LightningModule):
 
         self.encoder = self.init_encoder()
         self.decoder = self.init_decoder()
+
+        if pretrained:
+            self.load_from_checkpoint()
 
     def init_encoder(self):
         encoder = Encoder(
@@ -139,7 +143,7 @@ class VAE(LightningModule):
                             'val_kl_loss': kl_loss}
 
         return {
-            'avg_val_loss': avg_loss,
+            'val_loss': avg_loss,
             'log': tensorboard_logs
         }
 
@@ -163,7 +167,7 @@ class VAE(LightningModule):
                             'test_kl_loss': kl_loss}
 
         return {
-            'avg_test_loss': avg_loss,
+            'test_loss': avg_loss,
             'log': tensorboard_logs
         }
 
