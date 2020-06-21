@@ -75,3 +75,7 @@ class MNISTDataLoaders(BoltDataModule):
             transform_lib.ToTensor()
         ])
         return mnist_transforms
+
+    @property
+    def add_argparse_args(self, parser):
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)

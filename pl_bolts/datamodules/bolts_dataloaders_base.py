@@ -3,6 +3,7 @@ from typing import List, Union
 
 from pytorch_lightning.utilities import rank_zero_warn
 from torch.utils.data import DataLoader
+from argparse import ArgumentParser
 
 
 class BoltDataModule(object):
@@ -204,3 +205,9 @@ class BoltDataModule(object):
             this method.
 
         """
+
+    @property
+    def add_argparse_args(self, parent_parser):
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        parser.add_argument('--data_dir', type=str, default='')
+        return parser
