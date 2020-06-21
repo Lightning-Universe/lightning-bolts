@@ -20,7 +20,7 @@ from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-from pl_bolts.utils import torchvision_ssl_encoder
+from pl_bolts.utils.ssl_utils import torchvision_ssl_encoder
 from typing import Union
 
 __all__ = [

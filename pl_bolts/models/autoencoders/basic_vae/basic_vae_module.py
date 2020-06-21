@@ -10,6 +10,7 @@ from torchvision.models.utils import load_state_dict_from_url
 
 from pl_bolts.datamodules import MNISTDataLoaders
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
+from pl_bolts.utils.pretrained_weights import load_pretrained
 
 
 class VAE(LightningModule):
@@ -39,13 +40,9 @@ class VAE(LightningModule):
         self.encoder = self.init_encoder()
         self.decoder = self.init_decoder()
 
+        # load pretrained weights (imagenet)
         if pretrained:
-            self.load_pretrained()
-
-    def load_pretrained(self):
-        ckpt_url = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/version_0/checkpoints/epoch%3D2.ckpt'
-        model = VAE.load_from_checkpoint(ckpt_url)
-        self.load_state_dict(model.state_dict())
+            load_pretrained(self)
 
     def init_encoder(self):
         encoder = Encoder(
