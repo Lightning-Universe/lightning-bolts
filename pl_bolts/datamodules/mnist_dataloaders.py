@@ -2,12 +2,12 @@ from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
 from torchvision.datasets import MNIST
 
-from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders
+from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataModule
 
 
-class MNISTDataLoaders(BoltDataLoaders):
+class MNISTDataLoaders(BoltDataModule):
 
-    def __init__(self, save_path, val_split=5000, num_workers=16):
+    def __init__(self, save_path='.', val_split=5000, num_workers=16):
         super().__init__()
         self.save_path = save_path
         self.val_split = val_split
@@ -75,3 +75,6 @@ class MNISTDataLoaders(BoltDataLoaders):
             transform_lib.ToTensor()
         ])
         return mnist_transforms
+
+    def size(self):
+        return 1, 28, 28

@@ -25,14 +25,20 @@ STL-10
 .. autoclass:: pl_bolts.datamodules.stl10_dataloaders.STL10DataLoaders
     :noindex:
 
+Imagenet
+^^^^^^^^
+
+.. autoclass:: pl_bolts.datamodules.imagenet_dataloaders.ImagenetDataModule
+    :noindex:
+
 
 Semi-supervised learning
 ------------------------
 The following datasets have support for unlabeled training and semi-supervised learning where only a few examples
 are labeled.
 
-Imagenet
-^^^^^^^^
+Imagenet (ssl)
+^^^^^^^^^^^^^^
 
 .. autoclass:: pl_bolts.datamodules.ssl_imagenet_dataloaders.SSLImagenetDataLoaders
     :noindex:

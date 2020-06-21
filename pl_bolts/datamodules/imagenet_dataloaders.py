@@ -1,4 +1,5 @@
 import os
+from argparse import ArgumentParser
 
 from torch.utils.data import DataLoader
 from torchvision import transforms as transform_lib
@@ -8,21 +9,57 @@ from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 
 
-class SSLImagenetDataLoaders(BoltDataModule):
+class ImagenetDataModule(BoltDataModule):
 
     def __init__(self,
-                 data_dir,
-                 meta_root=None,
-                 num_workers=16):
+                 data_dir: str,
+                 meta_root: str = None,
+                 num_imgs_per_val_class: int = 50,
+                 image_size: int = 224,
+                 num_workers: int = 16):
+        """
+        Imagenet train, val and test dataloaders.
+
+        The train set is the imagenet train.
+
+        The val set is taken from the train set with `num_imgs_per_val_class` images per class.
+        For example if `num_imgs_per_val_class=2` then there will be 2,000 images in the validation set.
+
+        The test set is the official imagenet validation set.
+
+        The images are normalized using: Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
+         Example::
+
+            from pl_bolts.datamodules import ImagenetDataModule
+
+            datamodule = ImagenetDataModule(IMAGENET_PATH)
+            train_loader = datamodule.train_dataloader()
+            val_loader = datamodule.val_dataloader()
+            test_loader = datamodule.test_dataloader()
+
+        Args:
+
+            data_dir: path to the imagenet dataset file
+            meta_root: path to meta.bin file
+            num_imgs_per_val_class: how many images per class for the validation set
+            image_size: final image size
+            num_workers: how many data workers
+        """
 
         super().__init__()
         self.data_dir = data_dir
         self.num_workers = num_workers
         self.meta_root = meta_root
+        self.num_imgs_per_val_class = num_imgs_per_val_class
+        self.image_size = image_size
 
     @property
     def num_classes(self):
         return 1000
+
+    def size(self):
+        return 3, self.image_size, self.image_size
 
     def _verify_splits(self, data_dir, split):
         dirs = os.listdir(data_dir)
@@ -54,12 +91,12 @@ class SSLImagenetDataLoaders(BoltDataModule):
                 UnlabeledImagenet.generate_meta_bins(path)
                 """)
 
-    def train_dataloader(self, batch_size, num_images_per_class=-1, transforms=None, add_normalize=False):
+    def train_dataloader(self, batch_size, transforms=None, add_normalize=False):
         if transforms is None:
-            transforms = self._default_transforms()
+            transforms = self.train_transform()
 
         dataset = UnlabeledImagenet(self.data_dir,
-                                    num_imgs_per_class=num_images_per_class,
+                                    num_imgs_per_class=-1,
                                     meta_root=self.meta_root,
                                     split='train',
                                     transform=transforms)
@@ -73,12 +110,12 @@ class SSLImagenetDataLoaders(BoltDataModule):
         )
         return loader
 
-    def val_dataloader(self, batch_size, num_images_per_class=50, transforms=None, add_normalize=False):
+    def val_dataloader(self, batch_size, transforms=None, add_normalize=False):
         if transforms is None:
-            transforms = self._default_transforms()
+            transforms = self.val_transform()
 
         dataset = UnlabeledImagenet(self.data_dir,
-                                    num_imgs_per_class_val_split=num_images_per_class,
+                                    num_imgs_per_class_val_split=self.num_imgs_per_val_class,
                                     meta_root=self.meta_root,
                                     split='val',
                                     transform=transforms)
@@ -93,10 +130,10 @@ class SSLImagenetDataLoaders(BoltDataModule):
 
     def test_dataloader(self, batch_size, num_images_per_class, transforms=None, add_normalize=False):
         if transforms is None:
-            transforms = self._default_transforms()
+            transforms = self.val_transform()
 
         dataset = UnlabeledImagenet(self.data_dir,
-                                    num_imgs_per_class=num_images_per_class,
+                                    num_imgs_per_class=-1,
                                     meta_root=self.meta_root,
                                     split='test',
                                     transform=transforms)
@@ -110,9 +147,54 @@ class SSLImagenetDataLoaders(BoltDataModule):
         )
         return loader
 
-    def _default_transforms(self):
-        mnist_transforms = transform_lib.Compose([
+    def train_transform(self):
+        """
+        The standard imagenet transforms
+
+        .. code-block:: python
+
+            transform_lib.Compose([
+                transform_lib.RandomResizedCrop(self.image_size),
+                transform_lib.RandomHorizontalFlip(),
+                transform_lib.ToTensor(),
+                transform_lib.Normalize(
+                    mean=[0.485, 0.456, 0.406],
+                    std=[0.229, 0.224, 0.225]
+                ),
+            ])
+
+        """
+        preprocessing = transform_lib.Compose([
+            transform_lib.RandomResizedCrop(self.image_size),
+            transform_lib.RandomHorizontalFlip(),
             transform_lib.ToTensor(),
-            imagenet_normalization()
+            imagenet_normalization(),
         ])
-        return mnist_transforms
+
+        return preprocessing
+
+    def val_transform(self):
+        """
+        The standard imagenet transforms for validation
+
+        .. code-block:: python
+
+            transform_lib.Compose([
+                transform_lib.Resize(self.image_size + 32),
+                transform_lib.CenterCrop(self.image_size),
+                transform_lib.ToTensor(),
+                transform_lib.Normalize(
+                    mean=[0.485, 0.456, 0.406],
+                    std=[0.229, 0.224, 0.225]
+                ),
+            ])
+
+        """
+
+        preprocessing = transform_lib.Compose([
+            transform_lib.Resize(self.image_size + 32),
+            transform_lib.CenterCrop(self.image_size),
+            transform_lib.ToTensor(),
+            imagenet_normalization(),
+        ])
+        return preprocessing

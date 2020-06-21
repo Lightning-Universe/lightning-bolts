@@ -10,7 +10,7 @@ from pl_bolts.datamodules import MNISTDataLoaders
 from pl_bolts.models.gans.basic.components import Generator, Discriminator
 
 
-class BasicGAN(LightningModule):
+class GAN(LightningModule):
 
     def __init__(self,
                  input_channels=1,
@@ -168,9 +168,9 @@ class BasicGAN(LightningModule):
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
-    parser = BasicGAN.add_model_specific_args(parser)
+    parser = GAN.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    gan = BasicGAN(**vars(args))
+    gan = GAN(**vars(args))
     trainer = Trainer()
     trainer.fit(gan)

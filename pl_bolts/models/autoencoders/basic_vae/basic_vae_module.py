@@ -2,43 +2,98 @@ import os
 from argparse import ArgumentParser
 
 import torch
+import torchvision
 from pytorch_lightning import LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
+import pl_bolts
 
 from pl_bolts.datamodules import MNISTDataLoaders
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
+from pl_bolts.utils.pretrained_weights import load_pretrained
 
 
 class VAE(LightningModule):
 
     def __init__(
             self,
-            hidden_dim=128,
-            latent_dim=32,
-            input_width=28,
-            input_height=28,
-            batch_size=32,
-            learning_rate=0.001,
-            data_dir='',
+            hidden_dim:int = 128,
+            latent_dim: int = 32,
+            input_channels: int = 3,
+            input_width: int = 224,
+            input_height: int = 224,
+            batch_size: int = 32,
+            learning_rate: float = 0.001,
+            data_dir: str = '',
+            datamodule: pl_bolts.datamodules.BoltDataModule = None,
+            pretrained: str = None,
             **kwargs
     ):
+        """
+        Standard VAE with Gaussian Prior and approx posterior.
+
+        Model is available pretrained on different datasets:
+
+        Example::
+
+            # not pretrained
+            vae = VAE()
+
+            # pretrained on imagenet
+            vae = VAE(pretrained='imagenet')
+
+            # pretrained on cifar10
+            vae = VAE(pretrained='cifar10')
+
+        Args:
+
+            hidden_dim: encoder and decoder hidden dims
+            latent_dim: latenet code dim
+            input_channels: num of channels of the input image.
+            input_width: image input width
+            input_height: image input height
+            batch_size: the batch size
+            learning_rate" the learning rate
+            data_dir: the directory to store data
+            datamodule: The bolts DataModule
+            pretrained: Load weights pretrained on a dataset
+        """
         super().__init__()
         self.save_hyperparameters()
 
-        self.dataloaders = MNISTDataLoaders(save_path=data_dir)
+        # use mnist as the default module
+        self.datamodule = datamodule
+        if datamodule is None:
+            self.datamodule = MNISTDataLoaders(save_path=data_dir)
 
-        self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim,
-                                         self.hparams.input_width, self.hparams.input_height)
-        self.decoder = self.init_decoder(self.hparams.hidden_dim, self.hparams.latent_dim,
-                                         self.hparams.input_width, self.hparams.input_height)
+        self.encoder = self.init_encoder()
+        self.decoder = self.init_decoder()
 
-    def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
-        encoder = Encoder(hidden_dim, latent_dim, input_width, input_height)
+    def load_pretrained(self, pretrained):
+        available_weights = {'imagenet'}
+
+        if pretrained in available_weights:
+            weights_name = f'vae-{available_weights}'
+            load_pretrained(self, weights_name)
+
+    def init_encoder(self):
+        encoder = Encoder(
+            self.hparams.hidden_dim,
+            self.hparams.latent_dim,
+            self.hparams.input_channels,
+            self.hparams.input_width,
+            self.hparams.input_height
+        )
         return encoder
 
-    def init_decoder(self, hidden_dim, latent_dim, input_width, input_height):
-        decoder = Decoder(hidden_dim, latent_dim, input_width, input_height)
+    def init_decoder(self):
+        decoder = Decoder(
+            self.hparams.hidden_dim,
+            self.hparams.latent_dim,
+            self.hparams.input_width,
+            self.hparams.input_height,
+            self.hparams.input_channels
+        )
         return decoder
 
     def get_prior(self, z_mu, z_std):
@@ -55,7 +110,8 @@ class VAE(LightningModule):
         # Reconstruction loss
         z = Q.rsample()
         pxz = self(z)
-        recon_loss = F.binary_cross_entropy(pxz, x, reduction='none')
+        pxz = torch.tanh(pxz)
+        recon_loss = F.mse_loss(pxz, x, reduction='none')
 
         # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
         # multivariate gaussian
@@ -124,12 +180,16 @@ class VAE(LightningModule):
                             'val_kl_loss': kl_loss}
 
         return {
-            'avg_val_loss': avg_loss,
+            'val_loss': avg_loss,
             'log': tensorboard_logs
         }
 
     def test_step(self, batch, batch_idx):
+        x, y = batch
         loss, recon_loss, kl_div, pxz = self._run_step(batch)
+
+        if batch_idx == 0:
+            self._log_images(y)
 
         return {
             'test_loss': loss,
@@ -148,7 +208,7 @@ class VAE(LightningModule):
                             'test_kl_loss': kl_loss}
 
         return {
-            'avg_test_loss': avg_loss,
+            'test_loss': avg_loss,
             'log': tensorboard_logs
         }
 
@@ -156,16 +216,26 @@ class VAE(LightningModule):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
     def prepare_data(self):
-        self.dataloaders.prepare_data()
+        self.datamodule.prepare_data()
 
     def train_dataloader(self):
-        return self.dataloaders.train_dataloader(self.hparams.batch_size)
+        return self.datamodule.train_dataloader(self.hparams.batch_size)
 
     def val_dataloader(self):
-        return self.dataloaders.val_dataloader(self.hparams.batch_size)
+        return self.datamodule.val_dataloader(self.hparams.batch_size)
 
     def test_dataloader(self):
-        return self.dataloaders.test_dataloader(self.hparams.batch_size)
+        return self.datamodule.test_dataloader(self.hparams.batch_size)
+
+    def _log_images(self, y, y_hat, step_name, limit=1):
+        y = y[:limit]
+        y_hat = y_hat[:limit]
+
+        pred_images = torchvision.utils.make_grid(y_hat)
+        target_images = torchvision.utils.make_grid(y)
+
+        self.logger.experiment.add_image(f'{step_name}_predicted_images', pred_images, self.trainer.global_step)
+        self.logger.experiment.add_image(f'{step_name}_target_images', target_images, self.trainer.global_step)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -174,22 +244,41 @@ class VAE(LightningModule):
                             help='itermediate layers dimension before embedding for default encoder/decoder')
         parser.add_argument('--latent_dim', type=int, default=32,
                             help='dimension of latent variables z')
-        parser.add_argument('--input_width', type=int, default=28,
-                            help='input image width - 28 for MNIST (must be even)')
-        parser.add_argument('--input_height', type=int, default=28,
-                            help='input image height - 28 for MNIST (must be even)')
+        parser.add_argument('--input_width', type=int, default=224,
+                            help='input width (used Imagenet downsampled size)')
+        parser.add_argument('--input_height', type=int, default=224,
+                            help='input width (used Imagenet downsampled size)')
+        parser.add_argument('--input_channels', type=int, default=3,
+                            help='number of input channels')
         parser.add_argument('--batch_size', type=int, default=32)
+        parser.add_argument('--pretrained', action='store_true')
+
         parser.add_argument('--learning_rate', type=float, default=1e-3)
-        parser.add_argument('--data_dir', type=str, default='')
         return parser
 
 
 if __name__ == '__main__':
+    from pl_bolts.datamodules import ImagenetDataModule
     parser = ArgumentParser()
+    parser.add_argument('--dataset', default='mnist', type=str)
     parser = Trainer.add_argparse_args(parser)
+    parser = ImagenetDataModule.add_argparse_args(parser)
+    parser = MNISTDataLoaders.add_argparse_args(parser)
     parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args()
 
+    if args.dataset == 'imagenet' or args.pretrained:
+        datamodule = ImagenetDataModule.from_argparse_args(args)
+        args.image_width = datamodule.size()[1]
+        args.image_height = datamodule.size()[2]
+        args.input_channels = datamodule.size()[0]
+
+    elif args.dataset == 'mnist':
+        datamodule = MNISTDataLoaders.from_argparse_args(args)
+        args.image_width = datamodule.size()[1]
+        args.image_height = datamodule.size()[2]
+        args.input_channels = datamodule.size()[0]
+
     vae = VAE(**vars(args))
-    trainer = Trainer()
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(vae)

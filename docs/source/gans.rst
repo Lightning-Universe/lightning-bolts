@@ -9,9 +9,9 @@ This is a basic GAN.
 
 Example:
 
-    >>> from pytorch_lightning.models.gans import BasicGAN
+    >>> from pytorch_lightning.models.gans import GAN
     ...
-    >>> gan = BasicGAN()
+    >>> gan = GAN()
 
 Train::
 
@@ -19,5 +19,5 @@ Train::
     trainer.fit(gan)
 
 
-.. autoclass:: pl_bolts.models.gans.BasicGAN
+.. autoclass:: pl_bolts.models.gans.GAN
    :noindex:

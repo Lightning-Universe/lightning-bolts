@@ -1,4 +1,4 @@
-from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataLoaders
+from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataModule
 from torch.utils.data import Dataset, DataLoader
 from sklearn.utils import shuffle as sk_shuffle
 import math
@@ -49,7 +49,7 @@ class SklearnDataset(Dataset):
         return x, y
 
 
-class SklearnDataLoaders(BoltDataLoaders):
+class SklearnDataLoaders(BoltDataModule):
 
     def __init__(self, X, y, x_val=None, y_val=None, x_test=None, y_test=None, val_split=0.15, test_split=0.15, num_workers=2, random_state=1234, shuffle=True):
         """
