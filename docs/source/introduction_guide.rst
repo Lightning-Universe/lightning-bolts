@@ -25,10 +25,22 @@ Example::
     from pl_bolts.models.autoencoders import VAE
 
     # feature extractor (pretrained on Imagenet)
-    pretrained_model = VAE(pretrained=True)
+    pretrained_model = VAE(pretrained='imagenet')
     pretrained_model.freeze()
 
-Or load your own weights after training on your own data
+We encourage contributed bolts models to have pretrained weight options as well. For instance, this
+resnet18 was trained using self-supervised learning via the CPC approach.
+
+Example::
+
+    from pl_bolts.models.self_supervised import CPCV2
+
+    # feature extractor (pretrained on Imagenet)
+    cpc_model = CPCV2(pretrained='resnet18')
+    resnet18 = cpc_model.encoder
+    resnet18.freeze()
+
+You can also load your own weights after training on your own data.
 
 Example::
 
