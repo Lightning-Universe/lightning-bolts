@@ -192,7 +192,7 @@ class VAE(LightningModule):
                             help='input image width - 28 for MNIST (must be even)')
         parser.add_argument('--input_height', type=int, default=28,
                             help='input image height - 28 for MNIST (must be even)')
-        parser.add_argument('--input_channels', type=int, default=1,
+        parser.add_argument('--input_channels', type=int, default=3,
                             help='number of input channels')
         parser.add_argument('--batch_size', type=int, default=32)
         parser.add_argument('--learning_rate', type=float, default=1e-3)
