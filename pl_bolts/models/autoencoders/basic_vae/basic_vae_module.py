@@ -16,6 +16,7 @@ class VAE(LightningModule):
             self,
             hidden_dim=128,
             latent_dim=32,
+            input_channels=3,
             input_width=28,
             input_height=28,
             batch_size=32,
