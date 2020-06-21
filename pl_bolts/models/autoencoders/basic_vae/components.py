@@ -30,7 +30,7 @@ class Encoder(torch.nn.Module):
         self.sigma_fc = nn.Linear(hidden_dim, latent_dim)
 
     def _calculate_output_dim(self, input_width, input_height):
-        x = torch.rand(1, 1, input_width, input_height)
+        x = torch.rand(1, self.input_channels, input_width, input_height)
         x = self.c3(self.c2(self.c1(x)))
         x = x.view(-1)
         return x.size(0)
