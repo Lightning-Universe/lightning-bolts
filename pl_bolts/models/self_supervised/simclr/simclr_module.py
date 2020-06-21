@@ -62,6 +62,7 @@ class SimCLR(pl.LightningModule):
                  **kwargs):
         """
         PyTorch Lightning implementation of `SIMCLR <https://arxiv.org/abs/2002.05709.>`_
+
         Paper authors: Ting Chen, Simon Kornblith, Mohammad Norouzi, Geoffrey Hinton.
 
         Model implemented by:
@@ -291,5 +292,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model = SimCLR(**vars(args))
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = pl.Trainer.from_argparse_args(args, overfit_batches=1)
     trainer.fit(model)

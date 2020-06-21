@@ -37,6 +37,7 @@ class MocoV2(pl.LightningModule):
                  *args, **kwargs):
         """
         PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
+
         Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.
 
         Model implemented by:
