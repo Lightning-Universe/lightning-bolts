@@ -213,5 +213,5 @@ if __name__ == '__main__':
     elif args.dataset == 'mnist':
         datamodule = MNISTDataLoaders(save_path=args.data_dir)
     vae = VAE(**vars(args), datamodule=datamodule)
-    trainer = Trainer()
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(vae)
