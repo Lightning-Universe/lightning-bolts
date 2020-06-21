@@ -88,7 +88,7 @@ class Decoder(torch.nn.Module):
         x = F.relu(self.dc1(x))
         x = F.relu(self.dc2(x))
         x = F.relu(self.dc3(x))
-        x = F.sigmoid(self.dc4(x))
+        x = self.dc4(x)
         x = x.view(x.size(0), -1)
         return x
 
