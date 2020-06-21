@@ -5,8 +5,7 @@ Sklearn Datamodules
 ===================
 Utilities to map sklearn or numpy datasets to PyTorch Dataloaders with automatic data splits and GPU/TPU support.
 
-
-Example::
+.. code-block:: python
 
     from sklearn.datasets import load_boston
     from pl_bolts.datamodules import SklearnDataLoaders
@@ -20,7 +19,7 @@ Example::
 
 Or build your own torch datasets
 
-Example::
+.. code-block:: python
 
     from sklearn.datasets import load_boston
     from pl_bolts.datamodules import SklearnDataset
