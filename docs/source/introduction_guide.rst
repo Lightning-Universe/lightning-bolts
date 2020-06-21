@@ -44,6 +44,8 @@ Example::
     pretrained_model = VAE.load_from_checkpoint(PATH)
     pretrained_model.freeze()
 
+----------------
+
 Use for fine-tuning
 -------------------
 Can fine-tune on your own data. Either for stand-alone PyTorch
@@ -80,6 +82,7 @@ Example::
             x = self.some_other_model(x)
             return x
 
+----------------
 
 Use in production or for inference
 ----------------------------------
@@ -95,6 +98,7 @@ Example::
     z = ... # z ~ N(0, 1)
     predictions = vae(z)
 
+----------------
 
 Train from scratch
 ------------------
@@ -109,6 +113,7 @@ Here's an example on how to train this model from scratch
     trainer = pl.Trainer(gpus=1)
     trainer.fit(vae)
 
+----------------
 
 Customize any part
 ------------------
@@ -180,6 +185,7 @@ Example::
         def backward(self):
             # do something weird
 
+----------------
 
 Command line support
 --------------------
