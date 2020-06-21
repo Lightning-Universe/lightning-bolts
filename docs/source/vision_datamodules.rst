@@ -37,8 +37,8 @@ Semi-supervised learning
 The following datasets have support for unlabeled training and semi-supervised learning where only a few examples
 are labeled.
 
-Imagenet
-^^^^^^^^
+Imagenet (ssl)
+^^^^^^^^^^^^^^
 
 .. autoclass:: pl_bolts.datamodules.ssl_imagenet_dataloaders.SSLImagenetDataLoaders
     :noindex:
