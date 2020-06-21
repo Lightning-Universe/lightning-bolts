@@ -21,12 +21,14 @@ class VAE(LightningModule):
             batch_size=32,
             learning_rate=0.001,
             data_dir='',
+            datamodule=None,
             **kwargs
     ):
         super().__init__()
         self.save_hyperparameters()
 
-        self.dataloaders = MNISTDataLoaders(save_path=data_dir)
+        if datamodule is None:
+            self.dataloaders = MNISTDataLoaders(save_path=data_dir)
 
         self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim,
                                          self.hparams.input_width, self.hparams.input_height)
@@ -34,7 +36,7 @@ class VAE(LightningModule):
                                          self.hparams.input_width, self.hparams.input_height)
 
     def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
-        encoder = Encoder(hidden_dim, latent_dim, input_width, input_height)
+        encoder = Encoder(hidden_dim, latent_dim, input_width, input_height, input_channels)
         return encoder
 
     def init_decoder(self, hidden_dim, latent_dim, input_width, input_height):
