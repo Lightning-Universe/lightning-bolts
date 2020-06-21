@@ -222,6 +222,8 @@ class VAE(LightningModule):
         parser.add_argument('--input_channels', type=int, default=3,
                             help='number of input channels')
         parser.add_argument('--batch_size', type=int, default=32)
+        parser.add_argument('--pretrained', action='store_true')
+
         parser.add_argument('--learning_rate', type=float, default=1e-3)
         return parser
 
@@ -236,7 +238,7 @@ if __name__ == '__main__':
     parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    if args.dataset == 'imagenet':
+    if args.dataset == 'imagenet' or args.pretrained:
         datamodule = ImagenetDataModule.from_argparse_args(args)
         args.image_width = datamodule.size()[1]
         args.image_height = datamodule.size()[2]
@@ -248,6 +250,6 @@ if __name__ == '__main__':
         args.image_height = datamodule.size()[2]
         args.input_channels = datamodule.size()[0]
 
-    vae = VAE(**vars(args), pretrained=True)
+    vae = VAE(**vars(args))
     trainer = Trainer.from_argparse_args(args)
     trainer.fit(vae)
