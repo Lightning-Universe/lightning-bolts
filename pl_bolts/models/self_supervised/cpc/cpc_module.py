@@ -45,6 +45,7 @@ class CPCV2(pl.LightningModule):
                  **kwargs):
         """
         PyTorch Lightning implementation of `Data-Efficient Image Recognition with Contrastive Predictive Coding <https://arxiv.org/abs/1905.09272>`_
+
         Paper authors: (Olivier J. Hénaff, Aravind Srinivas, Jeffrey De Fauw, Ali Razavi, Carl Doersch, S. M. Ali Eslami, Aaron van den Oord).
 
         Model implemented by:
@@ -80,7 +81,7 @@ class CPCV2(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.online_evaluator = self.hparams.online_ft
+        self.online_evaluator = self.online_ft
         self.dataset = self.get_dataset(self.hparams.dataset)
 
         # init encoder

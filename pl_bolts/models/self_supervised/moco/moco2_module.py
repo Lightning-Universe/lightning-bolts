@@ -9,6 +9,7 @@ import torch
 import torch.nn.functional as F
 import torchvision
 from torch import nn
+from typing import Union
 
 from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
@@ -20,23 +21,24 @@ from pl_bolts.models.self_supervised.moco.transforms import \
 class MocoV2(pl.LightningModule):
 
     def __init__(self,
-                 base_encoder='resnet50',
-                 emb_dim=128,
-                 num_negatives=65536,
-                 encoder_momentum=0.999,
-                 softmax_temperature=0.07,
-                 learning_rate=0.03,
-                 momentum=0.9,
-                 weight_decay=1e-4,
-                 dataset='cifar10',
-                 data_dir='./',
-                 batch_size=256,
-                 use_mlp=False,
-                 num_workers=8,
+                 base_encoder: Union[str, torch.nn.Module] = 'resnet50',
+                 emb_dim: int = 128,
+                 num_negatives: int = 65536,
+                 encoder_momentum: float = 0.999,
+                 softmax_temperature: float = 0.07,
+                 learning_rate: float = 0.03,
+                 momentum: float = 0.9,
+                 weight_decay:float = 1e-4,
+                 dataset: str = 'cifar10',
+                 data_dir: str = './',
+                 batch_size: str = 256,
+                 use_mlp: bool = False,
+                 num_workers: int = 8,
                  *args, **kwargs):
         """
-        PyTorch Lightning implementation of `SIMCLR <https://arxiv.org/abs/2002.05709.>`_
-        Paper authors: Ting Chen, Simon Kornblith, Mohammad Norouzi, Geoffrey Hinton.
+        PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
+
+        Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.
 
         Model implemented by:
 
@@ -54,10 +56,19 @@ class MocoV2(pl.LightningModule):
             trainer.fit(model)
 
         Args:
+            base_encoder: torchvision model name or torch.nn.Module
             emb_dim: feature dimension (default: 128)
             num_negatives: queue size; number of negative keys (default: 65536)
             encoder_momentum: moco momentum of updating key encoder (default: 0.999)
             softmax_temperature: softmax temperature (default: 0.07)
+            learning_rate: the learning rate
+            momentum: optimizer momentum
+            weight_decay: optimizer weight decay
+            dataset: name of dataset
+            data_dir: the directory to store data
+            batch_size: batch size
+            use_mlp: add an mlp to the encoders
+            num_workers: workers for the loaders
         """
 
         super().__init__()
@@ -90,8 +101,8 @@ class MocoV2(pl.LightningModule):
         """
 
         template_model = getattr(torchvision.models, base_encoder)
-        encoder_q = template_model(num_classes=self.emb_dim)
-        encoder_k = template_model(num_classes=self.emb_dim)
+        encoder_q = template_model(num_classes=self.hparams.emb_dim)
+        encoder_k = template_model(num_classes=self.hparams.emb_dim)
 
         return encoder_q, encoder_k
 
@@ -101,7 +112,7 @@ class MocoV2(pl.LightningModule):
         Momentum update of the key encoder
         """
         for param_q, param_k in zip(self.encoder_q.parameters(), self.encoder_k.parameters()):
-            param_k.data = param_k.data * self.m + param_q.data * (1. - self.m)
+            param_k.data = param_k.data * self.hparams.encoder_momentum + param_q.data * (1. - self.hparams.encoder_momentum)
 
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys):
@@ -112,11 +123,11 @@ class MocoV2(pl.LightningModule):
         batch_size = keys.shape[0]
 
         ptr = int(self.queue_ptr)
-        assert self.K % batch_size == 0  # for simplicity
+        assert self.hparams.num_negatives % batch_size == 0  # for simplicity
 
         # replace the keys at ptr (dequeue and enqueue)
         self.queue[:, ptr:ptr + batch_size] = keys.T
-        ptr = (ptr + batch_size) % self.K  # move pointer
+        ptr = (ptr + batch_size) % self.hparams.num_negatives  # move pointer
 
         self.queue_ptr[0] = ptr
 
@@ -206,7 +217,7 @@ class MocoV2(pl.LightningModule):
         logits = torch.cat([l_pos, l_neg], dim=1)
 
         # apply temperature
-        logits /= self.T
+        logits /= self.hparams.softmax_temperature
 
         # labels: positive key indicators
         labels = torch.zeros(logits.shape[0], dtype=torch.long)
