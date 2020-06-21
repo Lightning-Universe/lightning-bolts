@@ -156,7 +156,10 @@ class ImagenetDataModule(BoltDataModule):
                 transform_lib.RandomSizedCrop(self.image_size),
                 transform_lib.RandomHorizontalFlip(),
                 transform_lib.ToTensor(),
-                transform_lib.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                transform_lib.Normalize(
+                    mean=[0.485, 0.456, 0.406],
+                    std=[0.229, 0.224, 0.225]
+                ),
             ])
 
         """
@@ -179,7 +182,10 @@ class ImagenetDataModule(BoltDataModule):
                 transform_lib.Scale(self.image_size + 32),
                 transform_lib.CenterCrop(self.image_size),
                 transform_lib.ToTensor(),
-                transform_lib.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                transform_lib.Normalize(
+                    mean=[0.485, 0.456, 0.406],
+                    std=[0.229, 0.224, 0.225]
+                ),
             ])
 
         """
