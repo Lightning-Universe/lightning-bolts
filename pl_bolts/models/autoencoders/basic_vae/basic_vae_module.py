@@ -210,9 +210,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.dataset == 'imagenet':
-        datamodule = ImagenetDataModule(data_dir=args.data_dir)
+        datamodule = ImagenetDataModule.from_argparse_args(args)
     elif args.dataset == 'mnist':
-        datamodule = MNISTDataLoaders(save_path=args.data_dir)
+        datamodule = MNISTDataLoaders.from_argparse_args(args)
     vae = VAE(**vars(args), datamodule=datamodule)
     trainer = Trainer.from_argparse_args(args)
     trainer.fit(vae)
