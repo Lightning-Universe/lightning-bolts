@@ -6,6 +6,7 @@ import torchvision
 from pytorch_lightning import LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
+import pl_bolts
 
 from pl_bolts.datamodules import MNISTDataLoaders
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
@@ -16,18 +17,47 @@ class VAE(LightningModule):
 
     def __init__(
             self,
-            hidden_dim=128,
-            latent_dim=32,
-            input_channels=3,
-            input_width=224,
-            input_height=224,
-            batch_size=32,
-            learning_rate=0.001,
-            data_dir='',
-            datamodule=None,
+            hidden_dim:int = 128,
+            latent_dim: int = 32,
+            input_channels: int = 3,
+            input_width: int = 224,
+            input_height: int = 224,
+            batch_size: int = 32,
+            learning_rate: float = 0.001,
+            data_dir: str = '',
+            datamodule: pl_bolts.datamodules.BoltDataModule = None,
             pretrained: str = None,
             **kwargs
     ):
+        """
+        Standard VAE with Gaussian Prior and approx posterior.
+
+        Model is available pretrained on different datasets:
+
+        Example::
+
+            # not pretrained
+            vae = VAE()
+
+            # pretrained on imagenet
+            vae = VAE(pretrained='imagenet')
+
+            # pretrained on cifar10
+            vae = VAE(pretrained='cifar10')
+
+        Args:
+
+            hidden_dim: encoder and decoder hidden dims
+            latent_dim: latenet code dim
+            input_channels: num of channels of the input image.
+            input_width: image input width
+            input_height: image input height
+            batch_size: the batch size
+            learning_rate" the learning rate
+            data_dir: the directory to store data
+            datamodule: The bolts DataModule
+            pretrained: Load weights pretrained on a dataset
+        """
         super().__init__()
         self.save_hyperparameters()
 
