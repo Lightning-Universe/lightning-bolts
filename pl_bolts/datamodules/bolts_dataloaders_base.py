@@ -207,7 +207,7 @@ class BoltDataModule(object):
 
         """
 
-    @property
+    @classmethod
     def add_argparse_args(self, parent_parser):
         """
         Adds dataset arguments to an argparser
