@@ -2,6 +2,7 @@ import os
 from argparse import ArgumentParser
 
 import torch
+import torchvision
 from pytorch_lightning import LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
@@ -148,7 +149,11 @@ class VAE(LightningModule):
         }
 
     def test_step(self, batch, batch_idx):
+        x, y = batch
         loss, recon_loss, kl_div, pxz = self._run_step(batch)
+
+        if batch_idx == 0:
+            self._log_images(y)
 
         return {
             'test_loss': loss,
@@ -185,6 +190,16 @@ class VAE(LightningModule):
 
     def test_dataloader(self):
         return self.datamodule.test_dataloader(self.hparams.batch_size)
+
+    def _log_images(self, y, y_hat, step_name, limit=1):
+        y = y[:limit]
+        y_hat = y_hat[:limit]
+
+        pred_images = torchvision.utils.make_grid(y_hat)
+        target_images = torchvision.utils.make_grid(y)
+
+        self.logger.experiment.add_image(f'{step_name}_predicted_images', pred_images, self.trainer.global_step)
+        self.logger.experiment.add_image(f'{step_name}_target_images', target_images, self.trainer.global_step)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
