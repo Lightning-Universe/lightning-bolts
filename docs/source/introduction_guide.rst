@@ -5,11 +5,82 @@ Lightning Bolts is a collection of Models, Callbacks and other goodies implement
 Bolts models are designed to bootstrap research or to be used in production. Here are ways in which bolts can be used
 
 1. As a feature extractor for production and research systems.
+
+.. code-block:: python
+
+    from pl_bolts.models.autoencoders import VAE
+
+    # feature extractor (pretrained on Imagenet)
+    pretrained_model = VAE(pretrained='imagenet')
+    pretrained_model.freeze()
+
 2. Subclass and override to try new research ideas.
+
+.. code-block:: python
+
+    from pl_bolts.models.autoencoders import VAE
+
+    class MyVAE(VAE):
+
+        def elbo_loss(self, x, P, Q):
+            # maybe your research is about a new type of loss
+
+.. code-block:: python
+
+    from pl_bolts.models.gans import GAN
+
+    class MyGAN(VAE):
+
+        def init_generator(self, img_dim):
+            # do your own generator
+            generator = Generator(latent_dim=self.hparams.latent_dim, img_shape=img_dim)
+            return generator
+
+        def generator_step(self, x):
+            # maybe try a different generator step?
+
+
 3. Fully pre-built models that can be fine-tuned on your data.
+
+.. code-block:: python
+
+    from pl_bolts.models.self_supervised import CPCV2
+
+    # feature extractor (pretrained on Imagenet)
+    cpc_model = CPCV2(pretrained='resnet18')
+    resnet18 = cpc_model.encoder
+    resnet18.freeze()
+
 4. Fully contained algorithms that can be trained on your data.
+
+.. code-block:: python
+
+    from pl_bolts.models.self_supervised import SimCLR
+
+    model = SimCLR()
+    train_data = DataLoader(yourData())
+    val_data = DataLoader(yourData())
+
+    trainer = Trainer()
+    trainer.fit(model, train_data, val_data)
+
 5. Fully compatible with GPUs, TPUs, 16-bit precision, etc because of PyTorch Lightning.
+
+.. code-block:: python
+
+    model = SimCLR()
+
+    trainer = Trainer(num_nodes=8, gpus=8)
+    trainer.fit(model)
+
+    trainer = Trainer(tpu_cores=8)
+    trainer.fit(model)
+
 6. Can be used as a stand-alone `torch.nn.Module`.
+
+.. code-block:: python
+
+    model = SimCLR()
 
 --------------------
 

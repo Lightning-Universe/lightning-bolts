@@ -18,11 +18,11 @@ It's designed to work  with PyTorch Lightning
 ```python
 
 from pl_bolts.models.autoencoders import VAE
-from pl_bolts.models.gans import BasicGAN
+from pl_bolts.models.gans import GAN
 from pytorch_lightning import Trainer
 
 vae = VAE()
-gan = BasicGAN()
+gan = GAN()
 
 # train VAE
 vae_trainer = Trainer()
