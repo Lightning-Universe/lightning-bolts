@@ -22,6 +22,7 @@ from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 from pl_bolts.utils.ssl_utils import torchvision_ssl_encoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
+from pytorch_lightning.utilities import rank_zero_warn
 from typing import Union
 
 __all__ = [
@@ -126,8 +127,11 @@ class CPCV2(pl.LightningModule):
                 n_hidden=1024
             )
 
-        if pretrained is not None:
+        available_weights = {'resnet18'}
+        if pretrained is not None and pretrained in available_weights:
             load_pretrained(self, f'CPCV2-{pretrained}')
+        elif available_weights not in available_weights:
+            rank_zero_warn(f'{pretrained} not yet available')
 
     def init_encoder(self):
         dummy_batch = torch.zeros((2, 3, self.hparams.patch_size, self.hparams.patch_size))
