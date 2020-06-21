@@ -196,7 +196,6 @@ class VAE(LightningModule):
                             help='number of input channels')
         parser.add_argument('--batch_size', type=int, default=32)
         parser.add_argument('--learning_rate', type=float, default=1e-3)
-        parser.add_argument('--data_dir', type=str, default='')
         return parser
 
 
