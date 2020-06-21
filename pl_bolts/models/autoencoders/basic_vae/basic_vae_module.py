@@ -48,7 +48,6 @@ class VAE(LightningModule):
         decoder = Decoder(
             self.hparams.hidden_dim,
             self.hparams.latent_dim,
-            self.hparams.output_channels,
             self.hparams.input_width,
             self.hparams.input_height,
             self.hparams.input_channels

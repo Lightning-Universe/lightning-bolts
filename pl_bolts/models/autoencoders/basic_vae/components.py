@@ -57,11 +57,11 @@ class Decoder(torch.nn.Module):
     Takes in latent vars and reconstructs an image
     """
 
-    def __init__(self, hidden_dim, latent_dim, output_channels, input_width, input_height, input_channels):
+    def __init__(self, hidden_dim, latent_dim, input_width, input_height, input_channels):
         super().__init__()
 
         self.input_channels = input_channels
-        self.deconv_dim_w, self.deconv_dim_h = self._calculate_output_size(input_width, input_height, output_channels)
+        self.deconv_dim_w, self.deconv_dim_h = self._calculate_output_size(input_width, input_height)
 
         self.latent_dim = latent_dim
         self.fc1 = DenseBlock(latent_dim, hidden_dim)
@@ -69,7 +69,7 @@ class Decoder(torch.nn.Module):
         self.dc1 = nn.ConvTranspose2d(64, 32, kernel_size=3, padding=1)
         self.dc2 = nn.ConvTranspose2d(32, 32, kernel_size=3, padding=1)
         self.dc3 = nn.ConvTranspose2d(32, 32, kernel_size=2, stride=2)
-        self.dc4 = nn.ConvTranspose2d(32, output_channels, kernel_size=1, stride=1)
+        self.dc4 = nn.ConvTranspose2d(32, input_channels, kernel_size=1, stride=1)
 
     def _calculate_output_size(self, input_width, input_height):
         x = torch.rand(1, self.input_channels, input_width, input_height)
