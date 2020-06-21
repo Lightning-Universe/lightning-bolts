@@ -21,6 +21,7 @@ from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 from pl_bolts.utils.ssl_utils import torchvision_ssl_encoder
+from pl_bolts.utils.pretrained_weights import load_pretrained
 from typing import Union
 
 __all__ = [
@@ -42,6 +43,8 @@ class CPCV2(pl.LightningModule):
                  data_dir: str = '',
                  meta_root: str = '',
                  batch_size: int = 32,
+                 amdim_task=False,
+                 pretrained: str = None,
                  **kwargs):
         """
         PyTorch Lightning implementation of `Data-Efficient Image Recognition with Contrastive Predictive Coding <https://arxiv.org/abs/1905.09272>`_
@@ -76,12 +79,18 @@ class CPCV2(pl.LightningModule):
             data_dir: where to store data
             meta_root: path to the imagenet meta.bin file (if not inside your imagenet folder)
             batch_size: batch size
+            pretrained: name of encoder pretrained via CPC ('resnet18', etc...)
         """
 
         super().__init__()
         self.save_hyperparameters()
 
-        self.online_evaluator = self.online_ft
+        self.online_evaluator = self.hparams.online_ft
+
+        if pretrained:
+            self.hparams.dataset = 'imagenet128'
+            self.online_evaluator = True
+
         self.dataset = self.get_dataset(self.hparams.dataset)
 
         # init encoder
@@ -102,6 +111,9 @@ class CPCV2(pl.LightningModule):
                 p=0.2,
                 n_hidden=1024
             )
+
+        if pretrained is not None:
+            load_pretrained(self, f'CPCV2-{pretrained}')
 
     def init_encoder(self):
         dummy_batch = torch.zeros((2, 3, self.hparams.patch_size, self.hparams.patch_size))
@@ -404,6 +416,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args.online_ft = True
 
-    model = CPCV2(**vars(args))
+    model = CPCV2(**vars(args), pretrained='resnet18')
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
