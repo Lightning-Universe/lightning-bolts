@@ -213,10 +213,11 @@ class BoltDataModule(object):
         r"""Extends existing argparse by default `BoltDataModule` attributes.
         """
         parser = ArgumentParser(parents=[parent_parser], add_help=False,)
-        import pdb; pdb.set_trace()
+        added_args = [x.dest for x in parser._actions]
 
         blacklist = ['kwargs']
-        depr_arg_names = blacklist
+        depr_arg_names = blacklist + added_args
+        depr_arg_names = set(depr_arg_names)
 
         allowed_types = (str, float, int, bool)
 
