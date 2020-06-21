@@ -139,7 +139,7 @@ class SimCLR(pl.LightningModule):
         h2, z2 = self.forward(img_2)
 
         # return h1, z1, h2, z2
-        loss = self.loss_func(z1, z2, self.temp)
+        loss = self.loss_func(z1, z2, self.hparams.temp)
         log = {'train_ntx_loss': loss}
 
         # don't use the training signal, just finetune the MLP to see how we're doing downstream
@@ -165,14 +165,6 @@ class SimCLR(pl.LightningModule):
         }
 
         return result
-
-    # def training_step_end(self, output_parts):
-    #     h1s, z1s, h2s, z2s = output_parts
-    #     rank = torch.distributed.get_rank()
-    #     print(f'Rank = {rank}', [h1.shape for h1 in h1s])
-    #     print(f'Rank = {rank}', [h2.shape for h2 in h2s])
-    #     print(f'Rank = {rank}', [z1.shape for z1 in z1s])
-    #     print(f'Rank = {rank}', [z2.shape for z2 in z2s])
 
     def validation_step(self, batch, batch_idx):
         if self.hparams.dataset == 'stl10':
@@ -255,8 +247,8 @@ class SimCLR(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--online_ft', action='store_true')
-        parser.add_argument('--dataset', type=str, default='cifar10')
+        parser.add_argument('--online_ft', action='store_true', help='run online finetuner')
+        parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, imagenet, stl10')
 
         (args, _) = parser.parse_known_args()
         height = {'cifar10': 32, 'stl10': 96, 'imagenet128': 224}[args.dataset]
@@ -276,7 +268,6 @@ class SimCLR(pl.LightningModule):
         parser.add_argument('--wd', type=float, default=0.0005)
         # Model
         parser.add_argument('--temp', type=float, default=0.5)
-        parser.add_argument('--trans', type=str, default='randcrop,flip')
         parser.add_argument('--num_workers', default=0, type=int)
         return parser
 

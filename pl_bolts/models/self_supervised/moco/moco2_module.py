@@ -21,7 +21,7 @@ from pl_bolts.models.self_supervised.moco.transforms import \
 class MocoV2(pl.LightningModule):
 
     def __init__(self,
-                 base_encoder: Union[str, torch.nn.Module]='resnet50',
+                 base_encoder: Union[str, torch.nn.Module] = 'resnet50',
                  emb_dim: int = 128,
                  num_negatives: int = 65536,
                  encoder_momentum: float = 0.999,
