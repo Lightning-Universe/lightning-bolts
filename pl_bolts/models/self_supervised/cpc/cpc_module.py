@@ -105,6 +105,7 @@ class CPCV2(pl.LightningModule):
         if pretrained:
             self.hparams.dataset = 'imagenet128'
             self.online_evaluator = True
+            self.hparams.encoder = pretrained
 
         self.dataset = self.get_dataset(self.hparams.dataset)
 
