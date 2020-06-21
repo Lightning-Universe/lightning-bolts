@@ -69,7 +69,7 @@ class VAE(LightningModule):
         # Reconstruction loss
         z = Q.rsample()
         pxz = self(z)
-        recon_loss = F.binary_cross_entropy(pxz, x, reduction='none')
+        recon_loss = F.binary_cross_entropy_with_logits(pxz, x, reduction='none')
 
         # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
         # multivariate gaussian
