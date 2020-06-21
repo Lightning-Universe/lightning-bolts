@@ -47,18 +47,18 @@ class Projection(nn.Module):
 
 class SimCLR(pl.LightningModule):
     def __init__(self,
-                 dataset='cifar10',
-                 data_dir='',
-                 learning_rate=0.00006,
-                 wd=0.0005,
-                 input_height=32,
-                 batch_size=128,
-                 online_ft=False,
-                 num_workers=4,
-                 optimizer='adam',
-                 step=30,
-                 gamma=0.5,
-                 temperature=0.5,
+                 dataset: str = 'cifar10',
+                 data_dir: str = '',
+                 learning_rate: float = 0.00006,
+                 weight_decay: float = 0.0005,
+                 input_height: int = 32,
+                 batch_size: int = 128,
+                 online_ft: bool = False,
+                 num_workers: int = 4,
+                 optimizer: str = 'adam',
+                 step: int = 30,
+                 lr_sched_gamma: float = 0.5,
+                 loss_temperature: float = 0.5,
                  **kwargs):
         """
         PyTorch Lightning implementation of `SIMCLR <https://arxiv.org/abs/2002.05709.>`_
@@ -81,8 +81,18 @@ class SimCLR(pl.LightningModule):
             trainer.fit(model)
 
         Args:
-            todo
-
+            dataset: dataset name
+            data_dir: directory to store data
+            learning_rate: the learning rate
+            weight_decay: optimizer weight decay
+            input_height: image input height
+            batch_size: the batch size
+            online_ft: whether to tune online or not
+            num_workers: number of workers
+            optimizer: optimizer name
+            lr_sched_step: step for learning rate scheduler
+            lr_sched_gamma: gamma for learning rate scheduler
+            loss_temperature: float = 0.
         """
         super().__init__()
         self.save_hyperparameters()
@@ -139,7 +149,7 @@ class SimCLR(pl.LightningModule):
         h2, z2 = self.forward(img_2)
 
         # return h1, z1, h2, z2
-        loss = self.loss_func(z1, z2, self.hparams.temp)
+        loss = self.loss_func(z1, z2, self.hparams.loss_temperature)
         log = {'train_ntx_loss': loss}
 
         # don't use the training signal, just finetune the MLP to see how we're doing downstream
@@ -175,7 +185,7 @@ class SimCLR(pl.LightningModule):
         (img_1, img_2), y = batch
         h1, z1 = self.forward(img_1)
         h2, z2 = self.forward(img_2)
-        loss = self.loss_func(z1, z2, self.hparams.temp)
+        loss = self.loss_func(z1, z2, self.hparams.loss_temperature)
         result = {'val_loss': loss}
 
         if self.online_evaluator:
@@ -233,15 +243,15 @@ class SimCLR(pl.LightningModule):
     def configure_optimizers(self):
         if self.hparams.optimizer == 'adam':
             optimizer = torch.optim.Adam(
-                self.parameters(), self.hparams.learning_rate, weight_decay=self.hparams.wd)
+                self.parameters(), self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
         elif self.hparams.optimizer == 'lars':
             optimizer = LARS(
                 self.parameters(), lr=self.hparams.learning_rate, momentum=self.hparams.mom,
-                weight_decay=self.hparams.wd, eta=self.hparams.eta)
+                weight_decay=self.hparams.weight_decay, eta=self.hparams.eta)
         else:
             raise ValueError(f'Invalid optimizer: {self.optimizer}')
         scheduler = StepLR(
-            optimizer, step_size=self.hparams.step, gamma=self.hparams.gamma)
+            optimizer, step_size=self.hparams.lr_sched_step, gamma=self.hparams.lr_sched_gamma)
         return [optimizer], [scheduler]
 
     @staticmethod
@@ -263,11 +273,11 @@ class SimCLR(pl.LightningModule):
         parser.add_argument('--learning_rate', type=float, default=0.00006)
         parser.add_argument('--mom', type=float, default=0.9)
         parser.add_argument('--eta', type=float, default=0.001)
-        parser.add_argument('--step', type=float, default=30)
-        parser.add_argument('--gamma', type=float, default=0.5)
-        parser.add_argument('--wd', type=float, default=0.0005)
+        parser.add_argument('--lr_sched_step', type=float, default=30, help='lr scheduler step')
+        parser.add_argument('--lr_sched_gamma', type=float, default=0.5, help='lr scheduler step')
+        parser.add_argument('--weight_decay', type=float, default=0.0005)
         # Model
-        parser.add_argument('--temp', type=float, default=0.5)
+        parser.add_argument('--loss_temperature', type=float, default=0.5)
         parser.add_argument('--num_workers', default=0, type=int)
         return parser
 
