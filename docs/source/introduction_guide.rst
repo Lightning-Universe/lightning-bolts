@@ -7,9 +7,9 @@ Bolts models are designed to bootstrap research or to be used in production. Her
 1. As a feature extractor for production and research systems.
 2. Subclass and override to try new research ideas.
 3. Fully pre-built models that can be fine-tuned on your data.
-3. Fully contained algorithms that can be trained on your data.
-4. Fully compatible with GPUs, TPUs, 16-bit precision, etc because of PyTorch Lightning.
-5. Can be used as a stand-alone `torch.nn.Module`.
+4. Fully contained algorithms that can be trained on your data.
+5. Fully compatible with GPUs, TPUs, 16-bit precision, etc because of PyTorch Lightning.
+6. Can be used as a stand-alone `torch.nn.Module`.
 
 --------------------
 
