@@ -1,9 +1,17 @@
 Introduction Guide
 ==================
-Bolts is designed to bootstrap research from prebuilt Lightning models
+Lightning Bolts is a collection of Models, Callbacks and other goodies implemented in PyTorch Lightning.
 
-There are many ways to use bolts models. Here we describe a few.
+Bolts models are designed to bootstrap research or to be used in production. Here are ways in which bolts can be used
 
+1. As a feature extractor for production and research systems.
+2. Subclass and override to try new research ideas.
+3. Fully pre-built models that can be fine-tuned on your data.
+3. Fully contained algorithms that can be trained on your data.
+4. Fully compatible with GPUs, TPUs, 16-bit precision, etc because of PyTorch Lightning.
+5. Can be used as a stand-alone `torch.nn.Module`.
+
+--------------------
 
 Use as a feature extractor
 --------------------------
@@ -13,16 +21,40 @@ a module inside the larger system.
 .. code-block:: python
 
     from pl_bolts.models.autoencoders import VAE
-    import pytorch_lightning as pl
+
+    # feature extractor
+    pretrained_model = VAE.load_from_checkpoint(PATH)
+    pretrained_model.freeze()
+
+Use for fine-tuning
+-------------------
+Can fine-tune on your own data. Either for stand-alone PyTorch
+
+Example::
+
+    from pl_bolts.models.autoencoders import VAE
+
+    # feature extractor (not frozen)
+    pretrained_model = VAE.load_from_checkpoint(PATH)
+
+Or in a Lightning Module
+
+Example::
 
     class YourResearchModel(pl.LightningModule):
         def __init__(self):
+
+            # pretrained VAE
             self.vae = VAE.load_from_checkpoint(PATH)
             self.vae.freeze()
 
             self.some_other_model = MyModel()
 
         def forward(self, z):
+            # unfreeze at some point
+            if self.current_epoch == 10:
+                self.vae.unfreeze()
+
             # generate a sample from z ~ N(0,1)
             x = self.vae(z)
 
