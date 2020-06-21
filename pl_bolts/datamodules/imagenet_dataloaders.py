@@ -30,7 +30,7 @@ class ImagenetDataModule(BoltDataModule):
 
          Example::
 
-            from pl_bolts.datamodulers import ImagenetDataModule
+            from pl_bolts.datamodules import ImagenetDataModule
 
             datamodule = ImagenetDataModule(IMAGENET_PATH)
             train_loader = datamodule.train_dataloader()

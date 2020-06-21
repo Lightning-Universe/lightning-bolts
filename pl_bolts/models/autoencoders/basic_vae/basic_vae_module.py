@@ -187,11 +187,12 @@ class VAE(LightningModule):
 
 
 if __name__ == '__main__':
+    from pl_bolts.datamodules import ImagenetDataModule
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
     parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    vae = VAE(**vars(args))
+    vae = VAE(**vars(args), datamodule=)
     trainer = Trainer()
     trainer.fit(vae)
