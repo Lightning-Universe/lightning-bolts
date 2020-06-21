@@ -26,6 +26,7 @@ PyTorchLightning-Bolts documentation
 
    datamodules
    sklearn_datamodules
+   vision_datamodules
 
 .. toctree::
    :maxdepth: 2
