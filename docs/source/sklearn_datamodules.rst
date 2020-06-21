@@ -18,6 +18,17 @@ Example::
     val_loader = loaders.val_dataloader(batch_size=32)
     test_loader = loaders.test_dataloader(batch_size=32)
 
+Or build your own torch datasets
+
+Example::
+
+    from sklearn.datasets import load_boston
+    from pl_bolts.datamodules import SklearnDataset
+
+    X, y = load_boston(return_X_y=True)
+    dataset = SklearnDataset(X, y)
+    loader = DataLoader(dataset)
+
 Sklearn Dataset
 ---------------
 Transforms a sklearn or numpy dataset to a PyTorch Dataset.
