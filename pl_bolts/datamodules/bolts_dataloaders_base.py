@@ -5,6 +5,7 @@ import inspect
 from pytorch_lightning.utilities import rank_zero_warn, parsing
 from torch.utils.data import DataLoader
 from argparse import ArgumentParser, Namespace
+from typing import Union, Optional, List, Dict, Tuple, Iterable, Any
 
 
 class BoltDataModule(object):
@@ -277,3 +278,25 @@ class BoltDataModule(object):
         trainer_kwargs.update(**kwargs)
 
         return cls(**trainer_kwargs)
+
+    @classmethod
+    def get_init_arguments_and_types(cls) -> List[Tuple[str, Tuple, Any]]:
+        r"""Scans the Trainer signature and returns argument names, types and default values.
+
+        Returns:
+            List with tuples of 3 values:
+            (argument name, set with argument types, argument default value).
+        """
+        trainer_default_params = inspect.signature(cls).parameters
+        name_type_default = []
+        for arg in trainer_default_params:
+            arg_type = trainer_default_params[arg].annotation
+            arg_default = trainer_default_params[arg].default
+            try:
+                arg_types = tuple(arg_type.__args__)
+            except AttributeError:
+                arg_types = (arg_type,)
+
+            name_type_default.append((arg, arg_types, arg_default))
+
+        return name_type_default
