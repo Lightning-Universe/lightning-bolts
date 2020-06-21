@@ -68,7 +68,7 @@ class CPCV2(pl.LightningModule):
             trainer = Trainer()
             trainer.fit(model)
 
-        Some uses:
+        Some uses::
 
             # load resnet18 pretrained using CPC on imagenet
             model = CPCV2(pretrained='resnet18')
