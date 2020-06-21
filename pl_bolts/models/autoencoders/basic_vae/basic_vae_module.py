@@ -203,10 +203,15 @@ class VAE(LightningModule):
 if __name__ == '__main__':
     from pl_bolts.datamodules import ImagenetDataModule
     parser = ArgumentParser()
+    parser.add_argument('--dataset', default='mnist', type=str)
     parser = Trainer.add_argparse_args(parser)
     parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    vae = VAE(**vars(args), datamodule=ImagenetDataModule(data_dir=args.data_dir))
+    if args.dataset == 'imagenet':
+        datamodule = ImagenetDataModule(data_dir=args.data_dir)
+    elif args.dataset == 'mnist':
+        datamodule = MNISTDataLoaders(save_path=args.data_dir)
+    vae = VAE(**vars(args))
     trainer = Trainer()
     trainer.fit(vae)
