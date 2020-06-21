@@ -28,6 +28,7 @@ class VAE(LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
+        self.datamodule = datamodule
         if datamodule is None:
             self.datamodule = MNISTDataLoaders(save_path=data_dir)
 
