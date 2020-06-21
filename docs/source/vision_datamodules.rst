@@ -25,6 +25,12 @@ STL-10
 .. autoclass:: pl_bolts.datamodules.stl10_dataloaders.STL10DataLoaders
     :noindex:
 
+Imagenet
+^^^^^^^^
+
+.. autoclass:: pl_bolts.datamodules.imagenet_dataloaders.ImagenetDataModule
+    :noindex:
+
 
 Semi-supervised learning
 ------------------------
