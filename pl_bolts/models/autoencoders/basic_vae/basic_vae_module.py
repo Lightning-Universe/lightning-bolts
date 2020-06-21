@@ -170,6 +170,7 @@ class VAE(LightningModule):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
     def prepare_data(self):
+        import pdb; pdb.set_trace()
         self.datamodule.prepare_data()
 
     def train_dataloader(self):
