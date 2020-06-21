@@ -6,6 +6,42 @@ from torch.utils.data import DataLoader
 
 
 class BoltDataLoaders(object):
+    def __init__(self):
+        """
+        A DataModule standardizes that training, val, test splits, data preparation and transforms.
+        The main advantage is consistent data splits across models.
+
+        A DataModule implements 4 key methods
+
+        The first is `prepare_data`. In Lightning, this method ensures that data processing and downloading
+        only happens on 1 GPU when doing multi-gpu training.
+
+        Prepare Data::
+
+            def prepare_data(self):
+                # download, split, etc...
+
+        The other three methods generate dataloaders for each split of the dataset. Each dataloader is also optimized
+        with best practices of num_workers, pinning, etc.
+
+        Dataloaders::
+
+            def train_dataloader(self):
+                train_split = Dataset(...)
+                return DataLoader(train_split)
+
+            def val_dataloader(self):
+                val_split = Dataset(...)
+                return DataLoader(val_split)
+
+            def test_dataloader(self):
+                test_split = Dataset(...)
+                return DataLoader(test_split)
+
+        Another key problem DataModules solve is that it standardizes transforms (ie: no need to figure out the
+        normalization coefficients for a dataset).
+        """
+        super().__init__()
 
     @abstractmethod
     def prepare_data(self, *args, **kwargs):
