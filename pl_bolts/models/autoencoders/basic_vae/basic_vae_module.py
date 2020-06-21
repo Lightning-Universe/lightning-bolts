@@ -193,6 +193,6 @@ if __name__ == '__main__':
     parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    vae = VAE(**vars(args), datamodule=)
+    vae = VAE(**vars(args), datamodule=ImagenetDataModule)
     trainer = Trainer()
     trainer.fit(vae)
