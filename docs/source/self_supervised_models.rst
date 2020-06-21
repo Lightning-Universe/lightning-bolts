@@ -9,7 +9,11 @@ we implement many of the current state-of-the-art self-supervised algorithms.
 
 Contrastive Learning
 --------------------
-The following models perform contrastive learning.
+Contrastive self-supervised learning (CSL) is a self-supervised learning approach where we generate representations
+of instances such that similar instances are near each other and far from dissimilar ones. This is often done by comparing
+triplets of positive, anchor and negative representations.
+
+In this section, we list Lightning implementations of popular contrastive learning approaches.
 
 AMDIM
 ^^^^^
