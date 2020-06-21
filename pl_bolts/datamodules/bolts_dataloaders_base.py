@@ -47,6 +47,13 @@ class BoltDataModule(object):
         super().__init__()
 
     @abstractmethod
+    def size(self):
+        """
+        Return the dimension of each input
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def prepare_data(self, *args, **kwargs):
         """
         Use this to download and prepare data.

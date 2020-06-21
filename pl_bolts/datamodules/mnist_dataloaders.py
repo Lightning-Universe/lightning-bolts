@@ -75,3 +75,6 @@ class MNISTDataLoaders(BoltDataModule):
             transform_lib.ToTensor()
         ])
         return mnist_transforms
+
+    def size(self):
+        return 1, 28, 28
