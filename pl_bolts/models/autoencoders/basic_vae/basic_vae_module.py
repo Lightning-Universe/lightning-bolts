@@ -212,15 +212,15 @@ if __name__ == '__main__':
 
     if args.dataset == 'imagenet':
         datamodule = ImagenetDataModule.from_argparse_args(args)
-        args.image_width = datamodule.size(1)
-        args.image_height = datamodule.size(2)
-        args.input_channels = datamodule.size(0)
-        
+        args.image_width = datamodule.size()[1]
+        args.image_height = datamodule.size()[2]
+        args.input_channels = datamodule.size()[0]
+
     elif args.dataset == 'mnist':
         datamodule = MNISTDataLoaders.from_argparse_args(args)
-        args.image_width = datamodule.size(1)
-        args.image_height = datamodule.size(2)
-        args.input_channels = datamodule.size(0)
+        args.image_width = datamodule.size()[1]
+        args.image_height = datamodule.size()[2]
+        args.input_channels = datamodule.size()[0]
 
     vae = VAE(**vars(args), datamodule=datamodule)
     trainer = Trainer.from_argparse_args(args)
