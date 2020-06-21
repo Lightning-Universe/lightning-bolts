@@ -18,9 +18,27 @@ Use as a feature extractor
 For certain projects that require an architecture you could use this as
 a module inside the larger system.
 
-.. code-block:: python
+Most models have pretrained weights (usually on Imagenet).
+
+Example::
 
     from pl_bolts.models.autoencoders import VAE
+
+    # feature extractor (pretrained on Imagenet)
+    pretrained_model = VAE(pretrained=True)
+    pretrained_model.freeze()
+
+Or load your own weights after training on your own data
+
+Example::
+
+    from pl_bolts.models.autoencoders import VAE
+    import pytorch_lightning as pl
+
+    # train
+    model = VAE()
+    trainer = pl.Trainer()
+    trainer.fit(model)
 
     # feature extractor
     pretrained_model = VAE.load_from_checkpoint(PATH)
@@ -67,7 +85,7 @@ Use in production or for inference
 ----------------------------------
 For production or predictions, load weights, freeze the model and use as needed.
 
-.. code-block:: python
+Example::
 
     from pl_bolts.models.autoencoders import VAE
 
@@ -92,11 +110,13 @@ Here's an example on how to train this model from scratch
     trainer.fit(vae)
 
 
-Use for research
-----------------
-To use a model for research, modify any relevant part you need.
+Customize any part
+------------------
+To adapt a bolt to research or a new problem, you can change any part of a bolt model.
 
-For example to change the prior and posterior you could do this
+Ex: Changing priors
+^^^^^^^^^^^^^^^^^^^
+You might be interested in changing the prior of a VAE
 
 .. code-block:: python
 
@@ -116,6 +136,8 @@ For example to change the prior and posterior you could do this
             # Q = distributions.normal.Normal(loc=z_mu, scale=z_std)
             return Q
 
+Ex: Changing encoders
+^^^^^^^^^^^^^^^^^^^^^
 To change parts of the model (for instance, the encoder or decoder) you could do this
 
 .. code-block:: python
@@ -132,27 +154,45 @@ To change parts of the model (for instance, the encoder or decoder) you could do
             decoder = MyDecoder(...)
             return decoder
 
+Ex: Changing optimizer
+^^^^^^^^^^^^^^^^^^^^^^
+Every bolt is a Lightning module. This means you can modify anything, even the optimizer used.
 
-Train the model from the command line
---------------------------------------
+Example::
+
+    from pl_bolts.models.autoencoders import VAE
+
+    class MyVAE(VAE):
+
+        def configure_optimizers(self):
+            return ANOptimizer(...), OrASecondOne(...)
+
+Ex: Custom backward pass
+^^^^^^^^^^^^^^^^^^^^^^^^
+Again, just a Lightning Module
+
+Example::
+
+    from pl_bolts.models.self_supervised import CPCV2
+
+    class MyCPC(CPCV2):
+
+        def backward(self):
+            # do something weird
+
+
+Command line support
+--------------------
+Any bolt module can also be trained from the command line
 
 .. code-block:: bash
 
     cd pl_bolts/models/autoencoders/basic_vae
     python basic_vae_pl_module.py
 
-Each script accepts Argparse arguments. For instance, the VAE accepts the following arguments::
+Each script accepts Argparse arguments for both the lightning trainer and the model
 
-    optional arguments:
-    --hidden_dim        if using default encoder/decoder - dimension of itermediate (dense) layers before embedding
-    --latent_dim        dimension of latent variables z
-    --input_width       input image width (must be even) - 28 for MNIST
-    --input_height      input image height (must be even) - 28 for MNIST
-    --batch_size
-
-    any arguments from pl.Trainer - e.g max_epochs, gpus
-
-For example::
+.. code-block:: bash
 
     python basic_vae_pl_module.py --hidden_dim 128 --latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12
 
