@@ -6,7 +6,6 @@ import torchvision
 from pytorch_lightning import LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
-from torchvision.models.utils import load_state_dict_from_url
 
 from pl_bolts.datamodules import MNISTDataLoaders
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
