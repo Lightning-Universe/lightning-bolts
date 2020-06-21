@@ -128,8 +128,10 @@ class CPCV2(pl.LightningModule):
                 n_hidden=1024
             )
 
+    def load_pretrained(self, pretrained):
         available_weights = {'resnet18'}
-        if pretrained is not None and pretrained in available_weights:
+
+        if pretrained in available_weights:
             load_pretrained(self, f'CPCV2-{pretrained}')
         elif available_weights not in available_weights:
             rank_zero_warn(f'{pretrained} not yet available')
