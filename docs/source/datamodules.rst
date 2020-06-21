@@ -27,9 +27,9 @@ Use this to build your own consistent train, validation, test splits.
 
 Example::
 
-    from pl_bolts.datamodules import BoltDataLoaders
+    from pl_bolts.datamodules import BoltDataModule
 
-    class MyDataModule(BoltDataLoaders):
+    class MyDataModule(BoltDataModule):
 
         def __init__(self,...):
 
@@ -71,5 +71,5 @@ Example::
 DataLoaders class
 ^^^^^^^^^^^^^^^^^
 
-.. autoclass:: pl_bolts.datamodules.bolts_dataloaders_base.BoltDataLoaders
+.. autoclass:: pl_bolts.datamodules.bolts_dataloaders_base.BoltDataModule
    :noindex:

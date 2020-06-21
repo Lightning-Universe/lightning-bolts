@@ -5,7 +5,7 @@ from pytorch_lightning.utilities import rank_zero_warn
 from torch.utils.data import DataLoader
 
 
-class BoltDataLoaders(object):
+class BoltDataModule(object):
     def __init__(self):
         """
         A DataModule standardizes that training, val, test splits, data preparation and transforms.
