@@ -28,7 +28,7 @@ class VAE(LightningModule):
         self.save_hyperparameters()
 
         if datamodule is None:
-            self.dataloaders = MNISTDataLoaders(save_path=data_dir)
+            self.datamodule = MNISTDataLoaders(save_path=data_dir)
 
         self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim,
                                          self.hparams.input_width, self.hparams.input_height)
@@ -158,16 +158,16 @@ class VAE(LightningModule):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
     def prepare_data(self):
-        self.dataloaders.prepare_data()
+        self.datamodule.prepare_data()
 
     def train_dataloader(self):
-        return self.dataloaders.train_dataloader(self.hparams.batch_size)
+        return self.datamodule.train_dataloader(self.hparams.batch_size)
 
     def val_dataloader(self):
-        return self.dataloaders.val_dataloader(self.hparams.batch_size)
+        return self.datamodule.val_dataloader(self.hparams.batch_size)
 
     def test_dataloader(self):
-        return self.dataloaders.test_dataloader(self.hparams.batch_size)
+        return self.datamodule.test_dataloader(self.hparams.batch_size)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
