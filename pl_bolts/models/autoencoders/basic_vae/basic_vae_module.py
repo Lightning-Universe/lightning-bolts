@@ -69,7 +69,7 @@ class VAE(LightningModule):
         # Reconstruction loss
         z = Q.rsample()
         pxz = self(z)
-        pxz = F.tanh(pxz)
+        pxz = torch.tanh(pxz)
         recon_loss = F.mse_loss(pxz, x, reduction='none')
 
         # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
