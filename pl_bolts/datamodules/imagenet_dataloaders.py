@@ -154,7 +154,7 @@ class ImagenetDataModule(BoltDataModule):
         .. code-block:: python
 
             transform_lib.Compose([
-                transform_lib.RandomSizedCrop(self.image_size),
+                transform_lib.RandomResizedCrop(self.image_size),
                 transform_lib.RandomHorizontalFlip(),
                 transform_lib.ToTensor(),
                 transform_lib.Normalize(
@@ -165,7 +165,7 @@ class ImagenetDataModule(BoltDataModule):
 
         """
         preprocessing = transform_lib.Compose([
-            transform_lib.RandomSizedCrop(self.image_size),
+            transform_lib.RandomResizedCrop(self.image_size),
             transform_lib.RandomHorizontalFlip(),
             transform_lib.ToTensor(),
             imagenet_normalization(),
@@ -180,7 +180,7 @@ class ImagenetDataModule(BoltDataModule):
         .. code-block:: python
 
             transform_lib.Compose([
-                transform_lib.Scale(self.image_size + 32),
+                transform_lib.Resize(self.image_size + 32),
                 transform_lib.CenterCrop(self.image_size),
                 transform_lib.ToTensor(),
                 transform_lib.Normalize(
@@ -192,7 +192,7 @@ class ImagenetDataModule(BoltDataModule):
         """
 
         preprocessing = transform_lib.Compose([
-            transform_lib.Scale(self.image_size + 32),
+            transform_lib.Resize(self.image_size + 32),
             transform_lib.CenterCrop(self.image_size),
             transform_lib.ToTensor(),
             imagenet_normalization(),
