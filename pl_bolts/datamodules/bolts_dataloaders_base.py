@@ -214,7 +214,7 @@ class BoltDataModule(object):
         parser = ArgumentParser(parents=[parent_parser], add_help=False, )
 
         blacklist = ['kwargs']
-        depr_arg_names = cls.get_deprecated_arg_names() + blacklist
+        depr_arg_names = blacklist
 
         allowed_types = (str, float, int, bool)
 
