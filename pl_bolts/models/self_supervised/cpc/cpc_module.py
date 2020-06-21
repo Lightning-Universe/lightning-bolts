@@ -80,7 +80,7 @@ class CPCV2(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.online_evaluator = self.hparams.online_ft
+        self.online_evaluator = self.online_ft
         self.dataset = self.get_dataset(self.hparams.dataset)
 
         # init encoder

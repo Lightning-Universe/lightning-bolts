@@ -86,6 +86,7 @@ class SimCLR(pl.LightningModule):
         """
         super().__init__()
         self.save_hyperparameters()
+        self.online_evaluator = online_ft
 
         self.dataset = self.get_dataset(dataset)
         self.loss_func = self.init_loss()
@@ -113,11 +114,11 @@ class SimCLR(pl.LightningModule):
 
     def get_dataset(self, name):
         if name == 'cifar10':
-            return CIFAR10DataLoaders(self.data_dir, num_workers=self.num_workers)
+            return CIFAR10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'stl10':
-            return STL10DataLoaders(self.data_dir, num_workers=self.num_workers)
+            return STL10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'imagenet128':
-            return SSLImagenetDataLoaders(self.data_dir, num_workers=self.num_workers)
+            return SSLImagenetDataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         else:
             raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
                                     f'your own \'')
@@ -128,7 +129,7 @@ class SimCLR(pl.LightningModule):
         return h, z
 
     def training_step(self, batch, batch_idx):
-        if self.dataset_name == 'stl10':
+        if self.hparams.dataset == 'stl10':
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -143,7 +144,7 @@ class SimCLR(pl.LightningModule):
 
         # don't use the training signal, just finetune the MLP to see how we're doing downstream
         if self.online_evaluator:
-            if self.dataset_name == 'stl10':
+            if self.hparams.dataset == 'stl10':
                 (img_1, img_2), y = labeled_batch
 
             with torch.no_grad():
@@ -174,7 +175,7 @@ class SimCLR(pl.LightningModule):
     #     print(f'Rank = {rank}', [z2.shape for z2 in z2s])
 
     def validation_step(self, batch, batch_idx):
-        if self.dataset_name == 'stl10':
+        if self.hparams.dataset == 'stl10':
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -182,11 +183,11 @@ class SimCLR(pl.LightningModule):
         (img_1, img_2), y = batch
         h1, z1 = self.forward(img_1)
         h2, z2 = self.forward(img_2)
-        loss = self.loss_func(z1, z2, self.temp)
+        loss = self.loss_func(z1, z2, self.hparams.temp)
         result = {'val_loss': loss}
 
         if self.online_evaluator:
-            if self.dataset_name == 'stl10':
+            if self.hparams.dataset == 'stl10':
                 (img_1, img_2), y = labeled_batch
                 h1, z1 = self.forward(img_1)
 
@@ -220,28 +221,28 @@ class SimCLR(pl.LightningModule):
         self.dataset.prepare_data()
 
     def train_dataloader(self):
-        train_transform = SimCLRDataTransform(input_height=self.input_height)
+        train_transform = SimCLRDataTransform(input_height=self.hparams.input_height)
 
-        if self.dataset_name == 'stl10':
+        if self.hparams.dataset == 'stl10':
             loader = self.dataset.train_dataloader_mixed(self.hparams.batch_size, transforms=train_transform)
         else:
             loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
 
     def val_dataloader(self):
-        test_transform = SimCLRDataTransform(input_height=self.input_height, test=True)
+        test_transform = SimCLRDataTransform(input_height=self.hparams.input_height, test=True)
 
-        if self.dataset_name == 'stl10':
+        if self.hparams.dataset == 'stl10':
             loader = self.dataset.val_dataloader_mixed(self.hparams.batch_size, transforms=test_transform)
         else:
             loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
         return loader
 
     def configure_optimizers(self):
-        if self.optimizer == 'adam':
+        if self.hparams.optimizer == 'adam':
             optimizer = torch.optim.Adam(
                 self.parameters(), self.hparams.learning_rate, weight_decay=self.hparams.wd)
-        elif self.optimizer == 'lars':
+        elif self.hparams.optimizer == 'lars':
             optimizer = LARS(
                 self.parameters(), lr=self.hparams.learning_rate, momentum=self.hparams.mom,
                 weight_decay=self.hparams.wd, eta=self.hparams.eta)
@@ -265,8 +266,7 @@ class SimCLR(pl.LightningModule):
         parser.add_argument('--data_dir', type=str, default='.')
 
         # Training
-        parser.add_argument('--expdir', type=str, default='simclrlogs')
-        parser.add_argument('--optim', choices=['adam', 'lars'], default='lars')
+        parser.add_argument('--optimizer', choices=['adam', 'lars'], default='lars')
         parser.add_argument('--batch_size', type=int, default=128)
         parser.add_argument('--learning_rate', type=float, default=0.00006)
         parser.add_argument('--mom', type=float, default=0.9)
@@ -277,7 +277,7 @@ class SimCLR(pl.LightningModule):
         # Model
         parser.add_argument('--temp', type=float, default=0.5)
         parser.add_argument('--trans', type=str, default='randcrop,flip')
-        parser.add_argument('--num_workers', default=8, type=int)
+        parser.add_argument('--num_workers', default=0, type=int)
         return parser
 
 
