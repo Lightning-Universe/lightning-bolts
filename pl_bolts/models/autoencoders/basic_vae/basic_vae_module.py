@@ -30,17 +30,28 @@ class VAE(LightningModule):
         if datamodule is None:
             self.datamodule = MNISTDataLoaders(save_path=data_dir)
 
-        self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim,
-                                         self.hparams.input_width, self.hparams.input_height)
-        self.decoder = self.init_decoder(self.hparams.hidden_dim, self.hparams.latent_dim,
-                                         self.hparams.input_width, self.hparams.input_height)
+        self.encoder = self.init_encoder()
+        self.decoder = self.init_decoder()
 
-    def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
-        encoder = Encoder(hidden_dim, latent_dim, input_width, input_height, input_channels)
+    def init_encoder(self):
+        encoder = Encoder(
+            self.hparams.hidden_dim,
+            self.hparams.latent_dim,
+            self.hparams.input_channels,
+            self.hparams.input_width,
+            self.hparams.input_height
+        )
         return encoder
 
-    def init_decoder(self, hidden_dim, latent_dim, input_width, input_height):
-        decoder = Decoder(hidden_dim, latent_dim, input_width, input_height)
+    def init_decoder(self):
+        decoder = Decoder(
+            self.hparams.hidden_dim,
+            self.hparams.latent_dim,
+            self.hparams.output_channels,
+            self.hparams.input_width,
+            self.hparams.input_height,
+            self.hparams.input_channels
+        )
         return decoder
 
     def get_prior(self, z_mu, z_std):
