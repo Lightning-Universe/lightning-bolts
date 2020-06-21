@@ -67,6 +67,20 @@ class CPCV2(pl.LightningModule):
             trainer = Trainer()
             trainer.fit(model)
 
+        Some uses:
+
+            # load resnet18 pretrained using CPC on imagenet
+            model = CPCV2(pretrained='resnet18')
+            resnet18 = model.encoder
+            renset18.freeze()
+
+            # it supportes any torchvision resnet
+            model = CPCV2(pretrained='resnet50')
+
+            # use it as a feature extractor
+            x = torch.rand(2, 3, 224, 224)
+            out = model(x)
+
         Args:
             encoder: A string for any of the resnets in torchvision, or the original CPC encoder, or a custon nn.Module encoder
             patch_size: How big to make the image patches
