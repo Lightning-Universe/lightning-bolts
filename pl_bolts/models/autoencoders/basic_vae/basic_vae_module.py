@@ -212,6 +212,6 @@ if __name__ == '__main__':
         datamodule = ImagenetDataModule(data_dir=args.data_dir)
     elif args.dataset == 'mnist':
         datamodule = MNISTDataLoaders(save_path=args.data_dir)
-    vae = VAE(**vars(args))
+    vae = VAE(**vars(args), datamodule=datamodule)
     trainer = Trainer()
     trainer.fit(vae)
