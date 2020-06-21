@@ -170,7 +170,6 @@ class VAE(LightningModule):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
     def prepare_data(self):
-        import pdb; pdb.set_trace()
         self.datamodule.prepare_data()
 
     def train_dataloader(self):
@@ -208,6 +207,6 @@ if __name__ == '__main__':
     parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    vae = VAE(**vars(args), datamodule=ImagenetDataModule)
+    vae = VAE(**vars(args), datamodule=ImagenetDataModule(data_dir=args.data_dir))
     trainer = Trainer()
     trainer.fit(vae)
