@@ -28,15 +28,15 @@ Or build your own torch datasets
     dataset = SklearnDataset(X, y)
     loader = DataLoader(dataset)
 
-Sklearn Dataset
----------------
+Sklearn Dataset Class
+---------------------
 Transforms a sklearn or numpy dataset to a PyTorch Dataset.
 
 .. autoclass:: pl_bolts.datamodules.sklearn_dataloaders.SklearnDataset
    :noindex:
 
-Sklearn DataLoaders
--------------------
+Sklearn DataModule Class
+------------------------
 Automatically generates the train, validation and test splits for a Numpy dataset.
 They are set up as dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
 
