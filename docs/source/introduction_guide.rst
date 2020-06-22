@@ -151,8 +151,14 @@ Callbacks
 ---------
 Bolts houses a collection of callbacks that are community contributed and can work in any Lightning Module!
 
---------------
+.. code-block:: python
 
+    from pl_bolts.callbacks import PrintTableMetricsCallback
+    import pytorch_lightning as pl
+
+    trainer = pl.Trainer(callbacks=[PrintTableMetricsCallback()])
+
+--------------
 
 DataModules
 -----------
