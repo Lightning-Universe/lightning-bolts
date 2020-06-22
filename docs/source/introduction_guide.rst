@@ -1,6 +1,14 @@
 Introduction Guide
 ==================
-Welcome to bolts!
+Welcome to bolts - The community collection of Lightning models, callbacks and modules which can be "bolted" onto
+PyTorch projects.
+
+Contributed bolts that you add are:
+
+    1. Tested
+    2. Standardized
+    3. Documented
+    4. Well maintained
 
 -------------
 
