@@ -1,4 +1,4 @@
-from pl_bolts.datamodules.sklearn_datalomodule import SklearnDataModule
+from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 from tests import reset_seed
 from sklearn.utils import shuffle as sk_shuffle
 import numpy as np
