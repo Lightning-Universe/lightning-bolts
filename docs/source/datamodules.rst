@@ -5,10 +5,10 @@ Bolts Datamodules
 =================
 Datasets in PyTorch, Lightning and general Deep learning research have 4 main parts:
 
-1. A train split + dataloader
-2. A val split + dataloader
-3. A test split + dataloader
-4. A step to download, split, etc...
+    1. A train split + dataloader
+    2. A val split + dataloader
+    3. A test split + dataloader
+    4. A step to download, split, etc...
 
 Step 4, also needs special care to make sure that it's only done on 1 GPU in a multi-GPU set-up.
 In addition, there are other challenges such as models that are built using information from the dataset
@@ -49,7 +49,7 @@ And they can be used in lightning modules
         def test_dataloader(self)
             return self.datamodule.test_dataloader()
 
-The advantage is that you can parametrize the data of your LightningModule
+An advantage is that you can parametrize the data of your LightningModule
 
 .. code-block:: python
 
@@ -73,8 +73,8 @@ DataModule Advantages
 ---------------------
 Datamodules have two advantages:
 
-1. You can guarantee that the exact same train, val and test splits can be used across models.
-2. You can parameterize your model to be dataset agnostic.
+    1. You can guarantee that the exact same train, val and test splits can be used across models.
+    2. You can parameterize your model to be dataset agnostic.
 
 Example::
 
