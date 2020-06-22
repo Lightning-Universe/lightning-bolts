@@ -46,7 +46,8 @@ def dicts_to_table(dicts: List[Dict],
 
     Args:
         dicts: input dictionary list; empty lists make keys OR header_names mandatory
-        keys: order list of keys to generate columns for; no key/dict-key should suffix with '____' else adjust code-suffix
+        keys: order list of keys to generate columns for; no key/dict-key should
+            suffix with '____' else adjust code-suffix
         pads: indicate padding direction and size, eg <10 to right pad alias left-align
         fcodes: formating codes for respective column type, eg .3f
         convert_headers: apply converters(dict) on column keys k, eg timestamps
