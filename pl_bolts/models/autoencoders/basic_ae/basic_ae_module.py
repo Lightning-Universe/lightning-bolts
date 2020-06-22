@@ -16,6 +16,7 @@ class AE(LightningModule):
             self,
             hidden_dim=128,
             latent_dim=32,
+            input_channels=1,
             input_width=28,
             input_height=28,
             batch_size=32,
@@ -27,18 +28,19 @@ class AE(LightningModule):
         self.save_hyperparameters()
 
         self.dataloaders = MNISTDataLoaders(data_dir=data_dir)
+        self.img_dim = self.dataloaders.size()
 
         self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim,
                                          self.hparams.input_width, self.hparams.input_height)
-        self.decoder = self.init_decoder(self.hparams.hidden_dim, self.hparams.latent_dim,
-                                         self.hparams.input_width, self.hparams.input_height)
+        self.decoder = self.init_decoder(self.hparams.hidden_dim, self.hparams.latent_dim)
 
     def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
         encoder = AEEncoder(hidden_dim, latent_dim, input_width, input_height)
         return encoder
 
-    def init_decoder(self, hidden_dim, latent_dim, input_width, input_height):
-        decoder = Decoder(hidden_dim, latent_dim, input_width, input_height)
+    def init_decoder(self, hidden_dim, latent_dim):
+        c, h, w = self.img_dim
+        decoder = Decoder(hidden_dim, latent_dim, w, h, c)
         return decoder
 
     def forward(self, z):
