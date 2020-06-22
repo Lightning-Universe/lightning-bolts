@@ -3,12 +3,15 @@ Introduction Guide
 Welcome to bolts - The community collection of Lightning models, callbacks and modules which can be "bolted" onto
 PyTorch projects.
 
-Contributed bolts that you add are:
+Bolts are built by, and added by the community. But unlike repos with one-off models,
+the lightning team guarantees that bolts are:
 
 1. Tested
 2. Standardized
 3. Documented
-4. Well maintained
+4. Curated
+5. Well maintained
+6. Checked for correctness
 
 -------------
 
@@ -16,9 +19,9 @@ What is it?
 -----------
 Lightning Bolts is a collection of Models, Callbacks and other goodies implemented in PyTorch Lightning.
 
-Bolts models are designed to bootstrap research or to be used in production. Here are ways in which bolts can be used
+Bolts are designed to bootstrap research or to be used in production. Here are ways in which bolts can be used
 
-1. As a feature extractor for production and research systems.
+**As a feature extractor for production and research systems.**
 
 .. code-block:: python
 
@@ -28,7 +31,7 @@ Bolts models are designed to bootstrap research or to be used in production. Her
     pretrained_model = VAE(pretrained='imagenet')
     pretrained_model.freeze()
 
-2. Subclass and override to try new research ideas.
+**Subclass and override to try new research ideas.**
 
 .. code-block:: python
 
@@ -54,7 +57,7 @@ Bolts models are designed to bootstrap research or to be used in production. Her
             # maybe try a different generator step?
 
 
-3. Fully pre-built models that can be fine-tuned on your data.
+**Fully pre-built models that can be FINE-TUNED on your data**
 
 .. code-block:: python
 
@@ -65,7 +68,7 @@ Bolts models are designed to bootstrap research or to be used in production. Her
     resnet18 = cpc_model.encoder
     resnet18.freeze()
 
-4. Fully contained algorithms that can be trained on your data.
+**Fully contained algorithms that can be TRAINED on your data from scratch**
 
 .. code-block:: python
 
@@ -78,7 +81,7 @@ Bolts models are designed to bootstrap research or to be used in production. Her
     trainer = Trainer()
     trainer.fit(model, train_data, val_data)
 
-5. Fully compatible with GPUs, TPUs, 16-bit precision, etc because of PyTorch Lightning.
+**Fully compatible with GPUs, TPUs, 16-bit precision, etc because of PyTorch Lightning**
 
 .. code-block:: python
 
@@ -90,13 +93,13 @@ Bolts models are designed to bootstrap research or to be used in production. Her
     trainer = Trainer(tpu_cores=8)
     trainer.fit(model)
 
-6. Can be used as a stand-alone `torch.nn.Module`.
+**Can be used as a stand-alone `torch.nn.Module`**
 
 .. code-block:: python
 
     model = SimCLR()
 
-7. Or use the other parts of the library in your code
+**Or use the other parts of the library in your code**
 
 .. code-block:: python
 
@@ -104,7 +107,7 @@ Bolts models are designed to bootstrap research or to be used in production. Her
 
     trainer = pl.Trainer(callbacks=[PrintTableMetricsCallback()])
 
-Or even individual components from models
+**Or even individual components from models**
 
 ..code-block:: python
 
