@@ -28,12 +28,16 @@ Or build your own torch datasets
     dataset = SklearnDataset(X, y)
     loader = DataLoader(dataset)
 
+----------------
+
 Sklearn Dataset Class
 ---------------------
 Transforms a sklearn or numpy dataset to a PyTorch Dataset.
 
 .. autoclass:: pl_bolts.datamodules.sklearn_dataloaders.SklearnDataset
    :noindex:
+
+----------------
 
 Sklearn DataModule Class
 ------------------------
