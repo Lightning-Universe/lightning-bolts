@@ -82,6 +82,47 @@ Bolts models are designed to bootstrap research or to be used in production. Her
 
     model = SimCLR()
 
+7. Or use the other parts of the library in your code
+
+.. code-block:: python
+
+    from pl_bolts.callbacks import PrintTableMetricsCallback
+
+    trainer = pl.Trainer(callbacks=[PrintTableMetricsCallback()])
+
+Or even individual components from models
+
+..code-block python
+
+    from pl_bolts.models.autoencoders.basic_ae import AEEncoder
+    from pl_bolts.models.autoencoders.basic_vae import Decoder, Encoder
+    from pl_bolts.models.self_supervised.cpc import CPCResNet101, CPCTransformsCIFAR10, CPCTransformsImageNet128Patches
+
+--------------------
+
+Modularity
+----------
+Bolt models and components are built in such a way that each part of the model can be used independently in other
+systems. For instance, in the CPC bolt, that system has a special loss function, custom encoders, and even transforms.
+
+If you want to build an extension of that work or use elements from it, just import what you need.
+
+For example, you can just train the full system
+
+.. code-block:: python
+
+    from pl_bolts.models.self_supervised.cpc import CPCV2
+
+    # use as is
+    model = CPCV2()
+
+Or use the encoders and transforms from CPC in another system
+
+.. code-block:: python
+
+    from pl_bolts.models.self_supervised.cpc import CPCResNet101, CPCTransformsCIFAR10
+
+
 --------------------
 
 Use as a feature extractor

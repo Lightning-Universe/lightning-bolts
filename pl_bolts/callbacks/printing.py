@@ -12,7 +12,15 @@ class PrintTableMetricsCallback(Callback):
 
         Example::
 
-            trainer = pl.Trainer(callbacks=[PrintTableMetricsCallback()])
+            from pl_bolts.callbacks import PrintTableMetricsCallback
+
+            callback = PrintTableMetricsCallback()
+
+        pass into trainer like so:
+
+        .. code-block:: python
+
+            trainer = pl.Trainer(callbacks=[callback])
             trainer.fit(...)
 
             # ------------------------------

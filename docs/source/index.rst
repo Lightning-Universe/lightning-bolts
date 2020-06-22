@@ -18,6 +18,7 @@ PyTorchLightning-Bolts documentation
    :caption: Callbacks
 
    callbacks
+   info_callbacks
 
 .. toctree::
    :maxdepth: 2

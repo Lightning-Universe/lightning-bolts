@@ -15,3 +15,4 @@ The default encoder and decoder are both convolutional with a 128-dimensional hi
  if you want to use the default encoder + decoder but with different hidden layer and latent layer dimensions.
  The model also assumes a Gaussian prior and a Gaussian approximate posterior distribution.
 """
+from pl_bolts.models.autoencoders.basic_vae.components import Decoder, Encoder
