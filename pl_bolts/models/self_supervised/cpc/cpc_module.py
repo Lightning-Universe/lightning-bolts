@@ -33,7 +33,7 @@ __all__ = [
 class CPCV2(pl.LightningModule):
 
     def __init__(self,
-                 encoder: Union[str, torch.nn.Module, pl.LightningModule] ='cpc_encoder',
+                 encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'cpc_encoder',
                  patch_size: int = 8,
                  patch_overlap: int = 4,
                  online_ft: int = True,
@@ -48,9 +48,11 @@ class CPCV2(pl.LightningModule):
                  pretrained: str = None,
                  **kwargs):
         """
-        PyTorch Lightning implementation of `Data-Efficient Image Recognition with Contrastive Predictive Coding <https://arxiv.org/abs/1905.09272>`_
+        PyTorch Lightning implementation of `Data-Efficient Image Recognition with Contrastive Predictive Coding
+        <https://arxiv.org/abs/1905.09272>`_
 
-        Paper authors: (Olivier J. Hénaff, Aravind Srinivas, Jeffrey De Fauw, Ali Razavi, Carl Doersch, S. M. Ali Eslami, Aaron van den Oord).
+        Paper authors: (Olivier J. Hénaff, Aravind Srinivas, Jeffrey De Fauw, Ali Razavi,
+        Carl Doersch, S. M. Ali Eslami, Aaron van den Oord).
 
         Model implemented by:
 
@@ -83,7 +85,8 @@ class CPCV2(pl.LightningModule):
             out = model(x)
 
         Args:
-            encoder: A string for any of the resnets in torchvision, or the original CPC encoder, or a custon nn.Module encoder
+            encoder: A string for any of the resnets in torchvision, or the original CPC encoder,
+                or a custon nn.Module encoder
             patch_size: How big to make the image patches
             patch_overlap: How much overlap should each patch have.
             online_ft: Enable a 1024-unit MLP to fine-tune online
