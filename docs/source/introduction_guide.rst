@@ -92,7 +92,7 @@ Bolts models are designed to bootstrap research or to be used in production. Her
 
 Or even individual components from models
 
-..code-block python
+..code-block:: python
 
     from pl_bolts.models.autoencoders.basic_ae import AEEncoder
     from pl_bolts.models.autoencoders.basic_vae import Decoder, Encoder
@@ -125,8 +125,11 @@ Or use the encoders and transforms from CPC in another system
 
 --------------------
 
+Models
+------
+
 Use as a feature extractor
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 For certain projects that require an architecture you could use this as
 a module inside the larger system.
 
@@ -171,7 +174,7 @@ Example::
 ----------------
 
 Use for fine-tuning
--------------------
+^^^^^^^^^^^^^^^^^^^
 Can fine-tune on your own data. Either for stand-alone PyTorch
 
 Example::
@@ -208,8 +211,8 @@ Example::
 
 ----------------
 
-Use in production or for inference
-----------------------------------
+Production or for inference
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 For production or predictions, load weights, freeze the model and use as needed.
 
 Example::
@@ -222,10 +225,8 @@ Example::
     z = ... # z ~ N(0, 1)
     predictions = vae(z)
 
-----------------
-
 Train from scratch
-------------------
+^^^^^^^^^^^^^^^^^^
 Here's an example on how to train this model from scratch
 
 .. code-block:: python
@@ -239,8 +240,8 @@ Here's an example on how to train this model from scratch
 
 ----------------
 
-Customize any part
-------------------
+Research
+--------
 To adapt a bolt to research or a new problem, you can change any part of a bolt model.
 
 Ex: Changing priors
