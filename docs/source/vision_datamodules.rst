@@ -2,6 +2,8 @@ Vision DataModules
 ==================
 The following are pre-built datamodules.
 
+-------------
+
 Supervised learning
 --------------------
 These are standard vision datasets with the train, test, val splits pre-generated in DataLoaders with
@@ -31,6 +33,7 @@ Imagenet
 .. autoclass:: pl_bolts.datamodules.imagenet_dataloaders.ImagenetDataModule
     :noindex:
 
+------------
 
 Semi-supervised learning
 ------------------------
