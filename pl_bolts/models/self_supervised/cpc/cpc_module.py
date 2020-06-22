@@ -156,9 +156,11 @@ class CPCV2(pl.LightningModule):
         elif name == 'stl10':
             return STL10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'imagenet2012':
-            return SSLImagenetDataModule(self.hparams.data_dir,
-                                          meta_root=self.hparams.meta_root,
-                                          num_workers=self.hparams.num_workers)
+            return SSLImagenetDataModule(
+                self.hparams.data_dir,
+                meta_root=self.hparams.meta_root,
+                num_workers=self.hparams.num_workers
+            )
         else:
             raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
                                     f'your own \'')
