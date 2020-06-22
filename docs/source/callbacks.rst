@@ -16,15 +16,17 @@ This module houses a collection of callbacks that can be passed into the trainer
     # ──────────────────────────────
     # 2.2541470527648926│2.2541470527648926│2.2158432006835938│0
 
-Info callbacks
---------------
-These callbacks give all sorts of useful information during training.
+Create a Callback
+-----------------
+Creating a callback is simple:
 
+.. code-block:: python
 
-PrintTableMetricsCallback
-^^^^^^^^^^^^^^^^^^^^^^^^^
-This callbacks prints training metrics to a table.
-It's very bare-bones for speed purposes.
+    from pytorch_lightning.callbacks import Callback
 
-.. autoclass:: pl_bolts.callbacks.printing.PrintTableMetricsCallback
-   :noindex:
+    class MyCallback(Callback)
+        def on_epoch_end(self, trainer, pl_module):
+            # do something
+
+Please refer to `Callback docs <https://pytorch-lightning.readthedocs.io/en/stable/callbacks.html#callback-base>`_
+for a full list of the 20+ hooks available.
