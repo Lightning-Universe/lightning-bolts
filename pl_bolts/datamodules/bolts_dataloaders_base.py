@@ -50,6 +50,11 @@ class LightningDataModule(object):
         """
         Return the dimension of each input
         Either as a tuple or list of tuples
+
+        Return:
+
+            (1, 28, 28)
+
         """
         raise NotImplementedError
 
