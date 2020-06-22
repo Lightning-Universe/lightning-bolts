@@ -6,6 +6,7 @@ Info Callbacks
 
 These callbacks give all sorts of useful information during training.
 
+---------------
 
 Print Table Metrics
 -------------------

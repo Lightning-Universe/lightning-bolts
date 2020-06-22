@@ -16,6 +16,8 @@ This module houses a collection of callbacks that can be passed into the trainer
     # ──────────────────────────────
     # 2.2541470527648926│2.2541470527648926│2.2158432006835938│0
 
+---------------
+
 Create a Callback
 -----------------
 Creating a callback is simple:
