@@ -109,7 +109,7 @@ If you want to build an extension of that work or use elements from it, just imp
 
 For example, you can just train the full system
 
-.. code-block python
+.. code-block:: python
 
     from pl_bolts.models.self_supervised.cpc import CPCV2
 
