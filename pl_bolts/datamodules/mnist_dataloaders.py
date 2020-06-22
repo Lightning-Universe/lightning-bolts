@@ -9,6 +9,28 @@ from pl_bolts.datamodules.bolts_dataloaders_base import LightningDataModule
 class MNISTDataModule(LightningDataModule):
 
     def __init__(self, data_dir: str = os.getcwd(), val_split: int = 5000, num_workers: int = 16):
+        """
+        Standard MNIST, train, val, test splits and transforms
+
+        Transforms::
+
+            mnist_transforms = transform_lib.Compose([
+                transform_lib.ToTensor()
+            ])
+
+        Args:
+            data_dir: where to save/load the data
+            val_split: how many of the training images to use for the validation split
+            num_workers: how many workers to use for loading data
+
+        Example::
+
+            from pl_bolts.datamodules import MNISTDataModule
+
+            dm = MNISTDataModule()
+            model = LitModel(datamodule=dm)
+
+        """
         super().__init__()
         self.data_dir = data_dir
         self.val_split = val_split
