@@ -2,7 +2,7 @@ from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
 from torchvision.datasets import STL10
 
-from pl_bolts.datamodules.bolts_dataloaders_base import LightningDataModule
+from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 from pl_bolts.datamodules.concat_dataset import ConcatDataset
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 

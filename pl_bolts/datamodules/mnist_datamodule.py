@@ -3,7 +3,7 @@ from torchvision import transforms as transform_lib
 from torchvision.datasets import MNIST
 import os
 
-from pl_bolts.datamodules.bolts_dataloaders_base import LightningDataModule
+from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 
 
 class MNISTDataModule(LightningDataModule):

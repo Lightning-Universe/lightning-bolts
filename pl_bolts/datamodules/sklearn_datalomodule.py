@@ -1,4 +1,4 @@
-from pl_bolts.datamodules.bolts_dataloaders_base import LightningDataModule
+from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 from torch.utils.data import Dataset, DataLoader
 from sklearn.utils import shuffle as sk_shuffle
 import math
