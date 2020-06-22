@@ -1,6 +1,6 @@
 Vision DataModules
 ==================
-The following are pre-built datamodules
+The following are pre-built datamodules.
 
 Supervised learning
 --------------------

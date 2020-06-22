@@ -3,8 +3,74 @@
 
 Bolts Datamodules
 =================
-Class for standardizing the prepare_data, train, validation and test dataloaders for a dataset.
+Datasets in PyTorch, Lightning and general Deep learning research have 4 main parts:
 
+1. A train split + dataloader
+2. A val split + dataloader
+3. A test split + dataloader
+4. A step to download, split, etc...
+
+Step 4, also needs special care to make sure that it's only done on 1 GPU in a multi-GPU set-up.
+In addition, there are other challenges such as models that are built using information from the dataset
+such as needing to know image dimensions or number of classes.
+
+A datamodule simplifies all of these parts and integrates seamlessly into Lightning.
+
+.. code-block:: python
+
+    from pl_bolts.datamodules import MNISTDataLoaders, CIFAR10DataLoaders
+
+
+    datamodule = CIFAR10DataLoaders()
+    train_loader = datamodule.train_dataloader()
+    val_loader = datamodule.train_dataloader()
+    test_loader = datamodule.train_dataloader()
+
+And they can be used in lightning modules
+
+.. code-block:: python
+
+    class LitModel(pl.LightningModule):
+
+        def __init__(self, datamodule):
+            c, w, h = datamodule.size()
+            self.l1 = nn.Linear(128, datamodule.num_classes)
+            self.datamodule = datamodule
+
+        def prepare_data(self):
+            self.datamodule.prepare_data()
+
+        def train_dataloader(self)
+            return self.datamodule.train_dataloader()
+
+        def val_dataloader(self)
+            return self.datamodule.val_dataloader()
+
+        def test_dataloader(self)
+            return self.datamodule.test_dataloader()
+
+The advantage is that you can parametrize the data of your LightningModule
+
+.. code-block:: python
+
+    model = LitModel(datamodule=CIFAR10DataLoaders())
+    model = LitModel(datamodule=ImagenetDataLoaders())
+
+Or even bridge between SKLearn or numpy datasets
+
+.. code-block:: python
+
+    from sklearn.datasets import load_boston
+    from pl_bolts.datamodules import SklearnDataLoaders
+
+    X, y = load_boston(return_X_y=True)
+    datamodule = SklearnDataLoaders(X, y)
+
+    model = LitModel(datamodule)
+
+
+DataModule Advantages
+---------------------
 Datamodules have two advantages:
 
 1. You can guarantee that the exact same train, val and test splits can be used across models.
