@@ -12,25 +12,25 @@ the standard transforms (and Normalization) values
 MNIST
 ^^^^^
 
-.. autoclass:: pl_bolts.datamodules.mnist_dataloaders.MNISTDataModule
+.. autoclass:: pl_bolts.datamodules.mnist_datamodule.MNISTDataModule
     :noindex:
 
 CIFAR-10
 ^^^^^^^^
 
-.. autoclass:: pl_bolts.datamodules.cifar10_dataloaders.CIFAR10DataModule
+.. autoclass:: pl_bolts.datamodules.cifar10_datamodule.CIFAR10DataModule
     :noindex:
 
 STL-10
 ^^^^^^
 
-.. autoclass:: pl_bolts.datamodules.stl10_dataloaders.STL10DataModule
+.. autoclass:: pl_bolts.datamodules.stl10_datamodule.STL10DataModule
     :noindex:
 
 Imagenet
 ^^^^^^^^
 
-.. autoclass:: pl_bolts.datamodules.imagenet_dataloaders.ImagenetDataModule
+.. autoclass:: pl_bolts.datamodules.imagenet_datamodule.ImagenetDataModule
     :noindex:
 
 ------------
@@ -43,5 +43,5 @@ are labeled.
 Imagenet (ssl)
 ^^^^^^^^^^^^^^
 
-.. autoclass:: pl_bolts.datamodules.ssl_imagenet_dataloaders.SSLImagenetDataModule
+.. autoclass:: pl_bolts.datamodules.ssl_imagenet_datamodule.SSLImagenetDataModule
     :noindex:
