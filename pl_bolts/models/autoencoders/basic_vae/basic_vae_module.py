@@ -55,7 +55,7 @@ class VAE(LightningModule):
             batch_size: the batch size
             learning_rate" the learning rate
             data_dir: the directory to store data
-            datamodule: The bolts DataModule
+            datamodule: The Lightning DataModule
             pretrained: Load weights pretrained on a dataset
         """
         super().__init__()

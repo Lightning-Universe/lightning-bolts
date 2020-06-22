@@ -1,7 +1,7 @@
 .. role:: hidden
     :class: hidden-section
 
-Bolts DataModule
+Lightning DataModule
 ================
 Datasets in PyTorch, Lightning and general Deep learning research have 4 main parts:
 
