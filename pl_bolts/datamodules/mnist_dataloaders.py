@@ -44,6 +44,11 @@ class MNISTDataModule(LightningDataModule):
         return 10
 
     def size(self):
+        """
+        Return:
+
+            (1, 28, 28)
+        """
         return 1, 28, 28
 
     def prepare_data(self):
