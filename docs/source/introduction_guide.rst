@@ -109,7 +109,7 @@ Bolts are designed to bootstrap research or to be used in production. Here are w
 
 **Or even individual components from models**
 
-..code-block:: python
+.. code-block:: python
 
     from pl_bolts.models.autoencoders.basic_ae import AEEncoder
     from pl_bolts.models.autoencoders.basic_vae import Decoder, Encoder
