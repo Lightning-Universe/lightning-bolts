@@ -85,7 +85,7 @@ class Moco2STL10Transforms:
         return q, k
 
 
-class Moco2Imagenet128Transforms:
+class Moco2ImagenetTransforms:
     """
     Moco 2 augmentation:
     https://arxiv.org/pdf/2003.04297.pdf
