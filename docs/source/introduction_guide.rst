@@ -378,6 +378,8 @@ Even more simple models like VAEs
     pretrained_model = VAE(pretrained='imagenet')
     pretrained_model.freeze()
 
+----------------
+
 Regression Heroes
 -----------------
 In case your job or research doesn't need a "hammer", we offer implementations of Classic ML models
