@@ -134,8 +134,8 @@ Example::
             return self.dm.test_dataloader()
 
 
-DataLoaders class
-^^^^^^^^^^^^^^^^^
+DataModule class
+^^^^^^^^^^^^^^^^
 
 .. autoclass:: pl_bolts.datamodules.bolts_dataloaders_base.BoltDataModule
    :noindex:
