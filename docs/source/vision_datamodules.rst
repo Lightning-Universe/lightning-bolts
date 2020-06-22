@@ -21,11 +21,6 @@ CIFAR-10
 .. autoclass:: pl_bolts.datamodules.cifar10_datamodule.CIFAR10DataModule
     :noindex:
 
-STL-10
-^^^^^^
-
-.. autoclass:: pl_bolts.datamodules.stl10_datamodule.STL10DataModule
-    :noindex:
 
 Imagenet
 ^^^^^^^^
@@ -44,4 +39,10 @@ Imagenet (ssl)
 ^^^^^^^^^^^^^^
 
 .. autoclass:: pl_bolts.datamodules.ssl_imagenet_datamodule.SSLImagenetDataModule
+    :noindex:
+
+STL-10
+^^^^^^
+
+.. autoclass:: pl_bolts.datamodules.stl10_datamodule.STL10DataModule
     :noindex:
