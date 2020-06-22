@@ -7,3 +7,4 @@ flake8
 check-manifest
 twine==1.13.0
 atari-py==0.2.6
+gym==0.17.2
