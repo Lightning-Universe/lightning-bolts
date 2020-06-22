@@ -2,7 +2,7 @@
     :class: hidden-section
 
 Lightning DataModule
-================
+====================
 Datasets in PyTorch, Lightning and general Deep learning research have 4 main parts:
 
     1. A train split + dataloader

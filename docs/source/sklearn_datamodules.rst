@@ -1,8 +1,8 @@
 .. role:: hidden
     :class: hidden-section
 
-Sklearn Datamodules
-===================
+Sklearn Datamodule
+==================
 Utilities to map sklearn or numpy datasets to PyTorch Dataloaders with automatic data splits and GPU/TPU support.
 
 .. code-block:: python
