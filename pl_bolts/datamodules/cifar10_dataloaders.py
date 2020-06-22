@@ -6,6 +6,16 @@ from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataModule
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 
 
+class MyCIFAR10(CIFAR10):
+    """`CIFAR10 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ Dataset.
+
+    TODO: proper dataset shrinking as TrialMNIST
+    """
+    train_list = [
+        ['data_batch_1', 'c99cafc152244af753f735de768cd75f'],
+    ]
+
+
 class CIFAR10DataLoaders(BoltDataModule):
 
     def __init__(self, save_path, val_split=5000, num_workers=16):
@@ -19,14 +29,14 @@ class CIFAR10DataLoaders(BoltDataModule):
         return 10
 
     def prepare_data(self):
-        CIFAR10(self.save_path, train=True, download=True, transform=transform_lib.ToTensor())
-        CIFAR10(self.save_path, train=False, download=True, transform=transform_lib.ToTensor())
+        MyCIFAR10(self.save_path, train=True, download=True, transform=transform_lib.ToTensor())
+        MyCIFAR10(self.save_path, train=False, download=True, transform=transform_lib.ToTensor())
 
     def train_dataloader(self, batch_size, transforms=None, add_normalize=False):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = CIFAR10(self.save_path, train=True, download=False, transform=transforms)
+        dataset = MyCIFAR10(self.save_path, train=True, download=False, transform=transforms)
         train_length = len(dataset)
         dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
@@ -43,7 +53,7 @@ class CIFAR10DataLoaders(BoltDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = CIFAR10(self.save_path, train=True, download=False, transform=transforms)
+        dataset = MyCIFAR10(self.save_path, train=True, download=False, transform=transforms)
         train_length = len(dataset)
         _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
@@ -59,7 +69,7 @@ class CIFAR10DataLoaders(BoltDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = CIFAR10(self.save_path, train=False, download=False, transform=transforms)
+        dataset = MyCIFAR10(self.save_path, train=False, download=False, transform=transforms)
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
