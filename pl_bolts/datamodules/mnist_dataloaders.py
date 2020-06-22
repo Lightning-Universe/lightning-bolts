@@ -39,11 +39,24 @@ class MNISTDataModule(LightningDataModule):
     def num_classes(self):
         return 10
 
+    def size(self):
+        return 1, 28, 28
+
     def prepare_data(self):
+        """
+        Saves MNIST files to data_dir
+        """
         MNIST(self.data_dir, train=True, download=True, transform=transform_lib.ToTensor())
         MNIST(self.data_dir, train=False, download=True, transform=transform_lib.ToTensor())
 
-    def train_dataloader(self, batch_size, transforms=None, use_default_normalize=True):
+    def train_dataloader(self, batch_size, transforms=None):
+        """
+        MNIST train set removes a subset to use for validation
+
+        Args:
+            batch_size: size of batch
+            transforms: custom transforms
+        """
         if transforms is None:
             transforms = self._default_transforms()
 
@@ -60,7 +73,14 @@ class MNISTDataModule(LightningDataModule):
         )
         return loader
 
-    def val_dataloader(self, batch_size, transforms=None, use_default_normalize=True):
+    def val_dataloader(self, batch_size, transforms=None):
+        """
+        MNIST val set uses a subset of the training set for validation
+
+        Args:
+            batch_size: size of batch
+            transforms: custom transforms
+        """
         if transforms is None:
             transforms = self._default_transforms()
 
@@ -77,7 +97,15 @@ class MNISTDataModule(LightningDataModule):
         )
         return loader
 
-    def test_dataloader(self, batch_size, transforms=None, use_default_normalize=True):
+    def test_dataloader(self, batch_size, transforms=None):
+        """
+        MNIST test set uses the test split
+
+        Args:
+            batch_size: size of batch
+            transforms: custom transforms
+        """
+
         if transforms is None:
             transforms = self._default_transforms()
 
@@ -97,6 +125,3 @@ class MNISTDataModule(LightningDataModule):
             transform_lib.ToTensor()
         ])
         return mnist_transforms
-
-    def size(self):
-        return 1, 28, 28
