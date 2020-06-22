@@ -494,6 +494,8 @@ Regular PyTorch
 Everything in bolts also works with regular PyTorch since they are all just nn.Modules!
 However, if you train using Lightning you don't have to deal with engineering code :)
 
+----------------
+
 Command line support
 --------------------
 Any bolt module can also be trained from the command line
