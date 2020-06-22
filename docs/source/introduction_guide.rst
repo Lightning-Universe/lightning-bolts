@@ -122,6 +122,8 @@ Or use the encoders and transforms from CPC in another system
 
     from pl_bolts.models.self_supervised.cpc import CPCResNet101, CPCTransformsCIFAR10
 
+--------------
+
 DataModules
 -----------
 Bolts also has a collection of datamodules. These allow easy sharing for datasets with
