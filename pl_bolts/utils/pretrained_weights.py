@@ -1,7 +1,7 @@
 
 
 urls = {
-    'vae-imagenet': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/version_0/checkpoints/epoch%3D2.ckpt',
+    'vae-imagenet': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/imagenet_06_22_2019/checkpoints/epoch%3D63.ckpt',
     'CPCV2-resnet18': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/resnet18_version_6/checkpoints/epoch%3D85.ckpt'
 }
 
