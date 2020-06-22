@@ -10,7 +10,7 @@ from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 class ImagenetDataModule(LightningDataModule):
 
     def __init__(self,
-                 data_dir: str = os.getcwd(),
+                 data_dir: str,
                  meta_root: str = None,
                  num_imgs_per_val_class: int = 50,
                  image_size: int = 224,
