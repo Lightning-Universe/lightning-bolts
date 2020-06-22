@@ -61,7 +61,7 @@ class CIFAR10DataModule(LightningDataModule):
 
             (1, 32, 32)
         """
-        return 1, 32, 32
+        return 3, 32, 32
 
     def prepare_data(self):
         """
