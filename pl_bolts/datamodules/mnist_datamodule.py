@@ -8,7 +8,7 @@ from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 
 class MNISTDataModule(LightningDataModule):
 
-    def __init__(self, data_dir: str = os.getcwd(), val_split: int = 5000, num_workers: int = 16):
+    def __init__(self, data_dir: str, val_split: int = 5000, num_workers: int = 16):
         """
         Standard MNIST, train, val, test splits and transforms
 
