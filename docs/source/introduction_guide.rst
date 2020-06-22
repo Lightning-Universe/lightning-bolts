@@ -122,6 +122,30 @@ Or use the encoders and transforms from CPC in another system
 
     from pl_bolts.models.self_supervised.cpc import CPCResNet101, CPCTransformsCIFAR10
 
+DataModules
+-----------
+Bolts also has a collection of datamodules. These allow easy sharing for datasets with
+consistent transforms, train, val, tests splits and data preparation steps.
+
+.. code-block:: python
+
+    from pl_bolts.datamodules import MNISTDataLoaders, ImagenetDataModule
+
+    model = LitModel(datamodule=CIFAR10DataLoaders())
+    model = LitModel(datamodule=ImagenetDataModule())
+
+We even have prebuilt modules to bridge the gap between Numpy, Sklearn and PyTorch
+
+.. code-block:: python
+
+    from sklearn.datasets import load_boston
+    from pl_bolts.datamodules import SklearnDataLoaders
+
+    X, y = load_boston(return_X_y=True)
+    datamodule = SklearnDataLoaders(X, y)
+
+    model = LitModel(datamodule)
+
 
 --------------------
 
