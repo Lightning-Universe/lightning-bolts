@@ -161,6 +161,7 @@ class STL10DataModule(LightningDataModule):
         the portion of the 'train' dataset to be used for validation
 
         unlabeled_val = (unlabeled - train_val_split)
+
         labeled_val = (train- train_val_split)
 
         full_val = unlabeled_val + labeled_val
