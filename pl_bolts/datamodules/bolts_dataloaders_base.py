@@ -7,7 +7,7 @@ from argparse import ArgumentParser, Namespace
 from typing import Union, List, Tuple, Any
 
 
-class BoltDataModule(object):
+class LightningDataModule(object):
     def __init__(self):
         """
         A DataModule standardizes that training, val, test splits, data preparation and transforms.
@@ -216,7 +216,7 @@ class BoltDataModule(object):
 
     @classmethod
     def add_argparse_args(cls, parent_parser: ArgumentParser) -> ArgumentParser:
-        r"""Extends existing argparse by default `BoltDataModule` attributes.
+        r"""Extends existing argparse by default `LightningDataModule` attributes.
         """
         parser = ArgumentParser(parents=[parent_parser], add_help=False,)
         added_args = [x.dest for x in parser._actions]
@@ -269,15 +269,15 @@ class BoltDataModule(object):
 
         Args:
             args: The parser or namespace to take arguments from. Only known arguments will be
-                parsed and passed to the :class:`BoltDataModule`.
+                parsed and passed to the :class:`LightningDataModule`.
             **kwargs: Additional keyword arguments that may override ones in the parser or namespace.
                 These must be valid Trainer arguments.
 
         Example::
 
             parser = ArgumentParser(add_help=False)
-            parser = BoltDataModule.add_argparse_args(parser)
-            module = BoltDataModule.from_argparse_args(args)
+            parser = LightningDataModule.add_argparse_args(parser)
+            module = LightningDataModule.from_argparse_args(args)
         """
         if isinstance(args, ArgumentParser):
             args = cls.parse_argparser(args)

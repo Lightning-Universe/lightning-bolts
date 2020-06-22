@@ -177,10 +177,10 @@ We even have prebuilt modules to bridge the gap between Numpy, Sklearn and PyTor
 .. code-block:: python
 
     from sklearn.datasets import load_boston
-    from pl_bolts.datamodules import SklearnDataLoaders
+    from pl_bolts.datamodules import SklearnDataModule
 
     X, y = load_boston(return_X_y=True)
-    datamodule = SklearnDataLoaders(X, y)
+    datamodule = SklearnDataModule(X, y)
 
     model = LitModel(datamodule)
 
@@ -429,12 +429,12 @@ Here's an example for Linear regression
 .. code-block:: python
 
     import pytorch_lightning as pl
-    from pl_bolts.datamodules import SklearnDataLoaders
+    from pl_bolts.datamodules import SklearnDataModule
     from sklearn.datasets import load_boston
 
     # link the numpy dataset to PyTorch
     X, y = load_boston(return_X_y=True)
-    loaders = SklearnDataLoaders(X, y)
+    loaders = SklearnDataModule(X, y)
 
     # training runs training batches while validating against a validation set
     model = LinearRegression()

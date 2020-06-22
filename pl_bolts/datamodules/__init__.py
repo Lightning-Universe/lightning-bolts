@@ -1,6 +1,6 @@
-from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataModule
+from pl_bolts.datamodules.bolts_dataloaders_base import LightningDataModule
 from pl_bolts.datamodules.imagenet_dataloaders import ImagenetDataModule
 from pl_bolts.datamodules.cifar10_dataloaders import CIFAR10DataModule
 from pl_bolts.datamodules.mnist_dataloaders import MNISTDataModule
-from pl_bolts.datamodules.stl10_dataloaders import STL10DataLoaders
-from pl_bolts.datamodules.sklearn_dataloaders import SklearnDataset, SklearnDataLoaders
+from pl_bolts.datamodules.stl10_dataloaders import STL10DataModule
+from pl_bolts.datamodules.sklearn_dataloaders import SklearnDataset, SklearnDataModule

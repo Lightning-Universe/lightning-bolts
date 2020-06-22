@@ -3,12 +3,12 @@ import os
 from torch.utils.data import DataLoader
 from torchvision import transforms as transform_lib
 
-from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataModule
+from pl_bolts.datamodules.bolts_dataloaders_base import LightningDataModule
 from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 
 
-class SSLImagenetDataLoaders(BoltDataModule):
+class SSLImagenetDataModule(LightningDataModule):
 
     def __init__(self,
                  data_dir,

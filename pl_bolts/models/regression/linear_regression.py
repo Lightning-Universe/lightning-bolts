@@ -4,7 +4,7 @@ from torch.nn import functional as F
 import pytorch_lightning as pl
 from torch.optim.optimizer import Optimizer
 
-from pl_bolts.datamodules.sklearn_dataloaders import SklearnDataLoaders
+from pl_bolts.datamodules.sklearn_dataloaders import SklearnDataModule
 
 
 class LinearRegression(pl.LightningModule):
@@ -99,7 +99,7 @@ if __name__ == '__main__':  # pragma: no cover
     # create dataset
     from sklearn.datasets import load_boston
     X, y = load_boston(return_X_y=True)  # these are numpy arrays
-    loaders = SklearnDataLoaders(X, y)
+    loaders = SklearnDataModule(X, y)
 
     # args
     parser = ArgumentParser()

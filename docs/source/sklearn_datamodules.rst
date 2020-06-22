@@ -8,10 +8,10 @@ Utilities to map sklearn or numpy datasets to PyTorch Dataloaders with automatic
 .. code-block:: python
 
     from sklearn.datasets import load_boston
-    from pl_bolts.datamodules import SklearnDataLoaders
+    from pl_bolts.datamodules import SklearnDataModule
 
     X, y = load_boston(return_X_y=True)
-    loaders = SklearnDataLoaders(X, y)
+    loaders = SklearnDataModule(X, y)
 
     train_loader = loaders.train_dataloader(batch_size=32)
     val_loader = loaders.val_dataloader(batch_size=32)
@@ -40,5 +40,5 @@ Sklearn DataLoaders
 Automatically generates the train, validation and test splits for a Numpy dataset.
 They are set up as dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
 
-.. autoclass:: pl_bolts.datamodules.sklearn_dataloaders.SklearnDataLoaders
+.. autoclass:: pl_bolts.datamodules.sklearn_dataloaders.SklearnDataModule
    :noindex:

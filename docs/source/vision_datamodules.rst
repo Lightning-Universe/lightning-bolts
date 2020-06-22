@@ -22,7 +22,7 @@ CIFAR-10
 STL-10
 ^^^^^^
 
-.. autoclass:: pl_bolts.datamodules.stl10_dataloaders.STL10DataLoaders
+.. autoclass:: pl_bolts.datamodules.stl10_dataloaders.STL10DataModule
     :noindex:
 
 Imagenet
@@ -40,5 +40,5 @@ are labeled.
 Imagenet (ssl)
 ^^^^^^^^^^^^^^
 
-.. autoclass:: pl_bolts.datamodules.ssl_imagenet_dataloaders.SSLImagenetDataLoaders
+.. autoclass:: pl_bolts.datamodules.ssl_imagenet_dataloaders.SSLImagenetDataModule
     :noindex:
