@@ -268,7 +268,8 @@ Here's an example on how to train this model from scratch
 
 Research
 --------
-To adapt a bolt to research or a new problem, you can change any part of a bolt model.
+Bolts are designed to be highly configurable and modular.
+Here are a few examples showing potential uses in the context of research.
 
 Ex: Changing priors
 ^^^^^^^^^^^^^^^^^^^
@@ -335,6 +336,20 @@ Example::
 
         def backward(self):
             # do something weird
+
+Ex: Share components
+^^^^^^^^^^^^^^^^^^^^
+Bolts are implemented to be modular so parts of these models can be shared across projects
+
+Example::
+
+    from pl_bolts.models.self_supervised.cpc import CPCResNet101, CPCTransformsCIFAR10
+    from pl_bolts.models.self_supervised import SimCLR
+
+    class MySimCLR(SimCLR):
+
+        def __init__(self):
+            self.encoder = CPCResNet101()
 
 --------------
 
