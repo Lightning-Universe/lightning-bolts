@@ -152,6 +152,8 @@ Or use the encoders and transforms from CPC in another system
 
 Callbacks
 ---------
+Callbacks are arbitrary programs which can run at any points in time within a training loop in Lightning.
+
 Bolts houses a collection of callbacks that are community contributed and can work in any Lightning Module!
 
 .. code-block:: python
@@ -165,8 +167,10 @@ Bolts houses a collection of callbacks that are community contributed and can wo
 
 DataModules
 -----------
-Bolts also has a collection of datamodules. These allow easy sharing for datasets with
-consistent transforms, train, val, tests splits and data preparation steps.
+A DataModule abstracts away all the details of train, test, val splits, downloading data
+and processing the data. DataModules can be shared and dropped into LightningModules.
+
+Bolt has a collection of these modules built by the community.
 
 .. code-block:: python
 
@@ -174,6 +178,23 @@ consistent transforms, train, val, tests splits and data preparation steps.
 
     model = LitModel(datamodule=CIFAR10DataModule())
     model = LitModel(datamodule=ImagenetDataModule())
+
+
+DataModules are just collections of train, val and test DataLoaders. This means
+you can also use them without lightning
+
+.. code-block:: python
+
+    imagenet = ImagenetDataModule()
+
+    for batch in imagenet.train_dataloader():
+        ...
+        for val_batch in imagenet.val_dataloader()
+        ...
+
+    for test_batch in imagenet.test_dataloader():
+        ...
+
 
 We even have prebuilt modules to bridge the gap between Numpy, Sklearn and PyTorch
 
