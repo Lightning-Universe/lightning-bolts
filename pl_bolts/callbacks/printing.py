@@ -9,6 +9,20 @@ class PrintTableMetricsCallback(Callback):
     def __init__(self):
         """
         Prints a table with the metrics in columns on every epoch end
+
+        Example::
+
+            trainer = pl.Trainer(callbacks=[PrintTableMetricsCallback()])
+            trainer.fit(...)
+
+            # ------------------------------
+            # at the end of every epoch it will print
+            # ------------------------------
+
+            # loss│train_loss│val_loss│epoch
+            # ──────────────────────────────
+            # 2.2541470527648926│2.2541470527648926│2.2158432006835938│0
+
         """
         self.metrics = []
 
