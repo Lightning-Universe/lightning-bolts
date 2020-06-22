@@ -5,7 +5,7 @@ import torch
 from pytorch_lightning import LightningModule, Trainer
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataLoaders
+from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models.autoencoders.basic_ae.components import AEEncoder
 from pl_bolts.models.autoencoders.basic_vae.components import Decoder
 
@@ -27,7 +27,7 @@ class AE(LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.dataloaders = MNISTDataLoaders(data_dir=data_dir)
+        self.dataloaders = MNISTDataModule(data_dir=data_dir)
         self.img_dim = self.dataloaders.size()
 
         self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim,

@@ -2,7 +2,7 @@ from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
 from torchvision.datasets import CIFAR10
 
-from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataModule
+from pl_bolts.datamodules.bolts_dataloaders_base import LightningDataModule
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 
 
@@ -16,7 +16,7 @@ class MyCIFAR10(CIFAR10):
     ]
 
 
-class CIFAR10DataLoaders(BoltDataModule):
+class CIFAR10DataModule(LightningDataModule):
 
     def __init__(self, save_path, val_split=5000, num_workers=16):
         super().__init__()

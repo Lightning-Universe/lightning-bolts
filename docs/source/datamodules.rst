@@ -1,8 +1,8 @@
 .. role:: hidden
     :class: hidden-section
 
-Bolts Datamodules
-=================
+Lightning DataModule
+====================
 Datasets in PyTorch, Lightning and general Deep learning research have 4 main parts:
 
     1. A train split + dataloader
@@ -18,10 +18,10 @@ A datamodule simplifies all of these parts and integrates seamlessly into Lightn
 
 .. code-block:: python
 
-    from pl_bolts.datamodules import MNISTDataLoaders, CIFAR10DataLoaders
+    from pl_bolts.datamodules import MNISTDataModule, CIFAR10DataModule
 
 
-    datamodule = CIFAR10DataLoaders()
+    datamodule = CIFAR10DataModule()
     train_loader = datamodule.train_dataloader()
     val_loader = datamodule.train_dataloader()
     test_loader = datamodule.train_dataloader()
@@ -53,18 +53,18 @@ An advantage is that you can parametrize the data of your LightningModule
 
 .. code-block:: python
 
-    model = LitModel(datamodule=CIFAR10DataLoaders())
-    model = LitModel(datamodule=ImagenetDataLoaders())
+    model = LitModel(datamodule = CIFAR10DataModule())
+    model = LitModel(datamodule = ImagenetDataModule())
 
 Or even bridge between SKLearn or numpy datasets
 
 .. code-block:: python
 
     from sklearn.datasets import load_boston
-    from pl_bolts.datamodules import SklearnDataLoaders
+    from pl_bolts.datamodules import SklearnDataModule
 
     X, y = load_boston(return_X_y=True)
-    datamodule = SklearnDataLoaders(X, y)
+    datamodule = SklearnDataModule(X, y)
 
     model = LitModel(datamodule)
 
@@ -78,14 +78,14 @@ Datamodules have two advantages:
 
 Example::
 
-    from pl_bolts.datamodules import STL10DataLoaders, CIFAR10DataLoaders
+    from pl_bolts.datamodules import STL10DataModule, CIFAR10DataModule
 
     # use the same dataset on different models (with exactly the same splits)
-    stl10_model = LitModel(STL10DataLoaders())
-    stl10_model = CoolModel(STL10DataLoaders())
+    stl10_model = LitModel(STL10DataModule())
+    stl10_model = CoolModel(STL10DataModule())
 
     # or make your model dataset agnostic
-    cifar10_model = LitModel(CIFAR10DataLoaders())
+    cifar10_model = LitModel(CIFAR10DataModule())
 
 Build a DataModule
 ------------------
@@ -93,9 +93,9 @@ Use this to build your own consistent train, validation, test splits.
 
 Example::
 
-    from pl_bolts.datamodules import BoltDataModule
+    from pl_bolts.datamodules import LightningDataModule
 
-    class MyDataModule(BoltDataModule):
+    class MyDataModule(LightningDataModule):
 
         def __init__(self,...):
 
@@ -137,5 +137,5 @@ Example::
 DataModule class
 ^^^^^^^^^^^^^^^^
 
-.. autoclass:: pl_bolts.datamodules.bolts_dataloaders_base.BoltDataModule
+.. autoclass:: pl_bolts.datamodules.bolts_dataloaders_base.LightningDataModule
    :noindex:

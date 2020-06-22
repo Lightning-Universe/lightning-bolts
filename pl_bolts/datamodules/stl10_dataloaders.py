@@ -2,12 +2,12 @@ from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
 from torchvision.datasets import STL10
 
-from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataModule
+from pl_bolts.datamodules.bolts_dataloaders_base import LightningDataModule
 from pl_bolts.datamodules.concat_dataset import ConcatDataset
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 
 
-class STL10DataLoaders(BoltDataModule):
+class STL10DataModule(LightningDataModule):
 
     def __init__(self, save_path, unlabeled_val_split=5000, train_val_split=500, num_workers=16):
         super().__init__()

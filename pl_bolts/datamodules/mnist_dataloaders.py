@@ -3,10 +3,10 @@ from torchvision import transforms as transform_lib
 from torchvision.datasets import MNIST
 import os
 
-from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataModule
+from pl_bolts.datamodules.bolts_dataloaders_base import LightningDataModule
 
 
-class MNISTDataLoaders(BoltDataModule):
+class MNISTDataModule(LightningDataModule):
 
     def __init__(self, data_dir: str = os.getcwd(), val_split: int = 5000, num_workers: int = 16):
         super().__init__()

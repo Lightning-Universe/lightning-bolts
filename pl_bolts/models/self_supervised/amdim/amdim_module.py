@@ -17,7 +17,7 @@ from typing import Union
 class AMDIM(pl.LightningModule):
 
     def __init__(self,
-                 datamodule: Union[str, pl_bolts.datamodules.BoltDataModule] = 'cifar10',
+                 datamodule: Union[str, pl_bolts.datamodules.LightningDataModule] = 'cifar10',
                  image_channels: int = 3,
                  image_height: int = 32,
                  encoder_feature_dim: int = 320,

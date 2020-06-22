@@ -14,8 +14,8 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
 
 from pl_bolts import metrics
-from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
-from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
+from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
+from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataModule
 from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
@@ -152,13 +152,15 @@ class CPCV2(pl.LightningModule):
 
     def get_dataset(self, name):
         if name == 'cifar10':
-            return CIFAR10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            return CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'stl10':
-            return STL10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            return STL10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'imagenet2012':
-            return SSLImagenetDataLoaders(self.hparams.data_dir,
-                                          meta_root=self.hparams.meta_root,
-                                          num_workers=self.hparams.num_workers)
+            return SSLImagenetDataModule(
+                self.hparams.data_dir,
+                meta_root=self.hparams.meta_root,
+                num_workers=self.hparams.num_workers
+            )
         else:
             raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
                                     f'your own \'')

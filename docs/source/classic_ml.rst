@@ -19,11 +19,11 @@ Linear Regression
 
     from pl_bolts.models import LinearRegression
     import pytorch_lightning as pl
-    from pl_bolts.datamodules import SklearnDataLoaders
+    from pl_bolts.datamodules import SklearnDataModule
     from sklearn.datasets import load_boston
 
     X, y = load_boston(return_X_y=True)
-    loaders = SklearnDataLoaders(X, y)
+    loaders = SklearnDataModule(X, y)
 
     model = LinearRegression()
     trainer = pl.Trainer()

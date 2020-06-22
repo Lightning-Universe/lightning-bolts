@@ -11,8 +11,8 @@ import torchvision
 from torch import nn
 from typing import Union
 
-from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
-from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
+from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
+from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataModule
 from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.models.self_supervised.moco.transforms import \
     Moco2ImagenetTransforms, Moco2CIFAR10Transforms, Moco2STL10Transforms
@@ -231,11 +231,11 @@ class MocoV2(pl.LightningModule):
 
     def get_dataset(self, name):
         if name == 'cifar10':
-            dataloaders = CIFAR10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            dataloaders = CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'stl10':
-            dataloaders = STL10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            dataloaders = STL10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'imagenet2012':
-            dataloaders = SSLImagenetDataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            dataloaders = SSLImagenetDataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         else:
             raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
                                     f'your own \'')
