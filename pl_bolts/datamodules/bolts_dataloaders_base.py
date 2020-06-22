@@ -1,11 +1,10 @@
 from abc import abstractmethod
-from typing import List, Union
 import inspect
 
 from pytorch_lightning.utilities import rank_zero_warn, parsing
 from torch.utils.data import DataLoader
 from argparse import ArgumentParser, Namespace
-from typing import Union, Optional, List, Dict, Tuple, Iterable, Any
+from typing import Union, List, Tuple, Any
 
 
 class BoltDataModule(object):
@@ -248,6 +247,9 @@ class BoltDataModule(object):
                     use_type = [at for at in arg_types if at is not bool][0]
             else:
                 use_type = arg_types[0]
+
+            if arg_default == inspect._empty:
+                arg_default = None
 
             parser.add_argument(
                 f'--{arg}',

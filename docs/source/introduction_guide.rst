@@ -47,7 +47,7 @@ Bolts models are designed to bootstrap research or to be used in production. Her
     from pl_bolts.models.self_supervised import CPCV2
 
     # feature extractor (pretrained on Imagenet)
-    cpc_model = CPCV2(pretrained='resnet18')
+    cpc_model = CPCV2(encoder='resnet18', pretrained='imagenet')
     resnet18 = cpc_model.encoder
     resnet18.freeze()
 

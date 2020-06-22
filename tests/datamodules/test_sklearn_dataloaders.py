@@ -1,5 +1,3 @@
-import pytorch_lightning as pl
-
 from pl_bolts.datamodules.sklearn_dataloaders import SklearnDataLoaders
 from tests import reset_seed
 from sklearn.utils import shuffle as sk_shuffle
@@ -62,7 +60,3 @@ def test_dataloader(tmpdir):
     assert np.all(train_loader.dataset.X == shuffled_X)
     assert np.all(val_loader.dataset.X == x_val)
     assert np.all(test_loader.dataset.X == x_test)
-
-
-
-test_dataloader('')

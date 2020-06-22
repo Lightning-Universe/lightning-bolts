@@ -15,7 +15,7 @@ from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
 from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.models.self_supervised.moco.transforms import \
-    Moco2Imagenet128Transforms, Moco2CIFAR10Transforms, Moco2STL10Transforms
+    Moco2ImagenetTransforms, Moco2CIFAR10Transforms, Moco2STL10Transforms
 
 
 class MocoV2(pl.LightningModule):
@@ -28,7 +28,7 @@ class MocoV2(pl.LightningModule):
                  softmax_temperature: float = 0.07,
                  learning_rate: float = 0.03,
                  momentum: float = 0.9,
-                 weight_decay:float = 1e-4,
+                 weight_decay: float = 1e-4,
                  dataset: str = 'cifar10',
                  data_dir: str = './',
                  batch_size: str = 256,
@@ -112,7 +112,8 @@ class MocoV2(pl.LightningModule):
         Momentum update of the key encoder
         """
         for param_q, param_k in zip(self.encoder_q.parameters(), self.encoder_k.parameters()):
-            param_k.data = param_k.data * self.hparams.encoder_momentum + param_q.data * (1. - self.hparams.encoder_momentum)
+            em = self.hparams.encoder_momentum
+            param_k.data = param_k.data * em + param_q.data * (1. - em)
 
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys):
@@ -233,7 +234,7 @@ class MocoV2(pl.LightningModule):
             dataloaders = CIFAR10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'stl10':
             dataloaders = STL10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        elif name == 'imagenet128':
+        elif name == 'imagenet2012':
             dataloaders = SSLImagenetDataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         else:
             raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
@@ -299,8 +300,8 @@ class MocoV2(pl.LightningModule):
         elif self.hparams.dataset == 'stl10':
             train_transform = Moco2STL10Transforms()
 
-        elif self.hparams.dataset == 'imagenet128':
-            train_transform = Moco2Imagenet128Transforms()
+        elif self.hparams.dataset == 'imagenet2012':
+            train_transform = Moco2ImagenetTransforms()
 
         loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
@@ -312,8 +313,8 @@ class MocoV2(pl.LightningModule):
         elif self.hparams.dataset == 'stl10':
             train_transform = Moco2STL10Transforms().train_transform
 
-        elif self.hparams.dataset == 'imagenet128':
-            train_transform = Moco2Imagenet128Transforms().train_transform
+        elif self.hparams.dataset == 'imagenet2012':
+            train_transform = Moco2ImagenetTransforms().train_transform
 
         loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader

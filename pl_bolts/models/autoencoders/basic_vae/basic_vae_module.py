@@ -17,14 +17,14 @@ class VAE(LightningModule):
 
     def __init__(
             self,
-            hidden_dim:int = 128,
+            hidden_dim: int = 128,
             latent_dim: int = 32,
             input_channels: int = 3,
             input_width: int = 224,
             input_height: int = 224,
             batch_size: int = 32,
             learning_rate: float = 0.001,
-            data_dir: str = '',
+            data_dir: str = os.getcwd(),
             datamodule: pl_bolts.datamodules.BoltDataModule = None,
             pretrained: str = None,
             **kwargs
@@ -61,19 +61,37 @@ class VAE(LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        # use mnist as the default module
         self.datamodule = datamodule
-        if datamodule is None:
-            self.datamodule = MNISTDataLoaders(save_path=data_dir)
+        self.__set_pretrained_dims(pretrained)
 
+        # use mnist as the default module
+        self.__set_default_datamodule(data_dir)
+
+        # init actual model
+        self.__init_system()
+
+        if pretrained:
+            self.load_pretrained(pretrained)
+
+    def __init_system(self):
         self.encoder = self.init_encoder()
         self.decoder = self.init_decoder()
 
+    def __set_pretrained_dims(self, pretrained):
+        if pretrained == 'imagenet2012':
+            self.datamodule = ImagenetDataModule(data_dir=self.hparams.data_dir)
+            (self.hparams.input_channels, self.hparams.input_height, self.hparams.input_width) = self.datamodule.size()
+
+    def __set_default_datamodule(self, data_dir):
+        if self.datamodule is None:
+            self.datamodule = MNISTDataLoaders(data_dir=data_dir)
+            (self.hparams.input_channels, self.hparams.input_height, self.hparams.input_width) = self.datamodule.size()
+
     def load_pretrained(self, pretrained):
-        available_weights = {'imagenet'}
+        available_weights = {'imagenet2012'}
 
         if pretrained in available_weights:
-            weights_name = f'vae-{available_weights}'
+            weights_name = f'vae-{pretrained}'
             load_pretrained(self, weights_name)
 
     def init_encoder(self):
@@ -185,11 +203,7 @@ class VAE(LightningModule):
         }
 
     def test_step(self, batch, batch_idx):
-        x, y = batch
         loss, recon_loss, kl_div, pxz = self._run_step(batch)
-
-        if batch_idx == 0:
-            self._log_images(y)
 
         return {
             'test_loss': loss,
@@ -251,7 +265,7 @@ class VAE(LightningModule):
         parser.add_argument('--input_channels', type=int, default=3,
                             help='number of input channels')
         parser.add_argument('--batch_size', type=int, default=32)
-        parser.add_argument('--pretrained', action='store_true')
+        parser.add_argument('--pretrained', type=str, default=None)
 
         parser.add_argument('--learning_rate', type=float, default=1e-3)
         return parser
@@ -261,23 +275,24 @@ if __name__ == '__main__':
     from pl_bolts.datamodules import ImagenetDataModule
     parser = ArgumentParser()
     parser.add_argument('--dataset', default='mnist', type=str)
+
     parser = Trainer.add_argparse_args(parser)
     parser = ImagenetDataModule.add_argparse_args(parser)
     parser = MNISTDataLoaders.add_argparse_args(parser)
     parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args()
-
-    if args.dataset == 'imagenet' or args.pretrained:
-        datamodule = ImagenetDataModule.from_argparse_args(args)
-        args.image_width = datamodule.size()[1]
-        args.image_height = datamodule.size()[2]
-        args.input_channels = datamodule.size()[0]
-
-    elif args.dataset == 'mnist':
-        datamodule = MNISTDataLoaders.from_argparse_args(args)
-        args.image_width = datamodule.size()[1]
-        args.image_height = datamodule.size()[2]
-        args.input_channels = datamodule.size()[0]
+    #
+    # if args.dataset == 'imagenet' or args.pretrained:
+    #     datamodule = ImagenetDataModule.from_argparse_args(args)
+    #     args.image_width = datamodule.size()[1]
+    #     args.image_height = datamodule.size()[2]
+    #     args.input_channels = datamodule.size()[0]
+    #
+    # elif args.dataset == 'mnist':
+    #     datamodule = MNISTDataLoaders.from_argparse_args(args)
+    #     args.image_width = datamodule.size()[1]
+    #     args.image_height = datamodule.size()[2]
+    #     args.input_channels = datamodule.size()[0]
 
     vae = VAE(**vars(args))
     trainer = Trainer.from_argparse_args(args)

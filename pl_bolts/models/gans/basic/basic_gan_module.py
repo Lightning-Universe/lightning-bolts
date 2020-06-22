@@ -28,9 +28,8 @@ class GAN(LightningModule):
         # makes self.hparams under the hood and saves to ckpt
         self.save_hyperparameters()
 
-        self.img_dim = (self.hparams.input_channels, self.hparams.input_width, self.hparams.input_height)
-
-        self.dataloaders = MNISTDataLoaders(save_path=data_dir)
+        self.dataloaders = MNISTDataLoaders(data_dir=data_dir)
+        self.img_dim = self.dataloaders.size()
 
         # networks
         self.generator = self.init_generator(self.img_dim)
