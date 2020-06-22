@@ -1,5 +1,11 @@
 Introduction Guide
 ==================
+Welcome to bolts!
+
+-------------
+
+What is it?
+-----------
 Lightning Bolts is a collection of Models, Callbacks and other goodies implemented in PyTorch Lightning.
 
 Bolts models are designed to bootstrap research or to be used in production. Here are ways in which bolts can be used
@@ -98,6 +104,15 @@ Or even individual components from models
     from pl_bolts.models.autoencoders.basic_vae import Decoder, Encoder
     from pl_bolts.models.self_supervised.cpc import CPCResNet101, CPCTransformsCIFAR10, CPCTransformsImageNet128Patches
 
+-----------------
+
+Community
+----------
+Bolts is a community driven library! That means all the callbacks, models and weights are contributed
+by community members.
+
+To contribute a bolt, just refactor the PyTorch code into Lightning and submit a PR!
+
 --------------------
 
 Modularity
@@ -123,6 +138,13 @@ Or use the encoders and transforms from CPC in another system
     from pl_bolts.models.self_supervised.cpc import CPCResNet101, CPCTransformsCIFAR10
 
 --------------
+
+Callbacks
+---------
+Bolts houses a collection of callbacks that are community contributed and can work in any Lightning Module!
+
+--------------
+
 
 DataModules
 -----------
@@ -428,6 +450,11 @@ But more importantly, you can scale up to many GPUs, TPUs or even CPUs
     trainer = pl.Trainer(num_processes=128)
 
 ----------------
+
+Regular PyTorch
+---------------
+Everything in bolts also works with regular PyTorch since they are all just nn.Modules!
+However, if you train using Lightning you don't have to deal with engineering code :)
 
 Command line support
 --------------------
