@@ -9,7 +9,7 @@ from torchvision import transforms
 from torchvision.datasets import MNIST
 
 
-class LitMNISTModel(LightningModule):
+class LitMNIST(LightningModule):
     def __init__(self, hidden_dim=128, learning_rate=1e-3, batch_size=32, num_workers=4, data_dir=''):
         super().__init__()
         self.save_hyperparameters()
@@ -106,11 +106,11 @@ if __name__ == '__main__':  # pragma: no cover
 
     # args
     parser = ArgumentParser()
-    parser = LitMNISTModel.add_model_specific_args(parser)
+    parser = LitMNIST.add_model_specific_args(parser)
     args = parser.parse_args()
 
     # model
-    model = LitMNISTModel(**vars(args))
+    model = LitMNIST(**vars(args))
 
     trainer = Trainer()
     trainer.fit(model)
