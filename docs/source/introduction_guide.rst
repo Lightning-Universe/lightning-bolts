@@ -336,6 +336,34 @@ Example::
         def backward(self):
             # do something weird
 
+--------------
+
+Production
+----------
+A major benefit of bolts is that most models have pretrained weights on whatever major datasets
+exist for those domains. These weights can be contributed by the community, so the models can be
+more domain specific.
+
+.. code-block:: python
+
+    from pl_bolts.models.self_supervised import CPCV2
+
+    # feature extractor (pretrained on Imagenet)
+    cpc_model = CPCV2(pretrained='resnet18')
+    resnet18 = cpc_model.encoder
+    resnet18.freeze()
+
+Even more simple models like VAEs
+
+.. code-block:: python
+
+    from pl_bolts.models.autoencoders import VAE
+
+    # feature extractor (pretrained on Imagenet)
+    pretrained_model = VAE(pretrained='imagenet')
+    pretrained_model.freeze()
+
+
 ----------------
 
 Command line support
