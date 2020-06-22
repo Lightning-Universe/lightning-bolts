@@ -180,7 +180,7 @@ class AMDIM(pl.LightningModule):
             eps=1e-7
         )
 
-        if self.hparams.dataset_name in ['CIFAR10', 'stl_10', 'CIFAR100']:
+        if self.hparams.dataset in ['cifar10', 'stl10', 'cifar100']:
             lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
         else:
             lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
@@ -188,14 +188,14 @@ class AMDIM(pl.LightningModule):
         return opt  # [opt], [lr_scheduler]
 
     def train_dataloader(self):
-        if self.hparams.dataset_name == 'CIFAR10':
+        if self.hparams.dataset == 'cifar10':
             dataset = AMDIMPretraining.cifar10_train(self.hparams.data_dir)
 
-        if self.hparams.dataset_name == 'stl_10':
+        if self.hparams.dataset == 'stl10':
             self.tng_split, self.val_split = AMDIMPretraining.stl_train(self.hparams.data_dir)
             dataset = self.tng_split
 
-        if self.hparams.dataset_name == 'imagenet_128':
+        if self.hparams.dataset == 'imagenet2012':
             dataset = AMDIMPretraining.imagenet_train(self.hparams.data_dir, self.hparams.nb_classes)
 
         # LOADER
@@ -209,13 +209,13 @@ class AMDIM(pl.LightningModule):
         return loader
 
     def val_dataloader(self):
-        if self.hparams.dataset_name == 'CIFAR10':
+        if self.hparams.dataset == 'cifar10':
             dataset = AMDIMPretraining.cifar10_val(self.hparams.data_dir)
 
-        if self.hparams.dataset_name == 'stl_10':
+        if self.hparams.dataset == 'stl10':
             dataset = self.val_split
 
-        if self.hparams.dataset_name == 'imagenet_128':
+        if self.hparams.dataset == 'imagenet2012':
             dataset = AMDIMPretraining.imagenet_val(self.hparams.data_dir, self.hparams.nb_classes)
 
         # LOADER
@@ -231,11 +231,12 @@ class AMDIM(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        parser.add_argument('--dataset', type=str, default='cifar10')
 
         # CIFAR 10
         cf_root_lr = 2e-4
         cifar_10 = {
-            'dataset_name': 'CIFAR10',
+            'dataset': 'cifar10',
             'ndf': 320,
             'n_rkhs': 1280,
             'depth': 10,
@@ -259,8 +260,8 @@ class AMDIM(pl.LightningModule):
 
         # stl-10
         stl_root_lr = 2e-4
-        stl_10 = {
-            'dataset_name': 'stl_10',
+        stl10 = {
+            'dataset': 'stl10',
             'ndf': 192,
             'n_rkhs': 1536,
             'depth': 8,
@@ -283,8 +284,8 @@ class AMDIM(pl.LightningModule):
         }
 
         imagenet_root_lr = 2e-4
-        imagenet_128 = {
-            'dataset_name': 'imagenet_128',
+        imagenet2012 = {
+            'dataset': 'imagenet2012',
             'ndf': 320,
             'n_rkhs': 2560,
             'depth': 10,
@@ -306,8 +307,8 @@ class AMDIM(pl.LightningModule):
             ]
         }
 
-        imagenet_128_large = {
-            'dataset_name': 'imagenet_128',
+        imagenet2012_large = {
+            'dataset': 'imagenet2012',
             'ndf': 320,
             'n_rkhs': 2560,
             'depth': 10,
@@ -329,9 +330,14 @@ class AMDIM(pl.LightningModule):
             ]
         }
 
-        # dataset = cifar_10
-        # dataset = stl_10
-        dataset = cifar_10
+        DATASETS = {
+            'cifar10': cifar_10,
+            'stl10': stl10,
+            'imagenet2012': imagenet2012
+        }
+
+        (args, _) = parser.parse_known_args()
+        dataset = DATASETS[args.dataset]
 
         # dataset options
         parser.add_argument('--num_classes', default=dataset['nb_classes'], type=int)
@@ -348,7 +354,6 @@ class AMDIM(pl.LightningModule):
         # trainin params
         resnets = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
                    'wide_resnet50_2', 'wide_resnet101_2']
-        parser.add_argument('--dataset_name', type=str, default=dataset['dataset_name'])
         parser.add_argument('--batch_size', type=int, default=dataset['batch_size'],
                             help='input batch size (default: 200)')
         parser.add_argument('--learning_rate', type=float, default=0.0002)

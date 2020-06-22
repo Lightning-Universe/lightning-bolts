@@ -76,7 +76,7 @@ class AE(LightningModule):
         tensorboard_logs = {'mse_loss': avg_loss}
 
         return {
-            'avg_val_loss': avg_loss,
+            'val_loss': avg_loss,
             'log': tensorboard_logs
         }
 
@@ -93,7 +93,7 @@ class AE(LightningModule):
         tensorboard_logs = {'mse_loss': avg_loss}
 
         return {
-            'avg_test_loss': avg_loss,
+            'test_loss': avg_loss,
             'log': tensorboard_logs
         }
 
