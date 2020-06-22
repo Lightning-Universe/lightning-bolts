@@ -37,6 +37,10 @@ class MNISTDataModule(LightningDataModule):
 
     @property
     def num_classes(self):
+        """
+        Return:
+            10
+        """
         return 10
 
     def size(self):
