@@ -26,7 +26,7 @@ PyTorchLightning-Bolts documentation
    :caption: DataModules
 
    datamodules
-   sklearn_datamodules
+   sklearn_datamodule
    vision_datamodules
 
 .. toctree::
