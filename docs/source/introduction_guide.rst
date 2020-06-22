@@ -5,10 +5,10 @@ PyTorch projects.
 
 Contributed bolts that you add are:
 
-    1. Tested
-    2. Standardized
-    3. Documented
-    4. Well maintained
+1. Tested
+2. Standardized
+3. Documented
+4. Well maintained
 
 -------------
 
