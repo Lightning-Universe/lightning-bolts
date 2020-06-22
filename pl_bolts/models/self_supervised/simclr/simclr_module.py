@@ -6,7 +6,7 @@ from torch.optim.lr_scheduler import StepLR
 from torchvision.models import densenet
 from argparse import Namespace
 
-from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
+from pl_bolts.datamodules import CIFAR10DataModule, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLRDataTransform
@@ -125,7 +125,7 @@ class SimCLR(pl.LightningModule):
 
     def get_dataset(self, name):
         if name == 'cifar10':
-            return CIFAR10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            return CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'stl10':
             return STL10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'imagenet2012':

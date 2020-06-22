@@ -6,7 +6,7 @@ import torch
 from pytorch_lightning import Trainer, LightningModule
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataLoaders
+from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models.gans.basic.components import Generator, Discriminator
 
 
@@ -28,7 +28,7 @@ class GAN(LightningModule):
         # makes self.hparams under the hood and saves to ckpt
         self.save_hyperparameters()
 
-        self.dataloaders = MNISTDataLoaders(data_dir=data_dir)
+        self.dataloaders = MNISTDataModule(data_dir=data_dir)
         self.img_dim = self.dataloaders.size()
 
         # networks

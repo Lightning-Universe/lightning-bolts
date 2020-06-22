@@ -16,7 +16,7 @@ class MyCIFAR10(CIFAR10):
     ]
 
 
-class CIFAR10DataLoaders(BoltDataModule):
+class CIFAR10DataModule(BoltDataModule):
 
     def __init__(self, save_path, val_split=5000, num_workers=16):
         super().__init__()

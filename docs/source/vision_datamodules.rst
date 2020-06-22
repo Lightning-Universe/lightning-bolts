@@ -10,13 +10,13 @@ the standard transforms (and Normalization) values
 MNIST
 ^^^^^
 
-.. autoclass:: pl_bolts.datamodules.mnist_dataloaders.MNISTDataLoaders
+.. autoclass:: pl_bolts.datamodules.mnist_dataloaders.MNISTDataModule
     :noindex:
 
 CIFAR-10
 ^^^^^^^^
 
-.. autoclass:: pl_bolts.datamodules.cifar10_dataloaders.CIFAR10DataLoaders
+.. autoclass:: pl_bolts.datamodules.cifar10_dataloaders.CIFAR10DataModule
     :noindex:
 
 STL-10

@@ -11,7 +11,7 @@ import torchvision
 from torch import nn
 from typing import Union
 
-from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
+from pl_bolts.datamodules import CIFAR10DataModule, STL10DataLoaders
 from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
 from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.models.self_supervised.moco.transforms import \
@@ -231,7 +231,7 @@ class MocoV2(pl.LightningModule):
 
     def get_dataset(self, name):
         if name == 'cifar10':
-            dataloaders = CIFAR10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            dataloaders = CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'stl10':
             dataloaders = STL10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'imagenet2012':

@@ -6,7 +6,7 @@ import os
 from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataModule
 
 
-class MNISTDataLoaders(BoltDataModule):
+class MNISTDataModule(BoltDataModule):
 
     def __init__(self, data_dir: str = os.getcwd(), val_split: int = 5000, num_workers: int = 16):
         super().__init__()

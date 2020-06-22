@@ -8,7 +8,7 @@ from torch import distributions
 from torch.nn import functional as F
 import pl_bolts
 
-from pl_bolts.datamodules import MNISTDataLoaders
+from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
 
@@ -84,7 +84,7 @@ class VAE(LightningModule):
 
     def __set_default_datamodule(self, data_dir):
         if self.datamodule is None:
-            self.datamodule = MNISTDataLoaders(data_dir=data_dir)
+            self.datamodule = MNISTDataModule(data_dir=data_dir)
             (self.hparams.input_channels, self.hparams.input_height, self.hparams.input_width) = self.datamodule.size()
 
     def load_pretrained(self, pretrained):
@@ -278,7 +278,7 @@ if __name__ == '__main__':
 
     parser = Trainer.add_argparse_args(parser)
     parser = ImagenetDataModule.add_argparse_args(parser)
-    parser = MNISTDataLoaders.add_argparse_args(parser)
+    parser = MNISTDataModule.add_argparse_args(parser)
     parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args()
     #
@@ -289,7 +289,7 @@ if __name__ == '__main__':
     #     args.input_channels = datamodule.size()[0]
     #
     # elif args.dataset == 'mnist':
-    #     datamodule = MNISTDataLoaders.from_argparse_args(args)
+    #     datamodule = MNISTDataModule.from_argparse_args(args)
     #     args.image_width = datamodule.size()[1]
     #     args.image_height = datamodule.size()[2]
     #     args.input_channels = datamodule.size()[0]

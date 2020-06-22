@@ -18,10 +18,10 @@ A datamodule simplifies all of these parts and integrates seamlessly into Lightn
 
 .. code-block:: python
 
-    from pl_bolts.datamodules import MNISTDataLoaders, CIFAR10DataLoaders
+    from pl_bolts.datamodules import MNISTDataModule, CIFAR10DataModule
 
 
-    datamodule = CIFAR10DataLoaders()
+    datamodule = CIFAR10DataModule()
     train_loader = datamodule.train_dataloader()
     val_loader = datamodule.train_dataloader()
     test_loader = datamodule.train_dataloader()
@@ -53,7 +53,7 @@ An advantage is that you can parametrize the data of your LightningModule
 
 .. code-block:: python
 
-    model = LitModel(datamodule=CIFAR10DataLoaders())
+    model = LitModel(datamodule=CIFAR10DataModule())
     model = LitModel(datamodule=ImagenetDataLoaders())
 
 Or even bridge between SKLearn or numpy datasets
@@ -78,14 +78,14 @@ Datamodules have two advantages:
 
 Example::
 
-    from pl_bolts.datamodules import STL10DataLoaders, CIFAR10DataLoaders
+    from pl_bolts.datamodules import STL10DataLoaders, CIFAR10DataModule
 
     # use the same dataset on different models (with exactly the same splits)
     stl10_model = LitModel(STL10DataLoaders())
     stl10_model = CoolModel(STL10DataLoaders())
 
     # or make your model dataset agnostic
-    cifar10_model = LitModel(CIFAR10DataLoaders())
+    cifar10_model = LitModel(CIFAR10DataModule())
 
 Build a DataModule
 ------------------
