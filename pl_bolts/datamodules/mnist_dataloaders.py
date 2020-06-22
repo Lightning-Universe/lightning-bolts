@@ -18,11 +18,6 @@ class MNISTDataModule(LightningDataModule):
                 transform_lib.ToTensor()
             ])
 
-        Args:
-            data_dir: where to save/load the data
-            val_split: how many of the training images to use for the validation split
-            num_workers: how many workers to use for loading data
-
         Example::
 
             from pl_bolts.datamodules import MNISTDataModule
@@ -30,6 +25,10 @@ class MNISTDataModule(LightningDataModule):
             dm = MNISTDataModule()
             model = LitModel(datamodule=dm)
 
+        Args:
+            data_dir: where to save/load the data
+            val_split: how many of the training images to use for the validation split
+            num_workers: how many workers to use for loading data
         """
         super().__init__()
         self.data_dir = data_dir
