@@ -20,13 +20,13 @@ class AE(LightningModule):
             input_height=28,
             batch_size=32,
             learning_rate=0.001,
-            data_dir='',
+            data_dir=os.getcwd(),
             **kwargs
     ):
         super().__init__()
         self.save_hyperparameters()
 
-        self.dataloaders = MNISTDataLoaders(save_path=data_dir)
+        self.dataloaders = MNISTDataLoaders(data_dir=data_dir)
 
         self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim,
                                          self.hparams.input_width, self.hparams.input_height)
