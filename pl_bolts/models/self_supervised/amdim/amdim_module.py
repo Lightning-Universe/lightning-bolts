@@ -6,15 +6,18 @@ import torch
 import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
+import pl_bolts
 
 from pl_bolts.losses.self_supervised_learning import AMDIMContrastiveTask
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
+from typing import Union
 
 
 class AMDIM(pl.LightningModule):
 
     def __init__(self,
+                 datamodule: Union[str, pl_bolts.datamodules.BoltDataModule] = 'cifar10',
                  image_channels: int = 3,
                  image_height: int = 32,
                  encoder_feature_dim: int = 320,
@@ -180,7 +183,7 @@ class AMDIM(pl.LightningModule):
             eps=1e-7
         )
 
-        if self.hparams.dataset in ['cifar10', 'stl10', 'cifar100']:
+        if self.hparams.datamodule in ['cifar10', 'stl10', 'cifar100']:
             lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
         else:
             lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
@@ -188,14 +191,14 @@ class AMDIM(pl.LightningModule):
         return opt  # [opt], [lr_scheduler]
 
     def train_dataloader(self):
-        if self.hparams.dataset == 'cifar10':
+        if self.hparams.datamodule == 'cifar10':
             dataset = AMDIMPretraining.cifar10_train(self.hparams.data_dir)
 
-        if self.hparams.dataset == 'stl10':
+        if self.hparams.datamodule == 'stl10':
             self.tng_split, self.val_split = AMDIMPretraining.stl_train(self.hparams.data_dir)
             dataset = self.tng_split
 
-        if self.hparams.dataset == 'imagenet2012':
+        if self.hparams.datamodule == 'imagenet2012':
             dataset = AMDIMPretraining.imagenet_train(self.hparams.data_dir, self.hparams.nb_classes)
 
         # LOADER
@@ -209,13 +212,13 @@ class AMDIM(pl.LightningModule):
         return loader
 
     def val_dataloader(self):
-        if self.hparams.dataset == 'cifar10':
+        if self.hparams.datamodule == 'cifar10':
             dataset = AMDIMPretraining.cifar10_val(self.hparams.data_dir)
 
-        if self.hparams.dataset == 'stl10':
+        if self.hparams.datamodule == 'stl10':
             dataset = self.val_split
 
-        if self.hparams.dataset == 'imagenet2012':
+        if self.hparams.datamodule == 'imagenet2012':
             dataset = AMDIMPretraining.imagenet_val(self.hparams.data_dir, self.hparams.nb_classes)
 
         # LOADER
@@ -231,7 +234,7 @@ class AMDIM(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--dataset', type=str, default='cifar10')
+        parser.add_argument('--datamodule', type=str, default='cifar10')
 
         # CIFAR 10
         cf_root_lr = 2e-4
@@ -337,7 +340,7 @@ class AMDIM(pl.LightningModule):
         }
 
         (args, _) = parser.parse_known_args()
-        dataset = DATASETS[args.dataset]
+        dataset = DATASETS[args.datamodule]
 
         # dataset options
         parser.add_argument('--num_classes', default=dataset['nb_classes'], type=int)
