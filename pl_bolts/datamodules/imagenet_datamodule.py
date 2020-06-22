@@ -1,6 +1,4 @@
 import os
-from argparse import ArgumentParser
-
 from torch.utils.data import DataLoader
 from torchvision import transforms as transform_lib
 
@@ -26,8 +24,6 @@ class ImagenetDataModule(LightningDataModule):
         For example if `num_imgs_per_val_class=2` then there will be 2,000 images in the validation set.
 
         The test set is the official imagenet validation set.
-
-        The images are normalized using: Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
          Example::
 
