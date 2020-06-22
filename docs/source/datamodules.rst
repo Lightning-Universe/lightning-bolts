@@ -136,5 +136,5 @@ Example::
 DataModule class
 ^^^^^^^^^^^^^^^^
 
-.. autoclass:: pl_bolts.datamodules.bolts_dataloaders_base.LightningDataModule
+.. autoclass:: pl_bolts.datamodules.lightning_datamodule.LightningDataModule
    :noindex:
