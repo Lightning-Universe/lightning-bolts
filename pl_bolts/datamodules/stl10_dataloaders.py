@@ -9,9 +9,9 @@ from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 
 class STL10DataModule(LightningDataModule):
 
-    def __init__(self, save_path, unlabeled_val_split=5000, train_val_split=500, num_workers=16):
+    def __init__(self, data_dir, unlabeled_val_split=5000, train_val_split=500, num_workers=16):
         super().__init__()
-        self.save_path = save_path
+        self.data_dir = data_dir
         self.unlabeled_val_split = unlabeled_val_split
         self.train_val_split = train_val_split
         self.num_workers = num_workers
@@ -21,15 +21,15 @@ class STL10DataModule(LightningDataModule):
         return 10
 
     def prepare_data(self):
-        STL10(self.save_path, split='unlabeled', download=True, transform=transform_lib.ToTensor())
-        STL10(self.save_path, split='train', download=True, transform=transform_lib.ToTensor())
-        STL10(self.save_path, split='test', download=True, transform=transform_lib.ToTensor())
+        STL10(self.data_dir, split='unlabeled', download=True, transform=transform_lib.ToTensor())
+        STL10(self.data_dir, split='train', download=True, transform=transform_lib.ToTensor())
+        STL10(self.data_dir, split='test', download=True, transform=transform_lib.ToTensor())
 
     def train_dataloader(self, batch_size, transforms=None):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
+        dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
         dataset_train, _ = random_split(dataset,
                                         [train_length - self.unlabeled_val_split,
@@ -48,7 +48,7 @@ class STL10DataModule(LightningDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        unlabeled_dataset = STL10(self.save_path,
+        unlabeled_dataset = STL10(self.data_dir,
                                   split='unlabeled',
                                   download=False,
                                   transform=transforms)
@@ -57,7 +57,7 @@ class STL10DataModule(LightningDataModule):
                                             [unlabeled_length - self.unlabeled_val_split,
                                              self.unlabeled_val_split])
 
-        labeled_dataset = STL10(self.save_path, split='train', download=False, transform=transforms)
+        labeled_dataset = STL10(self.data_dir, split='train', download=False, transform=transforms)
         labeled_length = len(labeled_dataset)
         labeled_dataset, _ = random_split(labeled_dataset,
                                           [labeled_length - self.train_val_split,
@@ -78,7 +78,7 @@ class STL10DataModule(LightningDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
+        dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
         _, dataset_val = random_split(dataset,
                                       [train_length - self.unlabeled_val_split,
@@ -96,7 +96,7 @@ class STL10DataModule(LightningDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        unlabeled_dataset = STL10(self.save_path,
+        unlabeled_dataset = STL10(self.data_dir,
                                   split='unlabeled',
                                   download=False,
                                   transform=transforms)
@@ -105,7 +105,7 @@ class STL10DataModule(LightningDataModule):
                                             [unlabeled_length - self.unlabeled_val_split,
                                              self.unlabeled_val_split])
 
-        labeled_dataset = STL10(self.save_path, split='train', download=False, transform=transforms)
+        labeled_dataset = STL10(self.data_dir, split='train', download=False, transform=transforms)
         labeled_length = len(labeled_dataset)
         _, labeled_dataset = random_split(labeled_dataset,
                                           [labeled_length - self.train_val_split,
@@ -126,7 +126,7 @@ class STL10DataModule(LightningDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = STL10(self.save_path, split='unlabeled', download=False, transform=transforms)
+        dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         _, dataset_val = random_split(dataset, [self.train_length - self.val_split, self.val_split])
         loader = DataLoader(
             dataset_val,
@@ -141,7 +141,7 @@ class STL10DataModule(LightningDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = STL10(self.save_path, split='test', download=False, transform=transforms)
+        dataset = STL10(self.data_dir, split='test', download=False, transform=transforms)
         loader = DataLoader(
             dataset,
             batch_size=batch_size,

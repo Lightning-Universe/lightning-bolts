@@ -18,9 +18,12 @@ class MyCIFAR10(CIFAR10):
 
 class CIFAR10DataModule(LightningDataModule):
 
-    def __init__(self, save_path, val_split=5000, num_workers=16):
+    def __init__(self, data_dir, val_split=5000, num_workers=16):
+        """
+
+        """
         super().__init__()
-        self.save_path = save_path
+        self.data_dir = data_dir
         self.val_split = val_split
         self.num_workers = num_workers
 
@@ -29,14 +32,14 @@ class CIFAR10DataModule(LightningDataModule):
         return 10
 
     def prepare_data(self):
-        MyCIFAR10(self.save_path, train=True, download=True, transform=transform_lib.ToTensor())
-        MyCIFAR10(self.save_path, train=False, download=True, transform=transform_lib.ToTensor())
+        MyCIFAR10(self.data_dir, train=True, download=True, transform=transform_lib.ToTensor())
+        MyCIFAR10(self.data_dir, train=False, download=True, transform=transform_lib.ToTensor())
 
     def train_dataloader(self, batch_size, transforms=None, add_normalize=False):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = MyCIFAR10(self.save_path, train=True, download=False, transform=transforms)
+        dataset = MyCIFAR10(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
         dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
@@ -53,7 +56,7 @@ class CIFAR10DataModule(LightningDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = MyCIFAR10(self.save_path, train=True, download=False, transform=transforms)
+        dataset = MyCIFAR10(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
         _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
@@ -69,7 +72,7 @@ class CIFAR10DataModule(LightningDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = MyCIFAR10(self.save_path, train=False, download=False, transform=transforms)
+        dataset = MyCIFAR10(self.data_dir, train=False, download=False, transform=transforms)
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
