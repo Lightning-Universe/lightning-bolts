@@ -378,6 +378,52 @@ Even more simple models like VAEs
     pretrained_model = VAE(pretrained='imagenet')
     pretrained_model.freeze()
 
+Regression Heroes
+-----------------
+In case your job or research doesn't need a "hammer", we offer implementations of Classic ML models
+which benefit from lightning's multi-GPU and TPU support. So, now you can run huge workloads
+scalably, without needing to do much engineering
+
+Linear Regression
+^^^^^^^^^^^^^^^^^
+Here's an example for Linear regression
+
+.. code-block:: python
+
+    import pytorch_lightning as pl
+    from pl_bolts.datamodules import SklearnDataLoaders
+    from sklearn.datasets import load_boston
+
+    # link the numpy dataset to PyTorch
+    X, y = load_boston(return_X_y=True)
+    loaders = SklearnDataLoaders(X, y)
+
+    # training runs training batches while validating against a validation set
+    model = LinearRegression()
+    trainer = pl.Trainer(num_gpus=8)
+    trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
+
+Once you're done, you can run the test set if needed.
+
+.. code-block:: python
+
+    trainer.test(test_dataloaders=loaders.test_dataloader())
+
+But more importantly, you can scale up to many GPUs, TPUs or even CPUs
+
+.. code-block:: python
+
+    # 8 GPUs
+    trainer = pl.Trainer(num_gpus=8)
+
+    # 8 TPUs
+    trainer = pl.Trainer(tpu_cores=8)
+
+    # 32 GPUs
+    trainer = pl.Trainer(num_gpus=8, num_nodes=4)
+
+    # 128 CPUs
+    trainer = pl.Trainer(num_processes=128)
 
 ----------------
 
