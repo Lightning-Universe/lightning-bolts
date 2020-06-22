@@ -18,18 +18,6 @@ A datamodule simplifies all of these parts and integrates seamlessly into Lightn
 
 .. code-block:: python
 
-    from pl_bolts.datamodules import MNISTDataModule, CIFAR10DataModule
-
-
-    datamodule = CIFAR10DataModule()
-    train_loader = datamodule.train_dataloader()
-    val_loader = datamodule.train_dataloader()
-    test_loader = datamodule.train_dataloader()
-
-And they can be used in lightning modules
-
-.. code-block:: python
-
     class LitModel(pl.LightningModule):
 
         def __init__(self, datamodule):
@@ -48,6 +36,17 @@ And they can be used in lightning modules
 
         def test_dataloader(self)
             return self.datamodule.test_dataloader()
+
+DataModules can also be used with plain PyTorch
+
+.. code-block:: python
+
+    from pl_bolts.datamodules import MNISTDataModule, CIFAR10DataModule
+
+    datamodule = CIFAR10DataModule()
+    train_loader = datamodule.train_dataloader()
+    val_loader = datamodule.train_dataloader()
+    test_loader = datamodule.train_dataloader()
 
 An advantage is that you can parametrize the data of your LightningModule
 
@@ -137,5 +136,5 @@ Example::
 DataModule class
 ^^^^^^^^^^^^^^^^
 
-.. autoclass:: pl_bolts.datamodules.bolts_dataloaders_base.LightningDataModule
+.. autoclass:: pl_bolts.datamodules.lightning_datamodule.LightningDataModule
    :noindex:

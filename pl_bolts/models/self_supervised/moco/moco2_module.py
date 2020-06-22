@@ -12,7 +12,7 @@ from torch import nn
 from typing import Union
 
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
-from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataModule
+from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.models.self_supervised.moco.transforms import \
     Moco2ImagenetTransforms, Moco2CIFAR10Transforms, Moco2STL10Transforms

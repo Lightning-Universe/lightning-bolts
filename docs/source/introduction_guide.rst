@@ -3,12 +3,15 @@ Introduction Guide
 Welcome to bolts - The community collection of Lightning models, callbacks and modules which can be "bolted" onto
 PyTorch projects.
 
-Contributed bolts that you add are:
+Bolts are built by, and added by the community. But unlike repos with one-off models,
+the lightning team guarantees that bolts are:
 
 1. Tested
 2. Standardized
 3. Documented
-4. Well maintained
+4. Curated
+5. Well maintained
+6. Checked for correctness
 
 -------------
 
@@ -16,9 +19,9 @@ What is it?
 -----------
 Lightning Bolts is a collection of Models, Callbacks and other goodies implemented in PyTorch Lightning.
 
-Bolts models are designed to bootstrap research or to be used in production. Here are ways in which bolts can be used
+Bolts are designed to bootstrap research or to be used in production. Here are ways in which bolts can be used
 
-1. As a feature extractor for production and research systems.
+**As a feature extractor for production and research systems.**
 
 .. code-block:: python
 
@@ -28,7 +31,7 @@ Bolts models are designed to bootstrap research or to be used in production. Her
     pretrained_model = VAE(pretrained='imagenet')
     pretrained_model.freeze()
 
-2. Subclass and override to try new research ideas.
+**Subclass and override to try new research ideas.**
 
 .. code-block:: python
 
@@ -54,7 +57,7 @@ Bolts models are designed to bootstrap research or to be used in production. Her
             # maybe try a different generator step?
 
 
-3. Fully pre-built models that can be fine-tuned on your data.
+**Fully pre-built models that can be FINE-TUNED on your data**
 
 .. code-block:: python
 
@@ -65,7 +68,7 @@ Bolts models are designed to bootstrap research or to be used in production. Her
     resnet18 = cpc_model.encoder
     resnet18.freeze()
 
-4. Fully contained algorithms that can be trained on your data.
+**Fully contained algorithms that can be TRAINED on your data from scratch**
 
 .. code-block:: python
 
@@ -78,7 +81,7 @@ Bolts models are designed to bootstrap research or to be used in production. Her
     trainer = Trainer()
     trainer.fit(model, train_data, val_data)
 
-5. Fully compatible with GPUs, TPUs, 16-bit precision, etc because of PyTorch Lightning.
+**Fully compatible with GPUs, TPUs, 16-bit precision, etc because of PyTorch Lightning**
 
 .. code-block:: python
 
@@ -90,13 +93,13 @@ Bolts models are designed to bootstrap research or to be used in production. Her
     trainer = Trainer(tpu_cores=8)
     trainer.fit(model)
 
-6. Can be used as a stand-alone `torch.nn.Module`.
+**Can be used as a stand-alone `torch.nn.Module`**
 
 .. code-block:: python
 
     model = SimCLR()
 
-7. Or use the other parts of the library in your code
+**Or use the other parts of the library in your code**
 
 .. code-block:: python
 
@@ -104,9 +107,9 @@ Bolts models are designed to bootstrap research or to be used in production. Her
 
     trainer = pl.Trainer(callbacks=[PrintTableMetricsCallback()])
 
-Or even individual components from models
+**Or even individual components from models**
 
-..code-block:: python
+.. code-block:: python
 
     from pl_bolts.models.autoencoders.basic_ae import AEEncoder
     from pl_bolts.models.autoencoders.basic_vae import Decoder, Encoder
@@ -149,6 +152,8 @@ Or use the encoders and transforms from CPC in another system
 
 Callbacks
 ---------
+Callbacks are arbitrary programs which can run at any points in time within a training loop in Lightning.
+
 Bolts houses a collection of callbacks that are community contributed and can work in any Lightning Module!
 
 .. code-block:: python
@@ -162,8 +167,10 @@ Bolts houses a collection of callbacks that are community contributed and can wo
 
 DataModules
 -----------
-Bolts also has a collection of datamodules. These allow easy sharing for datasets with
-consistent transforms, train, val, tests splits and data preparation steps.
+A DataModule abstracts away all the details of train, test, val splits, downloading data
+and processing the data. DataModules can be shared and dropped into LightningModules.
+
+Bolt has a collection of these modules built by the community.
 
 .. code-block:: python
 
@@ -171,6 +178,23 @@ consistent transforms, train, val, tests splits and data preparation steps.
 
     model = LitModel(datamodule=CIFAR10DataModule())
     model = LitModel(datamodule=ImagenetDataModule())
+
+
+DataModules are just collections of train, val and test DataLoaders. This means
+you can also use them without lightning
+
+.. code-block:: python
+
+    imagenet = ImagenetDataModule()
+
+    for batch in imagenet.train_dataloader():
+        ...
+        for val_batch in imagenet.val_dataloader()
+        ...
+
+    for test_batch in imagenet.test_dataloader():
+        ...
+
 
 We even have prebuilt modules to bridge the gap between Numpy, Sklearn and PyTorch
 
@@ -469,6 +493,8 @@ Regular PyTorch
 ---------------
 Everything in bolts also works with regular PyTorch since they are all just nn.Modules!
 However, if you train using Lightning you don't have to deal with engineering code :)
+
+----------------
 
 Command line support
 --------------------

@@ -49,6 +49,7 @@ class LightningDataModule(object):
     def size(self):
         """
         Return the dimension of each input
+        Either as a tuple or list of tuples
         """
         raise NotImplementedError
 
