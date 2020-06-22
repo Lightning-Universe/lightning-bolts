@@ -117,7 +117,7 @@ class SklearnDataLoaders(BoltDataModule):
         self.val_dataset = SklearnDataset(x_val, y_val)
         self.test_dataset = SklearnDataset(x_test, y_test)
 
-    def train_dataloader(self, batch_size: int = 32):
+    def train_dataloader(self, batch_size: int = 16):
         loader = DataLoader(
             self.train_dataset,
             batch_size=batch_size,
@@ -128,7 +128,7 @@ class SklearnDataLoaders(BoltDataModule):
         )
         return loader
 
-    def val_dataloader(self, batch_size: int = 32):
+    def val_dataloader(self, batch_size: int = 16):
         loader = DataLoader(
             self.val_dataset,
             batch_size=batch_size,
@@ -139,7 +139,7 @@ class SklearnDataLoaders(BoltDataModule):
         )
         return loader
 
-    def test_dataloader(self, batch_size=32):
+    def test_dataloader(self, batch_size: int = 16):
         loader = DataLoader(
             self.test_dataset,
             batch_size=batch_size,
