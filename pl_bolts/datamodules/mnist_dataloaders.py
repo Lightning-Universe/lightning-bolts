@@ -114,7 +114,6 @@ class MNISTDataModule(LightningDataModule):
             batch_size: size of batch
             transforms: custom transforms
         """
-
         if transforms is None:
             transforms = self._default_transforms()
 
