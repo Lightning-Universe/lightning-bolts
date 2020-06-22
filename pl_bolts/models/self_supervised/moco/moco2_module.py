@@ -28,7 +28,7 @@ class MocoV2(pl.LightningModule):
                  softmax_temperature: float = 0.07,
                  learning_rate: float = 0.03,
                  momentum: float = 0.9,
-                 weight_decay:float = 1e-4,
+                 weight_decay: float = 1e-4,
                  dataset: str = 'cifar10',
                  data_dir: str = './',
                  batch_size: str = 256,
@@ -112,7 +112,8 @@ class MocoV2(pl.LightningModule):
         Momentum update of the key encoder
         """
         for param_q, param_k in zip(self.encoder_q.parameters(), self.encoder_k.parameters()):
-            param_k.data = param_k.data * self.hparams.encoder_momentum + param_q.data * (1. - self.hparams.encoder_momentum)
+            em = self.hparams.encoder_momentum
+            param_k.data = param_k.data * em + param_q.data * (1. - em)
 
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys):

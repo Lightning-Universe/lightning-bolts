@@ -203,11 +203,7 @@ class VAE(LightningModule):
         }
 
     def test_step(self, batch, batch_idx):
-        x, y = batch
         loss, recon_loss, kl_div, pxz = self._run_step(batch)
-
-        if batch_idx == 0:
-            self._log_images(y)
 
         return {
             'test_loss': loss,
