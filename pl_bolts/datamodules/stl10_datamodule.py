@@ -51,7 +51,7 @@ class STL10DataModule(LightningDataModule):
         """
         Return:
 
-            3, 96, 96
+            (3, 96, 96)
         """
 
     def prepare_data(self):
