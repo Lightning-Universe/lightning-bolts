@@ -4,12 +4,17 @@ from torch.nn import functional as F
 import pytorch_lightning as pl
 from torch.optim.optimizer import Optimizer
 
-from pl_bolts.datamodules.sklearn_dataloaders import SklearnDataLoaders
+from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 
 
 class LinearRegression(pl.LightningModule):
 
-    def __init__(self, input_dim: int, bias=True, learning_rate=0.05, optimizer:Optimizer = 'Adam',**kwargs):
+    def __init__(self,
+                 input_dim: int,
+                 bias: bool = True,
+                 learning_rate: float = 0.05,
+                 optimizer: Optimizer = 'Adam',
+                 **kwargs):
         """
         Linear regression model implementing
         $$min_{W} ||(Wx + b) - y ||_2^2 $$
@@ -93,8 +98,8 @@ if __name__ == '__main__':  # pragma: no cover
 
     # create dataset
     from sklearn.datasets import load_boston
-    X, y = load_boston(return_X_y=True) #these are numpy arrays
-    loaders = SklearnDataLoaders(X, y)
+    X, y = load_boston(return_X_y=True)  # these are numpy arrays
+    loaders = SklearnDataModule(X, y)
 
     # args
     parser = ArgumentParser()

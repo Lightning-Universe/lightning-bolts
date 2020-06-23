@@ -1,15 +1,13 @@
 import os
-from argparse import ArgumentParser
-
 from torch.utils.data import DataLoader
 from torchvision import transforms as transform_lib
 
-from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataModule
+from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 
 
-class ImagenetDataModule(BoltDataModule):
+class ImagenetDataModule(LightningDataModule):
 
     def __init__(self,
                  data_dir: str,
@@ -27,16 +25,11 @@ class ImagenetDataModule(BoltDataModule):
 
         The test set is the official imagenet validation set.
 
-        The images are normalized using: Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-
          Example::
 
             from pl_bolts.datamodules import ImagenetDataModule
 
             datamodule = ImagenetDataModule(IMAGENET_PATH)
-            train_loader = datamodule.train_dataloader()
-            val_loader = datamodule.val_dataloader()
-            test_loader = datamodule.test_dataloader()
 
         Args:
 
@@ -56,9 +49,20 @@ class ImagenetDataModule(BoltDataModule):
 
     @property
     def num_classes(self):
+        """
+        Return:
+
+            1000
+
+        """
         return 1000
 
     def size(self):
+        """
+        Return:
+
+            (3, image_size, image_size)
+        """
         return 3, self.image_size, self.image_size
 
     def _verify_splits(self, data_dir, split):
@@ -69,7 +73,12 @@ class ImagenetDataModule(BoltDataModule):
                                     f'folder contains a subfolder named {split}')
 
     def prepare_data(self):
-        # imagenet cannot be downloaded... must provide path to folder with the train/val splits
+        """
+        This method already assumes you have imagenet2012 downloaded.
+        It validates the data using the meta.bin.
+
+        .. warning:: Please download imagenet on your own first.
+        """
         self._verify_splits(self.data_dir, 'train')
         self._verify_splits(self.data_dir, 'val')
 
@@ -91,7 +100,14 @@ class ImagenetDataModule(BoltDataModule):
                 UnlabeledImagenet.generate_meta_bins(path)
                 """)
 
-    def train_dataloader(self, batch_size, transforms=None, add_normalize=False):
+    def train_dataloader(self, batch_size, transforms=None):
+        """
+        Uses the train split of imagenet2012 and puts away a portion of it for the validation split
+
+        Args:
+            batch_size: the batch size
+            transforms: the transforms
+        """
         if transforms is None:
             transforms = self.train_transform()
 
@@ -110,7 +126,14 @@ class ImagenetDataModule(BoltDataModule):
         )
         return loader
 
-    def val_dataloader(self, batch_size, transforms=None, add_normalize=False):
+    def val_dataloader(self, batch_size, transforms=None):
+        """
+        Uses the part of the train split of imagenet2012  that was not used for training via `num_imgs_per_val_class`
+
+        Args:
+            batch_size: the batch size
+            transforms: the transforms
+        """
         if transforms is None:
             transforms = self.val_transform()
 
@@ -128,12 +151,20 @@ class ImagenetDataModule(BoltDataModule):
         )
         return loader
 
-    def test_dataloader(self, batch_size, num_images_per_class, transforms=None, add_normalize=False):
+    def test_dataloader(self, batch_size, num_images_per_class=-1, transforms=None):
+        """
+        Uses the validation split of imagenet2012 for testing
+
+        Args:
+            batch_size: the batch size
+            num_images_per_class: how many images per class to test on
+            transforms: the transforms
+        """
         if transforms is None:
             transforms = self.val_transform()
 
         dataset = UnlabeledImagenet(self.data_dir,
-                                    num_imgs_per_class=-1,
+                                    num_imgs_per_class=num_images_per_class,
                                     meta_root=self.meta_root,
                                     split='test',
                                     transform=transforms)

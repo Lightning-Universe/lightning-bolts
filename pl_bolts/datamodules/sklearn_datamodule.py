@@ -1,4 +1,4 @@
-from pl_bolts.datamodules.bolts_dataloaders_base import BoltDataModule
+from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 from torch.utils.data import Dataset, DataLoader
 from sklearn.utils import shuffle as sk_shuffle
 import math
@@ -49,19 +49,23 @@ class SklearnDataset(Dataset):
         return x, y
 
 
-class SklearnDataLoaders(BoltDataModule):
+class SklearnDataModule(LightningDataModule):
 
-    def __init__(self, X, y, x_val=None, y_val=None, x_test=None, y_test=None, val_split=0.15, test_split=0.15, num_workers=2, random_state=1234, shuffle=True):
+    def __init__(self, X, y,
+                 x_val=None, y_val=None,
+                 x_test=None, y_test=None,
+                 val_split=0.15, test_split=0.15,
+                 num_workers=2, random_state=1234, shuffle=True):
         """
         Automatically generates the train, validation and test splits for a Numpy dataset. They are set up as
         dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
 
         Example:
             >>> from sklearn.datasets import load_boston
-            >>> from pl_bolts.datamodules import SklearnDataLoaders
+            >>> from pl_bolts.datamodules import SklearnDataModule
             ...
             >>> X, y = load_boston(return_X_y=True)
-            >>> loaders = SklearnDataLoaders(X, y)
+            >>> loaders = SklearnDataModule(X, y)
             ...
             >>> # train set
             >>> train_loader = loaders.train_dataloader(batch_size=32)
@@ -149,5 +153,3 @@ class SklearnDataLoaders(BoltDataModule):
             pin_memory=True
         )
         return loader
-
-

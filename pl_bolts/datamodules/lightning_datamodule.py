@@ -1,14 +1,13 @@
 from abc import abstractmethod
-from typing import List, Union
 import inspect
 
 from pytorch_lightning.utilities import rank_zero_warn, parsing
 from torch.utils.data import DataLoader
 from argparse import ArgumentParser, Namespace
-from typing import Union, Optional, List, Dict, Tuple, Iterable, Any
+from typing import Union, List, Tuple, Any
 
 
-class BoltDataModule(object):
+class LightningDataModule(object):
     def __init__(self):
         """
         A DataModule standardizes that training, val, test splits, data preparation and transforms.
@@ -50,6 +49,7 @@ class BoltDataModule(object):
     def size(self):
         """
         Return the dimension of each input
+        Either as a tuple or list of tuples
         """
         raise NotImplementedError
 
@@ -217,7 +217,7 @@ class BoltDataModule(object):
 
     @classmethod
     def add_argparse_args(cls, parent_parser: ArgumentParser) -> ArgumentParser:
-        r"""Extends existing argparse by default `BoltDataModule` attributes.
+        r"""Extends existing argparse by default `LightningDataModule` attributes.
         """
         parser = ArgumentParser(parents=[parent_parser], add_help=False,)
         added_args = [x.dest for x in parser._actions]
@@ -249,6 +249,9 @@ class BoltDataModule(object):
             else:
                 use_type = arg_types[0]
 
+            if arg_default == inspect._empty:
+                arg_default = None
+
             parser.add_argument(
                 f'--{arg}',
                 dest=arg,
@@ -267,15 +270,15 @@ class BoltDataModule(object):
 
         Args:
             args: The parser or namespace to take arguments from. Only known arguments will be
-                parsed and passed to the :class:`BoltDataModule`.
+                parsed and passed to the :class:`LightningDataModule`.
             **kwargs: Additional keyword arguments that may override ones in the parser or namespace.
                 These must be valid Trainer arguments.
 
         Example::
 
             parser = ArgumentParser(add_help=False)
-            parser = BoltDataModule.add_argparse_args(parser)
-            module = BoltDataModule.from_argparse_args(args)
+            parser = LightningDataModule.add_argparse_args(parser)
+            module = LightningDataModule.from_argparse_args(args)
         """
         if isinstance(args, ArgumentParser):
             args = cls.parse_argparser(args)

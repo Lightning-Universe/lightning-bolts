@@ -18,6 +18,7 @@ PyTorchLightning-Bolts documentation
    :caption: Callbacks
 
    callbacks
+   info_callbacks
 
 .. toctree::
    :maxdepth: 2
@@ -25,7 +26,7 @@ PyTorchLightning-Bolts documentation
    :caption: DataModules
 
    datamodules
-   sklearn_datamodules
+   sklearn_datamodule
    vision_datamodules
 
 .. toctree::

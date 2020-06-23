@@ -7,8 +7,8 @@ from argparse import Namespace, ArgumentParser
 def test_cpcv2(tmpdir):
     reset_seed()
 
-    model = CPCV2(data_dir=tmpdir)
-    trainer = pl.Trainer(overfit_batches=2, default_root_dir=tmpdir)
+    model = CPCV2(data_dir=tmpdir, batch_size=2)
+    trainer = pl.Trainer(overfit_batches=2, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
 
@@ -18,8 +18,8 @@ def test_cpcv2(tmpdir):
 def test_amdim(tmpdir):
     reset_seed()
 
-    model = AMDIM(data_dir=tmpdir)
-    trainer = pl.Trainer(overfit_batches=2, default_root_dir=tmpdir)
+    model = AMDIM(data_dir=tmpdir, batch_size=2)
+    trainer = pl.Trainer(overfit_batches=2, max_epochs=2, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
 

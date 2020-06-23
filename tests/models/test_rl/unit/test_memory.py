@@ -211,7 +211,7 @@ class TestMultiStepReplayBuffer(TestCase):
         self.assertEqual(len(self.buffer), 0)
         self.assertEqual(len(self.buffer.n_step_buffer), 1)
 
-    def test_append_single_experience(self):
+    def test_append_single_experience2(self):
         """
         If a single experience is added and the number of experiences collected >= n, the multi step experience should
         be added to the full buffer.
