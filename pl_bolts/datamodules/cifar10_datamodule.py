@@ -51,6 +51,7 @@ class CIFAR10(LightDataset):
     TRAIN_FILE_NAME = 'training.pt'
     TEST_FILE_NAME = 'test.pt'
     DATASET_NAME = 'CIFAR10'
+    labels = set(range(10))
 
     def __init__(
             self,
@@ -197,7 +198,6 @@ class TrialCIFAR10(CIFAR10):
             torch.save((data, targets), os.path.join(self.cached_folder_path, fname))
 
 
-
 class CIFAR10DataModule(LightningDataModule):
 
     def __init__(self, data_dir, val_split=5000, num_workers=16):
@@ -230,27 +230,32 @@ class CIFAR10DataModule(LightningDataModule):
         self.num_workers = num_workers
 
     @property
-    def num_classes(self):
+    def num_classes(self) -> int:
         """
         Return:
             10
         """
+        if hasattr(self, '_train_dataset'):
+            return len(self._train_dataset.labels)
         return 10
 
-    def size(self):
+    @property
+    def size(self) -> Tuple:
         """
         Return:
 
             (1, 32, 32)
         """
+        if hasattr(self, '_train_dataset'):
+            return self._train_dataset[0].shape
         return 3, 32, 32
 
     def prepare_data(self):
         """
         Saves CIFAR10 files to data_dir
         """
-        CIFAR10(self.data_dir, train=True, download=True, transform=transform_lib.ToTensor())
-        CIFAR10(self.data_dir, train=False, download=True, transform=transform_lib.ToTensor())
+        self._train_dataset = CIFAR10(self.data_dir, train=True, download=True)
+        self._test_dataset = CIFAR10(self.data_dir, train=False, download=True)
 
     def train_dataloader(self, batch_size, transforms=None):
         """
