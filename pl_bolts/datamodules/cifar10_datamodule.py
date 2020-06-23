@@ -149,7 +149,7 @@ class TrialCIFAR10(CIFAR10):
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
         num_samples: number of examples per selected class/digit
-        labels: list selected MNIST digits/classes
+        labels: list selected CIFAR10 digits/classes
 
     Examples:
 
@@ -194,13 +194,20 @@ class TrialCIFAR10(CIFAR10):
             path_fname = os.path.join(super().cached_folder_path, fname)
             assert os.path.isfile(path_fname), 'Missing cached file: %s' % path_fname
             data, targets = torch.load(path_fname)
-            data, targets = self._prepare_subset(data, targets, self.num_samples, self.labels)
+            if self.num_samples or len(self.labels) < 10:
+                data, targets = self._prepare_subset(data, targets, self.num_samples, self.labels)
             torch.save((data, targets), os.path.join(self.cached_folder_path, fname))
 
 
 class CIFAR10DataModule(LightningDataModule):
 
-    def __init__(self, data_dir, val_split=5000, num_workers=16):
+    def __init__(
+            self,
+            data_dir: str,
+            val_split: int = 5000,
+            num_workers: int = 16,
+            num_samples: int = None,
+            labels: Optional[Sequence] = None):
         """
         Standard CIFAR10, train, val, test splits and transforms
 
@@ -223,11 +230,15 @@ class CIFAR10DataModule(LightningDataModule):
             data_dir: where to save/load the data
             val_split: how many of the training images to use for the validation split
             num_workers: how many workers to use for loading data
+            num_samples: number of examples per selected class/label
+            labels: list selected CIFAR10 classes/labels
         """
         super().__init__()
         self.data_dir = data_dir
         self.val_split = val_split
         self.num_workers = num_workers
+        self.num_samples = num_samples
+        self.labels = labels if labels is not None else set(range(10))
 
     @property
     def num_classes(self) -> int:
@@ -235,9 +246,7 @@ class CIFAR10DataModule(LightningDataModule):
         Return:
             10
         """
-        if hasattr(self, '_train_dataset'):
-            return len(self._train_dataset.labels)
-        return 10
+        return len(self.labels)
 
     @property
     def size(self) -> Tuple:
@@ -246,16 +255,14 @@ class CIFAR10DataModule(LightningDataModule):
 
             (1, 32, 32)
         """
-        if hasattr(self, '_train_dataset'):
-            return self._train_dataset[0].shape
         return 3, 32, 32
 
     def prepare_data(self):
         """
         Saves CIFAR10 files to data_dir
         """
-        self._train_dataset = CIFAR10(self.data_dir, train=True, download=True)
-        self._test_dataset = CIFAR10(self.data_dir, train=False, download=True)
+        TrialCIFAR10(self.data_dir, train=True, download=True, num_samples=self.num_samples, labels=self.labels)
+        TrialCIFAR10(self.data_dir, train=False, download=True, num_samples=self.num_samples, labels=self.labels)
 
     def train_dataloader(self, batch_size, transforms=None):
         """
@@ -268,7 +275,8 @@ class CIFAR10DataModule(LightningDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = CIFAR10(self.data_dir, train=True, download=False, transform=transforms)
+        dataset = TrialCIFAR10(self.data_dir, train=True, download=False, transform=transforms,
+                               num_samples=self.num_samples, labels=self.labels)
         train_length = len(dataset)
         dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
@@ -293,7 +301,8 @@ class CIFAR10DataModule(LightningDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = CIFAR10(self.data_dir, train=True, download=False, transform=transforms)
+        dataset = TrialCIFAR10(self.data_dir, train=True, download=False, transform=transforms,
+                               num_samples=self.num_samples, labels=self.labels)
         train_length = len(dataset)
         _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
@@ -316,7 +325,8 @@ class CIFAR10DataModule(LightningDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = CIFAR10(self.data_dir, train=False, download=False, transform=transforms)
+        dataset = TrialCIFAR10(self.data_dir, train=False, download=False, transform=transforms,
+                               num_samples=self.num_samples, labels=self.labels)
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
