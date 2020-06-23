@@ -27,9 +27,10 @@ below, we implement the original task, along with a few derivations.
 AMDIM_15_17_55_ContrastiveTask
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass::pl_bolts.losses.self_supervised_learning.AMDIM_15_17_55_ContrastiveTask
+.. autoclass:: pl_bolts.losses.self_supervised_learning.AMDIM_15_17_55_ContrastiveTask
     :noindex:
 
+--------------
 
 CPCContrastiveTask
 ^^^^^^^^^^^^^^^^^^
