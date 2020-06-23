@@ -55,7 +55,7 @@ class TestValueModels(TestCase):
 
     def test_noisy_dqn(self):
         """Smoke test that the Noisy DQN model runs"""
-        model = NoisyDQN(self.hparams)
+        model = NoisyDQN(self.hparams.env)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)
