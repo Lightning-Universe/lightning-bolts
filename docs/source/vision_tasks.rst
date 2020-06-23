@@ -20,7 +20,7 @@ The task compares feature maps from different layers of an encoder applied to ea
     (g1, g5, g7) = encoder(r_anchor)
 
 We implement a few tasks inspired by `AMDIM (Philip Bachman, R Devon Hjelm, William Buchwalter
-<https://arxiv.org/abs/1906.00910>`_)`
+<https://arxiv.org/abs/1906.00910>`_).
 
 -------------
 
