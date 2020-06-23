@@ -9,7 +9,7 @@ from pl_bolts.datamodules.sklearn_dataloaders import SklearnDataLoaders
 
 class LogisticRegression(pl.LightningModule):
 
-    def __init__(self, input_dim: int, num_classes: int, bias=True, learning_rate=0.05, optimizer:Optimizer = 'Adam',**kwargs):
+    def __init__(self, input_dim: int, num_classes: int, bias=True, learning_rate=0.0001, optimizer:Optimizer = 'Adam',**kwargs):
         """
         Logistic regression model
 
@@ -34,6 +34,8 @@ class LogisticRegression(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
+
+        # PyTorch cross_entropy function combines log_softmax and nll_loss in single function
         loss = F.cross_entropy(y_hat, y)
         #loss = F.nll_loss(y_hat, y) #logits, labels
         tensorboard_logs = {'train_ce_loss': loss}
@@ -94,9 +96,9 @@ if __name__ == '__main__':  # pragma: no cover
     from argparse import ArgumentParser
     pl.seed_everything(1234)
 
-    # create dataset
+    # Example: Iris dataset in Sklearn (4 features, 3 class labels)
     from sklearn.datasets import load_iris
-    X, y = load_iris(return_X_y=True) #these are numpy arrays
+    X, y = load_iris(return_X_y=True)
     loaders = SklearnDataLoaders(X, y)
 
     # args
@@ -106,7 +108,8 @@ if __name__ == '__main__':  # pragma: no cover
     args = parser.parse_args()
 
     # model
-    model = LogisticRegression(**vars(args))
+    # model = LogisticRegression(**vars(args))
+    model = LogisticRegression(input_dim=4, num_classes=3)
 
     # train
     trainer = pl.Trainer.from_argparse_args(args)
