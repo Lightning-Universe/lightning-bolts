@@ -4,6 +4,7 @@ import tarfile
 from typing import Tuple, Optional, Sequence, Callable
 
 import torch
+from PIL import Image
 from torch import Tensor
 
 from pl_bolts.datamodules.base_dataset import LightDataset
@@ -28,7 +29,10 @@ class CIFAR10(LightDataset):
 
     Examples:
 
-        >>> dataset = CIFAR10(download=True)
+        >>> from torchvision import transforms
+        >>> from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
+        >>> cf10_transforms = transforms.Compose([transforms.ToTensor(), cifar10_normalization()])
+        >>> dataset = CIFAR10(download=True, transform=cf10_transforms)
         >>> len(dataset)
         50000
         >>> torch.bincount(dataset.targets)
@@ -83,11 +87,12 @@ class CIFAR10(LightDataset):
         self.data, self.targets = torch.load(os.path.join(self.cached_folder_path, data_file))
 
     def __getitem__(self, idx: int) -> Tuple[Tensor, int]:
-        img = self.data[idx].float().reshape(3, 32, 32)
+        img = self.data[idx].reshape(3, 32, 32)
         target = int(self.targets[idx])
 
         if self.transform is not None:
-            img = self.transform(img)
+            img = img.numpy().transpose((1, 2, 0))  # convert to HWC
+            img = self.transform(Image.fromarray(img))
 
         return img, target
 
@@ -164,9 +169,9 @@ class TrialCIFAR10(CIFAR10):
         >>> len(dataset)
         450
         >>> sorted(set([d.item() for d in dataset.targets]))
-        [1, 5, 8
+        [1, 5, 8]
         >>> torch.bincount(dataset.targets)
-        tensor([150, 150, 150])
+        tensor([  0, 150,   0,   0,   0, 150,   0,   0, 150])
         >>> data, label = dataset[0]
         >>> data.shape
         torch.Size([3, 32, 32])

@@ -296,7 +296,7 @@ class CPCV2(pl.LightningModule):
 
     def train_dataloader(self):
         loader = None
-        if self.hparams.dataset == 'cifar10':
+        if 'cifar10' in self.hparams.dataset:
             train_transform = cpc_transforms.CPCTransformsCIFAR10()
 
         elif self.hparams.dataset == 'stl10':
@@ -320,7 +320,7 @@ class CPCV2(pl.LightningModule):
 
     def val_dataloader(self):
         loader = None
-        if self.hparams.dataset == 'cifar10':
+        if 'cifar10' in self.hparams.dataset:
             test_transform = cpc_transforms.CPCTransformsCIFAR10().test_transform
 
         if self.hparams.dataset == 'stl10':

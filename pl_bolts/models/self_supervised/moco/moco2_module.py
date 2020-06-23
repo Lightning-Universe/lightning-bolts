@@ -284,7 +284,7 @@ class MocoV2(pl.LightningModule):
         return optimizer
 
     def train_dataloader(self):
-        if self.hparams.dataset == 'cifar10':
+        if 'cifar10' in self.hparams.dataset:
             train_transform = Moco2CIFAR10Transforms()
 
         elif self.hparams.dataset == 'stl10':
@@ -297,7 +297,7 @@ class MocoV2(pl.LightningModule):
         return loader
 
     def val_dataloader(self):
-        if self.hparams.dataset == 'cifar10':
+        if 'cifar10' in self.hparams.dataset:
             train_transform = Moco2CIFAR10Transforms().train_transform
 
         elif self.hparams.dataset == 'stl10':
