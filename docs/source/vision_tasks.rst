@@ -1,5 +1,11 @@
+Contrastive tasks
+=================
+This section implements popular contrastive learning tasks used in self-supervised learning.
+
+---------------
+
 Feature map contrastive tasks
-=============================
+-----------------------------
 The following are pretext tasks used to compare sets of feature maps.
 In general the feature map comparison pretext task uses triplets of features, the positive and anchor features
 come from different augmentations of the same image, while the negative features come from another image
