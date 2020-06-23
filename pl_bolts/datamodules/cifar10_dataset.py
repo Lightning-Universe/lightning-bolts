@@ -160,11 +160,11 @@ class TrialCIFAR10(CIFAR10):
 
     Examples:
 
-        >>> dataset = TrialCIFAR10(download=True, num_samples=150)
+        >>> dataset = TrialCIFAR10(download=True, num_samples=150, labels=(1, 5, 8))
         >>> len(dataset)
         450
         >>> sorted(set([d.item() for d in dataset.targets]))
-        [0, 1, 2]
+        [1, 5, 8
         >>> torch.bincount(dataset.targets)
         tensor([150, 150, 150])
         >>> data, label = dataset[0]
