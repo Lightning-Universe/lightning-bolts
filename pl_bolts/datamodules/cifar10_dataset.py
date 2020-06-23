@@ -18,7 +18,7 @@ class CIFAR10(LightDataset):
     https://github.com/pytorch/vision/blob/build/v0.5.0/torchvision/datasets/
 
     Args:
-        root: Root directory of dataset where ``CIFAR10/processed/training.pt``
+        data_dir: Root directory of dataset where ``CIFAR10/processed/training.pt``
             and  ``CIFAR10/processed/test.pt`` exist.
         train: If ``True``, creates dataset from ``training.pt``,
             otherwise from ``test.pt``.
@@ -63,13 +63,13 @@ class CIFAR10(LightDataset):
 
     def __init__(
             self,
-            root: str,
+            data_dir: str = os.getcwd(),
             train: bool = True,
             transform: Callable = None,
             download: bool = True
     ):
         super().__init__()
-        self.root_path = root
+        self.dir_path = data_dir
         self.train = train  # training set or test set
         self.transform = transform
 
@@ -130,7 +130,7 @@ class CIFAR10(LightDataset):
         if self._check_exists(self.cached_folder_path, (self.TRAIN_FILE_NAME, self.TEST_FILE_NAME)):
             return
 
-        base_path = os.path.join(self.root_path, self.DATASET_NAME)
+        base_path = os.path.join(self.dir_path, self.DATASET_NAME)
         if download:
             self.download(base_path)
         self._extract_archive_save_torch(base_path)
@@ -148,7 +148,7 @@ class TrialCIFAR10(CIFAR10):
     without the torchvision dependency.
 
     Args:
-        root: Root directory of dataset where ``CIFAR10/processed/training.pt``
+        data_dir: Root directory of dataset where ``CIFAR10/processed/training.pt``
             and  ``CIFAR10/processed/test.pt`` exist.
         train: If ``True``, creates dataset from ``training.pt``,
             otherwise from ``test.pt``.
@@ -173,7 +173,7 @@ class TrialCIFAR10(CIFAR10):
     """
     def __init__(
             self,
-            root: str,
+            data_dir: str = os.getcwd(),
             train: bool = True,
             transform: Callable = None,
             download: bool = False,
@@ -188,7 +188,7 @@ class TrialCIFAR10(CIFAR10):
         self.cache_folder_name = f'labels-{"-".join(str(d) for d in sorted(self.labels))}_nb-{self.num_samples}'
 
         super().__init__(
-            root,
+            data_dir,
             train=train,
             transform=transform,
             download=download

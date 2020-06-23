@@ -17,20 +17,16 @@ class LightDataset(ABC, Dataset):
     data: torch.Tensor
     targets: torch.Tensor
     normalize: tuple
-    root_path: str
+    dir_path: str
     cache_folder_name: str
     DATASET_NAME = 'light'
 
     def __len__(self) -> int:
         return len(self.data)
 
-    @abstractmethod
-    def normalize_tensor(self, img: Tensor, mean, std) -> Tensor:
-        """Normalise image."""
-
     @property
     def cached_folder_path(self) -> str:
-        return os.path.join(self.root_path, self.DATASET_NAME, self.cache_folder_name)
+        return os.path.join(self.dir_path, self.DATASET_NAME, self.cache_folder_name)
 
     @staticmethod
     def _prepare_subset(

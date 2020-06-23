@@ -184,10 +184,10 @@ class AMDIM(pl.LightningModule):
             eps=1e-7
         )
 
-        if self.hparams.datamodule in ['cifar10', 'stl10', 'cifar100']:
-            lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
-        else:
-            lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
+        # if self.hparams.datamodule in ['cifar10', 'stl10', 'cifar100']:
+        #     lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
+        # else:
+        #     lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
 
         return opt  # [opt], [lr_scheduler]
 
