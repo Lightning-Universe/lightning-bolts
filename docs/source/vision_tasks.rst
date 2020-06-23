@@ -22,6 +22,8 @@ The AMDIM taks compares feature maps from different layers of an encoder applied
 Each individual AMDIM task then combines each of these feature maps in a particular way.
 below, we implement the original task, along with a few derivations.
 
+-------------
+
 AMDIM_15_17_55_ContrastiveTask
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
