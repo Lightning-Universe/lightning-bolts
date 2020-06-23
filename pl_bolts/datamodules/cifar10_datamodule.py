@@ -26,7 +26,6 @@ class CIFAR10(LightDataset):
             and  ``CIFAR10/processed/test.pt`` exist.
         train: If ``True``, creates dataset from ``training.pt``,
             otherwise from ``test.pt``.
-        normalize: mean and std deviation of the MNIST dataset.
         download: If true, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
@@ -144,7 +143,6 @@ class TrialCIFAR10(CIFAR10):
             and  ``CIFAR10/processed/test.pt`` exist.
         train: If ``True``, creates dataset from ``training.pt``,
             otherwise from ``test.pt``.
-        normalize: mean and std deviation of the MNIST dataset.
         download: If true, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
@@ -242,19 +240,12 @@ class CIFAR10DataModule(LightningDataModule):
 
     @property
     def num_classes(self) -> int:
-        """
-        Return:
-            10
-        """
+        """Return number of classes."""
         return len(self.labels)
 
     @property
-    def size(self) -> Tuple:
-        """
-        Return:
-
-            (1, 32, 32)
-        """
+    def size(self) -> Tuple[int, int, int]:
+        """Return sample dimensions"""
         return 3, 32, 32
 
     def prepare_data(self):

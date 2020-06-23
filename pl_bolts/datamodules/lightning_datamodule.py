@@ -45,8 +45,9 @@ class LightningDataModule(object):
         """
         super().__init__()
 
+    @property
     @abstractmethod
-    def size(self):
+    def size(self) -> Tuple:
         """
         Return the dimension of each input
         Either as a tuple or list of tuples
