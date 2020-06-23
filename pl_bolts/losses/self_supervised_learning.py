@@ -354,6 +354,19 @@ class AMDIM_15_17_55_ContrastiveTask(AMDIMContrastiveTask):
             loss55 = phi(f5, g5)
 
             total_loss = loss15 + loss17 + loss55
+
+        To use this task, pass in two sets of feature maps
+
+        Example::
+
+            task = AMDIM_15_17_55_ContrastiveTask()
+
+            # 3 feature maps per image
+            f1, f5, f7 = encoder(x_pos)
+            g1, g5, g7 = encoder(x_anchor)
+
+            loss, regularizer = task(x1_maps=(f1, f5, f7), x2_maps=(g1, g5, g7))
+
         """
         super(self).__init__(tclip)
 
