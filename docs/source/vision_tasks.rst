@@ -38,6 +38,10 @@ We implement a few tasks inspired by `AMDIM (Philip Bachman, R Devon Hjelm, Will
 
 --------------
 
+Context prediction tasks
+------------------------
+The following tasks aim to predict a target using a context representation.
+
 CPCContrastiveTask
 ^^^^^^^^^^^^^^^^^^
 This is the predictive task from CPC (v2).
