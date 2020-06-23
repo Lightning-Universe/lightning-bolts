@@ -64,6 +64,7 @@ class CIFAR10(LightDataset):
     TEST_FILE_NAME = 'test.pt'
     DATASET_NAME = 'CIFAR10'
     labels = set(range(10))
+    relabel = False
 
     def __init__(
             self,
@@ -93,7 +94,8 @@ class CIFAR10(LightDataset):
         if self.transform is not None:
             img = img.numpy().transpose((1, 2, 0))  # convert to HWC
             img = self.transform(Image.fromarray(img))
-        target = list(self.labels).index(target)
+        if self.relabel:
+            target = list(self.labels).index(target)
         return img, target
 
     @classmethod
@@ -183,12 +185,14 @@ class TrialCIFAR10(CIFAR10):
             transform: Callable = None,
             download: bool = False,
             num_samples: int = 100,
-            labels: Optional[Sequence] = (1, 5, 8)
+            labels: Optional[Sequence] = (1, 5, 8),
+            relabel: bool = True,
     ):
         # number of examples per class
         self.num_samples = num_samples
         # take just a subset of CIFAR dataset
         self.labels = labels if labels else list(range(10))
+        self.relabel = relabel
 
         self.cache_folder_name = f'labels-{"-".join(str(d) for d in sorted(self.labels))}_nb-{self.num_samples}'
 
