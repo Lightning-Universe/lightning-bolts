@@ -80,12 +80,12 @@ jobs:
         pip list
       shell: bash
 
-#    - name: Cache datasets
-#      uses: actions/cache@v1
-#      with:
-#        path: tests/Datasets # This path is specific to Ubuntu
-#        # Look to see if there is a cache hit for the corresponding requirements file
-#        key: mnist-dataset
+    - name: Cache datasets
+      uses: actions/cache@v1
+      with:
+        path: Datasets # This path is specific to Ubuntu
+        # Look to see if there is a cache hit for the corresponding requirements file
+        key: pl-datasets
 
     - name: Tests
       # env:
