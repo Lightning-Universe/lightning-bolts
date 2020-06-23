@@ -30,9 +30,9 @@ class Reinforce(pl.LightningModule):
     def __init__(self, env: str, gamma: float = 0.99, lr: float = 1e-4, batch_size: int = 32,
                  batch_episodes: int = 4) -> None:
         """
-        PyTorch Lightning implementation of `REINFORCE <TODO>`_
+        PyTorch Lightning implementation of `REINFORCE <https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
 
-        Paper authors: TODO
+        Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
 
         Model implemented by:
 

@@ -28,7 +28,7 @@ class TestPolicyModels(TestCase):
         )
 
     def test_reinforce(self):
-        """Smoke test that the DQN model runs"""
+        """Smoke test that the reinforce model runs"""
 
         model = Reinforce(self.hparams.env)
         result = self.trainer.fit(model)
@@ -36,8 +36,8 @@ class TestPolicyModels(TestCase):
         self.assertEqual(result, 1)
 
     def test_PolicyGradient(self):
-        """Smoke test that the Double DQN model runs"""
-        model = PolicyGradient(self.hparams)
+        """Smoke test that the policy gradient model runs"""
+        model = PolicyGradient(self.hparams.env)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)
