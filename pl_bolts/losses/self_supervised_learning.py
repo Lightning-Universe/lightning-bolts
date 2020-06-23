@@ -185,7 +185,7 @@ class AmdimNCELoss(nn.Module):
         return nce_scores, lgt_reg
 
 
-class AMDIMContrastiveTask(nn.Module):
+class FeatureMapContrastiveTask(nn.Module):
 
     def __init__(self, tclip=10.):
         super().__init__()
@@ -236,7 +236,7 @@ class AMDIMContrastiveTask(nn.Module):
         return self.contrastive_task(x1_maps, x2_maps)
 
 
-class AMDIM_11_55_77_ContrastiveTask(AMDIMContrastiveTask):
+class AMDIM_11_55_77_ContrastiveTask(FeatureMapContrastiveTask):
 
     def __init__(self, tclip=10.0):
         """
@@ -335,7 +335,7 @@ class AMDIM_11_55_77_ContrastiveTask(AMDIMContrastiveTask):
         return loss_1t1 + loss_5t5 + loss_7t7, regularizer
 
 
-class AMDIM_15_17_55_ContrastiveTask(AMDIMContrastiveTask):
+class ContrastiveTask_15_17_55(FeatureMapContrastiveTask):
 
     def __init__(self, tclip=10.0):
         """
@@ -359,7 +359,7 @@ class AMDIM_15_17_55_ContrastiveTask(AMDIMContrastiveTask):
 
         Example::
 
-            task = AMDIM_15_17_55_ContrastiveTask()
+            task = ContrastiveTask_15_17_55()
 
             # 3 feature maps per image
             # each feature map is (batch, channels, n, n) where fn, gn
@@ -452,7 +452,7 @@ class AMDIM_15_17_55_ContrastiveTask(AMDIMContrastiveTask):
         return loss_1t1 + loss_5t5 + loss_7t7, regularizer
 
 
-class AMDIM_1Random_ContrastiveTask(AMDIMContrastiveTask):
+class AMDIM_1Random_ContrastiveTask(FeatureMapContrastiveTask):
 
     def contrastive_task(self, x1_maps, x2_maps):
         r1_x1, r5_x1, r7_x1 = x1_maps
@@ -507,7 +507,7 @@ class AMDIM_1Random_ContrastiveTask(AMDIMContrastiveTask):
         return loss_1tR, regularizer
 
 
-class AMDIM_11_ContrastiveTask(AMDIMContrastiveTask):
+class AMDIM_11_ContrastiveTask(FeatureMapContrastiveTask):
 
     def contrastive_task(self, x1_maps, x2_maps):
         # (b, dim, w. h)

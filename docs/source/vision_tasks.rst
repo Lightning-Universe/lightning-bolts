@@ -27,7 +27,7 @@ We implement a few tasks inspired by `AMDIM (Philip Bachman, R Devon Hjelm, Will
 (15, 17, 55) Contrastive Task
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: pl_bolts.losses.self_supervised_learning.AMDIM_15_17_55_ContrastiveTask
+.. autoclass:: pl_bolts.losses.self_supervised_learning.ContrastiveTask_15_17_55
     :noindex:
 
 --------------
