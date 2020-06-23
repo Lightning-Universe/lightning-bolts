@@ -24,8 +24,8 @@ below, we implement the original task, along with a few derivations.
 
 -------------
 
-AMDIM_15_17_55_ContrastiveTask
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(15, 17, 55) Contrastive Task
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: pl_bolts.losses.self_supervised_learning.AMDIM_15_17_55_ContrastiveTask
     :noindex:
