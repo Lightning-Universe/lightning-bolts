@@ -93,7 +93,7 @@ class CIFAR10(LightDataset):
         if self.transform is not None:
             img = img.numpy().transpose((1, 2, 0))  # convert to HWC
             img = self.transform(Image.fromarray(img))
-
+        target = list(self.labels).index(target)
         return img, target
 
     @classmethod

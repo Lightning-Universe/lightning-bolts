@@ -145,9 +145,9 @@ class TinyCIFAR10DataModule(LightningDataModule):
     def __init__(
             self,
             data_dir: str,
-            val_split: int = 250,
+            val_split: int = 50,
             num_workers: int = 16,
-            num_samples: int = 500,
+            num_samples: int = 100,
             labels: Optional[Sequence] = (1, 5, 8)):
         """
         Standard CIFAR10, train, val, test splits and transforms
@@ -179,7 +179,7 @@ class TinyCIFAR10DataModule(LightningDataModule):
         self.val_split = val_split
         self.num_workers = num_workers
         self.num_samples = num_samples
-        self.labels = labels if labels is not None else set(range(10))
+        self.labels = sorted(labels) if labels is not None else set(range(10))
 
     @property
     def num_classes(self) -> int:
