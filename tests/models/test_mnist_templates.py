@@ -1,5 +1,4 @@
 import pytorch_lightning as pl
-from argparse import Namespace
 
 from pl_bolts.models import LitMNIST
 from tests import reset_seed

@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
-from pl_bolts.models.self_supervised import CPCV2, AMDIM, SimCLR, MocoV2
+
+from pl_bolts.models.self_supervised import CPCV2, AMDIM
 from tests import reset_seed
-from argparse import Namespace, ArgumentParser
 
 
 def test_cpcv2(tmpdir):
