@@ -362,6 +362,8 @@ class AMDIM_15_17_55_ContrastiveTask(AMDIMContrastiveTask):
             task = AMDIM_15_17_55_ContrastiveTask()
 
             # 3 feature maps per image
+            # each feature map is (batch, channels, n, n) where fn, gn
+            # (ie: f5 = (b, c, 5, 5))
             f1, f5, f7 = encoder(x_pos)
             g1, g5, g7 = encoder(x_anchor)
 
