@@ -69,7 +69,7 @@ class TestValueModels(TestCase):
 
     def test_n_step_dqn(self):
         """Smoke test that the N Step DQN model runs"""
-        model = NStepDQN(self.hparams)
+        model = NStepDQN(self.hparams.env)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)
