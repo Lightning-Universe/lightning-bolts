@@ -339,8 +339,8 @@ class AMDIM_15_17_55_ContrastiveTask(AMDIMContrastiveTask):
 
     def __init__(self, tclip=10.0):
         """
-        This is the original task from
-        AMDIM (`Philip Bachman, R Devon Hjelm, William Buchwalter <https://arxiv.org/abs/1906.00910>`_).
+        This task is used in AMDIM
+        (`Philip Bachman, R Devon Hjelm, William Buchwalter <https://arxiv.org/abs/1906.00910>`_).
 
         This implementation is adapted from the `original repo <https://github.com/Philip-Bachman/amdim-public>`_.
 

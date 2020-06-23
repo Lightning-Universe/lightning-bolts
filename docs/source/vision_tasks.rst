@@ -1,7 +1,7 @@
-AMDIM Tasks
-===========
-The following are pretext tasks used in the style of AMDIM.
-In general the AMDIM pretext task uses triplets of features, the positive and anchor features
+Feature map contrastive tasks
+=============================
+The following are pretext tasks used to compare sets of feature maps.
+In general the feature map comparison pretext task uses triplets of features, the positive and anchor features
 come from different augmentations of the same image, while the negative features come from another image
 
 .. code-block:: python
@@ -10,7 +10,7 @@ come from different augmentations of the same image, while the negative features
     x_anchor = data_augmentation(x1)
     x_negative = data_augmentation(x2)
 
-The AMDIM taks compares feature maps from different layers of an encoder applied to each input
+The task compares feature maps from different layers of an encoder applied to each input
 
 .. code-block:: python
 
@@ -19,8 +19,8 @@ The AMDIM taks compares feature maps from different layers of an encoder applied
     (f1, f5, f7) = encoder(x_pos)
     (g1, g5, g7) = encoder(r_anchor)
 
-Each individual AMDIM task then combines each of these feature maps in a particular way.
-below, we implement the original task, along with a few derivations.
+We implement a few tasks inspired by `AMDIM (Philip Bachman, R Devon Hjelm, William Buchwalter
+<https://arxiv.org/abs/1906.00910>`_)`
 
 -------------
 
