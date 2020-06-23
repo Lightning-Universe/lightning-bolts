@@ -14,8 +14,7 @@ from pytorch_lightning.utilities import rank_zero_warn
 from torch.optim.lr_scheduler import MultiStepLR
 
 from pl_bolts import metrics
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
-from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
+from pl_bolts.datamodules import get_datamodule
 from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
@@ -149,19 +148,8 @@ class CPCV2(pl.LightningModule):
             return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=self.hparams.amdim_task)
 
     def get_dataset(self, name):
-        if name == 'cifar10':
-            return CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        elif name == 'stl10':
-            return STL10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        elif name == 'imagenet2012':
-            return SSLImagenetDataModule(
-                self.hparams.data_dir,
-                meta_root=self.hparams.meta_root,
-                num_workers=self.hparams.num_workers
-            )
-        else:
-            raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
-                                    f'your own \'')
+        extra = dict(meta_root=self.hparams.meta_root) if name == 'imagenet2012' else {}
+        return get_datamodule(name, data_dir=self.hparams.data_dir, num_workers=self.hparams.num_workers, **extra)
 
     def __compute_final_nb_c(self, patch_size):
         dummy_batch = torch.zeros((2 * 49, 3, patch_size, patch_size))

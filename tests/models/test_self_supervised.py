@@ -7,7 +7,7 @@ from tests import reset_seed
 def test_cpcv2(tmpdir):
     reset_seed()
 
-    model = CPCV2(data_dir=tmpdir, batch_size=2)
+    model = CPCV2(data_dir=tmpdir, batch_size=2, dataset='tiny-cifar10')
     trainer = pl.Trainer(overfit_batches=2, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
