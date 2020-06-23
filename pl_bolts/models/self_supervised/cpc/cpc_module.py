@@ -6,6 +6,7 @@ import math
 from argparse import ArgumentParser
 
 import pytorch_lightning as pl
+import pytorch_lightning
 import torch
 from torchvision import models
 import torch.nn.functional as F
@@ -13,13 +14,16 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
 
 from pl_bolts import metrics
-from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
-from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
-from pl_bolts.losses.self_supervised_learning import InfoNCE
+from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
+from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
+from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-from pl_bolts.utils import torchvision_ssl_encoder
+from pl_bolts.utils.ssl_utils import torchvision_ssl_encoder
+from pl_bolts.utils.pretrained_weights import load_pretrained
+from pytorch_lightning.utilities import rank_zero_warn
+from typing import Union
 
 __all__ = [
     'CPCV2'
@@ -28,18 +32,93 @@ __all__ = [
 
 class CPCV2(pl.LightningModule):
 
-    def __init__(self, hparams):
+    def __init__(self,
+                 encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'cpc_encoder',
+                 patch_size: int = 8,
+                 patch_overlap: int = 4,
+                 online_ft: int = True,
+                 task: str = 'cpc',
+                 dataset: str = 'cifar10',
+                 num_workers: int = 4,
+                 learning_rate: int = 1e-4,
+                 data_dir: str = '',
+                 meta_root: str = '',
+                 batch_size: int = 32,
+                 amdim_task=False,
+                 pretrained: str = None,
+                 **kwargs):
+        """
+        PyTorch Lightning implementation of `Data-Efficient Image Recognition with Contrastive Predictive Coding
+        <https://arxiv.org/abs/1905.09272>`_
+
+        Paper authors: (Olivier J. Hénaff, Aravind Srinivas, Jeffrey De Fauw, Ali Razavi,
+        Carl Doersch, S. M. Ali Eslami, Aaron van den Oord).
+
+        Model implemented by:
+
+            - `William Falcon <https://github.com/williamFalcon>`_
+            - `Tullie Murrel <https://github.com/tullie>`_
+
+        Example:
+
+            >>> from pl_bolts.models.self_supervised import CPCV2
+            ...
+            >>> model = CPCV2()
+
+        Train::
+
+            trainer = Trainer()
+            trainer.fit(model)
+
+        Some uses::
+
+            # load resnet18 pretrained using CPC on imagenet
+            model = CPCV2(encoder='resnet18', pretrained=True)
+            resnet18 = model.encoder
+            renset18.freeze()
+
+            # it supportes any torchvision resnet
+            model = CPCV2(encoder='resnet50', pretrained=True)
+
+            # use it as a feature extractor
+            x = torch.rand(2, 3, 224, 224)
+            out = model(x)
+
+        Args:
+            encoder: A string for any of the resnets in torchvision, or the original CPC encoder,
+                or a custon nn.Module encoder
+            patch_size: How big to make the image patches
+            patch_overlap: How much overlap should each patch have.
+            online_ft: Enable a 1024-unit MLP to fine-tune online
+            task: Which self-supervised task to use ('cpc', 'amdim', etc...)
+            dataset: Dataset name
+            num_workers: num dataloader worksers
+            learning_rate: what learning rate to use
+            data_dir: where to store data
+            meta_root: path to the imagenet meta.bin file (if not inside your imagenet folder)
+            batch_size: batch size
+            pretrained: If true, will use the weights pretrained (using CPC) on Imagenet
+        """
+
         super().__init__()
+        self.save_hyperparameters()
 
-        self.hparams = hparams
         self.online_evaluator = self.hparams.online_ft
-        self.dataset = self.get_dataset(hparams.dataset)
 
-        self.encoder = self.init_encoder()
+        if pretrained:
+            self.hparams.dataset = pretrained
+            self.online_evaluator = True
+
+        self.dataset = self.get_dataset(self.hparams.dataset)
+
+        # init encoder
+        self.encoder = encoder
+        if isinstance(encoder, str):
+            self.encoder = self.init_encoder()
 
         # info nce loss
-        c, h = self.__compute_final_nb_c(hparams.patch_size)
-        self.info_nce = InfoNCE(num_input_channels=c, target_dim=64, embed_scale=0.1)
+        c, h = self.__compute_final_nb_c(self.hparams.patch_size)
+        self.info_nce = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
         if self.online_evaluator:
             z_dim = c * h * h
@@ -50,6 +129,17 @@ class CPCV2(pl.LightningModule):
                 p=0.2,
                 n_hidden=1024
             )
+
+        if pretrained:
+            self.load_pretrained(encoder)
+
+    def load_pretrained(self, encoder):
+        available_weights = {'resnet18'}
+
+        if encoder in available_weights:
+            load_pretrained(self, f'CPCV2-{encoder}')
+        elif available_weights not in available_weights:
+            rank_zero_warn(f'{encoder} not yet available')
 
     def init_encoder(self):
         dummy_batch = torch.zeros((2, 3, self.hparams.patch_size, self.hparams.patch_size))
@@ -62,13 +152,15 @@ class CPCV2(pl.LightningModule):
 
     def get_dataset(self, name):
         if name == 'cifar10':
-            return CIFAR10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            return CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'stl10':
-            return STL10DataLoaders(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        elif name == 'imagenet128':
-            return SSLImagenetDataLoaders(self.hparams.data_dir,
-                                          meta_root=self.hparams.meta_root,
-                                          num_workers=self.hparams.num_workers)
+            return STL10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+        elif name == 'imagenet2012':
+            return SSLImagenetDataModule(
+                self.hparams.data_dir,
+                meta_root=self.hparams.meta_root,
+                num_workers=self.hparams.num_workers
+            )
         else:
             raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
                                     f'your own \'')
@@ -195,7 +287,7 @@ class CPCV2(pl.LightningModule):
             log['val_mlp_acc'] = mlp_acc
             log['val_mlp_loss'] = mlp_loss
 
-        return {'val_loss': val_nce, 'log': log}
+        return {'val_loss': val_nce, 'log': log, 'progress_bar': log}
 
     def configure_optimizers(self):
         opt = optim.Adam(
@@ -208,7 +300,7 @@ class CPCV2(pl.LightningModule):
 
         if self.hparams.dataset in ['cifar10', 'stl10']:
             lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
-        elif self.hparams.dataset == 'imagenet128':
+        elif self.hparams.dataset == 'imagenet2012':
             lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
 
         return [opt]  # , [lr_scheduler]
@@ -219,22 +311,22 @@ class CPCV2(pl.LightningModule):
     def train_dataloader(self):
         loader = None
         if self.hparams.dataset == 'cifar10':
-            train_transform = cpc_transforms.CPCTransformsCIFAR10().train_transform
+            train_transform = cpc_transforms.CPCTransformsCIFAR10()
 
         elif self.hparams.dataset == 'stl10':
             stl10_transform = cpc_transforms.CPCTransformsSTL10Patches(
                 patch_size=self.hparams.patch_size,
                 overlap=self.hparams.patch_overlap
             )
-            train_transform = stl10_transform.train_transform
+            train_transform = stl10_transform
             loader = self.dataset.train_dataloader_mixed(self.hparams.batch_size, transforms=train_transform)
 
-        if self.hparams.dataset == 'imagenet128':
+        if self.hparams.dataset == 'imagenet2012':
             train_transform = cpc_transforms.CPCTransformsImageNet128Patches(
                 self.hparams.patch_size,
                 overlap=self.hparams.patch_overlap
             )
-            train_transform = train_transform.train_transform
+            train_transform = train_transform
 
         if loader is None:
             loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
@@ -253,7 +345,7 @@ class CPCV2(pl.LightningModule):
             test_transform = stl10_transform.test_transform
             loader = self.dataset.val_dataloader_mixed(self.hparams.batch_size, transforms=test_transform)
 
-        if self.hparams.dataset == 'imagenet128':
+        if self.hparams.dataset == 'imagenet2012':
             test_transform = cpc_transforms.CPCTransformsImageNet128Patches(
                 self.hparams.patch_size,
                 overlap=self.hparams.patch_overlap
@@ -269,7 +361,7 @@ class CPCV2(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true')
-        parser.add_argument('--amdim_task', action='store_true')
+        parser.add_argument('--task', type=str, default='cpc')
         parser.add_argument('--dataset', type=str, default='cifar10')
 
         (args, _) = parser.parse_known_args()
@@ -303,8 +395,8 @@ class CPCV2(pl.LightningModule):
             ]
         }
 
-        imagenet128 = {
-            'dataset': 'imagenet128',
+        imagenet2012 = {
+            'dataset': 'imagenet2012',
             'depth': 10,
             'patch_size': 32,
             'batch_size': 48,
@@ -318,7 +410,7 @@ class CPCV2(pl.LightningModule):
         DATASETS = {
             'cifar10': cifar_10,
             'stl10': stl10,
-            'imagenet128': imagenet128
+            'imagenet2012': imagenet2012
         }
 
         dataset = DATASETS[args.dataset]
@@ -328,7 +420,6 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--encoder', default='cpc_encoder', type=str)
 
         # dataset options
-        parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int)
         parser.add_argument('--patch_size', default=dataset['patch_size'], type=int)
         parser.add_argument('--patch_overlap', default=dataset['patch_overlap'], type=int)
 
@@ -353,6 +444,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args.online_ft = True
 
-    model = CPCV2(args)
+    model = CPCV2(**vars(args))
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)

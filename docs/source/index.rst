@@ -5,9 +5,6 @@
 
 PyTorchLightning-Bolts documentation
 ====================================
-
-.. include:: intro.rst
-
 .. toctree::
    :maxdepth: 1
    :name: start
@@ -21,6 +18,7 @@ PyTorchLightning-Bolts documentation
    :caption: Callbacks
 
    callbacks
+   info_callbacks
 
 .. toctree::
    :maxdepth: 2
@@ -28,6 +26,15 @@ PyTorchLightning-Bolts documentation
    :caption: DataModules
 
    datamodules
+   sklearn_datamodule
+   vision_datamodules
+
+.. toctree::
+   :maxdepth: 2
+   :name: losses
+   :caption: Losses
+
+   losses
 
 .. toctree::
    :maxdepth: 2
@@ -41,7 +48,11 @@ PyTorchLightning-Bolts documentation
    :name: models
    :caption: Models
 
-   models
+   autoencoders
+   classic_ml
+   gans
+   rl
+   self_supervised_models
 
 .. toctree::
    :maxdepth: 2
@@ -49,6 +60,13 @@ PyTorchLightning-Bolts documentation
    :caption: Transforms
 
    transforms
+
+.. toctree::
+   :maxdepth: 2
+   :name: ssl
+   :caption: Self-supervised learning
+
+   vision_tasks
 
 
 Indices and tables
@@ -72,3 +90,4 @@ Indices and tables
    api/pl_bolts.loggers
    api/pl_bolts.optimizers
    api/pl_bolts.transforms
+   api/pl_bolts.utils

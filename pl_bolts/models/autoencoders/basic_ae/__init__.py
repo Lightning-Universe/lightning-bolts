@@ -17,9 +17,10 @@ The default encoder and decoder are both convolutional with a 128-dimensional hi
 
 .. code-block:: python
 
-    from pl_bolts.models.autoencoders import BasicAE
+    from pl_bolts.models.autoencoders import AE
 
-    model = BasicAE()
+    model = AE()
     trainer = pl.Trainer()
     trainer.fit(model)
 """
+from pl_bolts.models.autoencoders.basic_ae.components import AEEncoder

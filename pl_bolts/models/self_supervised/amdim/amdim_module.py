@@ -6,29 +6,82 @@ import torch
 import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
+import pl_bolts
 
 from pl_bolts.losses.self_supervised_learning import AMDIMContrastiveTask
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
+from typing import Union
 
 
 class AMDIM(pl.LightningModule):
 
-    def __init__(self, hparams):
+    def __init__(self,
+                 datamodule: Union[str, pl_bolts.datamodules.LightningDataModule] = 'cifar10',
+                 image_channels: int = 3,
+                 image_height: int = 32,
+                 encoder_feature_dim: int = 320,
+                 embedding_fx_dim: int = 1280,
+                 conv_block_depth: int = 10,
+                 use_bn: bool = False,
+                 tclip: int = 20.0,
+                 learning_rate: int = 2e-4,
+                 data_dir: str = '',
+                 num_classes: int = 10,
+                 batch_size: int = 200,
+                 **kwargs
+                 ):
+        """
+        PyTorch Lightning implementation of
+        `Augmented Multiscale Deep InfoMax (AMDIM) <https://arxiv.org/abs/1906.00910.>`_
+
+        Paper authors: Philip Bachman, R Devon Hjelm, William Buchwalter.
+
+        Model implemented by: `William Falcon <https://github.com/williamFalcon>`_
+
+        This code is adapted to Lightning using the original author repo
+        (`the original repo <https://github.com/Philip-Bachman/amdim-public>`_).
+
+        Example:
+
+            >>> from pl_bolts.models.self_supervised import AMDIM
+            ...
+            >>> model = AMDIM()
+            Using a 32x32 encoder
+
+        Train::
+
+            trainer = Trainer()
+            trainer.fit(model)
+
+        Args:
+            image_channels: 3
+            image_height: pixels
+            encoder_feature_dim: Called `ndf` in the paper, this is the representation size for the encoder.
+            embedding_fx_dim: Output dim of the embedding function (`nrkhs` in the paper)
+                (Reproducing Kernel Hilbert Spaces).
+            conv_block_depth: Depth of each encoder block,
+            use_bn: If true will use batchnorm.
+            tclip: soft clipping non-linearity to the scores after computing the regularization term
+                and before computing the log-softmax. This is the 'second trick' used in the paper
+            learning_rate: The learning rate
+            data_dir: Where to store data
+            num_classes: How many classes in the dataset
+            batch_size: The batch size
+        """
         super().__init__()
+        self.save_hyperparameters()
 
-        self.hparams = hparams
-
-        dummy_batch = torch.zeros((2, 3, hparams.image_height, hparams.image_height))
+        dummy_batch = torch.zeros((2, image_channels, self.hparams.image_height, self.hparams.image_height))
 
         self.encoder = AMDIMEncoder(
             dummy_batch,
-            num_channels=3,
-            ndf=hparams.ndf,
-            n_rkhs=hparams.n_rkhs,
-            n_depth=hparams.n_depth,
-            encoder_size=hparams.image_height,
-            use_bn=hparams.use_bn
+            num_channels=self.hparams.image_channels,
+            encoder_feature_dim=self.hparams.encoder_feature_dim,
+            embedding_fx_dim=self.hparams.embedding_fx_dim,
+            conv_block_depth=self.hparams.conv_block_depth,
+            encoder_size=self.hparams.image_height,
+            use_bn=self.hparams.use_bn
         )
         self.encoder.init_weights()
 
@@ -72,7 +125,7 @@ class AMDIM(pl.LightningModule):
 
         return result
 
-    def training_epoch_end(self, outputs):
+    def training_step_end(self, outputs):
         r1_x1 = outputs['r1_x1']
         r5_x1 = outputs['r5_x1']
         r7_x1 = outputs['r7_x1']
@@ -82,8 +135,8 @@ class AMDIM(pl.LightningModule):
 
         # ------------------
         # NCE LOSS
-        loss_1t5, loss_1t7, loss_5t5, lgt_reg = self.nce_loss(r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2)
-        unsupervised_loss = loss_1t5 + loss_1t7 + loss_5t5 + lgt_reg
+        loss, lgt_reg = self.nce_loss((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
+        unsupervised_loss = loss + lgt_reg
 
         # ------------------
         # FULL LOSS
@@ -104,8 +157,8 @@ class AMDIM(pl.LightningModule):
         r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2 = self.forward(img_1, img_2)
 
         # NCE LOSS
-        loss_1t5, loss_1t7, loss_5t5, lgt_reg = self.nce_loss(r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2)
-        unsupervised_loss = loss_1t5 + loss_1t7 + loss_5t5 + lgt_reg
+        loss, lgt_reg = self.nce_loss((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
+        unsupervised_loss = loss + lgt_reg
 
         result = {
             'val_nce': unsupervised_loss
@@ -130,7 +183,7 @@ class AMDIM(pl.LightningModule):
             eps=1e-7
         )
 
-        if self.hparams.dataset_name in ['CIFAR10', 'stl_10', 'CIFAR100']:
+        if self.hparams.datamodule in ['cifar10', 'stl10', 'cifar100']:
             lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
         else:
             lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
@@ -138,14 +191,14 @@ class AMDIM(pl.LightningModule):
         return opt  # [opt], [lr_scheduler]
 
     def train_dataloader(self):
-        if self.hparams.dataset_name == 'CIFAR10':
+        if self.hparams.datamodule == 'cifar10':
             dataset = AMDIMPretraining.cifar10_train(self.hparams.data_dir)
 
-        if self.hparams.dataset_name == 'stl_10':
+        if self.hparams.datamodule == 'stl10':
             self.tng_split, self.val_split = AMDIMPretraining.stl_train(self.hparams.data_dir)
             dataset = self.tng_split
 
-        if self.hparams.dataset_name == 'imagenet_128':
+        if self.hparams.datamodule == 'imagenet2012':
             dataset = AMDIMPretraining.imagenet_train(self.hparams.data_dir, self.hparams.nb_classes)
 
         # LOADER
@@ -159,13 +212,13 @@ class AMDIM(pl.LightningModule):
         return loader
 
     def val_dataloader(self):
-        if self.hparams.dataset_name == 'CIFAR10':
+        if self.hparams.datamodule == 'cifar10':
             dataset = AMDIMPretraining.cifar10_val(self.hparams.data_dir)
 
-        if self.hparams.dataset_name == 'stl_10':
+        if self.hparams.datamodule == 'stl10':
             dataset = self.val_split
 
-        if self.hparams.dataset_name == 'imagenet_128':
+        if self.hparams.datamodule == 'imagenet2012':
             dataset = AMDIMPretraining.imagenet_val(self.hparams.data_dir, self.hparams.nb_classes)
 
         # LOADER
@@ -181,11 +234,12 @@ class AMDIM(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        parser.add_argument('--datamodule', type=str, default='cifar10')
 
         # CIFAR 10
         cf_root_lr = 2e-4
         cifar_10 = {
-            'dataset_name': 'CIFAR10',
+            'dataset': 'cifar10',
             'ndf': 320,
             'n_rkhs': 1280,
             'depth': 10,
@@ -209,8 +263,8 @@ class AMDIM(pl.LightningModule):
 
         # stl-10
         stl_root_lr = 2e-4
-        stl_10 = {
-            'dataset_name': 'stl_10',
+        stl10 = {
+            'dataset': 'stl10',
             'ndf': 192,
             'n_rkhs': 1536,
             'depth': 8,
@@ -233,8 +287,8 @@ class AMDIM(pl.LightningModule):
         }
 
         imagenet_root_lr = 2e-4
-        imagenet_128 = {
-            'dataset_name': 'imagenet_128',
+        imagenet2012 = {
+            'dataset': 'imagenet2012',
             'ndf': 320,
             'n_rkhs': 2560,
             'depth': 10,
@@ -256,8 +310,8 @@ class AMDIM(pl.LightningModule):
             ]
         }
 
-        imagenet_128_large = {
-            'dataset_name': 'imagenet_128',
+        imagenet2012_large = {
+            'dataset': 'imagenet2012',
             'ndf': 320,
             'n_rkhs': 2560,
             'depth': 10,
@@ -279,26 +333,30 @@ class AMDIM(pl.LightningModule):
             ]
         }
 
-        # dataset = cifar_10
-        # dataset = stl_10
-        dataset = cifar_10
+        DATASETS = {
+            'cifar10': cifar_10,
+            'stl10': stl10,
+            'imagenet2012': imagenet2012
+        }
+
+        (args, _) = parser.parse_known_args()
+        dataset = DATASETS[args.datamodule]
 
         # dataset options
-        parser.add_argument('--nb_classes', default=dataset['nb_classes'], type=int)
+        parser.add_argument('--num_classes', default=dataset['nb_classes'], type=int)
 
         # network params
         parser.add_argument('--tclip', type=float, default=20.0, help='soft clipping range for NCE scores')
         parser.add_argument('--use_bn', type=int, default=0)
-        parser.add_argument('--ndf', type=int, default=dataset['ndf'], help='feature width for encoder')
-        parser.add_argument('--n_rkhs', type=int, default=dataset['n_rkhs'],
+        parser.add_argument('--encoder_feature_dim', type=int, default=dataset['ndf'], help='feature size for encoder')
+        parser.add_argument('--embedding_fx_dim', type=int, default=dataset['n_rkhs'],
                             help='number of dimensions in fake RKHS embeddings')
-        parser.add_argument('--n_depth', type=int, default=dataset['depth'])
+        parser.add_argument('--conv_block_depth', type=int, default=dataset['depth'])
         parser.add_argument('--image_height', type=int, default=dataset['image_height'])
 
         # trainin params
         resnets = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
                    'wide_resnet50_2', 'wide_resnet101_2']
-        parser.add_argument('--dataset_name', type=str, default=dataset['dataset_name'])
         parser.add_argument('--batch_size', type=int, default=dataset['batch_size'],
                             help='input batch size (default: 200)')
         parser.add_argument('--learning_rate', type=float, default=0.0002)
@@ -315,6 +373,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    model = AMDIM(args)
-    trainer = pl.Trainer(fast_dev_run=True)
+    model = AMDIM(**vars(args))
+    trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)

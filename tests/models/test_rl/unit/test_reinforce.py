@@ -11,8 +11,8 @@ from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.experience import EpisodicExperienceStream
 from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.common.wrappers import ToTensor
-from pl_bolts.models.rl.dqn.model import DQNLightning
-from pl_bolts.models.rl.reinforce.model import ReinforceLightning
+from pl_bolts.models.rl.dqn.model import DQN
+from pl_bolts.models.rl.reinforce.model import Reinforce
 
 
 class TestReinforce(TestCase):
@@ -28,15 +28,14 @@ class TestReinforce(TestCase):
 
         parent_parser = argparse.ArgumentParser(add_help=False)
         parent_parser = cli.add_base_args(parent=parent_parser)
-        parent_parser = DQNLightning.add_model_specific_args(parent_parser)
+        parent_parser = DQN.add_model_specific_args(parent_parser)
         args_list = [
             "--algo", "dqn",
             "--warm_start_steps", "500",
             "--episode_length", "100",
         ]
         self.hparams = parent_parser.parse_args(args_list)
-
-        self.model = ReinforceLightning(self.hparams)
+        self.model = Reinforce(self.hparams)
 
     def test_loss(self):
         """Test the reinforce loss function"""

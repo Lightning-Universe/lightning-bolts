@@ -3,8 +3,8 @@ from unittest import TestCase
 import pytorch_lightning as pl
 
 from pl_bolts.models.rl.common import cli
-from pl_bolts.models.rl.reinforce.model import ReinforceLightning
-from pl_bolts.models.rl.vanilla_policy_gradient.model import VPGLightning
+from pl_bolts.models.rl.reinforce.model import Reinforce
+from pl_bolts.models.rl.vanilla_policy_gradient.model import PolicyGradient
 
 
 class TestPolicyModels(TestCase):
@@ -12,9 +12,9 @@ class TestPolicyModels(TestCase):
     def setUp(self) -> None:
         parent_parser = argparse.ArgumentParser(add_help=False)
         parent_parser = cli.add_base_args(parent=parent_parser)
-        parent_parser = VPGLightning.add_model_specific_args(parent_parser)
+        parent_parser = PolicyGradient.add_model_specific_args(parent_parser)
         args_list = [
-            "--algo", "vpg",
+            "--algo", "PolicyGradient",
             "--episode_length", "100",
             "--env", "CartPole-v0"
         ]
@@ -29,14 +29,15 @@ class TestPolicyModels(TestCase):
 
     def test_reinforce(self):
         """Smoke test that the DQN model runs"""
-        model = ReinforceLightning(self.hparams)
+
+        model = Reinforce(self.hparams)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)
 
-    def test_vpg(self):
+    def test_PolicyGradient(self):
         """Smoke test that the Double DQN model runs"""
-        model = VPGLightning(self.hparams)
+        model = PolicyGradient(self.hparams)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)

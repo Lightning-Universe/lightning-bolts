@@ -4,10 +4,10 @@ Dueling Deep Q-network
 
 
 from pl_bolts.models.rl.common.networks import DuelingCNN
-from pl_bolts.models.rl.dqn.model import DQNLightning
+from pl_bolts.models.rl.dqn.model import DQN
 
 
-class DuelingDQNLightning(DQNLightning):
+class DuelingDQN(DQN):
     """ Dueling DQN Model """
 
     def build_networks(self) -> None:

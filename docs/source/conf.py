@@ -49,11 +49,6 @@ github_repo = project
 
 
 # -- Project documents -------------------------------------------------------
-
-# export the documentation
-with open('intro.rst', 'w') as fp:
-    fp.write(pl_bolts.__long_doc__)
-
 # export the READme
 with open(os.path.join(PATH_ROOT, 'README.md'), 'r') as fp:
     readme = fp.read()

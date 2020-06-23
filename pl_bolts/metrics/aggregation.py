@@ -15,8 +15,6 @@ def accuracy(preds, labels):
 
     return acc
 
-    result.log('key', val)
-    result.to_pbar()
 
 def precision_at_k(output, target, top_k=(1,)):
     """Computes the accuracy over the k top predictions for the specified values of k"""

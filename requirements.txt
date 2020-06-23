@@ -1,5 +1,6 @@
-pytorch-lightning>=0.7.5
+pytorch-lightning>=0.8.1
 torchvision>=0.5
 scikit-learn>=0.23
 opencv-python
+torch==1.5
 test_tube

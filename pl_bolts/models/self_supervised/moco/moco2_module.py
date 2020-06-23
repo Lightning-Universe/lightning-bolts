@@ -9,56 +9,71 @@ import torch
 import torch.nn.functional as F
 import torchvision
 from torch import nn
+from typing import Union
 
-from pl_bolts.datamodules import CIFAR10DataLoaders, STL10DataLoaders
-from pl_bolts.datamodules.ssl_imagenet_dataloaders import SSLImagenetDataLoaders
+from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
+from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.models.self_supervised.moco.transforms import \
-    Moco2Imagenet128Transforms, Moco2CIFAR10Transforms, Moco2STL10Transforms
+    Moco2ImagenetTransforms, Moco2CIFAR10Transforms, Moco2STL10Transforms
 
 
 class MocoV2(pl.LightningModule):
 
     def __init__(self,
-                 base_encoder='resnet50',
-                 emb_dim=128,
-                 num_negatives=65536,
-                 encoder_momentum=0.999,
-                 softmax_temperature=0.07,
-                 lr=0.03,
-                 momentum=0.9,
-                 weight_decay=1e-4,
-                 dataset='cifar10',
-                 data_dir='./',
-                 batch_size=256,
-                 use_mlp=False,
+                 base_encoder: Union[str, torch.nn.Module] = 'resnet50',
+                 emb_dim: int = 128,
+                 num_negatives: int = 65536,
+                 encoder_momentum: float = 0.999,
+                 softmax_temperature: float = 0.07,
+                 learning_rate: float = 0.03,
+                 momentum: float = 0.9,
+                 weight_decay: float = 1e-4,
+                 dataset: str = 'cifar10',
+                 data_dir: str = './',
+                 batch_size: str = 256,
+                 use_mlp: bool = False,
+                 num_workers: int = 8,
                  *args, **kwargs):
-        super().__init__()
         """
-        emb_dim: feature dimension (default: 128)
-        num_negatives: queue size; number of negative keys (default: 65536)
-        encoder_momentum: moco momentum of updating key encoder (default: 0.999)
-        softmax_temperature: softmax temperature (default: 0.07)
-        """
-        super().__init__()
-        self.hparams = Namespace(**{
-            'emb_dim': emb_dim,
-            'num_negatives': num_negatives,
-            'encoder_momentum': encoder_momentum,
-            'softmax_temperature': softmax_temperature,
-            'use_mlp': use_mlp,
-            'lr': lr,
-            'momentum': momentum,
-            'weight_decay': weight_decay,
-            'dataset': dataset,
-            'data_dir': data_dir,
-            'batch_size': batch_size
-        })
+        PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
 
-        self.K = num_negatives
-        self.m = encoder_momentum
-        self.T = softmax_temperature
-        self.emb_dim = emb_dim
+        Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.
+
+        Model implemented by:
+
+            - `William Falcon <https://github.com/williamFalcon>`_
+
+        Example:
+
+            >>> from pl_bolts.models.self_supervised import MocoV2
+            ...
+            >>> model = MocoV2()
+
+        Train::
+
+            trainer = Trainer()
+            trainer.fit(model)
+
+        Args:
+            base_encoder: torchvision model name or torch.nn.Module
+            emb_dim: feature dimension (default: 128)
+            num_negatives: queue size; number of negative keys (default: 65536)
+            encoder_momentum: moco momentum of updating key encoder (default: 0.999)
+            softmax_temperature: softmax temperature (default: 0.07)
+            learning_rate: the learning rate
+            momentum: optimizer momentum
+            weight_decay: optimizer weight decay
+            dataset: name of dataset
+            data_dir: the directory to store data
+            batch_size: batch size
+            use_mlp: add an mlp to the encoders
+            num_workers: workers for the loaders
+        """
+
+        super().__init__()
+        self.save_hyperparameters()
+
         self.dataset = self.get_dataset(dataset)
 
         # create the encoders
@@ -86,8 +101,8 @@ class MocoV2(pl.LightningModule):
         """
 
         template_model = getattr(torchvision.models, base_encoder)
-        encoder_q = template_model(num_classes=self.emb_dim)
-        encoder_k = template_model(num_classes=self.emb_dim)
+        encoder_q = template_model(num_classes=self.hparams.emb_dim)
+        encoder_k = template_model(num_classes=self.hparams.emb_dim)
 
         return encoder_q, encoder_k
 
@@ -97,7 +112,8 @@ class MocoV2(pl.LightningModule):
         Momentum update of the key encoder
         """
         for param_q, param_k in zip(self.encoder_q.parameters(), self.encoder_k.parameters()):
-            param_k.data = param_k.data * self.m + param_q.data * (1. - self.m)
+            em = self.hparams.encoder_momentum
+            param_k.data = param_k.data * em + param_q.data * (1. - em)
 
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys):
@@ -108,11 +124,11 @@ class MocoV2(pl.LightningModule):
         batch_size = keys.shape[0]
 
         ptr = int(self.queue_ptr)
-        assert self.K % batch_size == 0  # for simplicity
+        assert self.hparams.num_negatives % batch_size == 0  # for simplicity
 
         # replace the keys at ptr (dequeue and enqueue)
         self.queue[:, ptr:ptr + batch_size] = keys.T
-        ptr = (ptr + batch_size) % self.K  # move pointer
+        ptr = (ptr + batch_size) % self.hparams.num_negatives  # move pointer
 
         self.queue_ptr[0] = ptr
 
@@ -202,7 +218,7 @@ class MocoV2(pl.LightningModule):
         logits = torch.cat([l_pos, l_neg], dim=1)
 
         # apply temperature
-        logits /= self.T
+        logits /= self.hparams.softmax_temperature
 
         # labels: positive key indicators
         labels = torch.zeros(logits.shape[0], dtype=torch.long)
@@ -215,11 +231,11 @@ class MocoV2(pl.LightningModule):
 
     def get_dataset(self, name):
         if name == 'cifar10':
-            dataloaders = CIFAR10DataLoaders(self.hparams.data_dir)
+            dataloaders = CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         elif name == 'stl10':
-            dataloaders = STL10DataLoaders(self.hparams.data_dir)
-        elif name == 'imagenet128':
-            dataloaders = SSLImagenetDataLoaders(self.hparams.data_dir)
+            dataloaders = STL10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+        elif name == 'imagenet2012':
+            dataloaders = SSLImagenetDataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
         else:
             raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
                                     f'your own \'')
@@ -272,7 +288,7 @@ class MocoV2(pl.LightningModule):
         return {'val_loss': val_loss, 'log': log}
 
     def configure_optimizers(self):
-        optimizer = torch.optim.SGD(self.parameters(), self.hparams.lr,
+        optimizer = torch.optim.SGD(self.parameters(), self.hparams.learning_rate,
                                     momentum=self.hparams.momentum,
                                     weight_decay=self.hparams.weight_decay)
         return optimizer
@@ -284,8 +300,8 @@ class MocoV2(pl.LightningModule):
         elif self.hparams.dataset == 'stl10':
             train_transform = Moco2STL10Transforms()
 
-        elif self.hparams.dataset == 'imagenet128':
-            train_transform = Moco2Imagenet128Transforms()
+        elif self.hparams.dataset == 'imagenet2012':
+            train_transform = Moco2ImagenetTransforms()
 
         loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
@@ -297,8 +313,8 @@ class MocoV2(pl.LightningModule):
         elif self.hparams.dataset == 'stl10':
             train_transform = Moco2STL10Transforms().train_transform
 
-        elif self.hparams.dataset == 'imagenet128':
-            train_transform = Moco2Imagenet128Transforms().train_transform
+        elif self.hparams.dataset == 'imagenet2012':
+            train_transform = Moco2ImagenetTransforms().train_transform
 
         loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
@@ -309,10 +325,11 @@ class MocoV2(pl.LightningModule):
         parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--base_encoder', type=str, default='resnet50')
         parser.add_argument('--emb_dim', type=int, default=128)
+        parser.add_argument('--num_workers', type=int, default=8)
         parser.add_argument('--num_negatives', type=int, default=65536)
         parser.add_argument('--encoder_momentum', type=float, default=0.999)
         parser.add_argument('--softmax_temperature', type=float, default=0.07)
-        parser.add_argument('--lr', type=float, default=0.03)
+        parser.add_argument('--learning_rate', type=float, default=0.03)
         parser.add_argument('--momentum', type=float, default=0.9)
         parser.add_argument('--weight_decay', type=float, default=1e-4)
         parser.add_argument('--dataset', type=str, default='cifar10')

@@ -28,7 +28,7 @@ def nt_xent_loss(out_1, out_2, temperature):
     return loss
 
 
-class InfoNCE(nn.Module):
+class CPCTask(nn.Module):
     """
     Loss used in CPC
     """
@@ -65,7 +65,8 @@ class InfoNCE(nn.Module):
         b1 = torch.arange(n) // ((h - i - 1) * w)
         c1 = torch.arange(n) % ((h - i - 1) * w)
         labels = b1 * h * w + (i + 1) * w + c1
-        labels = labels.type_as(logits).long()
+        labels = labels.to(logits.device)
+        labels = labels.long()
 
         loss = nn.functional.cross_entropy(logits, labels)
         return loss
@@ -90,14 +91,18 @@ class InfoNCE(nn.Module):
         return loss
 
 
-class AmdimNceLoss(nn.Module):
+class AmdimNCELoss(nn.Module):
+    def __init__(self, tclip):
+        super().__init__()
+        self.tclip = tclip
+
     def forward(self, anchor_representations, positive_representations, mask_mat):
         """
         Compute the NCE scores for predicting r_src->r_trg.
-        Input:
-          r_src    : (batch_size, emb_dim)
-          r_trg    : (emb_dim, n_batch * w* h) (ie: nb_feat_vectors x embedding_dim)
-          mask_mat : (n_batch_gpu, n_batch)
+        Args:
+          anchor_representations   : (batch_size, emb_dim)
+          positive_representations : (emb_dim, n_batch * w* h) (ie: nb_feat_vectors x embedding_dim)
+          mask_mat                 : (n_batch_gpu, n_batch)
 
         Output:
           raw_scores : (n_batch_gpu, n_locs)
@@ -194,14 +199,13 @@ class AMDIMContrastiveTask(nn.Module):
         self.strategy = strategy
 
         self.masks = {}
-        self.nce_loss = AmdimNceLoss()
+        self.nce_loss = AmdimNCELoss(tclip)
 
-    def feat_size_w_mask(self, w):
-        masks_r5 = np.zeros((w, w, 1, w, w))
+    def feat_size_w_mask(self, w, feature_map):
+        masks_r5 = torch.zeros((w, w, 1, w, w), device=feature_map.device).type(torch.bool)
         for i in range(w):
             for j in range(w):
                 masks_r5[i, j, 0, i, j] = 1
-        masks_r5 = torch.tensor(masks_r5, device=w.device).type(torch.uint8)
         masks_r5 = masks_r5.reshape(-1, 1, w, w)
         return masks_r5
 
@@ -212,9 +216,8 @@ class AMDIMContrastiveTask(nn.Module):
 
         if masks is not None:
             # subsample from conv-ish r_cnv to get a single vector
-            mask_idx = torch.randint(0, masks.size(0), (n_batch,))
+            mask_idx = torch.randint(0, masks.size(0), (n_batch,), device=r_cnv.device)
             mask = masks[mask_idx]
-            mask = mask.cuda(r_cnv.device.index)
             r_cnv = torch.masked_select(r_cnv, mask)
 
         # flatten features for use as globals in glb->lcl nce cost
@@ -244,8 +247,7 @@ class AMDIMContrastiveTask(nn.Module):
 
         # make masking matrix to help compute nce costs
         # (b x b) zero matrix with 1s in the diag
-        diag_mat = torch.eye(batch_size)
-        diag_mat = diag_mat.cuda(r1_src_x1.device.index)
+        diag_mat = torch.eye(batch_size, device=r1_src_x1.device)
 
         # -----------------
         # NCE COSTS
@@ -479,11 +481,11 @@ class AMDIMContrastiveTask(nn.Module):
 
                 # make mask
                 if h not in self.masks:
-                    mask = self.feat_size_w_mask(h)
+                    mask = self.feat_size_w_mask(h, m1)
                     self.masks[h] = mask
 
         if self.strategy == '1:1':
-            return self.one_one_loss(x1_maps, x2_maps)
+            return self.contrastive_task_77(x1_maps, x2_maps)
         elif self.strategy == '1:5,1:7,5:5':
             return self.contrastive_task_11_55_77(x1_maps, x2_maps)
         elif self.strategy == '1:1,5:5,7:7':

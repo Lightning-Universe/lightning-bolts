@@ -6,18 +6,30 @@ import torch
 from pytorch_lightning import Trainer, LightningModule
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataLoaders
+from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models.gans.basic.components import Generator, Discriminator
 
 
-class BasicGAN(LightningModule):
+class GAN(LightningModule):
 
-    def __init__(self, hparams=None):
+    def __init__(self,
+                 input_channels=1,
+                 input_width=28,
+                 input_height=28,
+                 latent_dim=32,
+                 batch_size=32,
+                 b1=0.5,
+                 b2=0.999,
+                 learning_rate=0.0002,
+                 data_dir='',
+                 **kwargs):
         super().__init__()
-        self.__check_hparams(hparams)
-        self.hparams = hparams
 
-        self.dataloaders = MNISTDataLoaders(save_path=os.getcwd())
+        # makes self.hparams under the hood and saves to ckpt
+        self.save_hyperparameters()
+
+        self.dataloaders = MNISTDataModule(data_dir=data_dir)
+        self.img_dim = self.dataloaders.size()
 
         # networks
         self.generator = self.init_generator(self.img_dim)
@@ -27,19 +39,8 @@ class BasicGAN(LightningModule):
         self.generated_imgs = None
         self.last_imgs = None
 
-    def __check_hparams(self, hparams):
-        self.input_channels = hparams.input_channels if hasattr(hparams, 'input_channels') else 1
-        self.input_width = hparams.input_width if hasattr(hparams, 'input_width') else 28
-        self.input_height = hparams.input_height if hasattr(hparams, 'input_height') else 28
-        self.latent_dim = hparams.latent_dim if hasattr(hparams, 'latent_dim') else 32
-        self.batch_size = hparams.batch_size if hasattr(hparams, 'batch_size') else 32
-        self.b1 = hparams.b1 if hasattr(hparams, 'b1') else 0.5
-        self.b2 = hparams.b2 if hasattr(hparams, 'b2') else 0.999
-        self.learning_rate = hparams.learning_rate if hasattr(hparams, 'learning_rate') else 0.0002
-        self.img_dim = (self.input_channels, self.input_width, self.input_height)
-
     def init_generator(self, img_dim):
-        generator = Generator(latent_dim=self.latent_dim, img_shape=img_dim)
+        generator = Generator(latent_dim=self.hparams.latent_dim, img_shape=img_dim)
         return generator
 
     def init_discriminator(self, img_dim):
@@ -60,7 +61,7 @@ class BasicGAN(LightningModule):
 
     def generator_step(self, x):
         # sample noise
-        z = torch.randn(x.shape[0], self.latent_dim)
+        z = torch.randn(x.shape[0], self.hparams.latent_dim)
         z = z.type_as(x)
 
         # generate images
@@ -93,7 +94,7 @@ class BasicGAN(LightningModule):
 
         # how well can it label as fake?
         fake = torch.zeros(x.size(0), 1)
-        fake = fake.type_as(fake)
+        fake = fake.type_as(x)
 
         fake_loss = self.adversarial_loss(
             self.discriminator(self.generated_imgs.detach()), fake)
@@ -127,9 +128,9 @@ class BasicGAN(LightningModule):
             return self.discriminator_step(x)
 
     def configure_optimizers(self):
-        lr = self.learning_rate
-        b1 = self.b1
-        b2 = self.b2
+        lr = self.hparams.learning_rate
+        b1 = self.hparams.b1
+        b2 = self.hparams.b2
 
         opt_g = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
@@ -139,7 +140,7 @@ class BasicGAN(LightningModule):
         self.dataloaders.prepare_data()
 
     def train_dataloader(self):
-        return self.dataloaders.train_dataloader(self.batch_size)
+        return self.dataloaders.train_dataloader(self.hparams.batch_size)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -158,6 +159,7 @@ class BasicGAN(LightningModule):
         parser.add_argument('--latent_dim', type=int, default=100,
                             help="generator embedding dim")
         parser.add_argument('--batch_size', type=int, default=64, help="size of the batches")
+        parser.add_argument('--data_dir', type=str, default='')
 
         return parser
 
@@ -165,9 +167,9 @@ class BasicGAN(LightningModule):
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
-    parser = BasicGAN.add_model_specific_args(parser)
+    parser = GAN.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    gan = BasicGAN(args)
+    gan = GAN(**vars(args))
     trainer = Trainer()
     trainer.fit(gan)

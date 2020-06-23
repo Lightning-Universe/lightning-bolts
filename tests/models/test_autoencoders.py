@@ -1,16 +1,16 @@
 import pytorch_lightning as pl
 
-from pl_bolts.models.autoencoders import BasicVAE, BasicAE
+from pl_bolts.models.autoencoders import VAE, AE
 from tests import reset_seed
 
 
 def test_vae(tmpdir):
     reset_seed()
 
-    model = BasicVAE()
-    trainer = pl.Trainer(fast_dev_run=True)
+    model = VAE(data_dir=tmpdir)
+    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model)
-    trainer.test()
+    trainer.test(model)
     loss = trainer.callback_metrics['loss']
 
     assert loss > 0, 'VAE failed'
@@ -19,7 +19,7 @@ def test_vae(tmpdir):
 def test_ae(tmpdir):
     reset_seed()
 
-    model = BasicAE()
-    trainer = pl.Trainer(fast_dev_run=True)
+    model = AE(data_dir=tmpdir)
+    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model)
-    trainer.test()
+    trainer.test(model)

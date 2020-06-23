@@ -20,7 +20,7 @@ from pl_bolts.models.rl.common.memory import ReplayBuffer
 from pl_bolts.models.rl.common.networks import CNN
 
 
-class DQNLightning(pl.LightningModule):
+class DQN(pl.LightningModule):
     """ Basic DQN Model """
 
     def __init__(self, hparams: argparse.Namespace) -> None:

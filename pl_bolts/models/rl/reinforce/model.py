@@ -24,8 +24,8 @@ from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.common.wrappers import ToTensor
 
 
-class ReinforceLightning(pl.LightningModule):
-    """ Basic DQN Model """
+class Reinforce(pl.LightningModule):
+    """ Basic REINFORCE Policy Model """
 
     def __init__(self, hparams: argparse.Namespace) -> None:
         super().__init__()
