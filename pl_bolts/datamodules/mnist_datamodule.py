@@ -1,7 +1,6 @@
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
 from torchvision.datasets import MNIST
-import os
 
 from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 
