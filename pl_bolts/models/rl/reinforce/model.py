@@ -27,12 +27,39 @@ from pl_bolts.models.rl.common.wrappers import ToTensor
 class Reinforce(pl.LightningModule):
     """ Basic REINFORCE Policy Model """
 
-    def __init__(self, hparams: argparse.Namespace) -> None:
+    def __init__(self, env: str, gamma: float = 0.99, lr: float = 1e-4, batch_size: int = 32,
+                 batch_episodes: int = 4) -> None:
+        """
+        PyTorch Lightning implementation of `REINFORCE <TODO>`_
+
+        Paper authors: TODO
+
+        Model implemented by:
+
+            - `Donal Byrne <https://github.com/djbyrne>`
+
+        Example:
+
+            >>> from pl_bolts.models.rl.reinforce.model import Reinforce
+            ...
+            >>> model = Reinforce("PongNoFrameskip-v4")
+
+        Train::
+
+            trainer = Trainer()
+            trainer.fit(model)
+
+        Args:
+            env: gym environment tag
+            gamma: discount factor
+            lr: learning rate
+            batch_size: size of minibatch pulled from the DataLoader
+            batch_episodes: how many episodes to rollout for each batch of training
+        """
         super().__init__()
-        self.hparams = hparams
 
         # self.env = wrappers.make_env(self.hparams.env)    # use for Atari
-        self.env = ToTensor(gym.make(self.hparams.env))  # use for Box2D/Control
+        self.env = ToTensor(gym.make(env))  # use for Box2D/Control
         self.env.seed(123)
 
         self.obs_shape = self.env.observation_space.shape
@@ -42,6 +69,11 @@ class Reinforce(pl.LightningModule):
         self.build_networks()
 
         self.agent = PolicyAgent(self.net)
+
+        self.gamma = gamma
+        self.lr = lr
+        self.batch_size = batch_size
+        self.batch_episodes = batch_episodes
 
         self.total_reward = 0
         self.episode_reward = 0
@@ -84,7 +116,7 @@ class Reinforce(pl.LightningModule):
         res = []
         sum_r = 0.0
         for reward in reversed(rewards):
-            sum_r *= self.hparams.gamma
+            sum_r *= self.gamma
             sum_r += reward
             res.append(deepcopy(sum_r))
         return list(reversed(res))
@@ -218,7 +250,7 @@ class Reinforce(pl.LightningModule):
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)
 
-        self.episode_count += self.hparams.batch_episodes
+        self.episode_count += self.batch_episodes
 
         log = {
             "episode_reward": torch.tensor(self.episode_reward).to(device),
@@ -245,13 +277,13 @@ class Reinforce(pl.LightningModule):
 
     def configure_optimizers(self) -> List[Optimizer]:
         """ Initialize Adam optimizer"""
-        optimizer = optim.Adam(self.net.parameters(), lr=self.hparams.lr)
+        optimizer = optim.Adam(self.net.parameters(), lr=self.lr)
         return [optimizer]
 
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""
         dataset = EpisodicExperienceStream(
-            self.env, self.agent, self.device, episodes=self.hparams.batch_episodes
+            self.env, self.agent, self.device, episodes=self.batch_episodes
         )
         dataloader = DataLoader(dataset=dataset)
         return dataloader
