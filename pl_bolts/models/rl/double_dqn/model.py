@@ -12,7 +12,7 @@ from pl_bolts.models.rl.dqn.model import DQN
 
 class DoubleDQN(DQN):
     """
-    PyTorch Lightning implementation of `DQN <https://arxiv.org/pdf/1509.06461.pdf>`_
+    PyTorch Lightning implementation of `Double DQN <https://arxiv.org/pdf/1509.06461.pdf>`_
 
     Paper authors: Hado van Hasselt, Arthur Guez, David Silver
 

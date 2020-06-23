@@ -48,7 +48,7 @@ class TestValueModels(TestCase):
 
     def test_dueling_dqn(self):
         """Smoke test that the Dueling DQN model runs"""
-        model = DuelingDQN(self.hparams)
+        model = DuelingDQN(self.hparams.env)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)
