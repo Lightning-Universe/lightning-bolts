@@ -62,7 +62,7 @@ class TestValueModels(TestCase):
 
     def test_per_dqn(self):
         """Smoke test that the PER DQN model runs"""
-        model = PERDQN(self.hparams)
+        model = PERDQN(self.hparams.env)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)
