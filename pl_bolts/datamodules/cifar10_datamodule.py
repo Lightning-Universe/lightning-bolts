@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, Sequence
+from typing import Optional, Sequence
 
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
@@ -12,7 +12,6 @@ from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 class CIFAR10DataModule(LightningDataModule):
 
     name = 'cifar10'
-    DATASET = CIFAR10
     extra_args = {}
 
     def __init__(
@@ -57,6 +56,7 @@ class CIFAR10DataModule(LightningDataModule):
             num_workers: how many workers to use for loading data
         """
         super().__init__(*args, **kwargs)
+        self.DATASET = CIFAR10
         self.data_dir = data_dir
         self.val_split = val_split
         self.num_workers = num_workers
@@ -158,7 +158,6 @@ class CIFAR10DataModule(LightningDataModule):
 
 class TinyCIFAR10DataModule(CIFAR10DataModule):
 
-    DATASET = TrialCIFAR10
 
     def __init__(
             self,
@@ -196,6 +195,7 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
             labels: list selected CIFAR10 classes/labels
         """
         super().__init__(data_dir, val_split, num_workers, *args, **kwargs)
+        self.DATASET = TrialCIFAR10
         self.num_samples = num_samples
         self.labels = sorted(labels) if labels is not None else set(range(10))
         self.extra_args = dict(num_samples=self.num_samples, labels=self.labels)
