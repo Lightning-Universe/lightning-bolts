@@ -127,7 +127,7 @@ The approach that works best most often is to freeze first then unfreeze later
 
 .. note:: In practice, unfreezing later works MUCH better.
 
-Or in Lightning as a Callback so you don't polute your research code.
+Or in Lightning as a Callback so you don't pollute your research code.
 
 .. code-block:: python
 
@@ -141,7 +141,7 @@ Or in Lightning as a Callback so you don't polute your research code.
     model = FineTuner(resnet18)
     trainer.fit(model)
 
-Unless you still want to pollute your research code.
+Unless you still need to mix it into your research code.
 
 .. code-block:: python
 
@@ -167,3 +167,24 @@ Unless you still want to pollute your research code.
             # a hook is cleaner (but a callback is much better)
             if self.trainer.current_epoch == 10:
                 self.encoder.unfreeze()
+
+--------------
+
+Train from scratch
+------------------
+If you do have enough data and compute resources, then you could try training from scratch.
+
+.. code-block:: python
+
+    # get data
+    train_data = DataLoader(YourDataset)
+    val_data = DataLoader(YourDataset)
+
+    # use any bolts model without pretraining
+    model = VAE()
+
+    # fit!
+    trainer = Trainer(gpus=2)
+    trainer.fit(model, train_data, val_data)
+
+.. note:: For this to work well, make sure you have enough data and time to train these models!
