@@ -13,9 +13,8 @@ Contributions by: `Donal Byrne <https://github.com/djbyrne>`_
 - Double DQN
 - Dueling DQN
 - Noisy DQN
-- Prioritized Experience Replay DQN
 - NStep DQN
-- Noisy DQN
+- Prioritized Experience Replay DQN
 - Reinforce
 - Policy Gradient
 
@@ -34,38 +33,127 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example:
 
-    >>> from pl_bolts.models.rl import DQN
+    >>> from pl_bolts.models.rl.dqn.model import DQN
     ...
-    >>> dqn = DQN()
+    >>> dqn = DQN("PongNoFrameskip-v4")
 
 Train::
 
     trainer = Trainer()
     trainer.fit(dqn)
 
-.. autoclass:: pl_bolts.models.rl.DQN
+.. autoclass:: pl_bolts.models.rl.dqn.model.DQN
    :noindex:
 
 Double DQN
 ^^^^^^^^^^^^^^^^^^^^
-Double DQN model introduced in TODO
-Paper authors: TODO
+Double DQN model introduced in `Deep Reinforcement Learning with Double Q-learning <https://arxiv.org/pdf/1509.06461.pdf>`_
+Paper authors: Hado van Hasselt, Arthur Guez, David Silver
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl import DoubleDQN
+    >>> from pl_bolts.models.rl.double_dqn.model import DoubleDQN
     ...
-    >>> ddqn = DoubleDQN()
+    >>> ddqn = DoubleDQN("PongNoFrameskip-v4")
 
 Train::
 
     trainer = Trainer()
     trainer.fit(ddqn)
 
-.. autoclass:: pl_bolts.models.rl.DoubleDQN
+.. autoclass:: pl_bolts.models.rl.double_dqn.model.DoubleDQN
    :noindex:
+
+Dueling DQN
+^^^^^^^^^^^^^^^^^^^^
+Dueling DQN model introduced in `Dueling Network Architectures for Deep Reinforcement Learning <https://arxiv.org/abs/1511.06581>`_
+Paper authors: Ziyu Wang, Tom Schaul, Matteo Hessel, Hado van Hasselt, Marc Lanctot, Nando de Freitas
+
+Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
+
+Example::
+
+    >>> from pl_bolts.models.rl.dueling_dqn.model import DuelingDQN
+    ...
+    >>> dueling_dqn = DuelingDQN("PongNoFrameskip-v4")
+
+Train::
+
+    trainer = Trainer()
+    trainer.fit(dueling_dqn)
+
+.. autoclass:: pl_bolts.models.rl.dueling_dqn.model.DuelingDQN
+   :noindex:
+
+Noisy DQN
+^^^^^^^^^^^^^^^^^^^^
+Noisy DQN model introduced in `Noisy Networks for Exploration <https://arxiv.org/abs/1706.10295>`_
+Paper authors: Meire Fortunato, Mohammad Gheshlaghi Azar, Bilal Piot, Jacob Menick, Ian Osband, Alex Graves,
+Vlad Mnih, Remi Munos, Demis Hassabis, Olivier Pietquin, Charles Blundell, Shane Legg
+
+Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
+
+Example::
+
+    >>> from pl_bolts.models.rl.noisy_dqn.model import NoisyDQN
+    ...
+    >>> noisy_dqn = NoisyDQN("PongNoFrameskip-v4")
+
+Train::
+
+    trainer = Trainer()
+    trainer.fit(noisy_dqn)
+
+.. autoclass:: pl_bolts.models.rl.noisy_dqn.model.NoisyDQN
+   :noindex:
+
+
+N-Step DQN
+^^^^^^^^^^^^^^^^^^^^
+N-Step DQN model introduced in `Learning to Predict by the Methods of Temporal Differences  <http://incompleteideas.net/papers/sutton-88-with-erratum.pdf>`_
+Paper authors: Richard S. Sutton
+
+Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
+
+Example::
+
+    >>> from pl_bolts.models.rl.n_step_dqn.model import NStepDQN
+    ...
+    >>> n_step_dqn = NStepDQN("PongNoFrameskip-v4")
+
+Train::
+
+    trainer = Trainer()
+    trainer.fit(n_step_dqn)
+
+.. autoclass:: pl_bolts.models.rl.n_step_dqn.model.NStepDQN
+   :noindex:
+
+
+Prioritized Experience Replay DQN
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Double DQN model introduced in `Prioritized Experience Replay  <http://incompleteideas.net/papers/sutton-88-with-erratum.pdf>`_
+Paper authors: Tom Schaul, John Quan, Ioannis Antonoglou, David Silver
+
+Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
+
+Example::
+
+    >>> from pl_bolts.models.rl.per_dqn.model import PERDQN
+    ...
+    >>> per_dqn = PERDQN("PongNoFrameskip-v4")
+
+Train::
+
+    trainer = Trainer()
+    trainer.fit(per_dqn)
+
+.. autoclass:: pl_bolts.models.rl.per_dqn.model.PERDQN
+   :noindex:
+
+
 
 --------------
 
@@ -73,10 +161,46 @@ Policy Gradient Models
 ----------------------
 The following models are based on Policy gradient
 
-Policy Gradient
-^^^^^^^^^^^^^^^
-TODO: add description
+REINFORCE
+^^^^^^^^^^^^^^^^^^^^
+REINFORCE model introduced in `Policy Gradient Methods For Reinforcement Learning With Function Approximation <https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
+Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
 
-.. autoclass:: pl_bolts.models.rl.PolicyGradient
+Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
+
+Example::
+
+    >>> from pl_bolts.models.rl.reinforce.model import Reinforce
+    ...
+    >>> reinforce = Reinforce("CartPole-v0")
+
+Train::
+
+    trainer = Trainer()
+    trainer.fit(reinforce)
+
+.. autoclass:: pl_bolts.models.rl.reinforce.model.Reinforce
+   :noindex:
+
+
+Vanilla Policy Gradient
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Vanilla Policy Gradient model introduced in `Policy Gradient Methods For Reinforcement Learning With Function Approximation <https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
+Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
+
+Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
+
+Example::
+
+    >>> from pl_bolts.models.rl.vpg.model import PolicyGradient
+    ...
+    >>> vpg = PolicyGradient("CartPole-v0")
+
+Train::
+
+    trainer = Trainer()
+    trainer.fit(vpg)
+
+.. autoclass:: pl_bolts.models.rl.vanilla_policy_gradient.model.PolicyGradient
    :noindex:
 
