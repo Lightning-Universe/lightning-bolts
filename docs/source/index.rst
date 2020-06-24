@@ -39,7 +39,7 @@ PyTorchLightning-Bolts documentation
 .. toctree::
    :maxdepth: 2
    :name: loggers
-   :caption: Loggers
+   :caption: Experimental Loggers
 
    loggers
 
