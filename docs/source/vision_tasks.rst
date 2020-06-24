@@ -4,42 +4,59 @@ This section implements popular contrastive learning tasks used in self-supervis
 
 ---------------
 
-Feature map contrastive tasks
------------------------------
-The following are pretext tasks used to compare sets of feature maps.
-In general the feature map comparison pretext task uses triplets of features, the positive and anchor features
-come from different augmentations of the same image, while the negative features come from another image
+Feature map contrastive task
+----------------------------
+This task compares sets of feature maps.
+
+In general the feature map comparison pretext task uses triplets of features.
+Here are the abstract steps of comparison.
+
+**Generate multiple views of the same image**
 
 .. code-block:: python
 
-    x_pos = data_augmentation(x1)
-    x_anchor = data_augmentation(x1)
-    x_negative = data_augmentation(x2)
+    x1_view_1 = data_augmentation(x1)
+    x1_view_2 = data_augmentation(x1)
 
-The task compares feature maps from different layers of an encoder applied to each input
+**Use a different example to generate additional views (usually within the same batch or a pool of candidates)**
 
 .. code-block:: python
 
-    # f1, g1 are feature maps (batch, c, 1, 1)
-    # f5, g5 are feature maps (batch, c, 5, 5), etc...
-    (f1, f5, f7) = encoder(x_pos)
-    (g1, g5, g7) = encoder(r_anchor)
+    x2_view_1 = data_augmentation(x2)
+    x2_view_2 = data_augmentation(x2)
 
-We implement a few tasks inspired by `AMDIM (Philip Bachman, R Devon Hjelm, William Buchwalter
-<https://arxiv.org/abs/1906.00910>`_).
+**Pick 3 views to compare, these are the anchor, positive and negative features**
 
--------------
+.. code-block:: python
 
-Contrastive Task (15, 17, 55)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    anchor = x1_view_1
+    positive = x1_view_2
+    negative = x2_view_1
 
-.. autoclass:: pl_bolts.losses.self_supervised_learning.ContrastiveTask_15_17_55
-    :noindex:
+**Generate feature maps for each view**
 
-Contrastive Task (11)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. code-block:: python
 
-.. autoclass:: pl_bolts.losses.self_supervised_learning.ContrastiveTask_11
+    (a0, a1, a2) = encoder(anchor)
+    (p0, p1, p2) = encoder(positive)
+
+**Make a comparison for a set of feature maps**
+
+.. code-block:: python
+
+    phi = some_score_function()
+
+    # the '01' comparison
+    score = phi(a0, p1)
+
+    # and can be bidirectional
+    score = phi(p0, a1)
+
+In practice the contrastive task creates a BxB matrix where B is the batch size. The diagonals for set 1 of feature maps
+are the anchors, the diagonals of set 2 of the feature maps are the positives, the non-diagonals of set 1 are the
+negatives.
+
+.. autoclass:: pl_bolts.losses.self_supervised_learning.FeatureMapContrastiveTask
     :noindex:
 
 --------------
