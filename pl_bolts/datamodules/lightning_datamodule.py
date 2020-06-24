@@ -36,10 +36,11 @@ class LightningDataModule(object):
 
     A DataModule implements 4 key methods
 
-    1. `prepare_data` (things to do on 1 GPU not on every GPU in distributed mode)
-    2. `train_dataloader` the training dataloader.
-    3. `val_dataloader` the val dataloader.
-    4. `test_dataloader` the test dataloader.
+    1. **prepare_data** (things to do on 1 GPU not on every GPU in distributed mode)
+    2. **train_dataloader** the training dataloader.
+    3. **val_dataloader** the val dataloader.
+    4. **test_dataloader** the test dataloader.
+
 
     This allows you to share a full dataset without explaining what the splits, transforms or download
     process is.
