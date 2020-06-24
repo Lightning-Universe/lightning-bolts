@@ -311,7 +311,6 @@ class MocoV2(pl.LightningModule):
         parser.add_argument('--learning_rate', type=float, default=0.03)
         parser.add_argument('--momentum', type=float, default=0.9)
         parser.add_argument('--weight_decay', type=float, default=1e-4)
-        parser.add_argument('--dataset', type=str, default='cifar10')
         parser.add_argument('--data_dir', type=str, default='./')
         parser.add_argument('--batch_size', type=int, default=256)
         parser.add_argument('--use_mlp', action='store_true')
