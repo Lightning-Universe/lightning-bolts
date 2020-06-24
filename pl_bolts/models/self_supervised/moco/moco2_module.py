@@ -20,17 +20,13 @@ from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainCIFAR10Transforms,
     Moco2EvalCIFAR10Transforms,
-    Moco2TrainSTL10Transforms,
-    Moco2EvalSTL10Transforms,
-    Moco2TrainImagenetTransforms,
-    Moco2EvalImagenetTransforms
 )
 
 
 class MocoV2(pl.LightningModule):
 
     def __init__(self,
-                 base_encoder: Union[str, torch.nn.Module] = 'resnet50',
+                 base_encoder: Union[str, torch.nn.Module] = 'resnet18',
                  emb_dim: int = 128,
                  num_negatives: int = 65536,
                  encoder_momentum: float = 0.999,
@@ -39,7 +35,6 @@ class MocoV2(pl.LightningModule):
                  momentum: float = 0.9,
                  weight_decay: float = 1e-4,
                  datamodule: pl_bolts.datamodules.LightningDataModule = None,
-                 dataset: str = 'cifar10',
                  data_dir: str = './',
                  batch_size: str = 256,
                  use_mlp: bool = False,
@@ -84,6 +79,12 @@ class MocoV2(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
+        # use CIFAR-10 by default if no datamodule passed in
+        if datamodule is None:
+            datamodule = CIFAR10DataModule(
+                data_dir,
+                train_transforms=Moco2TrainCIFAR10Transforms(),
+                val_transforms=Moco2EvalCIFAR10Transforms())
         self.datamodule = datamodule
 
         # create the encoders
@@ -104,9 +105,6 @@ class MocoV2(pl.LightningModule):
         self.queue = nn.functional.normalize(self.queue, dim=0)
 
         self.register_buffer("queue_ptr", torch.zeros(1, dtype=torch.long))
-
-    def default_datamodule(self):
-        cf10 = CIFAR10DataModule()
 
     def init_encoders(self, base_encoder):
         """
@@ -290,25 +288,15 @@ class MocoV2(pl.LightningModule):
                                     weight_decay=self.hparams.weight_decay)
         return optimizer
 
-
     def prepare_data(self):
         self.datamodule.prepare_data()
 
     def train_dataloader(self):
-        loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
+        loader = self.datamodule.train_dataloader(self.hparams.batch_size)
         return loader
 
     def val_dataloader(self):
-        if self.hparams.dataset == 'cifar10':
-            train_transform = Moco2CIFAR10Transforms().train_transform
-
-        elif self.hparams.dataset == 'stl10':
-            train_transform = Moco2STL10Transforms().train_transform
-
-        elif self.hparams.dataset == 'imagenet2012':
-            train_transform = Moco2ImagenetTransforms().train_transform
-
-        loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=train_transform)
+        loader = self.datamodule.val_dataloader(self.hparams.batch_size)
         return loader
 
     @staticmethod
