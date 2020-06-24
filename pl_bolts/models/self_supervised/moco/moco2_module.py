@@ -69,7 +69,7 @@ class MocoV2(pl.LightningModule):
             learning_rate: the learning rate
             momentum: optimizer momentum
             weight_decay: optimizer weight decay
-            dataset: name of dataset
+            datamodule: the DataModule (train, val, test dataloaders)
             data_dir: the directory to store data
             batch_size: batch size
             use_mlp: add an mlp to the encoders
