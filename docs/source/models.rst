@@ -352,7 +352,7 @@ And of course train it with lightning.
     trainer = Trainer()
     trainer.fit(model)
 
-In just a few lines of code you changed something fundamental about a VAE with only a few lines of code... This
+In just a few lines of code you changed something fundamental about a VAE... This
 means you can iterate through ideas much faster knowing that the bolt implementation and the training loop are CORRECT
 and TESTED.
 
