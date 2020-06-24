@@ -15,7 +15,7 @@ DATAMODULE_COLLECTION = {
 }
 
 
-def get_datamodule(name, data_dir, num_workers, **kwargs):
+def get_datamodule(name, data_dir, num_workers=1, **kwargs):
     if name not in DATAMODULE_COLLECTION:
         raise FileNotFoundError(f'the {name} dataset is not supported.'
                                 ' Subclass "get_dataset to provide your own"')

@@ -93,9 +93,16 @@ class SSLDatasetMixin(ABC):
 
 class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
-    def __init__(self, root, split='val',
-                 transform=None, target_transform=None,
-                 download=False, nb_labeled_per_class=None, val_pct=0.10):
+    def __init__(
+            self,
+            root,
+            split='val',
+            transform=None,
+            target_transform=None,
+            download=False,
+            nb_labeled_per_class=None,
+            val_pct=0.10
+    ):
 
         if nb_labeled_per_class == -1:
             nb_labeled_per_class = None
@@ -123,9 +130,8 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
             # limit the number of items per class
             if nb_labeled_per_class is not None:
-                self.data, self.targets = self.select_nb_imgs_per_class(self.data,
-                                                                        self.targets,
-                                                                        nb_labeled_per_class)
+                self.data, self.targets = \
+                    self.select_nb_imgs_per_class(self.data, self.targets, nb_labeled_per_class)
 
     def __balance_class_batches(self, X, Y, batch_size):
         """
@@ -185,9 +191,14 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
         return final_batches_x, final_batches_y
 
-    def __generate_half_labeled_batches(self, smaller_set_X, smaller_set_Y,
-                                        larger_set_X, larger_set_Y,
-                                        batch_size):
+    def __generate_half_labeled_batches(
+            self,
+            smaller_set_X,
+            smaller_set_Y,
+            larger_set_X,
+            larger_set_Y,
+            batch_size
+    ):
         X = []
         Y = []
         half_batch = batch_size // 2

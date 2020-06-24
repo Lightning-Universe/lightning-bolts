@@ -29,21 +29,23 @@ __all__ = [
 
 class CPCV2(pl.LightningModule):
 
-    def __init__(self,
-                 encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'cpc_encoder',
-                 patch_size: int = 8,
-                 patch_overlap: int = 4,
-                 online_ft: int = True,
-                 task: str = 'cpc',
-                 dataset: str = 'cifar10',
-                 num_workers: int = 4,
-                 learning_rate: int = 1e-4,
-                 data_dir: str = '',
-                 meta_root: str = '',
-                 batch_size: int = 32,
-                 amdim_task=False,
-                 pretrained: str = None,
-                 **kwargs):
+    def __init__(
+            self,
+            encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'cpc_encoder',
+            patch_size: int = 8,
+            patch_overlap: int = 4,
+            online_ft: int = True,
+            task: str = 'cpc',
+            dataset: str = 'cifar10',
+            num_workers: int = 4,
+            learning_rate: int = 1e-4,
+            data_dir: str = '',
+            meta_root: str = '',
+            batch_size: int = 32,
+            amdim_task=False,
+            pretrained: str = None,
+            **kwargs,
+    ):
         """
         PyTorch Lightning implementation of `Data-Efficient Image Recognition with Contrastive Predictive Coding
         <https://arxiv.org/abs/1905.09272>`_
