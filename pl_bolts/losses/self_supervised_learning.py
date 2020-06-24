@@ -187,7 +187,7 @@ class AmdimNCELoss(nn.Module):
 
 class FeatureMapContrastiveTask(nn.Module):
 
-    def __init__(self, comparisons: str = '00, 11', tclip=10., bidirectional=True):
+    def __init__(self, comparisons: str = '00, 11', tclip: float = 10.0, bidirectional: bool = True):
         """
         Performs an anchor, positive negative pair comparison for each each tuple of feature maps passed.
 
@@ -210,8 +210,7 @@ class FeatureMapContrastiveTask(nn.Module):
             task = FeatureMapContrastiveTask('0r')
             loss, regularizer = task((pos_0, pos_1, pos_2), (anc_0, anc_1, anc_2))
 
-        Arg:
-
+        Args:
             comparisons: groupings of feature map indices to compare (zero indexed, 'r' means random) ex: '00, 1r'
             tclip: stability clipping value
             bidirectional: if true, does the comparison both ways
