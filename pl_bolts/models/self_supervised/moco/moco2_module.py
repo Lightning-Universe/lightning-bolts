@@ -81,8 +81,8 @@ class MocoV2(pl.LightningModule):
         # use CIFAR-10 by default if no datamodule passed in
         if datamodule is None:
             datamodule = CIFAR10DataModule(data_dir)
-            datamodule.train_transforms=Moco2TrainCIFAR10Transforms()
-            datamodule.val_transforms=Moco2EvalCIFAR10Transforms()
+            datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
+            datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
 
         self.datamodule = datamodule
 
