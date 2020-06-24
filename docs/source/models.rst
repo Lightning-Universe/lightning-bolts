@@ -83,6 +83,22 @@ and affiliation information is added to the documentation and highlighted.
 
 Thank you for all the amazing contributions!
 
+Bolts vs my own repo
+^^^^^^^^^^^^^^^^^^^^
+You can do both! Feel free to maintain your own repository and link to it via the bolts documentation.
+If this is the case, make sure to maintain parity with the bolts library.
+
+We recommend you integrate the tests into bolts so we can run them through our rigorous pipeline.
+Linking your projects via bolts gives you a few advantages:
+
+1. More visibility.
+2. Robust testing.
+3. Robust documentation.
+4. Lightning Swag + involvement in the broader contributor community :)
+
+And you still get to keep your attribution and be recognized for your work! Bolts is a community library
+built by incredible people like you!
+
 -----------
 
 How to use models
