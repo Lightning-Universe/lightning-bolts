@@ -4,28 +4,28 @@ This section implements popular contrastive learning tasks used in self-supervis
 
 ---------------
 
-Feature map contrastive task
-----------------------------
+FeatureMapContrastiveTask
+-------------------------
 This task compares sets of feature maps.
 
 In general the feature map comparison pretext task uses triplets of features.
 Here are the abstract steps of comparison.
 
-**Generate multiple views of the same image**
+Generate multiple views of the same image
 
 .. code-block:: python
 
     x1_view_1 = data_augmentation(x1)
     x1_view_2 = data_augmentation(x1)
 
-**Use a different example to generate additional views (usually within the same batch or a pool of candidates)**
+Use a different example to generate additional views (usually within the same batch or a pool of candidates)
 
 .. code-block:: python
 
     x2_view_1 = data_augmentation(x2)
     x2_view_2 = data_augmentation(x2)
 
-**Pick 3 views to compare, these are the anchor, positive and negative features**
+Pick 3 views to compare, these are the anchor, positive and negative features
 
 .. code-block:: python
 
@@ -33,14 +33,14 @@ Here are the abstract steps of comparison.
     positive = x1_view_2
     negative = x2_view_1
 
-**Generate feature maps for each view**
+Generate feature maps for each view
 
 .. code-block:: python
 
     (a0, a1, a2) = encoder(anchor)
     (p0, p1, p2) = encoder(positive)
 
-**Make a comparison for a set of feature maps**
+Make a comparison for a set of feature maps
 
 .. code-block:: python
 
