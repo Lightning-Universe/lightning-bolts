@@ -337,6 +337,8 @@ class AMDIM_11_55_77_ContrastiveTask(FeatureMapContrastiveTask):
         """
         super().__init__(tclip, bidirectional)
 
+    def forward(self, *args):
+
     def contrastive_task(self, x1_maps, x2_maps):
         r1_x1, r5_x1, r7_x1 = x1_maps
         r1_x2, r5_x2, r7_x2 = x2_maps
