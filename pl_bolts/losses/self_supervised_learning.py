@@ -256,6 +256,25 @@ class FeatureMapContrastiveTask(nn.Module):
                     mask = self.feat_size_w_mask(h, m1)
                     self.masks[h] = mask
 
+    def __compare_maps(self, m1, m2):
+        b, c, h, w = m1.size()
+
+        mask_1 = self.masks[h]
+        src = self._sample_src_ftr(m1, mask_1)
+
+        # target vectors
+        # (b, c, h, w) -> (c, b * h * w)
+        tgt = m2.permute(1, 0, 2, 3).reshape(c, -1)
+
+        # make masking matrix to help compute nce costs
+        # (b x b) zero matrix with 1s in the diag
+        diag_mat = torch.eye(b, device=m1.device)
+
+        # compare
+        loss, regularizer = self.nce_loss(src, tgt, diag_mat)
+
+        return loss, regularizer
+
     def forward(self, *args):
         """
         Takes in a set of tuples, each tuple has two feature maps with all matching dimensions
@@ -273,36 +292,19 @@ class FeatureMapContrastiveTask(nn.Module):
             assert h == h2
             assert w == w2
 
-            # get source vectors
-            mask_1 = self.masks[h]
-            src_1 = self._sample_src_ftr(m1, mask_1)
-            src_2 = self._sample_src_ftr(m2, mask_1)
+            # m1 vs m2
+            loss1, reg1 = self.__compare_maps(m1, m2)
+            map_reg = reg1
+            map_loss = loss1
 
-            # target vectors
-            # (b, c, h, w) -> (c, b * h * w)
-            tgt_1 = m1.permute(1, 0, 2, 3).reshape(c, -1)
-            tgt_2 = m2.permute(1, 0, 2, 3).reshape(c, -1)
+            # add second direction if requested
+            if self.bidirectional:
+                loss2, reg2 = self.__compare_maps(m2, m1)
+                map_reg = 0.5 * (reg1 + reg2)
+                map_loss = 0.5 * (loss1 + loss2)
 
-            # make masking matrix to help compute nce costs
-            # (b x b) zero matrix with 1s in the diag
-            diag_mat = torch.eye(b, device=m1.device)
-
-            # (m1 vs m2)
-            loss_12, regularizer_12 = self.nce_loss(src_1, tgt_2, diag_mat)
-
-            # (m2 vs m1)
-            loss_21, regularizer_21 = self.nce_loss(src_2, tgt_1, diag_mat)
-
-            # map_loss
-            map_loss = 0.5 * (loss_12, loss_21)
+            regularizer += map_reg
             losses.append(map_loss.mean())
-
-            # regularizer
-            regularizer += regularizer_12
-            regularizer += regularizer_21
-
-        # scale regularizer
-        regularizer = regularizer * 0.5
 
         return losses, regularizer
 
