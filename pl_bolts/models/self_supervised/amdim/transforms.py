@@ -103,7 +103,6 @@ class AMDIMTrainTransformsSTL10:
             transform = AMDIMTrainTransformsSTL10()
             (view1, view2) = transform(x)
         """
-
         # flipping image along vertical axis
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
         normalize = transforms.Normalize(mean=(0.43, 0.42, 0.39), std=(0.27, 0.26, 0.27))
@@ -167,31 +166,37 @@ class AMDIMEvalTransformsSTL10(object):
         return out1
 
 
-class TransformsImageNet128:
-    '''
-    ImageNet dataset, for use with 128x128 full image encoder.
-    '''
+class AMDIMTrainTransformsImageNet128(object):
+    def __init__(self, height=128):
+        """
+        Transforms applied to AMDIM
 
-    def __init__(self):
+        Transforms::
+
+            img_jitter,
+            col_jitter,
+            rnd_gray,
+            transforms.ToTensor(),
+            normalize
+
+        Example::
+
+            x = torch.rand(5, 3, 128, 128)
+
+            transform = AMDIMTrainTransformsSTL10()
+            (view1, view2) = transform(x)
+        """
         # image augmentation functions
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
-        rand_crop = \
-            transforms.RandomResizedCrop(128, scale=(0.3, 1.0), ratio=(0.7, 1.4),
-                                         interpolation=3)
-        col_jitter = transforms.RandomApply([
-            transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8)
+        rand_crop = transforms.RandomResizedCrop(height, scale=(0.3, 1.0), ratio=(0.7, 1.4), interpolation=3)
+        col_jitter = transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8)
         rnd_gray = transforms.RandomGrayscale(p=0.25)
         post_transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225]),
         ])
-        self.test_transform = transforms.Compose([
-            transforms.Resize(146, interpolation=3),
-            transforms.CenterCrop(128),
-            post_transform
-        ])
-        self.train_transform = transforms.Compose([
+        self.transforms = transforms.Compose([
             rand_crop,
             col_jitter,
             rnd_gray,
@@ -200,6 +205,45 @@ class TransformsImageNet128:
 
     def __call__(self, inp):
         inp = self.flip_lr(inp)
-        out1 = self.train_transform(inp)
-        out2 = self.train_transform(inp)
+        out1 = self.transforms(inp)
+        out2 = self.transforms(inp)
         return out1, out2
+
+
+class AMDIMEvalTransformsImageNet128(object):
+    def __init__(self, height=128):
+        """
+        Transforms applied to AMDIM
+
+        Transforms::
+
+            transforms.Resize(height + 6, interpolation=3),
+            transforms.CenterCrop(height),
+            transforms.ToTensor(),
+            normalize
+
+        Example::
+
+            x = torch.rand(5, 3, 128, 128)
+
+            transform = AMDIMEvalTransformsImageNet128()
+            view1 = transform(x)
+        """
+        # image augmentation functions
+        self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
+        post_transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225]),
+        ])
+        self.transforms = transforms.Compose([
+            transforms.Resize(height + 18, interpolation=3),
+            transforms.CenterCrop(height),
+            post_transform
+        ])
+
+    def __call__(self, inp):
+        inp = self.flip_lr(inp)
+        out1 = self.transforms(inp)
+        return out1
+
