@@ -64,20 +64,20 @@ CIFAR-10 Eval
 
 Imagenet Train
 ^^^^^^^^^^^^^^
-.. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.CPCTrainTransformsImageNet128
+.. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.AMDIMTrainTransformsImageNet128
     :noindex:
 
 Imagenet Eval
 ^^^^^^^^^^^^^
-.. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.CPCEvalTransformsImageNet128
+.. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.AMDIMEvalTransformsImageNet128
     :noindex:
 
 STL-10 Train
 ^^^^^^^^^^^^
-.. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.CPCTrainTransformsSTL10
+.. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.AMDIMTrainTransformsSTL10
     :noindex:
 
 STL-10 Eval
 ^^^^^^^^^^^
-.. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.CPCEvalTransformsSTL10
+.. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.AMDIMEvalTransformsSTL10
     :noindex:
