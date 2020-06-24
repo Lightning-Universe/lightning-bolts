@@ -11,7 +11,7 @@ from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.metrics import mean
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLRDataTransform
+from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from pl_bolts.optimizers.layer_adaptive_scaling import LARS
 
 

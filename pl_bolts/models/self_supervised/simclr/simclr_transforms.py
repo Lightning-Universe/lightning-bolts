@@ -16,6 +16,13 @@ class SimCLRTrainDataTransform(object):
         GaussianBlur(kernel_size=int(0.1 * self.input_height))
         transforms.ToTensor()
 
+    Example::
+
+        from pl_bolts.models.self_supervised.simclr.transforms import SimCLRTrainDataTransform
+
+        transform = SimCLRTrainDataTransform(input_height=32)
+        x = sample()
+        (xi, xj) = transform(x)
     """
     def __init__(self, input_height, s=1):
         self.s = s
@@ -46,6 +53,13 @@ class SimCLREvalDataTransform(object):
         transforms.CenterCrop(input_height),
         transforms.ToTensor()
 
+    Example::
+
+        from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform
+
+        transform = SimCLREvalDataTransform(input_height=32)
+        x = sample()
+        (xi, xj) = transform(x)
     """
     def __init__(self, input_height, s=1):
         self.s = s
