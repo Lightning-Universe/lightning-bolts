@@ -15,14 +15,11 @@ from torch import nn
 
 import pl_bolts
 from pl_bolts.datamodules import CIFAR10DataModule
-from pl_bolts.datamodules import get_datamodule
 from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainCIFAR10Transforms,
     Moco2EvalCIFAR10Transforms,
 )
-from pl_bolts.models.self_supervised.moco.transforms import (
-    Moco2ImagenetTransforms, Moco2CIFAR10Transforms, Moco2STL10Transforms)
 
 
 class MocoV2(pl.LightningModule):

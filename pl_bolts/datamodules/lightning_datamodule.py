@@ -45,6 +45,8 @@ class LightningDataModule(object):
     This allows you to share a full dataset without explaining what the splits, transforms or download
     process is.
     """
+    name: str = ...
+
     def __init__(self, train_transforms=None, val_transforms=None, test_transforms=None):
         super().__init__()
         self._train_transforms = train_transforms
