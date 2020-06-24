@@ -21,3 +21,9 @@ Transfors used for CPC
 
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCEvalTransformsCIFAR10
     :noindex:
+
+.. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCTrainTransformsSTL10
+    :noindex:
+
+.. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCEvalTransformsSTL10
+    :noindex:
