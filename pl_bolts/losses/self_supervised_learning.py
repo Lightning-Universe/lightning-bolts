@@ -257,12 +257,21 @@ class FeatureMapContrastiveTask(nn.Module):
                     self.masks[h] = mask
 
     def forward(self, *args):
+        """
+        Takes in a set of tuples, each tuple has two feature maps with all matching dimensions
+        """
         self.__cache_dimension_masks(*args)
 
         regularizer = 0
         losses = []
         for (m1, m2) in args:
             b, c, h, w = m1.size()
+            b2, c2, h2, w2 = m2.size()
+
+            assert b == b2
+            assert c == c2
+            assert h == h2
+            assert w == w2
 
             # get source vectors
             mask_1 = self.masks[h]
