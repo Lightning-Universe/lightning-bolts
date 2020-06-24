@@ -13,6 +13,7 @@ import torch.nn.functional as F
 import torchvision
 from torch import nn
 
+import pl_bolts
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.metrics import precision_at_k, mean
@@ -37,6 +38,7 @@ class MocoV2(pl.LightningModule):
                  learning_rate: float = 0.03,
                  momentum: float = 0.9,
                  weight_decay: float = 1e-4,
+                 datamodule: pl_bolts.datamodules.LightningDataModule = None,
                  dataset: str = 'cifar10',
                  data_dir: str = './',
                  batch_size: str = 256,
@@ -82,7 +84,7 @@ class MocoV2(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.dataset = self.get_dataset(dataset)
+        self.datamodule = datamodule
 
         # create the encoders
         # num_classes is the output fc dimension
@@ -102,6 +104,9 @@ class MocoV2(pl.LightningModule):
         self.queue = nn.functional.normalize(self.queue, dim=0)
 
         self.register_buffer("queue_ptr", torch.zeros(1, dtype=torch.long))
+
+    def default_datamodule(self):
+        cf10 = CIFAR10DataModule()
 
     def init_encoders(self, base_encoder):
         """
@@ -237,22 +242,6 @@ class MocoV2(pl.LightningModule):
 
         return logits, labels
 
-    def get_dataset(self, name):
-        if name == 'cifar10':
-            dataloaders = CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        elif name == 'stl10':
-            dataloaders = STL10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        elif name == 'imagenet2012':
-            dataloaders = SSLImagenetDataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        else:
-            raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
-                                    f'your own \'')
-
-        return dataloaders
-
-    def prepare_data(self):
-        self.dataset.prepare_data()
-
     def training_step(self, batch, batch_idx):
         (img_1, img_2), _ = batch
 
@@ -301,16 +290,11 @@ class MocoV2(pl.LightningModule):
                                     weight_decay=self.hparams.weight_decay)
         return optimizer
 
+
+    def prepare_data(self):
+        self.datamodule.prepare_data()
+
     def train_dataloader(self):
-        if self.hparams.dataset == 'cifar10':
-            train_transform = Moco2CIFAR10Transforms()
-
-        elif self.hparams.dataset == 'stl10':
-            train_transform = Moco2STL10Transforms()
-
-        elif self.hparams.dataset == 'imagenet2012':
-            train_transform = Moco2ImagenetTransforms()
-
         loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
         return loader
 
