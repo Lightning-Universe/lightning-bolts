@@ -160,7 +160,7 @@ class CPCV2(pl.LightningModule):
         if encoder_name == 'cpc_encoder':
             return CPCResNet101(dummy_batch)
         else:
-            return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=self.hparams.task == 'cpc')
+            return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=self.hparams.task == 'amdim')
 
     def __compute_final_nb_c(self, patch_size):
         dummy_batch = torch.zeros((2 * 49, 3, patch_size, patch_size))
