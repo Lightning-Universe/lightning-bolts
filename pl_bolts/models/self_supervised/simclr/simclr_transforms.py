@@ -3,7 +3,7 @@ import numpy as np
 import torchvision.transforms as transforms
 
 
-class SimCLRDataTransform(object):
+class SimCLRTrainDataTransform(object):
     def __init__(self, input_height, s=1, test=False):
         self.s = s
         self.test = test
@@ -15,17 +15,28 @@ class SimCLRDataTransform(object):
                                               transforms.RandomGrayscale(p=0.2),
                                               GaussianBlur(kernel_size=int(0.1 * self.input_height)),
                                               transforms.ToTensor()])
+        self.train_transform = data_transforms
 
+    def __call__(self, sample):
+        transform = self.train_transform
+        xi = transform(sample)
+        xj = transform(sample)
+        return xi, xj
+
+
+class SimCLREvalDataTransform(object):
+    def __init__(self, input_height, s=1, test=False):
+        self.s = s
+        self.test = test
+        self.input_height = input_height
         self.test_transform = transforms.Compose([
             transforms.Resize(input_height + 10, interpolation=3),
             transforms.CenterCrop(input_height),
             transforms.ToTensor(),
         ])
 
-        self.train_transform = data_transforms
-
     def __call__(self, sample):
-        transform = self.train_transform if self.test else self.test_transform
+        transform = self.test_transform
         xi = transform(sample)
         xj = transform(sample)
         return xi, xj
