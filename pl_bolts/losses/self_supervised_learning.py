@@ -323,9 +323,9 @@ class FeatureMapContrastiveTask(nn.Module):
 
             # choose a random map
             if ai == -1:
-                a1 = np.random.randint(0, len(anchor_maps))
+                ai = np.random.randint(0, len(anchor_maps))
             if pi == -1:
-                p1 = np.random.randint(0, len(anchor_maps))
+                pi = np.random.randint(0, len(anchor_maps))
 
             # pull out the maps
             anchor = anchor_maps[ai]
