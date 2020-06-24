@@ -303,7 +303,7 @@ class MocoV2(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         from test_tube import HyperOptArgumentParser
         parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--base_encoder', type=str, default='resnet50')
+        parser.add_argument('--base_encoder', type=str, default='resnet18')
         parser.add_argument('--emb_dim', type=int, default=128)
         parser.add_argument('--num_workers', type=int, default=8)
         parser.add_argument('--num_negatives', type=int, default=65536)
