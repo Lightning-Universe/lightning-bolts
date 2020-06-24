@@ -12,12 +12,16 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
 
     name = 'imagenet'
 
-    def __init__(self,
-                 data_dir,
-                 meta_root=None,
-                 num_workers=16):
+    def __init__(
+            self,
+            data_dir,
+            meta_root=None,
+            num_workers=16,
+            *args,
+            **kwargs,
+    ):
 
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.data_dir = data_dir
         self.num_workers = num_workers
         self.meta_root = meta_root

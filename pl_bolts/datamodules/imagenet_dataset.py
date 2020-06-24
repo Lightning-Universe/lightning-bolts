@@ -16,25 +16,30 @@ from torchvision.datasets.imagenet import load_meta_file
 
 class UnlabeledImagenet(ImageNet):
 
-    def __init__(self, root, split='train',
-                 num_classes=-1,
-                 num_imgs_per_class=-1,
-                 num_imgs_per_class_val_split=50,
-                 meta_root=None,
-                 **kwargs):
+    def __init__(
+            self,
+            root,
+            split: str = 'train',
+            num_classes: int = -1,
+            num_imgs_per_class: int = -1,
+            num_imgs_per_class_val_split: int = 50,
+            meta_root=None,
+            **kwargs,
+    ):
         """
         Official train set gets split into train, val. (using nb_imgs_per_val_class for each class).
         Official validation becomes test set
 
         Within each class, we further allow limiting the number of samples per class (for semi-sup lng)
 
-        :param root: path of dataset
-        :param split:
-        :param num_classes: Sets the limit of classes
-        :param num_imgs_per_class: Limits the number of images per class
-        :param num_imgs_per_class_val_split: How many images per class to generate the val split
-        :param download:
-        :param kwargs:
+        Args:
+            root: path of dataset
+            split:
+            num_classes: Sets the limit of classes
+            num_imgs_per_class: Limits the number of images per class
+            num_imgs_per_class_val_split: How many images per class to generate the val split
+            download:
+            kwargs:
         """
         root = self.root = os.path.expanduser(root)
 
