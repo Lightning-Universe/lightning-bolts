@@ -13,33 +13,33 @@ CPC transforms
 
 Transforms used for CPC
 
-CIFAR-10 Train (cpc)
+CIFAR-10 Train (c)
 ^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCTrainTransformsCIFAR10
     :noindex:
 
-CIFAR-10 Eval (cpc)
+CIFAR-10 Eval (c)
 ^^^^^^^^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCEvalTransformsCIFAR10
     :noindex:
 
-Imagenet Train (cpc)
+Imagenet Train (c)
 ^^^^^^^^^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCTrainTransformsImageNet128
     :noindex:
 
-Imagenet Eval (cpc)
+Imagenet Eval (c)
 ^^^^^^^^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCEvalTransformsImageNet128
     :noindex:
 
-STL-10 Train (cpc)
+STL-10 Train (c)
 ^^^^^^^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCTrainTransformsSTL10
     :noindex:
 
-STL-10 Eval (cpc)
+STL-10 Eval (c)
 ^^^^^^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCEvalTransformsSTL10
     :noindex:
@@ -51,33 +51,33 @@ AMDIM transforms
 
 Transforms used for AMDIM
 
-CIFAR-10 Train (amdim)
+CIFAR-10 Train (a)
 ^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.AMDIMTrainTransformsCIFAR10
     :noindex:
 
-CIFAR-10 Eval (amdim)
+CIFAR-10 Eval (a)
 ^^^^^^^^^^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.AMDIMEvalTransformsCIFAR10
     :noindex:
 
-Imagenet Train (amdim)
+Imagenet Train (a)
 ^^^^^^^^^^^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.AMDIMTrainTransformsImageNet128
     :noindex:
 
-Imagenet Eval (amdim)
+Imagenet Eval (a)
 ^^^^^^^^^^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.AMDIMEvalTransformsImageNet128
     :noindex:
 
-STL-10 Train (amdim)
+STL-10 Train (a)
 ^^^^^^^^^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.AMDIMTrainTransformsSTL10
     :noindex:
 
-STL-10 Eval (amdim)
+STL-10 Eval (a)
 ^^^^^^^^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.AMDIMEvalTransformsSTL10
     :noindex:
