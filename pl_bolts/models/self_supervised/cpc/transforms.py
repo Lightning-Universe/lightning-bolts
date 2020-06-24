@@ -18,6 +18,16 @@ class CPCTrainTransformsCIFAR10:
             transforms.ToTensor()
             normalize
             Patchify(patch_size=patch_size, overlap_size=patch_size // 2)
+
+        Example::
+
+            # in a regular dataset
+            CIFAR10(..., transforms=CPCTrainTransformsCIFAR10())
+
+            # in a DataModule
+            module = CIFAR10DataModule()
+            train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsCIFAR10())
+
         """
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
 
@@ -57,6 +67,16 @@ class CPCEvalTransformsCIFAR10:
             transforms.ToTensor()
             normalize
             Patchify(patch_size=patch_size, overlap_size=patch_size // 2)
+
+        Example::
+
+            # in a regular dataset
+            CIFAR10(..., transforms=CPCEvalTransformsCIFAR10())
+
+            # in a DataModule
+            module = CIFAR10DataModule()
+            train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsCIFAR10())
+
         """
 
         # flipping image along vertical axis
