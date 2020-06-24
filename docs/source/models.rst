@@ -168,6 +168,23 @@ Unless you still need to mix it into your research code.
             if self.trainer.current_epoch == 10:
                 self.encoder.unfreeze()
 
+
+Hyperparameter search
+^^^^^^^^^^^^^^^^^^^^^
+For finetuning to work well, you should try many versions of the model hyperparameters. Otherwise you're unlikely
+to get the most value out of your data.
+
+.. code-block:: python
+
+    learning_rates = [0.01, 0.001, 0.0001]
+    hidden_dim = [128, 256, 512]
+
+    for lr in learning_rates:
+        for hd in hidden_dim:
+            vae = VAE(hidden_dim=hd, learning_rate=lr)
+            trainer = Trainer()
+            trainer.fit(vae)
+
 --------------
 
 Train from scratch
