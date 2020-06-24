@@ -347,14 +347,6 @@ class FeatureMapContrastiveTask(nn.Module):
             anchor = anchor_maps[ai]
             pos = positive_maps[pi]
 
-            b, c, h, w = anchor.size()
-            b2, c2, h2, w2 = pos.size()
-
-            assert b == b2
-            assert c == c2
-            assert h == h2
-            assert w == w2
-
             # m1 vs m2
             loss1, reg1 = self.__compare_maps(anchor, pos)
             map_reg = reg1
