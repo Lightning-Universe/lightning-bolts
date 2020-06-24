@@ -6,8 +6,8 @@ import torchvision
 from pytorch_lightning import LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
-import pl_bolts
 
+import pl_bolts
 from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained

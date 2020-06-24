@@ -2,11 +2,10 @@
 
 # Named tuple for storing experience steps gathered in training
 import collections
-from typing import Tuple, List, Union
 from collections import deque, namedtuple
+from typing import Tuple, List, Union
 
 import numpy as np
-
 
 Experience = namedtuple(
     "Experience", field_names=["state", "action", "reward", "done", "new_state"]

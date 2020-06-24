@@ -1,17 +1,18 @@
 import os
 from argparse import ArgumentParser
+from typing import Union
 
 import pytorch_lightning as pl
 import torch
 import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
-import pl_bolts
 
 from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
+import pl_bolts
+
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
-from typing import Union
 
 
 class AMDIM(pl.LightningModule):

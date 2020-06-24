@@ -3,10 +3,11 @@ Based on implementations found here:
 """
 import math
 from typing import Tuple
+
 import numpy as np
 import torch
-from torch import nn
 from torch import Tensor
+from torch import nn
 from torch.nn import functional as F
 
 
