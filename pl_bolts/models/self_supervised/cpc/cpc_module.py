@@ -332,6 +332,7 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--learning_rate', type=float, default=1e-5)
 
         # data
+        parser.add_argument('--dataset', default='cifar10', type=str)
         parser.add_argument('--data_dir', default='.', type=str)
         parser.add_argument('--meta_root', default='.', type=str)
         parser.add_argument('--num_workers', default=0, type=int)
