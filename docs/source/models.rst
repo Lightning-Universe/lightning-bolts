@@ -365,7 +365,7 @@ figure out if your VAE implementation was correct, or if your training loop was 
 
     from pl_bolts.models.gans import GAN
 
-    class FancyGAN(VAE):
+    class FancyGAN(GAN):
 
         def generator_step(self, x):
             # sample noise
@@ -410,3 +410,66 @@ figure out if your VAE implementation was correct, or if your training loop was 
                 'val_nce': unsupervised_loss
             }
             return result
+
+Importing parts
+^^^^^^^^^^^^^^^
+All the bolts are modular. This means you can also arbitrarily mix and match fundamental blocks from across
+approaches.
+
+**Example 1: Use the VAE encoder for a GAN as a generator**
+
+.. code-block:: python
+
+    from pl_bolts.models.gans import GAN
+    from pl_bolts.models.autoencoders.basic_vae import Encoder
+
+    class FancyGAN(GAN):
+
+        def init_generator(self, img_dim):
+            generator = Encoder(...)
+            return generator
+
+    trainer = Trainer(...)
+    trainer.fit(FancyGAN())
+
+**Example 2: Use the contrastive task of AMDIM in CPC**
+
+.. code-block:: python
+
+    from pl_bolts.models.self_supervised import AMDIM, CPCV2
+
+    default_amdim_task = AMDIM().contrastive_task
+    model = CPCV2(contrastive_task=default_amdim_task, encoder='cpc_default')
+    # you might need to modify the cpc encoder depending on what you use
+
+Compose new ideas
+^^^^^^^^^^^^^^^^^
+You may also be interested in creating completely new approaches that mix and match all sorts of different
+pieces together
+
+.. code-block:: python
+
+    # this model is for illustration purposes, it makes no research sense but it's intended to show
+    # that you can be as creative and expressive as you want.
+    class MyNewContrastiveApproach(pl.LightningModule):
+
+        def __init__(self):
+            suoer().__init_()
+
+            self.gan = GAN()
+            self.vae = VAE()
+            self.amdim = AMDIM()
+            self.cpc = CPCV2
+
+        def training_step(self, batch, batch_idx):
+            (x, y) = batch
+
+            feat_a = self.gan.generator(x)
+            feat_b = self.vae.encoder(x)
+
+            unsup_loss = self.amdim(feat_a) + self.cpc(feat_b)
+
+            vae_loss = self.vae._step(batch)
+            gan_loss = self.gan.generator_loss(x)
+
+            return unsup_loss + vae_loss + gan_loss
