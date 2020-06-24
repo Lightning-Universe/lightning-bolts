@@ -8,7 +8,7 @@ from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
 import pl_bolts
 
-from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask, AMDIM_11_55_77_ContrastiveTask
+from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
 from typing import Union
@@ -18,7 +18,7 @@ class AMDIM(pl.LightningModule):
 
     def __init__(self,
                  datamodule: Union[str, pl_bolts.datamodules.LightningDataModule] = 'cifar10',
-                 contrastive_task: Union[FeatureMapContrastiveTask] = AMDIM_11_55_77_ContrastiveTask(),
+                 contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask(),
                  image_channels: int = 3,
                  image_height: int = 32,
                  encoder_feature_dim: int = 320,
@@ -87,8 +87,7 @@ class AMDIM(pl.LightningModule):
         self.encoder.init_weights()
 
         # the task
-        self.contrastive_task = AMDIM_11_55_77_ContrastiveTask()
-        self.test_task = FeatureMapContrastiveTask(comparisons='00, 11, 22')
+        self.contrastive_task = FeatureMapContrastiveTask('01, 02, 11')
 
         self.tng_split = None
         self.val_split = None
@@ -135,10 +134,9 @@ class AMDIM(pl.LightningModule):
         r5_x2 = outputs['r5_x2']
         r7_x2 = outputs['r7_x2']
 
-        # ------------------
-        # NCE LOSS
-        loss, lgt_reg = self.nce_loss((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
-        unsupervised_loss = loss + lgt_reg
+        # Contrastive task
+        loss, lgt_reg = self.contrastive_task((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
+        unsupervised_loss = loss.sum() + lgt_reg
 
         # ------------------
         # FULL LOSS
@@ -158,9 +156,9 @@ class AMDIM(pl.LightningModule):
         # generate features
         r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2 = self.forward(img_1, img_2)
 
-        # NCE LOSS
-        losses, lgt_regs = self.test_task((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
-        unsupervised_loss = losses.sum() + lgt_regs
+        # Contrastive task
+        loss, lgt_reg = self.contrastive_task((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
+        unsupervised_loss = loss.sum() + lgt_reg
 
         result = {
             'val_nce': unsupervised_loss
