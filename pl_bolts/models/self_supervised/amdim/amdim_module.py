@@ -18,7 +18,7 @@ class AMDIM(pl.LightningModule):
 
     def __init__(self,
                  datamodule: Union[str, pl_bolts.datamodules.LightningDataModule] = 'cifar10',
-                 contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask(),
+                 contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask('01, 02, 11'),
                  image_channels: int = 3,
                  image_height: int = 32,
                  encoder_feature_dim: int = 320,
@@ -87,7 +87,7 @@ class AMDIM(pl.LightningModule):
         self.encoder.init_weights()
 
         # the task
-        self.contrastive_task = FeatureMapContrastiveTask('01, 02, 11')
+        self.contrastive_task = contrastive_task
 
         self.tng_split = None
         self.val_split = None
