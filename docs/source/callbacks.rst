@@ -1,8 +1,8 @@
 .. role:: hidden
     :class: hidden-section
 
-Bolts Callbacks
-===============
+Build a Callback
+================
 This module houses a collection of callbacks that can be passed into the trainer
 
 .. code-block:: python
@@ -15,6 +15,13 @@ This module houses a collection of callbacks that can be passed into the trainer
     # loss│train_loss│val_loss│epoch
     # ──────────────────────────────
     # 2.2541470527648926│2.2541470527648926│2.2158432006835938│0
+
+------------------
+
+What is a Callback
+------------------
+A callback is a self-contained program that can be intertwined into a training pipeline without polluting the main
+research logic.
 
 ---------------
 
