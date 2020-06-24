@@ -9,7 +9,7 @@ from pl_bolts.models.rl.dqn.model import DQN
 
 class DuelingDQN(DQN):
     """
-        PyTorch Lightning implementation of `Dueling DQN <https://arxiv.org/abs/1312.5602>`_
+        PyTorch Lightning implementation of `Dueling DQN <https://arxiv.org/abs/1511.06581>`_
 
         Paper authors: Ziyu Wang, Tom Schaul, Matteo Hessel, Hado van Hasselt, Marc Lanctot, Nando de Freitas
 

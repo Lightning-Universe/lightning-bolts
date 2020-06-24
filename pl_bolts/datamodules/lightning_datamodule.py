@@ -1,10 +1,10 @@
-from abc import abstractmethod
 import inspect
+from abc import abstractmethod
+from argparse import ArgumentParser, Namespace
+from typing import Union, List, Tuple, Any
 
 from pytorch_lightning.utilities import rank_zero_warn, parsing
 from torch.utils.data import DataLoader
-from argparse import ArgumentParser, Namespace
-from typing import Union, List, Tuple, Any
 
 
 class LightningDataModule(object):

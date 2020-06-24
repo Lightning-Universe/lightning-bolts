@@ -4,15 +4,17 @@ This example is based on https://github.com/PacktPublishing/Deep-Reinforcement-L
 Second-Edition/blob/master/Chapter06/02_dqn_pong.py
 """
 
-from typing import Tuple, List, Dict
 import argparse
 from collections import OrderedDict
+from typing import Tuple, List, Dict
+
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader
-import pytorch_lightning as pl
+
 from pl_bolts.models.rl.common import wrappers
 from pl_bolts.models.rl.common.agents import ValueAgent
 from pl_bolts.models.rl.common.experience import ExperienceSource, RLDataset

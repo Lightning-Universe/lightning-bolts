@@ -1,7 +1,7 @@
+import pytorch_lightning as pl
 import torch
 from torch import nn
 from torch.nn import functional as F
-import pytorch_lightning as pl
 from torch.optim.optimizer import Optimizer
 
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
