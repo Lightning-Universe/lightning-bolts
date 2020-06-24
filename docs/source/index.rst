@@ -48,6 +48,7 @@ PyTorchLightning-Bolts documentation
    :name: models
    :caption: Models
 
+   models
    autoencoders
    classic_ml
    gans
