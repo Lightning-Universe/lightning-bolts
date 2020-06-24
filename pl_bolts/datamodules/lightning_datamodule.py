@@ -117,7 +117,7 @@ class LightningDataModule(object):
             Lightning adds the correct sampler for distributed and arbitrary hardware.
             There is no need to set it yourself.
 
-        None:
+        Note:
             You can also return a list of DataLoaders
 
         Example::
@@ -140,7 +140,7 @@ class LightningDataModule(object):
             Lightning adds the correct sampler for distributed and arbitrary hardware.
             There is no need to set it yourself.
 
-        None:
+        Note:
             You can also return a list of DataLoaders
 
         Example::
