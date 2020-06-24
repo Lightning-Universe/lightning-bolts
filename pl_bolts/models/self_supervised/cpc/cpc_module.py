@@ -424,6 +424,7 @@ if __name__ == '__main__':
     if args.dataset == 'stl10':
         datamodule = STL10DataModule.from_argparse_args(args)
         datamodule.train_dataloader = datamodule.train_dataloader_mixed
+        datamodule.val_dataloader = datamodule.val_dataloader_mixed
         datamodule.train_transforms = CPCTrainTransformsSTL10()
         datamodule.val_transforms = CPCEvalTransformsSTL10()
 
