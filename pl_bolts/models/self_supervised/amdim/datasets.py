@@ -14,11 +14,10 @@ class AMDIMPretraining():
     @staticmethod
     def cifar10(dataset_root, split: str = 'train'):
         assert split in ('train', 'val')
-        train_transform = amdim_transforms.TransformsC10()
         dataset = CIFAR10Mixed(
             root=dataset_root,
             split=split,
-            transform=train_transform,
+            transform=amdim_transforms.AMDIMTrainTransformsCIFAR10(),
             download=True,
         )
         return dataset
@@ -26,11 +25,10 @@ class AMDIMPretraining():
     @staticmethod
     def cifar10_tiny(dataset_root, split: str = 'train'):
         assert split in ('train', 'val')
-        train_transform = amdim_transforms.TransformsC10()
         dataset = CIFAR10Mixed(
             root=dataset_root,
             split=split,
-            transform=train_transform,
+            transform=amdim_transforms.AMDIMTrainTransformsCIFAR10(),
             download=True,
             nb_labeled_per_class=50,
         )
@@ -39,19 +37,21 @@ class AMDIMPretraining():
     @staticmethod
     def imagenet(dataset_root, nb_classes, split: str = 'train'):
         assert split in ('train', 'val')
-        train_transform = amdim_transforms.TransformsImageNet128()
         dataset = UnlabeledImagenet(
             dataset_root,
             nb_classes=nb_classes,
             split=split,
-            transform=train_transform,
+            transform=amdim_transforms.AMDIMTrainTransformsImageNet128(),
         )
         return dataset
 
     @staticmethod
     def stl(dataset_root, split: str = None):
-        train_transform = amdim_transforms.TransformsSTL10()
-        dataset = STL10(root=dataset_root, split='unlabeled', transform=train_transform, download=True)
+        dataset = STL10(
+            root=dataset_root,
+            split='unlabeled',
+            transform=amdim_transforms.AMDIMTrainTransformsSTL10(),
+            download=True)
         tng_split, val_split = random_split(dataset, [95000, 5000])
         return tng_split, val_split
 

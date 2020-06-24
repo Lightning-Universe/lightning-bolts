@@ -9,7 +9,7 @@ from tests import reset_seed
 
 
 def test_cpcv2(tmpdir):
-    tmpdir = os.getcwd()
+    # tmpdir = os.getcwd()
     reset_seed()
 
     datamodule = TinyCIFAR10DataModule(data_dir=tmpdir)
@@ -25,6 +25,7 @@ def test_cpcv2(tmpdir):
 
 
 def test_amdim(tmpdir):
+    # tmpdir = os.getcwd()
     reset_seed()
 
     model = AMDIM(data_dir=tmpdir, batch_size=2, datamodule='tiny-cifar10')
