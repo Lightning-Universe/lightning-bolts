@@ -1,5 +1,5 @@
-SSL Contrastive tasks
-=====================
+Self-supervised Learning Contrastive tasks
+==========================================
 This section implements popular contrastive learning tasks used in self-supervised learning.
 
 ---------------
