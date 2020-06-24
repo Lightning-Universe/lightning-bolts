@@ -16,8 +16,14 @@ from torch import nn
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.metrics import precision_at_k, mean
-from pl_bolts.models.self_supervised.moco.transforms import \
-    Moco2ImagenetTransforms, Moco2CIFAR10Transforms, Moco2STL10Transforms
+from pl_bolts.models.self_supervised.moco.transforms import (
+    Moco2TrainCIFAR10Transforms,
+    Moco2EvalCIFAR10Transforms,
+    Moco2TrainSTL10Transforms,
+    Moco2EvalSTL10Transforms,
+    Moco2TrainImagenetTransforms,
+    Moco2EvalImagenetTransforms
+)
 
 
 class MocoV2(pl.LightningModule):
