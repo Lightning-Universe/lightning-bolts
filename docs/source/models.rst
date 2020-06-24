@@ -63,8 +63,8 @@ help overcome.
     x = np.some_fx(x)
     x = torch.tensor(x)
 
-Contributing
-------------
+I want to contribute
+--------------------
 If your model doesn't yet meet this bar, no worries! Please open the PR and our team of core contributors will
 help you get there!
 
