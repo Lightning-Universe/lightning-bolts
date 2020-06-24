@@ -411,6 +411,8 @@ figure out if your VAE implementation was correct, or if your training loop was 
             }
             return result
 
+---------------
+
 Importing parts
 ^^^^^^^^^^^^^^^
 All the bolts are modular. This means you can also arbitrarily mix and match fundamental blocks from across
@@ -441,6 +443,8 @@ approaches.
     default_amdim_task = AMDIM().contrastive_task
     model = CPCV2(contrastive_task=default_amdim_task, encoder='cpc_default')
     # you might need to modify the cpc encoder depending on what you use
+
+---------------
 
 Compose new ideas
 ^^^^^^^^^^^^^^^^^
