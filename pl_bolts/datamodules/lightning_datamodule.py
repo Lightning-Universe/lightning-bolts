@@ -8,42 +8,43 @@ from torch.utils.data import DataLoader
 
 
 class LightningDataModule(object):
+    """
+    A DataModule standardizes the training, val, test splits, data preparation and transforms.
+    The main advantage is consistent data splits and transforms across models.
+
+    Example::
+
+        class MyDataModule(LightningDataModule):
+
+            def __init__(self):
+                super().__init__()
+
+            def prepare_data(self):
+                # download, split, etc...
+
+            def train_dataloader(self):
+                train_split = Dataset(...)
+                return DataLoader(train_split)
+
+            def val_dataloader(self):
+                val_split = Dataset(...)
+                return DataLoader(val_split)
+
+            def test_dataloader(self):
+                test_split = Dataset(...)
+                return DataLoader(test_split)
+
+    A DataModule implements 4 key methods
+
+    1. `prepare_data` (things to do on 1 GPU not on every GPU in distributed mode)
+    2. `train_dataloader` the training dataloader.
+    3. `val_dataloader` the val dataloader.
+    4. `test_dataloader` the test dataloader.
+
+    This allows you to share a full dataset without explaining what the splits, transforms or download
+    process is.
+    """
     def __init__(self):
-        """
-        A DataModule standardizes that training, val, test splits, data preparation and transforms.
-        The main advantage is consistent data splits across models.
-
-        Example::
-
-            class MyDataModule(LightningDataModule):
-
-                def __init__(self, data_dir):
-                    super().__init__()
-                    self.data_dir = data_dir
-
-                def prepare_data(self):
-                    # download, split, etc...
-
-                def train_dataloader(self):
-                    train_split = Dataset(...)
-                    return DataLoader(train_split)
-
-                def val_dataloader(self):
-                    val_split = Dataset(...)
-                    return DataLoader(val_split)
-
-                def test_dataloader(self):
-                    test_split = Dataset(...)
-                    return DataLoader(test_split)
-
-        A DataModule implements 4 key methods
-
-        The first is `prepare_data`. In Lightning, this method ensures that data processing and downloading
-        only happens on 1 GPU when doing multi-gpu training.
-
-        The other three methods generate dataloaders for each split of the dataset. Each dataloader is also optimized
-        with best practices of num_workers, pinning, etc.
-        """
         super().__init__()
 
     @abstractmethod
