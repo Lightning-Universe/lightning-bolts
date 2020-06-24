@@ -130,7 +130,7 @@ class CPCV2(pl.LightningModule):
 
         # info nce loss
         c, h = self.__compute_final_nb_c(self.hparams.patch_size)
-        self.info_nce = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
+        self.contrastive_task = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
         if self.online_evaluator:
             z_dim = c * h * h
@@ -161,21 +161,6 @@ class CPCV2(pl.LightningModule):
             return CPCResNet101(dummy_batch)
         else:
             return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=self.hparams.task == 'cpc')
-
-    def get_dataset(self, name):
-        if name == 'cifar10':
-            return CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        elif name == 'stl10':
-            return STL10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        elif name == 'imagenet2012':
-            return SSLImagenetDataModule(
-                self.hparams.data_dir,
-                meta_root=self.hparams.meta_root,
-                num_workers=self.hparams.num_workers
-            )
-        else:
-            raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
-                                    f'your own \'')
 
     def __compute_final_nb_c(self, patch_size):
         dummy_batch = torch.zeros((2 * 49, 3, patch_size, patch_size))
@@ -229,7 +214,7 @@ class CPCV2(pl.LightningModule):
         Z = self(img_1)
 
         # infoNCE loss
-        nce_loss = self.info_nce(Z)
+        nce_loss = self.contrastive_task(Z)
         loss = nce_loss
         log = {'train_nce_loss': nce_loss}
 
@@ -272,7 +257,7 @@ class CPCV2(pl.LightningModule):
         Z = self(img_1)
 
         # infoNCE loss
-        nce_loss = self.info_nce(Z)
+        nce_loss = self.contrastive_task(Z)
         result = {'val_nce': nce_loss}
 
         if self.online_evaluator:
