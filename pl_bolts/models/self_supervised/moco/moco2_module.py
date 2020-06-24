@@ -263,9 +263,9 @@ class MocoV2(pl.LightningModule):
         return {'loss': loss, 'log': log}
 
     def validation_step(self, batch, batch_idx):
-        img_1, target = batch
+        (img_1, img_2), labels = batch
 
-        output = self.encoder_q(img_1)
+        output, target = self(img_q=img_1, img_k=img_2)
         loss = F.cross_entropy(output, target.long())
 
         acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))

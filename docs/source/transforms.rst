@@ -81,3 +81,41 @@ STL-10 Eval (a)
 ^^^^^^^^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.amdim.transforms.AMDIMEvalTransformsSTL10
     :noindex:
+
+---------------
+
+MOCO V2 transforms
+------------------
+
+Transforms used for MOCO V2
+
+CIFAR-10 Train (m2)
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: pl_bolts.models.self_supervised.moco.transforms.Moco2TrainCIFAR10Transforms
+    :noindex:
+
+CIFAR-10 Eval (m2)
+^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: pl_bolts.models.self_supervised.moco.transforms.Moco2EvalCIFAR10Transforms
+    :noindex:
+
+Imagenet Train (m2)
+^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: pl_bolts.models.self_supervised.moco.transforms.Moco2TrainSTL10Transforms
+    :noindex:
+
+Imagenet Eval (m2)
+^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: pl_bolts.models.self_supervised.moco.transforms.Moco2EvalSTL10Transforms
+    :noindex:
+
+STL-10 Train (m2)
+^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: pl_bolts.models.self_supervised.moco.transforms.Moco2TrainImagenetTransforms
+    :noindex:
+
+STL-10 Eval (m2)
+^^^^^^^^^^^^^^^^^^^
+.. autoclass:: pl_bolts.models.self_supervised.moco.transforms.Moco2EvalImagenetTransforms
+    :noindex:
