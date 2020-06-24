@@ -4,9 +4,21 @@ import torchvision.transforms as transforms
 
 
 class SimCLRTrainDataTransform(object):
-    def __init__(self, input_height, s=1, test=False):
+    """
+    Transforms for SimCLR
+
+    Transform::
+
+        RandomResizedCrop(size=self.input_height)
+        RandomHorizontalFlip()
+        RandomApply([color_jitter], p=0.8)
+        RandomGrayscale(p=0.2)
+        GaussianBlur(kernel_size=int(0.1 * self.input_height))
+        transforms.ToTensor()
+
+    """
+    def __init__(self, input_height, s=1):
         self.s = s
-        self.test = test
         self.input_height = input_height
         color_jitter = transforms.ColorJitter(0.8 * self.s, 0.8 * self.s, 0.8 * self.s, 0.2 * self.s)
         data_transforms = transforms.Compose([transforms.RandomResizedCrop(size=self.input_height),
@@ -25,9 +37,18 @@ class SimCLRTrainDataTransform(object):
 
 
 class SimCLREvalDataTransform(object):
-    def __init__(self, input_height, s=1, test=False):
+    """
+    Transforms for SimCLR
+
+    Transform::
+
+        Resize(input_height + 10, interpolation=3)
+        transforms.CenterCrop(input_height),
+        transforms.ToTensor()
+
+    """
+    def __init__(self, input_height, s=1):
         self.s = s
-        self.test = test
         self.input_height = input_height
         self.test_transform = transforms.Compose([
             transforms.Resize(input_height + 10, interpolation=3),
