@@ -12,9 +12,7 @@ class CIFAR10DataModule(LightningDataModule):
                  data_dir,
                  val_split=5000,
                  num_workers=16,
-                 train_transforms=None,
-                 val_transforms=None,
-                 test_transforms=None):
+                 *args, **kwargs):
         """
         Standard CIFAR10, train, val, test splits and transforms
 
@@ -37,17 +35,11 @@ class CIFAR10DataModule(LightningDataModule):
             data_dir: where to save/load the data
             val_split: how many of the training images to use for the validation split
             num_workers: how many workers to use for loading data
-            train_transforms: Optional set of transforms to use for training
-            val_transforms: Optional set of transforms to use for validation
-            test_transforms: Optional set of transforms to use for testing
         """
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.data_dir = data_dir
         self.val_split = val_split
         self.num_workers = num_workers
-        self.train_transforms = train_transforms
-        self.test_transforms = test_transforms
-        self.val_transforms = val_transforms
 
     @property
     def num_classes(self):
