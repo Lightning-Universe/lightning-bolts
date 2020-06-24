@@ -313,6 +313,8 @@ class FeatureMapContrastiveTask(nn.Module):
         """
         Takes in a set of tuples, each tuple has two feature maps with all matching dimensions
         """
+        assert len(anchor_maps) == len(self.map_indexes), f'expected each input to have {len(self.map_indexes)} tensors'
+
         self.__cache_dimension_masks(*(anchor_maps + positive_maps))
 
         regularizer = 0
