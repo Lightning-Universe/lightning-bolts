@@ -3,24 +3,31 @@ from torchvision import transforms
 from pl_bolts.transforms.self_supervised import RandomTranslateWithReflect, Patchify
 
 
-class CPCTransformsCIFAR10:
-    '''
-    Apply the same input transform twice, with independent randomness.
-    '''
+class CPCTrainTransformsCIFAR10:
 
     def __init__(self, patch_size=8):
-        # flipping image along vertical axis
+        """
+        Transforms used for CPC:
+
+        Transforms::
+
+            random_flip
+            img_jitter
+            col_jitter
+            rnd_gray
+            transforms.ToTensor()
+            normalize
+            Patchify(patch_size=patch_size, overlap_size=patch_size // 2)
+        """
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
-        # image augmentation functions
+
         normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
                                          std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
-        col_jitter = transforms.RandomApply([
-            transforms.ColorJitter(0.4, 0.4, 0.4, 0.2)], p=0.8)
-        img_jitter = transforms.RandomApply([
-            RandomTranslateWithReflect(4)], p=0.8)
+        col_jitter = transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.2)], p=0.8)
+        img_jitter = transforms.RandomApply([RandomTranslateWithReflect(4)], p=0.8)
         rnd_gray = transforms.RandomGrayscale(p=0.25)
-        # main transform for self-supervised training
-        self.train_transform = transforms.Compose([
+
+        self.transforms = transforms.Compose([
             img_jitter,
             col_jitter,
             rnd_gray,
@@ -28,16 +35,44 @@ class CPCTransformsCIFAR10:
             normalize,
             Patchify(patch_size=patch_size, overlap_size=patch_size // 2),
         ])
-        # transform for testing
-        self.test_transform = transforms.Compose([
+
+    def __call__(self, inp):
+        inp = self.flip_lr(inp)
+        out1 = self.transforms(inp)
+        return out1
+
+
+class CPCEvalTransformsCIFAR10:
+
+    def __init__(self, patch_size=8):
+        """
+        Transforms used for CPC:
+
+        Args:
+            patch_size: size of patches when cutting up the image into overlapping patches
+
+        Transforms::
+
+            random_flip
+            transforms.ToTensor()
+            normalize
+            Patchify(patch_size=patch_size, overlap_size=patch_size // 2)
+        """
+
+        # flipping image along vertical axis
+        self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
+
+        normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
+                                         std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
+
+        self.transforms = transforms.Compose([
             transforms.ToTensor(),
             normalize,
             Patchify(patch_size=patch_size, overlap_size=patch_size // 2),
         ])
 
     def __call__(self, inp):
-        inp = self.flip_lr(inp)
-        out1 = self.train_transform(inp)
+        out1 = self.transforms(inp)
         return out1
 
 

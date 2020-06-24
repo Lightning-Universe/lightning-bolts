@@ -58,7 +58,7 @@ PyTorchLightning-Bolts documentation
 .. toctree::
    :maxdepth: 2
    :name: transforms
-   :caption: Transforms
+   :caption: Data Processing
 
    transforms
 
