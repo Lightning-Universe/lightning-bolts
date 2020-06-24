@@ -187,7 +187,7 @@ class AmdimNCELoss(nn.Module):
 
 class FeatureMapContrastiveTask(nn.Module):
 
-    def __init__(self, tclip=10., bidirectional=True):
+    def __init__(self, comparisons: str = '11, 55, 1r', tclip=10., bidirectional=True):
         """
         Performs an anchor, positive negative pair comparison for each each tuple of feature maps passed in
 
@@ -219,8 +219,32 @@ class FeatureMapContrastiveTask(nn.Module):
         super().__init__()
         self.tclip = tclip
         self.bidirectional = bidirectional
+        self.map_indexes = self.parse_map_indexes(comparisons)
+        self.comparisons = comparisons
         self.masks = {}
         self.nce_loss = AmdimNCELoss(tclip)
+
+    def parse_map_indexes(self, comparisons):
+        """
+        Example::
+
+            >>> self.parse_map_indexes('11')
+            [(1, 1)]
+            >>> self.parse_map_indexes('11,59')
+            [(1, 1), (5, 9)]
+            >>> self.parse_map_indexes('11,59, 2r')
+            [(1, 1), (5, 9), (2, -1)]
+        """
+        map_indexes = [x.strip() for x in comparisons.split(',')]
+        for tup_i in range(len(map_indexes)):
+            (a, b) = map_indexes[tup_i]
+            if a == 'r':
+                a = '-1'
+            if b == 'r':
+                b = '-1'
+            map_indexes[tup_i] = (int(a), int(b))
+
+        return map_indexes
 
     def feat_size_w_mask(self, w, feature_map):
         masks_r5 = torch.zeros((w, w, 1, w, w), device=feature_map.device).type(torch.bool)
@@ -248,7 +272,7 @@ class FeatureMapContrastiveTask(nn.Module):
     def __cache_dimension_masks(self, *args):
         # cache masks for each feature map we'll need
         if len(self.masks) == 0:
-            for (m1, me) in args:
+            for m1 in args:
                 batch_size, emb_dim, h, w = m1.size()
 
                 # make mask
@@ -275,17 +299,28 @@ class FeatureMapContrastiveTask(nn.Module):
 
         return loss, regularizer
 
-    def forward(self, *args):
+    def forward(self, anchor_maps, positive_maps):
         """
         Takes in a set of tuples, each tuple has two feature maps with all matching dimensions
         """
-        self.__cache_dimension_masks(*args)
+        self.__cache_dimension_masks(*(anchor_maps + positive_maps))
 
         regularizer = 0
         losses = []
-        for (m1, m2) in args:
-            b, c, h, w = m1.size()
-            b2, c2, h2, w2 = m2.size()
+        for (ai, pi) in self.map_indexes:
+
+            # choose a random map
+            if ai == -1:
+                a1 = np.random.randint(0, len(anchor_maps))
+            if pi == -1:
+                p1 = np.random.randint(0, len(anchor_maps))
+
+            # pull out the maps
+            anchor = anchor_maps[ai]
+            pos = positive_maps[pi]
+
+            b, c, h, w = anchor.size()
+            b2, c2, h2, w2 = pos.size()
 
             assert b == b2
             assert c == c2
@@ -293,20 +328,24 @@ class FeatureMapContrastiveTask(nn.Module):
             assert w == w2
 
             # m1 vs m2
-            loss1, reg1 = self.__compare_maps(m1, m2)
+            loss1, reg1 = self.__compare_maps(anchor, pos)
             map_reg = reg1
             map_loss = loss1
 
             # add second direction if requested
             if self.bidirectional:
-                loss2, reg2 = self.__compare_maps(m2, m1)
+                # swap maps
+                anchor = positive_maps[ai]
+                pos = anchor_maps[pi]
+
+                loss2, reg2 = self.__compare_maps(anchor, pos)
                 map_reg = 0.5 * (reg1 + reg2)
                 map_loss = 0.5 * (loss1 + loss2)
 
             regularizer += map_reg
             losses.append(map_loss.mean())
 
-        return losses, regularizer
+        return torch.stack(losses), regularizer
 
 
 class AMDIM_11_55_77_ContrastiveTask(FeatureMapContrastiveTask):
@@ -335,9 +374,26 @@ class AMDIM_11_55_77_ContrastiveTask(FeatureMapContrastiveTask):
             tclip: stability clipping value
             bidirectional: if true, does the comparison both ways
         """
-        super().__init__(tclip, bidirectional)
+        super().__init__('11, 55, 7r', tclip, bidirectional)
 
-    def forward(self, *args):
+    def forward(self, x1_maps, x2_maps):
+        """
+        Compute nce infomax costs for various combos of source/target layers.
+        Compute costs in both directions, i.e. from/to both images (x1, x2).
+        rK_x1 are features from source image x1.
+        rK_x2 are features from source image x2.
+        """
+        # cache masks
+        if len(self.masks) == 0:
+            for m1, m2 in zip(x1_maps, x2_maps):
+                batch_size, emb_dim, h, w = m1.size()
+
+                # make mask
+                if h not in self.masks:
+                    mask = self.feat_size_w_mask(h, m1)
+                    self.masks[h] = mask
+
+        return self.contrastive_task(x1_maps, x2_maps)
 
     def contrastive_task(self, x1_maps, x2_maps):
         r1_x1, r5_x1, r7_x1 = x1_maps
@@ -379,8 +435,7 @@ class AMDIM_11_55_77_ContrastiveTask(FeatureMapContrastiveTask):
 
         # make masking matrix to help compute nce costs
         # (b x b) zero matrix with 1s in the diag
-        diag_mat = torch.eye(batch_size)
-        diag_mat = diag_mat.cuda(r1_x1.device.index)
+        diag_mat = torch.eye(batch_size, device=r1_trg_1.device)
 
         # -----------------
         # NCE COSTS
@@ -400,6 +455,12 @@ class AMDIM_11_55_77_ContrastiveTask(FeatureMapContrastiveTask):
         loss_7t7_2, regularizer_7t7_2 = self.nce_loss(r7_src_2, r7_trg_1, diag_mat)  # img 2
 
         # combine costs for optimization
+        print('loss_1t1_1', loss_1t1_1)
+        print('loss_1t1_2', loss_1t1_2)
+        print('loss_5t5_1', loss_5t5_1)
+        print('loss_5t5_2', loss_5t5_2)
+        print('loss_7t7_1', loss_7t7_1)
+        print('loss_7t7_2', loss_7t7_2)
         loss_1t1 = 0.5 * (loss_1t1_1 + loss_1t1_2)
         loss_5t5 = 0.5 * (loss_5t5_1 + loss_5t5_2)
         loss_7t7 = 0.5 * (loss_7t7_1 + loss_7t7_2)
@@ -416,8 +477,7 @@ class AMDIM_11_55_77_ContrastiveTask(FeatureMapContrastiveTask):
         loss_5t5 = loss_5t5.mean()
         loss_7t7 = loss_7t7.mean()
         regularizer = regularizer.mean()
-        return loss_1t1 + loss_5t5 + loss_7t7, regularizer
-
+        return (loss_1t1, loss_5t5, loss_7t7), regularizer
 
 class ContrastiveTask_15_17_55(FeatureMapContrastiveTask):
 

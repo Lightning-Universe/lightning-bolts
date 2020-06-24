@@ -88,7 +88,7 @@ class AMDIM(pl.LightningModule):
 
         # the task
         self.contrastive_task = AMDIM_11_55_77_ContrastiveTask()
-        self.test_task = FeatureMapContrastiveTask()
+        self.test_task = FeatureMapContrastiveTask(comparisons='00, 11, 22')
 
         self.tng_split = None
         self.val_split = None
@@ -159,9 +159,8 @@ class AMDIM(pl.LightningModule):
         r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2 = self.forward(img_1, img_2)
 
         # NCE LOSS
-        loss, lgt_reg = self.contrastive_task((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
-        losses, lgt_regs = self.test_task((r1_x1, r1_x2), (r5_x1, r5_x2), (r7_x1, r7_x2))
-        unsupervised_loss = loss + lgt_reg
+        losses, lgt_regs = self.test_task((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
+        unsupervised_loss = losses.sum() + lgt_regs
 
         result = {
             'val_nce': unsupervised_loss
