@@ -64,7 +64,7 @@ PyTorchLightning-Bolts documentation
 .. toctree::
    :maxdepth: 2
    :name: ssl
-   :caption: Self-supervised learning
+   :caption: Learning Tasks
 
    vision_tasks
 
