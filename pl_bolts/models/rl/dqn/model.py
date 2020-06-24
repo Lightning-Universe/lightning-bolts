@@ -30,7 +30,8 @@ class DQN(pl.LightningModule):
         """
         PyTorch Lightning implementation of `DQN <https://arxiv.org/abs/1312.5602>`_
 
-        Paper authors: Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves, Ioannis Antonoglou, Daan Wierstra, Martin Riedmiller.
+        Paper authors: Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves,
+        Ioannis Antonoglou, Daan Wierstra, Martin Riedmiller.
 
         Model implemented by:
 
