@@ -1,6 +1,8 @@
 """
 Adapted from: https://github.com/facebookresearch/moco
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+
+Original work is: Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+This implementation is: Copyright (c) PyTorch Lightning, Inc. and its affiliates. All Rights Reserved
 """
 
 from typing import Union
@@ -11,8 +13,14 @@ import torch.nn.functional as F
 import torchvision
 from torch import nn
 
+import pl_bolts
+from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.datamodules import get_datamodule
 from pl_bolts.metrics import precision_at_k, mean
+from pl_bolts.models.self_supervised.moco.transforms import (
+    Moco2TrainCIFAR10Transforms,
+    Moco2EvalCIFAR10Transforms,
+)
 from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2ImagenetTransforms, Moco2CIFAR10Transforms, Moco2STL10Transforms)
 
@@ -20,7 +28,7 @@ from pl_bolts.models.self_supervised.moco.transforms import (
 class MocoV2(pl.LightningModule):
 
     def __init__(self,
-                 base_encoder: Union[str, torch.nn.Module] = 'resnet50',
+                 base_encoder: Union[str, torch.nn.Module] = 'resnet18',
                  emb_dim: int = 128,
                  num_negatives: int = 65536,
                  encoder_momentum: float = 0.999,
@@ -28,7 +36,7 @@ class MocoV2(pl.LightningModule):
                  learning_rate: float = 0.03,
                  momentum: float = 0.9,
                  weight_decay: float = 1e-4,
-                 dataset: str = 'cifar10',
+                 datamodule: pl_bolts.datamodules.LightningDataModule = None,
                  data_dir: str = './',
                  batch_size: str = 256,
                  use_mlp: bool = False,
@@ -63,7 +71,7 @@ class MocoV2(pl.LightningModule):
             learning_rate: the learning rate
             momentum: optimizer momentum
             weight_decay: optimizer weight decay
-            dataset: name of dataset
+            datamodule: the DataModule (train, val, test dataloaders)
             data_dir: the directory to store data
             batch_size: batch size
             use_mlp: add an mlp to the encoders
@@ -73,7 +81,13 @@ class MocoV2(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.dataset = self.get_dataset(dataset)
+        # use CIFAR-10 by default if no datamodule passed in
+        if datamodule is None:
+            datamodule = CIFAR10DataModule(data_dir)
+            datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
+            datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
+
+        self.datamodule = datamodule
 
         # create the encoders
         # num_classes is the output fc dimension
@@ -228,13 +242,6 @@ class MocoV2(pl.LightningModule):
 
         return logits, labels
 
-    def get_dataset(self, name):
-        extra = dict(meta_root=self.hparams.meta_root) if name == 'imagenet2012' else {}
-        return get_datamodule(name, data_dir=self.hparams.data_dir, num_workers=self.hparams.num_workers, **extra)
-
-    def prepare_data(self):
-        self.dataset.prepare_data()
-
     def training_step(self, batch, batch_idx):
         (img_1, img_2), _ = batch
 
@@ -251,9 +258,9 @@ class MocoV2(pl.LightningModule):
         return {'loss': loss, 'log': log}
 
     def validation_step(self, batch, batch_idx):
-        img_1, target = batch
+        (img_1, img_2), labels = batch
 
-        output = self.encoder_q(img_1)
+        output, target = self(img_q=img_1, img_k=img_2)
         loss = F.cross_entropy(output, target.long())
 
         acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))
@@ -283,37 +290,22 @@ class MocoV2(pl.LightningModule):
                                     weight_decay=self.hparams.weight_decay)
         return optimizer
 
+    def prepare_data(self):
+        self.datamodule.prepare_data()
+
     def train_dataloader(self):
-        if 'cifar10' in self.hparams.dataset:
-            train_transform = Moco2CIFAR10Transforms()
-
-        elif self.hparams.dataset == 'stl10':
-            train_transform = Moco2STL10Transforms()
-
-        elif self.hparams.dataset == 'imagenet2012':
-            train_transform = Moco2ImagenetTransforms()
-
-        loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
+        loader = self.datamodule.train_dataloader(self.hparams.batch_size)
         return loader
 
     def val_dataloader(self):
-        if 'cifar10' in self.hparams.dataset:
-            train_transform = Moco2CIFAR10Transforms().train_transform
-
-        elif self.hparams.dataset == 'stl10':
-            train_transform = Moco2STL10Transforms().train_transform
-
-        elif self.hparams.dataset == 'imagenet2012':
-            train_transform = Moco2ImagenetTransforms().train_transform
-
-        loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=train_transform)
+        loader = self.datamodule.val_dataloader(self.hparams.batch_size)
         return loader
 
     @staticmethod
     def add_model_specific_args(parent_parser):
         from test_tube import HyperOptArgumentParser
         parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--base_encoder', type=str, default='resnet50')
+        parser.add_argument('--base_encoder', type=str, default='resnet18')
         parser.add_argument('--emb_dim', type=int, default=128)
         parser.add_argument('--num_workers', type=int, default=8)
         parser.add_argument('--num_negatives', type=int, default=65536)
@@ -322,7 +314,6 @@ class MocoV2(pl.LightningModule):
         parser.add_argument('--learning_rate', type=float, default=0.03)
         parser.add_argument('--momentum', type=float, default=0.9)
         parser.add_argument('--weight_decay', type=float, default=1e-4)
-        parser.add_argument('--dataset', type=str, default='cifar10')
         parser.add_argument('--data_dir', type=str, default='./')
         parser.add_argument('--batch_size', type=int, default=256)
         parser.add_argument('--use_mlp', action='store_true')

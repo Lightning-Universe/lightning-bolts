@@ -11,7 +11,14 @@ from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 
 class CIFAR10DataModule(LightningDataModule):
 
-    def __init__(self, data_dir, val_split=5000, num_workers=16):
+    def __init__(
+            self,
+            data_dir,
+            val_split=5000,
+            num_workers=16,
+            *args,
+            **kwargs,
+    ):
         """
         Standard CIFAR10, train, val, test splits and transforms
 
@@ -19,8 +26,10 @@ class CIFAR10DataModule(LightningDataModule):
 
             mnist_transforms = transform_lib.Compose([
                 transform_lib.ToTensor(),
-                transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
-                                     std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
+                transforms.Normalize(
+                    mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
+                    std=[x / 255.0 for x in [63.0, 62.1, 66.7]]
+                )
             ])
 
         Example::
@@ -30,12 +39,20 @@ class CIFAR10DataModule(LightningDataModule):
             dm = CIFAR10DataModule()
             model = LitModel(datamodule=dm)
 
+        Or you can set your own transforms
+
+        Example::
+
+            dm.train_transforms = ...
+            dm.test_transforms = ...
+            dm.val_transforms  = ...
+
         Args:
             data_dir: where to save/load the data
             val_split: how many of the training images to use for the validation split
             num_workers: how many workers to use for loading data
         """
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.data_dir = data_dir
         self.val_split = val_split
         self.num_workers = num_workers
@@ -63,16 +80,14 @@ class CIFAR10DataModule(LightningDataModule):
         CIFAR10(self.data_dir, train=True, download=True, transform=transform_lib.ToTensor())
         CIFAR10(self.data_dir, train=False, download=True, transform=transform_lib.ToTensor())
 
-    def train_dataloader(self, batch_size, transforms=None):
+    def train_dataloader(self, batch_size):
         """
         CIFAR train set removes a subset to use for validation
 
         Args:
             batch_size: size of batch
-            transforms: custom transforms
         """
-        if transforms is None:
-            transforms = self._default_transforms()
+        transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
 
         dataset = CIFAR10(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
@@ -87,16 +102,14 @@ class CIFAR10DataModule(LightningDataModule):
         )
         return loader
 
-    def val_dataloader(self, batch_size, transforms=None):
+    def val_dataloader(self, batch_size):
         """
         CIFAR10 val set uses a subset of the training set for validation
 
         Args:
             batch_size: size of batch
-            transforms: custom transforms
         """
-        if transforms is None:
-            transforms = self._default_transforms()
+        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
 
         dataset = CIFAR10(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
@@ -110,7 +123,7 @@ class CIFAR10DataModule(LightningDataModule):
         )
         return loader
 
-    def test_dataloader(self, batch_size, transforms=None):
+    def test_dataloader(self, batch_size):
         """
         CIFAR10 test set uses the test split
 
@@ -118,8 +131,7 @@ class CIFAR10DataModule(LightningDataModule):
             batch_size: size of batch
             transforms: custom transforms
         """
-        if transforms is None:
-            transforms = self._default_transforms()
+        transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
 
         dataset = CIFAR10(self.data_dir, train=False, download=False, transform=transforms)
         loader = DataLoader(
@@ -132,7 +144,7 @@ class CIFAR10DataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self):
+    def default_transforms(self):
         cf10_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             cifar10_normalization()
@@ -206,8 +218,7 @@ class TinyCIFAR10DataModule(LightningDataModule):
             batch_size: size of batch
             transforms: custom transforms
         """
-        if transforms is None:
-            transforms = self._default_transforms()
+        transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
 
         dataset = TrialCIFAR10(self.data_dir, train=True, download=False, transform=transforms,
                                num_samples=self.num_samples, labels=self.labels)
@@ -231,8 +242,7 @@ class TinyCIFAR10DataModule(LightningDataModule):
             batch_size: size of batch
             transforms: custom transforms
         """
-        if transforms is None:
-            transforms = self._default_transforms()
+        transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
 
         dataset = TrialCIFAR10(self.data_dir, train=True, download=False, transform=transforms,
                                num_samples=self.num_samples, labels=self.labels)
@@ -255,8 +265,7 @@ class TinyCIFAR10DataModule(LightningDataModule):
             batch_size: size of batch
             transforms: custom transforms
         """
-        if transforms is None:
-            transforms = self._default_transforms()
+        transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
 
         dataset = TrialCIFAR10(self.data_dir, train=False, download=False, transform=transforms,
                                num_samples=self.num_samples, labels=self.labels)
@@ -270,7 +279,7 @@ class TinyCIFAR10DataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self):
+    def default_transforms(self):
         cf10_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             cifar10_normalization()
