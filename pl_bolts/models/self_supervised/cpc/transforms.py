@@ -224,3 +224,41 @@ class CPCTransformsImageNet128Patches:
         inp = self.flip_lr(inp)
         out1 = self.train_transform(inp)
         return out1
+
+
+class CPCTransformsImageNet128Patches:
+    '''
+    ImageNet dataset, for use with 128x128 full image encoder.
+    '''
+
+    def __init__(self, patch_size, overlap):
+        # image augmentation functions
+        self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
+        rand_crop = \
+            transforms.RandomResizedCrop(128, scale=(0.3, 1.0), ratio=(0.7, 1.4),
+                                         interpolation=3)
+        col_jitter = transforms.RandomApply([
+            transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8)
+        rnd_gray = transforms.RandomGrayscale(p=0.25)
+        post_transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225]),
+            Patchify(patch_size=patch_size, overlap_size=overlap),
+        ])
+        self.test_transform = transforms.Compose([
+            transforms.Resize(146, interpolation=3),
+            transforms.CenterCrop(128),
+            post_transform
+        ])
+        self.train_transform = transforms.Compose([
+            rand_crop,
+            col_jitter,
+            rnd_gray,
+            post_transform
+        ])
+
+    def __call__(self, inp):
+        inp = self.flip_lr(inp)
+        out1 = self.train_transform(inp)
+        return out1
