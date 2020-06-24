@@ -1,29 +1,35 @@
 .. role:: hidden
     :class: hidden-section
 
-Image Transforms
-================
-The following are collections of transforms.
+Self-supervised learning Transforms
+===================================
 
------------------
-
-Self-supervised learning
-------------------------
 These transforms are used in various self-supervised learning approaches.
 
+-------------------
 
 CPC transforms
+--------------
+
+Transforms used for CPC
+
+CIFAR-10 Train
 ^^^^^^^^^^^^^^
-Transfors used for CPC
 
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCTrainTransformsCIFAR10
     :noindex:
 
+CIFAR-10 Eval
+^^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCEvalTransformsCIFAR10
     :noindex:
 
+STL-10 Train
+^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCTrainTransformsSTL10
     :noindex:
 
+STL-10 Eval
+^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCEvalTransformsSTL10
     :noindex:
