@@ -1,3 +1,31 @@
+Model quality control
+=====================
+For bolts to be added to the library we have a **rigorous** quality control checklist
+
+Benchmarked
+-----------
+Models have known performance results on common baseline datasets.
+
+Testing
+-------
+Models are tested on every PR (on CPUs, GPUs and soon TPUs).
+
+Modular
+-------
+Models are modularized to be extended and reused easily.
+
+Device agnostic
+---------------
+Models must work on CPUs, GPUs and TPUs without changing code. We help authors with this.
+
+Fast
+----
+We inspect models for computational inefficiencies and help authors meet the bar.
+Granted, sometimes the approaches are slow for mathematical reasons. But anything related to engineering we
+help overcome.
+
+-----------
+
 How to use models
 =================
 Models are meant to be "bolted" onto your research or production cases.
@@ -205,3 +233,105 @@ If you do have enough data and compute resources, then you could try training fr
     trainer.fit(model, train_data, val_data)
 
 .. note:: For this to work well, make sure you have enough data and time to train these models!
+
+-------------
+
+For research
+------------
+What separates bolts from all the other libraries out there is that bolts is built by and used by AI researchers.
+This means every single bolt is modularized so that it can be easily extended or mixed with arbitrary parts of
+the rest of the code-base.
+
+Extending work
+^^^^^^^^^^^^^^
+Perhaps a research project requires modifying a part of a know approach. In this case, you're better off only
+changing that part of a system that is already know to perform well. Otherwise, you risk not implementing the work
+correctly.
+
+**Example 1: Changing the prior or approx posterior of a VAE**
+
+.. code-block:: python
+
+    from pl_bolts.models.autoencoders import VAE
+
+    class MyVAEFlavor(VAE):
+
+        def init_prior(self, z_mu, z_std):
+            P = MyPriorDistribution
+
+            # default is standard normal
+            # P = distributions.normal.Normal(loc=torch.zeros_like(z_mu), scale=torch.ones_like(z_std))
+            return P
+
+        def init_posterior(self, z_mu, z_std):
+            Q = MyPosteriorDistribution
+            # default is normal(z_mu, z_sigma)
+            # Q = distributions.normal.Normal(loc=z_mu, scale=z_std)
+            return Q
+
+And of course train it with lightning.
+
+.. code-block:: python
+
+    model = MyVAEFlavor()
+    trainer = Trainer()
+    trainer.fit(model)
+
+In just a few lines of code you changed something fundamental about a VAE with only a few lines of code... This
+means you can iterate through ideas much faster knowing that the bolt implementation and the training loop are CORRECT
+and TESTED.
+
+If your model doesn't work with the new P, Q, then you can discard that research idea much faster than trying to
+figure out if your VAE implementation was correct, or if your training loop was correct.
+
+**Example 2: Changing the generator step of a GAN**
+
+.. code-block:: python
+
+    from pl_bolts.models.gans import GAN
+
+    class FancyGAN(VAE):
+
+        def generator_step(self, x):
+            # sample noise
+            z = torch.randn(x.shape[0], self.hparams.latent_dim)
+            z = z.type_as(x)
+
+            # generate images
+            self.generated_imgs = self(z)
+
+            # ground truth result (ie: all real)
+            real = torch.ones(x.size(0), 1)
+            real = real.type_as(x)
+            g_loss = self.generator_loss(real)
+
+            tqdm_dict = {'g_loss': g_loss}
+            output = OrderedDict({
+                'loss': g_loss,
+                'progress_bar': tqdm_dict,
+                'log': tqdm_dict
+            })
+            return output
+
+**Example 3: Changing the way the loss is calculated in a contrastive self-supervised learning approach**
+
+.. code-block:: python
+
+    from pl_bolts.models.self_supervised import AMDIM
+
+    class MyDIM(AMDIM):
+
+        def validation_step(self, batch, batch_nb):
+            [img_1, img_2], labels = batch
+
+            # generate features
+            r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2 = self.forward(img_1, img_2)
+
+            # Contrastive task
+            loss, lgt_reg = self.contrastive_task((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
+            unsupervised_loss = loss.sum() + lgt_reg
+
+            result = {
+                'val_nce': unsupervised_loss
+            }
+            return result
