@@ -1,6 +1,6 @@
 import pytorch_lightning as pl
 
-from pl_bolts.models.self_supervised import CPCV2, AMDIM
+from pl_bolts.models.self_supervised import CPCV2, AMDIM, MocoV2
 from tests import reset_seed
 
 
@@ -19,6 +19,17 @@ def test_amdim(tmpdir):
     reset_seed()
 
     model = AMDIM(data_dir=tmpdir, batch_size=2)
+    trainer = pl.Trainer(overfit_batches=2, max_epochs=2, default_root_dir=tmpdir)
+    trainer.fit(model)
+    loss = trainer.callback_metrics['loss']
+
+    assert loss > 0
+
+
+def test_moco(tmpdir):
+    reset_seed()
+
+    model = MocoV2(data_dir=tmpdir, batch_size=2)
     trainer = pl.Trainer(overfit_batches=2, max_epochs=2, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
