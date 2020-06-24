@@ -9,7 +9,7 @@ from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
 
 import pl_bolts
-from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask, AMDIMContrastiveTask
+from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
 

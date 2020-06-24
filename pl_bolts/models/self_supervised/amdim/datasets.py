@@ -15,24 +15,37 @@ class AMDIMPretraining():
     def cifar10(dataset_root, split: str = 'train'):
         assert split in ('train', 'val')
         train_transform = amdim_transforms.TransformsC10()
-        dataset = CIFAR10Mixed(root=dataset_root, split=split, transform=train_transform, download=True)
+        dataset = CIFAR10Mixed(
+            root=dataset_root,
+            split=split,
+            transform=train_transform,
+            download=True,
+        )
         return dataset
 
     @staticmethod
     def cifar10_tiny(dataset_root, split: str = 'train'):
         assert split in ('train', 'val')
         train_transform = amdim_transforms.TransformsC10()
-        dataset = CIFAR10Mixed(root=dataset_root, split=split, transform=train_transform, download=True)
+        dataset = CIFAR10Mixed(
+            root=dataset_root,
+            split=split,
+            transform=train_transform,
+            download=True,
+            nb_labeled_per_class=50,
+        )
         return dataset
 
     @staticmethod
     def imagenet(dataset_root, nb_classes, split: str = 'train'):
         assert split in ('train', 'val')
         train_transform = amdim_transforms.TransformsImageNet128()
-        dataset = UnlabeledImagenet(dataset_root,
-                                    nb_classes=nb_classes,
-                                    split=split,
-                                    transform=train_transform)
+        dataset = UnlabeledImagenet(
+            dataset_root,
+            nb_classes=nb_classes,
+            split=split,
+            transform=train_transform,
+        )
         return dataset
 
     @staticmethod
@@ -45,10 +58,12 @@ class AMDIMPretraining():
     @staticmethod
     def get_dataset(datamodule: str, data_dir, split: str = 'train', **kwargs):
         datasets = {
+            'tiny-cifar10': AMDIMPretraining.cifar10_tiny,
             'cifar10': AMDIMPretraining.cifar10,
             'stl10': AMDIMPretraining.stl,
             'imagenet2012': AMDIMPretraining.imagenet,
         }
+        assert datamodule in datasets, 'unrecognized dataset request'
         return datasets[datamodule](dataset_root=data_dir, split=split, **kwargs)
 
 
@@ -58,59 +73,46 @@ class AMDIMPatchesPretraining():
     """
 
     @staticmethod
-    def cifar10_train(dataset_root, patch_size, patch_overlap):
+    def cifar10(dataset_root, patch_size, patch_overlap, split: str = 'train'):
+        assert split in ('train', 'val')
         train_transform = amdim_transforms.TransformsC10Patches(
             patch_size=patch_size,
             patch_overlap=patch_overlap)
-        dataset = CIFAR10Mixed(root=dataset_root, split='train', transform=train_transform, download=True)
-
+        dataset = CIFAR10Mixed(
+            root=dataset_root,
+            split=split,
+            transform=train_transform,
+            download=True,
+        )
         return dataset
 
     @staticmethod
-    def stl_train(dataset_root, patch_size, patch_overlap):
+    def stl(dataset_root, patch_size, patch_overlap, split: str = None):
         train_transform = amdim_transforms.TransformsSTL10Patches(
             patch_size=patch_size,
             overlap=patch_overlap
         )
-        dataset = STL10(root=dataset_root, split='unlabeled', transform=train_transform, download=True)
+        dataset = STL10(
+            root=dataset_root,
+            split='unlabeled',
+            transform=train_transform,
+            download=True,
+        )
         tng_split, val_split = random_split(dataset, [95000, 5000])
 
         return tng_split, val_split
 
     @staticmethod
-    def imagenet_train(dataset_root, nb_classes, patch_size, patch_overlap):
+    def imagenet(dataset_root, nb_classes, patch_size, patch_overlap, split: str = 'train'):
+        assert split in ('train', 'val')
         train_transform = amdim_transforms.TransformsImageNet128Patches(
             patch_size=patch_size,
             overlap=patch_overlap
         )
-        dataset = UnlabeledImagenet(dataset_root,
-                                    nb_classes=nb_classes,
-                                    split='train',
-                                    transform=train_transform)
-        return dataset
-
-    @staticmethod
-    def cifar10_val(dataset_root, patch_size, patch_overlap):
-        train_transform = amdim_transforms.TransformsC10Patches(
-            patch_size=patch_size,
-            patch_overlap=patch_overlap)
-        dataset = CIFAR10Mixed(root=dataset_root, split='val', transform=train_transform, download=True)
-
-        return dataset
-
-    @staticmethod
-    def stl_val(dataset_root):
-        # VAL COMES FROM CALLING STL_TRAIN
-        return None
-
-    @staticmethod
-    def imagenet_val(dataset_root, nb_classes, patch_size, patch_overlap):
-        train_transform = amdim_transforms.TransformsImageNet128Patches(
-            patch_size=patch_size,
-            overlap=patch_overlap
+        dataset = UnlabeledImagenet(
+            dataset_root,
+            nb_classes=nb_classes,
+            split=split,
+            transform=train_transform,
         )
-        dataset = UnlabeledImagenet(dataset_root,
-                                    nb_classes=nb_classes,
-                                    split='val',
-                                    transform=train_transform)
         return dataset
