@@ -311,6 +311,23 @@ class FeatureMapContrastiveTask(nn.Module):
     def forward(self, anchor_maps, positive_maps):
         """
         Takes in a set of tuples, each tuple has two feature maps with all matching dimensions
+
+        Example::
+
+            >>> from pytorch_lightning import seed_everything
+            >>> seed_everything(0)
+            >>> a1 = torch.rand(3, 5, 2, 2)
+            >>> a2 = torch.rand(3, 5, 2, 2)
+            >>> b1 = torch.rand(3, 5, 2, 2)
+            >>> b2 = torch.rand(3, 5, 2, 2)
+            ...
+            >>> task = FeatureMapContrastiveTask('01, 11')
+            ...
+            >>> losses, regularizer = task((a1, a2), (b1, b2))
+            >>> losses
+            tensor([2.2351, 2.1902])
+            >>> regularizer
+            tensor(0.0324))
         """
         assert len(anchor_maps) == len(self.map_indexes), f'expected each input to have {len(self.map_indexes)} tensors'
 
