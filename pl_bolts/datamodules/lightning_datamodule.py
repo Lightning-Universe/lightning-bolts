@@ -13,35 +13,36 @@ class LightningDataModule(object):
         A DataModule standardizes that training, val, test splits, data preparation and transforms.
         The main advantage is consistent data splits across models.
 
+        Example::
+
+            class MyDataModule(LightningDataModule):
+
+                def __init__(self, data_dir):
+                    super().__init__()
+                    self.data_dir = data_dir
+
+                def prepare_data(self):
+                    # download, split, etc...
+
+                def train_dataloader(self):
+                    train_split = Dataset(...)
+                    return DataLoader(train_split)
+
+                def val_dataloader(self):
+                    val_split = Dataset(...)
+                    return DataLoader(val_split)
+
+                def test_dataloader(self):
+                    test_split = Dataset(...)
+                    return DataLoader(test_split)
+
         A DataModule implements 4 key methods
 
         The first is `prepare_data`. In Lightning, this method ensures that data processing and downloading
         only happens on 1 GPU when doing multi-gpu training.
 
-        Prepare Data::
-
-            def prepare_data(self):
-                # download, split, etc...
-
         The other three methods generate dataloaders for each split of the dataset. Each dataloader is also optimized
         with best practices of num_workers, pinning, etc.
-
-        Dataloaders::
-
-            def train_dataloader(self):
-                train_split = Dataset(...)
-                return DataLoader(train_split)
-
-            def val_dataloader(self):
-                val_split = Dataset(...)
-                return DataLoader(val_split)
-
-            def test_dataloader(self):
-                test_split = Dataset(...)
-                return DataLoader(test_split)
-
-        Another key problem DataModules solve is that it standardizes transforms (ie: no need to figure out the
-        normalization coefficients for a dataset).
         """
         super().__init__()
 
