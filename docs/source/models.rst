@@ -10,19 +10,58 @@ Testing
 -------
 Models are tested on every PR (on CPUs, GPUs and soon TPUs).
 
+- `Live build <https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/59/checks>`_
+- `Tests <https://github.com/PyTorchLightning/pytorch-lightning-bolts/tree/master/tests>`_
+
 Modular
 -------
 Models are modularized to be extended and reused easily.
 
+.. code-block:: python
+
+    # GOOD!
+    class LitVAE(pl.LightningModule):
+
+        def init_prior(self, ...):
+            # enable users to override interesting parts of each model
+
+        def init_posterior(self, ...):
+            # enable users to override interesting parts of each model
+
+    # not in bolts!
+    class LitVAE(pl.LightningModule):
+
+        def __init__(self):
+            self.prior = ...
+            self.posterior = ...
+
 Device agnostic
 ---------------
 Models must work on CPUs, GPUs and TPUs without changing code. We help authors with this.
+
+.. code-block:: python
+
+    # not in bolts!
+    encoder.to(device)
 
 Fast
 ----
 We inspect models for computational inefficiencies and help authors meet the bar.
 Granted, sometimes the approaches are slow for mathematical reasons. But anything related to engineering we
 help overcome.
+
+.. code-block:: python
+
+    # not in bolts!
+    mtx = ...
+    for xi in rows:
+        for yi in cols
+            mxt[xi, yi] = ...
+
+    # not in bolts!
+    x = x.item().numpy()
+    x = np.some_fx(x)
+    x = torch.tensor(x)
 
 -----------
 
