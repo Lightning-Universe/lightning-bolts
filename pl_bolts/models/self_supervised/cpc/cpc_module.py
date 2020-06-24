@@ -423,8 +423,9 @@ if __name__ == '__main__':
 
     if args.dataset == 'stl10':
         datamodule = STL10DataModule.from_argparse_args(args)
+        datamodule.train_dataloader = datamodule.train_dataloader_mixed
         datamodule.train_transforms = CPCTrainTransformsSTL10()
-        datamodule.val_transforms = CPCEvalTransformsCIFAR10()
+        datamodule.val_transforms = CPCEvalTransformsSTL10()
 
     if args.dataset == 'imagenet2012':
         datamodule = SSLImagenetDataModule.from_argparse_args(args)
