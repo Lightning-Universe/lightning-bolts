@@ -44,7 +44,7 @@ class MocoV2(pl.LightningModule):
 
         Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.
 
-        Model implemented by:
+        Code adapted from `facebookresearch/moco < https://github.com/facebookresearch/moco>`_ to Lightning by:
 
             - `William Falcon <https://github.com/williamFalcon>`_
 
