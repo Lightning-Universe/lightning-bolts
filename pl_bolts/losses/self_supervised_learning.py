@@ -187,7 +187,7 @@ class AmdimNCELoss(nn.Module):
 
 class FeatureMapContrastiveTask(nn.Module):
 
-    def __init__(self, comparisons: str = '11, 55, 1r', tclip=10., bidirectional=True):
+    def __init__(self, comparisons: str = '00, 11', tclip=10., bidirectional=True):
         """
         Performs an anchor, positive negative pair comparison for each each tuple of feature maps passed.
 
