@@ -39,7 +39,6 @@ class CPCV2(pl.LightningModule):
                  patch_overlap: int = 4,
                  online_ft: int = True,
                  task: str = 'cpc',
-                 dataset: str = 'cifar10',
                  num_workers: int = 4,
                  learning_rate: int = 1e-4,
                  data_dir: str = '',
@@ -110,11 +109,11 @@ class CPCV2(pl.LightningModule):
             self.hparams.dataset = pretrained
             self.online_evaluator = True
 
+        # link data
         if datamodule is None:
             datamodule = CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
             datamodule.train_transforms = CPCTrainTransformsCIFAR10()
             datamodule.val_transforms = CPCEvalTransformsCIFAR10()
-
         self.datamodule = datamodule
 
         # init encoder
