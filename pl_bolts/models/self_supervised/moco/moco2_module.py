@@ -14,8 +14,7 @@ import torchvision
 from torch import nn
 
 import pl_bolts
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
-from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
+from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainCIFAR10Transforms,
