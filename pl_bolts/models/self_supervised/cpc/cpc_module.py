@@ -54,7 +54,6 @@ class CPCV2(pl.LightningModule):
             data_dir: str = '',
             meta_root: str = '',
             batch_size: int = 32,
-            amdim_task=False,
             pretrained: str = None,
             **kwargs,
     ):
@@ -134,7 +133,7 @@ class CPCV2(pl.LightningModule):
 
         # info nce loss
         c, h = self.__compute_final_nb_c(self.hparams.patch_size)
-        self.info_nce = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
+        self.contrastive_task = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
         if self.online_evaluator:
             z_dim = c * h * h
@@ -164,11 +163,7 @@ class CPCV2(pl.LightningModule):
         if encoder_name == 'cpc_encoder':
             return CPCResNet101(dummy_batch)
         else:
-            return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=self.hparams.amdim_task)
-
-    def get_dataset(self, name):
-        extra = dict(meta_root=self.hparams.meta_root) if name == 'imagenet2012' else {}
-        return get_datamodule(name, data_dir=self.hparams.data_dir, num_workers=self.hparams.num_workers, **extra)
+            return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=self.hparams.task == 'amdim')
 
     def __compute_final_nb_c(self, patch_size):
         dummy_batch = torch.zeros((2 * 49, 3, patch_size, patch_size))
@@ -222,7 +217,7 @@ class CPCV2(pl.LightningModule):
         Z = self(img_1)
 
         # infoNCE loss
-        nce_loss = self.info_nce(Z)
+        nce_loss = self.contrastive_task(Z)
         loss = nce_loss
         log = {'train_nce_loss': nce_loss}
 
@@ -265,7 +260,7 @@ class CPCV2(pl.LightningModule):
         Z = self(img_1)
 
         # infoNCE loss
-        nce_loss = self.info_nce(Z)
+        nce_loss = self.contrastive_task(Z)
         result = {'val_nce': nce_loss}
 
         if self.online_evaluator:
@@ -326,72 +321,21 @@ class CPCV2(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true')
         parser.add_argument('--task', type=str, default='cpc')
-        parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, stl10, imagenet2012')
 
-        (args, _) = parser.parse_known_args()
-
-        # v100@32GB batch_size = 186
-        cifar_10 = {
-            'dataset': 'cifar10',
-            'depth': 10,
-            'patch_size': 8,
-            'batch_size': 44,
-            'nb_classes': 10,
-            'patch_overlap': 8 // 2,
-            'lr_options': [
-                1e-5,
-            ]
-        }
-
-        # v100@32GB batch_size = 176
-        stl10 = {
-            'dataset': 'stl10',
-            'depth': 12,
-            'patch_size': 16,
-            'batch_size': 108,
-            'nb_classes': 10,
-            'bs_options': [
-                176
-            ],
-            'patch_overlap': 16 // 2,
-            'lr_options': [
-                3e-5,
-            ]
-        }
-
-        imagenet2012 = {
-            'dataset': 'imagenet2012',
-            'depth': 10,
-            'patch_size': 32,
-            'batch_size': 48,
-            'nb_classes': 1000,
-            'patch_overlap': 32 // 2,
-            'lr_options': [
-                2e-5,
-            ]
-        }
-
-        DATASETS = {
-            'cifar10': cifar_10,
-            'stl10': stl10,
-            'imagenet2012': imagenet2012
-        }
-
-        dataset = DATASETS[args.dataset]
-
-        resnets = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
-                   'wide_resnet50_2', 'wide_resnet101_2']
+        possible_resnets = [
+            'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152',
+            'resnext50_32x4d', 'resnext101_32x8d', 'wide_resnet50_2', 'wide_resnet101_2'
+        ]
         parser.add_argument('--encoder', default='resnet18', type=str)
 
-        # dataset options
-        parser.add_argument('--patch_size', default=dataset['patch_size'], type=int)
-        parser.add_argument('--patch_overlap', default=dataset['patch_overlap'], type=int)
-
         # training params
-        parser.add_argument('--batch_size', type=int, default=dataset['batch_size'])
-        parser.add_argument('--learning_rate', type=float, default=0.0001)
+        parser.add_argument('--batch_size', type=int, default=128)
+
+        # cifar10: 1e-5, stl10: 3e-5, imagenet: 4e-4
+        parser.add_argument('--learning_rate', type=float, default=1e-5)
 
         # data
+        parser.add_argument('--dataset', default='cifar10', type=str)
         parser.add_argument('--data_dir', default='.', type=str)
         parser.add_argument('--meta_root', default='.', type=str)
         parser.add_argument('--num_workers', default=0, type=int)
@@ -416,6 +360,7 @@ if __name__ == '__main__':
     elif args.dataset == 'stl10':
         datamodule = STL10DataModule.from_argparse_args(args)
         datamodule.train_dataloader = datamodule.train_dataloader_mixed
+        datamodule.val_dataloader = datamodule.val_dataloader_mixed
         datamodule.train_transforms = CPCTrainTransformsSTL10()
         datamodule.val_transforms = CPCEvalTransformsSTL10()
 
