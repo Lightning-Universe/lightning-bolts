@@ -16,7 +16,15 @@ from torch.optim.lr_scheduler import MultiStepLR
 import pl_bolts
 from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
-from pl_bolts.models.self_supervised.cpc.transforms import CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10
+from pl_bolts.models.self_supervised.cpc.transforms import (
+    CPCTrainTransformsCIFAR10,
+    CPCEvalTransformsCIFAR10,
+    CPCTrainTransformsSTL10,
+    CPCEvalTransformsSTL10,
+    CPCTrainTransformsImageNet128,
+    CPCEvalTransformsImageNet128
+)
+
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
@@ -412,6 +420,16 @@ if __name__ == '__main__':
         datamodule = CIFAR10DataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsCIFAR10()
         datamodule.val_transforms = CPCEvalTransformsCIFAR10()
+
+    if args.dataset == 'stl10':
+        datamodule = STL10DataModule.from_argparse_args(args)
+        datamodule.train_transforms = CPCTrainTransformsSTL10()
+        datamodule.val_transforms = CPCEvalTransformsCIFAR10()
+
+    if args.dataset == 'imagenet2012':
+        datamodule = SSLImagenetDataModule.from_argparse_args(args)
+        datamodule.train_transforms = CPCTrainTransformsImageNet128()
+        datamodule.val_transforms = CPCEvalTransformsImageNet128()
 
     model = CPCV2(**vars(args), datamodule=datamodule)
     trainer = pl.Trainer.from_argparse_args(args)
