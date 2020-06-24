@@ -8,7 +8,7 @@ from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
 import pl_bolts
 
-from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
+from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask, ContrastiveTask_15_17_55
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
 from typing import Union
@@ -18,6 +18,7 @@ class AMDIM(pl.LightningModule):
 
     def __init__(self,
                  datamodule: Union[str, pl_bolts.datamodules.LightningDataModule] = 'cifar10',
+                 contrastive_task: Union[FeatureMapContrastiveTask] = ContrastiveTask_15_17_55(),
                  image_channels: int = 3,
                  image_height: int = 32,
                  encoder_feature_dim: int = 320,
@@ -85,8 +86,8 @@ class AMDIM(pl.LightningModule):
         )
         self.encoder.init_weights()
 
-        # the loss has learnable parameters
-        self.nce_loss = FeatureMapContrastiveTask(tclip=self.hparams.tclip)
+        # the task
+        self.contrastive_task = contrastive_task
 
         self.tng_split = None
         self.val_split = None

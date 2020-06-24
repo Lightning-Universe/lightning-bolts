@@ -187,9 +187,38 @@ class AmdimNCELoss(nn.Module):
 
 class FeatureMapContrastiveTask(nn.Module):
 
-    def __init__(self, tclip=10.):
+    def __init__(self, tclip=10., bidirectional=True):
+        """
+        Performs an anchor, positive negative pair comparison for each each tuple of feature maps passed in
+
+        Example::
+
+            # extract feature maps
+            pos_0, pos_1, pos_2 = encoder(x_pos)
+            anc_0, anc_1, anc_2 = encoder(x_anchor)
+
+            task = FeatureMapContrastiveTask()
+            g0 = (pos_0, anc_0)
+            g1 = (pos_1, anc_1)
+            g2 = (pos_2, anc_2)
+            (loss_0, loss_1, loss_2), regularizer = task(g0, g1, g2)
+
+            # each loss_x corresponds to
+            # if not bidirectional only loss_anc_pos is calculated
+            loss_anc_pos = phi(pos_0, anc_0)
+            loss_pos_anc = phi(anc_0, pos_0)
+            g0 = loss_anc_pos + loss_pos_anc
+
+        Arg:
+
+            pattern: groupings of feature map indices to compare
+            tclip: stability clipping value
+            bidirectional: if true, does the comparison both ways
+
+        """
         super().__init__()
         self.tclip = tclip
+        self.bidirectional = bidirectional
         self.masks = {}
         self.nce_loss = AmdimNCELoss(tclip)
 
@@ -216,16 +245,10 @@ class FeatureMapContrastiveTask(nn.Module):
         r_vec = r_cnv.reshape(n_batch, feat_dim)
         return r_vec
 
-    def forward(self, x1_maps, x2_maps):
-        """
-        Compute nce infomax costs for various combos of source/target layers.
-        Compute costs in both directions, i.e. from/to both images (x1, x2).
-        rK_x1 are features from source image x1.
-        rK_x2 are features from source image x2.
-        """
-        # cache masks
+    def __cache_dimension_masks(self, *args):
+        # cache masks for each feature map we'll need
         if len(self.masks) == 0:
-            for m1, m2 in zip(x1_maps, x2_maps):
+            for (m1, me) in args:
                 batch_size, emb_dim, h, w = m1.size()
 
                 # make mask
@@ -233,15 +256,54 @@ class FeatureMapContrastiveTask(nn.Module):
                     mask = self.feat_size_w_mask(h, m1)
                     self.masks[h] = mask
 
-        return self.contrastive_task(x1_maps, x2_maps)
+    def forward(self, *args):
+        self.__cache_dimension_masks(*args)
+
+        regularizer = 0
+        losses = []
+        for (m1, m2) in args:
+            b, c, h, w = m1.size()
+
+            # get source vectors
+            mask_1 = self.masks[h]
+            src_1 = self._sample_src_ftr(m1, mask_1)
+            src_2 = self._sample_src_ftr(m2, mask_1)
+
+            # target vectors
+            # (b, c, h, w) -> (c, b * h * w)
+            tgt_1 = m1.permute(1, 0, 2, 3).reshape(c, -1)
+            tgt_2 = m2.permute(1, 0, 2, 3).reshape(c, -1)
+
+            # make masking matrix to help compute nce costs
+            # (b x b) zero matrix with 1s in the diag
+            diag_mat = torch.eye(b, device=m1.device)
+
+            # (m1 vs m2)
+            loss_12, regularizer_12 = self.nce_loss(src_1, tgt_2, diag_mat)
+
+            # (m2 vs m1)
+            loss_21, regularizer_21 = self.nce_loss(src_2, tgt_1, diag_mat)
+
+            # map_loss
+            map_loss = 0.5 * (loss_12, loss_21)
+            losses.append(map_loss.mean())
+
+            # regularizer
+            regularizer += regularizer_12
+            regularizer += regularizer_21
+
+        # scale regularizer
+        regularizer = regularizer * 0.5
+
+        return losses, regularizer
 
 
 class AMDIM_11_55_77_ContrastiveTask(FeatureMapContrastiveTask):
 
-    def __init__(self, tclip=10.0):
+
+    def __init__(self, tclip: float = 10.0, bidirectional: bool = True):
         """
-        AMDIM task: 11, 55, 77.
-        Compares the three sets of feature maps at the same spatial location
+        Compares three sets of feature maps
 
         Example::
 
@@ -250,10 +312,19 @@ class AMDIM_11_55_77_ContrastiveTask(FeatureMapContrastiveTask):
             a1, a5, a7 = encoder(x_anchor)
 
             phi = lambda a, b: mm(a, b)
-            loss = phi(p1, a1) + phi(p5, a5) + phi(p7, a7)
+            pa_loss = phi(p1, a1) + phi(p5, a5) + phi(p7, a7)
 
+            # if bidirectional also calculate the other way
+            ap_loss = phi(a1, p1) + phi(a5, p5) + phi(a7, p7)
+
+            loss = pa_loss + ap_loss
+
+        Arg:
+
+            tclip: stability clipping value
+            bidirectional: if true, does the comparison both ways
         """
-        super().__init__(tclip)
+        super().__init__(tclip, bidirectional)
 
     def contrastive_task(self, x1_maps, x2_maps):
         r1_x1, r5_x1, r7_x1 = x1_maps
@@ -370,7 +441,7 @@ class ContrastiveTask_15_17_55(FeatureMapContrastiveTask):
             loss, regularizer = task(x1_maps=(f1, f5, f7), x2_maps=(g1, g5, g7))
 
         """
-        super(self).__init__(tclip)
+        super().__init__(tclip)
 
     def contrastive_task(self, x1_maps, x2_maps):
         r1_x1, r5_x1, r7_x1 = x1_maps
@@ -507,11 +578,48 @@ class AMDIM_1Random_ContrastiveTask(FeatureMapContrastiveTask):
         return loss_1tR, regularizer
 
 
-class AMDIM_11_ContrastiveTask(FeatureMapContrastiveTask):
+class ContrastiveTask_11(FeatureMapContrastiveTask):
+
+    def __init__(self, tclip=10.0):
+        """
+        This task compares two feature maps with the same dimensions. The feature maps are expected to be views
+        from the same image
+
+        .. code-block:: python
+
+            # pseudocode
+            phi = lambda a, b: mat_mul(a, b)
+
+            loss11 = phi(f1, g1)
+
+            total_loss = loss11
+
+        To use this task, pass in two sets of feature maps
+
+        Example::
+
+            task = ContrastiveTask_11()
+
+            # 1 feature map per image
+            f1 = encoder(x_pos)
+            g1 = encoder(x_anchor)
+
+            # will only
+            loss, regularizer = task(x1_maps=f1, x2_maps=g1)
+
+        """
+        super().__init__(tclip)
 
     def contrastive_task(self, x1_maps, x2_maps):
+        x1_tgt = x1_maps
+        x2_tgt = x2_maps
+
+        if isinstance(x1_maps, (list, tuple)):
+            x1_tgt = x1_maps[0]
+            x2_tgt = x2_maps[0]
+
         # (b, dim, w. h)
-        batch_size, emb_dim, h, w = x1_maps[0].size()
+        batch_size, emb_dim, h, w = x1_tgt.size()
 
         mask = self.masks[h]
 
@@ -519,16 +627,12 @@ class AMDIM_11_ContrastiveTask(FeatureMapContrastiveTask):
         # SOURCE VECTORS
         # 1 feature vector per image per feature map location
         # img1 -> img2
-        r1_src_x1 = self._sample_src_ftr(x1_maps[0], mask)
-        r1_src_x2 = self._sample_src_ftr(x2_maps[0], mask)
+        r1_src_x1 = self._sample_src_ftr(x1_tgt, mask)
+        r1_src_x2 = self._sample_src_ftr(x2_tgt, mask)
 
         # pick which map to use for negative samples
         x2_tgt = x2_maps[0]
         x1_tgt = x1_maps[0]
-
-        # adjust the maps for neg samples
-        x2_tgt = x2_tgt.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-        x1_tgt = x1_tgt.permute(1, 0, 2, 3).reshape(emb_dim, -1)
 
         # make masking matrix to help compute nce costs
         # (b x b) zero matrix with 1s in the diag
@@ -539,7 +643,7 @@ class AMDIM_11_ContrastiveTask(FeatureMapContrastiveTask):
         # compute costs for 1->5 prediction
         # use last layer to predict the layer with (5x5 features)
         loss_fwd, regularizer_fwd = self.nce_loss(r1_src_x1, x2_tgt, diag_mat)  # img 1
-        loss_back, regularizer_back = self.nce_loss(r1_src_x2, x1_tgt, diag_mat)  # img 1
+        loss_back, regularizer_back = self.nce_loss(r1_src_x2, x1_tgt, diag_mat)  # img 2
 
         # ------------------
         # FINAL LOSS MEAN

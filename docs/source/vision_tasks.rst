@@ -1,5 +1,5 @@
-Contrastive tasks
-=================
+SSL Contrastive tasks
+=====================
 This section implements popular contrastive learning tasks used in self-supervised learning.
 
 ---------------
@@ -30,10 +30,16 @@ We implement a few tasks inspired by `AMDIM (Philip Bachman, R Devon Hjelm, Will
 
 -------------
 
-(15, 17, 55) Contrastive Task
+Contrastive Task (15, 17, 55)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: pl_bolts.losses.self_supervised_learning.ContrastiveTask_15_17_55
+    :noindex:
+
+Contrastive Task (11)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: pl_bolts.losses.self_supervised_learning.ContrastiveTask_11
     :noindex:
 
 --------------
