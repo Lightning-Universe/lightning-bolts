@@ -20,7 +20,7 @@ jobs:
       # max-parallel: 6
       matrix:
         # PyTorch 1.5 is failing on Win and bolts requires torchvision>=0.5
-        os: [ubuntu-18.04, macOS-10.15]  # , windows-2019
+        os: [ubuntu-20.04, macOS-10.15]  # , windows-2019
         python-version: [3.6, 3.7, 3.8]
         requires: ['minimal', 'latest']
         # exclude:

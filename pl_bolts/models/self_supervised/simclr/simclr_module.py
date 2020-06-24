@@ -6,8 +6,7 @@ from torch.optim.lr_scheduler import StepLR
 from torchvision.models import densenet
 
 from pl_bolts import metrics
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
-from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
+from pl_bolts.datamodules import get_datamodule
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.metrics import mean
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
@@ -123,15 +122,8 @@ class SimCLR(pl.LightningModule):
         return Projection()
 
     def get_dataset(self, name):
-        if name == 'cifar10':
-            return CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        elif name == 'stl10':
-            return STL10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        elif name == 'imagenet2012':
-            return SSLImagenetDataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        else:
-            raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
-                                    f'your own \'')
+        extra = dict(meta_root=self.hparams.meta_root) if name == 'imagenet2012' else {}
+        return get_datamodule(name, data_dir=self.hparams.data_dir, num_workers=self.hparams.num_workers, **extra)
 
     def forward(self, x):
         h = self.encoder(x)

@@ -10,6 +10,8 @@ from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 
 class SSLImagenetDataModule(LightningDataModule):
 
+    name = 'imagenet'
+
     def __init__(self,
                  data_dir,
                  meta_root=None,

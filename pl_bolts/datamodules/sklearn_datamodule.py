@@ -53,6 +53,8 @@ class SklearnDataset(Dataset):
 
 class SklearnDataModule(LightningDataModule):
 
+    name = 'sklearn'
+
     def __init__(self, X, y,
                  x_val=None, y_val=None,
                  x_test=None, y_test=None,

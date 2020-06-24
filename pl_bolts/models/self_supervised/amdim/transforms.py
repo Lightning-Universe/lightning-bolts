@@ -246,4 +246,3 @@ class AMDIMEvalTransformsImageNet128(object):
         inp = self.flip_lr(inp)
         out1 = self.transforms(inp)
         return out1
-
