@@ -5,7 +5,7 @@ from pl_bolts.transforms.self_supervised import RandomTranslateWithReflect, Patc
 
 class CPCTrainTransformsCIFAR10:
 
-    def __init__(self, patch_size=8):
+    def __init__(self, patch_size=8, overlap=4):
         """
         Transforms used for CPC:
 
@@ -48,7 +48,7 @@ class CPCTrainTransformsCIFAR10:
             rnd_gray,
             transforms.ToTensor(),
             normalize,
-            Patchify(patch_size=patch_size, overlap_size=patch_size // 2),
+            Patchify(patch_size=patch_size, overlap_size=overlap),
         ])
 
     def __call__(self, inp):
