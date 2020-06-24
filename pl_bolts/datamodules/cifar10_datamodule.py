@@ -81,7 +81,9 @@ class CIFAR10DataModule(LightningDataModule):
         Args:
             batch_size: size of batch
         """
-        dataset = CIFAR10(self.data_dir, train=True, download=False, transform=self.train_transforms)
+        transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
+
+        dataset = CIFAR10(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
         dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
@@ -101,7 +103,9 @@ class CIFAR10DataModule(LightningDataModule):
         Args:
             batch_size: size of batch
         """
-        dataset = CIFAR10(self.data_dir, train=True, download=False, transform=self.val_transforms)
+        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+
+        dataset = CIFAR10(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
         _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
@@ -121,7 +125,9 @@ class CIFAR10DataModule(LightningDataModule):
             batch_size: size of batch
             transforms: custom transforms
         """
-        dataset = CIFAR10(self.data_dir, train=False, download=False, transform=self.test_transforms)
+        transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
+
+        dataset = CIFAR10(self.data_dir, train=False, download=False, transform=transforms)
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
@@ -132,19 +138,7 @@ class CIFAR10DataModule(LightningDataModule):
         )
         return loader
 
-    @property
-    def train_transforms(self):
-        return self._default_transforms()
-
-    @property
-    def val_transforms(self):
-        return self._default_transforms()
-
-    @property
-    def test_transforms(self):
-        return self._default_transforms()
-
-    def _default_transforms(self):
+    def default_transforms(self):
         cf10_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             cifar10_normalization()

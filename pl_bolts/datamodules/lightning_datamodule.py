@@ -47,9 +47,33 @@ class LightningDataModule(object):
     """
     def __init__(self, train_transforms=None, val_transforms=None, test_transforms=None):
         super().__init__()
-        self.train_transforms = train_transforms
-        self.val_transforms = val_transforms
-        self.test_transforms = test_transforms
+        self._train_transforms = train_transforms
+        self._val_transforms = val_transforms
+        self._test_transforms = test_transforms
+
+    @property
+    def train_transforms(self):
+        return self._train_transforms
+
+    @train_transforms.setter
+    def train_transforms(self, t):
+        self._train_transforms = t
+
+    @property
+    def val_transforms(self):
+        return self._val_transforms
+
+    @val_transforms.setter
+    def val_transforms(self, t):
+        self._val_transforms = t
+
+    @property
+    def test_transforms(self):
+        return self._test_transforms
+
+    @test_transforms.setter
+    def test_transforms(self, t):
+        self._test_transforms = t
 
     @abstractmethod
     def size(self):
