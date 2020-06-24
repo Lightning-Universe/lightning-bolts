@@ -24,6 +24,16 @@ CIFAR-10 Eval
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCEvalTransformsCIFAR10
     :noindex:
 
+Imagenet Train
+^^^^^^^^^^^^^
+.. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCTrainTransformsImageNet128
+    :noindex:
+
+Imagenet Eval
+^^^^^^^^^^^^^
+.. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCEvalTransformsImageNet128
+    :noindex:
+
 STL-10 Train
 ^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCTrainTransformsSTL10

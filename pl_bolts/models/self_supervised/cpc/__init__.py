@@ -5,5 +5,6 @@ from pl_bolts.models.self_supervised.cpc.transforms import (
     CPCEvalTransformsCIFAR10,
     CPCTrainTransformsSTL10,
     CPCEvalTransformsSTL10,
-    CPCTransformsImageNet128Patches
+    CPCTrainTransformsImageNet128,
+    CPCEvalTransformsImageNet128
 )
