@@ -8,14 +8,15 @@ from collections import OrderedDict
 from copy import deepcopy
 from itertools import chain
 from typing import Tuple, List
+
+import gym
+import pytorch_lightning as pl
 import torch
 import torch.optim as optim
 from torch import Tensor
 from torch.nn.functional import log_softmax
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader
-import pytorch_lightning as pl
-import gym
 
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.experience import EpisodicExperienceStream

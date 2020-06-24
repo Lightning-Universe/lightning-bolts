@@ -3,20 +3,21 @@ Vanilla Policy Gradient
 This example is based on: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/
 master/Chapter11/04_cartpole_pg.py
 """
+import argparse
+from collections import OrderedDict
 from copy import deepcopy
 from itertools import chain
 from typing import Tuple, List
-import argparse
-from collections import OrderedDict
 
+import gym
+import pytorch_lightning as pl
 import torch
-from torch import Tensor
 import torch.optim as optim
+from torch import Tensor
 from torch.nn.functional import log_softmax, softmax
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader
-import pytorch_lightning as pl
-import gym
+
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.experience import EpisodicExperienceStream
 from pl_bolts.models.rl.common.memory import Experience

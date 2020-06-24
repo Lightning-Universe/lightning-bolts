@@ -1,7 +1,8 @@
-from pytorch_lightning.callbacks import Callback
 import copy
 from itertools import zip_longest
-from typing import Union, List, Any, Dict, Callable
+from typing import List, Any, Dict, Callable
+
+from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.utilities import rank_zero_info
 
 

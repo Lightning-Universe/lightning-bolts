@@ -4,13 +4,13 @@ CPC V2
 """
 import math
 from argparse import ArgumentParser
+from typing import Union
 
 import pytorch_lightning as pl
-import pytorch_lightning
 import torch
-from torchvision import models
 import torch.nn.functional as F
 import torch.optim as optim
+from pytorch_lightning.utilities import rank_zero_warn
 from torch.optim.lr_scheduler import MultiStepLR
 
 from pl_bolts import metrics
@@ -20,10 +20,8 @@ from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-from pl_bolts.utils.ssl_utils import torchvision_ssl_encoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
-from pytorch_lightning.utilities import rank_zero_warn
-from typing import Union
+from pl_bolts.utils.ssl_utils import torchvision_ssl_encoder
 
 __all__ = [
     'CPCV2'

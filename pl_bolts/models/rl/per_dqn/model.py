@@ -6,6 +6,7 @@ blob/master/Chapter08/05_dqn_prio_replay.py
 
 from collections import OrderedDict
 from typing import Tuple, List
+
 import torch
 from torch.utils.data import DataLoader
 

@@ -4,15 +4,14 @@ from torch import nn
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import StepLR
 from torchvision.models import densenet
-from argparse import Namespace
 
+from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
-from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLRDataTransform
-from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-from pl_bolts import metrics
 from pl_bolts.metrics import mean
+from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
+from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLRDataTransform
 from pl_bolts.optimizers.layer_adaptive_scaling import LARS
 
 

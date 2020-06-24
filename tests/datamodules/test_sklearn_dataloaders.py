@@ -1,7 +1,8 @@
+import numpy as np
+from sklearn.utils import shuffle as sk_shuffle
+
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 from tests import reset_seed
-from sklearn.utils import shuffle as sk_shuffle
-import numpy as np
 
 
 def test_dataloader(tmpdir):

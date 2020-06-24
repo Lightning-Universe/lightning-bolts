@@ -2,14 +2,14 @@
 Adapted from: https://github.com/facebookresearch/moco
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 """
-from argparse import Namespace
+
+from typing import Union
 
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 import torchvision
 from torch import nn
-from typing import Union
 
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
