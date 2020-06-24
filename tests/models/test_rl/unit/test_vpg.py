@@ -12,6 +12,7 @@ from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.experience import EpisodicExperienceStream
 from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.common.wrappers import ToTensor
+
 from pl_bolts.models.rl.vanilla_policy_gradient.model import PolicyGradient
 
 
@@ -33,7 +34,6 @@ class TestPolicyGradient(TestCase):
             "--episode_length", "100",
         ]
         self.hparams = parent_parser.parse_args(args_list)
-
         self.model = PolicyGradient(self.hparams)
 
     def test_calc_q_vals(self):

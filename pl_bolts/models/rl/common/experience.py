@@ -4,7 +4,6 @@ Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/
 """
 from collections import deque
 from typing import List, Tuple
-
 import numpy as np
 from gym import Env
 from torch.utils.data import IterableDataset
