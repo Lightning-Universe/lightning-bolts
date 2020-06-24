@@ -68,6 +68,9 @@ I want to contribute
 If your model doesn't yet meet this bar, no worries! Please open the PR and our team of core contributors will
 help you get there!
 
+Don't have a model? no worries, we maintain a list of papers we are working on implementing! Ping us on the Lightning
+Slack and we will let you know which model you can work on!
+
 -----------
 
 How to use models
