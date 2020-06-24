@@ -1,6 +1,8 @@
 """
 Adapted from: https://github.com/facebookresearch/moco
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+
+Original work is: Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+This implementation is: Copyright (c) PyTorch Lightning, Inc. and its affiliates. All Rights Reserved
 """
 
 from typing import Union
