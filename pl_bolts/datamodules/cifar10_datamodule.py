@@ -158,7 +158,6 @@ class CIFAR10DataModule(LightningDataModule):
 
 class TinyCIFAR10DataModule(CIFAR10DataModule):
 
-
     def __init__(
             self,
             data_dir: str,
