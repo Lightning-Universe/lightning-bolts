@@ -25,7 +25,7 @@ CIFAR-10 Eval
     :noindex:
 
 Imagenet Train
-^^^^^^^^^^^^^
+^^^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCTrainTransformsImageNet128
     :noindex:
 

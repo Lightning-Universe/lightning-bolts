@@ -9,6 +9,11 @@ class CPCTrainTransformsCIFAR10:
         """
         Transforms used for CPC:
 
+        Args:
+
+            patch_size: size of patches when cutting up the image into overlapping patches
+            overlap: how much to overlap patches
+
         Transforms::
 
             random_flip
@@ -59,7 +64,9 @@ class CPCEvalTransformsCIFAR10:
         Transforms used for CPC:
 
         Args:
+
             patch_size: size of patches when cutting up the image into overlapping patches
+            overlap: how much to overlap patches
 
         Transforms::
 
@@ -102,6 +109,11 @@ class CPCTrainTransformsSTL10:
         """
         Transforms used for CPC:
 
+        Args:
+
+            patch_size: size of patches when cutting up the image into overlapping patches
+            overlap: how much to overlap patches
+
         Transforms::
 
             random_flip
@@ -120,6 +132,7 @@ class CPCTrainTransformsSTL10:
             # in a DataModule
             module = STL10DataModule()
             train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsSTL10())
+
 
         """
         # flipping image along vertical axis
@@ -153,7 +166,9 @@ class CPCEvalTransformsSTL10:
         Transforms used for CPC:
 
         Args:
+
             patch_size: size of patches when cutting up the image into overlapping patches
+            overlap: how much to overlap patches
 
         Transforms::
 
@@ -195,7 +210,9 @@ class CPCTrainTransformsImageNet128:
         Transforms used for CPC:
 
         Args:
+
             patch_size: size of patches when cutting up the image into overlapping patches
+            overlap: how much to overlap patches
 
         Transforms::
 
@@ -245,7 +262,9 @@ class CPCEvalTransformsImageNet128:
         Transforms used for CPC:
 
         Args:
+
             patch_size: size of patches when cutting up the image into overlapping patches
+            overlap: how much to overlap patches
 
         Transforms::
 
