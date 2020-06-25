@@ -34,7 +34,7 @@ class LinearRegression(pl.LightningModule):
         self.save_hyperparameters()
         self.optimizer = optimizer
 
-        self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=1, bias=bias).double()
+        self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=1, bias=bias)
 
     def forward(self, x):
         y_hat = self.linear(x)

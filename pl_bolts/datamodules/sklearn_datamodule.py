@@ -39,8 +39,12 @@ class SklearnDataset(Dataset):
         return len(self.X)
 
     def __getitem__(self, idx):
-        x = self.X[idx]
+        x = self.X[idx].astype(np.float32)
         y = self.Y[idx]
+
+        # Do not convert integer to float for classification data
+        if not np.issubdtype(y, np.integer):
+            y = y.astype(np.float32)
 
         if self.X_transform:
             x = self.X_transform(x)
