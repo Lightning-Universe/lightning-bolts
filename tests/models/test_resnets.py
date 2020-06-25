@@ -9,6 +9,6 @@ from pl_bolts.models.self_supervised.resnets import (
     resnet18
 ])
 def test_resnets(tmpdir, model_class):
-    x = torch.rand(1, 3, 32, 32)
+    x = torch.rand(3, 3, 64, 64)
     model = model_class()
     model(x)
