@@ -7,7 +7,7 @@ from tests import reset_seed
 def test_vae(tmpdir):
     reset_seed()
 
-    model = VAE(data_dir=tmpdir)
+    model = VAE(data_dir=tmpdir, batch_size=2)
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model)
     trainer.test(model)
@@ -19,7 +19,7 @@ def test_vae(tmpdir):
 def test_ae(tmpdir):
     reset_seed()
 
-    model = AE(data_dir=tmpdir)
+    model = AE(data_dir=tmpdir, batch_size=2)
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model)
     trainer.test(model)
