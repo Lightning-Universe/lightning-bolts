@@ -252,7 +252,7 @@ class MocoV2(pl.LightningModule):
             'train_acc1': acc1,
             'train_acc5': acc5
         }
-        return {'loss': loss, 'log': log}
+        return {'loss': loss, 'log': log, 'progress_bar': log}
 
     def validation_step(self, batch, batch_idx):
         (img_1, img_2), labels = batch
@@ -274,14 +274,12 @@ class MocoV2(pl.LightningModule):
         val_acc1 = mean(outputs, 'val_acc1')
         val_acc5 = mean(outputs, 'val_acc5')
 
-        self.print(val_acc1, val_acc5)
-
         log = {
             'val_loss': val_loss,
             'val_acc1': val_acc1,
             'val_acc5': val_acc5
         }
-        return {'val_loss': val_loss, 'log': log}
+        return {'val_loss': val_loss, 'log': log, 'progress_bar': log}
 
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(self.parameters(), self.hparams.learning_rate,
