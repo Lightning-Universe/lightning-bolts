@@ -3,8 +3,8 @@ Deep Q Network
 ==============
 
 The DQN was introduced in [Playing Atari with Deep Reinforcement Learning](https://arxiv.org/abs/1312.5602) by
- researchers at DeepMind. This took the concept of tabular Q learning and scaled it to much larger problems by
- apporximating the Q function using a deep neural network.
+researchers at DeepMind. This took the concept of tabular Q learning and scaled it to much larger problems by
+apporximating the Q function using a deep neural network.
 
 The goal behind DQN was to take the simple control method of Q learning and scale it up in order to solve complicated
  tasks. As well as this, the method needed to be stable. The DQN solves these issues with the following additions.
@@ -13,13 +13,13 @@ The goal behind DQN was to take the simple control method of Q learning and scal
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Storing Q values in a table works well in theory, but is completely unscalable. Instead, the authors apporximate the
- Q function using a deep neural network. This allows the DQN to be used for much more complicated tasks
+Q function using a deep neural network. This allows the DQN to be used for much more complicated tasks
 
 2. Replay Buffer
 ^^^^^^^^^^^^^^^^
 
 Similar to supervised learning, the DQN learns on randomly sampled batches of previous data stored in an
- Experience Replay Buffer. The 'target' is calculated using the Bellman equation
+Experience Replay Buffer. The 'target' is calculated using the Bellman equation
 
 .. math::
 
