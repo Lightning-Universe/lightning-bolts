@@ -83,7 +83,7 @@ from typing import Tuple
 import torch
 import torch.nn as nn
 
-from pl_bolts.models.rl.dqn.dqn_model import DQN
+from pl_bolts.models.rl.dqn_model import DQN
 
 
 class DoubleDQN(DQN):

@@ -12,7 +12,7 @@ from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.experience import EpisodicExperienceStream
 from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.common.wrappers import ToTensor
-from pl_bolts.models.rl.vanilla_policy_gradient.vanilla_policy_gradient_model import PolicyGradient
+from pl_bolts.models.rl.vanilla_policy_gradient_model import PolicyGradient
 
 
 class TestPolicyGradient(TestCase):

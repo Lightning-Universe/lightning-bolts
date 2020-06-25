@@ -11,8 +11,8 @@ from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.experience import EpisodicExperienceStream
 from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.common.wrappers import ToTensor
-from pl_bolts.models.rl.dqn.dqn_model import DQN
-from pl_bolts.models.rl.reinforce.reinforce_model import Reinforce
+from pl_bolts.models.rl.dqn_model import DQN
+from pl_bolts.models.rl.reinforce_model import Reinforce
 
 
 class TestReinforce(TestCase):

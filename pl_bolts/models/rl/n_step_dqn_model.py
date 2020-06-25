@@ -153,7 +153,7 @@ experiments I opted with an N step of 4.
 import torch
 
 from pl_bolts.models.rl.common.experience import NStepExperienceSource
-from pl_bolts.models.rl.dqn.dqn_model import DQN
+from pl_bolts.models.rl.dqn_model import DQN
 
 
 class NStepDQN(DQN):

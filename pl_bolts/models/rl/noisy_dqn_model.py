@@ -137,7 +137,7 @@ from typing import Tuple
 import torch
 
 from pl_bolts.models.rl.common.networks import NoisyCNN
-from pl_bolts.models.rl.dqn.dqn_model import DQN
+from pl_bolts.models.rl.dqn_model import DQN
 
 
 class NoisyDQN(DQN):
