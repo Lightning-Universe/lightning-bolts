@@ -33,7 +33,7 @@ from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
 
 @pytest.mark.parametrize("img_size", [
     (3, 32, 32),
-    (3, 64, 64),
+    (3, 96, 96),
     (3, 128, 128),
 ])
 def test_simclr_transforms(tmpdir, img_size):
