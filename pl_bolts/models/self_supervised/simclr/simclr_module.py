@@ -252,8 +252,8 @@ class SimCLR(pl.LightningModule):
 
         # Training
         parser.add_argument('--optimizer', choices=['adam', 'lars'], default='lars')
-        parser.add_argument('--batch_size', type=int, default=128)
-        parser.add_argument('--learning_rate', type=float, default=0.00006)
+        parser.add_argument('--batch_size', type=int, default=512)
+        parser.add_argument('--learning_rate', type=float, default=1.0)
         parser.add_argument('--mom', type=float, default=0.9)
         parser.add_argument('--eta', type=float, default=0.001)
         parser.add_argument('--lr_sched_step', type=float, default=30, help='lr scheduler step')
