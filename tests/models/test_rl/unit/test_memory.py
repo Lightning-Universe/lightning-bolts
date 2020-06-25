@@ -211,7 +211,6 @@ class TestMultiStepReplayBuffer(TestCase):
         self.assertEqual(len(self.buffer), 0)
         self.assertEqual(len(self.buffer.n_step_buffer), 1)
 
-
     def test_append_single_experience2(self):
         """
         If a single experience is added and the number of experiences collected >= n, the multi step experience should
@@ -244,7 +243,7 @@ class TestMultiStepReplayBuffer(TestCase):
         next_state = batch[4]
         self.assertEqual(next_state.all(), self.next_state_02.all())
 
-    def test_get_transition_info_2_STEP(self):
+    def test_get_transition_info_2_step(self):
         """Test that the accumulated experience is correct and"""
         self.buffer.append(self.experience01)
         self.buffer.append(self.experience02)
@@ -257,7 +256,7 @@ class TestMultiStepReplayBuffer(TestCase):
         self.assertEqual(next_state.all(), self.next_state_02.all())
         self.assertEqual(self.experience02.done, done)
 
-    def test_get_transition_info_3_STEP(self):
+    def test_get_transition_info_3_step(self):
         """Test that the accumulated experience is correct with multi step"""
         self.buffer = MultiStepBuffer(buffer_size=10, n_step=3)
 
@@ -274,7 +273,7 @@ class TestMultiStepReplayBuffer(TestCase):
         self.assertEqual(next_state.all(), self.next_state_02.all())
         self.assertEqual(self.experience03.done, done)
 
-    def test_sample_3_STEP(self):
+    def test_sample_3_step(self):
         """Test that final output of the 3 step sample is correct"""
         self.buffer = MultiStepBuffer(buffer_size=10, n_step=3)
 

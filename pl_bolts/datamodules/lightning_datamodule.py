@@ -45,6 +45,8 @@ class LightningDataModule(object):
     This allows you to share a full dataset without explaining what the splits, transforms or download
     process is.
     """
+    name: str = ...
+
     def __init__(self, train_transforms=None, val_transforms=None, test_transforms=None):
         super().__init__()
         self._train_transforms = train_transforms
@@ -75,8 +77,9 @@ class LightningDataModule(object):
     def test_transforms(self, t):
         self._test_transforms = t
 
+    @property
     @abstractmethod
-    def size(self):
+    def size(self) -> Tuple:
         """
         Return the dimension of each input
         Either as a tuple or list of tuples

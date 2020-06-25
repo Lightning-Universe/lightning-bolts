@@ -26,6 +26,7 @@ from pl_bolts.models.self_supervised.cpc.transforms import (
 )
 
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
+from pl_bolts.datamodules import get_datamodule
 from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc import transforms as cpc_transforms
 from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
@@ -40,20 +41,22 @@ __all__ = [
 
 class CPCV2(pl.LightningModule):
 
-    def __init__(self,
-                 datamodule: pl_bolts.datamodules.LightningDataModule = None,
-                 encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'cpc_encoder',
-                 patch_size: int = 8,
-                 patch_overlap: int = 4,
-                 online_ft: int = True,
-                 task: str = 'cpc',
-                 num_workers: int = 4,
-                 learning_rate: int = 1e-4,
-                 data_dir: str = '',
-                 meta_root: str = '',
-                 batch_size: int = 32,
-                 pretrained: str = None,
-                 **kwargs):
+    def __init__(
+            self,
+            datamodule: pl_bolts.datamodules.LightningDataModule = None,
+            encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'cpc_encoder',
+            patch_size: int = 8,
+            patch_overlap: int = 4,
+            online_ft: int = True,
+            task: str = 'cpc',
+            num_workers: int = 4,
+            learning_rate: int = 1e-4,
+            data_dir: str = '',
+            meta_root: str = '',
+            batch_size: int = 32,
+            pretrained: str = None,
+            **kwargs,
+    ):
         """
         PyTorch Lightning implementation of `Data-Efficient Image Recognition with Contrastive Predictive Coding
         <https://arxiv.org/abs/1905.09272>`_
@@ -203,7 +206,7 @@ class CPCV2(pl.LightningModule):
 
     def training_step(self, batch, batch_nb):
         # in STL10 we pass in both lab+unl for online ft
-        if self.hparams.dataset == 'stl10':
+        if self.hparams.datamodule.name == 'stl10':
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -220,7 +223,7 @@ class CPCV2(pl.LightningModule):
 
         # don't use the training signal, just finetune the MLP to see how we're doing downstream
         if self.online_evaluator:
-            if self.hparams.dataset == 'stl10':
+            if self.hparams.datamodule.name == 'stl10':
                 img_1, y = labeled_batch
 
             with torch.no_grad():
@@ -245,7 +248,7 @@ class CPCV2(pl.LightningModule):
     def validation_step(self, batch, batch_nb):
 
         # in STL10 we pass in both lab+unl for online ft
-        if self.hparams.dataset == 'stl10':
+        if self.hparams.datamodule.name == 'stl10':
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -261,7 +264,7 @@ class CPCV2(pl.LightningModule):
         result = {'val_nce': nce_loss}
 
         if self.online_evaluator:
-            if self.hparams.dataset == 'stl10':
+            if self.hparams.datamodule.name == 'stl10':
                 img_1, y = labeled_batch
                 Z = self(img_1)
 
@@ -295,10 +298,10 @@ class CPCV2(pl.LightningModule):
             eps=1e-7
         )
 
-        if self.hparams.dataset in ['cifar10', 'stl10']:
-            lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
-        elif self.hparams.dataset == 'imagenet2012':
-            lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
+        # if self.hparams.dataset in ['cifar10', 'stl10']:
+        #     lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
+        # elif self.hparams.dataset == 'imagenet2012':
+        #     lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
 
         return [opt]  # , [lr_scheduler]
 
@@ -354,14 +357,14 @@ if __name__ == '__main__':
         datamodule.train_transforms = CPCTrainTransformsCIFAR10()
         datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 
-    if args.dataset == 'stl10':
+    elif args.dataset == 'stl10':
         datamodule = STL10DataModule.from_argparse_args(args)
         datamodule.train_dataloader = datamodule.train_dataloader_mixed
         datamodule.val_dataloader = datamodule.val_dataloader_mixed
         datamodule.train_transforms = CPCTrainTransformsSTL10()
         datamodule.val_transforms = CPCEvalTransformsSTL10()
 
-    if args.dataset == 'imagenet2012':
+    elif args.dataset == 'imagenet2012':
         datamodule = SSLImagenetDataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsImageNet128()
         datamodule.val_transforms = CPCEvalTransformsImageNet128()

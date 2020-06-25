@@ -8,31 +8,31 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
 
-from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
 import pl_bolts
-
+from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
 
 
 class AMDIM(pl.LightningModule):
 
-    def __init__(self,
-                 datamodule: Union[str, pl_bolts.datamodules.LightningDataModule] = 'cifar10',
-                 contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask('01, 02, 11'),
-                 image_channels: int = 3,
-                 image_height: int = 32,
-                 encoder_feature_dim: int = 320,
-                 embedding_fx_dim: int = 1280,
-                 conv_block_depth: int = 10,
-                 use_bn: bool = False,
-                 tclip: int = 20.0,
-                 learning_rate: int = 2e-4,
-                 data_dir: str = '',
-                 num_classes: int = 10,
-                 batch_size: int = 200,
-                 **kwargs
-                 ):
+    def __init__(
+            self,
+            datamodule: Union[str, pl_bolts.datamodules.LightningDataModule] = 'cifar10',
+            contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask('01, 02, 11'),
+            image_channels: int = 3,
+            image_height: int = 32,
+            encoder_feature_dim: int = 320,
+            embedding_fx_dim: int = 1280,
+            conv_block_depth: int = 10,
+            use_bn: bool = False,
+            tclip: int = 20.0,
+            learning_rate: int = 2e-4,
+            data_dir: str = '',
+            num_classes: int = 10,
+            batch_size: int = 200,
+            **kwargs,
+    ):
         """
         PyTorch Lightning implementation of
         `Augmented Multiscale Deep InfoMax (AMDIM) <https://arxiv.org/abs/1906.00910.>`_
@@ -184,23 +184,16 @@ class AMDIM(pl.LightningModule):
             eps=1e-7
         )
 
-        if self.hparams.datamodule in ['cifar10', 'stl10', 'cifar100']:
-            lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
-        else:
-            lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
+        # if self.hparams.datamodule in ['cifar10', 'stl10', 'cifar100']:
+        #     lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
+        # else:
+        #     lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
 
         return opt  # [opt], [lr_scheduler]
 
     def train_dataloader(self):
-        if self.hparams.datamodule == 'cifar10':
-            dataset = AMDIMPretraining.cifar10_train(self.hparams.data_dir)
-
-        if self.hparams.datamodule == 'stl10':
-            self.tng_split, self.val_split = AMDIMPretraining.stl_train(self.hparams.data_dir)
-            dataset = self.tng_split
-
-        if self.hparams.datamodule == 'imagenet2012':
-            dataset = AMDIMPretraining.imagenet_train(self.hparams.data_dir, self.hparams.nb_classes)
+        kwargs = dict(nb_classes=self.hparams.nb_classes) if self.hparams.datamodule == 'imagenet2012' else {}
+        dataset = AMDIMPretraining.get_dataset(self.hparams.datamodule, self.hparams.data_dir, split='train', **kwargs)
 
         # LOADER
         loader = DataLoader(
@@ -213,14 +206,8 @@ class AMDIM(pl.LightningModule):
         return loader
 
     def val_dataloader(self):
-        if self.hparams.datamodule == 'cifar10':
-            dataset = AMDIMPretraining.cifar10_val(self.hparams.data_dir)
-
-        if self.hparams.datamodule == 'stl10':
-            dataset = self.val_split
-
-        if self.hparams.datamodule == 'imagenet2012':
-            dataset = AMDIMPretraining.imagenet_val(self.hparams.data_dir, self.hparams.nb_classes)
+        kwargs = dict(nb_classes=self.hparams.nb_classes) if self.hparams.datamodule == 'imagenet2012' else {}
+        dataset = AMDIMPretraining.get_dataset(self.hparams.datamodule, self.hparams.data_dir, split='val', **kwargs)
 
         # LOADER
         loader = DataLoader(

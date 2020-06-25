@@ -233,15 +233,16 @@ class FeatureMapContrastiveTask(nn.Module):
         self.masks = {}
         self.nce_loss = AmdimNCELoss(tclip)
 
-    def parse_map_indexes(self, comparisons):
+    @staticmethod
+    def parse_map_indexes(comparisons):
         """
         Example::
 
-            >>> self.parse_map_indexes('11')
+            >>> FeatureMapContrastiveTask.parse_map_indexes('11')
             [(1, 1)]
-            >>> self.parse_map_indexes('11,59')
+            >>> FeatureMapContrastiveTask.parse_map_indexes('11,59')
             [(1, 1), (5, 9)]
-            >>> self.parse_map_indexes('11,59, 2r')
+            >>> FeatureMapContrastiveTask.parse_map_indexes('11,59, 2r')
             [(1, 1), (5, 9), (2, -1)]
         """
         map_indexes = [x.strip() for x in comparisons.split(',')]

@@ -9,6 +9,8 @@ from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 
 class STL10DataModule(LightningDataModule):
 
+    name = 'stl10'
+
     def __init__(self, data_dir, unlabeled_val_split=5000, train_val_split=500, num_workers=16):
         """
         Standard STL-10, train, val, test splits and transforms.
