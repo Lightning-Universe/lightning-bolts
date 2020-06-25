@@ -31,27 +31,20 @@ from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
 )
 
 
-@pytest.mark.parametrize("transform_class", [
-    SimCLREvalDataTransform,
-    SimCLRTrainDataTransform
+@pytest.mark.parametrize("img_size", [
+    (3, 32, 32),
+    (3, 64, 64),
+    (3, 128, 128),
 ])
-def test_simclr_transforms(tmpdir, transform_class):
-    x = torch.rand(3, 32, 32)
+def test_simclr_transforms(tmpdir, img_size):
+    (c, h, w) = img_size
+    x = torch.rand(c, h, w)
     x = transforms.ToPILImage(mode='RGB')(x)
 
-    transform = transform_class(input_height=32)
+    transform = SimCLREvalDataTransform(input_height=h)
     transform(x)
 
-    x = torch.rand(3, 64, 64)
-    x = transforms.ToPILImage(mode='RGB')(x)
-
-    transform = transform_class(input_height=64)
-    transform(x)
-
-    x = torch.rand(3, 224, 224)
-    x = transforms.ToPILImage(mode='RGB')(x)
-
-    transform = transform_class(input_height=224)
+    transform = SimCLRTrainDataTransform(input_height=h)
     transform(x)
 
 
