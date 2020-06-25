@@ -14,11 +14,16 @@ import torchvision
 from torch import nn
 
 import pl_bolts
-from pl_bolts.datamodules import CIFAR10DataModule
+from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
+from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainCIFAR10Transforms,
     Moco2EvalCIFAR10Transforms,
+    Moco2TrainSTL10Transforms,
+    Moco2EvalSTL10Transforms,
+    Moco2TrainImagenetTransforms,
+    Moco2EvalImagenetTransforms
 )
 
 
@@ -345,7 +350,24 @@ if __name__ == '__main__':
     parser = MocoV2.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    model = MocoV2(**args.__dict__)
+    if args.dataset == 'cifar10':
+        datamodule = CIFAR10DataModule.from_argparse_args(args)
+        datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
+        datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
+
+    elif args.dataset == 'stl10':
+        datamodule = STL10DataModule.from_argparse_args(args)
+        datamodule.train_dataloader = datamodule.train_dataloader_mixed
+        datamodule.val_dataloader = datamodule.val_dataloader_mixed
+        datamodule.train_transforms = Moco2TrainSTL10Transforms()
+        datamodule.val_transforms = Moco2EvalSTL10Transforms()
+
+    elif args.dataset == 'imagenet2012':
+        datamodule = SSLImagenetDataModule.from_argparse_args(args)
+        datamodule.train_transforms = Moco2TrainImagenetTransforms()
+        datamodule.val_transforms = Moco2EvalImagenetTransforms()
+
+    model = MocoV2(**args.__dict__, datamodule=datamodule)
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)

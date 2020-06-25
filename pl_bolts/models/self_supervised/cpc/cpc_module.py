@@ -67,7 +67,7 @@ class CPCV2(pl.LightningModule):
         Model implemented by:
 
             - `William Falcon <https://github.com/williamFalcon>`_
-            - `Tullie Murrel <https://github.com/tullie>`_
+            - `Tullie Murrell <https://github.com/tullie>`_
 
         Example:
 
