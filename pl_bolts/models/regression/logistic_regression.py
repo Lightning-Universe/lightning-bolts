@@ -114,11 +114,7 @@ class LogisticRegression(pl.LightningModule):
         }
 
     def configure_optimizers(self):
-        # init default optimizer
-        # otherwise will use whatever the user passed in
-        if inspect.isclass(self.optimizer):
-            self.optimizer = self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
-
+        self.optimizer = self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
         return self.optimizer
 
     @staticmethod
