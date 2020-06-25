@@ -123,7 +123,8 @@ class CIFAR10DataModule(LightningDataModule):
             batch_size=batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            pin_memory=True
+            pin_memory=True,
+            drop_last=True
         )
         return loader
 
