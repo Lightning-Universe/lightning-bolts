@@ -2,9 +2,9 @@
 N Step DQN
 ==========
 
-N Step DQN was introduced in [Learning to Predict by the Methods of Temporal Differences
-](http://incompleteideas.net/papers/sutton-88-with-erratum.pdf). This method improves upon the original DQN by updating
- our Q values with the expected reward from multiple steps in the
+N Step DQN was introduced in `Learning to Predict by the Methods of Temporal Differences
+<http://incompleteideas.net/papers/sutton-88-with-erratum.pdf>`_.
+ This method improves upon the original DQN by updating our Q values with the expected reward from multiple steps in the
  future as opposed to the expected reward from the immediate next state. When getting the Q values for a state action
  pair using a single step which looks like this
 
@@ -43,7 +43,7 @@ Benefits
 
 - Multi-Step learning is capable of learning faster than typical 1 step learning methods.
 - Note that this method introduces a new hyperparameter n. Although n=4 is generally a good starting point and provides
- good results across the board.
+    good results across the board.
 
 Implementation
 --------------

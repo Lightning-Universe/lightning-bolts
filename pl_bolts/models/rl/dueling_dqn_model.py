@@ -29,13 +29,13 @@ Benefits
 --------
 
 - Ability to efficiently learn the state value function. In the dueling network, every Q update also updates the Value
- stream, where as in DQN only the value of the chosen action is updated. This provides a better approximation of the
- values
+    stream, where as in DQN only the value of the chosen action is updated. This provides a better approximation of the
+    values
 - The differences between total Q values for a given state are quite small in relation to the magnitude of Q. The
- difference in the Q values between the best action and the second best action can be very small, while the average
- state value can be much larger. The differences in scale can introduce noise, which may lead to the greedy policy
- switching the priority of these actions. The seperate estimators for state value and advantage makes the Dueling
- DQN robust to this type of scenario
+    difference in the Q values between the best action and the second best action can be very small, while the average
+    state value can be much larger. The differences in scale can introduce noise, which may lead to the greedy policy
+    switching the priority of these actions. The seperate estimators for state value and advantage makes the Dueling
+    DQN robust to this type of scenario
 
 In order to update the basic DQN to a Dueling DQN we need to do the following
 
@@ -87,8 +87,8 @@ The results below a noticeable improvement from the original DQN network.
 Pong
 ----
 
-Dueling DQN
-^^^^^^^^^^^
+Dueling DQN baseline
+^^^^^^^^^^^^^^^^^^^^
 
 Similar to the results of the DQN baseline, the agent has a period where the number of steps per episodes increase as
  it begins to hold its own against the heuristic oppoent, but then the steps per episode quickly begins to drop
@@ -110,7 +110,6 @@ In comparison to the base DQN, we see that the Dueling network's training is muc
 This could very well be due to the simplicity of the Pong environment.
 
  - Orange: DQN
-
  - Red: Dueling DQN
 
 ![Dueling DQN Results](../../docs/images/pong_dueling_dqn_comparison.png)

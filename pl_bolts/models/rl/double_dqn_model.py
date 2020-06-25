@@ -25,7 +25,7 @@ DQN expected return
 
 .. math::
 
-    Q(s_t, a_t) = r_t + gamma * maxQ'(S_t+1, argmaxQ(S_t+1, a))
+    Q(s_t, a_t) = r_t + gamma * maxQ'(S_t+1, \argmax_Q(S_t+1, a))
 
 In order to update the original DQN to DoubleDQN we need to do the following
 
