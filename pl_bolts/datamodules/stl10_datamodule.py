@@ -7,7 +7,7 @@ from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 
 
-class STL10DataModule(LightningDataModule):
+class STL10DataModule(LightningDataModule):  # pragma: no cover
 
     name = 'stl10'
 
