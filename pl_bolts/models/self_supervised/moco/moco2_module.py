@@ -261,7 +261,6 @@ class MocoV2(pl.LightningModule):
         loss = F.cross_entropy(output, target.long())
 
         acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))
-        import pdb; pdb.set_trace()
 
         results = {
             'val_loss': loss,
@@ -274,6 +273,8 @@ class MocoV2(pl.LightningModule):
         val_loss = mean(outputs, 'val_loss')
         val_acc1 = mean(outputs, 'val_acc1')
         val_acc5 = mean(outputs, 'val_acc5')
+
+        import pdb; pdb.set_trace()
 
         log = {
             'val_loss': val_loss,
