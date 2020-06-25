@@ -32,14 +32,24 @@ from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
 
 
 @pytest.mark.parametrize("transform", [
+    SimCLREvalDataTransform,
+    SimCLRTrainDataTransform
+])
+def test_simclr_transforms(tmpdir, transform):
+    x = torch.rand(3, 32, 32)
+    x = transforms.ToPILImage(mode='RGB')(x)
+
+    transform = transform(input_height=32)
+    transform(x)
+
+
+@pytest.mark.parametrize("transform", [
     CPCTrainTransformsCIFAR10,
     CPCEvalTransformsCIFAR10,
     AMDIMEvalTransformsCIFAR10,
     AMDIMTrainTransformsCIFAR10,
     Moco2TrainCIFAR10Transforms,
     Moco2EvalCIFAR10Transforms,
-    SimCLREvalDataTransform,
-    SimCLRTrainDataTransform
 ])
 def test_cifar10_transforms(tmpdir, transform):
     x = torch.rand(3, 32, 32)
