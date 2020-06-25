@@ -60,7 +60,9 @@ class PolicyGradient(pl.LightningModule):
             entropy_beta: dictates the level of entropy per batch
 
         .. note::
-            This example is based on: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/04_cartpole_pg.py
+            This example is based on:
+             https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\
+             /blob/master/Chapter11/04_cartpole_pg.py
 
         .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
 

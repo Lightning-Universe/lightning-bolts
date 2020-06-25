@@ -3,35 +3,36 @@ Noisy DQN
 =========
 
 Up until now the DQN agent uses a seperate exploration policy, generally epsilon-greedy where start and end values
-are set for its exploration. [Noisy Networks For Exploration](https://arxiv.org/abs/1706.10295) introduces
-a new exploration strategy by adding noise parameters to the weightsof the fully connect layers which get updated
-during backpropagation of the network. The noise parameters drive
-the exploration of the network instead of simply taking random actions more frequently at the start of training and
-less frequently towards the end.The of authors of
-propose two ways of doing this.
+ are set for its exploration. [Noisy Networks For Exploration](https://arxiv.org/abs/1706.10295) introduces
+ a new exploration strategy by adding noise parameters to the weightsof the fully connect layers which get updated
+ during backpropagation of the network. The noise parameters drive
+ the exploration of the network instead of simply taking random actions more frequently at the start of training and
+ less frequently towards the end.The of authors of
+ propose two ways of doing this.
 
 During the optimization step a new set of noisy parameters are sampled. During training the agent acts according to
-the fixed set of parameters. At the next optimization step, the parameters are updated with a new sample. This ensures
-the agent always acts based on the parameters that are drawn from the current noise
-distribution.
+ the fixed set of parameters. At the next optimization step, the parameters are updated with a new sample. This ensures
+ the agent always acts based on the parameters that are drawn from the current noise
+ distribution.
 
 The authors propose two methods of injecting noise to the network.
 
-1) Independent Gaussian Noise: This injects noise per weight. For each weight a random value is taken from the distribution.
-Noise parameters are stored inside the layer and are updated during backpropagation. The output of the layer is
+1) Independent Gaussian Noise: This injects noise per weight. For each weight a random value is taken from
+ the distribution. Noise parameters are stored inside the layer and are updated during backpropagation.
+ The output of the layer is
 calculated as normal.
 2) Factorized Gaussian Noise: This injects nosier per input/ouput. In order to minimize the number of random values
-this method stores two random vectors, one with the size of the input and the other with the size of the output. Using
-these two vectors, a random matrix is generated for the layer by calculating the outer products of the vector
+ this method stores two random vectors, one with the size of the input and the other with the size of the output. Using
+ these two vectors, a random matrix is generated for the layer by calculating the outer products of the vector
 
 
 Benefits
 --------
 
 - Improved exploration function. Instead of just performing completely random actions, we add decreasing amount of noise
-and uncertainty to our policy allowing to explore while still utilising its policy
+ and uncertainty to our policy allowing to explore while still utilising its policy
 - The fact that this method is automatically tuned means that we do not have to tune hyper parameters for
-epsilon-greedy!
+ epsilon-greedy!
 
 .. note::
     for now I have just implemented the Independant Gaussian as it has been reported there isn't much difference
@@ -122,7 +123,7 @@ Noisy DQN
 ^^^^^^^^^
 
 Similar to the other improvements, the average score of the agent reaches positive numbers around the 250k mark and
-steadily increases till convergence.
+ steadily increases till convergence.
 
 ![Noisy DQN Results](../../docs/images/pong_noisy_dqn_results.png)
 
@@ -130,8 +131,8 @@ DQN vs Dueling DQN
 ^^^^^^^^^^^^^^^^^^
 
 In comparison to the base DQN, the Noisy DQN is more stable and is able to converge on an optimal policy much faster
-than the original. It seems that the replacement of the epsilon-greedy strategy with network noise provides a better
-form of exploration.
+ than the original. It seems that the replacement of the epsilon-greedy strategy with network noise provides a better
+ form of exploration.
 
  - Orange: DQN
 

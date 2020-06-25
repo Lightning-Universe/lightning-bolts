@@ -58,7 +58,9 @@ class Reinforce(pl.LightningModule):
             batch_episodes: how many episodes to rollout for each batch of training
 
         .. note::
-            This example is based on: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/02_cartpole_reinforce.py
+            This example is based on:
+             https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\
+             /blob/master/Chapter11/02_cartpole_reinforce.py
 
         .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
 
