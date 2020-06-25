@@ -315,6 +315,7 @@ class FeatureMapContrastiveTask(nn.Module):
 
         Example:
 
+            >>> import torch
             >>> from pytorch_lightning import seed_everything
             >>> seed_everything(0)
             0
