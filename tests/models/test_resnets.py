@@ -15,8 +15,13 @@ from pl_bolts.models.self_supervised.resnets import (
 )
 
 
+def test_cpc_resnet(tmpir):
+    x = torch.rand(3, 3, 64, 64)
+    model = CPCResNet101(x)
+    model(x)
+
+
 @pytest.mark.parametrize("model_class", [
-    CPCResNet101,
     resnet18,
     resnet34,
     resnet50,
