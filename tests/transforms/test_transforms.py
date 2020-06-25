@@ -48,10 +48,10 @@ def test_simclr_transforms(tmpdir, transform_class):
     transform = transform_class(input_height=64)
     transform(x)
 
-    x = torch.rand(3, 128, 128)
+    x = torch.rand(3, 224, 224)
     x = transforms.ToPILImage(mode='RGB')(x)
 
-    transform = transform_class(input_height=128)
+    transform = transform_class(input_height=224)
     transform(x)
 
 
