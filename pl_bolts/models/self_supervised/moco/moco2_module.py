@@ -148,7 +148,7 @@ class MocoV2(pl.LightningModule):
         self.queue_ptr[0] = ptr
 
     @torch.no_grad()
-    def _batch_shuffle_ddp(self, x):
+    def _batch_shuffle_ddp(self, x):  # pragma: no-cover
         """
         Batch shuffle, for making use of BatchNorm.
         *** Only support DistributedDataParallel (DDP) model. ***
