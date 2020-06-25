@@ -50,7 +50,6 @@ class AMDIM(pl.LightningModule):
             >>> from pl_bolts.models.self_supervised import AMDIM
             ...
             >>> model = AMDIM(encoder='resnet18')
-            Using a 32x32 encoder
 
         Train::
 
