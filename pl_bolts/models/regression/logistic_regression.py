@@ -42,6 +42,10 @@ class LogisticRegression(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
+
+        # flatten any input
+        x = x.view(x.size(0), -1)
+
         y_hat = self(x)
 
         # PyTorch cross_entropy function combines log_softmax and nll_loss in single function
@@ -71,6 +75,10 @@ class LogisticRegression(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
+
+        # flatten any input
+        x = x.view(x.size(0), -1)
+
         y_hat = self(x)
         return {'val_loss': F.cross_entropy(y_hat, y)}
 
