@@ -17,10 +17,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@master
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
 
       - name: Create package
         run: |
