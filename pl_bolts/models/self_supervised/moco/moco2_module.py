@@ -134,6 +134,7 @@ class MocoV2(pl.LightningModule):
         batch_size = keys.shape[0]
 
         ptr = int(self.queue_ptr)
+        print(self.hparams.num_negatives, batch_size)
         assert self.hparams.num_negatives % batch_size == 0  # for simplicity
 
         # replace the keys at ptr (dequeue and enqueue)
