@@ -61,3 +61,19 @@ def test_stl10_transforms(tmpdir, transform):
 
     transform = transform()
     transform(x)
+
+
+@pytest.mark.parametrize("transform", [
+    CPCTrainTransformsImageNet128,
+    CPCEvalTransformsImageNet128,
+    AMDIMTrainTransformsImageNet128,
+    AMDIMEvalTransformsImageNet128,
+    Moco2TrainImagenetTransforms,
+    Moco2EvalImagenetTransforms
+])
+def test_stl10_transforms(tmpdir, transform):
+    x = torch.rand(3, 128, 128)
+    x = transforms.ToPILImage(mode='RGB')(x)
+
+    transform = transform()
+    transform(x)
