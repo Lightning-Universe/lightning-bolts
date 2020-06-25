@@ -22,10 +22,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@master
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: '3.7'
 
       # Note: This uses an internal pip API and may not always work
       # https://github.com/actions/cache/blob/master/examples.md#multiple-oss-in-a-workflow
@@ -56,8 +55,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@master
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: 3.7
 
