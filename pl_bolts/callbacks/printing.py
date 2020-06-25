@@ -124,10 +124,3 @@ def dicts_to_table(dicts: List[Dict],
         line = s.format(**d, **marked_values)
         lines.append(line)
     return '\n'.join(lines)
-
-
-if __name__ == '__main__':
-    a = {'a': 1, 'b': 2}
-    b = {'a': 3, 'b': 4}
-
-    print(dicts_to_table([a, b]))
