@@ -6,8 +6,8 @@ from typing import Tuple
 
 import torch
 
-from pl_bolts.models.reinforcement.common.networks import NoisyCNN
-from pl_bolts.models.reinforcement.dqn.model import DQN
+from pl_bolts.models.rl.common.networks import NoisyCNN
+from pl_bolts.models.rl.dqn.model import DQN
 
 
 class NoisyDQN(DQN):
@@ -23,7 +23,7 @@ class NoisyDQN(DQN):
 
     Example:
 
-        >>> from pl_bolts.models.reinforcement.n_step_dqn.model import NStepDQN
+        >>> from pl_bolts.models.rl.n_step_dqn.model import NStepDQN
         ...
         >>> model = NStepDQN("PongNoFrameskip-v4")
 

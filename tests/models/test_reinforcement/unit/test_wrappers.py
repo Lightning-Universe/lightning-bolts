@@ -3,7 +3,7 @@ from unittest import TestCase
 import gym
 import torch
 
-from pl_bolts.models.reinforcement.common.wrappers import ToTensor
+from pl_bolts.models.rl.common.wrappers import ToTensor
 
 
 class TestToTensor(TestCase):

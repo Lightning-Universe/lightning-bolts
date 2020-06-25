@@ -9,8 +9,8 @@ import numpy as np
 from gym import Env
 from torch.utils.data import IterableDataset
 
-from pl_bolts.models.reinforcement.common.agents import Agent
-from pl_bolts.models.reinforcement.common.memory import Experience, Buffer
+from pl_bolts.models.rl.common.agents import Agent
+from pl_bolts.models.rl.common.memory import Experience, Buffer
 
 
 class RLDataset(IterableDataset):

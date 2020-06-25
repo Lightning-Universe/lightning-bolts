@@ -15,11 +15,11 @@ import torch.optim as optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from pl_bolts.models.reinforcement.common import wrappers
-from pl_bolts.models.reinforcement.common.agents import ValueAgent
-from pl_bolts.models.reinforcement.common.experience import ExperienceSource, RLDataset
-from pl_bolts.models.reinforcement.common.memory import ReplayBuffer
-from pl_bolts.models.reinforcement.common.networks import CNN
+from pl_bolts.models.rl.common import wrappers
+from pl_bolts.models.rl.common.agents import ValueAgent
+from pl_bolts.models.rl.common.experience import ExperienceSource, RLDataset
+from pl_bolts.models.rl.common.memory import ReplayBuffer
+from pl_bolts.models.rl.common.networks import CNN
 
 
 class DQN(pl.LightningModule):
@@ -53,7 +53,7 @@ class DQN(pl.LightningModule):
 
         Example:
 
-            >>> from pl_bolts.models.reinforcement.dqn.model import DQN
+            >>> from pl_bolts.models.rl.dqn.model import DQN
             ...
             >>> model = DQN("PongNoFrameskip-v4")
 

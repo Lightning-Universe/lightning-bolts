@@ -6,13 +6,13 @@ import gym
 import torch
 from torch.utils.data import DataLoader
 
-from pl_bolts.models.reinforcement.common import cli
-from pl_bolts.models.reinforcement.common.agents import Agent
-from pl_bolts.models.reinforcement.common.experience import EpisodicExperienceStream
-from pl_bolts.models.reinforcement.common.networks import MLP
-from pl_bolts.models.reinforcement.common.wrappers import ToTensor
-from pl_bolts.models.reinforcement.dqn.model import DQN
-from pl_bolts.models.reinforcement.reinforce.model import Reinforce
+from pl_bolts.models.rl.common import cli
+from pl_bolts.models.rl.common.agents import Agent
+from pl_bolts.models.rl.common.experience import EpisodicExperienceStream
+from pl_bolts.models.rl.common.networks import MLP
+from pl_bolts.models.rl.common.wrappers import ToTensor
+from pl_bolts.models.rl.dqn.model import DQN
+from pl_bolts.models.rl.reinforce.model import Reinforce
 
 
 class TestReinforce(TestCase):
