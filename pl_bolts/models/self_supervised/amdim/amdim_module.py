@@ -5,13 +5,13 @@ from typing import Union
 import pytorch_lightning as pl
 import torch
 import torch.optim as optim
-from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
 
 import pl_bolts
 from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
+from pl_bolts.utils.ssl_utils import torchvision_ssl_encoder
 
 
 class AMDIM(pl.LightningModule):
@@ -19,6 +19,7 @@ class AMDIM(pl.LightningModule):
     def __init__(
             self,
             datamodule: Union[str, pl_bolts.datamodules.LightningDataModule] = 'cifar10',
+            encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'cpc_encoder',
             contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask('01, 02, 11'),
             image_channels: int = 3,
             image_height: int = 32,
@@ -74,18 +75,11 @@ class AMDIM(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        dummy_batch = torch.zeros((2, image_channels, self.hparams.image_height, self.hparams.image_height))
 
-        self.encoder = AMDIMEncoder(
-            dummy_batch,
-            num_channels=self.hparams.image_channels,
-            encoder_feature_dim=self.hparams.encoder_feature_dim,
-            embedding_fx_dim=self.hparams.embedding_fx_dim,
-            conv_block_depth=self.hparams.conv_block_depth,
-            encoder_size=self.hparams.image_height,
-            use_bn=self.hparams.use_bn
-        )
-        self.encoder.init_weights()
+        # init encoder
+        self.encoder = encoder
+        if isinstance(encoder, str):
+            self.encoder = self.init_encoder()
 
         # the task
         self.contrastive_task = contrastive_task
@@ -93,15 +87,40 @@ class AMDIM(pl.LightningModule):
         self.tng_split = None
         self.val_split = None
 
+    def init_encoder(self):
+        dummy_batch = torch.zeros((2, self.hparams.image_channels, self.hparams.image_height, self.hparams.image_height))
+        encoder_name = self.hparams.encoder
+
+        if encoder_name == 'amdim_encoder':
+            encoder = AMDIMEncoder(
+                dummy_batch,
+                num_channels=self.hparams.image_channels,
+                encoder_feature_dim=self.hparams.encoder_feature_dim,
+                embedding_fx_dim=self.hparams.embedding_fx_dim,
+                conv_block_depth=self.hparams.conv_block_depth,
+                encoder_size=self.hparams.image_height,
+                use_bn=self.hparams.use_bn
+            )
+            encoder.init_weights()
+            return encoder
+        else:
+            return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=True)
+
     def forward(self, img_1, img_2):
         # feats for img 1
         # r1 = last layer out
         # r5 = last layer with (b, c, 5, 5) size
         # r7 = last layer with (b, c, 7, 7) size
-        r1_x1, r5_x1, r7_x1 = self.encoder(img_1)
+        maps = self.encoder(img_1)
+        if len(maps) > 3:
+            maps = maps[-3:]
+        r1_x1, r5_x1, r7_x1 = maps
 
         # feats for img 2
-        r1_x2, r5_x2, r7_x2 = self.encoder(img_2)
+        maps = self.encoder(img_2)
+        if len(maps) > 3:
+            maps = maps[-3:]
+        r1_x2, r5_x2, r7_x2 = maps
 
         # first number = resnet block. second = image 1 or 2
         return r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2
@@ -361,6 +380,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    model = AMDIM(**vars(args))
+    model = AMDIM(**vars(args), encoder='resnet18')
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
