@@ -24,27 +24,6 @@ references:
        codecov
      no_output_timeout: 50m
 
-  install_pkg: &install_pkg
-    run:
-      name: Install package
-      command: |
-        virtualenv vEnv ; source vEnv/bin/activate
-        # pip install -r requirements.txt
-        pip install dist/*
-        cd .. & python -c "import pytorch_lightning as pl ; print(pl.__version__)"
-        cd .. & python -c "import pl_bolts ; print(pl_bolts.__version__)"
-        deactivate ; rm -rf vEnv
-
-  create_pkg: &create_pkg
-    run:
-      name: Create package
-      command: |
-        #python setup.py check --metadata --strict
-        sudo pip install twine==1.13.0
-        python setup.py sdist
-        twine check dist/*
-        python setup.py clean
-
   format: &format
    run:
      name: Formatting
@@ -94,14 +73,6 @@ jobs:
       - store_artifacts:
           path: test-reports
 
-  Install-pkg:
-    docker:
-      - image: circleci/python:3.7
-    steps:
-      - checkout
-      - *create_pkg
-      - *install_pkg
-
 
 workflows:
   version: 2
@@ -110,4 +81,3 @@ workflows:
       - Formatting
       - Testing
       - Build-Docs
-      - Install-pkg
