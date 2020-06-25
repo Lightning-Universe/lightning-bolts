@@ -35,7 +35,7 @@ class MocoV2(pl.LightningModule):
                  weight_decay: float = 1e-4,
                  datamodule: pl_bolts.datamodules.LightningDataModule = None,
                  data_dir: str = './',
-                 batch_size: str = 256,
+                 batch_size: int = 256,
                  use_mlp: bool = False,
                  num_workers: int = 8,
                  *args, **kwargs):
@@ -44,7 +44,7 @@ class MocoV2(pl.LightningModule):
 
         Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.
 
-        Model implemented by:
+        Code adapted from `facebookresearch/moco <https://github.com/facebookresearch/moco>`_ to Lightning by:
 
             - `William Falcon <https://github.com/williamFalcon>`_
 

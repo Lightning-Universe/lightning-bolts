@@ -6,7 +6,7 @@ Self-supervised learning Transforms
 
 These transforms are used in various self-supervised learning approaches.
 
--------------------
+----------------
 
 CPC transforms
 --------------
@@ -44,7 +44,7 @@ STL-10 Eval (c)
 .. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCEvalTransformsSTL10
     :noindex:
 
----------------
+-------------------
 
 AMDIM transforms
 ----------------
@@ -118,4 +118,20 @@ STL-10 Train (m2)
 STL-10 Eval (m2)
 ^^^^^^^^^^^^^^^^^^^
 .. autoclass:: pl_bolts.models.self_supervised.moco.transforms.Moco2EvalImagenetTransforms
+    :noindex:
+
+---------------
+
+SimCLR transforms
+------------------
+Transforms used for SimCLR
+
+Train (sc)
+^^^^^^^^^^
+.. autoclass:: pl_bolts.models.self_supervised.simclr.simclr_transforms.SimCLRTrainDataTransform
+    :noindex:
+
+Eval (sc)
+^^^^^^^^^
+.. autoclass:: pl_bolts.models.self_supervised.simclr.simclr_transforms.SimCLREvalDataTransform
     :noindex:

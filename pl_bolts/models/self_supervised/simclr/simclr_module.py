@@ -5,16 +5,17 @@ from torch.nn import functional as F
 from torch.optim.lr_scheduler import StepLR
 from torchvision.models import densenet
 
+import pl_bolts
 from pl_bolts import metrics
 from pl_bolts.datamodules import get_datamodule
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.metrics import mean
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLRDataTransform
+from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from pl_bolts.optimizers.layer_adaptive_scaling import LARS
 
 
-class EncoderModel(nn.Module):
+class DensenetEncoder(nn.Module):
     def __init__(self):
         super().__init__()
         self.model = densenet.densenet121(pretrained=False, num_classes=1)
@@ -45,7 +46,7 @@ class Projection(nn.Module):
 
 class SimCLR(pl.LightningModule):
     def __init__(self,
-                 dataset: str = 'cifar10',
+                 datamodule: pl_bolts.datamodules.LightningDataModule = None,
                  data_dir: str = '',
                  learning_rate: float = 0.00006,
                  weight_decay: float = 0.0005,
@@ -80,7 +81,7 @@ class SimCLR(pl.LightningModule):
             trainer.fit(model)
 
         Args:
-            dataset: dataset name
+            datamodule: The datamodule
             data_dir: directory to store data
             learning_rate: the learning rate
             weight_decay: optimizer weight decay
@@ -97,14 +98,20 @@ class SimCLR(pl.LightningModule):
         self.save_hyperparameters()
         self.online_evaluator = online_ft
 
-        self.dataset = self.get_dataset(dataset)
+        # init default datamodule
+        if datamodule is None:
+            datamodule = CIFAR10DataModule(data_dir, num_workers=num_workers)
+            datamodule.train_transforms = SimCLRTrainDataTransform(input_height)
+            datamodule.val_transforms = SimCLREvalDataTransform(input_height)
+
+        self.datamodule = datamodule
         self.loss_func = self.init_loss()
         self.encoder = self.init_encoder()
         self.projection = self.init_projection()
 
         if self.online_evaluator:
             z_dim = self.projection.output_dim
-            num_classes = self.dataset.num_classes
+            num_classes = self.datamodule.num_classes
             self.non_linear_evaluator = SSLEvaluator(
                 n_input=z_dim,
                 n_classes=num_classes,
@@ -116,14 +123,10 @@ class SimCLR(pl.LightningModule):
         return nt_xent_loss
 
     def init_encoder(self):
-        return EncoderModel()
+        return DensenetEncoder()
 
     def init_projection(self):
         return Projection()
-
-    def get_dataset(self, name):
-        extra = dict(meta_root=self.hparams.meta_root) if name == 'imagenet2012' else {}
-        return get_datamodule(name, data_dir=self.hparams.data_dir, num_workers=self.hparams.num_workers, **extra)
 
     def forward(self, x):
         h = self.encoder(x)
@@ -212,25 +215,13 @@ class SimCLR(pl.LightningModule):
         return dict(val_loss=val_loss, log=log, progress_bar=progress_bar)
 
     def prepare_data(self):
-        self.dataset.prepare_data()
+        self.datamodule.prepare_data()
 
     def train_dataloader(self):
-        train_transform = SimCLRDataTransform(input_height=self.hparams.input_height)
-
-        if self.hparams.dataset == 'stl10':
-            loader = self.dataset.train_dataloader_mixed(self.hparams.batch_size, transforms=train_transform)
-        else:
-            loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
-        return loader
+        return self.datamodule.train_dataloader(self.hparams.batch_size)
 
     def val_dataloader(self):
-        test_transform = SimCLRDataTransform(input_height=self.hparams.input_height, test=True)
-
-        if self.hparams.dataset == 'stl10':
-            loader = self.dataset.val_dataloader_mixed(self.hparams.batch_size, transforms=test_transform)
-        else:
-            loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
-        return loader
+        return self.datamodule.val_dataloader(self.hparams.batch_size)
 
     def configure_optimizers(self):
         if self.hparams.optimizer == 'adam':
@@ -278,10 +269,15 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
+
+    # trainer args
     parser = pl.Trainer.add_argparse_args(parser)
+
+    # model args
     parser = SimCLR.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    model = SimCLR(**vars(args))
-    trainer = pl.Trainer.from_argparse_args(args, overfit_batches=1)
+    model = SimCLR(**args.__dict__)
+
+    trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
