@@ -24,7 +24,6 @@ def test_cpcv2(tmpdir):
 
     assert loss > 0
 
-test_cpcv2(os.getcwd())
 
 def test_amdim(tmpdir):
     reset_seed()
