@@ -35,23 +35,23 @@ from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
     SimCLREvalDataTransform,
     SimCLRTrainDataTransform
 ])
-def test_simclr_transforms(tmpdir, transform):
+def test_simclr_transforms(tmpdir, transform_class):
     x = torch.rand(3, 32, 32)
     x = transforms.ToPILImage(mode='RGB')(x)
 
-    transform = transform(input_height=32)
+    transform = transform_class(input_height=32)
     transform(x)
 
     x = torch.rand(3, 64, 64)
     x = transforms.ToPILImage(mode='RGB')(x)
 
-    transform = transform(input_height=64)
+    transform = transform_class(input_height=64)
     transform(x)
 
     x = torch.rand(3, 128, 128)
     x = transforms.ToPILImage(mode='RGB')(x)
 
-    transform = transform(input_height=128)
+    transform = transform_class(input_height=128)
     transform(x)
 
 
