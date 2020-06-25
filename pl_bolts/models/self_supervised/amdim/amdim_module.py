@@ -19,7 +19,7 @@ class AMDIM(pl.LightningModule):
     def __init__(
             self,
             datamodule: Union[str, pl_bolts.datamodules.LightningDataModule] = 'cifar10',
-            encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'cpc_encoder',
+            encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'amdim_encoder',
             contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask('01, 02, 11'),
             image_channels: int = 3,
             image_height: int = 32,
@@ -75,7 +75,6 @@ class AMDIM(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-
         # init encoder
         self.encoder = encoder
         if isinstance(encoder, str):
@@ -88,7 +87,8 @@ class AMDIM(pl.LightningModule):
         self.val_split = None
 
     def init_encoder(self):
-        dummy_batch = torch.zeros((2, self.hparams.image_channels, self.hparams.image_height, self.hparams.image_height))
+        dummy_batch = torch.zeros((2, self.hparams.image_channels, self.hparams.image_height,
+                                   self.hparams.image_height))
         encoder_name = self.hparams.encoder
 
         if encoder_name == 'amdim_encoder':
