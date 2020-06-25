@@ -83,14 +83,11 @@ class ValueAgent(Agent):
                 action defined by Q values
         """
         if not isinstance(state, torch.Tensor):
-            state = torch.tensor([state])
-
-        if device.type != "cpu":
-            state = state.cuda(device)
+            state = torch.tensor([state], device=device)
 
         q_values = self.net(state)
         _, action = torch.max(q_values, dim=1)
-        return int(action.item())
+        return int(action.detach().item())
 
     def update_epsilon(self, step: int) -> None:
         """
