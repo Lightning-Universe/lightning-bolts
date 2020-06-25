@@ -29,7 +29,7 @@ def test_cpcv2(tmpdir):
 def test_amdim(tmpdir):
     reset_seed()
 
-    model = AMDIM(data_dir=tmpdir, batch_size=2, online_ft=True)
+    model = AMDIM(data_dir=tmpdir, batch_size=2, online_ft=True, encoder='resnet18')
     trainer = pl.Trainer(overfit_batches=2, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
