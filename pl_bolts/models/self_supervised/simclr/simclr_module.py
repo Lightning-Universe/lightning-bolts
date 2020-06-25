@@ -16,7 +16,7 @@ from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalD
 from pl_bolts.optimizers.layer_adaptive_scaling import LARS
 
 
-class EncoderModel(nn.Module):
+class DensenetEncoder(nn.Module):
     def __init__(self):
         super().__init__()
         self.model = densenet.densenet121(pretrained=False, num_classes=1)
@@ -124,7 +124,7 @@ class SimCLR(pl.LightningModule):
         return nt_xent_loss
 
     def init_encoder(self):
-        return EncoderModel()
+        return DensenetEncoder()
 
     def init_projection(self):
         return Projection()
