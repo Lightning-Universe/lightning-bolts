@@ -29,12 +29,13 @@ jobs:
 
       - name: Check package
         run: |
-          sudo pip install twine==1.13.0
+          pip install twine==1.13.0
           twine check dist/*
           python setup.py clean
 
       - name: Check package
         run: |
+          pip install virtualenv
           virtualenv vEnv ; source vEnv/bin/activate
           # pip install -r requirements.txt
           pip install dist/*

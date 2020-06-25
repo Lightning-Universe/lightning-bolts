@@ -79,5 +79,4 @@ workflows:
   build:
     jobs:
       - Formatting
-      - Testing
       - Build-Docs
