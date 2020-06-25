@@ -3,9 +3,10 @@ from torch import nn
 from torch.nn import functional as F
 import pytorch_lightning as pl
 from torch.optim.optimizer import Optimizer
+from torch.optim import Adam
 
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
-
+from pytorch_lightning.metrics.classification import accuracy
 
 class LogisticRegression(pl.LightningModule):
 
@@ -14,7 +15,7 @@ class LogisticRegression(pl.LightningModule):
                  num_classes: int,
                  bias: bool =True,
                  learning_rate: float =0.0001,
-                 optimizer: Optimizer = 'Adam',
+                 optimizer: Optimizer = Adam,
                  l1_strength: float = 0.0,
                  l2_strength: float = 0.0,
                  **kwargs):
@@ -33,6 +34,7 @@ class LogisticRegression(pl.LightningModule):
         """
         super().__init__()
         self.save_hyperparameters()
+        self.optimizer = optimizer
 
         self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=self.hparams.num_classes, bias=bias).double()
 
@@ -42,6 +44,10 @@ class LogisticRegression(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
+
+        # flatten any input
+        x = x.view(x.size(0), -1)
+
         y_hat = self(x)
 
         # PyTorch cross_entropy function combines log_softmax and nll_loss in single function
@@ -71,12 +77,18 @@ class LogisticRegression(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
+
+        # flatten any input
+        x = x.view(x.size(0), -1)
+
         y_hat = self(x)
-        return {'val_loss': F.cross_entropy(y_hat, y)}
+        acc = accuracy(y_hat, y)
+        return {'val_loss': F.cross_entropy(y_hat, y), 'acc':acc}
 
     def validation_epoch_end(self, outputs):
+        acc = torch.stack([x['acc'] for x in outputs]).mean()
         val_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
-        tensorboard_logs = {'val_ce_loss': val_loss}
+        tensorboard_logs = {'val_ce_loss': val_loss, 'val_acc': acc}
         progress_bar_metrics = tensorboard_logs
         return {
             'val_loss': val_loss,
@@ -86,12 +98,18 @@ class LogisticRegression(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         x, y = batch
+
+        # flatten any input
+        x = x.view(x.size(0), -1)
+
         y_hat = self(x)
-        return {'test_loss': F.cross_entropy(y_hat, y)}
+        acc = accuracy(y_hat, y)
+        return {'test_loss': F.cross_entropy(y_hat, y), 'acc':acc}
 
     def test_epoch_end(self, outputs):
+        acc = torch.stack([x['acc'] for x in outputs]).mean()
         test_loss = torch.stack([x['test_loss'] for x in outputs]).mean()
-        tensorboard_logs = {'test_ce_loss': test_loss}
+        tensorboard_logs = {'test_ce_loss': test_loss, 'test_acc': acc}
         progress_bar_metrics = tensorboard_logs
         return {
             'test_loss': test_loss,
@@ -100,8 +118,7 @@ class LogisticRegression(pl.LightningModule):
         }
 
     def configure_optimizers(self):
-        optimizer_class = getattr(torch.optim, self.hparams.optimizer)
-        return optimizer_class(self.parameters(), lr=self.hparams.learning_rate)
+        return self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -111,7 +128,6 @@ class LogisticRegression(pl.LightningModule):
         parser.add_argument('--num_classes', type=int, default=None)
         parser.add_argument('--bias', default='store_true')
         parser.add_argument('--batch_size', type=int, default=16)
-        parser.add_argument('--optimizer', type=str, default='Adam')
         return parser
 
 
@@ -132,7 +148,7 @@ if __name__ == '__main__':  # pragma: no cover
 
     # model
     # model = LogisticRegression(**vars(args))
-    model = LogisticRegression(input_dim=4, num_classes=3, l1_strength=0.01)
+    model = LogisticRegression(input_dim=4, num_classes=3, l1_strength=0.01, learning_rate=0.01)
 
     # train
     trainer = pl.Trainer.from_argparse_args(args)

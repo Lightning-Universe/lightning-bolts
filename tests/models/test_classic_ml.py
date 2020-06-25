@@ -2,6 +2,7 @@ import pytorch_lightning as pl
 from pl_bolts.models.regression import LinearRegression, LogisticRegression
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 import numpy as np
+import torch
 
 from tests import reset_seed
 import pytest
@@ -10,6 +11,7 @@ import pytest
 def test_linear_regression_model(tmpdir):
     reset_seed()
 
+    # Test model with Sklearn Dataset
     # create dataset
     from sklearn.datasets import make_regression
     X, y = make_regression(n_samples=100, n_features=3, random_state=1234)
@@ -19,7 +21,6 @@ def test_linear_regression_model(tmpdir):
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, loaders.train_dataloader(batch_size=2), loaders.val_dataloader(batch_size=2))
     trainer.test(model, loaders.test_dataloader(batch_size=2))
-
     #TODO: check loss/accuracy value
 
 

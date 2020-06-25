@@ -41,6 +41,7 @@ class LinearRegression(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
+        x = x.view(x.size(0), -1)
         y_hat = self(x)
         loss = F.mse_loss(y_hat, y)
 
@@ -68,6 +69,7 @@ class LinearRegression(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
+        x = x.view(x.size(0), -1)
         y_hat = self(x)
         return {'val_loss': F.mse_loss(y_hat, y)}
 
