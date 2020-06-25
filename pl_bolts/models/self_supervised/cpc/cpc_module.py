@@ -52,7 +52,6 @@ class CPCV2(pl.LightningModule):
             num_workers: int = 4,
             learning_rate: int = 1e-4,
             data_dir: str = '',
-            meta_root: str = '',
             batch_size: int = 32,
             pretrained: str = None,
             **kwargs,
@@ -105,7 +104,6 @@ class CPCV2(pl.LightningModule):
             num_workers: num dataloader worksers
             learning_rate: what learning rate to use
             data_dir: where to store data
-            meta_root: path to the imagenet meta.bin file (if not inside your imagenet folder)
             batch_size: batch size
             pretrained: If true, will use the weights pretrained (using CPC) on Imagenet
         """
@@ -337,7 +335,7 @@ class CPCV2(pl.LightningModule):
         # data
         parser.add_argument('--dataset', default='cifar10', type=str)
         parser.add_argument('--data_dir', default='.', type=str)
-        parser.add_argument('--meta_root', default='.', type=str)
+        parser.add_argument('--meta_root', default='.', type=str, help='path to meta.bin for imagenet')
         parser.add_argument('--num_workers', default=0, type=int)
 
         return parser
