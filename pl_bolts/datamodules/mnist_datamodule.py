@@ -1,14 +1,22 @@
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
 from torchvision.datasets import MNIST
-import os
 
 from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 
 
 class MNISTDataModule(LightningDataModule):
 
-    def __init__(self, data_dir: str, val_split: int = 5000, num_workers: int = 16):
+    name = 'mnist'
+
+    def __init__(
+            self,
+            data_dir: str,
+            val_split: int = 5000,
+            num_workers: int = 16,
+            *args,
+            **kwargs,
+    ):
         """
         Standard MNIST, train, val, test splits and transforms
 
@@ -30,7 +38,7 @@ class MNISTDataModule(LightningDataModule):
             val_split: how many of the training images to use for the validation split
             num_workers: how many workers to use for loading data
         """
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.data_dir = data_dir
         self.val_split = val_split
         self.num_workers = num_workers

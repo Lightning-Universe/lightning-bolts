@@ -1,20 +1,27 @@
 import os
+
 from torch.utils.data import DataLoader
 from torchvision import transforms as transform_lib
 
-from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
+from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 
 
 class ImagenetDataModule(LightningDataModule):
 
-    def __init__(self,
-                 data_dir: str,
-                 meta_root: str = None,
-                 num_imgs_per_val_class: int = 50,
-                 image_size: int = 224,
-                 num_workers: int = 16):
+    name = 'imagenet'
+
+    def __init__(
+            self,
+            data_dir: str,
+            meta_root: str = None,
+            num_imgs_per_val_class: int = 50,
+            image_size: int = 224,
+            num_workers: int = 16,
+            *args,
+            **kwargs,
+    ):
         """
         Imagenet train, val and test dataloaders.
 
@@ -39,8 +46,7 @@ class ImagenetDataModule(LightningDataModule):
             image_size: final image size
             num_workers: how many data workers
         """
-
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.data_dir = data_dir
         self.num_workers = num_workers
         self.meta_root = meta_root
@@ -69,8 +75,8 @@ class ImagenetDataModule(LightningDataModule):
         dirs = os.listdir(data_dir)
 
         if split not in dirs:
-            raise FileNotFoundError(f'a {split} Imagenet split was not found in {data_dir}, make sure the'
-                                    f'folder contains a subfolder named {split}')
+            raise FileNotFoundError(f'a {split} Imagenet split was not found in {data_dir},'
+                                    f' make sure the folder contains a subfolder named {split}')
 
     def prepare_data(self):
         """

@@ -1,5 +1,4 @@
 import pytorch_lightning as pl
-from argparse import Namespace
 
 from pl_bolts.models import LitMNIST
 from tests import reset_seed
@@ -9,7 +8,7 @@ def test_mnist(tmpdir):
     reset_seed()
 
     model = LitMNIST(data_dir=tmpdir)
-    trainer = pl.Trainer(train_percent_check=0.01, limit_val_batches=0.01, max_epochs=1,
+    trainer = pl.Trainer(limit_train_batches=0.01, limit_val_batches=0.01, max_epochs=1,
                          limit_test_batches=0.01, default_root_dir=tmpdir)
     trainer.fit(model)
     trainer.test(model)

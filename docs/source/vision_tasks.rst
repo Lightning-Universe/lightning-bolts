@@ -1,73 +1,69 @@
-Vision Tasks
-============
-Here we present common tasks used in computer vision.
+Self-supervised Learning Contrastive tasks
+==========================================
+This section implements popular contrastive learning tasks used in self-supervised learning.
 
-------------------
+---------------
 
-Self-supervised learning
-------------------------
-Self-supervised learning in computer vision uses a pretext task to extract learning signal.
-Here is a collection of common tasks
+FeatureMapContrastiveTask
+-------------------------
+This task compares sets of feature maps.
 
-AMDIMContrastiveTask
-^^^^^^^^^^^^^^^^^^^^
-Implementation modified from the `original repo <https://github.com/Philip-Bachman/amdim-public>`_.
-This is the contrastive task from AMDIM (`Philip Bachman, R Devon Hjelm, William Buchwalter <https://arxiv.org/abs/1906.00910>`_).
+In general the feature map comparison pretext task uses triplets of features.
+Here are the abstract steps of comparison.
 
-In this task, we take in two sets of feature maps
-(in this case from a positive $x^+$ and anchor example $x^a$) $M^a = \{m_1, m_2, ..., m_i\}, M^+ = \{m_1, m_2, ..., m_j\}$.
-
-The task compares feature maps across spatial locations within the network. Here are the supported possibilities:
-
-The `1:1` task:
-
-Corresponds to using the feature maps $m_{i} \in M^a$ vs $m_{j} \in M^+$ in the NCE Loss $\math{cal}(m_i, m_j)$
+Generate multiple views of the same image
 
 .. code-block:: python
 
-    xa, x+ = augmentations(x), augmentations(x)
-    ra = model(xa)
-    r+ = model(x+)
+    x1_view_1 = data_augmentation(x1)
+    x1_view_2 = data_augmentation(x1)
 
-    # 1:1 task (last two feature maps)
-    task = AMDIMContrastiveTask('1:1')
-    map_i = ra[-1]
-    map_j = r+[-1]
-    loss = task(map_i, map_j)
-
-The `1:5,1:7,5:5` task:
-This is the task used in the AMDIM paper. This task generates three losses.
-Corresponds to using the feature maps $m_{i} \in M^a$ vs $m_{j} \in M^+$ in the NCE Loss $\math{cal}(m_i, m_j)$
-
-$\math{cal}_1(m_i, m_{i-1})$
-$\math{cal}_2(m_i, m_{i-2})$
-$\math{cal}_3(m_{i-1}, m_{i-1})$
+Use a different example to generate additional views (usually within the same batch or a pool of candidates)
 
 .. code-block:: python
 
-    ra = model(xa)
-    r+ = model(x+)
+    x2_view_1 = data_augmentation(x2)
+    x2_view_2 = data_augmentation(x2)
 
-    # each model outputs the last feature maps where the dimensions match the numbers specified
-    # f1 = (b, c, 1, 1)
-    # f5 = (b, c, 5, 5)
-    # f6 = (b, c, 7, 7)
-    f1, f5, f7 = ra
-    f1, f5, f7 = r+
+Pick 3 views to compare, these are the anchor, positive and negative features
 
-    task = AMDIMContrastiveTask(strategy='1:5,1:7,5:5')
-    loss = task(ra, r+)
+.. code-block:: python
 
-Other strategies available are: '1:1,5:5,7:7', '1:random'
+    anchor = x1_view_1
+    positive = x1_view_2
+    negative = x2_view_1
 
-.. note:: This task can be generalized for any list of tuples. Feel free to submit a PR!
+Generate feature maps for each view
 
-.. note:: The softmax masking in this task can be sped up. Feel free to submit a PR!
+.. code-block:: python
 
+    (a0, a1, a2) = encoder(anchor)
+    (p0, p1, p2) = encoder(positive)
 
-.. autoclass:: pl_bolts.losses.self_supervised_learning.AMDIMContrastiveTask
+Make a comparison for a set of feature maps
+
+.. code-block:: python
+
+    phi = some_score_function()
+
+    # the '01' comparison
+    score = phi(a0, p1)
+
+    # and can be bidirectional
+    score = phi(p0, a1)
+
+In practice the contrastive task creates a BxB matrix where B is the batch size. The diagonals for set 1 of feature maps
+are the anchors, the diagonals of set 2 of the feature maps are the positives, the non-diagonals of set 1 are the
+negatives.
+
+.. autoclass:: pl_bolts.losses.self_supervised_learning.FeatureMapContrastiveTask
     :noindex:
 
+--------------
+
+Context prediction tasks
+------------------------
+The following tasks aim to predict a target using a context representation.
 
 CPCContrastiveTask
 ^^^^^^^^^^^^^^^^^^
