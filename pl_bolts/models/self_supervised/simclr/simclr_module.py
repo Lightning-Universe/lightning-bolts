@@ -7,7 +7,7 @@ from torchvision.models import densenet
 
 import pl_bolts
 from pl_bolts import metrics
-from pl_bolts.datamodules import CIFAR10DataModule
+from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.metrics import mean
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
@@ -134,7 +134,7 @@ class SimCLR(pl.LightningModule):
         return h, z
 
     def training_step(self, batch, batch_idx):
-        if self.hparams.dataset == 'stl10':
+        if isinstance(self.datamodule, STL10DataModule):
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -149,7 +149,7 @@ class SimCLR(pl.LightningModule):
 
         # don't use the training signal, just finetune the MLP to see how we're doing downstream
         if self.online_evaluator:
-            if self.hparams.dataset == 'stl10':
+            if isinstance(self.datamodule, STL10DataModule):
                 (img_1, img_2), y = labeled_batch
 
             with torch.no_grad():
@@ -172,7 +172,7 @@ class SimCLR(pl.LightningModule):
         return result
 
     def validation_step(self, batch, batch_idx):
-        if self.hparams.dataset == 'stl10':
+        if isinstance(self.datamodule, STL10DataModule):
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -184,7 +184,7 @@ class SimCLR(pl.LightningModule):
         result = {'val_loss': loss}
 
         if self.online_evaluator:
-            if self.hparams.dataset == 'stl10':
+            if isinstance(self.datamodule, STL10DataModule):
                 (img_1, img_2), y = labeled_batch
                 h1, z1 = self.forward(img_1)
 
