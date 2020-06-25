@@ -38,6 +38,8 @@ from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
     AMDIMTrainTransformsCIFAR10,
     Moco2TrainCIFAR10Transforms,
     Moco2EvalCIFAR10Transforms,
+    SimCLREvalDataTransform,
+    SimCLRTrainDataTransform
 ])
 def test_cifar10_transforms(tmpdir, transform):
     x = torch.rand(3, 32, 32)
@@ -71,7 +73,7 @@ def test_stl10_transforms(tmpdir, transform):
     Moco2TrainImagenetTransforms,
     Moco2EvalImagenetTransforms
 ])
-def test_stl10_transforms(tmpdir, transform):
+def test_imagenet_transforms(tmpdir, transform):
     x = torch.rand(3, 128, 128)
     x = transforms.ToPILImage(mode='RGB')(x)
 
