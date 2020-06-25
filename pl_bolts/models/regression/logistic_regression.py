@@ -4,6 +4,7 @@ from torch.nn import functional as F
 import pytorch_lightning as pl
 from torch.optim.optimizer import Optimizer
 from torch.optim import Adam
+import inspect
 
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 from pytorch_lightning.metrics.classification import accuracy
@@ -15,7 +16,7 @@ class LogisticRegression(pl.LightningModule):
                  input_dim: int,
                  num_classes: int,
                  bias: bool = True,
-                 learning_rate: float =0.0001,
+                 learning_rate: float = 0.0001,
                  optimizer: Optimizer = Adam,
                  l1_strength: float = 0.0,
                  l2_strength: float = 0.0,
@@ -113,7 +114,12 @@ class LogisticRegression(pl.LightningModule):
         }
 
     def configure_optimizers(self):
-        return self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
+        # init default optimizer
+        # otherwise will use whatever the user passed in
+        if inspect.isclass(self.optimizer):
+            self.optimizer = self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
+
+        return self.optimizer
 
     @staticmethod
     def add_model_specific_args(parent_parser):
