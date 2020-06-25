@@ -57,6 +57,7 @@ class SimCLR(pl.LightningModule):
                  optimizer: str = 'lars',
                  lr_sched_step: float = 30.0,
                  lr_sched_gamma: float = 0.5,
+                 lars_momentum: float = 0.9,
                  loss_temperature: float = 0.5,
                  **kwargs):
         """
@@ -92,6 +93,7 @@ class SimCLR(pl.LightningModule):
             optimizer: optimizer name
             lr_sched_step: step for learning rate scheduler
             lr_sched_gamma: gamma for learning rate scheduler
+            lars_momentum: the mom param for lars optimizer
             loss_temperature: float = 0.
         """
         super().__init__()
@@ -229,7 +231,7 @@ class SimCLR(pl.LightningModule):
                 self.parameters(), self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
         elif self.hparams.optimizer == 'lars':
             optimizer = LARS(
-                self.parameters(), lr=self.hparams.learning_rate, momentum=self.hparams.mom,
+                self.parameters(), lr=self.hparams.learning_rate, momentum=self.hparams.lars_momentum,
                 weight_decay=self.hparams.weight_decay, eta=self.hparams.eta)
         else:
             raise ValueError(f'Invalid optimizer: {self.optimizer}')
@@ -254,7 +256,7 @@ class SimCLR(pl.LightningModule):
         parser.add_argument('--optimizer', choices=['adam', 'lars'], default='lars')
         parser.add_argument('--batch_size', type=int, default=512)
         parser.add_argument('--learning_rate', type=float, default=1.0)
-        parser.add_argument('--mom', type=float, default=0.9)
+        parser.add_argument('--lars_momentum', type=float, default=0.9)
         parser.add_argument('--eta', type=float, default=0.001)
         parser.add_argument('--lr_sched_step', type=float, default=30, help='lr scheduler step')
         parser.add_argument('--lr_sched_gamma', type=float, default=0.5, help='lr scheduler step')
