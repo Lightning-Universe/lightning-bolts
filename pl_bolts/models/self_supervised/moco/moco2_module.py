@@ -274,8 +274,6 @@ class MocoV2(pl.LightningModule):
         val_acc1 = mean(outputs, 'val_acc1')
         val_acc5 = mean(outputs, 'val_acc5')
 
-        import pdb; pdb.set_trace()
-
         log = {
             'val_loss': val_loss,
             'val_acc1': val_acc1,
