@@ -137,7 +137,7 @@ class DuelingDQN(DQN):
 
         Example:
 
-            >>> from pl_bolts.models.rl.dueling_dqn.dueling_dqn_model import DuelingDQN
+            >>> from pl_bolts.models.rl.dueling_dqn_model import DuelingDQN
             ...
             >>> model = DuelingDQN("PongNoFrameskip-v4")
 

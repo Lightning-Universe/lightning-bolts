@@ -122,7 +122,7 @@ class PERDQN(DQN):
 
     Example:
 
-            >>> from pl_bolts.models.rl.per_dqn.per_dqn_model import PERDQN
+            >>> from pl_bolts.models.rl.per_dqn_model import PERDQN
             ...
             >>> model = PERDQN("PongNoFrameskip-v4")
 

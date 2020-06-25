@@ -195,7 +195,7 @@ class NStepDQN(DQN):
 
         Example:
 
-            >>> from pl_bolts.models.rl.n_step_dqn.n_step_dqn_model import NStepDQN
+            >>> from pl_bolts.models.rl.n_step_dqn_model import NStepDQN
             ...
             >>> model = NStepDQN("PongNoFrameskip-v4")
 
