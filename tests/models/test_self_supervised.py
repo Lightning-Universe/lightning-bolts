@@ -14,7 +14,7 @@ from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
 def test_cpcv2(tmpdir):
     reset_seed()
 
-    datamodule = CIFAR10DataModule(data_dir=tmpdir)
+    datamodule = CIFAR10DataModule(data_dir=tmpdir, num_workers=0)
     datamodule.train_transforms = CPCTrainTransformsCIFAR10()
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 
@@ -40,7 +40,7 @@ def test_amdim(tmpdir):
 def test_moco(tmpdir):
     reset_seed()
 
-    datamodule = CIFAR10DataModule(tmpdir)
+    datamodule = CIFAR10DataModule(tmpdir, num_workers=0)
     datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
     datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
 
@@ -55,7 +55,7 @@ def test_moco(tmpdir):
 def test_simclr(tmpdir):
     reset_seed()
 
-    datamodule = CIFAR10DataModule(tmpdir)
+    datamodule = CIFAR10DataModule(tmpdir, num_workers=0)
     datamodule.train_transforms = SimCLRTrainDataTransform(32)
     datamodule.val_transforms = SimCLREvalDataTransform(32)
 
