@@ -31,7 +31,7 @@ from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
 )
 
 
-@pytest.mark.parametrize("transform", [
+@pytest.mark.parametrize("transform_class", [
     SimCLREvalDataTransform,
     SimCLRTrainDataTransform
 ])
