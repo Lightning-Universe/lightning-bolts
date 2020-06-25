@@ -245,6 +245,12 @@ class MocoV2(pl.LightningModule):
         return logits, labels
 
     def training_step(self, batch, batch_idx):
+        # in STL10 we pass in both lab+unl for online ft
+        if self.hparams.datamodule.name == 'stl10':
+            labeled_batch = batch[1]
+            unlabeled_batch = batch[0]
+            batch = unlabeled_batch
+
         (img_1, img_2), _ = batch
 
         output, target = self(img_q=img_1, img_k=img_2)
@@ -260,6 +266,12 @@ class MocoV2(pl.LightningModule):
         return {'loss': loss, 'log': log, 'progress_bar': log}
 
     def validation_step(self, batch, batch_idx):
+        # in STL10 we pass in both lab+unl for online ft
+        if self.hparams.datamodule.name == 'stl10':
+            labeled_batch = batch[1]
+            unlabeled_batch = batch[0]
+            batch = unlabeled_batch
+
         (img_1, img_2), labels = batch
 
         output, target = self(img_q=img_1, img_k=img_2)
