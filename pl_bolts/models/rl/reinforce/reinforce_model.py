@@ -50,7 +50,7 @@ class Reinforce(pl.LightningModule):
 
         Example:
 
-            >>> from pl_bolts.models.rl.reinforce.model import Reinforce
+            >>> from pl_bolts.models.rl.reinforce.reinforce_model import Reinforce
             ...
             >>> model = Reinforce("PongNoFrameskip-v4")
 

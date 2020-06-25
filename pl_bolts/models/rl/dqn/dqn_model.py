@@ -86,7 +86,7 @@ class DQN(pl.LightningModule):
 
         Example:
 
-            >>> from pl_bolts.models.rl.dqn.model import DQN
+            >>> from pl_bolts.models.rl.dqn.dqn_model import DQN
             ...
             >>> model = DQN("PongNoFrameskip-v4")
 

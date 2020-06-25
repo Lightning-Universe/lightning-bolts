@@ -42,7 +42,7 @@ class PolicyGradient(pl.LightningModule):
 
         Example:
 
-            >>> from pl_bolts.models.rl.vanilla_policy_gradient.model import PolicyGradient
+            >>> from pl_bolts.models.rl.vanilla_policy_gradient.vanilla_policy_gradient_model import PolicyGradient
             ...
             >>> model = PolicyGradient("PongNoFrameskip-v4")
 
