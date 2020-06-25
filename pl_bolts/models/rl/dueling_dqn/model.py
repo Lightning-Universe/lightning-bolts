@@ -42,6 +42,9 @@ class DuelingDQN(DQN):
             warm_start_size: how many random steps through the environment to be carried out at the start of
             training to fill the buffer with a starting point
             sample_len: the number of samples to pull from the dataset iterator and feed to the DataLoader
+
+        ..note: Currently only supports cpu and single gpu training with `distributed_backend=dp`
+
         """
 
     def build_networks(self) -> None:
