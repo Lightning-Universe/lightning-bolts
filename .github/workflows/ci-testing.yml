@@ -91,6 +91,7 @@ jobs:
       run: |
         # tox --sitepackages
         coverage run --source pl_bolts -m py.test pl_bolts tests -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
+        coverage xml
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@v2
