@@ -8,6 +8,7 @@ from pl_bolts.models.self_supervised.cpc import CPCTrainTransformsCIFAR10, CPCEv
 from tests import reset_seed
 from pl_bolts.models.self_supervised.moco.transforms import (Moco2TrainCIFAR10Transforms, Moco2EvalCIFAR10Transforms)
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
+from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
 
 
 def test_cpcv2(tmpdir):
@@ -44,7 +45,7 @@ def test_moco(tmpdir):
     datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
 
     model = MocoV2(data_dir=tmpdir, batch_size=2, datamodule=datamodule, online_ft=True)
-    trainer = pl.Trainer(overfit_batches=2, max_epochs=1, default_root_dir=tmpdir)
+    trainer = pl.Trainer(overfit_batches=2, max_epochs=1, default_root_dir=tmpdir, callbacks=[MocoLRScheduler()])
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
 
