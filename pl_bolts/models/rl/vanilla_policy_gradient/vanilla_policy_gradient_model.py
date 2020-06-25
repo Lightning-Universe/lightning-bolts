@@ -1,7 +1,6 @@
 """
 Vanilla Policy Gradient
-This example is based on: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/
-master/Chapter11/04_cartpole_pg.py
+
 """
 import argparse
 from collections import OrderedDict
@@ -33,7 +32,7 @@ class PolicyGradient(pl.LightningModule):
         """
         PyTorch Lightning implementation of `Vanilla Policy Gradient
         <https://papers.nips.cc/paper/
-        1713-policy-gradient-methods-for-rl-learning-with-function-approximation.pdf>`_
+        1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
 
         Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
 
@@ -59,6 +58,9 @@ class PolicyGradient(pl.LightningModule):
             batch_size: size of minibatch pulled from the DataLoader
             batch_episodes: how many episodes to rollout for each batch of training
             entropy_beta: dictates the level of entropy per batch
+
+        .. note::
+            This example is based on: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/04_cartpole_pg.py
 
         .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
 

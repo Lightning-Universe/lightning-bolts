@@ -1,7 +1,14 @@
 """
-REINFORCE
-This example is based on: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/
-master/Chapter11/02_cartpole_reinforce.py
+# REINFORCE
+
+## Benefits
+
+## Implementation
+
+## Results
+
+## References
+
 """
 import argparse
 from collections import OrderedDict
@@ -33,7 +40,7 @@ class Reinforce(pl.LightningModule):
         """
         PyTorch Lightning implementation of `REINFORCE
         <https://papers.nips.cc/paper/
-        1713-policy-gradient-methods-for-rl-learning-with-function-approximation.pdf>`_
+        1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
 
         Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
 
@@ -58,6 +65,9 @@ class Reinforce(pl.LightningModule):
             lr: learning rate
             batch_size: size of minibatch pulled from the DataLoader
             batch_episodes: how many episodes to rollout for each batch of training
+
+        .. note::
+            This example is based on: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/02_cartpole_reinforce.py
 
         .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
 
