@@ -18,10 +18,21 @@ from pl_bolts.models.reinforcement.dqn.model import DQN
 class PERDQN(DQN):
     """ PER DQN Model """
 
-    def __init__(self, env: str, gpus: int = 0, eps_start: float = 1.0, eps_end: float = 0.02,
-                 eps_last_frame: int = 150000, sync_rate: int = 1000, gamma: float = 0.99, learning_rate: float = 1e-4,
-                 batch_size: int = 32, replay_size: int = 100000, warm_start_size: int = 10000, num_samples: int = 500,
-                 ) -> None:
+    def __init__(
+            self,
+            env: str,
+            gpus: int = 0,
+            eps_start: float = 1.0,
+            eps_end: float = 0.02,
+            eps_last_frame: int = 150000,
+            sync_rate: int = 1000,
+            gamma: float = 0.99,
+            learning_rate: float = 1e-4,
+            batch_size: int = 32,
+            replay_size: int = 100000,
+            warm_start_size: int = 10000,
+            num_samples: int = 500,
+    ):
         """
         PyTorch Lightning implementation of `DQN With Prioritized Experience Replay <https://arxiv.org/abs/1511.05952>`_
 
@@ -54,11 +65,11 @@ class PERDQN(DQN):
             batch_size: size of minibatch pulled from the DataLoader
             replay_size: total capacity of the replay buffer
             warm_start_size: how many random steps through the environment to be carried out at the start of
-            training to fill the buffer with a starting point
+                training to fill the buffer with a starting point
             num_samples: the number of samples to pull from the dataset iterator and feed to the DataLoader
         """
-        super().__init__(env, gpus, eps_start, eps_end, eps_last_frame, sync_rate, gamma, learning_rate, batch_size, replay_size,
-                         warm_start_size, num_samples)
+        super().__init__(env, gpus, eps_start, eps_end, eps_last_frame, sync_rate, gamma, learning_rate, batch_size,
+                         replay_size, warm_start_size, num_samples)
 
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

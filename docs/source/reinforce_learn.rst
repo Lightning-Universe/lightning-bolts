@@ -33,7 +33,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example:
 
-    >>> from pl_bolts.models.rl.dqn.model import DQN
+    >>> from pl_bolts.models.reinforcement.dqn.model import DQN
     ...
     >>> dqn = DQN("PongNoFrameskip-v4")
 
@@ -42,7 +42,7 @@ Train::
     trainer = Trainer()
     trainer.fit(dqn)
 
-.. autoclass:: pl_bolts.models.rl.dqn.model.DQN
+.. autoclass:: pl_bolts.models.reinforcement.dqn.model.DQN
    :noindex:
 
 Double DQN
@@ -54,7 +54,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl.double_dqn.model import DoubleDQN
+    >>> from pl_bolts.models.reinforcement.double_dqn.model import DoubleDQN
     ...
     >>> ddqn = DoubleDQN("PongNoFrameskip-v4")
 
@@ -63,7 +63,7 @@ Train::
     trainer = Trainer()
     trainer.fit(ddqn)
 
-.. autoclass:: pl_bolts.models.rl.double_dqn.model.DoubleDQN
+.. autoclass:: pl_bolts.models.reinforcement.double_dqn.model.DoubleDQN
    :noindex:
 
 Dueling DQN
@@ -75,7 +75,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl.dueling_dqn.model import DuelingDQN
+    >>> from pl_bolts.models.reinforcement.dueling_dqn.model import DuelingDQN
     ...
     >>> dueling_dqn = DuelingDQN("PongNoFrameskip-v4")
 
@@ -84,7 +84,7 @@ Train::
     trainer = Trainer()
     trainer.fit(dueling_dqn)
 
-.. autoclass:: pl_bolts.models.rl.dueling_dqn.model.DuelingDQN
+.. autoclass:: pl_bolts.models.reinforcement.dueling_dqn.model.DuelingDQN
    :noindex:
 
 Noisy DQN
@@ -97,7 +97,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl.noisy_dqn.model import NoisyDQN
+    >>> from pl_bolts.models.reinforcement.noisy_dqn.model import NoisyDQN
     ...
     >>> noisy_dqn = NoisyDQN("PongNoFrameskip-v4")
 
@@ -106,7 +106,7 @@ Train::
     trainer = Trainer()
     trainer.fit(noisy_dqn)
 
-.. autoclass:: pl_bolts.models.rl.noisy_dqn.model.NoisyDQN
+.. autoclass:: pl_bolts.models.reinforcement.noisy_dqn.model.NoisyDQN
    :noindex:
 
 
@@ -119,7 +119,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl.n_step_dqn.model import NStepDQN
+    >>> from pl_bolts.models.reinforcement.n_step_dqn.model import NStepDQN
     ...
     >>> n_step_dqn = NStepDQN("PongNoFrameskip-v4")
 
@@ -128,7 +128,7 @@ Train::
     trainer = Trainer()
     trainer.fit(n_step_dqn)
 
-.. autoclass:: pl_bolts.models.rl.n_step_dqn.model.NStepDQN
+.. autoclass:: pl_bolts.models.reinforcement.n_step_dqn.model.NStepDQN
    :noindex:
 
 
@@ -141,7 +141,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl.per_dqn.model import PERDQN
+    >>> from pl_bolts.models.reinforcement.per_dqn.model import PERDQN
     ...
     >>> per_dqn = PERDQN("PongNoFrameskip-v4")
 
@@ -150,7 +150,7 @@ Train::
     trainer = Trainer()
     trainer.fit(per_dqn)
 
-.. autoclass:: pl_bolts.models.rl.per_dqn.model.PERDQN
+.. autoclass:: pl_bolts.models.reinforcement.per_dqn.model.PERDQN
    :noindex:
 
 
@@ -170,7 +170,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl.reinforce.model import Reinforce
+    >>> from pl_bolts.models.reinforcement.reinforce.model import Reinforce
     ...
     >>> reinforce = Reinforce("CartPole-v0")
 
@@ -179,7 +179,7 @@ Train::
     trainer = Trainer()
     trainer.fit(reinforce)
 
-.. autoclass:: pl_bolts.models.rl.reinforce.model.Reinforce
+.. autoclass:: pl_bolts.models.reinforcement.reinforce.model.Reinforce
    :noindex:
 
 
@@ -192,7 +192,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl.vpg.model import PolicyGradient
+    >>> from pl_bolts.models.reinforcement.vpg.model import PolicyGradient
     ...
     >>> vpg = PolicyGradient("CartPole-v0")
 
@@ -201,6 +201,6 @@ Train::
     trainer = Trainer()
     trainer.fit(vpg)
 
-.. autoclass:: pl_bolts.models.rl.vanilla_policy_gradient.model.PolicyGradient
+.. autoclass:: pl_bolts.models.reinforcement.vanilla_policy_gradient.model.PolicyGradient
    :noindex:
 
