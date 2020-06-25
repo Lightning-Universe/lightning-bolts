@@ -329,7 +329,7 @@ class FeatureMapContrastiveTask(nn.Module):
             >>> losses
             tensor([2.2351, 2.1902])
             >>> regularizer
-            tensor(0.0324))
+            tensor(0.0324)
         """
         assert len(anchor_maps) == len(self.map_indexes), f'expected each input to have {len(self.map_indexes)} tensors'
 
