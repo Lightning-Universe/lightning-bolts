@@ -15,7 +15,7 @@ from pl_bolts.models.self_supervised.resnets import (
 )
 
 
-def test_cpc_resnet(tmpir):
+def test_cpc_resnet(tmpdir):
     x = torch.rand(3, 3, 64, 64)
     model = CPCResNet101(x)
     model(x)
