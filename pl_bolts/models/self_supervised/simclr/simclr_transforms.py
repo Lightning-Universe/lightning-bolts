@@ -30,7 +30,7 @@ class SimCLRTrainDataTransform(object):
         color_jitter = transforms.ColorJitter(0.8 * self.s, 0.8 * self.s, 0.8 * self.s, 0.2 * self.s)
         data_transforms = transforms.Compose([transforms.RandomResizedCrop(size=self.input_height),
                                               transforms.RandomHorizontalFlip(),
-                                              transforms.RandomApply([color_jitter], p=0.8),
+                                              transforms.RandomApply([color_jitter], p=0.5),
                                               transforms.RandomGrayscale(p=0.2),
                                               GaussianBlur(kernel_size=int(0.1 * self.input_height)),
                                               transforms.ToTensor()])
