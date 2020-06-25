@@ -103,4 +103,5 @@ jobs:
     - name: Statistics
       if: success()
       run: |
-         coverage report
+        coverage report
+        codecov
