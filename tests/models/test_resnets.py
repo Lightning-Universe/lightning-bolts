@@ -1,6 +1,7 @@
 import pytest
 import torch
 
+from pl_bolts.models.self_supervised.cpc import CPCResNet101
 from pl_bolts.models.self_supervised.resnets import (
     resnet18,
     resnet34,
@@ -15,6 +16,7 @@ from pl_bolts.models.self_supervised.resnets import (
 
 
 @pytest.mark.parametrize("model_class", [
+    CPCResNet101,
     resnet18,
     resnet34,
     resnet50,
