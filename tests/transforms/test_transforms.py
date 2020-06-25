@@ -1,5 +1,6 @@
 import torch
 from torchvision import transforms
+import pytorch_lightning as pl
 import pytest
 from pl_bolts.models.self_supervised.cpc.transforms import (
     CPCTrainTransformsCIFAR10,
@@ -37,6 +38,8 @@ from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
     (3, 160, 160),
 ])
 def test_simclr_transforms(tmpdir, img_size):
+    pl.seed_everything(0)
+
     (c, h, w) = img_size
     x = torch.rand(c, h, w)
     x = transforms.ToPILImage(mode='RGB')(x)
