@@ -15,20 +15,32 @@ import torch.optim as optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from pl_bolts.models.rl.common import wrappers
-from pl_bolts.models.rl.common.agents import ValueAgent
-from pl_bolts.models.rl.common.experience import ExperienceSource, RLDataset
-from pl_bolts.models.rl.common.memory import ReplayBuffer
-from pl_bolts.models.rl.common.networks import CNN
+from pl_bolts.models.reinforcement.common import wrappers
+from pl_bolts.models.reinforcement.common.agents import ValueAgent
+from pl_bolts.models.reinforcement.common.experience import ExperienceSource, RLDataset
+from pl_bolts.models.reinforcement.common.memory import ReplayBuffer
+from pl_bolts.models.reinforcement.common.networks import CNN
 
 
 class DQN(pl.LightningModule):
     """ Basic DQN Model """
 
-    def __init__(self, env: str, gpus: int = 0, eps_start: float = 1.0, eps_end: float = 0.02,
-                 eps_last_frame: int = 150000, sync_rate: int = 1000, gamma: float = 0.99, lr: float = 1e-4,
-                 batch_size: int = 32, replay_size: int = 100000, warm_start_size: int = 10000, sample_len: int = 500,
-                 **kwargs) -> None:
+    def __init__(
+            self,
+            env: str,
+            gpus: int = 0,
+            eps_start: float = 1.0,
+            eps_end: float = 0.02,
+            eps_last_frame: int = 150000,
+            sync_rate: int = 1000,
+            gamma: float = 0.99,
+            learning_rate: float = 1e-4,
+            batch_size: int = 32,
+            replay_size: int = 100000,
+            warm_start_size: int = 10000,
+            num_samples: int = 500,
+            **kwargs,
+    ):
         """
         PyTorch Lightning implementation of `DQN <https://arxiv.org/abs/1312.5602>`_
 
@@ -41,7 +53,7 @@ class DQN(pl.LightningModule):
 
         Example:
 
-            >>> from pl_bolts.models.rl.dqn.model import DQN
+            >>> from pl_bolts.models.reinforcement.dqn.model import DQN
             ...
             >>> model = DQN("PongNoFrameskip-v4")
 
@@ -58,12 +70,12 @@ class DQN(pl.LightningModule):
             eps_last_frame: the final frame in for the decrease of epsilon. At this frame espilon = eps_end
             sync_rate: the number of iterations between syncing up the target network with the train network
             gamma: discount factor
-            lr: learning rate
+            learning_rate: learning rate
             batch_size: size of minibatch pulled from the DataLoader
             replay_size: total capacity of the replay buffer
             warm_start_size: how many random steps through the environment to be carried out at the start of
-            training to fill the buffer with a starting point
-            sample_len: the number of samples to pull from the dataset iterator and feed to the DataLoader
+                training to fill the buffer with a starting point
+            num_samples: the number of samples to pull from the dataset iterator and feed to the DataLoader
         """
         super().__init__()
 
@@ -82,11 +94,11 @@ class DQN(pl.LightningModule):
 
         self.sync_rate = sync_rate
         self.gamma = gamma
-        self.lr = lr
+        self.lr = learning_rate
         self.batch_size = batch_size
         self.replay_size = replay_size
         self.warm_start_size = warm_start_size
-        self.sample_len = sample_len
+        self.sample_len = num_samples
 
         self.agent = ValueAgent(
             self.net,

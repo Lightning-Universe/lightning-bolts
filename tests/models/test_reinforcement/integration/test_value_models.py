@@ -3,13 +3,13 @@ from unittest import TestCase
 
 import pytorch_lightning as pl
 
-from pl_bolts.models.rl.common import cli
-from pl_bolts.models.rl.double_dqn.model import DoubleDQN
-from pl_bolts.models.rl.dqn.model import DQN
-from pl_bolts.models.rl.dueling_dqn.model import DuelingDQN
-from pl_bolts.models.rl.n_step_dqn.model import NStepDQN
-from pl_bolts.models.rl.noisy_dqn.model import NoisyDQN
-from pl_bolts.models.rl.per_dqn.model import PERDQN
+from pl_bolts.models.reinforcement.common import cli
+from pl_bolts.models.reinforcement.double_dqn.model import DoubleDQN
+from pl_bolts.models.reinforcement.dqn.model import DQN
+from pl_bolts.models.reinforcement.dueling_dqn.model import DuelingDQN
+from pl_bolts.models.reinforcement.n_step_dqn.model import NStepDQN
+from pl_bolts.models.reinforcement.noisy_dqn.model import NoisyDQN
+from pl_bolts.models.reinforcement.per_dqn.model import PERDQN
 
 
 class TestValueModels(TestCase):

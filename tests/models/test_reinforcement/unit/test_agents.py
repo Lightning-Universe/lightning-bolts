@@ -5,7 +5,7 @@ from unittest.mock import Mock
 import gym
 import torch
 
-from pl_bolts.models.rl.common.agents import Agent, PolicyAgent, ValueAgent
+from pl_bolts.models.reinforcement.common.agents import Agent, PolicyAgent, ValueAgent
 
 
 class TestAgents(TestCase):

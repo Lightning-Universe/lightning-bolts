@@ -3,8 +3,8 @@ Dueling Deep Q-network
 """
 
 
-from pl_bolts.models.rl.common.networks import DuelingCNN
-from pl_bolts.models.rl.dqn.model import DQN
+from pl_bolts.models.reinforcement.common.networks import DuelingCNN
+from pl_bolts.models.reinforcement.dqn.model import DQN
 
 
 class DuelingDQN(DQN):
@@ -19,9 +19,9 @@ class DuelingDQN(DQN):
 
         Example:
 
-            >>> from pl_bolts.models.rl.dueling_dqn.model import DuelingDQN
+            >>> from pl_bolts.models.reinforcement.dueling_dqn.model import DuelingDQN
             ...
-            >>> model = DQN("PongNoFrameskip-v4")
+            >>> model = DuelingDQN("PongNoFrameskip-v4")
 
         Train::
 
@@ -40,7 +40,7 @@ class DuelingDQN(DQN):
             batch_size: size of minibatch pulled from the DataLoader
             replay_size: total capacity of the replay buffer
             warm_start_size: how many random steps through the environment to be carried out at the start of
-            training to fill the buffer with a starting point
+                training to fill the buffer with a starting point
             sample_len: the number of samples to pull from the dataset iterator and feed to the DataLoader
         """
 

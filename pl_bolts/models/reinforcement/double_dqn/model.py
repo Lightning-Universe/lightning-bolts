@@ -9,7 +9,7 @@ from typing import Tuple
 import torch
 import torch.nn as nn
 
-from pl_bolts.models.rl.dqn.model import DQN
+from pl_bolts.models.reinforcement.dqn.model import DQN
 
 
 class DoubleDQN(DQN):
@@ -24,7 +24,7 @@ class DoubleDQN(DQN):
 
     Example:
 
-        >>> from pl_bolts.models.rl import DoubleDQN
+        >>> from pl_bolts.models.reinforcement import DoubleDQN
         ...
         >>> model = DoubleDQN("PongNoFrameskip-v4")
 

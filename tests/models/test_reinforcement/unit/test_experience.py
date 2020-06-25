@@ -6,11 +6,11 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from pl_bolts.models.rl.common.agents import Agent
-from pl_bolts.models.rl.common.experience import EpisodicExperienceStream, RLDataset, ExperienceSource, \
+from pl_bolts.models.reinforcement.common.agents import Agent
+from pl_bolts.models.reinforcement.common.experience import EpisodicExperienceStream, RLDataset, ExperienceSource, \
     NStepExperienceSource
-from pl_bolts.models.rl.common.memory import Experience
-from pl_bolts.models.rl.common.wrappers import ToTensor
+from pl_bolts.models.reinforcement.common.memory import Experience
+from pl_bolts.models.reinforcement.common.wrappers import ToTensor
 
 
 class DummyAgent(Agent):

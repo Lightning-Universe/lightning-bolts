@@ -5,8 +5,8 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from pl_bolts.models.rl.common.experience import RLDataset
-from pl_bolts.models.rl.common.memory import ReplayBuffer, Experience, PERBuffer, MultiStepBuffer, Buffer
+from pl_bolts.models.reinforcement.common.experience import RLDataset
+from pl_bolts.models.reinforcement.common.memory import ReplayBuffer, Experience, PERBuffer, MultiStepBuffer, Buffer
 
 
 class TestBuffer(TestCase):
