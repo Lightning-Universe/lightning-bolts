@@ -9,7 +9,15 @@ from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 
 class LogisticRegression(pl.LightningModule):
 
-    def __init__(self, input_dim: int, num_classes: int, bias=True, learning_rate=0.0001, optimizer:Optimizer = 'Adam',**kwargs):
+    def __init__(self,
+                 input_dim: int,
+                 num_classes: int,
+                 bias: bool =True,
+                 learning_rate: float =0.0001,
+                 optimizer: Optimizer = 'Adam',
+                 l1_strength: float = 0.0,
+                 l2_strength: float = 0.0,
+                 **kwargs):
         """
         Logistic regression model
 
@@ -19,6 +27,8 @@ class LogisticRegression(pl.LightningModule):
             bias: specifies if a constant or intercept should be fitted (equivalent to fit_intercept in sklearn)
             learning_rate: learning_rate for the optimizer
             optimizer: the optimizer to use (default='Adam')
+            l1_strength: L1 regularization strength (default=None)
+            l2_strength: L2 regularization strength (default=None)
 
         """
         super().__init__()
@@ -28,7 +38,6 @@ class LogisticRegression(pl.LightningModule):
 
     def forward(self, x):
         y_hat = self.linear(x)
-        #y_hat = torch.log_softmax(self.linear(x))  #returns the logits
         return y_hat
 
     def training_step(self, batch, batch_idx):
@@ -37,7 +46,21 @@ class LogisticRegression(pl.LightningModule):
 
         # PyTorch cross_entropy function combines log_softmax and nll_loss in single function
         loss = F.cross_entropy(y_hat, y)
-        #loss = F.nll_loss(y_hat, y) #logits, labels
+
+        # L1 regularizer
+        if self.hparams.l1_strength > 0:
+            l1_reg = torch.tensor(0.)
+            for param in self.parameters():
+                l1_reg += torch.norm(param, 1)
+            loss += self.hparams.l1_strength * l1_reg
+
+        # L2 regularizer
+        if self.hparams.l2_strength > 0:
+            l2_reg = torch.tensor(0.)
+            for param in self.parameters():
+                l2_reg += torch.norm(param, 2)
+            loss += self.hparams.l2_strength * l2_reg
+
         tensorboard_logs = {'train_ce_loss': loss}
         progress_bar_metrics = tensorboard_logs
         return {
@@ -99,7 +122,7 @@ if __name__ == '__main__':  # pragma: no cover
     # Example: Iris dataset in Sklearn (4 features, 3 class labels)
     from sklearn.datasets import load_iris
     X, y = load_iris(return_X_y=True)
-    loaders = SklearnDataLoaders(X, y)
+    loaders = SklearnDataModule(X, y)
 
     # args
     parser = ArgumentParser()
@@ -109,7 +132,7 @@ if __name__ == '__main__':  # pragma: no cover
 
     # model
     # model = LogisticRegression(**vars(args))
-    model = LogisticRegression(input_dim=4, num_classes=3)
+    model = LogisticRegression(input_dim=4, num_classes=3, l1_strength=0.01)
 
     # train
     trainer = pl.Trainer.from_argparse_args(args)
