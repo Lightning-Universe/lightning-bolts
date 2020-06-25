@@ -7,9 +7,9 @@ Basic GAN
 This is a basic GAN.
 
 
-Example:
+.. testcode::
 
-    >>> from pytorch_lightning.models.gans import GAN
+    >>> from pl_bolts.models.gans import GAN
     ...
     >>> gan = GAN()
 

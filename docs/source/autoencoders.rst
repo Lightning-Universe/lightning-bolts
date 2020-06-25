@@ -11,7 +11,7 @@ This is the simplest autoencoder. You can use it like so
 
 .. code-block:: python
 
-    from pytorch_lightning.models.autoencoders import AE
+    from pl_bolts.models.autoencoders import AE
 
     model = AE()
     trainer = Trainer()
@@ -43,7 +43,7 @@ Use the VAE like so.
 
 .. code-block:: python
 
-    from pytorch_lightning.models.autoencoders import VAE
+    from pl_bolts.models.autoencoders import VAE
 
     model = VAE()
     trainer = Trainer()
