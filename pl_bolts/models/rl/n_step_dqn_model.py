@@ -1,5 +1,6 @@
 """
-# N Step DQN
+N Step DQN
+==========
 
 N Step DQN was introduced in [Learning to Predict by the Methods
 of Temporal Differences
@@ -25,14 +26,10 @@ wouldn't be a good idea. Every time we take another step into the future, we are
 current policy. For a large portion of training, our policy is going to be less than optimal. For example, at the start
 of training, our policy will be in a state of high exploration, and will be little better than random.
 
----
-**NOTE**
-
+.. note::
 For each rollout step you must scale the discount factor accordingly by the number of steps. As you can see from the
 equation above, the second gamma value is to the power of 2. If we rolled this out one step further, we would use
 gamma to the power of 3 and so.
-
----
 
 So if we are aproximating future rewards off a bad policy, chances are those approximations are going to be pretty
 bad and every time we unroll our update equation, the worse it will get. The fact that we are using an off policy method
@@ -42,25 +39,31 @@ experiences using an old policy that was worse than our current policy.
 So we need to strike a balance between looking far enough ahead to improve the convergence of our agent, but not so far
 that are updates become unstable. In general, small values of 2-4 work best.
 
-### Benefits
+Benefits
+--------
 
 - Multi-Step learning is capable of learning faster than typical 1 step learning methods.
 - Note that this method introduces a new hyperparameter n. Although n=4 is generally a good starting point and provides
 good results across the board.
 
-### Implementation
+Implementation
+--------------
 
-#### Multi Step Buffer
+Multi Step Buffer
+^^^^^^^^^^^^^^^^^
 
 The only thing we need to change for the N Step DQN is the buffer. We need a multi step
 buffer that combines n-steps into a single experience. This requires the following
 
-##### N Step Buffer:
+N Step Buffer:
+~~~~~~~~~~~~~~
 
 Unlike the standard buffer, we need to use 2 buffers. One to store the n step roll outs
 and another to hold the accumulated multi step experience.
 
-##### Append:
+Append:
+~~~~~~~
+
 The append function needs to be changed. If the n_step_buffer is not full, i.e we dont have
 enough experiences to make a multi step experience, then we just append our current experience
 to the n_step_buffer.
@@ -76,7 +79,7 @@ The multi step experience will look like the following:
 - Next State = the next state at the end of the n_step_buffer
 - Done = the done flag at the end of the n_step_buffer
 
-```python
+.. code-block:: python
 
     def append(self, experience) -> None:
         self.n_step_buffer.append(experience)
@@ -109,22 +112,25 @@ The multi step experience will look like the following:
             final_state, done = (new_state_t, done_t) if done_t else (final_state, done)
 
         return reward, final_state, done
-```
 
-##### Sample
+Sample
+~~~~~~
 
 The sample function will behave as normal
 
 A snippet of the code for the N Step Replay Buffer is shown below
 
-## Results
+Results
+-------
 
 As excpected, the N-Step DQN converges much faster than the standard DQN, however it also adds more instability to the
 loss of the agent. This can be seen in the following experiments.
 
-### Pong
+Pong
+----
 
-#### N-Step DQN
+N-Step DQN
+^^^^^^^^^^
 
 The N-Step DQN shows the greates increase in performance with respect to the other DQN variations. After less than 150k steps the agent begins to
 consistently win games and achieves the top score after ~170K steps. This is reflected in the sharp peak of the
@@ -132,7 +138,8 @@ total episode steps and of course, the total episode rewards.
 
 ![N-Step DQN Baseline Results](../../docs/images/pong_nstep_dqn_1.png)
 
-#### DQN vs N-Step DQN
+DQN vs N-Step DQN
+^^^^^^^^^^^^^^^^^
 
 This improvement is shown in stark contrast to the base DQN, which only begins to win games after 250k steps and
 requires over twice as many steps (450k) as the N-Step agent to achieve the high score of 21. One important thing to
@@ -144,7 +151,9 @@ experiments I opted with an N step of 4.
 ![N-Step DQN Baseline Results vs DQN Baseline Results](../../docs/images/pong_nstep_dqn_2.png)
 
 
-## References
+References
+----------
+
  - [Learning to Predict by the Methods of Temporal Differences ](http://incompleteideas.net/papers/sutton-88-with-erratum.pdf)
  - [Deep Reinforcement Learning Hands On: Second Edition - Chapter 08 ](https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition)
  - [Rainbow Is All You Need](https://github.com/Curt-Park/rainbow-is-all-you-need/blob/master/07.n_step_learning.ipynb)

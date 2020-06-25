@@ -1,5 +1,6 @@
 """
-# Noisy DQN
+Noisy DQN
+=========
 
 Up until now the DQN agent uses a seperate exploration policy, generally epsilon-greedy where start and end values
 are set for its exploration. [Noisy Networks For Exploration](https://arxiv.org/abs/1706.10295) introduces
@@ -19,71 +20,76 @@ The authors propose two methods of injecting noise to the network.
 1) Independent Gaussian Noise: This injects noise per weight. For each weight a random value is taken from the distribution.
 Noise parameters are stored inside the layer and are updated during backpropagation. The output of the layer is
 calculated as normal.
-
 2) Factorized Gaussian Noise: This injects nosier per input/ouput. In order to minimize the number of random values
 this method stores two random vectors, one with the size of the input and the other with the size of the output. Using
 these two vectors, a random matrix is generated for the layer by calculating the outer products of the vector
 
 
-### Benefits
+Benefits
+--------
 
 - Improved exploration function. Instead of just performing completely random actions, we add decreasing amount of noise
 and uncertainty to our policy allowing to explore while still utilising its policy
-
 - The fact that this method is automatically tuned means that we do not have to tune hyper parameters for
 epsilon-greedy!
 
-**Note:** for now I have just implemented the Independant Gaussian as it has been reported there isn't much difference
-in results for these benchmark environments.
+.. note::
+    for now I have just implemented the Independant Gaussian as it has been reported there isn't much difference
+    in results for these benchmark environments.
 
 In order to update the basic DQN to a Noisy DQN we need to do the following
 
-### Add Linear Layer
+Add Linear Layer
+^^^^^^^^^^^^^^^^
 
-```python
-class NoisyLinear(nn.Linear):
+.. code-block:: python
 
-    def __init__(self, in_features, out_features,
-                 sigma_init=0.017, bias=True):
-        super(NoisyLinear, self).__init__(
-            in_features, out_features, bias=bias)
+    class NoisyLinear(nn.Linear):
 
-        # init noise parameter for the weights with initial noise sigma
-        weights = torch.full((out_features, in_features), sigma_init)
-        self.sigma_weight = nn.Parameter(weights)
-        epsilon_weight = torch.zeros(out_features, in_features)
-        self.register_buffer("epsilon_weight", epsilon_weight)
+        def __init__(self, in_features, out_features,
+                     sigma_init=0.017, bias=True):
+            super(NoisyLinear, self).__init__(
+                in_features, out_features, bias=bias)
 
-        if bias:
-            # init noise parameter for the bias with initial noise sigma
-            bias = torch.full((out_features,), sigma_init)
-            self.sigma_bias = nn.Parameter(bias)
-            epsilon_bias = torch.zeros(out_features)
-            self.register_buffer("epsilon_bias", epsilon_bias)
+            # init noise parameter for the weights with initial noise sigma
+            weights = torch.full((out_features, in_features), sigma_init)
+            self.sigma_weight = nn.Parameter(weights)
+            epsilon_weight = torch.zeros(out_features, in_features)
+            self.register_buffer("epsilon_weight", epsilon_weight)
 
-        self.reset_parameters()
+            if bias:
+                # init noise parameter for the bias with initial noise sigma
+                bias = torch.full((out_features,), sigma_init)
+                self.sigma_bias = nn.Parameter(bias)
+                epsilon_bias = torch.zeros(out_features)
+                self.register_buffer("epsilon_bias", epsilon_bias)
 
-    def reset_parameters(self) -> None:
-        std = math.sqrt(3 / self.in_features)
-        self.weight.data.uniform_(-std, std)
-        self.bias.data.uniform_(-std, std)
+            self.reset_parameters()
 
-    def forward(self, input_x: Tensor) -> Tensor:
-        self.epsilon_weight.normal_()
-        bias = self.bias
-        if bias is not None:
-            self.epsilon_bias.normal_()
-            # add noise to layer bias
-            bias = bias + self.sigma_bias * self.epsilon_bias.data
+        def reset_parameters(self) -> None:
+            std = math.sqrt(3 / self.in_features)
+            self.weight.data.uniform_(-std, std)
+            self.bias.data.uniform_(-std, std)
 
-        # add noise to layer weights
-        noisy_weights = self.sigma_weight * self.epsilon_weight.data + self.weight
+        def forward(self, input_x: Tensor) -> Tensor:
+            self.epsilon_weight.normal_()
+            bias = self.bias
+            if bias is not None:
+                self.epsilon_bias.normal_()
+                # add noise to layer bias
+                bias = bias + self.sigma_bias * self.epsilon_bias.data
 
-        return F.linear(input_x, noisy_weights, bias)
-```
+            # add noise to layer weights
+            noisy_weights = self.sigma_weight * self.epsilon_weight.data + self.weight
 
-### Update CNN with noisy layers
-```python
+            return F.linear(input_x, noisy_weights, bias)
+
+
+Update CNN with noisy layers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
     def __init__(self, input_shape, n_actions):
         super().__init__()
 
@@ -104,20 +110,24 @@ class NoisyLinear(nn.Linear):
         )
 ```
 
-## Results
+Results
+-------
 
 The results below improved stability and faster performance growth.
 
-### Pong
+Pong
+----
 
-#### Noisy DQN
+Noisy DQN
+^^^^^^^^^
 
 Similar to the other improvements, the average score of the agent reaches positive numbers around the 250k mark and
 steadily increases till convergence.
 
 ![Noisy DQN Results](../../docs/images/pong_noisy_dqn_results.png)
 
-#### DQN vs Dueling DQN
+DQN vs Dueling DQN
+^^^^^^^^^^^^^^^^^^
 
 In comparison to the base DQN, the Noisy DQN is more stable and is able to converge on an optimal policy much faster
 than the original. It seems that the replacement of the epsilon-greedy strategy with network noise provides a better

@@ -1,5 +1,6 @@
 """
-# Double DQN
+Double DQN
+==========
 
 The original DQN tends to overestimate Q values during the Bellman update, leading to instability and is harmful to
 training. This is due to the max operation in the Bellman equation.
@@ -13,23 +14,26 @@ The Double DQN fixes this overestimation by choosing actions for the next state 
 but uses the values of these actions from the more stable target network. So we are still going to take the greedy
 action, but the value will be less "optimisitc" because it is chosen by the target network.
 
-## DQN expected return
+DQN expected return
+-------------------
 
-````text
-Q(s_t, a_t) = r_t + gamma * maxQ'(S_t+1, a)
-````
+.. math::
+
+    Q(s_t, a_t) = r_t + gamma * maxQ'(S_t+1, a)
 
 ## Double DQN expected return
 
-````text
-Q(s_t, a_t) = r_t + gamma * maxQ'(S_t+1, argmaxQ(S_t+1, a))
-````
+.. math::
+
+    Q(s_t, a_t) = r_t + gamma * maxQ'(S_t+1, argmaxQ(S_t+1, a))
 
 In order to update the original DQN to DoubleDQN we need to do the following
 
-### Update the Loss
+Update the Los
+--------------
 
-````python
+.. code-block:: python
+
     def dqn_mse_loss(self, batch):
 
         states, actions, rewards, dones, next_states = batch  # batch of experiences, batch_size = 16
@@ -58,14 +62,17 @@ In order to update the original DQN to DoubleDQN we need to do the following
         # Standard MSE loss between the state action values of the current state and the
         # expected state action values of the next state
         return nn.MSELoss()(state_action_values, expected_state_action_values)
-````
 
-## Results
+Results
+-------
 
-### Double DQN Results
+Double DQN Results
+^^^^^^^^^^^^^^^^^^
+
 ![Double DQN Results](../../docs/images/pong_double_dqn_baseline_results.png)
 
-### DQN vs Double DQN
+DQN vs Double DQN
+^^^^^^^^^^^^^^^^^
 
 orange: DQN
 
@@ -73,7 +80,8 @@ blue: Double DQN
 
 ![Double DQN Results](../../docs/images/dqn_ddqn_comparison.png)
 
-## References
+References
+----------
 
 [Deep Reinforcement Learning with Double Q-learning](https://arxiv.org/pdf/1509.06461.pdf)
 """

@@ -1,13 +1,4 @@
 """
-# REINFORCE
-
-## Benefits
-
-## Implementation
-
-## Results
-
-## References
 
 """
 import argparse
