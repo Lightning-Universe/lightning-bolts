@@ -20,6 +20,10 @@ Contributions by: `Donal Byrne <https://github.com/djbyrne>`_
 
 ------------
 
+.. note:: RL models currently only supports cpu and single gpu training with `distributed_backend=dp`. Full GPU
+          support will be added in later updates.
+
+
 DQN Models
 ----------
 The following models are based on DQN
