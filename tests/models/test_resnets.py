@@ -20,6 +20,9 @@ def test_cpc_resnet(tmpdir):
     model = CPCResNet101(x)
     model(x)
 
+    model = CPCResNet101(x, zero_init_residual=True)
+    model(x)
+
 
 @pytest.mark.parametrize("model_class", [
     resnet18,
