@@ -58,6 +58,8 @@ class AMDIM(pl.LightningModule):
             trainer.fit(model)
 
         Args:
+            datamodule: A LightningDatamodule
+            encoder: an encoder string or model
             image_channels: 3
             image_height: pixels
             encoder_feature_dim: Called `ndf` in the paper, this is the representation size for the encoder.
