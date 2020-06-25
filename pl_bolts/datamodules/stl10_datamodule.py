@@ -11,7 +11,15 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
 
     name = 'stl10'
 
-    def __init__(self, data_dir, unlabeled_val_split=5000, train_val_split=500, num_workers=16):
+    def __init__(
+            self,
+            data_dir: str,
+            unlabeled_val_split: int = 5000,
+            train_val_split: int = 500,
+            num_workers: int = 16,
+            *args,
+            **kwargs,
+    ):
         """
         Standard STL-10, train, val, test splits and transforms.
         STL-10 has support for doing validation splits on the labeled or unlabeled splits
@@ -39,7 +47,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             train_val_split: how many images from the labeled training split to use for validation
             num_workers: how many workers to use for loading data
         """
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.data_dir = data_dir
         self.unlabeled_val_split = unlabeled_val_split
         self.train_val_split = train_val_split

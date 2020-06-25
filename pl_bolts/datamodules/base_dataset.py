@@ -1,7 +1,7 @@
 import logging
 import os
 import urllib.request
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Tuple, Sequence
 from urllib.error import HTTPError
 

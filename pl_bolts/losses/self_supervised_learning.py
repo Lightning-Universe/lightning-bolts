@@ -313,7 +313,7 @@ class FeatureMapContrastiveTask(nn.Module):
         """
         Takes in a set of tuples, each tuple has two feature maps with all matching dimensions
 
-        Example::
+        Example:
 
             >>> from pytorch_lightning import seed_everything
             >>> seed_everything(0)

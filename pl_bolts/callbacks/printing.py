@@ -64,6 +64,16 @@ def dicts_to_table(dicts: List[Dict],
         skip_none_lines: skip line if contains None
         replace_values: specify per column keys k a map from seen value to new value;
                         new value must comply with the columns fcode; CAUTION: modifies input (due speed)
+
+    Example:
+
+        >>> a = {'a': 1, 'b': 2}
+        >>> b = {'a': 3, 'b': 4}
+        >>> print(dicts_to_table([a, b]))
+        a│b
+        ───
+        1│2
+        3│4
     """
     # optional arg prelude
     if keys is None:
@@ -114,10 +124,3 @@ def dicts_to_table(dicts: List[Dict],
         line = s.format(**d, **marked_values)
         lines.append(line)
     return '\n'.join(lines)
-
-
-if __name__ == '__main__':
-    a = {'a': 1, 'b': 2}
-    b = {'a': 3, 'b': 4}
-
-    print(dicts_to_table([a, b]))

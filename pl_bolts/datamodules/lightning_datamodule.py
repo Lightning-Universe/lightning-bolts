@@ -47,7 +47,12 @@ class LightningDataModule(object):  # pragma: no cover
     """
     name: str = ...
 
-    def __init__(self, train_transforms=None, val_transforms=None, test_transforms=None):
+    def __init__(
+            self,
+            train_transforms=None,
+            val_transforms=None,
+            test_transforms=None,
+    ):
         super().__init__()
         self._train_transforms = train_transforms
         self._val_transforms = val_transforms

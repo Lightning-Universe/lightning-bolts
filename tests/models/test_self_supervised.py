@@ -1,5 +1,3 @@
-import os
-
 import pytorch_lightning as pl
 
 from pl_bolts.models.self_supervised import CPCV2, AMDIM, MocoV2, SimCLR

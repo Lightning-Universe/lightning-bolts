@@ -55,16 +55,23 @@ class SklearnDataModule(LightningDataModule):
 
     name = 'sklearn'
 
-    def __init__(self, X, y,
-                 x_val=None, y_val=None,
-                 x_test=None, y_test=None,
-                 val_split=0.15, test_split=0.15,
-                 num_workers=2, random_state=1234, shuffle=True):
+    def __init__(
+            self, X, y,
+            x_val=None, y_val=None,
+            x_test=None, y_test=None,
+            val_split=0.15, test_split=0.15,
+            num_workers=2,
+            random_state=1234,
+            shuffle=True,
+            *args,
+            **kwargs,
+    ):
         """
         Automatically generates the train, validation and test splits for a Numpy dataset. They are set up as
         dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
 
         Example:
+
             >>> from sklearn.datasets import load_boston
             >>> from pl_bolts.datamodules import SklearnDataModule
             ...
@@ -92,7 +99,7 @@ class SklearnDataModule(LightningDataModule):
 
         """
 
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.num_workers = num_workers
 
         # shuffle x and y
