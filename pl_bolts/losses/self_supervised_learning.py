@@ -317,6 +317,7 @@ class FeatureMapContrastiveTask(nn.Module):
 
             >>> from pytorch_lightning import seed_everything
             >>> seed_everything(0)
+            0
             >>> a1 = torch.rand(3, 5, 2, 2)
             >>> a2 = torch.rand(3, 5, 2, 2)
             >>> b1 = torch.rand(3, 5, 2, 2)
