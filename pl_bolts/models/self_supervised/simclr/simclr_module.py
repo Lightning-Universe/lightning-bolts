@@ -258,7 +258,7 @@ class SimCLR(pl.LightningModule):
         parser.add_argument('--eta', type=float, default=0.001)
         parser.add_argument('--lr_sched_step', type=float, default=30, help='lr scheduler step')
         parser.add_argument('--lr_sched_gamma', type=float, default=0.5, help='lr scheduler step')
-        parser.add_argument('--weight_decay', type=float, default=0.0005)
+        parser.add_argument('--weight_decay', type=float, default=1e-4)
         # Model
         parser.add_argument('--loss_temperature', type=float, default=0.5)
         parser.add_argument('--num_workers', default=0, type=int)
