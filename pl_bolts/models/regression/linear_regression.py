@@ -14,9 +14,11 @@ class LinearRegression(pl.LightningModule):
                  bias: bool = True,
                  learning_rate: float = 0.05,
                  optimizer: Optimizer = 'Adam',
+                 l1_strength: float = 0,
+                 l2_strength: float = 0,
                  **kwargs):
         """
-        Linear regression model implementing
+        Linear regression model implementing - with optional L1/L2 regularization
         $$min_{W} ||(Wx + b) - y ||_2^2 $$
 
         Args:
@@ -24,6 +26,8 @@ class LinearRegression(pl.LightningModule):
             bias: If false, will not use $$+b$$
             learning_rate: learning_rate for the optimizer
             optimizer: the optimizer to use (default='Adam')
+            l1_strength: L1 regularization strength (default=0)
+            l2_strength: L2 regularization strength (default=0)
 
         """
         super().__init__()
