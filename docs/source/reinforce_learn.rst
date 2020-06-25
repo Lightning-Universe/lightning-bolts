@@ -31,11 +31,11 @@ Paper authors: Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves, Ioa
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
-Example:
+.. testcode::
 
-    >>> from pl_bolts.models.rl.dqn.model import DQN
+    from pl_bolts.models.rl.dqn.model import DQN
     ...
-    >>> dqn = DQN("PongNoFrameskip-v4")
+    dqn = DQN("PongNoFrameskip-v4")
 
 Train::
 
@@ -52,11 +52,11 @@ Paper authors: Hado van Hasselt, Arthur Guez, David Silver
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
-Example::
+.. testcode::
 
-    >>> from pl_bolts.models.rl.double_dqn.model import DoubleDQN
+    from pl_bolts.models.rl.double_dqn.model import DoubleDQN
     ...
-    >>> ddqn = DoubleDQN("PongNoFrameskip-v4")
+    ddqn = DoubleDQN("PongNoFrameskip-v4")
 
 Train::
 
@@ -73,11 +73,11 @@ Paper authors: Ziyu Wang, Tom Schaul, Matteo Hessel, Hado van Hasselt, Marc Lanc
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
-Example::
+.. testcode::
 
-    >>> from pl_bolts.models.rl.dueling_dqn.model import DuelingDQN
+    from pl_bolts.models.rl.dueling_dqn.model import DuelingDQN
     ...
-    >>> dueling_dqn = DuelingDQN("PongNoFrameskip-v4")
+    dueling_dqn = DuelingDQN("PongNoFrameskip-v4")
 
 Train::
 
@@ -95,11 +95,11 @@ Vlad Mnih, Remi Munos, Demis Hassabis, Olivier Pietquin, Charles Blundell, Shane
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
-Example::
+.. testcode::
 
-    >>> from pl_bolts.models.rl.noisy_dqn.model import NoisyDQN
+    from pl_bolts.models.rl.noisy_dqn.model import NoisyDQN
     ...
-    >>> noisy_dqn = NoisyDQN("PongNoFrameskip-v4")
+    noisy_dqn = NoisyDQN("PongNoFrameskip-v4")
 
 Train::
 
@@ -117,11 +117,11 @@ Paper authors: Richard S. Sutton
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
-Example::
+.. testcode::
 
-    >>> from pl_bolts.models.rl.n_step_dqn.model import NStepDQN
+    from pl_bolts.models.rl.n_step_dqn.model import NStepDQN
     ...
-    >>> n_step_dqn = NStepDQN("PongNoFrameskip-v4")
+    n_step_dqn = NStepDQN("PongNoFrameskip-v4")
 
 Train::
 
@@ -139,11 +139,11 @@ Paper authors: Tom Schaul, John Quan, Ioannis Antonoglou, David Silver
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
-Example::
+.. testcode::
 
-    >>> from pl_bolts.models.rl.per_dqn.model import PERDQN
+    from pl_bolts.models.rl.per_dqn.model import PERDQN
     ...
-    >>> per_dqn = PERDQN("PongNoFrameskip-v4")
+    per_dqn = PERDQN("PongNoFrameskip-v4")
 
 Train::
 
@@ -168,11 +168,11 @@ Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Manso
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
-Example::
+.. testcode::
 
-    >>> from pl_bolts.models.rl.reinforce.model import Reinforce
+    from pl_bolts.models.rl.reinforce.model import Reinforce
     ...
-    >>> reinforce = Reinforce("CartPole-v0")
+    reinforce = Reinforce("CartPole-v0")
 
 Train::
 
@@ -190,11 +190,11 @@ Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Manso
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
-Example::
+.. testcode::
 
-    >>> from pl_bolts.models.rl.vpg.model import PolicyGradient
+    from pl_bolts.models.rl.vpg.model import PolicyGradient
     ...
-    >>> vpg = PolicyGradient("CartPole-v0")
+    vpg = PolicyGradient("CartPole-v0")
 
 Train::
 

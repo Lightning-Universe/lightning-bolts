@@ -9,9 +9,9 @@ This is a basic GAN.
 
 .. testcode::
 
-    >>> from pl_bolts.models.gans import GAN
+    from pl_bolts.models.gans import GAN
     ...
-    >>> gan = GAN()
+    gan = GAN()
 
 Train::
 
