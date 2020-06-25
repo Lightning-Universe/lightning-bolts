@@ -5,7 +5,7 @@ from pl_bolts.models.self_supervised.resnets import (
     resnet18,
 )
 
-@pytest.mark.parametrize("img_size", [
+@pytest.mark.parametrize("model_class", [
     resnet18
 ])
 def test_resnets(tmpdir, model_class):
