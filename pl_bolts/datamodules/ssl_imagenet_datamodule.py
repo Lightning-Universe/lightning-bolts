@@ -8,7 +8,7 @@ from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 
 
-class SSLImagenetDataModule(LightningDataModule):
+class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
 
     name = 'imagenet'
 

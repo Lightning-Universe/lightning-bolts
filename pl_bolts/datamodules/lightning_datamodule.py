@@ -7,7 +7,7 @@ from pytorch_lightning.utilities import rank_zero_warn, parsing
 from torch.utils.data import DataLoader
 
 
-class LightningDataModule(object):
+class LightningDataModule(object):  # pragma: no cover
     """
     A DataModule standardizes the training, val, test splits, data preparation and transforms.
     The main advantage is consistent data splits and transforms across models.
