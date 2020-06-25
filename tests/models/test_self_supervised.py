@@ -3,7 +3,7 @@ import os
 import pytorch_lightning as pl
 
 from pl_bolts.models.self_supervised import CPCV2, AMDIM, MocoV2, SimCLR
-from pl_bolts.datamodules import TinyCIFAR10DataModule
+from pl_bolts.datamodules import TinyCIFAR10DataModule, CIFAR10DataModule
 from pl_bolts.models.self_supervised.cpc import CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10
 from tests import reset_seed
 from pl_bolts.models.self_supervised.moco.transforms import (Moco2TrainCIFAR10Transforms, Moco2EvalCIFAR10Transforms)
@@ -13,7 +13,7 @@ from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalD
 def test_cpcv2(tmpdir):
     reset_seed()
 
-    datamodule = TinyCIFAR10DataModule(data_dir=tmpdir)
+    datamodule = CIFAR10DataModule(data_dir=tmpdir)
     datamodule.train_transforms = CPCTrainTransformsCIFAR10()
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 

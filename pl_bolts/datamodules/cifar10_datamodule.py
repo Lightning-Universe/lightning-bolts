@@ -204,3 +204,6 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
     def num_classes(self) -> int:
         """Return number of classes."""
         return len(self.labels)
+
+    def size(self):
+        return 3, 32, 32
