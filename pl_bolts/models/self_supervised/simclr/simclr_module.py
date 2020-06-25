@@ -7,7 +7,7 @@ from torchvision.models import densenet
 
 import pl_bolts
 from pl_bolts import metrics
-from pl_bolts.datamodules import get_datamodule
+from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.metrics import mean
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
