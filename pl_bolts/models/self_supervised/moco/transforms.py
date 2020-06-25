@@ -105,7 +105,7 @@ class Moco2TrainImagenetTransforms:
 
     """
 
-    def __init__(self, height=224):
+    def __init__(self, height=128):
         # image augmentation functions
         self.train_transform = transforms.Compose([
             transforms.RandomResizedCrop(height, scale=(0.2, 1.)),
@@ -131,7 +131,7 @@ class Moco2EvalImagenetTransforms:
     https://arxiv.org/pdf/2003.04297.pdf
 
     """
-    def __init__(self, height=224):
+    def __init__(self, height=128):
         self.test_transform = transforms.Compose([
             transforms.Resize(height + 32),
             transforms.CenterCrop(height),

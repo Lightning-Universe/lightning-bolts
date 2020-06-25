@@ -317,6 +317,7 @@ class FeatureMapContrastiveTask(nn.Module):
 
             >>> from pytorch_lightning import seed_everything
             >>> seed_everything(0)
+            0
             >>> a1 = torch.rand(3, 5, 2, 2)
             >>> a2 = torch.rand(3, 5, 2, 2)
             >>> b1 = torch.rand(3, 5, 2, 2)
@@ -328,7 +329,7 @@ class FeatureMapContrastiveTask(nn.Module):
             >>> losses
             tensor([2.2351, 2.1902])
             >>> regularizer
-            tensor(0.0324))
+            tensor(0.0324)
         """
         assert len(anchor_maps) == len(self.map_indexes), f'expected each input to have {len(self.map_indexes)} tensors'
 

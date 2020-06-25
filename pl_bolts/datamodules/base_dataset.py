@@ -9,8 +9,6 @@ import torch
 from torch import Tensor
 from torch.utils.data import Dataset
 
-from tests import PACKAGE_ROOT
-
 
 class LightDataset(ABC, Dataset):
 

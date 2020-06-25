@@ -12,7 +12,7 @@ import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.optim import Optimizer
+from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.models.rl.common import wrappers
@@ -28,7 +28,7 @@ class DQN(pl.LightningModule):
     def __init__(self, env: str, gpus: int = 0, eps_start: float = 1.0, eps_end: float = 0.02,
                  eps_last_frame: int = 150000, sync_rate: int = 1000, gamma: float = 0.99, lr: float = 1e-4,
                  batch_size: int = 32, replay_size: int = 100000, warm_start_size: int = 10000, sample_len: int = 500,
-                 ) -> None:
+                 **kwargs) -> None:
         """
         PyTorch Lightning implementation of `DQN <https://arxiv.org/abs/1312.5602>`_
 

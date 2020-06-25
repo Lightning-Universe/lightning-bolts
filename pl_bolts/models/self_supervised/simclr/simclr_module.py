@@ -7,7 +7,7 @@ from torchvision.models import densenet
 
 import pl_bolts
 from pl_bolts import metrics
-from pl_bolts.datamodules import get_datamodule
+from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.metrics import mean
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
@@ -55,7 +55,7 @@ class SimCLR(pl.LightningModule):
                  online_ft: bool = False,
                  num_workers: int = 4,
                  optimizer: str = 'adam',
-                 step: int = 30,
+                 lr_sched_step: float = 30.0,
                  lr_sched_gamma: float = 0.5,
                  loss_temperature: float = 0.5,
                  **kwargs):
@@ -67,7 +67,7 @@ class SimCLR(pl.LightningModule):
         Model implemented by:
 
             - `William Falcon <https://github.com/williamFalcon>`_
-            - `Tullie Murrel <https://github.com/tullie>`_
+            - `Tullie Murrell <https://github.com/tullie>`_
 
         Example:
 
@@ -134,7 +134,7 @@ class SimCLR(pl.LightningModule):
         return h, z
 
     def training_step(self, batch, batch_idx):
-        if self.hparams.dataset == 'stl10':
+        if isinstance(self.datamodule, STL10DataModule):
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -149,7 +149,7 @@ class SimCLR(pl.LightningModule):
 
         # don't use the training signal, just finetune the MLP to see how we're doing downstream
         if self.online_evaluator:
-            if self.hparams.dataset == 'stl10':
+            if isinstance(self.datamodule, STL10DataModule):
                 (img_1, img_2), y = labeled_batch
 
             with torch.no_grad():
@@ -172,7 +172,7 @@ class SimCLR(pl.LightningModule):
         return result
 
     def validation_step(self, batch, batch_idx):
-        if self.hparams.dataset == 'stl10':
+        if isinstance(self.datamodule, STL10DataModule):
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -184,7 +184,7 @@ class SimCLR(pl.LightningModule):
         result = {'val_loss': loss}
 
         if self.online_evaluator:
-            if self.hparams.dataset == 'stl10':
+            if isinstance(self.datamodule, STL10DataModule):
                 (img_1, img_2), y = labeled_batch
                 h1, z1 = self.forward(img_1)
 
@@ -252,13 +252,13 @@ class SimCLR(pl.LightningModule):
 
         # Training
         parser.add_argument('--optimizer', choices=['adam', 'lars'], default='lars')
-        parser.add_argument('--batch_size', type=int, default=128)
-        parser.add_argument('--learning_rate', type=float, default=0.00006)
+        parser.add_argument('--batch_size', type=int, default=512)
+        parser.add_argument('--learning_rate', type=float, default=1.0)
         parser.add_argument('--mom', type=float, default=0.9)
         parser.add_argument('--eta', type=float, default=0.001)
         parser.add_argument('--lr_sched_step', type=float, default=30, help='lr scheduler step')
         parser.add_argument('--lr_sched_gamma', type=float, default=0.5, help='lr scheduler step')
-        parser.add_argument('--weight_decay', type=float, default=0.0005)
+        parser.add_argument('--weight_decay', type=float, default=1e-4)
         # Model
         parser.add_argument('--loss_temperature', type=float, default=0.5)
         parser.add_argument('--num_workers', default=0, type=int)
