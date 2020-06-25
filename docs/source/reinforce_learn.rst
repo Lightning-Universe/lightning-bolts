@@ -47,7 +47,7 @@ Train::
     trainer = Trainer()
     trainer.fit(dqn)
 
-.. autoclass:: pl_bolts.models.rl.dqn.model.DQN
+.. autoclass:: pl_bolts.models.rl.dqn_model.DQN
    :noindex:
 
 Double DQN
@@ -68,7 +68,7 @@ Train::
     trainer = Trainer()
     trainer.fit(ddqn)
 
-.. autoclass:: pl_bolts.models.rl.double_dqn.model.DoubleDQN
+.. autoclass:: pl_bolts.models.rl.double_dqn_model.DoubleDQN
    :noindex:
 
 Dueling DQN
@@ -89,7 +89,7 @@ Train::
     trainer = Trainer()
     trainer.fit(dueling_dqn)
 
-.. autoclass:: pl_bolts.models.rl.dueling_dqn.model.DuelingDQN
+.. autoclass:: pl_bolts.models.rl.dueling_dqn_model.DuelingDQN
    :noindex:
 
 Noisy DQN
@@ -111,7 +111,7 @@ Train::
     trainer = Trainer()
     trainer.fit(noisy_dqn)
 
-.. autoclass:: pl_bolts.models.rl.noisy_dqn.model.NoisyDQN
+.. autoclass:: pl_bolts.models.rl.noisy_dqn_model.NoisyDQN
    :noindex:
 
 
@@ -133,7 +133,7 @@ Train::
     trainer = Trainer()
     trainer.fit(n_step_dqn)
 
-.. autoclass:: pl_bolts.models.rl.n_step_dqn.model.NStepDQN
+.. autoclass:: pl_bolts.models.rl.n_step_dqn_model.NStepDQN
    :noindex:
 
 
@@ -155,7 +155,7 @@ Train::
     trainer = Trainer()
     trainer.fit(per_dqn)
 
-.. autoclass:: pl_bolts.models.rl.per_dqn.model.PERDQN
+.. autoclass:: pl_bolts.models.rl.per_dqn_model.PERDQN
    :noindex:
 
 
@@ -184,7 +184,7 @@ Train::
     trainer = Trainer()
     trainer.fit(reinforce)
 
-.. autoclass:: pl_bolts.models.rl.reinforce.model.Reinforce
+.. autoclass:: pl_bolts.models.rl.reinforce_model.Reinforce
    :noindex:
 
 
@@ -206,5 +206,5 @@ Train::
     trainer = Trainer()
     trainer.fit(vpg)
 
-.. autoclass:: pl_bolts.models.rl.vanilla_policy_gradient.model.PolicyGradient
+.. autoclass:: pl_bolts.models.rl.vanilla_policy_gradient_model.PolicyGradient
    :noindex:

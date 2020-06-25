@@ -14,7 +14,7 @@ The priority of each sample is defined below where
 
 .. math::
 
-    P(i) = \frac{P^\\alpha_i}{\\sum_k P_k^\\alpha}
+    P(i) = P^\\alpha_i / \\sum_k P_k^\\alpha
 
 
 where pi is the priority of the ith sample in the buffer and
