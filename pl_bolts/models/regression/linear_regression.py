@@ -12,10 +12,10 @@ class LinearRegression(pl.LightningModule):
     def __init__(self,
                  input_dim: int,
                  bias: bool = True,
-                 learning_rate: float = 0.05,
+                 learning_rate: float = 0.0001,
                  optimizer: Optimizer = 'Adam',
-                 l1_strength: float = 0,
-                 l2_strength: float = 0,
+                 l1_strength: float = None,
+                 l2_strength: float = None,
                  **kwargs):
         """
         Linear regression model implementing - with optional L1/L2 regularization
@@ -26,8 +26,8 @@ class LinearRegression(pl.LightningModule):
             bias: If false, will not use $$+b$$
             learning_rate: learning_rate for the optimizer
             optimizer: the optimizer to use (default='Adam')
-            l1_strength: L1 regularization strength (default=0)
-            l2_strength: L2 regularization strength (default=0)
+            l1_strength: L1 regularization strength (default=None)
+            l2_strength: L2 regularization strength (default=None)
 
         """
         super().__init__()
@@ -43,6 +43,21 @@ class LinearRegression(pl.LightningModule):
         x, y = batch
         y_hat = self(x)
         loss = F.mse_loss(y_hat, y)
+
+        # L1 regularizer
+        if self.hparams.l1_strength is not None:
+            l1_reg = torch.tensor(0.)
+            for param in self.parameters():
+                l1_reg += torch.norm(param, 1)
+            loss += self.hparams.l1_strength * l1_reg
+
+        # L2 regularizer
+        if self.hparams.l2_strength is not None:
+            l2_reg = torch.tensor(0.)
+            for param in self.parameters():
+                l2_reg += torch.norm(param, 2)
+            loss += self.hparams.l2_strength * l2_reg
+
         tensorboard_logs = {'train_mse_loss': loss}
         progress_bar_metrics = tensorboard_logs
         return {
@@ -112,7 +127,8 @@ if __name__ == '__main__':  # pragma: no cover
     args = parser.parse_args()
 
     # model
-    model = LinearRegression(**vars(args))
+    model = LinearRegression(input_dim=13, l1_strength=1, l2_strength=1)
+    # model = LinearRegression(**vars(args))
 
     # train
     trainer = pl.Trainer.from_argparse_args(args)

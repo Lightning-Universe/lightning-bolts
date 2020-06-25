@@ -4,7 +4,7 @@ from torch.nn import functional as F
 import pytorch_lightning as pl
 from torch.optim.optimizer import Optimizer
 
-from pl_bolts.datamodules.sklearn_dataloaders import SklearnDataLoaders
+from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 
 
 class LogisticRegression(pl.LightningModule):
