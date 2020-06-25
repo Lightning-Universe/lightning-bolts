@@ -1,11 +1,11 @@
-import pytorch_lightning as pl
 import torch
 from torch import nn
 from torch.nn import functional as F
 from torch.optim.optimizer import Optimizer
+from torch.optim import Adam
 
+import pytorch_lightning as pl
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
-
 
 class LinearRegression(pl.LightningModule):
 
@@ -13,7 +13,7 @@ class LinearRegression(pl.LightningModule):
                  input_dim: int,
                  bias: bool = True,
                  learning_rate: float = 0.0001,
-                 optimizer: Optimizer = 'Adam',
+                 optimizer: Optimizer = Adam,
                  l1_strength: float = None,
                  l2_strength: float = None,
                  **kwargs):
@@ -32,6 +32,7 @@ class LinearRegression(pl.LightningModule):
         """
         super().__init__()
         self.save_hyperparameters()
+        self.optimizer = optimizer
 
         self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=1, bias=bias).double()
 
@@ -41,8 +42,12 @@ class LinearRegression(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
+
+        # flatten any input
         x = x.view(x.size(0), -1)
+
         y_hat = self(x)
+
         loss = F.mse_loss(y_hat, y)
 
         # L1 regularizer
@@ -99,8 +104,7 @@ class LinearRegression(pl.LightningModule):
         }
 
     def configure_optimizers(self):
-        optimizer_class = getattr(torch.optim, self.hparams.optimizer)
-        return optimizer_class(self.parameters(), lr=self.hparams.learning_rate)
+        return self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -109,7 +113,6 @@ class LinearRegression(pl.LightningModule):
         parser.add_argument('--input_dim', type=int, default=None)
         parser.add_argument('--bias', default='store_true')
         parser.add_argument('--batch_size', type=int, default=16)
-        parser.add_argument('--optimizer', type=str, default='Adam')
         return parser
 
 

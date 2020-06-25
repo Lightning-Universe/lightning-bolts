@@ -1,10 +1,10 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
-import pytorch_lightning as pl
 from torch.optim.optimizer import Optimizer
 from torch.optim import Adam
 
+import pytorch_lightning as pl
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 from pytorch_lightning.metrics.classification import accuracy
 
@@ -77,10 +77,7 @@ class LogisticRegression(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-
-        # flatten any input
         x = x.view(x.size(0), -1)
-
         y_hat = self(x)
         acc = accuracy(y_hat, y)
         return {'val_loss': F.cross_entropy(y_hat, y), 'acc':acc}
@@ -98,10 +95,7 @@ class LogisticRegression(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         x, y = batch
-
-        # flatten any input
         x = x.view(x.size(0), -1)
-
         y_hat = self(x)
         acc = accuracy(y_hat, y)
         return {'test_loss': F.cross_entropy(y_hat, y), 'acc':acc}
