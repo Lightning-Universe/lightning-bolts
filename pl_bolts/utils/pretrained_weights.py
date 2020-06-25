@@ -11,7 +11,7 @@ urls = {
 }
 
 
-def load_pretrained(model, class_name=None):
+def load_pretrained(model, class_name=None):  # pragma: no-cover
     if class_name is None:
         class_name = model.__class__.__name__
     ckpt_url = urls[class_name]

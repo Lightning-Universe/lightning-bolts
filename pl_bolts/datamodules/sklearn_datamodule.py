@@ -1,9 +1,11 @@
-from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
-from torch.utils.data import Dataset, DataLoader
-from sklearn.utils import shuffle as sk_shuffle
 import math
-import numpy as np
 from typing import Any
+
+import numpy as np
+from sklearn.utils import shuffle as sk_shuffle
+from torch.utils.data import Dataset, DataLoader
+
+from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 
 
 class SklearnDataset(Dataset):
@@ -50,6 +52,8 @@ class SklearnDataset(Dataset):
 
 
 class SklearnDataModule(LightningDataModule):
+
+    name = 'sklearn'
 
     def __init__(self, X, y,
                  x_val=None, y_val=None,

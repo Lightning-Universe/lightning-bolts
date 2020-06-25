@@ -1,5 +1,6 @@
 import argparse
 from unittest import TestCase
+
 import pytorch_lightning as pl
 
 from pl_bolts.models.rl.common import cli
@@ -34,42 +35,42 @@ class TestValueModels(TestCase):
 
     def test_dqn(self):
         """Smoke test that the DQN model runs"""
-        model = DQN(self.hparams)
+        model = DQN(self.hparams.env)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)
 
     def test_double_dqn(self):
         """Smoke test that the Double DQN model runs"""
-        model = DoubleDQN(self.hparams)
+        model = DoubleDQN(self.hparams.env)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)
 
     def test_dueling_dqn(self):
         """Smoke test that the Dueling DQN model runs"""
-        model = DuelingDQN(self.hparams)
+        model = DuelingDQN(self.hparams.env)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)
 
     def test_noisy_dqn(self):
         """Smoke test that the Noisy DQN model runs"""
-        model = NoisyDQN(self.hparams)
+        model = NoisyDQN(self.hparams.env)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)
 
     def test_per_dqn(self):
         """Smoke test that the PER DQN model runs"""
-        model = PERDQN(self.hparams)
+        model = PERDQN(self.hparams.env)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)
 
     def test_n_step_dqn(self):
         """Smoke test that the N Step DQN model runs"""
-        model = NStepDQN(self.hparams)
+        model = NStepDQN(self.hparams.env)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)

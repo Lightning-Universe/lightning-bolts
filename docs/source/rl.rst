@@ -16,7 +16,7 @@ Contributions by: `Donal Byrne <https://github.com/djbyrne>`_
 - NStep DQN
 - Prioritized Experience Replay DQN
 - Reinforce
-- Policy Gradient
+- Vanilla Policy Gradient
 
 ------------
 

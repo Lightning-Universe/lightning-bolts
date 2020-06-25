@@ -60,9 +60,7 @@ class CPCResNet101(nn.Module):
         # This improves the model by 0.2~0.3% according to https://arxiv.org/abs/1706.02677
         if zero_init_residual:
             for m in self.modules():
-                if isinstance(m, LNBottleneck):
-                    nn.init.constant_(m.bn3.weight, 0)
-                elif isinstance(m, BasicBlock):
+                if isinstance(m, BasicBlock):
                     nn.init.constant_(m.bn2.weight, 0)
 
     def _make_layer(self, sample_batch, block, planes, blocks, stride=1, dilate=False, expansion=4):

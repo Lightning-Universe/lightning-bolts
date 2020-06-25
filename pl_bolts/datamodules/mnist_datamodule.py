@@ -1,12 +1,13 @@
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
 from torchvision.datasets import MNIST
-import os
 
 from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 
 
 class MNISTDataModule(LightningDataModule):
+
+    name = 'mnist'
 
     def __init__(self, data_dir: str, val_split: int = 5000, num_workers: int = 16):
         """

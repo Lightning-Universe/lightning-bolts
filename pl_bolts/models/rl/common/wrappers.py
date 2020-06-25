@@ -3,10 +3,11 @@ Set of wrapper functions for gym environments taken from
 https://github.com/Shmuma/ptan/blob/master/ptan/common/wrappers.py
 """
 import collections
-import numpy as np
+
 import cv2
 import gym
 import gym.spaces
+import numpy as np
 import torch
 
 
