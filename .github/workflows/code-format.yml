@@ -1,4 +1,4 @@
-name: Check PEP8 formatting
+name: Check Code formatting
 
 # see: https://help.github.com/en/actions/reference/events-that-trigger-workflows
 on:
@@ -12,7 +12,7 @@ on:
       - master
 
 jobs:
-  package:
+  flake8:
     runs-on: ubuntu-latest
 
     steps:
