@@ -16,12 +16,16 @@ Q function using a deep neural network. This allows the DQN to be used for much 
 Similar to supervised learning, the DQN learns on randomly sampled batches of previous data stored in an
 Experience Replay Buffer. The 'target' is calculated using the Bellman equation
 
-<img src="https://latex.codecogs.com/svg.latex?\Large&space;Q(s,a)<-(r+{\gamma}\max_{a'{\in}A}Q(s',a'))^2"/>
+.. math::
+
+    Q(s,a)<-(r+{\gamma}\max_{a'{\in}A}Q(s',a'))^2
 
 and then we optimize using SGD just
 like a standard supervised learning problem.
 
-<img src="https://latex.codecogs.com/svg.latex?\Large&space;L=(Q(s,a)-(r+{\gamma}\max_{a'{\in}A}Q(s',a'))^2"/>
+.. math::
+
+    L=(Q(s,a)-(r+{\gamma}\max_{a'{\in}A}Q(s',a'))^2
 
 ###
 

@@ -10,7 +10,10 @@ Essentially we want to train more on the samples that suprise the agent.
 
 The priority of each sample is defined below where
 
-<img src="https://latex.codecogs.com/svg.latex?\Large&space;P(i)=\frac{P^\alpha_i}{\sum_kP_k^\alpha}"/>
+
+.. math::
+
+    P(i)=\frac{P^\alpha_i}{\sum_kP_k^\alpha}
 
 where pi is the priority of the ith sample in the buffer and
 𝛼 is the number that shows how much emphasis we give to the priority. If 𝛼 = 0 , our
@@ -20,7 +23,9 @@ more stress on samples with higher priority
 Its important that new samples are set to the highest priority so that they are sampled soon. This however introduces
 bias to new samples in our dataset. In order to compensate for this bias, the value of the weight is defined as
 
-<img src="https://latex.codecogs.com/svg.latex?\Large&space;w_i=(N . P(i))^{-\beta}"/>
+.. math::
+
+    w_i=(N . P(i))^{-\beta}
 
 Wher beta is a hyper parameter between 0-1. When beta is 1 the bias is fully compensated. However authors noted that
 in practice it is better to start beta with a small value near 0 and slowly increase it to 1.

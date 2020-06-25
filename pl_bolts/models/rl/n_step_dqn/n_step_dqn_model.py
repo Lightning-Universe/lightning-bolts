@@ -8,12 +8,16 @@ our Q values with the expected reward from multiple steps in the
 future as opposed to the expected reward from the immediate next state. When getting the Q values for a state action
 pair using a single step which looks like this
 
-<img src="https://latex.codecogs.com/svg.latex?\Large&space;Q(s_t,a_t)=r_t+{\gamma}\max_aQ(s_t+1,a_t+1)"/>
+.. math::
+
+    Q(s_t,a_t)=r_t+{\gamma}\max_aQ(s_t+1,a_t+1)
 
 but because the Q function is recursive we can continue to roll this out into multiple steps, looking at the expected
 return for each step into the future.
 
-<img src="https://latex.codecogs.com/svg.latex?\Large&space;Q(s_t,a_t)=r_t+{\gamma}r_{t+1}+{\gamma}^2\max_{a'}Q(s_{t+2},a')"/>
+.. math::
+
+    Q(s_t,a_t)=r_t+{\gamma}r_{t+1}+{\gamma}^2\max_{a'}Q(s_{t+2},a')
 
 The above example shows a 2-Step look ahead, but this could be rolled out to the end of the episode, which is just
 Monte Carlo learning. Although we could just do a monte carlo update and look forward to the end of the episode, it
