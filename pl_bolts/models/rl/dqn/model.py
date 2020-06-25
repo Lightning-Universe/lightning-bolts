@@ -79,26 +79,21 @@ class DQN(pl.LightningModule):
         """
         super().__init__()
 
-        device = torch.device("cuda:0" if gpus > 0 else "cpu")
-
+        # Environment
         self.env = wrappers.make_env(env)
         self.env.seed(123)
 
         self.obs_shape = self.env.observation_space.shape
         self.n_actions = self.env.action_space.n
 
+        # Model Attributes
+        self.buffer = None
+        self.source = None
+        self.dataset = None
+
         self.net = None
         self.target_net = None
-        self.buffer = None
         self.build_networks()
-
-        self.sync_rate = sync_rate
-        self.gamma = gamma
-        self.lr = learning_rate
-        self.batch_size = batch_size
-        self.replay_size = replay_size
-        self.warm_start_size = warm_start_size
-        self.sample_len = num_samples
 
         self.agent = ValueAgent(
             self.net,
@@ -107,8 +102,19 @@ class DQN(pl.LightningModule):
             eps_end=eps_end,
             eps_frames=eps_last_frame,
         )
-        self.source = ExperienceSource(self.env, self.agent, device)
 
+        # Hyperparameters
+        self.sync_rate = sync_rate
+        self.gamma = gamma
+        self.lr = learning_rate
+        self.batch_size = batch_size
+        self.replay_size = replay_size
+        self.warm_start_size = warm_start_size
+        self.sample_len = num_samples
+
+        self.save_hyperparameters()
+
+        # Metrics
         self.total_reward = 0
         self.episode_reward = 0
         self.episode_count = 0
@@ -211,15 +217,15 @@ class DQN(pl.LightningModule):
             self.target_net.load_state_dict(self.net.state_dict())
 
         log = {
-            "total_reward": torch.tensor(self.total_reward).to(self.device),
-            "avg_reward": torch.tensor(self.avg_reward),
+            "total_reward": self.total_reward,
+            "avg_reward": self.avg_reward,
             "train_loss": loss,
-            "episode_steps": torch.tensor(self.total_episode_steps),
+            "episode_steps": self.total_episode_steps,
         }
         status = {
-            "steps": torch.tensor(self.global_step).to(self.device),
-            "avg_reward": torch.tensor(self.avg_reward),
-            "total_reward": torch.tensor(self.total_reward).to(self.device),
+            "steps": self.global_step,
+            "avg_reward": self.avg_reward,
+            "total_reward": self.total_reward,
             "episodes": self.episode_count,
             "episode_steps": self.episode_steps,
             "epsilon": self.agent.epsilon,
@@ -228,7 +234,7 @@ class DQN(pl.LightningModule):
         return OrderedDict(
             {
                 "loss": loss,
-                "avg_reward": torch.tensor(self.avg_reward),
+                "avg_reward": self.avg_reward,
                 "log": log,
                 "progress_bar": status,
             }
@@ -253,22 +259,22 @@ class DQN(pl.LightningModule):
         optimizer = optim.Adam(self.net.parameters(), lr=self.lr)
         return [optimizer]
 
-    def _dataloader(self) -> DataLoader:
+    def prepare_data(self) -> None:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""
+        device = torch.device(self.trainer.root_gpu) if self.trainer.gpus >= 1 else self.device
+        self.source = ExperienceSource(self.env, self.agent, device)
         self.buffer = ReplayBuffer(self.replay_size)
         self.populate(self.warm_start_size)
 
-        dataset = RLDataset(self.buffer, self.sample_len)
-        dataloader = DataLoader(dataset=dataset, batch_size=self.batch_size,)
-        return dataloader
+        self.dataset = RLDataset(self.buffer, self.sample_len)
 
     def train_dataloader(self) -> DataLoader:
         """Get train loader"""
-        return self._dataloader()
+        return DataLoader(dataset=self.dataset, batch_size=self.batch_size)
 
     def test_dataloader(self) -> DataLoader:
         """Get test loader"""
-        return self._dataloader()
+        return DataLoader(dataset=self.dataset, batch_size=self.batch_size)
 
     @staticmethod
     def add_model_specific_args(arg_parser) -> argparse.ArgumentParser:
@@ -278,7 +284,7 @@ class DQN(pl.LightningModule):
         Note: these params are fine tuned for Pong env
 
         Args:
-            parent
+            arg_parser: parent parser
         """
         arg_parser.add_argument(
             "--sync_rate",
