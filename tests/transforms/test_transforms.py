@@ -45,3 +45,19 @@ def test_cifar10_transforms(tmpdir, transform):
 
     transform = transform()
     transform(x)
+
+
+@pytest.mark.parametrize("transform", [
+    CPCTrainTransformsSTL10,
+    CPCEvalTransformsSTL10,
+    AMDIMTrainTransformsSTL10,
+    AMDIMEvalTransformsSTL10,
+    Moco2TrainSTL10Transforms,
+    Moco2EvalSTL10Transforms,
+])
+def test_stl10_transforms(tmpdir, transform):
+    x = torch.rand(3, 64, 64)
+    x = transforms.ToPILImage(mode='RGB')(x)
+
+    transform = transform()
+    transform(x)
