@@ -35,7 +35,7 @@ class TestReinforce(TestCase):
             "--episode_length", "100",
         ]
         self.hparams = parent_parser.parse_args(args_list)
-        self.model = Reinforce(self.hparams.env)
+        self.model = Reinforce(**vars(self.hparams))
 
     def test_loss(self):
         """Test the reinforce loss function"""

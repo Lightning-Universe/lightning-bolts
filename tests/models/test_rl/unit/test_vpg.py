@@ -34,7 +34,7 @@ class TestPolicyGradient(TestCase):
             "--episode_length", "100",
         ]
         self.hparams = parent_parser.parse_args(args_list)
-        self.model = PolicyGradient(self.hparams.env)
+        self.model = PolicyGradient(**vars(self.hparams))
 
     def test_calc_q_vals(self):
         rewards = [torch.tensor(1), torch.tensor(1), torch.tensor(1), torch.tensor(1)]

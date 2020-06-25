@@ -24,7 +24,7 @@ class DoubleDQN(DQN):
 
     Example:
 
-        >>> from pl_bolts.models.rl.double_.model import DoubleDQN
+        >>> from pl_bolts.models.rl.double_dqn.model import DoubleDQN
         ...
         >>> model = DoubleDQN("PongNoFrameskip-v4")
 

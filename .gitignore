@@ -147,3 +147,4 @@ simclr.py
 source/api/
 test-reports
 tests/test-reports/
+tests/models/CIFAR10/

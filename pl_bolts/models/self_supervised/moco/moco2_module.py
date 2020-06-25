@@ -1,6 +1,8 @@
 """
 Adapted from: https://github.com/facebookresearch/moco
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+
+Original work is: Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+This implementation is: Copyright (c) PyTorch Lightning, Inc. and its affiliates. All Rights Reserved
 """
 
 from typing import Union
@@ -11,17 +13,24 @@ import torch.nn.functional as F
 import torchvision
 from torch import nn
 
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
+import pl_bolts
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
+from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.metrics import precision_at_k, mean
-from pl_bolts.models.self_supervised.moco.transforms import \
-    Moco2ImagenetTransforms, Moco2CIFAR10Transforms, Moco2STL10Transforms
+from pl_bolts.models.self_supervised.moco.transforms import (
+    Moco2TrainCIFAR10Transforms,
+    Moco2EvalCIFAR10Transforms,
+    Moco2TrainSTL10Transforms,
+    Moco2EvalSTL10Transforms,
+    Moco2TrainImagenetTransforms,
+    Moco2EvalImagenetTransforms
+)
 
 
 class MocoV2(pl.LightningModule):
 
     def __init__(self,
-                 base_encoder: Union[str, torch.nn.Module] = 'resnet50',
+                 base_encoder: Union[str, torch.nn.Module] = 'resnet18',
                  emb_dim: int = 128,
                  num_negatives: int = 65536,
                  encoder_momentum: float = 0.999,
@@ -29,9 +38,9 @@ class MocoV2(pl.LightningModule):
                  learning_rate: float = 0.03,
                  momentum: float = 0.9,
                  weight_decay: float = 1e-4,
-                 dataset: str = 'cifar10',
+                 datamodule: pl_bolts.datamodules.LightningDataModule = None,
                  data_dir: str = './',
-                 batch_size: str = 256,
+                 batch_size: int = 256,
                  use_mlp: bool = False,
                  num_workers: int = 8,
                  *args, **kwargs):
@@ -40,7 +49,7 @@ class MocoV2(pl.LightningModule):
 
         Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.
 
-        Model implemented by:
+        Code adapted from `facebookresearch/moco <https://github.com/facebookresearch/moco>`_ to Lightning by:
 
             - `William Falcon <https://github.com/williamFalcon>`_
 
@@ -64,7 +73,7 @@ class MocoV2(pl.LightningModule):
             learning_rate: the learning rate
             momentum: optimizer momentum
             weight_decay: optimizer weight decay
-            dataset: name of dataset
+            datamodule: the DataModule (train, val, test dataloaders)
             data_dir: the directory to store data
             batch_size: batch size
             use_mlp: add an mlp to the encoders
@@ -74,7 +83,13 @@ class MocoV2(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.dataset = self.get_dataset(dataset)
+        # use CIFAR-10 by default if no datamodule passed in
+        if datamodule is None:
+            datamodule = CIFAR10DataModule(data_dir)
+            datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
+            datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
+
+        self.datamodule = datamodule
 
         # create the encoders
         # num_classes is the output fc dimension
@@ -133,7 +148,7 @@ class MocoV2(pl.LightningModule):
         self.queue_ptr[0] = ptr
 
     @torch.no_grad()
-    def _batch_shuffle_ddp(self, x):
+    def _batch_shuffle_ddp(self, x):  # pragma: no-cover
         """
         Batch shuffle, for making use of BatchNorm.
         *** Only support DistributedDataParallel (DDP) model. ***
@@ -229,23 +244,13 @@ class MocoV2(pl.LightningModule):
 
         return logits, labels
 
-    def get_dataset(self, name):
-        if name == 'cifar10':
-            dataloaders = CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        elif name == 'stl10':
-            dataloaders = STL10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        elif name == 'imagenet2012':
-            dataloaders = SSLImagenetDataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        else:
-            raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
-                                    f'your own \'')
-
-        return dataloaders
-
-    def prepare_data(self):
-        self.dataset.prepare_data()
-
     def training_step(self, batch, batch_idx):
+        # in STL10 we pass in both lab+unl for online ft
+        if self.hparams.datamodule.name == 'stl10':
+            labeled_batch = batch[1]
+            unlabeled_batch = batch[0]
+            batch = unlabeled_batch
+
         (img_1, img_2), _ = batch
 
         output, target = self(img_q=img_1, img_k=img_2)
@@ -258,12 +263,18 @@ class MocoV2(pl.LightningModule):
             'train_acc1': acc1,
             'train_acc5': acc5
         }
-        return {'loss': loss, 'log': log}
+        return {'loss': loss, 'log': log, 'progress_bar': log}
 
     def validation_step(self, batch, batch_idx):
-        img_1, target = batch
+        # in STL10 we pass in both lab+unl for online ft
+        if self.hparams.datamodule.name == 'stl10':
+            labeled_batch = batch[1]
+            unlabeled_batch = batch[0]
+            batch = unlabeled_batch
 
-        output = self.encoder_q(img_1)
+        (img_1, img_2), labels = batch
+
+        output, target = self(img_q=img_1, img_k=img_2)
         loss = F.cross_entropy(output, target.long())
 
         acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))
@@ -285,7 +296,7 @@ class MocoV2(pl.LightningModule):
             'val_acc1': val_acc1,
             'val_acc5': val_acc5
         }
-        return {'val_loss': val_loss, 'log': log}
+        return {'val_loss': val_loss, 'log': log, 'progress_bar': log}
 
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(self.parameters(), self.hparams.learning_rate,
@@ -293,37 +304,22 @@ class MocoV2(pl.LightningModule):
                                     weight_decay=self.hparams.weight_decay)
         return optimizer
 
+    def prepare_data(self):
+        self.datamodule.prepare_data()
+
     def train_dataloader(self):
-        if self.hparams.dataset == 'cifar10':
-            train_transform = Moco2CIFAR10Transforms()
-
-        elif self.hparams.dataset == 'stl10':
-            train_transform = Moco2STL10Transforms()
-
-        elif self.hparams.dataset == 'imagenet2012':
-            train_transform = Moco2ImagenetTransforms()
-
-        loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
+        loader = self.datamodule.train_dataloader(self.hparams.batch_size)
         return loader
 
     def val_dataloader(self):
-        if self.hparams.dataset == 'cifar10':
-            train_transform = Moco2CIFAR10Transforms().train_transform
-
-        elif self.hparams.dataset == 'stl10':
-            train_transform = Moco2STL10Transforms().train_transform
-
-        elif self.hparams.dataset == 'imagenet2012':
-            train_transform = Moco2ImagenetTransforms().train_transform
-
-        loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=train_transform)
+        loader = self.datamodule.val_dataloader(self.hparams.batch_size)
         return loader
 
     @staticmethod
     def add_model_specific_args(parent_parser):
         from test_tube import HyperOptArgumentParser
         parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--base_encoder', type=str, default='resnet50')
+        parser.add_argument('--base_encoder', type=str, default='resnet18')
         parser.add_argument('--emb_dim', type=int, default=128)
         parser.add_argument('--num_workers', type=int, default=8)
         parser.add_argument('--num_negatives', type=int, default=65536)
@@ -332,10 +328,11 @@ class MocoV2(pl.LightningModule):
         parser.add_argument('--learning_rate', type=float, default=0.03)
         parser.add_argument('--momentum', type=float, default=0.9)
         parser.add_argument('--weight_decay', type=float, default=1e-4)
-        parser.add_argument('--dataset', type=str, default='cifar10')
         parser.add_argument('--data_dir', type=str, default='./')
+        parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, stl10, imagenet2012')
         parser.add_argument('--batch_size', type=int, default=256)
         parser.add_argument('--use_mlp', action='store_true')
+        parser.add_argument('--meta_root', default='.', type=str, help='path to meta.bin for imagenet')
 
         return parser
 
@@ -367,7 +364,24 @@ if __name__ == '__main__':
     parser = MocoV2.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    model = MocoV2(**args.__dict__)
+    if args.dataset == 'cifar10':
+        datamodule = CIFAR10DataModule.from_argparse_args(args)
+        datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
+        datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
+
+    elif args.dataset == 'stl10':
+        datamodule = STL10DataModule.from_argparse_args(args)
+        datamodule.train_dataloader = datamodule.train_dataloader_mixed
+        datamodule.val_dataloader = datamodule.val_dataloader_mixed
+        datamodule.train_transforms = Moco2TrainSTL10Transforms()
+        datamodule.val_transforms = Moco2EvalSTL10Transforms()
+
+    elif args.dataset == 'imagenet2012':
+        datamodule = SSLImagenetDataModule.from_argparse_args(args)
+        datamodule.train_transforms = Moco2TrainImagenetTransforms()
+        datamodule.val_transforms = Moco2EvalImagenetTransforms()
+
+    model = MocoV2(**args.__dict__, datamodule=datamodule)
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)

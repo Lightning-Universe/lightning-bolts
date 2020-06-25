@@ -1,5 +1,6 @@
 import math
 from abc import ABC
+from typing import Callable
 
 import numpy as np
 from sklearn.utils import shuffle
@@ -93,15 +94,22 @@ class SSLDatasetMixin(ABC):
 
 class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
-    def __init__(self, root, split='val',
-                 transform=None, target_transform=None,
-                 download=False, nb_labeled_per_class=None, val_pct=0.10):
+    def __init__(
+            self,
+            root: str,
+            split: str = 'val',
+            transform: Callable = None,
+            target_transform: Callable = None,
+            download: bool = False,
+            nb_labeled_per_class: int = None,
+            val_pct: float = 0.10
+    ):
 
         if nb_labeled_per_class == -1:
             nb_labeled_per_class = None
 
         # use train for all of these splits
-        train = split == 'val' or split == 'train' or split == 'train+unlabeled'
+        train = split in ('val', 'train', 'train+unlabeled')
         super().__init__(root, train, transform, target_transform, download)
 
         # modify only for val, train
@@ -123,11 +131,10 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
             # limit the number of items per class
             if nb_labeled_per_class is not None:
-                self.data, self.targets = self.select_nb_imgs_per_class(self.data,
-                                                                        self.targets,
-                                                                        nb_labeled_per_class)
+                self.data, self.targets = \
+                    self.select_nb_imgs_per_class(self.data, self.targets, nb_labeled_per_class)
 
-    def __balance_class_batches(self, X, Y, batch_size):
+    def __balance_class_batches(self, X, Y, batch_size: int):
         """
         Makes sure each batch has an equal amount of data from each class.
         Perfect balance
@@ -185,9 +192,14 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
         return final_batches_x, final_batches_y
 
-    def __generate_half_labeled_batches(self, smaller_set_X, smaller_set_Y,
-                                        larger_set_X, larger_set_Y,
-                                        batch_size):
+    def __generate_half_labeled_batches(
+            self,
+            smaller_set_X,
+            smaller_set_Y,
+            larger_set_X,
+            larger_set_Y,
+            batch_size: int,
+    ):
         X = []
         Y = []
         half_batch = batch_size // 2

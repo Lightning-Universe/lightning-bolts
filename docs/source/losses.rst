@@ -1,16 +1,12 @@
 Losses
 ======
 This package lists common losses across research domains
+(This is a work in progress. If you have any losses you want to contribute, please submit a PR!)
+
+.. note:: this module is a work in progress
 
 -------------
 
-Self-supervised
----------------
-Here are losses for popular self-supervised approaches
-
-NCE Loss
-^^^^^^^^^
-Used in AMDIM
-
-.. autoclass:: pl_bolts.losses.self_supervised_learning.AmdimNCELoss
-    :noindex:
+Your Loss
+---------
+We're cleaning up many of our losses, but in the meantime, submit a PR to add your loss here!

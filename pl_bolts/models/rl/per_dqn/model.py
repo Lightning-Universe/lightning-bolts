@@ -6,9 +6,7 @@ blob/master/Chapter08/05_dqn_prio_replay.py
 
 from collections import OrderedDict
 from typing import Tuple, List
-
 import torch
-from torch.utils.data import DataLoader
 
 from pl_bolts.models.rl.common.experience import ExperienceSource, PrioRLDataset
 from pl_bolts.models.rl.common.memory import PERBuffer

@@ -10,12 +10,15 @@ from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 
 class ImagenetDataModule(LightningDataModule):
 
+    name = 'imagenet'
+
     def __init__(self,
                  data_dir: str,
                  meta_root: str = None,
                  num_imgs_per_val_class: int = 50,
                  image_size: int = 224,
-                 num_workers: int = 16):
+                 num_workers: int = 16,
+                 ):
         """
         Imagenet train, val and test dataloaders.
 
@@ -40,7 +43,6 @@ class ImagenetDataModule(LightningDataModule):
             image_size: final image size
             num_workers: how many data workers
         """
-
         super().__init__()
         self.data_dir = data_dir
         self.num_workers = num_workers

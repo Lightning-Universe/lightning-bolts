@@ -3,29 +3,75 @@ import numpy as np
 import torchvision.transforms as transforms
 
 
-class SimCLRDataTransform(object):
-    def __init__(self, input_height, s=1, test=False):
+class SimCLRTrainDataTransform(object):
+    """
+    Transforms for SimCLR
+
+    Transform::
+
+        RandomResizedCrop(size=self.input_height)
+        RandomHorizontalFlip()
+        RandomApply([color_jitter], p=0.8)
+        RandomGrayscale(p=0.2)
+        GaussianBlur(kernel_size=int(0.1 * self.input_height))
+        transforms.ToTensor()
+
+    Example::
+
+        from pl_bolts.models.self_supervised.simclr.transforms import SimCLRTrainDataTransform
+
+        transform = SimCLRTrainDataTransform(input_height=32)
+        x = sample()
+        (xi, xj) = transform(x)
+    """
+    def __init__(self, input_height, s=1):
         self.s = s
-        self.test = test
         self.input_height = input_height
         color_jitter = transforms.ColorJitter(0.8 * self.s, 0.8 * self.s, 0.8 * self.s, 0.2 * self.s)
         data_transforms = transforms.Compose([transforms.RandomResizedCrop(size=self.input_height),
                                               transforms.RandomHorizontalFlip(),
-                                              transforms.RandomApply([color_jitter], p=0.8),
+                                              transforms.RandomApply([color_jitter], p=0.5),
                                               transforms.RandomGrayscale(p=0.2),
                                               GaussianBlur(kernel_size=int(0.1 * self.input_height)),
                                               transforms.ToTensor()])
+        self.train_transform = data_transforms
 
+    def __call__(self, sample):
+        transform = self.train_transform
+        xi = transform(sample)
+        xj = transform(sample)
+        return xi, xj
+
+
+class SimCLREvalDataTransform(object):
+    """
+    Transforms for SimCLR
+
+    Transform::
+
+        Resize(input_height + 10, interpolation=3)
+        transforms.CenterCrop(input_height),
+        transforms.ToTensor()
+
+    Example::
+
+        from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform
+
+        transform = SimCLREvalDataTransform(input_height=32)
+        x = sample()
+        (xi, xj) = transform(x)
+    """
+    def __init__(self, input_height, s=1):
+        self.s = s
+        self.input_height = input_height
         self.test_transform = transforms.Compose([
             transforms.Resize(input_height + 10, interpolation=3),
             transforms.CenterCrop(input_height),
             transforms.ToTensor(),
         ])
 
-        self.train_transform = data_transforms
-
     def __call__(self, sample):
-        transform = self.train_transform if self.test else self.test_transform
+        transform = self.test_transform
         xi = transform(sample)
         xj = transform(sample)
         return xi, xj
