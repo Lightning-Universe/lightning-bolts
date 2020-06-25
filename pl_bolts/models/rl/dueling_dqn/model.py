@@ -3,8 +3,8 @@ Dueling Deep Q-network
 """
 
 
-from pl_bolts.models.reinforcement.common.networks import DuelingCNN
-from pl_bolts.models.reinforcement.dqn.model import DQN
+from pl_bolts.models.rl.common.networks import DuelingCNN
+from pl_bolts.models.rl.dqn.model import DQN
 
 
 class DuelingDQN(DQN):
@@ -19,7 +19,7 @@ class DuelingDQN(DQN):
 
         Example:
 
-            >>> from pl_bolts.models.reinforcement.dueling_dqn.model import DuelingDQN
+            >>> from pl_bolts.models.rl.dueling_dqn.model import DuelingDQN
             ...
             >>> model = DuelingDQN("PongNoFrameskip-v4")
 

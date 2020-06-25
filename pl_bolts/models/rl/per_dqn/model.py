@@ -10,9 +10,9 @@ from typing import Tuple, List
 import torch
 from torch.utils.data import DataLoader
 
-from pl_bolts.models.reinforcement.common.experience import ExperienceSource, PrioRLDataset
-from pl_bolts.models.reinforcement.common.memory import PERBuffer
-from pl_bolts.models.reinforcement.dqn.model import DQN
+from pl_bolts.models.rl.common.experience import ExperienceSource, PrioRLDataset
+from pl_bolts.models.rl.common.memory import PERBuffer
+from pl_bolts.models.rl.dqn.model import DQN
 
 
 class PERDQN(DQN):
@@ -44,7 +44,7 @@ class PERDQN(DQN):
 
         Example:
 
-            >>> from pl_bolts.models.reinforcement.per_dqn.model import PERDQN
+            >>> from pl_bolts.models.rl.per_dqn.model import PERDQN
             ...
             >>> model = PERDQN("PongNoFrameskip-v4")
 

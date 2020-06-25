@@ -3,9 +3,9 @@ from unittest import TestCase
 
 import pytorch_lightning as pl
 
-from pl_bolts.models.reinforcement.common import cli
-from pl_bolts.models.reinforcement.reinforce.model import Reinforce
-from pl_bolts.models.reinforcement.vanilla_policy_gradient.model import PolicyGradient
+from pl_bolts.models.rl.common import cli
+from pl_bolts.models.rl.reinforce.model import Reinforce
+from pl_bolts.models.rl.vanilla_policy_gradient.model import PolicyGradient
 
 
 class TestPolicyModels(TestCase):
