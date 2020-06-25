@@ -5,6 +5,7 @@ import pytorch_lightning as pl
 from torch.optim.optimizer import Optimizer
 
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
+from pytorch_lightning.metrics.classification import accuracy
 
 
 class LogisticRegression(pl.LightningModule):
@@ -12,7 +13,7 @@ class LogisticRegression(pl.LightningModule):
     def __init__(self,
                  input_dim: int,
                  num_classes: int,
-                 bias: bool =True,
+                 bias: bool = True,
                  learning_rate: float =0.0001,
                  optimizer: Optimizer = 'Adam',
                  l1_strength: float = 0.0,
@@ -80,11 +81,13 @@ class LogisticRegression(pl.LightningModule):
         x = x.view(x.size(0), -1)
 
         y_hat = self(x)
-        return {'val_loss': F.cross_entropy(y_hat, y)}
+        acc = accuracy(y_hat, y)
+        return {'val_loss': F.cross_entropy(y_hat, y), 'acc': acc}
 
     def validation_epoch_end(self, outputs):
+        acc = torch.stack([x['acc'] for x in outputs]).mean()
         val_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
-        tensorboard_logs = {'val_ce_loss': val_loss}
+        tensorboard_logs = {'val_ce_loss': val_loss, 'val_acc': acc}
         progress_bar_metrics = tensorboard_logs
         return {
             'val_loss': val_loss,
