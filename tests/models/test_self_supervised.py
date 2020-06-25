@@ -17,13 +17,14 @@ def test_cpcv2(tmpdir):
     datamodule.train_transforms = CPCTrainTransformsCIFAR10()
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 
-    model = CPCV2(encoder='resnet18', data_dir=tmpdir, batch_size=2, datamodule=datamodule, online_ft=True)
+    model = CPCV2(encoder='resnet18', data_dir=tmpdir, batch_size=2, online_ft=True, datamodule=datamodule)
     trainer = pl.Trainer(overfit_batches=2, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
 
     assert loss > 0
 
+test_cpcv2(os.getcwd())
 
 def test_amdim(tmpdir):
     reset_seed()

@@ -204,7 +204,7 @@ class CPCV2(pl.LightningModule):
 
     def training_step(self, batch, batch_nb):
         # in STL10 we pass in both lab+unl for online ft
-        if self.hparams.datamodule.name == 'stl10':
+        if isinstance(self.datamodule, STL10DataModule):
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -221,7 +221,7 @@ class CPCV2(pl.LightningModule):
 
         # don't use the training signal, just finetune the MLP to see how we're doing downstream
         if self.online_evaluator:
-            if self.hparams.datamodule.name == 'stl10':
+            if isinstance(self.datamodule, STL10DataModule):
                 img_1, y = labeled_batch
 
             with torch.no_grad():
@@ -246,7 +246,7 @@ class CPCV2(pl.LightningModule):
     def validation_step(self, batch, batch_nb):
 
         # in STL10 we pass in both lab+unl for online ft
-        if self.hparams.datamodule.name == 'stl10':
+        if isinstance(self.datamodule, STL10DataModule):
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -262,7 +262,7 @@ class CPCV2(pl.LightningModule):
         result = {'val_nce': nce_loss}
 
         if self.online_evaluator:
-            if self.hparams.datamodule.name == 'stl10':
+            if isinstance(self.datamodule, STL10DataModule):
                 img_1, y = labeled_batch
                 Z = self(img_1)
 
