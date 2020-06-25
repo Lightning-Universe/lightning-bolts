@@ -15,7 +15,7 @@ import torch
 import torch.optim as optim
 from torch import Tensor
 from torch.nn.functional import log_softmax
-from torch.optim import Optimizer
+from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.models.rl.common.agents import PolicyAgent
@@ -29,7 +29,7 @@ class Reinforce(pl.LightningModule):
     """ Basic REINFORCE Policy Model """
 
     def __init__(self, env: str, gamma: float = 0.99, lr: float = 1e-4, batch_size: int = 32,
-                 batch_episodes: int = 4) -> None:
+                 batch_episodes: int = 4, **kwargs) -> None:
         """
         PyTorch Lightning implementation of `REINFORCE
         <https://papers.nips.cc/paper/
