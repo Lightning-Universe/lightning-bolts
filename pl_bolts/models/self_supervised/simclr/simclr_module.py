@@ -55,7 +55,7 @@ class SimCLR(pl.LightningModule):
                  online_ft: bool = False,
                  num_workers: int = 4,
                  optimizer: str = 'adam',
-                 step: int = 30,
+                 lr_sched_step: float = 30.0,
                  lr_sched_gamma: float = 0.5,
                  loss_temperature: float = 0.5,
                  **kwargs):
