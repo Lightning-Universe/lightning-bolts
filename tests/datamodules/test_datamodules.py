@@ -6,5 +6,3 @@ def test_dev_datasets(tmpdir):
     ds = CIFAR10(tmpdir)
     for b in ds:
         pass
-
-test_dev_datasets('')
