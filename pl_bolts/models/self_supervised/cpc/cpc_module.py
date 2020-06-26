@@ -28,7 +28,7 @@ from pl_bolts.models.self_supervised.cpc.transforms import (
 )
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 from pl_bolts.utils.pretrained_weights import load_pretrained
-from pl_bolts.utils.ssl_utils import torchvision_ssl_encoder
+from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
 __all__ = [
     'CPCV2'

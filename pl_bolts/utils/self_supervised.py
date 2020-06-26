@@ -1,5 +1,4 @@
 import torch
-
 from pl_bolts.models.self_supervised import resnets
 
 
