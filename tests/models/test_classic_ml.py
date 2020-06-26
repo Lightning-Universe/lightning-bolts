@@ -38,7 +38,7 @@ def test_logistic_regression_model(tmpdir):
     # create dataset
     dm = MNISTDataModule(num_workers=0, data_dir=tmpdir)
 
-    model = LogisticRegression(input_dim=28*28, num_classes=10, learning_rate=0.001)
+    model = LogisticRegression(input_dim=28 * 28, num_classes=10, learning_rate=0.001)
     model.prepare_data = dm.prepare_data
     model.train_dataloader = dm.train_dataloader
     model.val_dataloader = dm.val_dataloader
