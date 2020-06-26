@@ -33,7 +33,7 @@ class GAN(LightningModule):
         if datamodule is None:
             datamodule = MNISTDataModule(data_dir=self.hparams.data_dir, num_workers=self.hparams.num_workers)
         self.datamodule = datamodule
-        self.img_dim = self.datamodule.size
+        self.img_dim = self.datamodule.size()
 
         # networks
         self.generator = self.init_generator(self.img_dim)
