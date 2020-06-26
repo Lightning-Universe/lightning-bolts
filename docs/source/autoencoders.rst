@@ -1,5 +1,5 @@
-Autoencoder Models
-==================
+Autoencoders
+============
 This section houses autoencoders and variational autoencoders.
 
 ----------------
