@@ -256,6 +256,7 @@ class VAE(LightningModule):
                             help='number of input channels')
         parser.add_argument('--batch_size', type=int, default=32)
         parser.add_argument('--pretrained', type=str, default=None)
+        parser.add_argument('--data_dir', type=str, default=os.getcwd())
 
         parser.add_argument('--learning_rate', type=float, default=1e-3)
         return parser
@@ -267,9 +268,9 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', default='mnist', type=str)
 
     parser = Trainer.add_argparse_args(parser)
+    parser = VAE.add_model_specific_args(parser)
     parser = ImagenetDataModule.add_argparse_args(parser)
     parser = MNISTDataModule.add_argparse_args(parser)
-    parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args()
     #
     # if args.dataset == 'imagenet' or args.pretrained:
