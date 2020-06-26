@@ -1,9 +1,8 @@
 import pytorch_lightning as pl
 from pl_bolts.models.regression import LinearRegression, LogisticRegression
-from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule, SklearnDataset
+from pl_bolts.datamodules.sklearn_datamodule import SklearnDataset
 from pl_bolts.datamodules import MNISTDataModule
 import numpy as np
-import torch
 from tests import reset_seed
 from torch.utils.data import DataLoader
 
