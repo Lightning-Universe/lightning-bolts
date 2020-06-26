@@ -23,16 +23,19 @@ class Identity(torch.nn.Module):
         return x
 
 
-def balance_classes(X, Y, batch_size: int):
+def balance_classes(X: np.ndarray, Y: list, batch_size: int):
     """
     Makes sure each batch has an equal amount of data from each class.
     Perfect balance
-    :param X:
-    :param Y:
-    :param batch_size:
-    :return:
+
+    Args:
+
+        X: input features
+        Y: mixed labels (ints)
+        batch_size: the ultimate batch size
     """
     nb_classes = len(set(Y))
+
     nb_batches = math.ceil(len(Y) / batch_size)
 
     # sort by classes
@@ -82,10 +85,10 @@ def balance_classes(X, Y, batch_size: int):
 
 
 def generate_half_labeled_batches(
-        smaller_set_X,
-        smaller_set_Y,
-        larger_set_X,
-        larger_set_Y,
+        smaller_set_X: np.ndarray,
+        smaller_set_Y: np.ndarray,
+        larger_set_X: np.ndarray,
+        larger_set_Y: np.ndarray,
         batch_size: int,
 ):
     """
