@@ -5,30 +5,53 @@ import torch
 from pytorch_lightning import Trainer, LightningModule
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataModule
+from pl_bolts.datamodules import MNISTDataModule, LightningDataModule
 from pl_bolts.models.gans.basic.components import Generator, Discriminator
 
 
 class GAN(LightningModule):
 
     def __init__(self,
-                 input_channels=1,
-                 input_width=28,
-                 input_height=28,
-                 latent_dim=32,
-                 batch_size=32,
-                 b1=0.5,
-                 b2=0.999,
-                 learning_rate=0.0002,
-                 data_dir='',
+                 datamodule: LightningDataModule = None,
+                 input_channels: int = 1,
+                 input_width: int = 28,
+                 input_height: int = 28,
+                 latent_dim: int = 32,
+                 batch_size: int = 32,
+                 adam_b1: float = 0.5,
+                 adam_b2: float = 0.999,
+                 learning_rate: float = 0.0002,
+                 data_dir: str = '',
+                 num_workers: int = 8,
                  **kwargs):
+        """
+        Vanilla GAN implementation.
+
+        Args:
+
+            datamodule: the datamodule (train, val, test splits)
+            input_channels: num of image channels
+            input_height: image height
+            input_width: image width
+            latent_dim: emb dim for encoder
+            batch_size: the batch size
+            adam_b1: optimizer param
+            adam_b2: adam params
+            learning_rate: the learning rate
+            data_dir: where to store data
+            num_workers: data workers
+
+        """
         super().__init__()
 
         # makes self.hparams under the hood and saves to ckpt
         self.save_hyperparameters()
 
-        self.dataloaders = MNISTDataModule(data_dir=data_dir)
-        self.img_dim = self.dataloaders.size()
+        # link default data
+        if datamodule is None:
+            datamodule = MNISTDataModule(data_dir=self.hparams.data_dir, num_workers=self.hparams.num_workers)
+        self.datamodule = datamodule
+        self.img_dim = self.datamodule.size()
 
         # networks
         self.generator = self.init_generator(self.img_dim)
@@ -128,18 +151,18 @@ class GAN(LightningModule):
 
     def configure_optimizers(self):
         lr = self.hparams.learning_rate
-        b1 = self.hparams.b1
-        b2 = self.hparams.b2
+        adam_b1 = self.hparams.adam_b1
+        adam_b2 = self.hparams.adam_b2
 
-        opt_g = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
-        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
+        opt_g = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(adam_b1, adam_b2))
+        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(adam_b1, adam_b2))
         return [opt_g, opt_d], []
 
     def prepare_data(self):
-        self.dataloaders.prepare_data()
+        self.datamodule.prepare_data()
 
     def train_dataloader(self):
-        return self.dataloaders.train_dataloader(self.hparams.batch_size)
+        return self.datamodule.train_dataloader(self.hparams.batch_size)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -151,13 +174,14 @@ class GAN(LightningModule):
         parser.add_argument('--input_height', type=int, default=28,
                             help='input image height - 28 for MNIST (must be even)')
         parser.add_argument('--learning_rate', type=float, default=0.0002, help="adam: learning rate")
-        parser.add_argument('--b1', type=float, default=0.5,
+        parser.add_argument('--adam_b1', type=float, default=0.5,
                             help="adam: decay of first order momentum of gradient")
-        parser.add_argument('--b2', type=float, default=0.999,
+        parser.add_argument('--adam_b2', type=float, default=0.999,
                             help="adam: decay of first order momentum of gradient")
         parser.add_argument('--latent_dim', type=int, default=100,
                             help="generator embedding dim")
         parser.add_argument('--batch_size', type=int, default=64, help="size of the batches")
+        parser.add_argument('--num_workers', type=int, default=8, help="num dataloader workers")
         parser.add_argument('--data_dir', type=str, default='')
 
         return parser
@@ -170,5 +194,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     gan = GAN(**vars(args))
-    trainer = Trainer()
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(gan)

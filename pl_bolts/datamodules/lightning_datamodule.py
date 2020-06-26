@@ -82,7 +82,6 @@ class LightningDataModule(object):  # pragma: no cover
     def test_transforms(self, t):
         self._test_transforms = t
 
-    @property
     @abstractmethod
     def size(self) -> Tuple:
         """
