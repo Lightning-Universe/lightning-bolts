@@ -204,20 +204,6 @@ class BasicBlock(nn.Module):
         return out
 
 
-class MaskedConv2d(torch.nn.Module):
-
-    def __init__(self, c):
-        super().__init__()
-        self.conv = torch.nn.Conv2d(in_channels=c, out_channels=c, kernel_size=3)
-
-    def forward(self, x):
-        # pad top and sides so conv only accounts for things above it
-        x = F.pad(x, pad=[1, 1, 2, 0])
-
-        x = self.conv(x)
-        return x
-
-
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
