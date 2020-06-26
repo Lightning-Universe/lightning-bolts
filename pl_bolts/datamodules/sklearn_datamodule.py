@@ -140,7 +140,7 @@ class SklearnDataModule(LightningDataModule):
             >>> # test set
             >>> test_loader = loaders.test_dataloader(batch_size=32)
             >>> len(test_loader.dataset)
-            38
+            51
             >>> len(test_loader)
             51
 
