@@ -11,7 +11,7 @@ import pytest
 def test_linear_regression_model(tmpdir):
     reset_seed()
 
-    # Test model with Sklearn Dataset
+    # Test model with Sklearn dataset
     # create dataset
     from sklearn.datasets import make_regression
     X, y = make_regression(n_samples=100, n_features=3, random_state=1234)
@@ -22,6 +22,16 @@ def test_linear_regression_model(tmpdir):
     trainer.fit(model, loaders.train_dataloader(batch_size=2), loaders.val_dataloader(batch_size=2))
     trainer.test(model, loaders.test_dataloader(batch_size=2))
     #TODO: check loss/accuracy value
+
+    # Test model with PyTorch dataset
+    X = torch.rand(100, 3)
+    y = torch.rand(100)
+
+    model = LinearRegression(input_dim=3, learning_rate=0.01)
+    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer.fit(model, loaders.train_dataloader(batch_size=2), loaders.val_dataloader(batch_size=2))
+    trainer.test(model, loaders.test_dataloader(batch_size=2))
+
 
 
 def test_logistic_regression_model(tmpdir):
