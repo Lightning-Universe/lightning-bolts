@@ -90,15 +90,6 @@ class CPCResNet101(nn.Module):
 
         return nn.Sequential(*layers), sample_batch
 
-    def recover_format(self, x):
-        # (b*p, dim, 2, 2) -> (b*p, 4*d)
-        x = x.view(x.size(0), -1)
-
-        # (b*p, 4*d) -> (b, p, 4*d)
-        x = x.view(self.batch_size, -1, x.size(1))
-
-        return x
-
     def flatten(self, x):
         x = x.view(self.batch_size, -1)
         x = F.avg_pool1d(x.unsqueeze(1), 4).squeeze(1)
@@ -211,20 +202,6 @@ class BasicBlock(nn.Module):
         out = self.relu(out)
 
         return out
-
-
-class MaskedConv2d(torch.nn.Module):
-
-    def __init__(self, c):
-        super().__init__()
-        self.conv = torch.nn.Conv2d(in_channels=c, out_channels=c, kernel_size=3)
-
-    def forward(self, x):
-        # pad top and sides so conv only accounts for things above it
-        x = F.pad(x, pad=[1, 1, 2, 0])
-
-        x = self.conv(x)
-        return x
 
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):

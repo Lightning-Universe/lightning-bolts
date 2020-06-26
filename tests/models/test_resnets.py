@@ -1,6 +1,7 @@
 import pytest
 import torch
 
+from pl_bolts.models.self_supervised.amdim import AMDIMEncoder
 from pl_bolts.models.self_supervised.cpc import CPCResNet101
 from pl_bolts.models.self_supervised.resnets import (
     resnet18,
@@ -35,7 +36,12 @@ def test_cpc_resnet(tmpdir):
     wide_resnet50_2,
     wide_resnet101_2
 ])
-def test_resnets(tmpdir, model_class):
+def test_torchvision_resnets(tmpdir, model_class):
     x = torch.rand(3, 3, 64, 64)
     model = model_class()
     model(x)
+
+
+def test_amdim_encoder(tmpdir):
+    dummy_batch = torch.zeros((2, 3, 32, 32))
+    model = AMDIMEncoder(dummy_batch)
