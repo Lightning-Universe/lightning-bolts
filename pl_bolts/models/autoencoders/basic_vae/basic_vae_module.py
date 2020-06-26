@@ -241,16 +241,6 @@ class VAE(LightningModule):
     def test_dataloader(self):
         return self.datamodule.test_dataloader(self.hparams.batch_size)
 
-    def _log_images(self, y, y_hat, step_name, limit=1):
-        y = y[:limit]
-        y_hat = y_hat[:limit]
-
-        pred_images = torchvision.utils.make_grid(y_hat)
-        target_images = torchvision.utils.make_grid(y)
-
-        self.logger.experiment.add_image(f'{step_name}_predicted_images', pred_images, self.trainer.global_step)
-        self.logger.experiment.add_image(f'{step_name}_target_images', target_images, self.trainer.global_step)
-
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)

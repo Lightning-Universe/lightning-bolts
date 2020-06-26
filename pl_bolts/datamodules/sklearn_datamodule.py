@@ -43,7 +43,7 @@ class SklearnDataset(Dataset):
         y = self.Y[idx]
 
         # Do not convert integer to float for classification data
-        if not np.issubdtype(y, np.integer):
+        if not y.dtype == np.integer:
             y = y.astype(np.float32)
 
         if self.X_transform:
@@ -134,13 +134,13 @@ class SklearnDataModule(LightningDataModule):
             >>> # validation set
             >>> val_loader = loaders.val_dataloader(batch_size=32)
             >>> len(val_loader.dataset)
-            75
+            100
             >>> len(val_loader)
-            2
+            3
             >>> # test set
             >>> test_loader = loaders.test_dataloader(batch_size=32)
             >>> len(test_loader.dataset)
-            38
+            51
             >>> len(test_loader)
             1
 
@@ -167,11 +167,11 @@ class SklearnDataModule(LightningDataModule):
             X, y = X[hold_out_size:], y[hold_out_size:]
 
         # if don't have x_val and y_val create split from X
-        if x_val is None and y_val is None:
+        if x_val is None and y_val is None and val_split > 0:
             x_val, y_val = x_val_hold_out, y_val_holdout
 
         # if don't have x_test, y_test create split from X
-        if x_test is None and y_test is None:
+        if x_test is None and y_test is None and test_split > 0:
             x_test, y_test = x_test_hold_out, y_test_holdout
 
         self._init_datasets(X, y, x_val, y_val, x_test, y_test)

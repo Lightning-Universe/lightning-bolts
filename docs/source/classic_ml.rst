@@ -14,7 +14,7 @@ values.
 
 .. code-block:: python
 
-    from pl_bolts.models import LinearRegression
+    from pl_bolts.models.regression import LinearRegression
     import pytorch_lightning as pl
     from pl_bolts.datamodules import SklearnDataModule
     from sklearn.datasets import load_boston
@@ -30,29 +30,54 @@ values.
 .. autoclass:: pl_bolts.models.regression.linear_regression.LinearRegression
    :noindex:
 
+-------------
+
 Logistic Regression
 -------------------
-Logistic regression is a linear model used for classification, i.e. when we have a categorical target variable.
-This implementation supports both binary classification (when the number of classes/labels is 2) as well as multi-class
-classification. We can think of logistic regression as a one-layer neural network with a logistic (or sigmoid) function
-as the activation function in the case of binary classification. In the case of multi-class classification, we can use
-a generalization of the One-vs-All approach by outputting probabilities for each class and returning the "argmax", the
-class label corresponding to the highest probability.
+Logistic regression is a non-linear model used for classification, i.e. when we have a categorical target variable.
+This implementation supports both binary and multi-class classification.
+
+To leverage autograd we think of logistic regression as a one-layer neural network with a sigmoid activation. This
+allows us to support training on GPUs and TPUs.
 
 .. code-block:: python
 
-    from pl_bolts.models import LogisticRegression
-    import pytorch_lightning as pl
-    from pl_bolts.datamodules import SklearnDataLoaders
     from sklearn.datasets import load_iris
+    from pl_bolts.models.regression import LogisticRegression
+    from pl_bolts.datamodules import SklearnDataModule
+    import pytorch_lightning as pl
 
+    # use any numpy or sklearn dataset
     X, y = load_iris(return_X_y=True)
-    loaders = SklearnDataLoaders(X, y)
+    dm = SklearnDataModule(X, y)
 
+    # build model
     model = LogisticRegression(input_dim=4, num_classes=3)
-    trainer = pl.Trainer()
-    trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
-    trainer.test(test_dataloaders=loaders.test_dataloader(batch_size=12))
 
-.. autoclass:: pl_bolts.models.regression.linear_regression.LogisticRegression
+    # fit
+    trainer = pl.Trainer(tpu_cores=8, precision=16)
+    trainer.fit(model, dm.train_dataloader(), dm.val_dataloader())
+
+    trainer.test(test_dataloaders=dm.test_dataloader(batch_size=12))
+
+Any input will be flattened across all dimensions except the firs one (batch).
+This means images, sound, etc... work out of the box.
+
+.. code-block:: python
+
+    # create dataset
+    dm = MNISTDataModule(num_workers=0, data_dir=tmpdir)
+
+    model = LogisticRegression(input_dim=28 * 28, num_classes=10, learning_rate=0.001)
+    model.prepare_data = dm.prepare_data
+    model.train_dataloader = dm.train_dataloader
+    model.val_dataloader = dm.val_dataloader
+    model.test_dataloader = dm.test_dataloader
+
+    trainer = pl.Trainer(max_epochs=2)
+    trainer.fit(model)
+    trainer.test(model)
+    # {test_acc: 0.92}
+
+.. autoclass:: pl_bolts.models.regression.logistic_regression.LogisticRegression
    :noindex:
