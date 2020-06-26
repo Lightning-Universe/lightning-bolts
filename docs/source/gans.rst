@@ -7,14 +7,11 @@ Basic GAN
 This is a basic GAN.
 
 
-.. testcode::
+.. code-block:: python
 
     from pl_bolts.models.gans import GAN
     ...
     gan = GAN()
-
-Train::
-
     trainer = Trainer()
     trainer.fit(gan)
 
