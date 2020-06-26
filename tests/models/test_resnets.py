@@ -36,7 +36,7 @@ def test_cpc_resnet(tmpdir):
     wide_resnet50_2,
     wide_resnet101_2
 ])
-def test_resnets(tmpdir, model_class):
+def test_torchvision_resnets(tmpdir, model_class):
     x = torch.rand(3, 3, 64, 64)
     model = model_class()
     model(x)

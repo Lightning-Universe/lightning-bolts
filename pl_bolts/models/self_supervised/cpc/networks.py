@@ -90,15 +90,6 @@ class CPCResNet101(nn.Module):
 
         return nn.Sequential(*layers), sample_batch
 
-    def recover_format(self, x):
-        # (b*p, dim, 2, 2) -> (b*p, 4*d)
-        x = x.view(x.size(0), -1)
-
-        # (b*p, 4*d) -> (b, p, 4*d)
-        x = x.view(self.batch_size, -1, x.size(1))
-
-        return x
-
     def flatten(self, x):
         x = x.view(self.batch_size, -1)
         x = F.avg_pool1d(x.unsqueeze(1), 4).squeeze(1)
