@@ -28,3 +28,4 @@ Example::
     feat_maps = resnet(x)
 
 .. autofunction:: pl_bolts.utils.self_supervised.torchvision_ssl_encoder
+    :noindex:
