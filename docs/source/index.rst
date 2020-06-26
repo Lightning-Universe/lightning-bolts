@@ -61,6 +61,8 @@ PyTorch-Lightning-Bolts documentation
    :caption: Data Processing
 
    transforms
+   self_supervised_utils
+   semi_sup_processing
 
 .. toctree::
    :maxdepth: 2

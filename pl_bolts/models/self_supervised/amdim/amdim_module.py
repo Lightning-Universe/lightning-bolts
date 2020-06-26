@@ -11,7 +11,7 @@ import pl_bolts
 from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
-from pl_bolts.utils.ssl_utils import torchvision_ssl_encoder
+from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
 
 class AMDIM(pl.LightningModule):
