@@ -38,7 +38,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    from pl_bolts.models.rl.dqn_model import DQN
+    from pl_bolts.models.rl import DQN
     dqn = DQN("PongNoFrameskip-v4")
     trainer = Trainer()
     trainer.fit(dqn)
@@ -55,7 +55,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    from pl_bolts.models.rl.double_dqn_model import DoubleDQN
+    from pl_bolts.models.rl import DoubleDQN
     ddqn = DoubleDQN("PongNoFrameskip-v4")
     trainer = Trainer()
     trainer.fit(ddqn)
@@ -72,7 +72,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    from pl_bolts.models.rl.dueling_dqn_model import DuelingDQN
+    from pl_bolts.models.rl import DuelingDQN
     dueling_dqn = DuelingDQN("PongNoFrameskip-v4")
     trainer = Trainer()
     trainer.fit(dueling_dqn)
@@ -90,7 +90,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    from pl_bolts.models.rl.noisy_dqn_model import NoisyDQN
+    from pl_bolts.models.rl import NoisyDQN
     noisy_dqn = NoisyDQN("PongNoFrameskip-v4")
     trainer = Trainer()
     trainer.fit(noisy_dqn)
@@ -108,7 +108,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    from pl_bolts.models.rl.n_step_dqn_model import NStepDQN
+    from pl_bolts.models.rl import NStepDQN
     n_step_dqn = NStepDQN("PongNoFrameskip-v4")
     trainer = Trainer()
     trainer.fit(n_step_dqn)
@@ -126,7 +126,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    from pl_bolts.models.rl.per_dqn_model import PERDQN
+    from pl_bolts.models.rl import PERDQN
     per_dqn = PERDQN("PongNoFrameskip-v4")
     trainer = Trainer()
     trainer.fit(per_dqn)
@@ -151,7 +151,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    from pl_bolts.models.rl.reinforce_model import Reinforce
+    from pl_bolts.models.rl import Reinforce
     reinforce = Reinforce("CartPole-v0")
     trainer = Trainer()
     trainer.fit(reinforce)
@@ -169,7 +169,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    from pl_bolts.models.rl.vpg_model import PolicyGradient
+    from pl_bolts.models.rl import PolicyGradient
     vpg = PolicyGradient("CartPole-v0")
     trainer = Trainer()
     trainer.fit(vpg)
