@@ -8,6 +8,7 @@ import pytorch_lightning as pl
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 from pytorch_lightning.metrics.classification import accuracy
 
+
 class LogisticRegression(pl.LightningModule):
 
     def __init__(self,
