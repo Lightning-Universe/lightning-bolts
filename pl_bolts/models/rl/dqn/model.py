@@ -280,7 +280,7 @@ class DQN(pl.LightningModule):
         return DataLoader(dataset=self.dataset, batch_size=self.batch_size)
 
     @staticmethod
-    def add_model_specific_args(arg_parser) -> argparse.ArgumentParser:
+    def add_model_specific_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         """
         Adds arguments for DQN model
 
