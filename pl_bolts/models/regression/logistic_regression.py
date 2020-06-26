@@ -8,13 +8,14 @@ import pytorch_lightning as pl
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 from pytorch_lightning.metrics.classification import accuracy
 
+
 class LogisticRegression(pl.LightningModule):
 
     def __init__(self,
                  input_dim: int,
                  num_classes: int,
-                 bias: bool =True,
-                 learning_rate: float =0.0001,
+                 bias: bool = True,
+                 learning_rate: float = 0.0001,
                  optimizer: Optimizer = Adam,
                  l1_strength: float = 0.0,
                  l2_strength: float = 0.0,
@@ -80,7 +81,7 @@ class LogisticRegression(pl.LightningModule):
         x = x.view(x.size(0), -1)
         y_hat = self(x)
         acc = accuracy(y_hat, y)
-        return {'val_loss': F.cross_entropy(y_hat, y), 'acc':acc}
+        return {'val_loss': F.cross_entropy(y_hat, y), 'acc': acc}
 
     def validation_epoch_end(self, outputs):
         acc = torch.stack([x['acc'] for x in outputs]).mean()
@@ -98,7 +99,7 @@ class LogisticRegression(pl.LightningModule):
         x = x.view(x.size(0), -1)
         y_hat = self(x)
         acc = accuracy(y_hat, y)
-        return {'test_loss': F.cross_entropy(y_hat, y), 'acc':acc}
+        return {'test_loss': F.cross_entropy(y_hat, y), 'acc': acc}
 
     def test_epoch_end(self, outputs):
         acc = torch.stack([x['acc'] for x in outputs]).mean()

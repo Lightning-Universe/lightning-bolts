@@ -7,6 +7,7 @@ from torch.optim import Adam
 import pytorch_lightning as pl
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 
+
 class LinearRegression(pl.LightningModule):
 
     def __init__(self,

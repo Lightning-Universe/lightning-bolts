@@ -262,6 +262,65 @@ But more importantly, you can scale up to many GPUs, TPUs or even CPUs
     # 128 CPUs
     trainer = pl.Trainer(num_processes=128)
 
+Logistic Regression
+^^^^^^^^^^^^^^^^^^^
+Here's an example for Logistic regression
+
+.. code-block:: python
+
+    from sklearn.datasets import load_iris
+    from pl_bolts.models.regression import LogisticRegression
+    from pl_bolts.datamodules import SklearnDataModule
+    import pytorch_lightning as pl
+
+    # use any numpy or sklearn dataset
+    X, y = load_iris(return_X_y=True)
+    dm = SklearnDataModule(X, y)
+
+    # build model
+    model = LogisticRegression(input_dim=4, num_classes=3)
+
+    # fit
+    trainer = pl.Trainer(tpu_cores=8, precision=16)
+    trainer.fit(model, dm.train_dataloader(), dm.val_dataloader())
+
+    trainer.test(test_dataloaders=dm.test_dataloader(batch_size=12))
+
+Any input will be flattened across all dimensions except the firs one (batch).
+This means images, sound, etc... work out of the box.
+
+.. code-block:: python
+
+    # create dataset
+    dm = MNISTDataModule(num_workers=0, data_dir=tmpdir)
+
+    model = LogisticRegression(input_dim=28 * 28, num_classes=10, learning_rate=0.001)
+    model.prepare_data = dm.prepare_data
+    model.train_dataloader = dm.train_dataloader
+    model.val_dataloader = dm.val_dataloader
+    model.test_dataloader = dm.test_dataloader
+
+    trainer = pl.Trainer(max_epochs=2)
+    trainer.fit(model)
+    trainer.test(model)
+    # {test_acc: 0.92}
+
+But more importantly, you can scale up to many GPUs, TPUs or even CPUs
+
+.. code-block:: python
+
+    # 8 GPUs
+    trainer = pl.Trainer(num_gpus=8)
+
+    # 8 TPUs
+    trainer = pl.Trainer(tpu_cores=8)
+
+    # 32 GPUs
+    trainer = pl.Trainer(num_gpus=8, num_nodes=4)
+
+    # 128 CPUs
+    trainer = pl.Trainer(num_processes=128)
+
 ----------------
 
 Regular PyTorch
