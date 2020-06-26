@@ -50,6 +50,7 @@ PyTorch-Lightning-Bolts documentation
 
    autoencoders
    classic_ml
+   convolutional
    gans
    reinforce_learn
    self_supervised_models

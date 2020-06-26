@@ -3,7 +3,6 @@ PixelCNN
 Implemented by: William Falcon
 Reference: https://arxiv.org/pdf/1905.09272.pdf (page 15)
 Accessed: May 14, 2020
-
 """
 from torch import nn
 from torch.nn import functional as F
@@ -15,7 +14,7 @@ class PixelCNN(nn.Module):
         """
         Implementation of `Pixel CNN <https://arxiv.org/abs/1606.05328>`_.
         Paper authors: Aaron van den Oord, Nal Kalchbrenner, Oriol Vinyals, Lasse Espeholt, Alex Graves,
-            Koray Kavukcuoglu
+        Koray Kavukcuoglu
 
         Implemented by:
 
@@ -29,10 +28,9 @@ class PixelCNN(nn.Module):
             >>> model = PixelCNN(input_channels=3)
             >>> x = torch.rand(5, 3, 64, 64)
             >>> out = model(x)
-
+            ...
             >>> out.shape
             torch.Size([5, 3, 64, 64])
-
         """
         super().__init__()
         self.input_channels = input_channels

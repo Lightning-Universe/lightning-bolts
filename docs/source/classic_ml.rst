@@ -54,5 +54,5 @@ class label corresponding to the highest probability.
     trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
     trainer.test(test_dataloaders=loaders.test_dataloader(batch_size=12))
 
-.. autoclass:: pl_bolts.models.regression.linear_regression.LogisticRegression
+.. autoclass:: pl_bolts.models.regression.logistic_regression.LogisticRegression
    :noindex:
