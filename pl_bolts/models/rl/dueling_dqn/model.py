@@ -21,7 +21,7 @@ class DuelingDQN(DQN):
 
             >>> from pl_bolts.models.rl.dueling_dqn.model import DuelingDQN
             ...
-            >>> model = DQN("PongNoFrameskip-v4")
+            >>> model = DuelingDQN("PongNoFrameskip-v4")
 
         Train::
 
@@ -40,7 +40,7 @@ class DuelingDQN(DQN):
             batch_size: size of minibatch pulled from the DataLoader
             replay_size: total capacity of the replay buffer
             warm_start_size: how many random steps through the environment to be carried out at the start of
-            training to fill the buffer with a starting point
+                training to fill the buffer with a starting point
             sample_len: the number of samples to pull from the dataset iterator and feed to the DataLoader
 
         ..note: Currently only supports cpu and single gpu training with `distributed_backend=dp`

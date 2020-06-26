@@ -6,24 +6,26 @@ from torch.optim import Adam
 
 import pytorch_lightning as pl
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
+from pytorch_lightning.metrics.classification import accuracy
 
-class LinearRegression(pl.LightningModule):
+class LogisticRegression(pl.LightningModule):
 
     def __init__(self,
                  input_dim: int,
-                 bias: bool = True,
-                 learning_rate: float = 0.0001,
+                 num_classes: int,
+                 bias: bool =True,
+                 learning_rate: float =0.0001,
                  optimizer: Optimizer = Adam,
-                 l1_strength: float = None,
-                 l2_strength: float = None,
+                 l1_strength: float = 0.0,
+                 l2_strength: float = 0.0,
                  **kwargs):
         """
-        Linear regression model implementing - with optional L1/L2 regularization
-        $$min_{W} ||(Wx + b) - y ||_2^2 $$
+        Logistic regression model
 
         Args:
-            input_dim: number of dimensions of the input (1+)
-            bias: If false, will not use $$+b$$
+            input_dim: number of dimensions of the input (at least 1)
+            num_classes: number of class labels (binary: 2, multi-class: >2)
+            bias: specifies if a constant or intercept should be fitted (equivalent to fit_intercept in sklearn)
             learning_rate: learning_rate for the optimizer
             optimizer: the optimizer to use (default='Adam')
             l1_strength: L1 regularization strength (default=None)
@@ -34,7 +36,7 @@ class LinearRegression(pl.LightningModule):
         self.save_hyperparameters()
         self.optimizer = optimizer
 
-        self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=1, bias=bias)
+        self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=self.hparams.num_classes, bias=bias)
 
     def forward(self, x):
         y_hat = self.linear(x)
@@ -48,23 +50,24 @@ class LinearRegression(pl.LightningModule):
 
         y_hat = self(x)
 
-        loss = F.mse_loss(y_hat, y)
+        # PyTorch cross_entropy function combines log_softmax and nll_loss in single function
+        loss = F.cross_entropy(y_hat, y)
 
         # L1 regularizer
-        if self.hparams.l1_strength is not None:
+        if self.hparams.l1_strength > 0:
             l1_reg = torch.tensor(0.)
             for param in self.parameters():
                 l1_reg += torch.norm(param, 1)
             loss += self.hparams.l1_strength * l1_reg
 
         # L2 regularizer
-        if self.hparams.l2_strength is not None:
+        if self.hparams.l2_strength > 0:
             l2_reg = torch.tensor(0.)
             for param in self.parameters():
                 l2_reg += torch.norm(param, 2)
             loss += self.hparams.l2_strength * l2_reg
 
-        tensorboard_logs = {'train_mse_loss': loss}
+        tensorboard_logs = {'train_ce_loss': loss}
         progress_bar_metrics = tensorboard_logs
         return {
             'loss': loss,
@@ -76,11 +79,13 @@ class LinearRegression(pl.LightningModule):
         x, y = batch
         x = x.view(x.size(0), -1)
         y_hat = self(x)
-        return {'val_loss': F.mse_loss(y_hat, y)}
+        acc = accuracy(y_hat, y)
+        return {'val_loss': F.cross_entropy(y_hat, y), 'acc':acc}
 
     def validation_epoch_end(self, outputs):
+        acc = torch.stack([x['acc'] for x in outputs]).mean()
         val_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
-        tensorboard_logs = {'val_mse_loss': val_loss}
+        tensorboard_logs = {'val_ce_loss': val_loss, 'val_acc': acc}
         progress_bar_metrics = tensorboard_logs
         return {
             'val_loss': val_loss,
@@ -90,12 +95,15 @@ class LinearRegression(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         x, y = batch
+        x = x.view(x.size(0), -1)
         y_hat = self(x)
-        return {'test_loss': F.mse_loss(y_hat, y)}
+        acc = accuracy(y_hat, y)
+        return {'test_loss': F.cross_entropy(y_hat, y), 'acc':acc}
 
     def test_epoch_end(self, outputs):
+        acc = torch.stack([x['acc'] for x in outputs]).mean()
         test_loss = torch.stack([x['test_loss'] for x in outputs]).mean()
-        tensorboard_logs = {'test_mse_loss': test_loss}
+        tensorboard_logs = {'test_ce_loss': test_loss, 'test_acc': acc}
         progress_bar_metrics = tensorboard_logs
         return {
             'test_loss': test_loss,
@@ -111,6 +119,7 @@ class LinearRegression(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--learning_rate', type=float, default=0.0001)
         parser.add_argument('--input_dim', type=int, default=None)
+        parser.add_argument('--num_classes', type=int, default=None)
         parser.add_argument('--bias', default='store_true')
         parser.add_argument('--batch_size', type=int, default=16)
         return parser
@@ -120,20 +129,20 @@ if __name__ == '__main__':  # pragma: no cover
     from argparse import ArgumentParser
     pl.seed_everything(1234)
 
-    # create dataset
-    from sklearn.datasets import load_boston
-    X, y = load_boston(return_X_y=True)  # these are numpy arrays
+    # Example: Iris dataset in Sklearn (4 features, 3 class labels)
+    from sklearn.datasets import load_iris
+    X, y = load_iris(return_X_y=True)
     loaders = SklearnDataModule(X, y)
 
     # args
     parser = ArgumentParser()
-    parser = LinearRegression.add_model_specific_args(parser)
+    parser = LogisticRegression.add_model_specific_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
     # model
-    model = LinearRegression(input_dim=13, l1_strength=1, l2_strength=1)
-    # model = LinearRegression(**vars(args))
+    # model = LogisticRegression(**vars(args))
+    model = LogisticRegression(input_dim=4, num_classes=3, l1_strength=0.01, learning_rate=0.01)
 
     # train
     trainer = pl.Trainer.from_argparse_args(args)

@@ -33,7 +33,7 @@ class Reinforce(pl.LightningModule):
         """
         PyTorch Lightning implementation of `REINFORCE
         <https://papers.nips.cc/paper/
-        1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
+        1713-policy-gradient-methods-for-rl-learning-with-function-approximation.pdf>`_
 
         Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
 
