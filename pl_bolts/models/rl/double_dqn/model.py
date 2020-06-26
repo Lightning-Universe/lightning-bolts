@@ -24,7 +24,7 @@ class DoubleDQN(DQN):
 
     Example:
 
-        >>> from pl_bolts.models.rl import DoubleDQN
+        >>> from pl_bolts.models.rl.double_dqn.model import DoubleDQN
         ...
         >>> model = DoubleDQN("PongNoFrameskip-v4")
 
@@ -47,6 +47,9 @@ class DoubleDQN(DQN):
         warm_start_size: how many random steps through the environment to be carried out at the start of
         training to fill the buffer with a starting point
         sample_len: the number of samples to pull from the dataset iterator and feed to the DataLoader
+
+    .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
+
     """
 
     def loss(self, batch: Tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:

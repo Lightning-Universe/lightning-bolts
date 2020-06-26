@@ -20,6 +20,11 @@ Contributions by: `Donal Byrne <https://github.com/djbyrne>`_
 
 ------------
 
+.. note:: 
+          RL models currently only support CPU and single GPU training with `distributed_backend=dp`. Full GPU
+          support will be added in later updates.
+
+
 DQN Models
 ----------
 The following models are based on DQN
@@ -203,4 +208,3 @@ Train::
 
 .. autoclass:: pl_bolts.models.rl.vanilla_policy_gradient.model.PolicyGradient
    :noindex:
-

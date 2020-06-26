@@ -61,6 +61,9 @@ class NStepDQN(DQN):
             training to fill the buffer with a starting point
             num_samples: the number of samples to pull from the dataset iterator and feed to the DataLoader
             n_steps: number of steps to approximate and use in the bellman update
+
+        .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
+
         """
         super().__init__(env, gpus, eps_start, eps_end, eps_last_frame, sync_rate, gamma, learning_rate,
                          batch_size, replay_size, warm_start_size, num_samples)

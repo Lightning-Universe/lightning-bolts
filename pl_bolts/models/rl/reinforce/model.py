@@ -58,6 +58,9 @@ class Reinforce(pl.LightningModule):
             lr: learning rate
             batch_size: size of minibatch pulled from the DataLoader
             batch_episodes: how many episodes to rollout for each batch of training
+
+        .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
+
         """
         super().__init__()
 
