@@ -21,8 +21,8 @@ The authors propose two methods of injecting noise to the network.
     the distribution. Noise parameters are stored inside the layer and are updated during backpropagation.
     The output of the layer is calculated as normal.
 2) Factorized Gaussian Noise: This injects nosier per input/ouput. In order to minimize the number of random values
-    this method stores two random vectors, one with the size of the input and the other with the size of the output. Using
-    these two vectors, a random matrix is generated for the layer by calculating the outer products of the vector
+    this method stores two random vectors, one with the size of the input and the other with the size of the output.
+    Using these two vectors, a random matrix is generated for the layer by calculating the outer products of the vector
 
 
 Benefits
