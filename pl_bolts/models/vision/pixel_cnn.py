@@ -13,6 +13,7 @@ class PixelCNN(nn.Module):
     def __init__(self, input_channels, hidden_channels=256, num_blocks=5):
         """
         Implementation of `Pixel CNN <https://arxiv.org/abs/1606.05328>`_.
+
         Paper authors: Aaron van den Oord, Nal Kalchbrenner, Oriol Vinyals, Lasse Espeholt, Alex Graves,
         Koray Kavukcuoglu
 
