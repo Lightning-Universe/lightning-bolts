@@ -14,6 +14,7 @@ Example::
 
 
 .. autofunction:: pl_bolts.utils.semi_supervised.balance_classes
+    :noindex:
 
 half labeled batches
 --------------------
@@ -23,4 +24,4 @@ Example::
     from pl_bolts.utils.semi_supervised import balance_classes
 
 .. autofunction:: pl_bolts.utils.semi_supervised.generate_half_labeled_batches
-
+    :noindex:
