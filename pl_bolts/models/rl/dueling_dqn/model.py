@@ -43,7 +43,7 @@ class DuelingDQN(DQN):
                 training to fill the buffer with a starting point
             sample_len: the number of samples to pull from the dataset iterator and feed to the DataLoader
 
-        ..note: Currently only supports cpu and single gpu training with `distributed_backend=dp`
+        .. note:: Currently only supports cpu and single gpu training with `distributed_backend=dp`
 
         """
 

@@ -60,7 +60,7 @@ class PolicyGradient(pl.LightningModule):
             batch_episodes: how many episodes to rollout for each batch of training
             entropy_beta: dictates the level of entropy per batch
 
-        ..note: Currently only supports cpu and single gpu training with `distributed_backend=dp`
+        .. note:: Currently only supports cpu and single gpu training with `distributed_backend=dp`
 
         """
         super().__init__()
