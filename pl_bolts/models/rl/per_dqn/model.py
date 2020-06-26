@@ -49,7 +49,7 @@ class PERDQN(DQN):
             training to fill the buffer with a starting point
         num_samples: the number of samples to pull from the dataset iterator and feed to the DataLoader
 
-    .. note:: Currently only supports cpu and single gpu training with `distributed_backend=dp`
+    .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
 
     """
 
