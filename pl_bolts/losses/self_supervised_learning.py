@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from pl_bolts.models.vision import PixelCNN
+from pl_bolts.models.vision.pixel_cnn import PixelCNN
 
 
 def nt_xent_loss(out_1, out_2, temperature):
