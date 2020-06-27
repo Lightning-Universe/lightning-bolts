@@ -38,7 +38,7 @@ class GPT2(nn.Module):
     ):
         """
         GPT-2 from `language Models are Unsupervised Multitask Learners <https://d4mucfpksywv.cloudfront.net/
-        better-language-models/language-models.pdf>_
+        better-language-models/language-models.pdf>`_
 
         Paper by:  Alec Radford, Jeffrey Wu, Rewon Child, David Luan, Dario Amodei, Ilya Sutskever
 
@@ -56,7 +56,6 @@ class GPT2(nn.Module):
             x = torch.randint(0, vocab_size, (seq_len, batch_size))
             model = GPT2(embed_dim=32, heads=2, layers=2, num_positions=2, vocab_size=vocab_size, num_classes=4)
             results = model(x)
-
         """
         super(GPT2, self).__init__()
 
