@@ -112,6 +112,19 @@ class ImageGPT(pl.LightningModule):
             cd pl_bolts/models/vision/image_gpt
             python igpt_module.py --learning_rate 1e-2 --batch_size 32 --gpus 4
 
+        Args:
+
+            datamodule: LightningDataModule
+            embed_dim: the embedding dim
+            heads: number of attention heads
+            layers: number of layers
+            pixels: number of input pixels
+            vocab_size: vocab size
+            num_classes: number of classes in the input
+            classify: true if should classify
+            batch_size: the batch size
+            learning_rate: learning rate
+            steps: number of steps for cosine annealing
         """
         super(ImageGPT, self).__init__()
         self.save_hyperparameters()
