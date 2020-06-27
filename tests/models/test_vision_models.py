@@ -11,10 +11,12 @@ def test_igpt(tmpdir):
 
     trainer = pl.Trainer(limit_train_batches=2, limit_val_batches=2, limit_test_batches=2, max_epochs=1)
     trainer.fit(model)
-
     trainer.test()
-
     assert trainer.callback_metrics['test_loss'] < 1.7
+
+    model = ImageGPT(classify=True)
+    trainer = pl.Trainer(limit_train_batches=2, limit_val_batches=2, limit_test_batches=2, max_epochs=1)
+    trainer.fit(model)
 
 
 def test_gpt2(tmpdir):
