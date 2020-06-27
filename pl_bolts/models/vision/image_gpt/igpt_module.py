@@ -35,28 +35,65 @@ class ImageGPT(pl.LightningModule):
         """
         PyTorch implementation of Image GPT, based on paper `Generative Pretraining from Pixels
         <https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf>`_, and accompanying
-        `code <https://github.com/openai/image-gpt>`.
+        `code <https://github.com/openai/image-gpt>`_.
 
         **Paper by:** Mark Che, Alec Radford, Rewon Child, Jeff Wu, Heewoo Jun,
         Prafulla Dhariwal, David Luan, Ilya Sutskever
 
-        Implementation contributed by:
+        **Implementation contributed by**:
 
             - `Teddy Koker <https://github.com/teddykoker>`_
 
-        Original repo with results and more implementation details:
+        **Original repo with results and more implementation details**:
 
             - `https://github.com/teddykoker/image-gpt <https://github.com/teddykoker/image-gpt>`_
 
-        **Example Results**:
+        **Example Results (Photo credits: Teddy Koker)**:
 
         .. image:: https://raw.githubusercontent.com/teddykoker/image-gpt/master/figures/mnist.png
-            :width: 200
+            :width: 250
             :alt: credit-Teddy-Koker
 
         .. image:: https://raw.githubusercontent.com/teddykoker/image-gpt/master/figures/fmnist.png
-            :width: 200
+            :width: 250
             :alt: credit-Teddy-Koker
+
+        **Default arguments:**
+
+        .. list-table:: Argument Defaults
+            :widths: 50 25 25
+            :header-rows: 1
+
+            * - Argument
+              - Default
+              - iGPT-S (`Chen et al. <https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf>`_)
+            * - `--embed_dim`
+              - 16
+              - 512
+            * - `--heads`
+              - 2
+              - 8
+            * - `--layers`
+              - 8
+              - 24
+            * - `--pixels`
+              - 28
+              - 32
+            * - `--vocab_size`
+              - 16
+              - 512
+            * - `--num_classes`
+              - 10
+              - 10
+            * - `--batch_size`
+              - 64
+              - 128
+            * - `--learning_rate`
+              - 0.01
+              - 0.01
+            * - `--steps`
+              - 25000
+              - 1000000
 
         Example::
 
@@ -67,6 +104,13 @@ class ImageGPT(pl.LightningModule):
             model = ImageGPT(dm)
 
             pl.Trainer(gpu=4).fit(model)
+
+        As script:
+
+        .. code-block:: bash
+
+            cd pl_bolts/models/vision/image_gpt
+            python igpt_module.py --learning_rate 1e-2 --batch_size 32 --gpus 4
 
         """
         super(ImageGPT, self).__init__()
