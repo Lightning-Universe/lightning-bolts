@@ -35,10 +35,10 @@ class ImageGPT(pl.LightningModule):
         """
         PyTorch implementation of Image GPT, based on paper `Generative Pretraining from Pixels
         <https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf>`_, and accompanying
-        [code](https://github.com/openai/image-gpt).
+        `code <https://github.com/openai/image-gpt>`.
 
-        Paper by: Mark Che, Alec Radford, Rewon Child, Jeff Wu, Heewoo Jun,
-            Prafulla Dhariwal, David Luan, Ilya Sutskever
+        **Paper by:** Mark Che, Alec Radford, Rewon Child, Jeff Wu, Heewoo Jun,
+        Prafulla Dhariwal, David Luan, Ilya Sutskever
 
         Implementation contributed by:
 
@@ -47,6 +47,13 @@ class ImageGPT(pl.LightningModule):
         Original repo with results and more implementation details:
 
             - `https://github.com/teddykoker/image-gpt <https://github.com/teddykoker/image-gpt>`_
+
+        **Example Results**:
+
+        .. image:: https://github.com/teddykoker/image-gpt/blob/master/figures/mnist.png
+            :alt: credit-Teddy-Koker
+        .. image:: https://github.com/teddykoker/image-gpt/blob/master/figures/fmnist.png
+            :alt: credit-Teddy-Koker
 
         Example::
 
