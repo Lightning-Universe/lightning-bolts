@@ -51,9 +51,11 @@ class ImageGPT(pl.LightningModule):
         **Example Results**:
 
         .. image:: https://raw.githubusercontent.com/teddykoker/image-gpt/master/figures/mnist.png
+            :width: 200
             :alt: credit-Teddy-Koker
 
         .. image:: https://raw.githubusercontent.com/teddykoker/image-gpt/master/figures/fmnist.png
+            :width: 200
             :alt: credit-Teddy-Koker
 
         Example::
