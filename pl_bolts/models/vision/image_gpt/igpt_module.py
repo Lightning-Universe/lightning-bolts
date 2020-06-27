@@ -34,8 +34,8 @@ class ImageGPT(pl.LightningModule):
     ):
         """
         **Paper**: `Generative Pretraining from Pixels
-        <https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf>`_, and accompanying
-        `code <https://github.com/openai/image-gpt>`_.
+        <https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf>`_
+        [original paper `code <https://github.com/openai/image-gpt>`_].
 
         **Paper by:** Mark Che, Alec Radford, Rewon Child, Jeff Wu, Heewoo Jun,
         Prafulla Dhariwal, David Luan, Ilya Sutskever
