@@ -176,7 +176,7 @@ class MocoV2(pl.LightningModule):
         return x_gather[idx_this], idx_unshuffle
 
     @torch.no_grad()
-    def _batch_unshuffle_ddp(self, x, idx_unshuffle):
+    def _batch_unshuffle_ddp(self, x, idx_unshuffle):  # pragma: no-cover
         """
         Undo batch shuffle.
         *** Only support DistributedDataParallel (DDP) model. ***

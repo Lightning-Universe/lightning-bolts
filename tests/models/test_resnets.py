@@ -42,6 +42,12 @@ def test_torchvision_resnets(tmpdir, model_class):
     model(x)
 
 
-def test_amdim_encoder(tmpdir):
-    dummy_batch = torch.zeros((2, 3, 32, 32))
-    model = AMDIMEncoder(dummy_batch)
+@pytest.mark.parametrize("size", [
+    32,
+    64,
+    128
+])
+def test_amdim_encoder(tmpdir, size):
+    dummy_batch = torch.zeros((2, 3, size, size))
+    model = AMDIMEncoder(dummy_batch, encoder_size=size)
+    model(dummy_batch)
