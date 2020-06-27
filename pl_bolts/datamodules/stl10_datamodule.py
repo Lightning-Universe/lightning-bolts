@@ -48,6 +48,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             num_workers: how many workers to use for loading data
         """
         super().__init__(*args, **kwargs)
+        self.dims = (3, 96, 96)
         self.data_dir = data_dir
         self.unlabeled_val_split = unlabeled_val_split
         self.train_val_split = train_val_split
@@ -56,13 +57,6 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
     @property
     def num_classes(self):
         return 10
-
-    def size(self):
-        """
-        Return:
-
-            (3, 96, 96)
-        """
 
     def prepare_data(self):
         """

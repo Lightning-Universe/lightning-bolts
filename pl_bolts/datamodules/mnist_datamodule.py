@@ -39,6 +39,7 @@ class MNISTDataModule(LightningDataModule):
             num_workers: how many workers to use for loading data
         """
         super().__init__(*args, **kwargs)
+        self.dims = (1, 28, 28)
         self.data_dir = data_dir
         self.val_split = val_split
         self.num_workers = num_workers
@@ -50,14 +51,6 @@ class MNISTDataModule(LightningDataModule):
             10
         """
         return 10
-
-    def size(self):
-        """
-        Return:
-
-            (1, 28, 28)
-        """
-        return 1, 28, 28
 
     def prepare_data(self):
         """
