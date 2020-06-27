@@ -17,7 +17,8 @@ Submitting your model to bolts has a few key benefits
 4. We help you build thorough, beautiful documentation.
 5. We help you build robust tests.
 6. We'll pretrain expensive models for you and host weights.
-7. Lightning Swag + involvement in the broader contributor community :)
+7. We will improve the speed of your models!
+8. Lightning Swag + involvement in the broader contributor community :)
 
 And you still get to keep your attribution and be recognized for your work! Bolts is a community library
 built by incredible people like you!
