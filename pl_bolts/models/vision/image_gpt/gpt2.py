@@ -28,12 +28,12 @@ class Block(nn.Module):
 
 class GPT2(nn.Module):
     def __init__(
-        self, 
-            embed_dim: int, 
-            heads: int, 
-            layers: int, 
-            num_positions: int, 
-            vocab_size: int, 
+            self,
+            embed_dim: int,
+            heads: int,
+            layers: int,
+            num_positions: int,
+            vocab_size: int,
             num_classes: int
     ):
         """

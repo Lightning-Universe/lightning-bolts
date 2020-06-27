@@ -25,5 +25,5 @@ def test_gpt2(tmpdir):
     classes = 10
     x = torch.randint(0, 10, (seq_len, batch_size))
 
-    model = GPT2(embed_dim=16, heads=2, layers=2, num_positions=28*28, vocab_size=16, num_classes=classes)
+    model = GPT2(embed_dim=16, heads=2, layers=2, num_positions=28 * 28, vocab_size=16, num_classes=classes)
     model(x)
