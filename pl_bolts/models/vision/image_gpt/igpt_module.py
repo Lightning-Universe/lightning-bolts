@@ -33,7 +33,7 @@ class ImageGPT(pl.LightningModule):
             **kwargs
     ):
         """
-        PyTorch implementation of Image GPT, based on paper `Generative Pretraining from Pixels
+        **Paper**: `Generative Pretraining from Pixels
         <https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf>`_, and accompanying
         `code <https://github.com/openai/image-gpt>`_.
 
