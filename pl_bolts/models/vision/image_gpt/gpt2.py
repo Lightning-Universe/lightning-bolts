@@ -60,7 +60,7 @@ class GPT2(pl.LightningModule):
         """
         super(GPT2, self).__init__()
         self.save_hyperparameters()
-        
+
         self._init_sos_token()
         self._init_embeddings()
         self._init_layers()
@@ -81,7 +81,7 @@ class GPT2(pl.LightningModule):
         self.ln_f = nn.LayerNorm(self.hparams.embed_dim)
         self.head = nn.Linear(self.hparams.embed_dim, self.hparams.vocab_size, bias=False)
         self.clf_head = nn.Linear(self.hparams.embed_dim, self.hparams.num_classes)
-        
+
     def forward(self, x, classify=False):
         """
         Expect input as shape [sequence len, batch]
