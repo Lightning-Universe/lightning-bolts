@@ -56,6 +56,7 @@ class CIFAR10DataModule(LightningDataModule):
             num_workers: how many workers to use for loading data
         """
         super().__init__(*args, **kwargs)
+        self.dims = (3, 32, 32)
         self.DATASET = CIFAR10
         self.data_dir = data_dir
         self.val_split = val_split
@@ -68,14 +69,6 @@ class CIFAR10DataModule(LightningDataModule):
             10
         """
         return 10
-
-    def size(self):
-        """
-        Return:
-
-            (1, 32, 32)
-        """
-        return 3, 32, 32
 
     def prepare_data(self):
         """
@@ -195,6 +188,7 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
             labels: list selected CIFAR10 classes/labels
         """
         super().__init__(data_dir, val_split, num_workers, *args, **kwargs)
+        self.dims = (3, 32, 32)
         self.DATASET = TrialCIFAR10
         self.num_samples = num_samples
         self.labels = sorted(labels) if labels is not None else set(range(10))
@@ -204,6 +198,3 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
     def num_classes(self) -> int:
         """Return number of classes."""
         return len(self.labels)
-
-    def size(self):
-        return 3, 32, 32

@@ -47,6 +47,7 @@ class ImagenetDataModule(LightningDataModule):
             num_workers: how many data workers
         """
         super().__init__(*args, **kwargs)
+        self.dims = (3, self.image_size, self.image_size)
         self.data_dir = data_dir
         self.num_workers = num_workers
         self.meta_root = meta_root
@@ -62,14 +63,6 @@ class ImagenetDataModule(LightningDataModule):
 
         """
         return 1000
-
-    def size(self):
-        """
-        Return:
-
-            (3, image_size, image_size)
-        """
-        return 3, self.image_size, self.image_size
 
     def _verify_splits(self, data_dir, split):
         dirs = os.listdir(data_dir)

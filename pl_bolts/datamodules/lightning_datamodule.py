@@ -57,6 +57,7 @@ class LightningDataModule(object):  # pragma: no cover
         self._train_transforms = train_transforms
         self._val_transforms = val_transforms
         self._test_transforms = test_transforms
+        self.dims = ()
 
     @property
     def train_transforms(self):
@@ -82,13 +83,15 @@ class LightningDataModule(object):  # pragma: no cover
     def test_transforms(self, t):
         self._test_transforms = t
 
-    @abstractmethod
-    def size(self) -> Tuple:
+    def size(self, dim=None) -> Union[Tuple, int]:
         """
         Return the dimension of each input
         Either as a tuple or list of tuples
         """
-        raise NotImplementedError
+        if dim is not None:
+            return self.dims[dim]
+
+        return self.dims
 
     @abstractmethod
     def prepare_data(self, *args, **kwargs):

@@ -2,6 +2,28 @@ Model quality control
 =====================
 For bolts to be added to the library we have a **rigorous** quality control checklist
 
+Bolts vs my own repo
+--------------------
+You can do both!
+
+Feel free to maintain your own repository and link to it via the bolts documentation.
+If this is the case, make sure to maintain parity with the bolts library.
+
+Submitting your model to bolts has a few key benefits
+
+1. More visibility! (more people all over the world use your code)
+2. We test your code on every PR (CPUs, GPUs, TPUs).
+3. We host the docs (and test on every PR).
+4. We help you build thorough, beautiful documentation.
+5. We help you build robust tests.
+6. We'll pretrain expensive models for you and host weights.
+7. We will improve the speed of your models!
+8. Eligible for invited talks to discuss your implementation.
+9. Lightning Swag + involvement in the broader contributor community :)
+
+And you still get to keep your attribution and be recognized for your work! Bolts is a community library
+built by incredible people like you!
+
 Contribution requirements
 -------------------------
 
@@ -82,22 +104,6 @@ Any models and weights that are contributed are attributed to you as the author(
 and affiliation information is added to the documentation and highlighted.
 
 Thank you for all the amazing contributions!
-
-Bolts vs my own repo
-^^^^^^^^^^^^^^^^^^^^
-You can do both! Feel free to maintain your own repository and link to it via the bolts documentation.
-If this is the case, make sure to maintain parity with the bolts library.
-
-We recommend you integrate the tests into bolts so we can run them through our rigorous pipeline.
-Linking your projects via bolts gives you a few advantages:
-
-1. More visibility.
-2. Robust testing.
-3. Robust documentation.
-4. Lightning Swag + involvement in the broader contributor community :)
-
-And you still get to keep your attribution and be recognized for your work! Bolts is a community library
-built by incredible people like you!
 
 -----------
 

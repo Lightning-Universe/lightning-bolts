@@ -1,13 +1,13 @@
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
-from torchvision.datasets import MNIST
+from torchvision.datasets import FashionMNIST
 
 from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 
 
-class MNISTDataModule(LightningDataModule):
+class FashionMNISTDataModule(LightningDataModule):
 
-    name = 'mnist'
+    name = 'fashion_mnist'
 
     def __init__(
             self,
@@ -18,7 +18,7 @@ class MNISTDataModule(LightningDataModule):
             **kwargs,
     ):
         """
-        Standard MNIST, train, val, test splits and transforms
+        Standard FashionMNIST, train, val, test splits and transforms
 
         Transforms::
 
@@ -28,9 +28,9 @@ class MNISTDataModule(LightningDataModule):
 
         Example::
 
-            from pl_bolts.datamodules import MNISTDataModule
+            from pl_bolts.datamodules import FashionMNISTDataModule
 
-            dm = MNISTDataModule('.')
+            dm = FashionMNISTDataModule('.')
             model = LitModel(datamodule=dm)
 
         Args:
@@ -54,14 +54,14 @@ class MNISTDataModule(LightningDataModule):
 
     def prepare_data(self):
         """
-        Saves MNIST files to data_dir
+        Saves FashionMNIST files to data_dir
         """
-        MNIST(self.data_dir, train=True, download=True, transform=transform_lib.ToTensor())
-        MNIST(self.data_dir, train=False, download=True, transform=transform_lib.ToTensor())
+        FashionMNIST(self.data_dir, train=True, download=True, transform=transform_lib.ToTensor())
+        FashionMNIST(self.data_dir, train=False, download=True, transform=transform_lib.ToTensor())
 
     def train_dataloader(self, batch_size=32, transforms=None):
         """
-        MNIST train set removes a subset to use for validation
+        FashionMNIST train set removes a subset to use for validation
 
         Args:
             batch_size: size of batch
@@ -70,7 +70,7 @@ class MNISTDataModule(LightningDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = MNIST(self.data_dir, train=True, download=False, transform=transforms)
+        dataset = FashionMNIST(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
         dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
@@ -85,7 +85,7 @@ class MNISTDataModule(LightningDataModule):
 
     def val_dataloader(self, batch_size=32, transforms=None):
         """
-        MNIST val set uses a subset of the training set for validation
+        FashionMNIST val set uses a subset of the training set for validation
 
         Args:
             batch_size: size of batch
@@ -94,7 +94,7 @@ class MNISTDataModule(LightningDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = MNIST(self.data_dir, train=True, download=True, transform=transforms)
+        dataset = FashionMNIST(self.data_dir, train=True, download=True, transform=transforms)
         train_length = len(dataset)
         _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
         loader = DataLoader(
@@ -109,7 +109,7 @@ class MNISTDataModule(LightningDataModule):
 
     def test_dataloader(self, batch_size=32, transforms=None):
         """
-        MNIST test set uses the test split
+        FashionMNIST test set uses the test split
 
         Args:
             batch_size: size of batch
@@ -118,7 +118,7 @@ class MNISTDataModule(LightningDataModule):
         if transforms is None:
             transforms = self._default_transforms()
 
-        dataset = MNIST(self.data_dir, train=False, download=False, transform=transforms)
+        dataset = FashionMNIST(self.data_dir, train=False, download=False, transform=transforms)
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
