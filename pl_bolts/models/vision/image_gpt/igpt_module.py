@@ -179,17 +179,20 @@ class ImageGPT(pl.LightningModule):
         x, y = batch
         x = _shape_input(x)
 
+        result = {}
         if self.hparams.classify:
             clf_logits = self.gpt(x, classify=True)
             loss = self.criterion(clf_logits, y)
             _, preds = torch.max(clf_logits, 1)
             correct = preds == y
-            return {"val_loss": loss, "correct": correct}
+            result.update({"val_loss": loss, "correct": correct})
         else:
             logits = self.gpt(x)
             logits = logits.view(-1, logits.size(-1))
             loss = self.criterion(logits, x.view(-1).long())
-            return {"val_loss": loss}
+            result.update({"val_loss": loss})
+
+        return result
 
     def validation_epoch_end(self, outs):
         avg_loss = torch.stack([x["val_loss"] for x in outs]).mean()
