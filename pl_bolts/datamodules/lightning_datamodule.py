@@ -83,7 +83,7 @@ class LightningDataModule(object):  # pragma: no cover
     def test_transforms(self, t):
         self._test_transforms = t
 
-    def size(self, dim=None) -> Tuple:
+    def size(self, dim=None) -> Union[Tuple, int]:
         """
         Return the dimension of each input
         Either as a tuple or list of tuples
