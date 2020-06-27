@@ -19,7 +19,6 @@ def test_igpt(tmpdir):
 
 def test_gpt2(tmpdir):
 
-    # TODO: should there be a "correctness" test as well
     seq_len = 17
     batch_size = 32
     classes = 10
