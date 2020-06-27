@@ -1,5 +1,20 @@
 import torch
-from pl_bolts.models import GPT2
+from pl_bolts.models import GPT2, ImageGPT
+from pl_bolts.datamodules import MNISTDataModule
+import pytorch_lightning as pl
+
+
+def test_igpt(tmpdir):
+    pl.seed_everything(0)
+    dm = MNISTDataModule(tmpdir)
+    model = ImageGPT(datamodule=dm)
+
+    trainer = pl.Trainer(limit_train_batches=2, limit_val_batches=2, limit_test_batches=2, max_epochs=1)
+    trainer.fit(model)
+
+    trainer.test()
+
+    assert trainer.callback_metrics['test_loss'] < 1.0
 
 
 def test_gpt2(tmpdir):

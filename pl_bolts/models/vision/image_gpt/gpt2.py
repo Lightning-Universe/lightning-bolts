@@ -84,7 +84,7 @@ class GPT2(nn.Module):
         """
         length, batch = x.shape
 
-        h = self.token_embeddings(x)
+        h = self.token_embeddings(x.long())
 
         # prepend sos token
         sos = torch.ones(1, batch, self.embed_dim, device=x.device) * self.sos

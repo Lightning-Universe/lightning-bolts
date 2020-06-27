@@ -1,42 +1,80 @@
+import os
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader, random_split
 import pytorch_lightning as pl
 import numpy as np
-from pl_bolts.datamodules import MNISTDataModule
+from pl_bolts.datamodules import FashionMNISTDataModule, ImagenetDataModule
 from pl_bolts.models.vision.image_gpt.gpt2 import GPT2
 from pl_bolts.datamodules import LightningDataModule
 
 
+def _shape_input(x):
+    """shape batch of images for input into GPT2 model"""
+    x = x.view(x.shape[0], -1)  # flatten images into sequences
+    x = x.transpose(0, 1).contiguous()  # to shape [seq len, batch]
+    return x
+
+
 class ImageGPT(pl.LightningModule):
-    def __init__(self,
-                 datamodule: LightningDataModule = None,
-                 embed_dim: int = 16,
-                 heads: int = 2,
-                 layers: int = 2,
-                 pixels: int = 28,
-                 vocab_size: int = 16,
-                 num_classes: int = 10,
-                 classify: bool = False,
-                 batch_size: int = 64,
-                 learning_rate: float = 1e-2,
-                 steps: int = 25_000,
-                 **kwargs
-                 ):
+    def __init__(
+            self,
+            datamodule: LightningDataModule = None,
+            embed_dim: int = 16,
+            heads: int = 2,
+            layers: int = 2,
+            pixels: int = 28,
+            vocab_size: int = 16,
+            num_classes: int = 10,
+            classify: bool = False,
+            batch_size: int = 64,
+            learning_rate: float = 1e-2,
+            steps: int = 25_000,
+            **kwargs
+    ):
+        """
+        PyTorch implementation of Image GPT, based on paper `Generative Pretraining from Pixels
+        <https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf>`_, and accompanying
+        [code](https://github.com/openai/image-gpt).
+
+        Paper by: Mark Che, Alec Radford, Rewon Child, Jeff Wu, Heewoo Jun,
+            Prafulla Dhariwal, David Luan, Ilya Sutskever
+
+        Implementation contributed by:
+
+            - `Teddy Koker <https://github.com/teddykoker>`_
+
+        Original repo with results and more implementation details:
+
+            - `https://github.com/teddykoker/image-gpt <https://github.com/teddykoker/image-gpt>`_
+
+        Example::
+
+            import pytorch_lightning as pl
+            from pl_bolts.models.vision import ImageGPT
+
+            dm = MNISTDataModule('.')
+            model = ImageGPT(dm)
+
+            pl.Trainer(gpu=4).fit(model)
+
+        """
         super(ImageGPT, self).__init__()
         self.save_hyperparameters()
 
         # default to MNIST if no datamodule given
         if datamodule is None:
-            datamodule = MNISTDataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            datamodule = FashionMNISTDataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            self.hparams.pixels = datamodule.size(1)
+            self.hparams.num_classes = datamodule.num_classes
+
         self.datamodule = datamodule
-        num_pixels = self.datamodule.size(1)
 
         self.gpt = GPT2(
             embed_dim=self.hparams.embed_dim,
             heads=self.hparams.heads,
             layers=self.hparams.layers,
-            num_positions=num_pixels * num_pixels,
+            num_positions=self.hparams.pixels * self.hparams.pixels,
             vocab_size=self.hparams.vocab_size,
             num_classes=self.hparams.num_classes,
         )
@@ -65,7 +103,7 @@ class ImageGPT(pl.LightningModule):
             loss = self.criterion(clf_logits, y)
         else:
             logits = self.gpt(x)
-            loss = self.criterion(logits.view(-1, logits.size(-1)), x.view(-1))
+            loss = self.criterion(logits.view(-1, logits.size(-1)), x.view(-1).long())
 
         logs = {"loss": loss}
         return {"loss": loss, "log": logs}
@@ -82,7 +120,8 @@ class ImageGPT(pl.LightningModule):
             return {"val_loss": loss, "correct": correct}
         else:
             logits = self.gpt(x)
-            loss = self.criterion(logits.view(-1, logits.size(-1)), x.view(-1))
+            logits = logits.view(-1, logits.size(-1))
+            loss = self.criterion(logits, x.view(-1).long())
             return {"val_loss": loss}
 
     def validation_epoch_end(self, outs):
@@ -106,49 +145,27 @@ class ImageGPT(pl.LightningModule):
             result["log"]["test_acc"] = result["log"].pop("val_acc")
         return result
 
-    def setup(self, stage: str):
-        ds = lambda x, y: TensorDataset(torch.from_numpy(x), torch.from_numpy(y))
-
-        train_x = np.load(self.hparams.train_x)
-        train_y = np.load(self.hparams.train_y)
-        test_x = np.load(self.hparams.test_x)
-        test_y = np.load(self.hparams.test_y)
-
-        train_ds = ds(train_x, train_y)
-        train_size = int(0.9 * len(train_ds))
-        self.train_ds, self.valid_ds = random_split(
-            train_ds, [train_size, len(train_ds) - train_size]
-        )
-
-        self.test_ds = ds(test_x, test_y)
+    def prepare_data(self):
+        self.datamodule.prepare_data()
 
     def train_dataloader(self):
-        return DataLoader(
-            self.train_ds,
-            shuffle=True,
-            batch_size=self.hparams.batch_size,
-            num_workers=4,
-        )
+        return self.datamodule.train_dataloader()
 
     def val_dataloader(self):
-        return DataLoader(
-            self.valid_ds, batch_size=self.hparams.batch_size, num_workers=4
-        )
+        return self.datamodule.val_dataloader()
 
     def test_dataloader(self):
-        return DataLoader(
-            self.test_ds, batch_size=self.hparams.batch_size, num_workers=4
-        )
+        return self.datamodule.test_dataloader()
 
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--embed_dim", type=int, default=16)
+        parser.add_argument("--dataset", type=str, default='fashion_mnist')
+        parser.add_argument("--data_dir", type=str, default=os.getcwd())
         parser.add_argument("--heads", type=int, default=2)
         parser.add_argument("--layers", type=int, default=8)
-        parser.add_argument("--num_pixels", type=int, default=28)
         parser.add_argument("--vocab_size", type=int, default=16)
-        parser.add_argument("--num_classes", type=int, default=10)
         parser.add_argument("--classify", action="store_true", default=False)
         parser.add_argument("--batch_size", type=int, default=64)
         parser.add_argument("--learning_rate", type=float, default=1e-2)
@@ -168,24 +185,13 @@ if __name__ == '__main__':
     parser = ImageGPT.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    if args.dataset == 'cifar10':
-        datamodule = CIFAR10DataModule.from_argparse_args(args)
-        datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
-        datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
+    if args.dataset == 'fashion_mnist':
+        datamodule = FashionMNISTDataModule.from_argparse_args(args)
 
-    elif args.dataset == 'stl10':
-        datamodule = STL10DataModule.from_argparse_args(args)
-        datamodule.train_dataloader = datamodule.train_dataloader_mixed
-        datamodule.val_dataloader = datamodule.val_dataloader_mixed
-        datamodule.train_transforms = Moco2TrainSTL10Transforms()
-        datamodule.val_transforms = Moco2EvalSTL10Transforms()
+    elif args.dataset == 'imagenet128':
+        datamodule = ImagenetDataModule.from_argparse_args(args)
 
-    elif args.dataset == 'imagenet2012':
-        datamodule = SSLImagenetDataModule.from_argparse_args(args)
-        datamodule.train_transforms = Moco2TrainImagenetTransforms()
-        datamodule.val_transforms = Moco2EvalImagenetTransforms()
-
-    model = MocoV2(**args.__dict__, datamodule=datamodule)
+    model = ImageGPT(**args.__dict__, datamodule=datamodule)
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
