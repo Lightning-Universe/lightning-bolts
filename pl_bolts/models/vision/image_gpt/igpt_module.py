@@ -31,6 +31,7 @@ class ImageGPT(pl.LightningModule):
             learning_rate: float = 1e-2,
             steps: int = 25_000,
             data_dir: str = os.getcwd(),
+            num_workers: int = 8,
             **kwargs
     ):
         """
@@ -126,6 +127,8 @@ class ImageGPT(pl.LightningModule):
             batch_size: the batch size
             learning_rate: learning rate
             steps: number of steps for cosine annealing
+            data_dir: where to store data
+            num_workers: num_data workers
         """
         super(ImageGPT, self).__init__()
         self.save_hyperparameters()
