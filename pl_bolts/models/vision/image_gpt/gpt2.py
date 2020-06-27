@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import pytorch_lightning as pl
 
 
 class Block(nn.Module):
@@ -26,7 +27,7 @@ class Block(nn.Module):
         return x
 
 
-class GPT2(nn.Module):
+class GPT2(pl.LightningModule):
     def __init__(
             self,
             embed_dim: int,
@@ -58,24 +59,29 @@ class GPT2(nn.Module):
             results = model(x)
         """
         super(GPT2, self).__init__()
+        self.save_hyperparameters()
+        
+        self._init_sos_token()
+        self._init_embeddings()
+        self._init_layers()
 
-        self.embed_dim = embed_dim
-
-        # start of sequence token
-        self.sos = torch.nn.Parameter(torch.zeros(embed_dim))
+    def _init_sos_token(self):
+        self.sos = torch.nn.Parameter(torch.zeros(self.hparams.embed_dim))
         nn.init.normal_(self.sos)
 
-        self.token_embeddings = nn.Embedding(vocab_size, embed_dim)
-        self.position_embeddings = nn.Embedding(num_positions, embed_dim)
+    def _init_embeddings(self):
+        self.token_embeddings = nn.Embedding(self.hparams.vocab_size, self.hparams.embed_dim)
+        self.position_embeddings = nn.Embedding(self.hparams.num_positions, self.hparams.embed_dim)
 
+    def _init_layers(self):
         self.layers = nn.ModuleList()
-        for _ in range(layers):
-            self.layers.append(Block(embed_dim, heads))
+        for _ in range(self.hparams.layers):
+            self.layers.append(Block(self.hparams.embed_dim, self.hparams.heads))
 
-        self.ln_f = nn.LayerNorm(embed_dim)
-        self.head = nn.Linear(embed_dim, vocab_size, bias=False)
-        self.clf_head = nn.Linear(embed_dim, num_classes)
-
+        self.ln_f = nn.LayerNorm(self.hparams.embed_dim)
+        self.head = nn.Linear(self.hparams.embed_dim, self.hparams.vocab_size, bias=False)
+        self.clf_head = nn.Linear(self.hparams.embed_dim, self.hparams.num_classes)
+        
     def forward(self, x, classify=False):
         """
         Expect input as shape [sequence len, batch]
@@ -86,7 +92,7 @@ class GPT2(nn.Module):
         h = self.token_embeddings(x.long())
 
         # prepend sos token
-        sos = torch.ones(1, batch, self.embed_dim, device=x.device) * self.sos
+        sos = torch.ones(1, batch, self.hparams.embed_dim, device=x.device) * self.sos
         h = torch.cat([sos, h[:-1, :, :]], axis=0)
 
         # add positional embeddings
