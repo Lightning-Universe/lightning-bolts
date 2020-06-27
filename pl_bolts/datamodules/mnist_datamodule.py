@@ -30,7 +30,7 @@ class MNISTDataModule(LightningDataModule):
 
             from pl_bolts.datamodules import MNISTDataModule
 
-            dm = MNISTDataModule()
+            dm = MNISTDataModule('.')
             model = LitModel(datamodule=dm)
 
         Args:

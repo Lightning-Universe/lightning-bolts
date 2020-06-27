@@ -18,7 +18,7 @@ class FashionMNISTDataModule(LightningDataModule):
             **kwargs,
     ):
         """
-        Standard MNIST, train, val, test splits and transforms
+        Standard FashionMNIST, train, val, test splits and transforms
 
         Transforms::
 
@@ -28,9 +28,9 @@ class FashionMNISTDataModule(LightningDataModule):
 
         Example::
 
-            from pl_bolts.datamodules import MNISTDataModule
+            from pl_bolts.datamodules import FashionMNISTDataModule
 
-            dm = MNISTDataModule()
+            dm = FashionMNISTDataModule('.')
             model = LitModel(datamodule=dm)
 
         Args:
