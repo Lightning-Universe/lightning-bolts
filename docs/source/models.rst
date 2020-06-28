@@ -19,7 +19,7 @@ by adding your contribution to bolts you get these **additional** benefits!
 
 .. note:: You still get to keep your attribution and be recognized for your work!
 
-.. code-block:: Bolts is a community library built by incredible people like you!
+.. note:: Bolts is a community library built by incredible people like you!
 
 Contribution requirements
 -------------------------
