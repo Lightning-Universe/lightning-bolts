@@ -21,9 +21,6 @@ def test_cpc_resnet(tmpdir):
     model = CPCResNet101(x)
     model(x)
 
-    model = CPCResNet101(x, zero_init_residual=True)
-    model(x)
-
 
 @pytest.mark.parametrize("model_class", [
     resnet18,
@@ -50,4 +47,5 @@ def test_torchvision_resnets(tmpdir, model_class):
 def test_amdim_encoder(tmpdir, size):
     dummy_batch = torch.zeros((2, 3, size, size))
     model = AMDIMEncoder(dummy_batch, encoder_size=size)
+    model.init_weights()
     model(dummy_batch)
