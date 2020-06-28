@@ -24,7 +24,7 @@ class VAE(LightningModule):
             input_height: int = 224,
             batch_size: int = 32,
             learning_rate: float = 0.001,
-            data_dir: str = os.getcwd(),
+            data_dir: str = '.',
             datamodule: pl_bolts.datamodules.LightningDataModule = None,
             pretrained: str = None,
             **kwargs

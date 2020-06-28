@@ -68,7 +68,7 @@ class CIFAR10(LightDataset):
 
     def __init__(
             self,
-            data_dir: str = os.getcwd(),
+            data_dir: str = '.',
             train: bool = True,
             transform: Callable = None,
             download: bool = True
@@ -180,7 +180,7 @@ class TrialCIFAR10(CIFAR10):
     """
     def __init__(
             self,
-            data_dir: str = os.getcwd(),
+            data_dir: str = '.',
             train: bool = True,
             transform: Callable = None,
             download: bool = False,

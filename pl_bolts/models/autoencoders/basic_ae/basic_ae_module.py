@@ -23,7 +23,7 @@ class AE(LightningModule):
             hidden_dim=128,
             learning_rate=0.001,
             num_workers=8,
-            data_dir=os.getcwd(),
+            data_dir='.',
             **kwargs
     ):
         """

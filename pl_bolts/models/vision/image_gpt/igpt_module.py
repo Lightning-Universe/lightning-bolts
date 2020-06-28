@@ -30,7 +30,7 @@ class ImageGPT(pl.LightningModule):
             batch_size: int = 64,
             learning_rate: float = 1e-2,
             steps: int = 25_000,
-            data_dir: str = os.getcwd(),
+            data_dir: str = '.',
             num_workers: int = 8,
             **kwargs
     ):
