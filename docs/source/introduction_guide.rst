@@ -3,10 +3,12 @@ Introduction Guide
 Welcome to PyTorch Lightning Bolts!
 In Bolts you will find:
 
-- A collection of pretrained state-of-the-art models.
-- A collection of models designed to bootstrap your research.
-- A collection of Callbacks, transforms, full datasets.
-- All models work on CPUs, TPUs, GPUs and 16-bit precision.
+    - A collection of pretrained state-of-the-art models.
+    - A collection of models designed to bootstrap your research.
+    - A collection of Callbacks, transforms, full datasets.
+    - All models work on CPUs, TPUs, GPUs and 16-bit precision.
+
+**some examples!**
 
 .. code-block:: python
 
@@ -47,7 +49,11 @@ Or pass in any dataset of your choice
 .. code-block:: python
 
     model = ImageGPT()
-    Trainer().fit(model, train_dataloader=DataLoader(...), val_dataloader=DataLoader(...))
+    Trainer().fit(
+        model,
+        train_dataloader=DataLoader(...),
+        val_dataloader=DataLoader(...)
+    )
 
 -------------
 
@@ -72,14 +78,14 @@ We accept contributions directly to Bolts or via your own repository.
 
 To contribute:
 
-1. Submit a pull request to Bolts (we will help you finish it!).
-2. We'll help you add tests.
-3. We'll help you refactor models to work on any device (GPU, TPU, CPU).
-4. We'll help you remove bottlenecks in your model.
-5. We'll help you write up documentation.
-6. We'll help you pretrain expensive models and host weights for you.
-7. We'll create proper attribution for you and link to your repo.
-7. Once all of this is ready, we will merge into bolts
+    1. Submit a pull request to Bolts (we will help you finish it!).
+    2. We'll help you add `tests <https://github.com/PyTorchLightning/pytorch-lightning-bolts/tree/master/tests>`_.
+    3. We'll help you refactor models to work on `(GPU, TPU, CPU). <https://www.youtube.com/watch?v=neuNEcN9FK4>`_.
+    4. We'll help you remove bottlenecks in your model.
+    5. We'll help you write up `documentation <https://pytorch-lightning-bolts.readthedocs.io/en/latest/convolutional.html#image-gpt>`_.
+    6. We'll help you pretrain expensive models and host weights for you.
+    7. We'll create proper attribution for you and link to your repo.
+    8. Once all of this is ready, we will merge into bolts
 
 After your model or other contribution is in bolts, our team will make sure it maintains compatibility
 with the other components of the library!
@@ -238,33 +244,48 @@ Bolts houses a collection of callbacks that are community contributed and can wo
 
 DataModules
 -----------
-A DataModule abstracts away all the details of train, test, val splits, downloading data
-and processing the data. DataModules can be shared and dropped into LightningModules.
+In PyTorch, working with data has these major elements.
 
-Bolt has a collection of these modules built by the community.
+    1. Downloading, saving and preparing the dataset.
+    2. Splitting into train, val and test.
+    3. For each split, applying different transforms
+
+A DataModule groups together those actions into a single reproducible `DataModule` that can be shared
+around to guarantee:
+
+    1. Consistent data preprocessing (download, splits, etc...)
+    2. The same exact splits
+    3. The same exact transforms
 
 .. code-block:: python
 
-    from pl_bolts.datamodules import MNISTDataModule, ImagenetDataModule
+    from pl_bolts.datamodules import ImagenetDataModule
 
-    model = LitModel(datamodule=CIFAR10DataModule())
-    model = LitModel(datamodule=ImagenetDataModule())
+    dm = ImagenetDataModule(data_dir=PATH)
+
+    # standard PyTorch!
+    train_loader = dm.train_dataloader()
+    val_loader = dm.val_dataloader()
+    test_loader = dm.test_dataloader()
+
+    Trainer().fit(
+        model,
+        train_loader,
+        val_loader
+    )
 
 
-DataModules are just collections of train, val and test DataLoaders. This means
-you can also use them without lightning
+But when paired with PyTorch LightningModules (all bolts models), you can plug and play
+full dataset definitions with the same splits, transforms, etc...
+
 
 .. code-block:: python
 
     imagenet = ImagenetDataModule()
+    model = VAE(datamodule=imagenet)
+    model = ImageGPT(datamodule=imagenet)
+    model = GAN(datamodule=imagenet)
 
-    for batch in imagenet.train_dataloader():
-        ...
-        for val_batch in imagenet.val_dataloader()
-        ...
-
-    for test_batch in imagenet.test_dataloader():
-        ...
 
 
 We even have prebuilt modules to bridge the gap between Numpy, Sklearn and PyTorch
@@ -284,8 +305,28 @@ We even have prebuilt modules to bridge the gap between Numpy, Sklearn and PyTor
 Regression Heroes
 -----------------
 In case your job or research doesn't need a "hammer", we offer implementations of Classic ML models
-which benefit from lightning's multi-GPU and TPU support. So, now you can run huge workloads
-scalably, without needing to do much engineering
+which benefit from lightning's multi-GPU and TPU support.
+
+So, now you can run huge workloads scalably, without needing to do any engineering.
+For instance, here we can run Logistic Regression on Imagenet (each epoch takes about 3 minutes)!
+
+.. code-block:: python
+
+    from pl_bolts.models.regression import LogisticRegression
+
+    imagenet = ImagenetDataModule()
+
+    # 224 x 224 x 3
+    pixels_per_image = 150_528
+    model = LogisticRegression(input_dim=pixels_per_image, num_classes=1000)
+    model.prepare_data = imagenet.prepare_data
+
+    trainer = Trainer(gpus=2)
+    trainer.fit(
+        model,
+        imagenet.train_dataloader(batch_size=256),
+        imagenet.val_dataloader(batch_size=256)
+    )
 
 Linear Regression
 ^^^^^^^^^^^^^^^^^
@@ -319,7 +360,7 @@ But more importantly, you can scale up to many GPUs, TPUs or even CPUs
     # 8 GPUs
     trainer = pl.Trainer(num_gpus=8)
 
-    # 8 TPUs
+    # 8 TPU cores
     trainer = pl.Trainer(tpu_cores=8)
 
     # 32 GPUs
@@ -392,6 +433,7 @@ But more importantly, you can scale up to many GPUs, TPUs or even CPUs
 Regular PyTorch
 ---------------
 Everything in bolts also works with regular PyTorch since they are all just nn.Modules!
+
 However, if you train using Lightning you don't have to deal with engineering code :)
 
 ----------------
