@@ -36,13 +36,13 @@ And train on any hardware accelerator
     model = ImageGPT(datamodule=FashionMNISTDataModule())
 
     # cpus
-    pl.Trainer.fit()
+    pl.Trainer.fit(model)
 
     # gpus
-    pl.Trainer.fit(gpus=8)
+    pl.Trainer(gpus=8).fit(model)
 
     # tpus
-    pl.Trainer.fit(tpu_cores=8)
+    pl.Trainer(tpu_cores=8).fit(model)
 
 Or pass in any dataset of your choice
 
