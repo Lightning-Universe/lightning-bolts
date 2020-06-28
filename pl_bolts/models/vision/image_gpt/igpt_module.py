@@ -162,18 +162,18 @@ class ImageGPT(pl.LightningModule):
         sched = torch.optim.lr_scheduler.CosineAnnealingLR(optim, self.hparams.steps)
         return [optim], [sched]
 
-    def forward(self, x):
-        return self.gpt(x)
+    def forward(self, x, classify=False):
+        return self.gpt(x, classify)
 
     def training_step(self, batch, batch_idx):
         x, y = batch
         x = _shape_input(x)
 
         if self.hparams.classify:
-            clf_logits = self.gpt(x, classify=True)
+            clf_logits = self(x, classify=True)
             loss = self.criterion(clf_logits, y)
         else:
-            logits = self.gpt(x)
+            logits = self(x)
             loss = self.criterion(logits.view(-1, logits.size(-1)), x.view(-1).long())
 
         logs = {"loss": loss}
