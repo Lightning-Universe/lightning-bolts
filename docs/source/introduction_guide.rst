@@ -92,6 +92,16 @@ with the other components of the library!
 
 ---------------
 
+Contribution ideas
+------------------
+If you don't have something to contribute but want to get involved, please check the Github issues where
+we list ideas for things the community has requested in Bolts!
+
+We'll also help you finish implementations that you might be struggling with. Just submit a PR with what you
+have and we'll help you finish it!
+
+---------------
+
 When to use Bolts
 -----------------
 
