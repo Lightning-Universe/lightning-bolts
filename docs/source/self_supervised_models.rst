@@ -1,5 +1,5 @@
-Self-supervised
-===============
+Self-supervised Learning
+========================
 This bolts module houses a collection of all self-supervised learning models.
 
 Self-supervised learning extracts representations of an input by solving a pretext task. In this package,
