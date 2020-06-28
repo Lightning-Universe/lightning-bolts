@@ -49,6 +49,7 @@ PyTorch-Lightning-Bolts documentation
    :caption: Models
 
    models
+   models_howto
    autoencoders
    classic_ml
    convolutional
