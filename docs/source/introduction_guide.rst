@@ -1,154 +1,225 @@
 Introduction Guide
 ==================
-Welcome to bolts - The community collection of Lightning models, callbacks and modules which can be "bolted" onto
-PyTorch projects.
+Welcome to PyTorch Lightning Bolts!
+In Bolts you will find:
 
-Bolts are built by, and added by the community. But unlike repos with one-off models,
-the lightning team guarantees that bolts are:
+- A collection of pretrained state-of-the-art models.
+- A collection of models designed to bootstrap your research.
+- A collection of Callbacks, transforms, full datasets.
+- All models work on CPUs, TPUs, GPUs and 16-bit precision.
 
-1. Tested
-2. Standardized
-3. Documented
-4. Curated
-5. Well maintained
-6. Checked for correctness
+.. code-block:: python
+
+    from pl_bolts.models import VAE, GPT2, ImageGPT, PixelCNN
+    from pl_bolts.models.self_supervised import AMDIM, CPCV2, SimCLR, MocoV2
+    from pl_bolts.models import LinearRegression, LogisticRegression
+    from pl_bolts.models.gans import GAN
+    from pl_bolts.callbacks import PrintTableMetricsCallback
+    from pl_bolts.datamodules import FashionMNISTDataModule, CIFAR10DataModule, ImagenetDataModule
+
+Mix and match as you please!
+
+.. code-block:: python
+
+    model = GAN(datamodule=ImagenetDataModule())
+    model = GAN(datamodule=FashionMNISTDataModule())
+    model = ImageGPT(datamodule=FashionMNISTDataModule())
+
+And train on any hardware accelerator
+
+.. code-block:: python
+
+    import pytorch_lightning as pl
+
+    model = ImageGPT(datamodule=FashionMNISTDataModule())
+
+    # cpus
+    pl.Trainer.fit()
+
+    # gpus
+    pl.Trainer.fit(gpus=8)
+
+    # tpus
+    pl.Trainer.fit(tpu_cores=8)
+
+Or pass in any dataset of your choice
+
+.. code-block:: python
+
+    model = ImageGPT()
+    Trainer().fit(model, train_dataloader=DataLoader(...), val_dataloader=DataLoader(...))
 
 -------------
 
-What is it?
------------
-Lightning Bolts is a collection of Models, Callbacks and other goodies implemented in PyTorch Lightning.
+Community Contributed
+---------------------
+Bolts are built-by the Lightning community and contributed to bolts.
+The lightning team guarantees that contributions are:
 
-Bolts are designed to bootstrap research or to be used in production. Here are ways in which bolts can be used
+1. Rigorously Tested (CPUs, GPUs, TPUs)
+2. Rigorously Documented
+3. Standardized via PyTorch Lightning
+4. Optimized for speed
+5. Checked for correctness
 
-**As a feature extractor for production and research systems.**
+-------------
 
-.. code-block:: python
+How to contribute
+-----------------
+We accept contributions directly to Bolts or via your own repository.
 
-    from pl_bolts.models.autoencoders import VAE
+.. note:: We encourage you to have your own repository so we can link to it via our docs!
 
-    # feature extractor (pretrained on Imagenet)
-    pretrained_model = VAE(pretrained='imagenet')
-    pretrained_model.freeze()
+To contribute:
 
-**Subclass and override to try new research ideas.**
+1. Submit a pull request to Bolts (we will help you finish it!).
+2. We'll help you add tests.
+3. We'll help you refactor models to work on any device (GPU, TPU, CPU).
+4. We'll help you remove bottlenecks in your model.
+5. We'll help you write up documentation.
+6. We'll help you pretrain expensive models and host weights for you.
+7. We'll create proper attribution for you and link to your repo.
+7. Once all of this is ready, we will merge into bolts
 
-.. code-block:: python
+After your model or other contribution is in bolts, our team will make sure it maintains compatibility
+with the other components of the library!
 
-    from pl_bolts.models.autoencoders import VAE
+---------------
 
-    class MyVAE(VAE):
-
-        def elbo_loss(self, x, P, Q):
-            # maybe your research is about a new type of loss
-
-.. code-block:: python
-
-    from pl_bolts.models.gans import GAN
-
-    class MyGAN(VAE):
-
-        def init_generator(self, img_dim):
-            # do your own generator
-            generator = Generator(latent_dim=self.hparams.latent_dim, img_shape=img_dim)
-            return generator
-
-        def generator_step(self, x):
-            # maybe try a different generator step?
-
-
-**Fully pre-built models that can be FINE-TUNED on your data**
-
-.. code-block:: python
-
-    from pl_bolts.models.self_supervised import CPCV2
-
-    # feature extractor (pretrained on Imagenet)
-    cpc_model = CPCV2(encoder='resnet18', pretrained='imagenet')
-    resnet18 = cpc_model.encoder
-    resnet18.freeze()
-
-**Fully contained algorithms that can be TRAINED on your data from scratch**
-
-.. code-block:: python
-
-    from pl_bolts.models.self_supervised import SimCLR
-
-    model = SimCLR()
-    train_data = DataLoader(yourData())
-    val_data = DataLoader(yourData())
-
-    trainer = Trainer()
-    trainer.fit(model, train_data, val_data)
-
-**Fully compatible with GPUs, TPUs, 16-bit precision, etc because of PyTorch Lightning**
-
-.. code-block:: python
-
-    model = SimCLR()
-
-    trainer = Trainer(num_nodes=8, gpus=8)
-    trainer.fit(model)
-
-    trainer = Trainer(tpu_cores=8)
-    trainer.fit(model)
-
-**Can be used as a stand-alone `torch.nn.Module`**
-
-.. code-block:: python
-
-    model = SimCLR()
-
-**Or use the other parts of the library in your code**
-
-.. code-block:: python
-
-    from pl_bolts.callbacks import PrintTableMetricsCallback
-
-    trainer = pl.Trainer(callbacks=[PrintTableMetricsCallback()])
-
-**Or even individual components from models**
-
-.. code-block:: python
-
-    from pl_bolts.models.autoencoders.basic_ae import AEEncoder
-    from pl_bolts.models.autoencoders.basic_vae import Decoder, Encoder
-    from pl_bolts.models.self_supervised.cpc import CPCResNet101, CPCTransformsCIFAR10, CPCTransformsImageNet128Patches
-
+When to use Bolts
 -----------------
 
-Community
-----------
-Bolts is a community driven library! That means all the callbacks, models and weights are contributed
-by community members.
+For pretrained models
+^^^^^^^^^^^^^^^^^^^^^
+Most bolts have pretrained weights trained on various datasets or algorithms. This is useful when you
+don't have enough data, time or money to do your own training.
 
-To contribute a bolt, just refactor the PyTorch code into Lightning and submit a PR!
-
---------------------
-
-Modularity
-----------
-Bolt models and components are built in such a way that each part of the model can be used independently in other
-systems. For instance, in the CPC bolt, that system has a special loss function, custom encoders, and even transforms.
-
-If you want to build an extension of that work or use elements from it, just import what you need.
-
-For example, you can just train the full system
+For example, you could use a pretrained VAE to generate features for an image dataset.
 
 .. code-block:: python
 
-    from pl_bolts.models.self_supervised.cpc import CPCV2
+    from pl_bolts.models.autoencoders import VAE
+    from pl_bolts.models.self_supervised import CPCV2
 
-    # use as is
-    model = CPCV2()
+    model1 = VAE(pretrained='imagenet2012')
+    encoder = model1.encoder
+    encoder.freeze()
 
-Or use the encoders and transforms from CPC in another system
+    # bolts are pretrained on different datasets
+    model2 = CPCV2(encoder='resnet18', pretrained='imagenet128').freeze()
+    model3 = CPCV2(encoder='resnet18', pretrained='stl10').freeze()
+
+    for (x, y) in own_data
+        features = encoder(x)
+        feat2 = model2(x)
+        feat3 = model3(x)
+
+    # which is better?
+
+To finetune on your data
+^^^^^^^^^^^^^^^^^^^^^^^^
+If you have your own data, finetuning can often increase the performance. Since this is pure PyTorch
+you can use any finetuning protocol you prefer.
+
+**Example 1: Unfrozen finetune**
 
 .. code-block:: python
 
-    from pl_bolts.models.self_supervised.cpc import CPCResNet101, CPCTransformsCIFAR10
+    # unfrozen finetune
+    model = CPCV2(encoder='resnet18', pretrained='imagenet128')
+    resnet18 = model.encoder
+    # don't call .freeze()
 
---------------
+    classifier = LogisticRegression()
+
+    for (x, y) in own_data:
+        feats = resnet18(x)
+        y_hat = classifier(feats)
+
+**Example 2: Freeze then unfreeze**
+
+.. code-block:: python
+
+    # FREEZE!
+    model = CPCV2(encoder='resnet18', pretrained='imagenet128')
+    resnet18 = model.encoder
+    resnet18.freeze()
+
+    classifier = LogisticRegression()
+
+    for epoch in epochs:
+        for (x, y) in own_data:
+            feats = resnet18(x)
+            y_hat = classifier(feats)
+            loss = cross_entropy_with_logits(y_hat, y)
+
+        # UNFREEZE after 10 epochs
+        if epoch == 10:
+            resnet18.unfreeze()
+
+For research
+^^^^^^^^^^^^
+Here is where bolts is very different than other libraries with models. It's not just designed
+for production, but each module is written to be easily extended for research.
+
+.. code-block:: python
+
+    from pl_bolts.models import ImageGPT
+    from pl_bolts.self_supervised import SimCLR
+
+    class VideoGPT(ImageGPT):
+
+        def training_step(self, batch, batch_idx):
+            x, y = batch
+            x = _shape_input(x)
+
+            logits = self.gpt(x)
+            simclr_features = self.simclr(x)
+
+            # -----------------
+            # do something new with GPT logits + simclr_features
+            # -----------------
+
+            loss = self.criterion(logits.view(-1, logits.size(-1)), x.view(-1).long())
+
+            logs = {"loss": loss}
+            return {"loss": loss, "log": logs}
+
+Or perhaps your research is in self_supervised_learning and you want to do a new SimCLR. In this case, the only
+thing you want to change is the loss.
+
+By subclassing you can focus on changing a single piece of a system without worrying that the other parts work
+(because if they are in Bolts, then they do and we've tested it).
+
+.. code-block:: python
+
+    # subclass SimCLR and change ONLY what you want to try
+    class ComplexCLR(SimCLR):
+
+        def init_loss(self):
+            return self.new_xent_loss
+
+        def new_xent_loss(self):
+            out = torch.cat([out_1, out_2], dim=0) n_samples = len(out)
+
+            # Full similarity matrix
+            cov = torch.mm(out, out.t().contiguous())
+            sim = torch.exp(cov / temperature)
+
+            # Negative similarity
+            mask = ~torch.eye(n_samples, device=sim.device).bool()
+            neg = sim.masked_select(mask).view(n_samples, -1).sum(dim=-1)
+
+            # ------------------
+            # some new thing we want to do
+            # ------------------
+
+            # Positive similarity :
+            pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
+            pos = torch.cat([pos, pos], dim=0)
+            loss = -torch.log(pos / neg).mean()
+
+            return loss
 
 Callbacks
 ---------
@@ -207,11 +278,6 @@ We even have prebuilt modules to bridge the gap between Numpy, Sklearn and PyTor
     datamodule = SklearnDataModule(X, y)
 
     model = LitModel(datamodule)
-
-
---------------------
-
-.. include:: models.rst
 
 ---------------
 
