@@ -78,8 +78,8 @@ Mix and match any part, or subclass to create your own new method
 
 -----------------
 
-Contrastive Learning
---------------------
+Contrastive Learning Models
+---------------------------
 Contrastive self-supervised learning (CSL) is a self-supervised learning approach where we generate representations
 of instances such that similar instances are near each other and far from dissimilar ones. This is often done by comparing
 triplets of positive, anchor and negative representations.
