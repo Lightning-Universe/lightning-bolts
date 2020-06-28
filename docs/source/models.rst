@@ -4,25 +4,22 @@ For bolts to be added to the library we have a **rigorous** quality control chec
 
 Bolts vs my own repo
 --------------------
-You can do both!
+We hope you keep your own repo still! We want to link to it to let people know. However,
+by adding your contribution to bolts you get these **additional** benefits!
 
-Feel free to maintain your own repository and link to it via the bolts documentation.
-If this is the case, make sure to maintain parity with the bolts library.
+    1. More visibility! (more people all over the world use your code)
+    2. We test your code on every PR (CPUs, GPUs, TPUs).
+    3. We host the docs (and test on every PR).
+    4. We help you build thorough, beautiful documentation.
+    5. We help you build robust tests.
+    6. We'll pretrain expensive models for you and host weights.
+    7. We will improve the speed of your models!
+    8. Eligible for invited talks to discuss your implementation.
+    9. Lightning Swag + involvement in the broader contributor community :)
 
-Submitting your model to bolts has a few key benefits
+.. note:: You still get to keep your attribution and be recognized for your work!
 
-1. More visibility! (more people all over the world use your code)
-2. We test your code on every PR (CPUs, GPUs, TPUs).
-3. We host the docs (and test on every PR).
-4. We help you build thorough, beautiful documentation.
-5. We help you build robust tests.
-6. We'll pretrain expensive models for you and host weights.
-7. We will improve the speed of your models!
-8. Eligible for invited talks to discuss your implementation.
-9. Lightning Swag + involvement in the broader contributor community :)
-
-And you still get to keep your attribution and be recognized for your work! Bolts is a community library
-built by incredible people like you!
+.. code-block:: Bolts is a community library built by incredible people like you!
 
 Contribution requirements
 -------------------------
@@ -37,7 +34,7 @@ Models must work on CPUs, GPUs and TPUs without changing code. We help authors w
 
 .. code-block:: python
 
-    # not in bolts!
+    # bad
     encoder.to(device)
 
 Fast
@@ -48,13 +45,13 @@ help overcome.
 
 .. code-block:: python
 
-    # not in bolts!
+    # bad
     mtx = ...
     for xi in rows:
         for yi in cols
             mxt[xi, yi] = ...
 
-    # not in bolts!
+    # good
     x = x.item().numpy()
     x = np.some_fx(x)
     x = torch.tensor(x)
@@ -81,7 +78,7 @@ Models are modularized to be extended and reused easily.
         def init_posterior(self, ...):
             # enable users to override interesting parts of each model
 
-    # not in bolts!
+    # BAD
     class LitVAE(pl.LightningModule):
 
         def __init__(self):
@@ -90,20 +87,35 @@ Models are modularized to be extended and reused easily.
 
 -------------
 
-I want to contribute
---------------------
-If your model doesn't yet meet this bar, no worries! Please open the PR and our team of core contributors will
-help you get there!
+The bar seems high
+------------------
+If your model doesn't yet meet this bar, no worries!
+Please open the PR and our team of core contributors will help you get there!
 
-Don't have a model? no worries, we maintain a list of papers we are working on implementing! Ping us on the Lightning
-Slack and we will let you know which model you can work on!
+---------------
+
+Do you have contribution ideas?
+-------------------------------
+Yes! Check the Github issues for requests from the Lightning team and the community!
+We'll even work with you to finish your implementation! Then we'll help you pretrain it and cover the compute costs
+when possible.
 
 Attribution
 ^^^^^^^^^^^
-Any models and weights that are contributed are attributed to you as the author(s). Your name, team's name
-and affiliation information is added to the documentation and highlighted.
+Any models and weights that are contributed are attributed to you as the author(s).
 
-Thank you for all the amazing contributions!
+We request that each contribution have:
+
+    - The original paper link
+    - The list of paper authors
+    - The link to the original paper code (if available)
+    - The link to your repo
+    - Your name and your team's name as the implementation authors.
+    - Your team's affiliation
+    - Any generated examples, or result plots.
+    - Hyperparameters configurations for the results.
+
+Thank you for all your amazing contributions!
 
 -----------
 
