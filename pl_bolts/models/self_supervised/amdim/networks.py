@@ -106,7 +106,6 @@ class AMDIMEncoder(nn.Module):
         ndf_7 = enc_acts[self.dim2layer[7]].size(1)
 
         # configure modules for fake rkhs embeddings
-        self.rkhs_block_1 = NopNet()
         self.rkhs_block_5 = FakeRKHSConvNet(ndf_5, n_rkhs, use_bn)
         self.rkhs_block_7 = FakeRKHSConvNet(ndf_7, n_rkhs, use_bn)
 
@@ -132,7 +131,6 @@ class AMDIMEncoder(nn.Module):
         # gather rkhs embeddings from certain layers
         # last feature map with (b, d, 1, 1) (ie: last network out)
         r1 = activations[self.dim2layer[1]]
-        r1 = self.rkhs_block_1(r1)
 
         # last feature map with (b, d, 5, 5)
         r5 = activations[self.dim2layer[5]]
