@@ -71,6 +71,7 @@ instance/
 # Sphinx documentation
 docs/_build/
 docs/source/api/
+docs/source/*.md
 
 # PyBuilder
 target/
@@ -147,4 +148,6 @@ simclr.py
 source/api/
 test-reports
 tests/test-reports/
-tests/models/CIFAR10/
+**/CIFAR10
+**/MNIST
+**/FashionMNIST

@@ -1,9 +1,10 @@
-import pytorch_lightning as pl
 import torch
 from torch import nn
 from torch.nn import functional as F
 from torch.optim.optimizer import Optimizer
+from torch.optim import Adam
 
+import pytorch_lightning as pl
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 
 
@@ -12,24 +13,29 @@ class LinearRegression(pl.LightningModule):
     def __init__(self,
                  input_dim: int,
                  bias: bool = True,
-                 learning_rate: float = 0.05,
-                 optimizer: Optimizer = 'Adam',
+                 learning_rate: float = 0.0001,
+                 optimizer: Optimizer = Adam,
+                 l1_strength: float = None,
+                 l2_strength: float = None,
                  **kwargs):
         """
-        Linear regression model implementing
+        Linear regression model implementing - with optional L1/L2 regularization
         $$min_{W} ||(Wx + b) - y ||_2^2 $$
 
         Args:
             input_dim: number of dimensions of the input (1+)
-            bias: If false, will not use $$+b$$
+            bias: If false, will not use $+b$
             learning_rate: learning_rate for the optimizer
             optimizer: the optimizer to use (default='Adam')
+            l1_strength: L1 regularization strength (default=None)
+            l2_strength: L2 regularization strength (default=None)
 
         """
         super().__init__()
         self.save_hyperparameters()
+        self.optimizer = optimizer
 
-        self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=1, bias=bias).double()
+        self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=1, bias=bias)
 
     def forward(self, x):
         y_hat = self.linear(x)
@@ -37,8 +43,28 @@ class LinearRegression(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
+
+        # flatten any input
+        x = x.view(x.size(0), -1)
+
         y_hat = self(x)
+
         loss = F.mse_loss(y_hat, y)
+
+        # L1 regularizer
+        if self.hparams.l1_strength is not None:
+            l1_reg = torch.tensor(0.)
+            for param in self.parameters():
+                l1_reg += torch.norm(param, 1)
+            loss += self.hparams.l1_strength * l1_reg
+
+        # L2 regularizer
+        if self.hparams.l2_strength is not None:
+            l2_reg = torch.tensor(0.)
+            for param in self.parameters():
+                l2_reg += torch.norm(param, 2)
+            loss += self.hparams.l2_strength * l2_reg
+
         tensorboard_logs = {'train_mse_loss': loss}
         progress_bar_metrics = tensorboard_logs
         return {
@@ -49,6 +75,7 @@ class LinearRegression(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
+        x = x.view(x.size(0), -1)
         y_hat = self(x)
         return {'val_loss': F.mse_loss(y_hat, y)}
 
@@ -78,8 +105,7 @@ class LinearRegression(pl.LightningModule):
         }
 
     def configure_optimizers(self):
-        optimizer_class = getattr(torch.optim, self.hparams.optimizer)
-        return optimizer_class(self.parameters(), lr=self.hparams.learning_rate)
+        return self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -88,7 +114,6 @@ class LinearRegression(pl.LightningModule):
         parser.add_argument('--input_dim', type=int, default=None)
         parser.add_argument('--bias', default='store_true')
         parser.add_argument('--batch_size', type=int, default=16)
-        parser.add_argument('--optimizer', type=str, default='Adam')
         return parser
 
 
@@ -108,7 +133,8 @@ if __name__ == '__main__':  # pragma: no cover
     args = parser.parse_args()
 
     # model
-    model = LinearRegression(**vars(args))
+    model = LinearRegression(input_dim=13, l1_strength=1, l2_strength=1)
+    # model = LinearRegression(**vars(args))
 
     # train
     trainer = pl.Trainer.from_argparse_args(args)

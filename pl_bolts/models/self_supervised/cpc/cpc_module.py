@@ -15,6 +15,9 @@ from pytorch_lightning.utilities import rank_zero_warn
 import pl_bolts
 from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
+from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
+from pl_bolts.losses.self_supervised_learning import CPCTask
+from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.cpc.transforms import (
     CPCTrainTransformsCIFAR10,
     CPCEvalTransformsCIFAR10,
@@ -23,13 +26,9 @@ from pl_bolts.models.self_supervised.cpc.transforms import (
     CPCTrainTransformsImageNet128,
     CPCEvalTransformsImageNet128
 )
-
-from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
-from pl_bolts.losses.self_supervised_learning import CPCTask
-from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 from pl_bolts.utils.pretrained_weights import load_pretrained
-from pl_bolts.utils.ssl_utils import torchvision_ssl_encoder
+from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
 __all__ = [
     'CPCV2'

@@ -4,8 +4,8 @@ from unittest import TestCase
 import pytorch_lightning as pl
 
 from pl_bolts.models.rl.common import cli
-from pl_bolts.models.rl.reinforce.model import Reinforce
-from pl_bolts.models.rl.vanilla_policy_gradient.model import PolicyGradient
+from pl_bolts.models.rl.reinforce_model import Reinforce
+from pl_bolts.models.rl.vanilla_policy_gradient_model import PolicyGradient
 
 
 class TestPolicyModels(TestCase):
@@ -25,7 +25,8 @@ class TestPolicyModels(TestCase):
             gpus=0,
             max_steps=100,
             max_epochs=100,  # Set this as the same as max steps to ensure that it doesn't stop early
-            val_check_interval=1000  # This just needs 'some' value, does not effect training right now
+            val_check_interval=1000,  # This just needs 'some' value, does not effect training right now
+            fast_dev_run=True
         )
 
     def test_reinforce(self):

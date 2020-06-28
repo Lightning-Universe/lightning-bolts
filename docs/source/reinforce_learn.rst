@@ -20,6 +20,11 @@ Contributions by: `Donal Byrne <https://github.com/djbyrne>`_
 
 ------------
 
+.. note:: 
+          RL models currently only support CPU and single GPU training with `distributed_backend=dp`. Full GPU
+          support will be added in later updates.
+
+
 DQN Models
 ----------
 The following models are based on DQN
@@ -31,18 +36,14 @@ Paper authors: Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves, Ioa
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
-Example:
+Example::
 
-    >>> from pl_bolts.models.rl.dqn.model import DQN
-    ...
-    >>> dqn = DQN("PongNoFrameskip-v4")
-
-Train::
-
+    from pl_bolts.models.rl import DQN
+    dqn = DQN("PongNoFrameskip-v4")
     trainer = Trainer()
     trainer.fit(dqn)
 
-.. autoclass:: pl_bolts.models.rl.dqn.model.DQN
+.. autoclass:: pl_bolts.models.rl.dqn_model.DQN
    :noindex:
 
 Double DQN
@@ -54,16 +55,12 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl.double_dqn.model import DoubleDQN
-    ...
-    >>> ddqn = DoubleDQN("PongNoFrameskip-v4")
-
-Train::
-
+    from pl_bolts.models.rl import DoubleDQN
+    ddqn = DoubleDQN("PongNoFrameskip-v4")
     trainer = Trainer()
     trainer.fit(ddqn)
 
-.. autoclass:: pl_bolts.models.rl.double_dqn.model.DoubleDQN
+.. autoclass:: pl_bolts.models.rl.double_dqn_model.DoubleDQN
    :noindex:
 
 Dueling DQN
@@ -75,16 +72,12 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl.dueling_dqn.model import DuelingDQN
-    ...
-    >>> dueling_dqn = DuelingDQN("PongNoFrameskip-v4")
-
-Train::
-
+    from pl_bolts.models.rl import DuelingDQN
+    dueling_dqn = DuelingDQN("PongNoFrameskip-v4")
     trainer = Trainer()
     trainer.fit(dueling_dqn)
 
-.. autoclass:: pl_bolts.models.rl.dueling_dqn.model.DuelingDQN
+.. autoclass:: pl_bolts.models.rl.dueling_dqn_model.DuelingDQN
    :noindex:
 
 Noisy DQN
@@ -97,16 +90,12 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl.noisy_dqn.model import NoisyDQN
-    ...
-    >>> noisy_dqn = NoisyDQN("PongNoFrameskip-v4")
-
-Train::
-
+    from pl_bolts.models.rl import NoisyDQN
+    noisy_dqn = NoisyDQN("PongNoFrameskip-v4")
     trainer = Trainer()
     trainer.fit(noisy_dqn)
 
-.. autoclass:: pl_bolts.models.rl.noisy_dqn.model.NoisyDQN
+.. autoclass:: pl_bolts.models.rl.noisy_dqn_model.NoisyDQN
    :noindex:
 
 
@@ -119,16 +108,12 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl.n_step_dqn.model import NStepDQN
-    ...
-    >>> n_step_dqn = NStepDQN("PongNoFrameskip-v4")
-
-Train::
-
+    from pl_bolts.models.rl import NStepDQN
+    n_step_dqn = NStepDQN("PongNoFrameskip-v4")
     trainer = Trainer()
     trainer.fit(n_step_dqn)
 
-.. autoclass:: pl_bolts.models.rl.n_step_dqn.model.NStepDQN
+.. autoclass:: pl_bolts.models.rl.n_step_dqn_model.NStepDQN
    :noindex:
 
 
@@ -141,16 +126,12 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl.per_dqn.model import PERDQN
-    ...
-    >>> per_dqn = PERDQN("PongNoFrameskip-v4")
-
-Train::
-
+    from pl_bolts.models.rl import PERDQN
+    per_dqn = PERDQN("PongNoFrameskip-v4")
     trainer = Trainer()
     trainer.fit(per_dqn)
 
-.. autoclass:: pl_bolts.models.rl.per_dqn.model.PERDQN
+.. autoclass:: pl_bolts.models.rl.per_dqn_model.PERDQN
    :noindex:
 
 
@@ -170,16 +151,12 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl.reinforce.model import Reinforce
-    ...
-    >>> reinforce = Reinforce("CartPole-v0")
-
-Train::
-
+    from pl_bolts.models.rl import Reinforce
+    reinforce = Reinforce("CartPole-v0")
     trainer = Trainer()
     trainer.fit(reinforce)
 
-.. autoclass:: pl_bolts.models.rl.reinforce.model.Reinforce
+.. autoclass:: pl_bolts.models.rl.reinforce_model.Reinforce
    :noindex:
 
 
@@ -192,15 +169,10 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Example::
 
-    >>> from pl_bolts.models.rl.vpg.model import PolicyGradient
-    ...
-    >>> vpg = PolicyGradient("CartPole-v0")
-
-Train::
-
+    from pl_bolts.models.rl import PolicyGradient
+    vpg = PolicyGradient("CartPole-v0")
     trainer = Trainer()
     trainer.fit(vpg)
 
-.. autoclass:: pl_bolts.models.rl.vanilla_policy_gradient.model.PolicyGradient
+.. autoclass:: pl_bolts.models.rl.vanilla_policy_gradient_model.PolicyGradient
    :noindex:
-

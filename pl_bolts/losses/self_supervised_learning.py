@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from pl_bolts.models.vision import PixelCNN
+from pl_bolts.models.vision.pixel_cnn import PixelCNN
 
 
 def nt_xent_loss(out_1, out_2, temperature):
@@ -191,7 +191,7 @@ class FeatureMapContrastiveTask(nn.Module):
         """
         Performs an anchor, positive negative pair comparison for each each tuple of feature maps passed.
 
-        Example::
+        .. code-block:: python
 
             # extract feature maps
             pos_0, pos_1, pos_2 = encoder(x_pos)
@@ -215,14 +215,14 @@ class FeatureMapContrastiveTask(nn.Module):
             tclip: stability clipping value
             bidirectional: if true, does the comparison both ways
 
-                Example::
+        .. code-block:: python
 
-                    # with bidirectional the comparisons are done both ways
-                    task = FeatureMapContrastiveTask('01, 02')
+            # with bidirectional the comparisons are done both ways
+            task = FeatureMapContrastiveTask('01, 02')
 
-                    # will compare the following:
-                    # 01: (pos_0, anc_1), (anc_0, pos_1)
-                    # 02: (pos_0, anc_2), (anc_0, pos_2)
+            # will compare the following:
+            # 01: (pos_0, anc_1), (anc_0, pos_1)
+            # 02: (pos_0, anc_2), (anc_0, pos_2)
 
         """
         super().__init__()
@@ -313,8 +313,9 @@ class FeatureMapContrastiveTask(nn.Module):
         """
         Takes in a set of tuples, each tuple has two feature maps with all matching dimensions
 
-        Example::
+        Example:
 
+            >>> import torch
             >>> from pytorch_lightning import seed_everything
             >>> seed_everything(0)
             0
