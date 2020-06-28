@@ -5,6 +5,8 @@ This bolts module houses a collection of all self-supervised learning models.
 Self-supervised learning extracts representations of an input by solving a pretext task. In this package,
 we implement many of the current state-of-the-art self-supervised algorithms.
 
+--------------
+
 Use cases
 ---------
 The models in this module can be used as templates for research, subclassing for similar model research,
