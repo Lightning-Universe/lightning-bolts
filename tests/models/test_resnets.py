@@ -3,6 +3,7 @@ import torch
 
 from pl_bolts.models.self_supervised.amdim import AMDIMEncoder
 from pl_bolts.models.self_supervised.cpc import CPCResNet101
+from pl_bolts.models.self_supervised.cpc.networks import BasicBlock
 from pl_bolts.models.self_supervised.resnets import (
     resnet18,
     resnet34,
@@ -19,9 +20,6 @@ from pl_bolts.models.self_supervised.resnets import (
 def test_cpc_resnet(tmpdir):
     x = torch.rand(3, 3, 64, 64)
     model = CPCResNet101(x)
-    model(x)
-
-    model = CPCResNet101(x, zero_init_residual=True)
     model(x)
 
 
