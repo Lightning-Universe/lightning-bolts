@@ -2,7 +2,8 @@
 
 ![Logo](https://raw.githubusercontent.com/PyTorchLightning/pytorch-lightning/master/docs/source/_images/logos/lightning_logo.svg)
 
-# PyTorch Lightning Bolts
+# PyTorch Lightning    
+### Bolts
 
 **Pretrained SOTA models, callbacks and more for research and production with PyTorch Lightning and PyTorch**
 
