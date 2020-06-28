@@ -85,21 +85,6 @@ Models are modularized to be extended and reused easily.
             self.prior = ...
             self.posterior = ...
 
--------------
-
-The bar seems high
-------------------
-If your model doesn't yet meet this bar, no worries!
-Please open the PR and our team of core contributors will help you get there!
-
----------------
-
-Do you have contribution ideas?
--------------------------------
-Yes! Check the Github issues for requests from the Lightning team and the community!
-We'll even work with you to finish your implementation! Then we'll help you pretrain it and cover the compute costs
-when possible.
-
 Attribution
 ^^^^^^^^^^^
 Any models and weights that are contributed are attributed to you as the author(s).
@@ -117,7 +102,22 @@ We request that each contribution have:
 
 Thank you for all your amazing contributions!
 
------------
+-------------
+
+The bar seems high
+------------------
+If your model doesn't yet meet this bar, no worries!
+Please open the PR and our team of core contributors will help you get there!
+
+---------------
+
+Do you have contribution ideas?
+-------------------------------
+Yes! Check the Github issues for requests from the Lightning team and the community!
+We'll even work with you to finish your implementation! Then we'll help you pretrain it and cover the compute costs
+when possible.
+
+---------------
 
 How to use models
 =================
