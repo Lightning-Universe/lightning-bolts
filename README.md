@@ -2,10 +2,9 @@
 
 ![Logo](https://raw.githubusercontent.com/PyTorchLightning/pytorch-lightning/master/docs/source/_images/logos/lightning_logo.svg)
 
-# PyTorch Lightning    
-### Bolts
+# PyTorch Lightning Bolts    
 
-**Pretrained SOTA models, callbacks and more for research and production with PyTorch Lightning and PyTorch**
+**Pretrained SOTA Deep Learning models, callbacks and more for research and production with PyTorch Lightning and PyTorch**
 
 [![PyPI Status](https://badge.fury.io/py/pytorch-lightning-bolts.svg)](https://badge.fury.io/py/pytorch-lightning-bolts)
 [![PyPI Status](https://pepy.tech/badge/pytorch-lightning-bolts)](https://pepy.tech/project/pytorch-lightning-bolts)
