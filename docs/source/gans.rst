@@ -1,6 +1,8 @@
 GANs
 ====
-Stuff about gans
+Collection of Generative Adversarial Networks
+
+------------
 
 Basic GAN
 ---------

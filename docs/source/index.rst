@@ -11,6 +11,7 @@ PyTorch-Lightning-Bolts documentation
    :caption: Start here
 
    introduction_guide
+   models
 
 .. toctree::
    :maxdepth: 2
@@ -48,6 +49,7 @@ PyTorch-Lightning-Bolts documentation
    :name: models
    :caption: Models
 
+   models_howto
    autoencoders
    classic_ml
    convolutional

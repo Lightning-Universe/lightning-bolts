@@ -71,10 +71,13 @@ class GAN(LightningModule):
 
     def forward(self, z):
         """
-        Allows infernce to be about generating images
-        x = gan(z)
-        :param z:
-        :return:
+        Generates an image given input noise z
+
+        Example::
+
+            z = torch.rand(batch_size, latent_dim)
+            gan = GAN.load_from_checkpoint(PATH)
+            img = gan(z)
         """
         return self.generator(z)
 

@@ -24,7 +24,7 @@ class LinearRegression(pl.LightningModule):
 
         Args:
             input_dim: number of dimensions of the input (1+)
-            bias: If false, will not use $$+b$$
+            bias: If false, will not use $+b$
             learning_rate: learning_rate for the optimizer
             optimizer: the optimizer to use (default='Adam')
             l1_strength: L1 regularization strength (default=None)
