@@ -8,7 +8,7 @@ import torch
 
 try:
     import pandas as pd
-except Exception as e:
+except ModuleNotFoundError as e:
     raise Exception('To use this datamodule please install pandas\npip install pandas')
 
 URL = 'https://s3-eu-west-1.amazonaws.com/kaggle-display-advertising-challenge-dataset/dac.tar.gz'
