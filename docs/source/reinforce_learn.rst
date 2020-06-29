@@ -69,7 +69,7 @@ DQN Results
 
 **DQN: Pong**
 
-.. image:: ../images/rl_benchmark/pong_dqn_baseline_results.png
+.. image:: _images/rl_benchmark/pong_dqn_baseline_results.png
   :width: 800
   :alt: DQN Baseline Results
 
@@ -120,7 +120,7 @@ Double DQN Results
 
 **Double DQN: Pong**
 
-.. image:: ../images/rl_benchmark/pong_double_dqn_baseline_results.png
+.. image:: _images/rl_benchmark/pong_double_dqn_baseline_results.png
   :width: 800
   :alt: Double DQN Result
 
@@ -130,7 +130,7 @@ orange: DQN
 
 blue: Double DQN
 
-.. image:: ../images/rl_benchmark/dqn_ddqn_comparison.png
+.. image:: _images/rl_benchmark/dqn_ddqn_comparison.png
   :width: 800
   :alt: Double DQN Comparison Result
 
@@ -202,7 +202,7 @@ where the agent goes from losing to winning.
 As you can see by the total rewards, the dueling network's training progression is very stable and continues to trend
 upward until it finally plateus.
 
-.. image:: ../images/rl_benchmark/pong_dueling_dqn_results.png
+.. image:: _images/rl_benchmark/pong_dueling_dqn_results.png
   :width: 800
   :alt: Dueling DQN Result
 
@@ -217,7 +217,7 @@ This could very well be due to the simplicity of the Pong environment.
  - Orange: DQN
  - Red: Dueling DQN
 
-.. image:: ../images/rl_benchmark/pong_dueling_dqn_comparison.png
+.. image:: _images/rl_benchmark/pong_dueling_dqn_comparison.png
   :width: 800
   :alt: Dueling DQN Comparison Result
 
@@ -287,7 +287,7 @@ The results below improved stability and faster performance growth.
 Similar to the other improvements, the average score of the agent reaches positive numbers around the 250k mark and
 steadily increases till convergence.
 
-.. image:: ../images/rl_benchmark/pong_noisy_dqn_results.png
+.. image:: _images/rl_benchmark/pong_noisy_dqn_results.png
   :width: 800
   :alt: Noisy DQN Result
 
@@ -300,7 +300,7 @@ form of exploration.
 - Orange: DQN
 - Red: Noisy DQN
 
-.. image:: ../images/rl_benchmark/pong_noisy_dqn_comparison.png
+.. image:: _images/rl_benchmark/pong_noisy_dqn_comparison.png
   :width: 800
   :alt: Noisy DQN Comparison Result
 
@@ -378,7 +378,7 @@ The N-Step DQN shows the greatest increase in performance with respect to the ot
 After less than 150k steps the agent begins to consistently win games and achieves the top score after ~170K steps.
 This is reflected in the sharp peak of the total episode steps and of course, the total episode rewards.
 
-.. image:: ../images/rl_benchmark/pong_nstep_dqn_1.png
+.. image:: _images/rl_benchmark/pong_nstep_dqn_1.png
   :width: 800
   :alt: N-Step DQN Result
 
@@ -392,7 +392,7 @@ Previous literature, listed below, shows the best results for the Pong environme
 For these experiments I opted with an N step of 4.
 
 
-.. image:: ../images/rl_benchmark/pong_nstep_dqn_2.png
+.. image:: _images/rl_benchmark/pong_nstep_dqn_2.png
   :width: 800
   :alt: N-Step DQN Comparison Results
 
@@ -477,7 +477,7 @@ The results below show improved stability and faster performance growth.
 Similar to the other improvements, we see that PER improves the stability of the agents training and shows to converged
 on an optimal policy faster.
 
-.. image:: ../images/rl_benchmark/pong_per_dqn_baseline_v1_results.png
+.. image:: _images/rl_benchmark/pong_per_dqn_baseline_v1_results.png
   :width: 800
   :alt: PER DQN Results
 
@@ -489,7 +489,7 @@ In comparison to the base DQN, the PER DQN does show improved stability and perf
 It is important to note that loss is not the only metric we should be looking at. Although the agent may have very
  low loss during training, it may still perform poorly due to lack of exploration.
 
-.. image:: ../images/rl_benchmark/pong_per_dqn_baseline_v1_results_comp.png
+.. image:: _images/rl_benchmark/pong_per_dqn_baseline_v1_results_comp.png
   :width: 800
   :alt: PER DQN Results
 
