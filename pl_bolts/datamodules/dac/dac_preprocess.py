@@ -137,8 +137,8 @@ def preprocess_dac(datadir, outdir, num_train_sample=-1, num_test_sample=-1):
                     val = dists.gen(i, features[feat - 1])
                     continuous_vals.append("{0:.6f}".format(val).rstrip('0').rstrip('.'))
                 categorial_vals = []
-                for i in range(0, len(categorical_features)):
-                    val = dicts.gen(i, features[categorical_features[i] - 1])
+                for i, feat in enumerate(categorical_features):
+                    val = dicts.gen(i, features[feat - 1])
                     categorial_vals.append(str(val))
 
                 continuous_vals = ','.join(continuous_vals)
