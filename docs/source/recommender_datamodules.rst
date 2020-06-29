@@ -8,6 +8,8 @@ Continuous + categorical mix
 ----------------------------
 These modules have datasets with a mixture of continuous and categorical features
 
+-----------------
+
 Kaggle Display Advertising Challenge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -6,10 +6,10 @@ from torch.utils.data import Dataset
 import numpy as np
 import torch
 
-try:
-    import pandas as pd
-except ModuleNotFoundError as e:
-    raise Exception('To use this datamodule please install pandas\npip install pandas')
+# try:
+#     import pandas as pd
+# except ModuleNotFoundError as e:
+#     raise Exception('To use this datamodule please install pandas\npip install pandas')
 
 URL = 'https://s3-eu-west-1.amazonaws.com/kaggle-display-advertising-challenge-dataset/dac.tar.gz'
 URL_preprocessed = 'https://pl-public-data.s3.amazonaws.com/doc_processed.zip'
