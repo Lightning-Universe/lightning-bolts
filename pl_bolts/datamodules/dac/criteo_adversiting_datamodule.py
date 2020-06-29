@@ -198,13 +198,13 @@ class DACDataset(Dataset):
             return x1, x2, y
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no-cover
     dm = DACDataModule(data_dir=os.getcwd(), use_tiny_dac=True)
     dm.prepare_data()
 
-    print('-'*30)
+    print('-' * 30)
     print('train dims')
-    print('-'*30)
+    print('-' * 30)
     for batch in dm.train_dataloader():
         (x1_continuous, x2_categorical, y) = batch
         print('x1_continuous:', x1_continuous.shape)
@@ -212,9 +212,9 @@ if __name__ == '__main__':
         print('y:', y.shape)
         break
 
-    print('-'*30)
+    print('-' * 30)
     print('val/test dims')
-    print('-'*30)
+    print('-' * 30)
     for batch in dm.val_dataloader():
         (x1, x2, y) = batch
         print('x1:', x1.shape)
