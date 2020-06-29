@@ -113,8 +113,7 @@ def preprocess_dac(datadir, outdir, num_train_sample=-1, num_test_sample=-1):
                 continuous_vals = []
                 for i in range(0, len(continuous_features)):
                     val = dists.gen(i, features[continuous_features[i]])
-                    continuous_vals.append("{0:.6f}".format(val).rstrip('0')
-                                          .rstrip('.'))
+                    continuous_vals.append("{0:.6f}".format(val).rstrip('0').rstrip('.'))
                 categorial_vals = []
                 for i in range(0, len(categorical_features)):
                     val = dicts.gen(i, features[categorical_features[
@@ -137,12 +136,10 @@ def preprocess_dac(datadir, outdir, num_train_sample=-1, num_test_sample=-1):
                 continuous_vals = []
                 for i in range(0, len(continuous_features)):
                     val = dists.gen(i, features[continuous_features[i] - 1])
-                    continuous_vals.append("{0:.6f}".format(val).rstrip('0')
-                                          .rstrip('.'))
+                    continuous_vals.append("{0:.6f}".format(val).rstrip('0').rstrip('.'))
                 categorial_vals = []
                 for i in range(0, len(categorical_features)):
-                    val = dicts.gen(i, features[categorical_features[
-                                                    i] - 1])
+                    val = dicts.gen(i, features[categorical_features[i] - 1])
                     categorial_vals.append(str(val))
 
                 continuous_vals = ','.join(continuous_vals)
