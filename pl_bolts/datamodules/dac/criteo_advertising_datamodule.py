@@ -6,11 +6,6 @@ from torch.utils.data import Dataset
 import numpy as np
 import torch
 
-# try:
-#     import pandas as pd
-# except ModuleNotFoundError as e:
-#     raise Exception('To use this datamodule please install pandas\npip install pandas')
-
 URL = 'https://s3-eu-west-1.amazonaws.com/kaggle-display-advertising-challenge-dataset/dac.tar.gz'
 URL_preprocessed = 'https://pl-public-data.s3.amazonaws.com/doc_processed.zip'
 URL_preprocessed_tiny = 'https://pl-public-data.s3.amazonaws.com/doc_processed_tiny.zip'
@@ -101,6 +96,8 @@ class DACDataModule(LightningDataModule):
         return loader
 
     def __train_val_split(self):
+        import pandas as pd
+
         # get the train data
         root = os.path.join(self.data_dir, 'train_processed.txt')
         data = pd.read_csv(root)
@@ -140,6 +137,8 @@ class DACDataModule(LightningDataModule):
         Args:
             batch_size: size of batch
         """
+        import pandas as pd
+
         root = os.path.join(self.data_dir, 'test_processed.txt')
         data = pd.read_csv(root)
         test_data = data.iloc[:, :-1].values
