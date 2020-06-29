@@ -27,6 +27,7 @@ PyTorch-Lightning-Bolts documentation
    :caption: DataModules
 
    datamodules
+   recommender_systems
    sklearn_datamodule
    vision_datamodules
 
