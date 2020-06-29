@@ -1,7 +1,5 @@
 """
-Vanilla Policy Gradient
-This example is based on: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/
-master/Chapter11/04_cartpole_pg.py
+
 """
 import argparse
 from collections import OrderedDict
@@ -14,8 +12,8 @@ import pytorch_lightning as pl
 import torch
 import torch.optim as optim
 from torch import Tensor
-from torch.nn.functional import log_softmax, softmax
-from torch.optim import Optimizer
+from torch.nn.functional import log_softmax
+from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.models.rl.common.agents import PolicyAgent
@@ -25,15 +23,52 @@ from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.common.wrappers import ToTensor
 
 
-class PolicyGradient(pl.LightningModule):
-    """ PolicyGradient Model """
+class Reinforce(pl.LightningModule):
+    """ Basic REINFORCE Policy Model """
 
-    def __init__(self, hparams: argparse.Namespace) -> None:
+    def __init__(self, env: str, gamma: float = 0.99, lr: float = 1e-4, batch_size: int = 32,
+                 batch_episodes: int = 4, **kwargs) -> None:
+        """
+        PyTorch Lightning implementation of `REINFORCE
+        <https://papers.nips.cc/paper/
+        1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
+
+        Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
+
+        Model implemented by:
+
+            - `Donal Byrne <https://github.com/djbyrne>`
+
+        Example:
+
+            >>> from pl_bolts.models.rl.reinforce_model import Reinforce
+            ...
+            >>> model = Reinforce("PongNoFrameskip-v4")
+
+        Train::
+
+            trainer = Trainer()
+            trainer.fit(model)
+
+        Args:
+            env: gym environment tag
+            gamma: discount factor
+            lr: learning rate
+            batch_size: size of minibatch pulled from the DataLoader
+            batch_episodes: how many episodes to rollout for each batch of training
+
+        .. note::
+            This example is based on:
+             https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\
+             /blob/master/Chapter11/02_cartpole_reinforce.py
+
+        .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
+
+        """
         super().__init__()
-        self.hparams = hparams
 
         # self.env = wrappers.make_env(self.hparams.env)    # use for Atari
-        self.env = ToTensor(gym.make(self.hparams.env))  # use for Box2D/Control
+        self.env = ToTensor(gym.make(env))  # use for Box2D/Control
         self.env.seed(123)
 
         self.obs_shape = self.env.observation_space.shape
@@ -44,12 +79,16 @@ class PolicyGradient(pl.LightningModule):
 
         self.agent = PolicyAgent(self.net)
 
+        self.gamma = gamma
+        self.lr = lr
+        self.batch_size = batch_size
+        self.batch_episodes = batch_episodes
+
         self.total_reward = 0
         self.episode_reward = 0
         self.episode_count = 0
         self.episode_steps = 0
         self.total_episode_steps = 0
-        self.entropy_beta = self.hparams.entropy_beta
 
         self.reward_list = []
         for _ in range(100):
@@ -73,7 +112,7 @@ class PolicyGradient(pl.LightningModule):
         output = self.net(x)
         return output
 
-    def calc_qvals(self, rewards: List[Tensor]) -> List[Tensor]:
+    def calc_qvals(self, rewards: List[List]) -> List[List]:
         """
         Takes in the rewards for each batched episode and returns list of qvals for each batched episode
 
@@ -86,16 +125,10 @@ class PolicyGradient(pl.LightningModule):
         res = []
         sum_r = 0.0
         for reward in reversed(rewards):
-            sum_r *= self.hparams.gamma
+            sum_r *= self.gamma
             sum_r += reward
             res.append(deepcopy(sum_r))
-        res = list(reversed(res))
-        # Subtract the mean (baseline) from the q_vals to reduce the high variance
-        sum_q = 0
-        for rew in res:
-            sum_q += rew
-        mean_q = sum_q / len(res)
-        return [q - mean_q for q in res]
+        return list(reversed(res))
 
     def process_batch(
         self, batch: List[List[Experience]]
@@ -190,53 +223,12 @@ class PolicyGradient(pl.LightningModule):
             loss
         """
         logits = self.net(batch_states)
-
-        log_prob, policy_loss = self.calc_policy_loss(
-            batch_actions, batch_qvals, batch_states, logits
-        )
-
-        entropy_loss_v = self.calc_entropy_loss(log_prob, logits)
-
-        loss = policy_loss + entropy_loss_v
-
-        return loss
-
-    def calc_entropy_loss(self, log_prob: Tensor, logits: Tensor) -> Tensor:
-        """
-        Calculates the entropy to be added to the loss function
-        Args:
-            log_prob: log probabilities for each action
-            logits: the raw outputs of the network
-
-        Returns:
-            entropy penalty for each state
-        """
-        prob_v = softmax(logits, dim=1)
-        entropy_v = -(prob_v * log_prob).sum(dim=1).mean()
-        entropy_loss_v = -self.entropy_beta * entropy_v
-        return entropy_loss_v
-
-    @staticmethod
-    def calc_policy_loss(
-        batch_actions: Tensor, batch_qvals: Tensor, batch_states: Tensor, logits: Tensor
-    ) -> Tuple[List, Tensor]:
-        """
-        Calculate the policy loss give the batch outputs and logits
-        Args:
-            batch_actions: actions from batched episodes
-            batch_qvals: Q values from batched episodes
-            batch_states: states from batched episodes
-            logits: raw output of the network given the batch_states
-
-        Returns:
-            policy loss
-        """
         log_prob = log_softmax(logits, dim=1)
         log_prob_actions = (
             batch_qvals * log_prob[range(len(batch_states)), batch_actions]
         )
-        policy_loss = -log_prob_actions.mean()
-        return log_prob, policy_loss
+        loss = -log_prob_actions.mean()
+        return loss
 
     def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
         """
@@ -267,7 +259,7 @@ class PolicyGradient(pl.LightningModule):
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)
 
-        self.episode_count += self.hparams.batch_episodes
+        self.episode_count += self.batch_episodes
 
         log = {
             "episode_reward": torch.tensor(self.episode_reward).to(device),
@@ -294,13 +286,13 @@ class PolicyGradient(pl.LightningModule):
 
     def configure_optimizers(self) -> List[Optimizer]:
         """ Initialize Adam optimizer"""
-        optimizer = optim.Adam(self.net.parameters(), lr=self.hparams.lr)
+        optimizer = optim.Adam(self.net.parameters(), lr=self.lr)
         return [optimizer]
 
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""
         dataset = EpisodicExperienceStream(
-            self.env, self.agent, self.device, episodes=self.hparams.batch_episodes
+            self.env, self.agent, self.device, episodes=self.batch_episodes
         )
         dataloader = DataLoader(dataset=dataset)
         return dataloader
@@ -314,7 +306,7 @@ class PolicyGradient(pl.LightningModule):
         return batch[0][0][0].device.index if self.on_gpu else "cpu"
 
     @staticmethod
-    def add_model_specific_args(arg_parser) -> argparse.ArgumentParser:
+    def add_model_specific_args(parent) -> argparse.ArgumentParser:
         """
         Adds arguments for DQN model
 
@@ -323,6 +315,72 @@ class PolicyGradient(pl.LightningModule):
         Args:
             parent
         """
+        arg_parser = argparse.ArgumentParser(parents=[parent])
+
+        arg_parser.add_argument(
+            "--batch_size", type=int, default=32, help="size of the batches"
+        )
+        arg_parser.add_argument("--lr", type=float, default=0.01, help="learning rate")
+        arg_parser.add_argument(
+            "--env", type=str, default="PongNoFrameskip-v4", help="gym environment tag"
+        )
+        arg_parser.add_argument(
+            "--gamma", type=float, default=0.99, help="discount factor"
+        )
+        arg_parser.add_argument(
+            "--sync_rate",
+            type=int,
+            default=1000,
+            help="how many frames do we update the target network",
+        )
+        arg_parser.add_argument(
+            "--replay_size",
+            type=int,
+            default=100000,
+            help="capacity of the replay buffer",
+        )
+        arg_parser.add_argument(
+            "--warm_start_size",
+            type=int,
+            default=10000,
+            help="how many samples do we use to fill our buffer at the start of training",
+        )
+        arg_parser.add_argument(
+            "--eps_last_frame",
+            type=int,
+            default=150000,
+            help="what frame should epsilon stop decaying",
+        )
+        arg_parser.add_argument(
+            "--eps_start", type=float, default=1.0, help="starting value of epsilon"
+        )
+        arg_parser.add_argument(
+            "--eps_end", type=float, default=0.02, help="final value of epsilon"
+        )
+        arg_parser.add_argument(
+            "--episode_length", type=int, default=500, help="max length of an episode"
+        )
+        arg_parser.add_argument(
+            "--max_episode_reward",
+            type=int,
+            default=18,
+            help="max episode reward in the environment",
+        )
+        arg_parser.add_argument(
+            "--warm_start_steps",
+            type=int,
+            default=10000,
+            help="max episode reward in the environment",
+        )
+        arg_parser.add_argument(
+            "--max_steps", type=int, default=500000, help="max steps to train the agent"
+        )
+        arg_parser.add_argument(
+            "--n_steps",
+            type=int,
+            default=4,
+            help="how many steps to unroll for each update",
+        )
         arg_parser.add_argument(
             "--batch_episodes",
             type=int,
@@ -330,6 +388,15 @@ class PolicyGradient(pl.LightningModule):
             help="how episodes to run per batch",
         )
         arg_parser.add_argument(
-            "--entropy_beta", type=int, default=0.01, help="entropy beta"
+            "--gpus", type=int, default=1, help="number of gpus to use for training"
+        )
+        arg_parser.add_argument(
+            "--seed", type=int, default=123, help="seed for training run"
+        )
+        arg_parser.add_argument(
+            "--backend",
+            type=str,
+            default="dp",
+            help="distributed backend to be used by lightning",
         )
         return arg_parser
