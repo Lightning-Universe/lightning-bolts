@@ -53,10 +53,7 @@ class SklearnDataset(Dataset):
         if self.X_transform:
             x = self.X_transform(x)
 
-        if self.Y is None:
-            return x
-        else:
-            return x, y
+        return x if self.Y is None else x, y
 
 
 class TensorDataset(Dataset):

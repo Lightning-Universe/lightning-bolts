@@ -169,6 +169,7 @@ class DACDataset(Dataset):
         return len(self.X)
 
     def __getitem__(self, idx):
+
         if self.test:
             dp = self.X.iloc[idx, :]
 
@@ -181,7 +182,7 @@ class DACDataset(Dataset):
             x2_categorical = np.ones_like(dp[self.num_continuous_feats:])
             x2_continuous = dp[:self.num_continuous_feats]
             x2 = torch.from_numpy(np.concatenate((x2_continuous, x2_categorical)).astype(np.int32))
-            return x1, x2
+            result = x1, x2
         else:
             dp, y = self.X[idx, :], self.y[idx]
 
@@ -194,7 +195,9 @@ class DACDataset(Dataset):
             x2_categorical = np.ones_like(dp[self.num_continuous_feats:])
             x2_continuous = dp[:self.num_continuous_feats]
             x2 = torch.from_numpy(np.concatenate((x2_continuous, x2_categorical)).astype(np.int32))
-            return x1, x2, y
+            result = x1, x2, y
+
+        return result
 
 
 if __name__ == '__main__':  # pragma: no-cover
