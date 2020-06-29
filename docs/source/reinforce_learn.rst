@@ -1,12 +1,12 @@
 Reinforcement Learning
-========================
+======================
 
 This module is a collection of common RL approaches implemented in Lightning.
 
 -----------------
 
 Module authors
------------------
+--------------
 
 Contributions by: `Donal Byrne <https://github.com/djbyrne>`_
 
@@ -22,16 +22,18 @@ Contributions by: `Donal Byrne <https://github.com/djbyrne>`_
 ------------
 
 .. note:: 
-          RL models currently only support CPU and single GPU training with `distributed_backend=dp`. Full GPU
-          support will be added in later updates.
+    RL models currently only support CPU and single GPU training with `distributed_backend=dp`.
+    Full GPU support will be added in later updates.
 
 
 DQN Models
 ----------
+
 The following models are based on DQN
 
 Deep-Q-Network (DQN)
 ^^^^^^^^^^^^^^^^^^^^
+
 DQN model introduced in `Playing Atari with Deep Reinforcement Learning <https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf>`_.
 Paper authors: Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves, Ioannis Antonoglou, Daan Wierstra, Martin Riedmiller.
 
@@ -65,7 +67,7 @@ and then we optimize using SGD just like a standard supervised learning problem.
     L=(Q(s,a)-(r+{\\gamma}\\max_{a'{\\in}A}Q(s',a'))^2
 
 DQN Results
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
 
 **DQN: Pong**
 
@@ -84,7 +86,8 @@ Example::
    :noindex:
 
 Double DQN
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^
+
 Double DQN model introduced in `Deep Reinforcement Learning with Double Q-learning <https://arxiv.org/pdf/1509.06461.pdf>`_
 Paper authors: Hado van Hasselt, Arthur Guez, David Silver
 
@@ -116,7 +119,7 @@ action, but the value will be less "optimisitc" because it is chosen by the targ
     Q(s_t, a_t) = r_t + gamma * maxQ'(S_t+1, \argmax_Q(S_t+1, a))
 
 Double DQN Results
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 **Double DQN: Pong**
 
@@ -145,7 +148,8 @@ Example::
    :noindex:
 
 Dueling DQN
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^
+
 Dueling DQN model introduced in `Dueling Network Architectures for Deep Reinforcement Learning <https://arxiv.org/abs/1511.06581>`_
 Paper authors: Ziyu Wang, Tom Schaul, Matteo Hessel, Hado van Hasselt, Marc Lanctot, Nando de Freitas
 
@@ -175,7 +179,7 @@ by subtracting the mean advantage from the Q value. This essentially pulls the m
     Q(s, a) = V(s) + A(s, a) - 1/N * sum_k(A(s, k)
 
 Dueling DQN Benefits
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 - Ability to efficiently learn the state value function. In the dueling network, every Q update also updates the Value
     stream, where as in DQN only the value of the chosen action is updated. This provides a better approximation of the
@@ -187,7 +191,7 @@ Dueling DQN Benefits
     DQN robust to this type of scenario
 
 Dueling DQN Results
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 The results below a noticeable improvement from the original DQN network.
 
@@ -232,7 +236,8 @@ Example::
    :noindex:
 
 Noisy DQN
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^
+
 Noisy DQN model introduced in `Noisy Networks for Exploration <https://arxiv.org/abs/1706.10295>`_
 Paper authors: Meire Fortunato, Mohammad Gheshlaghi Azar, Bilal Piot, Jacob Menick, Ian Osband, Alex Graves,
 Vlad Mnih, Remi Munos, Demis Hassabis, Olivier Pietquin, Charles Blundell, Shane Legg
@@ -263,7 +268,7 @@ The authors propose two methods of injecting noise to the network.
 
 
 Noisy DQN Benefits
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 - Improved exploration function. Instead of just performing completely random actions, we add decreasing amount of noise
     and uncertainty to our policy allowing to explore while still utilising its policy
@@ -277,7 +282,7 @@ Noisy DQN Benefits
 In order to update the basic DQN to a Noisy DQN we need to do the following
 
 Noisy DQN Results
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 The results below improved stability and faster performance growth.
 
@@ -316,7 +321,8 @@ Example::
 
 
 N-Step DQN
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^
+
 N-Step DQN model introduced in `Learning to Predict by the Methods of Temporal Differences  <http://incompleteideas.net/papers/sutton-88-with-erratum.pdf>`_
 Paper authors: Richard S. Sutton
 
@@ -359,14 +365,14 @@ So we need to strike a balance between looking far enough ahead to improve the c
  that are updates become unstable. In general, small values of 2-4 work best.
 
 N-Step Benefits
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 - Multi-Step learning is capable of learning faster than typical 1 step learning methods.
 - Note that this method introduces a new hyperparameter n. Although n=4 is generally a good starting point and provides
     good results across the board.
 
 N-Step Results
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 As expected, the N-Step DQN converges much faster than the standard DQN, however it also adds more instability to the
 loss of the agent. This can be seen in the following experiments.
@@ -408,7 +414,8 @@ Example::
 
 
 Prioritized Experience Replay DQN
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Double DQN model introduced in `Prioritized Experience Replay  <http://incompleteideas.net/papers/sutton-88-with-erratum.pdf>`_
 Paper authors: Tom Schaul, John Quan, Ioannis Antonoglou, David Silver
 
@@ -445,7 +452,7 @@ Where beta is a hyper parameter between 0-1. When beta is 1 the bias is fully co
 in practice it is better to start beta with a small value near 0 and slowly increase it to 1.
 
 PER Benefits
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - The benefits of this technique are that the agent sees more samples that it struggled with and gets more
     chances to improve upon it.
@@ -468,7 +475,7 @@ for each datum, with the addition of a small epsilon value.
 
 
 PER Results
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
 
 The results below show improved stability and faster performance growth.
 
@@ -507,7 +514,6 @@ Example::
    :noindex:
 
 
-
 --------------
 
 Policy Gradient Models
@@ -515,7 +521,8 @@ Policy Gradient Models
 The following models are based on Policy gradient
 
 REINFORCE
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^
+
 REINFORCE model introduced in `Policy Gradient Methods For Reinforcement Learning With Function Approximation <https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
 Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
 
@@ -533,7 +540,8 @@ Example::
 
 
 Vanilla Policy Gradient
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
+
 Vanilla Policy Gradient model introduced in `Policy Gradient Methods For Reinforcement Learning With Function Approximation <https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
 Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
 
