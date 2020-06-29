@@ -8,14 +8,20 @@ from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 
 
-class SSLImagenetDataModule(LightningDataModule):
+class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
 
-    def __init__(self,
-                 data_dir,
-                 meta_root=None,
-                 num_workers=16):
+    name = 'imagenet'
 
-        super().__init__()
+    def __init__(
+            self,
+            data_dir,
+            meta_root=None,
+            num_workers=16,
+            *args,
+            **kwargs,
+    ):
+
+        super().__init__(*args, **kwargs)
         self.data_dir = data_dir
         self.num_workers = num_workers
         self.meta_root = meta_root

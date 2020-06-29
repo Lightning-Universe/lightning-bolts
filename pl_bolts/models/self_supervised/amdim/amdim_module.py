@@ -5,32 +5,35 @@ from typing import Union
 import pytorch_lightning as pl
 import torch
 import torch.optim as optim
-from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
 
 import pl_bolts
-from pl_bolts.losses.self_supervised_learning import AMDIMContrastiveTask
+from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
+from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
 
 class AMDIM(pl.LightningModule):
 
-    def __init__(self,
-                 datamodule: Union[str, pl_bolts.datamodules.LightningDataModule] = 'cifar10',
-                 image_channels: int = 3,
-                 image_height: int = 32,
-                 encoder_feature_dim: int = 320,
-                 embedding_fx_dim: int = 1280,
-                 conv_block_depth: int = 10,
-                 use_bn: bool = False,
-                 tclip: int = 20.0,
-                 learning_rate: int = 2e-4,
-                 data_dir: str = '',
-                 num_classes: int = 10,
-                 batch_size: int = 200,
-                 **kwargs
-                 ):
+    def __init__(
+            self,
+            datamodule: Union[str, pl_bolts.datamodules.LightningDataModule] = 'cifar10',
+            encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'amdim_encoder',
+            contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask('01, 02, 11'),
+            image_channels: int = 3,
+            image_height: int = 32,
+            encoder_feature_dim: int = 320,
+            embedding_fx_dim: int = 1280,
+            conv_block_depth: int = 10,
+            use_bn: bool = False,
+            tclip: int = 20.0,
+            learning_rate: int = 2e-4,
+            data_dir: str = '',
+            num_classes: int = 10,
+            batch_size: int = 200,
+            **kwargs,
+    ):
         """
         PyTorch Lightning implementation of
         `Augmented Multiscale Deep InfoMax (AMDIM) <https://arxiv.org/abs/1906.00910.>`_
@@ -46,8 +49,7 @@ class AMDIM(pl.LightningModule):
 
             >>> from pl_bolts.models.self_supervised import AMDIM
             ...
-            >>> model = AMDIM()
-            Using a 32x32 encoder
+            >>> model = AMDIM(encoder='resnet18')
 
         Train::
 
@@ -55,6 +57,8 @@ class AMDIM(pl.LightningModule):
             trainer.fit(model)
 
         Args:
+            datamodule: A LightningDatamodule
+            encoder: an encoder string or model
             image_channels: 3
             image_height: pixels
             encoder_feature_dim: Called `ndf` in the paper, this is the representation size for the encoder.
@@ -72,34 +76,52 @@ class AMDIM(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        dummy_batch = torch.zeros((2, image_channels, self.hparams.image_height, self.hparams.image_height))
+        # init encoder
+        self.encoder = encoder
+        if isinstance(encoder, str):
+            self.encoder = self.init_encoder()
 
-        self.encoder = AMDIMEncoder(
-            dummy_batch,
-            num_channels=self.hparams.image_channels,
-            encoder_feature_dim=self.hparams.encoder_feature_dim,
-            embedding_fx_dim=self.hparams.embedding_fx_dim,
-            conv_block_depth=self.hparams.conv_block_depth,
-            encoder_size=self.hparams.image_height,
-            use_bn=self.hparams.use_bn
-        )
-        self.encoder.init_weights()
-
-        # the loss has learnable parameters
-        self.nce_loss = AMDIMContrastiveTask(tclip=self.hparams.tclip)
+        # the task
+        self.contrastive_task = contrastive_task
 
         self.tng_split = None
         self.val_split = None
+
+    def init_encoder(self):
+        dummy_batch = torch.zeros((2, self.hparams.image_channels, self.hparams.image_height,
+                                   self.hparams.image_height))
+        encoder_name = self.hparams.encoder
+
+        if encoder_name == 'amdim_encoder':
+            encoder = AMDIMEncoder(
+                dummy_batch,
+                num_channels=self.hparams.image_channels,
+                encoder_feature_dim=self.hparams.encoder_feature_dim,
+                embedding_fx_dim=self.hparams.embedding_fx_dim,
+                conv_block_depth=self.hparams.conv_block_depth,
+                encoder_size=self.hparams.image_height,
+                use_bn=self.hparams.use_bn
+            )
+            encoder.init_weights()
+            return encoder
+        else:
+            return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=True)
 
     def forward(self, img_1, img_2):
         # feats for img 1
         # r1 = last layer out
         # r5 = last layer with (b, c, 5, 5) size
         # r7 = last layer with (b, c, 7, 7) size
-        r1_x1, r5_x1, r7_x1 = self.encoder(img_1)
+        maps = self.encoder(img_1)
+        if len(maps) > 3:
+            maps = maps[-3:]
+        r1_x1, r5_x1, r7_x1 = maps
 
         # feats for img 2
-        r1_x2, r5_x2, r7_x2 = self.encoder(img_2)
+        maps = self.encoder(img_2)
+        if len(maps) > 3:
+            maps = maps[-3:]
+        r1_x2, r5_x2, r7_x2 = maps
 
         # first number = resnet block. second = image 1 or 2
         return r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2
@@ -133,10 +155,9 @@ class AMDIM(pl.LightningModule):
         r5_x2 = outputs['r5_x2']
         r7_x2 = outputs['r7_x2']
 
-        # ------------------
-        # NCE LOSS
-        loss, lgt_reg = self.nce_loss((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
-        unsupervised_loss = loss + lgt_reg
+        # Contrastive task
+        loss, lgt_reg = self.contrastive_task((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
+        unsupervised_loss = loss.sum() + lgt_reg
 
         # ------------------
         # FULL LOSS
@@ -156,9 +177,9 @@ class AMDIM(pl.LightningModule):
         # generate features
         r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2 = self.forward(img_1, img_2)
 
-        # NCE LOSS
-        loss, lgt_reg = self.nce_loss((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
-        unsupervised_loss = loss + lgt_reg
+        # Contrastive task
+        loss, lgt_reg = self.contrastive_task((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
+        unsupervised_loss = loss.sum() + lgt_reg
 
         result = {
             'val_nce': unsupervised_loss
@@ -183,23 +204,16 @@ class AMDIM(pl.LightningModule):
             eps=1e-7
         )
 
-        if self.hparams.datamodule in ['cifar10', 'stl10', 'cifar100']:
-            lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
-        else:
-            lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
+        # if self.hparams.datamodule in ['cifar10', 'stl10', 'cifar100']:
+        #     lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
+        # else:
+        #     lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
 
         return opt  # [opt], [lr_scheduler]
 
     def train_dataloader(self):
-        if self.hparams.datamodule == 'cifar10':
-            dataset = AMDIMPretraining.cifar10_train(self.hparams.data_dir)
-
-        if self.hparams.datamodule == 'stl10':
-            self.tng_split, self.val_split = AMDIMPretraining.stl_train(self.hparams.data_dir)
-            dataset = self.tng_split
-
-        if self.hparams.datamodule == 'imagenet2012':
-            dataset = AMDIMPretraining.imagenet_train(self.hparams.data_dir, self.hparams.nb_classes)
+        kwargs = dict(nb_classes=self.hparams.nb_classes) if self.hparams.datamodule == 'imagenet2012' else {}
+        dataset = AMDIMPretraining.get_dataset(self.hparams.datamodule, self.hparams.data_dir, split='train', **kwargs)
 
         # LOADER
         loader = DataLoader(
@@ -212,14 +226,8 @@ class AMDIM(pl.LightningModule):
         return loader
 
     def val_dataloader(self):
-        if self.hparams.datamodule == 'cifar10':
-            dataset = AMDIMPretraining.cifar10_val(self.hparams.data_dir)
-
-        if self.hparams.datamodule == 'stl10':
-            dataset = self.val_split
-
-        if self.hparams.datamodule == 'imagenet2012':
-            dataset = AMDIMPretraining.imagenet_val(self.hparams.data_dir, self.hparams.nb_classes)
+        kwargs = dict(nb_classes=self.hparams.nb_classes) if self.hparams.datamodule == 'imagenet2012' else {}
+        dataset = AMDIMPretraining.get_dataset(self.hparams.datamodule, self.hparams.data_dir, split='val', **kwargs)
 
         # LOADER
         loader = DataLoader(
@@ -373,6 +381,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    model = AMDIM(**vars(args))
+    model = AMDIM(**vars(args), encoder='resnet18')
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)

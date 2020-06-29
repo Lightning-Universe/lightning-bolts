@@ -12,7 +12,7 @@ on:
       - master
 
 jobs:
-  build:
+  pytest:
 
     runs-on: ${{ matrix.os }}
     strategy:
@@ -20,7 +20,7 @@ jobs:
       # max-parallel: 6
       matrix:
         # PyTorch 1.5 is failing on Win and bolts requires torchvision>=0.5
-        os: [ubuntu-18.04, macOS-10.15]  # , windows-2019
+        os: [ubuntu-20.04, macOS-10.15]  # , windows-2019
         python-version: [3.6, 3.7, 3.8]
         requires: ['minimal', 'latest']
         # exclude:
@@ -29,12 +29,12 @@ jobs:
         #     requires: 'minimal'
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
-    timeout-minutes: 45
+    timeout-minutes: 20
 
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -80,43 +80,38 @@ jobs:
         pip list
       shell: bash
 
-    - name: Cache datasets
-      uses: actions/cache@v1
-      with:
-        path: Datasets # This path is specific to Ubuntu
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: pl-datasets
+    #- name: Cache datasets
+    #  uses: actions/cache@v1
+    #  with:
+    #    path: Datasets # This path is specific to Ubuntu
+    #    # Look to see if there is a cache hit for the corresponding requirements file
+    #    key: pl-datasets
 
     - name: Tests
-      # env:
-      #   TOXENV: py${{ matrix.python-version }}
       run: |
         # tox --sitepackages
         coverage run --source pl_bolts -m py.test pl_bolts tests -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
+        coverage xml
 
     - name: Upload pytest test results
-      uses: actions/upload-artifact@master
+      uses: actions/upload-artifact@v2
       with:
         name: pytest-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}
         path: junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
       # Use always() to always run this step to publish test results when there are test failures
       if: always()
 
-    - name: Package Setup
-      run: |
-        check-manifest
-        python setup.py check --metadata --strict
-        python setup.py sdist
-        twine check dist/*
-
-    #- name: Try install package
-    #  if: ! startsWith(matrix.os, 'windows')
-    #  run: |
-    #    virtualenv vEnv ; source vEnv/bin/activate
-    #    pip install --editable . ; cd .. & python -c "import pytorch_lightning ; print(pytorch_lightning.__version__)"
-    #    deactivate ; rm -rf vEnv
-
     - name: Statistics
       if: success()
       run: |
-         coverage report
+        coverage report
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        flags: unittests
+        env_vars: OS,PYTHON
+        name: codecov-umbrella
+        fail_ci_if_error: true

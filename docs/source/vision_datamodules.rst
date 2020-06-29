@@ -15,6 +15,12 @@ MNIST
 .. autoclass:: pl_bolts.datamodules.mnist_datamodule.MNISTDataModule
     :noindex:
 
+FashionMNIST
+^^^^^^^^^^^^
+
+.. autoclass:: pl_bolts.datamodules.fashion_mnist_datamodule.FashionMNISTDataModule
+    :noindex:
+
 CIFAR-10
 ^^^^^^^^
 

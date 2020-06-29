@@ -5,17 +5,17 @@ from torch.nn import functional as F
 from torch.optim.lr_scheduler import StepLR
 from torchvision.models import densenet
 
+import pl_bolts
 from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
-from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.metrics import mean
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLRDataTransform
+from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from pl_bolts.optimizers.layer_adaptive_scaling import LARS
 
 
-class EncoderModel(nn.Module):
+class DensenetEncoder(nn.Module):
     def __init__(self):
         super().__init__()
         self.model = densenet.densenet121(pretrained=False, num_classes=1)
@@ -46,7 +46,7 @@ class Projection(nn.Module):
 
 class SimCLR(pl.LightningModule):
     def __init__(self,
-                 dataset: str = 'cifar10',
+                 datamodule: pl_bolts.datamodules.LightningDataModule = None,
                  data_dir: str = '',
                  learning_rate: float = 0.00006,
                  weight_decay: float = 0.0005,
@@ -54,9 +54,11 @@ class SimCLR(pl.LightningModule):
                  batch_size: int = 128,
                  online_ft: bool = False,
                  num_workers: int = 4,
-                 optimizer: str = 'adam',
-                 step: int = 30,
+                 optimizer: str = 'lars',
+                 lr_sched_step: float = 30.0,
                  lr_sched_gamma: float = 0.5,
+                 lars_momentum: float = 0.9,
+                 lars_eta: float = 0.001,
                  loss_temperature: float = 0.5,
                  **kwargs):
         """
@@ -67,7 +69,7 @@ class SimCLR(pl.LightningModule):
         Model implemented by:
 
             - `William Falcon <https://github.com/williamFalcon>`_
-            - `Tullie Murrel <https://github.com/tullie>`_
+            - `Tullie Murrell <https://github.com/tullie>`_
 
         Example:
 
@@ -81,7 +83,7 @@ class SimCLR(pl.LightningModule):
             trainer.fit(model)
 
         Args:
-            dataset: dataset name
+            datamodule: The datamodule
             data_dir: directory to store data
             learning_rate: the learning rate
             weight_decay: optimizer weight decay
@@ -92,20 +94,28 @@ class SimCLR(pl.LightningModule):
             optimizer: optimizer name
             lr_sched_step: step for learning rate scheduler
             lr_sched_gamma: gamma for learning rate scheduler
+            lars_momentum: the mom param for lars optimizer
+            lars_eta: for lars optimizer
             loss_temperature: float = 0.
         """
         super().__init__()
         self.save_hyperparameters()
         self.online_evaluator = online_ft
 
-        self.dataset = self.get_dataset(dataset)
+        # init default datamodule
+        if datamodule is None:
+            datamodule = CIFAR10DataModule(data_dir, num_workers=num_workers)
+            datamodule.train_transforms = SimCLRTrainDataTransform(input_height)
+            datamodule.val_transforms = SimCLREvalDataTransform(input_height)
+
+        self.datamodule = datamodule
         self.loss_func = self.init_loss()
         self.encoder = self.init_encoder()
         self.projection = self.init_projection()
 
         if self.online_evaluator:
             z_dim = self.projection.output_dim
-            num_classes = self.dataset.num_classes
+            num_classes = self.datamodule.num_classes
             self.non_linear_evaluator = SSLEvaluator(
                 n_input=z_dim,
                 n_classes=num_classes,
@@ -117,21 +127,10 @@ class SimCLR(pl.LightningModule):
         return nt_xent_loss
 
     def init_encoder(self):
-        return EncoderModel()
+        return DensenetEncoder()
 
     def init_projection(self):
         return Projection()
-
-    def get_dataset(self, name):
-        if name == 'cifar10':
-            return CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        elif name == 'stl10':
-            return STL10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        elif name == 'imagenet2012':
-            return SSLImagenetDataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
-        else:
-            raise FileNotFoundError(f'the {name} dataset is not supported. Subclass \'get_dataset to provide'
-                                    f'your own \'')
 
     def forward(self, x):
         h = self.encoder(x)
@@ -139,7 +138,7 @@ class SimCLR(pl.LightningModule):
         return h, z
 
     def training_step(self, batch, batch_idx):
-        if self.hparams.dataset == 'stl10':
+        if isinstance(self.datamodule, STL10DataModule):
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -154,7 +153,7 @@ class SimCLR(pl.LightningModule):
 
         # don't use the training signal, just finetune the MLP to see how we're doing downstream
         if self.online_evaluator:
-            if self.hparams.dataset == 'stl10':
+            if isinstance(self.datamodule, STL10DataModule):
                 (img_1, img_2), y = labeled_batch
 
             with torch.no_grad():
@@ -177,7 +176,7 @@ class SimCLR(pl.LightningModule):
         return result
 
     def validation_step(self, batch, batch_idx):
-        if self.hparams.dataset == 'stl10':
+        if isinstance(self.datamodule, STL10DataModule):
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -189,7 +188,7 @@ class SimCLR(pl.LightningModule):
         result = {'val_loss': loss}
 
         if self.online_evaluator:
-            if self.hparams.dataset == 'stl10':
+            if isinstance(self.datamodule, STL10DataModule):
                 (img_1, img_2), y = labeled_batch
                 h1, z1 = self.forward(img_1)
 
@@ -220,25 +219,13 @@ class SimCLR(pl.LightningModule):
         return dict(val_loss=val_loss, log=log, progress_bar=progress_bar)
 
     def prepare_data(self):
-        self.dataset.prepare_data()
+        self.datamodule.prepare_data()
 
     def train_dataloader(self):
-        train_transform = SimCLRDataTransform(input_height=self.hparams.input_height)
-
-        if self.hparams.dataset == 'stl10':
-            loader = self.dataset.train_dataloader_mixed(self.hparams.batch_size, transforms=train_transform)
-        else:
-            loader = self.dataset.train_dataloader(self.hparams.batch_size, transforms=train_transform)
-        return loader
+        return self.datamodule.train_dataloader(self.hparams.batch_size)
 
     def val_dataloader(self):
-        test_transform = SimCLRDataTransform(input_height=self.hparams.input_height, test=True)
-
-        if self.hparams.dataset == 'stl10':
-            loader = self.dataset.val_dataloader_mixed(self.hparams.batch_size, transforms=test_transform)
-        else:
-            loader = self.dataset.val_dataloader(self.hparams.batch_size, transforms=test_transform)
-        return loader
+        return self.datamodule.val_dataloader(self.hparams.batch_size)
 
     def configure_optimizers(self):
         if self.hparams.optimizer == 'adam':
@@ -246,8 +233,8 @@ class SimCLR(pl.LightningModule):
                 self.parameters(), self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
         elif self.hparams.optimizer == 'lars':
             optimizer = LARS(
-                self.parameters(), lr=self.hparams.learning_rate, momentum=self.hparams.mom,
-                weight_decay=self.hparams.weight_decay, eta=self.hparams.eta)
+                self.parameters(), lr=self.hparams.learning_rate, momentum=self.hparams.lars_momentum,
+                weight_decay=self.hparams.weight_decay, eta=self.hparams.lars_eta)
         else:
             raise ValueError(f'Invalid optimizer: {self.optimizer}')
         scheduler = StepLR(
@@ -269,13 +256,13 @@ class SimCLR(pl.LightningModule):
 
         # Training
         parser.add_argument('--optimizer', choices=['adam', 'lars'], default='lars')
-        parser.add_argument('--batch_size', type=int, default=128)
-        parser.add_argument('--learning_rate', type=float, default=0.00006)
-        parser.add_argument('--mom', type=float, default=0.9)
-        parser.add_argument('--eta', type=float, default=0.001)
+        parser.add_argument('--batch_size', type=int, default=512)
+        parser.add_argument('--learning_rate', type=float, default=1.0)
+        parser.add_argument('--lars_momentum', type=float, default=0.9)
+        parser.add_argument('--lars_eta', type=float, default=0.001)
         parser.add_argument('--lr_sched_step', type=float, default=30, help='lr scheduler step')
         parser.add_argument('--lr_sched_gamma', type=float, default=0.5, help='lr scheduler step')
-        parser.add_argument('--weight_decay', type=float, default=0.0005)
+        parser.add_argument('--weight_decay', type=float, default=1e-4)
         # Model
         parser.add_argument('--loss_temperature', type=float, default=0.5)
         parser.add_argument('--num_workers', default=0, type=int)
@@ -286,10 +273,15 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
+
+    # trainer args
     parser = pl.Trainer.add_argparse_args(parser)
+
+    # model args
     parser = SimCLR.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    model = SimCLR(**vars(args))
-    trainer = pl.Trainer.from_argparse_args(args, overfit_batches=1)
+    model = SimCLR(**args.__dict__)
+
+    trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)

@@ -1,17 +1,21 @@
-Self-supervised
-===============
+Self-supervised Learning
+========================
 This bolts module houses a collection of all self-supervised learning models.
 
 Self-supervised learning extracts representations of an input by solving a pretext task. In this package,
 we implement many of the current state-of-the-art self-supervised algorithms.
 
+Self-supervised models are trained with unlabeled datasets
+
+--------------
+
 Use cases
 ---------
-The models in this module can be used as templates for research, subclassing for similar model research,
-or as feature extractors.
+Here are some use cases for the self-supervised package.
 
-For instance, many of the contrastive learning models have been pretrained on many of the torchvision encoders
-and can be used as feature extractors.
+Extracting image features
+^^^^^^^^^^^^^^^^^^^^^^^^^
+The models in this module are trained unsupervised and thus can capture better image representations (features).
 
 In this example, we'll load a resnet 18 which was pretrained on imagenet using CPC as the pretext task.
 
@@ -36,11 +40,46 @@ Example::
         x, y = batch
         out = cpc_resnet18(x)
 
+----------------
+
+Train with unlabeled data
+^^^^^^^^^^^^^^^^^^^^^^^^^
+These models are perfect for training from scratch when you have a huge set of unlabeled images
+
+.. code-block:: python
+
+    from pl_bolts.models.self_supervised import SimCLR
+    from pl_bolts.models.self_supervised.simclr import SimCLREvalDataTransform, SimCLRTrainDataTransform
+
+
+    train_dataset = MyDataset(transforms=SimCLRTrainDataTransform())
+    val_dataset = MyDataset(transforms=SimCLREvalDataTransform())
+
+    # simclr needs a lot of compute!
+    model = SimCLR()
+    trainer = Trainer(tpu_cores=128)
+    trainer.fit(
+        model,
+        DataLoader(train_dataset),
+        DataLoader(val_dataset),
+    )
+
+Research
+^^^^^^^^
+Mix and match any part, or subclass to create your own new method
+
+.. code-block:: python
+
+    from pl_bolts.models.self_supervised import CPCV2
+    from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
+
+    amdim_task = FeatureMapContrastiveTask(comparisons='01, 11, 02', bidirectional=True)
+    model = CPCV2(contrastive_task=amdim_task)
 
 -----------------
 
-Contrastive Learning
---------------------
+Contrastive Learning Models
+---------------------------
 Contrastive self-supervised learning (CSL) is a self-supervised learning approach where we generate representations
 of instances such that similar instances are near each other and far from dissimilar ones. This is often done by comparing
 triplets of positive, anchor and negative representations.
@@ -59,14 +98,14 @@ CPC (V2)
 .. autoclass:: pl_bolts.models.self_supervised.CPCV2
    :noindex:
 
-SimCLR
-^^^^^^
-
-.. autoclass:: pl_bolts.models.self_supervised.SimCLR
-   :noindex:
-
 Moco (V2)
 ^^^^^^^^^
 
 .. autoclass:: pl_bolts.models.self_supervised.MocoV2
+   :noindex:
+
+SimCLR
+^^^^^^
+
+.. autoclass:: pl_bolts.models.self_supervised.SimCLR
    :noindex:

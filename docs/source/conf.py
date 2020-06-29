@@ -374,3 +374,16 @@ html_add_permalinks = "¶"
 #  Useful for avoiding ambiguity when the same section heading appears in different documents.
 # http://www.sphinx-doc.org/en/master/usage/extensions/autosectionlabel.html
 autosectionlabel_prefix_document = True
+
+# only run doctests marked with a ".. doctest::" directive
+doctest_test_doctest_blocks = ''
+doctest_global_setup = """
+
+import importlib
+import os
+import torch
+
+TORCHVISION_AVAILABLE = importlib.util.find_spec('torchvision')
+
+"""
+coverage_skip_undoc_in_source = True

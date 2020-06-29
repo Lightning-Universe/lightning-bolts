@@ -24,7 +24,7 @@ class VAE(LightningModule):
             input_height: int = 224,
             batch_size: int = 32,
             learning_rate: float = 0.001,
-            data_dir: str = os.getcwd(),
+            data_dir: str = '.',
             datamodule: pl_bolts.datamodules.LightningDataModule = None,
             pretrained: str = None,
             **kwargs
@@ -241,16 +241,6 @@ class VAE(LightningModule):
     def test_dataloader(self):
         return self.datamodule.test_dataloader(self.hparams.batch_size)
 
-    def _log_images(self, y, y_hat, step_name, limit=1):
-        y = y[:limit]
-        y_hat = y_hat[:limit]
-
-        pred_images = torchvision.utils.make_grid(y_hat)
-        target_images = torchvision.utils.make_grid(y)
-
-        self.logger.experiment.add_image(f'{step_name}_predicted_images', pred_images, self.trainer.global_step)
-        self.logger.experiment.add_image(f'{step_name}_target_images', target_images, self.trainer.global_step)
-
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
@@ -266,6 +256,7 @@ class VAE(LightningModule):
                             help='number of input channels')
         parser.add_argument('--batch_size', type=int, default=32)
         parser.add_argument('--pretrained', type=str, default=None)
+        parser.add_argument('--data_dir', type=str, default=os.getcwd())
 
         parser.add_argument('--learning_rate', type=float, default=1e-3)
         return parser
@@ -277,9 +268,9 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', default='mnist', type=str)
 
     parser = Trainer.add_argparse_args(parser)
+    parser = VAE.add_model_specific_args(parser)
     parser = ImagenetDataModule.add_argparse_args(parser)
     parser = MNISTDataModule.add_argparse_args(parser)
-    parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args()
     #
     # if args.dataset == 'imagenet' or args.pretrained:

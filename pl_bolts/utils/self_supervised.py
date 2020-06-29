@@ -1,14 +1,5 @@
-import torch
-
 from pl_bolts.models.self_supervised import resnets
-
-
-class Identity(torch.nn.Module):
-    def __init__(self):
-        super(Identity, self).__init__()
-
-    def forward(self, x):
-        return x
+from pl_bolts.utils.semi_supervised import Identity
 
 
 def torchvision_ssl_encoder(name, pretrained=False, return_all_feature_maps=False):

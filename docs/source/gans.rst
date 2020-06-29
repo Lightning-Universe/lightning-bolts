@@ -1,20 +1,19 @@
 GANs
 ====
-Stuff about gans
+Collection of Generative Adversarial Networks
+
+------------
 
 Basic GAN
 ---------
 This is a basic GAN.
 
 
-Example:
+.. code-block:: python
 
-    >>> from pytorch_lightning.models.gans import GAN
+    from pl_bolts.models.gans import GAN
     ...
-    >>> gan = GAN()
-
-Train::
-
+    gan = GAN()
     trainer = Trainer()
     trainer.fit(gan)
 

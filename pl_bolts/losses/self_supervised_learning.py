@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from pl_bolts.models.vision import PixelCNN
+from pl_bolts.models.vision.pixel_cnn import PixelCNN
 
 
 def nt_xent_loss(out_1, out_2, temperature):
@@ -185,21 +185,76 @@ class AmdimNCELoss(nn.Module):
         return nce_scores, lgt_reg
 
 
-class AMDIMContrastiveTask(nn.Module):
+class FeatureMapContrastiveTask(nn.Module):
 
-    def __init__(self, strategy='1:1', tclip=10.):
+    def __init__(self, comparisons: str = '00, 11', tclip: float = 10.0, bidirectional: bool = True):
         """
-        Implements the contrastive task of AMDIM in addition to the ablation tasks.
+        Performs an anchor, positive negative pair comparison for each each tuple of feature maps passed.
+
+        .. code-block:: python
+
+            # extract feature maps
+            pos_0, pos_1, pos_2 = encoder(x_pos)
+            anc_0, anc_1, anc_2 = encoder(x_anchor)
+
+            # compare only the 0th feature maps
+            task = FeatureMapContrastiveTask('00')
+            loss, regularizer = task((pos_0), (anc_0))
+
+            # compare (pos_0 to anc_1) and (pos_0, anc_2)
+            task = FeatureMapContrastiveTask('01, 02')
+            losses, regularizer = task((pos_0, pos_1, pos_2), (anc_0, anc_1, anc_2))
+            loss = losses.sum()
+
+            # compare (pos_1 vs a anc_random)
+            task = FeatureMapContrastiveTask('0r')
+            loss, regularizer = task((pos_0, pos_1, pos_2), (anc_0, anc_1, anc_2))
 
         Args:
-            strategy:  which pair of positive and anchor maps to compare '1:1', '1:5,1:7,5:5', '1:1,5:5,7:7', '1:random'
+            comparisons: groupings of feature map indices to compare (zero indexed, 'r' means random) ex: '00, 1r'
+            tclip: stability clipping value
+            bidirectional: if true, does the comparison both ways
+
+        .. code-block:: python
+
+            # with bidirectional the comparisons are done both ways
+            task = FeatureMapContrastiveTask('01, 02')
+
+            # will compare the following:
+            # 01: (pos_0, anc_1), (anc_0, pos_1)
+            # 02: (pos_0, anc_2), (anc_0, pos_2)
+
         """
         super().__init__()
         self.tclip = tclip
-        self.strategy = strategy
-
+        self.bidirectional = bidirectional
+        self.map_indexes = self.parse_map_indexes(comparisons)
+        self.comparisons = comparisons
         self.masks = {}
         self.nce_loss = AmdimNCELoss(tclip)
+
+    @staticmethod
+    def parse_map_indexes(comparisons):
+        """
+        Example::
+
+            >>> FeatureMapContrastiveTask.parse_map_indexes('11')
+            [(1, 1)]
+            >>> FeatureMapContrastiveTask.parse_map_indexes('11,59')
+            [(1, 1), (5, 9)]
+            >>> FeatureMapContrastiveTask.parse_map_indexes('11,59, 2r')
+            [(1, 1), (5, 9), (2, -1)]
+        """
+        map_indexes = [x.strip() for x in comparisons.split(',')]
+        for tup_i in range(len(map_indexes)):
+            (a, b) = map_indexes[tup_i]
+            if a == 'r':
+                a = '-1'
+            if b == 'r':
+                b = '-1'
+            map_indexes[tup_i] = (int(a), int(b))
+
+        return map_indexes
 
     def feat_size_w_mask(self, w, feature_map):
         masks_r5 = torch.zeros((w, w, 1, w, w), device=feature_map.device).type(torch.bool)
@@ -224,259 +279,10 @@ class AMDIMContrastiveTask(nn.Module):
         r_vec = r_cnv.reshape(n_batch, feat_dim)
         return r_vec
 
-    def contrastive_task_77(self, x1_maps, x2_maps):
-        # (b, dim, w. h)
-        batch_size, emb_dim, h, w = x1_maps[0].size()
-
-        mask = self.masks[h]
-
-        # -----------------
-        # SOURCE VECTORS
-        # 1 feature vector per image per feature map location
-        # img1 -> img2
-        r1_src_x1 = self._sample_src_ftr(x1_maps[0], mask)
-        r1_src_x2 = self._sample_src_ftr(x2_maps[0], mask)
-
-        # pick which map to use for negative samples
-        x2_tgt = x2_maps[0]
-        x1_tgt = x1_maps[0]
-
-        # adjust the maps for neg samples
-        x2_tgt = x2_tgt.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-        x1_tgt = x1_tgt.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-
-        # make masking matrix to help compute nce costs
-        # (b x b) zero matrix with 1s in the diag
-        diag_mat = torch.eye(batch_size, device=r1_src_x1.device)
-
-        # -----------------
-        # NCE COSTS
-        # compute costs for 1->5 prediction
-        # use last layer to predict the layer with (5x5 features)
-        loss_fwd, regularizer_fwd = self.nce_loss(r1_src_x1, x2_tgt, diag_mat)  # img 1
-        loss_back, regularizer_back = self.nce_loss(r1_src_x2, x1_tgt, diag_mat)  # img 1
-
-        # ------------------
-        # FINAL LOSS MEAN
-        # loss mean
-        loss = 0.5 * (loss_fwd + loss_back)
-        loss = loss.mean()
-
-        regularizer = 0.5 * (regularizer_fwd + regularizer_back)
-        regularizer = regularizer.mean()
-        return loss, regularizer
-
-    def contrastive_task_15_17_55(self, x1_maps, x2_maps):
-        r1_x1, r5_x1, r7_x1 = x1_maps
-        r1_x2, r5_x2, r7_x2 = x2_maps
-
-        batch_size, emb_dim, _, _ = r1_x1.size()
-
-        # -----------------
-        # SOURCE VECTORS
-        # 1 feature vector per image per feature map location
-        # img 1
-        b_1, e_1, h_1, w_1 = r1_x1.size()
-        mask_1 = self.masks[h_1]
-        r1_src_1 = self._sample_src_ftr(r1_x1, mask_1)
-        r1_src_2 = self._sample_src_ftr(r1_x2, mask_1)
-
-        b_5, e_5, h_5, w_5 = r5_x1.size()
-        mask_5 = self.masks[h_5]
-        r5_src_1 = self._sample_src_ftr(r5_x1, mask_5)
-        r5_src_2 = self._sample_src_ftr(r5_x2, mask_5)
-
-        # -----------------
-        # TARGET VECTORS
-        # before shape: (n_batch, emb_dim, w, h)
-        r5_trg_1 = r5_x1.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-        r5_trg_2 = r5_x2.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-        r7_trg_1 = r7_x1.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-        r7_trg_2 = r7_x2.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-        # after shape: (emb_dim, n_batch * w * h)
-
-        # make masking matrix to help compute nce costs
-        # (b x b) zero matrix with 1s in the diag
-        diag_mat = torch.eye(batch_size)
-        diag_mat = diag_mat.cuda(r1_x1.device.index)
-
-        # -----------------
-        # NCE COSTS
-        # compute costs for 1->5 prediction
-        # use last layer to predict the layer with (5x5 features)
-        loss_1t5_1, regularizer_1t5_1 = self.nce_loss(r1_src_1, r5_trg_2, diag_mat)  # img 1
-        loss_1t5_2, regularizer_1t5_2 = self.nce_loss(r1_src_2, r5_trg_1, diag_mat)  # img 2
-
-        # compute costs for 1->7 prediction
-        # use last layer to predict the layer with (7x7 features)
-        loss_1t7_1, regularizer_1t7_1 = self.nce_loss(r1_src_1, r7_trg_2, diag_mat)  # img 1
-        loss_1t7_2, regularizer_1t7_2 = self.nce_loss(r1_src_2, r7_trg_1, diag_mat)  # img 2
-
-        # compute costs for 5->5 prediction
-        # use (5x5) layer to predict the (5x5) layer
-        loss_5t5_1, regularizer_5t5_1 = self.nce_loss(r5_src_1, r5_trg_2, diag_mat)  # img 1
-        loss_5t5_2, regularizer_5t5_2 = self.nce_loss(r5_src_2, r5_trg_1, diag_mat)  # img 2
-
-        # combine costs for optimization
-        loss_1t5 = 0.5 * (loss_1t5_1 + loss_1t5_2)
-        loss_1t7 = 0.5 * (loss_1t7_1 + loss_1t7_2)
-        loss_5t5 = 0.5 * (loss_5t5_1 + loss_5t5_2)
-
-        # regularizer
-        regularizer = 0.5 * (regularizer_1t5_1 + regularizer_1t5_2 +
-                             regularizer_1t7_1 + regularizer_1t7_2 +
-                             regularizer_5t5_1 + regularizer_5t5_2)
-
-        # ------------------
-        # FINAL LOSS MEAN
-        # loss mean
-        loss_1t5 = loss_1t5.mean()
-        loss_1t7 = loss_1t7.mean()
-        loss_5t5 = loss_5t5.mean()
-        regularizer = regularizer.mean()
-        return loss_1t5 + loss_1t7 + loss_5t5, regularizer
-
-    def contrastive_task_11_55_77(self, x1_maps, x2_maps):
-        r1_x1, r5_x1, r7_x1 = x1_maps
-        r1_x2, r5_x2, r7_x2 = x2_maps
-
-        batch_size, emb_dim, _, _ = r1_x1.size()
-
-        # -----------------
-        # SOURCE VECTORS
-        # 1 feature vector per image per feature map location
-        # img 1
-        b_1, e_1, h_1, w_1 = r1_x1.size()
-        mask_1 = self.masks[h_1]
-        r1_src_1 = self._sample_src_ftr(r1_x1, mask_1)
-        r1_src_2 = self._sample_src_ftr(r1_x2, mask_1)
-
-        # img 2
-        b_5, e_5, h_5, w_5 = r5_x1.size()
-        mask_5 = self.masks[h_5]
-        r5_src_1 = self._sample_src_ftr(r5_x1, mask_5)
-        r5_src_2 = self._sample_src_ftr(r5_x2, mask_5)
-
-        b_7, e_7, h_7, w_7 = r7_x1.size()
-        mask_7 = self.masks[h_7]
-        r7_src_1 = self._sample_src_ftr(r7_x1, mask_7)
-        r7_src_2 = self._sample_src_ftr(r7_x2, mask_7)
-
-        # -----------------
-        # TARGET VECTORS
-        # before shape: (n_batch, emb_dim, w, h)
-        r1_trg_1 = r1_x1.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-        r5_trg_1 = r5_x1.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-        r7_trg_1 = r7_x1.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-
-        r1_trg_2 = r1_x2.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-        r5_trg_2 = r5_x2.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-        r7_trg_2 = r7_x2.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-        # after shape: (emb_dim, n_batch * w * h)
-
-        # make masking matrix to help compute nce costs
-        # (b x b) zero matrix with 1s in the diag
-        diag_mat = torch.eye(batch_size)
-        diag_mat = diag_mat.cuda(r1_x1.device.index)
-
-        # -----------------
-        # NCE COSTS
-        # compute costs for 1->1 prediction
-        # use last layer to predict the layer with (5x5 features)
-        loss_1t1_1, regularizer_1t1_1 = self.nce_loss(r1_src_1, r1_trg_2, diag_mat)  # img 1
-        loss_1t1_2, regularizer_1t1_2 = self.nce_loss(r1_src_2, r1_trg_1, diag_mat)  # img 2
-
-        # compute costs for 5->5 prediction
-        # use last layer to predict the layer with (7x7 features)
-        loss_5t5_1, regularizer_1t7_1 = self.nce_loss(r5_src_1, r5_trg_2, diag_mat)  # img 1
-        loss_5t5_2, regularizer_1t7_2 = self.nce_loss(r5_src_2, r5_trg_1, diag_mat)  # img 2
-
-        # compute costs for 7->7 prediction
-        # use (5x5) layer to predict the (5x5) layer
-        loss_7t7_1, regularizer_7t7_1 = self.nce_loss(r7_src_1, r7_trg_2, diag_mat)  # img 1
-        loss_7t7_2, regularizer_7t7_2 = self.nce_loss(r7_src_2, r7_trg_1, diag_mat)  # img 2
-
-        # combine costs for optimization
-        loss_1t1 = 0.5 * (loss_1t1_1 + loss_1t1_2)
-        loss_5t5 = 0.5 * (loss_5t5_1 + loss_5t5_2)
-        loss_7t7 = 0.5 * (loss_7t7_1 + loss_7t7_2)
-
-        # regularizer
-        regularizer = 0.5 * (regularizer_1t1_1 + regularizer_1t1_2 +
-                             regularizer_1t7_1 + regularizer_1t7_2 +
-                             regularizer_7t7_1 + regularizer_7t7_2)
-
-        # ------------------
-        # FINAL LOSS MEAN
-        # loss mean
-        loss_1t1 = loss_1t1.mean()
-        loss_5t5 = loss_5t5.mean()
-        loss_7t7 = loss_7t7.mean()
-        regularizer = regularizer.mean()
-        return loss_1t1 + loss_5t5 + loss_7t7, regularizer
-
-    def contrastive_task_1_random(self, x1_maps, x2_maps):
-        r1_x1, r5_x1, r7_x1 = x1_maps
-        r1_x2, r5_x2, r7_x2 = x2_maps
-
-        batch_size, emb_dim, _, _ = r1_x1.size()
-
-        # -----------------
-        # SOURCE VECTORS
-        # 1 feature vector per image per feature map location
-        # img 1
-        b_1, e_1, h_1, w_1 = r1_x1.size()
-        mask_1 = self.masks[h_1]
-
-        r1_src_1 = self._sample_src_ftr(r1_x1, mask_1)
-        r1_src_2 = self._sample_src_ftr(r1_x2, mask_1)
-
-        # pick the target map
-        target_map_idx = np.random.randint(0, len(x2_maps), 1)[0]
-        target_map_x2 = x2_maps[target_map_idx]
-        target_map_x1 = x1_maps[target_map_idx]
-
-        # -----------------
-        # TARGET VECTORS
-        # before shape: (n_batch, emb_dim, w, h)
-        target_map_x2 = target_map_x2.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-        target_map_x1 = target_map_x1.permute(1, 0, 2, 3).reshape(emb_dim, -1)
-
-        # make masking matrix to help compute nce costs
-        # (b x b) zero matrix with 1s in the diag
-        diag_mat = torch.eye(batch_size)
-        diag_mat = diag_mat.cuda(r1_x1.device.index)
-
-        # -----------------
-        # NCE COSTS
-        # compute costs for 1->5 prediction
-        # use last layer to predict the layer with (5x5 features)
-        loss_1tR_1, regularizer_1t5_1 = self.nce_loss(r1_src_1, target_map_x2, diag_mat)  # img 1
-        loss_1tR_2, regularizer_1t5_2 = self.nce_loss(r1_src_2, target_map_x1, diag_mat)  # img 2
-
-        # combine costs for optimization
-        loss_1tR = 0.5 * (loss_1tR_1 + loss_1tR_2)
-
-        # regularizer
-        regularizer = 0.5 * (regularizer_1t5_1 + regularizer_1t5_2)
-
-        # ------------------
-        # FINAL LOSS MEAN
-        # loss mean
-        loss_1tR = loss_1tR.mean()
-        regularizer = regularizer.mean()
-        return loss_1tR, regularizer
-
-    def forward(self, x1_maps, x2_maps):
-        """
-        Compute nce infomax costs for various combos of source/target layers.
-        Compute costs in both directions, i.e. from/to both images (x1, x2).
-        rK_x1 are features from source image x1.
-        rK_x2 are features from source image x2.
-        """
-        # cache masks
+    def __cache_dimension_masks(self, *args):
+        # cache masks for each feature map we'll need
         if len(self.masks) == 0:
-            for m1, m2 in zip(x1_maps, x2_maps):
+            for m1 in args:
                 batch_size, emb_dim, h, w = m1.size()
 
                 # make mask
@@ -484,14 +290,85 @@ class AMDIMContrastiveTask(nn.Module):
                     mask = self.feat_size_w_mask(h, m1)
                     self.masks[h] = mask
 
-        if self.strategy == '1:1':
-            return self.contrastive_task_77(x1_maps, x2_maps)
-        elif self.strategy == '1:5,1:7,5:5':
-            return self.contrastive_task_11_55_77(x1_maps, x2_maps)
-        elif self.strategy == '1:1,5:5,7:7':
-            return self.contrastive_task_11_55_77(x1_maps, x2_maps)
-        elif self.strategy == '1:random':
-            return self.contrastive_task_1_random(x1_maps, x2_maps)
+    def __compare_maps(self, m1, m2):
+        b, c, h, w = m1.size()
+
+        mask_1 = self.masks[h]
+        src = self._sample_src_ftr(m1, mask_1)
+
+        # target vectors
+        # (b, c, h, w) -> (c, b * h * w)
+        tgt = m2.permute(1, 0, 2, 3).reshape(c, -1)
+
+        # make masking matrix to help compute nce costs
+        # (b x b) zero matrix with 1s in the diag
+        diag_mat = torch.eye(b, device=m1.device)
+
+        # compare
+        loss, regularizer = self.nce_loss(src, tgt, diag_mat)
+
+        return loss, regularizer
+
+    def forward(self, anchor_maps, positive_maps):
+        """
+        Takes in a set of tuples, each tuple has two feature maps with all matching dimensions
+
+        Example:
+
+            >>> import torch
+            >>> from pytorch_lightning import seed_everything
+            >>> seed_everything(0)
+            0
+            >>> a1 = torch.rand(3, 5, 2, 2)
+            >>> a2 = torch.rand(3, 5, 2, 2)
+            >>> b1 = torch.rand(3, 5, 2, 2)
+            >>> b2 = torch.rand(3, 5, 2, 2)
+            ...
+            >>> task = FeatureMapContrastiveTask('01, 11')
+            ...
+            >>> losses, regularizer = task((a1, a2), (b1, b2))
+            >>> losses
+            tensor([2.2351, 2.1902])
+            >>> regularizer
+            tensor(0.0324)
+        """
+        assert len(anchor_maps) == len(self.map_indexes), f'expected each input to have {len(self.map_indexes)} tensors'
+
+        self.__cache_dimension_masks(*(anchor_maps + positive_maps))
+
+        regularizer = 0
+        losses = []
+        for (ai, pi) in self.map_indexes:
+
+            # choose a random map
+            if ai == -1:
+                ai = np.random.randint(0, len(anchor_maps))
+            if pi == -1:
+                pi = np.random.randint(0, len(anchor_maps))
+
+            # pull out the maps
+            anchor = anchor_maps[ai]
+            pos = positive_maps[pi]
+
+            # m1 vs m2
+            loss1, reg1 = self.__compare_maps(anchor, pos)
+            map_reg = reg1
+            map_loss = loss1
+
+            # add second direction if requested
+            if self.bidirectional:
+                # swap maps
+                anchor = positive_maps[ai]
+                pos = anchor_maps[pi]
+
+                loss2, reg2 = self.__compare_maps(anchor, pos)
+                map_reg = 0.5 * (reg1 + reg2)
+                map_loss = 0.5 * (loss1 + loss2)
+
+            regularizer += map_reg
+            losses.append(map_loss.mean())
+
+        return torch.stack(losses), regularizer
 
 
 def tanh_clip(x, clip_val=10.):

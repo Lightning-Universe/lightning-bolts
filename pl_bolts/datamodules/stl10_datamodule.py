@@ -7,9 +7,19 @@ from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 
 
-class STL10DataModule(LightningDataModule):
+class STL10DataModule(LightningDataModule):  # pragma: no cover
 
-    def __init__(self, data_dir, unlabeled_val_split=5000, train_val_split=500, num_workers=16):
+    name = 'stl10'
+
+    def __init__(
+            self,
+            data_dir: str,
+            unlabeled_val_split: int = 5000,
+            train_val_split: int = 500,
+            num_workers: int = 16,
+            *args,
+            **kwargs,
+    ):
         """
         Standard STL-10, train, val, test splits and transforms.
         STL-10 has support for doing validation splits on the labeled or unlabeled splits
@@ -37,7 +47,8 @@ class STL10DataModule(LightningDataModule):
             train_val_split: how many images from the labeled training split to use for validation
             num_workers: how many workers to use for loading data
         """
-        super().__init__()
+        super().__init__(*args, **kwargs)
+        self.dims = (3, 96, 96)
         self.data_dir = data_dir
         self.unlabeled_val_split = unlabeled_val_split
         self.train_val_split = train_val_split
@@ -47,13 +58,6 @@ class STL10DataModule(LightningDataModule):
     def num_classes(self):
         return 10
 
-    def size(self):
-        """
-        Return:
-
-            (3, 96, 96)
-        """
-
     def prepare_data(self):
         """
         Downloads the unlabeled, train and test split
@@ -62,17 +66,15 @@ class STL10DataModule(LightningDataModule):
         STL10(self.data_dir, split='train', download=True, transform=transform_lib.ToTensor())
         STL10(self.data_dir, split='test', download=True, transform=transform_lib.ToTensor())
 
-    def train_dataloader(self, batch_size, transforms=None):
+    def train_dataloader(self, batch_size):
         """
         Loads the 'unlabeled' split minus a portion set aside for validation via `unlabeled_val_split`.
 
         Args:
 
             batch_size: the batch size
-            transforms: a sequence of transforms
         """
-        if transforms is None:
-            transforms = self._default_transforms()
+        transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
 
         dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
@@ -89,7 +91,7 @@ class STL10DataModule(LightningDataModule):
         )
         return loader
 
-    def train_dataloader_mixed(self, batch_size, transforms=None):
+    def train_dataloader_mixed(self, batch_size):
         """
         Loads a portion of the 'unlabeled' training data and 'train' (labeled) data.
         both portions have a subset removed for validation via `unlabeled_val_split` and `train_val_split`
@@ -99,8 +101,7 @@ class STL10DataModule(LightningDataModule):
             batch_size: the batch size
             transforms: a sequence of transforms
         """
-        if transforms is None:
-            transforms = self._default_transforms()
+        transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
 
         unlabeled_dataset = STL10(self.data_dir,
                                   split='unlabeled',
@@ -138,8 +139,7 @@ class STL10DataModule(LightningDataModule):
             batch_size: the batch size
             transforms: a sequence of transforms
         """
-        if transforms is None:
-            transforms = self._default_transforms()
+        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
 
         dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
@@ -171,9 +171,7 @@ class STL10DataModule(LightningDataModule):
             batch_size: the batch size
             transforms: a sequence of transforms
         """
-        if transforms is None:
-            transforms = self._default_transforms()
-
+        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
         unlabeled_dataset = STL10(self.data_dir,
                                   split='unlabeled',
                                   download=False,
@@ -200,7 +198,7 @@ class STL10DataModule(LightningDataModule):
         )
         return loader
 
-    def test_dataloader(self, batch_size, transforms=None):
+    def test_dataloader(self, batch_size):
         """
         Loads the test split of STL10
 
@@ -208,8 +206,7 @@ class STL10DataModule(LightningDataModule):
             batch_size: the batch size
             transforms: the transforms
         """
-        if transforms is None:
-            transforms = self._default_transforms()
+        transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
 
         dataset = STL10(self.data_dir, split='test', download=False, transform=transforms)
         loader = DataLoader(
@@ -222,9 +219,9 @@ class STL10DataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self):
-        mnist_transforms = transform_lib.Compose([
+    def default_transforms(self):
+        data_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             stl10_normalization()
         ])
-        return mnist_transforms
+        return data_transforms

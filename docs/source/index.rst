@@ -3,14 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-PyTorchLightning-Bolts documentation
-====================================
+PyTorch-Lightning-Bolts documentation
+=====================================
 .. toctree::
    :maxdepth: 1
    :name: start
    :caption: Start here
 
    introduction_guide
+   models
 
 .. toctree::
    :maxdepth: 2
@@ -39,7 +40,7 @@ PyTorchLightning-Bolts documentation
 .. toctree::
    :maxdepth: 2
    :name: loggers
-   :caption: Loggers
+   :caption: Experimental Loggers
 
    loggers
 
@@ -48,23 +49,27 @@ PyTorchLightning-Bolts documentation
    :name: models
    :caption: Models
 
+   models_howto
    autoencoders
    classic_ml
+   convolutional
    gans
-   rl
+   reinforce_learn
    self_supervised_models
 
 .. toctree::
    :maxdepth: 2
    :name: transforms
-   :caption: Transforms
+   :caption: Data Processing
 
    transforms
+   self_supervised_utils
+   semi_sup_processing
 
 .. toctree::
    :maxdepth: 2
    :name: ssl
-   :caption: Self-supervised learning
+   :caption: Learning Tasks
 
    vision_tasks
 

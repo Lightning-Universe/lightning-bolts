@@ -37,6 +37,7 @@ Paper authors: Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves, Ioa
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
+<<<<<<< HEAD
 The DQN was introduced in `Playing Atari with Deep Reinforcement Learning <https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf>`_ by
 researchers at DeepMind. This took the concept of tabular Q learning and scaled it to much larger problems by
 apporximating the Q function using a deep neural network.
@@ -90,6 +91,7 @@ Paper authors: Hado van Hasselt, Arthur Guez, David Silver
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
+<<<<<<< HEAD
 The original DQN tends to overestimate Q values during the Bellman update, leading to instability and is harmful to
 training. This is due to the max operation in the Bellman equation.
 
@@ -151,6 +153,7 @@ Paper authors: Ziyu Wang, Tom Schaul, Matteo Hessel, Hado van Hasselt, Marc Lanc
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
+<<<<<<< HEAD
 The Q value that we are trying to approximate can be divided into two parts, the value state V(s) and the 'advantage'
 of actions in that state A(s, a). Instead of having one full network estimate the entire Q value, Dueling DQN uses two
 estimator heads in order to separate the estimation of the two parts.
@@ -239,6 +242,7 @@ Vlad Mnih, Remi Munos, Demis Hassabis, Olivier Pietquin, Charles Blundell, Shane
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
+<<<<<<< HEAD
 Up until now the DQN agent uses a seperate exploration policy, generally epsilon-greedy where start and end values
 are set for its exploration. [Noisy Networks For Exploration](https://arxiv.org/abs/1706.10295) introduces
 a new exploration strategy by adding noise parameters to the weightsof the fully connect layers which get updated
@@ -322,6 +326,7 @@ Paper authors: Richard S. Sutton
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
+<<<<<<< HEAD
 N Step DQN was introduced in `Learning to Predict by the Methods of Temporal Differences
 <http://incompleteideas.net/papers/sutton-88-with-erratum.pdf>`_.
 This method improves upon the original DQN by updating our Q values with the expected reward from multiple steps in the
@@ -414,6 +419,7 @@ Paper authors: Tom Schaul, John Quan, Ioannis Antonoglou, David Silver
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
+<<<<<<< HEAD
 The standard DQN uses a buffer to break up the correlation between experiences and uniform random samples for each
 batch. Instead of just randomly sampling from the buffer prioritized experience replay (PER) prioritizes these samples
 based on training loss. This concept was introduced in the paper
