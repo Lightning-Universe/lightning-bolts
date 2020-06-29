@@ -53,7 +53,7 @@ class DACDataModule(LightningDataModule):
             use_tiny_dac: if true, uses a smaller version with only 100_000 samples
         """
         super().__init__(*args, **kwargs)
-        self.dims = (1, 28, 28)
+        self.dims = [(32, 39, 1), (32, 39), 32]
         self.data_dir = os.path.join(data_dir, 'dac')
         self.val_split = val_split
         self.num_workers = num_workers
@@ -68,14 +68,6 @@ class DACDataModule(LightningDataModule):
         elif download_preprocessed:
             url = URL_preprocessed
         self.add_data_url(url)
-
-    @property
-    def num_classes(self):
-        """
-        Return:
-            10
-        """
-        return 10
 
     def prepare_data(self):
         """
@@ -207,17 +199,15 @@ class DACDataset(Dataset):
 
 
 if __name__ == '__main__':
-    dm = DACDataModule(data_dir='/Users/williamfalcon/Downloads/', use_tiny_dac=True)
+    dm = DACDataModule(data_dir=os.getcwd(), use_tiny_dac=True)
     dm.prepare_data()
 
     for batch in dm.train_dataloader():
         (x1_continuous, x2_categorical, y) = batch
         print(x1_continuous.shape, x2_categorical.shape, y.shape)
-        print(x1_continuous)
-        print(x2_categorical)
         break
 
     for batch in dm.val_dataloader():
         (x1, x2) = batch
-        print(batch)
+        print(x1.shape, x2.shape)
         break
