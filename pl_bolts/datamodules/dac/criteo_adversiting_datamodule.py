@@ -202,12 +202,22 @@ if __name__ == '__main__':
     dm = DACDataModule(data_dir=os.getcwd(), use_tiny_dac=True)
     dm.prepare_data()
 
+    print('-'*30)
+    print('train dims')
+    print('-'*30)
     for batch in dm.train_dataloader():
         (x1_continuous, x2_categorical, y) = batch
-        print(x1_continuous.shape, x2_categorical.shape, y.shape)
+        print('x1_continuous:', x1_continuous.shape)
+        print('x2_categorical:', x2_categorical.shape)
+        print('y:', y.shape)
         break
 
+    print('-'*30)
+    print('val/test dims')
+    print('-'*30)
     for batch in dm.val_dataloader():
-        (x1, x2) = batch
-        print(x1.shape, x2.shape)
+        (x1, x2, y) = batch
+        print('x1:', x1.shape)
+        print('x2:', x2.shape)
+        print('y:', y.shape)
         break
