@@ -1,5 +1,5 @@
-Recommender DataModules
-=======================
+Recommender Systems
+===================
 The following are pre-built datamodules for recommended systems.
 
 -------------
