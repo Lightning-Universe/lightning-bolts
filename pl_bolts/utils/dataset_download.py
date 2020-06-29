@@ -14,7 +14,7 @@ def download_and_extract_archive(url, download_root, extract_root=None, filename
     if not filename:
         filename = os.path.basename(url)
 
-    # lay out directory
+    # lay out dir
     download_root = os.path.expanduser(download_root)
     if not filename:
         filename = os.path.basename(url)
