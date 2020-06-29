@@ -83,12 +83,10 @@ class DACDataModule(LightningDataModule):
 
         Deletes the original dataset and only keeps the untarred files
         """
-        preprocess_dac(self.data_dir, self.data_dir, num_train_sample=100_000, num_test_sample=100_000)
-
-        # num_downloaded_files = self.download_registered_data_urls()
-        # if num_downloaded_files > 0 and not self.download_preprocessed:
-        #     num_samples = 100_000 if self.use_tiny_dac else -1
-        #     preprocess_dac(self.data_dir, self.data_dir, num_train_sample=num_samples, num_test_sample=num_samples)
+        num_downloaded_files = self.download_registered_data_urls()
+        if num_downloaded_files > 0 and not self.download_preprocessed:
+            num_samples = 100_000 if self.use_tiny_dac else -1
+            preprocess_dac(self.data_dir, self.data_dir, num_train_sample=num_samples, num_test_sample=num_samples)
 
     def train_dataloader(self, batch_size=32):
         """
@@ -209,12 +207,14 @@ class DACDataset(Dataset):
 
 
 if __name__ == '__main__':
-    dm = DACDataModule(data_dir='/Users/williamfalcon/Downloads/', use_tiny_dac=True, download_preprocessed=False)
+    dm = DACDataModule(data_dir='/Users/williamfalcon/Downloads/', use_tiny_dac=True)
     dm.prepare_data()
 
     for batch in dm.train_dataloader():
-        (x1, x2, y) = batch
-        print(batch)
+        (x1_continuous, x2_categorical, y) = batch
+        print(x1_continuous.shape, x2_categorical.shape, y.shape)
+        print(x1_continuous)
+        print(x2_categorical)
         break
 
     for batch in dm.val_dataloader():
