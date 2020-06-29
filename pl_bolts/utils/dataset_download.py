@@ -63,7 +63,7 @@ def download_url(url, fpath):
             raise e
 
 
-def extract_archive(from_path, to_path=None, remove_finished=False):
+def extract_archive(from_path, to_path=None, remove_finished=False):  # pragma: no-cover
     if to_path is None:
         to_path = os.path.dirname(from_path)
 
