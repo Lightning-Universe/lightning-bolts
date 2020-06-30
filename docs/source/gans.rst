@@ -15,7 +15,7 @@ Implemented by:
 Example outputs:
 
     .. image:: _images/gans/basic_gan_interpolate.png
-        :width: 200
+        :width: 400
         :alt: Basic GAN generated samples
 
 Loss curves:
