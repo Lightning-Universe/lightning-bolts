@@ -7,7 +7,8 @@ Collection of Generative Adversarial Networks
 Basic GAN
 ---------
 This is a vanilla GAN. This model can work on any dataset size but results are shown for MNIST.
-Replace the encoder, decoder or any part of the training loop to build a new method.
+Replace the encoder, decoder or any part of the training loop to build a new method, or simply
+finetune on your data.
 
 Implemented by:
 
