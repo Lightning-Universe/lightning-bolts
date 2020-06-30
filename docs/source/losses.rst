@@ -11,10 +11,10 @@ Your Loss
 ---------
 We're cleaning up many of our losses, but in the meantime, submit a PR to add your loss here!
 
-----------------------------------------
+-------------
 
 Reinforcement Learning Loss Functions
-----------------------------------------
+-------------------------------------
 
 .. automodule:: pl_bolts.losses.reinforcement_learning
     :noindex:
