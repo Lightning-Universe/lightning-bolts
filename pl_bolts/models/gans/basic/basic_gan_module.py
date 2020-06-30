@@ -15,8 +15,6 @@ class GAN(LightningModule):
                  datamodule: LightningDataModule = None,
                  latent_dim: int = 32,
                  batch_size: int = 100,
-                 adam_b1: float = 0.5,
-                 adam_b2: float = 0.999,
                  learning_rate: float = 0.0002,
                  data_dir: str = '',
                  num_workers: int = 8,
@@ -46,8 +44,6 @@ class GAN(LightningModule):
             datamodule: the datamodule (train, val, test splits)
             latent_dim: emb dim for encoder
             batch_size: the batch size
-            adam_b1: optimizer param
-            adam_b2: adam params
             learning_rate: the learning rate
             data_dir: where to store data
             num_workers: data workers
@@ -165,8 +161,6 @@ class GAN(LightningModule):
 
     def configure_optimizers(self):
         lr = self.hparams.learning_rate
-        adam_b1 = self.hparams.adam_b1
-        adam_b2 = self.hparams.adam_b2
 
         opt_g = torch.optim.Adam(self.generator.parameters(), lr=lr)
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr)
