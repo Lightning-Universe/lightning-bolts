@@ -6,6 +6,7 @@ from typing import Tuple, List
 
 import torch
 from torch import nn
+import numpy as np
 
 
 def dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], net: nn.Module,
@@ -91,7 +92,7 @@ def double_dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], net: nn.Module,
 
 
 def per_dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], batch_weights: List, net: nn.Module,
-                 target_net: nn.Module, gamma: float = 0.99) -> torch.Tensor:
+                 target_net: nn.Module, gamma: float = 0.99) -> Tuple[torch.Tensor, np.ndarray]:
     """
     Calculates the mse loss with the priority weights of the batch from the PER buffer
 
@@ -103,7 +104,7 @@ def per_dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], batch_weights: List, 
         gamma: discount factor
 
     Returns:
-        loss
+        loss and batch_weights
     """
     states, actions, rewards, dones, next_states = batch
 
