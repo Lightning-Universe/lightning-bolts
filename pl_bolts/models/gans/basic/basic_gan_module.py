@@ -31,17 +31,17 @@ class GAN(LightningModule):
 
         Example outputs:
 
-            .. image:: _images/gans/basic_gan_interpolate.jpg
+            .. image:: _images/gans/basic_gan_interpolate.png
                 :width: 200
                 :alt: Basic GAN generated samples
 
         Loss curves:
 
-            .. image:: _images/gans/basic_gan_dloss.jpg
+            .. image:: _images/gans/basic_gan_dloss.png
                 :width: 200
                 :alt: Basic GAN disc loss
 
-            .. image:: _images/gans/basic_gan_gloss.jpg
+            .. image:: _images/gans/basic_gan_gloss.png
                 :width: 200
                 :alt: Basic GAN gen loss
 
