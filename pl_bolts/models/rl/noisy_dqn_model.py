@@ -8,6 +8,7 @@ from typing import Tuple
 import torch
 import pytorch_lightning as pl
 
+from pl_bolts.losses.reinforcement_learning import dqn_loss
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.networks import NoisyCNN
 from pl_bolts.models.rl.dqn_model import DQN
@@ -83,7 +84,7 @@ class NoisyDQN(DQN):
         self.episode_steps += 1
 
         # calculates training loss
-        loss = self.loss(batch)
+        loss = dqn_loss(batch, self.net, self.target_net)
 
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)

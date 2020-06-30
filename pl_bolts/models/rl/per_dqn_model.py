@@ -8,6 +8,7 @@ from typing import Tuple, List
 import torch
 import pytorch_lightning as pl
 
+from pl_bolts.losses.reinforcement_learning import per_dqn_loss
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.experience import ExperienceSource, PrioRLDataset
 from pl_bolts.models.rl.common.memory import PERBuffer
@@ -85,7 +86,7 @@ class PERDQN(DQN):
         self.episode_steps += 1
 
         # calculates training loss
-        loss, batch_weights = self.loss(samples, weights)
+        loss, batch_weights = per_dqn_loss(samples, weights, self.net, self.target_net)
 
         # update priorities in buffer
         self.buffer.update_priorities(indices, batch_weights)
@@ -122,36 +123,6 @@ class PERDQN(DQN):
         }
 
         return OrderedDict({"loss": loss, "log": log, "progress_bar": status})
-
-    def loss(
-        self, batch: Tuple[torch.Tensor, torch.Tensor], batch_weights: List
-    ) -> Tuple[torch.Tensor, List]:
-        """
-        Calculates the mse loss with the priority weights of the batch from the PER buffer
-
-        Args:
-            batch: current mini batch of replay data
-            batch_weights: how each of these samples are weighted in terms of priority
-
-        Returns:
-            loss
-        """
-        states, actions, rewards, dones, next_states = batch
-
-        actions = actions.long()
-
-        batch_weights = torch.tensor(batch_weights)
-
-        actions_v = actions.unsqueeze(-1)
-        state_action_vals = self.net(states).gather(1, actions_v)
-        state_action_vals = state_action_vals.squeeze(-1)
-        with torch.no_grad():
-            next_s_vals = self.target_net(next_states).max(1)[0]
-            next_s_vals[dones] = 0.0
-            exp_sa_vals = next_s_vals.detach() * self.gamma + rewards
-        loss = (state_action_vals - exp_sa_vals) ** 2
-        losses_v = batch_weights * loss
-        return losses_v.mean(), (losses_v + 1e-5).data.cpu().numpy()
 
     def prepare_data(self) -> None:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""

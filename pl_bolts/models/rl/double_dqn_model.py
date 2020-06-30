@@ -2,13 +2,13 @@
 Double DQN
 """
 import argparse
+from collections import OrderedDict
 from typing import Tuple
 
 import torch
-import torch.nn as nn
-
 import pytorch_lightning as pl
 
+from pl_bolts.losses.reinforcement_learning import double_dqn_loss
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.dqn_model import DQN
 
@@ -59,50 +59,69 @@ class DoubleDQN(DQN):
 
     """
 
-    def loss(self, batch: Tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:
+    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
         """
-        Calculates the mse loss using a mini batch from the replay buffer. This uses an improvement to the original
-        DQN loss by using the double dqn. This is shown by using the actions of the train network to pick the
-        value from the target network. This code is heavily commented in order to explain the process clearly
+        Carries out a single step through the environment to update the replay buffer.
+        Then calculates loss based on the minibatch recieved
 
         Args:
             batch: current mini batch of replay data
+            _: batch number, not used
 
         Returns:
-            loss
+            Training loss and log metrics
         """
-        states, actions, rewards, dones, next_states = batch  # batch of experiences, batch_size = 16
+        self.agent.update_epsilon(self.global_step)
 
-        actions = actions.unsqueeze(-1)  # adds a dimension, 16 -> [16, 1]
-        output = self.net(states)  # shape [16, 2], [batch, action space]
+        # step through environment with agent and add to buffer
+        exp, reward, done = self.source.step()
+        self.buffer.append(exp)
 
-        actions = actions.long()
+        self.episode_reward += reward
+        self.episode_steps += 1
 
-        # gather the value of the outputs according to the actions index from the batch
-        state_action_values = output.gather(1, actions).squeeze(-1)
+        # calculates training loss
+        loss = double_dqn_loss(batch, self.net, self.target_net)
 
-        # dont want to mess with gradients when using the target network
-        with torch.no_grad():
-            next_outputs = self.net(next_states)  # [16, 2], [batch, action_space]
+        if self.trainer.use_dp or self.trainer.use_ddp2:
+            loss = loss.unsqueeze(0)
 
-            next_state_acts = next_outputs.max(1)[1].unsqueeze(
-                -1
-            )  # take action at the index with the highest value
-            next_tgt_out = self.target_net(next_states)
+        if done:
+            self.total_reward = self.episode_reward
+            self.reward_list.append(self.total_reward)
+            self.avg_reward = sum(self.reward_list[-100:]) / 100
+            self.episode_count += 1
+            self.episode_reward = 0
+            self.total_episode_steps = self.episode_steps
+            self.episode_steps = 0
 
-            # Take the value of the action chosen by the train network
-            next_state_values = next_tgt_out.gather(1, next_state_acts).squeeze(-1)
-            next_state_values[dones] = 0.0  # any steps flagged as done get a 0 value
-            next_state_values = (
-                next_state_values.detach()
-            )  # remove values from the graph, no grads needed
+        # Soft update of target network
+        if self.global_step % self.sync_rate == 0:
+            self.target_net.load_state_dict(self.net.state_dict())
 
-        # calc expected discounted return of next_state_values
-        expected_state_action_values = next_state_values * self.gamma + rewards
+        log = {
+            "total_reward": self.total_reward,
+            "avg_reward": self.avg_reward,
+            "train_loss": loss,
+            "episode_steps": self.total_episode_steps,
+        }
+        status = {
+            "steps": self.global_step,
+            "avg_reward": self.avg_reward,
+            "total_reward": self.total_reward,
+            "episodes": self.episode_count,
+            "episode_steps": self.episode_steps,
+            "epsilon": self.agent.epsilon,
+        }
 
-        # Standard MSE loss between the state action values of the current state and the
-        # expected state action values of the next state
-        return nn.MSELoss()(state_action_values, expected_state_action_values)
+        return OrderedDict(
+            {
+                "loss": loss,
+                "avg_reward": self.avg_reward,
+                "log": log,
+                "progress_bar": status,
+            }
+        )
 
 
 if __name__ == '__main__':
