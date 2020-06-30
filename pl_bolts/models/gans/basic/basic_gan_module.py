@@ -6,7 +6,7 @@ from pytorch_lightning import Trainer, LightningModule, Callback
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataModule, LightningDataModule
+from pl_bolts.datamodules import MNISTDataModule, LightningDataModule, STL10DataModule
 from pl_bolts.models.gans.basic.components import Generator, Discriminator
 
 
@@ -277,6 +277,8 @@ if __name__ == '__main__':
     datamodule = None
     if args.dataset == 'imagenet2012':
         datamodule = ImagenetDataModule.from_argparse_args(args)
+    elif args.dataset == 'stl10':
+        datamodule = STL10DataModule.from_argparse_args(args)
 
     gan = GAN(**vars(args), datamodule=datamodule)
     callbacks = [ImageGenerator(), LatentDimInterpolator()]
