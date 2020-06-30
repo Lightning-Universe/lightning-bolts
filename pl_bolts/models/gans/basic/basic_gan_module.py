@@ -13,9 +13,6 @@ class GAN(LightningModule):
 
     def __init__(self,
                  datamodule: LightningDataModule = None,
-                 input_channels: int = 1,
-                 input_width: int = 28,
-                 input_height: int = 28,
                  latent_dim: int = 32,
                  batch_size: int = 32,
                  adam_b1: float = 0.5,
@@ -30,9 +27,6 @@ class GAN(LightningModule):
         Args:
 
             datamodule: the datamodule (train, val, test splits)
-            input_channels: num of image channels
-            input_height: image height
-            input_width: image width
             latent_dim: emb dim for encoder
             batch_size: the batch size
             adam_b1: optimizer param
@@ -170,12 +164,6 @@ class GAN(LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--input_width', type=int, default=28,
-                            help='input image width - 28 for MNIST (must be even)')
-        parser.add_argument('--input_channels', type=int, default=1,
-                            help='num channels')
-        parser.add_argument('--input_height', type=int, default=28,
-                            help='input image height - 28 for MNIST (must be even)')
         parser.add_argument('--learning_rate', type=float, default=0.0002, help="adam: learning rate")
         parser.add_argument('--adam_b1', type=float, default=0.5,
                             help="adam: decay of first order momentum of gradient")
@@ -218,9 +206,6 @@ if __name__ == '__main__':
     datamodule = None
     if args.dataset == 'imagenet2012' or args.pretrained:
         datamodule = ImagenetDataModule.from_argparse_args(args)
-        args.image_width = datamodule.size()[1]
-        args.image_height = datamodule.size()[2]
-        args.input_channels = datamodule.size()[0]
 
     gan = GAN(**vars(args), datamodule=datamodule)
     trainer = Trainer.from_argparse_args(args, callbacks=[ImageGenerator()])
