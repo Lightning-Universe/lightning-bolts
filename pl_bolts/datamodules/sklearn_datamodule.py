@@ -9,7 +9,7 @@ from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 
 
 class SklearnDataset(Dataset):
-    def __init__(self, X: np.ndarray, y: np.ndarray = None, X_transform: Any = None, y_transform: Any = None):
+    def __init__(self, X: np.ndarray, y: np.ndarray, X_transform: Any = None, y_transform: Any = None):
         """
         Mapping between numpy (or sklearn) datasets to PyTorch datasets.
 
@@ -40,20 +40,19 @@ class SklearnDataset(Dataset):
 
     def __getitem__(self, idx):
         x = self.X[idx].astype(np.float32)
+        y = self.Y[idx]
 
-        if self.Y is not None:
-            y = self.Y[idx]
-
-            # Do not convert integer to float for classification data
-            if not y.dtype == np.integer:
-                y = y.astype(np.float32)
-            if self.y_transform:
-                y = self.y_transform(y)
+        # Do not convert integer to float for classification data
+        if not y.dtype == np.integer:
+            y = y.astype(np.float32)
 
         if self.X_transform:
             x = self.X_transform(x)
 
-        return x if self.Y is None else x, y
+        if self.y_transform:
+            y = self.y_transform(y)
+
+        return x, y
 
 
 class TensorDataset(Dataset):

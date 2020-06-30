@@ -47,12 +47,12 @@ class ImagenetDataModule(LightningDataModule):
             num_workers: how many data workers
         """
         super().__init__(*args, **kwargs)
-        self.image_size = image_size
         self.dims = (3, self.image_size, self.image_size)
         self.data_dir = data_dir
         self.num_workers = num_workers
         self.meta_root = meta_root
         self.num_imgs_per_val_class = num_imgs_per_val_class
+        self.image_size = image_size
 
     @property
     def num_classes(self):

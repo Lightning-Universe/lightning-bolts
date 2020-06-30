@@ -144,7 +144,6 @@ datasets
 simclr.py
 .DS_Store
 .*_submit.py
-*.downloaded_receipt
 
 source/api/
 test-reports
