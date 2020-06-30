@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 import torch
 from pytorch_lightning import Trainer, LightningModule, Callback
+from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.nn import functional as F
 
 from pl_bolts.datamodules import MNISTDataModule, LightningDataModule
@@ -64,10 +65,6 @@ class GAN(LightningModule):
         self.generator = self.init_generator(self.img_dim)
         self.discriminator = self.init_discriminator(self.img_dim)
 
-        # cache for generated images
-        self.generated_imgs = None
-        self.last_imgs = None
-
     def init_generator(self, img_dim):
         generator = Generator(latent_dim=self.hparams.latent_dim, img_shape=img_dim)
         return generator
@@ -95,7 +92,7 @@ class GAN(LightningModule):
         output = OrderedDict({
             'loss': g_loss,
             'progress_bar': tqdm_dict,
-            'log': tqdm_dict
+            'log': tqdm_dict,
         })
         return output
 
@@ -124,7 +121,7 @@ class GAN(LightningModule):
         D_output = self.discriminator(x_real)
         D_real_loss = F.binary_cross_entropy(D_output, y_real)
 
-        # train discriminator on facke
+        # train discriminator on fake
         z = torch.randn(b, self.hparams.latent_dim, device=self.device)
         x_fake = self(z)
         y_fake = torch.zeros(b, 1, device=self.device)
@@ -146,25 +143,32 @@ class GAN(LightningModule):
         output = OrderedDict({
             'loss': d_loss,
             'progress_bar': tqdm_dict,
-            'log': tqdm_dict
+            'log': tqdm_dict,
         })
         return output
 
     def training_step(self, batch, batch_idx, optimizer_idx):
         x, _ = batch
-        self.last_imgs = x
 
         # train generator
+        result = None
         if optimizer_idx == 0:
-            return self.generator_step(x)
+            result = self.generator_step(x)
 
         # train discriminator
         if optimizer_idx == 1:
-            return self.discriminator_step(x)
+            result = self.discriminator_step(x)
+
+        return result
 
     def training_epoch_end(self, outputs):
         loss = torch.mean(torch.stack([x['loss'] for x in outputs]))
-        return {'log': {'train_epoch_loss': loss}}
+        result = {'log': {'train_epoch_loss': loss}}
+        if 'g_loss' in outputs[0]['log']:
+            gen_epoch_loss = torch.mean(torch.stack([x['log']['g_loss'] for x in outputs]))
+            result['val_loss'] = gen_epoch_loss
+
+        return result
 
     def configure_optimizers(self):
         lr = self.hparams.learning_rate
