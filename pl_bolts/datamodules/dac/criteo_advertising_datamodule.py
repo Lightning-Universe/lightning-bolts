@@ -171,7 +171,7 @@ class DACDataset(Dataset):
     def __getitem__(self, idx):
 
         if self.test:
-            dp = self.X.iloc[idx, :]
+            dp = self.X[idx, :]
 
             # get continuous features (idx=1)
             x_continuous = np.ones_like(dp[:self.num_continuous_feats])
@@ -215,11 +215,20 @@ if __name__ == '__main__':  # pragma: no-cover
         break
 
     print('-' * 30)
-    print('val/test dims')
+    print('val dims')
     print('-' * 30)
     for batch in dm.val_dataloader():
         (x1, x2, y) = batch
         print('x1:', x1.shape)
         print('x2:', x2.shape)
         print('y:', y.shape)
+        break
+
+    print('-' * 30)
+    print('test dims')
+    print('-' * 30)
+    for batch in dm.test_dataloader():
+        (x1, x2) = batch
+        print('x1:', x1.shape)
+        print('x2:', x2.shape)
         break
