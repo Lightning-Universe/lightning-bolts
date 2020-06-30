@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from collections import OrderedDict
 
 import torch
-from pytorch_lightning import Trainer, LightningModule
+from pytorch_lightning import Trainer, LightningModule, Callback
 from torch.nn import functional as F
 
 from pl_bolts.datamodules import MNISTDataModule, LightningDataModule
@@ -13,9 +13,6 @@ class GAN(LightningModule):
 
     def __init__(self,
                  datamodule: LightningDataModule = None,
-                 input_channels: int = 1,
-                 input_width: int = 28,
-                 input_height: int = 28,
                  latent_dim: int = 32,
                  batch_size: int = 32,
                  adam_b1: float = 0.5,
@@ -27,12 +24,26 @@ class GAN(LightningModule):
         """
         Vanilla GAN implementation.
 
+        Example::
+
+            from pl_bolts.models.gan import GAN
+
+            m = GAN()
+            Trainer(gpus=2).fit(m)
+
+        Example CLI::
+
+            # mnist
+            python  basic_gan_module.py --gpus 1
+
+            # imagenet
+            python  basic_gan_module.py --gpus 1 --dataset 'imagenet2012'
+            --data_dir /path/to/imagenet/folder/ --meta_root ~/path/to/meta/bin/folder
+            --batch_size 256 --learning_rate 0.0001
+
         Args:
 
             datamodule: the datamodule (train, val, test splits)
-            input_channels: num of image channels
-            input_height: image height
-            input_width: image width
             latent_dim: emb dim for encoder
             batch_size: the batch size
             adam_b1: optimizer param
@@ -170,12 +181,6 @@ class GAN(LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--input_width', type=int, default=28,
-                            help='input image width - 28 for MNIST (must be even)')
-        parser.add_argument('--input_channels', type=int, default=1,
-                            help='num channels')
-        parser.add_argument('--input_height', type=int, default=28,
-                            help='input image height - 28 for MNIST (must be even)')
         parser.add_argument('--learning_rate', type=float, default=0.0002, help="adam: learning rate")
         parser.add_argument('--adam_b1', type=float, default=0.5,
                             help="adam: decay of first order momentum of gradient")
@@ -186,16 +191,39 @@ class GAN(LightningModule):
         parser.add_argument('--batch_size', type=int, default=64, help="size of the batches")
         parser.add_argument('--num_workers', type=int, default=8, help="num dataloader workers")
         parser.add_argument('--data_dir', type=str, default='')
+        parser.add_argument('--dataset', type=str, default='mnist')
 
         return parser
 
 
+class ImageGenerator(Callback):
+
+    def on_epoch_end(self, trainer, pl_module):
+        import torchvision
+
+        num_samples = 3
+        z = torch.randn(num_samples, pl_module.hparams.latent_dim, device=pl_module.device)
+
+        # generate images
+        images = pl_module(z)
+
+        grid = torchvision.utils.make_grid(images)
+        trainer.logger.experiment.add_image('gan_images', grid, 0)
+
+
 if __name__ == '__main__':
+    from pl_bolts.datamodules import ImagenetDataModule
+
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
     parser = GAN.add_model_specific_args(parser)
+    parser = ImagenetDataModule.add_argparse_args(parser)
     args = parser.parse_args()
 
-    gan = GAN(**vars(args))
-    trainer = Trainer.from_argparse_args(args)
+    datamodule = None
+    if args.dataset == 'imagenet2012':
+        datamodule = ImagenetDataModule.from_argparse_args(args)
+
+    gan = GAN(**vars(args), datamodule=datamodule)
+    trainer = Trainer.from_argparse_args(args, callbacks=[ImageGenerator()])
     trainer.fit(gan)
