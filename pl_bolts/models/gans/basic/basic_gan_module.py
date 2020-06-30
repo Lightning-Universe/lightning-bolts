@@ -88,21 +88,18 @@ class GAN(LightningModule):
         """
         return self.generator(z)
 
-    def adversarial_loss(self, y_hat, y):
-        return F.binary_cross_entropy(y_hat, y)
-
     def generator_step(self, x):
         # sample noise
-        z = torch.randn(x.shape[0], self.hparams.latent_dim)
-        z = z.type_as(x)
+        z = torch.randn(x.shape[0], self.hparams.latent_dim, device=self.device)
+        y = torch.ones(x.size(0), 1, device=self.device)
 
         # generate images
-        self.generated_imgs = self(z)
+        generated_imgs = self(z)
+
+        D_output = self.discriminator(generated_imgs)
 
         # ground truth result (ie: all real)
-        real = torch.ones(x.size(0), 1)
-        real = real.type_as(x)
-        g_loss = self.generator_loss(real)
+        g_loss = F.binary_cross_entropy(D_output, y)
 
         tqdm_dict = {'g_loss': g_loss}
         output = OrderedDict({
@@ -112,28 +109,29 @@ class GAN(LightningModule):
         })
         return output
 
-    def generator_loss(self, real):
-        # adversarial loss is binary cross-entropy
-        g_loss = self.adversarial_loss(self.discriminator(self.generated_imgs), real)
-        return g_loss
-
     def discriminator_loss(self, x):
-        # how well can it label as real?
-        valid = torch.ones(x.size(0), 1)
-        valid = valid.type_as(x)
+        # train discriminator on real
+        b = x.size(0)
+        x_real = x.view(b, -1)
+        y_real = torch.ones(b, 1, device=self.device)
 
-        real_loss = self.adversarial_loss(self.discriminator(x), valid)
+        # calculate real score
+        D_output = self.discriminator(x_real)
+        D_real_loss = F.binary_cross_entropy(D_output, y_real)
 
-        # how well can it label as fake?
-        fake = torch.zeros(x.size(0), 1)
-        fake = fake.type_as(x)
+        # train discriminator on facke
+        z = torch.randn(b, self.hparams.latent_dim, device=self.device)
+        x_fake = self(z)
+        y_fake = torch.zeros(b, 1, device=self.device)
 
-        fake_loss = self.adversarial_loss(
-            self.discriminator(self.generated_imgs.detach()), fake)
+        # calculate fake score
+        D_output = self.discriminator(x_fake)
+        D_fake_loss = F.binary_cross_entropy(D_output, y_fake)
 
-        # discriminator loss is the average of these
-        d_loss = (real_loss + fake_loss) / 2
-        return d_loss
+        # gradient backprop & optimize ONLY D's parameters
+        D_loss = D_real_loss + D_fake_loss
+
+        return D_loss
 
     def discriminator_step(self, x):
         # Measure discriminator's ability to classify real from generated samples
