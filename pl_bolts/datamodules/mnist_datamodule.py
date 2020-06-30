@@ -131,6 +131,7 @@ class MNISTDataModule(LightningDataModule):
 
     def _default_transforms(self):
         mnist_transforms = transform_lib.Compose([
-            transform_lib.ToTensor()
+            transform_lib.ToTensor(),
+            transform_lib.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
         ])
         return mnist_transforms
