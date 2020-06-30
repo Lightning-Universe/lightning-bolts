@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from collections import OrderedDict
 
 import torch
-from pytorch_lightning import Trainer, LightningModule
+from pytorch_lightning import Trainer, LightningModule, Callback
 from torch.nn import functional as F
 
 from pl_bolts.datamodules import MNISTDataModule, LightningDataModule
@@ -186,16 +186,42 @@ class GAN(LightningModule):
         parser.add_argument('--batch_size', type=int, default=64, help="size of the batches")
         parser.add_argument('--num_workers', type=int, default=8, help="num dataloader workers")
         parser.add_argument('--data_dir', type=str, default='')
+        parser.add_argument('--dataset', type=str, default='mnist')
 
         return parser
 
 
+class ImageGenerator(Callback):
+
+    def on_epoch_end(self, trainer, pl_module):
+        import torchvision
+
+        num_samples = 3
+        z = torch.randn(num_samples, pl_module.hparams.latent_dim)
+
+        # generate images
+        images = pl_module(z)
+
+        grid = torchvision.utils.make_grid(images)
+        trainer.logger.experiment.add_image('gan_images', grid, 0)
+
+
 if __name__ == '__main__':
+    from pl_bolts.datamodules import ImagenetDataModule
+
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
     parser = GAN.add_model_specific_args(parser)
+    parser = ImagenetDataModule.add_argparse_args(parser)
     args = parser.parse_args()
 
-    gan = GAN(**vars(args))
-    trainer = Trainer.from_argparse_args(args)
+    datamodule = None
+    if args.dataset == 'imagenet2012' or args.pretrained:
+        datamodule = ImagenetDataModule.from_argparse_args(args)
+        args.image_width = datamodule.size()[1]
+        args.image_height = datamodule.size()[2]
+        args.input_channels = datamodule.size()[0]
+
+    gan = GAN(**vars(args), datamodule=datamodule)
+    trainer = Trainer.from_argparse_args(args, callbacks=[ImageGenerator()])
     trainer.fit(gan)
