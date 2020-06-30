@@ -25,26 +25,6 @@ class GAN(LightningModule):
         """
         Vanilla GAN implementation.
 
-        Implemented by:
-
-            - William Falcon
-
-        Example outputs:
-
-            .. image:: _images/gans/basic_gan_interpolate.png
-                :width: 200
-                :alt: Basic GAN generated samples
-
-        Loss curves:
-
-            .. image:: _images/gans/basic_gan_dloss.png
-                :width: 200
-                :alt: Basic GAN disc loss
-
-            .. image:: _images/gans/basic_gan_gloss.png
-                :width: 200
-                :alt: Basic GAN gen loss
-
         Example::
 
             from pl_bolts.models.gan import GAN
