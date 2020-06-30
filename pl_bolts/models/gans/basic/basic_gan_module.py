@@ -163,10 +163,7 @@ class GAN(LightningModule):
 
     def training_epoch_end(self, outputs):
         loss = torch.mean(torch.stack([x['loss'] for x in outputs]))
-        result = {'log': {'train_epoch_loss': loss}}
-        if 'g_loss' in outputs[0]['log']:
-            gen_epoch_loss = torch.mean(torch.stack([x['log']['g_loss'] for x in outputs]))
-            result['val_loss'] = gen_epoch_loss
+        result = {'log': {'train_epoch_loss': loss}, 'val_loss': - self.current_epoch}
 
         return result
 
