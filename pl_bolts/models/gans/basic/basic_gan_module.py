@@ -14,7 +14,7 @@ class GAN(LightningModule):
     def __init__(self,
                  datamodule: LightningDataModule = None,
                  latent_dim: int = 32,
-                 batch_size: int = 32,
+                 batch_size: int = 100,
                  adam_b1: float = 0.5,
                  adam_b2: float = 0.999,
                  learning_rate: float = 0.0002,
