@@ -1,4 +1,4 @@
-pytorch-lightning==git+git://github.com/PytorchLightning/pytorch-lightning.git@master#egg=pytorch-lightning
+pytorch-lightning>=0.8.4
 torch>=1.4
 torchvision>=0.5
 scikit-learn>=0.23
