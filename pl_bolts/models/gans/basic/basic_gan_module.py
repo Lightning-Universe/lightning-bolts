@@ -8,6 +8,7 @@ from torch.nn import functional as F
 
 from pl_bolts.datamodules import MNISTDataModule, LightningDataModule, STL10DataModule
 from pl_bolts.models.gans.basic.components import Generator, Discriminator
+import os
 
 
 class GAN(LightningModule):
@@ -193,7 +194,7 @@ class GAN(LightningModule):
                             help="generator embedding dim")
         parser.add_argument('--batch_size', type=int, default=64, help="size of the batches")
         parser.add_argument('--num_workers', type=int, default=8, help="num dataloader workers")
-        parser.add_argument('--data_dir', type=str, default='')
+        parser.add_argument('--data_dir', type=str, default=os.getcwd())
         parser.add_argument('--dataset', type=str, default='mnist')
 
         return parser
