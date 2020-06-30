@@ -159,13 +159,14 @@ class GAN(LightningModule):
         if optimizer_idx == 1:
             result = self.discriminator_step(x)
 
+        # add val_loss since we don't have a val set for checkpoints
+        # TODO: fix in PL (hack)
         result['val_loss'] = - self.current_epoch
         return result
 
     def training_epoch_end(self, outputs):
         loss = torch.mean(torch.stack([x['loss'] for x in outputs]))
 
-        # add val_loss since we don't have a val set for checkpoints
         result = {'log': {'train_epoch_loss': loss}}
 
         return result
