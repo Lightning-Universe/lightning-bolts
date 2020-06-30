@@ -168,8 +168,8 @@ class GAN(LightningModule):
         adam_b1 = self.hparams.adam_b1
         adam_b2 = self.hparams.adam_b2
 
-        opt_g = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(adam_b1, adam_b2))
-        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(adam_b1, adam_b2))
+        opt_g = torch.optim.Adam(self.generator.parameters(), lr=lr)
+        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr)
         return [opt_g, opt_d], []
 
     def prepare_data(self):
