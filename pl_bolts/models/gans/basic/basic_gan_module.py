@@ -159,9 +159,6 @@ class GAN(LightningModule):
         if optimizer_idx == 1:
             result = self.discriminator_step(x)
 
-        # add val_loss since we don't have a val set for checkpoints
-        # TODO: fix in PL (hack)
-        result['val_loss'] = - self.current_epoch
         return result
 
     def training_epoch_end(self, outputs):
@@ -282,5 +279,12 @@ if __name__ == '__main__':
 
     gan = GAN(**vars(args), datamodule=datamodule)
     callbacks = [ImageGenerator(), LatentDimInterpolator()]
-    trainer = Trainer.from_argparse_args(args, callbacks=callbacks)
+
+    # no val loop... thus we condition on loss and always save the last
+    checkpoint_cb = ModelCheckpoint(monitor='loss', save_last=True)
+    trainer = Trainer.from_argparse_args(
+        args,
+        callbacks=callbacks,
+        checkpoint_callback=checkpoint_cb
+    )
     trainer.fit(gan)
