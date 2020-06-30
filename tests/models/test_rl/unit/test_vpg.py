@@ -31,6 +31,7 @@ class TestPolicyGradient(TestCase):
         parent_parser = PolicyGradient.add_model_specific_args(parent_parser)
         args_list = [
             "--episode_length", "100",
+            "--env", "CartPole-v0",
         ]
         self.hparams = parent_parser.parse_args(args_list)
         self.model = PolicyGradient(**vars(self.hparams))

@@ -1,9 +1,13 @@
 """
 N Step DQN
 """
+import argparse
+from pprint import pprint
 
 import torch
+import pytorch_lightning as pl
 
+from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.experience import NStepExperienceSource
 from pl_bolts.models.rl.dqn_model import DQN
 
@@ -25,7 +29,8 @@ class NStepDQN(DQN):
             replay_size: int = 100000,
             warm_start_size: int = 10000,
             num_samples: int = 500,
-            n_steps=4
+            n_steps=4,
+            **kwargs
     ):
         """
         PyTorch Lightning implementation of
@@ -38,8 +43,7 @@ class NStepDQN(DQN):
             - `Donal Byrne <https://github.com/djbyrne>`
 
         Example:
-
-            >>> from pl_bolts.models.rl.n_step_dqn_model import NStepDQN
+            >>> from pl_bolts.models.rl.dqn_model import DQN
             ...
             >>> model = NStepDQN("PongNoFrameskip-v4")
 
@@ -75,3 +79,21 @@ class NStepDQN(DQN):
         self.source = NStepExperienceSource(
             self.env, self.agent, device, n_steps=n_steps
         )
+
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(add_help=False)
+
+    # trainer args
+    parser = pl.Trainer.add_argparse_args(parser)
+
+    # model args
+    parser = cli.add_base_args(parser)
+    parser = NStepDQN.add_model_specific_args(parser)
+    args = parser.parse_args()
+
+    model = NStepDQN(**args.__dict__)
+
+    trainer = pl.Trainer.from_argparse_args(args)
+    trainer.fit(model)
