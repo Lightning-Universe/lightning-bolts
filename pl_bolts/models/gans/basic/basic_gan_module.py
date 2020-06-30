@@ -7,6 +7,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.nn import functional as F
 
 from pl_bolts.datamodules import MNISTDataModule, LightningDataModule, STL10DataModule
+from pl_bolts.callbacks import LatentDimInterpolator
 from pl_bolts.models.gans.basic.components import Generator, Discriminator
 import os
 
