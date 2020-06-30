@@ -195,7 +195,7 @@ class GAN(LightningModule):
         parser.add_argument('--batch_size', type=int, default=64, help="size of the batches")
         parser.add_argument('--num_workers', type=int, default=8, help="num dataloader workers")
         parser.add_argument('--data_dir', type=str, default=os.getcwd())
-        parser.add_argument('--dataset', type=str, default='mnist')
+        parser.add_argument('--dataset', type=str, default='mnist', help='mnist, stl10, imagenet2012')
 
         return parser
 
