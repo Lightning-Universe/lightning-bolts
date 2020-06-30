@@ -43,7 +43,7 @@ DataModules can also be used with plain PyTorch
 
     from pl_bolts.datamodules import MNISTDataModule, CIFAR10DataModule
 
-    datamodule = CIFAR10DataModule()
+    datamodule = CIFAR10DataModule(PATH)
     train_loader = datamodule.train_dataloader()
     val_loader = datamodule.train_dataloader()
     test_loader = datamodule.train_dataloader()
@@ -52,8 +52,8 @@ An advantage is that you can parametrize the data of your LightningModule
 
 .. code-block:: python
 
-    model = LitModel(datamodule = CIFAR10DataModule())
-    model = LitModel(datamodule = ImagenetDataModule())
+    model = LitModel(datamodule = CIFAR10DataModule(PATH))
+    model = LitModel(datamodule = ImagenetDataModule(PATH))
 
 Or even bridge between SKLearn or numpy datasets
 
@@ -80,11 +80,11 @@ Example::
     from pl_bolts.datamodules import STL10DataModule, CIFAR10DataModule
 
     # use the same dataset on different models (with exactly the same splits)
-    stl10_model = LitModel(STL10DataModule())
-    stl10_model = CoolModel(STL10DataModule())
+    stl10_model = LitModel(STL10DataModule(PATH))
+    stl10_model = CoolModel(STL10DataModule(PATH))
 
     # or make your model dataset agnostic
-    cifar10_model = LitModel(CIFAR10DataModule())
+    cifar10_model = LitModel(CIFAR10DataModule(PATH))
 
 Build a DataModule
 ------------------
@@ -116,7 +116,7 @@ Example::
 
     class LitModel(pl.LightningModule):
 
-        def __init__(self, data_module=MyDataModule()):
+        def __init__(self, data_module=MyDataModule(PATH)):
             super().__init()
             self.dm = data_module
 
