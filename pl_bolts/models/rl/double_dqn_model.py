@@ -1,12 +1,15 @@
 """
 Double DQN
 """
-
+import argparse
 from typing import Tuple
 
 import torch
 import torch.nn as nn
 
+import pytorch_lightning as pl
+
+from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.dqn_model import DQN
 
 
@@ -70,11 +73,13 @@ class DoubleDQN(DQN):
         """
         states, actions, rewards, dones, next_states = batch  # batch of experiences, batch_size = 16
 
-        actions_v = actions.unsqueeze(-1)  # adds a dimension, 16 -> [16, 1]
+        actions = actions.unsqueeze(-1)  # adds a dimension, 16 -> [16, 1]
         output = self.net(states)  # shape [16, 2], [batch, action space]
 
+        actions = actions.long()
+
         # gather the value of the outputs according to the actions index from the batch
-        state_action_values = output.gather(1, actions_v).squeeze(-1)
+        state_action_values = output.gather(1, actions).squeeze(-1)
 
         # dont want to mess with gradients when using the target network
         with torch.no_grad():
@@ -98,3 +103,21 @@ class DoubleDQN(DQN):
         # Standard MSE loss between the state action values of the current state and the
         # expected state action values of the next state
         return nn.MSELoss()(state_action_values, expected_state_action_values)
+
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(add_help=False)
+
+    # trainer args
+    parser = pl.Trainer.add_argparse_args(parser)
+
+    # model args
+    parser = cli.add_base_args(parser)
+    parser = DoubleDQN.add_model_specific_args(parser)
+    args = parser.parse_args()
+
+    model = DoubleDQN(**args.__dict__)
+
+    trainer = pl.Trainer.from_argparse_args(args)
+    trainer.fit(model)
