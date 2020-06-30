@@ -33,6 +33,7 @@ class TestReinforce(TestCase):
             "--algo", "dqn",
             "--warm_start_steps", "500",
             "--episode_length", "100",
+            "--env", "CartPole-v0",
         ]
         self.hparams = parent_parser.parse_args(args_list)
         self.model = Reinforce(**vars(self.hparams))

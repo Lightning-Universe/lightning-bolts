@@ -1,12 +1,14 @@
 """
 Prioritized Experience Replay DQN
 """
-
+import argparse
 from collections import OrderedDict
 from typing import Tuple, List
 
 import torch
+import pytorch_lightning as pl
 
+from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.experience import ExperienceSource, PrioRLDataset
 from pl_bolts.models.rl.common.memory import PERBuffer
 from pl_bolts.models.rl.dqn_model import DQN
@@ -136,6 +138,8 @@ class PERDQN(DQN):
         """
         states, actions, rewards, dones, next_states = batch
 
+        actions = actions.long()
+
         batch_weights = torch.tensor(batch_weights)
 
         actions_v = actions.unsqueeze(-1)
@@ -151,9 +155,27 @@ class PERDQN(DQN):
 
     def prepare_data(self) -> None:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""
-        device = torch.device(self.trainer.root_gpu) if self.trainer.gpus >= 1 else self.device
+        device = torch.device(self.trainer.root_gpu) if self.trainer.num_gpus >= 1 else self.device
         self.source = ExperienceSource(self.env, self.agent, device)
         self.buffer = PERBuffer(self.replay_size)
         self.populate(self.warm_start_size)
 
         self.dataset = PrioRLDataset(self.buffer, self.batch_size)
+
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(add_help=False)
+
+    # trainer args
+    parser = pl.Trainer.add_argparse_args(parser)
+
+    # model args
+    parser = cli.add_base_args(parser)
+    parser = PERDQN.add_model_specific_args(parser)
+    args = parser.parse_args()
+
+    model = PERDQN(**args.__dict__)
+
+    trainer = pl.Trainer.from_argparse_args(args)
+    trainer.fit(model)

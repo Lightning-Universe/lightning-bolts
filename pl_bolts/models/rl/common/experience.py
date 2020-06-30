@@ -31,6 +31,7 @@ class RLDataset(IterableDataset):
         states, actions, rewards, dones, new_states = self.buffer.sample(
             self.sample_size
         )
+
         for idx, _ in enumerate(dones):
             yield states[idx], actions[idx], rewards[idx], dones[idx], new_states[idx]
 
@@ -53,6 +54,7 @@ class PrioRLDataset(RLDataset):
         samples, indices, weights = self.buffer.sample(self.sample_size)
 
         states, actions, rewards, dones, new_states = samples
+
         for idx, _ in enumerate(dones):
             yield (
                 states[idx],

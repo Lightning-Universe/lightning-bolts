@@ -16,13 +16,15 @@ class TestValueModels(TestCase):
 
     def setUp(self) -> None:
         parent_parser = argparse.ArgumentParser(add_help=False)
+        parent_parser = pl.Trainer.add_argparse_args(parent_parser)
         parent_parser = cli.add_base_args(parent=parent_parser)
         parent_parser = DQN.add_model_specific_args(parent_parser)
         args_list = [
             "--algo", "dqn",
             "--warm_start_steps", "100",
             "--episode_length", "100",
-            "--gpus", "0"
+            "--gpus", "0",
+            "--env", "PongNoFrameskip-v4",
         ]
         self.hparams = parent_parser.parse_args(args_list)
 

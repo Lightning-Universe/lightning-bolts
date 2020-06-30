@@ -13,7 +13,7 @@ import torch.optim as optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from pl_bolts.models.rl.common import wrappers
+from pl_bolts.models.rl.common import wrappers, cli
 from pl_bolts.models.rl.common.agents import ValueAgent
 from pl_bolts.models.rl.common.experience import ExperienceSource, RLDataset
 from pl_bolts.models.rl.common.memory import ReplayBuffer
@@ -170,6 +170,8 @@ class DQN(pl.LightningModule):
         """
         states, actions, rewards, dones, next_states = batch
 
+        actions = actions.long()
+
         state_action_values = (
             self.net(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
         )
@@ -268,7 +270,7 @@ class DQN(pl.LightningModule):
 
     def prepare_data(self) -> None:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""
-        device = torch.device(self.trainer.root_gpu) if self.trainer.gpus >= 1 else self.device
+        device = torch.device(self.trainer.root_gpu) if self.trainer.num_gpus >= 1 else self.device
         self.source = ExperienceSource(self.env, self.agent, device)
         self.buffer = ReplayBuffer(self.replay_size)
         self.populate(self.warm_start_size)
@@ -331,3 +333,21 @@ class DQN(pl.LightningModule):
         )
 
         return arg_parser
+
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(add_help=False)
+
+    # trainer args
+    parser = pl.Trainer.add_argparse_args(parser)
+
+    # model args
+    parser = cli.add_base_args(parser)
+    parser = DQN.add_model_specific_args(parser)
+    args = parser.parse_args()
+
+    model = DQN(**args.__dict__)
+
+    trainer = pl.Trainer.from_argparse_args(args)
+    trainer.fit(model)
