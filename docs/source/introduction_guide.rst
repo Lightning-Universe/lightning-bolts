@@ -23,9 +23,9 @@ Mix and match as you please!
 
 .. code-block:: python
 
-    model = GAN(datamodule=ImagenetDataModule())
-    model = GAN(datamodule=FashionMNISTDataModule())
-    model = ImageGPT(datamodule=FashionMNISTDataModule())
+    model = GAN(datamodule=ImagenetDataModule(PATH))
+    model = GAN(datamodule=FashionMNISTDataModule(PATH))
+    model = ImageGPT(datamodule=FashionMNISTDataModule(PATH))
 
 And train on any hardware accelerator
 
@@ -33,7 +33,7 @@ And train on any hardware accelerator
 
     import pytorch_lightning as pl
 
-    model = ImageGPT(datamodule=FashionMNISTDataModule())
+    model = ImageGPT(datamodule=FashionMNISTDataModule(PATH))
 
     # cpus
     pl.Trainer.fit(model)
@@ -291,7 +291,7 @@ full dataset definitions with the same splits, transforms, etc...
 
 .. code-block:: python
 
-    imagenet = ImagenetDataModule()
+    imagenet = ImagenetDataModule(PATH)
     model = VAE(datamodule=imagenet)
     model = ImageGPT(datamodule=imagenet)
     model = GAN(datamodule=imagenet)
@@ -324,7 +324,7 @@ For instance, here we can run Logistic Regression on Imagenet (each epoch takes 
 
     from pl_bolts.models.regression import LogisticRegression
 
-    imagenet = ImagenetDataModule()
+    imagenet = ImagenetDataModule(PATH)
 
     # 224 x 224 x 3
     pixels_per_image = 150_528

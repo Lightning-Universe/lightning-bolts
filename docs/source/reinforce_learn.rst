@@ -31,6 +31,8 @@ DQN Models
 
 The following models are based on DQN
 
+---------------
+
 Deep-Q-Network (DQN)
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -84,6 +86,8 @@ Example::
 
 .. autoclass:: pl_bolts.models.rl.dqn_model.DQN
    :noindex:
+
+---------------
 
 Double DQN
 ^^^^^^^^^^
@@ -146,6 +150,8 @@ Example::
 
 .. autoclass:: pl_bolts.models.rl.double_dqn_model.DoubleDQN
    :noindex:
+
+---------------
 
 Dueling DQN
 ^^^^^^^^^^^
@@ -235,6 +241,8 @@ Example::
 .. autoclass:: pl_bolts.models.rl.dueling_dqn_model.DuelingDQN
    :noindex:
 
+--------------
+
 Noisy DQN
 ^^^^^^^^^
 
@@ -319,6 +327,7 @@ Example::
 .. autoclass:: pl_bolts.models.rl.noisy_dqn_model.NoisyDQN
    :noindex:
 
+--------------
 
 N-Step DQN
 ^^^^^^^^^^
@@ -412,6 +421,7 @@ Example::
 .. autoclass:: pl_bolts.models.rl.n_step_dqn_model.NStepDQN
    :noindex:
 
+--------------
 
 Prioritized Experience Replay DQN
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -520,6 +530,8 @@ Policy Gradient Models
 ----------------------
 The following models are based on Policy gradient
 
+--------------
+
 REINFORCE
 ^^^^^^^^^
 
@@ -538,6 +550,7 @@ Example::
 .. autoclass:: pl_bolts.models.rl.reinforce_model.Reinforce
    :noindex:
 
+--------------
 
 Vanilla Policy Gradient
 ^^^^^^^^^^^^^^^^^^^^^^^

@@ -39,7 +39,7 @@ class CIFAR10DataModule(LightningDataModule):
 
             from pl_bolts.datamodules import CIFAR10DataModule
 
-            dm = CIFAR10DataModule()
+            dm = CIFAR10DataModule(PATH)
             model = LitModel(datamodule=dm)
 
         Or you can set your own transforms
@@ -177,7 +177,7 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
 
             from pl_bolts.datamodules import CIFAR10DataModule
 
-            dm = CIFAR10DataModule()
+            dm = CIFAR10DataModule(PATH)
             model = LitModel(datamodule=dm)
 
         Args:

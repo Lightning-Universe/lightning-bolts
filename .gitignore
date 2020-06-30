@@ -151,3 +151,4 @@ tests/test-reports/
 **/CIFAR10
 **/MNIST
 **/FashionMNIST
+**/dac

@@ -30,7 +30,7 @@ class CPCTrainTransformsCIFAR10:
             CIFAR10(..., transforms=CPCTrainTransformsCIFAR10())
 
             # in a DataModule
-            module = CIFAR10DataModule()
+            module = CIFAR10DataModule(PATH)
             train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsCIFAR10())
 
         """
@@ -81,7 +81,7 @@ class CPCEvalTransformsCIFAR10:
             CIFAR10(..., transforms=CPCEvalTransformsCIFAR10())
 
             # in a DataModule
-            module = CIFAR10DataModule()
+            module = CIFAR10DataModule(PATH)
             train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsCIFAR10())
 
         """
@@ -130,7 +130,7 @@ class CPCTrainTransformsSTL10:
             STL10(..., transforms=CPCTrainTransformsSTL10())
 
             # in a DataModule
-            module = STL10DataModule()
+            module = STL10DataModule(PATH)
             train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsSTL10())
 
 
@@ -183,7 +183,7 @@ class CPCEvalTransformsSTL10:
             STL10(..., transforms=CPCEvalTransformsSTL10())
 
             # in a DataModule
-            module = STL10DataModule()
+            module = STL10DataModule(PATH)
             train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsSTL10())
 
         """
@@ -227,7 +227,7 @@ class CPCTrainTransformsImageNet128:
             Imagenet(..., transforms=CPCTrainTransformsImageNet128())
 
             # in a DataModule
-            module = ImagenetDataModule()
+            module = ImagenetDataModule(PATH)
             train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsImageNet128())
         """
         # image augmentation functions
@@ -279,7 +279,7 @@ class CPCEvalTransformsImageNet128:
             Imagenet(..., transforms=CPCEvalTransformsImageNet128())
 
             # in a DataModule
-            module = ImagenetDataModule()
+            module = ImagenetDataModule(PATH)
             train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsImageNet128())
         """
         # image augmentation functions
