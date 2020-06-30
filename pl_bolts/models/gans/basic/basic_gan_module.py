@@ -185,7 +185,7 @@ class ImageGenerator(Callback):
         import torchvision
 
         num_samples = 3
-        z = torch.randn(num_samples, pl_module.hparams.latent_dim)
+        z = torch.randn(num_samples, pl_module.hparams.latent_dim, device=pl_module.device)
 
         # generate images
         images = pl_module(z)
