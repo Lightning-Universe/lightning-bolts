@@ -273,6 +273,7 @@ if __name__ == '__main__':
     parser = ImagenetDataModule.add_argparse_args(parser)
     args = parser.parse_args()
 
+    # default is mnist
     datamodule = None
     if args.dataset == 'imagenet2012':
         datamodule = ImagenetDataModule.from_argparse_args(args)
