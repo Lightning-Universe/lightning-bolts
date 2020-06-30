@@ -37,13 +37,9 @@ class GAN(LightningModule):
             python  basic_gan_module.py --gpus 1
 
             # imagenet
-            python  basic_gan_module.py \
-                    --gpus 1\
-                    --dataset 'imagenet2012'\
-                    --data_dir /path/to/imagenet/folder/\
-                    --meta_root ~/path/to/meta/bin/folder \
-                    --batch_size 256 \
-                    --learning_rate 0.0001
+            python  basic_gan_module.py --gpus 1 --dataset 'imagenet2012'
+            --data_dir /path/to/imagenet/folder/ --meta_root ~/path/to/meta/bin/folder
+            --batch_size 256 --learning_rate 0.0001
 
         Args:
 
