@@ -159,6 +159,10 @@ class GAN(LightningModule):
         if optimizer_idx == 1:
             return self.discriminator_step(x)
 
+    def training_epoch_end(self, outputs):
+        loss = torch.mean(torch.stack([x['loss'] for x in outputs]))
+        return {'log': {'train_epoch_loss': loss}}
+
     def configure_optimizers(self):
         lr = self.hparams.learning_rate
 
