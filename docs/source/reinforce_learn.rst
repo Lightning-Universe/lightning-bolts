@@ -31,6 +31,8 @@ DQN Models
 
 The following models are based on DQN
 
+---------------
+
 Deep-Q-Network (DQN)
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -84,6 +86,8 @@ Example::
 
 .. autoclass:: pl_bolts.models.rl.dqn_model.DQN
    :noindex:
+
+---------------
 
 Double DQN
 ^^^^^^^^^^
@@ -146,6 +150,8 @@ Example::
 
 .. autoclass:: pl_bolts.models.rl.double_dqn_model.DoubleDQN
    :noindex:
+
+---------------
 
 Dueling DQN
 ^^^^^^^^^^^
