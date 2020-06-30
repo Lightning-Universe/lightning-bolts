@@ -100,8 +100,6 @@ class GAN(LightningModule):
         return output
 
     def generator_loss(self, x):
-        # self.generator.zero_grad()
-
         # sample noise
         z = torch.randn(x.shape[0], self.hparams.latent_dim, device=self.device)
         y = torch.ones(x.size(0), 1, device=self.device)
@@ -117,8 +115,6 @@ class GAN(LightningModule):
         return g_loss
 
     def discriminator_loss(self, x):
-        # self.discriminator.zero_grad()
-        
         # train discriminator on real
         b = x.size(0)
         x_real = x.view(b, -1)
