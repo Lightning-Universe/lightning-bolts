@@ -204,7 +204,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     datamodule = None
-    if args.dataset == 'imagenet2012' or args.pretrained:
+    if args.dataset == 'imagenet2012':
         datamodule = ImagenetDataModule.from_argparse_args(args)
 
     gan = GAN(**vars(args), datamodule=datamodule)
