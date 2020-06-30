@@ -89,6 +89,8 @@ class GAN(LightningModule):
         return self.generator(z)
 
     def generator_step(self, x):
+        self.generator.zero_grad()
+        
         # sample noise
         z = torch.randn(x.shape[0], self.hparams.latent_dim, device=self.device)
         y = torch.ones(x.size(0), 1, device=self.device)
@@ -109,7 +111,9 @@ class GAN(LightningModule):
         })
         return output
 
-    def discriminator_loss(self, x):
+    def discriminator_step(self, x):
+        self.discriminator.zero_grad()
+        
         # train discriminator on real
         b = x.size(0)
         x_real = x.view(b, -1)
@@ -135,7 +139,7 @@ class GAN(LightningModule):
 
     def discriminator_step(self, x):
         # Measure discriminator's ability to classify real from generated samples
-        d_loss = self.discriminator_loss(x)
+        d_loss = self.discriminator_step(x)
 
         tqdm_dict = {'d_loss': d_loss}
         output = OrderedDict({
@@ -160,6 +164,13 @@ class GAN(LightningModule):
     def training_epoch_end(self, outputs):
         loss = torch.mean(torch.stack([x['loss'] for x in outputs]))
         return {'log': {'train_epoch_loss': loss}}
+
+    def optimizer_zero_grad(self,
+                            epoch: int,
+                            batch_idx: int,
+                            optimizer,
+                            optimizer_idx: int):
+        return None
 
     def configure_optimizers(self):
         lr = self.hparams.learning_rate
