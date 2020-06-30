@@ -6,3 +6,4 @@ from pl_bolts.datamodules.sklearn_datamodule import SklearnDataset, SklearnDataM
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
 from pl_bolts.datamodules.fashion_mnist_datamodule import FashionMNISTDataModule
+from pl_bolts.datamodules.dac.criteo_advertising_datamodule import DACDataModule

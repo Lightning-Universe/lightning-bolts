@@ -5,12 +5,13 @@ from typing import Union, List, Tuple, Any
 
 from pytorch_lightning.utilities import rank_zero_warn, parsing
 from torch.utils.data import DataLoader
+from pl_bolts.utils.dataset_download import download_and_extract_archive
 
 
 class LightningDataModule(object):  # pragma: no cover
     """
     A DataModule standardizes the training, val, test splits, data preparation and transforms.
-    The main advantage is consistent data splits and transforms across models.
+    The main advantage is consistenMt data splits and transforms across models.
 
     Example::
 
@@ -49,6 +50,7 @@ class LightningDataModule(object):  # pragma: no cover
 
     def __init__(
             self,
+            data_dir=None,
             train_transforms=None,
             val_transforms=None,
             test_transforms=None,
@@ -58,6 +60,11 @@ class LightningDataModule(object):  # pragma: no cover
         self._val_transforms = val_transforms
         self._test_transforms = test_transforms
         self.dims = ()
+        self.data_dir = data_dir
+        self._data_urls = {}
+
+    def add_data_url(self, file_url):
+        self._data_urls[file_url] = {'downloaded': False}
 
     @property
     def train_transforms(self):
@@ -282,3 +289,13 @@ class LightningDataModule(object):  # pragma: no cover
             name_type_default.append((arg, arg_types, arg_default))
 
         return name_type_default
+
+    def download_registered_data_urls(self):
+        files_already_downloaded = 0
+
+        # download, untar and save a receipt showing that it was already downloaded
+        for data_url in self._data_urls.keys():
+            file_downloaded = download_and_extract_archive(data_url, download_root=self.data_dir)
+            files_already_downloaded += file_downloaded
+
+        return files_already_downloaded
