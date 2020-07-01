@@ -34,6 +34,8 @@ class CPCTrainTransformsCIFAR10:
             train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsCIFAR10())
 
         """
+        self.patch_size = patch_size
+        self.overlap = overlap
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
 
         normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -87,6 +89,8 @@ class CPCEvalTransformsCIFAR10:
         """
 
         # flipping image along vertical axis
+        self.patch_size = patch_size
+        self.overlap = overlap
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
 
         normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -190,6 +194,8 @@ class CPCEvalTransformsSTL10:
 
         """
         # flipping image along vertical axis
+        self.patch_size = patch_size
+        self.overlap = overlap
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
         normalize = transforms.Normalize(mean=(0.43, 0.42, 0.39), std=(0.27, 0.26, 0.27))
 
@@ -233,6 +239,8 @@ class CPCTrainTransformsImageNet128:
             train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsImageNet128())
         """
         # image augmentation functions
+        self.patch_size = patch_size
+        self.overlap = overlap
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
         rand_crop = transforms.RandomResizedCrop(128, scale=(0.3, 1.0), ratio=(0.7, 1.4), interpolation=3)
         col_jitter = transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8)
@@ -285,6 +293,8 @@ class CPCEvalTransformsImageNet128:
             train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsImageNet128())
         """
         # image augmentation functions
+        self.patch_size = patch_size
+        self.overlap = overlap
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
         post_transform = transforms.Compose([
             transforms.ToTensor(),
