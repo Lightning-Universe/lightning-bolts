@@ -16,17 +16,17 @@ Implemented by:
 
 Example outputs:
 
-    .. image:: _images/gans/basic_gan_interpolate.png
+    .. image:: _images/gans/basic_gan_interpolate.jpg
         :width: 400
         :alt: Basic GAN generated samples
 
 Loss curves:
 
-    .. image:: _images/gans/basic_gan_dloss.png
+    .. image:: _images/gans/basic_gan_dloss.jpg
         :width: 200
         :alt: Basic GAN disc loss
 
-    .. image:: _images/gans/basic_gan_gloss.png
+    .. image:: _images/gans/basic_gan_gloss.jpg
         :width: 200
         :alt: Basic GAN gen loss
 
