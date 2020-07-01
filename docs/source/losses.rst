@@ -16,5 +16,5 @@ We're cleaning up many of our losses, but in the meantime, submit a PR to add yo
 Reinforcement Learning Loss Functions
 -------------------------------------
 
-.. automodule:: pl_bolts.losses.reinforcement_learning
+.. automodule:: pl_bolts.losses.rl
     :noindex:
