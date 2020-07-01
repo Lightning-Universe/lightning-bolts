@@ -1,12 +1,18 @@
 Introduction Guide
 ==================
 Welcome to PyTorch Lightning Bolts!
+
+Bolts is a toolbox of pretrained models, components, callbacks and losses. Unlike other libraries,
+bolts is built **modularly for fast idea iteration** - Simply overwrite what you need and train!
+
+**The Main goal of bolts is to enable trying new ideas as fast as possible!**
+
 In Bolts you will find:
 
-    - A collection of pretrained state-of-the-art models.
-    - A collection of models designed to bootstrap your research.
-    - A collection of Callbacks, transforms, full datasets.
-    - All models work on CPUs, TPUs, GPUs and 16-bit precision.
+- A collection of pretrained state-of-the-art models.
+- A collection of models designed to bootstrap your research.
+- A collection of Callbacks, transforms, full datasets.
+- All models work on CPUs, TPUs, GPUs and 16-bit precision.
 
 **some examples!**
 
