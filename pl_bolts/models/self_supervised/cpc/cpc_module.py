@@ -346,6 +346,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args.online_ft = True
 
+    datamodule = None
+
     if args.dataset == 'cifar10':
         datamodule = CIFAR10DataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsCIFAR10()
