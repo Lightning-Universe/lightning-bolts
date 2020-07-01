@@ -60,9 +60,8 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
                 UnlabeledImagenet.generate_meta_bins(path)
                 """)
 
-    def train_dataloader(self, batch_size, num_images_per_class=-1, transforms=None, add_normalize=False):
-        if transforms is None:
-            transforms = self._default_transforms()
+    def train_dataloader(self, batch_size, num_images_per_class=-1, add_normalize=False):
+        transforms = self._default_transforms() if self.train_transforms is None else self.train_transforms
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class=num_images_per_class,
@@ -79,9 +78,8 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def val_dataloader(self, batch_size, num_images_per_class=50, transforms=None, add_normalize=False):
-        if transforms is None:
-            transforms = self._default_transforms()
+    def val_dataloader(self, batch_size, num_images_per_class=50, add_normalize=False):
+        transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class_val_split=num_images_per_class,
@@ -97,9 +95,8 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def test_dataloader(self, batch_size, num_images_per_class, transforms=None, add_normalize=False):
-        if transforms is None:
-            transforms = self._default_transforms()
+    def test_dataloader(self, batch_size, num_images_per_class, add_normalize=False):
+        transforms = self._default_transforms() if self.test_transforms is None else self.test_transforms
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class=num_images_per_class,
