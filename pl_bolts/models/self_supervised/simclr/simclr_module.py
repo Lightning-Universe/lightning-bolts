@@ -281,7 +281,15 @@ if __name__ == '__main__':
     parser = SimCLR.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    model = SimCLR(**args.__dict__)
+    # pick data
+    datamodule = None
+    if args.dataset == 'stl10':
+        datamodule = STL10DataModule(args.data_dir, num_workers=args.num_workers)
+        (b, h, w) = datamodule.size()
+        datamodule.train_transforms = SimCLRTrainDataTransform(h)
+        datamodule.val_transforms = SimCLREvalDataTransform(h)
+
+    model = SimCLR(**args.__dict__, datamodule=datamodule)
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
