@@ -8,7 +8,7 @@ Bolts is a Deep learning research and production toolbox of:
 - Model components.
 - Callbacks.
 - Losses.
-- Datasets
+- Datasets.
 
 **The Main goal of bolts is to enable trying new ideas as fast as possible!**
 
