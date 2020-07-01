@@ -368,8 +368,6 @@ if __name__ == '__main__':
         datamodule = SSLImagenetDataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsImageNet128()
         datamodule.val_transforms = CPCEvalTransformsImageNet128()
-        args.patch_size = datamodule.val_transforms.patch_size
-        args.overlap = datamodule.val_transforms.overlap
 
     model = CPCV2(**vars(args), datamodule=datamodule)
     trainer = pl.Trainer.from_argparse_args(args)
