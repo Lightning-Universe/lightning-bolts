@@ -292,7 +292,7 @@ if __name__ == '__main__':
         datamodule.val_transforms = SimCLREvalDataTransform(h)
 
     elif args.dataset == 'imagenet2012':
-        datamodule = ImagenetDataModule.from_argparse_args(args)
+        datamodule = ImagenetDataModule.from_argparse_args(args, image_size=196)
         (c, h, w) = datamodule.size()
         datamodule.train_transforms = SimCLRTrainDataTransform(h)
         datamodule.val_transforms = SimCLREvalDataTransform(h)
