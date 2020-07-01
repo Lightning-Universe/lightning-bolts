@@ -11,7 +11,7 @@ import torch
 import numpy as np
 from torch.utils.data import DataLoader
 
-from pl_bolts.losses.reinforcement_learning import dqn_loss, double_dqn_loss, per_dqn_loss
+from pl_bolts.losses.rl import dqn_loss, double_dqn_loss, per_dqn_loss
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.experience import EpisodicExperienceStream, ExperienceSource, RLDataset

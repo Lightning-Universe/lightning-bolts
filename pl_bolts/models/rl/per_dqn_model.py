@@ -8,7 +8,7 @@ from typing import Tuple, List
 import torch
 import pytorch_lightning as pl
 
-from pl_bolts.losses.reinforcement_learning import per_dqn_loss
+from pl_bolts.losses.rl import per_dqn_loss
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.experience import ExperienceSource, PrioRLDataset
 from pl_bolts.models.rl.common.memory import PERBuffer

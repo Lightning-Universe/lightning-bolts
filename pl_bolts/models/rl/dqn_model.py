@@ -13,7 +13,7 @@ import torch.optim as optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from pl_bolts.losses.reinforcement_learning import dqn_loss
+from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common import wrappers, cli
 from pl_bolts.models.rl.common.agents import ValueAgent
 from pl_bolts.models.rl.common.experience import ExperienceSource, RLDataset

@@ -8,7 +8,7 @@ from typing import Tuple
 import torch
 import pytorch_lightning as pl
 
-from pl_bolts.losses.reinforcement_learning import dqn_loss
+from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.networks import NoisyCNN
 from pl_bolts.models.rl.dqn_model import DQN
