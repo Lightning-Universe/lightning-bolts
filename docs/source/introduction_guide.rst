@@ -50,7 +50,7 @@ All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, G
             logs = {"loss": loss}
             return {"loss": loss, "log": logs}
 
-**Mix and match as you please!**
+**Mix and match data, modules and components as you please!**
 
 .. code-block:: python
 
