@@ -15,6 +15,28 @@ We're cleaning up many of our losses, but in the meantime, submit a PR to add yo
 
 Reinforcement Learning
 ======================
+These are common losses used in RL.
 
-.. automodule:: pl_bolts.losses.rl
+---------------
+
+DQN Loss
+--------
+
+.. autofunction:: pl_bolts.losses.rl.dqn_loss
+    :noindex:
+
+---------------
+
+Double DQN Loss
+---------------
+
+.. autofunction:: pl_bolts.losses.rl.double_dqn_loss
+    :noindex:
+
+---------------
+
+Per DQN Loss
+------------
+
+.. autofunction:: pl_bolts.losses.rl.per_dqn_loss
     :noindex:
