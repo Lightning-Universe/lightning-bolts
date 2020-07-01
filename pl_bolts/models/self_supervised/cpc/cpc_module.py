@@ -75,6 +75,19 @@ class CPCV2(pl.LightningModule):
             trainer = Trainer()
             trainer.fit(model)
 
+        CLI command::
+
+            # cifar10
+            python cpc_module.py --gpus 1
+
+            # imagenet
+            python cpc_module.py
+                --gpus 8
+                --dataset imagenet2012
+                --data_dir /path/to/imagenet/
+                --meta_dir /path/to/folder/with/meta.bin/
+                --batch_size 32
+
         Some uses::
 
             # load resnet18 pretrained using CPC on imagenet
