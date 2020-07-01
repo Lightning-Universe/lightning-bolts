@@ -19,7 +19,32 @@ In Bolts you will find:
     from pl_bolts.callbacks import PrintTableMetricsCallback
     from pl_bolts.datamodules import FashionMNISTDataModule, CIFAR10DataModule, ImagenetDataModule
 
-Mix and match as you please!
+**Or build your own and only change what you need**
+
+.. code-block:: python
+
+    from pl_bolts.models import ImageGPT
+    from pl_bolts.self_supervised import SimCLR
+
+    class VideoGPT(ImageGPT):
+
+        def training_step(self, batch, batch_idx):
+            x, y = batch
+            x = _shape_input(x)
+
+            logits = self.gpt(x)
+            simclr_features = self.simclr(x)
+
+            # -----------------
+            # do something new with GPT logits + simclr_features
+            # -----------------
+
+            loss = self.criterion(logits.view(-1, logits.size(-1)), x.view(-1).long())
+
+            logs = {"loss": loss}
+            return {"loss": loss, "log": logs}
+
+**Mix and match as you please!**
 
 .. code-block:: python
 
@@ -27,7 +52,7 @@ Mix and match as you please!
     model = GAN(datamodule=FashionMNISTDataModule(PATH))
     model = ImageGPT(datamodule=FashionMNISTDataModule(PATH))
 
-And train on any hardware accelerator
+**And train on any hardware accelerator**
 
 .. code-block:: python
 
@@ -44,7 +69,7 @@ And train on any hardware accelerator
     # tpus
     pl.Trainer(tpu_cores=8).fit(model)
 
-Or pass in any dataset of your choice
+**Or pass in any dataset of your choice**
 
 .. code-block:: python
 
