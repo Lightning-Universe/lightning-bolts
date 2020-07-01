@@ -20,19 +20,24 @@
 ---   
 ## Trending contributors
 
-[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/0)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/0)[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/1)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/1)[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/2)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/2)[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/3)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/3)[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/4)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/4)[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/5)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/5)[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/6)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/6)[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/7)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/7)
+[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/0)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/0)
+[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/1)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/1)
+[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/2)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/2)
+[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/3)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/3)
+[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/4)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/4)
+[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/5)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/5)
+[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/6)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/6)
+[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/7)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/7)
 
 
 ## Continuous Integration
 <center>
 
-| System / PyTorch ver. | 1.3 (min. req.) | 1.4 | 1.5 (latest) |
-| :---: | :---: | :---: | :---: |
-| Conda py3.7 [linux] | ![PyTorch & Conda](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/PyTorch%20&%20Conda/badge.svg) | ![PyTorch & Conda](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/PyTorch%20&%20Conda/badge.svg) | ![PyTorch & Conda](https://github.com/PyTorchLightning/pytorch-lightning/workflows/PyTorch%20&%20Conda/badge.svg) |
-| Linux py3.7 [GPU] | - | - | [![Build Status](http://35.192.60.23/api/badges/PyTorchLightning/pytorch-lightning-bolts/status.svg)](http://35.192.60.23/PyTorchLightning/pytorch-lightning-bolts) |
-| Linux py3.6 / py3.7 / py3.8 | [![CI testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20testing/badge.svg?event=push)](https://github.com/PyTorchLightning/pytorch-lightning-bolts/actions?query=workflow%3A%22CI+testing%22) | - | [![CI testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20testing/badge.svg?event=push)](https://github.com/PyTorchLightning/pytorch-lightning-bolts/actions?query=workflow%3A%22CI+testing%22) |
-| OSX py3.6 / py3.7 | - | [![CI testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20testing/badge.svg?event=push)](https://github.com/PyTorchLightning/pytorch-lightning-bolts/actions?query=workflow%3A%22CI+testing%22) | [![CI testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20testing/badge.svg?event=push)](https://github.com/PyTorchLightning/pytorch-lightning-bolts/actions?query=workflow%3A%22CI+testing%22) |
-| Windows py3.6 / py3.7 / py3.8 | [![CI testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20testing/badge.svg?event=push)](https://github.com/PyTorchLightning/pytorch-lightning-bolts/actions?query=workflow%3A%22CI+testing%22) |[![CI testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20testing/badge.svg?event=push)](https://github.com/PyTorchLightning/pytorch-lightning-bolts/actions?query=workflow%3A%22CI+testing%22) | - |
+| System / PyTorch ver. | 1.4 (min. req.) | 1.5 (latest) |
+| :---: | :---: | :---: |
+| Linux py3.6 / py3.7 / py3.8 | ![CI testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20testing/badge.svg?branch=master) | ![CI testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20testing/badge.svg?branch=master) |
+| OSX py3.6 / py3.7 / py3.8 | ![CI testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20testing/badge.svg?branch=master) | ![CI testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20testing/badge.svg?branch=master) |
+| Windows py3.6 / py3.7 / py3.8 | wip | wip |
 
 </center>
 
