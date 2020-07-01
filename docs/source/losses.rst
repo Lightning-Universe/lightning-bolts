@@ -13,8 +13,8 @@ We're cleaning up many of our losses, but in the meantime, submit a PR to add yo
 
 -------------
 
-Reinforcement Learning Loss Functions
--------------------------------------
+Reinforcement Learning
+======================
 
 .. automodule:: pl_bolts.losses.rl
     :noindex:
