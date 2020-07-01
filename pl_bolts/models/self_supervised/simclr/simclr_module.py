@@ -176,6 +176,7 @@ class SimCLR(pl.LightningModule):
         return result
 
     def validation_step(self, batch, batch_idx):
+        import pdb; pdb.set_trace()
         if isinstance(self.datamodule, STL10DataModule):
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
