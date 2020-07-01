@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - yyyy-mm-dd
 
 ### Added
+
 - Added setup and repo structure
 - Added requirements
 - Added docs
@@ -41,10 +42,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Changed
+
 - Device is no longer set in the DQN model init
 - Moved RL loss function to the losses module
 
 ### Fixed
+
 - Documentation 
 - Doct tests
 - CI pipeline
