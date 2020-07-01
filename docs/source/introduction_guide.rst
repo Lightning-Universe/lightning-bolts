@@ -2,7 +2,7 @@ Introduction Guide
 ==================
 Welcome to PyTorch Lightning Bolts!
 
-Bolts is a Deep learning research toolbox of:
+Bolts is a Deep learning research and production toolbox of:
 
 - SOTA pretrained models.
 - Model components.
