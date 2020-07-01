@@ -352,6 +352,8 @@ if __name__ == '__main__':
         datamodule = CIFAR10DataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsCIFAR10()
         datamodule.val_transforms = CPCEvalTransformsCIFAR10()
+        args.patch_size = datamodule.val_transforms.patch_size
+        args.overlap = datamodule.val_transforms.overlap
 
     elif args.dataset == 'stl10':
         datamodule = STL10DataModule.from_argparse_args(args)
@@ -360,12 +362,14 @@ if __name__ == '__main__':
         datamodule.train_transforms = CPCTrainTransformsSTL10()
         datamodule.val_transforms = CPCEvalTransformsSTL10()
         args.patch_size = datamodule.val_transforms.patch_size
-        args.patch_size = datamodule.val_transforms.patch_size
+        args.overlap = datamodule.val_transforms.overlap
 
     elif args.dataset == 'imagenet2012':
         datamodule = SSLImagenetDataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsImageNet128()
         datamodule.val_transforms = CPCEvalTransformsImageNet128()
+        args.patch_size = datamodule.val_transforms.patch_size
+        args.overlap = datamodule.val_transforms.overlap
 
     model = CPCV2(**vars(args), datamodule=datamodule)
     trainer = pl.Trainer.from_argparse_args(args)
