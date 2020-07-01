@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+#
 # Configuration file for the Sphinx documentation builder.
 #
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
+# This file does only contain a selection of the most common options. For a
+# full list see the documentation:
+# http://www.sphinx-doc.org/en/master/config
 
 # -- Path setup --------------------------------------------------------------
 
@@ -20,6 +22,7 @@ import re
 import builtins
 
 import pt_lightning_sphinx_theme
+from sphinx.ext import apidoc
 
 PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 PATH_ROOT = os.path.join(PATH_HERE, '..', '..')
@@ -64,7 +67,7 @@ with open('readme.md', 'w') as fp:
 
 # If your documentation needs a minimal Sphinx version, state it here.
 
-needs_sphinx = '2.2'
+needs_sphinx = '2.0'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -80,6 +83,7 @@ extensions = [
     'sphinx.ext.linkcode',
     'sphinx.ext.autosummary',
     'sphinx.ext.napoleon',
+    'sphinx.ext.imgmath',
     'recommonmark',
     'sphinx.ext.autosectionlabel',
     # 'm2r',
@@ -128,6 +132,7 @@ exclude_patterns = [
     'api/pl_bolts.rst',
     'api/modules.rst',
     'api/pl_bolts.submit.rst',
+    'PULL_REQUEST_TEMPLATE.md',
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -154,10 +159,23 @@ html_theme_options = {
     'logo_only': False,
 }
 
+html_logo = '_images/logos/lightning_logo-name.svg'
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_templates']  # '_static'
+html_static_path = ['_images', '_templates', '_static']
+
+# Custom sidebar templates, must be a dictionary that maps document names
+# to template names.
+#
+# The default sidebars (for documents that don't match any pattern) are
+# defined by theme itself.  Builtin themes are using these templates by
+# default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
+# 'searchbox.html']``.
+#
+# html_sidebars = {}
+
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
@@ -223,6 +241,8 @@ epub_title = project
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
 
+# -- Extension configuration -------------------------------------------------
+
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
@@ -230,6 +250,7 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'torch': ('https://pytorch.org/docs/stable/', None),
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'PIL': ('https://pillow.readthedocs.io/en/stable/', None),
 }
 
 # -- Options for todo extension ----------------------------------------------
@@ -244,26 +265,37 @@ todo_include_todos = True
 # sphinx-apidoc for me, since it's easy to forget to regen API docs
 # and commit them to my repo after making changes to my code.
 
+# packages for which sphinx-apidoc should generate the docs (.rst files)
 PACKAGES = [
     pl_bolts.__name__,
 ]
 
+apidoc_output_folder = os.path.join(PATH_HERE, 'api')
+
 
 def run_apidoc(_):
+    sys.path.insert(0, apidoc_output_folder)
+
+    # delete api-doc files before generating them
+    if os.path.exists(apidoc_output_folder):
+        shutil.rmtree(apidoc_output_folder)
+
     for pkg in PACKAGES:
         argv = ['-e',
-                '-o', os.path.join(PATH_HERE, 'api'),
-                os.path.join(PATH_HERE, PATH_ROOT, pkg),
+                '-o', apidoc_output_folder,
+                os.path.join(PATH_ROOT, pkg),
                 '**/test_*',
                 '--force',
                 '--private',
                 '--module-first']
-        # Sphinx 1.7+
-        from sphinx.ext import apidoc
+
         apidoc.main(argv)
 
 
 def setup(app):
+    # this is for hiding doctest decoration,
+    # see: http://z4r.github.io/python/2011/12/02/hides-the-prompts-and-output/
+    app.add_javascript('copybutton.js')
     app.connect('builder-inited', run_apidoc)
 
 
@@ -383,7 +415,11 @@ import importlib
 import os
 import torch
 
-TORCHVISION_AVAILABLE = importlib.util.find_spec('torchvision')
+from pytorch_lightning.utilities import NATIVE_AMP_AVALAIBLE
+APEX_AVAILABLE = importlib.util.find_spec("apex") is not None
+XLA_AVAILABLE = importlib.util.find_spec("torch_xla") is not None
+TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
+
 
 """
 coverage_skip_undoc_in_source = True
