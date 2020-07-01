@@ -12,6 +12,7 @@ import torch
 import torch.nn.functional as F
 import torchvision
 from torch import nn
+import json
 
 import pl_bolts
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
@@ -35,9 +36,15 @@ class MocoV2(pl.LightningModule):
                  num_negatives: int = 65536,
                  encoder_momentum: float = 0.999,
                  softmax_temperature: float = 0.07,
-                 learning_rate: float = 0.03,
-                 momentum: float = 0.9,
-                 weight_decay: float = 1e-4,
+                 # learning_rate: float = 0.03,
+                 # momentum: float = 0.9,
+                 # weight_decay: float = 1e-4,
+                 optimizer: str = "SGD",
+                 optimizer_parameters: dict = {
+                                        "lr": 0.03,
+                                        "momentum": 0.9,
+                                        "weight_decay": 1.0e-4
+                                    },
                  datamodule: pl_bolts.datamodules.LightningDataModule = None,
                  data_dir: str = './',
                  batch_size: int = 256,
@@ -70,9 +77,8 @@ class MocoV2(pl.LightningModule):
             num_negatives: queue size; number of negative keys (default: 65536)
             encoder_momentum: moco momentum of updating key encoder (default: 0.999)
             softmax_temperature: softmax temperature (default: 0.07)
-            learning_rate: the learning rate
-            momentum: optimizer momentum
-            weight_decay: optimizer weight decay
+            optimizer: The torch.optim optimizer class
+            optimizer_parameters: The parameters to pass in to the torch.optim class
             datamodule: the DataModule (train, val, test dataloaders)
             data_dir: the directory to store data
             batch_size: batch size
@@ -299,9 +305,11 @@ class MocoV2(pl.LightningModule):
         return {'val_loss': val_loss, 'log': log, 'progress_bar': log}
 
     def configure_optimizers(self):
-        optimizer = torch.optim.SGD(self.parameters(), self.hparams.learning_rate,
-                                    momentum=self.hparams.momentum,
-                                    weight_decay=self.hparams.weight_decay)
+        optimizer_cls = getattr(torch.optim, self.hparams.optimizer)
+        optimizer = optimizer_cls(self.parameters(), **self.hparams.optimizer_parameters.__dict__)
+        # optimizer = torch.optim.SGD(self.parameters(), self.hparams.learning_rate,
+        #                             momentum=self.hparams.momentum,
+        #                             weight_decay=self.hparams.weight_decay)
         return optimizer
 
     def prepare_data(self):
@@ -325,9 +333,15 @@ class MocoV2(pl.LightningModule):
         parser.add_argument('--num_negatives', type=int, default=65536)
         parser.add_argument('--encoder_momentum', type=float, default=0.999)
         parser.add_argument('--softmax_temperature', type=float, default=0.07)
-        parser.add_argument('--learning_rate', type=float, default=0.03)
-        parser.add_argument('--momentum', type=float, default=0.9)
-        parser.add_argument('--weight_decay', type=float, default=1e-4)
+        parser.add_argument('--optimizer', type=str, default='SGD')
+        parser.add_argument('--optimizer-parameters', type=json.loads, default=json.dumps({
+            "lr": 0.03,
+            "momentum": 0.9,
+            "weight_decay": 1.0e-4
+        }))
+        # parser.add_argument('--learning_rate', type=float, default=0.03)
+        # parser.add_argument('--momentum', type=float, default=0.9)
+        # parser.add_argument('--weight_decay', type=float, default=1e-4)
         parser.add_argument('--data_dir', type=str, default='./')
         parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, stl10, imagenet2012')
         parser.add_argument('--batch_size', type=int, default=256)
