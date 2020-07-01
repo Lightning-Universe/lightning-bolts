@@ -287,13 +287,13 @@ if __name__ == '__main__':
         datamodule.train_dataloader = datamodule.train_dataloader_mixed
         datamodule.val_dataloader = datamodule.val_dataloader_mixed
 
-        (b, h, w) = datamodule.size()
+        (b, c, h, w) = datamodule.size()
         datamodule.train_transforms = SimCLRTrainDataTransform(h)
         datamodule.val_transforms = SimCLREvalDataTransform(h)
 
     elif args.dataset == 'imagenet2012':
         datamodule = ImagenetDataModule.from_argparse_args(args)
-        (b, h, w) = datamodule.size()
+        (b, c, h, w) = datamodule.size()
         datamodule.train_transforms = SimCLRTrainDataTransform(h)
         datamodule.val_transforms = SimCLREvalDataTransform(h)
 
