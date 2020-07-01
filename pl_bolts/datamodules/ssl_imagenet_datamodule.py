@@ -15,7 +15,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
     def __init__(
             self,
             data_dir,
-            meta_root=None,
+            meta_dir=None,
             num_workers=16,
             *args,
             **kwargs,
@@ -24,7 +24,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         super().__init__(*args, **kwargs)
         self.data_dir = data_dir
         self.num_workers = num_workers
-        self.meta_root = meta_root
+        self.meta_dir = meta_dir
 
     @property
     def num_classes(self):
@@ -66,7 +66,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class=num_images_per_class,
-                                    meta_root=self.meta_root,
+                                    meta_dir=self.meta_dir,
                                     split='train',
                                     transform=transforms)
         loader = DataLoader(
@@ -85,7 +85,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class_val_split=num_images_per_class,
-                                    meta_root=self.meta_root,
+                                    meta_dir=self.meta_dir,
                                     split='val',
                                     transform=transforms)
         loader = DataLoader(
@@ -103,7 +103,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class=num_images_per_class,
-                                    meta_root=self.meta_root,
+                                    meta_dir=self.meta_dir,
                                     split='test',
                                     transform=transforms)
         loader = DataLoader(

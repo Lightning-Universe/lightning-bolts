@@ -332,7 +332,7 @@ class MocoV2(pl.LightningModule):
         parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, stl10, imagenet2012')
         parser.add_argument('--batch_size', type=int, default=256)
         parser.add_argument('--use_mlp', action='store_true')
-        parser.add_argument('--meta_root', default='.', type=str, help='path to meta.bin for imagenet')
+        parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
 
         return parser
 

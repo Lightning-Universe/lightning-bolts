@@ -263,7 +263,7 @@ class SimCLR(pl.LightningModule):
         # Model
         parser.add_argument('--loss_temperature', type=float, default=0.5)
         parser.add_argument('--num_workers', default=4, type=int)
-        parser.add_argument('--meta_root', default='.', type=str, help='path to meta.bin for imagenet')
+        parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
 
         return parser
 
