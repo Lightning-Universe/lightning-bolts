@@ -88,11 +88,11 @@ class SimCLR(pl.LightningModule):
             python simclr_module.py --gpus 1
 
             # imagenet
-            python simclr_module.py \
-                --gpus 8 \
-                --dataset imagenet2012 \
-                --data_dir /path/to/imagenet/ \
-                --meta_dir /path/to/folder/with/meta.bin/ \
+            python simclr_module.py
+                --gpus 8
+                --dataset imagenet2012
+                --data_dir /path/to/imagenet/
+                --meta_dir /path/to/folder/with/meta.bin/
                 --batch_size 32
 
         Args:
