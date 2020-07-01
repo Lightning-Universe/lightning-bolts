@@ -143,7 +143,7 @@ class SimCLR(pl.LightningModule):
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
 
-        (img_1, img_2), y = batch
+        (img_1, img_2) = batch
         h1, z1 = self.forward(img_1)
         h2, z2 = self.forward(img_2)
 
@@ -181,7 +181,7 @@ class SimCLR(pl.LightningModule):
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
 
-        (img_1, img_2), y = batch
+        (img_1, img_2) = batch
         h1, z1 = self.forward(img_1)
         h2, z2 = self.forward(img_2)
         loss = self.loss_func(z1, z2, self.hparams.loss_temperature)
