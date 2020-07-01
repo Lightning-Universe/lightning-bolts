@@ -23,7 +23,7 @@ class UnlabeledImagenet(ImageNet):
             num_classes: int = -1,
             num_imgs_per_class: int = -1,
             num_imgs_per_class_val_split: int = 50,
-            meta_root=None,
+            meta_dir=None,
             **kwargs,
     ):
         """
@@ -53,8 +53,8 @@ class UnlabeledImagenet(ImageNet):
 
         self.split = split
         split_root = os.path.join(root, split)
-        meta_root = meta_root if meta_root is not None else split_root
-        wnid_to_classes = load_meta_file(meta_root)[0]
+        meta_dir = meta_dir if meta_dir is not None else split_root
+        wnid_to_classes = load_meta_file(meta_dir)[0]
 
         super(ImageNet, self).__init__(self.split_folder, **kwargs)
         self.root = root

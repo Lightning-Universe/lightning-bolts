@@ -75,6 +75,19 @@ class CPCV2(pl.LightningModule):
             trainer = Trainer()
             trainer.fit(model)
 
+        CLI command::
+
+            # cifar10
+            python cpc_module.py --gpus 1
+
+            # imagenet
+            python cpc_module.py
+                --gpus 8
+                --dataset imagenet2012
+                --data_dir /path/to/imagenet/
+                --meta_dir /path/to/folder/with/meta.bin/
+                --batch_size 32
+
         Some uses::
 
             # load resnet18 pretrained using CPC on imagenet
@@ -331,7 +344,7 @@ class CPCV2(pl.LightningModule):
         # data
         parser.add_argument('--dataset', default='cifar10', type=str)
         parser.add_argument('--data_dir', default='.', type=str)
-        parser.add_argument('--meta_root', default='.', type=str, help='path to meta.bin for imagenet')
+        parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
         parser.add_argument('--num_workers', default=0, type=int)
 
         return parser
@@ -352,8 +365,6 @@ if __name__ == '__main__':
         datamodule = CIFAR10DataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsCIFAR10()
         datamodule.val_transforms = CPCEvalTransformsCIFAR10()
-        args.patch_size = datamodule.val_transforms.patch_size
-        args.overlap = datamodule.val_transforms.overlap
 
     elif args.dataset == 'stl10':
         datamodule = STL10DataModule.from_argparse_args(args)
@@ -361,15 +372,11 @@ if __name__ == '__main__':
         datamodule.val_dataloader = datamodule.val_dataloader_mixed
         datamodule.train_transforms = CPCTrainTransformsSTL10()
         datamodule.val_transforms = CPCEvalTransformsSTL10()
-        args.patch_size = datamodule.val_transforms.patch_size
-        args.overlap = datamodule.val_transforms.overlap
 
     elif args.dataset == 'imagenet2012':
         datamodule = SSLImagenetDataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsImageNet128()
         datamodule.val_transforms = CPCEvalTransformsImageNet128()
-        args.patch_size = datamodule.val_transforms.patch_size
-        args.overlap = datamodule.val_transforms.overlap
 
     model = CPCV2(**vars(args), datamodule=datamodule)
     trainer = pl.Trainer.from_argparse_args(args)
