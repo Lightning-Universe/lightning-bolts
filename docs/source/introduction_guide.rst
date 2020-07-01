@@ -88,35 +88,36 @@ All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, G
 
 -------------
 
-Community Contributed
----------------------
+Community Built
+---------------
 Bolts are built-by the Lightning community and contributed to bolts.
 The lightning team guarantees that contributions are:
 
-1. Rigorously Tested (CPUs, GPUs, TPUs)
-2. Rigorously Documented
-3. Standardized via PyTorch Lightning
-4. Optimized for speed
-5. Checked for correctness
+1. Rigorously Tested (CPUs, GPUs, TPUs).
+2. Rigorously Documented.
+3. Standardized via PyTorch Lightning.
+4. Optimized for speed.
+5. Checked for correctness.
 
 -------------
 
 How to contribute
------------------
+^^^^^^^^^^^^^^^^^
 We accept contributions directly to Bolts or via your own repository.
 
 .. note:: We encourage you to have your own repository so we can link to it via our docs!
 
 To contribute:
 
-    1. Submit a pull request to Bolts (we will help you finish it!).
-    2. We'll help you add `tests <https://github.com/PyTorchLightning/pytorch-lightning-bolts/tree/master/tests>`_.
-    3. We'll help you refactor models to work on `(GPU, TPU, CPU). <https://www.youtube.com/watch?v=neuNEcN9FK4>`_.
-    4. We'll help you remove bottlenecks in your model.
-    5. We'll help you write up `documentation <https://pytorch-lightning-bolts.readthedocs.io/en/latest/convolutional.html#image-gpt>`_.
-    6. We'll help you pretrain expensive models and host weights for you.
-    7. We'll create proper attribution for you and link to your repo.
-    8. Once all of this is ready, we will merge into bolts
+1. Submit a pull request to Bolts (we will help you finish it!).
+2. We'll help you add `tests <https://github.com/PyTorchLightning/pytorch-lightning-bolts/tree/master/tests>`_.
+3. We'll help you refactor models to work on `(GPU, TPU, CPU). <https://www.youtube.com/watch?v=neuNEcN9FK4>`_.
+4. We'll help you remove bottlenecks in your model.
+5. We'll help you write up `documentation <https://pytorch-lightning-bolts.readthedocs.io/en/latest/convolutional.html#image-gpt>`_.
+6. We'll help you pretrain expensive models and host weights for you.
+7. We'll create proper attribution for you and link to your repo.
+8. Once all of this is ready, we will merge into bolts.
+
 
 After your model or other contribution is in bolts, our team will make sure it maintains compatibility
 with the other components of the library!
@@ -124,12 +125,10 @@ with the other components of the library!
 ---------------
 
 Contribution ideas
-------------------
-If you don't have something to contribute but want to get involved, please check the Github issues where
-we list ideas for things the community has requested in Bolts!
+^^^^^^^^^^^^^^^^^^
+Don't have something to contribute? Ping us on Slack or look at our Github issues!
 
-We'll also help you finish implementations that you might be struggling with. Just submit a PR with what you
-have and we'll help you finish it!
+**We'll help and guide you through the implementation / conversion**
 
 ---------------
 
