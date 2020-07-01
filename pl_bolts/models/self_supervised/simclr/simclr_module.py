@@ -7,7 +7,7 @@ from torchvision.models import densenet
 
 import pl_bolts
 from pl_bolts import metrics
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
+from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.metrics import mean
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
@@ -245,12 +245,9 @@ class SimCLR(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true', help='run online finetuner')
-        parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, imagenet, stl10')
+        parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, imagenet2012, stl10')
 
         (args, _) = parser.parse_known_args()
-        height = {'cifar10': 32, 'stl10': 96, 'imagenet2012': 224}[args.dataset]
-        parser.add_argument('--input_height', type=int, default=height)
-
         # Data
         parser.add_argument('--data_dir', type=str, default='.')
 
@@ -266,6 +263,8 @@ class SimCLR(pl.LightningModule):
         # Model
         parser.add_argument('--loss_temperature', type=float, default=0.5)
         parser.add_argument('--num_workers', default=0, type=int)
+        parser.add_argument('--meta_root', default='.', type=str, help='path to meta.bin for imagenet')
+
         return parser
 
 
@@ -284,7 +283,13 @@ if __name__ == '__main__':
     # pick data
     datamodule = None
     if args.dataset == 'stl10':
-        datamodule = STL10DataModule(args.data_dir, num_workers=args.num_workers)
+        datamodule = STL10DataModule.from_argparse_args(args)
+        (b, h, w) = datamodule.size()
+        datamodule.train_transforms = SimCLRTrainDataTransform(h)
+        datamodule.val_transforms = SimCLREvalDataTransform(h)
+
+    elif args.dataset == 'imagenet2012':
+        datamodule = ImagenetDataModule.from_argparse_args(args)
         (b, h, w) = datamodule.size()
         datamodule.train_transforms = SimCLRTrainDataTransform(h)
         datamodule.val_transforms = SimCLREvalDataTransform(h)
