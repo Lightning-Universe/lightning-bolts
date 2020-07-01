@@ -64,6 +64,19 @@ class MocoV2(pl.LightningModule):
             trainer = Trainer()
             trainer.fit(model)
 
+        CLI command::
+
+            # cifar10
+            python moco2_module.py --gpus 1
+
+            # imagenet
+            python moco2_module.py
+                --gpus 8
+                --dataset imagenet2012
+                --data_dir /path/to/imagenet/
+                --meta_dir /path/to/folder/with/meta.bin/
+                --batch_size 32
+
         Args:
             base_encoder: torchvision model name or torch.nn.Module
             emb_dim: feature dimension (default: 128)
