@@ -82,6 +82,19 @@ class SimCLR(pl.LightningModule):
             trainer = Trainer()
             trainer.fit(model)
 
+        CLI command::
+
+            # cifar10
+            python simclr_module.py --gpus 1
+
+            # imagenet
+            python simclr_module.py \
+                --gpus 8 \
+                --dataset imagenet2012 \
+                --data_dir /path/to/imagenet/ \
+                --meta_dir /path/to/folder/with/meta.bin/ \
+                --batch_size 32
+
         Args:
             datamodule: The datamodule
             data_dir: directory to store data
