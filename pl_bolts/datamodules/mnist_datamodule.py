@@ -14,6 +14,7 @@ class MNISTDataModule(LightningDataModule):
             data_dir: str,
             val_split: int = 5000,
             num_workers: int = 16,
+            normalize: bool = True,
             *args,
             **kwargs,
     ):
@@ -37,12 +38,14 @@ class MNISTDataModule(LightningDataModule):
             data_dir: where to save/load the data
             val_split: how many of the training images to use for the validation split
             num_workers: how many workers to use for loading data
+            normalize: If true applies image normalize
         """
         super().__init__(*args, **kwargs)
         self.dims = (1, 28, 28)
         self.data_dir = data_dir
         self.val_split = val_split
         self.num_workers = num_workers
+        self.normalize = normalize
 
     @property
     def num_classes(self):
@@ -130,8 +133,12 @@ class MNISTDataModule(LightningDataModule):
         return loader
 
     def _default_transforms(self):
-        mnist_transforms = transform_lib.Compose([
-            transform_lib.ToTensor(),
-            transform_lib.Normalize(mean=0.5, std=0.5),
-        ])
+        if self.normalize:
+            mnist_transforms = transform_lib.Compose([
+                transform_lib.ToTensor(),
+                transform_lib.Normalize(mean=0.5, std=0.5),
+            ])
+        else:
+            mnist_transforms = transform_lib.ToTensor()
+
         return mnist_transforms
