@@ -14,7 +14,7 @@ class MNISTDataModule(LightningDataModule):
             data_dir: str,
             val_split: int = 5000,
             num_workers: int = 16,
-            normalize: bool = True,
+            normalize: bool = False,
             *args,
             **kwargs,
     ):

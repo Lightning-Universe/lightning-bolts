@@ -59,7 +59,11 @@ class GAN(LightningModule):
 
         # link default data
         if datamodule is None:
-            datamodule = MNISTDataModule(data_dir=self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            datamodule = MNISTDataModule(
+                data_dir=self.hparams.data_dir,
+                num_workers=self.hparams.num_workers,
+                normalize=True
+            )
         self.datamodule = datamodule
         self.img_dim = self.datamodule.size()
 
