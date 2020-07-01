@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Transforms
 - Added Tiny Datasets
 - Added regularization to linear + logistic models
-- lr and lg tests
+- Added Linear and Logistic Regression tests
 - Added Image GPT
 - Added Recommenders module
 
