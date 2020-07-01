@@ -25,7 +25,7 @@ All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, G
     from pl_bolts.callbacks import PrintTableMetricsCallback
     from pl_bolts.datamodules import FashionMNISTDataModule, CIFAR10DataModule, ImagenetDataModule
 
-**Or build your own and only change what you need**
+**Bolts are built for rapid idea iteration - subclass, override and train!**
 
 .. code-block:: python
 
