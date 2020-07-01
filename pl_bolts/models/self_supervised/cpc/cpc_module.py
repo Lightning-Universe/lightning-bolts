@@ -359,6 +359,7 @@ if __name__ == '__main__':
         datamodule.val_dataloader = datamodule.val_dataloader_mixed
         datamodule.train_transforms = CPCTrainTransformsSTL10()
         datamodule.val_transforms = CPCEvalTransformsSTL10()
+        args.patch_size =
 
     elif args.dataset == 'imagenet2012':
         datamodule = SSLImagenetDataModule.from_argparse_args(args)

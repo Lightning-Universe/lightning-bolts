@@ -136,6 +136,8 @@ class CPCTrainTransformsSTL10:
 
         """
         # flipping image along vertical axis
+        self.patch_size = patch_size
+        self.overlap = overlap
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
         normalize = transforms.Normalize(mean=(0.43, 0.42, 0.39), std=(0.27, 0.26, 0.27))
 
