@@ -26,6 +26,11 @@
 ## Install
 ```pip install pytorch-lightning-bolts```
 
+## Docs
+- [master](https://pytorch-lightning-bolts.readthedocs.io/en/latest)
+- [stable](https://pytorch-lightning-bolts.readthedocs.io/en/stable)
+- [0.1.0](https://pytorch-lightning-bolts.readthedocs.io/en/0.1.0/)
+
 ## What is Bolts
 Bolts is a Deep learning research and production toolbox of:
 
@@ -45,12 +50,15 @@ from pl_bolts.models.self_supervised import SimCLR
 from pl_bolts.models.self_supervised.simclr.transforms import SimCLRTrainDataTransform, SimCLREvalDataTransform
 import pytorch_lightning as pl
 
-transform = SimCLRTrainDataTransform(input_height=32)
-model = SimCLR(pretrained='imagenet2012')
-trainer = pl.Trainer(gpus=8)
-
+# data
 train_data = DataLoader(MyDataset(transforms=SimCLRTrainDataTransform(input_height=32)))
 val_data = DataLoader(MyDataset(transforms=SimCLREvalDataTransform(input_height=32)))
+
+# model
+model = SimCLR(pretrained='imagenet2012')
+
+# train!
+trainer = pl.Trainer(gpus=8)
 trainer.fit(model, train_data, val_data)
 ```
 
