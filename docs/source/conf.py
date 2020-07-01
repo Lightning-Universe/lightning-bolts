@@ -36,7 +36,8 @@ import pl_bolts  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
-project = 'PyTorchLightning-Bolts'
+# this name shall match the project name in Github as it is used for linking to code
+project = 'PyTorch-Lightning-Bolts'
 copyright = pl_bolts.__copyright__
 author = pl_bolts.__author__
 
