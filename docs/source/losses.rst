@@ -10,3 +10,11 @@ This package lists common losses across research domains
 Your Loss
 ---------
 We're cleaning up many of our losses, but in the meantime, submit a PR to add your loss here!
+
+-------------
+
+Reinforcement Learning
+======================
+
+.. automodule:: pl_bolts.losses.rl
+    :noindex:
