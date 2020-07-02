@@ -416,6 +416,8 @@ import importlib
 import os
 import torch
 
+import pytorch_lightning as pl
+from pytorch_lightning import Trainer, LightningModule
 from pytorch_lightning.utilities import NATIVE_AMP_AVALAIBLE
 APEX_AVAILABLE = importlib.util.find_spec("apex") is not None
 XLA_AVAILABLE = importlib.util.find_spec("torch_xla") is not None
