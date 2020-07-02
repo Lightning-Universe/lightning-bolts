@@ -37,7 +37,6 @@ class TrainsLogger(LightningLoggerBase):
 
     Example:
         >>> from pytorch_lightning import Trainer
-        >>> from pytorch_lightning.loggers import TrainsLogger
         >>> trains_logger = TrainsLogger(
         ...     project_name='pytorch lightning',
         ...     task_name='default',
