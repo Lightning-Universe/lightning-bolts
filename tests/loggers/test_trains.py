@@ -1,9 +1,9 @@
 import pickle
 
 from pytorch_lightning import Trainer
-from pytorch_lightning.loggers import TrainsLogger
 
 from pl_bolts import LitMNIST
+from pl_bolts.loggers import TrainsLogger
 
 
 def test_trains_logger(tmpdir):
