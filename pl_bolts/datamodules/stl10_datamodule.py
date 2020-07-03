@@ -129,7 +129,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def val_dataloader(self, batch_size, transforms=None):
+    def val_dataloader(self, batch_size):
         """
         Loads a portion of the 'unlabeled' training data set aside for validation
         The val dataset = (unlabeled - train_val_split)
@@ -155,7 +155,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def val_dataloader_mixed(self, batch_size, transforms=None):
+    def val_dataloader_mixed(self, batch_size):
         """
         Loads a portion of the 'unlabeled' training data set aside for validation along with
         the portion of the 'train' dataset to be used for validation

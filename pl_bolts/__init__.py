@@ -2,7 +2,7 @@
 
 import os
 
-__version__ = '0.1.0-dev8'
+__version__ = '0.1.0'
 __author__ = 'PyTorchLightning et al.'
 __author_email__ = 'name@pytorchlightning.ai'
 __license__ = 'TBD'

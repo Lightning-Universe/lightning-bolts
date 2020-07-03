@@ -6,7 +6,7 @@ import pytorch_lightning as pl
 
 def test_igpt(tmpdir):
     pl.seed_everything(0)
-    dm = MNISTDataModule(tmpdir)
+    dm = MNISTDataModule(tmpdir, normalize=False)
     model = ImageGPT(datamodule=dm)
 
     trainer = pl.Trainer(limit_train_batches=2, limit_val_batches=2, limit_test_batches=2, max_epochs=1)
