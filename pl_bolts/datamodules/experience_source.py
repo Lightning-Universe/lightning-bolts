@@ -1,73 +1,34 @@
-"""Experience sources to be used as datasets for Ligthning DataLoaders
+"""
+Datamodules for RL models that rely on experiences generated during training
 
 Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/experience.py
-
-..note:: Deprecated, these functions have been moved to pl_bolts.datamodules.experience_source.py
-
 """
 from collections import deque
-from typing import List, Tuple
-
+from typing import Iterable, Callable, Tuple, List
 import numpy as np
 import torch
 from gym import Env
 from torch.utils.data import IterableDataset
 
+# Datasets
 from pl_bolts.models.rl.common.agents import Agent
-from pl_bolts.models.rl.common.memory import Experience, Buffer
+from pl_bolts.models.rl.common.memory import Experience
 
 
-class RLDataset(IterableDataset):
+class ExperienceSourceDataset(IterableDataset):
     """
-    Iterable Dataset containing the ExperienceBuffer
-    which will be updated with new experiences during training
-
-    Args:
-        buffer: replay buffer
-        sample_size: number of experiences to sample at a time
+    Basic experience source dataset. Takes a generate_batch function that returns an iterator.
+    The logic for the experience source and how the batch is generated is defined the Lightning model itself
     """
 
-    def __init__(self, buffer: Buffer, sample_size: int = 1) -> None:
-        self.buffer = buffer
-        self.sample_size = sample_size
+    def __init__(self, generate_batch: Callable):
+        self.generate_batch = generate_batch
 
-    def __iter__(self) -> Tuple:
-        states, actions, rewards, dones, new_states = self.buffer.sample(
-            self.sample_size
-        )
+    def __iter__(self) -> Iterable:
+        iterator = self.generate_batch()
+        return iterator
 
-        for idx, _ in enumerate(dones):
-            yield states[idx], actions[idx], rewards[idx], dones[idx], new_states[idx]
-
-    def __getitem__(self, item):
-        """Not used"""
-        return None
-
-
-class PrioRLDataset(RLDataset):
-    """
-    Iterable Dataset containing the ExperienceBuffer
-    which will be updated with new experiences during training
-
-    Args:
-        buffer: replay buffer
-        sample_size: number of experiences to sample at a time
-    """
-
-    def __iter__(self) -> Tuple:
-        samples, indices, weights = self.buffer.sample(self.sample_size)
-
-        states, actions, rewards, dones, new_states = samples
-
-        for idx, _ in enumerate(dones):
-            yield (
-                states[idx],
-                actions[idx],
-                rewards[idx],
-                dones[idx],
-                new_states[idx],
-            ), indices[idx], weights[idx]
-
+# Experience Sources
 
 class ExperienceSource:
     """

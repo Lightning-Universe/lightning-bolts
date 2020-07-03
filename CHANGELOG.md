@@ -45,6 +45,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Device is no longer set in the DQN model init
 - Moved RL loss function to the losses module
+- Moved rl.common.experience to datamodules
+- train_batch function to VPG model to generate batch of data at each step (POC)
+- Experience source no longer gets initialized with a device, instead the device is passed at each step()
 
 ### Fixed
 
