@@ -5,15 +5,13 @@ from unittest.mock import Mock
 import gym
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
 
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.agents import Agent
-from pl_bolts.models.rl.common.experience import EpisodicExperienceStream
 from pl_bolts.models.rl.common.memory import Experience
 from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.common.wrappers import ToTensor
-from pl_bolts.models.rl.vpg import PolicyGradient
+from pl_bolts.models.rl.vanilla_policy_gradient_model import PolicyGradient
 
 
 class TestPolicyGradient(TestCase):
