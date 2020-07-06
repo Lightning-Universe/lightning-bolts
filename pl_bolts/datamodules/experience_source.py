@@ -31,7 +31,7 @@ class ExperienceSourceDataset(IterableDataset):
 # Experience Sources
 
 
-class ExperienceSource:
+class ExperienceSource(object):
     """
     Basic single step experience source
 
