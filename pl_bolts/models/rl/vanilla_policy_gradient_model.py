@@ -274,7 +274,7 @@ class PolicyGradient(pl.LightningModule):
 
         log = {
             "train_loss": loss,
-            "avg_reward":  self.avg_reward,
+            "avg_reward": self.avg_reward,
             "episode_count": self.episode_count,
             "baseline": self.baseline
         }

@@ -5,8 +5,8 @@ import gym
 import torch
 from torch.utils.data import DataLoader
 
-from pl_bolts.datamodules.experience_source import ExperienceSourceDataset, ExperienceSource, NStepExperienceSource, \
-    EpisodicExperienceStream
+from pl_bolts.datamodules.experience_source import (ExperienceSourceDataset, ExperienceSource, NStepExperienceSource,
+    EpisodicExperienceStream)
 from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.memory import Experience
 
@@ -14,6 +14,7 @@ from pl_bolts.models.rl.common.memory import Experience
 class DummyAgent(Agent):
     def __call__(self, states, agent_states):
         return 0
+
 
 class TestExperienceSourceDataset(TestCase):
 
@@ -30,6 +31,7 @@ class TestExperienceSourceDataset(TestCase):
             self.assertEqual(batch[0], 0)
             self.assertEqual(batch[5], 5)
             break
+
 
 class TestExperienceSource(TestCase):
 
