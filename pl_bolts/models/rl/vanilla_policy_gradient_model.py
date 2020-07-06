@@ -98,7 +98,7 @@ class PolicyGradient(pl.LightningModule):
 
         self.reward_list = []
         for _ in range(100):
-            self.reward_list.append(torch.tensor(0))
+            self.reward_list.append(torch.tensor(0, device=self.device))
         self.avg_reward = 0
 
     def build_networks(self) -> None:
@@ -216,9 +216,6 @@ class PolicyGradient(pl.LightningModule):
         Returns:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
         """
-        states = []
-        actions = []
-        scales = []
 
         for _ in range(self.batch_size):
 
@@ -230,13 +227,11 @@ class PolicyGradient(pl.LightningModule):
             # update the baseline
             self.reward_sum += exp.reward
             self.baseline = self.reward_sum / self.total_steps
+            self.total_reward += reward
 
             # gather the experience data
-            states.append(exp.new_state)
-            actions.append(exp.action)
-            scales.append(exp.reward - self.baseline)
-
-            self.total_reward += reward
+            scale = exp.reward - self.baseline
+            yield exp.new_state, exp.action, scale
 
             if done:
                 # tracking metrics
@@ -249,8 +244,6 @@ class PolicyGradient(pl.LightningModule):
                 # reset metrics
                 self.total_reward = 0
                 self.env_steps = 0
-
-        yield from zip(states, actions, scales)
 
     def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
         """

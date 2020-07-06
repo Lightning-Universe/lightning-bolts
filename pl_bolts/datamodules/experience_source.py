@@ -7,7 +7,6 @@ from collections import deque
 from typing import Iterable, Callable, Tuple, List
 import numpy as np
 import torch
-from gym import Env
 from torch.utils.data import IterableDataset
 
 # Datasets
@@ -40,7 +39,7 @@ class ExperienceSource(object):
         agent: Agent being used to make decisions
     """
 
-    def __init__(self, env: Env, agent: Agent):
+    def __init__(self, env, agent: Agent):
         self.env = env
         self.agent = agent
         self.state = self.env.reset()
@@ -82,7 +81,7 @@ class ExperienceSource(object):
 class NStepExperienceSource(ExperienceSource):
     """Expands upon the basic ExperienceSource by collecting experience across N steps"""
 
-    def __init__(self, env: Env, agent: Agent, n_steps: int = 1, gamma: float = 0.99):
+    def __init__(self, env, agent: Agent, n_steps: int = 1, gamma: float = 0.99):
         super().__init__(env, agent)
         self.gamma = gamma
         self.n_steps = n_steps
@@ -95,10 +94,10 @@ class NStepExperienceSource(ExperienceSource):
         Returns:
             Experience
         """
-        exp = self.single_step(device)
+        exp = self.n_step(device)
 
         while len(self.n_step_buffer) < self.n_steps:
-            self.single_step(device)
+            self.n_step(device)
 
         reward, next_state, done = self.get_transition_info()
         first_experience = self.n_step_buffer[0]
@@ -108,7 +107,7 @@ class NStepExperienceSource(ExperienceSource):
 
         return multi_step_experience, exp.reward, exp.done
 
-    def single_step(self, device: torch.device) -> Experience:
+    def n_step(self, device: torch.device) -> Experience:
         """
         Takes a  single step in the environment and appends it to the n-step buffer
 
@@ -155,7 +154,7 @@ class EpisodicExperienceStream(ExperienceSource, IterableDataset):
         agent: Agent being used to make decisions
     """
 
-    def __init__(self, env: Env, agent: Agent, device: torch.device, episodes: int = 1):
+    def __init__(self, env, agent: Agent, device: torch.device, episodes: int = 1):
         super().__init__(env, agent)
         self.episodes = episodes
         self.device = device
