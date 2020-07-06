@@ -49,7 +49,6 @@ class TestPolicyGradient(TestCase):
         self.model.logger = Mock()
         xp_dataloader = self.model.train_dataloader()
 
-
         for i_batch, batch in enumerate(xp_dataloader):
             states, actions, scales = batch
 
