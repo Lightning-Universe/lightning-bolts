@@ -20,6 +20,7 @@ PyTorch-Lightning-Bolts documentation
 
    callbacks
    info_callbacks
+   variational_callbacks
 
 .. toctree::
    :maxdepth: 2

@@ -7,7 +7,7 @@ from torchvision.models import densenet
 
 import pl_bolts
 from pl_bolts import metrics
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
+from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.metrics import mean
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
@@ -81,6 +81,19 @@ class SimCLR(pl.LightningModule):
 
             trainer = Trainer()
             trainer.fit(model)
+
+        CLI command::
+
+            # cifar10
+            python simclr_module.py --gpus 1
+
+            # imagenet
+            python simclr_module.py
+                --gpus 8
+                --dataset imagenet2012
+                --data_dir /path/to/imagenet/
+                --meta_dir /path/to/folder/with/meta.bin/
+                --batch_size 32
 
         Args:
             datamodule: The datamodule
@@ -245,12 +258,9 @@ class SimCLR(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true', help='run online finetuner')
-        parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, imagenet, stl10')
+        parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, imagenet2012, stl10')
 
         (args, _) = parser.parse_known_args()
-        height = {'cifar10': 32, 'stl10': 96, 'imagenet2012': 224}[args.dataset]
-        parser.add_argument('--input_height', type=int, default=height)
-
         # Data
         parser.add_argument('--data_dir', type=str, default='.')
 
@@ -265,7 +275,9 @@ class SimCLR(pl.LightningModule):
         parser.add_argument('--weight_decay', type=float, default=1e-4)
         # Model
         parser.add_argument('--loss_temperature', type=float, default=0.5)
-        parser.add_argument('--num_workers', default=0, type=int)
+        parser.add_argument('--num_workers', default=4, type=int)
+        parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
+
         return parser
 
 
@@ -281,7 +293,24 @@ if __name__ == '__main__':
     parser = SimCLR.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    model = SimCLR(**args.__dict__)
+    # pick data
+    datamodule = None
+    if args.dataset == 'stl10':
+        datamodule = STL10DataModule.from_argparse_args(args)
+        datamodule.train_dataloader = datamodule.train_dataloader_mixed
+        datamodule.val_dataloader = datamodule.val_dataloader_mixed
+
+        (c, h, w) = datamodule.size()
+        datamodule.train_transforms = SimCLRTrainDataTransform(h)
+        datamodule.val_transforms = SimCLREvalDataTransform(h)
+
+    elif args.dataset == 'imagenet2012':
+        datamodule = ImagenetDataModule.from_argparse_args(args, image_size=196)
+        (c, h, w) = datamodule.size()
+        datamodule.train_transforms = SimCLRTrainDataTransform(h)
+        datamodule.val_transforms = SimCLREvalDataTransform(h)
+
+    model = SimCLR(**args.__dict__, datamodule=datamodule)
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)

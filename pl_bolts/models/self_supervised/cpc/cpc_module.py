@@ -75,6 +75,19 @@ class CPCV2(pl.LightningModule):
             trainer = Trainer()
             trainer.fit(model)
 
+        CLI command::
+
+            # cifar10
+            python cpc_module.py --gpus 1
+
+            # imagenet
+            python cpc_module.py
+                --gpus 8
+                --dataset imagenet2012
+                --data_dir /path/to/imagenet/
+                --meta_dir /path/to/folder/with/meta.bin/
+                --batch_size 32
+
         Some uses::
 
             # load resnet18 pretrained using CPC on imagenet
@@ -331,7 +344,7 @@ class CPCV2(pl.LightningModule):
         # data
         parser.add_argument('--dataset', default='cifar10', type=str)
         parser.add_argument('--data_dir', default='.', type=str)
-        parser.add_argument('--meta_root', default='.', type=str, help='path to meta.bin for imagenet')
+        parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
         parser.add_argument('--num_workers', default=0, type=int)
 
         return parser
@@ -345,6 +358,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     args.online_ft = True
+
+    datamodule = None
 
     if args.dataset == 'cifar10':
         datamodule = CIFAR10DataModule.from_argparse_args(args)

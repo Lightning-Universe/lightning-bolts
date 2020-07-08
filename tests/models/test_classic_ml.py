@@ -44,7 +44,7 @@ def test_logistic_regression_model(tmpdir):
     model.val_dataloader = dm.val_dataloader
     model.test_dataloader = dm.test_dataloader
 
-    trainer = pl.Trainer(max_epochs=2, default_root_dir=tmpdir, progress_bar_refresh_rate=0)
+    trainer = pl.Trainer(max_epochs=3, default_root_dir=tmpdir, progress_bar_refresh_rate=0)
     trainer.fit(model)
     trainer.test(model)
     assert trainer.progress_bar_metrics['test_acc'] >= 0.9

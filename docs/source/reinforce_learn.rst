@@ -60,13 +60,13 @@ Experience Replay Buffer. The 'target' is calculated using the Bellman equation
 
 .. math::
 
-    Q(s,a)<-(r+{\\gamma}\\max_{a'{\\in}A}Q(s',a'))^2
+    Q(s,a)<-(r+{\gamma}\max_{a'{\in}A}Q(s',a'))^2
 
 and then we optimize using SGD just like a standard supervised learning problem.
 
 .. math::
 
-    L=(Q(s,a)-(r+{\\gamma}\\max_{a'{\\in}A}Q(s',a'))^2
+    L=(Q(s,a)-(r+{\gamma}\max_{a'{\in}A}Q(s',a'))^2
 
 DQN Results
 ~~~~~~~~~~~
@@ -114,13 +114,13 @@ action, but the value will be less "optimisitc" because it is chosen by the targ
 
 .. math::
 
-    Q(s_t, a_t) = r_t + gamma * maxQ'(S_t+1, a)
+    Q(s_t, a_t) = r_t + \gamma * \max_{Q'}(S_{t+1}, a)
 
 **Double DQN expected return**
 
 .. math::
 
-    Q(s_t, a_t) = r_t + gamma * maxQ'(S_t+1, \argmax_Q(S_t+1, a))
+    Q(s_t, a_t) = r_t + \gamma * \max{Q'}(S_{t+1}, \arg\max_Q(S_{t+1}, a))
 
 Double DQN Results
 ~~~~~~~~~~~~~~~~~~
@@ -182,7 +182,7 @@ by subtracting the mean advantage from the Q value. This essentially pulls the m
 
 .. math::
 
-    Q(s, a) = V(s) + A(s, a) - 1/N * sum_k(A(s, k)
+    Q(s, a) = V(s) + A(s, a) - 1/N * \sum_k(A(s, k)
 
 Dueling DQN Benefits
 ~~~~~~~~~~~~~~~~~~~~
@@ -345,14 +345,14 @@ pair using a single step which looks like this
 
 .. math::
 
-    Q(s_t,a_t)=r_t+{\\gamma}\\max_aQ(s_t+1,a_t+1)
+    Q(s_t,a_t)=r_t+{\gamma}\max_aQ(s_{t+1},a_{t+1})
 
 but because the Q function is recursive we can continue to roll this out into multiple steps, looking at the expected
  return for each step into the future.
 
 .. math::
 
-    Q(s_t,a_t)=r_t+{\\gamma}r_{t+1}+{\\gamma}^2\\max_{a'}Q(s_{t+2},a')
+    Q(s_t,a_t)=r_t+{\gamma}r_{t+1}+{\gamma}^2\max_{a'}Q(s_{t+2},a')
 
 The above example shows a 2-Step look ahead, but this could be rolled out to the end of the episode, which is just
 Monte Carlo learning. Although we could just do a monte carlo update and look forward to the end of the episode, it
@@ -443,7 +443,7 @@ The priority of each sample is defined below where
 
 .. math::
 
-    P(i) = P^\\alpha_i / \\sum_k P_k^\\alpha
+    P(i) = P^\alpha_i / \sum_k P_k^\alpha
 
 
 where pi is the priority of the ith sample in the buffer and
