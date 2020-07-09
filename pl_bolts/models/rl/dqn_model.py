@@ -10,6 +10,8 @@ import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from pytorch_lightning import seed_everything, Trainer
+from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
@@ -130,8 +132,8 @@ class DQN(pl.LightningModule):
         self.total_episode_steps = 0
         self.reward_list = []
         for _ in range(100):
-            self.reward_list.append(-21)
-        self.avg_reward = -21
+            self.reward_list.append(torch.tensor(-21))
+        self.avg_reward = torch.tensor(-21)
 
     def populate(self, warm_start: int) -> None:
         """Populates the buffer with initial experience"""
@@ -253,11 +255,11 @@ class DQN(pl.LightningModule):
 
     def train_dataloader(self) -> DataLoader:
         """Get train loader"""
-        return DataLoader(dataset=self.dataset, batch_size=self.batch_size)
+        return DataLoader(dataset=self.dataset, batch_size=self.batch_size, pin_memory=True)
 
     def test_dataloader(self) -> DataLoader:
         """Get test loader"""
-        return DataLoader(dataset=self.dataset, batch_size=self.batch_size)
+        return DataLoader(dataset=self.dataset, batch_size=self.batch_size, pin_memory=True)
 
     @staticmethod
     def add_model_specific_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
@@ -313,15 +315,27 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(add_help=False)
 
-    # trainer args
+    # Trainer args
     parser = pl.Trainer.add_argparse_args(parser)
 
-    # model args
+    # Model args
     parser = cli.add_base_args(parser)
     parser = DQN.add_model_specific_args(parser)
     args = parser.parse_args()
 
     model = DQN(**args.__dict__)
 
-    trainer = pl.Trainer.from_argparse_args(args)
+    # Saving model
+    checkpoint_callback = ModelCheckpoint(
+        save_top_k=1,
+        monitor='avg_reward',
+        mode='max',
+        period=100
+    )
+
+    # Setup Trainer
+    seed_everything(123)
+    trainer = pl.Trainer.from_argparse_args(args, checkpoint_callback=checkpoint_callback)
+
+    # Train model
     trainer.fit(model)

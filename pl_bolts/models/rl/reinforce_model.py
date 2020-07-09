@@ -12,6 +12,8 @@ import gym
 import pytorch_lightning as pl
 import torch
 import torch.optim as optim
+from pytorch_lightning import seed_everything
+from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import Tensor
 from torch.nn.functional import log_softmax
 from torch.optim.optimizer import Optimizer
@@ -281,7 +283,7 @@ class Reinforce(pl.LightningModule):
         return OrderedDict(
             {
                 "loss": loss,
-                "reward": self.avg_reward,
+                "avg_reward": self.avg_reward,
                 "log": log,
                 "progress_bar": status,
             }
@@ -346,5 +348,17 @@ if __name__ == '__main__':
 
     model = Reinforce(**args.__dict__)
 
-    trainer = pl.Trainer.from_argparse_args(args)
+    # Saving model
+    checkpoint_callback = ModelCheckpoint(
+        save_top_k=1,
+        monitor='avg_reward',
+        mode='max',
+        period=100
+    )
+
+    # Setup Trainer
+    seed_everything(123)
+    trainer = pl.Trainer.from_argparse_args(args, checkpoint_callback=checkpoint_callback)
+
+    # Train model
     trainer.fit(model)

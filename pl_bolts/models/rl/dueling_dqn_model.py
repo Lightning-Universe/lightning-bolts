@@ -3,6 +3,8 @@ Dueling DQN
 """
 import argparse
 import pytorch_lightning as pl
+from pytorch_lightning import seed_everything
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.networks import DuelingCNN
@@ -69,5 +71,17 @@ if __name__ == '__main__':
 
     model = DuelingDQN(**args.__dict__)
 
-    trainer = pl.Trainer.from_argparse_args(args)
+    # Saving model
+    checkpoint_callback = ModelCheckpoint(
+        save_top_k=1,
+        monitor='avg_reward',
+        mode='max',
+        period=100
+    )
+
+    # Setup Trainer
+    seed_everything(123)
+    trainer = pl.Trainer.from_argparse_args(args, checkpoint_callback=checkpoint_callback)
+
+    # Train model
     trainer.fit(model)
