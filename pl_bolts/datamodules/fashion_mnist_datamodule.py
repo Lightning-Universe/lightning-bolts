@@ -90,7 +90,7 @@ class FashionMNISTDataModule(LightningDataModule):
             batch_size: size of batch
             transforms: custom transforms
         """
-        transforms = transforms or self.valid_transforms or self._default_transforms()
+        transforms = transforms or self.val_transforms or self._default_transforms()
 
         dataset = FashionMNIST(self.data_dir, train=True, download=True, transform=transforms)
         train_length = len(dataset)
