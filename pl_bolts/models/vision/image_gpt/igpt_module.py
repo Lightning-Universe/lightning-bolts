@@ -171,8 +171,6 @@ class ImageGPT(pl.LightningModule):
         # This only works with 1 channel images; something like KNN needs to be used
         # for RGB. Assumes data is in [0.0, 1.0].
         x = torch.round(x * (self.hparams.vocab_size - 1)).long()
-        self.print(x.max())
-        # test
 
         return self.gpt(x, classify)
 
