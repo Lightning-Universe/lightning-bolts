@@ -3,15 +3,17 @@ Datamodules for RL models that rely on experiences generated during training
 
 Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/experience.py
 """
-from collections import deque
+from collections import deque, namedtuple
 from typing import Iterable, Callable, Tuple, List
 import numpy as np
 import torch
 from torch.utils.data import IterableDataset
 
 # Datasets
-from pl_bolts.models.rl.common.agents import Agent
-from pl_bolts.models.rl.common.memory import Experience
+
+Experience = namedtuple(
+    "Experience", field_names=["state", "action", "reward", "done", "new_state"]
+)
 
 
 class ExperienceSourceDataset(IterableDataset):
@@ -39,7 +41,7 @@ class ExperienceSource(object):
         agent: Agent being used to make decisions
     """
 
-    def __init__(self, env, agent: Agent):
+    def __init__(self, env, agent):
         self.env = env
         self.agent = agent
         self.state = self.env.reset()
@@ -81,7 +83,7 @@ class ExperienceSource(object):
 class NStepExperienceSource(ExperienceSource):
     """Expands upon the basic ExperienceSource by collecting experience across N steps"""
 
-    def __init__(self, env, agent: Agent, n_steps: int = 1, gamma: float = 0.99):
+    def __init__(self, env, agent, n_steps: int = 1, gamma: float = 0.99):
         super().__init__(env, agent)
         self.gamma = gamma
         self.n_steps = n_steps
@@ -154,7 +156,7 @@ class EpisodicExperienceStream(ExperienceSource, IterableDataset):
         agent: Agent being used to make decisions
     """
 
-    def __init__(self, env, agent: Agent, device: torch.device, episodes: int = 1):
+    def __init__(self, env, agent, device: torch.device, episodes: int = 1):
         super().__init__(env, agent)
         self.episodes = episodes
         self.device = device
