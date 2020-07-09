@@ -70,8 +70,7 @@ class MNISTDataModule(LightningDataModule):
             batch_size: size of batch
             transforms: custom transforms
         """
-        if transforms is None:
-            transforms = self._default_transforms()
+        transforms = transforms or self.train_transforms or self._default_transforms()
 
         dataset = MNIST(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
@@ -94,9 +93,7 @@ class MNISTDataModule(LightningDataModule):
             batch_size: size of batch
             transforms: custom transforms
         """
-        if transforms is None:
-            transforms = self._default_transforms()
-
+        transforms = transforms or self.val_transforms or self._default_transforms()
         dataset = MNIST(self.data_dir, train=True, download=True, transform=transforms)
         train_length = len(dataset)
         _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
@@ -118,8 +115,7 @@ class MNISTDataModule(LightningDataModule):
             batch_size: size of batch
             transforms: custom transforms
         """
-        if transforms is None:
-            transforms = self._default_transforms()
+        transforms = transforms or self.val_transforms or self._default_transforms()
 
         dataset = MNIST(self.data_dir, train=False, download=False, transform=transforms)
         loader = DataLoader(
