@@ -6,9 +6,8 @@ import torch
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules.experience_source import (ExperienceSourceDataset, ExperienceSource, NStepExperienceSource,
-                                                    EpisodicExperienceStream)
+                                                    EpisodicExperienceStream, Experience)
 from pl_bolts.models.rl.common.agents import Agent
-from pl_bolts.models.rl.common.memory import Experience
 
 
 class DummyAgent(Agent):
