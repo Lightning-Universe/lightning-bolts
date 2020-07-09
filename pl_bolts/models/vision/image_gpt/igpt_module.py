@@ -18,21 +18,21 @@ def _shape_input(x):
 
 class ImageGPT(pl.LightningModule):
     def __init__(
-            self,
-            datamodule: LightningDataModule = None,
-            embed_dim: int = 16,
-            heads: int = 2,
-            layers: int = 2,
-            pixels: int = 28,
-            vocab_size: int = 16,
-            num_classes: int = 10,
-            classify: bool = False,
-            batch_size: int = 64,
-            learning_rate: float = 1e-2,
-            steps: int = 25_000,
-            data_dir: str = '.',
-            num_workers: int = 8,
-            **kwargs
+        self,
+        datamodule: LightningDataModule = None,
+        embed_dim: int = 16,
+        heads: int = 2,
+        layers: int = 2,
+        pixels: int = 28,
+        vocab_size: int = 16,
+        num_classes: int = 10,
+        classify: bool = False,
+        batch_size: int = 64,
+        learning_rate: float = 1e-2,
+        steps: int = 25_000,
+        data_dir: str = ".",
+        num_workers: int = 8,
+        **kwargs,
     ):
         """
         **Paper**: `Generative Pretraining from Pixels
@@ -135,7 +135,9 @@ class ImageGPT(pl.LightningModule):
 
         # default to MNIST if no datamodule given
         if datamodule is None:
-            datamodule = FashionMNISTDataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            datamodule = FashionMNISTDataModule(
+                self.hparams.data_dir, num_workers=self.hparams.num_workers
+            )
             self.hparams.pixels = datamodule.size(1)
             self.hparams.num_classes = datamodule.num_classes
 
@@ -163,11 +165,19 @@ class ImageGPT(pl.LightningModule):
         return [optim], [sched]
 
     def forward(self, x, classify=False):
+        x = _shape_input(x)
+
+        # TODO(teddykoker): this is a hack to quantize images into `vocab_size` bins.
+        # This only works with 1 channel images; something like KNN needs to be used
+        # for RGB. Assumes data is in [0.0, 1.0].
+        x = torch.round(x * (self.hparams.vocab_size - 1)).long()
+        self.print(x.max())
+        # test
+
         return self.gpt(x, classify)
 
     def training_step(self, batch, batch_idx):
         x, y = batch
-        x = _shape_input(x)
 
         if self.hparams.classify:
             clf_logits = self(x, classify=True)
@@ -181,17 +191,16 @@ class ImageGPT(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        x = _shape_input(x)
 
         result = {}
         if self.hparams.classify:
-            clf_logits = self.gpt(x, classify=True)
+            clf_logits = self(x, classify=True)
             loss = self.criterion(clf_logits, y)
             _, preds = torch.max(clf_logits, 1)
             correct = preds == y
             result.update({"val_loss": loss, "correct": correct})
         else:
-            logits = self.gpt(x)
+            logits = self(x)
             logits = logits.view(-1, logits.size(-1))
             loss = self.criterion(logits, x.view(-1).long())
             result.update({"val_loss": loss})
@@ -235,7 +244,7 @@ class ImageGPT(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--embed_dim", type=int, default=16)
-        parser.add_argument("--dataset", type=str, default='fashion_mnist')
+        parser.add_argument("--dataset", type=str, default="fashion_mnist")
         parser.add_argument("--data_dir", type=str, default=os.getcwd())
         parser.add_argument("--heads", type=int, default=2)
         parser.add_argument("--layers", type=int, default=8)
@@ -247,7 +256,7 @@ class ImageGPT(pl.LightningModule):
         return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
@@ -259,10 +268,10 @@ if __name__ == '__main__':
     parser = ImageGPT.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    if args.dataset == 'fashion_mnist':
+    if args.dataset == "fashion_mnist":
         datamodule = FashionMNISTDataModule.from_argparse_args(args)
 
-    elif args.dataset == 'imagenet128':
+    elif args.dataset == "imagenet128":
         datamodule = ImagenetDataModule.from_argparse_args(args)
 
     model = ImageGPT(**args.__dict__, datamodule=datamodule)
