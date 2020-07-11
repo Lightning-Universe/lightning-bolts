@@ -8,7 +8,6 @@ from typing import Tuple, List, Dict
 
 import pytorch_lightning as pl
 import torch
-import torch.nn as nn
 import torch.optim as optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
@@ -38,6 +37,7 @@ class DQN(pl.LightningModule):
             replay_size: int = 100000,
             warm_start_size: int = 10000,
             num_samples: int = 500,
+            avg_reward_len: int = 100,
             **kwargs,
     ):
         """
@@ -76,6 +76,7 @@ class DQN(pl.LightningModule):
             warm_start_size: how many random steps through the environment to be carried out at the start of
                 training to fill the buffer with a starting point
             num_samples: the number of samples to pull from the dataset iterator and feed to the DataLoader
+            avg_reward_len: how many episodes to take into account when calculating the avg reward
 
         .. note::
             This example is based on:
@@ -128,10 +129,12 @@ class DQN(pl.LightningModule):
         self.episode_count = 0
         self.episode_steps = 0
         self.total_episode_steps = 0
+        self.avg_reward_len = avg_reward_len
+
         self.reward_list = []
-        for _ in range(100):
-            self.reward_list.append(-21)
-        self.avg_reward = -21
+        for _ in range(avg_reward_len):
+            self.reward_list.append(torch.tensor(0, device=self.device))
+        self.avg_reward = 0
 
     def populate(self, warm_start: int) -> None:
         """Populates the buffer with initial experience"""
@@ -189,7 +192,7 @@ class DQN(pl.LightningModule):
         if done:
             self.total_reward = self.episode_reward
             self.reward_list.append(self.total_reward)
-            self.avg_reward = sum(self.reward_list[-100:]) / 100
+            self.avg_reward = sum(self.reward_list[-self.avg_reward_len:]) / self.avg_reward_len
             self.episode_count += 1
             self.episode_reward = 0
             self.total_episode_steps = self.episode_steps
