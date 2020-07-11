@@ -29,23 +29,22 @@ class DQN(pl.LightningModule):
     """ Basic DQN Model """
 
     def __init__(
-        self,
-        env: str,
-        eps_start: float = 1.0,
-        eps_end: float = 0.02,
-        eps_last_frame: int = 150000,
-        sync_rate: int = 1000,
-        gamma: float = 0.99,
-        learning_rate: float = 1e-4,
-        batch_size: int = 32,
-        replay_size: int = 100000,
-        warm_start_size: int = 10000,
-        avg_reward_len: int = 100,
-        min_episode_reward: int = -21,
-        n_steps: int = 1,
-        seed: int = 123,
-        num_envs: int = 1,
-        **kwargs,
+            self,
+            env: str,
+            gpus: int = 0,
+            eps_start: float = 1.0,
+            eps_end: float = 0.02,
+            eps_last_frame: int = 150000,
+            sync_rate: int = 1000,
+            gamma: float = 0.99,
+            learning_rate: float = 1e-4,
+            batch_size: int = 32,
+            replay_size: int = 100000,
+            warm_start_size: int = 10000,
+            seed: int = 123,
+            num_samples: int = 500,
+            avg_reward_len: int = 100,
+            **kwargs,
     ):
         """
         PyTorch Lightning implementation of `DQN <https://arxiv.org/abs/1312.5602>`_
@@ -77,11 +76,10 @@ class DQN(pl.LightningModule):
             replay_size: total capacity of the replay buffer
             warm_start_size: how many random steps through the environment to be carried out at the start of
                 training to fill the buffer with a starting point
-            avg_reward_len: how many episodes to take into account when calculating the avg reward
-            min_episode_reward: the minimum score that can be achieved in an episode. Used for filling the avg buffer
-                before training begins
             seed: seed value for all RNG used
             num_envs: number of environments to run the agent in at once
+            num_samples: the number of samples to pull from the dataset iterator and feed to the DataLoader
+            avg_reward_len: how many episodes to take into account when calculating the avg reward
 
         Note:
             This example is based on:
@@ -95,7 +93,7 @@ class DQN(pl.LightningModule):
 
         # Environment
         self.exp = None
-        self.env = [self.make_environment(env, seed) for _ in range(num_envs)]
+        self.env = self.make_environment(env, seed)
 
         self.obs_shape = self.env[0].observation_space.shape
         self.n_actions = self.env[0].action_space.n
@@ -116,17 +114,14 @@ class DQN(pl.LightningModule):
             eps_end=eps_end,
             eps_frames=eps_last_frame,
         )
-        self.source = DiscountedExperienceSource(self.env, self.agent, n_steps=n_steps)
 
         # Hyperparameters
-        self.num_envs = num_envs
         self.sync_rate = sync_rate
         self.gamma = gamma
         self.lr = learning_rate
-        self.batch_size = batch_size * num_envs
+        self.batch_size = batch_size
         self.replay_size = replay_size
         self.warm_start_size = warm_start_size
-        self.n_steps = n_steps
 
         self.save_hyperparameters()
 
@@ -136,18 +131,12 @@ class DQN(pl.LightningModule):
         self.episode_count = 0
         self.episode_steps = [0]
         self.total_episode_steps = 0
-
-        self.total_rewards = [0]
-        self.done_episodes = 0
-
         self.avg_reward_len = avg_reward_len
 
         self.reward_list = []
         for _ in range(avg_reward_len):
-            self.reward_list.append(
-                torch.tensor(min_episode_reward, device=self.device)
-            )
-        self.avg_rewards = 0
+            self.reward_list.append(torch.tensor(0, device=self.device))
+        self.avg_reward = 0
 
     def populate(self, warm_start: int) -> None:
         """Populates the buffer with initial experience"""

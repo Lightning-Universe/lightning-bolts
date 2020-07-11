@@ -49,7 +49,6 @@ class DuelingDQN(DQN):
         .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
 
         """
-
     def build_networks(self) -> None:
         """Initializes the Dueling DQN train and target networks"""
         self.net = DuelingCNN(self.obs_shape, self.n_actions)

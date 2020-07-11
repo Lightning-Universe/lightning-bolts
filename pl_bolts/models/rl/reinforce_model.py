@@ -21,20 +21,10 @@ from pl_bolts.models.rl.common.networks import MLP
 
 
 class Reinforce(pl.LightningModule):
-    def __init__(
-        self,
-        env: str,
-        gamma: float = 0.99,
-        lr: float = 0.01,
-        batch_size: int = 8,
-        n_steps: int = 10,
-        avg_reward_len: int = 100,
-        num_envs: int = 1,
-        entropy_beta: float = 0.01,
-        epoch_len: int = 1000,
-        num_batch_episodes: int = 4,
-        **kwargs
-    ) -> None:
+    """ Basic REINFORCE Policy Model """
+
+    def __init__(self, env: str, gamma: float = 0.99, lr: float = 1e-4, batch_size: int = 32,
+                 batch_episodes: int = 4, avg_reward_len=100, epoch_len: int = 1000, **kwargs) -> None:
         """
         PyTorch Lightning implementation of `REINFORCE
         <https://papers.nips.cc/paper/
@@ -60,6 +50,7 @@ class Reinforce(pl.LightningModule):
             lr: learning rate
             batch_size: size of minibatch pulled from the DataLoader
             batch_episodes: how many episodes to rollout for each batch of training
+            avg_reward_len: how many episodes to take into account when calculating the avg reward
 
         Note:
             This example is based on:
@@ -72,31 +63,37 @@ class Reinforce(pl.LightningModule):
 
         # Hyperparameters
         self.lr = lr
-        self.batch_size = batch_size * num_envs
+        self.batch_size = batch_size
         self.batches_per_epoch = self.batch_size * epoch_len
-        self.entropy_beta = entropy_beta
         self.gamma = gamma
-        self.n_steps = n_steps
-        self.num_batch_episodes = num_batch_episodes
+        self.num_batch_episodes = batch_episodes
 
         self.save_hyperparameters()
 
         # Model components
-        self.env = [gym.make(env) for _ in range(num_envs)]
+        self.env = gym.make(env)
         self.net = MLP(self.env[0].observation_space.shape, self.env[0].action_space.n)
         self.agent = PolicyAgent(self.net)
         self.exp_source = DiscountedExperienceSource(
             self.env, self.agent, gamma=gamma, n_steps=self.n_steps
         )
 
-        # Tracking metrics
-        self.total_steps = 0
-        self.total_rewards = [0]
-        self.done_episodes = 0
-        self.avg_rewards = 0
-        self.reward_sum = 0.0
-        self.batch_episodes = 0
+        self.gamma = gamma
+        self.lr = lr
+        self.batch_size = batch_size
+        self.batch_episodes = batch_episodes
+
+        self.total_reward = 0
+        self.episode_reward = 0
+        self.episode_count = 0
+        self.episode_steps = 0
+        self.total_episode_steps = 0
         self.avg_reward_len = avg_reward_len
+
+        self.reward_list = []
+        for _ in range(avg_reward_len):
+            self.reward_list.append(torch.tensor(0, device=self.device))
+        self.avg_reward = 0
 
         self.batch_states = []
         self.batch_actions = []

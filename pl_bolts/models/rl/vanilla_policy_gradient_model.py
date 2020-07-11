@@ -34,6 +34,7 @@ class VanillaPolicyGradient(pl.LightningModule):
         epoch_len: int = 1000,
         **kwargs
     ) -> None:
+
         """
         PyTorch Lightning implementation of `Vanilla Policy Gradient
         <https://papers.nips.cc/paper/
@@ -60,6 +61,7 @@ class VanillaPolicyGradient(pl.LightningModule):
             batch_size: size of minibatch pulled from the DataLoader
             batch_episodes: how many episodes to rollout for each batch of training
             entropy_beta: dictates the level of entropy per batch
+            avg_reward_len: how many episodes to take into account when calculating the avg reward
 
         Note:
             This example is based on:
@@ -78,15 +80,17 @@ class VanillaPolicyGradient(pl.LightningModule):
         self.gamma = gamma
         self.n_steps = n_steps
 
-        self.save_hyperparameters()
+        self.reward_sum = 0
+        self.env_steps = 0
+        self.total_steps = 0
+        self.total_reward = 0
+        self.episode_count = 0
+        self.avg_reward_len = avg_reward_len
 
-        # Model components
-        self.env = [gym.make(env) for _ in range(num_envs)]
-        self.net = MLP(self.env[0].observation_space.shape, self.env[0].action_space.n)
-        self.agent = PolicyAgent(self.net)
-        self.exp_source = DiscountedExperienceSource(
-            self.env, self.agent, gamma=gamma, n_steps=self.n_steps
-        )
+        self.reward_list = []
+        for _ in range(avg_reward_len):
+            self.reward_list.append(torch.tensor(0, device=self.device))
+        self.avg_reward = 0
 
         # Tracking metrics
         self.total_steps = 0
