@@ -27,7 +27,7 @@ class PolicyGradient(pl.LightningModule):
     """ Vanilla Policy Gradient Model """
 
     def __init__(self, env: str, gamma: float = 0.99, lr: float = 1e-4, batch_size: int = 32,
-                 entropy_beta: float = 0.01, batch_episodes: int = 4, *args, **kwargs) -> None:
+                 entropy_beta: float = 0.01, batch_episodes: int = 4, avg_reward_len=100, *args, **kwargs) -> None:
         """
         PyTorch Lightning implementation of `Vanilla Policy Gradient
         <https://papers.nips.cc/paper/
@@ -57,6 +57,7 @@ class PolicyGradient(pl.LightningModule):
             batch_size: size of minibatch pulled from the DataLoader
             batch_episodes: how many episodes to rollout for each batch of training
             entropy_beta: dictates the level of entropy per batch
+            avg_reward_len: how many episodes to take into account when calculating the avg reward
 
         .. note::
             This example is based on:
@@ -95,9 +96,10 @@ class PolicyGradient(pl.LightningModule):
         self.total_steps = 0
         self.total_reward = 0
         self.episode_count = 0
+        self.avg_reward_len = avg_reward_len
 
         self.reward_list = []
-        for _ in range(100):
+        for _ in range(avg_reward_len):
             self.reward_list.append(torch.tensor(0, device=self.device))
         self.avg_reward = 0
 
@@ -237,7 +239,7 @@ class PolicyGradient(pl.LightningModule):
                 # tracking metrics
                 self.episode_count += 1
                 self.reward_list.append(self.total_reward)
-                self.avg_reward = sum(self.reward_list[-100:]) / 100
+                self.avg_reward = sum(self.reward_list[-self.avg_reward_len:]) / self.avg_reward_len
 
                 self.logger.experiment.add_scalar("reward", self.total_reward, self.total_steps)
 
