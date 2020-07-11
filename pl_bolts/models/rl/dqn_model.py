@@ -138,7 +138,7 @@ class DQN(pl.LightningModule):
         if warm_start > 0:
             for _ in range(warm_start):
                 self.source.agent.epsilon = 1.0
-                exp, _, _ = self.source.step()
+                exp, _, _ = self.source.step(self.device)
                 self.buffer.append(exp)
 
     def build_networks(self) -> None:
@@ -174,7 +174,7 @@ class DQN(pl.LightningModule):
         self.agent.update_epsilon(self.global_step)
 
         # step through environment with agent and add to buffer
-        exp, reward, done = self.source.step()
+        exp, reward, done = self.source.step(self.device)
         self.buffer.append(exp)
 
         self.episode_reward += reward
@@ -244,8 +244,7 @@ class DQN(pl.LightningModule):
 
     def prepare_data(self) -> None:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""
-        device = torch.device(self.trainer.root_gpu) if self.trainer.num_gpus >= 1 else self.device
-        self.source = ExperienceSource(self.env, self.agent, device)
+        self.source = ExperienceSource(self.env, self.agent)
         self.buffer = ReplayBuffer(self.replay_size)
         self.populate(self.warm_start_size)
 
