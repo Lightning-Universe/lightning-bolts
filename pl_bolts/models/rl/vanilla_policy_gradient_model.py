@@ -293,19 +293,10 @@ class PolicyGradient(pl.LightningModule):
         Returns:
             Training loss and log metrics
         """
-        device = self.get_device(batch)
-
-        batch_qvals, batch_states, batch_actions, batch_rewards = self.process_batch(
-            batch
-        )
-
-        # get avg reward over the batched episodes
-        self.episode_reward = sum(batch_rewards) / len(batch)
-        self.reward_list.append(self.episode_reward)
-        self.avg_reward = sum(self.reward_list) / len(self.reward_list)
+        states, actions, scaled_rewards = batch
 
         # calculates training loss
-        loss = self.loss(batch_qvals, batch_states, batch_actions)
+        loss = self.loss(scaled_rewards, states, actions)
 
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)
@@ -313,15 +304,15 @@ class PolicyGradient(pl.LightningModule):
         self.episode_count += self.batch_episodes
 
         log = {
-            "episode_reward": torch.tensor(self.episode_reward).to(device),
+            "episode_reward": self.episode_reward,
             "train_loss": loss,
             "avg_reward": self.avg_reward,
         }
         status = {
-            "steps": torch.tensor(self.global_step).to(device),
-            "episode_reward": torch.tensor(self.episode_reward).to(device),
-            "episodes": torch.tensor(self.episode_count),
-            "avg_reward": self.avg_reward,
+            "steps": self.global_step,
+            "episode_reward": self.episode_reward,
+            "episodes": self.episode_count,
+            "avg_reward": self.avg_reward
         }
 
         self.episode_reward = 0
