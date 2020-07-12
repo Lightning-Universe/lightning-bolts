@@ -94,7 +94,7 @@ class NStepExperienceSource(ExperienceSource):
         Takes an n-step in the environment
 
         Returns:
-            Experience
+            Experience, undiscounted reward, done
         """
         exp = self.n_step(device)
 
