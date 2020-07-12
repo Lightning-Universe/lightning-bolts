@@ -39,6 +39,7 @@ class DQN(pl.LightningModule):
             num_samples: int = 500,
             avg_reward_len: int = 100,
             min_episode_reward: int = -21,
+
             **kwargs,
     ):
         """
@@ -80,6 +81,7 @@ class DQN(pl.LightningModule):
             avg_reward_len: how many episodes to take into account when calculating the avg reward
             min_episode_reward: the minimum score that can be achieved in an episode. Used for filling the avg buffer
                                 before training begins
+
 
         .. note::
             This example is based on:
@@ -136,6 +138,7 @@ class DQN(pl.LightningModule):
 
         self.total_steps = 0
         self.reward_sum = 0
+
         self.avg_reward_len = avg_reward_len
 
         self.reward_list = []
@@ -152,7 +155,7 @@ class DQN(pl.LightningModule):
         if warm_start > 0:
             for _ in range(warm_start):
                 self.source.agent.epsilon = 1.0
-                exp, _, _ = self.source.step()
+                exp, _, _ = self.source.step(self.device)
                 self.buffer.append(exp)
 
     def build_networks(self) -> None:
@@ -229,6 +232,7 @@ class DQN(pl.LightningModule):
 
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)
+
 
         # Soft update of target network
         if self.global_step % self.sync_rate == 0:

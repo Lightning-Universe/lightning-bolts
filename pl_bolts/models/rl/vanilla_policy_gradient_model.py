@@ -5,7 +5,6 @@ Vanilla Policy Gradient
 import argparse
 from collections import OrderedDict
 from copy import deepcopy
-from itertools import chain
 from typing import Tuple, List
 
 import gym
@@ -17,10 +16,9 @@ from torch.nn.functional import log_softmax, softmax
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
+from pl_bolts.datamodules.experience_source import NStepExperienceSource, ExperienceSourceDataset
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.agents import PolicyAgent
-from pl_bolts.models.rl.common.experience import EpisodicExperienceStream
-from pl_bolts.models.rl.common.memory import Experience
 from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.common.wrappers import ToTensor
 
@@ -29,7 +27,7 @@ class PolicyGradient(pl.LightningModule):
     """ Vanilla Policy Gradient Model """
 
     def __init__(self, env: str, gamma: float = 0.99, lr: float = 1e-4, batch_size: int = 32,
-                 entropy_beta: float = 0.01, batch_episodes: int = 4, *args, **kwargs) -> None:
+                 entropy_beta: float = 0.01, batch_episodes: int = 4, avg_reward_len=100, *args, **kwargs) -> None:
         """
         PyTorch Lightning implementation of `Vanilla Policy Gradient
         <https://papers.nips.cc/paper/
@@ -59,6 +57,7 @@ class PolicyGradient(pl.LightningModule):
             batch_size: size of minibatch pulled from the DataLoader
             batch_episodes: how many episodes to rollout for each batch of training
             entropy_beta: dictates the level of entropy per batch
+            avg_reward_len: how many episodes to take into account when calculating the avg reward
 
         .. note::
             This example is based on:
@@ -81,22 +80,27 @@ class PolicyGradient(pl.LightningModule):
         self.build_networks()
 
         self.agent = PolicyAgent(self.net)
+        self.source = NStepExperienceSource(env=self.env, agent=self.agent, n_steps=10)
 
         self.gamma = gamma
         self.lr = lr
         self.batch_size = batch_size
         self.batch_episodes = batch_episodes
-
-        self.total_reward = 0
-        self.episode_reward = 0
-        self.episode_count = 0
-        self.episode_steps = 0
-        self.total_episode_steps = 0
         self.entropy_beta = entropy_beta
+        self.baseline = 0
+
+        # Metrics
+
+        self.reward_sum = 0
+        self.env_steps = 0
+        self.total_steps = 0
+        self.total_reward = 0
+        self.episode_count = 0
+        self.avg_reward_len = avg_reward_len
 
         self.reward_list = []
-        for _ in range(100):
-            self.reward_list.append(0)
+        for _ in range(avg_reward_len):
+            self.reward_list.append(torch.tensor(0, device=self.device))
         self.avg_reward = 0
 
     def build_networks(self) -> None:
@@ -140,83 +144,9 @@ class PolicyGradient(pl.LightningModule):
         mean_q = sum_q / len(res)
         return [q - mean_q for q in res]
 
-    def process_batch(
-        self, batch: List[List[Experience]]
-    ) -> Tuple[List[Tensor], List[Tensor], List[Tensor]]:
-        """
-        Takes in a batch of episodes and retrieves the q vals, the states and the actions for the batch
-
-        Args:
-            batch: list of episodes, each containing a list of Experiences
-
-        Returns:
-            q_vals, states and actions used for calculating the loss
-        """
-        # get outputs for each episode
-        batch_rewards, batch_states, batch_actions = [], [], []
-        for episode in batch:
-            ep_rewards, ep_states, ep_actions = [], [], []
-
-            # log the outputs for each step
-            for step in episode:
-                ep_rewards.append(step[2].float())
-                ep_states.append(step[0])
-                ep_actions.append(step[1])
-
-            # add episode outputs to the batch
-            batch_rewards.append(ep_rewards)
-            batch_states.append(ep_states)
-            batch_actions.append(ep_actions)
-
-        # get qvals
-        batch_qvals = []
-        for reward in batch_rewards:
-            batch_qvals.append(self.calc_qvals(reward))
-
-        # flatten the batched outputs
-        batch_actions, batch_qvals, batch_rewards, batch_states = self.flatten_batch(
-            batch_actions, batch_qvals, batch_rewards, batch_states
-        )
-
-        return batch_qvals, batch_states, batch_actions, batch_rewards
-
-    @staticmethod
-    def flatten_batch(
-        batch_actions: List[List[Tensor]],
-        batch_qvals: List[List[Tensor]],
-        batch_rewards: List[List[Tensor]],
-        batch_states: List[List[Tuple[Tensor, Tensor]]],
-    ) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
-        """
-        Takes in the outputs of the processed batch and flattens the several episodes into a single tensor for each
-        batched output
-
-        Args:
-            batch_actions: actions taken in each batch episodes
-            batch_qvals: Q vals for each batch episode
-            batch_rewards: reward for each batch episode
-            batch_states: states for each batch episodes
-
-        Returns:
-            The input batched results flattend into a single tensor
-        """
-        # flatten all episode steps into a single list
-        batch_qvals = list(chain.from_iterable(batch_qvals))
-        batch_states = list(chain.from_iterable(batch_states))
-        batch_actions = list(chain.from_iterable(batch_actions))
-        batch_rewards = list(chain.from_iterable(batch_rewards))
-
-        # stack steps into single tensor and remove extra dimension
-        batch_qvals = torch.stack(batch_qvals).squeeze()
-        batch_states = torch.stack(batch_states).squeeze()
-        batch_actions = torch.stack(batch_actions).squeeze()
-        batch_rewards = torch.stack(batch_rewards).squeeze()
-
-        return batch_actions, batch_qvals, batch_rewards, batch_states
-
     def loss(
         self,
-        batch_qvals: List[Tensor],
+        batch_scales: List[Tensor],
         batch_states: List[Tensor],
         batch_actions: List[Tensor],
     ) -> torch.Tensor:
@@ -225,7 +155,7 @@ class PolicyGradient(pl.LightningModule):
         been flattend into a single tensor.
 
         Args:
-            batch_qvals: current mini batch of q values
+            batch_scales: current mini batch of rewards minus the baseline
             batch_actions: current batch of actions
             batch_states: current batch of states
 
@@ -235,7 +165,7 @@ class PolicyGradient(pl.LightningModule):
         logits = self.net(batch_states)
 
         log_prob, policy_loss = self.calc_policy_loss(
-            batch_actions, batch_qvals, batch_states, logits
+            batch_actions, batch_scales, batch_states, logits
         )
 
         entropy_loss_v = self.calc_entropy_loss(log_prob, logits)
@@ -281,6 +211,42 @@ class PolicyGradient(pl.LightningModule):
         policy_loss = -log_prob_actions.mean()
         return log_prob, policy_loss
 
+    def train_batch(self) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
+        """
+        Contains the logic for generating a new batch of data to be passed to the DataLoader
+
+        Returns:
+            yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
+        """
+
+        for _ in range(self.batch_size):
+
+            # take a step in the env
+            exp, reward, done = self.source.step(self.device)
+            self.env_steps += 1
+            self.total_steps += 1
+
+            # update the baseline
+            self.reward_sum += exp.reward
+            self.baseline = self.reward_sum / self.total_steps
+            self.total_reward += reward
+
+            # gather the experience data
+            scale = exp.reward - self.baseline
+            yield exp.new_state, exp.action, scale
+
+            if done:
+                # tracking metrics
+                self.episode_count += 1
+                self.reward_list.append(self.total_reward)
+                self.avg_reward = sum(self.reward_list[-self.avg_reward_len:]) / self.avg_reward_len
+
+                self.logger.experiment.add_scalar("reward", self.total_reward, self.total_steps)
+
+                # reset metrics
+                self.total_reward = 0
+                self.env_steps = 0
+
     def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
         """
         Carries out a single step through the environment to update the replay buffer.
@@ -298,10 +264,9 @@ class PolicyGradient(pl.LightningModule):
         # calculates training loss
         loss = self.loss(scaled_rewards, states, actions)
 
+
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)
-
-        self.episode_count += self.batch_episodes
 
         log = {
             "episode_reward": self.episode_reward,
@@ -315,14 +280,11 @@ class PolicyGradient(pl.LightningModule):
             "avg_reward": self.avg_reward
         }
 
-        self.episode_reward = 0
-
         return OrderedDict(
             {
                 "loss": loss,
-                "reward": self.avg_reward,
                 "log": log,
-                "progress_bar": status,
+                "progress_bar": status
             }
         )
 
@@ -333,10 +295,8 @@ class PolicyGradient(pl.LightningModule):
 
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""
-        dataset = EpisodicExperienceStream(
-            self.env, self.agent, self.device, episodes=self.batch_episodes
-        )
-        dataloader = DataLoader(dataset=dataset)
+        dataset = ExperienceSourceDataset(self.train_batch)
+        dataloader = DataLoader(dataset=dataset, batch_size=self.batch_size)
         return dataloader
 
     def train_dataloader(self) -> DataLoader:

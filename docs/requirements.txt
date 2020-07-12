@@ -6,7 +6,7 @@ pandoc
 docutils
 sphinxcontrib-fulltoc
 sphinxcontrib-mockautodoc
-gym
+
 git+https://github.com/PytorchLightning/lightning_sphinx_theme.git
 # pip_shims
 sphinx-autodoc-typehints
