@@ -27,7 +27,8 @@ class PolicyGradient(pl.LightningModule):
     """ Vanilla Policy Gradient Model """
 
     def __init__(self, env: str, gamma: float = 0.99, lr: float = 1e-4, batch_size: int = 32,
-                 entropy_beta: float = 0.01, batch_episodes: int = 4, avg_reward_len=100, *args, **kwargs) -> None:
+                 entropy_beta: float = 0.01, batch_episodes: int = 4, avg_reward_len=100, min_episode_reward: int = 0,
+                 *args, **kwargs) -> None:
         """
         PyTorch Lightning implementation of `Vanilla Policy Gradient
         <https://papers.nips.cc/paper/
@@ -100,7 +101,7 @@ class PolicyGradient(pl.LightningModule):
 
         self.reward_list = []
         for _ in range(avg_reward_len):
-            self.reward_list.append(torch.tensor(0, device=self.device))
+            self.reward_list.append(min_episode_reward)
         self.avg_reward = 0
 
     def build_networks(self) -> None:
@@ -269,13 +270,13 @@ class PolicyGradient(pl.LightningModule):
             loss = loss.unsqueeze(0)
 
         log = {
-            "episode_reward": self.episode_reward,
+            "episode_reward": self.reward_list[-1],
             "train_loss": loss,
             "avg_reward": self.avg_reward,
         }
         status = {
             "steps": self.global_step,
-            "episode_reward": self.episode_reward,
+            "episode_reward": self.reward_list[-1],
             "episodes": self.episode_count,
             "avg_reward": self.avg_reward
         }
