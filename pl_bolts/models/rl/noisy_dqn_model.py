@@ -79,7 +79,7 @@ class NoisyDQN(DQN):
             Training loss and log metrics
         """
         # step through environment with agent and add to buffer
-        exp, reward, done = self.source.step()
+        exp, reward, done = self.source.step(self.device)
         self.buffer.append(exp)
 
         self.episode_reward += reward

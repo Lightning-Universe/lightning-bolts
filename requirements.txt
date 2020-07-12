@@ -5,3 +5,4 @@ scikit-learn>=0.23
 opencv-python
 test_tube>=0.7.5
 trains>=0.14.1
+gym>=0.17.2

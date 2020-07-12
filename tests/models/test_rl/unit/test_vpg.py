@@ -5,11 +5,10 @@ from unittest.mock import Mock
 import gym
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
 
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.agents import Agent
-from pl_bolts.models.rl.common.experience import EpisodicExperienceStream
+from pl_bolts.models.rl.common.memory import Experience
 from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.common.wrappers import ToTensor
 from pl_bolts.models.rl.vanilla_policy_gradient_model import PolicyGradient
@@ -23,8 +22,6 @@ class TestPolicyGradient(TestCase):
         self.n_actions = self.env.action_space.n
         self.net = MLP(self.obs_shape, self.n_actions)
         self.agent = Agent(self.net)
-        self.xp_stream = EpisodicExperienceStream(self.env, self.agent, Mock(), episodes=4)
-        self.rl_dataloader = DataLoader(self.xp_stream)
 
         parent_parser = argparse.ArgumentParser(add_help=False)
         parent_parser = cli.add_base_args(parent=parent_parser)
@@ -49,13 +46,32 @@ class TestPolicyGradient(TestCase):
         """Test the PolicyGradient loss function"""
         self.model.net = self.net
         self.model.agent = self.agent
+        self.model.logger = Mock()
+        xp_dataloader = self.model.train_dataloader()
 
-        for i_batch, batch in enumerate(self.rl_dataloader):
-            exp_batch = batch
+        for i_batch, batch in enumerate(xp_dataloader):
+            states, actions, scales = batch
 
-            batch_qvals, batch_states, batch_actions, _ = self.model.process_batch(exp_batch)
-
-            loss = self.model.loss(batch_qvals, batch_states, batch_actions)
+            loss = self.model.loss(scales, states, actions)
 
             self.assertIsInstance(loss, torch.Tensor)
+            break
+
+    def test_train_batch(self):
+        state = np.random.rand(4, 84, 84)
+        self.source = Mock()
+        exp = Experience(state=state, action=0, reward=5, done=False, new_state=state)
+        self.source.step = Mock(return_value=(exp, 1, False))
+        self.model.source = self.source
+
+        xp_dataloader = self.model.train_dataloader()
+
+        for i_batch, batch in enumerate(xp_dataloader):
+            self.assertEqual(len(batch), 3)
+            self.assertEqual(len(batch[0]), self.model.batch_size)
+            self.assertTrue(isinstance(batch, list))
+            self.assertEqual(self.model.baseline, 5)
+            self.assertIsInstance(batch[0], torch.Tensor)
+            self.assertIsInstance(batch[1], torch.Tensor)
+            self.assertIsInstance(batch[2], torch.Tensor)
             break

@@ -1,16 +1,13 @@
 from unittest import TestCase
 from unittest.mock import Mock
-
-import gym
 import numpy as np
+import gym
 import torch
 from torch.utils.data import DataLoader
 
+from pl_bolts.datamodules.experience_source import (ExperienceSourceDataset, ExperienceSource, NStepExperienceSource,
+                                                    EpisodicExperienceStream, Experience)
 from pl_bolts.models.rl.common.agents import Agent
-from pl_bolts.models.rl.common.experience import EpisodicExperienceStream, RLDataset, ExperienceSource, \
-    NStepExperienceSource
-from pl_bolts.models.rl.common.memory import Experience
-from pl_bolts.models.rl.common.wrappers import ToTensor
 
 
 class DummyAgent(Agent):
@@ -18,33 +15,21 @@ class DummyAgent(Agent):
         return 0
 
 
-class TestEpisodicExperience(TestCase):
-    """Test the standard experience stream"""
+class TestExperienceSourceDataset(TestCase):
 
-    def setUp(self) -> None:
-        self.env = ToTensor(gym.make("CartPole-v0"))
-        self.net = Mock()
-        self.agent = Agent(self.net)
-        self.xp_stream = EpisodicExperienceStream(self.env, self.agent, torch.device('cpu'), episodes=4)
-        self.rl_dataloader = DataLoader(self.xp_stream)
+    def train_batch(self):
+        return iter([i for i in range(100)])
 
-    def test_experience_stream_SINGLE_EPISODE(self):
-        """Check that the experience stream gives 1 full episode per batch"""
-        self.xp_stream.episodes = 1
+    def test_iterator(self):
+        source = ExperienceSourceDataset(self.train_batch)
+        batch_size = 10
+        data_loader = DataLoader(source, batch_size=batch_size)
 
-        for i_batch, batch in enumerate(self.rl_dataloader):
-            self.assertEqual(len(batch), 1)
-            self.assertIsInstance(batch[0][0], Experience)
-            self.assertEqual(batch[0][-1].done, True)
-
-    def test_experience_stream_MULTI_EPISODE(self):
-        """Check that the experience stream gives 4 full episodes per batch"""
-        self.xp_stream.episodes = 4
-
-        for i_batch, batch in enumerate(self.rl_dataloader):
-            self.assertEqual(len(batch), 4)
-            self.assertIsInstance(batch[0][0], Experience)
-            self.assertEqual(batch[0][-1].done, True)
+        for idx, batch in enumerate(data_loader):
+            self.assertEqual(len(batch), batch_size)
+            self.assertEqual(batch[0], 0)
+            self.assertEqual(batch[5], 5)
+            break
 
 
 class TestExperienceSource(TestCase):
@@ -140,28 +125,30 @@ class TestNStepExperienceSource(TestCase):
         self.assertEqual(exp[4].all(), self.experience02.new_state.all())
 
 
-class TestRLDataset(TestCase):
+class TestEpisodicExperience(TestCase):
+    """Test the standard experience stream"""
 
     def setUp(self) -> None:
-        mock_states = np.random.rand(32, 4, 84, 84)
-        mock_action = np.random.rand(32)
-        mock_rewards = np.random.rand(32)
-        mock_dones = np.random.rand(32)
-        mock_next_states = np.random.rand(32, 4, 84, 84)
-        self.sample = mock_states, mock_action, mock_rewards, mock_dones, mock_next_states
+        self.env = gym.make("CartPole-v0")
+        self.net = Mock()
+        self.agent = Agent(self.net)
+        self.xp_stream = EpisodicExperienceStream(self.env, self.agent, torch.device('cpu'), episodes=4)
+        self.rl_dataloader = DataLoader(self.xp_stream)
 
-        self.buffer = Mock()
-        self.buffer.sample = Mock(return_value=self.sample)
-        self.dataset = RLDataset(buffer=self.buffer, sample_size=32)
-        self.dl = DataLoader(self.dataset, batch_size=32)
+    def test_experience_stream_SINGLE_EPISODE(self):
+        """Check that the experience stream gives 1 full episode per batch"""
+        self.xp_stream.episodes = 1
 
-    def test_rl_dataset_batch(self):
-        """test that the dataset gives the correct batch"""
+        for i_batch, batch in enumerate(self.rl_dataloader):
+            self.assertEqual(len(batch), 1)
+            self.assertIsInstance(batch[0][0], Experience)
+            self.assertEqual(batch[0][-1].done, True)
 
-        for i_batch, sample_batched in enumerate(self.dl):
-            self.assertIsInstance(sample_batched, list)
-            self.assertEqual(sample_batched[0].shape, torch.Size([32, 4, 84, 84]))
-            self.assertEqual(sample_batched[1].shape, torch.Size([32]))
-            self.assertEqual(sample_batched[2].shape, torch.Size([32]))
-            self.assertEqual(sample_batched[3].shape, torch.Size([32]))
-            self.assertEqual(sample_batched[4].shape, torch.Size([32, 4, 84, 84]))
+    def test_experience_stream_MULTI_EPISODE(self):
+        """Check that the experience stream gives 4 full episodes per batch"""
+        self.xp_stream.episodes = 4
+
+        for i_batch, batch in enumerate(self.rl_dataloader):
+            self.assertEqual(len(batch), 4)
+            self.assertIsInstance(batch[0][0], Experience)
+            self.assertEqual(batch[0][-1].done, True)
