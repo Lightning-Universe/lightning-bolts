@@ -59,6 +59,52 @@ class PERDQN(DQN):
         .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
 
         """
+    def train_batch(self) -> Tuple[Tuple, torch.Tensor, torch.Tensor]:
+        """
+        Contains the logic for generating a new batch of data to be passed to the DataLoader
+
+        Returns:
+            yields a Experience tuple.
+        """
+        self.agent.update_epsilon(self.total_steps)
+
+        # take a step in the env
+        exp, reward, done = self.source.step(self.device)
+        self.episode_steps += 1
+        self.total_steps += 1
+
+        self.reward_sum += exp.reward
+        self.episode_reward += reward
+
+        # gather the experience data
+        self.buffer.append(exp)
+
+        if done:
+            # tracking metrics
+            self.episode_count += 1
+            self.reward_list.append(self.total_reward)
+            self.avg_reward = sum(self.reward_list[-self.avg_reward_len:]) / self.avg_reward_len
+            self.total_reward = self.episode_reward
+            self.total_episode_steps = self.episode_steps
+
+            self.logger.experiment.add_scalar("reward", self.total_reward, self.total_steps)
+
+            # reset metrics
+            self.episode_reward = 0
+            self.episode_steps = 0
+
+        samples, indices, weights = self.buffer.sample(self.sample_size)
+
+        states, actions, rewards, dones, new_states = samples
+
+        for idx, _ in enumerate(dones):
+            yield (
+                      states[idx],
+                      actions[idx],
+                      rewards[idx],
+                      dones[idx],
+                      new_states[idx],
+                  ), indices[idx], weights[idx]
 
     def training_step(self, batch, _) -> OrderedDict:
         """
@@ -76,15 +122,6 @@ class PERDQN(DQN):
 
         indices = indices.cpu().numpy()
 
-        self.agent.update_epsilon(self.global_step)
-
-        # step through environment with agent and add to buffer
-        exp, reward, done = self.source.step(self.device)
-        self.buffer.append(exp)
-
-        self.episode_reward += reward
-        self.episode_steps += 1
-
         # calculates training loss
         loss, batch_weights = per_dqn_loss(samples, weights, self.net, self.target_net)
 
@@ -93,15 +130,6 @@ class PERDQN(DQN):
 
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)
-
-        if done:
-            self.total_reward = self.episode_reward
-            self.reward_list.append(self.total_reward)
-            self.avg_reward = sum(self.reward_list[-100:]) / 100
-            self.episode_count += 1
-            self.episode_reward = 0
-            self.total_episode_steps = self.episode_steps
-            self.episode_steps = 0
 
         # Soft update of target network
         if self.global_step % self.sync_rate == 0:

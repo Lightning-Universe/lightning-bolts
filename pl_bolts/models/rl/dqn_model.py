@@ -176,12 +176,12 @@ class DQN(pl.LightningModule):
         output = self.net(x)
         return output
 
-    def train_batch(self) -> Experience:
+    def train_batch(self) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
         Returns:
-            yields a Experience tuple.
+            yields a Experience tuple containing the state, action, reward, done and next_state.
         """
         self.agent.update_epsilon(self.total_steps)
 
