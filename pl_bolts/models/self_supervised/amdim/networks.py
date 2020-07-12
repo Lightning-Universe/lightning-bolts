@@ -144,8 +144,16 @@ class AMDIMEncoder(nn.Module):
 
 
 class Conv3x3(nn.Module):
-    def __init__(self, n_in, n_out, n_kern, n_stride, n_pad,
-                 use_bn=True, pad_mode='constant'):
+    def __init__(
+            self,
+            n_in: int,
+            n_out: int,
+            n_kern: int,
+            n_stride: int,
+            n_pad: int,
+            use_bn: bool = True,
+            pad_mode: srt = 'constant',
+    ):
         super(Conv3x3, self).__init__()
         assert (pad_mode in ['constant', 'reflect'])
         self.n_pad = (n_pad, n_pad, n_pad, n_pad)

@@ -26,9 +26,19 @@ from pl_bolts.models.rl.common.wrappers import ToTensor
 class PolicyGradient(pl.LightningModule):
     """ Vanilla Policy Gradient Model """
 
-    def __init__(self, env: str, gamma: float = 0.99, lr: float = 1e-4, batch_size: int = 32,
-                 entropy_beta: float = 0.01, batch_episodes: int = 4, avg_reward_len=100, min_episode_reward: int = 0,
-                 *args, **kwargs) -> None:
+    def __init__(
+            self,
+            env: str,
+            gamma: float = 0.99,
+            lr: float = 1e-4,
+            batch_size: int = 32,
+            entropy_beta: float = 0.01,
+            batch_episodes: int = 4,
+            avg_reward_len=100,
+            min_episode_reward: int = 0,
+            *args,
+            **kwargs,
+    ) -> None:
         """
         PyTorch Lightning implementation of `Vanilla Policy Gradient
         <https://papers.nips.cc/paper/

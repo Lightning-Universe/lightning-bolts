@@ -29,21 +29,24 @@ from pl_bolts.models.self_supervised.moco.transforms import (
 
 class MocoV2(pl.LightningModule):
 
-    def __init__(self,
-                 base_encoder: Union[str, torch.nn.Module] = 'resnet18',
-                 emb_dim: int = 128,
-                 num_negatives: int = 65536,
-                 encoder_momentum: float = 0.999,
-                 softmax_temperature: float = 0.07,
-                 learning_rate: float = 0.03,
-                 momentum: float = 0.9,
-                 weight_decay: float = 1e-4,
-                 datamodule: pl_bolts.datamodules.LightningDataModule = None,
-                 data_dir: str = './',
-                 batch_size: int = 256,
-                 use_mlp: bool = False,
-                 num_workers: int = 8,
-                 *args, **kwargs):
+    def __init__(
+            self,
+            base_encoder: Union[str, torch.nn.Module] = 'resnet18',
+            emb_dim: int = 128,
+            num_negatives: int = 65536,
+            encoder_momentum: float = 0.999,
+            softmax_temperature: float = 0.07,
+            learning_rate: float = 0.03,
+            momentum: float = 0.9,
+            weight_decay: float = 1e-4,
+            datamodule: pl_bolts.datamodules.LightningDataModule = None,
+            data_dir: str = './',
+            batch_size: int = 256,
+            use_mlp: bool = False,
+            num_workers: int = 8,
+            *args,
+            **kwargs,
+    ):
         """
         PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
 

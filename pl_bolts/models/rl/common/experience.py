@@ -63,13 +63,11 @@ class PrioRLDataset(RLDataset):
         states, actions, rewards, dones, new_states = samples
 
         for idx, _ in enumerate(dones):
-            yield (
-                states[idx],
-                actions[idx],
-                rewards[idx],
-                dones[idx],
-                new_states[idx],
-            ), indices[idx], weights[idx]
+            yield (states[idx],
+                   actions[idx],
+                   rewards[idx],
+                   dones[idx],
+                   new_states[idx]), indices[idx], weights[idx]
 
 
 class ExperienceSource:

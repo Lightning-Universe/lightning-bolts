@@ -5,9 +5,15 @@ from torch import nn
 
 class CPCResNet101(nn.Module):
 
-    def __init__(self, sample_batch, zero_init_residual=False,
-                 groups=1, width_per_group=64, replace_stride_with_dilation=None,
-                 norm_layer=None):
+    def __init__(
+            self,
+            sample_batch,
+            zero_init_residual=False,
+            groups=1,
+            width_per_group=64,
+            replace_stride_with_dilation=None,
+            norm_layer=None,
+    ):
         super(CPCResNet101, self).__init__()
         if norm_layer is None:
             norm_layer = nn.LayerNorm
@@ -103,8 +109,19 @@ class CPCResNet101(nn.Module):
 
 class LNBottleneck(nn.Module):
 
-    def __init__(self, sample_batch, inplanes, planes, stride=1, downsample_conv=None, groups=1,
-                 base_width=64, dilation=1, norm_layer=None, expansion=4):
+    def __init__(
+            self,
+            sample_batch,
+            inplanes,
+            planes,
+            stride=1,
+            downsample_conv=None,
+            groups=1,
+            base_width=64,
+            dilation=1,
+            norm_layer=None,
+            expansion=4,
+    ):
         super(LNBottleneck, self).__init__()
         width = int(planes * (base_width / 64.)) * groups
         # Both self.conv2 and self.downsample layers downsample the input when stride != 1
