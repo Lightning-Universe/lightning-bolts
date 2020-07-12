@@ -71,29 +71,12 @@ class DoubleDQN(DQN):
         Returns:
             Training loss and log metrics
         """
-        self.agent.update_epsilon(self.global_step)
-
-        # step through environment with agent and add to buffer
-        exp, reward, done = self.source.step(self.device)
-        self.buffer.append(exp)
-
-        self.episode_reward += reward
-        self.episode_steps += 1
 
         # calculates training loss
         loss = double_dqn_loss(batch, self.net, self.target_net)
 
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)
-
-        if done:
-            self.total_reward = self.episode_reward
-            self.reward_list.append(self.total_reward)
-            self.avg_reward = sum(self.reward_list[-100:]) / 100
-            self.episode_count += 1
-            self.episode_reward = 0
-            self.total_episode_steps = self.episode_steps
-            self.episode_steps = 0
 
         # Soft update of target network
         if self.global_step % self.sync_rate == 0:
