@@ -80,8 +80,7 @@ class DQN(pl.LightningModule):
             num_samples: the number of samples to pull from the dataset iterator and feed to the DataLoader
             avg_reward_len: how many episodes to take into account when calculating the avg reward
             min_episode_reward: the minimum score that can be achieved in an episode. Used for filling the avg buffer
-                                before training begins
-
+                before training begins
 
         .. note::
             This example is based on:
