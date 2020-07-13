@@ -152,7 +152,7 @@ class Conv3x3(nn.Module):
             n_stride: int,
             n_pad: int,
             use_bn: bool = True,
-            pad_mode: srt = 'constant',
+            pad_mode: str = 'constant',
     ):
         super(Conv3x3, self).__init__()
         assert (pad_mode in ['constant', 'reflect'])
