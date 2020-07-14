@@ -132,7 +132,7 @@ class MNISTDataModule(LightningDataModule):
         if self.normalize:
             mnist_transforms = transform_lib.Compose([
                 transform_lib.ToTensor(),
-                transform_lib.Normalize(mean=0.5, std=0.5),
+                transform_lib.Normalize(mean=(0.5,), std=(0.5,)),
             ])
         else:
             mnist_transforms = transform_lib.ToTensor()
