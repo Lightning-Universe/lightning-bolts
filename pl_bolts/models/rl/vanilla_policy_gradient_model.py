@@ -275,7 +275,6 @@ class PolicyGradient(pl.LightningModule):
         # calculates training loss
         loss = self.loss(scaled_rewards, states, actions)
 
-
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)
 
