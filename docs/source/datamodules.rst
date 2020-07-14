@@ -140,7 +140,7 @@ DataModule class
    :noindex:
 
 DummyDataset
-^^^^^^^^^^^^
+------------
 
 .. autoclass:: pl_bolts.datamodules.dummy_dataset.DummyDataset
    :noindex:
