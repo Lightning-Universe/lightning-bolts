@@ -10,7 +10,7 @@ class DummyDataset(Dataset):
 
         Args:
             *shapes: list of shapes
-            num_samples:
+            num_samples: how many samples to use in this dataset
 
         Example::
 
