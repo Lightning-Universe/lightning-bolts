@@ -145,7 +145,6 @@ class DQN(pl.LightningModule):
             self.reward_list.append(torch.tensor(min_episode_reward, device=self.device))
         self.avg_reward = 0
 
-
         self.buffer = ReplayBuffer(self.replay_size)
         self.populate(self.warm_start_size)
 
@@ -231,7 +230,6 @@ class DQN(pl.LightningModule):
 
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)
-
 
         # Soft update of target network
         if self.global_step % self.sync_rate == 0:
