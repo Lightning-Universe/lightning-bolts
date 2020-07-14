@@ -19,7 +19,7 @@ class DummyDataset(Dataset):
             # mnist dims
             >>> ds = DummyDataset((1, 28, 28), (1,))
             >>> dl = DataLoader(ds, batch_size=7)
-
+            ...
             >>> batch = next(iter(dl))
             >>> x, y = batch
             >>> x.size()
