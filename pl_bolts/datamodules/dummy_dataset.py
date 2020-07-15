@@ -23,9 +23,9 @@ class DummyDataset(Dataset):
             >>> batch = next(iter(dl))
             >>> x, y = batch
             >>> x.size()
-            ... torch.Size([7, 1, 28, 28])
+            torch.Size([7, 1, 28, 28])
             >>> y.size()
-            ... torch.Size([7, 1])
+            torch.Size([7, 1])
         """
         super().__init__()
         self.shapes = shapes
