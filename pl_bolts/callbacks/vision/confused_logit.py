@@ -13,11 +13,11 @@ class ConfusedLogitCallback(Callback):
         This callback shows how the input would have to change to swing the model from one label prediction
         to the other.
 
-        Example:
+        Example::
 
             from pl_bolts.callbacks.vision import ConfusedLogitCallback
-
             trainer = Trainer(callbacks=[ConfusedLogitCallback()])
+
 
         .. note:: whenever called, this model will look for self.last_batch and self.last_logits in the LightningModule
 
