@@ -11,7 +11,7 @@ Latent Dim Interpolator
 -----------------------
 Interpolates latent dims.
 
-Example outputs:
+Example output:
 
     .. image:: _images/gans/basic_gan_interpolate.jpg
         :width: 400
