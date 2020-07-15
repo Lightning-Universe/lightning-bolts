@@ -5,7 +5,7 @@ from pytorch_lightning import Callback
 
 class ConfusedLogitCallback(Callback):
 
-    def __init__(self, top_k, projection_factor=3):
+    def __init__(self, top_k, projection_factor=3, min_logit_value=5.0, logging_batch_interval=20, max_logit_difference=0.1):
         """
         Takes the logit predictions of a model and when the probabilities of two classes are very close, the model
         doesn't have high certainty that it should pick one vs the other class.
@@ -32,6 +32,9 @@ class ConfusedLogitCallback(Callback):
         Args:
             top_k: How many "offending" images we should plot
             projection_factor: How much to multiply the input image to make it look more like this logit label
+            min_logit_value: Only consider logit values above this threshold
+            logging_batch_interval: how frequently to inspect/potentially plot something
+            max_logit_difference: when the top 2 logits are within this threshold we consider them confused
 
         Authored by:
 
@@ -41,25 +44,27 @@ class ConfusedLogitCallback(Callback):
         super().__init__()
         self.top_k = top_k
         self.projection_factor = projection_factor
+        self.max_logit_difference = max_logit_difference
+        self.logging_batch_interval = logging_batch_interval
+        self.min_logit_value = min_logit_value
 
     def on_batch_end(self, trainer, pl_module):
 
         # show images only every 20 batches
-        if (trainer.batch_idx + 1) % 20 != 0:
+        if (trainer.batch_idx + 1) % self.logging_batch_interval != 0:
             return
 
         # pick the last batch and logits
-        # TODO: use context instead
         x, y = pl_module.last_batch
         l = pl_module.last_logits
 
         # only check when it has opinions (ie: the logit > 5)
-        if l.max() > 5.0:
+        if l.max() > self.min_logit_value:
             # pick the top two confused probs
             (values, idxs) = torch.topk(l, k=2, dim=1)
 
             # care about only the ones that are at most eps close to each other
-            eps = 0.1
+            eps = self.max_logit_difference
             mask = (values[:, 0] - values[:, 1]).abs() < eps
 
             if mask.sum() > 0:
@@ -75,7 +80,7 @@ class ConfusedLogitCallback(Callback):
     def _plot(self, confusing_x, confusing_y, trainer, model, mask_idxs):
         from matplotlib import pyplot as plt
 
-        batch_size = confusing_x.size(0)
+        batch_size, c, w, h = confusing_x.size()
 
         confusing_x = confusing_x[:self.top_k]
         confusing_y = confusing_y[:self.top_k]
@@ -89,8 +94,8 @@ class ConfusedLogitCallback(Callback):
             l[:, mask_idxs[:, logit_i]].sum().backward()
 
         # reshape grads
-        grad_a = x_param_a.grad.view(batch_size, 28, 28)
-        grad_b = x_param_b.grad.view(batch_size, 28, 28)
+        grad_a = x_param_a.grad.view(batch_size, w, h)
+        grad_b = x_param_b.grad.view(batch_size, w, h)
 
         for img_i in range(len(confusing_x)):
             x = confusing_x[img_i].squeeze(0)
