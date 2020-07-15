@@ -5,7 +5,14 @@ from pytorch_lightning import Callback
 
 class ConfusedLogitCallback(Callback):
 
-    def __init__(self, top_k, projection_factor=3, min_logit_value=5.0, logging_batch_interval=20, max_logit_difference=0.1):
+    def __init__(
+            self,
+            top_k,
+            projection_factor=3,
+            min_logit_value=5.0,
+            logging_batch_interval=20,
+            max_logit_difference=0.1
+    ):
         """
         Takes the logit predictions of a model and when the probabilities of two classes are very close, the model
         doesn't have high certainty that it should pick one vs the other class.
