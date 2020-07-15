@@ -63,12 +63,12 @@ class ConfusedLogitCallback(Callback):
 
         # pick the last batch and logits
         x, y = pl_module.last_batch
-        l = pl_module.last_logits
+        logits = pl_module.last_logits
 
         # only check when it has opinions (ie: the logit > 5)
-        if l.max() > self.min_logit_value:
+        if logits.max() > self.min_logit_value:
             # pick the top two confused probs
-            (values, idxs) = torch.topk(l, k=2, dim=1)
+            (values, idxs) = torch.topk(logits, k=2, dim=1)
 
             # care about only the ones that are at most eps close to each other
             eps = self.max_logit_difference
@@ -78,7 +78,6 @@ class ConfusedLogitCallback(Callback):
                 # pull out the ones we care about
                 confusing_x = x[mask, ...]
                 confusing_y = y[mask]
-                confusing_l = l[mask]
 
                 mask_idxs = idxs[mask]
 
