@@ -32,6 +32,11 @@ class ConfusedLogitCallback(Callback):
         Args:
             top_k: How many "offending" images we should plot
             projection_factor: How much to multiply the input image to make it look more like this logit label
+
+        Authored by:
+
+            - Alfredo Canziani
+
         """
         super().__init__()
         self.top_k = top_k
