@@ -138,3 +138,11 @@ DataModule class
 
 .. autoclass:: pl_bolts.datamodules.lightning_datamodule.LightningDataModule
    :noindex:
+
+-------------
+
+DummyDataset
+------------
+
+.. autoclass:: pl_bolts.datamodules.dummy_dataset.DummyDataset
+   :noindex:
