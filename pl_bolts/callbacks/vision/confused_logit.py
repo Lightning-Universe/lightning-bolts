@@ -111,30 +111,17 @@ class ConfusedLogitCallback(Callback):
 
             mask_idx = mask_idxs[img_i]
 
-            fig = plt.figure(figsize=(15, 10))
-            plt.subplot(231)
-            plt.imshow(x)
-            plt.colorbar()
-            plt.title(f'True: {y}', fontsize=20)
-
-            plt.subplot(232)
-            plt.imshow(ga)
-            plt.colorbar()
-            plt.title(f'd{mask_idx[0]}-logit/dx', fontsize=20)
-
-            plt.subplot(233)
-            plt.imshow(gb)
-            plt.colorbar()
-            plt.title(f'd{mask_idx[1]}-logit/dx', fontsize=20)
-
-            plt.subplot(235)
-            plt.imshow(ga * 2 + x)
-            plt.colorbar()
-            plt.title(f'd{mask_idx[0]}-logit/dx', fontsize=20)
-
-            plt.subplot(236)
-            plt.imshow(gb * 2 + x)
-            plt.colorbar()
-            plt.title(f'd{mask_idx[1]}-logit/dx', fontsize=20)
+            fig, axarr = plt.subplots(nrows=2, ncols=3, figsize=(15, 10))
+            self.__draw_sample(fig, axarr, 0, 0, x, f'True: {y}')
+            self.__draw_sample(fig, axarr, 0, 1, ga, f'd{mask_idx[0]}-logit/dx')
+            self.__draw_sample(fig, axarr, 0, 2, gb, f'd{mask_idx[1]}-logit/dx')
+            self.__draw_sample(fig, axarr, 1, 1, ga * 2 + x, f'd{mask_idx[0]}-logit/dx')
+            self.__draw_sample(fig, axarr, 1, 2, gb * 2 + x, f'd{mask_idx[1]}-logit/dx')
 
             trainer.logger.experiment.add_figure('confusing_imgs', fig, global_step=trainer.global_step)
+
+    @staticmethod
+    def __draw_sample(fig, axarr, row_idx, col_idx, img, title):
+        im = axarr[row_idx, col_idx].imshow(img)
+        fig.colorbar(im, ax=axarr[row_idx, col_idx])
+        axarr[row_idx, col_idx].set_title(title, fontsize=20)
