@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from pytorch_lightning import Callback
 
 
-class ConfusionCallback(Callback):
+class ConfusedLogitCallback(Callback):
 
     def __init__(self, top_k, projection_factor=3):
         """
@@ -22,6 +22,7 @@ class ConfusionCallback(Callback):
             top_k: How many "offending" images we should plot
             projection_factor: How much to multiply the input image to make it look more like this logit label
         """
+        super().__init__()
         self.top_k = top_k
         self.projection_factor = projection_factor
 
