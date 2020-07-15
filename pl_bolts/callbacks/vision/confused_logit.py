@@ -96,8 +96,8 @@ class ConfusedLogitCallback(Callback):
         x_param_b = nn.Parameter(confusing_x)
 
         for logit_i, x_param in enumerate((x_param_a, x_param_b)):
-            l = model(x_param.view(batch_size, -1))
-            l[:, mask_idxs[:, logit_i]].sum().backward()
+            logits = model(x_param.view(batch_size, -1))
+            logits[:, mask_idxs[:, logit_i]].sum().backward()
 
         # reshape grads
         grad_a = x_param_a.grad.view(batch_size, w, h)
