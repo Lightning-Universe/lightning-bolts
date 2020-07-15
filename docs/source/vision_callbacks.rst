@@ -7,8 +7,8 @@ Useful callbacks for vision models
 
 ---------------
 
-Confused Logit Callback
------------------------
+Confused Logit
+--------------
 Shows how the input would have to change to move the prediction from one logit to the other
 
 
