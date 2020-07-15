@@ -308,6 +308,7 @@ class DQN(pl.LightningModule):
         return arg_parser
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(add_help=False)

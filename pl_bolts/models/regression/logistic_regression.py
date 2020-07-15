@@ -126,6 +126,7 @@ class LogisticRegression(pl.LightningModule):
         return parser
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':  # pragma: no cover
     from argparse import ArgumentParser
     pl.seed_everything(1234)

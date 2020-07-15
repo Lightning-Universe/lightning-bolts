@@ -102,15 +102,20 @@ class LitMNIST(LightningModule):
         return parser
 
 
-if __name__ == '__main__':  # pragma: no cover
-
+def run_cli():
     # args
     parser = ArgumentParser()
+    parser = Trainer.add_argparse_args(parser)
     parser = LitMNIST.add_model_specific_args(parser)
     args = parser.parse_args()
 
     # model
     model = LitMNIST(**vars(args))
 
-    trainer = Trainer()
+    # training
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model)
+
+
+if __name__ == '__main__':  # pragma: no cover
+    run_cli()
