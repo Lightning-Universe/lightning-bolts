@@ -1,6 +1,5 @@
 import torch
 from torch import nn
-from matplotlib import pyplot as plt
 from pytorch_lightning import Callback
 
 
@@ -13,6 +12,12 @@ class ConfusedLogitCallback(Callback):
 
         This callback shows how the input would have to change to swing the model from one label prediction
         to the other.
+
+        Example:
+
+            from pl_bolts.callbacks.vision import ConfusedLogitCallback
+
+            trainer = Trainer(callbacks=[ConfusedLogitCallback()])
 
         .. note:: whenever called, this model will look for self.last_batch and self.last_logits in the LightningModule
 
@@ -57,6 +62,8 @@ class ConfusedLogitCallback(Callback):
                 self._plot(confusing_x, confusing_y, trainer, pl_module, mask_idxs)
 
     def _plot(self, confusing_x, confusing_y, trainer, model, mask_idxs):
+        from matplotlib import pyplot as plt
+
         batch_size = confusing_x.size(0)
 
         confusing_x = confusing_x[:self.top_k]
