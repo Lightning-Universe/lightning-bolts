@@ -2,7 +2,7 @@
     :class: hidden-section
 
 Vision Callbacks
-=====================
+================
 Useful callbacks for vision models
 
 ---------------
