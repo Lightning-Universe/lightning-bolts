@@ -3,10 +3,12 @@ Datamodules for RL models that rely on experiences generated during training
 
 Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/experience.py
 """
+from abc import ABC, abstractmethod
 from collections import deque, namedtuple
-from typing import Iterable, Callable, Tuple, List
-import numpy as np
+from typing import Iterable, Callable, List, Deque, Tuple
+
 import torch
+from gym import Env
 from torch.utils.data import IterableDataset
 
 # Datasets
@@ -29,174 +31,123 @@ class ExperienceSourceDataset(IterableDataset):
         iterator = self.generate_batch()
         return iterator
 
+
 # Experience Sources
-
-
-class ExperienceSource(object):
+class BaseExperienceSource(ABC):
     """
-    Basic single step experience source
+    Simplest form of the experience source
 
     Args:
         env: Environment that is being used
         agent: Agent being used to make decisions
     """
 
-    def __init__(self, env, agent):
+    def __init__(self, env, agent) -> None:
         self.env = env
         self.agent = agent
-        self.state = self.env.reset()
 
-    def _reset(self) -> None:
-        """resets the env and state"""
-        self.state = self.env.reset()
-
-    def step(self, device: torch.device) -> Tuple[Experience, float, bool]:
-        """Takes a single step through the environment"""
-        action = self.agent(self.state, device)
-        new_state, reward, done, _ = self.env.step(action)
-        experience = Experience(
-            state=self.state,
-            action=action,
-            reward=reward,
-            new_state=new_state,
-            done=done,
-        )
-        self.state = new_state
-
-        if done:
-            self.state = self.env.reset()
-
-        return experience, reward, done
-
-    def run_episode(self, device: torch.device) -> float:
-        """Carries out a single episode and returns the total reward. This is used for testing"""
-        done = False
-        total_reward = 0
-
-        while not done:
-            _, reward, done = self.step(device)
-            total_reward += reward
-
-        return total_reward
+    @abstractmethod
+    def __iter__(self) -> Experience:
+        raise NotImplementedError("ExperienceSource has no __iter__ method implemented")
 
 
-class NStepExperienceSource(ExperienceSource):
-    """Expands upon the basic ExperienceSource by collecting experience across N steps"""
-
-    def __init__(self, env, agent, n_steps: int = 1, gamma: float = 0.99):
-        super().__init__(env, agent)
-        self.gamma = gamma
-        self.n_steps = n_steps
-        self.n_step_buffer = deque(maxlen=n_steps)
-
-    def step(self, device: torch.device) -> Tuple[Experience, float, bool]:
-        """
-        Takes an n-step in the environment
-
-        Returns:
-            Experience
-        """
-        exp = self.n_step(device)
-
-        while len(self.n_step_buffer) < self.n_steps:
-            self.n_step(device)
-
-        reward, next_state, done = self.get_transition_info()
-        first_experience = self.n_step_buffer[0]
-        multi_step_experience = Experience(
-            first_experience.state, first_experience.action, reward, done, next_state
-        )
-
-        return multi_step_experience, exp.reward, exp.done
-
-    def n_step(self, device: torch.device) -> Experience:
-        """
-        Takes a  single step in the environment and appends it to the n-step buffer
-
-        Returns:
-            Experience
-        """
-        exp, _, _ = super().step(device)
-        self.n_step_buffer.append(exp)
-        return exp
-
-    def get_transition_info(self) -> Tuple[np.float, np.array, np.int]:
-        """
-        get the accumulated transition info for the n_step_buffer
-        Args:
-            gamma: discount factor
-
-        Returns:
-            multi step reward, final observation and done
-        """
-        last_experience = self.n_step_buffer[-1]
-        final_state = last_experience.new_state
-        done = last_experience.done
-        reward = last_experience.reward
-
-        # calculate reward
-        # in reverse order, go through all the experiences up till the first experience
-        for experience in reversed(list(self.n_step_buffer)[:-1]):
-            reward_t = experience.reward
-            new_state_t = experience.new_state
-            done_t = experience.done
-
-            reward = reward_t + self.gamma * reward * (1 - done_t)
-            final_state, done = (new_state_t, done_t) if done_t else (final_state, done)
-
-        return reward, final_state, done
-
-
-class EpisodicExperienceStream(ExperienceSource, IterableDataset):
+class ExperienceSource(BaseExperienceSource):
     """
-    Basic experience stream that iteratively yield the current experience of the agent in the env
+    Experience source class handling single and multiple environment steps
 
     Args:
-        env: Environmen that is being used
+        env: Environment that is being used
         agent: Agent being used to make decisions
+        n_steps: Number of steps to return from each environment at once
     """
 
-    def __init__(self, env, agent, device: torch.device, episodes: int = 1):
+    def __init__(self, env, agent, n_steps: int = 1) -> None:
         super().__init__(env, agent)
-        self.episodes = episodes
-        self.device = device
 
-    def __getitem__(self, item):
-        return item
+        if isinstance(env, (list, tuple)):
+            self.pool = env
+        else:
+            self.pool = [env]
 
-    def __iter__(self) -> List[Experience]:
+        self.n_steps = n_steps
+        self.total_rewards = []
+        self.total_steps = []
+        self.states = []
+        self.histories = []
+        self.cur_rewards = []
+        self.cur_steps = []
+        self.iter_idx = 0
+
+        self.init_envs()
+
+    def init_envs(self) -> None:
         """
-        Plays a step through the environment until the episode is complete
+        For each environment in the pool setups lists for tracking history of size n, state, current reward and
+        current step
+        """
+        for env in self.pool:
+            self.states.append(env.reset())
+            self.histories.append(deque(maxlen=self.n_steps))
+            self.cur_rewards.append(0.0)
+            self.cur_steps.append(0)
+
+    def env_actions(self) -> List[List[int]]:
+        """
+        For each environment in the pool, get the correct action
 
         Returns:
-            Batch of all transitions for the entire episode
+            List of actions for each env, with size (num_envs, action_size)
         """
-        episode_steps, batch = [], []
+        actions = [None] * len(self.states)
+        states_actions = self.agent(self.states)
 
-        while len(batch) < self.episodes:
-            exp = self.step(self.device)
-            episode_steps.append(exp)
+        for idx, action in enumerate(states_actions):
+            actions[idx] = action if isinstance(action, list) else [action]
 
-            if exp.done:
-                batch.append(episode_steps)
-                episode_steps = []
+        return actions
 
-        yield batch
+    def env_step(self, env_idx: int, env: Env, action: List[int]) -> Experience:
+        """
+        Carries out a step through the given environment using the given action
 
-    def step(self, device: torch.device) -> Experience:
-        """Carries out a single step in the environment"""
-        action = self.agent(self.state, device)
-        new_state, reward, done, _ = self.env.step(action)
-        experience = Experience(
-            state=self.state,
-            action=action,
-            reward=reward,
-            new_state=new_state,
-            done=done,
-        )
-        self.state = new_state
+        Args:
+            env_idx: index of the current environment
+            env: env at index env_idx
+            action: action for this environment step
 
-        if done:
-            self.state = self.env.reset()
+        Returns:
+            Experience tuple
+        """
+        next_state, r, is_done, _ = env.step(action[0])
 
-        return experience
+        self.cur_rewards[env_idx] += 1
+        self.cur_steps[env_idx] += 1
+
+        exp = Experience(state=self.states[env_idx], action=action[0], reward=r, done=is_done, new_state=next_state)
+
+        return exp
+
+    def __iter__(self) -> Tuple[Experience]:
+        """Experience Source iterator yielding Tuple of experiences for n_steps. These come from the pool
+        of environments provided by the user.
+
+        Returns:
+            Tuple of Experiences
+        """
+        while True:
+
+            # get actions for all envs
+            actions = self.env_actions()
+
+            # step through each env
+            for env_idx, (env, action) in enumerate(zip(self.pool, actions)):
+
+                exp = self.env_step(env_idx, env, action)
+                history = self.histories[env_idx]
+                history.append(exp)
+
+                self.states[env_idx] = exp.new_state
+
+                if len(history) == self.n_steps:
+                    yield self.history
+

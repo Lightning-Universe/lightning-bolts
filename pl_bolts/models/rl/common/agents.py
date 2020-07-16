@@ -9,6 +9,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn
+from typing import List
 
 
 class Agent:
@@ -17,7 +18,7 @@ class Agent:
     def __init__(self, net: nn.Module):
         self.net = net
 
-    def __call__(self, state: torch.Tensor, device: str) -> int:
+    def __call__(self, state: torch.Tensor, device: str, *args, **kwargs) -> List[int]:
         """
         Using the given network, decide what action to carry
 
@@ -27,7 +28,7 @@ class Agent:
         Returns:
             action
         """
-        return 0
+        return [0]
 
 
 class ValueAgent(Agent):
@@ -48,7 +49,8 @@ class ValueAgent(Agent):
         self.eps_end = eps_end
         self.eps_frames = eps_frames
 
-    def __call__(self, state: torch.Tensor, device: str) -> int:
+    @torch.no_grad()
+    def __call__(self, state: torch.Tensor, device: str) -> List[int]:
         """
         Takes in the current state and returns the action based on the agents policy
 
@@ -102,25 +104,29 @@ class ValueAgent(Agent):
 class PolicyAgent(Agent):
     """Policy based agent that returns an action based on the networks policy"""
 
-    def __call__(self, state: torch.Tensor, device: str) -> int:
+    @torch.no_grad()
+    def __call__(self, states: torch.Tensor, device: str) -> List[int]:
         """
         Takes in the current state and returns the action based on the agents policy
 
         Args:
-            state: current state of the environment
+            states: current state of the environment
             device: the device used for the current batch
 
         Returns:
             action defined by policy
         """
+        if not isinstance(states, torch.Tensor):
+            states = torch.FloatTensor(states).to(device)
+
         if device.type != "cpu":
-            state = state.cuda(device)
+            states = states.cuda(device)
 
         # get the logits and pass through softmax for probability distribution
-        probabilities = F.softmax(self.net(state))
+        probabilities = F.softmax(self.net(states))
         prob_np = probabilities.data.cpu().numpy()
 
         # take the numpy values and randomly select action based on prob distribution
-        action = np.random.choice(len(prob_np), p=prob_np)
+        actions = [np.random.choice(len(prob), p=prob) for prob in prob_np]
 
-        return action
+        return actions

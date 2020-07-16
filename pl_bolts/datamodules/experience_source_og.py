@@ -1,78 +1,38 @@
-"""Experience sources to be used as datasets for Ligthning DataLoaders
+"""
+Datamodules for RL models that rely on experiences generated during training
 
 Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/experience.py
-
-..note:: Deprecated, these functions have been moved to pl_bolts.datamodules.experience_source_og.py
-
 """
-import warnings
-from collections import deque
-from typing import List, Tuple
-
+from collections import deque, namedtuple
+from typing import Iterable, Callable, Tuple, List
 import numpy as np
 import torch
-from gym import Env
 from torch.utils.data import IterableDataset
 
-from pl_bolts.models.rl.common.agents import Agent
-from pl_bolts.models.rl.common.memory import Experience, Buffer
+# Datasets
+
+Experience = namedtuple(
+    "Experience", field_names=["state", "action", "reward", "done", "new_state"]
+)
 
 
-class RLDataset(IterableDataset):
+class ExperienceSourceDataset(IterableDataset):
     """
-    Iterable Dataset containing the ExperienceBuffer
-    which will be updated with new experiences during training
-
-    Args:
-        buffer: replay buffer
-        sample_size: number of experiences to sample at a time
-    """
-
-    def __init__(self, buffer: Buffer, sample_size: int = 1) -> None:
-        warnings.warn("Deprecated, these functions have been moved to pl_bolts.datamodules.experience_source_og.py",
-                      DeprecationWarning)
-        self.buffer = buffer
-        self.sample_size = sample_size
-
-    def __iter__(self) -> Tuple:
-        states, actions, rewards, dones, new_states = self.buffer.sample(
-            self.sample_size
-        )
-
-        for idx, _ in enumerate(dones):
-            yield states[idx], actions[idx], rewards[idx], dones[idx], new_states[idx]
-
-    def __getitem__(self, item):
-        """Not used"""
-        return None
-
-
-class PrioRLDataset(RLDataset):
-    """
-    Iterable Dataset containing the ExperienceBuffer
-    which will be updated with new experiences during training
-
-    Args:
-        buffer: replay buffer
-        sample_size: number of experiences to sample at a time
+    Basic experience source dataset. Takes a generate_batch function that returns an iterator.
+    The logic for the experience source and how the batch is generated is defined the Lightning model itself
     """
 
-    def __iter__(self) -> Tuple:
-        samples, indices, weights = self.buffer.sample(self.sample_size)
+    def __init__(self, generate_batch: Callable):
+        self.generate_batch = generate_batch
 
-        states, actions, rewards, dones, new_states = samples
+    def __iter__(self) -> Iterable:
+        iterator = self.generate_batch()
+        return iterator
 
-        for idx, _ in enumerate(dones):
-            yield (
-                states[idx],
-                actions[idx],
-                rewards[idx],
-                dones[idx],
-                new_states[idx],
-            ), indices[idx], weights[idx]
+# Experience Sources
 
 
-class ExperienceSource:
+class ExperienceSource(object):
     """
     Basic single step experience source
 
@@ -81,9 +41,7 @@ class ExperienceSource:
         agent: Agent being used to make decisions
     """
 
-    def __init__(self, env: Env, agent: Agent):
-        warnings.warn("Deprecated, these functions have been moved to pl_bolts.datamodules.experience_source_og.py",
-                      DeprecationWarning)
+    def __init__(self, env, agent):
         self.env = env
         self.agent = agent
         self.state = self.env.reset()
@@ -125,7 +83,7 @@ class ExperienceSource:
 class NStepExperienceSource(ExperienceSource):
     """Expands upon the basic ExperienceSource by collecting experience across N steps"""
 
-    def __init__(self, env: Env, agent: Agent, n_steps: int = 1, gamma: float = 0.99):
+    def __init__(self, env, agent, n_steps: int = 1, gamma: float = 0.99):
         super().__init__(env, agent)
         self.gamma = gamma
         self.n_steps = n_steps
@@ -138,10 +96,10 @@ class NStepExperienceSource(ExperienceSource):
         Returns:
             Experience
         """
-        exp = self.single_step(device)
+        exp = self.n_step(device)
 
         while len(self.n_step_buffer) < self.n_steps:
-            self.single_step(device)
+            self.n_step(device)
 
         reward, next_state, done = self.get_transition_info()
         first_experience = self.n_step_buffer[0]
@@ -151,7 +109,7 @@ class NStepExperienceSource(ExperienceSource):
 
         return multi_step_experience, exp.reward, exp.done
 
-    def single_step(self, device: torch.device) -> Experience:
+    def n_step(self, device: torch.device) -> Experience:
         """
         Takes a  single step in the environment and appends it to the n-step buffer
 
@@ -198,7 +156,7 @@ class EpisodicExperienceStream(ExperienceSource, IterableDataset):
         agent: Agent being used to make decisions
     """
 
-    def __init__(self, env: Env, agent: Agent, device: torch.device, episodes: int = 1):
+    def __init__(self, env, agent, device: torch.device, episodes: int = 1):
         super().__init__(env, agent)
         self.episodes = episodes
         self.device = device
