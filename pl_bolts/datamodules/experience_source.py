@@ -3,12 +3,11 @@ Datamodules for RL models that rely on experiences generated during training
 
 Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/experience.py
 """
-from abc import ABC, abstractmethod
+from abc import ABC
 from collections import deque, namedtuple
-from typing import Iterable, Callable, List, Deque, Tuple
+from typing import Iterable, Callable, List, Tuple
 
 import gym
-import torch
 from gym import Env
 from torch.utils.data import IterableDataset
 
@@ -183,3 +182,18 @@ class ExperienceSource(BaseExperienceSource):
         self.cur_rewards[env_idx] = 0
         self.cur_steps[env_idx] = 0
         self.states[env_idx] = env.reset()
+
+    def pop_total_rewards(self) -> List[float]:
+        """
+        Returns the list of the current total rewards collected
+
+        Returns:
+            list of total rewards for all completed episodes for each environment since last pop
+        """
+        rewards = self.total_rewards
+
+        if rewards:
+            self.total_rewards = []
+            self.total_steps = []
+
+        return rewards

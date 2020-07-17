@@ -1,4 +1,3 @@
-from collections import deque
 from unittest import TestCase
 from unittest.mock import Mock
 import numpy as np
@@ -24,9 +23,11 @@ class DummyExperienceSource(BaseExperienceSource):
 class TestExperienceSourceDataset(TestCase):
 
     def train_batch(self):
+        """Returns an iterator used for testing"""
         return iter([i for i in range(100)])
 
     def test_iterator(self):
+        """Tests that the iterator returns batches correctly"""
         source = ExperienceSourceDataset(self.train_batch)
         batch_size = 10
         data_loader = DataLoader(source, batch_size=batch_size)
@@ -250,3 +251,11 @@ class TestExperienceSource(TestCase):
             elif idx == (3 * n_envs) - 1:
                 self.assertEqual(self.source.iter_idx, 1)
                 break
+
+    def test_pop_total_rewards(self):
+        """Test that pop rewards returns correct rewards"""
+        self.source.total_rewards = [10, 20, 30]
+
+        rewards = self.source.pop_total_rewards()
+
+        self.assertEqual(rewards, [10, 20, 30])
