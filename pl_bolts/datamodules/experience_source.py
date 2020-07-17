@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from collections import deque, namedtuple
 from typing import Iterable, Callable, List, Deque, Tuple
 
+import gym
 import torch
 from gym import Env
 from torch.utils.data import IterableDataset
@@ -46,7 +47,6 @@ class BaseExperienceSource(ABC):
         self.env = env
         self.agent = agent
 
-    @abstractmethod
     def __iter__(self) -> Experience:
         raise NotImplementedError("ExperienceSource has no __iter__ method implemented")
 
@@ -145,9 +145,41 @@ class ExperienceSource(BaseExperienceSource):
                 exp = self.env_step(env_idx, env, action)
                 history = self.histories[env_idx]
                 history.append(exp)
-
                 self.states[env_idx] = exp.new_state
 
                 if len(history) == self.n_steps:
-                    yield self.history
+                    yield tuple(history)
 
+                if exp.done:
+                    if 0 < len(history) < self.n_steps:
+                        yield tuple(history)
+
+                    # generate tail of history
+                    while len(history) > 2:
+                        history.popleft()
+                        yield tuple(history)
+
+                    if len(history) > 1:
+                        self.update_env_stats(env, env_idx)
+
+                        history.popleft()
+                        yield tuple(history)
+
+                    history.clear()
+
+            self.iter_idx += 1
+
+    def update_env_stats(self, env: gym.Env, env_idx: int) -> None:
+        """
+        To be called at the end of the history tail generation during the termination state. Updates the stats
+        tracked for all environments
+
+        Args:
+            env: current environment to be reset
+            env_idx: index of the environment used to update stats
+        """
+        self.total_rewards.append(self.cur_rewards[env_idx])
+        self.total_steps.append(self.cur_steps[env_idx])
+        self.cur_rewards[env_idx] = 0
+        self.cur_steps[env_idx] = 0
+        self.states[env_idx] = env.reset()
