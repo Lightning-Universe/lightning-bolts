@@ -79,6 +79,48 @@ class ExperienceSource(BaseExperienceSource):
 
         self.init_envs()
 
+    def __iter__(self) -> Tuple[Experience]:
+        """Experience Source iterator yielding Tuple of experiences for n_steps. These come from the pool
+        of environments provided by the user.
+
+        Returns:
+            Tuple of Experiences
+        """
+        while True:
+
+            # get actions for all envs
+            actions = self.env_actions()
+
+            # step through each env
+            for env_idx, (env, action) in enumerate(zip(self.pool, actions)):
+
+                exp = self.env_step(env_idx, env, action)
+                history = self.histories[env_idx]
+                history.append(exp)
+                self.states[env_idx] = exp.new_state
+
+                if len(history) == self.n_steps:
+                    yield tuple(history)
+
+                if exp.done:
+                    if 0 < len(history) < self.n_steps:
+                        yield tuple(history)
+
+                    # generate tail of history
+                    while len(history) > 2:
+                        history.popleft()
+                        yield tuple(history)
+
+                    if len(history) > 1:
+                        self.update_env_stats(env, env_idx)
+
+                        history.popleft()
+                        yield tuple(history)
+
+                    history.clear()
+
+            self.iter_idx += 1
+
     def init_envs(self) -> None:
         """
         For each environment in the pool setups lists for tracking history of size n, state, current reward and
@@ -125,48 +167,6 @@ class ExperienceSource(BaseExperienceSource):
         exp = Experience(state=self.states[env_idx], action=action[0], reward=r, done=is_done, new_state=next_state)
 
         return exp
-
-    def __iter__(self) -> Tuple[Experience]:
-        """Experience Source iterator yielding Tuple of experiences for n_steps. These come from the pool
-        of environments provided by the user.
-
-        Returns:
-            Tuple of Experiences
-        """
-        while True:
-
-            # get actions for all envs
-            actions = self.env_actions()
-
-            # step through each env
-            for env_idx, (env, action) in enumerate(zip(self.pool, actions)):
-
-                exp = self.env_step(env_idx, env, action)
-                history = self.histories[env_idx]
-                history.append(exp)
-                self.states[env_idx] = exp.new_state
-
-                if len(history) == self.n_steps:
-                    yield tuple(history)
-
-                if exp.done:
-                    if 0 < len(history) < self.n_steps:
-                        yield tuple(history)
-
-                    # generate tail of history
-                    while len(history) > 2:
-                        history.popleft()
-                        yield tuple(history)
-
-                    if len(history) > 1:
-                        self.update_env_stats(env, env_idx)
-
-                        history.popleft()
-                        yield tuple(history)
-
-                    history.clear()
-
-            self.iter_idx += 1
 
     def update_env_stats(self, env: gym.Env, env_idx: int) -> None:
         """
