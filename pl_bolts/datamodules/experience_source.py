@@ -13,7 +13,6 @@ from gym import Env
 from torch.utils.data import IterableDataset
 
 # Datasets
-from pl_bolts.models.rl.common.agents import Agent
 
 Experience = namedtuple(
     "Experience", field_names=["state", "action", "reward", "done", "new_state"]
@@ -208,7 +207,7 @@ class ExperienceSource(BaseExperienceSource):
 class DiscountedExperienceSource(ExperienceSource):
     """Outputs experiences with a discounted reward over N steps"""
 
-    def __init__(self, env: Env, agent: Agent, n_steps: int = 1, gamma: float = 0.99):
+    def __init__(self, env: Env, agent, n_steps: int = 1, gamma: float = 0.99):
         super().__init__(env, agent, n_steps+1)
         self.gamma = gamma
         self.steps = n_steps
