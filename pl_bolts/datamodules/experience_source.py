@@ -12,6 +12,7 @@ from gym import Env
 from torch.utils.data import IterableDataset
 
 # Datasets
+from pl_bolts.models.rl.common.agents import Agent
 
 Experience = namedtuple(
     "Experience", field_names=["state", "action", "reward", "done", "new_state"]
@@ -197,3 +198,64 @@ class ExperienceSource(BaseExperienceSource):
             self.total_steps = []
 
         return rewards
+
+
+class DiscountedExperienceSource(ExperienceSource):
+    """Outputs experiences with a discounted reward over N steps"""
+
+    def __init__(self, env: Env, agent: Agent, n_steps: int = 1, gamma: float = 0.99):
+        super().__init__(env, agent, n_steps+1)
+        self.gamma = gamma
+        self.steps = n_steps
+
+    def __iter__(self):
+        """
+        Iterates through experience tuple and calculate discounted experience
+
+        Yields:
+            Discounted Experience
+        """
+        for experiences in super().__iter__():
+
+            last_exp_state, tail_experiences = self.split_head_tail_exp(experiences)
+
+            total_reward = self.discount_rewards(tail_experiences)
+
+            yield Experience(state=experiences[0].state, action=experiences[0].action,
+                             reward=total_reward, done=experiences[0].done, new_state=last_exp_state)
+
+    def split_head_tail_exp(self, experiences: Tuple[Experience]) -> Tuple[List, Tuple[Experience]]:
+        """
+        Takes in a tuple of experiences and returns the last state and tail experiences based on
+        if the last state is the end of an episode
+
+        Args:
+            experiences: Tuple of N Experience
+
+        Returns:
+            last state (Array or None) and remaining Experience
+        """
+        if experiences[-1].done and len(experiences) <= self.steps:
+            last_exp_state = None
+            tail_experiences = experiences
+        else:
+            last_exp_state = experiences[-1].state
+            tail_experiences = experiences[:-1]
+        return last_exp_state, tail_experiences
+
+    def discount_rewards(self, experiences: Tuple[Experience]) -> float:
+        """
+        Calculates the discounted reward over N experiences
+
+        Args:
+            experiences: Tuple of Experience
+
+        Returns:
+            total discounted reward
+        """
+        total_reward = 0.0
+        for exp in reversed(experiences):
+            total_reward *= self.gamma
+            total_reward += exp.reward
+        return total_reward
+

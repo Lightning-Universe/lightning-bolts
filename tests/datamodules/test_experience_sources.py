@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules.experience_source import BaseExperienceSource, ExperienceSource, ExperienceSourceDataset, \
-    Experience
+    Experience, DiscountedExperienceSource
 from pl_bolts.models.rl.common.agents import Agent
 
 
@@ -259,3 +259,68 @@ class TestExperienceSource(TestCase):
         rewards = self.source.pop_total_rewards()
 
         self.assertEqual(rewards, [10, 20, 30])
+
+
+class TestDiscountedExperienceSource(TestCase):
+
+    def setUp(self) -> None:
+        self.net = Mock()
+        self.agent = DummyAgent(net=self.net)
+        self.env = [gym.make("CartPole-v0") for _ in range(2)]
+        self.device = torch.device('cpu')
+        self.n_steps = 3
+        self.gamma = 0.9
+        self.source = DiscountedExperienceSource(self.env, self.agent, n_steps=self.n_steps, gamma=self.gamma)
+
+        self.s1 = torch.ones(3)
+        self.s2 = torch.zeros(3)
+
+        self.exp1 = Experience(state=self.s1, action=1, reward=1, done=False, new_state=self.s2)
+        self.exp2 = Experience(state=self.s2, action=1, reward=1, done=False, new_state=self.s1)
+
+        self.env1 = Mock()
+        self.env1.step = Mock(return_value=(self.s2, 1, True, Mock))
+
+    def test_init(self):
+        """Test that experience source is setup correctly"""
+        self.assertEqual(self.source.n_steps, self.n_steps + 1)
+        self.assertEqual(self.source.steps, self.n_steps)
+        self.assertEqual(self.source.gamma, self.gamma)
+
+    def test_source_step(self):
+        """Tests that the source returns a single experience"""
+
+        for idx, exp in enumerate(self.source):
+            self.assertTrue(isinstance(exp, Experience))
+            break
+
+    def test_source_step_done(self):
+        """Tests that the source returns a single experience"""
+
+        self.device = torch.device('cpu')
+        self.source = DiscountedExperienceSource(self.env1, self.agent, n_steps=self.n_steps)
+
+        self.source.histories[0].append(self.exp1)
+        self.source.histories[0].append(self.exp2)
+
+        for idx, exp in enumerate(self.source):
+            self.assertTrue(isinstance(exp, Experience))
+            self.assertEqual(exp.new_state, None)
+            break
+
+    def test_source_discounted_return(self):
+        """Tests that the source returns a single experience"""
+
+        self.device = torch.device('cpu')
+        self.source = DiscountedExperienceSource(self.env1, self.agent, n_steps=self.n_steps)
+
+        self.source.histories[0].append(self.exp1)
+        self.source.histories[0].append(self.exp2)
+
+        for idx, exp in enumerate(self.source):
+            self.assertTrue(isinstance(exp, Experience))
+            self.assertEqual(exp.reward, 2.9701)
+            break
+
+
+
