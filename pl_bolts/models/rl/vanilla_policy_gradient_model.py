@@ -23,8 +23,8 @@ from pl_bolts.models.rl.common.networks import MLP
 
 class VanillaPolicyGradient(pl.LightningModule):
 
-    def __init__(self, env: str, gamma: float = 0.99, lr: float = 0.01, batch_size: int = 8,
-                 avg_reward_len: int = 100, num_envs: int = 1, entropy_beta: float = 0.01,  epoch_len: int = 100,
+    def __init__(self, env: str, gamma: float = 0.99, lr: float = 0.01, batch_size: int = 8, n_steps: int = 10,
+                 avg_reward_len: int = 100, num_envs: int = 4, entropy_beta: float = 0.01,  epoch_len: int = 1000,
                  **kwargs) -> None:
         super().__init__()
 
@@ -33,13 +33,12 @@ class VanillaPolicyGradient(pl.LightningModule):
         self.batches_per_epoch = self.batch_size * epoch_len
         self.entropy_beta = entropy_beta
         self.gamma = gamma
-
-        # self.env = gym.make("CartPole-v0")
+        self.n_steps = n_steps
 
         self.env = [gym.make(env) for _ in range(num_envs)]
         self.net = MLP(self.env[0].observation_space.shape, self.env[0].action_space.n)
         self.agent = PolicyAgent(self.net)
-        self.exp_source = DiscountedExperienceSource(self.env, self.agent, gamma=gamma, n_steps=10)
+        self.exp_source = DiscountedExperienceSource(self.env, self.agent, gamma=gamma, n_steps=self.n_steps)
 
         self.total_steps = 0
         self.total_rewards = [0]
@@ -90,9 +89,6 @@ class VanillaPolicyGradient(pl.LightningModule):
                 reward = new_rewards[0]
                 self.total_rewards.append(reward)
                 self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
-
-                if self.avg_rewards >= 195:
-                    print("Solved in %d steps and %d episodes!" % (self.total_steps, self.done_episodes))
 
             yield exp.state, exp.action, scaled_reward
 
@@ -177,20 +173,6 @@ class VanillaPolicyGradient(pl.LightningModule):
         Returns:
             arg_parser with model specific cargs added
         """
-
-        arg_parser.add_argument(
-            "--avg_reward_len",
-            type=int,
-            default=100,
-            help="how many episodes to include in avg reward",
-        )
-
-        arg_parser.add_argument(
-            "--num_envs",
-            type=int,
-            default=1,
-            help="number of environments to run at once",
-        )
 
         arg_parser.add_argument(
             "--entropy_beta",
