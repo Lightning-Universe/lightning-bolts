@@ -28,5 +28,3 @@ class LabelSmoothingLoss(nn.Module):
             one_hot.scatter_(1, target.data.unsqueeze(1), 1 - self.smoothing)
 
         return torch.mean(torch.sum(-one_hot * pred.log_softmax(dim=self.dim), dim=self.dim))
-
-
