@@ -1,51 +1,42 @@
 
 import argparse
 from collections import OrderedDict
-from copy import deepcopy
-from itertools import chain
-from pprint import pprint
 from typing import Tuple, List
+import numpy as np
 
 import gym
-import pytorch_lightning as pl
 import torch
 import torch.optim as optim
-from pytorch_lightning import seed_everything
-from torch import Tensor, nn
 from torch.nn.functional import log_softmax, softmax
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
+import pytorch_lightning as pl
+from pytorch_lightning import seed_everything
 from pl_bolts.datamodules import ExperienceSourceDataset
-from pl_bolts.models.rl import DQN
+from pl_bolts.datamodules.experience_source import DiscountedExperienceSource
 from pl_bolts.models.rl.common import cli
-from pl_bolts.models.rl.common.experience import EpisodicExperienceStream
-from pl_bolts.models.rl.common.memory import Experience
+from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.networks import MLP
-from pl_bolts.models.rl.common.wrappers import ToTensor
-from pl_bolts.models.rl.ptan.agents import float32_preprocessor, PolicyAgent
-from pl_bolts.models.rl.ptan.experience import ExperienceSourceFirstLast
-import numpy as np
 
-class Reinforce(pl.LightningModule):
 
-    def __init__(self, env: str, gamma: float = 0.99, lr: float = 1e-4, batch_size: int = 32,
-                 batch_episodes: int = 4, avg_reward_len=100, **kwargs) -> None:
+class VPG(pl.LightningModule):
+
+    def __init__(self, env: str, gamma: float = 0.99, lr: float = 0.01, batch_size: int = 8,
+                 avg_reward_len: int = 100, num_envs: int = 1, entropy_beta: float = 0.01,  **kwargs) -> None:
         super().__init__()
 
-        num_envs = 2
-        self.lr = 0.001
-        self.batch_size = 8 * num_envs
-        self.entropy_beta = 0.01
+        self.lr = lr
+        self.batch_size = batch_size * num_envs
+        self.entropy_beta = entropy_beta
         self.gamma = gamma
 
         # self.env = gym.make("CartPole-v0")
 
-        self.env = [gym.make("CartPole-v0") for _ in range(num_envs)]
+        self.env = [gym.make(env) for _ in range(num_envs)]
         self.net = MLP(self.env[0].observation_space.shape, self.env[0].action_space.n)
-        self.agent = PolicyAgent(self.net, preprocessor=float32_preprocessor,
-                                       apply_softmax=True, device='cuda:0')
-        self.exp_source = ExperienceSourceFirstLast(self.env, self.agent, gamma=gamma, steps_count=10)
+        self.agent = PolicyAgent(self.net)
+        self.exp_source = DiscountedExperienceSource(self.env, self.agent, gamma=gamma, n_steps=10)
 
         self.total_rewards = [0]
         self.step_idx = 0
@@ -53,6 +44,7 @@ class Reinforce(pl.LightningModule):
         self.mean_rewards = 0
         self.reward_sum = 0.0
         self.baseline = 0
+        self.avg_reward_len = avg_reward_len
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -84,7 +76,7 @@ class Reinforce(pl.LightningModule):
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
         """
 
-        for step_idx, exp in enumerate(self.exp_source):
+        for step_idx, exp in enumerate(self.exp_source.stepper(self.device)):
 
             self.reward_sum += exp.reward
             self.baseline = self.reward_sum / (step_idx + 1)
@@ -95,9 +87,9 @@ class Reinforce(pl.LightningModule):
                 self.done_episodes += 1
                 reward = new_rewards[0]
                 self.total_rewards.append(reward)
-                self.mean_rewards = float(np.mean(self.total_rewards[-100:]))
+                self.mean_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
 
-                if self.total_rewards[-1] > 195:
+                if self.mean_rewards >= 195:
                     print("Solved in %d steps and %d episodes!" % (step_idx, self.done_episodes))
 
             yield exp.state, exp.action, scaled_reward
@@ -173,10 +165,24 @@ class Reinforce(pl.LightningModule):
         """
 
         arg_parser.add_argument(
-            "--batch_episodes",
+            "--avg_reward_len",
             type=int,
-            default=4,
-            help="how many episodes to run per batch",
+            default=100,
+            help="how many episodes to include in avg reward",
+        )
+
+        arg_parser.add_argument(
+            "--num_envs",
+            type=int,
+            default=1,
+            help="number of environments to run at once",
+        )
+
+        arg_parser.add_argument(
+            "--entropy_beta",
+            type=float,
+            default=0.01,
+            help="entropy value",
         )
 
         return arg_parser
@@ -190,10 +196,10 @@ if __name__ == '__main__':
 
     # model args
     parser = cli.add_base_args(parser)
-    parser = Reinforce.add_model_specific_args(parser)
+    parser = VPG.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    model = Reinforce(**args.__dict__)
+    model = VPG(**args.__dict__)
 
     seed_everything(123)
     trainer = pl.Trainer.from_argparse_args(args, deterministic=True)

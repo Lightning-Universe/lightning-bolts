@@ -4,6 +4,7 @@ from unittest.mock import Mock
 
 import gym
 import torch
+from typing import List
 
 from pl_bolts.models.rl.common.agents import Agent, PolicyAgent, ValueAgent
 
@@ -18,7 +19,7 @@ class TestAgents(TestCase):
     def test_base_agent(self):
         agent = Agent(self.net)
         action = agent(self.state, 'cuda:0')
-        self.assertIsInstance(action, int)
+        self.assertIsInstance(action, list)
 
 
 class TestValueAgent(TestCase):
@@ -49,12 +50,12 @@ class TestPolicyAgent(TestCase):
 
     def setUp(self) -> None:
         self.env = gym.make("CartPole-v0")
-        self.net = Mock(return_value=torch.Tensor([0.0, 100.0]))
-        self.state = torch.tensor(self.env.reset())
-        self.device = self.state.device
+        self.net = Mock(return_value=torch.Tensor([[0.0, 100.0]]))
+        self.states = [self.env.reset()]
+        self.device = torch.device('cpu')
 
     def test_policy_agent(self):
         policy_agent = PolicyAgent(self.net)
-        action = policy_agent(self.state, self.device)
-        self.assertIsInstance(action, int)
-        self.assertEqual(action, 1)
+        action = policy_agent(self.states, self.device)
+        self.assertIsInstance(action, list)
+        self.assertEqual(action[0], 1)

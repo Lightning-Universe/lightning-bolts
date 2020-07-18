@@ -3,6 +3,7 @@ Agent module containing classes for Agent logic
 
 Based on the implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/agent.py
 """
+from abc import ABC
 from random import randint
 
 import numpy as np
@@ -12,7 +13,7 @@ from torch import nn
 from typing import List
 
 
-class Agent:
+class Agent(ABC):
     """Basic agent that always returns 0"""
 
     def __init__(self, net: nn.Module):

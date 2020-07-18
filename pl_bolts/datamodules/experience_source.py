@@ -8,6 +8,7 @@ from collections import deque, namedtuple
 from typing import Iterable, Callable, List, Tuple
 
 import gym
+import torch
 from gym import Env
 from torch.utils.data import IterableDataset
 
@@ -47,8 +48,9 @@ class BaseExperienceSource(ABC):
         self.env = env
         self.agent = agent
 
-    def __iter__(self) -> Experience:
-        raise NotImplementedError("ExperienceSource has no __iter__ method implemented")
+    def stepper(self) -> Experience:
+        """Iterable method that yields steps from the experience source"""
+        raise NotImplementedError("ExperienceSource has no stepper method implemented")
 
 
 class ExperienceSource(BaseExperienceSource):
@@ -80,9 +82,12 @@ class ExperienceSource(BaseExperienceSource):
 
         self.init_envs()
 
-    def __iter__(self) -> Tuple[Experience]:
+    def stepper(self, device: torch.device) -> Tuple[Experience]:
         """Experience Source iterator yielding Tuple of experiences for n_steps. These come from the pool
         of environments provided by the user.
+
+        Args:
+            device: current device to be used for executing experience steps
 
         Returns:
             Tuple of Experiences
@@ -90,7 +95,7 @@ class ExperienceSource(BaseExperienceSource):
         while True:
 
             # get actions for all envs
-            actions = self.env_actions()
+            actions = self.env_actions(device)
 
             # step through each env
             for env_idx, (env, action) in enumerate(zip(self.pool, actions)):
@@ -133,7 +138,7 @@ class ExperienceSource(BaseExperienceSource):
             self.cur_rewards.append(0.0)
             self.cur_steps.append(0)
 
-    def env_actions(self) -> List[List[int]]:
+    def env_actions(self, device) -> List[List[int]]:
         """
         For each environment in the pool, get the correct action
 
@@ -141,7 +146,7 @@ class ExperienceSource(BaseExperienceSource):
             List of actions for each env, with size (num_envs, action_size)
         """
         actions = [None] * len(self.states)
-        states_actions = self.agent(self.states)
+        states_actions = self.agent(self.states, device)
 
         for idx, action in enumerate(states_actions):
             actions[idx] = action if isinstance(action, list) else [action]
@@ -208,14 +213,17 @@ class DiscountedExperienceSource(ExperienceSource):
         self.gamma = gamma
         self.steps = n_steps
 
-    def __iter__(self):
+    def stepper(self, device: torch.device) -> Experience:
         """
         Iterates through experience tuple and calculate discounted experience
+
+        Args:
+            device: current device to be used for executing experience steps
 
         Yields:
             Discounted Experience
         """
-        for experiences in super().__iter__():
+        for experiences in super().stepper(device):
 
             last_exp_state, tail_experiences = self.split_head_tail_exp(experiences)
 
