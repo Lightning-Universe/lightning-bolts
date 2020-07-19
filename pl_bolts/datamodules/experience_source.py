@@ -6,7 +6,7 @@ Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/
 from abc import ABC
 from collections import deque, namedtuple
 from typing import Iterable, Callable, List, Tuple
-
+import numpy as np
 import gym
 import torch
 from gym import Env
@@ -166,7 +166,7 @@ class ExperienceSource(BaseExperienceSource):
         """
         next_state, r, is_done, _ = env.step(action[0])
 
-        self.cur_rewards[env_idx] += 1
+        self.cur_rewards[env_idx] += r
         self.cur_steps[env_idx] += 1
 
         exp = Experience(state=self.states[env_idx], action=action[0], reward=r, done=is_done, new_state=next_state)
@@ -202,6 +202,18 @@ class ExperienceSource(BaseExperienceSource):
             self.total_steps = []
 
         return rewards
+
+    def pop_rewards_steps(self):
+        """
+        Returns the list of the current total rewards and steps collected
+
+        Returns:
+            list of total rewards and steps for all completed episodes for each environment since last pop
+        """
+        res = list(zip(self.total_rewards, self.total_steps))
+        if res:
+            self.total_rewards, self.total_steps = [], []
+        return res
 
 
 class DiscountedExperienceSource(ExperienceSource):
@@ -243,7 +255,7 @@ class DiscountedExperienceSource(ExperienceSource):
             last state (Array or None) and remaining Experience
         """
         if experiences[-1].done and len(experiences) <= self.steps:
-            last_exp_state = None
+            last_exp_state = experiences[-1].new_state
             tail_experiences = experiences
         else:
             last_exp_state = experiences[-1].state
@@ -265,4 +277,3 @@ class DiscountedExperienceSource(ExperienceSource):
             total_reward *= self.gamma
             total_reward += exp.reward
         return total_reward
-

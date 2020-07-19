@@ -68,7 +68,7 @@ class ValueAgent(Agent):
         else:
             action = self.get_action(state, device)
 
-        return action
+        return [action]
 
     def get_random_action(self) -> int:
         """returns a random action"""
@@ -89,8 +89,8 @@ class ValueAgent(Agent):
             state = torch.tensor([state], device=device)
 
         q_values = self.net(state)
-        _, action = torch.max(q_values, dim=1)
-        return int(action.detach().item())
+        _, actions = torch.max(q_values, dim=1)
+        return actions.detach().item()
 
     def update_epsilon(self, step: int) -> None:
         """

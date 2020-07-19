@@ -35,6 +35,8 @@ class VanillaPolicyGradient(pl.LightningModule):
         self.gamma = gamma
         self.n_steps = n_steps
 
+        self.save_hyperparameters()
+
         self.env = [gym.make(env) for _ in range(num_envs)]
         self.net = MLP(self.env[0].observation_space.shape, self.env[0].action_space.n)
         self.agent = PolicyAgent(self.net)
@@ -85,10 +87,10 @@ class VanillaPolicyGradient(pl.LightningModule):
 
             new_rewards = self.exp_source.pop_total_rewards()
             if new_rewards:
-                self.done_episodes += 1
-                reward = new_rewards[0]
-                self.total_rewards.append(reward)
-                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+                for reward in new_rewards:
+                    self.done_episodes += 1
+                    self.total_rewards.append(reward)
+                    self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
 
             yield exp.state, exp.action, scaled_reward
 
