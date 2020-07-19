@@ -19,8 +19,8 @@ class FocalLoss(nn.Module):
 
     def __init__(
             self,
-            alpha = 0.25,
-            gamma = 2.
+            alpha=0.25,
+            gamma=2.
     ):
         """
         Args:
