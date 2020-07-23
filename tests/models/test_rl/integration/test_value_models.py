@@ -21,6 +21,7 @@ class TestValueModels(TestCase):
         parent_parser = DQN.add_model_specific_args(parent_parser)
         args_list = [
             "--algo", "dqn",
+            "--n_steps", "4",
             "--warm_start_steps", "100",
             "--episode_length", "100",
             "--gpus", "0",
@@ -73,7 +74,7 @@ class TestValueModels(TestCase):
 
     def test_n_step_dqn(self):
         """Smoke test that the N Step DQN model runs"""
-        model = NStepDQN(self.hparams.env)
+        model = DQN(self.hparams.env, n_steps=self.hparams.n_steps)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)

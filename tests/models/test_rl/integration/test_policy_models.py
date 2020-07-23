@@ -5,7 +5,7 @@ import pytorch_lightning as pl
 
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.reinforce_model import Reinforce
-from pl_bolts.models.rl.vanilla_policy_gradient_model import PolicyGradient
+from pl_bolts.models.rl.vanilla_policy_gradient_model import VanillaPolicyGradient
 
 
 class TestPolicyModels(TestCase):
@@ -13,7 +13,7 @@ class TestPolicyModels(TestCase):
     def setUp(self) -> None:
         parent_parser = argparse.ArgumentParser(add_help=False)
         parent_parser = cli.add_base_args(parent=parent_parser)
-        parent_parser = PolicyGradient.add_model_specific_args(parent_parser)
+        parent_parser = VanillaPolicyGradient.add_model_specific_args(parent_parser)
         args_list = [
             "--algo", "PolicyGradient",
             "--episode_length", "100",
@@ -39,7 +39,7 @@ class TestPolicyModels(TestCase):
 
     def test_PolicyGradient(self):
         """Smoke test that the policy gradient model runs"""
-        model = PolicyGradient(self.hparams.env)
+        model = VanillaPolicyGradient(self.hparams.env)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)

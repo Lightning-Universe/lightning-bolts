@@ -28,6 +28,7 @@ class VanillaPolicyGradient(pl.LightningModule):
                  **kwargs) -> None:
         super().__init__()
 
+        # Hyperparameters
         self.lr = lr
         self.batch_size = batch_size * num_envs
         self.batches_per_epoch = self.batch_size * epoch_len
@@ -37,11 +38,13 @@ class VanillaPolicyGradient(pl.LightningModule):
 
         self.save_hyperparameters()
 
+        # Model components
         self.env = [gym.make(env) for _ in range(num_envs)]
         self.net = MLP(self.env[0].observation_space.shape, self.env[0].action_space.n)
         self.agent = PolicyAgent(self.net)
         self.exp_source = DiscountedExperienceSource(self.env, self.agent, gamma=gamma, n_steps=self.n_steps)
 
+        # Tracking metrics
         self.total_steps = 0
         self.total_rewards = [0]
         self.done_episodes = 0
@@ -62,15 +65,6 @@ class VanillaPolicyGradient(pl.LightningModule):
         """
         output = self.net(x)
         return output
-
-    def calc_qvals(self, rewards):
-        res = []
-        sum_r = 0.0
-        for r in reversed(rewards):
-            sum_r *= self.gamma
-            sum_r += r
-            res.append(sum_r)
-        return list(reversed(res))
 
     def train_batch(self) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
         """
@@ -99,19 +93,7 @@ class VanillaPolicyGradient(pl.LightningModule):
             if self.total_steps % self.batches_per_epoch == 0:
                 break
 
-    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
-        """
-        Carries out a single step through the environment to update the replay buffer.
-        Then calculates loss based on the minibatch recieved
-
-        Args:
-            batch: current mini batch of replay data
-            _: batch number, not used
-
-        Returns:
-            Training loss and log metrics
-        """
-        states, actions, scaled_rewards = batch
+    def loss(self, states, actions, scaled_rewards):
 
         logits = self.net(states)
 
@@ -127,6 +109,24 @@ class VanillaPolicyGradient(pl.LightningModule):
 
         # total loss
         loss = policy_loss + entropy_loss
+
+        return loss
+
+    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
+        """
+        Carries out a single step through the environment to update the replay buffer.
+        Then calculates loss based on the minibatch recieved
+
+        Args:
+            batch: current mini batch of replay data
+            _: batch number, not used
+
+        Returns:
+            Training loss and log metrics
+        """
+        states, actions, scaled_rewards = batch
+
+        loss = self.loss(states, actions, scaled_rewards)
 
         log = {
             'episodes': self.done_episodes,

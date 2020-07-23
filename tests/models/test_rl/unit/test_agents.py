@@ -34,7 +34,8 @@ class TestValueAgent(TestCase):
     def test_value_agent(self):
 
         action = self.value_agent(self.state, self.device)
-        self.assertIsInstance(action, int)
+        self.assertIsInstance(action, list)
+        self.assertIsInstance(action[0], int)
 
     def test_value_agent_GET_ACTION(self):
         action = self.value_agent.get_action(self.state, self.device)

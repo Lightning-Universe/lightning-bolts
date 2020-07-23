@@ -11,7 +11,7 @@ from pl_bolts.models.rl.common.agents import Agent
 
 
 class DummyAgent(Agent):
-    def __call__(self, states):
+    def __call__(self, states, device):
         return [0 for s in states]
 
 
@@ -83,7 +83,7 @@ class TestExperienceSource(TestCase):
 
     def test_env_actions(self):
         """Assert that a list of actions of shape [num_envs, action_len] is returned"""
-        actions = self.source.env_actions()
+        actions = self.source.env_actions(self.device)
         self.assertEqual(len(actions), len(self.env))
         self.assertTrue(isinstance(actions[0], list))
 
@@ -102,7 +102,7 @@ class TestExperienceSource(TestCase):
         self.device = torch.device('cpu')
         self.source = ExperienceSource(self.env, self.agent, n_steps=1)
 
-        for idx, exp in enumerate(self.source):
+        for idx, exp in enumerate(self.source.stepper(self.device)):
             self.assertTrue(isinstance(exp, tuple))
             break
 
@@ -114,7 +114,7 @@ class TestExperienceSource(TestCase):
         n_steps = 4
         self.source = ExperienceSource(self.env, self.agent, n_steps=n_steps)
 
-        for idx, exp in enumerate(self.source):
+        for idx, exp in enumerate(self.source.stepper(self.device)):
             self.assertTrue(isinstance(exp, tuple))
             self.assertTrue(len(exp) == n_steps)
             break
@@ -126,7 +126,7 @@ class TestExperienceSource(TestCase):
         self.device = torch.device('cpu')
         self.source = ExperienceSource(self.env, self.agent, n_steps=1)
 
-        for idx, exp in enumerate(self.source):
+        for idx, exp in enumerate(self.source.stepper(self.device)):
             self.assertTrue(isinstance(exp, tuple))
             self.assertTrue(len(exp) == self.source.n_steps)
             break
@@ -138,7 +138,7 @@ class TestExperienceSource(TestCase):
         self.device = torch.device('cpu')
         self.source = ExperienceSource(self.env, self.agent, n_steps=2)
 
-        for idx, exp in enumerate(self.source):
+        for idx, exp in enumerate(self.source.stepper(self.device)):
             self.assertTrue(isinstance(exp, tuple))
             self.assertTrue(len(exp) == self.source.n_steps)
             break
@@ -150,7 +150,7 @@ class TestExperienceSource(TestCase):
         self.device = torch.device('cpu')
         self.source = ExperienceSource(self.env, self.agent, n_steps=2)
 
-        for idx, exp in enumerate(self.source):
+        for idx, exp in enumerate(self.source.stepper(self.device)):
             self.assertTrue(isinstance(exp, tuple))
             new = np.asarray(exp[-1].new_state)
             old = np.asarray(self.source.states[0])
@@ -173,7 +173,7 @@ class TestExperienceSource(TestCase):
         self.device = torch.device('cpu')
         self.source = ExperienceSource(self.env, self.agent, n_steps=2)
 
-        for idx, exp in enumerate(self.source):
+        for idx, exp in enumerate(self.source.stepper(self.device)):
             self.assertTrue(isinstance(exp, tuple))
             self.assertTrue(len(exp) == 1)
             break
@@ -202,7 +202,7 @@ class TestExperienceSource(TestCase):
         history = self.source.histories[0]
         history.append(exp1)
 
-        for idx, exp in enumerate(self.source):
+        for idx, exp in enumerate(self.source.stepper(self.device)):
 
             self.assertTrue(isinstance(exp, tuple))
 
@@ -241,7 +241,7 @@ class TestExperienceSource(TestCase):
         history.append(exp2)
         history.append(exp2)
 
-        for idx, exp in enumerate(self.source):
+        for idx, exp in enumerate(self.source.stepper(self.device)):
 
             if idx == n_steps - 1:
                 self.assertEqual(self.source.total_rewards[0], 1)
@@ -279,7 +279,7 @@ class TestDiscountedExperienceSource(TestCase):
         self.exp2 = Experience(state=self.s2, action=1, reward=1, done=False, new_state=self.s1)
 
         self.env1 = Mock()
-        self.env1.step = Mock(return_value=(self.s2, 1, True, Mock))
+        self.env1.step = Mock(return_value=(self.s2, 1, True, self.s1))
 
     def test_init(self):
         """Test that experience source is setup correctly"""
@@ -290,7 +290,7 @@ class TestDiscountedExperienceSource(TestCase):
     def test_source_step(self):
         """Tests that the source returns a single experience"""
 
-        for idx, exp in enumerate(self.source):
+        for idx, exp in enumerate(self.source.stepper(self.device)):
             self.assertTrue(isinstance(exp, Experience))
             break
 
@@ -303,9 +303,9 @@ class TestDiscountedExperienceSource(TestCase):
         self.source.histories[0].append(self.exp1)
         self.source.histories[0].append(self.exp2)
 
-        for idx, exp in enumerate(self.source):
+        for idx, exp in enumerate(self.source.stepper(self.device)):
             self.assertTrue(isinstance(exp, Experience))
-            self.assertEqual(exp.new_state, None)
+            self.assertTrue(torch.all(torch.eq(exp.new_state,  self.s2)))
             break
 
     def test_source_discounted_return(self):
@@ -317,10 +317,7 @@ class TestDiscountedExperienceSource(TestCase):
         self.source.histories[0].append(self.exp1)
         self.source.histories[0].append(self.exp2)
 
-        for idx, exp in enumerate(self.source):
+        for idx, exp in enumerate(self.source.stepper(self.device)):
             self.assertTrue(isinstance(exp, Experience))
             self.assertEqual(exp.reward, 2.9701)
             break
-
-
-

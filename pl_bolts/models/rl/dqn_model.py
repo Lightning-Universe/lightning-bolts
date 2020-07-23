@@ -26,7 +26,6 @@ class DQN(pl.LightningModule):
     def __init__(
             self,
             env: str,
-            gpus: int = 0,
             eps_start: float = 1.0,
             eps_end: float = 0.02,
             eps_last_frame: int = 150000,
@@ -36,10 +35,9 @@ class DQN(pl.LightningModule):
             batch_size: int = 32,
             replay_size: int = 100000,
             warm_start_size: int = 10000,
-            num_samples: int = 500,
             avg_reward_len: int = 100,
             min_episode_reward: int = -21,
-
+            n_steps: int = 1,
             **kwargs,
     ):
         """
@@ -57,7 +55,6 @@ class DQN(pl.LightningModule):
             trainer.fit(model)
         Args:
             env: gym environment tag
-            gpus: number of gpus being used
             eps_start: starting value of epsilon for the epsilon-greedy exploration
             eps_end: final value of epsilon for the epsilon-greedy exploration
             eps_last_frame: the final frame in for the decrease of epsilon. At this frame espilon = eps_end
@@ -68,7 +65,6 @@ class DQN(pl.LightningModule):
             replay_size: total capacity of the replay buffer
             warm_start_size: how many random steps through the environment to be carried out at the start of
                 training to fill the buffer with a starting point
-            num_samples: the number of samples to pull from the dataset iterator and feed to the DataLoader
             avg_reward_len: how many episodes to take into account when calculating the avg reward
             min_episode_reward: the minimum score that can be achieved in an episode. Used for filling the avg buffer
                 before training begins
@@ -104,7 +100,7 @@ class DQN(pl.LightningModule):
             eps_end=eps_end,
             eps_frames=eps_last_frame,
         )
-        self.source = DiscountedExperienceSource(self.env, self.agent)
+        self.source = DiscountedExperienceSource(self.env, self.agent, n_steps=n_steps)
 
         # Hyperparameters
         self.sync_rate = sync_rate
@@ -113,7 +109,7 @@ class DQN(pl.LightningModule):
         self.batch_size = batch_size
         self.replay_size = replay_size
         self.warm_start_size = warm_start_size
-        self.sample_len = num_samples
+        self.n_steps = n_steps
 
         self.save_hyperparameters()
 
@@ -134,9 +130,6 @@ class DQN(pl.LightningModule):
         for _ in range(avg_reward_len):
             self.reward_list.append(torch.tensor(min_episode_reward, device=self.device))
         self.avg_rewards = 0
-
-        self.buffer = ReplayBuffer(self.replay_size)
-        self.populate(self.warm_start_size)
 
     def populate(self, warm_start: int) -> None:
         """Populates the buffer with initial experience"""
@@ -210,22 +203,17 @@ class DQN(pl.LightningModule):
         if self.global_step % self.sync_rate == 0:
             self.target_net.load_state_dict(self.net.state_dict())
 
-        # Soft update of target network
-        if self.global_step % self.sync_rate == 0:
-            self.target_net.load_state_dict(self.net.state_dict())
-
         log = {
             "total_reward": self.total_rewards[-1],
             "avg_reward": self.avg_rewards,
             "train_loss": loss,
-            # "episodes": self.total_episode_steps,
+            "episodes": self.done_episodes,
         }
         status = {
             "steps": self.global_step,
             "avg_reward": self.avg_rewards,
             "total_reward": self.total_rewards[-1],
             "episodes": self.done_episodes,
-            # "episode_steps": self.episode_steps,
             "epsilon": self.agent.epsilon,
         }
 
@@ -259,6 +247,8 @@ class DQN(pl.LightningModule):
 
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""
+        self.buffer = ReplayBuffer(self.replay_size)
+        self.populate(self.warm_start_size)
 
         self.dataset = ExperienceSourceDataset(self.train_batch)
         return DataLoader(dataset=self.dataset, batch_size=self.batch_size)

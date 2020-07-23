@@ -6,7 +6,6 @@ Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/
 from abc import ABC
 from collections import deque, namedtuple
 from typing import Iterable, Callable, List, Tuple
-import numpy as np
 import gym
 import torch
 from gym import Env

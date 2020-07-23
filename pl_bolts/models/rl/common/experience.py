@@ -228,6 +228,10 @@ class EpisodicExperienceStream(ExperienceSource, IterableDataset):
     def step(self, device: torch.device) -> Experience:
         """Carries out a single step in the environment"""
         action = self.agent(self.state, device)
+
+        if isinstance(action, list):
+            action = action[0]
+
         new_state, reward, done, _ = self.env.step(action)
         experience = Experience(
             state=self.state,

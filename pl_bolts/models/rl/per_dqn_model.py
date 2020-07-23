@@ -3,11 +3,14 @@ Prioritized Experience Replay DQN
 """
 import argparse
 from collections import OrderedDict
-from typing import Tuple, List
+from typing import Tuple
+import numpy as np
 
 import torch
 import pytorch_lightning as pl
+from torch.utils.data import DataLoader
 
+from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.losses.rl import per_dqn_loss
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.experience import ExperienceSource, PrioRLDataset
@@ -60,6 +63,41 @@ class PERDQN(DQN):
 
         """
 
+    def train_batch(self) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        """
+        Contains the logic for generating a new batch of data to be passed to the DataLoader
+        Returns:
+            yields a Experience tuple containing the state, action, reward, done and next_state.
+        """
+
+        for step_idx, exp in enumerate(self.source.stepper(self.device)):
+
+            self.agent.update_epsilon(self.global_step)
+            self.buffer.append(exp)
+
+            self.reward_sum += exp.reward
+            episode_reward_steps = self.source.pop_rewards_steps()
+
+            if episode_reward_steps:
+                for reward, steps in episode_reward_steps:
+                    self.done_episodes += 1
+                    self.total_rewards.append(reward)
+                    self.episode_steps.append(steps)
+                    self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+
+            samples, indices, weights = self.buffer.sample(self.batch_size)
+
+            states, actions, rewards, dones, new_states = samples
+
+            for idx, _ in enumerate(dones):
+                yield (
+                          states[idx],
+                          actions[idx],
+                          rewards[idx],
+                          dones[idx],
+                          new_states[idx],
+                      ), indices[idx], weights[idx]
+
     def training_step(self, batch, _) -> OrderedDict:
         """
         Carries out a single step through the environment to update the replay buffer.
@@ -73,64 +111,52 @@ class PERDQN(DQN):
             Training loss and log metrics
         """
         samples, indices, weights = batch
-
         indices = indices.cpu().numpy()
-
-        self.agent.update_epsilon(self.global_step)
-
-        # step through environment with agent and add to buffer
-        exp, reward, done = self.source.step(self.device)
-        self.buffer.append(exp)
-
-        self.episode_reward += reward
-        self.episode_steps += 1
 
         # calculates training loss
         loss, batch_weights = per_dqn_loss(samples, weights, self.net, self.target_net)
 
-        # update priorities in buffer
-        self.buffer.update_priorities(indices, batch_weights)
-
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)
 
-        if done:
-            self.total_reward = self.episode_reward
-            self.reward_list.append(self.total_reward)
-            self.avg_reward = sum(self.reward_list[-100:]) / 100
-            self.episode_count += 1
-            self.episode_reward = 0
-            self.total_episode_steps = self.episode_steps
-            self.episode_steps = 0
+        # update priorities in buffer
+        self.buffer.update_priorities(indices, batch_weights)
 
-        # Soft update of target network
+        # update of target network
         if self.global_step % self.sync_rate == 0:
             self.target_net.load_state_dict(self.net.state_dict())
 
         log = {
-            "total_reward": torch.tensor(self.total_reward).to(self.device),
-            "avg_reward": torch.tensor(self.avg_reward),
+            "total_reward": self.total_rewards[-1],
+            "avg_reward": self.avg_rewards,
             "train_loss": loss,
-            "episode_steps": torch.tensor(self.total_episode_steps),
+            # "episodes": self.total_episode_steps,
         }
         status = {
-            "steps": torch.tensor(self.global_step).to(self.device),
-            "avg_reward": torch.tensor(self.avg_reward),
-            "total_reward": torch.tensor(self.total_reward).to(self.device),
-            "episodes": self.episode_count,
-            "episode_steps": self.episode_steps,
+            "steps": self.global_step,
+            "avg_reward": self.avg_rewards,
+            "total_reward": self.total_rewards[-1],
+            "episodes": self.done_episodes,
+            # "episode_steps": self.episode_steps,
             "epsilon": self.agent.epsilon,
         }
 
-        return OrderedDict({"loss": loss, "log": log, "progress_bar": status})
+        return OrderedDict(
+            {
+                "loss": loss,
+                "avg_reward": self.avg_rewards,
+                "log": log,
+                "progress_bar": status,
+            }
+        )
 
-    def prepare_data(self) -> None:
+    def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""
-        self.source = ExperienceSource(self.env, self.agent)
         self.buffer = PERBuffer(self.replay_size)
         self.populate(self.warm_start_size)
 
-        self.dataset = PrioRLDataset(self.buffer, self.batch_size)
+        self.dataset = ExperienceSourceDataset(self.train_batch)
+        return DataLoader(dataset=self.dataset, batch_size=self.batch_size)
 
 
 if __name__ == '__main__':
