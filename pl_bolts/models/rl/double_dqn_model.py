@@ -50,13 +50,12 @@ class DoubleDQN(DQN):
             training to fill the buffer with a starting point
         sample_len: the number of samples to pull from the dataset iterator and feed to the DataLoader
 
-    .. note::
-        This example is based on:
-         https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\
-         /blob/master/Chapter08/03_dqn_double.py
+    Note:
+        This example is based on
+        https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter08/03_dqn_double.py
 
-    .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
-
+    Note:
+        Currently only supports CPU and single GPU training with `distributed_backend=dp`
     """
 
     def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:

@@ -32,6 +32,7 @@ class Reinforce(pl.LightningModule):
         1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
         Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
         Model implemented by:
+
             - `Donal Byrne <https://github.com/djbyrne>`
 
         Example:
@@ -50,11 +51,13 @@ class Reinforce(pl.LightningModule):
             lr: learning rate
             batch_size: size of minibatch pulled from the DataLoader
             batch_episodes: how many episodes to rollout for each batch of training
-        .. note::
+
+        Note:
             This example is based on:
-             https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\
-             /blob/master/Chapter11/02_cartpole_reinforce.py
-        .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
+            https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/02_cartpole_reinforce.py
+
+        Note:
+            Currently only supports CPU and single GPU training with `distributed_backend=dp`
         """
         super().__init__()
 

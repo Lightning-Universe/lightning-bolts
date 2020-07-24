@@ -48,6 +48,7 @@ class DQN(pl.LightningModule):
         Paper authors: Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves,
         Ioannis Antonoglou, Daan Wierstra, Martin Riedmiller.
         Model implemented by:
+
             - `Donal Byrne <https://github.com/djbyrne>`
 
         Example:
@@ -78,11 +79,13 @@ class DQN(pl.LightningModule):
             seed: seed value for all RNG used
             num_envs: number of environments to run the agent in at once
 
-        .. note::
+        Note:
             This example is based on:
-             https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\
-             /blob/master/Chapter06/02_dqn_pong.py
-        .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
+            https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\
+            /blob/master/Chapter06/02_dqn_pong.py
+
+        Note:
+            Currently only supports CPU and single GPU training with `distributed_backend=dp`
         """
         super().__init__()
 
