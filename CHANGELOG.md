@@ -50,6 +50,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Experience source no longer gets initialized with a device, instead the device is passed at each step()
 - Refactored ExperienceSource classes to be handle multiple environments. 
 
+### Removed
+
+- Removed N-Step DQN as the latest version of the DQN supports N-Step by setting the `n_step` arg to n
+
 ### Fixed
 
 - Documentation 

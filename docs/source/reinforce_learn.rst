@@ -413,13 +413,10 @@ For these experiments I opted with an N step of 4.
 
 Example::
 
-    from pl_bolts.models.rl import NStepDQN
-    n_step_dqn = NStepDQN("PongNoFrameskip-v4")
+    from pl_bolts.models.rl import DQN
+    n_step_dqn = DQN("PongNoFrameskip-v4", n_steps=4)
     trainer = Trainer()
     trainer.fit(n_step_dqn)
-
-.. autoclass:: pl_bolts.models.rl.n_step_dqn_model.NStepDQN
-   :noindex:
 
 --------------
 
