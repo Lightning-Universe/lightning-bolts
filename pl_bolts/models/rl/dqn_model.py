@@ -49,13 +49,17 @@ class DQN(pl.LightningModule):
         Ioannis Antonoglou, Daan Wierstra, Martin Riedmiller.
         Model implemented by:
             - `Donal Byrne <https://github.com/djbyrne>`
+
         Example:
             >>> from pl_bolts.models.rl.dqn_model import DQN
             ...
             >>> model = DQN("PongNoFrameskip-v4")
+
         Train::
+
             trainer = Trainer()
             trainer.fit(model)
+
         Args:
             env: gym environment tag
             eps_start: starting value of epsilon for the epsilon-greedy exploration

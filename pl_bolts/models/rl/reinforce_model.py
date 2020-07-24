@@ -33,13 +33,17 @@ class Reinforce(pl.LightningModule):
         Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
         Model implemented by:
             - `Donal Byrne <https://github.com/djbyrne>`
+
         Example:
             >>> from pl_bolts.models.rl.reinforce_model import Reinforce
             ...
             >>> model = Reinforce("PongNoFrameskip-v4")
+
         Train::
+
             trainer = Trainer()
             trainer.fit(model)
+
         Args:
             env: gym environment tag
             gamma: discount factor

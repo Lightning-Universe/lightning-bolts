@@ -26,10 +26,9 @@ class NoisyDQN(DQN):
         - `Donal Byrne <https://github.com/djbyrne>`
 
     Example:
-
-        >>> from pl_bolts.models.rl.n_step_dqn_model import NStepDQN
+        >>> from pl_bolts.models.rl.noisy_dqn_model import NoisyDQN
         ...
-        >>> model = NStepDQN("PongNoFrameskip-v4")
+        >>> model = NoisyDQN("PongNoFrameskip-v4")
 
     Train::
 
