@@ -38,7 +38,7 @@ class TestValueModels(TestCase):
 
     def test_dqn(self):
         """Smoke test that the DQN model runs"""
-        model = DQN(self.hparams.env)
+        model = DQN(self.hparams.env, num_envs=5)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)

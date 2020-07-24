@@ -4,8 +4,7 @@ from unittest.mock import Mock
 
 import gym
 import torch
-from typing import List
-
+import numpy as np
 from pl_bolts.models.rl.common.agents import Agent, PolicyAgent, ValueAgent
 
 
@@ -27,8 +26,8 @@ class TestValueAgent(TestCase):
     def setUp(self) -> None:
         self.env = gym.make("CartPole-v0")
         self.net = Mock(return_value=torch.Tensor([[0.0, 100.0]]))
-        self.state = torch.tensor(self.env.reset())
-        self.device = self.state.device
+        self.state = [self.env.reset()]
+        self.device = torch.device('cpu')
         self.value_agent = ValueAgent(self.net, self.env.action_space.n)
 
     def test_value_agent(self):
@@ -39,12 +38,12 @@ class TestValueAgent(TestCase):
 
     def test_value_agent_GET_ACTION(self):
         action = self.value_agent.get_action(self.state, self.device)
-        self.assertIsInstance(action, int)
-        self.assertEqual(action, 1)
+        self.assertIsInstance(action, np.ndarray)
+        self.assertEqual(action[0], 1)
 
     def test_value_agent_RANDOM(self):
-        action = self.value_agent.get_random_action()
-        self.assertIsInstance(action, int)
+        action = self.value_agent.get_random_action(self.state)
+        self.assertIsInstance(action[0], int)
 
 
 class TestPolicyAgent(TestCase):
