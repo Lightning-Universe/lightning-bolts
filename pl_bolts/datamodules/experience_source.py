@@ -219,7 +219,7 @@ class DiscountedExperienceSource(ExperienceSource):
     """Outputs experiences with a discounted reward over N steps"""
 
     def __init__(self, env: Env, agent, n_steps: int = 1, gamma: float = 0.99):
-        super().__init__(env, agent, n_steps+1)
+        super().__init__(env, agent, (n_steps + 1))
         self.gamma = gamma
         self.steps = n_steps
 
@@ -234,7 +234,6 @@ class DiscountedExperienceSource(ExperienceSource):
             Discounted Experience
         """
         for experiences in super().stepper(device):
-
             last_exp_state, tail_experiences = self.split_head_tail_exp(experiences)
 
             total_reward = self.discount_rewards(tail_experiences)

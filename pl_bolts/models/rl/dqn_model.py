@@ -6,6 +6,7 @@ import argparse
 from collections import OrderedDict
 from typing import Tuple, List, Dict
 import numpy as np
+import gym
 import pytorch_lightning as pl
 import torch
 import torch.optim as optim
@@ -38,6 +39,8 @@ class DQN(pl.LightningModule):
             avg_reward_len: int = 100,
             min_episode_reward: int = -21,
             n_steps: int = 1,
+            seed: int = 123,
+            num_envs: int = 1,
             **kwargs,
     ):
         """
@@ -68,6 +71,9 @@ class DQN(pl.LightningModule):
             avg_reward_len: how many episodes to take into account when calculating the avg reward
             min_episode_reward: the minimum score that can be achieved in an episode. Used for filling the avg buffer
                 before training begins
+            seed: seed value for all RNG used
+            num_envs: number of environments to run the agent in at once
+
         .. note::
             This example is based on:
              https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\
@@ -78,11 +84,10 @@ class DQN(pl.LightningModule):
 
         # Environment
         self.exp = None
-        self.env = wrappers.make_env(env)
-        self.env.seed(123)
+        self.env = [self.make_env(env, seed) for _ in range(num_envs)]
 
-        self.obs_shape = self.env.observation_space.shape
-        self.n_actions = self.env.action_space.n
+        self.obs_shape = self.env[0].observation_space.shape
+        self.n_actions = self.env[0].action_space.n
 
         # Model Attributes
         self.buffer = None
@@ -103,10 +108,11 @@ class DQN(pl.LightningModule):
         self.source = DiscountedExperienceSource(self.env, self.agent, n_steps=n_steps)
 
         # Hyperparameters
+        self.num_envs = num_envs
         self.sync_rate = sync_rate
         self.gamma = gamma
         self.lr = learning_rate
-        self.batch_size = batch_size
+        self.batch_size = batch_size * num_envs
         self.replay_size = replay_size
         self.warm_start_size = warm_start_size
         self.n_steps = n_steps
@@ -262,6 +268,22 @@ class DQN(pl.LightningModule):
         return DataLoader(dataset=self.dataset, batch_size=self.batch_size)
 
     @staticmethod
+    def make_env(env_name: str, seed: int) -> gym.Env:
+        """
+        Initialise gym  environment
+
+        Args:
+            env_name: environment name or tag
+            seed: value to seed the environment RNG for reproducibility
+
+        Returns:
+            gym environment
+        """
+        env = wrappers.make_env(env_name)
+        env.seed(seed)
+        return env
+
+    @staticmethod
     def add_model_specific_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         """
         Adds arguments for DQN model
@@ -310,7 +332,6 @@ class DQN(pl.LightningModule):
 
 
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args

@@ -305,7 +305,7 @@ class TestDiscountedExperienceSource(TestCase):
 
         for idx, exp in enumerate(self.source.stepper(self.device)):
             self.assertTrue(isinstance(exp, Experience))
-            self.assertTrue(torch.all(torch.eq(exp.new_state,  self.s2)))
+            self.assertTrue(torch.all(torch.eq(exp.new_state, self.s2)))
             break
 
     def test_source_discounted_return(self):

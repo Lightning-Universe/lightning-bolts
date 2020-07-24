@@ -24,7 +24,7 @@ from pl_bolts.models.rl.common.networks import MLP
 class VanillaPolicyGradient(pl.LightningModule):
 
     def __init__(self, env: str, gamma: float = 0.99, lr: float = 0.01, batch_size: int = 8, n_steps: int = 10,
-                 avg_reward_len: int = 100, num_envs: int = 4, entropy_beta: float = 0.01,  epoch_len: int = 1000,
+                 avg_reward_len: int = 100, num_envs: int = 4, entropy_beta: float = 0.01, epoch_len: int = 1000,
                  **kwargs) -> None:
         super().__init__()
 
@@ -213,6 +213,3 @@ if __name__ == '__main__':
                                             checkpoint_callback=checkpoint_callback
                                             )
     trainer.fit(model)
-
-
-

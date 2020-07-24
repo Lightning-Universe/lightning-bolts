@@ -64,17 +64,20 @@ class ValueAgent(Agent):
         """
 
         if np.random.random() < self.epsilon:
-            action = self.get_random_action()
+            action = self.get_random_action(state)
         else:
             action = self.get_action(state, device)
 
-        return [action]
-
-    def get_random_action(self) -> int:
-        """returns a random action"""
-        action = randint(0, self.action_space - 1)
-
         return action
+
+    def get_random_action(self, state: torch.Tensor) -> int:
+        """returns a random action"""
+        actions = []
+        for i in range(len(state)):
+            action = np.random.randint(0, self.action_space - 1)
+            actions.append(action)
+
+        return actions
 
     def get_action(self, state: torch.Tensor, device: torch.device):
         """
@@ -90,7 +93,7 @@ class ValueAgent(Agent):
 
         q_values = self.net(state)
         _, actions = torch.max(q_values, dim=1)
-        return actions.detach().item()
+        return actions.detach().cpu().numpy()
 
     def update_epsilon(self, step: int) -> None:
         """

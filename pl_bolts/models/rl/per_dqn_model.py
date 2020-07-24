@@ -13,7 +13,6 @@ from torch.utils.data import DataLoader
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.losses.rl import per_dqn_loss
 from pl_bolts.models.rl.common import cli
-from pl_bolts.models.rl.common.experience import ExperienceSource, PrioRLDataset
 from pl_bolts.models.rl.common.memory import PERBuffer
 from pl_bolts.models.rl.dqn_model import DQN
 
@@ -90,13 +89,12 @@ class PERDQN(DQN):
             states, actions, rewards, dones, new_states = samples
 
             for idx, _ in enumerate(dones):
-                yield (
-                          states[idx],
-                          actions[idx],
-                          rewards[idx],
-                          dones[idx],
-                          new_states[idx],
-                      ), indices[idx], weights[idx]
+                yield (states[idx],
+                       actions[idx],
+                       rewards[idx],
+                       dones[idx],
+                       new_states[idx],
+                       ), indices[idx], weights[idx]
 
     def training_step(self, batch, _) -> OrderedDict:
         """
@@ -160,7 +158,6 @@ class PERDQN(DQN):
 
 
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
