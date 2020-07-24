@@ -17,7 +17,7 @@ def test_cpcv2(tmpdir):
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 
     model = CPCV2(encoder='resnet18', data_dir=tmpdir, batch_size=2, online_ft=True, datamodule=datamodule)
-    trainer = pl.Trainer(overfit_batches=2, max_epochs=1, default_root_dir=tmpdir)
+    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
 
@@ -28,7 +28,7 @@ def test_amdim(tmpdir):
     reset_seed()
 
     model = AMDIM(data_dir=tmpdir, batch_size=2, online_ft=True, encoder='resnet18')
-    trainer = pl.Trainer(overfit_batches=2, max_epochs=1, default_root_dir=tmpdir)
+    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
 
@@ -43,7 +43,7 @@ def test_moco(tmpdir):
     datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
 
     model = MocoV2(data_dir=tmpdir, batch_size=2, datamodule=datamodule, online_ft=True)
-    trainer = pl.Trainer(overfit_batches=2, max_epochs=1, default_root_dir=tmpdir, callbacks=[MocoLRScheduler()])
+    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, callbacks=[MocoLRScheduler()])
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
 
@@ -58,7 +58,7 @@ def test_simclr(tmpdir):
     datamodule.val_transforms = SimCLREvalDataTransform(32)
 
     model = SimCLR(data_dir=tmpdir, batch_size=2, datamodule=datamodule, online_ft=True)
-    trainer = pl.Trainer(overfit_batches=2, max_epochs=1, default_root_dir=tmpdir)
+    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.callback_metrics['loss']
 
