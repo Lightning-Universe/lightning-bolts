@@ -29,7 +29,9 @@ Contributions by: `Donal Byrne <https://github.com/djbyrne>`_
 DQN Models
 ----------
 
-The following models are based on DQN
+The following models are based on DQN. DQN uses Value based learning where it is deciding what action to take based
+on the models current learned value (V), or the state action value (Q) of the current state. These Values are defined
+as the discounted total reward of the agents state or state action pair.
 
 ---------------
 
@@ -525,7 +527,20 @@ Example::
 
 Policy Gradient Models
 ----------------------
-The following models are based on Policy gradient
+The following models are based on Policy Gradients. Unlike the Q learning models shown before, Policy based models
+do not try and learn the specifc values of state or state action pairs. Instead it cuts out the middle man and
+directly learns the policy distribution.
+
+Policy Gradient Key Points:
+    - Outputs a distribution of actions instead of discrete Q values
+    - Optimizes the policy directly, instead of indirectly through the optimization of Q values
+    - The policy distribution of actions allows the model to handle more complex action spaces, such as continuos actions
+    - The policy distribution introduces stochasticity, providing natural exploration to the model
+    - The policy distribution provides a more stable update as a change in weights will only change the total distribution
+      slightly, as opposed to changing weights based on the Q value of state S will change all Q values with similar states.
+    - Policy gradients tend to converge faste, however they are not as sample efficient and generally require more
+      interactions with the environment.
+
 
 --------------
 
@@ -536,6 +551,56 @@ REINFORCE model introduced in `Policy Gradient Methods For Reinforcement Learnin
 Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
+
+REINFORCE is one of the simplest forms of the Policy Gradient method of RL. The steps for the algorithm are as follows
+
+1. Initialize our network.
+2. Play N full episodes saving the transitions through the environment.
+3. For every step `t` in each episode `k` we calculate the discounted reward of the subsequent steps.
+
+.. math::
+
+    Q_{k,t} = \sum_{i=0}\gamma^i r_i
+
+4. Calculate the loss for all transitions.
+
+.. math::
+
+    L =  - \sum_{k,t} Q_{k,t} \log(\pi(S_{k,t}, A_{k,t}))
+
+5. Perform SGD on the loss and repeat.
+
+
+What this loss function is saying is simply that we want to take the log probability of action A at state S given
+our policy (network output). This is then scaled by the discounted reward that we calculated in the previous step.
+We then take the negative of our sum. This is because the loss is minimized during SGD, but we want to
+maximize our policy.
+
+.. note::
+    the current implementation does not actually wait for the batch episodes the complete every time as we pass in a
+    fixed batch size. For the time being we simply use a large batch size to accomodate this. This approach still works
+    well for simple tasks as it still manages to get an accurate Q value by using a large batch size, but it is not
+    as accurate or completely correct. This will be updated in a later version.
+
+
+Benefits
+~~~~~~~~~~
+
+- Simple and straightforward
+
+- Computationally more efficient for simple tasks such as Cartpole than the Value Based methods.
+
+Results
+~~~~~~~~~
+
+Hyperparameters:
+
+- Batch Size: 240
+- Learning Rate: 0.01
+- Episodes Per Batch: 4
+- Gamma: 0.99
+
+TODO: Add results graph
 
 Example::
 
@@ -557,12 +622,14 @@ Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Manso
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
+
+
 Example::
 
-    from pl_bolts.models.rl import PolicyGradient
-    vpg = PolicyGradient("CartPole-v0")
+    from pl_bolts.models.rl import VanillaPolicyGradient
+    vpg = VanillaPolicyGradient("CartPole-v0")
     trainer = Trainer()
     trainer.fit(vpg)
 
-.. autoclass:: pl_bolts.models.rl.vanilla_policy_gradient_model.PolicyGradient
+.. autoclass:: pl_bolts.models.rl.vanilla_policy_gradient_model.VanillaPolicyGradient
    :noindex:
