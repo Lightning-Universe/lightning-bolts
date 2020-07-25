@@ -360,7 +360,7 @@ For instance, here we can run Logistic Regression on Imagenet (each epoch takes 
     imagenet = ImagenetDataModule(PATH)
 
     # 224 x 224 x 3
-    pixels_per_image = 150_528
+    pixels_per_image = 150528
     model = LogisticRegression(input_dim=pixels_per_image, num_classes=1000)
     model.prepare_data = imagenet.prepare_data
 
@@ -494,4 +494,4 @@ Each script accepts Argparse arguments for both the lightning trainer and the mo
 
 .. code-block:: bash
 
-    python basic_vae_pl_module.py -latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12
+    python basic_vae_pl_module.py --latent_dim 32 --batch_size 32 --gpus 4 --max_epochs 12

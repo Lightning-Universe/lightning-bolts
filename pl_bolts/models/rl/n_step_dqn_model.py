@@ -72,12 +72,10 @@ class NStepDQN(DQN):
 
         """
         super().__init__(env, gpus, eps_start, eps_end, eps_last_frame, sync_rate, gamma, learning_rate,
-                         batch_size, replay_size, warm_start_size, num_samples)
-
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+                         batch_size, replay_size, warm_start_size, num_samples, **kwargs)
 
         self.source = NStepExperienceSource(
-            self.env, self.agent, device, n_steps=n_steps
+            self.env, self.agent, n_steps=n_steps
         )
 
 

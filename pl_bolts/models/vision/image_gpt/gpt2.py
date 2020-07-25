@@ -29,13 +29,13 @@ class Block(nn.Module):
 
 class GPT2(pl.LightningModule):
     def __init__(
-            self,
-            embed_dim: int,
-            heads: int,
-            layers: int,
-            num_positions: int,
-            vocab_size: int,
-            num_classes: int
+        self,
+        embed_dim: int,
+        heads: int,
+        layers: int,
+        num_positions: int,
+        vocab_size: int,
+        num_classes: int,
     ):
         """
         GPT-2 from `language Models are Unsupervised Multitask Learners <https://d4mucfpksywv.cloudfront.net/
@@ -55,7 +55,7 @@ class GPT2(pl.LightningModule):
             batch_size = 32
             vocab_size = 16
             x = torch.randint(0, vocab_size, (seq_len, batch_size))
-            model = GPT2(embed_dim=32, heads=2, layers=2, num_positions=2, vocab_size=vocab_size, num_classes=4)
+            model = GPT2(embed_dim=32, heads=2, layers=2, num_positions=seq_len, vocab_size=vocab_size, num_classes=4)
             results = model(x)
         """
         super(GPT2, self).__init__()
@@ -70,8 +70,12 @@ class GPT2(pl.LightningModule):
         nn.init.normal_(self.sos)
 
     def _init_embeddings(self):
-        self.token_embeddings = nn.Embedding(self.hparams.vocab_size, self.hparams.embed_dim)
-        self.position_embeddings = nn.Embedding(self.hparams.num_positions, self.hparams.embed_dim)
+        self.token_embeddings = nn.Embedding(
+            self.hparams.vocab_size, self.hparams.embed_dim
+        )
+        self.position_embeddings = nn.Embedding(
+            self.hparams.num_positions, self.hparams.embed_dim
+        )
 
     def _init_layers(self):
         self.layers = nn.ModuleList()
@@ -79,7 +83,9 @@ class GPT2(pl.LightningModule):
             self.layers.append(Block(self.hparams.embed_dim, self.hparams.heads))
 
         self.ln_f = nn.LayerNorm(self.hparams.embed_dim)
-        self.head = nn.Linear(self.hparams.embed_dim, self.hparams.vocab_size, bias=False)
+        self.head = nn.Linear(
+            self.hparams.embed_dim, self.hparams.vocab_size, bias=False
+        )
         self.clf_head = nn.Linear(self.hparams.embed_dim, self.hparams.num_classes)
 
     def forward(self, x, classify=False):

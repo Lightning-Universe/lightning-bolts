@@ -30,7 +30,7 @@ class Reinforce(pl.LightningModule):
     """ Basic REINFORCE Policy Model """
 
     def __init__(self, env: str, gamma: float = 0.99, lr: float = 1e-4, batch_size: int = 32,
-                 batch_episodes: int = 4, **kwargs) -> None:
+                 batch_episodes: int = 4, avg_reward_len=100, **kwargs) -> None:
         """
         PyTorch Lightning implementation of `REINFORCE
         <https://papers.nips.cc/paper/
@@ -59,6 +59,7 @@ class Reinforce(pl.LightningModule):
             lr: learning rate
             batch_size: size of minibatch pulled from the DataLoader
             batch_episodes: how many episodes to rollout for each batch of training
+            avg_reward_len: how many episodes to take into account when calculating the avg reward
 
         .. note::
             This example is based on:
@@ -92,10 +93,11 @@ class Reinforce(pl.LightningModule):
         self.episode_count = 0
         self.episode_steps = 0
         self.total_episode_steps = 0
+        self.avg_reward_len = avg_reward_len
 
         self.reward_list = []
-        for _ in range(100):
-            self.reward_list.append(0)
+        for _ in range(avg_reward_len):
+            self.reward_list.append(torch.tensor(0, device=self.device))
         self.avg_reward = 0
 
     def build_networks(self) -> None:
@@ -254,7 +256,7 @@ class Reinforce(pl.LightningModule):
         # get avg reward over the batched episodes
         self.episode_reward = sum(batch_rewards) / len(batch)
         self.reward_list.append(self.episode_reward)
-        self.avg_reward = sum(self.reward_list) / len(self.reward_list)
+        self.avg_reward = sum(self.reward_list[-self.avg_reward_len:]) / self.avg_reward_len
 
         # calculates training loss
         loss = self.loss(batch_qvals, batch_states, batch_actions)
