@@ -150,7 +150,7 @@ DummyDataset
 -------------
 
 AsynchronousLoader
-------------
+------------------
 DataModules also includes an extra asynchronous dataloader for accelerating single GPU training.
 
 This dataloader behaves identically to the standard pytorch dataloader, but will transfer
@@ -158,6 +158,7 @@ data asynchronously to the GPU with training. You can also use it to wrap an exi
 
 Example::
     ds = CIFAR10(tmpdir)
+    device = torch.device('cuda', 0)
 
     dataloader = AsynchronousLoader(ds, device=device)
     for b in dataloader:

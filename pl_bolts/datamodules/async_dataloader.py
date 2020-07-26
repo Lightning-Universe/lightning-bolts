@@ -30,6 +30,7 @@ class AsynchronousLoader(object):
         >>> from pl_bolts.datamodules.cifar10_dataset import CIFAR10
         >>> from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
         >>> ds = CIFAR10(download=True)
+        >>> device = torch.device('cuda', 0)
         >>> dataloader = AsynchronousLoader(ds, device=device)
         >>> dataloader = AsynchronousLoader(DataLoader(ds, batch_size=16), device=device)
     """
