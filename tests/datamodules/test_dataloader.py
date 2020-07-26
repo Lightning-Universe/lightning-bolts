@@ -8,6 +8,7 @@ if torch.cuda.device_count() > 0:
 else:
     device = torch.device('cpu')
 
+
 def test_async_dataloader(tmpdir):
     ds = CIFAR10(tmpdir)
 
@@ -16,3 +17,5 @@ def test_async_dataloader(tmpdir):
         pass
 
     dataloader = AsynchronousLoader(DataLoader(ds, batch_size=16), device=device)
+    for b in dataloader:
+        pass
