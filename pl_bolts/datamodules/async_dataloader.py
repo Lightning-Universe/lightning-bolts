@@ -23,6 +23,15 @@ class AsynchronousLoader(object):
             if set and DataLoader has a __len__. Otherwise it can be left as None
         **kwargs: Any additional arguments to pass to the dataloader if we're
             constructing one here
+
+    Examples:
+        >>> import torch
+        >>> from torch.utils.data import DataLoader
+        >>> from pl_bolts.datamodules.cifar10_dataset import CIFAR10
+        >>> from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
+        >>> ds = CIFAR10(tmpdir)
+        >>> dataloader = AsynchronousLoader(ds, device=device)
+        >>> dataloader = AsynchronousLoader(DataLoader(ds, batch_size=16), device=device)
     """
 
     def __init__(self, data, device=torch.device('cuda', 0), q_size=10, num_batches=None, **kwargs):
