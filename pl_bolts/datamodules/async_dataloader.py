@@ -86,10 +86,10 @@ class AsynchronousLoader(object):
             self.queue.join()
             self.worker.join()
             raise StopIteration
-        else:  # Otherwise return the next batch
-            out = self.queue.get()
-            self.queue.task_done()
-            self.idx += 1
+        # Otherwise return the next batch
+        out = self.queue.get()
+        self.queue.task_done()
+        self.idx += 1
         return out
 
     def __len__(self):
