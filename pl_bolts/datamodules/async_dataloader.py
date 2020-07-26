@@ -9,24 +9,20 @@ from torch.utils.data import DataLoader
 class AsynchronousLoader(object):
     """
     Class for asynchronously loading from CPU memory to device memory with DataLoader
-    Note that this only works for single GPU training, multiGPU uses PyTorch's DataParallel or
-    DistributedDataParallel which uses its own code for transferring data across GPUs. This could just
-    break or make things slower with DataParallel or DistributedDataParallel
-    Parameters
-    ----------
-    data: PyTorch Dataset or PyTorch DataLoader
-        The PyTorch Dataset or DataLoader we're using to load.
-    device: PyTorch Device
-        The PyTorch device we are loading to
-    q_size: Integer
-        Size of the queue used to store the data loaded to the device
-    num_batches: Integer or None
-        Number of batches to load.
-        This must be set if the dataloader doesn't have a finite __len__
-        It will also override DataLoader.__len__ if set and DataLoader has a __len__
-        Otherwise can be left as None
-    **kwargs:
-        Any additional arguments to pass to the dataloader if we're constructing one here
+    Note that this only works for single GPU training, multiGPU uses PyTorch's
+    DataParallel or DistributedDataParallel which uses its own code for transferring
+    data across GPUs. This could just break or make things slower with DataParallel
+    or DistributedDataParallel.
+
+    Args:
+        data: The PyTorch Dataset or DataLoader we're using to load.
+        device: The PyTorch device we are loading to
+        q_size: Size of the queue used to store the data loaded to the device
+        num_batches: Number of batches to load. This must be set if the dataloader
+            doesn't have a finite __len__. It will also override DataLoader.__len__
+            if set and DataLoader has a __len__. Otherwise it can be left as None
+        **kwargs: Any additional arguments to pass to the dataloader if we're
+            constructing one here
     """
 
     def __init__(self, data, device=torch.device('cuda', 0), q_size=10, num_batches=None, **kwargs):
