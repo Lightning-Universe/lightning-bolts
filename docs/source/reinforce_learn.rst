@@ -529,7 +529,8 @@ Policy Gradient Models
 ----------------------
 The following models are based on Policy Gradients. Unlike the Q learning models shown before, Policy based models
 do not try and learn the specifc values of state or state action pairs. Instead it cuts out the middle man and
-directly learns the policy distribution.
+directly learns the policy distribution. In Policy Gradient models we update our network parameters in the direction
+suggested by our policy gradient in order to find a policy that produces the highest results.
 
 Policy Gradient Key Points:
     - Outputs a distribution of actions instead of discrete Q values
@@ -552,7 +553,9 @@ Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Manso
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
-REINFORCE is one of the simplest forms of the Policy Gradient method of RL. The steps for the algorithm are as follows
+REINFORCE is one of the simplest forms of the Policy Gradient method of RL. This method uses a Monte Carlo rollout,
+where its steps through entire episodes of the environment to build up trajectories computing the total rewards. The
+algorithm is as follows:
 
 1. Initialize our network.
 2. Play N full episodes saving the transitions through the environment.
@@ -583,15 +586,15 @@ maximize our policy.
     as accurate or completely correct. This will be updated in a later version.
 
 
-Benefits
-~~~~~~~~~~
+REINFORCE Benefits
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Simple and straightforward
 
 - Computationally more efficient for simple tasks such as Cartpole than the Value Based methods.
 
-Results
-~~~~~~~~~
+REINFORCE Results
+~~~~~~~~~~~~~~~~~~~~~
 
 Hyperparameters:
 
@@ -622,7 +625,38 @@ Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Manso
 
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
+Vanilla Policy Gradient (VPG) expands upon the REINFORCE algorithm and improves some of its major issues. The major
+issue with REINFORCE is that it has high variance. This can be improved by subtracting a baseline value from the
+Q values. For  this implementation we use the average reward as our baseline.
 
+Although Policy Gradients are able to explore naturally due to the stochastic nature of the model, the agent can still
+frequently be stuck in a local optima. In order to improve this, VPG adds an entropy term to improve exploration.
+
+.. math::
+
+    H(\pi) = - \sum \pi (a | s) \log \pi (a | s)
+
+To further control the amount of additional entropy in our model we scale the entropy term by a small beta value. The
+scaled entropy is then subtracted from the policy loss.
+
+VPG Benefits
+~~~~~~~~~~~~~~~
+
+- Addition of the baseline reduces variance in the model
+
+- Improved exploration due to entropy bonus
+
+VPG Results
+~~~~~~~~~~~~~~~~
+
+Hyperparameters:
+
+- Batch Size: 8
+- Learning Rate: 0.001
+- N Steps: 10
+- N environments: 4
+- Entropy Beta: 0.01
+- Gamma: 0.99
 
 Example::
 
