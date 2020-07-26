@@ -146,3 +146,23 @@ DummyDataset
 
 .. autoclass:: pl_bolts.datamodules.dummy_dataset.DummyDataset
    :noindex:
+
+-------------
+
+AsynchronousLoader
+------------
+DataModules also includes an extra asynchronous dataloader for accelerating single GPU training.
+
+This dataloader behaves identically to the standard pytorch dataloader, but will transfer
+data asynchronously to the GPU with training. You can also use it to wrap an existing dataloader.
+
+.. code-block:: python
+    ds = CIFAR10(tmpdir)
+
+    dataloader = AsynchronousLoader(ds, device=device)
+    for b in dataloader:
+        pass
+
+    dataloader = AsynchronousLoader(DataLoader(ds, batch_size=16), device=device)
+    for b in dataloader:
+        pass
