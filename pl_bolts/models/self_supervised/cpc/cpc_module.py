@@ -350,6 +350,7 @@ class CPCV2(pl.LightningModule):
         return parser
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
     pl.seed_everything(1234)
     parser = ArgumentParser()
