@@ -46,7 +46,7 @@ class Projection(nn.Module):
 
 class SimCLR(pl.LightningModule):
     def __init__(self,
-                 datamodule: pl_bolts.datamodules.LightningDataModule = None,
+                 datamodule: pl.LightningDataModule = None,
                  data_dir: str = '',
                  learning_rate: float = 0.00006,
                  weight_decay: float = 0.0005,

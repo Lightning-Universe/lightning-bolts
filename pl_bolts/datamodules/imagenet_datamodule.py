@@ -1,10 +1,10 @@
 import os
 
+from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torchvision import transforms as transform_lib
 
 from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
-from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 
 

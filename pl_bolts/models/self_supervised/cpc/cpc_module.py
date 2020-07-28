@@ -39,7 +39,7 @@ class CPCV2(pl.LightningModule):
 
     def __init__(
             self,
-            datamodule: pl_bolts.datamodules.LightningDataModule = None,
+            datamodule: pl.LightningDataModule = None,
             encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'cpc_encoder',
             patch_size: int = 8,
             patch_overlap: int = 4,

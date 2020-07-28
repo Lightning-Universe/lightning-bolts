@@ -2,10 +2,10 @@ import os
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning import LightningModule, Trainer
+from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataModule, LightningDataModule
+from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models.autoencoders.basic_ae.components import AEEncoder
 from pl_bolts.models.autoencoders.basic_vae.components import Decoder
 
