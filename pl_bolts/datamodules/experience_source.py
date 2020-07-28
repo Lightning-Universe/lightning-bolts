@@ -64,10 +64,7 @@ class ExperienceSource(BaseExperienceSource):
     def __init__(self, env, agent, n_steps: int = 1) -> None:
         super().__init__(env, agent)
 
-        if isinstance(env, (list, tuple)):
-            self.pool = env
-        else:
-            self.pool = [env]
+        self.pool = env if isinstance(env, (list, tuple)) else [env]
 
         self.n_steps = n_steps
         self.total_rewards = []
