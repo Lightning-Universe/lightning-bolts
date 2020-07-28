@@ -14,7 +14,8 @@ Step 4, also needs special care to make sure that it's only done on 1 GPU in a m
 In addition, there are other challenges such as models that are built using information from the dataset
 such as needing to know image dimensions or number of classes.
 
-A datamodule simplifies all of these parts and integrates seamlessly into Lightning.
+A datamodule simplifies all of these parts and has been integrated directly into Lightning in version 0.9.0.
+You can view the documentation for the datamodule in the `Pytorch Lightning docs here. <https://pytorch-lightning.readthedocs.io/en/latest/datamodules.html>`_
 
 .. code-block:: python
 
@@ -92,7 +93,7 @@ Use this to build your own consistent train, validation, test splits.
 
 Example::
 
-    from pl_bolts.datamodules import LightningDataModule
+    from pytorch_lightning import LightningDataModule
 
     class MyDataModule(LightningDataModule):
 
