@@ -134,12 +134,6 @@ Example::
             return self.dm.test_dataloader()
 
 
-DataModule class
-^^^^^^^^^^^^^^^^
-
-.. autoclass:: pl_bolts.datamodules.lightning_datamodule.LightningDataModule
-   :noindex:
-
 -------------
 
 DummyDataset
