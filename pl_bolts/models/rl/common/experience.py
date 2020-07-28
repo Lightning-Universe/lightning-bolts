@@ -229,7 +229,7 @@ class EpisodicExperienceStream(ExperienceSource, IterableDataset):
         """Carries out a single step in the environment"""
         action = self.agent(self.state, device)
 
-        if isinstance(action, list):
+        if isinstance(action, Sequence):
             action = action[0]
 
         new_state, reward, done, _ = self.env.step(action)
