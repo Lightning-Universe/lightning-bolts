@@ -25,9 +25,7 @@ def dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], net: nn.Module,
     """
     states, actions, rewards, dones, next_states = batch
 
-    actions = actions.long()
-
-    actions = actions.squeeze(-1)
+    actions = actions.long().squeeze(-1)
 
     state_action_values = (
         net(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
