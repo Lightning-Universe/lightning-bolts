@@ -129,10 +129,12 @@ class Reinforce(pl.LightningModule):
 
         cumul_reward = []
         sum_r = 0.0
+
         for r in reversed(rewards):
             sum_r *= self.gamma
             sum_r += r
             cumul_reward.append(sum_r)
+
         return list(reversed(cumul_reward))
 
     def train_batch(
@@ -144,7 +146,7 @@ class Reinforce(pl.LightningModule):
         Returns:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
         """
-        for step_idx, exp in enumerate(self.exp_source.stepper(self.device)):
+        for exp in self.exp_source.stepper(self.device):
 
             self.batch_states.append(exp.state)
             self.batch_actions.append(exp.action)

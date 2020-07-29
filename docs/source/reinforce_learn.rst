@@ -598,7 +598,7 @@ REINFORCE Results
 
 Hyperparameters:
 
-- Batch Size: 240
+- Batch Size: 800
 - Learning Rate: 0.01
 - Episodes Per Batch: 4
 - Gamma: 0.99
