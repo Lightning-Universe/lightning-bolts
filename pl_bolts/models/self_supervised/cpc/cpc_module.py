@@ -128,7 +128,11 @@ class CPCV2(pl.LightningModule):
 
         # link data
         if datamodule is None:
-            datamodule = CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            datamodule = CIFAR10DataModule(
+                self.hparams.data_dir,
+                num_workers=self.hparams.num_workers,
+                batch_size=batch_size
+            )
             datamodule.train_transforms = CPCTrainTransformsCIFAR10()
             datamodule.val_transforms = CPCEvalTransformsCIFAR10()
         self.datamodule = datamodule

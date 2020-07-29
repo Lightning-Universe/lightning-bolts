@@ -117,7 +117,7 @@ class SimCLR(pl.LightningModule):
 
         # init default datamodule
         if datamodule is None:
-            datamodule = CIFAR10DataModule(data_dir, num_workers=num_workers)
+            datamodule = CIFAR10DataModule(data_dir, num_workers=num_workers, batch_size=batch_size)
             datamodule.train_transforms = SimCLRTrainDataTransform(input_height)
             datamodule.val_transforms = SimCLREvalDataTransform(input_height)
 
