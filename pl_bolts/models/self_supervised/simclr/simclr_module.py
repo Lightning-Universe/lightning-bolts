@@ -122,6 +122,8 @@ class SimCLR(pl.LightningModule):
             datamodule.val_transforms = SimCLREvalDataTransform(input_height)
 
         self.datamodule = datamodule
+        self.datamodule.prepare_data()
+
         self.loss_func = self.init_loss()
         self.encoder = self.init_encoder()
         self.projection = self.init_projection()
@@ -230,15 +232,6 @@ class SimCLR(pl.LightningModule):
             progress_bar['val_acc'] = mlp_acc
 
         return dict(val_loss=val_loss, log=log, progress_bar=progress_bar)
-
-    def prepare_data(self):
-        self.datamodule.prepare_data()
-
-    def train_dataloader(self):
-        return self.datamodule.train_dataloader(self.hparams.batch_size)
-
-    def val_dataloader(self):
-        return self.datamodule.val_dataloader(self.hparams.batch_size)
 
     def configure_optimizers(self):
         if self.hparams.optimizer == 'adam':
