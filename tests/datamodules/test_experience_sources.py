@@ -48,7 +48,7 @@ class TestBaseExperienceSource(TestCase):
         self.net = Mock()
         self.agent = DummyAgent(net=self.net)
         self.env = gym.make("CartPole-v0")
-        self.device = torch.device("cpu")
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.source = DummyExperienceSource(self.env, self.agent)
 
     def test_dummy_base_class(self):
@@ -64,7 +64,7 @@ class TestExperienceSource(TestCase):
         self.net = Mock()
         self.agent = DummyAgent(net=self.net)
         self.env = [gym.make("CartPole-v0") for _ in range(2)]
-        self.device = torch.device("cpu")
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.source = ExperienceSource(self.env, self.agent, n_steps=1)
 
     def test_init(self):
@@ -252,7 +252,7 @@ class TestDiscountedExperienceSource(TestCase):
         self.net = Mock()
         self.agent = DummyAgent(net=self.net)
         self.env = [gym.make("CartPole-v0") for _ in range(2)]
-        self.device = torch.device("cpu")
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.n_steps = 3
         self.gamma = 0.9
         self.source = DiscountedExperienceSource(

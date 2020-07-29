@@ -53,7 +53,7 @@ class TestExperienceSource(TestCase):
         self.net = Mock()
         self.agent = DummyAgent(net=self.net)
         self.env = gym.make("CartPole-v0")
-        self.device = torch.device('cpu')
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.source = ExperienceSource(self.env, self.agent)
 
     def test_step(self):
@@ -73,7 +73,7 @@ class TestNStepExperienceSource(TestCase):
         self.env = gym.make("CartPole-v0")
         self.n_step = 2
         self.source = NStepExperienceSource(self.env, self.agent, n_steps=self.n_step)
-        self.device = torch.device('cpu')
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         self.state = np.zeros([32, 32])
         self.state_02 = np.ones([32, 32])

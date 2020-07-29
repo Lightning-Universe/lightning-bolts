@@ -27,7 +27,7 @@ class TestValueAgent(TestCase):
         self.env = gym.make("CartPole-v0")
         self.net = Mock(return_value=torch.Tensor([[0.0, 100.0]]))
         self.state = [self.env.reset()]
-        self.device = torch.device('cpu')
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.value_agent = ValueAgent(self.net, self.env.action_space.n)
 
     def test_value_agent(self):
@@ -52,7 +52,7 @@ class TestPolicyAgent(TestCase):
         self.env = gym.make("CartPole-v0")
         self.net = Mock(return_value=torch.Tensor([[0.0, 100.0]]))
         self.states = [self.env.reset()]
-        self.device = torch.device('cpu')
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     def test_policy_agent(self):
         policy_agent = PolicyAgent(self.net)
