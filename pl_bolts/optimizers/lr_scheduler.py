@@ -4,9 +4,8 @@ import warnings
 from torch.optim.lr_scheduler import _LRScheduler
 
 
-"""
 class GradualWarmupScheduler(_LRScheduler):
-    "" Gradually warm-up(increasing) learning rate in optimizer.
+    """ Gradually warm-up(increasing) learning rate in optimizer.
     Proposed in 'Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour'.
 
     Adapted from: https://github.com/ildoonet/pytorch-gradual-warmup-lr
@@ -16,7 +15,7 @@ class GradualWarmupScheduler(_LRScheduler):
         multiplier: target learning rate = base lr * multiplier if multiplier > 1.0. if multiplier = 1.0, lr starts from 0 and ends up with the base_lr.
         total_epoch: target learning rate is reached at total_epoch, gradually
         after_scheduler: after target_epoch, use this scheduler(eg. ReduceLROnPlateau)
-    ""
+    """
 
     def __init__(self, optimizer, multiplier, total_epoch, after_scheduler=None):
         self.multiplier = multiplier
@@ -69,7 +68,6 @@ class GradualWarmupScheduler(_LRScheduler):
                 return super(GradualWarmupScheduler, self).step(epoch)
         else:
             self.step_ReduceLROnPlateau(metrics, epoch)
-"""
 
 
 class LinearWarmupCosineAnnealingLR(_LRScheduler):
@@ -122,8 +120,11 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         if self.last_epoch == 0:
             return [self.warmup_start_lr] * len(self.base_lrs)
         elif self.last_epoch < self.warmup_epochs:
-            return [group['lr'] + (base_lr - self.warmup_start_lr) / self.warmup_epochs
+            return [group['lr'] + (base_lr - self.warmup_start_lr) / (self.warmup_epochs - 1)
                     for base_lr, group in zip(self.base_lrs, self.optimizer.param_groups)]
+        elif self.last_epoch == self.warmup_epochs:
+            return self.base_lrs
+        # TODO: what does this do? This might be wrong for now when the axis has shifted
         elif (self.last_epoch - 1 - self.max_epochs) % (2 * (self.max_epochs - self.warmup_epochs)) == 0:
             return [group['lr'] + (base_lr - self.eta_min) *
                     (1 - math.cos(math.pi / (self.max_epochs - self.warmup_epochs))) / 2
