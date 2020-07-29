@@ -134,7 +134,6 @@ class DQN(pl.LightningModule):
         self.total_episode_steps = 0
 
         self.total_rewards = [0]
-        self.reward_sum = 0
         self.done_episodes = 0
 
         self.avg_reward_len = avg_reward_len
@@ -180,7 +179,6 @@ class DQN(pl.LightningModule):
             self.agent.update_epsilon(self.global_step)
             self.buffer.append(exp)
 
-            self.reward_sum += exp.reward
             episode_reward_steps = self.source.pop_rewards_steps()
 
             if episode_reward_steps:

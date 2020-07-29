@@ -143,8 +143,10 @@ class ExperienceSource(BaseExperienceSource):
         Returns:
             List of actions for each env, with size (num_envs, action_size)
         """
-        actions = [None] * len(self.states)
+        actions = []
         states_actions = self.agent(self.states, device)
+
+        assert len(self.states) == len(states_actions)
 
         for idx, action in enumerate(states_actions):
             actions[idx] = action if isinstance(action, list) else [action]

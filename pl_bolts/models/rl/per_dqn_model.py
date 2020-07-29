@@ -74,7 +74,6 @@ class PERDQN(DQN):
             self.agent.update_epsilon(self.global_step)
             self.buffer.append(exp)
 
-            self.reward_sum += exp.reward
             episode_reward_steps = self.source.pop_rewards_steps()
 
             if episode_reward_steps:
