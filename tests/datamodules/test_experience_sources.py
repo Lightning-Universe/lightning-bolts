@@ -63,7 +63,7 @@ class TestExperienceSource(TestCase):
         self.agent = DummyAgent(net=self.net)
         self.env = [gym.make("CartPole-v0") for _ in range(2)]
         self.device = torch.device('cpu')
-        self.source = ExperienceSource(self.env, self.agent)
+        self.source = ExperienceSource(self.env, self.agent, n_steps=1)
 
     def test_init(self):
         """Test that experience source is setup correctly"""
@@ -99,7 +99,6 @@ class TestExperienceSource(TestCase):
         """Test that steps are executed correctly with one environment and 1 step"""
 
         self.env = [gym.make("CartPole-v0") for _ in range(1)]
-        self.device = torch.device('cpu')
         self.source = ExperienceSource(self.env, self.agent, n_steps=1)
 
         for idx, exp in enumerate(self.source.stepper(self.device)):
@@ -110,7 +109,6 @@ class TestExperienceSource(TestCase):
         """Test that steps are executed correctly with one environment and 2 step"""
 
         self.env = [gym.make("CartPole-v0") for _ in range(1)]
-        self.device = torch.device('cpu')
         n_steps = 4
         self.source = ExperienceSource(self.env, self.agent, n_steps=n_steps)
 
@@ -122,10 +120,6 @@ class TestExperienceSource(TestCase):
     def test_source_next_multi_env_single_step(self):
         """Test that steps are executed correctly with 2 environment and 1 step"""
 
-        self.env = [gym.make("CartPole-v0") for _ in range(2)]
-        self.device = torch.device('cpu')
-        self.source = ExperienceSource(self.env, self.agent, n_steps=1)
-
         for idx, exp in enumerate(self.source.stepper(self.device)):
             self.assertTrue(isinstance(exp, tuple))
             self.assertTrue(len(exp) == self.source.n_steps)
@@ -133,9 +127,6 @@ class TestExperienceSource(TestCase):
 
     def test_source_next_multi_env_multi_step(self):
         """Test that steps are executed correctly with 2 environment and 2 step"""
-
-        self.env = [gym.make("CartPole-v0") for _ in range(2)]
-        self.device = torch.device('cpu')
         self.source = ExperienceSource(self.env, self.agent, n_steps=2)
 
         for idx, exp in enumerate(self.source.stepper(self.device)):
@@ -147,7 +138,6 @@ class TestExperienceSource(TestCase):
         """Test that after a step the state is updated"""
 
         self.env = [gym.make("CartPole-v0") for _ in range(1)]
-        self.device = torch.device('cpu')
         self.source = ExperienceSource(self.env, self.agent, n_steps=2)
 
         for idx, exp in enumerate(self.source.stepper(self.device)):
@@ -161,7 +151,6 @@ class TestExperienceSource(TestCase):
         """Test that when done and the history is not full, to return the partial history"""
 
         s1 = torch.ones(3)
-        s2 = torch.zeros(3)
         r = 1.0
         done = True
         _ = Mock()
@@ -170,7 +159,6 @@ class TestExperienceSource(TestCase):
         env1.step = Mock(return_value=(s1, r, done, _))
 
         self.env = [env1 for _ in range(1)]
-        self.device = torch.device('cpu')
         self.source = ExperienceSource(self.env, self.agent, n_steps=2)
 
         for idx, exp in enumerate(self.source.stepper(self.device)):
@@ -196,7 +184,6 @@ class TestExperienceSource(TestCase):
         env1.step = Mock(return_value=(s1, r, done, _))
 
         self.env = [env1 for _ in range(1)]
-        self.device = torch.device('cpu')
         self.source = ExperienceSource(self.env, self.agent, n_steps=2)
 
         history = self.source.histories[0]
@@ -233,7 +220,6 @@ class TestExperienceSource(TestCase):
         n_envs = 2
 
         self.env = [env1 for _ in range(2)]
-        self.device = torch.device('cpu')
         self.source = ExperienceSource(self.env, self.agent, n_steps=3)
 
         history = self.source.histories[0]
@@ -297,7 +283,6 @@ class TestDiscountedExperienceSource(TestCase):
     def test_source_step_done(self):
         """Tests that the source returns a single experience"""
 
-        self.device = torch.device('cpu')
         self.source = DiscountedExperienceSource(self.env1, self.agent, n_steps=self.n_steps)
 
         self.source.histories[0].append(self.exp1)
@@ -311,7 +296,6 @@ class TestDiscountedExperienceSource(TestCase):
     def test_source_discounted_return(self):
         """Tests that the source returns a single experience"""
 
-        self.device = torch.device('cpu')
         self.source = DiscountedExperienceSource(self.env1, self.agent, n_steps=self.n_steps)
 
         self.source.histories[0].append(self.exp1)

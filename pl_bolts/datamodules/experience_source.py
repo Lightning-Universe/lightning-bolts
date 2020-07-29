@@ -146,7 +146,7 @@ class ExperienceSource(BaseExperienceSource):
         assert len(self.states) == len(states_actions)
 
         for idx, action in enumerate(states_actions):
-            actions[idx] = action if isinstance(action, list) else [action]
+            actions.append(action if isinstance(action, list) else [action])
 
         return actions
 
