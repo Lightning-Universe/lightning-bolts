@@ -237,9 +237,7 @@ class TestExperienceSource(TestCase):
         self.source = ExperienceSource(self.env, self.agent, n_steps=3)
 
         history = self.source.histories[0]
-        history.append(exp1)
-        history.append(exp2)
-        history.append(exp2)
+        history += [exp1, exp2, exp2]
 
         for idx, exp in enumerate(self.source.stepper(self.device)):
 
