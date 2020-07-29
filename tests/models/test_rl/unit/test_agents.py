@@ -36,12 +36,12 @@ class TestValueAgent(TestCase):
         self.assertIsInstance(action, list)
         self.assertIsInstance(action[0], int)
 
-    def test_value_agent_GET_ACTION(self):
+    def test_value_agent_get_action(self):
         action = self.value_agent.get_action(self.state, self.device)
         self.assertIsInstance(action, np.ndarray)
         self.assertEqual(action[0], 1)
 
-    def test_value_agent_RANDOM(self):
+    def test_value_agent_random(self):
         action = self.value_agent.get_random_action(self.state)
         self.assertIsInstance(action[0], int)
 

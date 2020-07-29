@@ -37,7 +37,7 @@ class TestPolicyModels(TestCase):
 
         self.assertEqual(result, 1)
 
-    def test_PolicyGradient(self):
+    def test_policy_gradient(self):
         """Smoke test that the policy gradient model runs"""
         model = VanillaPolicyGradient(self.hparams.env)
         result = self.trainer.fit(model)

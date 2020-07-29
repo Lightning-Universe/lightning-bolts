@@ -29,8 +29,10 @@ class RLDataset(IterableDataset):
     """
 
     def __init__(self, buffer: Buffer, sample_size: int = 1) -> None:
-        warnings.warn("Deprecated, these functions have been moved to pl_bolts.datamodules.experience_source_og.py",
-                      DeprecationWarning)
+        warnings.warn(
+            "Deprecated, these functions have been moved to pl_bolts.datamodules.experience_source_og.py",
+            DeprecationWarning,
+        )
         self.buffer = buffer
         self.sample_size = sample_size
 
@@ -82,8 +84,10 @@ class ExperienceSource:
     """
 
     def __init__(self, env: Env, agent: Agent):
-        warnings.warn("Deprecated, these functions have been moved to pl_bolts.datamodules.experience_source_og.py",
-                      DeprecationWarning)
+        warnings.warn(
+            "Deprecated, these functions have been moved to pl_bolts.datamodules.experience_source_og.py",
+            DeprecationWarning,
+        )
         self.env = env
         self.agent = agent
         self.state = self.env.reset()

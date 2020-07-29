@@ -28,7 +28,7 @@ class TestEpisodicExperience(TestCase):
         self.xp_stream = EpisodicExperienceStream(self.env, self.agent, torch.device('cpu'), episodes=4)
         self.rl_dataloader = DataLoader(self.xp_stream)
 
-    def test_experience_stream_SINGLE_EPISODE(self):
+    def test_experience_stream_single_episode(self):
         """Check that the experience stream gives 1 full episode per batch"""
         self.xp_stream.episodes = 1
 
@@ -37,7 +37,7 @@ class TestEpisodicExperience(TestCase):
             self.assertIsInstance(batch[0][0], Experience)
             self.assertEqual(batch[0][-1].done, True)
 
-    def test_experience_stream_MULTI_EPISODE(self):
+    def test_experience_stream_multi_episode(self):
         """Check that the experience stream gives 4 full episodes per batch"""
         self.xp_stream.episodes = 4
 
