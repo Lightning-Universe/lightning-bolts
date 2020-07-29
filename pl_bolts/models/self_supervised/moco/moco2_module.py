@@ -38,7 +38,7 @@ class MocoV2(pl.LightningModule):
                  learning_rate: float = 0.03,
                  momentum: float = 0.9,
                  weight_decay: float = 1e-4,
-                 datamodule: pl_bolts.datamodules.LightningDataModule = None,
+                 datamodule: pl.LightningDataModule = None,
                  data_dir: str = './',
                  batch_size: int = 256,
                  use_mlp: bool = False,
@@ -319,14 +319,6 @@ class MocoV2(pl.LightningModule):
 
     def prepare_data(self):
         self.datamodule.prepare_data()
-
-    def train_dataloader(self):
-        loader = self.datamodule.train_dataloader(self.hparams.batch_size)
-        return loader
-
-    def val_dataloader(self):
-        loader = self.datamodule.val_dataloader(self.hparams.batch_size)
-        return loader
 
     @staticmethod
     def add_model_specific_args(parent_parser):

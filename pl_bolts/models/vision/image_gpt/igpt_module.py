@@ -6,7 +6,6 @@ import pytorch_lightning as pl
 import numpy as np
 from pl_bolts.datamodules import FashionMNISTDataModule, ImagenetDataModule
 from pl_bolts.models.vision.image_gpt.gpt2 import GPT2
-from pl_bolts.datamodules import LightningDataModule
 
 
 def _shape_input(x):
@@ -19,7 +18,7 @@ def _shape_input(x):
 class ImageGPT(pl.LightningModule):
     def __init__(
         self,
-        datamodule: LightningDataModule = None,
+        datamodule: pl.LightningDataModule = None,
         embed_dim: int = 16,
         heads: int = 2,
         layers: int = 2,
@@ -228,15 +227,6 @@ class ImageGPT(pl.LightningModule):
 
     def prepare_data(self):
         self.datamodule.prepare_data()
-
-    def train_dataloader(self):
-        return self.datamodule.train_dataloader()
-
-    def val_dataloader(self):
-        return self.datamodule.val_dataloader()
-
-    def test_dataloader(self):
-        return self.datamodule.test_dataloader()
 
     @staticmethod
     def add_model_specific_args(parent_parser):
