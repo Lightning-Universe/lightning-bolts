@@ -2,12 +2,11 @@ import math
 import warnings
 
 from torch.optim.lr_scheduler import _LRScheduler
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch.optim.lr_scheduler import LambdaLR
 
 
+"""
 class GradualWarmupScheduler(_LRScheduler):
-    """ Gradually warm-up(increasing) learning rate in optimizer.
+    "" Gradually warm-up(increasing) learning rate in optimizer.
     Proposed in 'Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour'.
 
     Adapted from: https://github.com/ildoonet/pytorch-gradual-warmup-lr
@@ -17,7 +16,7 @@ class GradualWarmupScheduler(_LRScheduler):
         multiplier: target learning rate = base lr * multiplier if multiplier > 1.0. if multiplier = 1.0, lr starts from 0 and ends up with the base_lr.
         total_epoch: target learning rate is reached at total_epoch, gradually
         after_scheduler: after target_epoch, use this scheduler(eg. ReduceLROnPlateau)
-    """
+    ""
 
     def __init__(self, optimizer, multiplier, total_epoch, after_scheduler=None):
         self.multiplier = multiplier
@@ -70,6 +69,7 @@ class GradualWarmupScheduler(_LRScheduler):
                 return super(GradualWarmupScheduler, self).step(epoch)
         else:
             self.step_ReduceLROnPlateau(metrics, epoch)
+"""
 
 
 class LinearWarmupCosineAnnealingLR(_LRScheduler):
