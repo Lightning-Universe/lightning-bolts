@@ -319,14 +319,6 @@ class CPCV2(pl.LightningModule):
     def prepare_data(self):
         self.datamodule.prepare_data()
 
-    def train_dataloader(self):
-        loader = self.datamodule.train_dataloader(self.hparams.batch_size)
-        return loader
-
-    def val_dataloader(self):
-        loader = self.datamodule.val_dataloader(self.hparams.batch_size)
-        return loader
-
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
