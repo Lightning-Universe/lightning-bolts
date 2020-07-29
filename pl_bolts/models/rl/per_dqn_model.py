@@ -84,7 +84,7 @@ class PERDQN(DQN):
                     self.total_rewards.append(reward)
                     self.episode_steps.append(steps)
                     self.avg_rewards = float(
-                        np.mean(self.total_rewards[-self.avg_reward_len :])
+                        np.mean(self.total_rewards[-self.avg_reward_len:])
                     )
 
             samples, indices, weights = self.buffer.sample(self.batch_size)

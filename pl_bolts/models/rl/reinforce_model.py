@@ -127,13 +127,13 @@ class Reinforce(pl.LightningModule):
         """
         assert isinstance(rewards[0], float)
 
-        res = []
+        cumul_reward = []
         sum_r = 0.0
         for r in reversed(rewards):
             sum_r *= self.gamma
             sum_r += r
-            res.append(sum_r)
-        return list(reversed(res))
+            cumul_reward.append(sum_r)
+        return list(reversed(cumul_reward))
 
     def train_batch(
         self,
@@ -155,13 +155,14 @@ class Reinforce(pl.LightningModule):
                 self.cur_rewards.clear()
                 self.batch_episodes += 1
 
+            # Check if episodes have finished and use total reward
             new_rewards = self.exp_source.pop_total_rewards()
             if new_rewards:
                 for reward in new_rewards:
                     self.done_episodes += 1
                     self.total_rewards.append(reward)
                     self.avg_rewards = float(
-                        np.mean(self.total_rewards[-self.avg_reward_len :])
+                        np.mean(self.total_rewards[-self.avg_reward_len:])
                     )
 
             self.total_steps += 1
@@ -174,6 +175,7 @@ class Reinforce(pl.LightningModule):
 
                 self.batch_episodes = 0
 
+            # Simulates epochs
             if self.total_steps % self.batches_per_epoch == 0:
                 break
 

@@ -131,7 +131,7 @@ class VanillaPolicyGradient(pl.LightningModule):
                     self.done_episodes += 1
                     self.total_rewards.append(reward)
                     self.avg_rewards = float(
-                        np.mean(self.total_rewards[-self.avg_reward_len :])
+                        np.mean(self.total_rewards[-self.avg_reward_len:])
                     )
 
             yield exp.state, exp.action, scaled_reward

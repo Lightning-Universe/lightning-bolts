@@ -7,7 +7,7 @@ Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/
 """
 import warnings
 from collections import deque
-from typing import List, Tuple
+from typing import List, Tuple, Sequence
 
 import numpy as np
 import torch

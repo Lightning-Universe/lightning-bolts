@@ -195,7 +195,7 @@ class DQN(pl.LightningModule):
                     self.total_rewards.append(reward)
                     self.episode_steps.append(steps)
                     self.avg_rewards = float(
-                        np.mean(self.total_rewards[-self.avg_reward_len :])
+                        np.mean(self.total_rewards[-self.avg_reward_len:])
                     )
 
             states, actions, rewards, dones, new_states = self.buffer.sample(
