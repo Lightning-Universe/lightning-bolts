@@ -78,7 +78,12 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
     between warmup_start_lr and base_lr followed by a cosine annealing schedule between
     base_lr and eta_min.
 
-    TODO: always call each step, else for 1 whole epoch, the LR is 0
+    .. warning::
+        It is recommended to call :func:`.step()` for :class:`LinearWarmupCosineAnnealingLR`
+        after each iteration as calling it after each epoch will keep the starting lr at
+        warmup_start_lr for the first epoch which is 0 in most cases.
+    
+    TODO: what to pass per step and how to use it in lightning
 
     Args:
         optimizer (Optimizer): Wrapped optimizer.
@@ -89,7 +94,7 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         last_epoch (int): The index of last epoch. Default: -1.
 
     Example:
-        >>> fill out
+        >>> fill out with lightning example
     """
 
     def __init__(
