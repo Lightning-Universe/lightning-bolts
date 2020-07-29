@@ -132,6 +132,30 @@ Example::
         def test_dataloader(self):
             return self.dm.test_dataloader()
 
+Asynchronous Loading
+--------------------
+DataModules also includes an extra asynchronous dataloader for accelerating single GPU training.
+
+This dataloader behaves identically to the standard pytorch dataloader, but will transfer
+data asynchronously to the GPU with training. You can also use it to wrap an existing dataloader.
+
+Example::
+
+    from pl_bolts.datamodules.cifar10_dataset import CIFAR10
+    ds = CIFAR10(tmpdir)
+    device = torch.device('cuda', 0)
+
+    dataloader = AsynchronousLoader(ds, device=device)
+
+    for b in dataloader:
+        ...
+
+or::
+
+    dataloader = AsynchronousLoader(DataLoader(ds, batch_size=16), device=device)
+
+    for b in dataloader:
+        ...
 
 DataModule class
 ^^^^^^^^^^^^^^^^
@@ -145,4 +169,12 @@ DummyDataset
 ------------
 
 .. autoclass:: pl_bolts.datamodules.dummy_dataset.DummyDataset
+   :noindex:
+
+-------------
+
+AsynchronousLoader
+------------------
+
+.. autoclass:: pl_bolts.datamodules.async_dataloader.AsynchronousLoader
    :noindex:

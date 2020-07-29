@@ -9,3 +9,4 @@ from pl_bolts.datamodules.fashion_mnist_datamodule import FashionMNISTDataModule
 from pl_bolts.datamodules.dummy_dataset import DummyDataset
 from pl_bolts.datamodules.experience_source import (ExperienceSourceDataset, ExperienceSource,
                                                     NStepExperienceSource, EpisodicExperienceStream)
+from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
