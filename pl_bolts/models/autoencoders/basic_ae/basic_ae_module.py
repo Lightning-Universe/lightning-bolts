@@ -46,8 +46,8 @@ class AE(LightningModule):
         # link default data
         if datamodule is None:
             datamodule = MNISTDataModule(data_dir=self.hparams.data_dir, num_workers=self.hparams.num_workers)
+
         self.datamodule = datamodule
-        self.datamodule.prepare_data()
 
         self.img_dim = self.datamodule.size()
 
@@ -120,6 +120,9 @@ class AE(LightningModule):
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
+
+    def prepare_data(self):
+        self.datamodule.prepare_data()
 
     @staticmethod
     def add_model_specific_args(parent_parser):
