@@ -133,6 +133,7 @@ class PERDQN(DQN):
         self.dataset = PrioRLDataset(self.buffer, self.batch_size)
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(add_help=False)
