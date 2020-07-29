@@ -55,8 +55,8 @@ class DuelingDQN(DQN):
         self.target_net = DuelingCNN(self.obs_shape, self.n_actions)
 
 
-if __name__ == "__main__":
-
+# todo: covert to CLI func and add test
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args

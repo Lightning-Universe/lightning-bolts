@@ -149,6 +149,7 @@ class AE(LightningModule):
         return parser
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)

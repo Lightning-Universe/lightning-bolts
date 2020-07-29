@@ -281,6 +281,7 @@ class SimCLR(pl.LightningModule):
         return parser
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
     from argparse import ArgumentParser
 

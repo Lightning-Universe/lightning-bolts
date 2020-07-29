@@ -262,6 +262,7 @@ class VAE(LightningModule):
         return parser
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
     from pl_bolts.datamodules import ImagenetDataModule
     parser = ArgumentParser()

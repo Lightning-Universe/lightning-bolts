@@ -231,7 +231,8 @@ class VanillaPolicyGradient(pl.LightningModule):
         return arg_parser
 
 
-if __name__ == "__main__":
+# todo: covert to CLI func and add test
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
