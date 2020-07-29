@@ -56,6 +56,7 @@ def test_simclr(tmpdir):
     datamodule = CIFAR10DataModule(tmpdir, num_workers=0, batch_size=2)
     datamodule.train_transforms = SimCLRTrainDataTransform(32)
     datamodule.val_transforms = SimCLREvalDataTransform(32)
+    datamodule.prepare_data()
 
     model = SimCLR(data_dir=tmpdir, batch_size=2, datamodule=datamodule, online_ft=True)
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
