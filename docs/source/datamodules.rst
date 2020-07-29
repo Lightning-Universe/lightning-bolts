@@ -134,7 +134,9 @@ Example::
 
 Asynchronous Loading
 --------------------
-DataModules also includes an extra asynchronous dataloader for accelerating single GPU training.
+An asynchronous dataloader can also be used in the construction of datamodules for accelerating
+single GPU training. The AsynchronousLoader class wraps a standard pytorch dataset or dataloader
+for asynchronous data transfer to a single GPU.
 
 This dataloader behaves identically to the standard pytorch dataloader, but will transfer
 data asynchronously to the GPU with training. You can also use it to wrap an existing dataloader.
@@ -156,6 +158,30 @@ or::
 
     for b in dataloader:
         ...
+
+Example use in datamodule construction::
+
+    from pl_bolts.datamodules import LightningDataModule
+    from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
+
+    class MyDataModule(LightningDataModule):
+
+        def __init__(self,...):
+
+        def prepare_data(self):
+            # download and do something to your data
+
+        def train_dataloader(self, batch_size):
+            device = torch.device('cuda', 0)
+            return AsynchronousLoader(DataLoader(...), device=device)
+
+        def val_dataloader(self, batch_size):
+            device = torch.device('cuda', 0)
+            return AsynchronousLoader(DataLoader(...), device=device)
+
+        def test_dataloader(self, batch_size):
+            device = torch.device('cuda', 0)
+            return AsynchronousLoader(DataLoader(...), device=device)
 
 DataModule class
 ^^^^^^^^^^^^^^^^
