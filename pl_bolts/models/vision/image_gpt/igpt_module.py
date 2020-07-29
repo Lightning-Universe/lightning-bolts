@@ -228,15 +228,6 @@ class ImageGPT(pl.LightningModule):
     def prepare_data(self):
         self.datamodule.prepare_data()
 
-    def train_dataloader(self):
-        return self.datamodule.train_dataloader()
-
-    def val_dataloader(self):
-        return self.datamodule.val_dataloader()
-
-    def test_dataloader(self):
-        return self.datamodule.test_dataloader()
-
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
