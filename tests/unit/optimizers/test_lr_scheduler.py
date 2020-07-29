@@ -31,7 +31,6 @@ class TestLRScheduler(object):
     adapted from: https://github.com/pytorch/pytorch/blob/master/test/test_optim.py
     """
     def __init__(self, base_lr=0.05, multiplier=10):
-        
         self.net = SchedulerTestNet()
         self.optimizer = SGD(
             [
@@ -120,6 +119,88 @@ def test_lwca_lr_with_nz_start_lr(tmpdir):
     warmup_epochs = 9
     max_epochs = 28
     multiplier=10
+
+    # define target schedule
+    targets = []
+
+    # param-group1
+    warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr, warmup_epochs)
+    iters = np.arange(max_epochs - warmup_epochs)
+    cosine_lr_schedule = np.array([eta_min + 0.5 * (base_lr - eta_min) * (1 + \
+                         math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters])
+    lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
+    targets.append(list(lr_schedule))
+
+    # param-group2
+    base_lr2 = base_lr * multiplier
+    warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr2, warmup_epochs)
+    cosine_lr_schedule = np.array([eta_min + 0.5 * (base_lr2 - eta_min) * (1 + \
+                         math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters])
+    lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
+    targets.append(list(lr_schedule))
+
+    test_lr_scheduler = TestLRScheduler(base_lr=base_lr, multiplier=multiplier)
+    scheduler = LinearWarmupCosineAnnealingLR(
+        optimizer=test_lr_scheduler.optimizer,
+        warmup_epochs=warmup_epochs,
+        max_epochs=max_epochs,
+        warmup_start_lr=warmup_start_lr,
+        eta_min=eta_min
+    )
+
+    test_lr_scheduler._test_lr(scheduler, targets, epochs=max_epochs)
+
+
+def test_lwca_lr_with_nz_eta_min(tmpdir):
+    reset_seed()
+
+    warmup_start_lr = 0.
+    base_lr = 0.04
+    eta_min=0.0001
+    warmup_epochs = 15
+    max_epochs = 47
+    multiplier=17
+
+    # define target schedule
+    targets = []
+
+    # param-group1
+    warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr, warmup_epochs)
+    iters = np.arange(max_epochs - warmup_epochs)
+    cosine_lr_schedule = np.array([eta_min + 0.5 * (base_lr - eta_min) * (1 + \
+                         math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters])
+    lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
+    targets.append(list(lr_schedule))
+
+    # param-group2
+    base_lr2 = base_lr * multiplier
+    warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr2, warmup_epochs)
+    cosine_lr_schedule = np.array([eta_min + 0.5 * (base_lr2 - eta_min) * (1 + \
+                         math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters])
+    lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
+    targets.append(list(lr_schedule))
+
+    test_lr_scheduler = TestLRScheduler(base_lr=base_lr, multiplier=multiplier)
+    scheduler = LinearWarmupCosineAnnealingLR(
+        optimizer=test_lr_scheduler.optimizer,
+        warmup_epochs=warmup_epochs,
+        max_epochs=max_epochs,
+        warmup_start_lr=warmup_start_lr,
+        eta_min=eta_min
+    )
+
+    test_lr_scheduler._test_lr(scheduler, targets, epochs=max_epochs)
+
+
+def test_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
+    reset_seed()
+
+    warmup_start_lr = 0.009
+    base_lr = 0.07
+    eta_min=0.003
+    warmup_epochs = 15
+    max_epochs = 115
+    multiplier=32
 
     # define target schedule
     targets = []
