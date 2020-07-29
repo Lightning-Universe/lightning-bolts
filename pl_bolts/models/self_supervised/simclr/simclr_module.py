@@ -47,7 +47,7 @@ class Projection(nn.Module):
 class SimCLR(pl.LightningModule):
     def __init__(self,
                  datamodule: pl.LightningDataModule = None,
-                 data_dir: str = '',
+                 data_dir: str = './',
                  learning_rate: float = 0.00006,
                  weight_decay: float = 0.0005,
                  input_height: int = 32,
@@ -122,7 +122,6 @@ class SimCLR(pl.LightningModule):
             datamodule.val_transforms = SimCLREvalDataTransform(input_height)
 
         self.datamodule = datamodule
-        self.datamodule.prepare_data()
 
         self.loss_func = self.init_loss()
         self.encoder = self.init_encoder()
@@ -305,6 +304,7 @@ if __name__ == '__main__':
         datamodule.val_transforms = SimCLREvalDataTransform(h)
 
     model = SimCLR(**args.__dict__, datamodule=datamodule)
+    model.datamodule.prepare_data()
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
