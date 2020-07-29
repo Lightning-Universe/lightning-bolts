@@ -1,4 +1,3 @@
-
 import argparse
 from collections import OrderedDict
 from typing import Tuple, List
@@ -22,10 +21,20 @@ from pl_bolts.models.rl.common.networks import MLP
 
 
 class Reinforce(pl.LightningModule):
-
-    def __init__(self, env: str, gamma: float = 0.99, lr: float = 0.01, batch_size: int = 8, n_steps: int = 10,
-                 avg_reward_len: int = 100, num_envs: int = 1, entropy_beta: float = 0.01, epoch_len: int = 1000,
-                 num_batch_episodes: int = 4, **kwargs) -> None:
+    def __init__(
+        self,
+        env: str,
+        gamma: float = 0.99,
+        lr: float = 0.01,
+        batch_size: int = 8,
+        n_steps: int = 10,
+        avg_reward_len: int = 100,
+        num_envs: int = 1,
+        entropy_beta: float = 0.01,
+        epoch_len: int = 1000,
+        num_batch_episodes: int = 4,
+        **kwargs
+    ) -> None:
         """
         PyTorch Lightning implementation of `REINFORCE
         <https://papers.nips.cc/paper/
@@ -76,7 +85,9 @@ class Reinforce(pl.LightningModule):
         self.env = [gym.make(env) for _ in range(num_envs)]
         self.net = MLP(self.env[0].observation_space.shape, self.env[0].action_space.n)
         self.agent = PolicyAgent(self.net)
-        self.exp_source = DiscountedExperienceSource(self.env, self.agent, gamma=gamma, n_steps=self.n_steps)
+        self.exp_source = DiscountedExperienceSource(
+            self.env, self.agent, gamma=gamma, n_steps=self.n_steps
+        )
 
         # Tracking metrics
         self.total_steps = 0
@@ -124,7 +135,9 @@ class Reinforce(pl.LightningModule):
             res.append(sum_r)
         return list(reversed(res))
 
-    def train_batch(self) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
+    def train_batch(
+        self,
+    ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -147,12 +160,16 @@ class Reinforce(pl.LightningModule):
                 for reward in new_rewards:
                     self.done_episodes += 1
                     self.total_rewards.append(reward)
-                    self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+                    self.avg_rewards = float(
+                        np.mean(self.total_rewards[-self.avg_reward_len :])
+                    )
 
             self.total_steps += 1
 
             if self.batch_episodes >= self.num_batch_episodes:
-                for state, action, qval in zip(self.batch_states, self.batch_actions, self.batch_qvals):
+                for state, action, qval in zip(
+                    self.batch_states, self.batch_actions, self.batch_qvals
+                ):
                     yield state, action, qval
 
                 self.batch_episodes = 0
@@ -187,17 +204,17 @@ class Reinforce(pl.LightningModule):
         loss = self.loss(states, actions, scaled_rewards)
 
         log = {
-            'episodes': self.done_episodes,
-            'reward': self.total_rewards[-1],
-            'avg_reward': self.avg_rewards,
+            "episodes": self.done_episodes,
+            "reward": self.total_rewards[-1],
+            "avg_reward": self.avg_rewards,
         }
 
         return OrderedDict(
             {
                 "loss": loss,
-                'avg_reward': self.avg_rewards,
+                "avg_reward": self.avg_rewards,
                 "log": log,
-                "progress_bar": log
+                "progress_bar": log,
             }
         )
 
@@ -235,16 +252,13 @@ class Reinforce(pl.LightningModule):
         """
 
         arg_parser.add_argument(
-            "--entropy_beta",
-            type=float,
-            default=0.01,
-            help="entropy value",
+            "--entropy_beta", type=float, default=0.01, help="entropy value",
         )
 
         return arg_parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
@@ -259,15 +273,11 @@ if __name__ == '__main__':
 
     # save checkpoints based on avg_reward
     checkpoint_callback = ModelCheckpoint(
-        save_top_k=1,
-        monitor='avg_reward',
-        mode='max',
-        period=1,
-        verbose=True
+        save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True
     )
 
     seed_everything(123)
-    trainer = pl.Trainer.from_argparse_args(args, deterministic=True,
-                                            checkpoint_callback=checkpoint_callback
-                                            )
+    trainer = pl.Trainer.from_argparse_args(
+        args, deterministic=True, checkpoint_callback=checkpoint_callback
+    )
     trainer.fit(model)

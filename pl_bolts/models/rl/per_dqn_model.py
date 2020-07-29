@@ -62,7 +62,9 @@ class PERDQN(DQN):
 
         """
 
-    def train_batch(self) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def train_batch(
+        self,
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
         Returns:
@@ -81,19 +83,22 @@ class PERDQN(DQN):
                     self.done_episodes += 1
                     self.total_rewards.append(reward)
                     self.episode_steps.append(steps)
-                    self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+                    self.avg_rewards = float(
+                        np.mean(self.total_rewards[-self.avg_reward_len :])
+                    )
 
             samples, indices, weights = self.buffer.sample(self.batch_size)
 
             states, actions, rewards, dones, new_states = samples
 
             for idx, _ in enumerate(dones):
-                yield (states[idx],
-                       actions[idx],
-                       rewards[idx],
-                       dones[idx],
-                       new_states[idx],
-                       ), indices[idx], weights[idx]
+                yield (
+                    states[idx],
+                    actions[idx],
+                    rewards[idx],
+                    dones[idx],
+                    new_states[idx],
+                ), indices[idx], weights[idx]
 
     def training_step(self, batch, _) -> OrderedDict:
         """
@@ -156,7 +161,7 @@ class PERDQN(DQN):
         return DataLoader(dataset=self.dataset, batch_size=self.batch_size)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args

@@ -13,7 +13,11 @@ import torch.optim as optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from pl_bolts.datamodules.experience_source import ExperienceSourceDataset, DiscountedExperienceSource, Experience
+from pl_bolts.datamodules.experience_source import (
+    ExperienceSourceDataset,
+    DiscountedExperienceSource,
+    Experience,
+)
 from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common import wrappers, cli
 from pl_bolts.models.rl.common.agents import ValueAgent
@@ -25,23 +29,23 @@ class DQN(pl.LightningModule):
     """ Basic DQN Model """
 
     def __init__(
-            self,
-            env: str,
-            eps_start: float = 1.0,
-            eps_end: float = 0.02,
-            eps_last_frame: int = 150000,
-            sync_rate: int = 1000,
-            gamma: float = 0.99,
-            learning_rate: float = 1e-4,
-            batch_size: int = 32,
-            replay_size: int = 100000,
-            warm_start_size: int = 10000,
-            avg_reward_len: int = 100,
-            min_episode_reward: int = -21,
-            n_steps: int = 1,
-            seed: int = 123,
-            num_envs: int = 1,
-            **kwargs,
+        self,
+        env: str,
+        eps_start: float = 1.0,
+        eps_end: float = 0.02,
+        eps_last_frame: int = 150000,
+        sync_rate: int = 1000,
+        gamma: float = 0.99,
+        learning_rate: float = 1e-4,
+        batch_size: int = 32,
+        replay_size: int = 100000,
+        warm_start_size: int = 10000,
+        avg_reward_len: int = 100,
+        min_episode_reward: int = -21,
+        n_steps: int = 1,
+        seed: int = 123,
+        num_envs: int = 1,
+        **kwargs,
     ):
         """
         PyTorch Lightning implementation of `DQN <https://arxiv.org/abs/1312.5602>`_
@@ -140,7 +144,9 @@ class DQN(pl.LightningModule):
 
         self.reward_list = []
         for _ in range(avg_reward_len):
-            self.reward_list.append(torch.tensor(min_episode_reward, device=self.device))
+            self.reward_list.append(
+                torch.tensor(min_episode_reward, device=self.device)
+            )
         self.avg_rewards = 0
 
     def populate(self, warm_start: int) -> None:
@@ -167,7 +173,9 @@ class DQN(pl.LightningModule):
         output = self.net(x)
         return output
 
-    def train_batch(self) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def train_batch(
+        self,
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
         Returns:
@@ -186,12 +194,18 @@ class DQN(pl.LightningModule):
                     self.done_episodes += 1
                     self.total_rewards.append(reward)
                     self.episode_steps.append(steps)
-                    self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+                    self.avg_rewards = float(
+                        np.mean(self.total_rewards[-self.avg_reward_len :])
+                    )
 
-            states, actions, rewards, dones, new_states = self.buffer.sample(self.batch_size)
+            states, actions, rewards, dones, new_states = self.buffer.sample(
+                self.batch_size
+            )
 
             for idx, _ in enumerate(dones):
-                yield states[idx], actions[idx], rewards[idx], dones[idx], new_states[idx]
+                yield states[idx], actions[idx], rewards[idx], dones[idx], new_states[
+                    idx
+                ]
 
     def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
         """
@@ -289,7 +303,9 @@ class DQN(pl.LightningModule):
         return env
 
     @staticmethod
-    def add_model_specific_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    def add_model_specific_args(
+        arg_parser: argparse.ArgumentParser,
+    ) -> argparse.ArgumentParser:
         """
         Adds arguments for DQN model
         Note: these params are fine tuned for Pong env
@@ -336,7 +352,7 @@ class DQN(pl.LightningModule):
         return arg_parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args

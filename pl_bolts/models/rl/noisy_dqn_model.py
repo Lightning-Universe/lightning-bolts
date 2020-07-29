@@ -64,7 +64,7 @@ class NoisyDQN(DQN):
         self.agent.epsilon = 0.0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(add_help=False)
 

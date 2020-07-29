@@ -55,7 +55,7 @@ class DuelingDQN(DQN):
         self.target_net = DuelingCNN(self.obs_shape, self.n_actions)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(add_help=False)
 
