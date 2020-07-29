@@ -75,9 +75,6 @@ class DoubleDQN(DQN):
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)
 
-        # Soft update of target network
-        if self.global_step % self.sync_rate == 0:
-            self.target_net.load_state_dict(self.net.state_dict())
 
         # Soft update of target network
         if self.global_step % self.sync_rate == 0:

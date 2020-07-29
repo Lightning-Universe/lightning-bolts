@@ -64,10 +64,7 @@ class ExperienceSource(BaseExperienceSource):
     def __init__(self, env, agent, n_steps: int = 1) -> None:
         super().__init__(env, agent)
 
-        if isinstance(env, (list, tuple)):
-            self.pool = env
-        else:
-            self.pool = [env]
+        self.pool = env if isinstance(env, (list, tuple)) else [env]
 
         self.n_steps = n_steps
         self.total_rewards = []
@@ -274,6 +271,5 @@ class DiscountedExperienceSource(ExperienceSource):
         """
         total_reward = 0.0
         for exp in reversed(experiences):
-            total_reward *= self.gamma
-            total_reward += exp.reward
+            total_reward = (self.gamma * total_reward) + exp.reward
         return total_reward
