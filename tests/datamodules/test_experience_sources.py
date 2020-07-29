@@ -325,9 +325,9 @@ class TestDiscountedExperienceSource(TestCase):
         self.source.histories[0] += [self.exp1, self.exp2]
 
         discounted_reward = (
-            self.exp1.reward
-            + (self.source.gamma * self.exp2.reward)
-            + (self.source.gamma * self.reward) ** 2
+            self.exp1.reward +
+            (self.source.gamma * self.exp2.reward) +
+            (self.source.gamma * self.reward) ** 2
         )
 
         for idx, exp in enumerate(self.source.stepper(self.device)):
