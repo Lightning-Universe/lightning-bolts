@@ -67,7 +67,7 @@ class TestExperienceSource(TestCase):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.source = ExperienceSource(self.env, self.agent, n_steps=1)
 
-    def test_init(self):
+    def test_init_source(self):
         """Test that experience source is setup correctly"""
         self.assertEqual(self.source.n_steps, 1)
         self.assertIsInstance(self.source.pool, list)
