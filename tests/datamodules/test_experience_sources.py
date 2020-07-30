@@ -50,6 +50,8 @@ class TestBaseExperienceSource(TestCase):
         self.env = gym.make("CartPole-v0")
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.source = DummyExperienceSource(self.env, self.agent)
+        self.s1 = torch.ones(3)
+        self.s2 = torch.zeros(3)
 
     def test_dummy_base_class(self):
         """Tests that base class is initialized correctly"""
@@ -67,6 +69,15 @@ class TestExperienceSource(TestCase):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.source = ExperienceSource(self.env, self.agent, n_steps=1)
 
+        self.s1 = torch.ones(3)
+        self.s2 = torch.zeros(3)
+
+        self.mock_env = Mock()
+        self.mock_env.step = Mock(return_value=(self.s1, 1, False, Mock()))
+
+        self.exp1 = Experience(state=self.s1, action=1, reward=1, done=False, new_state=self.s2)
+        self.exp2 = Experience(state=self.s1, action=1, reward=1, done=False, new_state=self.s2)
+
     def test_init(self):
         """Test that experience source is setup correctly"""
         self.assertEqual(self.source.n_steps, 1)
@@ -79,8 +90,7 @@ class TestExperienceSource(TestCase):
 
     def test_init_single_env(self):
         """Test that if a single env is passed that it is wrapped in a list"""
-        single_env = Mock()
-        self.source = ExperienceSource(single_env, self.agent)
+        self.source = ExperienceSource(self.mock_env, self.agent)
         self.assertIsInstance(self.source.pool, list)
 
     def test_env_actions(self):
@@ -152,16 +162,10 @@ class TestExperienceSource(TestCase):
     def test_source_is_done_short_episode(self):
         """Test that when done and the history is not full, to return the partial history"""
 
-        s1 = torch.ones(3)
-        r = 1.0
-        done = True
-        _ = Mock()
+        self.mock_env.step = Mock(return_value=(self.s1, 1, True, Mock))
 
-        env1 = Mock()
-        env1.step = Mock(return_value=(s1, r, done, _))
-
-        self.env = [env1 for _ in range(1)]
-        self.source = ExperienceSource(self.env, self.agent, n_steps=2)
+        env = [self.mock_env for _ in range(1)]
+        self.source = ExperienceSource(env, self.agent, n_steps=2)
 
         for idx, exp in enumerate(self.source.stepper(self.device)):
             self.assertTrue(isinstance(exp, tuple))
@@ -174,22 +178,12 @@ class TestExperienceSource(TestCase):
         the history
         """
 
-        s1 = torch.ones(3)
-        s2 = torch.zeros(3)
-        r = 1.0
-        done = True
-        _ = Mock()
-
-        exp1 = Experience(state=s1, action=1, reward=r, done=False, new_state=s2)
-
-        env1 = Mock()
-        env1.step = Mock(return_value=(s1, r, done, _))
-
-        self.env = [env1 for _ in range(1)]
+        self.env = [self.mock_env]
         self.source = ExperienceSource(self.env, self.agent, n_steps=2)
 
-        history = self.source.histories[0]
-        history.append(exp1)
+        self.mock_env.step = Mock(return_value=(self.s1, 1, True, Mock))
+
+        self.source.histories[0].append(self.exp1)
 
         for idx, exp in enumerate(self.source.stepper(self.device)):
 
@@ -199,33 +193,23 @@ class TestExperienceSource(TestCase):
                 self.assertTrue(len(exp) == self.source.n_steps)
             elif idx == 1:
                 self.assertTrue(len(exp) == self.source.n_steps - 1)
-                self.assertTrue(torch.equal(exp[0].new_state, s1))
+                self.assertTrue(torch.equal(exp[0].new_state, self.s1))
 
                 break
 
     def test_source_is_done_metrics(self):
         """Test that when done and the history is full, return the full history"""
 
-        s1 = torch.ones(3)
-        s2 = torch.zeros(3)
-        r = 1.0
-        done = True
-        _ = Mock()
-
-        exp1 = Experience(state=s1, action=1, reward=r, done=False, new_state=s2)
-        exp2 = Experience(state=s1, action=1, reward=r, done=False, new_state=s2)
-
-        env1 = Mock()
-        env1.step = Mock(return_value=(s1, r, done, _))
-
         n_steps = 3
         n_envs = 2
 
-        self.env = [env1 for _ in range(2)]
+        self.mock_env.step = Mock(return_value=(self.s1, 1, True, Mock))
+
+        self.env = [self.mock_env for _ in range(2)]
         self.source = ExperienceSource(self.env, self.agent, n_steps=3)
 
         history = self.source.histories[0]
-        history += [exp1, exp2, exp2]
+        history += [self.exp1, self.exp2, self.exp2]
 
         for idx, exp in enumerate(self.source.stepper(self.device)):
 
