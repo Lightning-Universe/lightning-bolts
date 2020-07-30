@@ -39,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Linear and Logistic Regression tests
 - Added Image GPT
 - Added Recommenders module
-
+- Added an asynchronous single GPU dataloader. ([#1521](https://github.com/PyTorchLightning/pytorch-lightning/pull/1521))
 
 ### Changed
 

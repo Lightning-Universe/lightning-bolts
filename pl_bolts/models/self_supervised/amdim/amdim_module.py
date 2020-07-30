@@ -18,7 +18,7 @@ class AMDIM(pl.LightningModule):
 
     def __init__(
             self,
-            datamodule: Union[str, pl_bolts.datamodules.LightningDataModule] = 'cifar10',
+            datamodule: Union[str, pl.LightningDataModule] = 'cifar10',
             encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'amdim_encoder',
             contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask('01, 02, 11'),
             image_channels: int = 3,

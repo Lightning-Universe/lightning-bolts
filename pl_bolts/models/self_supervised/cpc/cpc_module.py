@@ -39,7 +39,7 @@ class CPCV2(pl.LightningModule):
 
     def __init__(
             self,
-            datamodule: pl_bolts.datamodules.LightningDataModule = None,
+            datamodule: pl.LightningDataModule = None,
             encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'cpc_encoder',
             patch_size: int = 8,
             patch_overlap: int = 4,
@@ -128,7 +128,11 @@ class CPCV2(pl.LightningModule):
 
         # link data
         if datamodule is None:
-            datamodule = CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            datamodule = CIFAR10DataModule(
+                self.hparams.data_dir,
+                num_workers=self.hparams.num_workers,
+                batch_size=batch_size
+            )
             datamodule.train_transforms = CPCTrainTransformsCIFAR10()
             datamodule.val_transforms = CPCEvalTransformsCIFAR10()
         self.datamodule = datamodule
@@ -314,14 +318,6 @@ class CPCV2(pl.LightningModule):
 
     def prepare_data(self):
         self.datamodule.prepare_data()
-
-    def train_dataloader(self):
-        loader = self.datamodule.train_dataloader(self.hparams.batch_size)
-        return loader
-
-    def val_dataloader(self):
-        loader = self.datamodule.val_dataloader(self.hparams.batch_size)
-        return loader
 
     @staticmethod
     def add_model_specific_args(parent_parser):
