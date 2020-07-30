@@ -78,7 +78,7 @@ class TestExperienceSource(TestCase):
         self.exp1 = Experience(state=self.s1, action=1, reward=1, done=False, new_state=self.s2)
         self.exp2 = Experience(state=self.s1, action=1, reward=1, done=False, new_state=self.s2)
 
-    def test_init(self):
+    def test_init_source(self):
         """Test that experience source is setup correctly"""
         self.assertEqual(self.source.n_steps, 1)
         self.assertIsInstance(self.source.pool, list)
