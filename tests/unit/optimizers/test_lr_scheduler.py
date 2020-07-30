@@ -31,6 +31,9 @@ class TestLRScheduler(object):
     adapted from: https://github.com/pytorch/pytorch/blob/master/test/test_optim.py
     """
     def __init__(self, base_lr=0.05, multiplier=10):
+        self.base_lr = base_lr
+        self.multiplier = multiplier
+
         self.net = SchedulerTestNet()
         self.optimizer = SGD(
             [
@@ -38,10 +41,11 @@ class TestLRScheduler(object):
                 {'params': self.net.conv2.parameters(), 'lr': base_lr * multiplier}
             ], lr=base_lr)
 
+        self.closed_form_net = SchedulerTestNet()
         self.closed_form_opt = SGD(
             [
-                {'params': self.net.conv1.parameters()},
-                {'params': self.net.conv2.parameters(), 'lr': base_lr * multiplier}
+                {'params': self.closed_form_net.conv1.parameters()},
+                {'params': self.closed_form_net.conv2.parameters(), 'lr': base_lr * multiplier}
             ], lr=base_lr)
 
     def _test_lr(self, schedulers, targets, epochs=10):
@@ -59,15 +63,25 @@ class TestLRScheduler(object):
         targets = []
         for epoch in range(epochs):
             closed_form_scheduler.step(epoch)
-            targets.append([group['lr'] for group in self.optimizer.param_groups])
+            targets.append([group['lr'] for group in self.closed_form_opt.param_groups])
+
+        """
+        self.net = SchedulerTestNet()
+        self.optimizer = SGD(
+            [
+                {'params': self.net.conv1.parameters()},
+                {'params': self.net.conv2.parameters(), 'lr': self.base_lr * self.multiplier}
+            ], lr=self.base_lr)
+        scheduler.optimizer = self.optimizer
+        """
 
         for epoch in range(epochs):
-            scheduler.step()
             for i, param_group in enumerate(self.optimizer.param_groups):
                 assert abs(targets[epoch][i] - param_group['lr']) < EPSILON,\
                     "LR is wrong in epoch {}: expected {}, got {}".format(
                         epoch, targets[epoch][i], param_group['lr']
                     )
+            scheduler.step()
 
 
 def test_lwca_lr(tmpdir):
@@ -233,7 +247,6 @@ def test_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
     test_lr_scheduler._test_lr(scheduler, targets, epochs=max_epochs)
 
 
-"""
 def test_closed_form_lwca_lr(tmpdir):
     reset_seed()
 
@@ -262,15 +275,93 @@ def test_closed_form_lwca_lr(tmpdir):
     )
 
     test_lr_scheduler._test_against_closed_form(scheduler, closed_form_scheduler, epochs=max_epochs)
-"""
-"""
-# Test for non-zero start lr, non-zero end lr
-# test closed form
 
-1) 0 start lr, 0 end lr, random base_lr
-2) non-zero start lr, 0 end lr, random base_lr
-3) 0 start lr, non-zero end lr, random base_lr
-4) non-zero start lr, non-zero end lr, random base_lr
 
-5) repeat for closed form
-"""
+def test_closed_form_lwca_lr_with_nz_start_lr(tmpdir):
+    reset_seed()
+
+    warmup_start_lr = 0.2
+    base_lr = 0.8
+    eta_min=0.
+    warmup_epochs = 9
+    max_epochs = 28
+    multiplier=10
+
+    test_lr_scheduler = TestLRScheduler(base_lr=base_lr, multiplier=multiplier)
+    scheduler = LinearWarmupCosineAnnealingLR(
+        optimizer=test_lr_scheduler.optimizer,
+        warmup_epochs=warmup_epochs,
+        max_epochs=max_epochs,
+        warmup_start_lr=warmup_start_lr,
+        eta_min=eta_min
+    )
+
+    closed_form_scheduler = LinearWarmupCosineAnnealingLR(
+        optimizer=test_lr_scheduler.closed_form_opt,
+        warmup_epochs=warmup_epochs,
+        max_epochs=max_epochs,
+        warmup_start_lr=warmup_start_lr,
+        eta_min=eta_min
+    )
+
+    test_lr_scheduler._test_against_closed_form(scheduler, closed_form_scheduler, epochs=max_epochs)
+
+
+def test_closed_form_lwca_lr_with_nz_eta_min(tmpdir):
+    reset_seed()
+
+    warmup_start_lr = 0.
+    base_lr = 0.04
+    eta_min=0.0001
+    warmup_epochs = 15
+    max_epochs = 47
+    multiplier=17
+
+    test_lr_scheduler = TestLRScheduler(base_lr=base_lr, multiplier=multiplier)
+    scheduler = LinearWarmupCosineAnnealingLR(
+        optimizer=test_lr_scheduler.optimizer,
+        warmup_epochs=warmup_epochs,
+        max_epochs=max_epochs,
+        warmup_start_lr=warmup_start_lr,
+        eta_min=eta_min
+    )
+
+    closed_form_scheduler = LinearWarmupCosineAnnealingLR(
+        optimizer=test_lr_scheduler.closed_form_opt,
+        warmup_epochs=warmup_epochs,
+        max_epochs=max_epochs,
+        warmup_start_lr=warmup_start_lr,
+        eta_min=eta_min
+    )
+
+    test_lr_scheduler._test_against_closed_form(scheduler, closed_form_scheduler, epochs=max_epochs)
+
+
+def test_closed_form_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
+    reset_seed()
+
+    warmup_start_lr = 0.009
+    base_lr = 0.07
+    eta_min=0.003
+    warmup_epochs = 15
+    max_epochs = 115
+    multiplier=32
+
+    test_lr_scheduler = TestLRScheduler(base_lr=base_lr, multiplier=multiplier)
+    scheduler = LinearWarmupCosineAnnealingLR(
+        optimizer=test_lr_scheduler.optimizer,
+        warmup_epochs=warmup_epochs,
+        max_epochs=max_epochs,
+        warmup_start_lr=warmup_start_lr,
+        eta_min=eta_min
+    )
+
+    closed_form_scheduler = LinearWarmupCosineAnnealingLR(
+        optimizer=test_lr_scheduler.closed_form_opt,
+        warmup_epochs=warmup_epochs,
+        max_epochs=max_epochs,
+        warmup_start_lr=warmup_start_lr,
+        eta_min=eta_min
+    )
+
+    test_lr_scheduler._test_against_closed_form(scheduler, closed_form_scheduler, epochs=max_epochs)
