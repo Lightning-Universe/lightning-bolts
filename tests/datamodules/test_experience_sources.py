@@ -214,7 +214,7 @@ class TestExperienceSource(TestCase):
         for idx, exp in enumerate(self.source.stepper(self.device)):
 
             if idx == n_steps - 1:
-                self.assertEqual(self.source.total_rewards[0], 1)
+                self.assertEqual(self.source._total_rewards[0], 1)
                 self.assertEqual(self.source.total_steps[0], 1)
                 self.assertEqual(self.source.cur_rewards[0], 0)
                 self.assertEqual(self.source.cur_steps[0], 0)
@@ -224,7 +224,7 @@ class TestExperienceSource(TestCase):
 
     def test_pop_total_rewards(self):
         """Test that pop rewards returns correct rewards"""
-        self.source.total_rewards = [10, 20, 30]
+        self.source._total_rewards = [10, 20, 30]
 
         rewards = self.source.pop_total_rewards()
 

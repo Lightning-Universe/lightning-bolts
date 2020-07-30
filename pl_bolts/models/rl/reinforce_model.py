@@ -152,6 +152,7 @@ class Reinforce(pl.LightningModule):
             self.batch_actions.append(exp.action)
             self.cur_rewards.append(exp.reward)
 
+            # Check if episode is completed and update trackers
             if exp.done:
                 self.batch_qvals.extend(self.calc_qvals(self.cur_rewards))
                 self.cur_rewards.clear()

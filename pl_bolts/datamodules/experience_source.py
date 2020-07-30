@@ -67,13 +67,14 @@ class ExperienceSource(BaseExperienceSource):
         self.pool = env if isinstance(env, (list, tuple)) else [env]
 
         self.n_steps = n_steps
-        self.total_rewards = []
         self.total_steps = []
         self.states = []
         self.histories = []
         self.cur_rewards = []
         self.cur_steps = []
         self.iter_idx = 0
+
+        self._total_rewards = []
 
         self.init_envs()
 
@@ -180,7 +181,7 @@ class ExperienceSource(BaseExperienceSource):
             env: current environment to be reset
             env_idx: index of the environment used to update stats
         """
-        self.total_rewards.append(self.cur_rewards[env_idx])
+        self._total_rewards.append(self.cur_rewards[env_idx])
         self.total_steps.append(self.cur_steps[env_idx])
         self.cur_rewards[env_idx] = 0
         self.cur_steps[env_idx] = 0
@@ -193,10 +194,10 @@ class ExperienceSource(BaseExperienceSource):
         Returns:
             list of total rewards for all completed episodes for each environment since last pop
         """
-        rewards = self.total_rewards
+        rewards = self._total_rewards
 
         if rewards:
-            self.total_rewards = []
+            self._total_rewards = []
             self.total_steps = []
 
         return rewards
@@ -208,9 +209,9 @@ class ExperienceSource(BaseExperienceSource):
         Returns:
             list of total rewards and steps for all completed episodes for each environment since last pop
         """
-        res = list(zip(self.total_rewards, self.total_steps))
+        res = list(zip(self._total_rewards, self.total_steps))
         if res:
-            self.total_rewards, self.total_steps = [], []
+            self._total_rewards, self.total_steps = [], []
         return res
 
 
