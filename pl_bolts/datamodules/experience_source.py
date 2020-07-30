@@ -65,6 +65,7 @@ class ExperienceSource(BaseExperienceSource):
         super().__init__(env, agent)
 
         self.pool = env if isinstance(env, (list, tuple)) else [env]
+        self.exp_history_queue = deque()
 
         self.n_steps = n_steps
         self.total_steps = []
@@ -89,7 +90,6 @@ class ExperienceSource(BaseExperienceSource):
             Tuple of Experiences
         """
         while True:
-
             # get actions for all envs
             actions = self.env_actions(device)
 
@@ -101,27 +101,47 @@ class ExperienceSource(BaseExperienceSource):
                 history.append(exp)
                 self.states[env_idx] = exp.new_state
 
-                if len(history) == self.n_steps:
-                    yield tuple(history)
+                self.update_history_queue(env_idx, exp, history)
 
-                if exp.done:
-                    if 0 < len(history) < self.n_steps:
-                        yield tuple(history)
-
-                    # generate tail of history
-                    while len(history) > 2:
-                        history.popleft()
-                        yield tuple(history)
-
-                    if len(history) > 1:
-                        self.update_env_stats(env, env_idx)
-
-                        history.popleft()
-                        yield tuple(history)
-
-                    history.clear()
+                # Yield all accumulated history tuples to model
+                while self.exp_history_queue:
+                    yield self.exp_history_queue.popleft()
 
             self.iter_idx += 1
+
+    def update_history_queue(self, env_idx, exp, history) -> None:
+        """
+        Updates the experience history queue with the lastest experiences. In the event of an experience step is in
+        the done state, the history will be incrementally appended to the queue, removing the tail of the history
+        each time.
+        Args:
+            env_idx: index of the environment
+            exp: the current experience
+            history: history of experience steps for this environment
+        """
+        # If there is a full history of step, append history to queue
+        if len(history) == self.n_steps:
+            self.exp_history_queue.append(tuple(history))
+
+        if exp.done:
+            if 0 < len(history) < self.n_steps:
+                self.exp_history_queue.append(tuple(history))
+
+            # generate tail of history, incrementally append history to queue
+            while len(history) > 2:
+                history.popleft()
+                self.exp_history_queue.append(tuple(history))
+
+            # when there are only 2 experiences left in the history,
+            # append to the queue then update the env stats and reset the environment
+            if len(history) > 1:
+                self.update_env_stats(env_idx)
+
+                history.popleft()
+                self.exp_history_queue.append(tuple(history))
+
+            # Clear that last tail in the history once all others have been added to the queue
+            history.clear()
 
     def init_envs(self) -> None:
         """
@@ -172,20 +192,19 @@ class ExperienceSource(BaseExperienceSource):
 
         return exp
 
-    def update_env_stats(self, env: gym.Env, env_idx: int) -> None:
+    def update_env_stats(self, env_idx: int) -> None:
         """
         To be called at the end of the history tail generation during the termination state. Updates the stats
         tracked for all environments
 
         Args:
-            env: current environment to be reset
             env_idx: index of the environment used to update stats
         """
         self._total_rewards.append(self.cur_rewards[env_idx])
         self.total_steps.append(self.cur_steps[env_idx])
         self.cur_rewards[env_idx] = 0
         self.cur_steps[env_idx] = 0
-        self.states[env_idx] = env.reset()
+        self.states[env_idx] = self.pool[env_idx].reset()
 
     def pop_total_rewards(self) -> List[float]:
         """
@@ -213,6 +232,170 @@ class ExperienceSource(BaseExperienceSource):
         if res:
             self._total_rewards, self.total_steps = [], []
         return res
+
+#
+# class ExperienceSource(BaseExperienceSource):
+#     """
+#     Experience source class handling single and multiple environment steps
+#
+#     Args:
+#         env: Environment that is being used
+#         agent: Agent being used to make decisions
+#         n_steps: Number of steps to return from each environment at once
+#     """
+#
+#     def __init__(self, env, agent, n_steps: int = 1) -> None:
+#         super().__init__(env, agent)
+#
+#         self.pool = env if isinstance(env, (list, tuple)) else [env]
+#
+#         self.n_steps = n_steps
+#         self.total_steps = []
+#         self.states = []
+#         self.histories = []
+#         self.cur_rewards = []
+#         self.cur_steps = []
+#         self.iter_idx = 0
+#
+#         self._total_rewards = []
+#
+#         self.init_envs()
+#
+#     def stepper(self, device: torch.device) -> Tuple[Experience]:
+#         """Experience Source iterator yielding Tuple of experiences for n_steps. These come from the pool
+#         of environments provided by the user.
+#
+#         Args:
+#             device: current device to be used for executing experience steps
+#
+#         Returns:
+#             Tuple of Experiences
+#         """
+#         while True:
+#
+#             # get actions for all envs
+#             actions = self.env_actions(device)
+#
+#             # step through each env
+#             for env_idx, (env, action) in enumerate(zip(self.pool, actions)):
+#
+#                 exp = self.env_step(env_idx, env, action)
+#                 history = self.histories[env_idx]
+#                 history.append(exp)
+#                 self.states[env_idx] = exp.new_state
+#
+#                 if len(history) == self.n_steps:
+#                     yield tuple(history)
+#
+#                 if exp.done:
+#                     if 0 < len(history) < self.n_steps:
+#                         yield tuple(history)
+#
+#                     # generate tail of history
+#                     while len(history) > 2:
+#                         history.popleft()
+#                         yield tuple(history)
+#
+#                     if len(history) > 1:
+#                         self.update_env_stats(env, env_idx)
+#
+#                         history.popleft()
+#                         yield tuple(history)
+#
+#                     history.clear()
+#
+#             self.iter_idx += 1
+#
+#     def init_envs(self) -> None:
+#         """
+#         For each environment in the pool setups lists for tracking history of size n, state, current reward and
+#         current step
+#         """
+#         for env in self.pool:
+#             self.states.append(env.reset())
+#             self.histories.append(deque(maxlen=self.n_steps))
+#             self.cur_rewards.append(0.0)
+#             self.cur_steps.append(0)
+#
+#     def env_actions(self, device) -> List[List[int]]:
+#         """
+#         For each environment in the pool, get the correct action
+#
+#         Returns:
+#             List of actions for each env, with size (num_envs, action_size)
+#         """
+#         actions = []
+#         states_actions = self.agent(self.states, device)
+#
+#         assert len(self.states) == len(states_actions)
+#
+#         for idx, action in enumerate(states_actions):
+#             actions.append(action if isinstance(action, list) else [action])
+#
+#         return actions
+#
+#     def env_step(self, env_idx: int, env: Env, action: List[int]) -> Experience:
+#         """
+#         Carries out a step through the given environment using the given action
+#
+#         Args:
+#             env_idx: index of the current environment
+#             env: env at index env_idx
+#             action: action for this environment step
+#
+#         Returns:
+#             Experience tuple
+#         """
+#         next_state, r, is_done, _ = env.step(action[0])
+#
+#         self.cur_rewards[env_idx] += r
+#         self.cur_steps[env_idx] += 1
+#
+#         exp = Experience(state=self.states[env_idx], action=action[0], reward=r, done=is_done, new_state=next_state)
+#
+#         return exp
+#
+#     def update_env_stats(self, env: gym.Env, env_idx: int) -> None:
+#         """
+#         To be called at the end of the history tail generation during the termination state. Updates the stats
+#         tracked for all environments
+#
+#         Args:
+#             env: current environment to be reset
+#             env_idx: index of the environment used to update stats
+#         """
+#         self._total_rewards.append(self.cur_rewards[env_idx])
+#         self.total_steps.append(self.cur_steps[env_idx])
+#         self.cur_rewards[env_idx] = 0
+#         self.cur_steps[env_idx] = 0
+#         self.states[env_idx] = env.reset()
+#
+#     def pop_total_rewards(self) -> List[float]:
+#         """
+#         Returns the list of the current total rewards collected
+#
+#         Returns:
+#             list of total rewards for all completed episodes for each environment since last pop
+#         """
+#         rewards = self._total_rewards
+#
+#         if rewards:
+#             self._total_rewards = []
+#             self.total_steps = []
+#
+#         return rewards
+#
+#     def pop_rewards_steps(self):
+#         """
+#         Returns the list of the current total rewards and steps collected
+#
+#         Returns:
+#             list of total rewards and steps for all completed episodes for each environment since last pop
+#         """
+#         res = list(zip(self._total_rewards, self.total_steps))
+#         if res:
+#             self._total_rewards, self.total_steps = [], []
+#         return res
 
 
 class DiscountedExperienceSource(ExperienceSource):
@@ -274,3 +457,4 @@ class DiscountedExperienceSource(ExperienceSource):
         for exp in reversed(experiences):
             total_reward = (self.gamma * total_reward) + exp.reward
         return total_reward
+
