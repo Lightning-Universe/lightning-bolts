@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 import torch
 import torchvision
-from pytorch_lightning import LightningModule, Trainer
+from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
 
@@ -25,7 +25,7 @@ class VAE(LightningModule):
             batch_size: int = 32,
             learning_rate: float = 0.001,
             data_dir: str = '.',
-            datamodule: pl_bolts.datamodules.LightningDataModule = None,
+            datamodule: LightningDataModule = None,
             pretrained: str = None,
             **kwargs
     ):
@@ -231,15 +231,6 @@ class VAE(LightningModule):
 
     def prepare_data(self):
         self.datamodule.prepare_data()
-
-    def train_dataloader(self):
-        return self.datamodule.train_dataloader(self.hparams.batch_size)
-
-    def val_dataloader(self):
-        return self.datamodule.val_dataloader(self.hparams.batch_size)
-
-    def test_dataloader(self):
-        return self.datamodule.test_dataloader(self.hparams.batch_size)
 
     @staticmethod
     def add_model_specific_args(parent_parser):

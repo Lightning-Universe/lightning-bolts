@@ -46,8 +46,8 @@ class Projection(nn.Module):
 
 class SimCLR(pl.LightningModule):
     def __init__(self,
-                 datamodule: pl_bolts.datamodules.LightningDataModule = None,
-                 data_dir: str = '',
+                 datamodule: pl.LightningDataModule = None,
+                 data_dir: str = './',
                  learning_rate: float = 0.00006,
                  weight_decay: float = 0.0005,
                  input_height: int = 32,
@@ -117,11 +117,12 @@ class SimCLR(pl.LightningModule):
 
         # init default datamodule
         if datamodule is None:
-            datamodule = CIFAR10DataModule(data_dir, num_workers=num_workers)
+            datamodule = CIFAR10DataModule(data_dir, num_workers=num_workers, batch_size=batch_size)
             datamodule.train_transforms = SimCLRTrainDataTransform(input_height)
             datamodule.val_transforms = SimCLREvalDataTransform(input_height)
 
         self.datamodule = datamodule
+
         self.loss_func = self.init_loss()
         self.encoder = self.init_encoder()
         self.projection = self.init_projection()
@@ -233,12 +234,6 @@ class SimCLR(pl.LightningModule):
 
     def prepare_data(self):
         self.datamodule.prepare_data()
-
-    def train_dataloader(self):
-        return self.datamodule.train_dataloader(self.hparams.batch_size)
-
-    def val_dataloader(self):
-        return self.datamodule.val_dataloader(self.hparams.batch_size)
 
     def configure_optimizers(self):
         if self.hparams.optimizer == 'adam':

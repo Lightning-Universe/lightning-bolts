@@ -4,8 +4,7 @@ import torch
 import numpy as np
 from sklearn.utils import shuffle as sk_shuffle
 from torch.utils.data import Dataset, DataLoader
-
-from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
+from pytorch_lightning import LightningDataModule
 
 
 class SklearnDataset(Dataset):
