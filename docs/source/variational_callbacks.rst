@@ -11,5 +11,11 @@ Latent Dim Interpolator
 -----------------------
 Interpolates latent dims.
 
+Example output:
+
+    .. image:: _images/gans/basic_gan_interpolate.jpg
+        :width: 400
+        :alt: Example latent space interpolation
+
 .. autoclass:: pl_bolts.callbacks.variational.LatentDimInterpolator
    :noindex:
