@@ -71,7 +71,7 @@ class PERDQN(DQN):
             yields a Experience tuple containing the state, action, reward, done and next_state.
         """
 
-        for step_idx, exp in enumerate(self.source.stepper(self.device)):
+        for step_idx, exp in enumerate(self.source.runner(self.device)):
 
             self.agent.update_epsilon(self.global_step)
             self.buffer.append(exp)

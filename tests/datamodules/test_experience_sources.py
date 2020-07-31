@@ -113,7 +113,7 @@ class TestExperienceSource(TestCase):
         self.env = [gym.make("CartPole-v0") for _ in range(1)]
         self.source = ExperienceSource(self.env, self.agent, n_steps=1)
 
-        for idx, exp in enumerate(self.source.stepper(self.device)):
+        for idx, exp in enumerate(self.source.runner(self.device)):
             self.assertTrue(isinstance(exp, tuple))
             break
 
@@ -124,7 +124,7 @@ class TestExperienceSource(TestCase):
         n_steps = 4
         self.source = ExperienceSource(self.env, self.agent, n_steps=n_steps)
 
-        for idx, exp in enumerate(self.source.stepper(self.device)):
+        for idx, exp in enumerate(self.source.runner(self.device)):
             self.assertTrue(isinstance(exp, tuple))
             self.assertTrue(len(exp) == n_steps)
             break
@@ -132,7 +132,7 @@ class TestExperienceSource(TestCase):
     def test_source_next_multi_env_single_step(self):
         """Test that steps are executed correctly with 2 environment and 1 step"""
 
-        for idx, exp in enumerate(self.source.stepper(self.device)):
+        for idx, exp in enumerate(self.source.runner(self.device)):
             self.assertTrue(isinstance(exp, tuple))
             self.assertTrue(len(exp) == self.source.n_steps)
             break
@@ -141,7 +141,7 @@ class TestExperienceSource(TestCase):
         """Test that steps are executed correctly with 2 environment and 2 step"""
         self.source = ExperienceSource(self.env, self.agent, n_steps=2)
 
-        for idx, exp in enumerate(self.source.stepper(self.device)):
+        for idx, exp in enumerate(self.source.runner(self.device)):
             self.assertTrue(isinstance(exp, tuple))
             self.assertTrue(len(exp) == self.source.n_steps)
             break
@@ -152,7 +152,7 @@ class TestExperienceSource(TestCase):
         self.env = [gym.make("CartPole-v0") for _ in range(1)]
         self.source = ExperienceSource(self.env, self.agent, n_steps=2)
 
-        for idx, exp in enumerate(self.source.stepper(self.device)):
+        for idx, exp in enumerate(self.source.runner(self.device)):
             self.assertTrue(isinstance(exp, tuple))
             new = np.asarray(exp[-1].new_state)
             old = np.asarray(self.source.states[0])
@@ -167,7 +167,7 @@ class TestExperienceSource(TestCase):
         env = [self.mock_env for _ in range(1)]
         self.source = ExperienceSource(env, self.agent, n_steps=2)
 
-        for idx, exp in enumerate(self.source.stepper(self.device)):
+        for idx, exp in enumerate(self.source.runner(self.device)):
             self.assertTrue(isinstance(exp, tuple))
             self.assertTrue(len(exp) == 1)
             break
@@ -185,7 +185,7 @@ class TestExperienceSource(TestCase):
 
         self.source.histories[0].append(self.exp1)
 
-        for idx, exp in enumerate(self.source.stepper(self.device)):
+        for idx, exp in enumerate(self.source.runner(self.device)):
 
             self.assertTrue(isinstance(exp, tuple))
 
@@ -211,7 +211,7 @@ class TestExperienceSource(TestCase):
         history = self.source.histories[0]
         history += [self.exp1, self.exp2, self.exp2]
 
-        for idx, exp in enumerate(self.source.stepper(self.device)):
+        for idx, exp in enumerate(self.source.runner(self.device)):
 
             if idx == n_steps - 1:
                 self.assertEqual(self.source._total_rewards[0], 1)
@@ -276,7 +276,7 @@ class TestDiscountedExperienceSource(TestCase):
     def test_source_step(self):
         """Tests that the source returns a single experience"""
 
-        for idx, exp in enumerate(self.source.stepper(self.device)):
+        for idx, exp in enumerate(self.source.runner(self.device)):
             self.assertTrue(isinstance(exp, Experience))
             break
 
@@ -290,7 +290,7 @@ class TestDiscountedExperienceSource(TestCase):
         self.source.histories[0].append(self.exp1)
         self.source.histories[0].append(self.exp2)
 
-        for idx, exp in enumerate(self.source.stepper(self.device)):
+        for idx, exp in enumerate(self.source.runner(self.device)):
             self.assertTrue(isinstance(exp, Experience))
             self.assertTrue(torch.all(torch.eq(exp.new_state, self.next_state)))
             break
@@ -314,7 +314,7 @@ class TestDiscountedExperienceSource(TestCase):
             (self.source.gamma * self.reward) ** 2
         )
 
-        for idx, exp in enumerate(self.source.stepper(self.device)):
+        for idx, exp in enumerate(self.source.runner(self.device)):
             self.assertTrue(isinstance(exp, Experience))
             self.assertEqual(exp.reward, discounted_reward)
             break

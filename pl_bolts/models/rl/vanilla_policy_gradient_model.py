@@ -119,7 +119,7 @@ class VanillaPolicyGradient(pl.LightningModule):
         Returns:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
         """
-        for step_idx, exp in enumerate(self.exp_source.stepper(self.device)):
+        for step_idx, exp in enumerate(self.exp_source.runner(self.device)):
 
             self.reward_sum += exp.reward
             self.baseline = self.reward_sum / (self.total_steps + 1)

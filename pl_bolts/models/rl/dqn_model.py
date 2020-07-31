@@ -154,7 +154,7 @@ class DQN(pl.LightningModule):
         if warm_start > 0:
             for _ in range(warm_start):
                 self.source.agent.epsilon = 1.0
-                exp = next(self.source.stepper(self.device))
+                exp = next(self.source.runner(self.device))
                 self.buffer.append(exp)
 
     def build_networks(self) -> None:
@@ -182,7 +182,7 @@ class DQN(pl.LightningModule):
             yields a Experience tuple containing the state, action, reward, done and next_state.
         """
 
-        for step_idx, exp in enumerate(self.source.stepper(self.device)):
+        for step_idx, exp in enumerate(self.source.runner(self.device)):
 
             self.agent.update_epsilon(self.global_step)
             self.buffer.append(exp)

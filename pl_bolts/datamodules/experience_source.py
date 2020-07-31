@@ -46,7 +46,7 @@ class BaseExperienceSource(ABC):
         self.env = env
         self.agent = agent
 
-    def stepper(self) -> Experience:
+    def runner(self) -> Experience:
         """Iterable method that yields steps from the experience source"""
         raise NotImplementedError("ExperienceSource has no stepper method implemented")
 
@@ -79,7 +79,7 @@ class ExperienceSource(BaseExperienceSource):
 
         self.init_envs()
 
-    def stepper(self, device: torch.device) -> Tuple[Experience]:
+    def runner(self, device: torch.device) -> Tuple[Experience]:
         """Experience Source iterator yielding Tuple of experiences for n_steps. These come from the pool
         of environments provided by the user.
 
@@ -242,7 +242,7 @@ class DiscountedExperienceSource(ExperienceSource):
         self.gamma = gamma
         self.steps = n_steps
 
-    def stepper(self, device: torch.device) -> Experience:
+    def runner(self, device: torch.device) -> Experience:
         """
         Iterates through experience tuple and calculate discounted experience
 
@@ -252,7 +252,7 @@ class DiscountedExperienceSource(ExperienceSource):
         Yields:
             Discounted Experience
         """
-        for experiences in super().stepper(device):
+        for experiences in super().runner(device):
             last_exp_state, tail_experiences = self.split_head_tail_exp(experiences)
 
             total_reward = self.discount_rewards(tail_experiences)

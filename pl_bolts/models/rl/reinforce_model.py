@@ -146,7 +146,7 @@ class Reinforce(pl.LightningModule):
         Returns:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
         """
-        for exp in self.exp_source.stepper(self.device):
+        for exp in self.exp_source.runner(self.device):
 
             self.batch_states.append(exp.state)
             self.batch_actions.append(exp.action)
