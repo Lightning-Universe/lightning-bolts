@@ -3,7 +3,7 @@ from torch import nn
 from pytorch_lightning import Callback
 
 
-class ConfusedLogitCallback(Callback):
+class ConfusedLogitCallback(Callback):  # pragma: no-cover
 
     def __init__(
             self,
