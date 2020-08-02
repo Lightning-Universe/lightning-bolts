@@ -99,7 +99,7 @@ class ImagenetDataModule(LightningDataModule):
                 UnlabeledImagenet.generate_meta_bins(path)
                 """)
 
-    def train_dataloader(self, batch_size):
+    def train_dataloader(self):
         """
         Uses the train split of imagenet2012 and puts away a portion of it for the validation split
 

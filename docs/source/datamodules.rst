@@ -102,13 +102,13 @@ Example::
         def prepare_data(self):
             # download and do something to your data
 
-        def train_dataloader(self, batch_size):
+        def train_dataloader(self):
             return DataLoader(...)
 
-        def val_dataloader(self, batch_size):
+        def val_dataloader(self):
             return DataLoader(...)
 
-        def test_dataloader(self, batch_size):
+        def test_dataloader(self):
             return DataLoader(...)
 
 Then use this in any model you want.
