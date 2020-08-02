@@ -17,6 +17,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             unlabeled_val_split: int = 5000,
             train_val_split: int = 500,
             num_workers: int = 16,
+            batch_size: int = 32,
             *args,
             **kwargs,
     ):
@@ -46,6 +47,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             unlabeled_val_split: how many images from the unlabeled training split to use for validation
             train_val_split: how many images from the labeled training split to use for validation
             num_workers: how many workers to use for loading data
+            batch_size: the batch size
         """
         super().__init__(*args, **kwargs)
         self.dims = (3, 96, 96)
@@ -53,6 +55,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         self.unlabeled_val_split = unlabeled_val_split
         self.train_val_split = train_val_split
         self.num_workers = num_workers
+        self.batch_size = batch_size
 
     @property
     def num_classes(self):
@@ -69,10 +72,6 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
     def train_dataloader(self):
         """
         Loads the 'unlabeled' split minus a portion set aside for validation via `unlabeled_val_split`.
-
-        Args:
-
-            batch_size: the batch size
         """
         transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
 
@@ -83,7 +82,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
                                          self.unlabeled_val_split])
         loader = DataLoader(
             dataset_train,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=True,
             num_workers=self.num_workers,
             drop_last=True,
@@ -121,7 +120,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         dataset = ConcatDataset(unlabeled_dataset, labeled_dataset)
         loader = DataLoader(
             dataset,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=True,
             num_workers=self.num_workers,
             drop_last=True,
@@ -148,7 +147,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
                                        self.unlabeled_val_split])
         loader = DataLoader(
             dataset_val,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
             pin_memory=True
@@ -190,7 +189,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         dataset = ConcatDataset(unlabeled_dataset, labeled_dataset)
         loader = DataLoader(
             dataset,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
             drop_last=True,
@@ -211,7 +210,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         dataset = STL10(self.data_dir, split='test', download=False, transform=transforms)
         loader = DataLoader(
             dataset,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
             drop_last=True,
