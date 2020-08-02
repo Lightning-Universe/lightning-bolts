@@ -19,6 +19,7 @@ class ImagenetDataModule(LightningDataModule):
             num_imgs_per_val_class: int = 50,
             image_size: int = 224,
             num_workers: int = 16,
+            batch_size: int = 32,
             *args,
             **kwargs,
     ):
@@ -45,6 +46,7 @@ class ImagenetDataModule(LightningDataModule):
             num_imgs_per_val_class: how many images per class for the validation set
             image_size: final image size
             num_workers: how many data workers
+            batch_size: batch_size
         """
         super().__init__(*args, **kwargs)
         self.image_size = image_size
@@ -53,6 +55,7 @@ class ImagenetDataModule(LightningDataModule):
         self.num_workers = num_workers
         self.meta_dir = meta_dir
         self.num_imgs_per_val_class = num_imgs_per_val_class
+        self.batch_size = batch_size
 
     @property
     def num_classes(self):
@@ -102,10 +105,6 @@ class ImagenetDataModule(LightningDataModule):
     def train_dataloader(self):
         """
         Uses the train split of imagenet2012 and puts away a portion of it for the validation split
-
-        Args:
-            batch_size: the batch size
-            transforms: the transforms
         """
         transforms = self.train_transform() if self.train_transforms is None else self.train_transforms
 
@@ -116,7 +115,7 @@ class ImagenetDataModule(LightningDataModule):
                                     transform=transforms)
         loader = DataLoader(
             dataset,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=True,
             num_workers=self.num_workers,
             drop_last=True,
@@ -124,7 +123,7 @@ class ImagenetDataModule(LightningDataModule):
         )
         return loader
 
-    def val_dataloader(self, batch_size, transforms=None):
+    def val_dataloader(self):
         """
         Uses the part of the train split of imagenet2012  that was not used for training via `num_imgs_per_val_class`
 
@@ -141,32 +140,27 @@ class ImagenetDataModule(LightningDataModule):
                                     transform=transforms)
         loader = DataLoader(
             dataset,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
             pin_memory=True
         )
         return loader
 
-    def test_dataloader(self, batch_size, num_images_per_class=-1, transforms=None):
+    def test_dataloader(self):
         """
         Uses the validation split of imagenet2012 for testing
-
-        Args:
-            batch_size: the batch size
-            num_images_per_class: how many images per class to test on
-            transforms: the transforms
         """
         transforms = self.val_transform() if self.test_transforms is None else self.test_transforms
 
         dataset = UnlabeledImagenet(self.data_dir,
-                                    num_imgs_per_class=num_images_per_class,
+                                    num_imgs_per_class=-1,
                                     meta_dir=self.meta_dir,
                                     split='test',
                                     transform=transforms)
         loader = DataLoader(
             dataset,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
             drop_last=True,
