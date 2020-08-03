@@ -65,16 +65,6 @@ class TestLRScheduler(object):
             closed_form_scheduler.step(epoch)
             targets.append([group['lr'] for group in self.closed_form_opt.param_groups])
 
-        """
-        self.net = SchedulerTestNet()
-        self.optimizer = SGD(
-            [
-                {'params': self.net.conv1.parameters()},
-                {'params': self.net.conv2.parameters(), 'lr': self.base_lr * self.multiplier}
-            ], lr=self.base_lr)
-        scheduler.optimizer = self.optimizer
-        """
-
         for epoch in range(epochs):
             for i, param_group in enumerate(self.optimizer.param_groups):
                 assert abs(targets[epoch][i] - param_group['lr']) < EPSILON,\
@@ -89,10 +79,10 @@ def test_lwca_lr(tmpdir):
 
     warmup_start_lr = 0.
     base_lr = 0.4
-    eta_min=0.
+    eta_min = 0.
     warmup_epochs = 6
     max_epochs = 15
-    multiplier=10
+    multiplier = 10
 
     # define target schedule
     targets = []
@@ -129,10 +119,10 @@ def test_lwca_lr_with_nz_start_lr(tmpdir):
 
     warmup_start_lr = 0.2
     base_lr = 0.8
-    eta_min=0.
+    eta_min = 0.
     warmup_epochs = 9
     max_epochs = 28
-    multiplier=10
+    multiplier = 10
 
     # define target schedule
     targets = []
@@ -170,10 +160,10 @@ def test_lwca_lr_with_nz_eta_min(tmpdir):
 
     warmup_start_lr = 0.
     base_lr = 0.04
-    eta_min=0.0001
+    eta_min = 0.0001
     warmup_epochs = 15
     max_epochs = 47
-    multiplier=17
+    multiplier = 17
 
     # define target schedule
     targets = []
@@ -211,10 +201,10 @@ def test_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
 
     warmup_start_lr = 0.009
     base_lr = 0.07
-    eta_min=0.003
+    eta_min = 0.003
     warmup_epochs = 15
     max_epochs = 115
-    multiplier=32
+    multiplier = 32
 
     # define target schedule
     targets = []
@@ -252,10 +242,10 @@ def test_closed_form_lwca_lr(tmpdir):
 
     warmup_start_lr = 0.
     base_lr = 0.4
-    eta_min=0.
+    eta_min = 0.
     warmup_epochs = 6
     max_epochs = 15
-    multiplier=10
+    multiplier = 10
 
     test_lr_scheduler = TestLRScheduler(base_lr=base_lr, multiplier=multiplier)
     scheduler = LinearWarmupCosineAnnealingLR(
@@ -282,10 +272,10 @@ def test_closed_form_lwca_lr_with_nz_start_lr(tmpdir):
 
     warmup_start_lr = 0.2
     base_lr = 0.8
-    eta_min=0.
+    eta_min = 0.
     warmup_epochs = 9
     max_epochs = 28
-    multiplier=10
+    multiplier = 10
 
     test_lr_scheduler = TestLRScheduler(base_lr=base_lr, multiplier=multiplier)
     scheduler = LinearWarmupCosineAnnealingLR(
@@ -312,10 +302,10 @@ def test_closed_form_lwca_lr_with_nz_eta_min(tmpdir):
 
     warmup_start_lr = 0.
     base_lr = 0.04
-    eta_min=0.0001
+    eta_min = 0.0001
     warmup_epochs = 15
     max_epochs = 47
-    multiplier=17
+    multiplier = 17
 
     test_lr_scheduler = TestLRScheduler(base_lr=base_lr, multiplier=multiplier)
     scheduler = LinearWarmupCosineAnnealingLR(
@@ -342,10 +332,10 @@ def test_closed_form_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
 
     warmup_start_lr = 0.009
     base_lr = 0.07
-    eta_min=0.003
+    eta_min = 0.003
     warmup_epochs = 15
     max_epochs = 115
-    multiplier=32
+    multiplier = 32
 
     test_lr_scheduler = TestLRScheduler(base_lr=base_lr, multiplier=multiplier)
     scheduler = LinearWarmupCosineAnnealingLR(
