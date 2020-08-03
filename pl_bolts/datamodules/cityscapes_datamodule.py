@@ -23,7 +23,7 @@ class CityscapesDataModule(LightningDataModule):
         """
         Standard Cityscapes, train, val, test splits and transforms
 
-        Transforms:
+        Transforms::
 
             transforms = transform_lib.Compose([
                 transform_lib.ToTensor(),
