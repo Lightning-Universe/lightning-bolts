@@ -317,9 +317,6 @@ class MocoV2(pl.LightningModule):
                                     weight_decay=self.hparams.weight_decay)
         return optimizer
 
-    def prepare_data(self):
-        self.datamodule.prepare_data()
-
     @staticmethod
     def add_model_specific_args(parent_parser):
         from test_tube import HyperOptArgumentParser
