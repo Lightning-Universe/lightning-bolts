@@ -333,9 +333,6 @@ class CPCV2(pl.LightningModule):
 
         return [opt]  # , [lr_scheduler]
 
-    def prepare_data(self):
-        self.datamodule.prepare_data()
-
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
