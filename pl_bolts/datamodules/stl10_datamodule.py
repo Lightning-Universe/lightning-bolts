@@ -205,7 +205,6 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size: the batch size
             transforms: the transforms
         """
-        import pdb; pdb.set_trace()
         transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
 
         dataset = STL10(self.data_dir, split='test', download=False, transform=transforms)
