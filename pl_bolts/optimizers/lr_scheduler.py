@@ -15,7 +15,12 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         after each iteration as calling it after each epoch will keep the starting lr at
         warmup_start_lr for the first epoch which is 0 in most cases.
 
-    TODO: what to pass per step and how to use it in lightning
+    .. warning::
+        passing epoch to :func:`.step()` is being deprecated and comes with an EPOCH_DEPRECATION_WARNING.
+        It calls the :func:`_get_closed_form_lr()` method for this scheduler instead of
+        :func:`get_lr()`. Though this does not change the behavior of the scheduler, when passing
+        epoch param to :func:`.step()`, the user should call the :func:`.step()` function before calling
+        train and validation methods.
 
     Args:
         optimizer (Optimizer): Wrapped optimizer.
@@ -26,7 +31,19 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         last_epoch (int): The index of last epoch. Default: -1.
 
     Example:
-        >>> fill out with lightning example
+        >>> scheduler = LinearWarmupCosineAnnealingLR(optimizer, warmup_epochs=10, max_epochs=40)
+        >>> #
+        >>> # the default case
+        >>> for epoch in range(40):
+        >>>     train(...)
+        >>>     validate(...)
+        >>>     scheduler.step()
+        >>> #
+        >>> # passing epoch param case
+        >>> for epoch in range(40):
+        >>>     scheduler.step(epoch)
+        >>>     train(...)
+        >>>     validate(...)
     """
 
     def __init__(
