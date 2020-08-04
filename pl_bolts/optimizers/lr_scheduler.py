@@ -39,15 +39,15 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         >>> #
         >>> # the default case
         >>> for epoch in range(40):
-        ...     train(...)
-        ...     validate(...)
+        ...     # train(...)
+        ...     # validate(...)
         ...     scheduler.step()
         >>> #
         >>> # passing epoch param case
         >>> for epoch in range(40):
         ...     scheduler.step(epoch)
-        ...     train(...)
-        ...     validate(...)
+        ...     # train(...)
+        ...     # validate(...)
     """
 
     def __init__(
