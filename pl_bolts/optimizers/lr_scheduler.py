@@ -1,7 +1,8 @@
 import math
 import warnings
 
-from torch.optim import Optimizer
+import torch.nn as nn
+from torch.optim import Optimizer, Adam
 from torch.optim.lr_scheduler import _LRScheduler
 
 
@@ -32,6 +33,8 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         last_epoch (int): The index of last epoch. Default: -1.
 
     Example:
+        >>> layer = nn.Linear(10)
+        >>> optimizer = Adam(layer.parameters(), lr=0.02)
         >>> scheduler = LinearWarmupCosineAnnealingLR(optimizer, warmup_epochs=10, max_epochs=40)
         >>> #
         >>> # the default case
