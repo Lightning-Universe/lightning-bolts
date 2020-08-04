@@ -1,3 +1,4 @@
+import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
@@ -18,6 +19,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             train_val_split: int = 500,
             num_workers: int = 16,
             batch_size: int = 32,
+            seed: int = 42,
             *args,
             **kwargs,
     ):
@@ -56,6 +58,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         self.train_val_split = train_val_split
         self.num_workers = num_workers
         self.batch_size = batch_size
+        self.seed = seed
 
     @property
     def num_classes(self):
@@ -78,8 +81,8 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
         dataset_train, _ = random_split(dataset,
-                                        [train_length - self.unlabeled_val_split,
-                                         self.unlabeled_val_split])
+                                        [train_length - self.unlabeled_val_split, self.unlabeled_val_split],
+                                        generator=torch.Generator().manual_seed(self.seed))
         loader = DataLoader(
             dataset_train,
             batch_size=self.batch_size,
@@ -108,14 +111,14 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
                                   transform=transforms)
         unlabeled_length = len(unlabeled_dataset)
         unlabeled_dataset, _ = random_split(unlabeled_dataset,
-                                            [unlabeled_length - self.unlabeled_val_split,
-                                             self.unlabeled_val_split])
+                                            [unlabeled_length - self.unlabeled_val_split, self.unlabeled_val_split],
+                                            generator=torch.Generator().manual_seed(self.seed))
 
         labeled_dataset = STL10(self.data_dir, split='train', download=False, transform=transforms)
         labeled_length = len(labeled_dataset)
         labeled_dataset, _ = random_split(labeled_dataset,
-                                          [labeled_length - self.train_val_split,
-                                           self.train_val_split])
+                                          [labeled_length - self.train_val_split, self.train_val_split],
+                                          generator=torch.Generator().manual_seed(self.seed))
 
         dataset = ConcatDataset(unlabeled_dataset, labeled_dataset)
         loader = DataLoader(
@@ -143,8 +146,8 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
         _, dataset_val = random_split(dataset,
-                                      [train_length - self.unlabeled_val_split,
-                                       self.unlabeled_val_split])
+                                      [train_length - self.unlabeled_val_split, self.unlabeled_val_split],
+                                      generator=torch.Generator().manual_seed(self.seed))
         loader = DataLoader(
             dataset_val,
             batch_size=self.batch_size,
@@ -177,14 +180,14 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
                                   transform=transforms)
         unlabeled_length = len(unlabeled_dataset)
         _, unlabeled_dataset = random_split(unlabeled_dataset,
-                                            [unlabeled_length - self.unlabeled_val_split,
-                                             self.unlabeled_val_split])
+                                            [unlabeled_length - self.unlabeled_val_split, self.unlabeled_val_split],
+                                            generator=torch.Generator().manual_seed(self.seed))
 
         labeled_dataset = STL10(self.data_dir, split='train', download=False, transform=transforms)
         labeled_length = len(labeled_dataset)
         _, labeled_dataset = random_split(labeled_dataset,
-                                          [labeled_length - self.train_val_split,
-                                           self.train_val_split])
+                                          [labeled_length - self.train_val_split, self.train_val_split],
+                                          generator=torch.Generator().manual_seed(self.seed))
 
         dataset = ConcatDataset(unlabeled_dataset, labeled_dataset)
         loader = DataLoader(
