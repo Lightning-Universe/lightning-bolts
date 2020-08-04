@@ -126,8 +126,7 @@ class LogisticRegression(pl.LightningModule):
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':  # pragma: no cover
+def run_cli():
     from argparse import ArgumentParser
     pl.seed_everything(1234)
 
@@ -149,3 +148,7 @@ if __name__ == '__main__':  # pragma: no cover
     # train
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model, loaders.train_dataloader(args.batch_size), loaders.val_dataloader(args.batch_size))
+
+
+if __name__ == '__main__':
+    run_cli()
