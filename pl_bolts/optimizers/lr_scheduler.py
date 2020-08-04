@@ -33,7 +33,7 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         last_epoch (int): The index of last epoch. Default: -1.
 
     Example:
-        >>> layer = nn.Linear(10)
+        >>> layer = nn.Linear(10, 1)
         >>> optimizer = Adam(layer.parameters(), lr=0.02)
         >>> scheduler = LinearWarmupCosineAnnealingLR(optimizer, warmup_epochs=10, max_epochs=40)
         >>> #
