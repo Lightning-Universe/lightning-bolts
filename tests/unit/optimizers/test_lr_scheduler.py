@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
-EPSILON = 1e-12
+FLOAT64_EPSILON = np.finfo(np.float64).eps
 
 
 class SchedulerTestNet(torch.nn.Module):
@@ -63,7 +63,7 @@ class TestLRScheduler(object):
         for epoch in range(epochs):
             for param_group, target in zip(self.optimizer.param_groups, targets):
                 assert (
-                    abs(target[epoch] - param_group["lr"]) < EPSILON
+                    abs(target[epoch] - param_group["lr"]) < FLOAT64_EPSILON
                 ), "LR is wrong in epoch {}: expected {}, got {}".format(
                     epoch, target[epoch], param_group["lr"]
                 )
@@ -79,7 +79,7 @@ class TestLRScheduler(object):
         for epoch in range(epochs):
             for i, param_group in enumerate(self.optimizer.param_groups):
                 assert (
-                    abs(targets[epoch][i] - param_group["lr"]) < EPSILON
+                    abs(targets[epoch][i] - param_group["lr"]) < FLOAT64_EPSILON
                 ), "LR is wrong in epoch {}: expected {}, got {}".format(
                     epoch, targets[epoch][i], param_group["lr"]
                 )
