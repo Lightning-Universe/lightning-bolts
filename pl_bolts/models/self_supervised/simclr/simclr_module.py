@@ -232,9 +232,6 @@ class SimCLR(pl.LightningModule):
 
         return dict(val_loss=val_loss, log=log, progress_bar=progress_bar)
 
-    def prepare_data(self):
-        self.datamodule.prepare_data()
-
     def configure_optimizers(self):
         if self.hparams.optimizer == 'adam':
             optimizer = torch.optim.Adam(

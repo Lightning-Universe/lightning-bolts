@@ -225,9 +225,6 @@ class ImageGPT(pl.LightningModule):
             result["log"]["test_acc"] = result["log"].pop("val_acc")
         return result
 
-    def prepare_data(self):
-        self.datamodule.prepare_data()
-
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
