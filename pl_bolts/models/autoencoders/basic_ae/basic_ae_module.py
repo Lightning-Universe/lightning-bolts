@@ -138,8 +138,7 @@ class AE(LightningModule):
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def run_cli():
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
     parser = AE.add_model_specific_args(parser)
@@ -148,3 +147,7 @@ if __name__ == '__main__':
     ae = AE(**vars(args))
     trainer = Trainer.from_argparse_args(args)
     trainer.fit(ae)
+
+
+if __name__ == '__main__':
+    run_cli()
