@@ -1,6 +1,7 @@
 import math
 import warnings
 
+from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
 
 
@@ -81,7 +82,6 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
             ]
         elif self.last_epoch == self.warmup_epochs:
             return self.base_lrs
-        # TODO: what does this do? This might be wrong for now since axis has shifted due to warmup
         elif (self.last_epoch - 1 - self.max_epochs) % (
             2 * (self.max_epochs - self.warmup_epochs)
         ) == 0:

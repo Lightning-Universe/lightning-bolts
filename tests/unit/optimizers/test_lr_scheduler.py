@@ -67,7 +67,8 @@ class TestLRScheduler(object):
                 ), "LR is wrong in epoch {}: expected {}, got {}".format(
                     epoch, target[epoch], param_group["lr"]
                 )
-            [scheduler.step() for scheduler in schedulers]
+            for scheduler in schedulers:
+                scheduler.step()
 
     def _test_against_closed_form(self, scheduler, closed_form_scheduler, epochs=10):
         targets = []
