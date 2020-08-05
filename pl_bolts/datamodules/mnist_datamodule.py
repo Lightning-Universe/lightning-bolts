@@ -20,6 +20,10 @@ class MNISTDataModule(LightningDataModule):
             **kwargs,
     ):
         """
+        .. figure:: https://upload.wikimedia.org/wikipedia/commons/2/27/MnistExamples.png
+            :width: 400
+            :alt: MNIST
+
         Standard MNIST, train, val, test splits and transforms
 
         Transforms::

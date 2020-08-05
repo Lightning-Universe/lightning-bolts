@@ -36,9 +36,6 @@ Imagenet
 
 MNIST
 ^^^^^
-.. figure:: https://upload.wikimedia.org/wikipedia/commons/2/27/MnistExamples.png
-  :width: 400
-  :alt: MNIST
 
 .. autoclass:: pl_bolts.datamodules.mnist_datamodule.MNISTDataModule
     :noindex:
