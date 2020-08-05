@@ -5,7 +5,7 @@ from torchvision.datasets import Cityscapes
 import torch
 
 
-class CityscapesDataModule(LightningDataModule):  # pragma: no-cover
+class CityscapesDataModule(LightningDataModule):
 
     name = 'Cityscapes'
     extra_args = {}
