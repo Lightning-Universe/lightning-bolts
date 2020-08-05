@@ -33,6 +33,13 @@ PyTorch-Lightning-Bolts documentation
 
 .. toctree::
    :maxdepth: 2
+   :name: dataloaders
+   :caption: DataLoaders
+
+   dataloaders
+
+.. toctree::
+   :maxdepth: 2
    :name: losses
    :caption: Losses
 
