@@ -138,7 +138,11 @@ class CityscapesDataModule(LightningDataModule):
         return loader
 
     def default_transforms(self):
+        mean = [0.28689554, 0.32513303, 0.28389177]
+        std = [0.18696375, 0.19017339, 0.18720214]
+
         cityscapes_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
+            transform_lib.Normalize(mean=mean, std=std)
         ])
         return cityscapes_transforms
