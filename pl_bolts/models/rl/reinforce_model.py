@@ -131,8 +131,7 @@ class Reinforce(pl.LightningModule):
         sum_r = 0.0
 
         for r in reversed(rewards):
-            sum_r *= self.gamma
-            sum_r += r
+            sum_r = (sum_r * self.gamma) + r
             cumul_reward.append(sum_r)
 
         return list(reversed(cumul_reward))
