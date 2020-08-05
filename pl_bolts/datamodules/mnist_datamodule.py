@@ -1,3 +1,4 @@
+import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
@@ -14,6 +15,7 @@ class MNISTDataModule(LightningDataModule):
             val_split: int = 5000,
             num_workers: int = 16,
             normalize: bool = False,
+            seed: int = 42,
             *args,
             **kwargs,
     ):
@@ -45,6 +47,7 @@ class MNISTDataModule(LightningDataModule):
         self.val_split = val_split
         self.num_workers = num_workers
         self.normalize = normalize
+        self.seed = seed
 
     @property
     def num_classes(self):
@@ -73,7 +76,11 @@ class MNISTDataModule(LightningDataModule):
 
         dataset = MNIST(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
-        dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
+        dataset_train, _ = random_split(
+            dataset,
+            [train_length - self.val_split, self.val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
         loader = DataLoader(
             dataset_train,
             batch_size=batch_size,
@@ -95,7 +102,11 @@ class MNISTDataModule(LightningDataModule):
         transforms = transforms or self.val_transforms or self._default_transforms()
         dataset = MNIST(self.data_dir, train=True, download=True, transform=transforms)
         train_length = len(dataset)
-        _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
+        _, dataset_val = random_split(
+            dataset,
+            [train_length - self.val_split, self.val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
         loader = DataLoader(
             dataset_val,
             batch_size=batch_size,
