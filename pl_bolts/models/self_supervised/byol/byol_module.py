@@ -40,7 +40,6 @@ class BYOL(pl.LightningModule):
         .. warning:: Work in progress. This implementation is still being verified.
 
         TODOs:
-            - add l2 normalize before loss calculation
             - add cosine scheduler
             - verify on CIFAR-10
             - verify on STL-10
@@ -116,15 +115,21 @@ class BYOL(pl.LightningModule):
         y1, z1, h1 = self.online_network(img_1)
         with torch.no_grad():
             y2, z2, h2 = self.target_network(img_2)
-        loss_a = F.mse_loss(h1, z2)
+        # L2 normalize
+        h1_norm = F.normalize(h1, p=2, dim=1)
+        z2_norm = F.normalize(z2, p=2, dim=1)
+        loss_a = F.mse_loss(h1_norm, z2_norm)
 
         # Image 2 to image 1 loss
         y1, z1, h1 = self.online_network(img_2)
         with torch.no_grad():
             y2, z2, h2 = self.target_network(img_1)
-        loss_b = F.mse_loss(h1, z2)
+        # L2 normalize
+        h1_norm = F.normalize(h1, p=2, dim=1)
+        z2_norm = F.normalize(z2, p=2, dim=1)
+        loss_b = F.mse_loss(h1_norm, z2_norm)
 
-        # final loss
+        # Final loss
         total_loss = loss_a + loss_b
 
         return loss_a, loss_b, total_loss
