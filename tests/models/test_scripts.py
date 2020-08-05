@@ -64,7 +64,7 @@ def test_cli_run_log_regression(cli_args):
 
 
 @pytest.mark.parametrize('cli_args', ['--max_epochs 1 --max_steps 3'])
-def test_cli_run_(cli_args):
+def test_cli_run_vision_image_gpt(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.vision.image_gpt.igpt_module import run_cli
 

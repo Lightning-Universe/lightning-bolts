@@ -373,8 +373,7 @@ class AMDIM(pl.LightningModule):
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def run_cli():
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
     parser = AMDIM.add_model_specific_args(parser)
@@ -384,3 +383,7 @@ if __name__ == '__main__':
     model = AMDIM(**vars(args), encoder='resnet18')
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
+
+
+if __name__ == '__main__':
+    run_cli()

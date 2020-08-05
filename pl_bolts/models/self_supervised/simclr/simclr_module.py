@@ -262,3 +262,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer.from_argparse_args(args, callbacks=[online_eval])
     trainer.fit(model, dm)
+
+
+if __name__ == '__main__':
+    run_cli()

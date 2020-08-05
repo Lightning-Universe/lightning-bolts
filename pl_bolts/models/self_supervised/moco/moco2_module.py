@@ -353,8 +353,7 @@ def concat_all_gather(tensor):
     return output
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def run_cli():
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
@@ -387,3 +386,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
+
+
+if __name__ == '__main__':
+    run_cli()
