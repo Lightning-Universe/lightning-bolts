@@ -40,6 +40,7 @@ class BYOL(pl.LightningModule):
         .. warning:: Work in progress. This implementation is still being verified.
 
         TODOs:
+            - add l2 normalize before loss calculation
             - add cosine scheduler
             - verify on CIFAR-10
             - verify on STL-10
