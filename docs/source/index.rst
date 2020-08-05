@@ -20,6 +20,7 @@ PyTorch-Lightning-Bolts documentation
 
    callbacks
    info_callbacks
+   self_supervised_callbacks
    variational_callbacks
    vision_callbacks
 
