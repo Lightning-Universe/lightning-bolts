@@ -92,6 +92,12 @@ AMDIM
 .. autoclass:: pl_bolts.models.self_supervised.AMDIM
    :noindex:
 
+BYOL
+^^^^
+
+.. autoclass:: pl_bolts.models.self_supervised.BYOL
+   :noindex:
+
 CPC (V2)
 ^^^^^^^^
 
