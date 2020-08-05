@@ -17,6 +17,8 @@ class BYOLMAWeightUpdate(pl.Callback):
         Updates the target_network params using an exponential moving average update rule weighted by tau.
         BYOL claims this keeps the online_network from collapsing.
 
+        .. note:: Automatically increases tau from `initial_tau` to 1.0 with every training step
+
         Example::
 
             from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
