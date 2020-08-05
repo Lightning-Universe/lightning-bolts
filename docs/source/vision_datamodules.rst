@@ -13,6 +13,7 @@ CityScapes
 ^^^^^^^^^^
 
 .. autoclass:: pl_bolts.datamodules.cityscapes_datamodule.CityscapesDataModule
+    :noindex:
 
 CIFAR-10
 ^^^^^^^^
