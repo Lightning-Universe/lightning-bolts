@@ -19,6 +19,15 @@ class FashionMNISTDataModule(LightningDataModule):
             **kwargs,
     ):
         """
+        .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/
+            wp-content/uploads/2019/02/Plot-of-a-Subset-of-Images-from-the-Fashion-MNIST-Dataset.png
+            :width: 400
+            :alt: Fashion MNIST
+
+        Specs:
+            - 10 classes (1 per digit)
+            - Each image is (1 x 28 x 28)
+
         Standard FashionMNIST, train, val, test splits and transforms
 
         Transforms::

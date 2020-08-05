@@ -23,7 +23,7 @@ class CityscapesDataModule(LightningDataModule):
         """
         .. figure:: https://www.cityscapes-dataset.com/wordpress/wp-content/uploads/2015/07/muenster00-1024x510.png
             :width: 400
-            :alt: MNIST
+            :alt: Cityscape
 
         Standard Cityscapes, train, val, test splits and transforms
 

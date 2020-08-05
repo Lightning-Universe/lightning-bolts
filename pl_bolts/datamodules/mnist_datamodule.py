@@ -26,7 +26,7 @@ class MNISTDataModule(LightningDataModule):
 
         Specs:
             - 10 classes (1 per digit)
-            - Each image is (1 x 32 x 32)
+            - Each image is (1 x 28 x 28)
 
         Standard MNIST, train, val, test splits and transforms
 
