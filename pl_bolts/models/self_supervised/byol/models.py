@@ -1,6 +1,7 @@
 from torch import nn
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
+
 class MLP(nn.Module):
     def __init__(self, input_dim=2048, hidden_size=4096, output_dim=256):
         super().__init__()

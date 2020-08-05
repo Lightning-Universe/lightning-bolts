@@ -41,4 +41,3 @@ class BYOLMAWeightUpdate(pl.Callback):
         for (name, online_p), (_, target_p) in zip(online_net.named_parameters(), target_net.named_parameters()):
             if 'weight' in name:
                 target_p.data = self.current_tau * target_p.data + (1 - self.current_tau) * online_p.data
-
