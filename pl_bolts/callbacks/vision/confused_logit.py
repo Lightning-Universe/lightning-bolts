@@ -1,6 +1,6 @@
 import torch
-from torch import nn
 from pytorch_lightning import Callback
+from torch import nn
 
 
 class ConfusedLogitCallback(Callback):  # pragma: no-cover

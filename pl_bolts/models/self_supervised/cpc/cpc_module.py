@@ -12,7 +12,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 from pytorch_lightning.utilities import rank_zero_warn
 
-import pl_bolts
 from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule

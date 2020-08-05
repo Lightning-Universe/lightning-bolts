@@ -5,6 +5,7 @@ Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/
 """
 from collections import deque, namedtuple
 from typing import Iterable, Callable, Tuple, List
+
 import numpy as np
 import torch
 from torch.utils.data import IterableDataset

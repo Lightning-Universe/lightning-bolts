@@ -4,9 +4,9 @@ Loss functions for the RL models
 
 from typing import Tuple, List
 
+import numpy as np
 import torch
 from torch import nn
-import numpy as np
 
 
 def dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], net: nn.Module,

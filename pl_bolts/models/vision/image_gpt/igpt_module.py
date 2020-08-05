@@ -1,9 +1,9 @@
 import os
+
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader, random_split
-import pytorch_lightning as pl
-import numpy as np
+
 from pl_bolts.datamodules import FashionMNISTDataModule, ImagenetDataModule
 from pl_bolts.models.vision.image_gpt.gpt2 import GPT2
 

@@ -1,6 +1,7 @@
-import torch
-import numpy as np
 import math
+
+import numpy as np
+import torch
 from sklearn.utils import shuffle as sk_shuffle
 
 
