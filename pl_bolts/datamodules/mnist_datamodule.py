@@ -40,6 +40,10 @@ class MNISTDataModule(LightningDataModule):
             val_split: how many of the training images to use for the validation split
             num_workers: how many workers to use for loading data
             normalize: If true applies image normalize
+
+        Specs:
+            - 10 classes (1 per digit)
+            - Each image is (1 x 32 x 32)
         """
         super().__init__(*args, **kwargs)
         self.dims = (1, 28, 28)
