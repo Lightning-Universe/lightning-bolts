@@ -1,7 +1,7 @@
 import numpy as np
-from torch import nn
-import torch.nn.functional as F
 import torch
+import torch.nn.functional as F
+from torch import nn
 
 
 class Generator(nn.Module):

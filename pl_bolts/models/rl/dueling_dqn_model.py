@@ -2,6 +2,7 @@
 Dueling DQN
 """
 import argparse
+
 import pytorch_lightning as pl
 
 from pl_bolts.models.rl.common import cli

@@ -8,7 +8,6 @@ from typing import Tuple, List, Dict
 
 import pytorch_lightning as pl
 import torch
-import torch.nn as nn
 import torch.optim as optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader

@@ -1,10 +1,10 @@
+import pytorch_lightning as pl
 import torch
 from torch import nn
 from torch.nn import functional as F
-from torch.optim.optimizer import Optimizer
 from torch.optim import Adam
+from torch.optim.optimizer import Optimizer
 
-import pytorch_lightning as pl
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 
 
