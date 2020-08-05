@@ -102,7 +102,8 @@ def test_lwca_lr(tmpdir):
     # param-group1
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr, warmup_epochs)
     iters = np.arange(max_epochs - warmup_epochs)
-    cosine_lr_schedule = np.array([
+    cosine_lr_schedule = np.array(
+        [
             eta_min + 0.5 * (base_lr - eta_min)
             * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
         ]
@@ -113,7 +114,8 @@ def test_lwca_lr(tmpdir):
     # param-group2
     base_lr2 = base_lr * multiplier
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr2, warmup_epochs)
-    cosine_lr_schedule = np.array([
+    cosine_lr_schedule = np.array(
+        [
             eta_min + 0.5 * (base_lr2 - eta_min)
             * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
         ]
@@ -149,7 +151,8 @@ def test_lwca_lr_with_nz_start_lr(tmpdir):
     # param-group1
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr, warmup_epochs)
     iters = np.arange(max_epochs - warmup_epochs)
-    cosine_lr_schedule = np.array([
+    cosine_lr_schedule = np.array(
+        [
             eta_min + 0.5 * (base_lr - eta_min)
             * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
         ]
@@ -160,7 +163,8 @@ def test_lwca_lr_with_nz_start_lr(tmpdir):
     # param-group2
     base_lr2 = base_lr * multiplier
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr2, warmup_epochs)
-    cosine_lr_schedule = np.array([
+    cosine_lr_schedule = np.array(
+        [
             eta_min + 0.5 * (base_lr2 - eta_min)
             * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
         ]
@@ -196,7 +200,8 @@ def test_lwca_lr_with_nz_eta_min(tmpdir):
     # param-group1
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr, warmup_epochs)
     iters = np.arange(max_epochs - warmup_epochs)
-    cosine_lr_schedule = np.array([
+    cosine_lr_schedule = np.array(
+        [
             eta_min + 0.5 * (base_lr - eta_min)
             * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
         ]
@@ -207,7 +212,8 @@ def test_lwca_lr_with_nz_eta_min(tmpdir):
     # param-group2
     base_lr2 = base_lr * multiplier
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr2, warmup_epochs)
-    cosine_lr_schedule = np.array([
+    cosine_lr_schedule = np.array(
+        [
             eta_min + 0.5 * (base_lr2 - eta_min)
             * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
         ]
@@ -243,7 +249,8 @@ def test_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
     # param-group1
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr, warmup_epochs)
     iters = np.arange(max_epochs - warmup_epochs)
-    cosine_lr_schedule = np.array([
+    cosine_lr_schedule = np.array(
+        [
             eta_min + 0.5 * (base_lr - eta_min)
             * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
         ]
@@ -254,7 +261,8 @@ def test_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
     # param-group2
     base_lr2 = base_lr * multiplier
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr2, warmup_epochs)
-    cosine_lr_schedule = np.array([
+    cosine_lr_schedule = np.array(
+        [
             eta_min + 0.5 * (base_lr2 - eta_min)
             * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
         ]
