@@ -1,30 +1,49 @@
 """
-Dueling DQN
+N Step DQN
 """
 import argparse
 
 import pytorch_lightning as pl
 
 from pl_bolts.models.rl.common import cli
-from pl_bolts.models.rl.common.networks import DuelingCNN
+from pl_bolts.models.rl.common.experience import NStepExperienceSource
 from pl_bolts.models.rl.dqn_model import DQN
 
 
-class DuelingDQN(DQN):
-    """
-        PyTorch Lightning implementation of `Dueling DQN <https://arxiv.org/abs/1511.06581>`_
+class NStepDQN(DQN):
+    """ NStep DQN Model """
 
-        Paper authors: Ziyu Wang, Tom Schaul, Matteo Hessel, Hado van Hasselt, Marc Lanctot, Nando de Freitas
+    def __init__(
+            self,
+            env: str,
+            gpus: int = 0,
+            eps_start: float = 1.0,
+            eps_end: float = 0.02,
+            eps_last_frame: int = 150000,
+            sync_rate: int = 1000,
+            gamma: float = 0.99,
+            learning_rate: float = 1e-4,
+            batch_size: int = 32,
+            replay_size: int = 100000,
+            warm_start_size: int = 10000,
+            num_samples: int = 500,
+            n_steps=4,
+            **kwargs
+    ):
+        """
+        PyTorch Lightning implementation of
+         `N-Step DQN <http://incompleteideas.net/papers/sutton-88-with-erratum.pdf>`_
+
+        Paper authors: Richard Sutton
 
         Model implemented by:
 
             - `Donal Byrne <https://github.com/djbyrne>`
 
         Example:
-
-            >>> from pl_bolts.models.rl.dueling_dqn_model import DuelingDQN
+            >>> from pl_bolts.models.rl.dqn_model import DQN
             ...
-            >>> model = DuelingDQN("PongNoFrameskip-v4")
+            >>> model = NStepDQN("PongNoFrameskip-v4")
 
         Train::
 
@@ -39,25 +58,28 @@ class DuelingDQN(DQN):
             eps_last_frame: the final frame in for the decrease of epsilon. At this frame espilon = eps_end
             sync_rate: the number of iterations between syncing up the target network with the train network
             gamma: discount factor
-            lr: learning rate
+            learning_rate: learning rate
             batch_size: size of minibatch pulled from the DataLoader
             replay_size: total capacity of the replay buffer
             warm_start_size: how many random steps through the environment to be carried out at the start of
                 training to fill the buffer with a starting point
-            sample_len: the number of samples to pull from the dataset iterator and feed to the DataLoader
+            num_samples: the number of samples to pull from the dataset iterator and feed to the DataLoader
+            n_steps: number of steps to approximate and use in the bellman update
 
         .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
 
         """
+        super().__init__(env, gpus, eps_start, eps_end, eps_last_frame, sync_rate, gamma, learning_rate,
+                         batch_size, replay_size, warm_start_size, num_samples, **kwargs)
 
-    def build_networks(self) -> None:
-        """Initializes the Dueling DQN train and target networks"""
-        self.net = DuelingCNN(self.obs_shape, self.n_actions)
-        self.target_net = DuelingCNN(self.obs_shape, self.n_actions)
+        self.source = NStepExperienceSource(
+            self.env, self.agent, n_steps=n_steps
+        )
 
 
 # todo: covert to CLI func and add test
 if __name__ == '__main__':
+
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
@@ -65,10 +87,10 @@ if __name__ == '__main__':
 
     # model args
     parser = cli.add_base_args(parser)
-    parser = DuelingDQN.add_model_specific_args(parser)
+    parser = NStepDQN.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    model = DuelingDQN(**args.__dict__)
+    model = NStepDQN(**args.__dict__)
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)

@@ -5,8 +5,8 @@ Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/
 """
 from abc import ABC
 from collections import deque, namedtuple
-from typing import Iterable, Callable, List, Tuple
-import gym
+from typing import Iterable, Callable, Tuple, List
+
 import torch
 from gym import Env
 from torch.utils.data import IterableDataset
@@ -121,16 +121,16 @@ class ExperienceSource(BaseExperienceSource):
         """
         # If there is a full history of step, append history to queue
         if len(history) == self.n_steps:
-            self.exp_history_queue.append(history)
+            self.exp_history_queue.append(tuple(history))
 
         if exp.done:
             if 0 < len(history) < self.n_steps:
-                self.exp_history_queue.append(history)
+                self.exp_history_queue.append(tuple(history))
 
             # generate tail of history, incrementally append history to queue
             while len(history) > 2:
                 history.popleft()
-                self.exp_history_queue.append(history)
+                self.exp_history_queue.append(tuple(history))
 
             # when there are only 2 experiences left in the history,
             # append to the queue then update the env stats and reset the environment

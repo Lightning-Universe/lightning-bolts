@@ -2,12 +2,10 @@ import os
 from argparse import ArgumentParser
 
 import torch
-import torchvision
 from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
 
-import pl_bolts
 from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
@@ -228,9 +226,6 @@ class VAE(LightningModule):
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
-
-    def prepare_data(self):
-        self.datamodule.prepare_data()
 
     @staticmethod
     def add_model_specific_args(parent_parser):

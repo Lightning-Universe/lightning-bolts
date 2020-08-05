@@ -6,8 +6,8 @@ import numpy as np
 import gym
 import torch
 import torch.optim as optim
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
-from torch.nn.functional import log_softmax, softmax
+from pytorch_lightning.callbacks import ModelCheckpoint
+from torch.nn.functional import log_softmax
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
