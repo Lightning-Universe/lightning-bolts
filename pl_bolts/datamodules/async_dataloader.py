@@ -1,9 +1,9 @@
-from threading import Thread
 from queue import Queue
+from threading import Thread
 
 import torch
-from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
+from torch.utils.data import Dataset
 
 
 class AsynchronousLoader(object):
