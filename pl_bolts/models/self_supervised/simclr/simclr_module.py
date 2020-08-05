@@ -5,7 +5,6 @@ from torch.nn import functional as F
 from torch.optim.lr_scheduler import StepLR
 from torchvision.models import densenet
 
-import pl_bolts
 from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
@@ -231,9 +230,6 @@ class SimCLR(pl.LightningModule):
             progress_bar['val_acc'] = mlp_acc
 
         return dict(val_loss=val_loss, log=log, progress_bar=progress_bar)
-
-    def prepare_data(self):
-        self.datamodule.prepare_data()
 
     def configure_optimizers(self):
         if self.hparams.optimizer == 'adam':

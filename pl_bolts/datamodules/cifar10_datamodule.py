@@ -1,6 +1,7 @@
 from typing import Optional, Sequence
 
 from pytorch_lightning import LightningDataModule
+import torch
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
 from torchvision.datasets import CIFAR10
@@ -17,9 +18,10 @@ class CIFAR10DataModule(LightningDataModule):
     def __init__(
             self,
             data_dir,
-            val_split=5000,
-            num_workers=16,
-            batch_size=32,
+            val_split: int = 5000,
+            num_workers: int = 16,
+            batch_size: int = 32,
+            seed: int = 42,
             *args,
             **kwargs,
     ):
@@ -64,6 +66,7 @@ class CIFAR10DataModule(LightningDataModule):
         self.val_split = val_split
         self.num_workers = num_workers
         self.batch_size = batch_size
+        self.seed = seed
 
     @property
     def num_classes(self):
@@ -88,7 +91,11 @@ class CIFAR10DataModule(LightningDataModule):
 
         dataset = self.DATASET(self.data_dir, train=True, download=False, transform=transforms, **self.extra_args)
         train_length = len(dataset)
-        dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
+        dataset_train, _ = random_split(
+            dataset,
+            [train_length - self.val_split, self.val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
         loader = DataLoader(
             dataset_train,
             batch_size=self.batch_size,
@@ -107,7 +114,11 @@ class CIFAR10DataModule(LightningDataModule):
 
         dataset = self.DATASET(self.data_dir, train=True, download=False, transform=transforms, **self.extra_args)
         train_length = len(dataset)
-        _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
+        _, dataset_val = random_split(
+            dataset,
+            [train_length - self.val_split, self.val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
         loader = DataLoader(
             dataset_val,
             batch_size=self.batch_size,

@@ -1,9 +1,9 @@
 import os
+
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader, random_split
-import pytorch_lightning as pl
-import numpy as np
+
 from pl_bolts.datamodules import FashionMNISTDataModule, ImagenetDataModule
 from pl_bolts.models.vision.image_gpt.gpt2 import GPT2
 
@@ -224,9 +224,6 @@ class ImageGPT(pl.LightningModule):
         if self.hparams.classify:
             result["log"]["test_acc"] = result["log"].pop("val_acc")
         return result
-
-    def prepare_data(self):
-        self.datamodule.prepare_data()
 
     @staticmethod
     def add_model_specific_args(parent_parser):
