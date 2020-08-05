@@ -26,6 +26,15 @@ class CIFAR10DataModule(LightningDataModule):
             **kwargs,
     ):
         """
+        .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/wp-content/uploads/2019/01/
+            Plot-of-a-Subset-of-Images-from-the-CIFAR-10-Dataset.png
+            :width: 400
+            :alt: CIFAR-10
+
+        Specs:
+            - 10 classes (1 per class)
+            - Each image is (3 x 32 x 32)
+
         Standard CIFAR10, train, val, test splits and transforms
 
         Transforms::
