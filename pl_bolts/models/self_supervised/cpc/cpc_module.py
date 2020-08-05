@@ -12,7 +12,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 from pytorch_lightning.utilities import rank_zero_warn
 
-import pl_bolts
 from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
@@ -300,6 +299,23 @@ class CPCV2(pl.LightningModule):
 
         return {'val_loss': val_nce, 'log': log, 'progress_bar': log}
 
+    def test_step(self, batch, batch_idx):
+        img_1, y = batch
+        Z = self(img_1)
+        z_in = Z.reshape(Z.size(0), -1)
+        mlp_preds = self.non_linear_evaluator(z_in)
+        mlp_loss = F.cross_entropy(mlp_preds, y)
+        acc = metrics.accuracy(mlp_preds, y)
+
+        return {'acc': acc, 'loss': mlp_loss}
+
+    def test_epoch_end(self, test_step_outputs):
+        avg_acc = torch.stack([x['acc'] for x in test_step_outputs]).mean()
+        avg_loss = torch.stack([x['loss'] for x in test_step_outputs]).mean()
+
+        logs = {'test_acc': avg_acc, 'test_loss': avg_loss}
+        return {'log': logs}
+
     def configure_optimizers(self):
         opt = optim.Adam(
             params=self.parameters(),
@@ -315,9 +331,6 @@ class CPCV2(pl.LightningModule):
         #     lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
 
         return [opt]  # , [lr_scheduler]
-
-    def prepare_data(self):
-        self.datamodule.prepare_data()
 
     @staticmethod
     def add_model_specific_args(parent_parser):

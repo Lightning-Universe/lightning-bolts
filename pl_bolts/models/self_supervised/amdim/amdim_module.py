@@ -7,7 +7,6 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-import pl_bolts
 from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder

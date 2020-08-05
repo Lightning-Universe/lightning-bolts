@@ -2,9 +2,7 @@
 N Step DQN
 """
 import argparse
-from pprint import pprint
 
-import torch
 import pytorch_lightning as pl
 
 from pl_bolts.models.rl.common import cli

@@ -1,4 +1,3 @@
-import math
 from abc import ABC
 from typing import Callable
 
