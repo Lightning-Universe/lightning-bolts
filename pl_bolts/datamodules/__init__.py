@@ -9,4 +9,3 @@ from pl_bolts.datamodules.mnist_datamodule import MNISTDataModule
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataset, SklearnDataModule, TensorDataset, TensorDataModule
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
-
