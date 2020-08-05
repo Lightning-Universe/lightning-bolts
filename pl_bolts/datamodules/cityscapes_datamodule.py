@@ -1,9 +1,8 @@
-from typing import Optional, Sequence
-
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
 from torchvision.datasets import Cityscapes
+import torch
 
 
 class CityscapesDataModule(LightningDataModule):
@@ -17,6 +16,7 @@ class CityscapesDataModule(LightningDataModule):
             val_split=5000,
             num_workers=16,
             batch_size=32,
+            seed=42,
             *args,
             **kwargs,
     ):
@@ -57,6 +57,7 @@ class CityscapesDataModule(LightningDataModule):
         self.val_split = val_split
         self.num_workers = num_workers
         self.batch_size = batch_size
+        self.seed = seed
 
     @property
     def num_classes(self):
@@ -81,7 +82,11 @@ class CityscapesDataModule(LightningDataModule):
 
         dataset = self.DATASET(self.data_dir, train=True, download=False, transform=transforms, **self.extra_args)
         train_length = len(dataset)
-        dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
+        dataset_train, _ = random_split(
+            dataset,
+            [train_length - self.val_split, self.val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
         loader = DataLoader(
             dataset_train,
             batch_size=self.batch_size,
@@ -100,7 +105,11 @@ class CityscapesDataModule(LightningDataModule):
 
         dataset = self.DATASET(self.data_dir, train=True, download=False, transform=transforms, **self.extra_args)
         train_length = len(dataset)
-        _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
+        _, dataset_val = random_split(
+            dataset,
+            [train_length - self.val_split, self.val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
         loader = DataLoader(
             dataset_val,
             batch_size=self.batch_size,
