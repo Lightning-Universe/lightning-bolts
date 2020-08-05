@@ -7,5 +7,5 @@ from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
 from pl_bolts.datamodules.fashion_mnist_datamodule import FashionMNISTDataModule
 from pl_bolts.datamodules.dummy_dataset import DummyDataset
 from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
-from pl_bolts.datamodules.experience_source import (ExperienceSourceDataset, ExperienceSource,
-                                                    DiscountedExperienceSource)
+from pl_bolts.datamodules.experience_source import (
+    ExperienceSourceDataset, ExperienceSource, DiscountedExperienceSource)
