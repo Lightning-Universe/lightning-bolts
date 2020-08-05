@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from copy import deepcopy
-from pl_bolts.models.self_supervised.byol.callbacks import BYOLMAWeightUpdate
+from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
 
 
 def test_byol_ma_weight_update_callback(tmpdir):

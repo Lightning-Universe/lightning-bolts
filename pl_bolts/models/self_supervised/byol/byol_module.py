@@ -7,7 +7,7 @@ from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDat
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from pl_bolts.optimizers.layer_adaptive_scaling import LARS
 from pl_bolts.models.self_supervised.byol.models import SiameseArm
-from pl_bolts.models.self_supervised.byol.callbacks import BYOLMAWeightUpdate
+from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
 
 
 class BYOL(pl.LightningModule):
