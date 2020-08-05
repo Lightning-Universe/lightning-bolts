@@ -98,10 +98,10 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
             ]
 
         return [(1 + math.cos(math.pi * (self.last_epoch - self.warmup_epochs)
-                / (self.max_epochs - self.warmup_epochs)))
-                / (1 + math.cos(math.pi * (self.last_epoch - self.warmup_epochs - 1)
-                / (self.max_epochs - self.warmup_epochs))) * (group["lr"] - self.eta_min)
-                + self.eta_min for group in self.optimizer.param_groups
+            / (self.max_epochs - self.warmup_epochs)))
+            / (1 + math.cos(math.pi * (self.last_epoch - self.warmup_epochs - 1)
+            / (self.max_epochs - self.warmup_epochs))) * (group["lr"] - self.eta_min)
+            + self.eta_min for group in self.optimizer.param_groups
         ]
 
     def _get_closed_form_lr(self) -> List[float]:
