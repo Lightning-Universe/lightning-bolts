@@ -27,15 +27,8 @@ class BYOL(pl.LightningModule):
                  loss_temperature: float = 0.5,
                  **kwargs):
         """
-        .. warning:: Work in progress. This implementation is still being verified.
-
-        TODOs:
-            - add cosine scheduler
-            - verify on CIFAR-10
-            - verify on STL-10
-            - pre-train on imagenet
-
-        PyTorch Lightning implementation of `BYOL <https://arxiv.org/pdf/2006.07733.pdf.>`_
+        PyTorch Lightning implementation of `Bring Your Own Latent Space (BYOL)
+        <https://arxiv.org/pdf/2006.07733.pdf.>`_
 
         Paper authors: Jean-Bastien Grill ,Florian Strub, Florent Altché, Corentin Tallec, Pierre H. Richemond, \
         Elena Buchatskaya, Carl Doersch, Bernardo Avila Pires, Zhaohan Daniel Guo, Mohammad Gheshlaghi Azar, \
@@ -43,6 +36,14 @@ class BYOL(pl.LightningModule):
 
         Model implemented by:
             - `Annika Brundyn <https://github.com/annikabrundyn>`_
+
+        .. warning:: Work in progress. This implementation is still being verified.
+
+        TODOs:
+            - add cosine scheduler
+            - verify on CIFAR-10
+            - verify on STL-10
+            - pre-train on imagenet
 
         Example:
 
