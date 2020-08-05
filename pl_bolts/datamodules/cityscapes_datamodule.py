@@ -21,7 +21,15 @@ class CityscapesDataModule(LightningDataModule):
             **kwargs,
     ):
         """
+        .. figure:: https://www.cityscapes-dataset.com/wordpress/wp-content/uploads/2015/07/muenster00-1024x510.png
+            :width: 400
+            :alt: MNIST
+
         Standard Cityscapes, train, val, test splits and transforms
+
+        Specs:
+            - 30 classes (road, person, sidewalk, etc...)
+            - (image, target) - image dims: (3 x 32 x 32), target dims: (3 x 32 x 32)
 
         Transforms::
 

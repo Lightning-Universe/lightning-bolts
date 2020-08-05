@@ -20,7 +20,7 @@ class MNISTDataModule(LightningDataModule):
             **kwargs,
     ):
         """
-        .. figure:: https://upload.wikimedia.org/wikipedia/commons/2/27/MnistExamples.png
+        .. figure:: https://miro.medium.com/max/744/1*AO2rIhzRYzFVQlFLx9DM9A.png
             :width: 400
             :alt: MNIST
 
