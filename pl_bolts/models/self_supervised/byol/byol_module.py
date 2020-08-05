@@ -1,8 +1,7 @@
-import pytorch_lightning as pl
-import torch
-from torch.nn import functional as F
-
 from copy import deepcopy
+import torch
+import torch.nn.functional as F
+import pytorch_lightning as pl
 
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
@@ -18,7 +17,7 @@ class BYOL(pl.LightningModule):
                  learning_rate: float = 0.00006,
                  weight_decay: float = 0.0005,
                  input_height: int = 32,
-                 batch_size: int = 2,
+                 batch_size: int = 32,
                  num_workers: int = 4,
                  optimizer: str = 'lars',
                  lr_sched_step: float = 30.0,
@@ -31,30 +30,36 @@ class BYOL(pl.LightningModule):
         .. warning:: Work in progress. This implementation is still being verified.
 
         TODOs:
-
             - add cosine scheduler
             - verify on CIFAR-10
             - verify on STL-10
             - pre-train on imagenet
 
         PyTorch Lightning implementation of `BYOL <https://arxiv.org/pdf/2006.07733.pdf.>`_
-        Paper authors: Jean-Bastien Grill ,Florian Strub, Florent Altché, Corentin Tallec, Pierre H. Richemond,
-        Elena Buchatskaya, Carl Doersch, Bernardo Avila Pires, Zhaohan Daniel Guo, Mohammad Gheshlaghi Azar,
+
+        Paper authors: Jean-Bastien Grill ,Florian Strub, Florent Altché, Corentin Tallec, Pierre H. Richemond, \
+        Elena Buchatskaya, Carl Doersch, Bernardo Avila Pires, Zhaohan Daniel Guo, Mohammad Gheshlaghi Azar, \
         Bilal Piot, Koray Kavukcuoglu, Rémi Munos, Michal Valko.
 
         Model implemented by:
             - `Annika Brundyn <https://github.com/annikabrundyn>`_
 
         Example:
+
             >>> from pl_bolts.models.self_supervised import BYOL
             ...
             >>> model = BYOL()
+
         Train::
+
             trainer = Trainer()
             trainer.fit(model)
+
         CLI command::
+
             # cifar10
             python byol_module.py --gpus 1
+
             # imagenet
             python byol_module.py
                 --gpus 8
@@ -62,6 +67,7 @@ class BYOL(pl.LightningModule):
                 --data_dir /path/to/imagenet/
                 --meta_dir /path/to/folder/with/meta.bin/
                 --batch_size 32
+
         Args:
             datamodule: The datamodule
             data_dir: directory to store data

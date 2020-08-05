@@ -8,16 +8,19 @@ class BYOLMAWeightUpdate(pl.Callback):
     def __init__(self, initial_tau=0.996):
         """
         Weight update rule from BYOL.
+
         Your model should have a:
-            - self.online_network
-            - self.target_network
+
+            - self.online_network.
+            - self.target_network.
 
         Updates the target_network params using an exponential moving average update rule weighted by tau.
         BYOL claims this keeps the online_network from collapsing.
 
-        Arg:
+        Args:
             initial_tau: starting tau. Auto-updates with every training step
         """
+        super().__init__()
         self.initial_tau = initial_tau
         self.current_tau = initial_tau
 
