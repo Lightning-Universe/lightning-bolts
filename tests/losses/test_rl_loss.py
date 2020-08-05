@@ -3,8 +3,8 @@ Test RL Loss Functions
 """
 
 from unittest import TestCase
-import torch
 import numpy as np
+import torch
 
 from pl_bolts.losses.rl import dqn_loss, double_dqn_loss, per_dqn_loss
 from pl_bolts.models.rl.common.networks import CNN

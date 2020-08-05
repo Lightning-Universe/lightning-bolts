@@ -1,10 +1,11 @@
-import pytorch_lightning as pl
-from pl_bolts.models.regression import LinearRegression, LogisticRegression
-from pl_bolts.datamodules.sklearn_datamodule import SklearnDataset
-from pl_bolts.datamodules import MNISTDataModule
 import numpy as np
-from tests import reset_seed
+import pytorch_lightning as pl
 from torch.utils.data import DataLoader
+
+from pl_bolts.datamodules import MNISTDataModule
+from pl_bolts.datamodules.sklearn_datamodule import SklearnDataset
+from pl_bolts.models.regression import LinearRegression, LogisticRegression
+from tests import reset_seed
 
 
 def test_linear_regression_model(tmpdir):

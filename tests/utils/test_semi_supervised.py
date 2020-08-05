@@ -1,7 +1,9 @@
-import torch
-from pl_bolts.utils.semi_supervised import balance_classes, generate_half_labeled_batches
-import numpy as np
 from collections import Counter
+
+import numpy as np
+import torch
+
+from pl_bolts.utils.semi_supervised import balance_classes, generate_half_labeled_batches
 
 
 def test_balance_classes(tmpdir):

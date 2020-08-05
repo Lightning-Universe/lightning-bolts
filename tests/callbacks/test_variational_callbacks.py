@@ -1,6 +1,7 @@
+from pytorch_lightning.loggers.base import DummyLogger
+
 from pl_bolts.callbacks import LatentDimInterpolator
 from pl_bolts.models.gans import GAN
-from pytorch_lightning.loggers.base import DummyLogger
 
 
 def test_latent_dim_interpolator(tmpdir):

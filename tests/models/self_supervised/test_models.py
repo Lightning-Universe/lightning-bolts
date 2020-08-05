@@ -1,12 +1,12 @@
 import pytorch_lightning as pl
 
+from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.models.self_supervised import CPCV2, AMDIM, MocoV2, SimCLR, BYOL
-from pl_bolts.datamodules import TinyCIFAR10DataModule, CIFAR10DataModule
 from pl_bolts.models.self_supervised.cpc import CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10
-from tests import reset_seed
+from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
 from pl_bolts.models.self_supervised.moco.transforms import (Moco2TrainCIFAR10Transforms, Moco2EvalCIFAR10Transforms)
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
-from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
+from tests import reset_seed
 
 
 def test_cpcv2(tmpdir):

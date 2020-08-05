@@ -1,7 +1,8 @@
 import torch
 from torch.utils.data import DataLoader
-from pl_bolts.datamodules.cifar10_dataset import CIFAR10
+
 from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
+from pl_bolts.datamodules.cifar10_dataset import CIFAR10
 
 
 def test_async_dataloader(tmpdir):

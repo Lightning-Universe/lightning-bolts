@@ -1,7 +1,8 @@
-import torch
-from pl_bolts.models import GPT2, ImageGPT
-from pl_bolts.datamodules import MNISTDataModule
 import pytorch_lightning as pl
+import torch
+
+from pl_bolts.datamodules import MNISTDataModule
+from pl_bolts.models import GPT2, ImageGPT
 
 
 def test_igpt(tmpdir):
