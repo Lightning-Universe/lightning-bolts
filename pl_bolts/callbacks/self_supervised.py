@@ -39,15 +39,17 @@ class BYOLMAWeightUpdate(pl.Callback):
         self.current_tau = initial_tau
 
     def on_batch_end(self, trainer, pl_module):
-        # get networks
-        online_net = pl_module.online_network
-        target_net = pl_module.target_network
 
-        # update weights
-        self.update_weights(online_net, target_net)
+        if pl_module.training:
+            # get networks
+            online_net = pl_module.online_network
+            target_net = pl_module.target_network
 
-        # update tau after
-        self.current_tau = self.update_tau(pl_module, trainer)
+            # update weights
+            self.update_weights(online_net, target_net)
+
+            # update tau after
+            self.current_tau = self.update_tau(pl_module, trainer)
 
     def update_tau(self, pl_module, trainer):
         tau = 1 - (1 - self.initial_tau) * (math.cos(math.pi * pl_module.global_step / trainer.max_steps) + 1) / 2
