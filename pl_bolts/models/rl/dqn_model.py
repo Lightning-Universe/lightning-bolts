@@ -287,7 +287,7 @@ class DQN(pl.LightningModule):
         return DataLoader(dataset=self.dataset, batch_size=self.batch_size)
 
     @staticmethod
-    def make_env(env_name: str, seed: int) -> gym.Env:
+    def make_environment(env_name: str, seed: int) -> gym.Env:
         """
         Initialise gym  environment
 
