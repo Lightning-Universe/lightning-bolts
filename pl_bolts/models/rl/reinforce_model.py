@@ -142,7 +142,7 @@ class Reinforce(pl.LightningModule):
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
-        Returns:
+        Yield:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
         """
         for exp in self.exp_source.runner(self.device):
