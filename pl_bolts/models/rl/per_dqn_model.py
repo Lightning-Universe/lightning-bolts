@@ -161,8 +161,7 @@ class PERDQN(DQN):
         return DataLoader(dataset=self.dataset, batch_size=self.batch_size)
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def run_cli():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
@@ -177,3 +176,8 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
+
+
+if __name__ == '__main__':
+    run_cli()
+

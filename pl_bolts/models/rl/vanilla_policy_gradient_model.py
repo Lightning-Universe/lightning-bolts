@@ -231,8 +231,7 @@ class VanillaPolicyGradient(pl.LightningModule):
         return arg_parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def run_cli():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
@@ -255,3 +254,8 @@ if __name__ == '__main__':
         args, deterministic=True, checkpoint_callback=checkpoint_callback
     )
     trainer.fit(model)
+
+
+if __name__ == '__main__':
+    run_cli()
+
