@@ -6,6 +6,7 @@ import pytorch_lightning as pl
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from pl_bolts.optimizers.layer_adaptive_scaling import LARS
+from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.models.self_supervised.byol.models import SiameseArm
 from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
 
@@ -14,7 +15,7 @@ class BYOL(pl.LightningModule):
     def __init__(self,
                  datamodule: pl.LightningDataModule = None,
                  data_dir: str = './',
-                 learning_rate: float = 0.00006,
+                 learning_rate: float = 0.2,
                  weight_decay: float = 0.0005,
                  input_height: int = 32,
                  batch_size: int = 32,
@@ -153,9 +154,9 @@ class BYOL(pl.LightningModule):
         return result
 
     def configure_optimizers(self):
-        optimizer = LARS(self.parameters(), lr=self.hparams.learning_rate)
-        # TODO: add scheduler - cosine decay
-        return optimizer
+        optimizer = LARS(self.parameters(), lr=self.hparams.learning_rate, weight_decay=0.000015)
+        scheduler = LinearWarmupCosineAnnealingLR(optimizer, warmup_epochs=10, max_epochs=1000)
+        return [optimizer], [scheduler]
 
     @staticmethod
     def add_model_specific_args(parent_parser):
