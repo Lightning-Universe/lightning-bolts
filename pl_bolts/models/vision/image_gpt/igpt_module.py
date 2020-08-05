@@ -1,4 +1,5 @@
 import os
+from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import torch
@@ -242,8 +243,6 @@ class ImageGPT(pl.LightningModule):
 
 
 def run_cli():
-    from argparse import ArgumentParser
-
     parser = ArgumentParser()
 
     # trainer args

@@ -1,3 +1,5 @@
+from argparse import ArgumentParser
+
 import pytorch_lightning as pl
 from torch.optim import Adam
 from torch import nn
@@ -212,10 +214,7 @@ class SimCLR(pl.LightningModule):
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
-    from argparse import ArgumentParser
-
+def run_cli():
     parser = ArgumentParser()
 
     # trainer args
