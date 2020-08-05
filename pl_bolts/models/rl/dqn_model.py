@@ -95,7 +95,7 @@ class DQN(pl.LightningModule):
 
         # Environment
         self.exp = None
-        self.env = [self.make_env(env, seed) for _ in range(num_envs)]
+        self.env = [self.make_environment(env, seed) for _ in range(num_envs)]
 
         self.obs_shape = self.env[0].observation_space.shape
         self.n_actions = self.env[0].action_space.n

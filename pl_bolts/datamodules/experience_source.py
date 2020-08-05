@@ -77,7 +77,7 @@ class ExperienceSource(BaseExperienceSource):
 
         self._total_rewards = []
 
-        self.init_envs()
+        self.init_environments()
 
     def runner(self, device: torch.device) -> Tuple[Experience]:
         """Experience Source iterator yielding Tuple of experiences for n_steps. These come from the pool
@@ -121,16 +121,16 @@ class ExperienceSource(BaseExperienceSource):
         """
         # If there is a full history of step, append history to queue
         if len(history) == self.n_steps:
-            self.exp_history_queue.append(tuple(history))
+            self.exp_history_queue.append(history)
 
         if exp.done:
             if 0 < len(history) < self.n_steps:
-                self.exp_history_queue.append(tuple(history))
+                self.exp_history_queue.append(history)
 
             # generate tail of history, incrementally append history to queue
             while len(history) > 2:
                 history.popleft()
-                self.exp_history_queue.append(tuple(history))
+                self.exp_history_queue.append(history)
 
             # when there are only 2 experiences left in the history,
             # append to the queue then update the env stats and reset the environment
@@ -143,7 +143,7 @@ class ExperienceSource(BaseExperienceSource):
             # Clear that last tail in the history once all others have been added to the queue
             history.clear()
 
-    def init_envs(self) -> None:
+    def init_environments(self) -> None:
         """
         For each environment in the pool setups lists for tracking history of size n, state, current reward and
         current step
