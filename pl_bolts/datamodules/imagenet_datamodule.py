@@ -24,6 +24,15 @@ class ImagenetDataModule(LightningDataModule):
             **kwargs,
     ):
         """
+        .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/wp-content/uploads/2017/08/
+            Sample-of-Images-from-the-ImageNet-Dataset-used-in-the-ILSVRC-Challenge.png
+            :width: 400
+            :alt: Imagenet
+
+        Specs:
+            - 1000 classes
+            - Each image is (3 x varies x varies) (here we default to 3 x 224 x 224)
+
         Imagenet train, val and test dataloaders.
 
         The train set is the imagenet train.
@@ -37,7 +46,10 @@ class ImagenetDataModule(LightningDataModule):
 
             from pl_bolts.datamodules import ImagenetDataModule
 
-            datamodule = ImagenetDataModule(IMAGENET_PATH)
+            dm = ImagenetDataModule(IMAGENET_PATH)
+            model = LitModel()
+
+            Trainer().fit(model, dm)
 
         Args:
 

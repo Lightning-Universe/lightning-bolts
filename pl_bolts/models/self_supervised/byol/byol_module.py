@@ -27,7 +27,7 @@ class BYOL(pl.LightningModule):
                  loss_temperature: float = 0.5,
                  **kwargs):
         """
-        PyTorch Lightning implementation of `Bring Your Own Latent Space (BYOL)
+        PyTorch Lightning implementation of `Bring Your Own Latent (BYOL)
         <https://arxiv.org/pdf/2006.07733.pdf.>`_
 
         Paper authors: Jean-Bastien Grill ,Florian Strub, Florent Altché, Corentin Tallec, Pierre H. Richemond, \

@@ -9,16 +9,10 @@ Supervised learning
 These are standard vision datasets with the train, test, val splits pre-generated in DataLoaders with
 the standard transforms (and Normalization) values
 
-MNIST
-^^^^^
+CityScapes
+^^^^^^^^^^
 
-.. autoclass:: pl_bolts.datamodules.mnist_datamodule.MNISTDataModule
-    :noindex:
-
-FashionMNIST
-^^^^^^^^^^^^
-
-.. autoclass:: pl_bolts.datamodules.fashion_mnist_datamodule.FashionMNISTDataModule
+.. autoclass:: pl_bolts.datamodules.cityscapes_datamodule.CityscapesDataModule
     :noindex:
 
 CIFAR-10
@@ -27,11 +21,23 @@ CIFAR-10
 .. autoclass:: pl_bolts.datamodules.cifar10_datamodule.CIFAR10DataModule
     :noindex:
 
+FashionMNIST
+^^^^^^^^^^^^
+
+.. autoclass:: pl_bolts.datamodules.fashion_mnist_datamodule.FashionMNISTDataModule
+    :noindex:
+
 
 Imagenet
 ^^^^^^^^
 
 .. autoclass:: pl_bolts.datamodules.imagenet_datamodule.ImagenetDataModule
+    :noindex:
+
+MNIST
+^^^^^
+
+.. autoclass:: pl_bolts.datamodules.mnist_datamodule.MNISTDataModule
     :noindex:
 
 ------------
