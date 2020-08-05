@@ -30,10 +30,10 @@ class BYOLMAWeightUpdate(pl.Callback):
         self.update_weights(online_net, target_net)
 
         # update tau after
-        self.current_tau = self.update_tau(pl_module)
+        self.current_tau = self.update_tau(pl_module, trainer)
 
     def update_tau(self, pl_module, trainer):
-        tau = 1 - (1 - self.initial_tau) * (torch.cos(math.pi * pl_module.global_step / trainer.max_steps) + 1) / 2
+        tau = 1 - (1 - self.initial_tau) * (math.cos(math.pi * pl_module.global_step / trainer.max_steps) + 1) / 2
         return tau
 
     def update_weights(self, online_net, target_net):

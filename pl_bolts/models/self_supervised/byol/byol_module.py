@@ -18,7 +18,7 @@ class BYOL(pl.LightningModule):
                  learning_rate: float = 0.00006,
                  weight_decay: float = 0.0005,
                  input_height: int = 32,
-                 batch_size: int = 1,
+                 batch_size: int = 2,
                  num_workers: int = 4,
                  optimizer: str = 'lars',
                  lr_sched_step: float = 30.0,
@@ -149,7 +149,7 @@ class BYOL(pl.LightningModule):
 
         # Training
         parser.add_argument('--optimizer', choices=['adam', 'lars'], default='lars')
-        parser.add_argument('--batch_size', type=int, default=1)
+        parser.add_argument('--batch_size', type=int, default=2)
         parser.add_argument('--learning_rate', type=float, default=1.0)
         parser.add_argument('--lars_momentum', type=float, default=0.9)
         parser.add_argument('--lars_eta', type=float, default=0.001)
@@ -195,5 +195,5 @@ if __name__ == '__main__':
 
     model = BYOL(**args.__dict__, datamodule=datamodule)
 
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = pl.Trainer.from_argparse_args(args, max_steps=10000)
     trainer.fit(model)
