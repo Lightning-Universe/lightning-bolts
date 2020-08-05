@@ -17,7 +17,7 @@ from pl_bolts.models.rl.common.agents import Agent
 
 class DummyAgent(Agent):
     def __call__(self, states, device):
-        return [0 for s in states]
+        return [0] * len(states)
 
 
 class DummyExperienceSource(BaseExperienceSource):
