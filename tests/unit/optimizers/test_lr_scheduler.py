@@ -104,8 +104,9 @@ def test_lwca_lr(tmpdir):
     iters = np.arange(max_epochs - warmup_epochs)
     cosine_lr_schedule = np.array(
         [
-            eta_min + 0.5 * (base_lr - eta_min) \
-            * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+            eta_min + 0.5 * (base_lr - eta_min) * (
+                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
+            ) for t in iters
         ]
     )
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
@@ -116,8 +117,9 @@ def test_lwca_lr(tmpdir):
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr2, warmup_epochs)
     cosine_lr_schedule = np.array(
         [
-            eta_min + 0.5 * (base_lr2 - eta_min) \
-            * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+            eta_min + 0.5 * (base_lr2 - eta_min) * (
+                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
+            ) for t in iters
         ]
     )
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
@@ -153,8 +155,9 @@ def test_lwca_lr_with_nz_start_lr(tmpdir):
     iters = np.arange(max_epochs - warmup_epochs)
     cosine_lr_schedule = np.array(
         [
-            eta_min + 0.5 * (base_lr - eta_min) \
-            * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+            eta_min + 0.5 * (base_lr - eta_min) * (
+                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
+            ) for t in iters
         ]
     )
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
@@ -165,8 +168,9 @@ def test_lwca_lr_with_nz_start_lr(tmpdir):
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr2, warmup_epochs)
     cosine_lr_schedule = np.array(
         [
-            eta_min + 0.5 * (base_lr2 - eta_min) \
-            * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+            eta_min + 0.5 * (base_lr2 - eta_min) * (
+                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
+            ) for t in iters
         ]
     )
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
@@ -202,8 +206,9 @@ def test_lwca_lr_with_nz_eta_min(tmpdir):
     iters = np.arange(max_epochs - warmup_epochs)
     cosine_lr_schedule = np.array(
         [
-            eta_min + 0.5 * (base_lr - eta_min) \
-            * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+            eta_min + 0.5 * (base_lr - eta_min) * (
+                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
+            ) for t in iters
         ]
     )
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
@@ -214,8 +219,9 @@ def test_lwca_lr_with_nz_eta_min(tmpdir):
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr2, warmup_epochs)
     cosine_lr_schedule = np.array(
         [
-            eta_min + 0.5 * (base_lr2 - eta_min) \
-            * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+            eta_min + 0.5 * (base_lr2 - eta_min) * (
+                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
+            ) for t in iters
         ]
     )
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
@@ -251,8 +257,9 @@ def test_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
     iters = np.arange(max_epochs - warmup_epochs)
     cosine_lr_schedule = np.array(
         [
-            eta_min + 0.5 * (base_lr - eta_min) \
-            * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+            eta_min + 0.5 * (base_lr - eta_min) * (
+                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
+            ) for t in iters
         ]
     )
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
@@ -263,8 +270,9 @@ def test_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr2, warmup_epochs)
     cosine_lr_schedule = np.array(
         [
-            eta_min + 0.5 * (base_lr2 - eta_min) \
-            * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+            eta_min + 0.5 * (base_lr2 - eta_min) * (
+                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
+            ) for t in iters
         ]
     )
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
