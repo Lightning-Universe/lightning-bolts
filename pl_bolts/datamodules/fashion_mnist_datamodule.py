@@ -25,7 +25,7 @@ class FashionMNISTDataModule(LightningDataModule):
             :alt: Fashion MNIST
 
         Specs:
-            - 10 classes (1 per digit)
+            - 10 classes (1 per type)
             - Each image is (1 x 28 x 28)
 
         Standard FashionMNIST, train, val, test splits and transforms
