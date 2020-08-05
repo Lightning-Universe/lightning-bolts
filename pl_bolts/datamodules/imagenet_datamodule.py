@@ -46,7 +46,10 @@ class ImagenetDataModule(LightningDataModule):
 
             from pl_bolts.datamodules import ImagenetDataModule
 
-            datamodule = ImagenetDataModule(IMAGENET_PATH)
+            dm = ImagenetDataModule(IMAGENET_PATH)
+            model = LitModel()
+
+            Trainer().fit(model, dm)
 
         Args:
 

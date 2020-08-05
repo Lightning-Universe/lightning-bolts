@@ -50,7 +50,9 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             from pl_bolts.datamodules import STL10DataModule
 
             dm = STL10DataModule(PATH)
-            model = LitModel(datamodule=dm)
+            model = LitModel()
+
+            Trainer().fit(model, dm)
 
         Args:
             data_dir: where to save/load the data

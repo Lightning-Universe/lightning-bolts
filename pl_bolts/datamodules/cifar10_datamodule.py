@@ -52,7 +52,9 @@ class CIFAR10DataModule(LightningDataModule):
             from pl_bolts.datamodules import CIFAR10DataModule
 
             dm = CIFAR10DataModule(PATH)
-            model = LitModel(datamodule=dm)
+            model = LitModel()
+
+            Trainer().fit(model, dm)
 
         Or you can set your own transforms
 

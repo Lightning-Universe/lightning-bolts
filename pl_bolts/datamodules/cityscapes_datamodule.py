@@ -46,7 +46,9 @@ class CityscapesDataModule(LightningDataModule):
             from pl_bolts.datamodules import CityscapesDataModule
 
             dm = CityscapesDataModule(PATH)
-            model = LitModel(datamodule=dm)
+            model = LitModel()
+
+            Trainer().fit(model, dm)
 
         Or you can set your own transforms
 
