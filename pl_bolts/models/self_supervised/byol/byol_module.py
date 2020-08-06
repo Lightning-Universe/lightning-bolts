@@ -171,7 +171,6 @@ class BYOL(pl.LightningModule):
         parser.add_argument('--learning_rate', type=float, default=1e-3)
         parser.add_argument('--weight_decay', type=float, default=15e-6)
         parser.add_argument('--warmup_epochs', type=float, default=10)
-        parser.add_argument('--max_epochs', type=float, default=1000)
 
         # Model
         parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
