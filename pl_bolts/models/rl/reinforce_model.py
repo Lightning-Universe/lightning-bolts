@@ -1,47 +1,50 @@
-"""
-
-"""
 import argparse
 from collections import OrderedDict
-from copy import deepcopy
-from itertools import chain
 from typing import Tuple, List
 
 import gym
+import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.optim as optim
-from torch import Tensor
+from pytorch_lightning import seed_everything
+from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.nn.functional import log_softmax
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
+from pl_bolts.datamodules import ExperienceSourceDataset
+from pl_bolts.datamodules.experience_source import DiscountedExperienceSource
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.agents import PolicyAgent
-from pl_bolts.models.rl.common.experience import EpisodicExperienceStream
-from pl_bolts.models.rl.common.memory import Experience
 from pl_bolts.models.rl.common.networks import MLP
-from pl_bolts.models.rl.common.wrappers import ToTensor
 
 
 class Reinforce(pl.LightningModule):
-    """ Basic REINFORCE Policy Model """
-
-    def __init__(self, env: str, gamma: float = 0.99, lr: float = 1e-4, batch_size: int = 32,
-                 batch_episodes: int = 4, **kwargs) -> None:
+    def __init__(
+        self,
+        env: str,
+        gamma: float = 0.99,
+        lr: float = 0.01,
+        batch_size: int = 8,
+        n_steps: int = 10,
+        avg_reward_len: int = 100,
+        num_envs: int = 1,
+        entropy_beta: float = 0.01,
+        epoch_len: int = 1000,
+        num_batch_episodes: int = 4,
+        **kwargs
+    ) -> None:
         """
         PyTorch Lightning implementation of `REINFORCE
         <https://papers.nips.cc/paper/
         1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
-
         Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
-
         Model implemented by:
 
             - `Donal Byrne <https://github.com/djbyrne>`
 
         Example:
-
             >>> from pl_bolts.models.rl.reinforce_model import Reinforce
             ...
             >>> model = Reinforce("PongNoFrameskip-v4")
@@ -58,47 +61,47 @@ class Reinforce(pl.LightningModule):
             batch_size: size of minibatch pulled from the DataLoader
             batch_episodes: how many episodes to rollout for each batch of training
 
-        .. note::
+        Note:
             This example is based on:
-             https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\
-             /blob/master/Chapter11/02_cartpole_reinforce.py
+            https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/02_cartpole_reinforce.py
 
-        .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
-
+        Note:
+            Currently only supports CPU and single GPU training with `distributed_backend=dp`
         """
         super().__init__()
 
-        # self.env = wrappers.make_env(self.hparams.env)    # use for Atari
-        self.env = ToTensor(gym.make(env))  # use for Box2D/Control
-        self.env.seed(123)
-
-        self.obs_shape = self.env.observation_space.shape
-        self.n_actions = self.env.action_space.n
-
-        self.net = None
-        self.build_networks()
-
-        self.agent = PolicyAgent(self.net)
-
-        self.gamma = gamma
+        # Hyperparameters
         self.lr = lr
-        self.batch_size = batch_size
-        self.batch_episodes = batch_episodes
+        self.batch_size = batch_size * num_envs
+        self.batches_per_epoch = self.batch_size * epoch_len
+        self.entropy_beta = entropy_beta
+        self.gamma = gamma
+        self.n_steps = n_steps
+        self.num_batch_episodes = num_batch_episodes
 
-        self.total_reward = 0
-        self.episode_reward = 0
-        self.episode_count = 0
-        self.episode_steps = 0
-        self.total_episode_steps = 0
+        self.save_hyperparameters()
 
-        self.reward_list = []
-        for _ in range(100):
-            self.reward_list.append(0)
-        self.avg_reward = 0
+        # Model components
+        self.env = [gym.make(env) for _ in range(num_envs)]
+        self.net = MLP(self.env[0].observation_space.shape, self.env[0].action_space.n)
+        self.agent = PolicyAgent(self.net)
+        self.exp_source = DiscountedExperienceSource(
+            self.env, self.agent, gamma=gamma, n_steps=self.n_steps
+        )
 
-    def build_networks(self) -> None:
-        """Initializes the DQN train and target networks"""
-        self.net = MLP(self.obs_shape, self.n_actions)
+        # Tracking metrics
+        self.total_steps = 0
+        self.total_rewards = [0]
+        self.done_episodes = 0
+        self.avg_rewards = 0
+        self.reward_sum = 0.0
+        self.batch_episodes = 0
+        self.avg_reward_len = avg_reward_len
+
+        self.batch_states = []
+        self.batch_actions = []
+        self.batch_qvals = []
+        self.cur_rewards = []
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -113,122 +116,79 @@ class Reinforce(pl.LightningModule):
         output = self.net(x)
         return output
 
-    def calc_qvals(self, rewards: List[List]) -> List[List]:
-        """
-        Takes in the rewards for each batched episode and returns list of qvals for each batched episode
+    def calc_qvals(self, rewards: List[float]) -> List[float]:
+        """Calculate the discounted rewards of all rewards in list
 
         Args:
-            rewards: list of rewards for each episodes in the batch
+            rewards: list of rewards from latest batch
 
         Returns:
-            List of qvals for each episodes
+            list of discounted rewards
         """
-        res = []
+        assert isinstance(rewards[0], float)
+
+        cumul_reward = []
         sum_r = 0.0
-        for reward in reversed(rewards):
-            sum_r *= self.gamma
-            sum_r += reward
-            res.append(deepcopy(sum_r))
-        return list(reversed(res))
 
-    def process_batch(
-        self, batch: List[List[Experience]]
-    ) -> Tuple[List[Tensor], List[Tensor], List[Tensor]]:
-        """
-        Takes in a batch of episodes and retrieves the q vals, the states and the actions for the batch
+        for r in reversed(rewards):
+            sum_r = (sum_r * self.gamma) + r
+            cumul_reward.append(sum_r)
 
-        Args:
-            batch: list of episodes, each containing a list of Experiences
+        return list(reversed(cumul_reward))
 
-        Returns:
-            q_vals, states and actions used for calculating the loss
-        """
-        # get outputs for each episode
-        batch_rewards, batch_states, batch_actions = [], [], []
-        for episode in batch:
-            ep_rewards, ep_states, ep_actions = [], [], []
-
-            # log the outputs for each step
-            for step in episode:
-                ep_rewards.append(step[2].float())
-                ep_states.append(step[0])
-                ep_actions.append(step[1])
-
-            # add episode outputs to the batch
-            batch_rewards.append(ep_rewards)
-            batch_states.append(ep_states)
-            batch_actions.append(ep_actions)
-
-        # get qvals
-        batch_qvals = []
-        for reward in batch_rewards:
-            batch_qvals.append(self.calc_qvals(reward))
-
-        # flatten the batched outputs
-        batch_actions, batch_qvals, batch_rewards, batch_states = self.flatten_batch(
-            batch_actions, batch_qvals, batch_rewards, batch_states
-        )
-
-        return batch_qvals, batch_states, batch_actions, batch_rewards
-
-    @staticmethod
-    def flatten_batch(
-        batch_actions: List[List[Tensor]],
-        batch_qvals: List[List[Tensor]],
-        batch_rewards: List[List[Tensor]],
-        batch_states: List[List[Tuple[Tensor, Tensor]]],
-    ) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
-        """
-        Takes in the outputs of the processed batch and flattens the several episodes into a single tensor for each
-        batched output
-
-        Args:
-            batch_actions: actions taken in each batch episodes
-            batch_qvals: Q vals for each batch episode
-            batch_rewards: reward for each batch episode
-            batch_states: states for each batch episodes
-
-        Returns:
-            The input batched results flattend into a single tensor
-        """
-        # flatten all episode steps into a single list
-        batch_qvals = list(chain.from_iterable(batch_qvals))
-        batch_states = list(chain.from_iterable(batch_states))
-        batch_actions = list(chain.from_iterable(batch_actions))
-        batch_rewards = list(chain.from_iterable(batch_rewards))
-
-        # stack steps into single tensor and remove extra dimension
-        batch_qvals = torch.stack(batch_qvals).squeeze()
-        batch_states = torch.stack(batch_states).squeeze()
-        batch_actions = torch.stack(batch_actions).squeeze()
-        batch_rewards = torch.stack(batch_rewards).squeeze()
-
-        return batch_actions, batch_qvals, batch_rewards, batch_states
-
-    def loss(
+    def train_batch(
         self,
-        batch_qvals: List[Tensor],
-        batch_states: List[Tensor],
-        batch_actions: List[Tensor],
-    ) -> torch.Tensor:
+    ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
         """
-        Calculates the mse loss using a batch of states, actions and Q values from several episodes. These have all
-        been flattend into a single tensor.
+        Contains the logic for generating a new batch of data to be passed to the DataLoader
 
-        Args:
-            batch_qvals: current mini batch of q values
-            batch_actions: current batch of actions
-            batch_states: current batch of states
-
-        Returns:
-            loss
+        Yield:
+            yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
         """
-        logits = self.net(batch_states)
+        for exp in self.exp_source.runner(self.device):
+
+            self.batch_states.append(exp.state)
+            self.batch_actions.append(exp.action)
+            self.cur_rewards.append(exp.reward)
+
+            # Check if episode is completed and update trackers
+            if exp.done:
+                self.batch_qvals.extend(self.calc_qvals(self.cur_rewards))
+                self.cur_rewards.clear()
+                self.batch_episodes += 1
+
+            # Check if episodes have finished and use total reward
+            new_rewards = self.exp_source.pop_total_rewards()
+            if new_rewards:
+                for reward in new_rewards:
+                    self.done_episodes += 1
+                    self.total_rewards.append(reward)
+                    self.avg_rewards = float(
+                        np.mean(self.total_rewards[-self.avg_reward_len:])
+                    )
+
+            self.total_steps += 1
+
+            if self.batch_episodes >= self.num_batch_episodes:
+                for state, action, qval in zip(
+                    self.batch_states, self.batch_actions, self.batch_qvals
+                ):
+                    yield state, action, qval
+
+                self.batch_episodes = 0
+
+            # Simulates epochs
+            if self.total_steps % self.batches_per_epoch == 0:
+                break
+
+    def loss(self, states, actions, scaled_rewards) -> torch.Tensor:
+        logits = self.net(states)
+
+        # policy loss
         log_prob = log_softmax(logits, dim=1)
-        log_prob_actions = (
-            batch_qvals * log_prob[range(len(batch_states)), batch_actions]
-        )
+        log_prob_actions = scaled_rewards * log_prob[range(self.batch_size), actions]
         loss = -log_prob_actions.mean()
+
         return loss
 
     def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
@@ -243,45 +203,22 @@ class Reinforce(pl.LightningModule):
         Returns:
             Training loss and log metrics
         """
-        device = self.get_device(batch)
+        states, actions, scaled_rewards = batch
 
-        batch_qvals, batch_states, batch_actions, batch_rewards = self.process_batch(
-            batch
-        )
-
-        # get avg reward over the batched episodes
-        self.episode_reward = sum(batch_rewards) / len(batch)
-        self.reward_list.append(self.episode_reward)
-        self.avg_reward = sum(self.reward_list) / len(self.reward_list)
-
-        # calculates training loss
-        loss = self.loss(batch_qvals, batch_states, batch_actions)
-
-        if self.trainer.use_dp or self.trainer.use_ddp2:
-            loss = loss.unsqueeze(0)
-
-        self.episode_count += self.batch_episodes
+        loss = self.loss(states, actions, scaled_rewards)
 
         log = {
-            "episode_reward": torch.tensor(self.episode_reward).to(device),
-            "train_loss": loss,
-            "avg_reward": self.avg_reward,
+            "episodes": self.done_episodes,
+            "reward": self.total_rewards[-1],
+            "avg_reward": self.avg_rewards,
         }
-        status = {
-            "steps": torch.tensor(self.global_step).to(device),
-            "episode_reward": torch.tensor(self.episode_reward).to(device),
-            "episodes": torch.tensor(self.episode_count),
-            "avg_reward": self.avg_reward,
-        }
-
-        self.episode_reward = 0
 
         return OrderedDict(
             {
                 "loss": loss,
-                "reward": self.avg_reward,
+                "avg_reward": self.avg_rewards,
                 "log": log,
-                "progress_bar": status,
+                "progress_bar": log,
             }
         )
 
@@ -292,10 +229,8 @@ class Reinforce(pl.LightningModule):
 
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""
-        dataset = EpisodicExperienceStream(
-            self.env, self.agent, self.device, episodes=self.batch_episodes
-        )
-        dataloader = DataLoader(dataset=dataset)
+        dataset = ExperienceSourceDataset(self.train_batch)
+        dataloader = DataLoader(dataset=dataset, batch_size=self.batch_size)
         return dataloader
 
     def train_dataloader(self) -> DataLoader:
@@ -321,10 +256,7 @@ class Reinforce(pl.LightningModule):
         """
 
         arg_parser.add_argument(
-            "--batch_episodes",
-            type=int,
-            default=4,
-            help="how many episodes to run per batch",
+            "--entropy_beta", type=float, default=0.01, help="entropy value",
         )
 
         return arg_parser
@@ -332,7 +264,6 @@ class Reinforce(pl.LightningModule):
 
 # todo: covert to CLI func and add test
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
@@ -345,5 +276,13 @@ if __name__ == '__main__':
 
     model = Reinforce(**args.__dict__)
 
-    trainer = pl.Trainer.from_argparse_args(args)
+    # save checkpoints based on avg_reward
+    checkpoint_callback = ModelCheckpoint(
+        save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True
+    )
+
+    seed_everything(123)
+    trainer = pl.Trainer.from_argparse_args(
+        args, deterministic=True, checkpoint_callback=checkpoint_callback
+    )
     trainer.fit(model)

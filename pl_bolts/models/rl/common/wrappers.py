@@ -181,7 +181,7 @@ class DataAugmentation(gym.ObservationWrapper):
         return ProcessFrame84.process(obs)
 
 
-def make_env(env_name):
+def make_environment(env_name):
     """Convert environment with wrappers"""
     env = gym.make(env_name)
     env = MaxAndSkipEnv(env)

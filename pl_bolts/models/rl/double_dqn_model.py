@@ -50,35 +50,24 @@ class DoubleDQN(DQN):
             training to fill the buffer with a starting point
         sample_len: the number of samples to pull from the dataset iterator and feed to the DataLoader
 
-    .. note::
-        This example is based on:
-         https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\
-         /blob/master/Chapter08/03_dqn_double.py
+    Note:
+        This example is based on
+        https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter08/03_dqn_double.py
 
-    .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
-
+    Note:
+        Currently only supports CPU and single GPU training with `distributed_backend=dp`
     """
 
     def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved
-
         Args:
             batch: current mini batch of replay data
             _: batch number, not used
-
         Returns:
             Training loss and log metrics
         """
-        self.agent.update_epsilon(self.global_step)
-
-        # step through environment with agent and add to buffer
-        exp, reward, done = self.source.step(self.device)
-        self.buffer.append(exp)
-
-        self.episode_reward += reward
-        self.episode_steps += 1
 
         # calculates training loss
         loss = double_dqn_loss(batch, self.net, self.target_net)
@@ -86,38 +75,29 @@ class DoubleDQN(DQN):
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)
 
-        if done:
-            self.total_reward = self.episode_reward
-            self.reward_list.append(self.total_reward)
-            self.avg_reward = sum(self.reward_list[-100:]) / 100
-            self.episode_count += 1
-            self.episode_reward = 0
-            self.total_episode_steps = self.episode_steps
-            self.episode_steps = 0
-
         # Soft update of target network
         if self.global_step % self.sync_rate == 0:
             self.target_net.load_state_dict(self.net.state_dict())
 
         log = {
-            "total_reward": self.total_reward,
-            "avg_reward": self.avg_reward,
+            "total_reward": self.total_rewards[-1],
+            "avg_reward": self.avg_rewards,
             "train_loss": loss,
-            "episode_steps": self.total_episode_steps,
+            # "episodes": self.total_episode_steps,
         }
         status = {
             "steps": self.global_step,
-            "avg_reward": self.avg_reward,
-            "total_reward": self.total_reward,
-            "episodes": self.episode_count,
-            "episode_steps": self.episode_steps,
+            "avg_reward": self.avg_rewards,
+            "total_reward": self.total_rewards[-1],
+            "episodes": self.done_episodes,
+            # "episode_steps": self.episode_steps,
             "epsilon": self.agent.epsilon,
         }
 
         return OrderedDict(
             {
                 "loss": loss,
-                "avg_reward": self.avg_reward,
+                "avg_reward": self.avg_rewards,
                 "log": log,
                 "progress_bar": status,
             }

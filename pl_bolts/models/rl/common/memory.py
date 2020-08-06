@@ -2,6 +2,7 @@
 
 # Named tuple for storing experience steps gathered in training
 import collections
+import warnings
 from collections import deque, namedtuple
 from typing import Tuple, List, Union
 
@@ -98,6 +99,11 @@ class MultiStepBuffer:
     """
 
     def __init__(self, buffer_size, n_step=2):
+        warnings.warn(
+            "Deprecated, this so no longer be used. Instead use the DiscountedExperienceSource with the "
+            "standard replay buffer.",
+            DeprecationWarning,
+        )
         self.n_step = n_step
         self.buffer = deque(maxlen=buffer_size)
         self.n_step_buffer = deque(maxlen=n_step)

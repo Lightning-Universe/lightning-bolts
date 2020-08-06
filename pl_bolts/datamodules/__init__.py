@@ -2,7 +2,7 @@ from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
 from pl_bolts.datamodules.cifar10_datamodule import CIFAR10DataModule, TinyCIFAR10DataModule
 from pl_bolts.datamodules.dummy_dataset import DummyDataset
 from pl_bolts.datamodules.experience_source import (ExperienceSourceDataset, ExperienceSource,
-                                                    NStepExperienceSource, EpisodicExperienceStream)
+                                                    DiscountedExperienceSource)
 from pl_bolts.datamodules.fashion_mnist_datamodule import FashionMNISTDataModule
 from pl_bolts.datamodules.imagenet_datamodule import ImagenetDataModule
 from pl_bolts.datamodules.mnist_datamodule import MNISTDataModule
