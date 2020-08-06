@@ -298,7 +298,7 @@ class DQN(pl.LightningModule):
         Returns:
             gym environment
         """
-        env = wrappers.make_env(env_name)
+        env = wrappers.make_environment(env_name)
         env.seed(seed)
         return env
 

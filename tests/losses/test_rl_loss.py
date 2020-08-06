@@ -8,7 +8,7 @@ import numpy as np
 
 from pl_bolts.losses.rl import dqn_loss, double_dqn_loss, per_dqn_loss
 from pl_bolts.models.rl.common.networks import CNN
-from pl_bolts.models.rl.common.wrappers import make_env
+from pl_bolts.models.rl.common.wrappers import make_environment
 
 
 class TestRLLoss(TestCase):
@@ -23,7 +23,7 @@ class TestRLLoss(TestCase):
 
         self.batch = (self.state, self.action, self.reward, self.done, self.next_state)
 
-        self.env = make_env("PongNoFrameskip-v4")
+        self.env = make_environment("PongNoFrameskip-v4")
         self.obs_shape = self.env.observation_space.shape
         self.n_actions = self.env.action_space.n
         self.net = CNN(self.obs_shape, self.n_actions)
