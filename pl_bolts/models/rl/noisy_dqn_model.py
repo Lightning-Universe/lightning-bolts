@@ -2,13 +2,9 @@
 Noisy DQN
 """
 import argparse
-from collections import OrderedDict
-from typing import Tuple
 
 import pytorch_lightning as pl
-import torch
 
-from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.networks import NoisyCNN
 from pl_bolts.models.rl.dqn_model import DQN

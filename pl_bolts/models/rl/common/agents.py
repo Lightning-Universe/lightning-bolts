@@ -4,13 +4,12 @@ Agent module containing classes for Agent logic
 Based on the implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/agent.py
 """
 from abc import ABC
-from random import randint
+from typing import List
 
 import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn
-from typing import List
 
 
 class Agent(ABC):

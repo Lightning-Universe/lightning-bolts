@@ -4,11 +4,11 @@ Prioritized Experience Replay DQN
 import argparse
 from collections import OrderedDict
 from typing import Tuple
-import numpy as np
 
+import numpy as np
 import pytorch_lightning as pl
-from torch.utils.data import DataLoader
 import torch
+from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.losses.rl import per_dqn_loss

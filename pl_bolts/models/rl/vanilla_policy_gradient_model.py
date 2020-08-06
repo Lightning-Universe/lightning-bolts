@@ -1,18 +1,18 @@
 import argparse
 from collections import OrderedDict
 from typing import Tuple, List
-import numpy as np
 
 import gym
+import numpy as np
+import pytorch_lightning as pl
 import torch
 import torch.optim as optim
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+from pytorch_lightning import seed_everything
+from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.nn.functional import log_softmax, softmax
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-import pytorch_lightning as pl
-from pytorch_lightning import seed_everything
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.datamodules.experience_source import DiscountedExperienceSource
 from pl_bolts.models.rl.common import cli
