@@ -2,23 +2,13 @@
 Test RL Loss Functions
 """
 
-import argparse
 from unittest import TestCase
-from unittest.mock import Mock
-
-import gym
 import torch
 import numpy as np
-from torch.utils.data import DataLoader
 
 from pl_bolts.losses.rl import dqn_loss, double_dqn_loss, per_dqn_loss
-from pl_bolts.models.rl.common import cli
-from pl_bolts.models.rl.common.agents import Agent
-from pl_bolts.models.rl.common.experience import EpisodicExperienceStream, ExperienceSource, RLDataset
-from pl_bolts.models.rl.common.memory import Experience, Buffer
-from pl_bolts.models.rl.common.networks import MLP, CNN
-from pl_bolts.models.rl.common.wrappers import ToTensor, make_env
-from pl_bolts.models.rl.dqn_model import DQN
+from pl_bolts.models.rl.common.networks import CNN
+from pl_bolts.models.rl.common.wrappers import make_env
 
 
 class TestRLLoss(TestCase):

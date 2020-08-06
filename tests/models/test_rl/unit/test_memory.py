@@ -1,15 +1,15 @@
 from unittest import TestCase
 from unittest.mock import Mock
-
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
-
-from pl_bolts.models.rl.common.experience import RLDataset
 from pl_bolts.models.rl.common.memory import ReplayBuffer, Experience, PERBuffer, MultiStepBuffer, Buffer
 
 
 class TestBuffer(TestCase):
+
+    def train_batch(self):
+        """Returns an iterator used for testing"""
+        return iter([i for i in range(100)])
 
     def setUp(self) -> None:
         self.state = np.random.rand(4, 84, 84)
@@ -35,19 +35,6 @@ class TestBuffer(TestCase):
         self.assertEqual(sample[2].shape, (self.batch_size, 1))
         self.assertEqual(sample[3].shape, (self.batch_size, 1))
         self.assertEqual(sample[4].shape, (self.batch_size, 4, 84, 84))
-
-    def test_dataloader(self):
-        """tests that the buffer works with dataloader"""
-        dataset = RLDataset(self.buffer, sample_size=self.batch_size)
-        dl = DataLoader(dataset, batch_size=self.batch_size)
-
-        for i_batch, sample_batched in enumerate(dl):
-            self.assertIsInstance(sample_batched, list)
-            self.assertEqual(sample_batched[0].shape, torch.Size([self.batch_size, 4, 84, 84]))
-            self.assertEqual(sample_batched[1].shape, torch.Size([self.batch_size, 1]))
-            self.assertEqual(sample_batched[2].shape, torch.Size([self.batch_size, 1]))
-            self.assertEqual(sample_batched[3].shape, torch.Size([self.batch_size, 1]))
-            self.assertEqual(sample_batched[4].shape, torch.Size([self.batch_size, 4, 84, 84]))
 
 
 class TestReplayBuffer(TestCase):

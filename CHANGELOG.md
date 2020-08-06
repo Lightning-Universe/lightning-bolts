@@ -53,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Removed N-Step DQN as the latest version of the DQN supports N-Step by setting the `n_step` arg to n
+- Deprecated common.experience
 
 ### Fixed
 
