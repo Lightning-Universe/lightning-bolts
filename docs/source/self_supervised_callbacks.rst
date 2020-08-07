@@ -13,3 +13,12 @@ The exponential moving average weight-update rule from Bring Your Own Latent (BY
 
 .. autoclass:: pl_bolts.callbacks.self_supervised.BYOLMAWeightUpdate
    :noindex:
+
+-------------
+
+SSLOnlineEvaluator
+------------------
+Adds an online MLP for fine-tuning. Standard protocol for Self-supervised learning
+
+.. autoclass:: pl_bolts.callbacks.self_supervised.SSLOnlineEvaluatorCallback
+   :noindex:

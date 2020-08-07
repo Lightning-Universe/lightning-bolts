@@ -8,7 +8,7 @@ from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalD
 from pl_bolts.optimizers.layer_adaptive_scaling import LARS
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.models.self_supervised.byol.models import SiameseArm
-from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
+from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate, SSLOnlineEvaluatorCallback
 
 
 class BYOL(pl.LightningModule):
@@ -92,6 +92,10 @@ class BYOL(pl.LightningModule):
         self.target_network = deepcopy(self.online_network)
 
         self.weight_callback = BYOLMAWeightUpdate()
+
+        # for finetuning callback
+        self.z_dim = 2048
+        self.num_classes = self.datamodule.num_classes
 
     def on_batch_end(self):
         # Add callback for user automatically since it's key to BYOL weight update
@@ -209,5 +213,5 @@ if __name__ == '__main__':
 
     model = BYOL(**args.__dict__, datamodule=datamodule)
 
-    trainer = pl.Trainer.from_argparse_args(args, max_steps=10000)
+    trainer = pl.Trainer.from_argparse_args(args, max_steps=10000, callbacks=[SSLOnlineEvaluatorCallback()])
     trainer.fit(model)
