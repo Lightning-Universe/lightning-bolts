@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 import math
 import pytorch_lightning as pl
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
