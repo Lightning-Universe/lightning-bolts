@@ -1,8 +1,8 @@
 import torch
 import torch.nn.functional as F
 from pytorch_lightning import Callback
-from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 from pytorch_lightning.metrics.functional import accuracy
+from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 
 
 class SSLOnlineEvaluator(Callback):
