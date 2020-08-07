@@ -1,12 +1,12 @@
 import torch
 import torch.nn.functional as F
 import math
-import pytorch_lightning as pl
+from pytorch_lightning import Callback
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 from pytorch_lightning.metrics.functional import accuracy
 
 
-class BYOLMAWeightUpdate(pl.Callback):
+class BYOLMAWeightUpdate(Callback):
 
     def __init__(self, initial_tau=0.996):
         """
@@ -65,7 +65,7 @@ class BYOLMAWeightUpdate(pl.Callback):
                 target_p.data = self.current_tau * target_p.data + (1 - self.current_tau) * online_p.data
 
 
-class SSLOnlineEvaluatorCallback(pl.Callback):
+class SSLOnlineEvaluatorCallback(Callback):
 
     def __init__(self, drop_p: float = 0.2, hidden_dim: int = 1024):
         """
