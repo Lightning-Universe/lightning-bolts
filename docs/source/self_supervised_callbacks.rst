@@ -20,5 +20,5 @@ SSLOnlineEvaluator
 ------------------
 Adds an online MLP for fine-tuning. Standard protocol for Self-supervised learning
 
-.. autoclass:: pl_bolts.callbacks.self_supervised.SSLOnlineEvaluatorCallback
+.. autoclass:: pl_bolts.callbacks.self_supervised.SSLOnlineEvaluator
    :noindex:
