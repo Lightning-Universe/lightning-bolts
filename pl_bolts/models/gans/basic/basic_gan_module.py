@@ -1,6 +1,5 @@
 import os
 from argparse import ArgumentParser
-from collections import OrderedDict
 
 import torch
 import pytorch_lightning as pl
