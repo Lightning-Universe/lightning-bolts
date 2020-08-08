@@ -200,6 +200,7 @@ class GAN(pl.LightningModule):
 
 
 def cli_main():
+    pl.seed_everything(1234)
 
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
