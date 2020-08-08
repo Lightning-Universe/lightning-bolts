@@ -16,16 +16,12 @@ class BYOL(pl.LightningModule):
                  datamodule: pl.LightningDataModule = None,
                  data_dir: str = './',
                  learning_rate: float = 0.2,
-                 weight_decay: float = 0.0005,
+                 weight_decay: float = 15e-6,
                  input_height: int = 32,
                  batch_size: int = 32,
                  num_workers: int = 4,
-                 optimizer: str = 'lars',
-                 lr_sched_step: float = 30.0,
-                 lr_sched_gamma: float = 0.5,
-                 lars_momentum: float = 0.9,
-                 lars_eta: float = 0.001,
-                 loss_temperature: float = 0.5,
+                 warmup_epochs: int = 10,
+                 max_epochs: int = 1000,
                  **kwargs):
         """
         PyTorch Lightning implementation of `Bring Your Own Latent (BYOL)
@@ -78,12 +74,8 @@ class BYOL(pl.LightningModule):
             input_height: image input height
             batch_size: the batch size
             num_workers: number of workers
-            optimizer: optimizer name
-            lr_sched_step: step for learning rate scheduler
-            lr_sched_gamma: gamma for learning rate scheduler
-            lars_momentum: the mom param for lars optimizer
-            lars_eta: for lars optimizer
-            loss_temperature: float = 0.
+            warmup_epochs: num of epochs for scheduler warm up
+            max_epochs: max epochs for scheduler
         """
         super().__init__()
         self.save_hyperparameters()
@@ -100,6 +92,10 @@ class BYOL(pl.LightningModule):
         self.target_network = deepcopy(self.online_network)
 
         self.weight_callback = BYOLMAWeightUpdate()
+
+        # for finetuning callback
+        self.z_dim = 2048
+        self.num_classes = self.datamodule.num_classes
 
     def on_batch_end(self):
         # Add callback for user automatically since it's key to BYOL weight update
@@ -154,8 +150,12 @@ class BYOL(pl.LightningModule):
         return result
 
     def configure_optimizers(self):
-        optimizer = LARS(self.parameters(), lr=self.hparams.learning_rate, weight_decay=0.000015)
-        scheduler = LinearWarmupCosineAnnealingLR(optimizer, warmup_epochs=10, max_epochs=1000)
+        optimizer = LARS(self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
+        scheduler = LinearWarmupCosineAnnealingLR(
+            optimizer,
+            warmup_epochs=self.hparams.warmup_epochs,
+            max_epochs=self.hparams.max_epochs
+        )
         return [optimizer], [scheduler]
 
     @staticmethod
@@ -165,25 +165,98 @@ class BYOL(pl.LightningModule):
         parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, imagenet2012, stl10')
 
         (args, _) = parser.parse_known_args()
+
         # Data
         parser.add_argument('--data_dir', type=str, default='.')
-
-        # Training
-        parser.add_argument('--optimizer', choices=['adam', 'lars'], default='lars')
-        parser.add_argument('--batch_size', type=int, default=2)
-        parser.add_argument('--learning_rate', type=float, default=1.0)
-        parser.add_argument('--lars_momentum', type=float, default=0.9)
-        parser.add_argument('--lars_eta', type=float, default=0.001)
-        parser.add_argument('--lr_sched_step', type=float, default=30, help='lr scheduler step')
-        parser.add_argument('--lr_sched_gamma', type=float, default=0.5, help='lr scheduler step')
-        parser.add_argument('--weight_decay', type=float, default=1e-4)
-        # Model
-        parser.add_argument('--loss_temperature', type=float, default=0.5)
         parser.add_argument('--num_workers', default=4, type=int)
+
+        # optim
+        parser.add_argument('--batch_size', type=int, default=256)
+        parser.add_argument('--learning_rate', type=float, default=1e-3)
+        parser.add_argument('--weight_decay', type=float, default=15e-6)
+        parser.add_argument('--warmup_epochs', type=float, default=10)
+
+        # Model
         parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
 
         return parser
 
+import torch
+from torch.nn import functional as F
+from pytorch_lightning import Callback
+from pytorch_lightning.metrics.functional import accuracy
+from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
+
+
+class SSLOnlineEvaluator(Callback):  # pragma: no-cover
+
+    def __init__(self, drop_p: float = 0.2, hidden_dim: int = 1024):
+        """
+        Attaches a MLP for finetuning using the standard self-supervised protocol.
+
+        Example::
+
+            from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
+
+            # your model must have 2 attributes
+            model = Model()
+            model.z_dim = ... # the representation dim
+            model.num_classes = ... # the num of classes in the model
+
+        Args:
+            drop_p: (0.2) dropout probability
+            hidden_dim: (1024) the hidden dimension for the finetune MLP
+        """
+        super().__init__()
+        self.hidden_dim = hidden_dim
+        self.drop_p = drop_p
+        self.optimizer = None
+
+    def on_pretrain_routine_start(self, trainer, pl_module):
+        # attach the evaluator to the module
+        z_dim = pl_module.z_dim
+        num_classes = pl_module.num_classes
+        pl_module.non_linear_evaluator = SSLEvaluator(
+            n_input=z_dim,
+            n_classes=num_classes,
+            p=self.drop_p,
+            n_hidden=self.hidden_dim
+        ).to(pl_module.device)
+
+        self.optimizer = torch.optim.SGD(pl_module.non_linear_evaluator.parameters(), lr=1e-3)
+
+    def get_representations(self, pl_module, x):
+        """
+        Override this to customize for the particular model
+        Args:
+            pl_module:
+            x:
+        """
+        if len(x) == 2 and isinstance(x, list):
+            x = x[0]
+
+        representations = pl_module(x)
+        representations = representations.reshape(representations.size(0), -1)
+        return representations
+
+    def on_train_batch_end(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+        x, y = batch
+        with torch.no_grad():
+            representations = self.get_representations(pl_module, x)
+
+        # forward pass
+        mlp_preds = pl_module.non_linear_evaluator(representations)
+        mlp_loss = F.cross_entropy(mlp_preds, y)
+
+        # update finetune weights
+        mlp_loss.backward()
+        self.optimizer.step()
+        self.optimizer.zero_grad()
+
+        # log metrics
+        acc = accuracy(mlp_preds, y)
+        metrics = {'ft_callback_mlp_loss': mlp_loss, 'ft_callback_mlp_acc': acc}
+        pl_module.logger.log_metrics(metrics)
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -216,5 +289,5 @@ if __name__ == '__main__':
 
     model = BYOL(**args.__dict__, datamodule=datamodule)
 
-    trainer = pl.Trainer.from_argparse_args(args, max_steps=10000)
+    trainer = pl.Trainer.from_argparse_args(args, max_steps=10000, callbacks=[SSLOnlineEvaluator()])
     trainer.fit(model)
