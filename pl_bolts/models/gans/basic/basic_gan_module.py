@@ -91,17 +91,6 @@ class GAN(pl.LightningModule):
         """
         return self.generator(z)
 
-    def generator_step(self, x):
-        g_loss = self.generator_loss(x)
-
-        tqdm_dict = {'g_loss': g_loss}
-        output = OrderedDict({
-            'loss': g_loss,
-            'progress_bar': tqdm_dict,
-            'log': tqdm_dict,
-        })
-        return output
-
     def generator_loss(self, x):
         # sample noise
         z = torch.randn(x.shape[0], self.hparams.latent_dim, device=self.device)
@@ -141,18 +130,6 @@ class GAN(pl.LightningModule):
 
         return D_loss
 
-    def discriminator_step(self, x):
-        # Measure discriminator's ability to classify real from generated samples
-        d_loss = self.discriminator_loss(x)
-
-        tqdm_dict = {'d_loss': d_loss}
-        output = OrderedDict({
-            'loss': d_loss,
-            'progress_bar': tqdm_dict,
-            'log': tqdm_dict,
-        })
-        return output
-
     def training_step(self, batch, batch_idx, optimizer_idx):
         x, _ = batch
 
@@ -167,11 +144,19 @@ class GAN(pl.LightningModule):
 
         return result
 
-    def training_epoch_end(self, outputs):
-        loss = torch.mean(torch.stack([x['loss'] for x in outputs]))
+    def generator_step(self, x):
+        g_loss = self.generator_loss(x)
 
-        result = {'log': {'train_epoch_loss': loss}}
+        result = pl.TrainResult(minimize=g_loss)
+        result.log('g_loss', g_loss, on_epoch=True, prog_bar=True)
+        return result
 
+    def discriminator_step(self, x):
+        # Measure discriminator's ability to classify real from generated samples
+        d_loss = self.discriminator_loss(x)
+
+        result = pl.TrainResult(minimize=d_loss)
+        result.log('d_loss', d_loss, on_epoch=True, prog_bar=True)
         return result
 
     def configure_optimizers(self):
