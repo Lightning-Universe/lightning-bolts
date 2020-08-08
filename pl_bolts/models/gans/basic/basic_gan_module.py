@@ -199,7 +199,24 @@ class GAN(LightningModule):
         return parser
 
 
-class ImageGenerator(Callback):
+class TensorboardGenerativeModelImageSampler(Callback):
+    def __init__(self):
+        """
+        Generates images and logs to tensorboard.
+        Your model must implement the forward function for generation
+
+        Requirements::
+
+            z = torch.rand(batch_size, latent_dim)
+            img_samples = your_model(z)
+
+        Example::
+
+            from pl_bolts.callbacks.vision import TensorboardGenerativeModelImageSampler
+
+            trainer = Trainer(callbacks=[TensorboardGenerativeModelImageSampler()])
+        """
+        super().__init__()
 
     def on_epoch_end(self, trainer, pl_module):
         import torchvision
@@ -232,7 +249,7 @@ if __name__ == '__main__':
         datamodule = STL10DataModule.from_argparse_args(args)
 
     gan = GAN(**vars(args), datamodule=datamodule)
-    callbacks = [ImageGenerator(), LatentDimInterpolator()]
+    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator()]
 
     # no val loop... thus we condition on loss and always save the last
     checkpoint_cb = ModelCheckpoint(monitor='loss', save_last=True)
