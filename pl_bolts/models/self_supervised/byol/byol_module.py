@@ -8,7 +8,7 @@ from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalD
 from pl_bolts.optimizers.layer_adaptive_scaling import LARS
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.models.self_supervised.byol.models import SiameseArm
-from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
+from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate, SSLOnlineEvaluator
 
 
 class BYOL(pl.LightningModule):
@@ -16,16 +16,12 @@ class BYOL(pl.LightningModule):
                  datamodule: pl.LightningDataModule = None,
                  data_dir: str = './',
                  learning_rate: float = 0.2,
-                 weight_decay: float = 0.0005,
+                 weight_decay: float = 15e-6,
                  input_height: int = 32,
                  batch_size: int = 32,
                  num_workers: int = 4,
-                 optimizer: str = 'lars',
-                 lr_sched_step: float = 30.0,
-                 lr_sched_gamma: float = 0.5,
-                 lars_momentum: float = 0.9,
-                 lars_eta: float = 0.001,
-                 loss_temperature: float = 0.5,
+                 warmup_epochs: int = 10,
+                 max_epochs: int = 1000,
                  **kwargs):
         """
         PyTorch Lightning implementation of `Bring Your Own Latent (BYOL)
@@ -41,7 +37,6 @@ class BYOL(pl.LightningModule):
         .. warning:: Work in progress. This implementation is still being verified.
 
         TODOs:
-            - add cosine scheduler
             - verify on CIFAR-10
             - verify on STL-10
             - pre-train on imagenet
@@ -78,12 +73,8 @@ class BYOL(pl.LightningModule):
             input_height: image input height
             batch_size: the batch size
             num_workers: number of workers
-            optimizer: optimizer name
-            lr_sched_step: step for learning rate scheduler
-            lr_sched_gamma: gamma for learning rate scheduler
-            lars_momentum: the mom param for lars optimizer
-            lars_eta: for lars optimizer
-            loss_temperature: float = 0.
+            warmup_epochs: num of epochs for scheduler warm up
+            max_epochs: max epochs for scheduler
         """
         super().__init__()
         self.save_hyperparameters()
@@ -100,6 +91,10 @@ class BYOL(pl.LightningModule):
         self.target_network = deepcopy(self.online_network)
 
         self.weight_callback = BYOLMAWeightUpdate()
+
+        # for finetuning callback
+        self.z_dim = 2048
+        self.num_classes = self.datamodule.num_classes
 
     def on_batch_end(self):
         # Add callback for user automatically since it's key to BYOL weight update
@@ -154,8 +149,12 @@ class BYOL(pl.LightningModule):
         return result
 
     def configure_optimizers(self):
-        optimizer = LARS(self.parameters(), lr=self.hparams.learning_rate, weight_decay=0.000015)
-        scheduler = LinearWarmupCosineAnnealingLR(optimizer, warmup_epochs=10, max_epochs=1000)
+        optimizer = LARS(self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
+        scheduler = LinearWarmupCosineAnnealingLR(
+            optimizer,
+            warmup_epochs=self.hparams.warmup_epochs,
+            max_epochs=self.hparams.max_epochs
+        )
         return [optimizer], [scheduler]
 
     @staticmethod
@@ -165,21 +164,18 @@ class BYOL(pl.LightningModule):
         parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, imagenet2012, stl10')
 
         (args, _) = parser.parse_known_args()
+
         # Data
         parser.add_argument('--data_dir', type=str, default='.')
-
-        # Training
-        parser.add_argument('--optimizer', choices=['adam', 'lars'], default='lars')
-        parser.add_argument('--batch_size', type=int, default=2)
-        parser.add_argument('--learning_rate', type=float, default=1.0)
-        parser.add_argument('--lars_momentum', type=float, default=0.9)
-        parser.add_argument('--lars_eta', type=float, default=0.001)
-        parser.add_argument('--lr_sched_step', type=float, default=30, help='lr scheduler step')
-        parser.add_argument('--lr_sched_gamma', type=float, default=0.5, help='lr scheduler step')
-        parser.add_argument('--weight_decay', type=float, default=1e-4)
-        # Model
-        parser.add_argument('--loss_temperature', type=float, default=0.5)
         parser.add_argument('--num_workers', default=4, type=int)
+
+        # optim
+        parser.add_argument('--batch_size', type=int, default=256)
+        parser.add_argument('--learning_rate', type=float, default=1e-3)
+        parser.add_argument('--weight_decay', type=float, default=15e-6)
+        parser.add_argument('--warmup_epochs', type=float, default=10)
+
+        # Model
         parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
 
         return parser
@@ -216,5 +212,5 @@ if __name__ == '__main__':
 
     model = BYOL(**args.__dict__, datamodule=datamodule)
 
-    trainer = pl.Trainer.from_argparse_args(args, max_steps=10000)
+    trainer = pl.Trainer.from_argparse_args(args, max_steps=10000, callbacks=[SSLOnlineEvaluator()])
     trainer.fit(model)
