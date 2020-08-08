@@ -3,19 +3,19 @@ from argparse import ArgumentParser
 from collections import OrderedDict
 
 import torch
-from pytorch_lightning import Trainer, LightningDataModule, LightningModule, Callback
+import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.nn import functional as F
 
 from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
-from pl_bolts.datamodules import MNISTDataModule, STL10DataModule
+from pl_bolts.datamodules import MNISTDataModule, STL10DataModule, ImagenetDataModule
 from pl_bolts.models.gans.basic.components import Generator, Discriminator
 
 
-class GAN(LightningModule):
+class GAN(pl.LightningModule):
 
     def __init__(self,
-                 datamodule: LightningDataModule = None,
+                 datamodule: pl.LightningDataModule = None,
                  latent_dim: int = 32,
                  batch_size: int = 100,
                  learning_rate: float = 0.0002,
@@ -199,12 +199,10 @@ class GAN(LightningModule):
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
-    from pl_bolts.datamodules import ImagenetDataModule
+def cli_main():
 
     parser = ArgumentParser()
-    parser = Trainer.add_argparse_args(parser)
+    parser = pl.Trainer.add_argparse_args(parser)
     parser = GAN.add_model_specific_args(parser)
     parser = ImagenetDataModule.add_argparse_args(parser)
     args = parser.parse_args()
@@ -221,9 +219,13 @@ if __name__ == '__main__':
 
     # no val loop... thus we condition on loss and always save the last
     checkpoint_cb = ModelCheckpoint(monitor='loss', save_last=True)
-    trainer = Trainer.from_argparse_args(
+    trainer = pl.Trainer.from_argparse_args(
         args,
         callbacks=callbacks,
         checkpoint_callback=checkpoint_cb
     )
     trainer.fit(gan)
+
+
+if __name__ == '__main__':
+    cli_main()
