@@ -37,7 +37,6 @@ class BYOL(pl.LightningModule):
         .. warning:: Work in progress. This implementation is still being verified.
 
         TODOs:
-            - add cosine scheduler
             - verify on CIFAR-10
             - verify on STL-10
             - pre-train on imagenet
