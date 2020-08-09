@@ -1,21 +1,18 @@
 import os
 from argparse import ArgumentParser
-from collections import OrderedDict
 
 import torch
-from pytorch_lightning import Trainer, LightningDataModule, LightningModule, Callback
-from pytorch_lightning.callbacks import ModelCheckpoint
+import pytorch_lightning as pl
 from torch.nn import functional as F
 
-from pl_bolts.callbacks import LatentDimInterpolator
-from pl_bolts.datamodules import MNISTDataModule, STL10DataModule
+from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models.gans.basic.components import Generator, Discriminator
 
 
-class GAN(LightningModule):
+class GAN(pl.LightningModule):
 
     def __init__(self,
-                 datamodule: LightningDataModule = None,
+                 datamodule: pl.LightningDataModule = None,
                  latent_dim: int = 32,
                  batch_size: int = 100,
                  learning_rate: float = 0.0002,
@@ -57,6 +54,13 @@ class GAN(LightningModule):
         # makes self.hparams under the hood and saves to ckpt
         self.save_hyperparameters()
 
+        self._set_default_datamodule(datamodule)
+
+        # networks
+        self.generator = self.init_generator(self.img_dim)
+        self.discriminator = self.init_discriminator(self.img_dim)
+
+    def _set_default_datamodule(self, datamodule):
         # link default data
         if datamodule is None:
             datamodule = MNISTDataModule(
@@ -66,10 +70,6 @@ class GAN(LightningModule):
             )
         self.datamodule = datamodule
         self.img_dim = self.datamodule.size()
-
-        # networks
-        self.generator = self.init_generator(self.img_dim)
-        self.discriminator = self.init_discriminator(self.img_dim)
 
     def init_generator(self, img_dim):
         generator = Generator(latent_dim=self.hparams.latent_dim, img_shape=img_dim)
@@ -90,17 +90,6 @@ class GAN(LightningModule):
             img = gan(z)
         """
         return self.generator(z)
-
-    def generator_step(self, x):
-        g_loss = self.generator_loss(x)
-
-        tqdm_dict = {'g_loss': g_loss}
-        output = OrderedDict({
-            'loss': g_loss,
-            'progress_bar': tqdm_dict,
-            'log': tqdm_dict,
-        })
-        return output
 
     def generator_loss(self, x):
         # sample noise
@@ -141,18 +130,6 @@ class GAN(LightningModule):
 
         return D_loss
 
-    def discriminator_step(self, x):
-        # Measure discriminator's ability to classify real from generated samples
-        d_loss = self.discriminator_loss(x)
-
-        tqdm_dict = {'d_loss': d_loss}
-        output = OrderedDict({
-            'loss': d_loss,
-            'progress_bar': tqdm_dict,
-            'log': tqdm_dict,
-        })
-        return output
-
     def training_step(self, batch, batch_idx, optimizer_idx):
         x, _ = batch
 
@@ -167,11 +144,22 @@ class GAN(LightningModule):
 
         return result
 
-    def training_epoch_end(self, outputs):
-        loss = torch.mean(torch.stack([x['loss'] for x in outputs]))
+    def generator_step(self, x):
+        g_loss = self.generator_loss(x)
 
-        result = {'log': {'train_epoch_loss': loss}}
+        # log to prog bar on each step AND for the full epoch
+        # use the generator loss for checkpointing
+        result = pl.TrainResult(minimize=g_loss, checkpoint_on=g_loss)
+        result.log('g_loss', g_loss, on_epoch=True, prog_bar=True)
+        return result
 
+    def discriminator_step(self, x):
+        # Measure discriminator's ability to classify real from generated samples
+        d_loss = self.discriminator_loss(x)
+
+        # log to prog bar on each step AND for the full epoch
+        result = pl.TrainResult(minimize=d_loss)
+        result.log('d_loss', d_loss, on_epoch=True, prog_bar=True)
         return result
 
     def configure_optimizers(self):
@@ -194,32 +182,20 @@ class GAN(LightningModule):
         parser.add_argument('--batch_size', type=int, default=64, help="size of the batches")
         parser.add_argument('--num_workers', type=int, default=8, help="num dataloader workers")
         parser.add_argument('--data_dir', type=str, default=os.getcwd())
-        parser.add_argument('--dataset', type=str, default='mnist', help='mnist, stl10, imagenet2012')
 
         return parser
 
 
-class ImageGenerator(Callback):
+def cli_main():
+    from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
+    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule
 
-    def on_epoch_end(self, trainer, pl_module):
-        import torchvision
-
-        num_samples = 3
-        z = torch.randn(num_samples, pl_module.hparams.latent_dim, device=pl_module.device)
-
-        # generate images
-        images = pl_module(z)
-
-        grid = torchvision.utils.make_grid(images)
-        trainer.logger.experiment.add_image('gan_images', grid, global_step=trainer.global_step)
-
-
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
-    from pl_bolts.datamodules import ImagenetDataModule
+    pl.seed_everything(1234)
 
     parser = ArgumentParser()
-    parser = Trainer.add_argparse_args(parser)
+    parser.add_argument('--dataset', type=str, default='mnist', help='mnist, stl10, imagenet2012')
+
+    parser = pl.Trainer.add_argparse_args(parser)
     parser = GAN.add_model_specific_args(parser)
     parser = ImagenetDataModule.add_argparse_args(parser)
     args = parser.parse_args()
@@ -232,13 +208,15 @@ if __name__ == '__main__':
         datamodule = STL10DataModule.from_argparse_args(args)
 
     gan = GAN(**vars(args), datamodule=datamodule)
-    callbacks = [ImageGenerator(), LatentDimInterpolator()]
+    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator()]
 
-    # no val loop... thus we condition on loss and always save the last
-    checkpoint_cb = ModelCheckpoint(monitor='loss', save_last=True)
-    trainer = Trainer.from_argparse_args(
+    trainer = pl.Trainer.from_argparse_args(
         args,
         callbacks=callbacks,
-        checkpoint_callback=checkpoint_cb
+        progress_bar_refresh_rate=10
     )
     trainer.fit(gan)
+
+
+if __name__ == '__main__':
+    cli_main()
