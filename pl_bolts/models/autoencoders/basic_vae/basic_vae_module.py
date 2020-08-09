@@ -263,19 +263,6 @@ def cli_main():
     parser = ImagenetDataModule.add_argparse_args(parser)
     parser = MNISTDataModule.add_argparse_args(parser)
     args = parser.parse_args()
-    #
-    # if args.dataset == 'imagenet' or args.pretrained:
-    #     datamodule = ImagenetDataModule.from_argparse_args(args)
-    #     args.image_width = datamodule.size()[1]
-    #     args.image_height = datamodule.size()[2]
-    #     args.input_channels = datamodule.size()[0]
-    #
-    # elif args.dataset == 'mnist':
-    #     datamodule = MNISTDataModule.from_argparse_args(args)
-    #     args.image_width = datamodule.size()[1]
-    #     args.image_height = datamodule.size()[2]
-    #     args.input_channels = datamodule.size()[0]
-
     callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator()]
 
     vae = VAE(**vars(args))
