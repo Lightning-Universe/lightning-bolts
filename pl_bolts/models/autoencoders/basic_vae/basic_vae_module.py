@@ -9,6 +9,7 @@ from torch.nn import functional as F
 from pl_bolts.datamodules import MNISTDataModule, ImagenetDataModule, STL10DataModule
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
+from pl_bolts.utils import shaping
 
 
 class VAE(pl.LightningModule):
@@ -131,21 +132,31 @@ class VAE(pl.LightningModule):
         Q = distributions.normal.Normal(loc=z_mu, scale=z_std)
         return Q
 
-    def elbo_loss(self, x, P, Q):
-        # Reconstruction loss
+    def elbo_loss(self, x, P, Q, num_samples):
         z = Q.rsample()
+
+        # ----------------------
+        # KL divergence loss
+        # ----------------------
+        log_qz = Q.log_prob(z)
+        log_pz = P.log_prob(z)
+        kl_div = (log_qz - log_pz).sum(dim=2)
+
+        # ----------------------
+        # Reconstruction loss
+        # ----------------------
+        z = z.view(-1, z.size(-1)).contiguous()
         pxz = self(z)
         pxz = torch.tanh(pxz)
+
+        pxz = pxz.view(-1, num_samples, pxz.size(-1))
+        x = shaping.tile(x.unsqueeze(1), 1, num_samples)
+
         recon_loss = F.mse_loss(pxz, x, reduction='none')
 
         # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
         # multivariate gaussian
         recon_loss = recon_loss.sum(dim=-1)
-
-        # KL divergence loss
-        log_qz = Q.log_prob(z)
-        log_pz = P.log_prob(z)
-        kl_div = (log_qz - log_pz).sum(dim=1)
 
         # ELBO = reconstruction + KL
         loss = recon_loss + kl_div
@@ -163,6 +174,20 @@ class VAE(pl.LightningModule):
     def _run_step(self, batch):
         x, _ = batch
         z_mu, z_log_var = self.encoder(x)
+
+        # we're estimating the KL divergence using sampling
+        num_samples = 16
+
+        # expand dims to sample all at once
+        # (batch, z_dim) -> (batch, num_samples, z_dim)
+        z_mu = z_mu.unsqueeze(1)
+        z_mu = shaping.tile(z_mu, 1, num_samples)
+
+        # (batch, z_dim) -> (batch, num_samples, z_dim)
+        z_log_var = z_log_var.unsqueeze(1)
+        z_log_var = shaping.tile(z_log_var, 1, num_samples)
+
+        # convert to std
         z_std = torch.exp(z_log_var / 2)
 
         P = self.get_prior(z_mu, z_std)
@@ -170,7 +195,7 @@ class VAE(pl.LightningModule):
 
         x = x.view(x.size(0), -1)
 
-        loss, recon_loss, kl_div, pxz = self.elbo_loss(x, P, Q)
+        loss, recon_loss, kl_div, pxz = self.elbo_loss(x, P, Q, num_samples)
 
         return loss, recon_loss, kl_div, pxz
 
