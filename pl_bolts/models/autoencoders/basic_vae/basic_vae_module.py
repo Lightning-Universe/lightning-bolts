@@ -184,7 +184,7 @@ class VAE(pl.LightningModule):
         z_mu, z_log_var = self.encoder(x)
 
         # we're estimating the KL divergence using sampling
-        num_samples = 16
+        num_samples = 32
 
         # expand dims to sample all at once
         # (batch, z_dim) -> (batch, num_samples, z_dim)
@@ -247,7 +247,7 @@ class VAE(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--hidden_dim', type=int, default=128,
                             help='itermediate layers dimension before embedding for default encoder/decoder')
-        parser.add_argument('--latent_dim', type=int, default=32,
+        parser.add_argument('--latent_dim', type=int, default=4,
                             help='dimension of latent variables z')
         parser.add_argument('--input_width', type=int, default=224,
                             help='input width (used Imagenet downsampled size)')
