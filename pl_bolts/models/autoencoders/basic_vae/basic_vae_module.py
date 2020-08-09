@@ -145,7 +145,7 @@ class VAE(pl.LightningModule):
         kl_div = (log_qz - log_pz).sum(dim=2)
 
         # we used monte carlo sampling to estimate. average across samples
-        kl_div = kl_div.mean(-1)
+        # kl_div = kl_div.mean(-1)
 
         # ----------------------
         # Reconstruction loss
@@ -161,10 +161,10 @@ class VAE(pl.LightningModule):
 
         # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
         # multivariate gaussian
-        recon_loss = recon_loss.sum(dim=-1)\
+        recon_loss = recon_loss.sum(dim=-1)
 
         # we used monte carlo sampling to estimate. average across samples
-        recon_loss = recon_loss.mean(-1)
+        # recon_loss = recon_loss.mean(-1)
 
         # ELBO = reconstruction + KL
         loss = recon_loss + kl_div
