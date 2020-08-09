@@ -208,7 +208,7 @@ def cli_main():
         datamodule = STL10DataModule.from_argparse_args(args)
 
     gan = GAN(**vars(args), datamodule=datamodule)
-    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator()]
+    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=2)]
 
     trainer = pl.Trainer.from_argparse_args(
         args,
