@@ -4,7 +4,7 @@ from pytorch_lightning.callbacks import Callback
 
 class LatentDimInterpolator(Callback):
 
-    def __init__(self, interpolate_epoch_interval=20, range_start=-5, range_end=5):
+    def __init__(self, interpolate_epoch_interval=20, range_start=-5, range_end=5, num_samples=2):
         """
         Interpolates the latent space for a model by setting all dims to zero and stepping
         through the first two dims increasing one unit at a time.
@@ -21,11 +21,13 @@ class LatentDimInterpolator(Callback):
             interpolate_epoch_interval:
             range_start: default -5
             range_end: default 5
+            num_samples: default 2
         """
         super().__init__()
         self.interpolate_epoch_interval = interpolate_epoch_interval
         self.range_start = range_start
         self.range_end = range_end
+        self.num_samples = num_samples
 
     def on_epoch_end(self, trainer, pl_module):
         import torchvision
@@ -45,7 +47,7 @@ class LatentDimInterpolator(Callback):
         for z1 in range(self.range_start, self.range_end, 1):
             for z2 in range(self.range_start, self.range_end, 1):
                 # set all dims to zero
-                z = torch.zeros(1, latent_dim, device=model.device)
+                z = torch.zeros(self.num_samples, latent_dim, device=model.device)
 
                 # set the fist 2 dims to the value
                 z[:, 0] = torch.tensor(z1)

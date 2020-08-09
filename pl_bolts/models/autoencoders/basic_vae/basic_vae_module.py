@@ -6,7 +6,7 @@ import pytorch_lightning as pl
 from torch import distributions
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataModule
+from pl_bolts.datamodules import MNISTDataModule, ImagenetDataModule
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
 
@@ -24,6 +24,7 @@ class VAE(pl.LightningModule):
             learning_rate: float = 0.001,
             data_dir: str = '.',
             datamodule: pl.LightningDataModule = None,
+            num_workers: int = 8,
             pretrained: str = None,
             **kwargs
     ):
@@ -82,7 +83,7 @@ class VAE(pl.LightningModule):
 
     def __set_default_datamodule(self, data_dir):
         if self.datamodule is None:
-            self.datamodule = MNISTDataModule(data_dir=data_dir)
+            self.datamodule = MNISTDataModule(data_dir=data_dir, num_workers=self.hparams.num_workers)
             (self.hparams.input_channels, self.hparams.input_height, self.hparams.input_width) = self.datamodule.size()
 
     def load_pretrained(self, pretrained):
@@ -243,6 +244,7 @@ class VAE(pl.LightningModule):
         parser.add_argument('--batch_size', type=int, default=32)
         parser.add_argument('--pretrained', type=str, default=None)
         parser.add_argument('--data_dir', type=str, default=os.getcwd())
+        parser.add_argument('--num_workers', type=int, default=8, help="num dataloader workers")
 
         parser.add_argument('--learning_rate', type=float, default=1e-3)
         return parser
