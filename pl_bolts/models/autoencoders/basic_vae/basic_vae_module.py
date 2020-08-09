@@ -176,62 +176,35 @@ class VAE(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         loss, recon_loss, kl_div, pxz = self._run_step(batch)
-
-        tensorboard_logs = {
+        result = pl.TrainResult(loss)
+        result.log_dict({
             'train_elbo_loss': loss,
             'train_recon_loss': recon_loss,
             'train_kl_loss': kl_div
-        }
-
-        return {'loss': loss, 'log': tensorboard_logs}
+        })
+        return result
 
     def validation_step(self, batch, batch_idx):
         loss, recon_loss, kl_div, pxz = self._run_step(batch)
-
-        return {
+        result = pl.EvalResult(loss)
+        result.log_dict({
             'val_loss': loss,
             'val_recon_loss': recon_loss,
             'val_kl_div': kl_div,
             'pxz': pxz
-        }
-
-    def validation_epoch_end(self, outputs):
-        avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
-        recon_loss = torch.stack([x['val_recon_loss'] for x in outputs]).mean()
-        kl_loss = torch.stack([x['val_kl_div'] for x in outputs]).mean()
-
-        tensorboard_logs = {'val_elbo_loss': avg_loss,
-                            'val_recon_loss': recon_loss,
-                            'val_kl_loss': kl_loss}
-
-        return {
-            'val_loss': avg_loss,
-            'log': tensorboard_logs
-        }
+        })
+        return result
 
     def test_step(self, batch, batch_idx):
         loss, recon_loss, kl_div, pxz = self._run_step(batch)
-
-        return {
+        result = pl.EvalResult(loss)
+        result.log_dict({
             'test_loss': loss,
             'test_recon_loss': recon_loss,
             'test_kl_div': kl_div,
             'pxz': pxz
-        }
-
-    def test_epoch_end(self, outputs):
-        avg_loss = torch.stack([x['test_loss'] for x in outputs]).mean()
-        recon_loss = torch.stack([x['test_recon_loss'] for x in outputs]).mean()
-        kl_loss = torch.stack([x['test_kl_div'] for x in outputs]).mean()
-
-        tensorboard_logs = {'test_elbo_loss': avg_loss,
-                            'test_recon_loss': recon_loss,
-                            'test_kl_loss': kl_loss}
-
-        return {
-            'test_loss': avg_loss,
-            'log': tensorboard_logs
-        }
+        })
+        return result
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
