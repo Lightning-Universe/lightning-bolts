@@ -146,7 +146,7 @@ class VAE(pl.LightningModule):
         # Reconstruction loss
         # ----------------------
         z = z.view(-1, z.size(-1)).contiguous()
-        pxz = self(z)
+        pxz = self.decoder(z)
 
         pxz = pxz.view(-1, num_samples, pxz.size(-1))
         x = shaping.tile(x.unsqueeze(1), 1, num_samples)
