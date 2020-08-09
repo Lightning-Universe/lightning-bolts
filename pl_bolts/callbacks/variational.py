@@ -40,7 +40,7 @@ class LatentDimInterpolator(Callback):
             num_images = (self.range_end - self.range_start) ** 2
             num_rows = int(math.sqrt(num_images))
             grid = torchvision.utils.make_grid(images, nrow=num_rows)
-            trainer.logger.experiment.add_image('gan_image_grid', grid, global_step=trainer.global_step)
+            trainer.logger.experiment.add_image('image_grid', grid, global_step=trainer.global_step)
 
     def interpolate_latent_space(self, model, latent_dim):
         images = []
