@@ -354,7 +354,7 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--dataset', default='cifar10', type=str)
         parser.add_argument('--data_dir', default='.', type=str)
         parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
-        parser.add_argument('--num_workers', default=0, type=int)
+        parser.add_argument('--num_workers', default=8, type=int)
 
         return parser
 
