@@ -274,8 +274,14 @@ def cli_main():
     #     args.image_height = datamodule.size()[2]
     #     args.input_channels = datamodule.size()[0]
 
+    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator()]
+
     vae = VAE(**vars(args))
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = pl.Trainer.from_argparse_args(
+        args,
+        callbacks=callbacks,
+        progress_bar_refresh_rate=10
+    )
     trainer.fit(vae)
 
 
