@@ -60,6 +60,6 @@ class LatentDimInterpolator(Callback):
                     pl_module.eval()
                     img = pl_module(z)
                     pl_module.train()
-                images.append(img)
+                images.append(img[0])
 
         return images
