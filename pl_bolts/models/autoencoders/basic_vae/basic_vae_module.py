@@ -6,7 +6,7 @@ import pytorch_lightning as pl
 from torch import distributions
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataModule, ImagenetDataModule, STL10DataModule
+from pl_bolts.datamodules import MNISTDataModule, ImagenetDataModule, STL10DataModule, BinaryMNISTDataModule
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
 from pl_bolts.utils import shaping
@@ -85,7 +85,7 @@ class VAE(pl.LightningModule):
     def _set_default_datamodule(self, datamodule):
         # link default data
         if datamodule is None:
-            datamodule = MNISTDataModule(
+            datamodule = BinaryMNISTDataModule(
                 data_dir=self.hparams.data_dir,
                 num_workers=self.hparams.num_workers,
                 normalize=False
