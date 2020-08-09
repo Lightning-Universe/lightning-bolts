@@ -247,7 +247,7 @@ class VAE(pl.LightningModule):
                             help='input width (used Imagenet downsampled size)')
         parser.add_argument('--input_channels', type=int, default=3,
                             help='number of input channels')
-        parser.add_argument('--batch_size', type=int, default=32)
+        parser.add_argument('--batch_size', type=int, default=64)
         parser.add_argument('--pretrained', type=str, default=None)
         parser.add_argument('--data_dir', type=str, default=os.getcwd())
         parser.add_argument('--num_workers', type=int, default=8, help="num dataloader workers")
