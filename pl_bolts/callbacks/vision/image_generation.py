@@ -42,5 +42,5 @@ class TensorboardGenerativeModelImageSampler(Callback):
             images = images.view(self.num_samples, *img_dim)
 
         grid = torchvision.utils.make_grid(images)
-        str_title = f'{pl_module.__class__}_images'
+        str_title = f'{pl_module.__class__.__name__}_images'
         trainer.logger.experiment.add_image(str_title, grid, global_step=trainer.global_step)
