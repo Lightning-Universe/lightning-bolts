@@ -25,7 +25,7 @@ from pl_bolts.models.self_supervised.cpc.transforms import (
     CPCTrainTransformsImageNet128,
     CPCEvalTransformsImageNet128
 )
-from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
+from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
 from pl_bolts.utils.pretrained_weights import load_pretrained
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
@@ -145,15 +145,8 @@ class CPCV2(pl.LightningModule):
         c, h = self.__compute_final_nb_c(self.hparams.patch_size)
         self.contrastive_task = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
-        if self.online_evaluator:
-            z_dim = c * h * h
-            num_classes = self.datamodule.num_classes
-            self.non_linear_evaluator = SSLEvaluator(
-                n_input=z_dim,
-                n_classes=num_classes,
-                p=0.2,
-                n_hidden=1024
-            )
+        self.z_dim = c * h * h
+        self.num_classes = self.datamodule.num_classes
 
         if pretrained:
             self.load_pretrained(encoder)
@@ -231,23 +224,6 @@ class CPCV2(pl.LightningModule):
         loss = nce_loss
         log = {'train_nce_loss': nce_loss}
 
-        # don't use the training signal, just finetune the MLP to see how we're doing downstream
-        if self.online_evaluator:
-            if isinstance(self.datamodule, STL10DataModule):
-                img_1, y = labeled_batch
-
-            with torch.no_grad():
-                Z = self(img_1)
-
-            # just in case... no grads into unsupervised part!
-            z_in = Z.detach()
-
-            z_in = z_in.reshape(Z.size(0), -1)
-            mlp_preds = self.non_linear_evaluator(z_in)
-            mlp_loss = F.cross_entropy(mlp_preds, y)
-            loss = nce_loss + mlp_loss
-            log['train_mlp_loss'] = mlp_loss
-
         result = {
             'loss': loss,
             'log': log
@@ -256,7 +232,6 @@ class CPCV2(pl.LightningModule):
         return result
 
     def validation_step(self, batch, batch_nb):
-
         # in STL10 we pass in both lab+unl for online ft
         if isinstance(self.datamodule, STL10DataModule):
             labeled_batch = batch[1]
@@ -272,18 +247,6 @@ class CPCV2(pl.LightningModule):
         # infoNCE loss
         nce_loss = self.contrastive_task(Z)
         result = {'val_nce': nce_loss}
-
-        if self.online_evaluator:
-            if isinstance(self.datamodule, STL10DataModule):
-                img_1, y = labeled_batch
-                Z = self(img_1)
-
-            z_in = Z.reshape(Z.size(0), -1)
-            mlp_preds = self.non_linear_evaluator(z_in)
-            mlp_loss = F.cross_entropy(mlp_preds, y)
-            acc = metrics.accuracy(mlp_preds, y)
-            result['mlp_acc'] = acc
-            result['mlp_loss'] = mlp_loss
 
         return result
 
@@ -392,5 +355,5 @@ if __name__ == '__main__':
         args.patch_size = 32
 
     model = CPCV2(**vars(args), datamodule=datamodule)
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = pl.Trainer.from_argparse_args(args, callbacks=[SSLOnlineEvaluator()])
     trainer.fit(model)
