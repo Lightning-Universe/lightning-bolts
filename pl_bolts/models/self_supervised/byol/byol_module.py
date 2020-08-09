@@ -2,6 +2,7 @@ from copy import deepcopy
 import torch
 import torch.nn.functional as F
 import pytorch_lightning as pl
+from typing import Any
 
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
