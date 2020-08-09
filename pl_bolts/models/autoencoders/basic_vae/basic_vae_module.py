@@ -277,7 +277,7 @@ def cli_main():
     elif args.dataset == 'stl10':
         datamodule = STL10DataModule.from_argparse_args(args)
 
-    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator()]
+    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=2)]
     vae = VAE(**vars(args), datamodule=datamodule)
     trainer = pl.Trainer.from_argparse_args(
         args,
