@@ -3,11 +3,9 @@ from argparse import ArgumentParser
 
 import torch
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.nn import functional as F
 
-from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
-from pl_bolts.datamodules import MNISTDataModule, STL10DataModule, ImagenetDataModule
+from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models.gans.basic.components import Generator, Discriminator
 
 
@@ -186,6 +184,9 @@ class GAN(pl.LightningModule):
 
 
 def cli_main():
+    from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
+    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule
+
     pl.seed_everything(1234)
 
     parser = ArgumentParser()

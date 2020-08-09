@@ -249,9 +249,10 @@ class VAE(pl.LightningModule):
 
 
 def cli_main():
-    pl.seed_everything(1234)
-
+    from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
     from pl_bolts.datamodules import ImagenetDataModule
+
+    pl.seed_everything(1234)
     parser = ArgumentParser()
     parser.add_argument('--dataset', default='mnist', type=str)
 
