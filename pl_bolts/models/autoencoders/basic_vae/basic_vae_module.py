@@ -186,7 +186,7 @@ class VAE(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         loss, recon_loss, kl_div, pxz = self._run_step(batch)
-        result = pl.EvalResult(loss)
+        result = pl.EvalResult(loss, checkpoint_on=loss)
         result.log_dict({
             'val_loss': loss,
             'val_recon_loss': recon_loss,
