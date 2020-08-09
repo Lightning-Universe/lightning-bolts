@@ -32,7 +32,10 @@ class TensorboardGenerativeModelImageSampler(Callback):
         z = torch.randn(self.num_samples, pl_module.hparams.latent_dim, device=pl_module.device)
 
         # generate images
-        images = pl_module(z)
+        with torch.no_grad():
+            pl_module.eval()
+            images = pl_module(z)
+            pl_module.train()
 
         if len(images.size()) == 2:
             img_dim = pl_module.img_dim

@@ -43,19 +43,23 @@ class LatentDimInterpolator(Callback):
             str_title = f'{pl_module.__class__}_latent_space'
             trainer.logger.experiment.add_image(str_title, grid, global_step=trainer.global_step)
 
-    def interpolate_latent_space(self, model, latent_dim):
+    def interpolate_latent_space(self, pl_module, latent_dim):
         images = []
         for z1 in range(self.range_start, self.range_end, 1):
             for z2 in range(self.range_start, self.range_end, 1):
                 # set all dims to zero
-                z = torch.zeros(self.num_samples, latent_dim, device=model.device)
+                z = torch.zeros(self.num_samples, latent_dim, device=pl_module.device)
 
                 # set the fist 2 dims to the value
                 z[:, 0] = torch.tensor(z1)
                 z[:, 1] = torch.tensor(z2)
 
                 # sample
-                img = model(z)
+                # generate images
+                with torch.no_grad():
+                    pl_module.eval()
+                    img = pl_module(z)
+                    pl_module.train()
                 images.append(img)
 
         return images
