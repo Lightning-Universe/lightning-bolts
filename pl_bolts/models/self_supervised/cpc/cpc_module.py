@@ -252,14 +252,7 @@ class CPCV2(pl.LightningModule):
 
     def validation_epoch_end(self, outputs):
         val_nce = metrics.mean(outputs, 'val_nce')
-
         log = {'val_nce_loss': val_nce}
-        if self.online_evaluator:
-            mlp_acc = metrics.mean(outputs, 'mlp_acc')
-            mlp_loss = metrics.mean(outputs, 'mlp_loss')
-            log['val_mlp_acc'] = mlp_acc
-            log['val_mlp_loss'] = mlp_loss
-
         return {'val_loss': val_nce, 'log': log, 'progress_bar': log}
 
     def test_step(self, batch, batch_idx):
