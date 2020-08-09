@@ -88,7 +88,7 @@ class VAE(pl.LightningModule):
             datamodule = MNISTDataModule(
                 data_dir=self.hparams.data_dir,
                 num_workers=self.hparams.num_workers,
-                normalize=True
+                normalize=False
             )
         self.datamodule = datamodule
         self.img_dim = self.datamodule.size()
