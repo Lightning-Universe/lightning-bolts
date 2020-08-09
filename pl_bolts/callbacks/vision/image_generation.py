@@ -31,4 +31,4 @@ class TensorboardGenerativeModelImageSampler(Callback):
         images = pl_module(z)
 
         grid = torchvision.utils.make_grid(images)
-        trainer.logger.experiment.add_image('gan_images', grid, global_step=trainer.global_step)
+        trainer.logger.experiment.add_image('images', grid, global_step=trainer.global_step)
