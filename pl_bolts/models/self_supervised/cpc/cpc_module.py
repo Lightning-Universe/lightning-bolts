@@ -342,7 +342,7 @@ class CPCV2(pl.LightningModule):
             'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152',
             'resnext50_32x4d', 'resnext101_32x8d', 'wide_resnet50_2', 'wide_resnet101_2'
         ]
-        parser.add_argument('--encoder', default='resnet18', type=str)
+        parser.add_argument('--encoder', default='cpc_encoder', type=str)
 
         # training params
         parser.add_argument('--batch_size', type=int, default=128)
