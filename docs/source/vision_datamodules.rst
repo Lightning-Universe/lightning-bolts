@@ -9,6 +9,13 @@ Supervised learning
 These are standard vision datasets with the train, test, val splits pre-generated in DataLoaders with
 the standard transforms (and Normalization) values
 
+
+BinaryMNIST
+^^^^^^^^^^^
+
+.. autoclass:: pl_bolts.datamodules.binary_mnist_datamodule.BinaryMNISTDataModule
+    :noindex:
+
 CityScapes
 ^^^^^^^^^^
 
