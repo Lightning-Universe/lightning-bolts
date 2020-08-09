@@ -79,7 +79,7 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
         # log metrics
         acc = accuracy(mlp_preds, y)
         metrics = {'ft_callback_mlp_loss': mlp_loss, 'ft_callback_mlp_acc': acc}
-        pl_module.logger.log_metrics(metrics)
+        pl_module.logger.log_metrics(metrics, step=trainer.global_step)
 
 
 class BYOLMAWeightUpdate(pl.Callback):
