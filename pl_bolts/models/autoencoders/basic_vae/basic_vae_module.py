@@ -85,7 +85,7 @@ class VAE(pl.LightningModule):
     def _set_default_datamodule(self, datamodule):
         # link default data
         if datamodule is None:
-            datamodule = BinaryMNISTDataModule(
+            datamodule = MNISTDataModule(
                 data_dir=self.hparams.data_dir,
                 num_workers=self.hparams.num_workers,
                 normalize=False
