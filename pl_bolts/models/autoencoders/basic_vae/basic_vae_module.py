@@ -6,7 +6,7 @@ import pytorch_lightning as pl
 from torch import distributions
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataModule, ImagenetDataModule
+from pl_bolts.datamodules import MNISTDataModule, ImagenetDataModule, STL10DataModule
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
 
@@ -64,7 +64,7 @@ class VAE(pl.LightningModule):
         self.__set_pretrained_dims(pretrained)
 
         # use mnist as the default module
-        self.__set_default_datamodule(data_dir)
+        self._set_default_datamodule(datamodule)
 
         # init actual model
         self.__init_system()
@@ -81,10 +81,18 @@ class VAE(pl.LightningModule):
             self.datamodule = ImagenetDataModule(data_dir=self.hparams.data_dir)
             (self.hparams.input_channels, self.hparams.input_height, self.hparams.input_width) = self.datamodule.size()
 
-    def __set_default_datamodule(self, data_dir):
-        if self.datamodule is None:
-            self.datamodule = MNISTDataModule(data_dir=data_dir, num_workers=self.hparams.num_workers)
-            (self.hparams.input_channels, self.hparams.input_height, self.hparams.input_width) = self.datamodule.size()
+    def _set_default_datamodule(self, datamodule):
+        # link default data
+        if datamodule is None:
+            datamodule = MNISTDataModule(
+                data_dir=self.hparams.data_dir,
+                num_workers=self.hparams.num_workers,
+                normalize=True
+            )
+        self.datamodule = datamodule
+        self.img_dim = self.datamodule.size()
+
+        (self.hparams.input_channels, self.hparams.input_height, self.hparams.input_width) = self.img_dim
 
     def load_pretrained(self, pretrained):
         available_weights = {'imagenet2012'}
@@ -263,9 +271,16 @@ def cli_main():
     parser = ImagenetDataModule.add_argparse_args(parser)
     parser = MNISTDataModule.add_argparse_args(parser)
     args = parser.parse_args()
-    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator()]
 
-    vae = VAE(**vars(args))
+    # default is mnist
+    datamodule = None
+    if args.dataset == 'imagenet2012':
+        datamodule = ImagenetDataModule.from_argparse_args(args)
+    elif args.dataset == 'stl10':
+        datamodule = STL10DataModule.from_argparse_args(args)
+
+    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator()]
+    vae = VAE(**vars(args), datamodule=datamodule)
     trainer = pl.Trainer.from_argparse_args(
         args,
         callbacks=callbacks,

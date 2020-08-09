@@ -54,6 +54,13 @@ class GAN(pl.LightningModule):
         # makes self.hparams under the hood and saves to ckpt
         self.save_hyperparameters()
 
+        self._set_default_datamodule(datamodule)
+
+        # networks
+        self.generator = self.init_generator(self.img_dim)
+        self.discriminator = self.init_discriminator(self.img_dim)
+
+    def _set_default_datamodule(self, datamodule):
         # link default data
         if datamodule is None:
             datamodule = MNISTDataModule(
@@ -63,10 +70,6 @@ class GAN(pl.LightningModule):
             )
         self.datamodule = datamodule
         self.img_dim = self.datamodule.size()
-
-        # networks
-        self.generator = self.init_generator(self.img_dim)
-        self.discriminator = self.init_discriminator(self.img_dim)
 
     def init_generator(self, img_dim):
         generator = Generator(latent_dim=self.hparams.latent_dim, img_shape=img_dim)
