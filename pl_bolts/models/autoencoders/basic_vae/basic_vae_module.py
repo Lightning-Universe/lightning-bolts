@@ -147,12 +147,11 @@ class VAE(pl.LightningModule):
         # ----------------------
         z = z.view(-1, z.size(-1)).contiguous()
         pxz = self(z)
-        pxz = torch.tanh(pxz)
 
         pxz = pxz.view(-1, num_samples, pxz.size(-1))
         x = shaping.tile(x.unsqueeze(1), 1, num_samples)
 
-        recon_loss = F.mse_loss(pxz, x, reduction='none')
+        recon_loss = F.binary_cross_entropy_with_logits(pxz, x, reduction='none')
 
         # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
         # multivariate gaussian
@@ -277,7 +276,7 @@ def cli_main():
     elif args.dataset == 'stl10':
         datamodule = STL10DataModule.from_argparse_args(args)
 
-    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=2)]
+    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]
     vae = VAE(**vars(args), datamodule=datamodule)
     trainer = pl.Trainer.from_argparse_args(
         args,
