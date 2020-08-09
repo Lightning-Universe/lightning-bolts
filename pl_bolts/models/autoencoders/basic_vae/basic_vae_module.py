@@ -264,7 +264,7 @@ def cli_main():
 
     pl.seed_everything(1234)
     parser = ArgumentParser()
-    parser.add_argument('--dataset', default='mnist', type=str)
+    parser.add_argument('--dataset', default='mnist', type=str, help='mnist, stl10, imagenet')
 
     parser = pl.Trainer.add_argparse_args(parser)
     parser = VAE.add_model_specific_args(parser)
