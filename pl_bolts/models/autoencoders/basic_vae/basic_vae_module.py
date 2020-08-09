@@ -151,6 +151,7 @@ class VAE(pl.LightningModule):
         pxz = pxz.view(-1, num_samples, pxz.size(-1))
         x = shaping.tile(x.unsqueeze(1), 1, num_samples)
 
+        pxz = torch.sigmoid(pxz)
         recon_loss = F.binary_cross_entropy_with_logits(pxz, x, reduction='none')
 
         # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
