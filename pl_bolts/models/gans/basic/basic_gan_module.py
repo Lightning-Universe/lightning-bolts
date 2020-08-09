@@ -205,12 +205,9 @@ def cli_main():
     gan = GAN(**vars(args), datamodule=datamodule)
     callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator()]
 
-    # no val loop... thus we condition on loss and always save the last
-    checkpoint_cb = ModelCheckpoint(save_last=True)
     trainer = pl.Trainer.from_argparse_args(
         args,
         callbacks=callbacks,
-        checkpoint_callback=checkpoint_cb
     )
     trainer.fit(gan)
 
