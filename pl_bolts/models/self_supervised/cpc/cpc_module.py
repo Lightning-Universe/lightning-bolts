@@ -208,33 +208,25 @@ class CPCV2(pl.LightningModule):
         return Z
 
     def training_step(self, batch, batch_nb):
-        # in STL10 we pass in both lab+unl for online ft
-        if isinstance(self.datamodule, STL10DataModule):
-            labeled_batch = batch[1]
-            unlabeled_batch = batch[0]
-            batch = unlabeled_batch
+        # calculate loss
+        nce_loss = self.shared_step(batch)
 
-        img_1, y = batch
-
-        # Latent features
-        Z = self(img_1)
-
-        # infoNCE loss
-        nce_loss = self.contrastive_task(Z)
-        loss = nce_loss
-        log = {'train_nce_loss': nce_loss}
-
-        result = {
-            'loss': loss,
-            'log': log
-        }
-
+        # result
+        result = pl.TrainResult(nce_loss)
+        result.log('train_nce_loss', nce_loss)
         return result
 
     def validation_step(self, batch, batch_nb):
-        # in STL10 we pass in both lab+unl for online ft
+        # calculate loss
+        nce_loss = self.shared_step(batch)
+
+        # result
+        result = pl.EvalResult(checkpoint_on=nce_loss)
+        result.log('val_nce', nce_loss, prog_bar=True)
+        return result
+
+    def shared_step(self, batch):
         if isinstance(self.datamodule, STL10DataModule):
-            labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
 
@@ -246,31 +238,7 @@ class CPCV2(pl.LightningModule):
 
         # infoNCE loss
         nce_loss = self.contrastive_task(Z)
-        result = {'val_nce': nce_loss}
-
-        return result
-
-    def validation_epoch_end(self, outputs):
-        val_nce = metrics.mean(outputs, 'val_nce')
-        log = {'val_nce_loss': val_nce}
-        return {'val_loss': val_nce, 'log': log, 'progress_bar': log}
-
-    def test_step(self, batch, batch_idx):
-        img_1, y = batch
-        Z = self(img_1)
-        z_in = Z.reshape(Z.size(0), -1)
-        mlp_preds = self.non_linear_evaluator(z_in)
-        mlp_loss = F.cross_entropy(mlp_preds, y)
-        acc = metrics.accuracy(mlp_preds, y)
-
-        return {'acc': acc, 'loss': mlp_loss}
-
-    def test_epoch_end(self, test_step_outputs):
-        avg_acc = torch.stack([x['acc'] for x in test_step_outputs]).mean()
-        avg_loss = torch.stack([x['loss'] for x in test_step_outputs]).mean()
-
-        logs = {'test_acc': avg_acc, 'test_loss': avg_loss}
-        return {'log': logs}
+        return nce_loss
 
     def configure_optimizers(self):
         opt = optim.Adam(
@@ -315,8 +283,7 @@ class CPCV2(pl.LightningModule):
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def cli_main():
     pl.seed_everything(1234)
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
@@ -350,3 +317,7 @@ if __name__ == '__main__':
     model = CPCV2(**vars(args), datamodule=datamodule)
     trainer = pl.Trainer.from_argparse_args(args, callbacks=[SSLOnlineEvaluator()])
     trainer.fit(model)
+
+
+if __name__ == '__main__':
+    cli_main()
