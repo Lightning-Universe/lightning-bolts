@@ -8,11 +8,8 @@ from typing import Union
 
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
 import torch.optim as optim
 from pytorch_lightning.utilities import rank_zero_warn
-
-from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.losses.self_supervised_learning import CPCTask
@@ -25,7 +22,7 @@ from pl_bolts.models.self_supervised.cpc.transforms import (
     CPCTrainTransformsImageNet128,
     CPCEvalTransformsImageNet128
 )
-from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
+from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
 from pl_bolts.utils.pretrained_weights import load_pretrained
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
@@ -145,15 +142,8 @@ class CPCV2(pl.LightningModule):
         c, h = self.__compute_final_nb_c(self.hparams.patch_size)
         self.contrastive_task = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
-        if self.online_evaluator:
-            z_dim = c * h * h
-            num_classes = self.datamodule.num_classes
-            self.non_linear_evaluator = SSLEvaluator(
-                n_input=z_dim,
-                n_classes=num_classes,
-                p=0.2,
-                n_hidden=1024
-            )
+        self.z_dim = c * h * h
+        self.num_classes = self.datamodule.num_classes
 
         if pretrained:
             self.load_pretrained(encoder)
@@ -215,51 +205,25 @@ class CPCV2(pl.LightningModule):
         return Z
 
     def training_step(self, batch, batch_nb):
-        # in STL10 we pass in both lab+unl for online ft
-        if isinstance(self.datamodule, STL10DataModule):
-            labeled_batch = batch[1]
-            unlabeled_batch = batch[0]
-            batch = unlabeled_batch
+        # calculate loss
+        nce_loss = self.shared_step(batch)
 
-        img_1, y = batch
-
-        # Latent features
-        Z = self(img_1)
-
-        # infoNCE loss
-        nce_loss = self.contrastive_task(Z)
-        loss = nce_loss
-        log = {'train_nce_loss': nce_loss}
-
-        # don't use the training signal, just finetune the MLP to see how we're doing downstream
-        if self.online_evaluator:
-            if isinstance(self.datamodule, STL10DataModule):
-                img_1, y = labeled_batch
-
-            with torch.no_grad():
-                Z = self(img_1)
-
-            # just in case... no grads into unsupervised part!
-            z_in = Z.detach()
-
-            z_in = z_in.reshape(Z.size(0), -1)
-            mlp_preds = self.non_linear_evaluator(z_in)
-            mlp_loss = F.cross_entropy(mlp_preds, y)
-            loss = nce_loss + mlp_loss
-            log['train_mlp_loss'] = mlp_loss
-
-        result = {
-            'loss': loss,
-            'log': log
-        }
-
+        # result
+        result = pl.TrainResult(nce_loss)
+        result.log('train_nce_loss', nce_loss)
         return result
 
     def validation_step(self, batch, batch_nb):
+        # calculate loss
+        nce_loss = self.shared_step(batch)
 
-        # in STL10 we pass in both lab+unl for online ft
+        # result
+        result = pl.EvalResult(checkpoint_on=nce_loss)
+        result.log('val_nce', nce_loss, prog_bar=True)
+        return result
+
+    def shared_step(self, batch):
         if isinstance(self.datamodule, STL10DataModule):
-            labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
 
@@ -271,50 +235,7 @@ class CPCV2(pl.LightningModule):
 
         # infoNCE loss
         nce_loss = self.contrastive_task(Z)
-        result = {'val_nce': nce_loss}
-
-        if self.online_evaluator:
-            if isinstance(self.datamodule, STL10DataModule):
-                img_1, y = labeled_batch
-                Z = self(img_1)
-
-            z_in = Z.reshape(Z.size(0), -1)
-            mlp_preds = self.non_linear_evaluator(z_in)
-            mlp_loss = F.cross_entropy(mlp_preds, y)
-            acc = metrics.accuracy(mlp_preds, y)
-            result['mlp_acc'] = acc
-            result['mlp_loss'] = mlp_loss
-
-        return result
-
-    def validation_epoch_end(self, outputs):
-        val_nce = metrics.mean(outputs, 'val_nce')
-
-        log = {'val_nce_loss': val_nce}
-        if self.online_evaluator:
-            mlp_acc = metrics.mean(outputs, 'mlp_acc')
-            mlp_loss = metrics.mean(outputs, 'mlp_loss')
-            log['val_mlp_acc'] = mlp_acc
-            log['val_mlp_loss'] = mlp_loss
-
-        return {'val_loss': val_nce, 'log': log, 'progress_bar': log}
-
-    def test_step(self, batch, batch_idx):
-        img_1, y = batch
-        Z = self(img_1)
-        z_in = Z.reshape(Z.size(0), -1)
-        mlp_preds = self.non_linear_evaluator(z_in)
-        mlp_loss = F.cross_entropy(mlp_preds, y)
-        acc = metrics.accuracy(mlp_preds, y)
-
-        return {'acc': acc, 'loss': mlp_loss}
-
-    def test_epoch_end(self, test_step_outputs):
-        avg_acc = torch.stack([x['acc'] for x in test_step_outputs]).mean()
-        avg_loss = torch.stack([x['loss'] for x in test_step_outputs]).mean()
-
-        logs = {'test_acc': avg_acc, 'test_loss': avg_loss}
-        return {'log': logs}
+        return nce_loss
 
     def configure_optimizers(self):
         opt = optim.Adam(
@@ -342,7 +263,7 @@ class CPCV2(pl.LightningModule):
             'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152',
             'resnext50_32x4d', 'resnext101_32x8d', 'wide_resnet50_2', 'wide_resnet101_2'
         ]
-        parser.add_argument('--encoder', default='resnet18', type=str)
+        parser.add_argument('--encoder', default='cpc_encoder', type=str)
 
         # training params
         parser.add_argument('--batch_size', type=int, default=128)
@@ -354,13 +275,12 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--dataset', default='cifar10', type=str)
         parser.add_argument('--data_dir', default='.', type=str)
         parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
-        parser.add_argument('--num_workers', default=0, type=int)
+        parser.add_argument('--num_workers', default=8, type=int)
 
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def cli_main():
     pl.seed_everything(1234)
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
@@ -392,5 +312,9 @@ if __name__ == '__main__':
         args.patch_size = 32
 
     model = CPCV2(**vars(args), datamodule=datamodule)
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = pl.Trainer.from_argparse_args(args, callbacks=[SSLOnlineEvaluator()])
     trainer.fit(model)
+
+
+if __name__ == '__main__':
+    cli_main()

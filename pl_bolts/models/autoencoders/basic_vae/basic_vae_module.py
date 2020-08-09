@@ -6,9 +6,10 @@ import pytorch_lightning as pl
 from torch import distributions
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataModule, ImagenetDataModule, STL10DataModule
+from pl_bolts.datamodules import MNISTDataModule, ImagenetDataModule, STL10DataModule, BinaryMNISTDataModule
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
+from pl_bolts.utils import shaping
 
 
 class VAE(pl.LightningModule):
@@ -87,7 +88,7 @@ class VAE(pl.LightningModule):
             datamodule = MNISTDataModule(
                 data_dir=self.hparams.data_dir,
                 num_workers=self.hparams.num_workers,
-                normalize=True
+                normalize=False
             )
         self.datamodule = datamodule
         self.img_dim = self.datamodule.size()
@@ -131,21 +132,39 @@ class VAE(pl.LightningModule):
         Q = distributions.normal.Normal(loc=z_mu, scale=z_std)
         return Q
 
-    def elbo_loss(self, x, P, Q):
-        # Reconstruction loss
+    def elbo_loss(self, x, P, Q, num_samples):
         z = Q.rsample()
-        pxz = self(z)
-        pxz = torch.tanh(pxz)
-        recon_loss = F.mse_loss(pxz, x, reduction='none')
+
+        # ----------------------
+        # KL divergence loss (using monte carlo sampling)
+        # ----------------------
+        log_qz = Q.log_prob(z)
+        log_pz = P.log_prob(z)
+
+        # (batch, num_samples, z_dim) -> (batch, num_samples)
+        kl_div = (log_qz - log_pz).sum(dim=2)
+
+        # we used monte carlo sampling to estimate. average across samples
+        # kl_div = kl_div.mean(-1)
+
+        # ----------------------
+        # Reconstruction loss
+        # ----------------------
+        z = z.view(-1, z.size(-1)).contiguous()
+        pxz = self.decoder(z)
+
+        pxz = pxz.view(-1, num_samples, pxz.size(-1))
+        x = shaping.tile(x.unsqueeze(1), 1, num_samples)
+
+        pxz = torch.sigmoid(pxz)
+        recon_loss = F.binary_cross_entropy(pxz, x, reduction='none')
 
         # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
         # multivariate gaussian
         recon_loss = recon_loss.sum(dim=-1)
 
-        # KL divergence loss
-        log_qz = Q.log_prob(z)
-        log_pz = P.log_prob(z)
-        kl_div = (log_qz - log_pz).sum(dim=1)
+        # we used monte carlo sampling to estimate. average across samples
+        # recon_loss = recon_loss.mean(-1)
 
         # ELBO = reconstruction + KL
         loss = recon_loss + kl_div
@@ -163,6 +182,20 @@ class VAE(pl.LightningModule):
     def _run_step(self, batch):
         x, _ = batch
         z_mu, z_log_var = self.encoder(x)
+
+        # we're estimating the KL divergence using sampling
+        num_samples = 32
+
+        # expand dims to sample all at once
+        # (batch, z_dim) -> (batch, num_samples, z_dim)
+        z_mu = z_mu.unsqueeze(1)
+        z_mu = shaping.tile(z_mu, 1, num_samples)
+
+        # (batch, z_dim) -> (batch, num_samples, z_dim)
+        z_log_var = z_log_var.unsqueeze(1)
+        z_log_var = shaping.tile(z_log_var, 1, num_samples)
+
+        # convert to std
         z_std = torch.exp(z_log_var / 2)
 
         P = self.get_prior(z_mu, z_std)
@@ -170,7 +203,7 @@ class VAE(pl.LightningModule):
 
         x = x.view(x.size(0), -1)
 
-        loss, recon_loss, kl_div, pxz = self.elbo_loss(x, P, Q)
+        loss, recon_loss, kl_div, pxz = self.elbo_loss(x, P, Q, num_samples)
 
         return loss, recon_loss, kl_div, pxz
 
@@ -214,7 +247,7 @@ class VAE(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--hidden_dim', type=int, default=128,
                             help='itermediate layers dimension before embedding for default encoder/decoder')
-        parser.add_argument('--latent_dim', type=int, default=32,
+        parser.add_argument('--latent_dim', type=int, default=4,
                             help='dimension of latent variables z')
         parser.add_argument('--input_width', type=int, default=224,
                             help='input width (used Imagenet downsampled size)')
@@ -222,7 +255,7 @@ class VAE(pl.LightningModule):
                             help='input width (used Imagenet downsampled size)')
         parser.add_argument('--input_channels', type=int, default=3,
                             help='number of input channels')
-        parser.add_argument('--batch_size', type=int, default=32)
+        parser.add_argument('--batch_size', type=int, default=64)
         parser.add_argument('--pretrained', type=str, default=None)
         parser.add_argument('--data_dir', type=str, default=os.getcwd())
         parser.add_argument('--num_workers', type=int, default=8, help="num dataloader workers")
@@ -252,7 +285,7 @@ def cli_main():
     elif args.dataset == 'stl10':
         datamodule = STL10DataModule.from_argparse_args(args)
 
-    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator()]
+    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]
     vae = VAE(**vars(args), datamodule=datamodule)
     trainer = pl.Trainer.from_argparse_args(
         args,

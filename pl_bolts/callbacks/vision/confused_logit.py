@@ -55,8 +55,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
         self.logging_batch_interval = logging_batch_interval
         self.min_logit_value = min_logit_value
 
-    def on_batch_end(self, trainer, pl_module):
-
+    def on_train_batch_end(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
         # show images only every 20 batches
         if (trainer.batch_idx + 1) % self.logging_batch_interval != 0:
             return
@@ -81,7 +80,9 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
 
                 mask_idxs = idxs[mask]
 
+                pl_module.eval()
                 self._plot(confusing_x, confusing_y, trainer, pl_module, mask_idxs)
+                pl_module.train()
 
     def _plot(self, confusing_x, confusing_y, trainer, model, mask_idxs):
         from matplotlib import pyplot as plt
@@ -91,7 +92,6 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
         confusing_x = confusing_x[:self.top_k]
         confusing_y = confusing_y[:self.top_k]
 
-        model.eval()
         x_param_a = nn.Parameter(confusing_x)
         x_param_b = nn.Parameter(confusing_x)
 

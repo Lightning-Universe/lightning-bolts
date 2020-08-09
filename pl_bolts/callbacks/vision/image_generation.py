@@ -29,7 +29,8 @@ class TensorboardGenerativeModelImageSampler(Callback):
     def on_epoch_end(self, trainer, pl_module):
         import torchvision
 
-        z = torch.randn(self.num_samples, pl_module.hparams.latent_dim, device=pl_module.device)
+        dim = (self.num_samples, pl_module.hparams.latent_dim)
+        z = torch.normal(mean=0.0, std=1.0, size=dim, device=pl_module.device)
 
         # generate images
         with torch.no_grad():
