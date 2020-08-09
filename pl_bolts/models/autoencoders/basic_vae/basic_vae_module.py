@@ -136,11 +136,13 @@ class VAE(pl.LightningModule):
         z = Q.rsample()
 
         # ----------------------
-        # KL divergence loss
+        # KL divergence loss (using monte carlo sampling)
         # ----------------------
         log_qz = Q.log_prob(z)
         log_pz = P.log_prob(z)
-        kl_div = (log_qz - log_pz).sum(dim=2)
+
+        # (batch, num_samples, z_dim) -> (batch, num_samples) -> scalar
+        kl_div = (log_qz - log_pz).sum(dim=2).mean(-1)
 
         # ----------------------
         # Reconstruction loss
@@ -156,7 +158,7 @@ class VAE(pl.LightningModule):
 
         # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
         # multivariate gaussian
-        recon_loss = recon_loss.sum(dim=-1)
+        recon_loss = recon_loss.sum(dim=-1).mean(-1)
 
         # ELBO = reconstruction + KL
         loss = recon_loss + kl_div
