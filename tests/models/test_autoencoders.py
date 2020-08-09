@@ -13,8 +13,8 @@ def test_vae(tmpdir):
     model = VAE(data_dir=tmpdir, batch_size=2)
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model)
-    trainer.test(model)
-    loss = trainer.callback_metrics['loss']
+    results = trainer.test(model)[0]
+    loss = results['test_loss']
 
     assert loss > 0, 'VAE failed'
 
