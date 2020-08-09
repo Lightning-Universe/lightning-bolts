@@ -181,7 +181,6 @@ class GAN(pl.LightningModule):
         parser.add_argument('--batch_size', type=int, default=64, help="size of the batches")
         parser.add_argument('--num_workers', type=int, default=8, help="num dataloader workers")
         parser.add_argument('--data_dir', type=str, default=os.getcwd())
-        parser.add_argument('--dataset', type=str, default='mnist', help='mnist, stl10, imagenet2012')
 
         return parser
 
@@ -190,6 +189,8 @@ def cli_main():
     pl.seed_everything(1234)
 
     parser = ArgumentParser()
+    parser.add_argument('--dataset', type=str, default='mnist', help='mnist, stl10, imagenet2012')
+
     parser = pl.Trainer.add_argparse_args(parser)
     parser = GAN.add_model_specific_args(parser)
     parser = ImagenetDataModule.add_argparse_args(parser)

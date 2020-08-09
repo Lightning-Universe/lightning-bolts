@@ -2,7 +2,7 @@ import os
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning import LightningDataModule, LightningModule, Trainer
+import pytorch_lightning as pl
 from torch import distributions
 from torch.nn import functional as F
 
@@ -11,7 +11,7 @@ from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
 
 
-class VAE(LightningModule):
+class VAE(pl.LightningModule):
 
     def __init__(
             self,
@@ -23,7 +23,7 @@ class VAE(LightningModule):
             batch_size: int = 32,
             learning_rate: float = 0.001,
             data_dir: str = '.',
-            datamodule: LightningDataModule = None,
+            datamodule: pl.LightningDataModule = None,
             pretrained: str = None,
             **kwargs
     ):
@@ -248,13 +248,14 @@ class VAE(LightningModule):
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def cli_main():
+    pl.seed_everything(1234)
+
     from pl_bolts.datamodules import ImagenetDataModule
     parser = ArgumentParser()
     parser.add_argument('--dataset', default='mnist', type=str)
 
-    parser = Trainer.add_argparse_args(parser)
+    parser = pl.Trainer.add_argparse_args(parser)
     parser = VAE.add_model_specific_args(parser)
     parser = ImagenetDataModule.add_argparse_args(parser)
     parser = MNISTDataModule.add_argparse_args(parser)
@@ -273,5 +274,9 @@ if __name__ == '__main__':
     #     args.input_channels = datamodule.size()[0]
 
     vae = VAE(**vars(args))
-    trainer = Trainer.from_argparse_args(args)
+    trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(vae)
+
+
+if __name__ == '__main__':
+    cli_main()
