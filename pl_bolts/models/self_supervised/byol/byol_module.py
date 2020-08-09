@@ -96,7 +96,7 @@ class BYOL(pl.LightningModule):
         self.z_dim = 2048
         self.num_classes = self.datamodule.num_classes
 
-    def on_batch_end(self):
+    def on_train_batch_end(self, batch: Any, batch_idx: int, dataloader_idx: int) -> None:
         # Add callback for user automatically since it's key to BYOL weight update
         self.weight_callback.on_batch_end(self.trainer, self)
 
