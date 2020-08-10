@@ -186,7 +186,7 @@ class GAN(pl.LightningModule):
         return parser
 
 
-def cli_main():
+def run_cli():
     from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
     from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule
 
@@ -219,4 +219,4 @@ def cli_main():
 
 
 if __name__ == '__main__':
-    cli_main()
+    run_cli()
