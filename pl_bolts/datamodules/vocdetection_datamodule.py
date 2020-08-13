@@ -2,6 +2,7 @@ import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torchvision.datasets import VOCDetection
+from torchvision import transforms as transform_lib
 
 
 class VOCDetectionDataModule(LightningDataModule):
@@ -24,6 +25,7 @@ class VOCDetectionDataModule(LightningDataModule):
         self.year = year
         self.data_dir = data_dir
         self.num_workers = num_workers
+        self.normalize = normalize
 
     @property
     def num_classes(self):
@@ -82,6 +84,21 @@ class VOCDetectionDataModule(LightningDataModule):
         )
         return loader
 
+    def _default_transforms(self):
+        if self.normalize:
+            transforms = transform_lib.Compose(
+                [
+                    transform_lib.ToTensor(),
+                    transform_lib.Normalize(
+                        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                    ),
+                ]
+            )
+        else:
+            transforms = transform_lib.ToTensor()
+        return transforms
+
 
 dm = VOCDetectionDataModule("tmp")
 dm.prepare_data()
+print(next(iter(dm.train_dataloader())))
