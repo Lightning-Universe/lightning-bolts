@@ -3,7 +3,7 @@ from pl_bolts.datamodules.cifar10_datamodule import (
     CIFAR10DataModule,
     TinyCIFAR10DataModule,
 )
-from pl_bolts.datamodules.dummy_dataset import DummyDataset
+from pl_bolts.datamodules.dummy_dataset import DummyDataset, DummyDetectionDataset
 from pl_bolts.datamodules.experience_source import (
     ExperienceSourceDataset,
     ExperienceSource,
