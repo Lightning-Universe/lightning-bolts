@@ -126,7 +126,7 @@ class FasterRCNN(pl.LightningModule):
         return parser
 
 
-def cli_main():
+def run_cli():
     pl.seed_everything(42)
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
