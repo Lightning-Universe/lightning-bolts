@@ -2,9 +2,7 @@
 N Step DQN
 """
 import argparse
-from pprint import pprint
 
-import torch
 import pytorch_lightning as pl
 
 from pl_bolts.models.rl.common import cli
@@ -79,6 +77,7 @@ class NStepDQN(DQN):
         )
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(add_help=False)

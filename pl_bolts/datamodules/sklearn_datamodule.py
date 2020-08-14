@@ -1,11 +1,11 @@
 import math
 from typing import Any
-import torch
+
 import numpy as np
+import torch
+from pytorch_lightning import LightningDataModule
 from sklearn.utils import shuffle as sk_shuffle
 from torch.utils.data import Dataset, DataLoader
-
-from pl_bolts.datamodules.lightning_datamodule import LightningDataModule
 
 
 class SklearnDataset(Dataset):

@@ -5,7 +5,6 @@ from torch.nn import functional as F
 from torch.optim.lr_scheduler import StepLR
 from torchvision.models import densenet
 
-import pl_bolts
 from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
@@ -46,8 +45,8 @@ class Projection(nn.Module):
 
 class SimCLR(pl.LightningModule):
     def __init__(self,
-                 datamodule: pl_bolts.datamodules.LightningDataModule = None,
-                 data_dir: str = '',
+                 datamodule: pl.LightningDataModule = None,
+                 data_dir: str = './',
                  learning_rate: float = 0.00006,
                  weight_decay: float = 0.0005,
                  input_height: int = 32,
@@ -117,11 +116,12 @@ class SimCLR(pl.LightningModule):
 
         # init default datamodule
         if datamodule is None:
-            datamodule = CIFAR10DataModule(data_dir, num_workers=num_workers)
+            datamodule = CIFAR10DataModule(data_dir, num_workers=num_workers, batch_size=batch_size)
             datamodule.train_transforms = SimCLRTrainDataTransform(input_height)
             datamodule.val_transforms = SimCLREvalDataTransform(input_height)
 
         self.datamodule = datamodule
+
         self.loss_func = self.init_loss()
         self.encoder = self.init_encoder()
         self.projection = self.init_projection()
@@ -231,15 +231,6 @@ class SimCLR(pl.LightningModule):
 
         return dict(val_loss=val_loss, log=log, progress_bar=progress_bar)
 
-    def prepare_data(self):
-        self.datamodule.prepare_data()
-
-    def train_dataloader(self):
-        return self.datamodule.train_dataloader(self.hparams.batch_size)
-
-    def val_dataloader(self):
-        return self.datamodule.val_dataloader(self.hparams.batch_size)
-
     def configure_optimizers(self):
         if self.hparams.optimizer == 'adam':
             optimizer = torch.optim.Adam(
@@ -281,6 +272,7 @@ class SimCLR(pl.LightningModule):
         return parser
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
     from argparse import ArgumentParser
 

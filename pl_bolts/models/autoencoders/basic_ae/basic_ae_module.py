@@ -1,11 +1,10 @@
-import os
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning import LightningModule, Trainer
+from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataModule, LightningDataModule
+from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models.autoencoders.basic_ae.components import AEEncoder
 from pl_bolts.models.autoencoders.basic_vae.components import Decoder
 
@@ -46,7 +45,9 @@ class AE(LightningModule):
         # link default data
         if datamodule is None:
             datamodule = MNISTDataModule(data_dir=self.hparams.data_dir, num_workers=self.hparams.num_workers)
+
         self.datamodule = datamodule
+
         self.img_dim = self.datamodule.size()
 
         self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim,
@@ -119,18 +120,6 @@ class AE(LightningModule):
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
-    def prepare_data(self):
-        self.datamodule.prepare_data()
-
-    def train_dataloader(self):
-        return self.datamodule.train_dataloader(self.hparams.batch_size)
-
-    def val_dataloader(self):
-        return self.datamodule.val_dataloader(self.hparams.batch_size)
-
-    def test_dataloader(self):
-        return self.datamodule.test_dataloader(self.hparams.batch_size)
-
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
@@ -149,6 +138,7 @@ class AE(LightningModule):
         return parser
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)

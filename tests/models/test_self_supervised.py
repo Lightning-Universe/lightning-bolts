@@ -1,6 +1,6 @@
 import pytorch_lightning as pl
 
-from pl_bolts.models.self_supervised import CPCV2, AMDIM, MocoV2, SimCLR
+from pl_bolts.models.self_supervised import CPCV2, AMDIM, MocoV2, SimCLR, BYOL
 from pl_bolts.datamodules import TinyCIFAR10DataModule, CIFAR10DataModule
 from pl_bolts.models.self_supervised.cpc import CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10
 from tests import reset_seed
@@ -12,7 +12,7 @@ from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
 def test_cpcv2(tmpdir):
     reset_seed()
 
-    datamodule = CIFAR10DataModule(data_dir=tmpdir, num_workers=0)
+    datamodule = CIFAR10DataModule(data_dir=tmpdir, num_workers=0, batch_size=2)
     datamodule.train_transforms = CPCTrainTransformsCIFAR10()
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 
@@ -22,6 +22,21 @@ def test_cpcv2(tmpdir):
     loss = trainer.callback_metrics['loss']
 
     assert loss > 0
+
+
+def test_byol(tmpdir):
+    reset_seed()
+
+    datamodule = CIFAR10DataModule(data_dir=tmpdir, num_workers=0, batch_size=2)
+    datamodule.train_transforms = CPCTrainTransformsCIFAR10()
+    datamodule.val_transforms = CPCEvalTransformsCIFAR10()
+
+    model = BYOL(data_dir=tmpdir, batch_size=2, datamodule=datamodule)
+    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=2)
+    trainer.fit(model)
+    loss = trainer.progress_bar_dict['loss']
+
+    assert float(loss) < 1.0
 
 
 def test_amdim(tmpdir):
@@ -38,7 +53,7 @@ def test_amdim(tmpdir):
 def test_moco(tmpdir):
     reset_seed()
 
-    datamodule = CIFAR10DataModule(tmpdir, num_workers=0)
+    datamodule = CIFAR10DataModule(tmpdir, num_workers=0, batch_size=2)
     datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
     datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
 
@@ -53,7 +68,7 @@ def test_moco(tmpdir):
 def test_simclr(tmpdir):
     reset_seed()
 
-    datamodule = CIFAR10DataModule(tmpdir, num_workers=0)
+    datamodule = CIFAR10DataModule(tmpdir, num_workers=0, batch_size=2)
     datamodule.train_transforms = SimCLRTrainDataTransform(32)
     datamodule.val_transforms = SimCLREvalDataTransform(32)
 

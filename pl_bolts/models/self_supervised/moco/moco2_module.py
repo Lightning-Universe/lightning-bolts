@@ -13,9 +13,8 @@ import torch.nn.functional as F
 import torchvision
 from torch import nn
 
-import pl_bolts
-from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
+from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainCIFAR10Transforms,
@@ -38,7 +37,7 @@ class MocoV2(pl.LightningModule):
                  learning_rate: float = 0.03,
                  momentum: float = 0.9,
                  weight_decay: float = 1e-4,
-                 datamodule: pl_bolts.datamodules.LightningDataModule = None,
+                 datamodule: pl.LightningDataModule = None,
                  data_dir: str = './',
                  batch_size: int = 256,
                  use_mlp: bool = False,
@@ -317,17 +316,6 @@ class MocoV2(pl.LightningModule):
                                     weight_decay=self.hparams.weight_decay)
         return optimizer
 
-    def prepare_data(self):
-        self.datamodule.prepare_data()
-
-    def train_dataloader(self):
-        loader = self.datamodule.train_dataloader(self.hparams.batch_size)
-        return loader
-
-    def val_dataloader(self):
-        loader = self.datamodule.val_dataloader(self.hparams.batch_size)
-        return loader
-
     @staticmethod
     def add_model_specific_args(parent_parser):
         from test_tube import HyperOptArgumentParser
@@ -365,6 +353,7 @@ def concat_all_gather(tensor):
     return output
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
     from argparse import ArgumentParser
 

@@ -1,12 +1,12 @@
+import pytorch_lightning as pl
 import torch
+from pytorch_lightning.metrics.classification import accuracy
 from torch import nn
 from torch.nn import functional as F
-from torch.optim.optimizer import Optimizer
 from torch.optim import Adam
+from torch.optim.optimizer import Optimizer
 
-import pytorch_lightning as pl
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
-from pytorch_lightning.metrics.classification import accuracy
 
 
 class LogisticRegression(pl.LightningModule):
@@ -126,6 +126,7 @@ class LogisticRegression(pl.LightningModule):
         return parser
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':  # pragma: no cover
     from argparse import ArgumentParser
     pl.seed_everything(1234)

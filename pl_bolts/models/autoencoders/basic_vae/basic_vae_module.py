@@ -2,12 +2,10 @@ import os
 from argparse import ArgumentParser
 
 import torch
-import torchvision
-from pytorch_lightning import LightningModule, Trainer
+from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 from torch import distributions
 from torch.nn import functional as F
 
-import pl_bolts
 from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
@@ -25,7 +23,7 @@ class VAE(LightningModule):
             batch_size: int = 32,
             learning_rate: float = 0.001,
             data_dir: str = '.',
-            datamodule: pl_bolts.datamodules.LightningDataModule = None,
+            datamodule: LightningDataModule = None,
             pretrained: str = None,
             **kwargs
     ):
@@ -229,18 +227,6 @@ class VAE(LightningModule):
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
-    def prepare_data(self):
-        self.datamodule.prepare_data()
-
-    def train_dataloader(self):
-        return self.datamodule.train_dataloader(self.hparams.batch_size)
-
-    def val_dataloader(self):
-        return self.datamodule.val_dataloader(self.hparams.batch_size)
-
-    def test_dataloader(self):
-        return self.datamodule.test_dataloader(self.hparams.batch_size)
-
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
@@ -262,6 +248,7 @@ class VAE(LightningModule):
         return parser
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
     from pl_bolts.datamodules import ImagenetDataModule
     parser = ArgumentParser()

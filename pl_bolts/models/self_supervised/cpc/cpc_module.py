@@ -12,7 +12,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 from pytorch_lightning.utilities import rank_zero_warn
 
-import pl_bolts
 from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
@@ -39,7 +38,7 @@ class CPCV2(pl.LightningModule):
 
     def __init__(
             self,
-            datamodule: pl_bolts.datamodules.LightningDataModule = None,
+            datamodule: pl.LightningDataModule = None,
             encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'cpc_encoder',
             patch_size: int = 8,
             patch_overlap: int = 4,
@@ -128,7 +127,11 @@ class CPCV2(pl.LightningModule):
 
         # link data
         if datamodule is None:
-            datamodule = CIFAR10DataModule(self.hparams.data_dir, num_workers=self.hparams.num_workers)
+            datamodule = CIFAR10DataModule(
+                self.hparams.data_dir,
+                num_workers=self.hparams.num_workers,
+                batch_size=batch_size
+            )
             datamodule.train_transforms = CPCTrainTransformsCIFAR10()
             datamodule.val_transforms = CPCEvalTransformsCIFAR10()
         self.datamodule = datamodule
@@ -296,6 +299,23 @@ class CPCV2(pl.LightningModule):
 
         return {'val_loss': val_nce, 'log': log, 'progress_bar': log}
 
+    def test_step(self, batch, batch_idx):
+        img_1, y = batch
+        Z = self(img_1)
+        z_in = Z.reshape(Z.size(0), -1)
+        mlp_preds = self.non_linear_evaluator(z_in)
+        mlp_loss = F.cross_entropy(mlp_preds, y)
+        acc = metrics.accuracy(mlp_preds, y)
+
+        return {'acc': acc, 'loss': mlp_loss}
+
+    def test_epoch_end(self, test_step_outputs):
+        avg_acc = torch.stack([x['acc'] for x in test_step_outputs]).mean()
+        avg_loss = torch.stack([x['loss'] for x in test_step_outputs]).mean()
+
+        logs = {'test_acc': avg_acc, 'test_loss': avg_loss}
+        return {'log': logs}
+
     def configure_optimizers(self):
         opt = optim.Adam(
             params=self.parameters(),
@@ -311,17 +331,6 @@ class CPCV2(pl.LightningModule):
         #     lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
 
         return [opt]  # , [lr_scheduler]
-
-    def prepare_data(self):
-        self.datamodule.prepare_data()
-
-    def train_dataloader(self):
-        loader = self.datamodule.train_dataloader(self.hparams.batch_size)
-        return loader
-
-    def val_dataloader(self):
-        loader = self.datamodule.val_dataloader(self.hparams.batch_size)
-        return loader
 
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -350,6 +359,7 @@ class CPCV2(pl.LightningModule):
         return parser
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
     pl.seed_everything(1234)
     parser = ArgumentParser()
@@ -365,6 +375,7 @@ if __name__ == '__main__':
         datamodule = CIFAR10DataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsCIFAR10()
         datamodule.val_transforms = CPCEvalTransformsCIFAR10()
+        args.patch_size = 8
 
     elif args.dataset == 'stl10':
         datamodule = STL10DataModule.from_argparse_args(args)
@@ -372,11 +383,13 @@ if __name__ == '__main__':
         datamodule.val_dataloader = datamodule.val_dataloader_mixed
         datamodule.train_transforms = CPCTrainTransformsSTL10()
         datamodule.val_transforms = CPCEvalTransformsSTL10()
+        args.patch_size = 16
 
     elif args.dataset == 'imagenet2012':
         datamodule = SSLImagenetDataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsImageNet128()
         datamodule.val_transforms = CPCEvalTransformsImageNet128()
+        args.patch_size = 32
 
     model = CPCV2(**vars(args), datamodule=datamodule)
     trainer = pl.Trainer.from_argparse_args(args)

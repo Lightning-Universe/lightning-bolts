@@ -5,7 +5,6 @@ import argparse
 from collections import OrderedDict
 from copy import deepcopy
 from itertools import chain
-from pprint import pprint
 from typing import Tuple, List
 
 import gym
@@ -17,7 +16,6 @@ from torch.nn.functional import log_softmax
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from pl_bolts.models.rl import DQN
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.experience import EpisodicExperienceStream
@@ -334,6 +332,7 @@ class Reinforce(pl.LightningModule):
         return arg_parser
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(add_help=False)

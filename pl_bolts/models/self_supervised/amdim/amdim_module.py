@@ -7,7 +7,6 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-import pl_bolts
 from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
@@ -18,7 +17,7 @@ class AMDIM(pl.LightningModule):
 
     def __init__(
             self,
-            datamodule: Union[str, pl_bolts.datamodules.LightningDataModule] = 'cifar10',
+            datamodule: Union[str, pl.LightningDataModule] = 'cifar10',
             encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'amdim_encoder',
             contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask('01, 02, 11'),
             image_channels: int = 3,
@@ -374,6 +373,7 @@ class AMDIM(pl.LightningModule):
         return parser
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)

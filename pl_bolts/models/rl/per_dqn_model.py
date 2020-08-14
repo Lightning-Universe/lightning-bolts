@@ -3,10 +3,9 @@ Prioritized Experience Replay DQN
 """
 import argparse
 from collections import OrderedDict
-from typing import Tuple, List
 
-import torch
 import pytorch_lightning as pl
+import torch
 
 from pl_bolts.losses.rl import per_dqn_loss
 from pl_bolts.models.rl.common import cli
@@ -133,6 +132,7 @@ class PERDQN(DQN):
         self.dataset = PrioRLDataset(self.buffer, self.batch_size)
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(add_help=False)

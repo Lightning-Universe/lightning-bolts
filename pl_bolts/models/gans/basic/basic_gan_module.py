@@ -1,15 +1,15 @@
+import os
 from argparse import ArgumentParser
 from collections import OrderedDict
 
 import torch
-from pytorch_lightning import Trainer, LightningModule, Callback
+from pytorch_lightning import Trainer, LightningDataModule, LightningModule, Callback
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataModule, LightningDataModule, STL10DataModule
 from pl_bolts.callbacks import LatentDimInterpolator
+from pl_bolts.datamodules import MNISTDataModule, STL10DataModule
 from pl_bolts.models.gans.basic.components import Generator, Discriminator
-import os
 
 
 class GAN(LightningModule):
@@ -181,12 +181,6 @@ class GAN(LightningModule):
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr)
         return [opt_g, opt_d], []
 
-    def prepare_data(self):
-        self.datamodule.prepare_data()
-
-    def train_dataloader(self):
-        return self.datamodule.train_dataloader(self.hparams.batch_size)
-
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
@@ -220,6 +214,7 @@ class ImageGenerator(Callback):
         trainer.logger.experiment.add_image('gan_images', grid, global_step=trainer.global_step)
 
 
+# todo: covert to CLI func and add test
 if __name__ == '__main__':
     from pl_bolts.datamodules import ImagenetDataModule
 
