@@ -143,4 +143,4 @@ def run_cli():
 
 
 if __name__ == "__main__":
-    cli_main()
+    run_cli()
