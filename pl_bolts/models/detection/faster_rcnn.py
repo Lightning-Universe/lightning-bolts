@@ -34,7 +34,9 @@ class FasterRCNN(pl.LightningModule):
         **kwargs,
     ):
         """
-        PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks https://arxiv.org/abs/1506.01497`_
+        PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with
+        Region Proposal Networks <https://arxiv.org/abs/1506.01497>`_.
+
         Paper authors: Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun
 
         Model implemented by:
