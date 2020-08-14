@@ -6,6 +6,10 @@ import torchvision.transforms as T
 
 
 class Compose(object):
+    """
+    Like `torchvision.transforms.compose` but works for (image, target)
+    """
+
     def __init__(self, transforms):
         self.transforms = transforms
 
@@ -13,6 +17,10 @@ class Compose(object):
         for t in self.transforms:
             image, target = t(image, target)
         return image, target
+
+
+def _collate_fn(batch):
+    return tuple(zip(*batch))
 
 
 CLASSES = (
@@ -109,9 +117,9 @@ class VOCDetectionDataModule(LightningDataModule):
     def num_classes(self):
         """
         Return:
-            20
+            21
         """
-        return 20
+        return 21
 
     def prepare_data(self):
         """
@@ -143,6 +151,7 @@ class VOCDetectionDataModule(LightningDataModule):
             shuffle=True,
             num_workers=self.num_workers,
             pin_memory=True,
+            collate_fn=_collate_fn,
         )
         return loader
 
@@ -168,6 +177,7 @@ class VOCDetectionDataModule(LightningDataModule):
             shuffle=False,
             num_workers=self.num_workers,
             pin_memory=True,
+            collate_fn=_collate_fn,
         )
         return loader
 
@@ -187,8 +197,3 @@ class VOCDetectionDataModule(LightningDataModule):
                 ),
             )
         return lambda image, target: (T.ToTensor()(image), target)
-
-
-dm = VOCDetectionDataModule("tmp")
-dm.prepare_data()
-print(next(iter(dm.train_dataloader())))
