@@ -1,11 +1,11 @@
 import pytorch_lightning as pl
+from pytorch_lightning import seed_everything
 
 from pl_bolts.models.gans import GAN
-from tests import reset_seed
 
 
 def test_gan(tmpdir):
-    reset_seed()
+    seed_everything()
 
     model = GAN(data_dir=tmpdir)
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)

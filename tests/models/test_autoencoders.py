@@ -1,17 +1,17 @@
 import pytorch_lightning as pl
 import torch
+from pytorch_lightning import seed_everything
 
 from pl_bolts.models.autoencoders import VAE, AE
 from pl_bolts.models.autoencoders.basic_ae import AEEncoder
 from pl_bolts.models.autoencoders.basic_vae import Encoder, Decoder
-from tests import reset_seed
 
 
 def test_vae(tmpdir):
-    reset_seed()
+    seed_everything()
 
     model = VAE(data_dir=tmpdir, batch_size=2)
-    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir, deterministic=True)
     trainer.fit(model)
     results = trainer.test(model)[0]
     loss = results['test_loss']
@@ -20,7 +20,7 @@ def test_vae(tmpdir):
 
 
 def test_ae(tmpdir):
-    reset_seed()
+    seed_everything()
 
     model = AE(data_dir=tmpdir, batch_size=2)
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
@@ -29,7 +29,7 @@ def test_ae(tmpdir):
 
 
 def test_basic_ae_encoder(tmpdir):
-    reset_seed()
+    seed_everything()
 
     hidden_dim = 128
     latent_dim = 2
@@ -45,7 +45,7 @@ def test_basic_ae_encoder(tmpdir):
 
 
 def test_basic_vae_components(tmpdir):
-    reset_seed()
+    seed_everything()
 
     hidden_dim = 128
     latent_dim = 2

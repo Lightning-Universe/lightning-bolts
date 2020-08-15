@@ -3,6 +3,7 @@ Test RL Loss Functions
 """
 
 from unittest import TestCase
+
 import numpy as np
 import torch
 

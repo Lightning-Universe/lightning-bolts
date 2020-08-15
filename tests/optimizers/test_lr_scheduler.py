@@ -1,14 +1,13 @@
+import math
+
+import numpy as np
 import torch
 import torch.nn.functional as F
+from pytorch_lightning import seed_everything
 from torch.optim import SGD
 from torch.optim.lr_scheduler import _LRScheduler
 
-import math
-import numpy as np
-from tests import reset_seed
-import pytorch_lightning as pl
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-
 
 EPSILON = 1e-12
 
@@ -87,7 +86,7 @@ class TestLRScheduler(object):
 
 
 def test_lwca_lr(tmpdir):
-    reset_seed()
+    seed_everything()
 
     warmup_start_lr = 0.0
     base_lr = 0.4
@@ -138,7 +137,7 @@ def test_lwca_lr(tmpdir):
 
 
 def test_lwca_lr_with_nz_start_lr(tmpdir):
-    reset_seed()
+    seed_everything()
 
     warmup_start_lr = 0.2
     base_lr = 0.8
@@ -189,7 +188,7 @@ def test_lwca_lr_with_nz_start_lr(tmpdir):
 
 
 def test_lwca_lr_with_nz_eta_min(tmpdir):
-    reset_seed()
+    seed_everything()
 
     warmup_start_lr = 0.0
     base_lr = 0.04
@@ -240,7 +239,7 @@ def test_lwca_lr_with_nz_eta_min(tmpdir):
 
 
 def test_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
-    reset_seed()
+    seed_everything()
 
     warmup_start_lr = 0.009
     base_lr = 0.07
@@ -291,7 +290,7 @@ def test_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
 
 
 def test_closed_form_lwca_lr(tmpdir):
-    reset_seed()
+    seed_everything()
 
     warmup_start_lr = 0.0
     base_lr = 0.4
@@ -323,7 +322,7 @@ def test_closed_form_lwca_lr(tmpdir):
 
 
 def test_closed_form_lwca_lr_with_nz_start_lr(tmpdir):
-    reset_seed()
+    seed_everything()
 
     warmup_start_lr = 0.2
     base_lr = 0.8
@@ -355,7 +354,7 @@ def test_closed_form_lwca_lr_with_nz_start_lr(tmpdir):
 
 
 def test_closed_form_lwca_lr_with_nz_eta_min(tmpdir):
-    reset_seed()
+    seed_everything()
 
     warmup_start_lr = 0.0
     base_lr = 0.04
@@ -387,7 +386,7 @@ def test_closed_form_lwca_lr_with_nz_eta_min(tmpdir):
 
 
 def test_closed_form_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
-    reset_seed()
+    seed_everything()
 
     warmup_start_lr = 0.009
     base_lr = 0.07

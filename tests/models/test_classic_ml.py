@@ -1,15 +1,15 @@
 import numpy as np
 import pytorch_lightning as pl
+from pytorch_lightning import seed_everything
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataset
 from pl_bolts.models.regression import LinearRegression, LogisticRegression
-from tests import reset_seed
 
 
 def test_linear_regression_model(tmpdir):
-    reset_seed()
+    seed_everything()
 
     # --------------------
     # numpy data

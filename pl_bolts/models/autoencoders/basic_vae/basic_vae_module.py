@@ -288,7 +288,7 @@ def run_cli():
     trainer = pl.Trainer.from_argparse_args(
         args,
         callbacks=callbacks,
-        progress_bar_refresh_rate=10
+        progress_bar_refresh_rate=10,
     )
     trainer.fit(vae)
 
