@@ -10,7 +10,7 @@ from pl_bolts.models.autoencoders.basic_vae import Encoder, Decoder
 def test_vae(tmpdir):
     seed_everything()
 
-    model = VAE(data_dir=tmpdir, batch_size=2)
+    model = VAE(data_dir=tmpdir, batch_size=2, num_workers=0)
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir, deterministic=True)
     trainer.fit(model)
     results = trainer.test(model)[0]
