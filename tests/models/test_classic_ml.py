@@ -29,7 +29,8 @@ def test_linear_regression_model(tmpdir):
 
     coeffs = model.linear.weight.detach().numpy().flatten()
     assert len(coeffs) == 2
-    assert coeffs[0] == 1 and coeffs[1] == 2
+    assert np.testing.assert_allclose(coeffs[0], 1, rtol=1e-5)
+    assert np.testing.assert_allclose(coeffs[1], 2, rtol=1e-5)
     trainer.test(model, loader)
 
 
