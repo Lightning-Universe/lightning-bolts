@@ -86,7 +86,7 @@ class CPCV2(pl.LightningModule):
 
         To Finetune::
 
-            python cpc_finetuner.py --ckpt_path path/to/checkpoint.ckpt --dataset cifar10
+            python cpc_finetuner.py --ckpt_path path/to/checkpoint.ckpt --dataset cifar10 --gpus x
 
         Some uses::
 
