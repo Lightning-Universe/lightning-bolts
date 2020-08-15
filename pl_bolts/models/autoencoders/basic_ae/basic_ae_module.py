@@ -138,7 +138,7 @@ class AE(LightningModule):
         return parser
 
 
-def run_cli():
+def cli_main():
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
     parser = AE.add_model_specific_args(parser)
@@ -150,4 +150,4 @@ def run_cli():
 
 
 if __name__ == '__main__':
-    run_cli()
+    cli_main()

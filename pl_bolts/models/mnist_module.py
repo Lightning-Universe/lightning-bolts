@@ -102,7 +102,7 @@ class LitMNIST(LightningModule):
         return parser
 
 
-def run_cli():
+def cli_main():
     # args
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
@@ -118,4 +118,4 @@ def run_cli():
 
 
 if __name__ == '__main__':  # pragma: no cover
-    run_cli()
+    cli_main()

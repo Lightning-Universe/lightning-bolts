@@ -353,7 +353,7 @@ def concat_all_gather(tensor):
     return output
 
 
-def run_cli():
+def cli_main():
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
@@ -389,4 +389,4 @@ def run_cli():
 
 
 if __name__ == '__main__':
-    run_cli()
+    cli_main()

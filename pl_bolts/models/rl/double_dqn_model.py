@@ -104,7 +104,7 @@ class DoubleDQN(DQN):
         )
 
 
-def run_cli():
+def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
@@ -122,4 +122,4 @@ def run_cli():
 
 
 if __name__ == '__main__':
-    run_cli()
+    cli_main()

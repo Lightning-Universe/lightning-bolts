@@ -128,7 +128,7 @@ class LogisticRegression(pl.LightningModule):
         return parser
 
 
-def run_cli():
+def cli_main():
     pl.seed_everything(1234)
 
     # Example: Iris dataset in Sklearn (4 features, 3 class labels)
@@ -152,4 +152,4 @@ def run_cli():
 
 
 if __name__ == '__main__':
-    run_cli()
+    cli_main()

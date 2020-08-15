@@ -56,7 +56,7 @@ class DuelingDQN(DQN):
         self.target_net = DuelingCNN(self.obs_shape, self.n_actions)
 
 
-def run_cli():
+def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
@@ -74,4 +74,4 @@ def run_cli():
 
 
 if __name__ == '__main__':
-    run_cli()
+    cli_main()
