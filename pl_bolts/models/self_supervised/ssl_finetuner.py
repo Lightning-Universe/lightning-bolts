@@ -65,12 +65,12 @@ class SSLFineTuner(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         loss, acc = self.shared_step(batch)
         result = pl.EvalResult(checkpoint_on=loss, early_stop_on=loss)
-        result.log_dict({'val_acc': acc, 'val_loss': loss})
+        result.log_dict({'val_acc': acc, 'val_loss': loss}, prog_bar=True)
         return result
 
     def test_step(self, batch, batch_idx):
         loss, acc = self.shared_step(batch)
-        result = pl.EvalResult(checkpoint_on=loss, early_stop_on=loss)
+        result = pl.EvalResult()
         result.log_dict({'test_acc': acc, 'test_loss': loss})
         return result
 
