@@ -11,6 +11,8 @@ import os
 
 
 def cli_main():
+    pl.seed_everything(1234)
+
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
     parser.add_argument('--dataset', type=str, help='stl10, cifar10', default='cifar10')
