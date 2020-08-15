@@ -25,6 +25,7 @@ def cli_main():
         dm = CIFAR10DataModule.from_argparse_args(args)
         dm.train_transforms = CPCTrainTransformsCIFAR10()
         dm.val_transforms = CPCEvalTransformsCIFAR10()
+        dm.test_transforms = CPCEvalTransformsCIFAR10()
 
     elif args.dataset == 'stl10':
         dm = STL10DataModule.from_argparse_args(args)
@@ -32,6 +33,7 @@ def cli_main():
         dm.val_dataloader = dm.val_dataloader_mixed
         dm.train_transforms = CPCTrainTransformsSTL10()
         dm.val_transforms = CPCEvalTransformsSTL10()
+        dm.test_transforms = CPCEvalTransformsSTL10()
 
     # finetune
     tuner = SSLFineTuner(backbone, in_features=backbone.z_dim, num_classes=backbone.num_classes)
