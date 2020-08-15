@@ -35,8 +35,10 @@ def cli_main():
 
     # finetune
     tuner = SSLFineTuner(backbone, in_features=backbone.z_dim, num_classes=backbone.num_classes)
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = pl.Trainer.from_argparse_args(args, early_stop_callback=True)
     trainer.fit(tuner, dm)
+
+    trainer.test(datamodule=dm)
 
 
 if __name__ == '__main__':
