@@ -224,7 +224,6 @@ class VAE(pl.LightningModule):
             'val_loss': loss,
             'val_recon_loss': recon_loss,
             'val_kl_div': kl_div,
-            'pxz': pxz
         })
         return result
 
@@ -235,7 +234,6 @@ class VAE(pl.LightningModule):
             'test_loss': loss,
             'test_recon_loss': recon_loss,
             'test_kl_div': kl_div,
-            'pxz': pxz
         })
         return result
 
