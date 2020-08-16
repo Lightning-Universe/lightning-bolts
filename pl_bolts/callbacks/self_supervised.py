@@ -58,7 +58,7 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
         representations = representations.reshape(representations.size(0), -1)
         return representations
 
-    def __to_device(self, x, device):
+    def to_device(self, x, device):
         if isinstance(x, list):
             for i in range(len(x)):
                 x[i] = x[i].to(device)
@@ -70,8 +70,8 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
     def on_train_batch_end(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
 
         x, y = batch
-        y = self.__to_device(y, pl_module.device)
-        x = self.__to_device(x, pl_module.device)
+        y = self.to_device(y, pl_module.device)
+        x = self.to_device(x, pl_module.device)
 
         with torch.no_grad():
             representations = self.get_representations(pl_module, x)
