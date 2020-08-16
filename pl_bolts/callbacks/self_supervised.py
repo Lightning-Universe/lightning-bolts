@@ -36,9 +36,9 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
 
         # attach the evaluator to the module
 
-        if getattr(pl_module, 'z_dim'):
+        if hasattr(pl_module, 'z_dim'):
             self.z_dim = pl_module.z_dim
-        if getattr(pl_module, 'num_classes'):
+        if hasattr(pl_module, 'num_classes'):
             self.num_classes = pl_module.num_classes
 
         pl_module.non_linear_evaluator = SSLEvaluator(
