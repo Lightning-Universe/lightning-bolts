@@ -84,6 +84,10 @@ class CPCV2(pl.LightningModule):
                 --meta_dir /path/to/folder/with/meta.bin/
                 --batch_size 32
 
+        To Finetune::
+
+            python cpc_finetuner.py --ckpt_path path/to/checkpoint.ckpt --dataset cifar10 --gpus x
+
         Some uses::
 
             # load resnet18 pretrained using CPC on imagenet
