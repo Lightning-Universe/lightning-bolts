@@ -7,7 +7,7 @@ from pytorch_lightning.metrics.functional import accuracy
 
 class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
 
-    def __init__(self, drop_p: float = 0.2, hidden_dim: int = 1024):
+    def __init__(self, drop_p: float = 0.2, hidden_dim: int = 1024, z_dim: int = None, num_classes: int = None):
         """
         Attaches a MLP for finetuning using the standard self-supervised protocol.
 
@@ -28,16 +28,22 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
         self.hidden_dim = hidden_dim
         self.drop_p = drop_p
         self.optimizer = None
+        self.z_dim = z_dim
+        self.num_classes = num_classes
 
     def on_pretrain_routine_start(self, trainer, pl_module):
         from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 
         # attach the evaluator to the module
-        z_dim = pl_module.z_dim
-        num_classes = pl_module.num_classes
+
+        if getattr(pl_module, 'z_dim'):
+            self.z_dim = pl_module.z_dim
+        if getattr(pl_module, 'num_classes'):
+            self.num_classes = pl_module.num_classes
+
         pl_module.non_linear_evaluator = SSLEvaluator(
-            n_input=z_dim,
-            n_classes=num_classes,
+            n_input=self.z_dim,
+            n_classes=self.num_classes,
             p=self.drop_p,
             n_hidden=self.hidden_dim
         ).to(pl_module.device)
