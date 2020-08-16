@@ -295,6 +295,7 @@ def cli_main():
 
     datamodule = None
 
+    online_evaluator = SSLOnlineEvaluator()
     if args.dataset == 'cifar10':
         datamodule = CIFAR10DataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsCIFAR10()
@@ -309,6 +310,18 @@ def cli_main():
         datamodule.val_transforms = CPCEvalTransformsSTL10()
         args.patch_size = 16
 
+        # 16 GB RAM - 64
+        # 32 GB RAM - 144
+        args.batch_size = 144
+
+        def to_device(batch, device):
+            (_, _), (x2, y2) = batch
+            x2 = x2.to(device)
+            y2 = y2.to(device)
+            return x2, y2
+
+        online_evaluator.to_device = to_device
+
     elif args.dataset == 'imagenet2012':
         datamodule = SSLImagenetDataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsImageNet128()
@@ -316,7 +329,7 @@ def cli_main():
         args.patch_size = 32
 
     model = CPCV2(**vars(args), datamodule=datamodule)
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=[SSLOnlineEvaluator()])
+    trainer = pl.Trainer.from_argparse_args(args, callbacks=[online_evaluator])
     trainer.fit(model)
 
 
