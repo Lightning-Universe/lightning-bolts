@@ -310,6 +310,10 @@ def cli_main():
         datamodule.val_transforms = CPCEvalTransformsSTL10()
         args.patch_size = 16
 
+        # 16 GB RAM - 64
+        # 32 GB RAM - 144
+        args.batch_size = 144
+
         def to_device(batch, device):
             (_, _), (x2, y2) = batch
             x2 = x2.to(device)
