@@ -324,7 +324,7 @@ def cli_main():
         args.patch_size = 32
 
     model = CPCV2(**vars(args), datamodule=datamodule)
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=[])
+    trainer = pl.Trainer.from_argparse_args(args, callbacks=[online_evaluator])
     trainer.fit(model)
 
 
