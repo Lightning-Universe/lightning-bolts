@@ -310,9 +310,9 @@ def cli_main():
         datamodule.val_transforms = CPCEvalTransformsSTL10()
         args.patch_size = 16
 
-        def to_device(x, device):
+        def to_device(batch, device):
             import pdb; pdb.set_trace()
-            (x1, x2), (y1, y2) = x
+            (x1, x2), (y1, y2) = batch
             return y1, y2
 
         online_evaluator.to_device = to_device
