@@ -311,8 +311,8 @@ def cli_main():
         args.patch_size = 16
 
         def to_device(x, device):
-            (x1, x2), (y1, y2) = x
             import pdb; pdb.set_trace()
+            (x1, x2), (y1, y2) = x
             return y1, y2
 
         online_evaluator.to_device = to_device
