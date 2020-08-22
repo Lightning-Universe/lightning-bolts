@@ -1,2 +1,2 @@
-from pl_bolts.optimizers.layer_adaptive_scaling import LARS
+from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
