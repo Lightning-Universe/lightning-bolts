@@ -15,7 +15,7 @@ from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate, SSLOnlineEval
 
 class BYOL(pl.LightningModule):
     def __init__(self,
-                 datamodule: pl.LightningDataModule = None,
+                 num_classes: int = None,
                  data_dir: str = './',
                  learning_rate: float = 0.2,
                  weight_decay: float = 15e-6,
@@ -81,22 +81,9 @@ class BYOL(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        # init default datamodule
-        if datamodule is None:
-            datamodule = CIFAR10DataModule(data_dir, num_workers=num_workers, batch_size=batch_size)
-            datamodule.train_transforms = SimCLRTrainDataTransform(input_height)
-            datamodule.val_transforms = SimCLREvalDataTransform(input_height)
-
-        self.datamodule = datamodule
-
         self.online_network = SiameseArm()
         self.target_network = deepcopy(self.online_network)
-
         self.weight_callback = BYOLMAWeightUpdate()
-
-        # for finetuning callback
-        self.z_dim = 2048
-        self.num_classes = self.datamodule.num_classes
 
     def on_train_batch_end(self, batch: Any, batch_idx: int, dataloader_idx: int) -> None:
         # Add callback for user automatically since it's key to BYOL weight update
@@ -197,23 +184,32 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # pick data
-    datamodule = None
-    if args.dataset == 'stl10':
-        datamodule = STL10DataModule.from_argparse_args(args)
-        datamodule.train_dataloader = datamodule.train_dataloader_mixed
-        datamodule.val_dataloader = datamodule.val_dataloader_mixed
+    dm = None
 
-        (c, h, w) = datamodule.size()
-        datamodule.train_transforms = SimCLRTrainDataTransform(h)
-        datamodule.val_transforms = SimCLREvalDataTransform(h)
+    # init default datamodule
+    if args.dataset == 'cifar10':
+        dm = CIFAR10DataModule.from_argparse_args(args)
+        dm.train_transforms = SimCLRTrainDataTransform(32)
+        dm.val_transforms = SimCLREvalDataTransform(32)
+
+    elif args.dataset == 'stl10':
+        dm = STL10DataModule.from_argparse_args(args)
+        dm.train_dataloader = dm.train_dataloader_mixed
+        dm.val_dataloader = dm.val_dataloader_mixed
+
+        (c, h, w) = dm.size()
+        dm.train_transforms = SimCLRTrainDataTransform(h)
+        dm.val_transforms = SimCLREvalDataTransform(h)
+        args.num_classes = dm.num_classes
 
     elif args.dataset == 'imagenet2012':
-        datamodule = ImagenetDataModule.from_argparse_args(args, image_size=196)
-        (c, h, w) = datamodule.size()
-        datamodule.train_transforms = SimCLRTrainDataTransform(h)
-        datamodule.val_transforms = SimCLREvalDataTransform(h)
+        dm = ImagenetDataModule.from_argparse_args(args, image_size=196)
+        (c, h, w) = dm.size()
+        dm.train_transforms = SimCLRTrainDataTransform(h)
+        dm.val_transforms = SimCLREvalDataTransform(h)
+        args.num_classes = dm.num_classes
 
-    model = BYOL(**args.__dict__, datamodule=datamodule)
+    model = BYOL(**args.__dict__)
 
     def to_device(batch, device):
         (x1, x2), y = batch
@@ -221,7 +217,9 @@ if __name__ == '__main__':
         y = y.to(device)
         return x1, y
 
-    online_eval = SSLOnlineEvaluator()
+    # finetune in real-time
+    online_eval = SSLOnlineEvaluator(z_dim=2048, num_classes=dm.num_classes)
     online_eval.to_device = to_device
+
     trainer = pl.Trainer.from_argparse_args(args, max_steps=10000, callbacks=[])
     trainer.fit(model)
