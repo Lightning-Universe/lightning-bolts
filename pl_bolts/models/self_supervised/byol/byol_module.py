@@ -100,7 +100,7 @@ class BYOL(pl.LightningModule):
 
     def on_train_batch_end(self, batch: Any, batch_idx: int, dataloader_idx: int) -> None:
         # Add callback for user automatically since it's key to BYOL weight update
-        self.weight_callback.on_batch_end(self.trainer, self)
+        self.weight_callback.on_train_batch_end(self.trainer, self, batch, batch_idx, dataloader_idx)
 
     def forward(self, x):
         y, _, _ = self.online_network(x)
