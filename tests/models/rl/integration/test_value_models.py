@@ -21,7 +21,7 @@ class TestValueModels(TestCase):
         args_list = [
             "--algo", "dqn",
             "--n_steps", "4",
-            "--warm_start_steps", "100",
+            "--warm_start_size", "100",
             "--episode_length", "100",
             "--gpus", "0",
             "--env", "PongNoFrameskip-v4",

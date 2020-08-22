@@ -260,6 +260,7 @@ class Reinforce(pl.LightningModule):
 
 
 def cli_main():
+
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
