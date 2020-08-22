@@ -70,8 +70,8 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         self.num_workers = num_workers
         self.batch_size = batch_size
         self.seed = seed
-        self.num_labeled_samples = 100000 - unlabeled_val_split
-        self.num_unlabeled_samples = 5000 - train_val_split
+        self.num_unlabeled_samples = 100000 - unlabeled_val_split
+        self.num_labeled_samples = 5000 - train_val_split
 
     @property
     def num_classes(self):
@@ -226,6 +226,44 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         dataset = STL10(self.data_dir, split='test', download=False, transform=transforms)
         loader = DataLoader(
             dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
+            drop_last=True,
+            pin_memory=True
+        )
+        return loader
+
+    def train_dataloader_labeled(self):
+        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+
+        dataset = STL10(self.data_dir, split='train', download=False, transform=transforms)
+        train_length = len(dataset)
+        dataset_train, _ = random_split(dataset,
+                                        [train_length - self.num_labeled_samples, self.num_labeled_samples],
+                                        generator=torch.Generator().manual_seed(self.seed))
+        loader = DataLoader(
+            dataset_train,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
+            pin_memory=True
+        )
+        return loader
+
+    def val_dataloader_labeled(self):
+        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+        dataset = STL10(self.data_dir,
+                        split='train',
+                        download=False,
+                        transform=transforms)
+        labeled_length = len(dataset)
+        _, labeled_val = random_split(dataset,
+                                      [labeled_length - self.num_labeled_samples, self.num_labeled_samples],
+                                      generator=torch.Generator().manual_seed(self.seed))
+
+        loader = DataLoader(
+            labeled_val,
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
