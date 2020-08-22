@@ -61,6 +61,8 @@ class ValueAgent(Agent):
         Returns:
             action defined by policy
         """
+        if not isinstance(state, list):
+            state = [state]
 
         if np.random.random() < self.epsilon:
             action = self.get_random_action(state)
@@ -72,6 +74,7 @@ class ValueAgent(Agent):
     def get_random_action(self, state: torch.Tensor) -> int:
         """returns a random action"""
         actions = []
+
         for i in range(len(state)):
             action = np.random.randint(0, self.action_space - 1)
             actions.append(action)

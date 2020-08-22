@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.losses.rl import per_dqn_loss
 from pl_bolts.models.rl.common import cli
-from pl_bolts.models.rl.common.memory import PERBuffer
+from pl_bolts.models.rl.common.memory import PERBuffer, Experience
 from pl_bolts.models.rl.dqn_model import DQN
 
 
@@ -26,17 +26,6 @@ class PERDQN(DQN):
     Model implemented by:
 
         - `Donal Byrne <https://github.com/djbyrne>`
-
-    Example:
-
-            >>> from pl_bolts.models.rl.per_dqn_model import PERDQN
-            ...
-            >>> model = PERDQN("PongNoFrameskip-v4")
-
-    Train::
-
-        trainer = Trainer()
-        trainer.fit(model)
 
         Args:
             env: gym environment tag
@@ -71,21 +60,29 @@ class PERDQN(DQN):
             yields a Experience tuple containing the state, action, reward, done and next_state.
         """
 
-        for step_idx, exp in enumerate(self.source.runner(self.device)):
+        while True:
+            action = self.agent(self.state, self.device)
+
+            next_state, reward, done, _ = self.env.step(action)
+            exp = Experience(state=self.state, action=action, reward=reward, done=done, new_state=next_state)
 
             self.agent.update_epsilon(self.global_step)
             self.buffer.append(exp)
 
-            episode_reward_steps = self.source.pop_rewards_steps()
+            self.state = next_state
+            self.episode_steps += 1
+            self.episode_reward += reward
 
-            if episode_reward_steps:
-                for reward, steps in episode_reward_steps:
-                    self.done_episodes += 1
-                    self.total_rewards.append(reward)
-                    self.episode_steps.append(steps)
-                    self.avg_rewards = float(
-                        np.mean(self.total_rewards[-self.avg_reward_len:])
-                    )
+            if done:
+                self.done_episodes += 1
+                self.total_rewards.append(self.episode_reward)
+                self.total_episode_steps = self.episode_steps
+                self.avg_rewards = float(
+                    np.mean(self.total_rewards[-self.avg_reward_len:])
+                )
+                self.episode_reward = 0
+                self.episode_steps = 0
+                self.state = self.env.reset()
 
             samples, indices, weights = self.buffer.sample(self.batch_size)
 
@@ -93,12 +90,12 @@ class PERDQN(DQN):
 
             for idx, _ in enumerate(dones):
                 yield (
-                    states[idx],
-                    actions[idx],
-                    rewards[idx],
-                    dones[idx],
-                    new_states[idx],
-                ), indices[idx], weights[idx]
+                          states[idx],
+                          actions[idx],
+                          rewards[idx],
+                          dones[idx],
+                          new_states[idx],
+                      ), indices[idx], weights[idx]
 
     def training_step(self, batch, _) -> OrderedDict:
         """

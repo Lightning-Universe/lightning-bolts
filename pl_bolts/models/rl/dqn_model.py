@@ -16,7 +16,7 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules.experience_source import (
     ExperienceSourceDataset,
-    DiscountedExperienceSource,
+    DiscountedExperienceSource, Experience,
 )
 from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common import wrappers, cli
@@ -55,15 +55,6 @@ class DQN(pl.LightningModule):
 
             - `Donal Byrne <https://github.com/djbyrne>`
 
-        Example:
-            >>> from pl_bolts.models.rl.dqn_model import DQN
-            ...
-            >>> model = DQN("PongNoFrameskip-v4")
-
-        Train::
-
-            trainer = Trainer()
-            trainer.fit(model)
 
         Args:
             env: gym environment tag
@@ -95,10 +86,10 @@ class DQN(pl.LightningModule):
 
         # Environment
         self.exp = None
-        self.env = [self.make_environment(env, seed) for _ in range(num_envs)]
+        self.env = self.make_environment(env, seed)
 
-        self.obs_shape = self.env[0].observation_space.shape
-        self.n_actions = self.env[0].action_space.n
+        self.obs_shape = self.env.observation_space.shape
+        self.n_actions = self.env.action_space.n
 
         # Model Attributes
         self.buffer = None
@@ -134,7 +125,7 @@ class DQN(pl.LightningModule):
         self.total_reward = 0
         self.episode_reward = 0
         self.episode_count = 0
-        self.episode_steps = [0]
+        self.episode_steps = 0
         self.total_episode_steps = 0
 
         self.total_rewards = [0]
@@ -149,12 +140,18 @@ class DQN(pl.LightningModule):
             )
         self.avg_rewards = 0
 
+        self.state = self.env.reset()
+
     def populate(self, warm_start: int) -> None:
         """Populates the buffer with initial experience"""
         if warm_start > 0:
+            self.state = self.env.reset()
+
             for _ in range(warm_start):
-                self.source.agent.epsilon = 1.0
-                exp = next(self.source.runner(self.device))
+                self.agent.epsilon = 1.0
+                action = self.agent(self.state, self.device)
+                next_state, reward, done, _ = self.env.step(action)
+                exp = Experience(state=self.state, action=action, reward=reward, done=done, new_state=next_state)
                 self.buffer.append(exp)
 
     def build_networks(self) -> None:
@@ -182,25 +179,33 @@ class DQN(pl.LightningModule):
             yields a Experience tuple containing the state, action, reward, done and next_state.
         """
 
-        for step_idx, exp in enumerate(self.source.runner(self.device)):
+        while True:
+            action = self.agent(self.state, self.device)
+
+            next_state, reward, done, _ = self.env.step(action)
+            exp = Experience(state=self.state, action=action, reward=reward, done=done, new_state=next_state)
 
             self.agent.update_epsilon(self.global_step)
             self.buffer.append(exp)
 
-            episode_reward_steps = self.source.pop_rewards_steps()
+            self.state = next_state
+            self.episode_steps += 1
+            self.episode_reward += reward
 
-            if episode_reward_steps:
-                for reward, steps in episode_reward_steps:
-                    self.done_episodes += 1
-                    self.total_rewards.append(reward)
-                    self.episode_steps.append(steps)
-                    self.avg_rewards = float(
-                        np.mean(self.total_rewards[-self.avg_reward_len:])
-                    )
+            if done:
+                self.done_episodes += 1
+                self.total_rewards.append(self.episode_reward)
+                self.total_episode_steps = self.episode_steps
+                self.avg_rewards = float(
+                    np.mean(self.total_rewards[-self.avg_reward_len:])
+                )
+                self.episode_reward = 0
+                self.episode_steps = 0
+                self.state = self.env.reset()
 
             states, actions, rewards, dones, new_states = self.buffer.sample(
-                self.batch_size
-            )
+                    self.batch_size
+                )
 
             for idx, _ in enumerate(dones):
                 yield states[idx], actions[idx], rewards[idx], dones[idx], new_states[
@@ -341,12 +346,6 @@ class DQN(pl.LightningModule):
         )
         arg_parser.add_argument(
             "--eps_end", type=float, default=0.02, help="final value of epsilon"
-        )
-        arg_parser.add_argument(
-            "--warm_start_steps",
-            type=int,
-            default=10000,
-            help="max episode reward in the environment",
         )
 
         return arg_parser

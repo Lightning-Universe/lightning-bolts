@@ -59,7 +59,6 @@ def double_dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], net: nn.Module,
     """
     states, actions, rewards, dones, next_states = batch  # batch of experiences, batch_size = 16
 
-    actions = actions.unsqueeze(-1)  # adds a dimension, 16 -> [16, 1]
     output = net(states)  # shape [16, 2], [batch, action space]
 
     actions = actions.long()
@@ -112,8 +111,7 @@ def per_dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], batch_weights: List, 
 
     batch_weights = torch.tensor(batch_weights)
 
-    actions_v = actions.unsqueeze(-1)
-    state_action_vals = net(states).gather(1, actions_v)
+    state_action_vals = net(states).gather(1, actions)
     state_action_vals = state_action_vals.squeeze(-1)
     with torch.no_grad():
         next_s_vals = target_net(next_states).max(1)[0]
