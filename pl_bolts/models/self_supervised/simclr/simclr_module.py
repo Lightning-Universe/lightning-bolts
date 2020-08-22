@@ -1,18 +1,17 @@
 import pytorch_lightning as pl
-import torch
 from torch.optim import Adam
 from torch import nn
 from torch.nn import functional as F
-from torch.optim.lr_scheduler import StepLR
 from torchvision.models import densenet
 
-from pl_bolts import metrics
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
-from pl_bolts.metrics import mean
-from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
+from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
+from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
+from pl_bolts.models.self_supervised.evaluator import Flatten
+from pl_bolts.models.self_supervised.resnets import resnet50
 
 
 class DensenetEncoder(nn.Module):
@@ -29,15 +28,19 @@ class DensenetEncoder(nn.Module):
 
 
 class Projection(nn.Module):
-    def __init__(self, input_dim=1024, output_dim=128):
+    def __init__(self, input_dim=2048, hidden_dim=2048, output_dim=128):
         super().__init__()
         self.output_dim = output_dim
         self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
+
         self.model = nn.Sequential(
-            nn.Linear(input_dim, 512, bias=False),
-            nn.BatchNorm1d(512),
-            nn.ReLU(inplace=True),
-            nn.Linear(512, output_dim, bias=True))
+            nn.AdaptiveAvgPool2d((1, 1)),
+            Flatten(),
+            nn.Linear(self.input_dim, self.hidden_dim, bias=True),
+            nn.BatchNorm1d(self.hidden_dim),
+            nn.ReLU(),
+            nn.Linear(self.hidden_dim, self.output_dim, bias=False))
 
     def forward(self, x):
         x = self.model(x)
@@ -46,20 +49,12 @@ class Projection(nn.Module):
 
 class SimCLR(pl.LightningModule):
     def __init__(self,
-                 datamodule: pl.LightningDataModule = None,
-                 data_dir: str = './',
-                 learning_rate: float = 0.00006,
-                 weight_decay: float = 0.0005,
-                 input_height: int = 32,
-                 batch_size: int = 128,
-                 online_ft: bool = False,
-                 num_workers: int = 4,
-                 optimizer: str = 'lars',
-                 lr_sched_step: float = 30.0,
-                 lr_sched_gamma: float = 0.5,
-                 lars_momentum: float = 0.9,
-                 lars_eta: float = 0.001,
-                 loss_temperature: float = 0.5,
+                 batch_size,
+                 num_samples,
+                 warmup_epochs=10,
+                 lr=1e-4,
+                 opt_weight_decay=1e-6,
+                 loss_temperature=0.5,
                  **kwargs):
         """
         PyTorch Lightning implementation of `SIMCLR <https://arxiv.org/abs/2002.05709.>`_
@@ -71,11 +66,25 @@ class SimCLR(pl.LightningModule):
             - `William Falcon <https://github.com/williamFalcon>`_
             - `Tullie Murrell <https://github.com/tullie>`_
 
-        Example:
+        Example::
 
-            >>> from pl_bolts.models.self_supervised import SimCLR
-            ...
-            >>> model = SimCLR()
+            import pytorch_lightning as pl
+            from pl_bolts.models.self_supervised import SimCLR
+            from pl_bolts.datamodules import CIFAR10DataModule
+            from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
+                SimCLREvalDataTransform, SimCLRTrainDataTransform)
+
+            # data
+            dm = CIFAR10DataModule(num_workers=0)
+            dm.train_transforms = SimCLRTrainDataTransform(32)
+            dm.val_transforms = SimCLREvalDataTransform(32)
+
+            # model
+            model = SimCLR(num_samples=dm.num_samples, batch_size=dm.batch_size)
+
+            # fit
+            trainer = pl.Trainer()
+            trainer.fit(model, dm))
 
         Train::
 
@@ -96,153 +105,129 @@ class SimCLR(pl.LightningModule):
                 --batch_size 32
 
         Args:
-            datamodule: The datamodule
-            data_dir: directory to store data
-            learning_rate: the learning rate
-            weight_decay: optimizer weight decay
-            input_height: image input height
             batch_size: the batch size
-            online_ft: whether to tune online or not
-            num_workers: number of workers
-            optimizer: optimizer name
-            lr_sched_step: step for learning rate scheduler
-            lr_sched_gamma: gamma for learning rate scheduler
-            lars_momentum: the mom param for lars optimizer
-            lars_eta: for lars optimizer
-            loss_temperature: float = 0.
+            num_samples: num samples in the dataset
+             warmup_epochs: epochs to warmup the lr for
+             lr: the optimizer learning rate
+             opt_weight_decay: the optimizer weight decay
+             loss_temperature: the loss temperature
         """
         super().__init__()
         self.save_hyperparameters()
-        self.online_evaluator = online_ft
 
-        # init default datamodule
-        if datamodule is None:
-            datamodule = CIFAR10DataModule(data_dir, num_workers=num_workers, batch_size=batch_size)
-            datamodule.train_transforms = SimCLRTrainDataTransform(input_height)
-            datamodule.val_transforms = SimCLREvalDataTransform(input_height)
-
-        self.datamodule = datamodule
-
-        self.loss_func = self.init_loss()
+        self.nt_xent_loss = nt_xent_loss
         self.encoder = self.init_encoder()
-        self.projection = self.init_projection()
 
-        if self.online_evaluator:
-            z_dim = self.projection.output_dim
-            num_classes = self.datamodule.num_classes
-            self.non_linear_evaluator = SSLEvaluator(
-                n_input=z_dim,
-                n_classes=num_classes,
-                p=0.2,
-                n_hidden=1024
-            )
-
-    def init_loss(self):
-        return nt_xent_loss
+        # h -> || -> z
+        self.projection = Projection()
 
     def init_encoder(self):
-        return DensenetEncoder()
+        encoder = resnet50(return_all_feature_maps=False)
 
-    def init_projection(self):
-        return Projection()
+        # when using cifar10, replace the first conv so image doesn't shrink away
+        encoder.conv1 = nn.Conv2d(
+            3, 64,
+            kernel_size=3,
+            stride=1,
+            padding=1,
+            bias=False
+        )
+        return encoder
 
-    def forward(self, x):
-        h = self.encoder(x)
-        z = self.projection(h)
-        return h, z
+    def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=['bias', 'bn']):
+        params = []
+        excluded_params = []
 
-    def training_step(self, batch, batch_idx):
-        if isinstance(self.datamodule, STL10DataModule):
-            labeled_batch = batch[1]
-            unlabeled_batch = batch[0]
-            batch = unlabeled_batch
+        for name, param in named_params:
+            if not param.requires_grad:
+                continue
+            elif any(layer_name in name for layer_name in skip_list):
+                excluded_params.append(param)
+            else:
+                params.append(param)
 
-        (img_1, img_2), y = batch
-        h1, z1 = self.forward(img_1)
-        h2, z2 = self.forward(img_2)
+        return [
+            {'params': params, 'weight_decay': weight_decay},
+            {'params': excluded_params, 'weight_decay': 0.}
+        ]
 
-        # return h1, z1, h2, z2
-        loss = self.loss_func(z1, z2, self.hparams.loss_temperature)
-        log = {'train_ntx_loss': loss}
+    def setup(self, stage):
+        global_batch_size = self.trainer.world_size * self.hparams.batch_size
+        self.train_iters_per_epoch = self.hparams.num_samples // global_batch_size
 
-        # don't use the training signal, just finetune the MLP to see how we're doing downstream
-        if self.online_evaluator:
-            if isinstance(self.datamodule, STL10DataModule):
-                (img_1, img_2), y = labeled_batch
+    def configure_optimizers(self):
+        # TRICK 1 (Use lars + filter weights)
+        # exclude certain parameters
+        parameters = self.exclude_from_wt_decay(
+            self.named_parameters(),
+            weight_decay=self.hparams.opt_weight_decay
+        )
 
-            with torch.no_grad():
-                h1, z1 = self.forward(img_1)
+        optimizer = LARSWrapper(Adam(parameters, lr=self.hparams.lr))
 
-            # just in case... no grads into unsupervised part!
-            z_in = z1.detach()
+        # Trick 2 (after each step)
+        self.hparams.warmup_epochs = self.hparams.warmup_epochs * self.train_iters_per_epoch
+        max_epochs = self.trainer.max_epochs * self.train_iters_per_epoch
 
-            z_in = z_in.reshape(z_in.size(0), -1)
-            mlp_preds = self.non_linear_evaluator(z_in)
-            mlp_loss = F.cross_entropy(mlp_preds, y)
-            loss = loss + mlp_loss
-            log['train_mlp_loss'] = mlp_loss
+        linear_warmup_cosine_decay = LinearWarmupCosineAnnealingLR(
+            optimizer,
+            warmup_epochs=self.hparams.warmup_epochs,
+            max_epochs=max_epochs,
+            warmup_start_lr=0,
+            eta_min=0
+        )
 
-        result = {
-            'loss': loss,
-            'log': log
+        scheduler = {
+            'scheduler': linear_warmup_cosine_decay,
+            'interval': 'step',
+            'frequency': 1
         }
 
+        return [optimizer], [scheduler]
+
+    def forward(self, x):
+        result = self.encoder(x)
+        if isinstance(result, list):
+            result = result[-1]
+        return result
+
+    def training_step(self, batch, batch_idx):
+        loss = self.shared_step(batch, batch_idx)
+
+        result = pl.TrainResult(minimize=loss)
+        result.log('train_loss', loss, on_epoch=True)
         return result
 
     def validation_step(self, batch, batch_idx):
-        if isinstance(self.datamodule, STL10DataModule):
-            labeled_batch = batch[1]
-            unlabeled_batch = batch[0]
-            batch = unlabeled_batch
+        loss = self.shared_step(batch, batch_idx)
 
-        (img_1, img_2), y = batch
-        h1, z1 = self.forward(img_1)
-        h2, z2 = self.forward(img_2)
-        loss = self.loss_func(z1, z2, self.hparams.loss_temperature)
-        result = {'val_loss': loss}
-
-        if self.online_evaluator:
-            if isinstance(self.datamodule, STL10DataModule):
-                (img_1, img_2), y = labeled_batch
-                h1, z1 = self.forward(img_1)
-
-            z_in = z1.reshape(z1.size(0), -1)
-            mlp_preds = self.non_linear_evaluator(z_in)
-            mlp_loss = F.cross_entropy(mlp_preds, y)
-            acc = metrics.accuracy(mlp_preds, y)
-            result['mlp_acc'] = acc
-            result['mlp_loss'] = mlp_loss
-
+        result = pl.EvalResult(checkpoint_on=loss)
+        result.log('avg_val_loss', loss)
         return result
 
-    def validation_epoch_end(self, outputs: list):
-        val_loss = mean(outputs, 'val_loss')
+    def shared_step(self, batch, batch_idx):
+        (img1, img2), y = batch
 
-        log = dict(
-            val_loss=val_loss,
-        )
+        # ENCODE
+        # encode -> representations
+        # (b, 3, 32, 32) -> (b, 2048, 2, 2)
+        h1 = self.encoder(img1)
+        h2 = self.encoder(img2)
 
-        progress_bar = {}
-        if self.online_evaluator:
-            mlp_acc = mean(outputs, 'mlp_acc')
-            mlp_loss = mean(outputs, 'mlp_loss')
-            log['val_mlp_acc'] = mlp_acc
-            log['val_mlp_loss'] = mlp_loss
-            progress_bar['val_acc'] = mlp_acc
+        # the bolts resnets return a list of feature maps
+        if isinstance(h1, list):
+            h1 = h1[-1]
+            h2 = h2[-1]
 
-        return dict(val_loss=val_loss, log=log, progress_bar=progress_bar)
+        # PROJECT
+        # img -> E -> h -> || -> z
+        # (b, 2048, 2, 2) -> (b, 128)
+        z1 = self.projection(h1)
+        z2 = self.projection(h2)
 
-    def configure_optimizers(self):
-        optimizer = torch.optim.Adam(
-            self.parameters(), self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
+        loss = self.nt_xent_loss(z1, z2, self.hparams.loss_temperature)
 
-        if self.hparams.optimizer == 'lars':
-            optimizer = LARSWrapper(optimizer)
-        else:
-            raise ValueError(f'Invalid optimizer: {self.optimizer}')
-        scheduler = StepLR(
-            optimizer, step_size=self.hparams.lr_sched_step, gamma=self.hparams.lr_sched_gamma)
-        return [optimizer], [scheduler]
+        return loss
 
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -265,7 +250,7 @@ class SimCLR(pl.LightningModule):
         parser.add_argument('--weight_decay', type=float, default=1e-4)
         # Model
         parser.add_argument('--loss_temperature', type=float, default=0.5)
-        parser.add_argument('--num_workers', default=4, type=int)
+        parser.add_argument('--num_workers', default=0, type=int)
         parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
 
         return parser
@@ -284,24 +269,40 @@ if __name__ == '__main__':
     parser = SimCLR.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    # pick data
-    datamodule = None
-    if args.dataset == 'stl10':
-        datamodule = STL10DataModule.from_argparse_args(args)
-        datamodule.train_dataloader = datamodule.train_dataloader_mixed
-        datamodule.val_dataloader = datamodule.val_dataloader_mixed
+    # init default datamodule
+    if args.dataset == 'cifar10':
+        dm = CIFAR10DataModule.from_argparse_args(args)
+        dm.train_transforms = SimCLRTrainDataTransform(32)
+        dm.val_transforms = SimCLREvalDataTransform(32)
+        args.num_samples = dm.num_samples
+        
+    elif args.dataset == 'stl10':
+        dm = STL10DataModule.from_argparse_args(args)
+        dm.train_dataloader = dm.train_dataloader_mixed
+        dm.val_dataloader = dm.val_dataloader_mixed
+        args.num_samples = dm.num_unlabeled_samples
 
-        (c, h, w) = datamodule.size()
-        datamodule.train_transforms = SimCLRTrainDataTransform(h)
-        datamodule.val_transforms = SimCLREvalDataTransform(h)
+        (c, h, w) = dm.size()
+        dm.train_transforms = SimCLRTrainDataTransform(h)
+        dm.val_transforms = SimCLREvalDataTransform(h)
 
     elif args.dataset == 'imagenet2012':
-        datamodule = ImagenetDataModule.from_argparse_args(args, image_size=196)
-        (c, h, w) = datamodule.size()
-        datamodule.train_transforms = SimCLRTrainDataTransform(h)
-        datamodule.val_transforms = SimCLREvalDataTransform(h)
+        dm = ImagenetDataModule.from_argparse_args(args, image_size=196)
+        (c, h, w) = dm.size()
+        dm.train_transforms = SimCLRTrainDataTransform(h)
+        dm.val_transforms = SimCLREvalDataTransform(h)
 
-    model = SimCLR(**args.__dict__, datamodule=datamodule)
+    model = SimCLR(**args.__dict__)
 
-    trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model)
+    # finetune in real-time
+    def to_device(batch, device):
+        (x1, x2), y = batch
+        x1 = x1.to(device)
+        y = y.to(device)
+        return x1, y
+
+    online_eval = SSLOnlineEvaluator(z_dim=2048 * 2 * 2, num_classes=dm.num_classes)
+    online_eval.to_device = to_device
+
+    trainer = pl.Trainer.from_argparse_args(args, callbacks=[online_eval])
+    trainer.fit(model, dm)
