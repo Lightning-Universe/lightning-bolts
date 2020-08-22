@@ -8,8 +8,7 @@ import torch
 from torch.optim import Optimizer
 
 
-class LARSWrapper(Optimizer):
-
+class LARSWrapper(object):
     def __init__(self, optimizer, eta=0.02, clip=True, eps=1e-8):
         """
         Wrapper that adds LARS scheduling to any optimizer. This helps stability with huge batch sizes.
@@ -35,6 +34,10 @@ class LARSWrapper(Optimizer):
         self.__repr__ = self.optim.__repr__
 
     @property
+    def __class__(self):
+        return Optimizer
+
+    @property
     def state(self):
         return self.optim.state
 
@@ -58,7 +61,7 @@ class LARSWrapper(Optimizer):
             group['weight_decay'] = 0
 
             # update the parameters
-            [self.update_p(p, group, weight_decay) for p in group['params'] if p.grad]
+            [self.update_p(p, group, weight_decay) for p in group['params'] if p.grad is not None]
 
         # update the optimizer
         self.optim.step()

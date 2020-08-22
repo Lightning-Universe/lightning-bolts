@@ -21,7 +21,7 @@ class BYOL(pl.LightningModule):
                  weight_decay: float = 15e-6,
                  input_height: int = 32,
                  batch_size: int = 32,
-                 num_workers: int = 4,
+                 num_workers: int = 0,
                  warmup_epochs: int = 10,
                  max_epochs: int = 1000,
                  **kwargs):
@@ -170,7 +170,7 @@ class BYOL(pl.LightningModule):
 
         # Data
         parser.add_argument('--data_dir', type=str, default='.')
-        parser.add_argument('--num_workers', default=4, type=int)
+        parser.add_argument('--num_workers', default=0, type=int)
 
         # optim
         parser.add_argument('--batch_size', type=int, default=256)
@@ -215,5 +215,13 @@ if __name__ == '__main__':
 
     model = BYOL(**args.__dict__, datamodule=datamodule)
 
-    trainer = pl.Trainer.from_argparse_args(args, max_steps=10000, callbacks=[SSLOnlineEvaluator()])
+    def to_device(batch, device):
+        (x1, x2), y = batch
+        x1 = x1.to(device)
+        y = y.to(device)
+        return x1, y
+
+    online_eval = SSLOnlineEvaluator()
+    online_eval.to_device = to_device
+    trainer = pl.Trainer.from_argparse_args(args, max_steps=10000, callbacks=[])
     trainer.fit(model)
