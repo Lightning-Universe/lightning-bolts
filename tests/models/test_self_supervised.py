@@ -72,9 +72,9 @@ def test_simclr(tmpdir):
     datamodule.train_transforms = SimCLRTrainDataTransform(32)
     datamodule.val_transforms = SimCLREvalDataTransform(32)
 
-    model = SimCLR(data_dir=tmpdir, batch_size=2, datamodule=datamodule, online_ft=True)
+    model = SimCLR(batch_size=2, num_samples=datamodule.num_samples)
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
-    trainer.fit(model)
+    trainer.fit(model, datamodule)
     loss = trainer.callback_metrics['loss']
 
     assert loss > 0
