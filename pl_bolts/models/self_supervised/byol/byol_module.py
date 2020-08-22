@@ -1,12 +1,13 @@
 from copy import deepcopy
 import torch
 import torch.nn.functional as F
+from torch.optim import Adam
 import pytorch_lightning as pl
 from typing import Any
 
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
-from pl_bolts.optimizers.layer_adaptive_scaling import LARS
+from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.models.self_supervised.byol.models import SiameseArm
 from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate, SSLOnlineEvaluator
@@ -150,7 +151,8 @@ class BYOL(pl.LightningModule):
         return result
 
     def configure_optimizers(self):
-        optimizer = LARS(self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
+        optimizer = Adam(self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
+        optimizer = LARSWrapper(optimizer)
         scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
             warmup_epochs=self.hparams.warmup_epochs,
