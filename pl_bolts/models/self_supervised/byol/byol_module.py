@@ -15,7 +15,7 @@ from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate, SSLOnlineEval
 
 class BYOL(pl.LightningModule):
     def __init__(self,
-                 num_classes: int = None,
+                 num_classes,
                  data_dir: str = './',
                  learning_rate: float = 0.2,
                  weight_decay: float = 15e-6,
@@ -43,11 +43,24 @@ class BYOL(pl.LightningModule):
             - verify on STL-10
             - pre-train on imagenet
 
-        Example:
+        Example::
 
-            >>> from pl_bolts.models.self_supervised import BYOL
-            ...
-            >>> model = BYOL()
+            import pytorch_lightning as pl
+            from pl_bolts.models.self_supervised import BYOL
+            from pl_bolts.datamodules import CIFAR10DataModule
+            from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
+                SimCLREvalDataTransform, SimCLRTrainDataTransform)
+
+            # model
+            model = BYOL(num_classes=10)
+
+            # data
+            dm = CIFAR10DataModule('.', num_workers=0)
+            dm.train_transforms = SimCLRTrainDataTransform(32)
+            dm.val_transforms = SimCLREvalDataTransform(32)
+
+            trainer = pl.Trainer()
+            trainer.fit(model, dm)
 
         Train::
 
@@ -222,4 +235,4 @@ if __name__ == '__main__':
     online_eval.to_device = to_device
 
     trainer = pl.Trainer.from_argparse_args(args, max_steps=10000, callbacks=[])
-    trainer.fit(model)
+    trainer.fit(model, dm)
