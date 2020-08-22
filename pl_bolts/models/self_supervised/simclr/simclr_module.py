@@ -1,5 +1,6 @@
 import pytorch_lightning as pl
 import torch
+from torch.optim import Adam
 from torch import nn
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import StepLR
@@ -11,7 +12,7 @@ from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.metrics import mean
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
-from pl_bolts.optimizers.layer_adaptive_scaling import LARS
+from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 
 
 class DensenetEncoder(nn.Module):
@@ -232,13 +233,11 @@ class SimCLR(pl.LightningModule):
         return dict(val_loss=val_loss, log=log, progress_bar=progress_bar)
 
     def configure_optimizers(self):
-        if self.hparams.optimizer == 'adam':
-            optimizer = torch.optim.Adam(
-                self.parameters(), self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
-        elif self.hparams.optimizer == 'lars':
-            optimizer = LARS(
-                self.parameters(), lr=self.hparams.learning_rate, momentum=self.hparams.lars_momentum,
-                weight_decay=self.hparams.weight_decay, eta=self.hparams.lars_eta)
+        optimizer = torch.optim.Adam(
+            self.parameters(), self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
+
+        if self.hparams.optimizer == 'lars':
+            optimizer = LARSWrapper(optimizer)
         else:
             raise ValueError(f'Invalid optimizer: {self.optimizer}')
         scheduler = StepLR(
