@@ -8,6 +8,7 @@ from torchvision.datasets import CIFAR10
 
 from pl_bolts.datamodules.cifar10_dataset import TrialCIFAR10
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
+import os
 
 
 class CIFAR10DataModule(LightningDataModule):
@@ -17,7 +18,7 @@ class CIFAR10DataModule(LightningDataModule):
 
     def __init__(
             self,
-            data_dir,
+            data_dir: str = None,
             val_split: int = 5000,
             num_workers: int = 16,
             batch_size: int = 32,
@@ -73,11 +74,12 @@ class CIFAR10DataModule(LightningDataModule):
         super().__init__(*args, **kwargs)
         self.dims = (3, 32, 32)
         self.DATASET = CIFAR10
-        self.data_dir = data_dir
         self.val_split = val_split
         self.num_workers = num_workers
         self.batch_size = batch_size
         self.seed = seed
+        self.data_dir = data_dir if data_dir is not None else os.getcwd()
+        self.num_samples = 60000 - val_split
 
     @property
     def num_classes(self):

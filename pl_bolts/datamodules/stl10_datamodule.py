@@ -1,3 +1,4 @@
+import os
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
@@ -14,7 +15,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
 
     def __init__(
             self,
-            data_dir: str,
+            data_dir: str = None,
             unlabeled_val_split: int = 5000,
             train_val_split: int = 500,
             num_workers: int = 16,
@@ -63,12 +64,14 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         """
         super().__init__(*args, **kwargs)
         self.dims = (3, 96, 96)
-        self.data_dir = data_dir
+        self.data_dir = data_dir if data_dir is not None else os.getcwd()
         self.unlabeled_val_split = unlabeled_val_split
         self.train_val_split = train_val_split
         self.num_workers = num_workers
         self.batch_size = batch_size
         self.seed = seed
+        self.num_labeled_samples = 100000 - unlabeled_val_split
+        self.num_unlabeled_samples = 5000 - train_val_split
 
     @property
     def num_classes(self):
