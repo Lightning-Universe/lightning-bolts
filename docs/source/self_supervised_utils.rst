@@ -13,6 +13,8 @@ Example::
 .. autoclass:: pl_bolts.utils.self_supervised.Identity
     :noindex:
 
+------------
+
 SSL-ready resnets
 --------------------
 Torchvision resnets with the fc layers removed and with the ability to return all feature maps instead of just the
@@ -28,4 +30,12 @@ Example::
     feat_maps = resnet(x)
 
 .. autofunction:: pl_bolts.utils.self_supervised.torchvision_ssl_encoder
+    :noindex:
+
+--------------
+
+SSL backbone finetuner
+----------------------
+
+.. autoclass:: pl_bolts.models.self_supervised.ssl_finetuner.SSLFineTuner
     :noindex:

@@ -1,57 +1,51 @@
-from typing import Optional, Sequence
-
 from pytorch_lightning import LightningDataModule
-import torch
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
-from torchvision.datasets import CIFAR10
-
-from pl_bolts.datamodules.cifar10_dataset import TrialCIFAR10
-from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
+from torchvision.datasets import Cityscapes
+import torch
 
 
-class CIFAR10DataModule(LightningDataModule):
+class CityscapesDataModule(LightningDataModule):
 
-    name = 'cifar10'
+    name = 'Cityscapes'
     extra_args = {}
 
     def __init__(
             self,
             data_dir,
-            val_split: int = 5000,
-            num_workers: int = 16,
-            batch_size: int = 32,
-            seed: int = 42,
+            val_split=5000,
+            num_workers=16,
+            batch_size=32,
+            seed=42,
             *args,
             **kwargs,
     ):
         """
-        .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/wp-content/uploads/2019/01/
-            Plot-of-a-Subset-of-Images-from-the-CIFAR-10-Dataset.png
+        .. figure:: https://www.cityscapes-dataset.com/wordpress/wp-content/uploads/2015/07/muenster00-1024x510.png
             :width: 400
-            :alt: CIFAR-10
+            :alt: Cityscape
+
+        Standard Cityscapes, train, val, test splits and transforms
 
         Specs:
-            - 10 classes (1 per class)
-            - Each image is (3 x 32 x 32)
-
-        Standard CIFAR10, train, val, test splits and transforms
+            - 30 classes (road, person, sidewalk, etc...)
+            - (image, target) - image dims: (3 x 32 x 32), target dims: (3 x 32 x 32)
 
         Transforms::
 
-            mnist_transforms = transform_lib.Compose([
+            transforms = transform_lib.Compose([
                 transform_lib.ToTensor(),
-                transforms.Normalize(
-                    mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
-                    std=[x / 255.0 for x in [63.0, 62.1, 66.7]]
+                transform_lib.Normalize(
+                    mean=[0.28689554, 0.32513303, 0.28389177],
+                    std=[0.18696375, 0.19017339, 0.18720214]
                 )
             ])
 
         Example::
 
-            from pl_bolts.datamodules import CIFAR10DataModule
+            from pl_bolts.datamodules import CityscapesDataModule
 
-            dm = CIFAR10DataModule(PATH)
+            dm = CityscapesDataModule(PATH)
             model = LitModel()
 
             Trainer().fit(model, dm)
@@ -72,7 +66,7 @@ class CIFAR10DataModule(LightningDataModule):
         """
         super().__init__(*args, **kwargs)
         self.dims = (3, 32, 32)
-        self.DATASET = CIFAR10
+        self.DATASET = Cityscapes
         self.data_dir = data_dir
         self.val_split = val_split
         self.num_workers = num_workers
@@ -83,20 +77,20 @@ class CIFAR10DataModule(LightningDataModule):
     def num_classes(self):
         """
         Return:
-            10
+            30
         """
-        return 10
+        return 30
 
     def prepare_data(self):
         """
-        Saves CIFAR10 files to data_dir
+        Saves Cityscapes files to data_dir
         """
         self.DATASET(self.data_dir, train=True, download=True, transform=transform_lib.ToTensor(), **self.extra_args)
         self.DATASET(self.data_dir, train=False, download=True, transform=transform_lib.ToTensor(), **self.extra_args)
 
     def train_dataloader(self):
         """
-        CIFAR train set removes a subset to use for validation
+        Cityscapes train set with removed subset to use for validation
         """
         transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
 
@@ -119,7 +113,7 @@ class CIFAR10DataModule(LightningDataModule):
 
     def val_dataloader(self):
         """
-        CIFAR10 val set uses a subset of the training set for validation
+        Cityscapes val set uses a subset of the training set for validation
         """
         transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
 
@@ -142,7 +136,7 @@ class CIFAR10DataModule(LightningDataModule):
 
     def test_dataloader(self):
         """
-        CIFAR10 test set uses the test split
+        Cityscapes test set uses the test split
         """
         transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
 
@@ -158,58 +152,11 @@ class CIFAR10DataModule(LightningDataModule):
         return loader
 
     def default_transforms(self):
-        cf10_transforms = transform_lib.Compose([
+        cityscapes_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
-            cifar10_normalization()
+            transform_lib.Normalize(
+                mean=[0.28689554, 0.32513303, 0.28389177],
+                std=[0.18696375, 0.19017339, 0.18720214]
+            )
         ])
-        return cf10_transforms
-
-
-class TinyCIFAR10DataModule(CIFAR10DataModule):
-
-    def __init__(
-            self,
-            data_dir: str,
-            val_split: int = 50,
-            num_workers: int = 16,
-            num_samples: int = 100,
-            labels: Optional[Sequence] = (1, 5, 8),
-            *args,
-            **kwargs,
-    ):
-        """
-        Standard CIFAR10, train, val, test splits and transforms
-
-        Transforms::
-
-            mnist_transforms = transform_lib.Compose([
-                transform_lib.ToTensor(),
-                transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
-                                     std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
-            ])
-
-        Example::
-
-            from pl_bolts.datamodules import CIFAR10DataModule
-
-            dm = CIFAR10DataModule(PATH)
-            model = LitModel(datamodule=dm)
-
-        Args:
-            data_dir: where to save/load the data
-            val_split: how many of the training images to use for the validation split
-            num_workers: how many workers to use for loading data
-            num_samples: number of examples per selected class/label
-            labels: list selected CIFAR10 classes/labels
-        """
-        super().__init__(data_dir, val_split, num_workers, *args, **kwargs)
-        self.dims = (3, 32, 32)
-        self.DATASET = TrialCIFAR10
-        self.num_samples = num_samples
-        self.labels = sorted(labels) if labels is not None else set(range(10))
-        self.extra_args = dict(num_samples=self.num_samples, labels=self.labels)
-
-    @property
-    def num_classes(self) -> int:
-        """Return number of classes."""
-        return len(self.labels)
+        return cityscapes_transforms

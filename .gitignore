@@ -153,3 +153,4 @@ tests/test-reports/
 **/FashionMNIST
 **/dac
 **_binary
+**MNIST

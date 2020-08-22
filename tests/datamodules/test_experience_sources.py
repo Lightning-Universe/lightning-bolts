@@ -5,22 +5,33 @@ import gym
 import torch
 from torch.utils.data import DataLoader
 
-from pl_bolts.datamodules.experience_source import (ExperienceSourceDataset, ExperienceSource, NStepExperienceSource,
-                                                    EpisodicExperienceStream, Experience)
+from pl_bolts.datamodules.experience_source import (
+    BaseExperienceSource,
+    ExperienceSource,
+    ExperienceSourceDataset,
+    Experience,
+    DiscountedExperienceSource,
+)
 from pl_bolts.models.rl.common.agents import Agent
 
 
 class DummyAgent(Agent):
-    def __call__(self, states, agent_states):
-        return 0
+    def __call__(self, states, device):
+        return [0] * len(states)
+
+
+class DummyExperienceSource(BaseExperienceSource):
+    def __iter__(self):
+        yield torch.ones(3)
 
 
 class TestExperienceSourceDataset(TestCase):
-
     def train_batch(self):
+        """Returns an iterator used for testing"""
         return iter([i for i in range(100)])
 
     def test_iterator(self):
+        """Tests that the iterator returns batches correctly"""
         source = ExperienceSourceDataset(self.train_batch)
         batch_size = 10
         data_loader = DataLoader(source, batch_size=batch_size)
@@ -32,123 +43,278 @@ class TestExperienceSourceDataset(TestCase):
             break
 
 
+class TestBaseExperienceSource(TestCase):
+    def setUp(self) -> None:
+        self.net = Mock()
+        self.agent = DummyAgent(net=self.net)
+        self.env = gym.make("CartPole-v0")
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.source = DummyExperienceSource(self.env, self.agent)
+        self.s1 = torch.ones(3)
+        self.s2 = torch.zeros(3)
+
+    def test_dummy_base_class(self):
+        """Tests that base class is initialized correctly"""
+        self.assertTrue(isinstance(self.source.env, gym.Env))
+        self.assertTrue(isinstance(self.source.agent, Agent))
+        out = next(iter(self.source))
+        self.assertTrue(torch.all(out.eq(torch.ones(3))))
+
+
 class TestExperienceSource(TestCase):
-
     def setUp(self) -> None:
         self.net = Mock()
         self.agent = DummyAgent(net=self.net)
-        self.env = gym.make("CartPole-v0")
-        self.device = torch.device('cpu')
-        self.source = ExperienceSource(self.env, self.agent)
+        self.env = [gym.make("CartPole-v0") for _ in range(2)]
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.source = ExperienceSource(self.env, self.agent, n_steps=1)
 
-    def test_step(self):
-        exp, reward, done = self.source.step(self.device)
-        self.assertEqual(len(exp), 5)
+        self.s1 = torch.ones(3)
+        self.s2 = torch.zeros(3)
 
-    def test_episode(self):
-        total_reward = self.source.run_episode(self.device)
-        self.assertIsInstance(total_reward, float)
+        self.mock_env = Mock()
+        self.mock_env.step = Mock(return_value=(self.s1, 1, False, Mock()))
+
+        self.exp1 = Experience(state=self.s1, action=1, reward=1, done=False, new_state=self.s2)
+        self.exp2 = Experience(state=self.s1, action=1, reward=1, done=False, new_state=self.s2)
+
+    def test_init_source(self):
+        """Test that experience source is setup correctly"""
+        self.assertEqual(self.source.n_steps, 1)
+        self.assertIsInstance(self.source.pool, list)
+
+        self.assertEqual(len(self.source.states), len(self.source.pool))
+        self.assertEqual(len(self.source.histories), len(self.source.pool))
+        self.assertEqual(len(self.source.cur_rewards), len(self.source.pool))
+        self.assertEqual(len(self.source.cur_steps), len(self.source.pool))
+
+    def test_init_single_env(self):
+        """Test that if a single env is passed that it is wrapped in a list"""
+        self.source = ExperienceSource(self.mock_env, self.agent)
+        self.assertIsInstance(self.source.pool, list)
+
+    def test_env_actions(self):
+        """Assert that a list of actions of shape [num_envs, action_len] is returned"""
+        actions = self.source.env_actions(self.device)
+        self.assertEqual(len(actions), len(self.env))
+        self.assertTrue(isinstance(actions[0], list))
+
+    def test_env_step(self):
+        """Assert that taking a step through a single environment yields a list of history steps"""
+        actions = [[1], [1]]
+        env = self.env[0]
+        exp = self.source.env_step(0, env, actions[0])
+
+        self.assertTrue(isinstance(exp, Experience))
+
+    def test_source_next_single_env_single_step(self):
+        """Test that steps are executed correctly with one environment and 1 step"""
+
+        self.env = [gym.make("CartPole-v0") for _ in range(1)]
+        self.source = ExperienceSource(self.env, self.agent, n_steps=1)
+
+        for idx, exp in enumerate(self.source.runner(self.device)):
+            self.assertTrue(isinstance(exp, tuple))
+            break
+
+    def test_source_next_single_env_multi_step(self):
+        """Test that steps are executed correctly with one environment and 2 step"""
+
+        self.env = [gym.make("CartPole-v0") for _ in range(1)]
+        n_steps = 4
+        self.source = ExperienceSource(self.env, self.agent, n_steps=n_steps)
+
+        for idx, exp in enumerate(self.source.runner(self.device)):
+            self.assertTrue(isinstance(exp, tuple))
+            self.assertTrue(len(exp) == n_steps)
+            break
+
+    def test_source_next_multi_env_single_step(self):
+        """Test that steps are executed correctly with 2 environment and 1 step"""
+
+        for idx, exp in enumerate(self.source.runner(self.device)):
+            self.assertTrue(isinstance(exp, tuple))
+            self.assertTrue(len(exp) == self.source.n_steps)
+            break
+
+    def test_source_next_multi_env_multi_step(self):
+        """Test that steps are executed correctly with 2 environment and 2 step"""
+        self.source = ExperienceSource(self.env, self.agent, n_steps=2)
+
+        for idx, exp in enumerate(self.source.runner(self.device)):
+            self.assertTrue(isinstance(exp, tuple))
+            self.assertTrue(len(exp) == self.source.n_steps)
+            break
+
+    def test_source_update_state(self):
+        """Test that after a step the state is updated"""
+
+        self.env = [gym.make("CartPole-v0") for _ in range(1)]
+        self.source = ExperienceSource(self.env, self.agent, n_steps=2)
+
+        for idx, exp in enumerate(self.source.runner(self.device)):
+            self.assertTrue(isinstance(exp, tuple))
+            new = np.asarray(exp[-1].new_state)
+            old = np.asarray(self.source.states[0])
+            self.assertTrue(np.array_equal(new, old))
+            break
+
+    def test_source_is_done_short_episode(self):
+        """Test that when done and the history is not full, to return the partial history"""
+
+        self.mock_env.step = Mock(return_value=(self.s1, 1, True, Mock))
+
+        env = [self.mock_env for _ in range(1)]
+        self.source = ExperienceSource(env, self.agent, n_steps=2)
+
+        for idx, exp in enumerate(self.source.runner(self.device)):
+            self.assertTrue(isinstance(exp, tuple))
+            self.assertTrue(len(exp) == 1)
+            break
+
+    def test_source_is_done_2step_episode(self):
+        """
+        Test that when done and the history is full, return the full history, then start to return the tail of
+        the history
+        """
+
+        self.env = [self.mock_env]
+        self.source = ExperienceSource(self.env, self.agent, n_steps=2)
+
+        self.mock_env.step = Mock(return_value=(self.s1, 1, True, Mock))
+
+        self.source.histories[0].append(self.exp1)
+
+        for idx, exp in enumerate(self.source.runner(self.device)):
+
+            self.assertTrue(isinstance(exp, tuple))
+
+            if idx == 0:
+                self.assertTrue(len(exp) == self.source.n_steps)
+            elif idx == 1:
+                self.assertTrue(len(exp) == self.source.n_steps - 1)
+                self.assertTrue(torch.equal(exp[0].new_state, self.s1))
+
+                break
+
+    def test_source_is_done_metrics(self):
+        """Test that when done and the history is full, return the full history"""
+
+        n_steps = 3
+        n_envs = 2
+
+        self.mock_env.step = Mock(return_value=(self.s1, 1, True, Mock))
+
+        self.env = [self.mock_env for _ in range(2)]
+        self.source = ExperienceSource(self.env, self.agent, n_steps=3)
+
+        history = self.source.histories[0]
+        history += [self.exp1, self.exp2, self.exp2]
+
+        for idx, exp in enumerate(self.source.runner(self.device)):
+
+            if idx == n_steps - 1:
+                self.assertEqual(self.source._total_rewards[0], 1)
+                self.assertEqual(self.source.total_steps[0], 1)
+                self.assertEqual(self.source.cur_rewards[0], 0)
+                self.assertEqual(self.source.cur_steps[0], 0)
+            elif idx == (3 * n_envs) - 1:
+                self.assertEqual(self.source.iter_idx, 1)
+                break
+
+    def test_pop_total_rewards(self):
+        """Test that pop rewards returns correct rewards"""
+        self.source._total_rewards = [10, 20, 30]
+
+        rewards = self.source.pop_total_rewards()
+
+        self.assertEqual(rewards, [10, 20, 30])
 
 
-class TestNStepExperienceSource(TestCase):
-
+class TestDiscountedExperienceSource(TestCase):
     def setUp(self) -> None:
         self.net = Mock()
         self.agent = DummyAgent(net=self.net)
-        self.env = gym.make("CartPole-v0")
-        self.n_step = 2
-        self.source = NStepExperienceSource(self.env, self.agent, n_steps=self.n_step)
-        self.device = torch.device('cpu')
+        self.env = [gym.make("CartPole-v0") for _ in range(2)]
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.n_steps = 3
+        self.gamma = 0.9
+        self.source = DiscountedExperienceSource(
+            self.env, self.agent, n_steps=self.n_steps, gamma=self.gamma
+        )
 
-        self.state = np.zeros([32, 32])
-        self.state_02 = np.ones([32, 32])
-        self.next_state = np.zeros([32, 32])
-        self.next_state_02 = np.ones([32, 32])
-        self.action = np.zeros([1])
-        self.action_02 = np.ones([1])
-        self.reward = np.zeros([1])
-        self.reward_02 = np.ones([1])
-        self.done = np.zeros([1])
-        self.done_02 = np.zeros([1])
+        self.state = torch.ones(3)
+        self.next_state = torch.zeros(3)
+        self.reward = 1
 
-        self.experience01 = Experience(self.state, self.action, self.reward, self.done, self.next_state)
-        self.experience02 = Experience(self.state_02, self.action_02, self.reward_02, self.done_02, self.next_state_02)
-        self.experience03 = Experience(self.state_02, self.action_02, self.reward_02, self.done_02, self.next_state_02)
+        self.exp1 = Experience(
+            state=self.state,
+            action=1,
+            reward=self.reward,
+            done=False,
+            new_state=self.next_state,
+        )
+        self.exp2 = Experience(
+            state=self.next_state,
+            action=1,
+            reward=self.reward,
+            done=False,
+            new_state=self.state,
+        )
 
-    def test_step(self):
-        self.assertEqual(len(self.source.n_step_buffer), 0)
-        exp, reward, done = self.source.step(self.device)
-        self.assertEqual(len(exp), 5)
-        self.assertEqual(len(self.source.n_step_buffer), self.n_step)
+        self.env1 = Mock()
+        self.env1.step = Mock(
+            return_value=(self.next_state, self.reward, True, self.state)
+        )
 
-    def test_multi_step(self):
-        self.source.env.step = Mock(return_value=(self.next_state_02, self.reward_02, self.done_02, Mock()))
-        self.source.n_step_buffer.append(self.experience01)
-        self.source.n_step_buffer.append(self.experience01)
+    def test_init(self):
+        """Test that experience source is setup correctly"""
+        self.assertEqual(self.source.n_steps, self.n_steps + 1)
+        self.assertEqual(self.source.steps, self.n_steps)
+        self.assertEqual(self.source.gamma, self.gamma)
 
-        exp, reward, done = self.source.step(self.device)
+    def test_source_step(self):
+        """Tests that the source returns a single experience"""
 
-        next_state = exp[4]
-        self.assertEqual(next_state.all(), self.next_state_02.all())
+        for idx, exp in enumerate(self.source.runner(self.device)):
+            self.assertTrue(isinstance(exp, Experience))
+            break
 
-    def test_discounted_transition(self):
-        self.source = NStepExperienceSource(self.env, self.agent, n_steps=3, gamma=0.9)
+    def test_source_step_done(self):
+        """Tests that the source returns a single experience"""
 
-        self.source.n_step_buffer.append(self.experience01)
-        self.source.n_step_buffer.append(self.experience02)
-        self.source.n_step_buffer.append(self.experience03)
+        self.source = DiscountedExperienceSource(
+            self.env1, self.agent, n_steps=self.n_steps
+        )
 
-        reward, next_state, done = self.source.get_transition_info()
+        self.source.histories[0].append(self.exp1)
+        self.source.histories[0].append(self.exp2)
 
-        reward_01 = self.experience02.reward + 0.9 * self.experience03.reward * (1 - done)
-        reward_gt = self.experience01.reward + 0.9 * reward_01 * (1 - done)
+        for idx, exp in enumerate(self.source.runner(self.device)):
+            self.assertTrue(isinstance(exp, Experience))
+            self.assertTrue(torch.all(torch.eq(exp.new_state, self.next_state)))
+            break
 
-        self.assertEqual(reward, reward_gt)
-        self.assertEqual(next_state.all(), self.next_state_02.all())
-        self.assertEqual(self.experience03.done, done)
+    def test_source_discounted_return(self):
+        """
+        Tests that the source returns a single experience with discounted rewards
 
-    def test_multi_step_discount(self):
-        self.source = NStepExperienceSource(self.env, self.agent, n_steps=3, gamma=0.9)
-        self.source.env.step = Mock(return_value=(self.next_state_02, self.reward_02, self.done_02, Mock()))
+        discounted returns: G(t) = R(t+1) + γ*R(t+2) + γ^2*R(t+3) ... + γ^N-1*R(t+N)
+        """
 
-        self.source.n_step_buffer.append(self.experience01)
-        self.source.n_step_buffer.append(self.experience02)
+        self.source = DiscountedExperienceSource(
+            self.env1, self.agent, n_steps=self.n_steps
+        )
 
-        reward_gt = 1.71
+        self.source.histories[0] += [self.exp1, self.exp2]
 
-        exp, reward, done = self.source.step(self.device)
+        discounted_reward = (
+            self.exp1.reward +
+            (self.source.gamma * self.exp2.reward) +
+            (self.source.gamma * self.reward) ** 2
+        )
 
-        self.assertEqual(exp[0].all(), self.experience01.state.all())
-        self.assertEqual(exp[1], self.experience01.action)
-        self.assertEqual(exp[2], reward_gt)
-        self.assertEqual(exp[3], self.experience02.done)
-        self.assertEqual(exp[4].all(), self.experience02.new_state.all())
-
-
-class TestEpisodicExperience(TestCase):
-    """Test the standard experience stream"""
-
-    def setUp(self) -> None:
-        self.env = gym.make("CartPole-v0")
-        self.net = Mock()
-        self.agent = Agent(self.net)
-        self.xp_stream = EpisodicExperienceStream(self.env, self.agent, torch.device('cpu'), episodes=4)
-        self.rl_dataloader = DataLoader(self.xp_stream)
-
-    def test_experience_stream_SINGLE_EPISODE(self):
-        """Check that the experience stream gives 1 full episode per batch"""
-        self.xp_stream.episodes = 1
-
-        for i_batch, batch in enumerate(self.rl_dataloader):
-            self.assertEqual(len(batch), 1)
-            self.assertIsInstance(batch[0][0], Experience)
-            self.assertEqual(batch[0][-1].done, True)
-
-    def test_experience_stream_MULTI_EPISODE(self):
-        """Check that the experience stream gives 4 full episodes per batch"""
-        self.xp_stream.episodes = 4
-
-        for i_batch, batch in enumerate(self.rl_dataloader):
-            self.assertEqual(len(batch), 4)
-            self.assertIsInstance(batch[0][0], Experience)
-            self.assertEqual(batch[0][-1].done, True)
+        for idx, exp in enumerate(self.source.runner(self.device)):
+            self.assertTrue(isinstance(exp, Experience))
+            self.assertEqual(exp.reward, discounted_reward)
+            break

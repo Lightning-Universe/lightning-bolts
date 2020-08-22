@@ -1,4 +1,5 @@
 from pytorch_lightning import LightningDataModule
+import torch
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
 from torchvision.datasets import FashionMNIST
@@ -13,10 +14,20 @@ class FashionMNISTDataModule(LightningDataModule):
             data_dir: str,
             val_split: int = 5000,
             num_workers: int = 16,
+            seed: int = 42,
             *args,
             **kwargs,
     ):
         """
+        .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/
+            wp-content/uploads/2019/02/Plot-of-a-Subset-of-Images-from-the-Fashion-MNIST-Dataset.png
+            :width: 400
+            :alt: Fashion MNIST
+
+        Specs:
+            - 10 classes (1 per type)
+            - Each image is (1 x 28 x 28)
+
         Standard FashionMNIST, train, val, test splits and transforms
 
         Transforms::
@@ -30,7 +41,9 @@ class FashionMNISTDataModule(LightningDataModule):
             from pl_bolts.datamodules import FashionMNISTDataModule
 
             dm = FashionMNISTDataModule('.')
-            model = LitModel(datamodule=dm)
+            model = LitModel()
+
+            Trainer().fit(model, dm)
 
         Args:
             data_dir: where to save/load the data
@@ -42,6 +55,7 @@ class FashionMNISTDataModule(LightningDataModule):
         self.data_dir = data_dir
         self.val_split = val_split
         self.num_workers = num_workers
+        self.seed = seed
 
     @property
     def num_classes(self):
@@ -70,7 +84,11 @@ class FashionMNISTDataModule(LightningDataModule):
 
         dataset = FashionMNIST(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
-        dataset_train, _ = random_split(dataset, [train_length - self.val_split, self.val_split])
+        dataset_train, _ = random_split(
+            dataset,
+            [train_length - self.val_split, self.val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
         loader = DataLoader(
             dataset_train,
             batch_size=batch_size,
@@ -93,7 +111,11 @@ class FashionMNISTDataModule(LightningDataModule):
 
         dataset = FashionMNIST(self.data_dir, train=True, download=True, transform=transforms)
         train_length = len(dataset)
-        _, dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
+        _, dataset_val = random_split(
+            dataset,
+            [train_length - self.val_split, self.val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
         loader = DataLoader(
             dataset_val,
             batch_size=batch_size,

@@ -1,175 +1,36 @@
 .. role:: hidden
     :class: hidden-section
 
-Lightning DataModule
-====================
-Datasets in PyTorch, Lightning and general Deep learning research have 4 main parts:
+DataModules
+-----------
+DataModules (introduced in PyTorch Lightning 0.9.0) decouple the data from a model. A DataModule
+is simply a collection of a training dataloder, val dataloader and test dataloader. In addition,
+it specifies how to:
 
-    1. A train split + dataloader
-    2. A val split + dataloader
-    3. A test split + dataloader
-    4. A step to download, split, etc...
+- Downloading/preparing data.
+- Train/val/test splits.
+- Transforms
 
-Step 4, also needs special care to make sure that it's only done on 1 GPU in a multi-GPU set-up.
-In addition, there are other challenges such as models that are built using information from the dataset
-such as needing to know image dimensions or number of classes.
-
-A datamodule simplifies all of these parts and has been integrated directly into Lightning in version 0.9.0.
-You can view the documentation for the datamodule in the `Pytorch Lightning docs here. <https://pytorch-lightning.readthedocs.io/en/latest/datamodules.html>`_
-
-.. code-block:: python
-
-    class LitModel(pl.LightningModule):
-
-        def __init__(self, datamodule):
-            c, w, h = datamodule.size()
-            self.l1 = nn.Linear(128, datamodule.num_classes)
-            self.datamodule = datamodule
-
-        def prepare_data(self):
-            self.datamodule.prepare_data()
-
-        def train_dataloader(self)
-            return self.datamodule.train_dataloader()
-
-        def val_dataloader(self)
-            return self.datamodule.val_dataloader()
-
-        def test_dataloader(self)
-            return self.datamodule.test_dataloader()
-
-DataModules can also be used with plain PyTorch
-
-.. code-block:: python
-
-    from pl_bolts.datamodules import MNISTDataModule, CIFAR10DataModule
-
-    datamodule = CIFAR10DataModule(PATH)
-    train_loader = datamodule.train_dataloader()
-    val_loader = datamodule.train_dataloader()
-    test_loader = datamodule.train_dataloader()
-
-An advantage is that you can parametrize the data of your LightningModule
-
-.. code-block:: python
-
-    model = LitModel(datamodule = CIFAR10DataModule(PATH))
-    model = LitModel(datamodule = ImagenetDataModule(PATH))
-
-Or even bridge between SKLearn or numpy datasets
-
-.. code-block:: python
-
-    from sklearn.datasets import load_boston
-    from pl_bolts.datamodules import SklearnDataModule
-
-    X, y = load_boston(return_X_y=True)
-    datamodule = SklearnDataModule(X, y)
-
-    model = LitModel(datamodule)
-
-
-DataModule Advantages
----------------------
-Datamodules have two advantages:
-
-    1. You can guarantee that the exact same train, val and test splits can be used across models.
-    2. You can parameterize your model to be dataset agnostic.
+Then you can use it like this:
 
 Example::
 
-    from pl_bolts.datamodules import STL10DataModule, CIFAR10DataModule
+    dm = MNISTDataModule('path/to/data')
+    model = LitModel()
 
-    # use the same dataset on different models (with exactly the same splits)
-    stl10_model = LitModel(STL10DataModule(PATH))
-    stl10_model = CoolModel(STL10DataModule(PATH))
+    trainer = Trainer()
+    trainer.fit(model, dm)
 
-    # or make your model dataset agnostic
-    cifar10_model = LitModel(CIFAR10DataModule(PATH))
-
-Build a DataModule
-------------------
-Use this to build your own consistent train, validation, test splits.
+Or use it manually with plain PyTorch
 
 Example::
 
-    from pytorch_lightning import LightningDataModule
-
-    class MyDataModule(LightningDataModule):
-
-        def __init__(self,...):
-
-        def prepare_data(self):
-            # download and do something to your data
-
-        def train_dataloader(self):
-            return DataLoader(...)
-
-        def val_dataloader(self):
-            return DataLoader(...)
-
-        def test_dataloader(self):
-            return DataLoader(...)
-
-Then use this in any model you want.
-
-Example::
-
-    class LitModel(pl.LightningModule):
-
-        def __init__(self, data_module=MyDataModule(PATH)):
-            super().__init()
-            self.dm = data_module
-
-        def prepare_data(self):
-            self.dm.prepare_data()
-
-        def train_dataloader(self):
-            return self.dm.train_dataloader()
-
-        def val_dataloader(self):
-            return self.dm.val_dataloader()
-
-        def test_dataloader(self):
-            return self.dm.test_dataloader()
-
-Asynchronous Loading
---------------------
-DataModules also includes an extra asynchronous dataloader for accelerating single GPU training.
-
-This dataloader behaves identically to the standard pytorch dataloader, but will transfer
-data asynchronously to the GPU with training. You can also use it to wrap an existing dataloader.
-
-Example::
-
-    from pl_bolts.datamodules.cifar10_dataset import CIFAR10
-    ds = CIFAR10(tmpdir)
-    device = torch.device('cuda', 0)
-
-    dataloader = AsynchronousLoader(ds, device=device)
-
-    for b in dataloader:
+    dm = MNISTDataModule('path/to/data')
+    for batch in dm.train_dataloader():
+        ...
+    for batch in dm.val_dataloader():
+        ...
+    for batch in dm.test_dataloader():
         ...
 
-or::
-
-    dataloader = AsynchronousLoader(DataLoader(ds, batch_size=16), device=device)
-
-    for b in dataloader:
-        ...
-
--------------
-
-DummyDataset
-------------
-
-.. autoclass:: pl_bolts.datamodules.dummy_dataset.DummyDataset
-   :noindex:
-
--------------
-
-AsynchronousLoader
-------------------
-
-.. autoclass:: pl_bolts.datamodules.async_dataloader.AsynchronousLoader
-   :noindex:
+Please visit the PyTorch Lightning documentation for more details on DataModules

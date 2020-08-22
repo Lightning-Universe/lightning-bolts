@@ -3,9 +3,10 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
 from torchvision.datasets import MNIST
+from PIL import Image
 
 
-class MNISTDataModule(LightningDataModule):
+class BinaryMNISTDataModule(LightningDataModule):
 
     name = 'mnist'
 
@@ -28,7 +29,7 @@ class MNISTDataModule(LightningDataModule):
             - 10 classes (1 per digit)
             - Each image is (1 x 28 x 28)
 
-        Standard MNIST, train, val, test splits and transforms
+        Binary MNIST, train, val, test splits and transforms
 
         Transforms::
 
@@ -38,9 +39,9 @@ class MNISTDataModule(LightningDataModule):
 
         Example::
 
-            from pl_bolts.datamodules import MNISTDataModule
+            from pl_bolts.datamodules import BinaryMNISTDataModule
 
-            dm = MNISTDataModule('.')
+            dm = BinaryMNISTDataModule('.')
             model = LitModel()
 
             Trainer().fit(model, dm)
@@ -84,7 +85,7 @@ class MNISTDataModule(LightningDataModule):
         """
         transforms = transforms or self.train_transforms or self._default_transforms()
 
-        dataset = MNIST(self.data_dir, train=True, download=False, transform=transforms)
+        dataset = BinaryMNIST(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
         dataset_train, _ = random_split(
             dataset,
@@ -110,7 +111,7 @@ class MNISTDataModule(LightningDataModule):
             transforms: custom transforms
         """
         transforms = transforms or self.val_transforms or self._default_transforms()
-        dataset = MNIST(self.data_dir, train=True, download=True, transform=transforms)
+        dataset = BinaryMNIST(self.data_dir, train=True, download=True, transform=transforms)
         train_length = len(dataset)
         _, dataset_val = random_split(
             dataset,
@@ -137,7 +138,7 @@ class MNISTDataModule(LightningDataModule):
         """
         transforms = transforms or self.val_transforms or self._default_transforms()
 
-        dataset = MNIST(self.data_dir, train=False, download=False, transform=transforms)
+        dataset = BinaryMNIST(self.data_dir, train=False, download=False, transform=transforms)
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
@@ -158,3 +159,30 @@ class MNISTDataModule(LightningDataModule):
             mnist_transforms = transform_lib.ToTensor()
 
         return mnist_transforms
+
+
+class BinaryMNIST(MNIST):
+    def __getitem__(self, idx):
+        """
+        Args:
+            index (int): Index
+        Returns:
+            tuple: (image, target) where target is index of the target class.
+        """
+        img, target = self.data[idx], int(self.targets[idx])
+
+        # doing this so that it is consistent with all other datasets
+        # to return a PIL Image
+        img = Image.fromarray(img.numpy(), mode='L')
+
+        if self.transform is not None:
+            img = self.transform(img)
+
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+
+        # binary
+        img[img < 0.5] = 0.0
+        img[img >= 0.5] = 1.0
+
+        return img, target

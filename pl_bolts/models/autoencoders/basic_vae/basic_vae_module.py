@@ -2,16 +2,17 @@ import os
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning import LightningDataModule, LightningModule, Trainer
+import pytorch_lightning as pl
 from torch import distributions
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataModule
+from pl_bolts.datamodules import MNISTDataModule, ImagenetDataModule, STL10DataModule, BinaryMNISTDataModule
 from pl_bolts.models.autoencoders.basic_vae.components import Encoder, Decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
+from pl_bolts.utils import shaping
 
 
-class VAE(LightningModule):
+class VAE(pl.LightningModule):
 
     def __init__(
             self,
@@ -23,7 +24,8 @@ class VAE(LightningModule):
             batch_size: int = 32,
             learning_rate: float = 0.001,
             data_dir: str = '.',
-            datamodule: LightningDataModule = None,
+            datamodule: pl.LightningDataModule = None,
+            num_workers: int = 8,
             pretrained: str = None,
             **kwargs
     ):
@@ -63,7 +65,7 @@ class VAE(LightningModule):
         self.__set_pretrained_dims(pretrained)
 
         # use mnist as the default module
-        self.__set_default_datamodule(data_dir)
+        self._set_default_datamodule(datamodule)
 
         # init actual model
         self.__init_system()
@@ -80,10 +82,18 @@ class VAE(LightningModule):
             self.datamodule = ImagenetDataModule(data_dir=self.hparams.data_dir)
             (self.hparams.input_channels, self.hparams.input_height, self.hparams.input_width) = self.datamodule.size()
 
-    def __set_default_datamodule(self, data_dir):
-        if self.datamodule is None:
-            self.datamodule = MNISTDataModule(data_dir=data_dir)
-            (self.hparams.input_channels, self.hparams.input_height, self.hparams.input_width) = self.datamodule.size()
+    def _set_default_datamodule(self, datamodule):
+        # link default data
+        if datamodule is None:
+            datamodule = MNISTDataModule(
+                data_dir=self.hparams.data_dir,
+                num_workers=self.hparams.num_workers,
+                normalize=False
+            )
+        self.datamodule = datamodule
+        self.img_dim = self.datamodule.size()
+
+        (self.hparams.input_channels, self.hparams.input_height, self.hparams.input_width) = self.img_dim
 
     def load_pretrained(self, pretrained):
         available_weights = {'imagenet2012'}
@@ -122,21 +132,39 @@ class VAE(LightningModule):
         Q = distributions.normal.Normal(loc=z_mu, scale=z_std)
         return Q
 
-    def elbo_loss(self, x, P, Q):
-        # Reconstruction loss
+    def elbo_loss(self, x, P, Q, num_samples):
         z = Q.rsample()
-        pxz = self(z)
-        pxz = torch.tanh(pxz)
-        recon_loss = F.mse_loss(pxz, x, reduction='none')
+
+        # ----------------------
+        # KL divergence loss (using monte carlo sampling)
+        # ----------------------
+        log_qz = Q.log_prob(z)
+        log_pz = P.log_prob(z)
+
+        # (batch, num_samples, z_dim) -> (batch, num_samples)
+        kl_div = (log_qz - log_pz).sum(dim=2)
+
+        # we used monte carlo sampling to estimate. average across samples
+        # kl_div = kl_div.mean(-1)
+
+        # ----------------------
+        # Reconstruction loss
+        # ----------------------
+        z = z.view(-1, z.size(-1)).contiguous()
+        pxz = self.decoder(z)
+
+        pxz = pxz.view(-1, num_samples, pxz.size(-1))
+        x = shaping.tile(x.unsqueeze(1), 1, num_samples)
+
+        pxz = torch.sigmoid(pxz)
+        recon_loss = F.binary_cross_entropy(pxz, x, reduction='none')
 
         # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
         # multivariate gaussian
         recon_loss = recon_loss.sum(dim=-1)
 
-        # KL divergence loss
-        log_qz = Q.log_prob(z)
-        log_pz = P.log_prob(z)
-        kl_div = (log_qz - log_pz).sum(dim=1)
+        # we used monte carlo sampling to estimate. average across samples
+        # recon_loss = recon_loss.mean(-1)
 
         # ELBO = reconstruction + KL
         loss = recon_loss + kl_div
@@ -154,6 +182,20 @@ class VAE(LightningModule):
     def _run_step(self, batch):
         x, _ = batch
         z_mu, z_log_var = self.encoder(x)
+
+        # we're estimating the KL divergence using sampling
+        num_samples = 32
+
+        # expand dims to sample all at once
+        # (batch, z_dim) -> (batch, num_samples, z_dim)
+        z_mu = z_mu.unsqueeze(1)
+        z_mu = shaping.tile(z_mu, 1, num_samples)
+
+        # (batch, z_dim) -> (batch, num_samples, z_dim)
+        z_log_var = z_log_var.unsqueeze(1)
+        z_log_var = shaping.tile(z_log_var, 1, num_samples)
+
+        # convert to std
         z_std = torch.exp(z_log_var / 2)
 
         P = self.get_prior(z_mu, z_std)
@@ -161,68 +203,39 @@ class VAE(LightningModule):
 
         x = x.view(x.size(0), -1)
 
-        loss, recon_loss, kl_div, pxz = self.elbo_loss(x, P, Q)
+        loss, recon_loss, kl_div, pxz = self.elbo_loss(x, P, Q, num_samples)
 
         return loss, recon_loss, kl_div, pxz
 
     def training_step(self, batch, batch_idx):
         loss, recon_loss, kl_div, pxz = self._run_step(batch)
-
-        tensorboard_logs = {
+        result = pl.TrainResult(loss)
+        result.log_dict({
             'train_elbo_loss': loss,
             'train_recon_loss': recon_loss,
             'train_kl_loss': kl_div
-        }
-
-        return {'loss': loss, 'log': tensorboard_logs}
+        })
+        return result
 
     def validation_step(self, batch, batch_idx):
         loss, recon_loss, kl_div, pxz = self._run_step(batch)
-
-        return {
+        result = pl.EvalResult(loss, checkpoint_on=loss)
+        result.log_dict({
             'val_loss': loss,
             'val_recon_loss': recon_loss,
             'val_kl_div': kl_div,
-            'pxz': pxz
-        }
-
-    def validation_epoch_end(self, outputs):
-        avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
-        recon_loss = torch.stack([x['val_recon_loss'] for x in outputs]).mean()
-        kl_loss = torch.stack([x['val_kl_div'] for x in outputs]).mean()
-
-        tensorboard_logs = {'val_elbo_loss': avg_loss,
-                            'val_recon_loss': recon_loss,
-                            'val_kl_loss': kl_loss}
-
-        return {
-            'val_loss': avg_loss,
-            'log': tensorboard_logs
-        }
+        })
+        return result
 
     def test_step(self, batch, batch_idx):
         loss, recon_loss, kl_div, pxz = self._run_step(batch)
-
-        return {
+        result = pl.EvalResult(loss)
+        result.log_dict({
             'test_loss': loss,
             'test_recon_loss': recon_loss,
             'test_kl_div': kl_div,
-            'pxz': pxz
-        }
-
-    def test_epoch_end(self, outputs):
-        avg_loss = torch.stack([x['test_loss'] for x in outputs]).mean()
-        recon_loss = torch.stack([x['test_recon_loss'] for x in outputs]).mean()
-        kl_loss = torch.stack([x['test_kl_div'] for x in outputs]).mean()
-
-        tensorboard_logs = {'test_elbo_loss': avg_loss,
-                            'test_recon_loss': recon_loss,
-                            'test_kl_loss': kl_loss}
-
-        return {
-            'test_loss': avg_loss,
-            'log': tensorboard_logs
-        }
+        })
+        return result
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
@@ -232,7 +245,7 @@ class VAE(LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--hidden_dim', type=int, default=128,
                             help='itermediate layers dimension before embedding for default encoder/decoder')
-        parser.add_argument('--latent_dim', type=int, default=32,
+        parser.add_argument('--latent_dim', type=int, default=4,
                             help='dimension of latent variables z')
         parser.add_argument('--input_width', type=int, default=224,
                             help='input width (used Imagenet downsampled size)')
@@ -240,38 +253,45 @@ class VAE(LightningModule):
                             help='input width (used Imagenet downsampled size)')
         parser.add_argument('--input_channels', type=int, default=3,
                             help='number of input channels')
-        parser.add_argument('--batch_size', type=int, default=32)
+        parser.add_argument('--batch_size', type=int, default=64)
         parser.add_argument('--pretrained', type=str, default=None)
         parser.add_argument('--data_dir', type=str, default=os.getcwd())
+        parser.add_argument('--num_workers', type=int, default=8, help="num dataloader workers")
 
         parser.add_argument('--learning_rate', type=float, default=1e-3)
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def cli_main():
+    from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
     from pl_bolts.datamodules import ImagenetDataModule
-    parser = ArgumentParser()
-    parser.add_argument('--dataset', default='mnist', type=str)
 
-    parser = Trainer.add_argparse_args(parser)
+    pl.seed_everything(1234)
+    parser = ArgumentParser()
+    parser.add_argument('--dataset', default='mnist', type=str, help='mnist, stl10, imagenet')
+
+    parser = pl.Trainer.add_argparse_args(parser)
     parser = VAE.add_model_specific_args(parser)
     parser = ImagenetDataModule.add_argparse_args(parser)
     parser = MNISTDataModule.add_argparse_args(parser)
     args = parser.parse_args()
-    #
-    # if args.dataset == 'imagenet' or args.pretrained:
-    #     datamodule = ImagenetDataModule.from_argparse_args(args)
-    #     args.image_width = datamodule.size()[1]
-    #     args.image_height = datamodule.size()[2]
-    #     args.input_channels = datamodule.size()[0]
-    #
-    # elif args.dataset == 'mnist':
-    #     datamodule = MNISTDataModule.from_argparse_args(args)
-    #     args.image_width = datamodule.size()[1]
-    #     args.image_height = datamodule.size()[2]
-    #     args.input_channels = datamodule.size()[0]
 
-    vae = VAE(**vars(args))
-    trainer = Trainer.from_argparse_args(args)
+    # default is mnist
+    datamodule = None
+    if args.dataset == 'imagenet2012':
+        datamodule = ImagenetDataModule.from_argparse_args(args)
+    elif args.dataset == 'stl10':
+        datamodule = STL10DataModule.from_argparse_args(args)
+
+    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]
+    vae = VAE(**vars(args), datamodule=datamodule)
+    trainer = pl.Trainer.from_argparse_args(
+        args,
+        callbacks=callbacks,
+        progress_bar_refresh_rate=10
+    )
     trainer.fit(vae)
+
+
+if __name__ == '__main__':
+    cli_main()

@@ -7,7 +7,6 @@ from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.double_dqn_model import DoubleDQN
 from pl_bolts.models.rl.dqn_model import DQN
 from pl_bolts.models.rl.dueling_dqn_model import DuelingDQN
-from pl_bolts.models.rl.n_step_dqn_model import NStepDQN
 from pl_bolts.models.rl.noisy_dqn_model import NoisyDQN
 from pl_bolts.models.rl.per_dqn_model import PERDQN
 
@@ -21,6 +20,7 @@ class TestValueModels(TestCase):
         parent_parser = DQN.add_model_specific_args(parent_parser)
         args_list = [
             "--algo", "dqn",
+            "--n_steps", "4",
             "--warm_start_steps", "100",
             "--episode_length", "100",
             "--gpus", "0",
@@ -32,13 +32,13 @@ class TestValueModels(TestCase):
             gpus=self.hparams.gpus,
             max_steps=100,
             max_epochs=100,  # Set this as the same as max steps to ensure that it doesn't stop early
-            val_check_interval=1000,  # This just needs 'some' value, does not effect training right now
+            val_check_interval=1,  # This just needs 'some' value, does not effect training right now
             fast_dev_run=True
         )
 
     def test_dqn(self):
         """Smoke test that the DQN model runs"""
-        model = DQN(self.hparams.env)
+        model = DQN(self.hparams.env, num_envs=5)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)
@@ -73,7 +73,7 @@ class TestValueModels(TestCase):
 
     def test_n_step_dqn(self):
         """Smoke test that the N Step DQN model runs"""
-        model = NStepDQN(self.hparams.env)
+        model = DQN(self.hparams.env, n_steps=self.hparams.n_steps)
         result = self.trainer.fit(model)
 
         self.assertEqual(result, 1)

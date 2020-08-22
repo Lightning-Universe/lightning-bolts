@@ -1,15 +1,15 @@
 from unittest import TestCase
 from unittest.mock import Mock
-
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
-
-from pl_bolts.models.rl.common.experience import RLDataset
 from pl_bolts.models.rl.common.memory import ReplayBuffer, Experience, PERBuffer, MultiStepBuffer, Buffer
 
 
 class TestBuffer(TestCase):
+
+    def train_batch(self):
+        """Returns an iterator used for testing"""
+        return iter([i for i in range(100)])
 
     def setUp(self) -> None:
         self.state = np.random.rand(4, 84, 84)
@@ -36,19 +36,6 @@ class TestBuffer(TestCase):
         self.assertEqual(sample[3].shape, (self.batch_size, 1))
         self.assertEqual(sample[4].shape, (self.batch_size, 4, 84, 84))
 
-    def test_dataloader(self):
-        """tests that the buffer works with dataloader"""
-        dataset = RLDataset(self.buffer, sample_size=self.batch_size)
-        dl = DataLoader(dataset, batch_size=self.batch_size)
-
-        for i_batch, sample_batched in enumerate(dl):
-            self.assertIsInstance(sample_batched, list)
-            self.assertEqual(sample_batched[0].shape, torch.Size([self.batch_size, 4, 84, 84]))
-            self.assertEqual(sample_batched[1].shape, torch.Size([self.batch_size, 1]))
-            self.assertEqual(sample_batched[2].shape, torch.Size([self.batch_size, 1]))
-            self.assertEqual(sample_batched[3].shape, torch.Size([self.batch_size, 1]))
-            self.assertEqual(sample_batched[4].shape, torch.Size([self.batch_size, 4, 84, 84]))
-
 
 class TestReplayBuffer(TestCase):
 
@@ -67,7 +54,7 @@ class TestReplayBuffer(TestCase):
         for _ in range(self.warm_start):
             self.buffer.append(self.experience)
 
-    def test_replay_buffer_APPEND(self):
+    def test_replay_buffer_append(self):
         """Test that you can append to the replay buffer"""
 
         self.assertEqual(len(self.buffer), self.warm_start)
@@ -76,11 +63,11 @@ class TestReplayBuffer(TestCase):
 
         self.assertEqual(len(self.buffer), self.warm_start + 1)
 
-    def test_replay_buffer_POPULATE(self):
+    def test_replay_buffer_populate(self):
         """Tests that the buffer is populated correctly with warm_start"""
         self.assertEqual(len(self.buffer.buffer), self.warm_start)
 
-    def test_replay_buffer_UPDATE(self):
+    def test_replay_buffer_update(self):
         """Tests that buffer append works correctly"""
         batch_size = 3
         self.assertEqual(len(self.buffer.buffer), self.warm_start)
@@ -88,7 +75,7 @@ class TestReplayBuffer(TestCase):
             self.buffer.append(self.experience)
         self.assertEqual(len(self.buffer.buffer), self.warm_start + batch_size)
 
-    def test_replay_buffer_SAMPLE(self):
+    def test_replay_buffer_sample(self):
         """Test that you can sample from the buffer and the outputs are the correct shape"""
         batch_size = 3
 
@@ -128,7 +115,7 @@ class TestPrioReplayBuffer(TestCase):
         self.done = np.zeros([1])
         self.experience = Experience(self.state, self.action, self.reward, self.done, self.next_state)
 
-    def test_replay_buffer_APPEND(self):
+    def test_replay_buffer_append(self):
         """Test that you can append to the replay buffer and the latest experience has max priority"""
 
         self.assertEqual(len(self.buffer), 0)
@@ -138,7 +125,7 @@ class TestPrioReplayBuffer(TestCase):
         self.assertEqual(len(self.buffer), 1)
         self.assertEqual(self.buffer.priorities[0], 1.0)
 
-    def test_replay_buffer_SAMPLE(self):
+    def test_replay_buffer_sample(self):
         """Test that you can sample from the buffer and the outputs are the correct shape"""
         batch_size = 3
 
@@ -188,7 +175,7 @@ class TestMultiStepReplayBuffer(TestCase):
         self.experience02 = Experience(self.state_02, self.action_02, self.reward_02, self.done_02, self.next_state_02)
         self.experience03 = Experience(self.state_02, self.action_02, self.reward_02, self.done_02, self.next_state_02)
 
-    def test_append_single_experience_LESS_THAN_N(self):
+    def test_append_single_experience_less_than_n(self):
         """
         If a single experience is added and n > 1 nothing should be added to the buffer as it is waiting experiences
         to equal n

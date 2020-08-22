@@ -20,3 +20,13 @@ Example outputs:
 
 .. autoclass:: pl_bolts.callbacks.vision.confused_logit.ConfusedLogitCallback
    :noindex:
+
+
+---------------
+
+Tensorboard Image Generator
+---------------------------
+Generates images from a generative model and plots to tensorboard
+
+.. autoclass:: pl_bolts.callbacks.vision.image_generation.TensorboardGenerativeModelImageSampler
+   :noindex:

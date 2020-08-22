@@ -24,6 +24,14 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             **kwargs,
     ):
         """
+        .. figure:: https://samyzaf.com/ML/cifar10/cifar1.jpg
+            :width: 400
+            :alt: STL-10
+
+        Specs:
+            - 10 classes (1 per type)
+            - Each image is (3 x 96 x 96)
+
         Standard STL-10, train, val, test splits and transforms.
         STL-10 has support for doing validation splits on the labeled or unlabeled splits
 
@@ -42,7 +50,9 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             from pl_bolts.datamodules import STL10DataModule
 
             dm = STL10DataModule(PATH)
-            model = LitModel(datamodule=dm)
+            model = LitModel()
+
+            Trainer().fit(model, dm)
 
         Args:
             data_dir: where to save/load the data
