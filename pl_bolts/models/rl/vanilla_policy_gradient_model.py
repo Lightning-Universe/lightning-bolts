@@ -1,5 +1,5 @@
 import argparse
-from collections import OrderedDict
+from collections import OrderedDict, deque
 from typing import Tuple, List
 
 import gym
@@ -14,7 +14,6 @@ from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import ExperienceSourceDataset
-from pl_bolts.datamodules.experience_source import DiscountedExperienceSource
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.networks import MLP
@@ -72,8 +71,8 @@ class VanillaPolicyGradient(pl.LightningModule):
         super().__init__()
 
         # Hyperparameters
-        self.lr = lr
-        self.batch_size = batch_size * num_envs
+        self.lr = 0.001
+        self.batch_size = 32
         self.batches_per_epoch = self.batch_size * epoch_len
         self.entropy_beta = entropy_beta
         self.gamma = gamma
@@ -82,21 +81,21 @@ class VanillaPolicyGradient(pl.LightningModule):
         self.save_hyperparameters()
 
         # Model components
-        self.env = [gym.make(env) for _ in range(num_envs)]
-        self.net = MLP(self.env[0].observation_space.shape, self.env[0].action_space.n)
+        self.env = gym.make(env)
+        self.net = MLP(self.env.observation_space.shape, self.env.action_space.n)
         self.agent = PolicyAgent(self.net)
-        self.exp_source = DiscountedExperienceSource(
-            self.env, self.agent, gamma=gamma, n_steps=self.n_steps
-        )
 
         # Tracking metrics
-        self.total_steps = 0
-        self.total_rewards = [0]
+        self.total_rewards = []
+        self.episode_rewards = []
         self.done_episodes = 0
         self.avg_rewards = 0
-        self.reward_sum = 0.0
-        self.baseline = 0
         self.avg_reward_len = avg_reward_len
+        self.eps = np.finfo(np.float32).eps.item()
+        self.batch_states = []
+        self.batch_actions = []
+
+        self.state = self.env.reset()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -120,27 +119,44 @@ class VanillaPolicyGradient(pl.LightningModule):
         Returns:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
         """
-        for step_idx, exp in enumerate(self.exp_source.runner(self.device)):
 
-            self.reward_sum += exp.reward
-            self.baseline = self.reward_sum / (self.total_steps + 1)
-            scaled_reward = exp.reward - self.baseline
+        while True:
 
-            new_rewards = self.exp_source.pop_total_rewards()
-            if new_rewards:
-                for reward in new_rewards:
-                    self.done_episodes += 1
-                    self.total_rewards.append(reward)
-                    self.avg_rewards = float(
-                        np.mean(self.total_rewards[-self.avg_reward_len:])
-                    )
+            action = self.agent(self.state, self.device)
 
-            yield exp.state, exp.action, scaled_reward
+            next_state, reward, done, _ = self.env.step(action[0])
 
-            self.total_steps += 1
+            self.episode_rewards.append(reward)
+            self.batch_actions.append(action)
+            self.batch_states.append(self.state)
+            self.state = next_state
 
-            if self.total_steps % self.batches_per_epoch == 0:
-                break
+            if done:
+                self.done_episodes += 1
+                self.state = self.env.reset()
+                self.total_rewards.append(sum(self.episode_rewards))
+                self.avg_rewards = float(
+                            np.mean(self.total_rewards[-self.avg_reward_len:])
+                        )
+
+                returns = self.compute_returns(self.episode_rewards)
+
+                for idx in range(len(self.batch_actions)):
+                    yield self.batch_states[idx], self.batch_actions[idx], returns[idx]
+
+                self.batch_states = []
+                self.batch_actions = []
+                self.episode_rewards = []
+
+    def compute_returns(self, rewards):
+        R = 0
+        returns = []
+        for r in rewards[::-1]:
+            R = r + self.gamma * R
+            returns.insert(0, R)
+        returns = torch.tensor(returns)
+        returns = (returns - returns.mean()) / (returns.std() + self.eps)
+        return returns
 
     def loss(self, states, actions, scaled_rewards):
 
@@ -148,7 +164,7 @@ class VanillaPolicyGradient(pl.LightningModule):
 
         # policy loss
         log_prob = log_softmax(logits, dim=1)
-        log_prob_actions = scaled_rewards * log_prob[range(self.batch_size), actions]
+        log_prob_actions = scaled_rewards * log_prob[range(self.batch_size), actions[0]]
         policy_loss = -log_prob_actions.mean()
 
         # entropy loss
@@ -181,7 +197,6 @@ class VanillaPolicyGradient(pl.LightningModule):
             "episodes": self.done_episodes,
             "reward": self.total_rewards[-1],
             "avg_reward": self.avg_rewards,
-            "baseline": self.baseline,
         }
         return OrderedDict(
             {

@@ -14,7 +14,7 @@ from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import ExperienceSourceDataset
-from pl_bolts.datamodules.experience_source import DiscountedExperienceSource
+from pl_bolts.datamodules.experience_source import DiscountedExperienceSource, Experience
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.networks import MLP
@@ -84,12 +84,9 @@ class Reinforce(pl.LightningModule):
         self.save_hyperparameters()
 
         # Model components
-        self.env = [gym.make(env) for _ in range(num_envs)]
-        self.net = MLP(self.env[0].observation_space.shape, self.env[0].action_space.n)
+        self.env = gym.make(env)
+        self.net = MLP(self.env.observation_space.shape, self.env.action_space.n)
         self.agent = PolicyAgent(self.net)
-        self.exp_source = DiscountedExperienceSource(
-            self.env, self.agent, gamma=gamma, n_steps=self.n_steps
-        )
 
         # Tracking metrics
         self.total_steps = 0
@@ -104,6 +101,8 @@ class Reinforce(pl.LightningModule):
         self.batch_actions = []
         self.batch_qvals = []
         self.cur_rewards = []
+
+        self.state = self.env.reset()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -138,6 +137,21 @@ class Reinforce(pl.LightningModule):
 
         return list(reversed(cumul_reward))
 
+    def discount_rewards(self, experiences: Tuple[Experience]) -> float:
+        """
+        Calculates the discounted reward over N experiences
+
+        Args:
+            experiences: Tuple of Experience
+
+        Returns:
+            total discounted reward
+        """
+        total_reward = 0.0
+        for exp in reversed(experiences):
+            total_reward = (self.gamma * total_reward) + exp.reward
+        return total_reward
+
     def train_batch(
         self,
     ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
@@ -147,29 +161,30 @@ class Reinforce(pl.LightningModule):
         Yield:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
         """
-        for exp in self.exp_source.runner(self.device):
 
-            self.batch_states.append(exp.state)
-            self.batch_actions.append(exp.action)
-            self.cur_rewards.append(exp.reward)
+        while True:
 
-            # Check if episode is completed and update trackers
-            if exp.done:
-                self.batch_qvals.extend(self.calc_qvals(self.cur_rewards))
-                self.cur_rewards.clear()
-                self.batch_episodes += 1
+            action = self.agent(self.state, self.device)
 
-            # Check if episodes have finished and use total reward
-            new_rewards = self.exp_source.pop_total_rewards()
-            if new_rewards:
-                for reward in new_rewards:
-                    self.done_episodes += 1
-                    self.total_rewards.append(reward)
-                    self.avg_rewards = float(
-                        np.mean(self.total_rewards[-self.avg_reward_len:])
-                    )
+            next_state, reward, done, _ = self.env.step(action[0])
 
+            self.batch_states.append(self.state)
+            self.batch_actions.append(action[0])
+            self.cur_rewards.append(reward)
+
+            self.state = next_state
             self.total_steps += 1
+
+            if done:
+                self.batch_qvals.extend(self.calc_qvals(self.cur_rewards))
+                self.batch_episodes += 1
+                self.done_episodes += 1
+                self.total_rewards.append(sum(self.cur_rewards))
+                self.avg_rewards = float(
+                    np.mean(self.total_rewards[-self.avg_reward_len:])
+                )
+                self.cur_rewards = []
+                self.state = self.env.reset()
 
             if self.batch_episodes >= self.num_batch_episodes:
                 for state, action, qval in zip(
