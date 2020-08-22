@@ -77,7 +77,6 @@ class SSLFineTuner(pl.LightningModule):
     def shared_step(self, batch):
         x, y = batch
 
-        import pdb; pdb.set_trace()
         with torch.no_grad():
             feats = self.backbone(x)
         feats = feats.view(x.size(0), -1)
