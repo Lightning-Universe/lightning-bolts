@@ -204,6 +204,7 @@ if __name__ == '__main__':
         dm = CIFAR10DataModule.from_argparse_args(args)
         dm.train_transforms = SimCLRTrainDataTransform(32)
         dm.val_transforms = SimCLREvalDataTransform(32)
+        args.num_classes = dm.num_classes
 
     elif args.dataset == 'stl10':
         dm = STL10DataModule.from_argparse_args(args)
