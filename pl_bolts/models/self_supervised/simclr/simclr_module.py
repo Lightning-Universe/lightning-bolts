@@ -275,7 +275,7 @@ if __name__ == '__main__':
         dm.train_transforms = SimCLRTrainDataTransform(32)
         dm.val_transforms = SimCLREvalDataTransform(32)
         args.num_samples = dm.num_samples
-        
+
     elif args.dataset == 'stl10':
         dm = STL10DataModule.from_argparse_args(args)
         dm.train_dataloader = dm.train_dataloader_mixed
