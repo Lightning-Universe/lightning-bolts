@@ -5,9 +5,11 @@ References:
     - https://github.com/noahgolmant/pytorch-lars/blob/master/lars.py
 """
 import torch
+from torch.optim import Optimizer
 
 
-class LARSWrapper(object):
+class LARSWrapper(Optimizer):
+
     def __init__(self, optimizer, eta=0.02, clip=True, eps=1e-8):
         """
         Wrapper that adds LARS scheduling to any optimizer. This helps stability with huge batch sizes.
@@ -27,7 +29,7 @@ class LARSWrapper(object):
         self.state_dict = self.optim.state_dict
         self.load_state_dict = self.optim.load_state_dict
         self.zero_grad = self.optim.zero_grad
-        self.add_param_group = self.add_param_group
+        self.add_param_group = self.optim.add_param_group
         self.__setstate__ = self.optim.__setstate__
         self.__getstate__ = self.optim.__getstate__
         self.__repr__ = self.optim.__repr__
