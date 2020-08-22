@@ -79,6 +79,7 @@ class CIFAR10DataModule(LightningDataModule):
         self.batch_size = batch_size
         self.seed = seed
         self.data_dir = data_dir if data_dir is not None else os.getcwd()
+        self.num_samples = 60000 - val_split
 
     @property
     def num_classes(self):
