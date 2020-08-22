@@ -122,14 +122,14 @@ class PolicyAgent(Agent):
         Returns:
             action defined by policy
         """
-        if not isinstance(states, torch.Tensor):
-            states = torch.FloatTensor(states).to(device)
+        if not isinstance(states, list):
+            states = [states]
 
-        if device.type != "cpu":
-            states = states.cuda(device)
+        if not isinstance(states, torch.Tensor):
+            states = torch.tensor(states, device=device)
 
         # get the logits and pass through softmax for probability distribution
-        probabilities = F.softmax(self.net(states))
+        probabilities = F.softmax(self.net(states)).squeeze(dim=-1)
         prob_np = probabilities.data.cpu().numpy()
 
         # take the numpy values and randomly select action based on prob distribution
