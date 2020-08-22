@@ -55,7 +55,7 @@ class BYOL(pl.LightningModule):
             model = BYOL(num_classes=10)
 
             # data
-            dm = CIFAR10DataModule('.', num_workers=0)
+            dm = CIFAR10DataModule(num_workers=0)
             dm.train_transforms = SimCLRTrainDataTransform(32)
             dm.val_transforms = SimCLREvalDataTransform(32)
 
