@@ -235,5 +235,5 @@ if __name__ == '__main__':
     online_eval = SSLOnlineEvaluator(z_dim=2048, num_classes=dm.num_classes)
     online_eval.to_device = to_device
 
-    trainer = pl.Trainer.from_argparse_args(args, max_steps=10000, callbacks=[])
+    trainer = pl.Trainer.from_argparse_args(args, max_steps=10000, callbacks=[online_eval])
     trainer.fit(model, dm)
