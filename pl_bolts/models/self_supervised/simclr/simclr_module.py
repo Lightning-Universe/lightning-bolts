@@ -186,6 +186,9 @@ class SimCLR(pl.LightningModule):
         return [optimizer], [scheduler]
 
     def forward(self, x):
+        if isinstance(x, list):
+            x = x[0]
+
         result = self.encoder(x)
         if isinstance(result, list):
             result = result[-1]
