@@ -121,7 +121,7 @@ Moco (V2)
 SimCLR
 ^^^^^^
 
-PyTorch Lightning implementation of `SIMCLR <https://arxiv.org/abs/2002.05709.>`_
+PyTorch Lightning implementation of `SimCLR <https://arxiv.org/abs/2006.10029>`_
 
 Paper authors: Ting Chen, Simon Kornblith, Mohammad Norouzi, Geoffrey Hinton.
 
