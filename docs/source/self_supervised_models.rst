@@ -113,6 +113,35 @@ Moco (V2)
 SimCLR
 ^^^^^^
 
+PyTorch Lightning implementation of `SIMCLR <https://arxiv.org/abs/2002.05709.>`_
+
+Paper authors: Ting Chen, Simon Kornblith, Mohammad Norouzi, Geoffrey Hinton.
+
+Model implemented by:
+
+    - `William Falcon <https://github.com/williamFalcon>`_
+    - `Tullie Murrell <https://github.com/tullie>`_
+
+Example::
+
+    import pytorch_lightning as pl
+    from pl_bolts.models.self_supervised import SimCLR
+    from pl_bolts.datamodules import CIFAR10DataModule
+    from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
+        SimCLREvalDataTransform, SimCLRTrainDataTransform)
+
+    # data
+    dm = CIFAR10DataModule(num_workers=0)
+    dm.train_transforms = SimCLRTrainDataTransform(32)
+    dm.val_transforms = SimCLREvalDataTransform(32)
+
+    # model
+    model = SimCLR(num_samples=dm.num_samples, batch_size=dm.batch_size)
+
+    # fit
+    trainer = pl.Trainer()
+    trainer.fit(model, dm))
+
 CIFAR-10 baseline
 *****************
 
