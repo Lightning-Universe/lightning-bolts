@@ -130,7 +130,7 @@ Model implemented by:
     - `William Falcon <https://github.com/williamFalcon>`_
     - `Tullie Murrell <https://github.com/tullie>`_
 
-Example::
+To Train::
 
     import pytorch_lightning as pl
     from pl_bolts.models.self_supervised import SimCLR
@@ -164,6 +164,17 @@ CIFAR-10 baseline
      - `86.75 <https://tensorboard.dev/experiment/mh3qnIdaQcWA9d4XkErNEA>`_
 
 .. note:: This experiment used a standard resnet50 (not extra-wide, 2x, 4x). But you can use any resnet
+
+|
+
+CIFAR-10 pretrained model::
+
+    from pl_bolts.models.self_supervised import SimCLR
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp2_acc_867/epoch%3D698.ckpt'
+    simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+
+    simclr.freeze()
 
 |
 
