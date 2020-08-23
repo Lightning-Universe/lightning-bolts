@@ -163,7 +163,7 @@ CIFAR-10 baseline
    * - Our implementation
      - `86.7 <https://tensorboard.dev/experiment/mh3qnIdaQcWA9d4XkErNEA>`_
 
-.. note:: This experiment used a standard resnet50 (not extra-wide, 2x, 4x).
+.. note:: This experiment used a standard resnet50 (not extra-wide, 2x, 4x). But you can use any resnet
 
 |
 
