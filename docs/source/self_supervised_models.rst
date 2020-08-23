@@ -148,7 +148,7 @@ Example::
 
     # fit
     trainer = pl.Trainer()
-    trainer.fit(model, dm))
+    trainer.fit(model, dm)
 
 CIFAR-10 baseline
 *****************
