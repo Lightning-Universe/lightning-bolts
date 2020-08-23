@@ -153,7 +153,7 @@ To Train::
 CIFAR-10 baseline
 *****************
 .. list-table:: Cifar-10 implementation results
-   :widths: 20 25 15 10 15 20 10 10
+   :widths: 20 25 15 10 20 20 10 10
    :header-rows: 1
 
    * - Implementation
