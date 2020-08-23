@@ -165,19 +165,19 @@ CIFAR-10 baseline
      - Hardware
      - LR
    * - `Original <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
-     - `82.00? <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
-     - resnet (depth 18)
+     - `92.00? <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
+     - resnet50
      - LARS
      - 512
      - 1000
      - 1 V100 (32GB)
      - 1.0
    * - Ours
-     - `87.52 <https://tensorboard.dev/experiment/GlS1eLXMQsqh3T5DAec6UQ/#scalars>`_
+     - `85.68 <https://tensorboard.dev/experiment/GlS1eLXMQsqh3T5DAec6UQ/#scalars>`_
      - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
      - `LARS <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
      - 512
-     - 698 (10 hr)
+     - 960 (12 hr)
      - 1 V100 (32GB)
      - 1e-6
 
