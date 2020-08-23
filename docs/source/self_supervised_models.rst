@@ -173,7 +173,7 @@ CIFAR-10 baseline
      - 1 V100 (32GB)
      - 1.0
    * - Ours
-     - `86.75 <https://tensorboard.dev/experiment/mh3qnIdaQcWA9d4XkErNEA>`_
+     - `87.52 <https://tensorboard.dev/experiment/GlS1eLXMQsqh3T5DAec6UQ/#scalars>`_
      - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
      - `LARS <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
      - 512
@@ -187,7 +187,7 @@ CIFAR-10 pretrained model::
 
     from pl_bolts.models.self_supervised import SimCLR
 
-    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp2_acc_867/epoch%3D698.ckpt'
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp12_87_52/epoch%3D960.ckpt'
     simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
 
     simclr.freeze()
