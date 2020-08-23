@@ -79,6 +79,7 @@ class SSLFineTuner(pl.LightningModule):
 
         with torch.no_grad():
             feats = self.backbone(x)
+        import pdb; pdb.set_trace()
         feats = feats.view(x.size(0), -1)
         logits = self.ft_network(feats)
         loss = F.cross_entropy(logits, y)
