@@ -152,8 +152,16 @@ Example::
 
 CIFAR-10 baseline
 *****************
+.. list-table:: Cifar-10 test accuracy
+   :widths: 50 50
+   :header-rows: 1
 
-`(Pre-training Logs) <https://tensorboard.dev/experiment/mh3qnIdaQcWA9d4XkErNEA/>`_
+   * - Model
+     - test accuracy
+   * - `Original repo <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
+     - 82
+   * - Our implementation
+     - `86.7 <https://tensorboard.dev/experiment/mh3qnIdaQcWA9d4XkErNEA>`_
 
 |
 
