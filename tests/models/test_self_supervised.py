@@ -21,7 +21,7 @@ def test_cpcv2(tmpdir):
     trainer.fit(model)
     loss = trainer.progress_bar_metrics['val_nce']
 
-    assert loss > 0
+    assert float(loss) > 0
 
 
 def test_byol(tmpdir):
@@ -47,7 +47,7 @@ def test_amdim(tmpdir):
     trainer.fit(model)
     loss = trainer.progress_bar_dict['loss']
 
-    assert loss > 0
+    assert float(loss) > 0
 
 
 def test_moco(tmpdir):
@@ -62,7 +62,7 @@ def test_moco(tmpdir):
     trainer.fit(model)
     loss = trainer.progress_bar_dict['loss']
 
-    assert loss > 0
+    assert float(loss) > 0
 
 
 def test_simclr(tmpdir):
@@ -77,4 +77,4 @@ def test_simclr(tmpdir):
     trainer.fit(model, datamodule)
     loss = trainer.progress_bar_dict['loss']
 
-    assert loss > 0
+    assert float(loss) > 0
