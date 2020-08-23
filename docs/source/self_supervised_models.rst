@@ -92,11 +92,15 @@ AMDIM
 .. autoclass:: pl_bolts.models.self_supervised.AMDIM
    :noindex:
 
+---------
+
 BYOL
 ^^^^
 
 .. autoclass:: pl_bolts.models.self_supervised.BYOL
    :noindex:
+
+---------
 
 CPC (V2)
 ^^^^^^^^
@@ -104,14 +108,102 @@ CPC (V2)
 .. autoclass:: pl_bolts.models.self_supervised.CPCV2
    :noindex:
 
+---------
+
 Moco (V2)
 ^^^^^^^^^
 
 .. autoclass:: pl_bolts.models.self_supervised.MocoV2
    :noindex:
 
+---------
+
 SimCLR
 ^^^^^^
+
+PyTorch Lightning implementation of `SIMCLR <https://arxiv.org/abs/2002.05709.>`_
+
+Paper authors: Ting Chen, Simon Kornblith, Mohammad Norouzi, Geoffrey Hinton.
+
+Model implemented by:
+
+    - `William Falcon <https://github.com/williamFalcon>`_
+    - `Tullie Murrell <https://github.com/tullie>`_
+
+Example::
+
+    import pytorch_lightning as pl
+    from pl_bolts.models.self_supervised import SimCLR
+    from pl_bolts.datamodules import CIFAR10DataModule
+    from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
+        SimCLREvalDataTransform, SimCLRTrainDataTransform)
+
+    # data
+    dm = CIFAR10DataModule(num_workers=0)
+    dm.train_transforms = SimCLRTrainDataTransform(32)
+    dm.val_transforms = SimCLREvalDataTransform(32)
+
+    # model
+    model = SimCLR(num_samples=dm.num_samples, batch_size=dm.batch_size)
+
+    # fit
+    trainer = pl.Trainer()
+    trainer.fit(model, dm)
+
+CIFAR-10 baseline
+*****************
+.. list-table:: Cifar-10 test accuracy
+   :widths: 50 50
+   :header-rows: 1
+
+   * - Model
+     - test accuracy
+   * - Original repo
+     - `82.00 <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
+   * - Our implementation
+     - `86.75 <https://tensorboard.dev/experiment/mh3qnIdaQcWA9d4XkErNEA>`_
+
+.. note:: This experiment used a standard resnet50 (not extra-wide, 2x, 4x). But you can use any resnet
+
+|
+
+Pre-training:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp2_acc_867/val_loss.png
+    :width: 200
+    :alt: pretraining validation loss
+
+|
+
+Fine-tuning (Single layer MLP, 1024 hidden units):
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp2_acc_867/val_acc.png
+    :width: 200
+    :alt: finetuning validation accuracy
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp2_acc_867/test_acc.png
+    :width: 200
+    :alt: finetuning test accuracy
+
+|
+
+To reproduce::
+
+    # pretrain
+    python simclr_module.py
+        --gpus 1
+        --dataset cifar10
+        --batch_size 512
+        --learning_rate 1e-06
+        --num_workers 8
+
+    # finetune
+    python simclr_finetuner.py
+        --ckpt_path path/to/epoch=xyz.ckpt
+        --gpus 1
+
+SimCLR API
+**********
 
 .. autoclass:: pl_bolts.models.self_supervised.SimCLR
    :noindex:

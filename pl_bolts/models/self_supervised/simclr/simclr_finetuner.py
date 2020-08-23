@@ -6,7 +6,7 @@ import os
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
 
-def cli_main():
+def cli_main():  # pragma: no-cover
     pl.seed_everything(1234)
 
     parser = ArgumentParser()
@@ -24,6 +24,7 @@ def cli_main():
         dm = CIFAR10DataModule.from_argparse_args(args)
         dm.train_transforms = SimCLRTrainDataTransform(32)
         dm.val_transforms = SimCLREvalDataTransform(32)
+        dm.test_transforms = SimCLREvalDataTransform(32)
         args.num_samples = dm.num_samples
 
     elif args.dataset == 'stl10':
