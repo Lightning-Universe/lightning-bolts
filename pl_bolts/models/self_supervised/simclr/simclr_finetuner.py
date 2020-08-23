@@ -24,6 +24,7 @@ def cli_main():
         dm = CIFAR10DataModule.from_argparse_args(args)
         dm.train_transforms = SimCLRTrainDataTransform(32)
         dm.val_transforms = SimCLREvalDataTransform(32)
+        dm.test_transforms = SimCLREvalDataTransform(32)
         args.num_samples = dm.num_samples
 
     elif args.dataset == 'stl10':
