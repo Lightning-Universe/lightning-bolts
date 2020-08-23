@@ -16,7 +16,6 @@ from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate, SSLOnlineEval
 class BYOL(pl.LightningModule):
     def __init__(self,
                  num_classes,
-                 data_dir: str = './',
                  learning_rate: float = 0.2,
                  weight_decay: float = 15e-6,
                  input_height: int = 32,
@@ -82,7 +81,6 @@ class BYOL(pl.LightningModule):
 
         Args:
             datamodule: The datamodule
-            data_dir: directory to store data
             learning_rate: the learning rate
             weight_decay: optimizer weight decay
             input_height: image input height

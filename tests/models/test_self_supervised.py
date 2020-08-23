@@ -31,7 +31,7 @@ def test_byol(tmpdir):
     datamodule.train_transforms = CPCTrainTransformsCIFAR10()
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 
-    model = BYOL(data_dir=tmpdir, batch_size=2, datamodule=datamodule)
+    model = BYOL(data_dir=tmpdir, num_classes=datamodule)
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=2)
     trainer.fit(model)
     loss = trainer.progress_bar_dict['loss']
