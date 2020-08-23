@@ -167,6 +167,17 @@ CIFAR-10 baseline
 
 |
 
+To load pretrained::
+
+    from pl_bolts.models.self_supervised import SimCLR
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp2_acc_867/epoch%3D698.ckpt'
+    simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+
+    simclr.freeze()
+
+|
+
 Pre-training:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp2_acc_867/val_loss.png
