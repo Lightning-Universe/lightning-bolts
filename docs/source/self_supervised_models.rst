@@ -113,5 +113,42 @@ Moco (V2)
 SimCLR
 ^^^^^^
 
+CIFAR-10 baseline
+*****************
+
+`(Full Logs) <https://tensorboard.dev/experiment/mh3qnIdaQcWA9d4XkErNEA/>`_
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp2_acc_867/val_loss.png
+    :width: 200
+    :alt: pretraining validation loss
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp2_acc_867/val_acc.png
+    :width: 200
+    :alt: finetuning validation accuracy
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp2_acc_867/test_acc.png
+    :width: 200
+    :alt: finetuning test accuracy
+
+|
+
+To reproduce::
+
+    # pretrain
+    python simclr_module.py
+        --gpus 1
+        --dataset cifar10
+        --batch_size 512
+        --learning_rate 1e-06
+        --num_workers 8
+
+    # finetune
+    python simclr_finetuner.py
+        --ckpt_path path/to/epoch=xyz.ckpt
+        --gpus 1
+
+SimCLR API
+**********
+
 .. autoclass:: pl_bolts.models.self_supervised.SimCLR
    :noindex:

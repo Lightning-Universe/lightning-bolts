@@ -96,14 +96,6 @@ class SimCLR(pl.LightningModule):
             # cifar10
             python simclr_module.py --gpus 1
 
-            # imagenet
-            python simclr_module.py
-                --gpus 8
-                --dataset imagenet2012
-                --data_dir /path/to/imagenet/
-                --meta_dir /path/to/folder/with/meta.bin/
-                --batch_size 32
-
         Args:
             batch_size: the batch size
             num_samples: num samples in the dataset
