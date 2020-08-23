@@ -130,7 +130,7 @@ Model implemented by:
     - `William Falcon <https://github.com/williamFalcon>`_
     - `Tullie Murrell <https://github.com/tullie>`_
 
-Example::
+To Train::
 
     import pytorch_lightning as pl
     from pl_bolts.models.self_supervised import SimCLR
@@ -167,7 +167,7 @@ CIFAR-10 baseline
 
 |
 
-To load pretrained::
+CIFAR-10 pretrained model::
 
     from pl_bolts.models.self_supervised import SimCLR
 
