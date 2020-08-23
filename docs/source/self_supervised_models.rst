@@ -165,7 +165,7 @@ CIFAR-10 baseline
      - Hardware
      - LR
    * - `Original <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
-     - `82.00 <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
+     - `82.00? <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
      - resnet (depth 18)
      - LARS
      - 512
