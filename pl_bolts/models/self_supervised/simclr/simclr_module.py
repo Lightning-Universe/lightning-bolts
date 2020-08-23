@@ -11,7 +11,7 @@ from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
 from pl_bolts.models.self_supervised.evaluator import Flatten
-from pl_bolts.models.self_supervised.resnets import resnet50
+from pl_bolts.models.self_supervised.resnets import resnet50_bn
 
 
 class DensenetEncoder(nn.Module):
@@ -122,7 +122,7 @@ class SimCLR(pl.LightningModule):
         self.projection = Projection()
 
     def init_encoder(self):
-        encoder = resnet50(return_all_feature_maps=False)
+        encoder = resnet50_bn(return_all_feature_maps=False)
 
         # when using cifar10, replace the first conv so image doesn't shrink away
         encoder.conv1 = nn.Conv2d(
