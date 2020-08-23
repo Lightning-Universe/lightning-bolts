@@ -153,7 +153,7 @@ To Train::
 CIFAR-10 baseline
 *****************
 .. list-table:: Cifar-10 implementation results
-   :widths: 20 10 25 15 10 20 20 10
+   :widths: 18 15 25 15 10 20 20 10
    :header-rows: 1
 
    * - Implementation
@@ -164,7 +164,7 @@ CIFAR-10 baseline
      - Epochs
      - Hardware
      - LR
-   * - Original repo
+   * - `Original <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
      - `82.00 <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
      - resnet (depth 18)
      - LARS
@@ -175,7 +175,7 @@ CIFAR-10 baseline
    * - Ours
      - `86.75 <https://tensorboard.dev/experiment/mh3qnIdaQcWA9d4XkErNEA>`_
      - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
-     - `LARS(Adam) <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - `LARS <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
      - 512
      - 698 (10 hr)
      - 1 V100 (32GB)
