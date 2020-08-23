@@ -44,7 +44,7 @@ def cli_main():  # pragma: no-cover
         dm.val_transforms = SimCLREvalDataTransform(h)
 
     # finetune
-    tuner = SSLFineTuner(backbone, in_features=2048 * 2 * 2, num_classes=dm.num_classes)
+    tuner = SSLFineTuner(backbone, in_features=2048 * 2 * 2, num_classes=dm.num_classes, hidden_dim=None)
     trainer = pl.Trainer.from_argparse_args(args, early_stop_callback=True)
     trainer.fit(tuner, dm)
 
