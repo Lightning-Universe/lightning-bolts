@@ -159,9 +159,9 @@ CIFAR-10 baseline
    * - Model
      - test accuracy
    * - `Original repo <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
-     - 82
+     - 82.00
    * - Our implementation
-     - `86.7 <https://tensorboard.dev/experiment/mh3qnIdaQcWA9d4XkErNEA>`_
+     - `86.75 <https://tensorboard.dev/experiment/mh3qnIdaQcWA9d4XkErNEA>`_
 
 .. note:: This experiment used a standard resnet50 (not extra-wide, 2x, 4x). But you can use any resnet
 
