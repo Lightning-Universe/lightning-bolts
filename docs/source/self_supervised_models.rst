@@ -155,11 +155,15 @@ CIFAR-10 baseline
 
 `(Full Logs) <https://tensorboard.dev/experiment/mh3qnIdaQcWA9d4XkErNEA/>`_
 
+|
+
 Pre-training:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp2_acc_867/val_loss.png
     :width: 200
     :alt: pretraining validation loss
+
+|
 
 Fine-tuning (Single layer MLP, 1024 hidden units):
 
