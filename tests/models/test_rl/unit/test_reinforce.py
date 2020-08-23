@@ -28,7 +28,6 @@ class TestReinforce(TestCase):
         parent_parser = DQN.add_model_specific_args(parent_parser)
         args_list = [
             "--algo", "dqn",
-            "--warm_start_steps", "500",
             "--episode_length", "100",
             "--env", "CartPole-v0",
             "--batch_size", "32",
