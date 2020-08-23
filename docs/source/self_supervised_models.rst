@@ -173,7 +173,7 @@ CIFAR-10 baseline
      - 1.0
      - `82.00 <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
    * - Ours
-     - `Resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
+     - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
      - `LARS(Adam) <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
      - 512
      - 698 (10 hr)
