@@ -153,7 +153,7 @@ Example::
 CIFAR-10 baseline
 *****************
 
-`(Full Logs) <https://tensorboard.dev/experiment/mh3qnIdaQcWA9d4XkErNEA/>`_
+`(Pre-training Logs) <https://tensorboard.dev/experiment/mh3qnIdaQcWA9d4XkErNEA/>`_
 
 |
 
