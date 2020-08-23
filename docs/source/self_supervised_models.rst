@@ -158,8 +158,8 @@ CIFAR-10 baseline
 
    * - Model
      - test accuracy
-   * - `Original repo <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
-     - 82.00
+   * - Original repo
+     - `82.00 <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
    * - Our implementation
      - `86.75 <https://tensorboard.dev/experiment/mh3qnIdaQcWA9d4XkErNEA>`_
 
