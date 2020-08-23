@@ -60,10 +60,10 @@ class SimCLR(pl.LightningModule):
         Args:
             batch_size: the batch size
             num_samples: num samples in the dataset
-             warmup_epochs: epochs to warmup the lr for
-             lr: the optimizer learning rate
-             opt_weight_decay: the optimizer weight decay
-             loss_temperature: the loss temperature
+            warmup_epochs: epochs to warmup the lr for
+            lr: the optimizer learning rate
+            opt_weight_decay: the optimizer weight decay
+            loss_temperature: the loss temperature
         """
         super().__init__()
         self.save_hyperparameters()
