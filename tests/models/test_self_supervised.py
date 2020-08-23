@@ -21,7 +21,7 @@ def test_cpcv2(tmpdir):
     trainer.fit(model)
     loss = trainer.progress_bar_metrics['val_nce']
 
-    assert loss > 0
+    assert float(loss) > 0
 
 
 def test_byol(tmpdir):
@@ -31,9 +31,9 @@ def test_byol(tmpdir):
     datamodule.train_transforms = CPCTrainTransformsCIFAR10()
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 
-    model = BYOL(data_dir=tmpdir, batch_size=2, datamodule=datamodule)
+    model = BYOL(data_dir=tmpdir, num_classes=datamodule)
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=2)
-    trainer.fit(model)
+    trainer.fit(model, datamodule)
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) < 1.0
@@ -45,9 +45,9 @@ def test_amdim(tmpdir):
     model = AMDIM(data_dir=tmpdir, batch_size=2, online_ft=True, encoder='resnet18')
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model)
-    loss = trainer.callback_metrics['loss']
+    loss = trainer.progress_bar_dict['loss']
 
-    assert loss > 0
+    assert float(loss) > 0
 
 
 def test_moco(tmpdir):
@@ -60,9 +60,9 @@ def test_moco(tmpdir):
     model = MocoV2(data_dir=tmpdir, batch_size=2, datamodule=datamodule, online_ft=True)
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, callbacks=[MocoLRScheduler()])
     trainer.fit(model)
-    loss = trainer.callback_metrics['loss']
+    loss = trainer.progress_bar_dict['loss']
 
-    assert loss > 0
+    assert float(loss) > 0
 
 
 def test_simclr(tmpdir):
@@ -75,6 +75,6 @@ def test_simclr(tmpdir):
     model = SimCLR(batch_size=2, num_samples=datamodule.num_samples)
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model, datamodule)
-    loss = trainer.callback_metrics['loss']
+    loss = trainer.progress_bar_dict['loss']
 
-    assert loss > 0
+    assert float(loss) > 0
