@@ -6,7 +6,7 @@ import os
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
 
-def cli_main():
+def cli_main():  # pragma: no-cover
     pl.seed_everything(1234)
 
     parser = ArgumentParser()

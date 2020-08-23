@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 import os
 
 
-def cli_main():
+def cli_main():  # pragma: no-cover
     pl.seed_everything(1234)
 
     parser = ArgumentParser()
