@@ -71,7 +71,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         self.batch_size = batch_size
         self.seed = seed
         self.num_unlabeled_samples = 100000 - unlabeled_val_split
-        self.labeled_val_split = 500
+        self.labeled_val_split = 200
 
     @property
     def num_classes(self):
