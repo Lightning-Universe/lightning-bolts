@@ -38,7 +38,8 @@ def cli_main():  # pragma: no-cover
         dm.val_transforms = SimCLREvalDataTransform(h)
 
         def to_device(batch, device):
-            (_, _), (x, y)  = batch
+            import pdb; pdb.set_trace()
+            (_, _), (x, y) = batch
             x = x.to(device)
             y = y.to(device)
             return x, y
