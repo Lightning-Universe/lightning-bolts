@@ -37,6 +37,15 @@ def cli_main():  # pragma: no-cover
         dm.val_transforms = CPCEvalTransformsSTL10()
         dm.test_transforms = CPCEvalTransformsSTL10()
 
+        def to_device(batch, device):
+            import pdb; pdb.set_trace()
+            (_, _), (x, y) = batch
+            x = x.to(device)
+            y = y.to(device)
+            return x, y
+
+        dm.transfer_batch_to_device = to_device
+
     # finetune
     tuner = SSLFineTuner(backbone, in_features=backbone.z_dim, num_classes=backbone.num_classes)
     trainer = pl.Trainer.from_argparse_args(args, early_stop_callback=True)
