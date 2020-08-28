@@ -193,7 +193,6 @@ class CPCV2(pl.LightningModule):
 
     def forward(self, img_1):
         # put all patches on the batch dim for simultaneous processing
-        import pdb; pdb.set_trace()
         b, p, c, w, h = img_1.size()
         img_1 = img_1.view(-1, c, w, h)
 
