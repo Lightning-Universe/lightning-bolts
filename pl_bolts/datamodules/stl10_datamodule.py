@@ -71,7 +71,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         self.batch_size = batch_size
         self.seed = seed
         self.num_unlabeled_samples = 100000 - unlabeled_val_split
-        self.num_labeled_samples = 5000 - train_val_split
+        self.labeled_val_split = 500
 
     @property
     def num_classes(self):
@@ -239,8 +239,9 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
 
         dataset = STL10(self.data_dir, split='train', download=False, transform=transforms)
         train_length = len(dataset)
+        import pdb; pdb.set_trace()
         dataset_train, _ = random_split(dataset,
-                                        [train_length - self.num_labeled_samples, self.num_labeled_samples],
+                                        [train_length - self.labeled_val_split, self.labeled_val_split],
                                         generator=torch.Generator().manual_seed(self.seed))
         loader = DataLoader(
             dataset_train,
@@ -259,7 +260,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
                         transform=transforms)
         labeled_length = len(dataset)
         _, labeled_val = random_split(dataset,
-                                      [labeled_length - self.num_labeled_samples, self.num_labeled_samples],
+                                      [labeled_length - self.labeled_val_split, self.labeled_val_split],
                                       generator=torch.Generator().manual_seed(self.seed))
 
         loader = DataLoader(
