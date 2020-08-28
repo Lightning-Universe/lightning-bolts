@@ -239,7 +239,6 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
 
         dataset = STL10(self.data_dir, split='train', download=False, transform=transforms)
         train_length = len(dataset)
-        import pdb; pdb.set_trace()
         dataset_train, _ = random_split(dataset,
                                         [train_length - self.labeled_val_split, self.labeled_val_split],
                                         generator=torch.Generator().manual_seed(self.seed))
