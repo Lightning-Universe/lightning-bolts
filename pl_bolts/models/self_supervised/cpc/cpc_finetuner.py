@@ -38,7 +38,6 @@ def cli_main():  # pragma: no-cover
         dm.test_transforms = CPCEvalTransformsSTL10()
 
         def to_device(batch, device):
-            import pdb; pdb.set_trace()
             (_, _), (x, y) = batch
             x = x.to(device)
             y = y.to(device)
