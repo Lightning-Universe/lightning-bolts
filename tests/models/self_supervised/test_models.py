@@ -25,7 +25,6 @@ def test_cpcv2(tmpdir):
     assert float(loss) > 0
 
 
-@pytest.mark.skip("TODO: This seems to be hanging...")
 def test_byol(tmpdir):
     seed_everything()
 
@@ -41,6 +40,7 @@ def test_byol(tmpdir):
     assert float(loss) < 1.0
 
 
+@pytest.mark.skip("TODO")
 def test_amdim(tmpdir):
     seed_everything()
 
@@ -52,6 +52,7 @@ def test_amdim(tmpdir):
     assert float(loss) > 0
 
 
+@pytest.mark.skip("TODO")
 def test_moco(tmpdir):
     seed_everything()
 
@@ -67,6 +68,7 @@ def test_moco(tmpdir):
     assert float(loss) > 0
 
 
+@pytest.mark.skip("TODO")
 def test_simclr(tmpdir):
     seed_everything()
 
