@@ -40,7 +40,7 @@ def test_byol(tmpdir):
     assert float(loss) < 1.0
 
 
-@pytest.mark.skip("TODO")
+@pytest.mark.skip(reason='seems to freeze CLI run...')  # TODO
 def test_amdim(tmpdir):
     seed_everything()
 
@@ -52,7 +52,7 @@ def test_amdim(tmpdir):
     assert float(loss) > 0
 
 
-@pytest.mark.skip("TODO")
+@pytest.mark.skip(reason='seems to freeze CLI run...')  # TODO
 def test_moco(tmpdir):
     seed_everything()
 
@@ -68,7 +68,7 @@ def test_moco(tmpdir):
     assert float(loss) > 0
 
 
-@pytest.mark.skip("TODO")
+@pytest.mark.skip(reason='seems to freeze CLI run...')  # TODO
 def test_simclr(tmpdir):
     seed_everything()
 

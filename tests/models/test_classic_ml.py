@@ -14,23 +14,22 @@ def test_linear_regression_model(tmpdir):
     # --------------------
     # numpy data
     # --------------------
-    X = np.array([[1.0, 1], [1, 2], [2, 2], [2, 3]])
+    X = np.array([[1.0, 1], [1, 2], [2, 2], [2, 3], [3, 3], [3, 4], [4, 4], [4, 5]])
     y = np.dot(X, np.array([1.0, 2])) + 3
     y = y[:, np.newaxis]
     loader = DataLoader(SklearnDataset(X, y), batch_size=2)
 
-    model = LinearRegression(input_dim=2, learning_rate=1.0)
-    trainer = pl.Trainer(max_epochs=200, default_root_dir=tmpdir, progress_bar_refresh_rate=0)
+    model = LinearRegression(input_dim=2, learning_rate=0.5)
+    trainer = pl.Trainer(max_epochs=300, default_root_dir=tmpdir, progress_bar_refresh_rate=0)
     trainer.fit(
         model,
         loader,
-        loader
+        loader,
     )
 
     coeffs = model.linear.weight.detach().numpy().flatten()
-    assert len(coeffs) == 2
-    assert np.testing.assert_allclose(coeffs[0], 1, rtol=1e-3)
-    assert np.testing.assert_allclose(coeffs[1], 2, rtol=1e-3)
+    # assert len(coeffs) == 2
+    np.testing.assert_allclose(coeffs, [1, 2], rtol=1e-3)
     trainer.test(model, loader)
 
 
