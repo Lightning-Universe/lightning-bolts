@@ -5,12 +5,10 @@ from torch.optim import Adam
 import pytorch_lightning as pl
 from typing import Any
 
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
-from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.models.self_supervised.byol.models import SiameseArm
-from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate, SSLOnlineEvaluator
+from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
 
 
 class BYOL(pl.LightningModule):
@@ -184,7 +182,10 @@ class BYOL(pl.LightningModule):
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
-
+    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
+    from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
+    from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
+    
     parser = ArgumentParser()
 
     # trainer args
