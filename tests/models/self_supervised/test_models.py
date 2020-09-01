@@ -40,7 +40,7 @@ def test_byol(tmpdir):
     assert float(loss) < 1.0
 
 
-@pytest.mark.skip(reason='seems to freeze CLI run...')  # TODO
+@pytest.mark.skip(reason='seems to freeze...')  # TODO
 def test_amdim(tmpdir):
     seed_everything()
 
