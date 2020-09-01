@@ -5,12 +5,10 @@ from torch.optim import Adam
 import pytorch_lightning as pl
 from typing import Any
 
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
-from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.models.self_supervised.byol.models import SiameseArm
-from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate, SSLOnlineEvaluator
+from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
 
 
 class BYOL(pl.LightningModule):
@@ -184,6 +182,9 @@ class BYOL(pl.LightningModule):
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
+    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
+    from pl_bolts.models.self_supervised.simclr import simclr_transforms
+    from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
 
     parser = ArgumentParser()
 
@@ -200,8 +201,8 @@ if __name__ == '__main__':
     # init default datamodule
     if args.dataset == 'cifar10':
         dm = CIFAR10DataModule.from_argparse_args(args)
-        dm.train_transforms = SimCLRTrainDataTransform(32)
-        dm.val_transforms = SimCLREvalDataTransform(32)
+        dm.train_transforms = simclr_transforms.SimCLRTrainDataTransform(32)
+        dm.val_transforms = simclr_transforms.SimCLREvalDataTransform(32)
         args.num_classes = dm.num_classes
 
     elif args.dataset == 'stl10':
@@ -210,15 +211,15 @@ if __name__ == '__main__':
         dm.val_dataloader = dm.val_dataloader_mixed
 
         (c, h, w) = dm.size()
-        dm.train_transforms = SimCLRTrainDataTransform(h)
-        dm.val_transforms = SimCLREvalDataTransform(h)
+        dm.train_transforms = simclr_transforms.SimCLRTrainDataTransform(h)
+        dm.val_transforms = simclr_transforms.SimCLREvalDataTransform(h)
         args.num_classes = dm.num_classes
 
     elif args.dataset == 'imagenet2012':
         dm = ImagenetDataModule.from_argparse_args(args, image_size=196)
         (c, h, w) = dm.size()
-        dm.train_transforms = SimCLRTrainDataTransform(h)
-        dm.val_transforms = SimCLREvalDataTransform(h)
+        dm.train_transforms = simclr_transforms.SimCLRTrainDataTransform(h)
+        dm.val_transforms = simclr_transforms.SimCLREvalDataTransform(h)
         args.num_classes = dm.num_classes
 
     model = BYOL(**args.__dict__)
