@@ -52,7 +52,6 @@ def test_amdim(tmpdir):
     assert float(loss) > 0
 
 
-@pytest.mark.skip(reason='seems to freeze CLI run...')  # TODO
 def test_moco(tmpdir):
     seed_everything()
 
