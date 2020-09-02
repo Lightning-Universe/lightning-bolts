@@ -17,7 +17,7 @@ class BYOL(pl.LightningModule):
     def __init__(self,
                  num_classes,
                  learning_rate: float = 0.2,
-                 weight_decay: float = 15e-6,
+                 weight_decay: float = 1.5e-6,
                  input_height: int = 32,
                  batch_size: int = 32,
                  num_workers: int = 0,
