@@ -173,7 +173,7 @@ class BYOL(pl.LightningModule):
         # optim
         parser.add_argument('--batch_size', type=int, default=256)
         parser.add_argument('--learning_rate', type=float, default=1e-3)
-        parser.add_argument('--weight_decay', type=float, default=15e-6)
+        parser.add_argument('--weight_decay', type=float, default=1.5e-6)
         parser.add_argument('--warmup_epochs', type=float, default=10)
 
         # Model
