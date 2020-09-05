@@ -1,9 +1,9 @@
-import torch
 import pytorch_lightning as pl
-
-from pl_bolts.models.detection import FasterRCNN
-from pl_bolts.datamodules import DummyDetectionDataset
+import torch
 from torch.utils.data import DataLoader
+
+from pl_bolts.datamodules import DummyDetectionDataset
+from pl_bolts.models.detection import FasterRCNN
 
 
 def _collate_fn(batch):

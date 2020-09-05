@@ -352,8 +352,7 @@ class DQN(pl.LightningModule):
         return arg_parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
@@ -368,3 +367,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
+
+
+if __name__ == '__main__':
+    cli_main()

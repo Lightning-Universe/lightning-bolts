@@ -1,12 +1,12 @@
 import numpy as np
+from pytorch_lightning import seed_everything
 from sklearn.utils import shuffle as sk_shuffle
 
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
-from tests import reset_seed
 
 
 def test_dataloader(tmpdir):
-    reset_seed()
+    seed_everything()
 
     X = np.random.rand(5, 2)
     y = np.random.rand(5)

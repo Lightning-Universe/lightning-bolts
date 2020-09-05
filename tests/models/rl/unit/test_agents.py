@@ -3,8 +3,9 @@ from unittest import TestCase
 from unittest.mock import Mock
 
 import gym
-import torch
 import numpy as np
+import torch
+
 from pl_bolts.models.rl.common.agents import Agent, PolicyAgent, ValueAgent
 
 
