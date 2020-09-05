@@ -26,7 +26,7 @@ class AE(LightningModule):
             **kwargs
     ):
         """
-        Arg:
+        Args:
 
             datamodule: the datamodule (train, val, test splits)
             input_channels: num of image channels
