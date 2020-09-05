@@ -49,7 +49,7 @@ class VAE(pl.LightningModule):
 
             hidden_dim: encoder and decoder hidden dims
             latent_dim: latenet code dim
-            input_channels: num of channels of the input image.
+            input_channels: num of channels of the input image
             input_width: image input width
             input_height: image input height
             batch_size: the batch size
