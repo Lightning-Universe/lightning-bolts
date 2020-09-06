@@ -15,9 +15,6 @@ def add_base_args(parent) -> argparse.ArgumentParser:
     arg_parser = argparse.ArgumentParser(parents=[parent])
 
     arg_parser.add_argument(
-        "--algo", type=str, default="dqn", help="algorithm to use for training"
-    )
-    arg_parser.add_argument(
         "--batch_size", type=int, default=32, help="size of the batches"
     )
     arg_parser.add_argument("--lr", type=float, default=1e-4, help="learning rate")

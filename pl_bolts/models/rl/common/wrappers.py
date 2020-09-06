@@ -1,6 +1,6 @@
 """
 Set of wrapper functions for gym environments taken from
-https://github.com/Shmuma/ptan/blob/master/ptan/common/wrappers.py
+https://github.com/openai/baselines/blob/master/baselines/common/atari_wrappers.py
 """
 import collections
 
@@ -135,11 +135,11 @@ class ScaledFloatFrame(gym.ObservationWrapper):
         return np.array(obs).astype(np.float32) / 255.0
 
 
-class BufferWrapper(gym.ObservationWrapper):
-    """"Wrapper for image stacking"""
+class FrameStack(gym.ObservationWrapper):
+    """"Stacks N frames into single environment state"""
 
     def __init__(self, env, n_steps, dtype=np.float32):
-        super(BufferWrapper, self).__init__(env)
+        super().__init__(env)
         self.dtype = dtype
         self.buffer = None
         old_space = env.observation_space
@@ -181,12 +181,13 @@ class DataAugmentation(gym.ObservationWrapper):
         return ProcessFrame84.process(obs)
 
 
-def make_environment(env_name):
+def make_atari_environment(env_name):
     """Convert environment with wrappers"""
     env = gym.make(env_name)
     env = MaxAndSkipEnv(env)
-    env = FireResetEnv(env)
+    if "FIRE" in env.unwrapped.get_action_meanings():
+        env = FireResetEnv(env)
     env = ProcessFrame84(env)
     env = ImageToPyTorch(env)
-    env = BufferWrapper(env, 4)
+    env = FrameStack(env, 4)
     return ScaledFloatFrame(env)

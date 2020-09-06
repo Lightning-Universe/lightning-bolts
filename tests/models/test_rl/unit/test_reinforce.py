@@ -4,7 +4,6 @@ import numpy as np
 import gym
 import torch
 
-from pl_bolts.datamodules.experience_source import DiscountedExperienceSource
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.networks import MLP
@@ -21,7 +20,6 @@ class TestReinforce(TestCase):
         self.n_actions = self.env.action_space.n
         self.net = MLP(self.obs_shape, self.n_actions)
         self.agent = Agent(self.net)
-        self.exp_source = DiscountedExperienceSource(self.env, self.agent)
 
         parent_parser = argparse.ArgumentParser(add_help=False)
         parent_parser = cli.add_base_args(parent=parent_parser)
