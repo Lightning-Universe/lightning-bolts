@@ -15,14 +15,14 @@ from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules.experience_source import (
-    ExperienceSourceDataset,
-    DiscountedExperienceSource, Experience,
+    ExperienceSourceDataset, Experience,
 )
 from pl_bolts.losses.rl import dqn_loss
-from pl_bolts.models.rl.common import wrappers, cli
+from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.agents import ValueAgent
 from pl_bolts.models.rl.common.memory import ReplayBuffer
 from pl_bolts.models.rl.common.networks import CNN
+from pl_bolts.models.rl.common.wrappers import make_atari_environment
 
 
 class DQN(pl.LightningModule):
@@ -53,6 +53,7 @@ class DQN(pl.LightningModule):
         Model implemented by:
 
             - `Donal Byrne <https://github.com/djbyrne>`
+
 
 
         Args:
@@ -245,20 +246,6 @@ class DQN(pl.LightningModule):
             }
         )
 
-    def test_step(self, *args, **kwargs) -> Dict[str, torch.Tensor]:
-        """Evaluate the agent for 10 episodes"""
-        self.agent.epsilon = 0.0
-        test_reward = self.source.run_episode()
-
-        return {"test_reward": test_reward}
-
-    def test_epoch_end(self, outputs) -> Dict[str, torch.Tensor]:
-        """Log the avg of the test results"""
-        rewards = [x["test_reward"] for x in outputs]
-        avg_reward = sum(rewards) / len(rewards)
-        tensorboard_logs = {"avg_test_reward": avg_reward}
-        return {"avg_test_reward": avg_reward, "log": tensorboard_logs}
-
     def configure_optimizers(self) -> List[Optimizer]:
         """ Initialize Adam optimizer"""
         optimizer = optim.Adam(self.net.parameters(), lr=self.lr)
@@ -292,7 +279,7 @@ class DQN(pl.LightningModule):
         Returns:
             gym environment
         """
-        env = wrappers.make_environment(env_name)
+        env = make_atari_environment(env_name)
         env.seed(seed)
         return env
 

@@ -13,7 +13,7 @@ from torch.nn.functional import log_softmax, softmax
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from pl_bolts.datamodules import ExperienceSourceDataset
+from pl_bolts.datamodules.experience_source import ExperienceSourceDataset
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.networks import MLP

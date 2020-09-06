@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader
 
-from pl_bolts.datamodules import ExperienceSourceDataset
+from pl_bolts.datamodules.experience_source import ExperienceSourceDataset
 from pl_bolts.losses.rl import per_dqn_loss
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.memory import PERBuffer, Experience
