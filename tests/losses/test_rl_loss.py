@@ -9,7 +9,7 @@ import torch
 
 from pl_bolts.losses.rl import dqn_loss, double_dqn_loss, per_dqn_loss
 from pl_bolts.models.rl.common.networks import CNN
-from pl_bolts.models.rl.common.wrappers import make_environment
+from pl_bolts.models.rl.common.wrappers import make_atari_environment
 
 
 class TestRLLoss(TestCase):
@@ -18,13 +18,13 @@ class TestRLLoss(TestCase):
 
         self.state = torch.rand(32, 4, 84, 84)
         self.next_state = torch.rand(32, 4, 84, 84)
-        self.action = torch.ones([32])
-        self.reward = torch.ones([32])
-        self.done = torch.zeros([32]).long()
+        self.action = torch.ones(32, 1)
+        self.reward = torch.ones(32, 1)
+        self.done = torch.zeros(32).long()
 
         self.batch = (self.state, self.action, self.reward, self.done, self.next_state)
 
-        self.env = make_environment("PongNoFrameskip-v4")
+        self.env = make_atari_environment("PongNoFrameskip-v4")
         self.obs_shape = self.env.observation_space.shape
         self.n_actions = self.env.action_space.n
         self.net = CNN(self.obs_shape, self.n_actions)
