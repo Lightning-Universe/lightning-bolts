@@ -19,7 +19,6 @@ class TestValueModels(TestCase):
         parent_parser = cli.add_base_args(parent=parent_parser)
         parent_parser = DQN.add_model_specific_args(parent_parser)
         args_list = [
-            "--algo", "dqn",
             "--n_steps", "4",
             "--warm_start_size", "100",
             "--episode_length", "100",

@@ -10,7 +10,9 @@ class Block(nn.Module):
         self.ln_2 = nn.LayerNorm(embed_dim)
         self.attn = nn.MultiheadAttention(embed_dim, heads)
         self.mlp = nn.Sequential(
-            nn.Linear(embed_dim, embed_dim), nn.GELU(), nn.Linear(embed_dim, embed_dim)
+            nn.Linear(embed_dim, embed_dim * 4),
+            nn.GELU(),
+            nn.Linear(embed_dim * 4, embed_dim),
         )
 
     def forward(self, x):

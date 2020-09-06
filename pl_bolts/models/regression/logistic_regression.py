@@ -1,3 +1,5 @@
+from argparse import ArgumentParser
+
 import pytorch_lightning as pl
 import torch
 from pytorch_lightning.metrics.classification import accuracy
@@ -126,9 +128,7 @@ class LogisticRegression(pl.LightningModule):
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':  # pragma: no cover
-    from argparse import ArgumentParser
+def cli_main():
     pl.seed_everything(1234)
 
     # Example: Iris dataset in Sklearn (4 features, 3 class labels)
@@ -149,3 +149,7 @@ if __name__ == '__main__':  # pragma: no cover
     # train
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model, loaders.train_dataloader(args.batch_size), loaders.val_dataloader(args.batch_size))
+
+
+if __name__ == '__main__':
+    cli_main()

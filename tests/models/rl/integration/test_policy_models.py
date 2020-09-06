@@ -15,7 +15,6 @@ class TestPolicyModels(TestCase):
         parent_parser = cli.add_base_args(parent=parent_parser)
         parent_parser = VanillaPolicyGradient.add_model_specific_args(parent_parser)
         args_list = [
-            "--algo", "PolicyGradient",
             "--episode_length", "100",
             "--env", "CartPole-v0"
         ]

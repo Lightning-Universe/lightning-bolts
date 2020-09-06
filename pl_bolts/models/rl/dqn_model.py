@@ -15,7 +15,8 @@ from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules.experience_source import (
-    ExperienceSourceDataset, Experience,
+    ExperienceSourceDataset,
+    Experience,
 )
 from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common import cli
@@ -42,9 +43,7 @@ class DQN(pl.LightningModule):
         warm_start_size: int = 10000,
         avg_reward_len: int = 100,
         min_episode_reward: int = -21,
-        n_steps: int = 1,
         seed: int = 123,
-        num_envs: int = 1,
         **kwargs,
     ):
         """
@@ -55,7 +54,9 @@ class DQN(pl.LightningModule):
 
             - `Donal Byrne <https://github.com/djbyrne>`
 
-
+        >>> from pl_bolts.models.rl.dqn_model import DQN
+        ...
+        >>> model = DQN("PongNoFrameskip-v4")
 
         Args:
             env: gym environment tag
@@ -73,7 +74,6 @@ class DQN(pl.LightningModule):
             min_episode_reward: the minimum score that can be achieved in an episode. Used for filling the avg buffer
                 before training begins
             seed: seed value for all RNG used
-            num_envs: number of environments to run the agent in at once
 
         Note:
             This example is based on:
@@ -94,7 +94,6 @@ class DQN(pl.LightningModule):
 
         # Model Attributes
         self.buffer = None
-        self.source = None
         self.dataset = None
 
         self.net = None
@@ -110,14 +109,12 @@ class DQN(pl.LightningModule):
         )
 
         # Hyperparameters
-        self.num_envs = num_envs
         self.sync_rate = sync_rate
         self.gamma = gamma
         self.lr = learning_rate
-        self.batch_size = batch_size * num_envs
+        self.batch_size = batch_size
         self.replay_size = replay_size
         self.warm_start_size = warm_start_size
-        self.n_steps = n_steps
 
         self.save_hyperparameters()
 
@@ -151,7 +148,13 @@ class DQN(pl.LightningModule):
                 self.agent.epsilon = 1.0
                 action = self.agent(self.state, self.device)
                 next_state, reward, done, _ = self.env.step(action)
-                exp = Experience(state=self.state, action=action, reward=reward, done=done, new_state=next_state)
+                exp = Experience(
+                    state=self.state,
+                    action=action,
+                    reward=reward,
+                    done=done,
+                    new_state=next_state,
+                )
                 self.buffer.append(exp)
 
     def build_networks(self) -> None:
@@ -183,7 +186,13 @@ class DQN(pl.LightningModule):
             action = self.agent(self.state, self.device)
 
             next_state, reward, done, _ = self.env.step(action)
-            exp = Experience(state=self.state, action=action, reward=reward, done=done, new_state=next_state)
+            exp = Experience(
+                state=self.state,
+                action=action,
+                reward=reward,
+                done=done,
+                new_state=next_state,
+            )
 
             self.agent.update_epsilon(self.global_step)
             self.buffer.append(exp)
@@ -204,8 +213,8 @@ class DQN(pl.LightningModule):
                 self.state = self.env.reset()
 
             states, actions, rewards, dones, new_states = self.buffer.sample(
-                    self.batch_size
-                )
+                self.batch_size
+            )
 
             for idx, _ in enumerate(dones):
                 yield states[idx], actions[idx], rewards[idx], dones[idx], new_states[
@@ -337,8 +346,7 @@ class DQN(pl.LightningModule):
         return arg_parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
@@ -353,3 +361,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
+
+
+if __name__ == "__main__":
+    cli_main()

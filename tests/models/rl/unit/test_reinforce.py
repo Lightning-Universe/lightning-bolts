@@ -1,7 +1,8 @@
 import argparse
 from unittest import TestCase
-import numpy as np
+
 import gym
+import numpy as np
 import torch
 
 from pl_bolts.models.rl.common import cli
@@ -25,7 +26,6 @@ class TestReinforce(TestCase):
         parent_parser = cli.add_base_args(parent=parent_parser)
         parent_parser = DQN.add_model_specific_args(parent_parser)
         args_list = [
-            "--algo", "dqn",
             "--episode_length", "100",
             "--env", "CartPole-v0",
             "--batch_size", "32",

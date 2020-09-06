@@ -79,7 +79,7 @@ class SSLFineTuner(pl.LightningModule):
 
         with torch.no_grad():
             feats = self.backbone(x)
-        feats = feats.view(x.size(0), -1)
+        feats = feats.view(feats.size(0), -1)
         logits = self.ft_network(feats)
         loss = F.cross_entropy(logits, y)
         acc = plm.accuracy(logits, y)

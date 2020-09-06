@@ -26,9 +26,7 @@ class VanillaPolicyGradient(pl.LightningModule):
         gamma: float = 0.99,
         lr: float = 0.01,
         batch_size: int = 8,
-        n_steps: int = 10,
         avg_reward_len: int = 100,
-        num_envs: int = 4,
         entropy_beta: float = 0.01,
         epoch_len: int = 1000,
         **kwargs
@@ -57,9 +55,9 @@ class VanillaPolicyGradient(pl.LightningModule):
             gamma: discount factor
             lr: learning rate
             batch_size: size of minibatch pulled from the DataLoader
-            batch_episodes: how many episodes to rollout for each batch of training
-            entropy_beta: dictates the level of entropy per batch
             avg_reward_len: how many episodes to take into account when calculating the avg reward
+            epoch_len: number of batches per epoch
+            entropy_beta: entropy coefficient used for loss caluclation
 
         Note:
             This example is based on:
@@ -71,12 +69,11 @@ class VanillaPolicyGradient(pl.LightningModule):
         super().__init__()
 
         # Hyperparameters
-        self.lr = 0.001
-        self.batch_size = 32
+        self.lr = lr
+        self.batch_size = batch_size
         self.batches_per_epoch = self.batch_size * epoch_len
         self.entropy_beta = entropy_beta
         self.gamma = gamma
-        self.n_steps = n_steps
 
         self.save_hyperparameters()
 
@@ -136,8 +133,8 @@ class VanillaPolicyGradient(pl.LightningModule):
                 self.state = self.env.reset()
                 self.total_rewards.append(sum(self.episode_rewards))
                 self.avg_rewards = float(
-                            np.mean(self.total_rewards[-self.avg_reward_len:])
-                        )
+                    np.mean(self.total_rewards[-self.avg_reward_len:])
+                )
 
                 returns = self.compute_returns(self.episode_rewards)
 
@@ -241,14 +238,16 @@ class VanillaPolicyGradient(pl.LightningModule):
         """
 
         arg_parser.add_argument(
-            "--entropy_beta", type=float, default=0.01, help="entropy value",
+            "--entropy_beta",
+            type=float,
+            default=0.01,
+            help="entropy value",
         )
 
         return arg_parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
@@ -271,3 +270,7 @@ if __name__ == '__main__':
         args, deterministic=True, checkpoint_callback=checkpoint_callback
     )
     trainer.fit(model)
+
+
+if __name__ == "__main__":
+    cli_main()

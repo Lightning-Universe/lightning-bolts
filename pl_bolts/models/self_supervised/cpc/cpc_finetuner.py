@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 import os
 
 
-def cli_main():
+def cli_main():  # pragma: no-cover
     pl.seed_everything(1234)
 
     parser = ArgumentParser()
@@ -31,8 +31,8 @@ def cli_main():
 
     elif args.dataset == 'stl10':
         dm = STL10DataModule.from_argparse_args(args)
-        dm.train_dataloader = dm.train_dataloader_mixed
-        dm.val_dataloader = dm.val_dataloader_mixed
+        dm.train_dataloader = dm.train_dataloader_labeled
+        dm.val_dataloader = dm.val_dataloader_labeled
         dm.train_transforms = CPCTrainTransformsSTL10()
         dm.val_transforms = CPCEvalTransformsSTL10()
         dm.test_transforms = CPCEvalTransformsSTL10()

@@ -1,11 +1,11 @@
 import pytorch_lightning as pl
+from pytorch_lightning import seed_everything
 
 from pl_bolts.models import LitMNIST
-from tests import reset_seed
 
 
 def test_mnist(tmpdir):
-    reset_seed()
+    seed_everything()
 
     model = LitMNIST(data_dir=tmpdir)
     trainer = pl.Trainer(limit_train_batches=0.01, limit_val_batches=0.01, max_epochs=1,

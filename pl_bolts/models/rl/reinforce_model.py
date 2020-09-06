@@ -20,17 +20,13 @@ from pl_bolts.models.rl.common.networks import MLP
 
 
 class Reinforce(pl.LightningModule):
-
     def __init__(
         self,
         env: str,
         gamma: float = 0.99,
         lr: float = 0.01,
         batch_size: int = 8,
-        n_steps: int = 10,
         avg_reward_len: int = 100,
-        num_envs: int = 1,
-        entropy_beta: float = 0.01,
         epoch_len: int = 1000,
         num_batch_episodes: int = 4,
         **kwargs
@@ -59,8 +55,9 @@ class Reinforce(pl.LightningModule):
             gamma: discount factor
             lr: learning rate
             batch_size: size of minibatch pulled from the DataLoader
-            batch_episodes: how many episodes to rollout for each batch of training
             avg_reward_len: how many episodes to take into account when calculating the avg reward
+            epoch_len: number of batches per epoch
+            num_batch_episodes: how many episodes to rollout for each batch of training
 
         Note:
             This example is based on:
@@ -73,11 +70,9 @@ class Reinforce(pl.LightningModule):
 
         # Hyperparameters
         self.lr = lr
-        self.batch_size = batch_size * num_envs
+        self.batch_size = batch_size
         self.batches_per_epoch = self.batch_size * epoch_len
-        self.entropy_beta = entropy_beta
         self.gamma = gamma
-        self.n_steps = n_steps
         self.num_batch_episodes = num_batch_episodes
 
         self.save_hyperparameters()
@@ -257,29 +252,8 @@ class Reinforce(pl.LightningModule):
         """Retrieve device currently being used by minibatch"""
         return batch[0][0][0].device.index if self.on_gpu else "cpu"
 
-    @staticmethod
-    def add_model_specific_args(arg_parser) -> argparse.ArgumentParser:
-        """
-        Adds arguments for DQN model
 
-        Note: these params are fine tuned for Pong env
-
-        Args:
-            arg_parser: the current argument parser to add to
-
-        Returns:
-            arg_parser with model specific cargs added
-        """
-
-        arg_parser.add_argument(
-            "--entropy_beta", type=float, default=0.01, help="entropy value",
-        )
-
-        return arg_parser
-
-
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
@@ -302,3 +276,7 @@ if __name__ == '__main__':
         args, deterministic=True, checkpoint_callback=checkpoint_callback
     )
     trainer.fit(model)
+
+
+if __name__ == "__main__":
+    cli_main()
