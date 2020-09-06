@@ -128,8 +128,10 @@ class Reinforce(pl.LightningModule):
     def discount_rewards(self, experiences: Tuple[Experience]) -> float:
         """
         Calculates the discounted reward over N experiences
+
         Args:
             experiences: Tuple of Experience
+
         Returns:
             total discounted reward
         """

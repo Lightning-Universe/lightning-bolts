@@ -74,6 +74,7 @@ class DQN(pl.LightningModule):
             min_episode_reward: the minimum score that can be achieved in an episode. Used for filling the avg buffer
                 before training begins
             seed: seed value for all RNG used
+
         Note:
             This example is based on:
             https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\

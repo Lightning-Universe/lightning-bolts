@@ -14,16 +14,28 @@ from pl_bolts.models.rl.dqn_model import DQN
 class DuelingDQN(DQN):
     """
      PyTorch Lightning implementation of `Dueling DQN <https://arxiv.org/abs/1511.06581>`_
+<<<<<<< HEAD
      Paper authors: Ziyu Wang, Tom Schaul, Matteo Hessel, Hado van Hasselt, Marc Lanctot, Nando de Freitas
      Model implemented by:
          - `Donal Byrne <https://github.com/djbyrne>`
 
      Example:
+=======
+
+     Paper authors: Ziyu Wang, Tom Schaul, Matteo Hessel, Hado van Hasselt, Marc Lanctot, Nando de Freitas
+
+     Model implemented by:
+
+         - `Donal Byrne <https://github.com/djbyrne>`
+
+     Example:
+
          >>> from pl_bolts.models.rl.dueling_dqn_model import DuelingDQN
          ...
          >>> model = DuelingDQN("PongNoFrameskip-v4")
 
      Train::
+
          trainer = Trainer()
          trainer.fit(model)
 
@@ -45,6 +57,7 @@ class DuelingDQN(DQN):
          seed: seed value for all RNG used
 
      .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
+
     """
 
     def build_networks(self) -> None:

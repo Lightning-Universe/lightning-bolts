@@ -55,6 +55,7 @@ class VanillaPolicyGradient(pl.LightningModule):
             avg_reward_len: how many episodes to take into account when calculating the avg reward
             epoch_len: number of batches per epoch
             entropy_beta: entropy coefficient used for loss caluclation
+
         Note:
             This example is based on:
             https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/04_cartpole_pg.py
@@ -110,7 +111,6 @@ class VanillaPolicyGradient(pl.LightningModule):
         """
 
         while True:
-
             action = self.agent(self.state, self.device)
 
             next_state, reward, done, _ = self.env.step(action[0])

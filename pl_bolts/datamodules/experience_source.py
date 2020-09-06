@@ -1,7 +1,5 @@
 """
 Datamodules for RL models that rely on experiences generated during training
-
-Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/experience.py
 """
 from collections import namedtuple
 from typing import Iterable, Callable
