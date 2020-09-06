@@ -54,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed N-Step DQN as the latest version of the DQN supports N-Step by setting the `n_step` arg to n
 - Deprecated common.experience
+- Removed old ExperienceSource modules in favour of the custom train_batch method.
 
 ### Fixed
 

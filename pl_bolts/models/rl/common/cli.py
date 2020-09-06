@@ -46,7 +46,10 @@ def add_base_args(parent) -> argparse.ArgumentParser:
         "--epoch_len", type=int, default=1000, help="how many batches per epoch"
     )
     arg_parser.add_argument(
-        "--num_envs", type=int, default=1, help="number of environments to run at once",
+        "--num_envs",
+        type=int,
+        default=1,
+        help="number of environments to run at once",
     )
     arg_parser.add_argument(
         "--avg_reward_len",
