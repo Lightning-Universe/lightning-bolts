@@ -27,6 +27,12 @@ class PERDQN(DQN):
 
         - `Donal Byrne <https://github.com/djbyrne>`
 
+        Example:
+
+            >>> from pl_bolts.models.rl.per_dqn_model import PERDQN
+            ...
+            >>> model = PERDQN("PongNoFrameskip-v4")
+
         Args:
             env: gym environment tag
             gpus: number of gpus being used

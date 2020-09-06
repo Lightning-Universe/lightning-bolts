@@ -283,7 +283,6 @@ def cli_main():
 
     # model args
     parser = cli.add_base_args(parser)
-    parser = Reinforce.add_model_specific_args(parser)
     args = parser.parse_args()
 
     model = Reinforce(**args.__dict__)
