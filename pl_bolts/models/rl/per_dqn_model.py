@@ -20,22 +20,17 @@ from pl_bolts.models.rl.dqn_model import DQN
 class PERDQN(DQN):
     """
     PyTorch Lightning implementation of `DQN With Prioritized Experience Replay <https://arxiv.org/abs/1511.05952>`_
-
     Paper authors: Tom Schaul, John Quan, Ioannis Antonoglou, David Silver
-
     Model implemented by:
-
         - `Donal Byrne <https://github.com/djbyrne>`
 
         Example:
-
             >>> from pl_bolts.models.rl.per_dqn_model import PERDQN
             ...
             >>> model = PERDQN("PongNoFrameskip-v4")
 
         Args:
             env: gym environment tag
-            gpus: number of gpus being used
             eps_start: starting value of epsilon for the epsilon-greedy exploration
             eps_end: final value of epsilon for the epsilon-greedy exploration
             eps_last_frame: the final frame in for the decrease of epsilon. At this frame espilon = eps_end
@@ -46,7 +41,10 @@ class PERDQN(DQN):
             replay_size: total capacity of the replay buffer
             warm_start_size: how many random steps through the environment to be carried out at the start of
                 training to fill the buffer with a starting point
-            num_samples: the number of samples to pull from the dataset iterator and feed to the DataLoader
+            avg_reward_len: how many episodes to take into account when calculating the avg reward
+            min_episode_reward: the minimum score that can be achieved in an episode. Used for filling the avg buffer
+                before training begins
+            seed: seed value for all RNG used
 
         .. note::
             This example is based on:
@@ -54,7 +52,6 @@ class PERDQN(DQN):
              /blob/master/Chapter08/05_dqn_prio_replay.py
 
         .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
-
         """
 
     def train_batch(
@@ -70,7 +67,13 @@ class PERDQN(DQN):
             action = self.agent(self.state, self.device)
 
             next_state, reward, done, _ = self.env.step(action)
-            exp = Experience(state=self.state, action=action, reward=reward, done=done, new_state=next_state)
+            exp = Experience(
+                state=self.state,
+                action=action,
+                reward=reward,
+                done=done,
+                new_state=next_state,
+            )
 
             self.agent.update_epsilon(self.global_step)
             self.buffer.append(exp)
@@ -96,22 +99,20 @@ class PERDQN(DQN):
 
             for idx, _ in enumerate(dones):
                 yield (
-                          states[idx],
-                          actions[idx],
-                          rewards[idx],
-                          dones[idx],
-                          new_states[idx],
-                      ), indices[idx], weights[idx]
+                    states[idx],
+                    actions[idx],
+                    rewards[idx],
+                    dones[idx],
+                    new_states[idx],
+                ), indices[idx], weights[idx]
 
     def training_step(self, batch, _) -> OrderedDict:
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved
-
         Args:
             batch: current mini batch of replay data
             _: batch number, not used
-
         Returns:
             Training loss and log metrics
         """
@@ -181,5 +182,5 @@ def cli_main():
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

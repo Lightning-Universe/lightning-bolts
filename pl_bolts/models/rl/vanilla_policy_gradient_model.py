@@ -25,22 +25,18 @@ class VanillaPolicyGradient(pl.LightningModule):
         env: str,
         gamma: float = 0.99,
         lr: float = 0.01,
-        batch_size: int = 8,
-        n_steps: int = 10,
+        batch_size: int = 32,
         avg_reward_len: int = 100,
-        num_envs: int = 4,
         entropy_beta: float = 0.01,
         epoch_len: int = 1000,
         **kwargs
     ) -> None:
-
         """
         PyTorch Lightning implementation of `Vanilla Policy Gradient
         <https://papers.nips.cc/paper/
         1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
         Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
         Model implemented by:
-
             - `Donal Byrne <https://github.com/djbyrne>`
 
         Example:
@@ -49,42 +45,32 @@ class VanillaPolicyGradient(pl.LightningModule):
             >>> model = VanillaPolicyGradient("PongNoFrameskip-v4")
 
         Train::
-
             trainer = Trainer()
             trainer.fit(model)
-
         Args:
             env: gym environment tag
             gamma: discount factor
             lr: learning rate
             batch_size: size of minibatch pulled from the DataLoader
-            batch_episodes: how many episodes to rollout for each batch of training
-            entropy_beta: dictates the level of entropy per batch
             avg_reward_len: how many episodes to take into account when calculating the avg reward
-
+            epoch_len: number of batches per epoch
+            entropy_beta: entropy coefficient used for loss caluclation
         Note:
             This example is based on:
             https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/04_cartpole_pg.py
-
         Note:
             Currently only supports CPU and single GPU training with `distributed_backend=dp`
         """
         super().__init__()
 
         # Hyperparameters
-        self.lr = 0.001
-        self.batch_size = 32
+        self.lr = lr
+        self.batch_size = batch_size
         self.batches_per_epoch = self.batch_size * epoch_len
         self.entropy_beta = entropy_beta
         self.gamma = gamma
-        self.n_steps = n_steps
 
-        self.reward_sum = 0
-        self.env_steps = 0
-        self.total_steps = 0
-        self.total_reward = 0
-        self.episode_count = 0
-        self.avg_reward_len = avg_reward_len
+        self.save_hyperparameters()
 
         # Model components
         self.env = gym.make(env)
@@ -106,10 +92,8 @@ class VanillaPolicyGradient(pl.LightningModule):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Passes in a state x through the network and gets the q_values of each action as an output
-
         Args:
             x: environment state
-
         Returns:
             q values
         """
@@ -121,7 +105,6 @@ class VanillaPolicyGradient(pl.LightningModule):
     ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
-
         Returns:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
         """
@@ -142,8 +125,8 @@ class VanillaPolicyGradient(pl.LightningModule):
                 self.state = self.env.reset()
                 self.total_rewards.append(sum(self.episode_rewards))
                 self.avg_rewards = float(
-                            np.mean(self.total_rewards[-self.avg_reward_len:])
-                        )
+                    np.mean(self.total_rewards[-self.avg_reward_len:])
+                )
 
                 returns = self.compute_returns(self.episode_rewards)
 
@@ -187,11 +170,9 @@ class VanillaPolicyGradient(pl.LightningModule):
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved
-
         Args:
             batch: current mini batch of replay data
             _: batch number, not used
-
         Returns:
             Training loss and log metrics
         """
@@ -236,18 +217,18 @@ class VanillaPolicyGradient(pl.LightningModule):
     def add_model_specific_args(arg_parser) -> argparse.ArgumentParser:
         """
         Adds arguments for DQN model
-
         Note: these params are fine tuned for Pong env
-
         Args:
             arg_parser: the current argument parser to add to
-
         Returns:
             arg_parser with model specific cargs added
         """
 
         arg_parser.add_argument(
-            "--entropy_beta", type=float, default=0.01, help="entropy value",
+            "--entropy_beta",
+            type=float,
+            default=0.01,
+            help="entropy value",
         )
 
         return arg_parser
@@ -278,5 +259,5 @@ def cli_main():
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

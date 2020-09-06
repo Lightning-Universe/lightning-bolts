@@ -20,17 +20,23 @@ from pl_bolts.models.rl.common.networks import MLP
 
 
 class Reinforce(pl.LightningModule):
-    """ Basic REINFORCE Policy Model """
-
-    def __init__(self, env: str, gamma: float = 0.99, lr: float = 1e-4, batch_size: int = 32,
-                 batch_episodes: int = 4, avg_reward_len=100, epoch_len: int = 1000, **kwargs) -> None:
+    def __init__(
+        self,
+        env: str,
+        gamma: float = 0.99,
+        lr: float = 0.01,
+        batch_size: int = 8,
+        avg_reward_len: int = 100,
+        epoch_len: int = 1000,
+        num_batch_episodes: int = 4,
+        **kwargs
+    ) -> None:
         """
         PyTorch Lightning implementation of `REINFORCE
         <https://papers.nips.cc/paper/
         1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
         Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
         Model implemented by:
-
             - `Donal Byrne <https://github.com/djbyrne>`
 
         Example:
@@ -39,7 +45,6 @@ class Reinforce(pl.LightningModule):
             >>> model = Reinforce("PongNoFrameskip-v4")
 
         Train::
-
             trainer = Trainer()
             trainer.fit(model)
 
@@ -48,8 +53,9 @@ class Reinforce(pl.LightningModule):
             gamma: discount factor
             lr: learning rate
             batch_size: size of minibatch pulled from the DataLoader
-            batch_episodes: how many episodes to rollout for each batch of training
             avg_reward_len: how many episodes to take into account when calculating the avg reward
+            epoch_len: number of batches per epoch
+            num_batch_episodes: how many episodes to rollout for each batch of training
 
         Note:
             This example is based on:
@@ -65,32 +71,23 @@ class Reinforce(pl.LightningModule):
         self.batch_size = batch_size
         self.batches_per_epoch = self.batch_size * epoch_len
         self.gamma = gamma
-        self.num_batch_episodes = batch_episodes
+        self.num_batch_episodes = num_batch_episodes
 
         self.save_hyperparameters()
 
         # Model components
         self.env = gym.make(env)
-
         self.net = MLP(self.env.observation_space.shape, self.env.action_space.n)
         self.agent = PolicyAgent(self.net)
 
-        self.gamma = gamma
-        self.lr = lr
-        self.batch_size = batch_size
-        self.batch_episodes = batch_episodes
-
-        self.total_reward = 0
-        self.episode_reward = 0
-        self.episode_count = 0
-        self.episode_steps = 0
-        self.total_episode_steps = 0
+        # Tracking metrics
+        self.total_steps = 0
+        self.total_rewards = [0]
+        self.done_episodes = 0
+        self.avg_rewards = 0
+        self.reward_sum = 0.0
+        self.batch_episodes = 0
         self.avg_reward_len = avg_reward_len
-
-        self.reward_list = []
-        for _ in range(avg_reward_len):
-            self.reward_list.append(torch.tensor(0, device=self.device))
-        self.avg_reward = 0
 
         self.batch_states = []
         self.batch_actions = []
@@ -102,10 +99,8 @@ class Reinforce(pl.LightningModule):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Passes in a state x through the network and gets the q_values of each action as an output
-
         Args:
             x: environment state
-
         Returns:
             q values
         """
@@ -114,10 +109,8 @@ class Reinforce(pl.LightningModule):
 
     def calc_qvals(self, rewards: List[float]) -> List[float]:
         """Calculate the discounted rewards of all rewards in list
-
         Args:
             rewards: list of rewards from latest batch
-
         Returns:
             list of discounted rewards
         """
@@ -135,10 +128,8 @@ class Reinforce(pl.LightningModule):
     def discount_rewards(self, experiences: Tuple[Experience]) -> float:
         """
         Calculates the discounted reward over N experiences
-
         Args:
             experiences: Tuple of Experience
-
         Returns:
             total discounted reward
         """
@@ -152,7 +143,6 @@ class Reinforce(pl.LightningModule):
     ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
-
         Yield:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
         """
@@ -207,11 +197,9 @@ class Reinforce(pl.LightningModule):
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved
-
         Args:
             batch: current mini batch of replay data
             _: batch number, not used
-
         Returns:
             Training loss and log metrics
         """
@@ -253,29 +241,8 @@ class Reinforce(pl.LightningModule):
         """Retrieve device currently being used by minibatch"""
         return batch[0][0][0].device.index if self.on_gpu else "cpu"
 
-    @staticmethod
-    def add_model_specific_args(arg_parser) -> argparse.ArgumentParser:
-        """
-        Adds arguments for DQN model
-
-        Note: these params are fine tuned for Pong env
-
-        Args:
-            arg_parser: the current argument parser to add to
-
-        Returns:
-            arg_parser with model specific cargs added
-        """
-
-        arg_parser.add_argument(
-            "--entropy_beta", type=float, default=0.01, help="entropy value",
-        )
-
-        return arg_parser
-
 
 def cli_main():
-
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
@@ -299,5 +266,5 @@ def cli_main():
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

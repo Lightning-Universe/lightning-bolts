@@ -15,7 +15,8 @@ from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules.experience_source import (
-    ExperienceSourceDataset, Experience,
+    ExperienceSourceDataset,
+    Experience,
 )
 from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common import cli
@@ -29,32 +30,33 @@ class DQN(pl.LightningModule):
     """ Basic DQN Model """
 
     def __init__(
-            self,
-            env: str,
-            gpus: int = 0,
-            eps_start: float = 1.0,
-            eps_end: float = 0.02,
-            eps_last_frame: int = 150000,
-            sync_rate: int = 1000,
-            gamma: float = 0.99,
-            learning_rate: float = 1e-4,
-            batch_size: int = 32,
-            replay_size: int = 100000,
-            warm_start_size: int = 10000,
-            seed: int = 123,
-            num_samples: int = 500,
-            avg_reward_len: int = 100,
-            **kwargs,
+        self,
+        env: str,
+        eps_start: float = 1.0,
+        eps_end: float = 0.02,
+        eps_last_frame: int = 150000,
+        sync_rate: int = 1000,
+        gamma: float = 0.99,
+        learning_rate: float = 1e-4,
+        batch_size: int = 32,
+        replay_size: int = 100000,
+        warm_start_size: int = 10000,
+        avg_reward_len: int = 100,
+        min_episode_reward: int = -21,
+        seed: int = 123,
+        **kwargs,
     ):
         """
         PyTorch Lightning implementation of `DQN <https://arxiv.org/abs/1312.5602>`_
         Paper authors: Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves,
         Ioannis Antonoglou, Daan Wierstra, Martin Riedmiller.
         Model implemented by:
-
             - `Donal Byrne <https://github.com/djbyrne>`
 
-
+        Example:
+            >>> from pl_bolts.models.rl.dqn_model import DQN
+            ...
+            >>> model = DQN("PongNoFrameskip-v4")
 
         Args:
             env: gym environment tag
@@ -68,16 +70,14 @@ class DQN(pl.LightningModule):
             replay_size: total capacity of the replay buffer
             warm_start_size: how many random steps through the environment to be carried out at the start of
                 training to fill the buffer with a starting point
-            seed: seed value for all RNG used
-            num_envs: number of environments to run the agent in at once
-            num_samples: the number of samples to pull from the dataset iterator and feed to the DataLoader
             avg_reward_len: how many episodes to take into account when calculating the avg reward
-
+            min_episode_reward: the minimum score that can be achieved in an episode. Used for filling the avg buffer
+                before training begins
+            seed: seed value for all RNG used
         Note:
             This example is based on:
             https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\
             /blob/master/Chapter06/02_dqn_pong.py
-
         Note:
             Currently only supports CPU and single GPU training with `distributed_backend=dp`
         """
@@ -92,7 +92,6 @@ class DQN(pl.LightningModule):
 
         # Model Attributes
         self.buffer = None
-        self.source = None
         self.dataset = None
 
         self.net = None
@@ -123,12 +122,18 @@ class DQN(pl.LightningModule):
         self.episode_count = 0
         self.episode_steps = 0
         self.total_episode_steps = 0
+
+        self.total_rewards = [0]
+        self.done_episodes = 0
+
         self.avg_reward_len = avg_reward_len
 
         self.reward_list = []
         for _ in range(avg_reward_len):
-            self.reward_list.append(torch.tensor(0, device=self.device))
-        self.avg_reward = 0
+            self.reward_list.append(
+                torch.tensor(min_episode_reward, device=self.device)
+            )
+        self.avg_rewards = 0
 
         self.state = self.env.reset()
 
@@ -141,7 +146,13 @@ class DQN(pl.LightningModule):
                 self.agent.epsilon = 1.0
                 action = self.agent(self.state, self.device)
                 next_state, reward, done, _ = self.env.step(action)
-                exp = Experience(state=self.state, action=action, reward=reward, done=done, new_state=next_state)
+                exp = Experience(
+                    state=self.state,
+                    action=action,
+                    reward=reward,
+                    done=done,
+                    new_state=next_state,
+                )
                 self.buffer.append(exp)
 
     def build_networks(self) -> None:
@@ -173,7 +184,13 @@ class DQN(pl.LightningModule):
             action = self.agent(self.state, self.device)
 
             next_state, reward, done, _ = self.env.step(action)
-            exp = Experience(state=self.state, action=action, reward=reward, done=done, new_state=next_state)
+            exp = Experience(
+                state=self.state,
+                action=action,
+                reward=reward,
+                done=done,
+                new_state=next_state,
+            )
 
             self.agent.update_epsilon(self.global_step)
             self.buffer.append(exp)
@@ -194,8 +211,8 @@ class DQN(pl.LightningModule):
                 self.state = self.env.reset()
 
             states, actions, rewards, dones, new_states = self.buffer.sample(
-                    self.batch_size
-                )
+                self.batch_size
+            )
 
             for idx, _ in enumerate(dones):
                 yield states[idx], actions[idx], rewards[idx], dones[idx], new_states[
@@ -271,11 +288,9 @@ class DQN(pl.LightningModule):
     def make_environment(env_name: str, seed: int) -> gym.Env:
         """
         Initialise gym  environment
-
         Args:
             env_name: environment name or tag
             seed: value to seed the environment RNG for reproducibility
-
         Returns:
             gym environment
         """
@@ -344,5 +359,5 @@ def cli_main():
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()
