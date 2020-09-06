@@ -76,7 +76,7 @@ class ValueAgent(Agent):
         actions = []
 
         for i in range(len(state)):
-            action = np.random.randint(0, self.action_space - 1)
+            action = np.random.randint(0, self.action_space)
             actions.append(action)
 
         return actions
