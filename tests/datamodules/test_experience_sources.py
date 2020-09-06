@@ -5,7 +5,6 @@ from torch.utils.data import DataLoader
 from pl_bolts.datamodules.experience_source import ExperienceSourceDataset
 
 
-
 class TestExperienceSourceDataset(TestCase):
     def train_batch(self):
         """Returns an iterator used for testing"""
