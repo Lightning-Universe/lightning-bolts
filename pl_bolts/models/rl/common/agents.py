@@ -83,12 +83,12 @@ class ValueAgent(Agent):
 
     def get_action(self, state: torch.Tensor, device: torch.device):
         """
-            Returns the best action based on the Q values of the network
-            Args:
-                state: current state of the environment
-                device: the device used for the current batch
-            Returns:
-                action defined by Q values
+        Returns the best action based on the Q values of the network
+        Args:
+            state: current state of the environment
+            device: the device used for the current batch
+        Returns:
+            action defined by Q values
         """
         if not isinstance(state, torch.Tensor):
             state = torch.tensor(state, device=device)
