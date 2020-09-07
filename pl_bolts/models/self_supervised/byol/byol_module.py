@@ -102,6 +102,12 @@ class BYOL(pl.LightningModule):
         y, _, _ = self.online_network(x)
         return y
 
+    def cosine_similarity(self, a, b):
+        a = F.normalize(a, dim=-1)
+        b = F.normalize(b, dim=-1)
+        sim = (a * b).sum(-1).mean()
+        return sim
+
     def shared_step(self, batch, batch_idx):
         (img_1, img_2), y = batch
 
@@ -109,19 +115,14 @@ class BYOL(pl.LightningModule):
         y1, z1, h1 = self.online_network(img_1)
         with torch.no_grad():
             y2, z2, h2 = self.target_network(img_2)
-        # L2 normalize
-        h1_norm = F.normalize(h1, p=2, dim=-1)
-        z2_norm = F.normalize(z2, p=2, dim=-1)
-        loss_a = F.mse_loss(h1_norm, z2_norm)
+        loss_a = - 2 * self.cosine_similarity(h1, z2)
 
         # Image 2 to image 1 loss
         y1, z1, h1 = self.online_network(img_2)
         with torch.no_grad():
             y2, z2, h2 = self.target_network(img_1)
         # L2 normalize
-        h1_norm = F.normalize(h1, p=2, dim=1)
-        z2_norm = F.normalize(z2, p=2, dim=1)
-        loss_b = F.mse_loss(h1_norm, z2_norm)
+        loss_b = - 2 * self.cosine_similarity(h1, z2)
 
         # Final loss
         total_loss = loss_a + loss_b
