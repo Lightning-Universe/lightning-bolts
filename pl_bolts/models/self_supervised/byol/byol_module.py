@@ -110,8 +110,8 @@ class BYOL(pl.LightningModule):
         with torch.no_grad():
             y2, z2, h2 = self.target_network(img_2)
         # L2 normalize
-        h1_norm = F.normalize(h1, p=2, dim=1)
-        z2_norm = F.normalize(z2, p=2, dim=1)
+        h1_norm = F.normalize(h1, p=2, dim=-1)
+        z2_norm = F.normalize(z2, p=2, dim=-1)
         loss_a = F.mse_loss(h1_norm, z2_norm)
 
         # Image 2 to image 1 loss
