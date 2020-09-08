@@ -1,10 +1,12 @@
 from queue import Queue
 from threading import Thread
 
+import re
+
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
-
+from torch._six import container_abcs, string_classes, int_classes
 
 class AsynchronousLoader(object):
     """
@@ -54,14 +56,30 @@ class AsynchronousLoader(object):
 
     # Recursive loading for each instance based on torch.utils.data.default_collate
     def load_instance(self, sample):
+        np_str_obj_array_pattern = re.compile(r'[SaUO]')
+
+        elem_type = type(sample)
+
         if torch.is_tensor(sample):
             with torch.cuda.stream(self.load_stream):
                 # Can only do asynchronous transfer if we use pin_memory
                 if not sample.is_pinned():
                     sample = sample.pin_memory()
                 return sample.to(self.device, non_blocking=True)
-        else:
+        elif elem_type.__module__ == 'numpy' and elem_type.__name__ != 'str_' \
+                and elem_type.__name__ != 'string_':
+            if elem_type.__name__ == 'ndarray' \
+                    and np_str_obj_array_pattern.search(sample.dtype.str) is not None:
+                return self.load_instance(sample)
+            return self.load_instance(torch.as_tensor(sample))
+        elif isinstance(sample, container_abcs.Mapping):
+            return {key: self.load_instance(sample[key]) for key in sample}
+        elif isinstance(sample, tuple) and hasattr(sample, '_fields'):  # namedtuple
+            return elem_type(*(self.load_instance(d) for d in sample))
+        elif isinstance(sample, container_abcs.Sequence) and not isinstance(sample, string_classes):
             return [self.load_instance(s) for s in sample]
+        else:
+            return sample
 
     def __iter__(self):
         # We don't want to run the thread more than once
