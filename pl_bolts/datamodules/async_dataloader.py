@@ -8,7 +8,6 @@ from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from torch._six import container_abcs, string_classes, int_classes
 
-
 class AsynchronousLoader(object):
     """
     Class for asynchronously loading from CPU memory to device memory with DataLoader.
@@ -39,8 +38,7 @@ class AsynchronousLoader(object):
         elif hasattr(self.dataloader, '__len__'):
             self.num_batches = len(self.dataloader)
         else:
-            raise Exception(
-                "num_batches must be specified or data must have finite __len__")
+            raise Exception("num_batches must be specified or data must have finite __len__")
 
         self.device = device
         self.q_size = q_size
@@ -78,10 +76,10 @@ class AsynchronousLoader(object):
             return {key: self.load_instance(sample[key]) for key in sample}
         elif isinstance(sample, tuple) and hasattr(sample, '_fields'):  # namedtuple
             return elem_type(*(self.load_instance(d) for d in sample))
-        elif isinstance(sample, string_classes):
-            return sample
-        else:
+        elif isinstance(sample, container_abcs.Sequence) and not isinstance(sample, string_classes):
             return [self.load_instance(s) for s in sample]
+        else:
+            return sample
 
     def __iter__(self):
         # We don't want to run the thread more than once
