@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from torch._six import container_abcs, string_classes, int_classes
 
+
 class AsynchronousLoader(object):
     """
     Class for asynchronously loading from CPU memory to device memory with DataLoader.
@@ -15,7 +16,7 @@ class AsynchronousLoader(object):
     Note that this only works for single GPU training, multiGPU uses PyTorch's DataParallel or
     DistributedDataParallel which uses its own code for transferring data across GPUs. This could just
     break or make things slower with DataParallel or DistributedDataParallel.
-
+    
     Args:
         data: The PyTorch Dataset or DataLoader we're using to load.
         device: The PyTorch device we are loading to
