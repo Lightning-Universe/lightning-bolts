@@ -16,7 +16,7 @@ class AsynchronousLoader(object):
     Note that this only works for single GPU training, multiGPU uses PyTorch's DataParallel or
     DistributedDataParallel which uses its own code for transferring data across GPUs. This could just
     break or make things slower with DataParallel or DistributedDataParallel.
-    
+
     Args:
         data: The PyTorch Dataset or DataLoader we're using to load.
         device: The PyTorch device we are loading to
@@ -49,6 +49,8 @@ class AsynchronousLoader(object):
 
         self.idx = 0
 
+        self.np_str_obj_array_pattern = re.compile(r'[SaUO]')
+
     def load_loop(self):  # The loop that will load into the queue in the background
         for i, sample in enumerate(self.dataloader):
             self.queue.put(self.load_instance(sample))
@@ -57,8 +59,6 @@ class AsynchronousLoader(object):
 
     # Recursive loading for each instance based on torch.utils.data.default_collate
     def load_instance(self, sample):
-        np_str_obj_array_pattern = re.compile(r'[SaUO]')
-
         elem_type = type(sample)
 
         if torch.is_tensor(sample):
@@ -70,7 +70,7 @@ class AsynchronousLoader(object):
         elif elem_type.__module__ == 'numpy' and elem_type.__name__ != 'str_' \
                 and elem_type.__name__ != 'string_':
             if elem_type.__name__ == 'ndarray' \
-                    and np_str_obj_array_pattern.search(sample.dtype.str) is not None:
+                    and self.np_str_obj_array_pattern.search(sample.dtype.str) is not None:
                 return self.load_instance(sample)
             return self.load_instance(torch.as_tensor(sample))
         elif isinstance(sample, container_abcs.Mapping):
