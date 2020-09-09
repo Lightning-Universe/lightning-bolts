@@ -13,7 +13,7 @@ from pytorch_lightning.utilities import rank_zero_warn
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.losses.self_supervised_learning import CPCTask
-from pl_bolts.models.self_supervised.cpc.networks import CPCResNet101
+from pl_bolts.models.self_supervised.cpc.networks import cpc_resnet101
 from pl_bolts.models.self_supervised.cpc.transforms import (
     CPCTrainTransformsCIFAR10,
     CPCEvalTransformsCIFAR10,
@@ -165,7 +165,7 @@ class CPCV2(pl.LightningModule):
 
         encoder_name = self.hparams.encoder
         if encoder_name == 'cpc_encoder':
-            return CPCResNet101(dummy_batch)
+            return cpc_resnet101(dummy_batch)
         else:
             return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=self.hparams.task == 'amdim')
 
