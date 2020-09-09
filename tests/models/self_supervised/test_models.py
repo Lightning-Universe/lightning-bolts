@@ -5,13 +5,13 @@ from pytorch_lightning import seed_everything
 
 from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.models.self_supervised import CPCV2, AMDIM, MocoV2, SimCLR, BYOL
+from pl_bolts.models.self_supervised.resnets import resnet34
 from pl_bolts.models.self_supervised.cpc import CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10
 from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
 from pl_bolts.models.self_supervised.moco.transforms import (Moco2TrainCIFAR10Transforms, Moco2EvalCIFAR10Transforms)
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
 
-@pytest.mark.skipif(torch.cuda.device_count() == 0, reason="test requires GPU machine")
 def test_cpcv2(tmpdir):
     seed_everything()
 
@@ -20,14 +20,13 @@ def test_cpcv2(tmpdir):
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 
     model = CPCV2(encoder='resnet18', data_dir=tmpdir, batch_size=2, online_ft=True, datamodule=datamodule)
-    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, gpus=1)
+    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.progress_bar_metrics['val_nce']
 
     assert float(loss) > 0
 
 
-@pytest.mark.skipif(torch.cuda.device_count() == 0, reason="test requires GPU machine")
 def test_byol(tmpdir):
     seed_everything()
 
@@ -43,19 +42,17 @@ def test_byol(tmpdir):
     assert float(loss) < 1.0
 
 
-@pytest.mark.skipif(torch.cuda.device_count() == 0, reason="test requires GPU machine")
 def test_amdim(tmpdir):
     seed_everything()
 
     model = AMDIM(data_dir=tmpdir, batch_size=2, online_ft=True, encoder='resnet18')
-    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, gpus=1)
+    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) > 0
 
 
-@pytest.mark.skipif(torch.cuda.device_count() == 0, reason="test requires GPU machine")
 def test_moco(tmpdir):
     seed_everything()
 
@@ -65,7 +62,7 @@ def test_moco(tmpdir):
 
     model = MocoV2(data_dir=tmpdir, batch_size=2, datamodule=datamodule, online_ft=True)
     trainer = pl.Trainer(
-        fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, callbacks=[MocoLRScheduler()], gpus=1
+        fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, callbacks=[MocoLRScheduler()]
     )
     trainer.fit(model)
     loss = trainer.progress_bar_dict['loss']
@@ -73,7 +70,6 @@ def test_moco(tmpdir):
     assert float(loss) > 0
 
 
-@pytest.mark.skipif(torch.cuda.device_count() == 0, reason="test requires GPU machine")
 def test_simclr(tmpdir):
     seed_everything()
 
@@ -82,7 +78,7 @@ def test_simclr(tmpdir):
     datamodule.val_transforms = SimCLREvalDataTransform(32)
 
     model = SimCLR(batch_size=2, num_samples=datamodule.num_samples)
-    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, gpus=1)
+    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model, datamodule)
     loss = trainer.progress_bar_dict['loss']
 
