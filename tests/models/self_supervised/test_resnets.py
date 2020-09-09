@@ -2,7 +2,7 @@ import pytest
 import torch
 
 from pl_bolts.models.self_supervised.amdim import AMDIMEncoder
-from pl_bolts.models.self_supervised.cpc import CPCResNet101
+from pl_bolts.models.self_supervised.cpc import cpc_resnet50
 from pl_bolts.models.self_supervised.resnets import (
     resnet18,
     resnet34,
@@ -16,10 +16,9 @@ from pl_bolts.models.self_supervised.resnets import (
 )
 
 
-@pytest.mark.skip(reason='seems to freeze...')  # TODO: use smaller model
 def test_cpc_resnet(tmpdir):
     x = torch.rand(3, 3, 64, 64)
-    model = CPCResNet101(x)
+    model = cpc_resnet50(x)
     model(x)
 
 

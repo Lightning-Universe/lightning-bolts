@@ -2,12 +2,12 @@ import torch.nn.functional as F
 from torch import nn
 
 
-class CPCResNet101(nn.Module):
+class CPCResNet(nn.Module):
 
-    def __init__(self, sample_batch, zero_init_residual=False,
+    def __init__(self, sample_batch, block, layers, zero_init_residual=False,
                  groups=1, width_per_group=64, replace_stride_with_dilation=None,
                  norm_layer=None):
-        super(CPCResNet101, self).__init__()
+        super(CPCResNet, self).__init__()
         if norm_layer is None:
             norm_layer = nn.LayerNorm
         self._norm_layer = norm_layer
@@ -38,12 +38,12 @@ class CPCResNet101(nn.Module):
 
         sample_batch = self.maxpool(sample_batch)
 
-        self.layer1, sample_batch = self._make_layer(sample_batch, LNBottleneck, 64, blocks=3)
-        self.layer2, sample_batch = self._make_layer(sample_batch, LNBottleneck, 128, blocks=4,
+        self.layer1, sample_batch = self._make_layer(sample_batch, block, 64, blocks=layers[0])
+        self.layer2, sample_batch = self._make_layer(sample_batch, block, 128, blocks=layers[1],
                                                      stride=2, dilate=replace_stride_with_dilation[0])
-        self.layer3, sample_batch = self._make_layer(sample_batch, LNBottleneck, 512, blocks=46,
+        self.layer3, sample_batch = self._make_layer(sample_batch, block, 512, blocks=layers[2],
                                                      stride=2, dilate=replace_stride_with_dilation[1], expansion=8)
-        self.layer4, sample_batch = self._make_layer(sample_batch, LNBottleneck, 512, blocks=3,
+        self.layer4, sample_batch = self._make_layer(sample_batch, block, 512, blocks=layers[3],
                                                      stride=2, dilate=replace_stride_with_dilation[2])
         # self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
@@ -98,6 +98,14 @@ class CPCResNet101(nn.Module):
         x = self.layer4(x)
 
         return x
+
+
+def cpc_resnet101(sample_batch, **kwargs):
+    return CPCResNet(sample_batch, LNBottleneck, [3, 4, 46, 3], **kwargs)
+
+
+def cpc_resnet50(sample_batch, **kwargs):
+    return CPCResNet(sample_batch, LNBottleneck, [3, 4, 6, 3], **kwargs)
 
 
 class LNBottleneck(nn.Module):
