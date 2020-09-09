@@ -66,7 +66,6 @@ def test_cli_run_log_regression(cli_args):
         cli_main()
 
 
-#@pytest.mark.skip(reason='seems to freeze CLI run...')  # TODO
 @pytest.mark.skipif(torch.cuda.device_count() == 0, reason="test requires GPU machine")
 @pytest.mark.parametrize('cli_args', ['--max_epochs 1 --max_steps 3 --gpus 1'])
 def test_cli_run_vision_image_gpt(cli_args):
