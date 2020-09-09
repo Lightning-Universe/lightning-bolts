@@ -17,7 +17,8 @@
 
 </div>
 
----   
+---
+
 ## Trending contributors
 
 [![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/0)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/0)
@@ -31,6 +32,7 @@
 
 
 ## Continuous Integration
+
 <center>
 
 | System / PyTorch ver. | 1.4 (min. req.) | 1.6 (latest) |
@@ -42,12 +44,15 @@
 </center>
 
 ## Install
+
 ```pip install pytorch-lightning-bolts```
 
 ## Docs
+
 - [master](https://pytorch-lightning-bolts.readthedocs.io/en/latest)
 - [stable](https://pytorch-lightning-bolts.readthedocs.io/en/stable)
-- [0.1.0](https://pytorch-lightning-bolts.readthedocs.io/en/0.1.0/)
+- [0.2.0](https://pytorch-lightning-bolts.readthedocs.io/en/0.2.0/)
+- [0.1.1](https://pytorch-lightning-bolts.readthedocs.io/en/0.1.1/)
 
 ## What is Bolts
 Bolts is a Deep learning research and production toolbox of:
