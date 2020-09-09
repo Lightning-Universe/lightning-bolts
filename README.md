@@ -12,6 +12,7 @@
 
 [![Documentation Status](https://readthedocs.org/projects/pytorch-lightning-bolts/badge/?version=latest)](https://pytorch-lightning-bolts.readthedocs.io/en/latest/)
 [![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://join.slack.com/t/pytorch-lightning/shared_invite/zt-f6bl2l0l-JYMK3tbAgAmGRrlNr00f1A)
+[![Discourse status](https://img.shields.io/discourse/status?server=https%3A%2F%2Fforums.pytorchlightning.ai)](https://forums.pytorchlightning.ai/)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/PytorchLightning/pytorch-lightning/blob/master/LICENSE)
 [![Next Release](https://img.shields.io/badge/Next%20Release-Oct%2005-purple.svg)](https://shields.io/)
 
@@ -45,7 +46,15 @@
 
 ## Install
 
-```pip install pytorch-lightning-bolts```
+Simple installation from PyPI
+```bash
+pip install pytorch-lightning
+```
+
+Install bleeding-edge (no guarantees)   
+```bash
+pip install git+https://github.com/PytorchLightning/pytorch-lightning-bolts.git@master --upgrade
+```
 
 ## Docs
 
@@ -55,6 +64,7 @@
 - [0.1.1](https://pytorch-lightning-bolts.readthedocs.io/en/0.1.1/)
 
 ## What is Bolts
+
 Bolts is a Deep learning research and production toolbox of:
 
 - SOTA pretrained models.
@@ -64,6 +74,7 @@ Bolts is a Deep learning research and production toolbox of:
 - Datasets.
 
 ## Main Goals of Bolts
+
 The main goal of Bolts is to enable rapid model idea iteration.
 
 #### Example 1: Finetuning on data
@@ -111,12 +122,14 @@ class VideoGPT(ImageGPT):
 ```
 
 ## Who is Bolts for?
+
 - Corporate production teams
 - Professional researchers
 - Ph.D. students
 - Linear + Logistic regression heroes
 
 ## I don't need deep learning
+
 Great! 
 We have LinearRegression and LogisticRegression implementations with numpy and sklearn bridges for datasets!
 But our implementations work on multiple GPUs, TPUs and scale dramatically...
@@ -138,6 +151,7 @@ trainer.test(test_dataloaders=loaders.test_dataloader())
 ```
 
 ## Is this another model zoo?
+
 No! 
 
 Bolts is unique because models are implemented using PyTorch Lightning and structured so that they can be easily
@@ -148,5 +162,6 @@ The best part is that all the models are benchmarked so you won't waste time try
 with your implementation.
 
 ## Team
+
 Bolts is supported by the PyTorch Lightning team and the PyTorch Lightning community!
 
