@@ -48,7 +48,7 @@
 
 Simple installation from PyPI
 ```bash
-pip install pytorch-lightning
+pip install pytorch-lightning-bolts
 ```
 
 Install bleeding-edge (no guarantees)   
