@@ -139,7 +139,7 @@ CIFAR-10 pretrained model::
 
     from pl_bolts.models.self_supervised import CPCV2
 
-    weight_path = ''
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/epoch%3D474.ckpt'
     cpc_v2 = CPCV2.load_from_checkpoint(weight_path, strict=False)
 
     cpc_v2.freeze()
