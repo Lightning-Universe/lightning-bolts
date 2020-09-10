@@ -43,6 +43,7 @@ def test_cli_run_self_supervised_simclr(cli_args):
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
         cli_main()
 
+
 @pytest.mark.parametrize('cli_args', ['--max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2 --online_ft'])
 def test_cli_run_self_supervised_byol(cli_args):
     """Test running CLI for an example with default params."""
