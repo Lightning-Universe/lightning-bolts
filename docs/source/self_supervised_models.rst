@@ -105,10 +105,11 @@ BYOL
 CPC (V2)
 ^^^^^^^^
 
-PyTorch Lightning implementation of `CPCv2 <https://arxiv.org/pdf/1905.09272.pdf>`_
+PyTorch Lightning implementation of `Data-Efficient Image Recognition with Contrastive
+Predictive Coding <https://arxiv.org/abs/1905.09272>`_
 
-Paper authors: Olivier J. Henaff, Aravind Srinivas, Jeffrey De Fauw, Ali Razavi, Carl Doersch,
-S. M. Ali Eslami, Aaron van den Oord.
+Paper authors: (Olivier J. Hénaff, Aravind Srinivas, Jeffrey De Fauw, Ali Razavi,
+Carl Doersch, S. M. Ali Eslami, Aaron van den Oord).
 
 Model implemented by:
 
@@ -134,6 +135,27 @@ To Train::
     # fit
     trainer = pl.Trainer()
     trainer.fit(model, dm)
+
+To finetune::
+
+    python cpc_finetuner.py
+        --ckpt_path path/to/checkpoint.ckpt
+        --dataset cifar10
+        --gpus 1
+
+Some uses::
+
+    # load resnet18 pretrained using CPC on imagenet
+    model = CPCV2(encoder='resnet18', pretrained=True)
+    resnet18 = model.encoder
+    renset18.freeze()
+
+    # it supportes any torchvision resnet
+    model = CPCV2(encoder='resnet50', pretrained=True)
+
+    # use it as a feature extractor
+    x = torch.rand(2, 3, 224, 224)
+    out = model(x)
 
 CIFAR-10 pretrained model::
 

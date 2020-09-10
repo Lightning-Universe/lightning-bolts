@@ -49,59 +49,6 @@ class CPCV2(pl.LightningModule):
             **kwargs,
     ):
         """
-        PyTorch Lightning implementation of `Data-Efficient Image Recognition with Contrastive Predictive Coding
-        <https://arxiv.org/abs/1905.09272>`_
-
-        Paper authors: (Olivier J. Hénaff, Aravind Srinivas, Jeffrey De Fauw, Ali Razavi,
-        Carl Doersch, S. M. Ali Eslami, Aaron van den Oord).
-
-        Model implemented by:
-
-            - `William Falcon <https://github.com/williamFalcon>`_
-            - `Tullie Murrell <https://github.com/tullie>`_
-
-        Example:
-
-            >>> from pl_bolts.models.self_supervised import CPCV2
-            ...
-            >>> model = CPCV2()
-
-        Train::
-
-            trainer = Trainer()
-            trainer.fit(model)
-
-        CLI command::
-
-            # cifar10
-            python cpc_module.py --gpus 1
-
-            # imagenet
-            python cpc_module.py
-                --gpus 8
-                --dataset imagenet2012
-                --data_dir /path/to/imagenet/
-                --meta_dir /path/to/folder/with/meta.bin/
-                --batch_size 32
-
-        To Finetune::
-
-            python cpc_finetuner.py --ckpt_path path/to/checkpoint.ckpt --dataset cifar10 --gpus x
-
-        Some uses::
-
-            # load resnet18 pretrained using CPC on imagenet
-            model = CPCV2(encoder='resnet18', pretrained=True)
-            resnet18 = model.encoder
-            renset18.freeze()
-
-            # it supportes any torchvision resnet
-            model = CPCV2(encoder='resnet50', pretrained=True)
-
-            # use it as a feature extractor
-            x = torch.rand(2, 3, 224, 224)
-            out = model(x)
-
         Args:
             datamodule: A Datamodule (optional). Otherwise set the dataloaders directly
             encoder: A string for any of the resnets in torchvision, or the original CPC encoder,
