@@ -164,7 +164,7 @@ CPCv2 does not report baselines on CIFAR-10 and STL-10 datasets.
 Results in table are reported from the
 `YADIM <https://arxiv.org/pdf/2009.00104.pdf>`_ paper.
 
-.. list-table:: Cifar-10 implementation results
+.. list-table:: CPCv2 implementation results
    :widths: 18 15 25 15 10 20 20 10
    :header-rows: 1
 
