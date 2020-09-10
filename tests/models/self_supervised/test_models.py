@@ -61,9 +61,7 @@ def test_moco(tmpdir):
     datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
 
     model = MocoV2(data_dir=tmpdir, batch_size=2, datamodule=datamodule, online_ft=True)
-    trainer = pl.Trainer(
-        fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, callbacks=[MocoLRScheduler()]
-    )
+    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, callbacks=[MocoLRScheduler()])
     trainer.fit(model)
     loss = trainer.progress_bar_dict['loss']
 
