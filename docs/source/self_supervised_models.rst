@@ -156,7 +156,7 @@ Pre-training:
 
 |
 
-Fine-tuning (Single layer MLP, 1024 hidden units):
+Fine-tuning:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/online-finetuning-cpc-cifar10.png
     :width: 200
@@ -185,7 +185,7 @@ Pre-training:
 
 |
 
-Fine-tuning (Single layer MLP, 1024 hidden units):
+Fine-tuning:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/online-finetuning-cpc-stl10.png
     :width: 200
