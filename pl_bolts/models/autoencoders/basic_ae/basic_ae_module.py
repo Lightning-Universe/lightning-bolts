@@ -4,7 +4,7 @@ import torch
 from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataModule
+from pl_bolts.datamodules import MNISTDataModule, CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 from pl_bolts.models.autoencoders.basic_ae.components import AEEncoder
 from pl_bolts.models.autoencoders.basic_vae.components import Decoder
 
@@ -13,16 +13,12 @@ class AE(LightningModule):
 
     def __init__(
             self,
-            # datamodule: LightningDataModule = None,
-            input_channels=1,
-            input_height=28,
-            input_width=28,
+            input_channels: int,
+            input_height: int,
+            input_width: int,
             latent_dim=32,
-            batch_size=32,
             hidden_dim=128,
             learning_rate=0.001,
-            num_workers=8,
-            data_dir='.',
             **kwargs
     ):
         """
@@ -127,27 +123,36 @@ class AE(LightningModule):
                             help='itermediate layers dimension before embedding for default encoder/decoder')
         parser.add_argument('--latent_dim', type=int, default=32,
                             help='dimension of latent variables z')
-        parser.add_argument('--input_width', type=int, default=28,
-                            help='input image width - 28 for MNIST (must be even)')
-        parser.add_argument('--input_height', type=int, default=28,
-                            help='input image height - 28 for MNIST (must be even)')
-        parser.add_argument('--batch_size', type=int, default=32)
-        parser.add_argument('--num_workers', type=int, default=8, help="num dataloader workers")
         parser.add_argument('--learning_rate', type=float, default=1e-3)
-        parser.add_argument('--data_dir', type=str, default='')
         return parser
 
 
-def cli_main():
+def cli_main(args=None):
+    # cli_main()
     parser = ArgumentParser()
+    parser.add_argument('--dataset', default='mnist', type=str, help='mnist, cifar10, stl10, imagenet')
+    script_args, _ = parser.parse_known_args(args)
+
+    if script_args.dataset == 'mnist':
+        dm_cls = MNISTDataModule
+    elif script_args.dataset == 'cifar10':
+        dm_cls = CIFAR10DataModule
+    elif script_args.dataset == 'stl10':
+        dm_cls = STL10DataModule
+    elif script_args.dataset == 'imagenet':
+        dm_cls = ImagenetDataModule
+
+    parser = dm_cls.add_argparse_args(parser)
     parser = Trainer.add_argparse_args(parser)
     parser = AE.add_model_specific_args(parser)
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
-    ae = AE(**vars(args))
+    dm = dm_cls.from_argparse_args(args)
+    model = AE(*dm.size(), **vars(args))
     trainer = Trainer.from_argparse_args(args)
-    trainer.fit(ae)
+    trainer.fit(model, dm)
+    return dm, model, trainer
 
 
 if __name__ == '__main__':
-    cli_main()
+    dm, model, trainer = cli_main()
