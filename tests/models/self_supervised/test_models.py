@@ -1,9 +1,11 @@
 import pytest
+import torch
 import pytorch_lightning as pl
 from pytorch_lightning import seed_everything
 
 from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.models.self_supervised import CPCV2, AMDIM, MocoV2, SimCLR, BYOL
+from pl_bolts.models.self_supervised.resnets import resnet34
 from pl_bolts.models.self_supervised.cpc import CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10
 from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
 from pl_bolts.models.self_supervised.moco.transforms import (Moco2TrainCIFAR10Transforms, Moco2EvalCIFAR10Transforms)
@@ -40,7 +42,6 @@ def test_byol(tmpdir):
     assert float(loss) < 1.0
 
 
-@pytest.mark.skip(reason='seems to freeze...')  # TODO
 def test_amdim(tmpdir):
     seed_everything()
 

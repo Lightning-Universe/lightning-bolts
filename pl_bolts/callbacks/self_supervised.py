@@ -87,7 +87,11 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
         self.optimizer.zero_grad()
 
         # log metrics
-        acc = accuracy(mlp_preds, y)
+        if trainer.datamodule is not None:
+            acc = accuracy(mlp_preds, y, num_classes=trainer.datamodule.num_classes)
+        else:
+            acc = accuracy(mlp_preds, y)
+
         metrics = {'ft_callback_mlp_loss': mlp_loss, 'ft_callback_mlp_acc': acc}
         pl_module.logger.log_metrics(metrics, step=trainer.global_step)
 
