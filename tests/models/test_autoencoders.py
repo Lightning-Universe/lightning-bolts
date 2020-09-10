@@ -2,6 +2,7 @@ import pytorch_lightning as pl
 import torch
 from pytorch_lightning import seed_everything
 
+from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models.autoencoders import VAE, AE
 from pl_bolts.models.autoencoders.basic_ae import AEEncoder
 from pl_bolts.models.autoencoders.basic_vae import Encoder, Decoder
@@ -9,11 +10,11 @@ from pl_bolts.models.autoencoders.basic_vae import Encoder, Decoder
 
 def test_vae(tmpdir):
     seed_everything()
-
-    model = VAE(data_dir=tmpdir, batch_size=2, num_workers=0)
+    dm = MNISTDataModule(batch_size=2, num_workers=0)
+    model = VAE(*dm.size())
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir, deterministic=True)
-    trainer.fit(model)
-    results = trainer.test(model)[0]
+    trainer.fit(model, dm)
+    results = trainer.test(model, datamodule=dm)[0]
     loss = results['test_loss']
 
     assert loss > 0, 'VAE failed'
@@ -22,10 +23,11 @@ def test_vae(tmpdir):
 def test_ae(tmpdir):
     seed_everything()
 
-    model = AE(data_dir=tmpdir, batch_size=2)
+    dm = MNISTDataModule(batch_size=2, num_workers=0)
+    model = VAE(*dm.size())
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
-    trainer.fit(model)
-    trainer.test(model)
+    trainer.fit(model, dm)
+    trainer.test(model, datamodule=dm)
 
 
 def test_basic_ae_encoder(tmpdir):
@@ -37,7 +39,7 @@ def test_basic_ae_encoder(tmpdir):
     batch_size = 16
     channels = 1
 
-    encoder = AEEncoder(hidden_dim, latent_dim, width, height)
+    encoder = AEEncoder(hidden_dim, latent_dim, channels, width, height)
     x = torch.randn(batch_size, channels, width, height)
     z = encoder(x)
 
