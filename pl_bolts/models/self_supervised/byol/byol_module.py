@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from torch.optim import Adam
 import pytorch_lightning as pl
 from typing import Any
+from argparse import ArgumentParser
 
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
@@ -180,8 +181,7 @@ class BYOL(pl.LightningModule):
         return parser
 
 
-if __name__ == '__main__':
-    from argparse import ArgumentParser
+def cli_main():
     from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
     from pl_bolts.models.self_supervised.simclr import simclr_transforms
     from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
@@ -234,5 +234,9 @@ if __name__ == '__main__':
     online_eval = SSLOnlineEvaluator(z_dim=2048, num_classes=dm.num_classes)
     online_eval.to_device = to_device
 
-    trainer = pl.Trainer.from_argparse_args(args, max_steps=100000, callbacks=[online_eval])
+    trainer = pl.Trainer.from_argparse_args(args, callbacks=[online_eval])
     trainer.fit(model, dm)
+
+
+if __name__ == '__main__':
+    cli_main()
