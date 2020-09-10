@@ -157,6 +157,9 @@ Some uses::
     x = torch.rand(2, 3, 224, 224)
     out = model(x)
 
+- `Tensorboard for CIFAR10 <https://tensorboard.dev/experiment/8m1aX0gcQ7aEmH0J7kbBtg/#scalars>`_
+- `Tensorboard for STL10 <https://tensorboard.dev/experiment/hgYOq0TVQfOwGHLjiBVggA/#scalars>`_
+
 CIFAR-10 pretrained model::
 
     from pl_bolts.models.self_supervised import CPCV2
@@ -167,8 +170,6 @@ CIFAR-10 pretrained model::
     cpc_v2.freeze()
 
 |
-
-`Tensorboard for CIFAR10 <https://tensorboard.dev/experiment/8m1aX0gcQ7aEmH0J7kbBtg/#scalars>`_
 
 Pre-training:
 
@@ -196,8 +197,6 @@ STL-10 pretrained model::
     cpc_v2.freeze()
 
 |
-
-`Tensorboard for STL10 <https://tensorboard.dev/experiment/hgYOq0TVQfOwGHLjiBVggA/#scalars>`_
 
 Pre-training:
 
