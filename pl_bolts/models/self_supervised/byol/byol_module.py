@@ -187,6 +187,8 @@ def cli_main():
     from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
     from pl_bolts.models.self_supervised.simclr import simclr_transforms
     from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
+    from pytorch_lightning import seed_everything
+    seed_everything(1234)
 
     parser = ArgumentParser()
 
