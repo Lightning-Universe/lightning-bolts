@@ -124,7 +124,6 @@ class AE(LightningModule):
 
 
 def cli_main(args=None):
-    # cli_main()
     parser = ArgumentParser()
     parser.add_argument("--dataset", default="mnist", type=str, help="mnist, cifar10, stl10, imagenet")
     script_args, _ = parser.parse_known_args(args)
