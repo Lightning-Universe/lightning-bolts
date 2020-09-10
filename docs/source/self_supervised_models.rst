@@ -157,8 +157,41 @@ Some uses::
     x = torch.rand(2, 3, 224, 224)
     out = model(x)
 
-- `Tensorboard for CIFAR10 <https://tensorboard.dev/experiment/8m1aX0gcQ7aEmH0J7kbBtg/#scalars>`_
-- `Tensorboard for STL10 <https://tensorboard.dev/experiment/hgYOq0TVQfOwGHLjiBVggA/#scalars>`_
+CIFAR-10 and STL-10 baselines
+*****************************
+
+CPCv2 does not report baselines on CIFAR-10 and STL-10 datasets.
+
+.. list-table:: Cifar-10 implementation results
+   :widths: 18 15 25 15 10 20 20 10
+   :header-rows: 1
+
+   * - Dataset
+     - test acc
+     - Encoder
+     - Optimizer
+     - Batch
+     - Time
+     - Hardware
+     - LR
+   * - CIFAR-10
+     - 84.52
+     - `CPCresnet101 <https://github.com/PyTorchLightning/pytorch-lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
+     - Adam
+     - 512
+     - upto 24 hours
+     - 2 V100 (32GB)
+     - 1e-4
+   * - STL-10
+     - 78.36
+     - `CPCresnet101 <https://github.com/PyTorchLightning/pytorch-lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
+     - Adam
+     - 144
+     - upto 72 hours
+     - 8 V100 (32GB)
+     - 1e-4
+
+|
 
 CIFAR-10 pretrained model::
 
@@ -170,6 +203,8 @@ CIFAR-10 pretrained model::
     cpc_v2.freeze()
 
 |
+
+- `Tensorboard for CIFAR10 <https://tensorboard.dev/experiment/8m1aX0gcQ7aEmH0J7kbBtg/#scalars>`_
 
 Pre-training:
 
@@ -198,6 +233,8 @@ STL-10 pretrained model::
 
 |
 
+- `Tensorboard for STL10 <https://tensorboard.dev/experiment/hgYOq0TVQfOwGHLjiBVggA/#scalars>`_
+
 Pre-training:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/cpc-stl10-val.png
@@ -215,7 +252,7 @@ Fine-tuning:
 |
 
 CPCV2 API
-**********
+*********
 
 .. autoclass:: pl_bolts.models.self_supervised.CPCV2
    :noindex:
