@@ -38,14 +38,6 @@ class AE(LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        # link default data
-        # if datamodule is None:
-        #     datamodule = MNISTDataModule(data_dir=self.hparams.data_dir, num_workers=self.hparams.num_workers)
-
-        # self.datamodule = datamodule
-
-        # self.img_dim = self.datamodule.size()
-
         self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim, self.hparams.input_channels,
                                          self.hparams.input_width, self.hparams.input_height)
         self.decoder = self.init_decoder(self.hparams.hidden_dim, self.hparams.latent_dim)

@@ -16,6 +16,7 @@ class MNISTDataModule(LightningDataModule):
             num_workers: int = 16,
             normalize: bool = False,
             seed: int = 42,
+            batch_size: int = 32,
             *args,
             **kwargs,
     ):
