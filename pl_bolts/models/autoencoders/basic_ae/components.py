@@ -9,26 +9,27 @@ class AEEncoder(torch.nn.Module):
     get split into a mu and sigma vector
     """
 
-    def __init__(self, hidden_dim, latent_dim, input_width, input_height):
+    def __init__(self, hidden_dim, latent_dim, input_channels, input_height, input_width):
         super().__init__()
         self.hidden_dim = hidden_dim
         self.latent_dim = latent_dim
-        self.input_width = input_width
+        self.input_channels = input_channels
         self.input_height = input_height
+        self.input_width = input_width
 
-        self.c1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)
+        self.c1 = nn.Conv2d(input_channels, 32, kernel_size=3, padding=1)
         self.c2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
         self.c3 = nn.Conv2d(32, 32, kernel_size=3, stride=2, padding=1)
 
-        conv_out_dim = self._calculate_output_dim(input_width, input_height)
+        conv_out_dim = self._calculate_output_dim(input_channels, input_width, input_height)
 
         self.fc1 = DenseBlock(conv_out_dim, hidden_dim)
         self.fc2 = DenseBlock(hidden_dim, hidden_dim)
 
         self.fc_z_out = nn.Linear(hidden_dim, latent_dim)
 
-    def _calculate_output_dim(self, input_width, input_height):
-        x = torch.rand(1, 1, input_width, input_height)
+    def _calculate_output_dim(self, input_channels, input_width, input_height):
+        x = torch.rand(1, input_channels, input_width, input_height)
         x = self.c3(self.c2(self.c1(x)))
         x = x.view(-1)
         return x.size(0)

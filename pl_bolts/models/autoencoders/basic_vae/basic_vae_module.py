@@ -61,11 +61,11 @@ class VAE(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.datamodule = datamodule
-        self.__set_pretrained_dims(pretrained)
+        #self.datamodule = datamodule
+        #self.__set_pretrained_dims(pretrained)
 
         # use mnist as the default module
-        self._set_default_datamodule(datamodule)
+        #self._set_default_datamodule(datamodule)
 
         # init actual model
         self.__init_system()
@@ -77,23 +77,23 @@ class VAE(pl.LightningModule):
         self.encoder = self.init_encoder()
         self.decoder = self.init_decoder()
 
-    def __set_pretrained_dims(self, pretrained):
-        if pretrained == 'imagenet2012':
-            self.datamodule = ImagenetDataModule(data_dir=self.hparams.data_dir)
-            (self.hparams.input_channels, self.hparams.input_height, self.hparams.input_width) = self.datamodule.size()
+    # def __set_pretrained_dims(self, pretrained):
+    #     if pretrained == 'imagenet2012':
+    #         self.datamodule = ImagenetDataModule(data_dir=self.hparams.data_dir)
+    #         (self.hparams.input_channels, self.hparams.input_height, self.hparams.input_width) = self.datamodule.size()
 
-    def _set_default_datamodule(self, datamodule):
-        # link default data
-        if datamodule is None:
-            datamodule = MNISTDataModule(
-                data_dir=self.hparams.data_dir,
-                num_workers=self.hparams.num_workers,
-                normalize=False
-            )
-        self.datamodule = datamodule
-        self.img_dim = self.datamodule.size()
+    # def _set_default_datamodule(self, datamodule):
+    #     # link default data
+    #     if datamodule is None:
+    #         datamodule = MNISTDataModule(
+    #             data_dir=self.hparams.data_dir,
+    #             num_workers=self.hparams.num_workers,
+    #             normalize=False
+    #         )
+    #     self.datamodule = datamodule
+    #     self.img_dim = self.datamodule.size()
 
-        (self.hparams.input_channels, self.hparams.input_height, self.hparams.input_width) = self.img_dim
+    #     (self.hparams.input_channels, self.hparams.input_height, self.hparams.input_width) = self.img_dim
 
     def load_pretrained(self, pretrained):
         available_weights = {'imagenet2012'}

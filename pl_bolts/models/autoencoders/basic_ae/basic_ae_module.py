@@ -13,7 +13,7 @@ class AE(LightningModule):
 
     def __init__(
             self,
-            datamodule: LightningDataModule = None,
+            # datamodule: LightningDataModule = None,
             input_channels=1,
             input_height=28,
             input_width=28,
@@ -43,24 +43,24 @@ class AE(LightningModule):
         self.save_hyperparameters()
 
         # link default data
-        if datamodule is None:
-            datamodule = MNISTDataModule(data_dir=self.hparams.data_dir, num_workers=self.hparams.num_workers)
+        # if datamodule is None:
+        #     datamodule = MNISTDataModule(data_dir=self.hparams.data_dir, num_workers=self.hparams.num_workers)
 
-        self.datamodule = datamodule
+        # self.datamodule = datamodule
 
-        self.img_dim = self.datamodule.size()
+        # self.img_dim = self.datamodule.size()
 
-        self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim,
+        self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim, self.hparams.input_channels,
                                          self.hparams.input_width, self.hparams.input_height)
         self.decoder = self.init_decoder(self.hparams.hidden_dim, self.hparams.latent_dim)
 
-    def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
-        encoder = AEEncoder(hidden_dim, latent_dim, input_width, input_height)
+    def init_encoder(self, hidden_dim, latent_dim, input_channels, input_height, input_width):
+        encoder = AEEncoder(hidden_dim, latent_dim, input_channels, input_height, input_width)
         return encoder
 
     def init_decoder(self, hidden_dim, latent_dim):
-        c, h, w = self.img_dim
-        decoder = Decoder(hidden_dim, latent_dim, w, h, c)
+        # c, h, w = self.img_dim
+        decoder = Decoder(hidden_dim, latent_dim, self.hparams.input_width, self.hparams.input_height, self.hparams.input_channels)
         return decoder
 
     def forward(self, z):
