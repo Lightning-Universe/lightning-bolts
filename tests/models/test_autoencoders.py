@@ -10,7 +10,7 @@ from pl_bolts.models.autoencoders.basic_vae import Decoder, Encoder
 
 
 @pytest.mark.parametrize(
-    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"), pytest.param(CIFAR10DataModule, id="cifar10"),]
+    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"), pytest.param(CIFAR10DataModule, id="cifar10")]
 )
 def test_vae(tmpdir, dm_cls):
     seed_everything()
@@ -25,7 +25,7 @@ def test_vae(tmpdir, dm_cls):
 
 
 @pytest.mark.parametrize(
-    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"), pytest.param(CIFAR10DataModule, id="cifar10"),]
+    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"), pytest.param(CIFAR10DataModule, id="cifar10")]
 )
 def test_ae(tmpdir, dm_cls):
     seed_everything()
