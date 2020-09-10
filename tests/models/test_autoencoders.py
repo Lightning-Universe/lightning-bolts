@@ -3,22 +3,14 @@ import pytorch_lightning as pl
 import torch
 from pytorch_lightning import seed_everything
 
-from pl_bolts.datamodules import MNISTDataModule, CIFAR10DataModule
-from pl_bolts.models.autoencoders import VAE, AE
+from pl_bolts.datamodules import CIFAR10DataModule, MNISTDataModule
+from pl_bolts.models.autoencoders import AE, VAE
 from pl_bolts.models.autoencoders.basic_ae import AEEncoder
-from pl_bolts.models.autoencoders.basic_vae import Encoder, Decoder
+from pl_bolts.models.autoencoders.basic_vae import Decoder, Encoder
 
 
 @pytest.mark.parametrize(
-    "dm_cls",
-    [
-        pytest.param(
-            MNISTDataModule, id='mnist'
-        ),
-        pytest.param(
-            CIFAR10DataModule, id='cifar10'
-        ),
-    ]
+    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"), pytest.param(CIFAR10DataModule, id="cifar10"),]
 )
 def test_vae(tmpdir, dm_cls):
     seed_everything()
@@ -27,20 +19,13 @@ def test_vae(tmpdir, dm_cls):
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir, deterministic=True)
     trainer.fit(model, dm)
     results = trainer.test(model, datamodule=dm)[0]
-    loss = results['test_loss']
+    loss = results["test_loss"]
 
-    assert loss > 0, 'VAE failed'
+    assert loss > 0, "VAE failed"
+
 
 @pytest.mark.parametrize(
-    "dm_cls",
-    [
-        pytest.param(
-            MNISTDataModule, id='mnist'
-        ),
-        pytest.param(
-            CIFAR10DataModule, id='cifar10'
-        ),
-    ]
+    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"), pytest.param(CIFAR10DataModule, id="cifar10"),]
 )
 def test_ae(tmpdir, dm_cls):
     seed_everything()
@@ -54,19 +39,11 @@ def test_ae(tmpdir, dm_cls):
 @pytest.mark.parametrize(
     "hidden_dim,latent_dim,batch_size,channels,height,width",
     [
-        pytest.param(
-            128, 2, 16, 1, 28, 28, id='like-mnist-hidden-128-latent-2'
-        ),
-        pytest.param(
-            128, 4, 16, 1, 28, 28, id='like-mnist-hidden-128-latent-4'
-        ),
-        pytest.param(
-            64, 4, 16, 1, 28, 28, id='like-mnist-hidden-64-latent-4'
-        ),
-        pytest.param(
-            128, 2, 16, 3, 32, 32, id='like-cifar10-hidden-128-latent-2'
-        ),
-    ]
+        pytest.param(128, 2, 16, 1, 28, 28, id="like-mnist-hidden-128-latent-2"),
+        pytest.param(128, 4, 16, 1, 28, 28, id="like-mnist-hidden-128-latent-4"),
+        pytest.param(64, 4, 16, 1, 28, 28, id="like-mnist-hidden-64-latent-4"),
+        pytest.param(128, 2, 16, 3, 32, 32, id="like-cifar10-hidden-128-latent-2"),
+    ],
 )
 def test_basic_ae_encoder(tmpdir, hidden_dim, latent_dim, batch_size, channels, height, width):
     seed_everything()
@@ -79,19 +56,11 @@ def test_basic_ae_encoder(tmpdir, hidden_dim, latent_dim, batch_size, channels, 
 @pytest.mark.parametrize(
     "hidden_dim,latent_dim,batch_size,channels,height,width",
     [
-        pytest.param(
-            128, 2, 16, 1, 28, 28, id='like-mnist-hidden-128-latent-2'
-        ),
-        pytest.param(
-            128, 4, 16, 1, 28, 28, id='like-mnist-hidden-128-latent-4'
-        ),
-        pytest.param(
-            64, 4, 16, 1, 28, 28, id='like-mnist-hidden-64-latent-4'
-        ),
-        pytest.param(
-            128, 2, 16, 3, 32, 32, id='like-cifar10-hidden-128-latent-2'
-        ),
-    ]
+        pytest.param(128, 2, 16, 1, 28, 28, id="like-mnist-hidden-128-latent-2"),
+        pytest.param(128, 4, 16, 1, 28, 28, id="like-mnist-hidden-128-latent-4"),
+        pytest.param(64, 4, 16, 1, 28, 28, id="like-mnist-hidden-64-latent-4"),
+        pytest.param(128, 2, 16, 3, 32, 32, id="like-cifar10-hidden-128-latent-2"),
+    ],
 )
 def test_basic_vae_components(tmpdir, hidden_dim, latent_dim, batch_size, channels, height, width):
     seed_everything()
