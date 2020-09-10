@@ -146,6 +146,24 @@ CIFAR-10 pretrained model::
 
 |
 
+`Tensorboard for CIFAR10 <https://tensorboard.dev/experiment/8m1aX0gcQ7aEmH0J7kbBtg/#scalars>`_
+
+Pre-training:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/cpc-cifar10-val.png
+    :width: 200
+    :alt: pretraining validation loss
+
+|
+
+Fine-tuning (Single layer MLP, 1024 hidden units):
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/online-finetuning-cpc-cifar10.png
+    :width: 200
+    :alt: online finetuning accuracy
+
+|
+
 STL-10 pretrained model::
 
     from pl_bolts.models.self_supervised import CPCV2
@@ -154,6 +172,24 @@ STL-10 pretrained model::
     cpc_v2 = CPCV2.load_from_checkpoint(weight_path, strict=False)
 
     cpc_v2.freeze()
+
+|
+
+`Tensorboard for STL10 <https://tensorboard.dev/experiment/hgYOq0TVQfOwGHLjiBVggA/#scalars>`_
+
+Pre-training:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/cpc-stl10-val.png
+    :width: 200
+    :alt: pretraining validation loss
+
+|
+
+Fine-tuning (Single layer MLP, 1024 hidden units):
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/online-finetuning-cpc-stl10.png
+    :width: 200
+    :alt: online finetuning accuracy
 
 |
 
