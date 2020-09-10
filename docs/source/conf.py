@@ -88,7 +88,7 @@ extensions = [
     'recommonmark',
     'sphinx.ext.autosectionlabel',
     # 'm2r',
-    'nbsphinx',
+    # 'nbsphinx',
     'sphinx_autodoc_typehints',
     'sphinx_paramlinks',
 ]
