@@ -191,7 +191,7 @@ class VAE(pl.LightningModule):
         loss, recon_loss, kl_div, pxz = self._run_step(batch)
         result = pl.EvalResult(loss, checkpoint_on=loss)
         result.log_dict(
-            {"val_loss": loss, "val_recon_loss": recon_loss, "val_kl_div": kl_div,}
+            {"val_loss": loss, "val_recon_loss": recon_loss, "val_kl_div": kl_div}
         )
         return result
 
@@ -199,7 +199,7 @@ class VAE(pl.LightningModule):
         loss, recon_loss, kl_div, pxz = self._run_step(batch)
         result = pl.EvalResult(loss)
         result.log_dict(
-            {"test_loss": loss, "test_recon_loss": recon_loss, "test_kl_div": kl_div,}
+            {"test_loss": loss, "test_recon_loss": recon_loss, "test_kl_div": kl_div}
         )
         return result
 
