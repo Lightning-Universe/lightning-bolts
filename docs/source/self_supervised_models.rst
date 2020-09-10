@@ -105,6 +105,97 @@ BYOL
 CPC (V2)
 ^^^^^^^^
 
+PyTorch Lightning implementation of `CPCv2 <https://arxiv.org/pdf/1905.09272.pdf>`_
+
+Paper authors: Olivier J. Henaff, Aravind Srinivas, Jeffrey De Fauw, Ali Razavi, Carl Doersch,
+S. M. Ali Eslami, Aaron van den Oord.
+
+Model implemented by:
+
+    - `William Falcon <https://github.com/williamFalcon>`_
+    - `Tullie Murrell <https://github.com/tullie>`_
+
+To Train::
+
+    import pytorch_lightning as pl
+    from pl_bolts.models.self_supervised import CPCV2
+    from pl_bolts.datamodules import CIFAR10DataModule
+    from pl_bolts.models.self_supervised.cpc import (
+        CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10)
+
+    # data
+    dm = CIFAR10DataModule(num_workers=0)
+    dm.train_transforms = CPCTrainTransformsCIFAR10()
+    dm.val_transforms = CPCEvalTransformsCIFAR10()
+
+    # model
+    model = CPCV2()
+
+    # fit
+    trainer = pl.Trainer()
+    trainer.fit(model, dm)
+
+CIFAR-10 pretrained model::
+
+    from pl_bolts.models.self_supervised import CPCV2
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/epoch%3D474.ckpt'
+    cpc_v2 = CPCV2.load_from_checkpoint(weight_path, strict=False)
+
+    cpc_v2.freeze()
+
+|
+
+`Tensorboard for CIFAR10 <https://tensorboard.dev/experiment/8m1aX0gcQ7aEmH0J7kbBtg/#scalars>`_
+
+Pre-training:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/cpc-cifar10-val.png
+    :width: 200
+    :alt: pretraining validation loss
+
+|
+
+Fine-tuning:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/online-finetuning-cpc-cifar10.png
+    :width: 200
+    :alt: online finetuning accuracy
+
+|
+
+STL-10 pretrained model::
+
+    from pl_bolts.models.self_supervised import CPCV2
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/epoch%3D624.ckpt'
+    cpc_v2 = CPCV2.load_from_checkpoint(weight_path, strict=False)
+
+    cpc_v2.freeze()
+
+|
+
+`Tensorboard for STL10 <https://tensorboard.dev/experiment/hgYOq0TVQfOwGHLjiBVggA/#scalars>`_
+
+Pre-training:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/cpc-stl10-val.png
+    :width: 200
+    :alt: pretraining validation loss
+
+|
+
+Fine-tuning:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/online-finetuning-cpc-stl10.png
+    :width: 200
+    :alt: online finetuning accuracy
+
+|
+
+CPCV2 API
+**********
+
 .. autoclass:: pl_bolts.models.self_supervised.CPCV2
    :noindex:
 
