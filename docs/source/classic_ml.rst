@@ -34,11 +34,13 @@ values.
 
 Logistic Regression
 -------------------
-Logistic regression is a non-linear model used for classification, i.e. when we have a categorical target variable.
+Logistic regression is a linear model used for classification, i.e. when we have a categorical target variable.
 This implementation supports both binary and multi-class classification.
 
-To leverage autograd we think of logistic regression as a one-layer neural network with a sigmoid activation. This
-allows us to support training on GPUs and TPUs.
+In the binary case, we formulate the logistic regression model as a one-layer neural network with one neuron in the
+output layer and a sigmoid activation function. In the multi-class case, we use a single-layer neural network but now
+with $k$ neurons in the output, where $k$ is the number of classes. This is also referred to as multinomial
+logistic regression.
 
 .. code-block:: python
 
