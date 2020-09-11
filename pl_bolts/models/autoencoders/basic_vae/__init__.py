@@ -11,7 +11,7 @@ This template uses the CIFAR10 dataset but image data of any dimension can be fe
  to change the Encoder and Decoder.
 
 The default encoder is a resnet18 backbone followed by linear layers which map representations
- to mu and log_var. The default decoder mirrors the encoder architecture and is similar to an inverted
+ to mu and var. The default decoder mirrors the encoder architecture and is similar to an inverted
  resnet18. The model also assumes a Gaussian prior and a Gaussian approximate posterior distribution.
 """
 from pl_bolts.models.autoencoders.basic_vae.components import resnet18_encoder, resnet18_decoder

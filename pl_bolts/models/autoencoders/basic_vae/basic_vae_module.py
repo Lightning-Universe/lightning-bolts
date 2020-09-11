@@ -1,10 +1,9 @@
 import os
 from argparse import ArgumentParser
 
-import pytorch_lightning as pl
 import torch
-from torch import distributions
 from torch.nn import functional as F
+import pytorch_lightning as pl
 
 from pl_bolts.datamodules import (BinaryMNISTDataModule, CIFAR10DataModule,
                                   ImagenetDataModule, MNISTDataModule,
@@ -13,7 +12,7 @@ from pl_bolts.models.autoencoders.basic_vae.components import resnet18_encoder, 
 from pl_bolts.models.autoencoders.basic_vae.components import resnet50_encoder, resnet50_decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
 
-pretrained_urls ={
+pretrained_urls = {
     'cifar10': 'abc'
 }
 
@@ -21,7 +20,6 @@ pretrained_urls ={
 class VAE(pl.LightningModule):
     def __init__(
         self,
-        datamodule,
         enc_type='resnet18',
         enc_out_dim=512,
         kl_coeff=0.1,
@@ -66,8 +64,6 @@ class VAE(pl.LightningModule):
         self.enc_out_dim = enc_out_dim
         self.latent_dim = latent_dim
 
-        self.datamodule = datamodule
-
         valid_encoders = {
             'resnet18': {'enc': resnet18_encoder, 'dec': resnet18_decoder},
             'resnet50': {'enc': resnet50_encoder, 'dec': resnet50_decoder},
@@ -95,36 +91,32 @@ class VAE(pl.LightningModule):
 
     def sample(self, mu, log_var):
         std = torch.exp(log_var / 2)
-        p = distributions[self.prior](torch.zeros_like(mu), torch.ones_like(std))
-        q = distributions[self.posterior](mu, std)
+        p = torch.distributions.Normal(torch.zeros_like(mu), torch.ones_like(std))
+        q = torch.distributions.Normal(mu, std)
         z = q.rsample()
         return p, q, z
 
     def step(self, batch, batch_idx):
-        (x1, _, x), y = batch
+        x, y = batch
 
-        z, x1_hat, p, q = self.forward(x1)
+        z, x_hat, p, q = self.forward(x)
 
-        log_pxz = discretized_logistic(x1_hat, self.log_scale, x)
+        reconstruction_loss = F.mse_loss(x_hat, x, reduction='sum')
+
         log_qz = q.log_prob(z)
         log_pz = p.log_prob(z)
 
         kl = log_qz - log_pz
-        kl = kl.sum(dim=(1))  # sum all dims except batch
+        kl = kl.sum(dim=-1)
 
-        elbo = (kl - log_pxz).mean()  # elbo
-        bpd = elbo / (32 * 32 * 3 * np.log(2.0))
-
-        gini = gini_score(z)
+        loss = kl + reconstruction_loss
 
         logs = {
-            "kl": kl.mean(),
-            "elbo": elbo,
-            "gini": gini.mean(),
-            "bpd": bpd,
-            "log_pxz": log_pxz.mean(),
+            "recon_loss": reconstruction_loss,
+            "kl": kl,
+            "loss": loss,
         }
-        return elbo, logs
+        return loss, logs
 
     def training_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
@@ -163,12 +155,10 @@ def cli_main(args=None):
 
     # cli_main()
     parser = ArgumentParser()
-    parser.add_argument("--dataset", default="mnist", type=str, help="mnist, cifar10, stl10, imagenet")
+    parser.add_argument("--dataset", default="cifar10", type=str, help="cifar10, stl10, imagenet")
     script_args, _ = parser.parse_known_args(args)
 
-    if script_args.dataset == "mnist":
-        dm_cls = MNISTDataModule
-    elif script_args.dataset == "cifar10":
+    if script_args.dataset == "cifar10":
         dm_cls = CIFAR10DataModule
     elif script_args.dataset == "stl10":
         dm_cls = STL10DataModule
