@@ -12,6 +12,11 @@ Linear regression fits a linear model between a real-valued target variable ($y$
 estimate the regression coefficients $\beta$ that minimizes the mean squared error between the predicted and true target
 values.
 
+We formulate the linear regression model as a single-layer neural network. By default, we include only one neuron in
+the output layer although you can specify any number.
+
+Add either L1 or L2 regularization, or both, by specifying the regularization strength (default 0).
+
 .. code-block:: python
 
     from pl_bolts.models.regression import LinearRegression
@@ -42,7 +47,7 @@ output layer and a sigmoid activation function. In the multi-class case, we use 
 with $k$ neurons in the output, where $k$ is the number of classes. This is also referred to as multinomial
 logistic regression.
 
-Add either L1 or L2 regularization, or both by specifying the regularization strength (default 0).
+Add either L1 or L2 regularization, or both, by specifying the regularization strength (default 0).
 
 .. code-block:: python
 
