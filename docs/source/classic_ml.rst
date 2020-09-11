@@ -8,8 +8,8 @@ half-precision training.
 
 Linear Regression
 -----------------
-Linear regression fits a linear model between a real-valued target variable (:math:`y`) and one or more features (:math:`X`). We
-estimate the regression coefficients $\beta$ that minimizes the mean squared error between the predicted and true target
+Linear regression fits a linear model between a real-valued target variable :math:`y` and one or more features :math:`X`. We
+estimate the regression coefficients :math:`\beta` that minimizes the mean squared error between the predicted and true target
 values.
 
 We formulate the linear regression model as a single-layer neural network. By default we include only one neuron in
@@ -44,7 +44,7 @@ This implementation supports both binary and multi-class classification.
 
 In the binary case, we formulate the logistic regression model as a one-layer neural network with one neuron in the
 output layer and a sigmoid activation function. In the multi-class case, we use a single-layer neural network but now
-with $k$ neurons in the output, where $k$ is the number of classes. This is also referred to as multinomial
+with :math:`k` neurons in the output, where :math:`k` is the number of classes. This is also referred to as multinomial
 logistic regression.
 
 Add either L1 or L2 regularization, or both, by specifying the regularization strength (default 0).
