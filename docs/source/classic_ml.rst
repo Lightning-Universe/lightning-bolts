@@ -9,11 +9,11 @@ half-precision training.
 Linear Regression
 -----------------
 Linear regression fits a linear model between a real-valued target variable :math:`y` and one or more features :math:`X`. We
-estimate the regression coefficients :math:`\beta` that minimizes the mean squared error between the predicted and true target
+estimate the regression coefficients that minimizes the mean squared error between the predicted and true target
 values.
 
 We formulate the linear regression model as a single-layer neural network. By default we include only one neuron in
-the output layer, although you can specify any number.
+the output layer, although you can specify the `output_dim` yourself.
 
 Add either L1 or L2 regularization, or both, by specifying the regularization strength (default 0).
 
