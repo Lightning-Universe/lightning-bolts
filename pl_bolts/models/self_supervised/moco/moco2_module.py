@@ -5,6 +5,7 @@ Original work is: Copyright (c) Facebook, Inc. and its affiliates. All Rights Re
 This implementation is: Copyright (c) PyTorch Lightning, Inc. and its affiliates. All Rights Reserved
 """
 
+from argparse import ArgumentParser
 from typing import Union
 
 import pytorch_lightning as pl
@@ -318,8 +319,7 @@ class MocoV2(pl.LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser):
-        from test_tube import HyperOptArgumentParser
-        parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--base_encoder', type=str, default='resnet18')
         parser.add_argument('--emb_dim', type=int, default=128)
         parser.add_argument('--num_workers', type=int, default=8)
@@ -353,9 +353,7 @@ def concat_all_gather(tensor):
     return output
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
-    from argparse import ArgumentParser
+def cli_main():
 
     parser = ArgumentParser()
 
@@ -387,3 +385,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
+
+
+if __name__ == '__main__':
+    cli_main()

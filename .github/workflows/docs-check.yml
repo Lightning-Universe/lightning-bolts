@@ -41,7 +41,9 @@ jobs:
           # python -m pip install --upgrade --user pip
           pip install -r requirements.txt -U -f https://download.pytorch.org/whl/torch_stable.html -q
           pip install -r docs/requirements.txt
-          python --version ; pip --version ; pip list
+          python --version
+          pip --version
+          pip list
         shell: bash
 
       - name: Test Documentation
@@ -77,7 +79,9 @@ jobs:
           pip install -r docs/requirements.txt
           # install Texlive, see https://linuxconfig.org/how-to-install-latex-on-ubuntu-20-04-focal-fossa-linux
           sudo apt-get update && sudo apt-get install -y texlive-latex-extra dvipng texlive-pictures
-          python --version ; pip --version ; pip list
+          python --version
+          pip --version
+          pip list
         shell: bash
 
       - name: Make Documentation

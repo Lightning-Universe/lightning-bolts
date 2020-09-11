@@ -1,3 +1,5 @@
+from argparse import ArgumentParser
+
 import pytorch_lightning as pl
 import torch
 from torch import nn
@@ -12,6 +14,7 @@ class LinearRegression(pl.LightningModule):
 
     def __init__(self,
                  input_dim: int,
+                 output_dim: int = 1,
                  bias: bool = True,
                  learning_rate: float = 0.0001,
                  optimizer: Optimizer = Adam,
@@ -24,6 +27,7 @@ class LinearRegression(pl.LightningModule):
 
         Args:
             input_dim: number of dimensions of the input (1+)
+            output_dim: number of dimensions of the output (default=1)
             bias: If false, will not use $+b$
             learning_rate: learning_rate for the optimizer
             optimizer: the optimizer to use (default='Adam')
@@ -35,7 +39,7 @@ class LinearRegression(pl.LightningModule):
         self.save_hyperparameters()
         self.optimizer = optimizer
 
-        self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=1, bias=bias)
+        self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=self.hparams.output_dim, bias=bias)
 
     def forward(self, x):
         y_hat = self.linear(x)
@@ -112,14 +116,13 @@ class LinearRegression(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--learning_rate', type=float, default=0.0001)
         parser.add_argument('--input_dim', type=int, default=None)
+        parser.add_argument('--output_dim', type=int, default=1)
         parser.add_argument('--bias', default='store_true')
         parser.add_argument('--batch_size', type=int, default=16)
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':  # pragma: no cover
-    from argparse import ArgumentParser
+def cli_main():
     pl.seed_everything(1234)
 
     # create dataset
@@ -140,3 +143,7 @@ if __name__ == '__main__':  # pragma: no cover
     # train
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model, loaders.train_dataloader(args.batch_size), loaders.val_dataloader(args.batch_size))
+
+
+if __name__ == '__main__':
+    cli_main()

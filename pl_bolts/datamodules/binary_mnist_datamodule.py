@@ -1,9 +1,9 @@
 import torch
+from PIL import Image
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
 from torchvision.datasets import MNIST
-from PIL import Image
 
 
 class BinaryMNISTDataModule(LightningDataModule):

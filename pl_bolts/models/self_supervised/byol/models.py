@@ -1,4 +1,5 @@
 from torch import nn
+
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
 

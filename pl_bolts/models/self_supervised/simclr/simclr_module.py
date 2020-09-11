@@ -1,17 +1,19 @@
+from argparse import ArgumentParser
+
 import pytorch_lightning as pl
-from torch.optim import Adam
 from torch import nn
 from torch.nn import functional as F
+from torch.optim import Adam
 from torchvision.models import densenet
 
+from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
+from pl_bolts.models.self_supervised.evaluator import Flatten
+from pl_bolts.models.self_supervised.resnets import resnet50_bn
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
-from pl_bolts.models.self_supervised.evaluator import Flatten
-from pl_bolts.models.self_supervised.resnets import resnet50_bn
 
 
 class DensenetEncoder(nn.Module):
@@ -212,10 +214,7 @@ class SimCLR(pl.LightningModule):
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
-    from argparse import ArgumentParser
-
+def cli_main():
     parser = ArgumentParser()
 
     # trainer args
@@ -262,3 +261,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer.from_argparse_args(args, callbacks=[online_eval])
     trainer.fit(model, dm)
+
+
+if __name__ == '__main__':
+    cli_main()

@@ -105,6 +105,157 @@ BYOL
 CPC (V2)
 ^^^^^^^^
 
+PyTorch Lightning implementation of `Data-Efficient Image Recognition with Contrastive
+Predictive Coding <https://arxiv.org/abs/1905.09272>`_
+
+Paper authors: (Olivier J. Hénaff, Aravind Srinivas, Jeffrey De Fauw, Ali Razavi,
+Carl Doersch, S. M. Ali Eslami, Aaron van den Oord).
+
+Model implemented by:
+
+    - `William Falcon <https://github.com/williamFalcon>`_
+    - `Tullie Murrell <https://github.com/tullie>`_
+
+To Train::
+
+    import pytorch_lightning as pl
+    from pl_bolts.models.self_supervised import CPCV2
+    from pl_bolts.datamodules import CIFAR10DataModule
+    from pl_bolts.models.self_supervised.cpc import (
+        CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10)
+
+    # data
+    dm = CIFAR10DataModule(num_workers=0)
+    dm.train_transforms = CPCTrainTransformsCIFAR10()
+    dm.val_transforms = CPCEvalTransformsCIFAR10()
+
+    # model
+    model = CPCV2()
+
+    # fit
+    trainer = pl.Trainer()
+    trainer.fit(model, dm)
+
+To finetune::
+
+    python cpc_finetuner.py
+        --ckpt_path path/to/checkpoint.ckpt
+        --dataset cifar10
+        --gpus 1
+
+Some uses::
+
+    # load resnet18 pretrained using CPC on imagenet
+    model = CPCV2(encoder='resnet18', pretrained=True)
+    resnet18 = model.encoder
+    renset18.freeze()
+
+    # it supportes any torchvision resnet
+    model = CPCV2(encoder='resnet50', pretrained=True)
+
+    # use it as a feature extractor
+    x = torch.rand(2, 3, 224, 224)
+    out = model(x)
+
+CIFAR-10 and STL-10 baselines
+*****************************
+
+CPCv2 does not report baselines on CIFAR-10 and STL-10 datasets.
+Results in table are reported from the
+`YADIM <https://arxiv.org/pdf/2009.00104.pdf>`_ paper.
+
+.. list-table:: CPCv2 implementation results
+   :widths: 18 15 25 15 10 20 20 10
+   :header-rows: 1
+
+   * - Dataset
+     - test acc
+     - Encoder
+     - Optimizer
+     - Batch
+     - Time
+     - Hardware
+     - LR
+   * - CIFAR-10
+     - 84.52
+     - `CPCresnet101 <https://github.com/PyTorchLightning/pytorch-lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
+     - Adam
+     - 512
+     - upto 24 hours
+     - 2 V100 (32GB)
+     - 1e-4
+   * - STL-10
+     - 78.36
+     - `CPCresnet101 <https://github.com/PyTorchLightning/pytorch-lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
+     - Adam
+     - 144
+     - upto 72 hours
+     - 8 V100 (32GB)
+     - 1e-4
+
+|
+
+CIFAR-10 pretrained model::
+
+    from pl_bolts.models.self_supervised import CPCV2
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/epoch%3D474.ckpt'
+    cpc_v2 = CPCV2.load_from_checkpoint(weight_path, strict=False)
+
+    cpc_v2.freeze()
+
+|
+
+- `Tensorboard for CIFAR10 <https://tensorboard.dev/experiment/8m1aX0gcQ7aEmH0J7kbBtg/#scalars>`_
+
+Pre-training:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/cpc-cifar10-val.png
+    :width: 200
+    :alt: pretraining validation loss
+
+|
+
+Fine-tuning:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/online-finetuning-cpc-cifar10.png
+    :width: 200
+    :alt: online finetuning accuracy
+
+|
+
+STL-10 pretrained model::
+
+    from pl_bolts.models.self_supervised import CPCV2
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/epoch%3D624.ckpt'
+    cpc_v2 = CPCV2.load_from_checkpoint(weight_path, strict=False)
+
+    cpc_v2.freeze()
+
+|
+
+- `Tensorboard for STL10 <https://tensorboard.dev/experiment/hgYOq0TVQfOwGHLjiBVggA/#scalars>`_
+
+Pre-training:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/cpc-stl10-val.png
+    :width: 200
+    :alt: pretraining validation loss
+
+|
+
+Fine-tuning:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/online-finetuning-cpc-stl10.png
+    :width: 200
+    :alt: online finetuning accuracy
+
+|
+
+CPCV2 API
+*********
+
 .. autoclass:: pl_bolts.models.self_supervised.CPCV2
    :noindex:
 

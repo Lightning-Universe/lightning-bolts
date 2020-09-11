@@ -1,6 +1,8 @@
+from copy import deepcopy
+
 import torch
 from torch import nn
-from copy import deepcopy
+
 from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
 
 

@@ -1,8 +1,9 @@
-import torch
 import math
+
 import pytorch_lightning as pl
-from torch.nn import functional as F
+import torch
 from pytorch_lightning.metrics.functional import accuracy
+from torch.nn import functional as F
 
 
 class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
@@ -87,7 +88,11 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
         self.optimizer.zero_grad()
 
         # log metrics
-        acc = accuracy(mlp_preds, y)
+        if trainer.datamodule is not None:
+            acc = accuracy(mlp_preds, y, num_classes=trainer.datamodule.num_classes)
+        else:
+            acc = accuracy(mlp_preds, y)
+
         metrics = {'ft_callback_mlp_loss': mlp_loss, 'ft_callback_mlp_acc': acc}
         pl_module.logger.log_metrics(metrics, step=trainer.global_step)
 

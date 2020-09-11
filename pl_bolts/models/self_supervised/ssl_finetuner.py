@@ -1,8 +1,9 @@
 import pytorch_lightning as pl
 import pytorch_lightning.metrics.functional as plm
-from pl_bolts.models.self_supervised import SSLEvaluator
 import torch
 import torch.nn.functional as F
+
+from pl_bolts.models.self_supervised import SSLEvaluator
 
 
 class SSLFineTuner(pl.LightningModule):

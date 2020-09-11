@@ -1,14 +1,16 @@
+from argparse import ArgumentParser
 from copy import deepcopy
+from typing import Any
+
+import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 from torch.optim import Adam
-import pytorch_lightning as pl
-from typing import Any
 
+from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
+from pl_bolts.models.self_supervised.byol.models import SiameseArm
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-from pl_bolts.models.self_supervised.byol.models import SiameseArm
-from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
 
 
 class BYOL(pl.LightningModule):
@@ -181,8 +183,7 @@ class BYOL(pl.LightningModule):
         return parser
 
 
-if __name__ == '__main__':
-    from argparse import ArgumentParser
+def cli_main():
     from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
     from pl_bolts.models.self_supervised.simclr import simclr_transforms
     from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
@@ -237,5 +238,18 @@ if __name__ == '__main__':
     online_eval = SSLOnlineEvaluator(z_dim=2048, num_classes=dm.num_classes)
     online_eval.to_device = to_device
 
+<<<<<<< HEAD
     trainer = pl.Trainer.from_argparse_args(args, max_steps=300000, callbacks=[online_eval])
+=======
+    trainer = pl.Trainer.from_argparse_args(
+        args,
+        max_steps=300000,
+        callbacks=[online_eval],
+        resume_from_checkpoint="https://gridai-8b9b66dc-38ae-4fe4-9e96-bb78af2e1546.s3.amazonaws.com/grid_artifacts/clusters/c-mwnjp/experiments/byol-cifar10-dev3-exp2/version_0/checkpoints/epoch%3D191.ckpt?AWSAccessKeyId=AKIAUMW2YRMZ4VK7ETMX&Signature=vwz2bDzwcnC8WMrdKl3jmWUhj%2FA%3D&Expires=1599868550"
+    )
+>>>>>>> dca0cf5ffefe40b9c73b395697eb7643e2b52920
     trainer.fit(model, dm)
+
+
+if __name__ == '__main__':
+    cli_main()

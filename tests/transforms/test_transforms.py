@@ -1,15 +1,8 @@
+import pytest
+import pytorch_lightning as pl
 import torch
 from torchvision import transforms
-import pytorch_lightning as pl
-import pytest
-from pl_bolts.models.self_supervised.cpc.transforms import (
-    CPCTrainTransformsCIFAR10,
-    CPCEvalTransformsCIFAR10,
-    CPCTrainTransformsSTL10,
-    CPCEvalTransformsSTL10,
-    CPCTrainTransformsImageNet128,
-    CPCEvalTransformsImageNet128
-)
+
 from pl_bolts.models.self_supervised.amdim.transforms import (
     AMDIMEvalTransformsCIFAR10,
     AMDIMTrainTransformsCIFAR10,
@@ -17,6 +10,14 @@ from pl_bolts.models.self_supervised.amdim.transforms import (
     AMDIMEvalTransformsSTL10,
     AMDIMTrainTransformsImageNet128,
     AMDIMEvalTransformsImageNet128
+)
+from pl_bolts.models.self_supervised.cpc.transforms import (
+    CPCTrainTransformsCIFAR10,
+    CPCEvalTransformsCIFAR10,
+    CPCTrainTransformsSTL10,
+    CPCEvalTransformsSTL10,
+    CPCTrainTransformsImageNet128,
+    CPCEvalTransformsImageNet128
 )
 from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainCIFAR10Transforms,

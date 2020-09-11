@@ -64,7 +64,6 @@ PyTorch-Lightning-Bolts documentation
    classic_ml
    convolutional
    gans
-   reinforce_learn
    self_supervised_models
 
 .. toctree::
