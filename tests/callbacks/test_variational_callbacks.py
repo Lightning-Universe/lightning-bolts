@@ -12,7 +12,7 @@ def test_latent_dim_interpolator(tmpdir):
             self.global_step = 1
             self.logger = DummyLogger()
 
-    model = GAN()
+    model = GAN(3, 28, 28)
     cb = LatentDimInterpolator(interpolate_epoch_interval=2)
 
     cb.on_epoch_end(FakeTrainer(), model)
