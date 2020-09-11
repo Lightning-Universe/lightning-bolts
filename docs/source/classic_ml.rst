@@ -42,6 +42,8 @@ output layer and a sigmoid activation function. In the multi-class case, we use 
 with $k$ neurons in the output, where $k$ is the number of classes. This is also referred to as multinomial
 logistic regression.
 
+Add either L1 or L2 regularization, or both by specifying the regularization strength (default 0).
+
 .. code-block:: python
 
     from sklearn.datasets import load_iris
