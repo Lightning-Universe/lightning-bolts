@@ -238,16 +238,8 @@ def cli_main():
     online_eval = SSLOnlineEvaluator(z_dim=2048, num_classes=dm.num_classes)
     online_eval.to_device = to_device
 
-<<<<<<< HEAD
     trainer = pl.Trainer.from_argparse_args(args, max_steps=300000, callbacks=[online_eval])
-=======
-    trainer = pl.Trainer.from_argparse_args(
-        args,
-        max_steps=300000,
-        callbacks=[online_eval],
-        resume_from_checkpoint="https://gridai-8b9b66dc-38ae-4fe4-9e96-bb78af2e1546.s3.amazonaws.com/grid_artifacts/clusters/c-mwnjp/experiments/byol-cifar10-dev3-exp2/version_0/checkpoints/epoch%3D191.ckpt?AWSAccessKeyId=AKIAUMW2YRMZ4VK7ETMX&Signature=vwz2bDzwcnC8WMrdKl3jmWUhj%2FA%3D&Expires=1599868550"
-    )
->>>>>>> dca0cf5ffefe40b9c73b395697eb7643e2b52920
+
     trainer.fit(model, dm)
 
 
