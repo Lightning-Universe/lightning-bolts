@@ -9,7 +9,7 @@ codecov:
   strict_yaml_branch: "yaml-config"
   require_ci_to_pass: yes
   notify:
-    # after_n_builds: 2
+    after_n_builds: 15
     wait_for_ci: yes
 
 coverage:
@@ -49,4 +49,5 @@ comment:
   require_changes: false
   behavior: default  # update if exists else create new
   # branches: *
+  after_n_builds: 15
 
