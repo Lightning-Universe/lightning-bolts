@@ -1,0 +1,4 @@
+torchvision>=0.7
+scikit-learn>=0.23
+opencv-python
+gym>=0.17.2

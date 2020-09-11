@@ -19,11 +19,17 @@ builtins.__LIGHTNING_BOLT_SETUP__ = True
 import pl_bolts  # noqa: E402
 
 
-def load_requirements(path_dir=PATH_ROOT, comment_char='#'):
-    with open(os.path.join(path_dir, 'requirements.txt'), 'r') as file:
+def load_requirements(path_dir=PATH_ROOT, file_name='base.txt', comment_char='#'):
+    with open(os.path.join(path_dir, 'requirements', file_name), 'r') as file:
         lines = [ln.strip() for ln in file.readlines()]
-    reqs = [ln[:ln.index(comment_char)] if comment_char in ln else ln for ln in lines]
-    reqs = [ln for ln in reqs if ln]
+    reqs = []
+    for ln in lines:
+        if comment_char in ln:  # filer all comments
+            ln = ln[:ln.index(comment_char)].strip()
+        if ln.startswith('http'):  # skip directly installed dependencies
+            continue
+        if ln:  # if requirement is not empty
+            reqs.append(ln)
     return reqs
 
 
@@ -38,11 +44,12 @@ def load_long_describtion():
     return text
 
 extras = {
-    'extra': [req for req in load_requirements(PATH_ROOT) if not req.startswith('pytorch-lightning')],
-    'test': load_requirements(os.path.join(PATH_ROOT, 'tests'))
+    'loggers': load_requirements(file_name='loggers.pxt'),
+    'models': load_requirements(file_name='models.pxt'),
+    'test': load_requirements(file_name='tests.pxt'),
 }
+extras['extra'] = extras['models'] + extras['loggers']
 extras['dev'] = extras['extra'] + extras['test']
-require_base = [req for req in load_requirements(PATH_ROOT) if req.startswith('pytorch-lightning')]
 
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
@@ -69,7 +76,7 @@ setup(
     keywords=['deep learning', 'pytorch', 'AI'],
     python_requires='>=3.6',
     setup_requires=[],
-    install_requires=require_base,
+    install_requires=load_requirements(),
     extras_require=extras,
 
     project_urls={

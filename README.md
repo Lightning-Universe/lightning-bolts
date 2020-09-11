@@ -56,6 +56,11 @@ Install bleeding-edge (no guarantees)
 pip install git+https://github.com/PytorchLightning/pytorch-lightning-bolts.git@master --upgrade
 ```
 
+In case you wan to have full experience you can install all optional packages at once
+```bash
+pip install pytorch-lightning-bolts["extra"]
+```
+
 ## Docs
 
 - [master](https://pytorch-lightning-bolts.readthedocs.io/en/latest)
