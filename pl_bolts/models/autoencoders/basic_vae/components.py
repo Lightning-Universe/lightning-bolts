@@ -230,7 +230,7 @@ class ResNetEncoder(nn.Module):
 
         self.bn1 = nn.BatchNorm2d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
-        
+
         if self.maxpool1:
             self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         else:
@@ -287,7 +287,7 @@ class ResNetDecoder(nn.Module):
         self.first_conv = first_conv
         self.maxpool1 = maxpool1
         self.input_height = input_height
-        
+
         self.upscale_factor = 8
 
         self.linear = nn.Linear(latent_dim, self.inplanes * 4 * 4)
@@ -309,7 +309,7 @@ class ResNetDecoder(nn.Module):
             self.upscale = Interpolate(scale_factor=1)
 
         # interpolate after linear layer using scale factor
-        self.upscale1 = Interpolate(size=input_height//self.upscale_factor)
+        self.upscale1 = Interpolate(size=input_height // self.upscale_factor)
 
         self.conv1 = nn.Conv2d(
             64 * block.expansion, 3, kernel_size=3, stride=1, padding=1, bias=False
