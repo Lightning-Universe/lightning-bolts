@@ -44,9 +44,9 @@ def load_long_describtion():
     return text
 
 extras = {
-    'loggers': load_requirements(file_name='loggers.pxt'),
-    'models': load_requirements(file_name='models.pxt'),
-    'test': load_requirements(file_name='tests.pxt'),
+    'loggers': load_requirements(file_name='loggers.txt'),
+    'models': load_requirements(file_name='models.txt'),
+    'test': load_requirements(file_name='test.txt'),
 }
 extras['extra'] = extras['models'] + extras['loggers']
 extras['dev'] = extras['extra'] + extras['test']
