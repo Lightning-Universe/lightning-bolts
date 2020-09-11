@@ -22,7 +22,7 @@ def test_cpcv2(tmpdir):
     model = CPCV2(encoder='resnet18', data_dir=tmpdir, batch_size=2, online_ft=True, datamodule=datamodule)
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model)
-    loss = trainer.progress_bar_metrics['val_nce']
+    loss = trainer.progress_bar_dict['val_nce']
 
     assert float(loss) > 0
 
