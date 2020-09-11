@@ -7,17 +7,18 @@ from torchvision.datasets import MNIST
 
 class MNISTDataModule(LightningDataModule):
 
-    name = 'mnist'
+    name = "mnist"
 
     def __init__(
-            self,
-            data_dir: str,
-            val_split: int = 5000,
-            num_workers: int = 16,
-            normalize: bool = False,
-            seed: int = 42,
-            *args,
-            **kwargs,
+        self,
+        data_dir: str = "./",
+        val_split: int = 5000,
+        num_workers: int = 16,
+        normalize: bool = False,
+        seed: int = 42,
+        batch_size: int = 32,
+        *args,
+        **kwargs,
     ):
         """
         .. figure:: https://miro.medium.com/max/744/1*AO2rIhzRYzFVQlFLx9DM9A.png
@@ -87,9 +88,7 @@ class MNISTDataModule(LightningDataModule):
         dataset = MNIST(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
         dataset_train, _ = random_split(
-            dataset,
-            [train_length - self.val_split, self.val_split],
-            generator=torch.Generator().manual_seed(self.seed)
+            dataset, [train_length - self.val_split, self.val_split], generator=torch.Generator().manual_seed(self.seed)
         )
         loader = DataLoader(
             dataset_train,
@@ -97,7 +96,7 @@ class MNISTDataModule(LightningDataModule):
             shuffle=True,
             num_workers=self.num_workers,
             drop_last=True,
-            pin_memory=True
+            pin_memory=True,
         )
         return loader
 
@@ -113,9 +112,7 @@ class MNISTDataModule(LightningDataModule):
         dataset = MNIST(self.data_dir, train=True, download=True, transform=transforms)
         train_length = len(dataset)
         _, dataset_val = random_split(
-            dataset,
-            [train_length - self.val_split, self.val_split],
-            generator=torch.Generator().manual_seed(self.seed)
+            dataset, [train_length - self.val_split, self.val_split], generator=torch.Generator().manual_seed(self.seed)
         )
         loader = DataLoader(
             dataset_val,
@@ -123,7 +120,7 @@ class MNISTDataModule(LightningDataModule):
             shuffle=False,
             num_workers=self.num_workers,
             drop_last=True,
-            pin_memory=True
+            pin_memory=True,
         )
         return loader
 
@@ -139,21 +136,15 @@ class MNISTDataModule(LightningDataModule):
 
         dataset = MNIST(self.data_dir, train=False, download=False, transform=transforms)
         loader = DataLoader(
-            dataset,
-            batch_size=batch_size,
-            shuffle=False,
-            num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            dataset, batch_size=batch_size, shuffle=False, num_workers=self.num_workers, drop_last=True, pin_memory=True
         )
         return loader
 
     def _default_transforms(self):
         if self.normalize:
-            mnist_transforms = transform_lib.Compose([
-                transform_lib.ToTensor(),
-                transform_lib.Normalize(mean=(0.5,), std=(0.5,)),
-            ])
+            mnist_transforms = transform_lib.Compose(
+                [transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5,), std=(0.5,))]
+            )
         else:
             mnist_transforms = transform_lib.ToTensor()
 
