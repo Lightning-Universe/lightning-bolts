@@ -2,14 +2,17 @@ import os
 from argparse import ArgumentParser
 
 import torch
+import torch. nn as nn
 from torch.nn import functional as F
 import pytorch_lightning as pl
 
 from pl_bolts.datamodules import (BinaryMNISTDataModule, CIFAR10DataModule,
                                   ImagenetDataModule, MNISTDataModule,
                                   STL10DataModule)
-from pl_bolts.models.autoencoders.basic_vae.components import resnet18_encoder, resnet18_decoder
-from pl_bolts.models.autoencoders.basic_vae.components import resnet50_encoder, resnet50_decoder
+#from pl_bolts.models.autoencoders.basic_vae.components import resnet18_encoder, resnet18_decoder
+#from pl_bolts.models.autoencoders.basic_vae.components import resnet50_encoder, resnet50_decoder
+from components import resnet18_encoder, resnet18_decoder
+from components import resnet50_encoder, resnet50_decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
 
 pretrained_urls = {
@@ -28,12 +31,13 @@ class VAE(pl.LightningModule):
     def __init__(
         self,
         enc_type='resnet18',
-        conv1=False,
+        first_conv=False,
         maxpool1=False,
         enc_out_dim=512,
         kl_coeff=0.1,
         latent_dim=256,
-        lr=1e-4
+        lr=1e-4,
+        **kwargs
     ):
         """
         Standard VAE with Gaussian Prior and approx posterior.
@@ -80,11 +84,11 @@ class VAE(pl.LightningModule):
         }
 
         if enc_type not in valid_encoders:
-            self.encoder = resnet18_encoder(conv1, maxpool1)
-            self.decoder = resnet18_decoder(latent_dim=self.latent_dim, conv1, maxpool1)
+            self.encoder = resnet18_encoder(first_conv, maxpool1)
+            self.decoder = resnet18_decoder(self.latent_dim, first_conv, maxpool1)
         else:
-            self.encoder = valid_encoders[enc_type]['enc'](conv1, maxpool1)
-            self.decoder = valid_encoders[enc_type]['dec'](latent_dim=self.latent_dim, conv1, maxpool1)
+            self.encoder = valid_encoders[enc_type]['enc'](first_conv, maxpool1)
+            self.decoder = valid_encoders[enc_type]['dec'](self.latent_dim, first_conv, maxpool1)
 
         self.fc_mu = nn.Linear(self.enc_out_dim, self.latent_dim)
         self.fc_var = nn.Linear(self.enc_out_dim, self.latent_dim)
@@ -93,6 +97,10 @@ class VAE(pl.LightningModule):
         pass
 
     def forward(self, x):
+        if x.shape != (256, 3, 32, 32):
+            print(x.shape)
+            print('forward')
+            exit(-1)
         x = self.encoder(x)
         mu = self.fc_mu(x)
         log_var = self.fc_var(x)
@@ -108,27 +116,38 @@ class VAE(pl.LightningModule):
 
     def step(self, batch, batch_idx):
         x, y = batch
+        if x.shape != (256, 3, 32, 32):
+            print(x.shape)
+            print(y.shape)
+            print('Step')
+            exit(-1)
 
         z, x_hat, p, q = self.forward(x)
 
-        reconstruction_loss = F.mse_loss(x_hat, x, reduction='sum')
+        recon_loss = F.mse_loss(x_hat, x, reduction='mean')
 
         log_qz = q.log_prob(z)
         log_pz = p.log_prob(z)
 
         kl = log_qz - log_pz
-        kl = kl.sum(dim=-1)
+        kl = kl.mean()
 
-        loss = kl + reconstruction_loss
+        loss = kl + recon_loss
 
         logs = {
-            "recon_loss": reconstruction_loss,
+            "recon_loss": recon_loss,
             "kl": kl,
             "loss": loss,
         }
         return loss, logs
 
     def training_step(self, batch, batch_idx):
+        x, y = batch
+        if x.shape != (256, 3, 32, 32):
+            print(x.shape)
+            print(y.shape)
+            print('train step')
+            exit(-1)
         loss, logs = self.step(batch, batch_idx)
         result = pl.TrainResult(minimize=loss)
         result.log_dict(
@@ -137,6 +156,12 @@ class VAE(pl.LightningModule):
         return result
 
     def validation_step(self, batch, batch_idx):
+        x, y = batch
+        if x.shape != (256, 3, 32, 32):
+            print(x.shape)
+            print(y.shape)
+            print('val step')
+            exit(-1)
         loss, logs = self.step(batch, batch_idx)
         result = pl.EvalResult(checkpoint_on=loss)
         result.log_dict({f"val_{k}": v for k, v in logs.items()})
@@ -148,15 +173,26 @@ class VAE(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
+
+        parser.add_argument("--enc_type", type=str, default='resnet18', help="resnet18/resnet50")
+        parser.add_argument("--first_conv", action='store_true')
+        parser.add_argument("--maxpool1", action='store_true')
+        parser.add_argument("--lr", type=float, default=1e-4)
+
         parser.add_argument(
-            "--hidden_dim",
-            type=int,
-            default=128,
-            help="itermediate layers dimension before embedding for default encoder/decoder",
+            "--enc_out_dim", type=int, default=512,
+            help="512 for resnet18, 2048 for bigger resnets, adjust for wider resnets"
         )
-        parser.add_argument("--latent_dim", type=int, default=4, help="dimension of latent variables z")
-        parser.add_argument("--pretrained", type=str, default=None)
-        parser.add_argument("--learning_rate", type=float, default=1e-3)
+        parser.add_argument("--kl_coeff", type=float, default=0.1)
+        parser.add_argument("--latent_dim", type=int, default=256)
+
+        parser.add_argument("--batch_size", type=int, default=256)
+        parser.add_argument("--num_workers", type=int, default=8)
+        parser.add_argument("--data_dir", type=str, default=".")
+        
+        parser.add_argument("--gpus", type=int, default=1)
+        parser.add_argument("--max_epochs", type=int, default=200)
+
         return parser
 
 
@@ -175,15 +211,18 @@ def cli_main(args=None):
     elif script_args.dataset == "imagenet":
         dm_cls = ImagenetDataModule
 
-    parser = dm_cls.add_argparse_args(parser)
-    parser = pl.Trainer.add_argparse_args(parser)
     parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args(args)
 
     dm = dm_cls.from_argparse_args(args)
-    model = VAE(*dm.size(), **vars(args))
+
+    # enable default transforms
+    dm.train_transforms = None
+    dm.val_transforms = None
+
+    model = VAE(**vars(args))
     callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks, progress_bar_refresh_rate=20)
+    trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks)
     trainer.fit(model, dm)
     return dm, model, trainer
 
