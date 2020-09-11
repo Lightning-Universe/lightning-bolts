@@ -4,7 +4,7 @@ import torch
 from pytorch_lightning import seed_everything
 
 from pl_bolts.datamodules import CIFAR10DataModule, MNISTDataModule
-from pl_bolts.models.autoencoders import AE, VAE
+from pl_bolts.models.autoencoders import VAE
 from pl_bolts.models.autoencoders.basic_ae import AEEncoder
 from pl_bolts.models.autoencoders.basic_vae import Decoder, Encoder
 

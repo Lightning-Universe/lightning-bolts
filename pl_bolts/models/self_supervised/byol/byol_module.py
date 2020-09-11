@@ -1,15 +1,16 @@
+from argparse import ArgumentParser
 from copy import deepcopy
+from typing import Any
+
+import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 from torch.optim import Adam
-import pytorch_lightning as pl
-from typing import Any
-from argparse import ArgumentParser
 
+from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
+from pl_bolts.models.self_supervised.byol.models import SiameseArm
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-from pl_bolts.models.self_supervised.byol.models import SiameseArm
-from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
 
 
 class BYOL(pl.LightningModule):

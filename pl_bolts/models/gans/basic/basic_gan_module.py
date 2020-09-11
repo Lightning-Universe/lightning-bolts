@@ -1,8 +1,8 @@
 import os
 from argparse import ArgumentParser
 
-import torch
 import pytorch_lightning as pl
+import torch
 from torch.nn import functional as F
 
 from pl_bolts.datamodules import MNISTDataModule

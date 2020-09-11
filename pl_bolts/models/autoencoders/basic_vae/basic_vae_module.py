@@ -1,4 +1,3 @@
-import os
 from argparse import ArgumentParser
 
 import pytorch_lightning as pl
@@ -6,7 +5,7 @@ import torch
 from torch import distributions
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import (BinaryMNISTDataModule, CIFAR10DataModule,
+from pl_bolts.datamodules import (CIFAR10DataModule,
                                   ImagenetDataModule, MNISTDataModule,
                                   STL10DataModule)
 from pl_bolts.models.autoencoders.basic_vae.components import Decoder, Encoder

@@ -1,8 +1,10 @@
-from pl_bolts.models.self_supervised import SimCLR, SSLFineTuner
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
-from argparse import ArgumentParser
-import pytorch_lightning as pl
 import os
+from argparse import ArgumentParser
+
+import pytorch_lightning as pl
+
+from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
+from pl_bolts.models.self_supervised import SimCLR, SSLFineTuner
 from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
 

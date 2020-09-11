@@ -1,7 +1,6 @@
 from unittest import mock
 
 import pytest
-import torch
 
 
 @pytest.mark.parametrize('cli_args', ["--max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2"])

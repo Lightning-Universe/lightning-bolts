@@ -1,12 +1,9 @@
-import torch
-from torch import nn
-from torchvision.models.detection import faster_rcnn, fasterrcnn_resnet50_fpn
-from torchvision.ops import box_iou
+from argparse import ArgumentParser
 
 import pytorch_lightning as pl
-
-from pytorch_lightning.metrics import IoU
-from argparse import ArgumentParser
+import torch
+from torchvision.models.detection import faster_rcnn, fasterrcnn_resnet50_fpn
+from torchvision.ops import box_iou
 
 from pl_bolts.datamodules import VOCDetectionDataModule
 
