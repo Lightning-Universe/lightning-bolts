@@ -143,20 +143,6 @@ To finetune::
         --dataset cifar10
         --gpus 1
 
-Some uses::
-
-    # load resnet18 pretrained using CPC on imagenet
-    model = CPCV2(encoder='resnet18', pretrained=True)
-    resnet18 = model.encoder
-    renset18.freeze()
-
-    # it supportes any torchvision resnet
-    model = CPCV2(encoder='resnet50', pretrained=True)
-
-    # use it as a feature extractor
-    x = torch.rand(2, 3, 224, 224)
-    out = model(x)
-
 CIFAR-10 and STL-10 baselines
 *****************************
 
@@ -173,25 +159,33 @@ Results in table are reported from the
      - Encoder
      - Optimizer
      - Batch
-     - Time
+     - Epochs
      - Hardware
      - LR
    * - CIFAR-10
      - 84.52
      - `CPCresnet101 <https://github.com/PyTorchLightning/pytorch-lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
      - Adam
-     - 512
-     - upto 24 hours
-     - 2 V100 (32GB)
-     - 1e-4
+     - 64
+     - 1000 (upto 24 hours)
+     - 1 V100 (32GB)
+     - 4e-5
    * - STL-10
      - 78.36
      - `CPCresnet101 <https://github.com/PyTorchLightning/pytorch-lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
      - Adam
      - 144
-     - upto 72 hours
-     - 8 V100 (32GB)
+     - 1000 (upto 72 hours)
+     - 4 V100 (32GB)
      - 1e-4
+   * - ImageNet
+     - 54.82
+     - `CPCresnet101 <https://github.com/PyTorchLightning/pytorch-lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
+     - Adam
+     - 3072
+     - 1000 (upto 21 days)
+     - 64 V100 (32GB)
+     - 4e-5
 
 |
 
@@ -248,6 +242,35 @@ Pre-training:
 Fine-tuning:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/online-finetuning-cpc-stl10.png
+    :width: 200
+    :alt: online finetuning accuracy
+
+|
+
+ImageNet pretrained model::
+
+    from pl_bolts.models.self_supervised import CPCV2
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpcv2_weights/checkpoints/epoch%3D526.ckpt'
+    cpc_v2 = CPCV2.load_from_checkpoint(weight_path, strict=False)
+
+    cpc_v2.freeze()
+
+|
+
+- `Tensorboard for ImageNet <https://tensorboard.dev/experiment/7li8AqcnQdigDA33LzfDMA/#scalars>`_
+
+Pre-training:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpcv2_weights/cpc-imagenet-val.png
+    :width: 200
+    :alt: pretraining validation loss
+
+|
+
+Fine-tuning:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpcv2_weights/online-finetuning-cpc-imagenet.png
     :width: 200
     :alt: online finetuning accuracy
 
