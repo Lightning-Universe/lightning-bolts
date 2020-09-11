@@ -37,6 +37,13 @@ def load_long_describtion():
     text = text.replace('.svg', '.png')
     return text
 
+extras = {
+    'extra': [req for req in load_requirements(PATH_ROOT) if not req.startswith('pytorch-lightning')],
+    'test': load_requirements(os.path.join(PATH_ROOT, 'tests'))
+}
+extras['dev'] = extras['extra'] + extras['test']
+require_base = [req for req in load_requirements(PATH_ROOT) if req.startswith('pytorch-lightning')]
+
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
 # keep the meta-data here for simplicity in reading this file... it's not obvious
@@ -62,7 +69,8 @@ setup(
     keywords=['deep learning', 'pytorch', 'AI'],
     python_requires='>=3.6',
     setup_requires=[],
-    install_requires=load_requirements(PATH_ROOT),
+    install_requires=require_base,
+    extras_require=extras,
 
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",
