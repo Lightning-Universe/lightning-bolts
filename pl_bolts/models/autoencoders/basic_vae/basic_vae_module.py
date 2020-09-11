@@ -30,6 +30,7 @@ pretrained_urls = {
 class VAE(pl.LightningModule):
     def __init__(
         self,
+        input_height,
         enc_type='resnet18',
         first_conv=False,
         maxpool1=False,
@@ -77,6 +78,7 @@ class VAE(pl.LightningModule):
         self.kl_coeff = kl_coeff
         self.enc_out_dim = enc_out_dim
         self.latent_dim = latent_dim
+        self.input_height = input_height
 
         valid_encoders = {
             'resnet18': {'enc': resnet18_encoder, 'dec': resnet18_decoder},
@@ -85,10 +87,10 @@ class VAE(pl.LightningModule):
 
         if enc_type not in valid_encoders:
             self.encoder = resnet18_encoder(first_conv, maxpool1)
-            self.decoder = resnet18_decoder(self.latent_dim, first_conv, maxpool1)
+            self.decoder = resnet18_decoder(self.latent_dim, self.input_height, first_conv, maxpool1)
         else:
             self.encoder = valid_encoders[enc_type]['enc'](first_conv, maxpool1)
-            self.decoder = valid_encoders[enc_type]['dec'](self.latent_dim, first_conv, maxpool1)
+            self.decoder = valid_encoders[enc_type]['dec'](self.latent_dim, self.input_height, first_conv, maxpool1)
 
         self.fc_mu = nn.Linear(self.enc_out_dim, self.latent_dim)
         self.fc_var = nn.Linear(self.enc_out_dim, self.latent_dim)
@@ -196,10 +198,7 @@ def cli_main(args=None):
     args = parser.parse_args(args)
 
     dm = dm_cls.from_argparse_args(args)
-
-    # enable default transforms
-    dm.train_transforms = None
-    dm.val_transforms = None
+    args.input_height = dm.size()[-1]
 
     model = VAE(**vars(args))
     callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]
