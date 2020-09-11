@@ -1,3 +1,5 @@
+from torchvision.datasets import CIFAR10, STL10
+
 from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
 from pl_bolts.datamodules.binary_mnist_datamodule import BinaryMNISTDataModule
 from pl_bolts.datamodules.cifar10_datamodule import (

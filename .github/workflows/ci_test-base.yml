@@ -66,7 +66,7 @@ jobs:
     - name: Test Package [only]
       run: |
         # NOTE: run coverage on tests does not propagare faler status for Win, https://github.com/nedbat/coveragepy/issues/1003
-        coverage run --source pl_bolts -m pytest pl_bolts -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml --ignore=pl_bolts/loggers/comet.py
+        coverage run --source pl_bolts -m pytest pl_bolts -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml --ignore=pl_bolts/loggers/trains.py --ignore=pl_bolts/models/detection/faster_rcnn.py --ignore=pl_bolts/models/self_supervised/cpc/√
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@master
