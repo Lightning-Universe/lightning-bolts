@@ -9,22 +9,24 @@ from torch.nn import functional as F
 from pl_bolts.datamodules import (BinaryMNISTDataModule, CIFAR10DataModule,
                                   ImagenetDataModule, MNISTDataModule,
                                   STL10DataModule)
-from pl_bolts.models.autoencoders.basic_vae.components import Decoder, Encoder
-from pl_bolts.utils import shaping
+from pl_bolts.models.autoencoders.basic_vae.components import resnet18_encoder, resnet18_decoder
+from pl_bolts.models.autoencoders.basic_vae.components import resnet50_encoder, resnet50_decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
+
+pretrained_urls ={
+    'cifar10': 'abc'
+}
 
 
 class VAE(pl.LightningModule):
     def __init__(
         self,
-        input_channels: int,
-        input_height: int,
-        input_width: int,
-        hidden_dim: int = 128,
-        latent_dim: int = 32,
-        learning_rate: float = 0.001,
-        pretrained: str = None,
-        **kwargs
+        datamodule,
+        enc_type='resnet18',
+        enc_out_dim=512,
+        kl_coeff=0.1,
+        latent_dim=256,
+        lr=1e-4
     ):
         """
         Standard VAE with Gaussian Prior and approx posterior.
@@ -37,10 +39,10 @@ class VAE(pl.LightningModule):
             vae = VAE()
 
             # pretrained on imagenet
-            vae = VAE(pretrained='imagenet')
+            vae = VAE.from_pretrained('resnet50-imagenet')
 
             # pretrained on cifar10
-            vae = VAE(pretrained='cifar10')
+            vae = VAE.from_pretrained('resnet18-cifar10')
 
         Args:
 
@@ -55,156 +57,91 @@ class VAE(pl.LightningModule):
             datamodule: The Lightning DataModule
             pretrained: Load weights pretrained on a dataset
         """
-        super().__init__()
+
+        super(VAE, self).__init__()
+
         self.save_hyperparameters()
-        self.img_dim = (input_channels, input_height, input_width)
+        self.lr = lr
+        self.kl_coeff = kl_coeff
+        self.enc_out_dim = enc_out_dim
+        self.latent_dim = latent_dim
 
-        # init actual model
-        self.__init_system()
+        self.datamodule = datamodule
 
-        if pretrained:
-            self.load_pretrained(pretrained)
+        valid_encoders = {
+            'resnet18': {'enc': resnet18_encoder, 'dec': resnet18_decoder},
+            'resnet50': {'enc': resnet50_encoder, 'dec': resnet50_decoder},
+        }
 
-    def __init_system(self):
-        self.encoder = self.init_encoder()
-        self.decoder = self.init_decoder()
+        if enc_type not in valid_encoders:
+            self.encoder = resnet18_encoder()
+            self.decoder = resnet18_decoder(latent_dim=self.latent_dim)
+        else:
+            self.encoder = valid_encoders[enc_type]['enc']()
+            self.decoder = valid_encoders[enc_type]['dec'](latent_dim=self.latent_dim)
 
-    def load_pretrained(self, pretrained):
-        available_weights = {"imagenet2012"}
+        self.fc_mu = nn.Linear(self.enc_out_dim, self.latent_dim)
+        self.fc_var = nn.Linear(self.enc_out_dim, self.latent_dim)
 
-        if pretrained in available_weights:
-            weights_name = f"vae-{pretrained}"
-            load_pretrained(self, weights_name)
+    def from_pretrained(checkpoint_name):
+        pass
 
-    def init_encoder(self):
-        encoder = Encoder(
-            self.hparams.hidden_dim,
-            self.hparams.latent_dim,
-            self.hparams.input_channels,
-            self.hparams.input_width,
-            self.hparams.input_height,
-        )
-        return encoder
+    def forward(self, x):
+        x = self.encoder(x)
+        mu = self.fc_mu(x)
+        log_var = self.fc_var(x)
+        p, q, z = self.sample(mu, log_var)
+        return z, self.decoder(z), p, q
 
-    def init_decoder(self):
-        decoder = Decoder(
-            self.hparams.hidden_dim,
-            self.hparams.latent_dim,
-            self.hparams.input_width,
-            self.hparams.input_height,
-            self.hparams.input_channels,
-        )
-        return decoder
+    def sample(self, mu, log_var):
+        std = torch.exp(log_var / 2)
+        p = distributions[self.prior](torch.zeros_like(mu), torch.ones_like(std))
+        q = distributions[self.posterior](mu, std)
+        z = q.rsample()
+        return p, q, z
 
-    def get_prior(self, z_mu, z_std):
-        # Prior ~ Normal(0,1)
-        P = distributions.normal.Normal(loc=torch.zeros_like(z_mu), scale=torch.ones_like(z_std))
-        return P
+    def step(self, batch, batch_idx):
+        (x1, _, x), y = batch
 
-    def get_approx_posterior(self, z_mu, z_std):
-        # Approx Posterior ~ Normal(mu, sigma)
-        Q = distributions.normal.Normal(loc=z_mu, scale=z_std)
-        return Q
+        z, x1_hat, p, q = self.forward(x1)
 
-    def elbo_loss(self, x, P, Q, num_samples):
-        z = Q.rsample()
+        log_pxz = discretized_logistic(x1_hat, self.log_scale, x)
+        log_qz = q.log_prob(z)
+        log_pz = p.log_prob(z)
 
-        # ----------------------
-        # KL divergence loss (using monte carlo sampling)
-        # ----------------------
-        log_qz = Q.log_prob(z)
-        log_pz = P.log_prob(z)
+        kl = log_qz - log_pz
+        kl = kl.sum(dim=(1))  # sum all dims except batch
 
-        # (batch, num_samples, z_dim) -> (batch, num_samples)
-        kl_div = (log_qz - log_pz).sum(dim=2)
+        elbo = (kl - log_pxz).mean()  # elbo
+        bpd = elbo / (32 * 32 * 3 * np.log(2.0))
 
-        # we used monte carlo sampling to estimate. average across samples
-        # kl_div = kl_div.mean(-1)
+        gini = gini_score(z)
 
-        # ----------------------
-        # Reconstruction loss
-        # ----------------------
-        z = z.view(-1, z.size(-1)).contiguous()
-        pxz = self.decoder(z)
-
-        pxz = pxz.view(-1, num_samples, pxz.size(-1))
-        x = shaping.tile(x.unsqueeze(1), 1, num_samples)
-
-        pxz = torch.sigmoid(pxz)
-        recon_loss = F.binary_cross_entropy(pxz, x, reduction="none")
-
-        # sum across dimensions because sum of log probabilities of iid univariate gaussians is the same as
-        # multivariate gaussian
-        recon_loss = recon_loss.sum(dim=-1)
-
-        # we used monte carlo sampling to estimate. average across samples
-        # recon_loss = recon_loss.mean(-1)
-
-        # ELBO = reconstruction + KL
-        loss = recon_loss + kl_div
-
-        # average over batch
-        loss = loss.mean()
-        recon_loss = recon_loss.mean()
-        kl_div = kl_div.mean()
-
-        return loss, recon_loss, kl_div, pxz
-
-    def forward(self, z):
-        return self.decoder(z)
-
-    def _run_step(self, batch):
-        x, _ = batch
-        z_mu, z_log_var = self.encoder(x)
-
-        # we're estimating the KL divergence using sampling
-        num_samples = 32
-
-        # expand dims to sample all at once
-        # (batch, z_dim) -> (batch, num_samples, z_dim)
-        z_mu = z_mu.unsqueeze(1)
-        z_mu = shaping.tile(z_mu, 1, num_samples)
-
-        # (batch, z_dim) -> (batch, num_samples, z_dim)
-        z_log_var = z_log_var.unsqueeze(1)
-        z_log_var = shaping.tile(z_log_var, 1, num_samples)
-
-        # convert to std
-        z_std = torch.exp(z_log_var / 2)
-
-        P = self.get_prior(z_mu, z_std)
-        Q = self.get_approx_posterior(z_mu, z_std)
-
-        x = x.view(x.size(0), -1)
-
-        loss, recon_loss, kl_div, pxz = self.elbo_loss(x, P, Q, num_samples)
-
-        return loss, recon_loss, kl_div, pxz
+        logs = {
+            "kl": kl.mean(),
+            "elbo": elbo,
+            "gini": gini.mean(),
+            "bpd": bpd,
+            "log_pxz": log_pxz.mean(),
+        }
+        return elbo, logs
 
     def training_step(self, batch, batch_idx):
-        loss, recon_loss, kl_div, pxz = self._run_step(batch)
-        result = pl.TrainResult(loss)
-        result.log_dict({"train_elbo_loss": loss, "train_recon_loss": recon_loss, "train_kl_loss": kl_div})
+        loss, logs = self.step(batch, batch_idx)
+        result = pl.TrainResult(minimize=loss)
+        result.log_dict(
+            {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
+        )
         return result
 
     def validation_step(self, batch, batch_idx):
-        loss, recon_loss, kl_div, pxz = self._run_step(batch)
-        result = pl.EvalResult(loss, checkpoint_on=loss)
-        result.log_dict(
-            {"val_loss": loss, "val_recon_loss": recon_loss, "val_kl_div": kl_div}
-        )
-        return result
-
-    def test_step(self, batch, batch_idx):
-        loss, recon_loss, kl_div, pxz = self._run_step(batch)
-        result = pl.EvalResult(loss)
-        result.log_dict(
-            {"test_loss": loss, "test_recon_loss": recon_loss, "test_kl_div": kl_div}
-        )
+        loss, logs = self.step(batch, batch_idx)
+        result = pl.EvalResult(checkpoint_on=loss)
+        result.log_dict({f"val_{k}": v for k, v in logs.items()})
         return result
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
+        return torch.optim.Adam(self.parameters(), lr=self.lr)
 
     @staticmethod
     def add_model_specific_args(parent_parser):

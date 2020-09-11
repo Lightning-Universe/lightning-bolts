@@ -1,109 +1,361 @@
 import torch
 from torch import nn
-from torch.nn import functional as F
+import torch.nn.functional as F
 
 
-class Encoder(torch.nn.Module):
-    """
-    Takes as input an image, uses a CNN to extract features which
-    get split into a mu and sigma vector
-    """
+class Interpolate(nn.Module):
+    """nn.Module wrapper for F.interpolate"""
 
-    def __init__(self, hidden_dim, latent_dim, input_channels, input_width, input_height):
+    def __init__(self, size=None, scale_factor=None):
         super().__init__()
-        self.hidden_dim = hidden_dim
-        self.latent_dim = latent_dim
-        self.input_width = input_width
-        self.input_height = input_height
-        self.input_channels = input_channels
-
-        self.c1 = nn.Conv2d(input_channels, 32, kernel_size=3, padding=1)
-        self.c2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
-        self.c3 = nn.Conv2d(32, 32, kernel_size=3, stride=2, padding=1)
-
-        conv_out_dim = self._calculate_output_dim(input_width, input_height)
-
-        self.fc1 = DenseBlock(conv_out_dim, hidden_dim)
-        self.fc2 = DenseBlock(hidden_dim, hidden_dim)
-
-        self.mu_fc = nn.Linear(hidden_dim, latent_dim)
-        self.sigma_fc = nn.Linear(hidden_dim, latent_dim)
-
-    def _calculate_output_dim(self, input_width, input_height):
-        x = torch.rand(1, self.input_channels, input_width, input_height)
-        x = self.c3(self.c2(self.c1(x)))
-        x = x.view(-1)
-        return x.size(0)
+        self.size, self.scale_factor = size, scale_factor
 
     def forward(self, x):
-        x = F.relu(self.c1(x))
-        x = F.relu(self.c2(x))
-        x = F.relu(self.c3(x))
-        x = x.view(x.size(0), -1)
-
-        x = self.fc1(x)
-        x = self.fc2(x)
-
-        # generate mu
-        mu = self.mu_fc(x)
-
-        # generate sigma
-        sigma = self.sigma_fc(x)
-        return mu, sigma
+        return F.interpolate(x, size=self.size, scale_factor=self.scale_factor)
 
 
-class Decoder(torch.nn.Module):
+def conv3x3(in_planes, out_planes, stride=1):
+    """3x3 convolution with padding"""
+    return nn.Conv2d(
+        in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False
+    )
+
+
+def conv1x1(in_planes, out_planes, stride=1):
+    """1x1 convolution"""
+    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
+
+
+def resize_conv3x3(in_planes, out_planes, scale=1):
+    """upsample + 3x3 convolution with padding to avoid checkerboard artifact"""
+    if scale == 1:
+        return conv3x3(in_planes, out_planes)
+    else:
+        return nn.Sequential(
+            Interpolate(scale_factor=scale), conv3x3(in_planes, out_planes)
+        )
+
+
+def resize_conv1x1(in_planes, out_planes, scale=1):
+    """upsample + 1x1 convolution with padding to avoid checkerboard artifact"""
+    if scale == 1:
+        return conv1x1(in_planes, out_planes)
+    else:
+        return nn.Sequential(
+            Interpolate(scale_factor=scale), conv1x1(in_planes, out_planes)
+        )
+
+
+def conv3x3(in_planes, out_planes, stride=1):
+    """3x3 convolution with padding"""
+    return nn.Conv2d(
+        in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False
+    )
+
+
+class EncoderBlock(nn.Module):
     """
-    Takes in latent vars and reconstructs an image
+    ResNet block, copied from
+    https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py#L35
     """
 
-    def __init__(self, hidden_dim, latent_dim, input_width, input_height, input_channels):
+    expansion = 1
+
+    def __init__(self, inplanes, planes, stride=1, downsample=None):
+        super().__init__()
+        self.conv1 = conv3x3(inplanes, planes, stride)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = conv3x3(planes, planes)
+        self.bn2 = nn.BatchNorm2d(planes)
+        self.downsample = downsample
+
+    def forward(self, x):
+        identity = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        if self.downsample is not None:
+            identity = self.downsample(x)
+
+        out += identity
+        out = self.relu(out)
+
+        return out
+
+
+class EncoderBottleneck(nn.Module):
+    """
+    ResNet bottleneck, copied from
+    https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py#L75
+    """
+
+    expansion = 4
+
+    def __init__(self, inplanes, planes, stride=1, downsample=None):
+        super().__init__()
+        width = planes  # this needs to change if we want wide resnets
+        self.conv1 = conv1x1(inplanes, width)
+        self.bn1 = nn.BatchNorm2d(width)
+        self.conv2 = conv3x3(width, width, stride)
+        self.bn2 = nn.BatchNorm2d(width)
+        self.conv3 = conv1x1(width, planes * self.expansion)
+        self.bn3 = nn.BatchNorm2d(planes * self.expansion)
+        self.relu = nn.ReLU(inplace=True)
+        self.downsample = downsample
+        self.stride = stride
+
+    def forward(self, x):
+        identity = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+        out = self.relu(out)
+
+        out = self.conv3(out)
+        out = self.bn3(out)
+
+        if self.downsample is not None:
+            identity = self.downsample(x)
+
+        out += identity
+        out = self.relu(out)
+        return out
+
+
+class DecoderBlock(nn.Module):
+    """
+    ResNet block, but convs replaced with resize convs, and channel increase is in
+    second conv, not first
+    """
+
+    expansion = 1
+
+    def __init__(self, inplanes, planes, scale=1, upsample=None):
+        super().__init__()
+        self.conv1 = resize_conv3x3(inplanes, inplanes)
+        self.bn1 = nn.BatchNorm2d(inplanes)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = resize_conv3x3(inplanes, planes, scale)
+        self.bn2 = nn.BatchNorm2d(planes)
+        self.upsample = upsample
+
+    def forward(self, x):
+        identity = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        if self.upsample is not None:
+            identity = self.upsample(x)
+
+        out += identity
+        out = self.relu(out)
+
+        return out
+
+
+class DecoderBottleneck(nn.Module):
+    """
+    ResNet bottleneck, but convs replaced with resize convs
+    """
+
+    expansion = 4
+
+    def __init__(self, inplanes, planes, scale=1, upsample=None):
+        super().__init__()
+        width = planes  # this needs to change if we want wide resnets
+        self.conv1 = resize_conv1x1(inplanes, width)
+        self.bn1 = nn.BatchNorm2d(width)
+        self.conv2 = resize_conv3x3(width, width, scale)
+        self.bn2 = nn.BatchNorm2d(width)
+        self.conv3 = conv1x1(width, planes * self.expansion)
+        self.bn3 = nn.BatchNorm2d(planes * self.expansion)
+        self.relu = nn.ReLU(inplace=True)
+        self.upsample = upsample
+        self.scale = scale
+
+    def forward(self, x):
+        identity = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+        out = self.relu(out)
+
+        out = self.conv3(out)
+        out = self.bn3(out)
+
+        if self.upsample is not None:
+            identity = self.upsample(x)
+
+        out += identity
+        out = self.relu(out)
+        return out
+
+
+class ResNetEncoder(nn.Module):
+    """
+    ResNet up until adaptive average pool.
+    Differences: first conv layer and no max pool
+    """
+
+    def __init__(self, block, layers):
         super().__init__()
 
-        self.input_channels = input_channels
-        self.deconv_dim_w, self.deconv_dim_h = self._calculate_output_size(input_width, input_height)
+        self.inplanes = 64
+        self.conv1 = nn.Conv2d(
+            3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
+        )
+        self.bn1 = nn.BatchNorm2d(self.inplanes)
+        self.relu = nn.ReLU(inplace=True)
+        self.layer1 = self._make_layer(block, 64, layers[0])
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
+        self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
+        self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
-        self.latent_dim = latent_dim
-        self.fc1 = DenseBlock(latent_dim, hidden_dim)
-        self.fc2 = DenseBlock(hidden_dim, self.deconv_dim_w * self.deconv_dim_h * 64)
-        self.dc1 = nn.ConvTranspose2d(64, 32, kernel_size=3, padding=1)
-        self.dc2 = nn.ConvTranspose2d(32, 32, kernel_size=3, padding=1)
-        self.dc3 = nn.ConvTranspose2d(32, 32, kernel_size=2, stride=2)
-        self.dc4 = nn.ConvTranspose2d(32, input_channels, kernel_size=1, stride=1)
+    def _make_layer(self, block, planes, blocks, stride=1):
+        downsample = None
+        if stride != 1 or self.inplanes != planes * block.expansion:
+            downsample = nn.Sequential(
+                conv1x1(self.inplanes, planes * block.expansion, stride),
+                nn.BatchNorm2d(planes * block.expansion),
+            )
 
-    def _calculate_output_size(self, input_width, input_height):
-        x = torch.rand(1, self.input_channels, input_width, input_height)
-        dc1 = nn.Conv2d(self.input_channels, 32, kernel_size=1, stride=1)
-        dc2 = nn.Conv2d(32, 32, kernel_size=2, stride=2)
-        dc3 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
-        dc4 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+        layers = []
+        layers.append(block(self.inplanes, planes, stride, downsample))
+        self.inplanes = planes * block.expansion
+        for _ in range(1, blocks):
+            layers.append(block(self.inplanes, planes))
 
-        x = dc4(dc3(dc2(dc1(x))))
-        return x.size(-2), x.size(-1)
+        return nn.Sequential(*layers)
 
-    def forward(self, z):
-        x = self.fc1(z)
-        x = self.fc2(x)
-        x = x.view(x.size(0), 64, self.deconv_dim_w, self.deconv_dim_h)
-        x = F.relu(self.dc1(x))
-        x = F.relu(self.dc2(x))
-        x = F.relu(self.dc3(x))
-        x = self.dc4(x)
-        x = x.view(x.size(0), -1)
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        # no max pool
+
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
         return x
 
 
-class DenseBlock(nn.Module):
-    def __init__(self, in_dim, out_dim, drop_p=0.2):
+class ResNetDecoder(nn.Module):
+    """
+    Resnet in reverse order
+    """
+
+    def __init__(self, block, layers, latent_dim):
         super().__init__()
-        self.drop_p = drop_p
-        self.fc1 = nn.Linear(in_dim, out_dim)
-        self.fc_bn = nn.BatchNorm1d(out_dim)
-        self.in_dim = in_dim
+
+        self.expansion = block.expansion
+        self.inplanes = 512 * block.expansion
+        self.linear = nn.Linear(latent_dim, self.inplanes * 4 * 4)
+
+        self.layer1 = self._make_layer(block, 256, layers[0], scale=2)
+        self.layer2 = self._make_layer(block, 128, layers[1], scale=2)
+        self.layer3 = self._make_layer(block, 64, layers[2], scale=2)
+        self.layer4 = self._make_layer(block, 64, layers[3])
+        self.conv1 = nn.Conv2d(
+            64 * block.expansion, 3, kernel_size=3, stride=1, padding=1, bias=False
+        )
+
+    def _make_layer(self, block, planes, blocks, scale=1):
+        upsample = None
+        if scale != 1 or self.inplanes != planes * block.expansion:
+            upsample = nn.Sequential(
+                resize_conv1x1(self.inplanes, planes * block.expansion, scale),
+                nn.BatchNorm2d(planes * block.expansion),
+            )
+
+        layers = []
+        layers.append(block(self.inplanes, planes, scale, upsample))
+        self.inplanes = planes * block.expansion
+        for _ in range(1, blocks):
+            layers.append(block(self.inplanes, planes))
+
+        return nn.Sequential(*layers)
 
     def forward(self, x):
-        x = self.fc1(x)
-        x = self.fc_bn(x)
-        x = F.relu(x)
-        x = F.dropout(x, self.drop_p)
+        x = self.linear(x)
+
+        # NOTE: replaced this by Linear(in_channels, 514 * 4 * 4)
+        # x = F.interpolate(x, scale_factor=4)
+
+        x = x.view(x.size(0), 512 * self.expansion, 4, 4)
+
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+
+        x = self.conv1(x)
+        x = x.view(x.size(0), 3, 32, 32)
         return x
+
+
+def resnet18_encoder():
+    return ResNetEncoder(EncoderBlock, [2, 2, 2, 2])
+
+
+def resnet18_decoder(latent_dim):
+    return ResNetDecoder(DecoderBlock, [2, 2, 2, 2], latent_dim)
+
+
+def resnet50_encoder():
+    return ResNetEncoder(EncoderBottleneck, [3, 4, 6, 3])
+
+
+def resnet50_decoder(latent_dim):
+    return ResNetDecoder(DecoderBottleneck, [3, 4, 6, 3], latent_dim)
+
+
+def test_resnet18_encoder():
+    model = resnet18_encoder()
+    img = torch.rand(64, 3, 32, 32)
+    out = model(img)
+    assert out.shape == (64, 512)
+
+
+def test_resnet18_decoder():
+    model = resnet18_decoder(latent_dim=256)
+    z = torch.rand(64, 256)
+    out = model(z)
+    assert out.shape == (64, 3, 32, 32)
+
+
+def test_resnet_50_encoder():
+    model = resnet50_encoder()
+    img = torch.rand(64, 3, 32, 32)
+    out = model(img)
+    assert out.shape == (64, 512 * 4)
+
+
+def test_resnet50_decoder():
+    model = resnet50_decoder(latent_dim=256)
+    z = torch.rand(64, 256)
+    out = model(z)
+    assert out.shape == (64, 3, 32, 32)
