@@ -8,7 +8,7 @@ half-precision training.
 
 Linear Regression
 -----------------
-Linear regression fits a linear model between a real-valued target variable ($y$) and one or more features ($X$). We
+Linear regression fits a linear model between a real-valued target variable (:math:`y`) and one or more features (:math:`X`). We
 estimate the regression coefficients $\beta$ that minimizes the mean squared error between the predicted and true target
 values.
 
