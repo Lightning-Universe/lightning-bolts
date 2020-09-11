@@ -21,7 +21,7 @@ pretrained_urls = {
 
 """
 # TODO: pretrained url
-# TODO: correct enc, dec for maxpool and conv
+# TODO: correct enc, dec for any dataset
 # correct params for class
 # run cifar10
 # run imagenet
@@ -96,11 +96,10 @@ class VAE(pl.LightningModule):
     def from_pretrained(checkpoint_name):
         pass
 
-    def forward(self, x):
-        if x.shape != (256, 3, 32, 32):
-            print(x.shape)
-            print('forward')
-            exit(-1)
+    def forward(self, z):
+        return self.decoder(z)
+
+    def _run_step(self, x):
         x = self.encoder(x)
         mu = self.fc_mu(x)
         log_var = self.fc_var(x)
@@ -116,13 +115,7 @@ class VAE(pl.LightningModule):
 
     def step(self, batch, batch_idx):
         x, y = batch
-        if x.shape != (256, 3, 32, 32):
-            print(x.shape)
-            print(y.shape)
-            print('Step')
-            exit(-1)
-
-        z, x_hat, p, q = self.forward(x)
+        z, x_hat, p, q = self._run_step(x)
 
         recon_loss = F.mse_loss(x_hat, x, reduction='mean')
 
@@ -142,12 +135,6 @@ class VAE(pl.LightningModule):
         return loss, logs
 
     def training_step(self, batch, batch_idx):
-        x, y = batch
-        if x.shape != (256, 3, 32, 32):
-            print(x.shape)
-            print(y.shape)
-            print('train step')
-            exit(-1)
         loss, logs = self.step(batch, batch_idx)
         result = pl.TrainResult(minimize=loss)
         result.log_dict(
@@ -156,15 +143,9 @@ class VAE(pl.LightningModule):
         return result
 
     def validation_step(self, batch, batch_idx):
-        x, y = batch
-        if x.shape != (256, 3, 32, 32):
-            print(x.shape)
-            print(y.shape)
-            print('val step')
-            exit(-1)
         loss, logs = self.step(batch, batch_idx)
         result = pl.EvalResult(checkpoint_on=loss)
-        result.log_dict({f"val_{k}": v for k, v in logs.items()})
+        result.log_dict({f"val_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False)
         return result
 
     def configure_optimizers(self):
@@ -222,7 +203,7 @@ def cli_main(args=None):
 
     model = VAE(**vars(args))
     callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks)
+    trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model, dm)
     return dm, model, trainer
 
