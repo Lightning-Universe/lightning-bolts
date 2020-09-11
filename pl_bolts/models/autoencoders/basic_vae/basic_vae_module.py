@@ -16,11 +16,20 @@ pretrained_urls = {
     'cifar10': 'abc'
 }
 
+"""
+# TODO: pretrained url
+# TODO: correct enc, dec for maxpool and conv
+# correct params for class
+# run cifar10
+# run imagenet
+"""
 
 class VAE(pl.LightningModule):
     def __init__(
         self,
         enc_type='resnet18',
+        conv1=False,
+        maxpool1=False,
         enc_out_dim=512,
         kl_coeff=0.1,
         latent_dim=256,
@@ -59,6 +68,7 @@ class VAE(pl.LightningModule):
         super(VAE, self).__init__()
 
         self.save_hyperparameters()
+
         self.lr = lr
         self.kl_coeff = kl_coeff
         self.enc_out_dim = enc_out_dim
@@ -70,11 +80,11 @@ class VAE(pl.LightningModule):
         }
 
         if enc_type not in valid_encoders:
-            self.encoder = resnet18_encoder()
-            self.decoder = resnet18_decoder(latent_dim=self.latent_dim)
+            self.encoder = resnet18_encoder(conv1, maxpool1)
+            self.decoder = resnet18_decoder(latent_dim=self.latent_dim, conv1, maxpool1)
         else:
-            self.encoder = valid_encoders[enc_type]['enc']()
-            self.decoder = valid_encoders[enc_type]['dec'](latent_dim=self.latent_dim)
+            self.encoder = valid_encoders[enc_type]['enc'](conv1, maxpool1)
+            self.decoder = valid_encoders[enc_type]['dec'](latent_dim=self.latent_dim, conv1, maxpool1)
 
         self.fc_mu = nn.Linear(self.enc_out_dim, self.latent_dim)
         self.fc_var = nn.Linear(self.enc_out_dim, self.latent_dim)
