@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 
+import pytorch_lightning as pl
 import torch
-from pytorch_lightning import LightningModule, Trainer
 from torch.nn import functional as F
 
 from pl_bolts.datamodules import (CIFAR10DataModule, ImagenetDataModule,
@@ -10,7 +10,7 @@ from pl_bolts.models.autoencoders.basic_ae.components import AEEncoder
 from pl_bolts.models.autoencoders.basic_vae.components import Decoder
 
 
-class AE(LightningModule):
+class AE(pl.LightningModule):
     def __init__(
         self,
         input_channels: int,
@@ -124,6 +124,8 @@ class AE(LightningModule):
 
 
 def cli_main(args=None):
+    pl.seed_everything()
+
     parser = ArgumentParser()
     parser.add_argument("--dataset", default="mnist", type=str, help="mnist, cifar10, stl10, imagenet")
     script_args, _ = parser.parse_known_args(args)
@@ -136,15 +138,17 @@ def cli_main(args=None):
         dm_cls = STL10DataModule
     elif script_args.dataset == "imagenet":
         dm_cls = ImagenetDataModule
+    else:
+        raise ValueError(f"undefined dataset {script_args.dataset}")
 
     parser = dm_cls.add_argparse_args(parser)
-    parser = Trainer.add_argparse_args(parser)
+    parser = pl.Trainer.add_argparse_args(parser)
     parser = AE.add_model_specific_args(parser)
     args = parser.parse_args(args)
 
     dm = dm_cls.from_argparse_args(args)
     model = AE(*dm.size(), **vars(args))
-    trainer = Trainer.from_argparse_args(args)
+    trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model, dm)
     return dm, model, trainer
 
