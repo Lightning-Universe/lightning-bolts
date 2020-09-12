@@ -12,13 +12,13 @@ from pl_bolts.datamodules import (BinaryMNISTDataModule, CIFAR10DataModule,
                                   STL10DataModule)
 from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_decoder
 from pl_bolts.models.autoencoders.components import resnet50_encoder, resnet50_decoder
-from pl_bolts.utils.pretrained_weights import load_pretrained
 
 
 class AE(pl.LightningModule):
 
     pretrained_urls = {
-        'cifar10-resnet18': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/ae/ae-cifar10/checkpoints/epoch%3D96.ckpt'
+        'cifar10-resnet18':
+            'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/ae/ae-cifar10/checkpoints/epoch%3D96.ckpt'
     }
 
     def __init__(

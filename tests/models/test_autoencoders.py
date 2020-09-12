@@ -92,7 +92,7 @@ def test_from_pretrained(tmpdir):
         vae = vae.from_pretrained('stl10-resnet18')  # try loading weights not compatible with exact architecture
 
         ae = ae.from_pretrained('cifar10-resnet18')
-    except:
+    except Exception as e:
         exception_raised = True
 
     assert exception_raised is False, "error in loading weights"
