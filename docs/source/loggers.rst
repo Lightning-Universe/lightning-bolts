@@ -39,9 +39,6 @@ Then configure the logger and pass it to the :class:`~pl_bolts.trainer.trainer.T
             some_img = fake_image()
             self.logger.experiment.log_image('debug', 'generated_image_0', some_img, 0)
 
-.. seealso::
-    :class:`~pl_bolts.loggers.TrainsLogger` docs.
-
 ---------
 
 Your Logger
