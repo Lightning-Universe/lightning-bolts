@@ -140,6 +140,7 @@ class AE(pl.LightningModule):
         parser.add_argument("--gpus", type=int, default=1)
         parser.add_argument("--max_epochs", type=int, default=200)
         parser.add_argument("--max_steps", type=int, default=-1)
+        parser.add_argument("--fast_dev_run", action='store_true')
 
         return parser
 
