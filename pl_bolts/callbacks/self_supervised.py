@@ -1,8 +1,9 @@
-import torch
 import math
+
 import pytorch_lightning as pl
-from torch.nn import functional as F
+import torch
 from pytorch_lightning.metrics.functional import accuracy
+from torch.nn import functional as F
 
 
 class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
