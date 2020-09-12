@@ -6,6 +6,7 @@ import tarfile
 import tempfile
 import zipfile
 from contextlib import contextmanager
+from warnings import warn
 
 import torch
 from torch._six import PY3
@@ -13,14 +14,14 @@ from torch._six import PY3
 try:
     from sklearn.utils import shuffle
 except ImportError:
-    raise ImportError('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
+    warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install sklearn`.')
 
 try:
     from torchvision.datasets import ImageNet
     from torchvision.datasets.imagenet import load_meta_file
 except ImportError:
-    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install torchvision`.')
 
 

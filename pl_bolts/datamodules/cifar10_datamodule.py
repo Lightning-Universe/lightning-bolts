@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader, random_split
 
 from pl_bolts.datamodules.cifar10_dataset import TrialCIFAR10
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
+from warnings import warn
 
 
 try:
@@ -15,7 +16,7 @@ try:
     from torchvision.datasets import CIFAR10
 
 except ImportError:
-    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install torchvision`.')
 
 

@@ -5,12 +5,13 @@ import torch
 
 
 from pl_bolts.datamodules import VOCDetectionDataModule
+from warnings import warn
 
 try:
     from torchvision.models.detection import faster_rcnn, fasterrcnn_resnet50_fpn
     from torchvision.ops import box_iou
 except ImportError:
-    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install torchvision`.')
 
 

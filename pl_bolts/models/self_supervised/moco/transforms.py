@@ -1,4 +1,5 @@
 import random
+from warnings import warn
 from pl_bolts.transforms.dataset_normalizations import \
     imagenet_normalization, cifar10_normalization, stl10_normalization
 
@@ -6,7 +7,7 @@ try:
     from PIL import ImageFilter
     from torchvision import transforms
 except ImportError:
-    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install torchvision`.')
 
 

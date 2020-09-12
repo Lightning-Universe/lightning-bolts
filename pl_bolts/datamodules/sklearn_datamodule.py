@@ -5,11 +5,12 @@ import numpy as np
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset, DataLoader
+from warnings import warn
 
 try:
     from sklearn.utils import shuffle as sk_shuffle
 except ImportError:
-    raise ImportError('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
+    warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install sklearn`.')
 
 

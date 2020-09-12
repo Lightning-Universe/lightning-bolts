@@ -5,12 +5,13 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
+from warnings import warn
 
 try:
     from torchvision import transforms as transform_lib
 
 except ImportError:
-    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install torchvision`.')
 
 

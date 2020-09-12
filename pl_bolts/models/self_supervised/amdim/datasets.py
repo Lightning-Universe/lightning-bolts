@@ -7,7 +7,7 @@ from pl_bolts.models.self_supervised.amdim.ssl_datasets import CIFAR10Mixed
 try:
     from torchvision.datasets import STL10
 except ImportError:
-    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install torchvision`.')
 
 
