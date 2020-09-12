@@ -36,7 +36,6 @@ class LatentDimInterpolator(Callback):
         self.num_samples = num_samples
 
     def on_epoch_end(self, trainer, pl_module):
-        import torchvision
         import math
 
         if (trainer.current_epoch + 1) % self.interpolate_epoch_interval == 0:
