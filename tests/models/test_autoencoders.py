@@ -76,3 +76,33 @@ def test_decoder(tmpdir):
     assert out2.shape == (2, 3, 288, 288)
     assert out3.shape == (2, 3, 288, 288)
     assert out4.shape == (2, 3, 288, 288)
+
+
+def test_from_pretrained(tmpdir):
+    vae = VAE(input_height=32)
+    ae = AE(input_height=32)
+
+    assert len(VAE.pretrained_weights_available()) > 0
+    assert len(AE.pretrained_weights_available()) > 0
+
+    exception_raised = False
+
+    try:
+        vae = vae.from_pretrained('cifar10-resnet18')
+        vae = vae.from_pretrained('stl10-resnet18')  # try loading weights not compatible with exact architecture
+
+        ae = ae.from_pretrained('cifar10-resnet18')
+    except:
+        exception_raised = True
+
+    assert exception_raised is False, "error in loading weights"
+
+    keyerror = False
+
+    try:
+        vae = vae.from_pretrained('abc')
+        ae = ae.from_pretrained('xyz')
+    except KeyError:
+        keyerror = True
+
+    assert keyerror is True, "KeyError not raised when provided with illegal checkpoint name"
