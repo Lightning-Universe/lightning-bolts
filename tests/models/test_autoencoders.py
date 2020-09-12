@@ -3,76 +3,74 @@ import pytorch_lightning as pl
 import torch
 from pytorch_lightning import seed_everything
 
-from pl_bolts.datamodules import CIFAR10DataModule, MNISTDataModule
+from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.models.autoencoders import AE, VAE
-from pl_bolts.models.autoencoders.basic_ae import AEEncoder
-from pl_bolts.models.autoencoders.basic_vae import resnet18_encoder, resnet18_decoder
+from pl_bolts.models.autoencoders import resnet18_encoder, resnet18_decoder
+from pl_bolts.models.autoencoders import resnet50_encoder, resnet50_decoder
 
 
-@pytest.mark.parametrize(
-    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"), pytest.param(CIFAR10DataModule, id="cifar10")]
-)
+@pytest.mark.parametrize("dm_cls", [pytest.param(CIFAR10DataModule, id="cifar10")])
 def test_vae(tmpdir, dm_cls):
     seed_everything()
-    dm = dm_cls(batch_size=2, num_workers=0)
-    model = VAE(*dm.size())
-    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir, deterministic=True)
-    trainer.fit(model, dm)
-    results = trainer.test(model, datamodule=dm)[0]
-    loss = results["test_loss"]
 
-    assert loss > 0, "VAE failed"
+    dm = dm_cls(batch_size=4)
+    model = VAE(input_height=dm.size()[-1])
+    trainer = pl.Trainer(
+        fast_dev_run=True,
+        default_root_dir=tmpdir,
+        max_epochs=1
+    )
+    
+    result = trainer.fit(model, dm)
+    assert result == 1
 
 
-@pytest.mark.parametrize(
-    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"), pytest.param(CIFAR10DataModule, id="cifar10")]
-)
+@pytest.mark.parametrize("dm_cls", [pytest.param(CIFAR10DataModule, id="cifar10")])
 def test_ae(tmpdir, dm_cls):
     seed_everything()
-    dm = dm_cls(batch_size=2, num_workers=0)
-    model = VAE(*dm.size())
-    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
-    trainer.fit(model, dm)
-    trainer.test(model, datamodule=dm)
+
+    dm = dm_cls(batch_size=4)
+    model = AE(input_height=dm.size()[-1])
+    trainer = pl.Trainer(
+        fast_dev_run=True,
+        default_root_dir=tmpdir,
+        max_epochs=1
+    )
+    
+    result = trainer.fit(model, dm)
+    assert result == 1
 
 
-@pytest.mark.parametrize(
-    "hidden_dim,latent_dim,batch_size,channels,height,width",
-    [
-        pytest.param(128, 2, 16, 1, 28, 28, id="like-mnist-hidden-128-latent-2"),
-        pytest.param(128, 4, 16, 1, 28, 28, id="like-mnist-hidden-128-latent-4"),
-        pytest.param(64, 4, 16, 1, 28, 28, id="like-mnist-hidden-64-latent-4"),
-        pytest.param(128, 2, 16, 3, 32, 32, id="like-cifar10-hidden-128-latent-2"),
-    ],
-)
-def test_basic_ae_encoder(tmpdir, hidden_dim, latent_dim, batch_size, channels, height, width):
-    seed_everything()
-    encoder = AEEncoder(hidden_dim, latent_dim, channels, width, height)
-    x = torch.randn(batch_size, channels, width, height)
-    z = encoder(x)
-    assert z.shape == (batch_size, latent_dim)
+def test_encoder(tmpdir):
+    img = torch.rand(16, 3, 224, 224)
+
+    encoder1 = resnet18_encoder(first_conv=False, maxpool1=True)
+    encoder2 = resnet50_encoder(first_conv=False, maxpool1=True)
+    
+    out1 = encoder1(img)
+    out2 = encoder2(img)
+
+    assert out1.shape == (16, 512)
+    assert out2.shape == (16, 2048)
 
 
-@pytest.mark.parametrize(
-    "hidden_dim,latent_dim,batch_size,channels,height,width",
-    [
-        pytest.param(128, 2, 16, 1, 28, 28, id="like-mnist-hidden-128-latent-2"),
-        pytest.param(128, 4, 16, 1, 28, 28, id="like-mnist-hidden-128-latent-4"),
-        pytest.param(64, 4, 16, 1, 28, 28, id="like-mnist-hidden-64-latent-4"),
-        pytest.param(128, 2, 16, 3, 32, 32, id="like-cifar10-hidden-128-latent-2"),
-    ],
-)
-def test_basic_vae_components(tmpdir, hidden_dim, latent_dim, batch_size, channels, height, width):
-    seed_everything()
-    enc = resnet18_encoder()
-    dec = resnet18_decoder()
-    enc = Encoder(hidden_dim, latent_dim, channels, width, height)
-    x = torch.randn(batch_size, channels, width, height)
-    mu, sigma = enc(x)
+def test_decoder(tmpdir):
+    latent_dim = 128
+    input_height = 288 # random but has to be a multiple of 32 for first_conv=True, maxpool1=True
 
-    assert mu.shape == sigma.shape
+    decoder1 = resnet18_decoder(latent_dim=latent_dim, input_height=input_height, first_conv=True, maxpool1=True)
+    decoder2 = resnet18_decoder(latent_dim=latent_dim, input_height=input_height, first_conv=True, maxpool1=False)
+    decoder3 = resnet18_decoder(latent_dim=latent_dim, input_height=input_height, first_conv=False, maxpool1=True)
+    decoder4 = resnet18_decoder(latent_dim=latent_dim, input_height=input_height, first_conv=False, maxpool1=False)
+    
+    z = torch.rand(2, latent_dim)
 
-    dec = Decoder(hidden_dim, latent_dim, width, height, channels)
-    decoded_x = dec(mu)
+    out1 = decoder1(z)
+    out2 = decoder2(z)
+    out3 = decoder3(z)
+    out4 = decoder4(z)
 
-    assert decoded_x.view(-1).shape == x.view(-1).shape
+    assert out1.shape == (2, 3, 288, 288)
+    assert out2.shape == (2, 3, 288, 288)
+    assert out3.shape == (2, 3, 288, 288)
+    assert out4.shape == (2, 3, 288, 288)
