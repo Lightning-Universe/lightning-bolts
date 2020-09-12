@@ -15,11 +15,11 @@ try:
     import trains
     from trains import Task
     _TRAINS_AVAILABLE = True
-except ImportError:  # pragma: no-cover
+except Exception:  # pragma: no-cover
     trains = None
     Task = None
     _TRAINS_AVAILABLE = False
-    raise ImportError('You want to use `TRAINS` logger which is not installed yet,'  # pragma: no-cover
+    raise UserWarning('You want to use `TRAINS` logger which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install trains`.')
 
 from pytorch_lightning import _logger as log
