@@ -17,7 +17,6 @@ def test_cli_basic_gan(cli_args):
 
 @pytest.mark.parametrize(
     "dataset_name", [
-        pytest.param('mnist', id="mnist"),
         pytest.param('cifar10', id="cifar10")
     ]
 )
@@ -37,7 +36,6 @@ def test_cli_basic_vae(dataset_name):
 
 @pytest.mark.parametrize(
     "dataset_name", [
-        pytest.param('mnist', id="mnist"),
         pytest.param('cifar10', id="cifar10")
     ]
 )
