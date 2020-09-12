@@ -49,13 +49,6 @@ PyTorch-Lightning-Bolts documentation
 
 .. toctree::
    :maxdepth: 2
-   :name: loggers
-   :caption: Experimental Loggers
-
-   loggers
-
-.. toctree::
-   :maxdepth: 2
    :name: models
    :caption: Models
 
