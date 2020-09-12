@@ -1,6 +1,10 @@
-from torchvision import transforms
-
 from pl_bolts.transforms.self_supervised import RandomTranslateWithReflect
+
+try:
+    from torchvision import transforms
+except ImportError:
+    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install torchvision`.')
 
 
 class AMDIMTrainTransformsCIFAR10:

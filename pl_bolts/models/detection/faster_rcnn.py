@@ -2,10 +2,16 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import torch
-from torchvision.models.detection import faster_rcnn, fasterrcnn_resnet50_fpn
-from torchvision.ops import box_iou
+
 
 from pl_bolts.datamodules import VOCDetectionDataModule
+
+try:
+    from torchvision.models.detection import faster_rcnn, fasterrcnn_resnet50_fpn
+    from torchvision.ops import box_iou
+except ImportError:
+    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install torchvision`.')
 
 
 def _evaluate_iou(target, pred):

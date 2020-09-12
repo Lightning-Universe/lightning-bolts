@@ -1,6 +1,12 @@
 import torch
 from pytorch_lightning import Callback
 
+try:
+    import torchvision
+except ImportError:
+    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install torchvision`.')
+
 
 class TensorboardGenerativeModelImageSampler(Callback):
     def __init__(self, num_samples: int = 3):

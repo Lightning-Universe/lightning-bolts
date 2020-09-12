@@ -3,11 +3,17 @@ import os
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
-from torchvision import transforms as transform_lib
-from torchvision.datasets import STL10
+
 
 from pl_bolts.datamodules.concat_dataset import ConcatDataset
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
+
+try:
+    from torchvision import transforms as transform_lib
+    from torchvision.datasets import STL10
+except ImportError:
+    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install torchvision`.')
 
 
 class STL10DataModule(LightningDataModule):  # pragma: no cover

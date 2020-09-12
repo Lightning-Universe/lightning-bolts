@@ -2,7 +2,13 @@ import torch
 import torchvision.transforms as T
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
-from torchvision.datasets import VOCDetection
+
+try:
+    from torchvision.datasets import VOCDetection
+
+except ImportError:
+    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install torchvision`.')
 
 
 class Compose(object):

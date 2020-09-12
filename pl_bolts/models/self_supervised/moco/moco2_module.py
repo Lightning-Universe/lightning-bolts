@@ -11,8 +11,13 @@ from typing import Union
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-import torchvision
 from torch import nn
+
+try:
+    import torchvision
+except ImportError:
+    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install torchvision`.')
 
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule

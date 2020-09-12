@@ -1,9 +1,15 @@
 import torch
-from PIL import Image
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
-from torchvision import transforms as transform_lib
-from torchvision.datasets import MNIST
+
+try:
+    from torchvision import transforms as transform_lib
+    from torchvision.datasets import MNIST
+    from PIL import Image
+
+except ImportError:
+    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install torchvision`.')
 
 
 class BinaryMNISTDataModule(LightningDataModule):

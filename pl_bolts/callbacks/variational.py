@@ -1,6 +1,12 @@
 import torch
 from pytorch_lightning.callbacks import Callback
 
+try:
+    import torchvision
+except ImportError:
+    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install torchvision`.')
+
 
 class LatentDimInterpolator(Callback):
 
