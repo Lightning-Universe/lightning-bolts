@@ -20,7 +20,7 @@ def test_vae(tmpdir, dm_cls):
         default_root_dir=tmpdir,
         max_epochs=1
     )
-    
+
     result = trainer.fit(model, dm)
     assert result == 1
 
@@ -36,7 +36,7 @@ def test_ae(tmpdir, dm_cls):
         default_root_dir=tmpdir,
         max_epochs=1
     )
-    
+
     result = trainer.fit(model, dm)
     assert result == 1
 
@@ -46,7 +46,7 @@ def test_encoder(tmpdir):
 
     encoder1 = resnet18_encoder(first_conv=False, maxpool1=True)
     encoder2 = resnet50_encoder(first_conv=False, maxpool1=True)
-    
+
     out1 = encoder1(img)
     out2 = encoder2(img)
 
@@ -56,13 +56,13 @@ def test_encoder(tmpdir):
 
 def test_decoder(tmpdir):
     latent_dim = 128
-    input_height = 288 # random but has to be a multiple of 32 for first_conv=True, maxpool1=True
+    input_height = 288  # random but has to be a multiple of 32 for first_conv=True, maxpool1=True
 
     decoder1 = resnet18_decoder(latent_dim=latent_dim, input_height=input_height, first_conv=True, maxpool1=True)
     decoder2 = resnet18_decoder(latent_dim=latent_dim, input_height=input_height, first_conv=True, maxpool1=False)
     decoder3 = resnet18_decoder(latent_dim=latent_dim, input_height=input_height, first_conv=False, maxpool1=True)
     decoder4 = resnet18_decoder(latent_dim=latent_dim, input_height=input_height, first_conv=False, maxpool1=False)
-    
+
     z = torch.rand(2, latent_dim)
 
     out1 = decoder1(z)

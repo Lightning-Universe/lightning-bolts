@@ -21,4 +21,3 @@ The default encoder is a resnet18 backbone followed by linear layers which map r
     trainer = pl.Trainer()
     trainer.fit(model)
 """
-

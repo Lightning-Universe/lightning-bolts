@@ -18,6 +18,7 @@ pretrained_urls = {
     'cifar10': 'abc'
 }
 
+
 class AE(pl.LightningModule):
     def __init__(
         self,
