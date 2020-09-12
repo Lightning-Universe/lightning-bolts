@@ -16,7 +16,7 @@ from torch import nn
 try:
     import torchvision
 except ImportError:
-    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install torchvision`.')
 
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule

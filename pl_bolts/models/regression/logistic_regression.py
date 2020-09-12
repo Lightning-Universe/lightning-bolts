@@ -127,10 +127,17 @@ class LogisticRegression(pl.LightningModule):
 
 
 def cli_main():
+    from warnings import warn
+
     pl.seed_everything(1234)
 
     # Example: Iris dataset in Sklearn (4 features, 3 class labels)
-    from sklearn.datasets import load_iris
+    try:
+        from sklearn.datasets import load_iris
+    except ImportError:
+        warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
+             ' install it with `pip install sklearn`.')
+
     X, y = load_iris(return_X_y=True)
     loaders = SklearnDataModule(X, y)
 

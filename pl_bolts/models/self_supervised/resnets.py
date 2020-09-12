@@ -1,9 +1,10 @@
 import torch.nn as nn
+from warnings import warn
 
 try:
     from torchvision.models.utils import load_state_dict_from_url
 except ImportError:
-    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install torchvision`.')
 
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet50_bn', 'resnet101',

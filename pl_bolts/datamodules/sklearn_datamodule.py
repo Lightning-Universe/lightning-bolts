@@ -4,8 +4,14 @@ from typing import Any
 import numpy as np
 import torch
 from pytorch_lightning import LightningDataModule
-from sklearn.utils import shuffle as sk_shuffle
 from torch.utils.data import Dataset, DataLoader
+from warnings import warn
+
+try:
+    from sklearn.utils import shuffle as sk_shuffle
+except ImportError:
+    warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install sklearn`.')
 
 
 class SklearnDataset(Dataset):

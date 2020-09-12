@@ -4,11 +4,12 @@ import pytorch_lightning as pl
 from torch import nn
 from torch.nn import functional as F
 from torch.optim import Adam
+from warnings import warn
 
 try:
     from torchvision.models import densenet
 except ImportError:
-    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install torchvision`.')
 
 from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator

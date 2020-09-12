@@ -1,15 +1,16 @@
 import numpy as np
+from warnings import warn
 
 try:
     import torchvision.transforms as transforms
 except ImportError:
-    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install torchvision`.')
 
 try:
     import cv2
 except ImportError:
-    raise ImportError('You want to use `opencv-python` which is not installed yet,'  # pragma: no-cover
+    warn('You want to use `opencv-python` which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install opencv-python`.')
 
 
