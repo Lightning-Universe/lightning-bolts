@@ -1,12 +1,10 @@
+import re
 from queue import Queue
 from threading import Thread
 
-import re
-
 import torch
+from torch._six import container_abcs, string_classes
 from torch.utils.data import DataLoader
-from torch.utils.data import Dataset
-from torch._six import container_abcs, string_classes, int_classes
 
 
 class AsynchronousLoader(object):

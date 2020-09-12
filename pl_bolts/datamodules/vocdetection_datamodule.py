@@ -1,8 +1,8 @@
 import torch
+import torchvision.transforms as T
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torchvision.datasets import VOCDetection
-import torchvision.transforms as T
 
 
 class Compose(object):

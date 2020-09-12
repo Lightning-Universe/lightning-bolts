@@ -1,7 +1,9 @@
 import os
 from argparse import ArgumentParser
 
+import pytorch_lightning as pl
 import torch
+
 import torch. nn as nn
 from torch.nn import functional as F
 import pytorch_lightning as pl
@@ -148,6 +150,7 @@ def cli_main(args=None):
     from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
 
     # cli_main()
+
     parser = ArgumentParser()
     parser.add_argument("--dataset", default="cifar10", type=str, help="cifar10, stl10, imagenet")
     script_args, _ = parser.parse_known_args(args)
@@ -158,6 +161,8 @@ def cli_main(args=None):
         dm_cls = STL10DataModule
     elif script_args.dataset == "imagenet":
         dm_cls = ImagenetDataModule
+    else:
+        raise ValueError(f"undefined dataset {script_args.dataset}")
 
     parser = AE.add_model_specific_args(parser)
     args = parser.parse_args(args)
@@ -170,6 +175,7 @@ def cli_main(args=None):
 
     model = AE(**vars(args))
     callbacks = [TensorboardGenerativeModelImageSampler()]
+
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model, dm)
     return dm, model, trainer

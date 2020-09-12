@@ -1,4 +1,3 @@
-import os
 from argparse import ArgumentParser
 
 import torch
@@ -6,7 +5,7 @@ import torch. nn as nn
 from torch.nn import functional as F
 import pytorch_lightning as pl
 
-from pl_bolts.datamodules import (BinaryMNISTDataModule, CIFAR10DataModule,
+from pl_bolts.datamodules import (CIFAR10DataModule,
                                   ImagenetDataModule, MNISTDataModule,
                                   STL10DataModule)
 from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_decoder
@@ -173,7 +172,8 @@ class VAE(pl.LightningModule):
 def cli_main(args=None):
     from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
 
-    # cli_main()
+    pl.seed_everything()
+
     parser = ArgumentParser()
     parser.add_argument("--dataset", default="cifar10", type=str, help="cifar10, stl10, imagenet")
     script_args, _ = parser.parse_known_args(args)
