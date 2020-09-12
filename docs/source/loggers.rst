@@ -23,7 +23,7 @@ First, install the package:
 
 Then configure the logger and pass it to the :class:`~pl_bolts.trainer.trainer.Trainer`:
 
-.. testcode::
+.. code-block::
 
     from pl_bolts.loggers import TrainsLogger
     trains_logger = TrainsLogger(
@@ -32,14 +32,7 @@ Then configure the logger and pass it to the :class:`~pl_bolts.trainer.trainer.T
     )
     trainer = Trainer(logger=trains_logger)
 
-.. testoutput::
-    :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    :hide:
-
-    TRAINS Task: ...
-    TRAINS results page: ...
-
-.. testcode::
+.. code-block::
 
     class MyModule(LightningModule):
         def __init__(self):
