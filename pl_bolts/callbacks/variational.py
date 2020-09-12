@@ -1,6 +1,12 @@
 import torch
 from pytorch_lightning.callbacks import Callback
 
+try:
+    import torchvision
+except ImportError:
+    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install torchvision`.')
+
 
 class LatentDimInterpolator(Callback):
 
@@ -30,7 +36,6 @@ class LatentDimInterpolator(Callback):
         self.num_samples = num_samples
 
     def on_epoch_end(self, trainer, pl_module):
-        import torchvision
         import math
 
         if (trainer.current_epoch + 1) % self.interpolate_epoch_interval == 0:

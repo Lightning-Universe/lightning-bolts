@@ -3,7 +3,12 @@ from typing import Callable
 
 import numpy as np
 from sklearn.utils import shuffle
-from torchvision.datasets import CIFAR10
+
+try:
+    from torchvision.datasets import CIFAR10
+except ImportError:
+    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install torchvision`.')
 
 
 class SSLDatasetMixin(ABC):

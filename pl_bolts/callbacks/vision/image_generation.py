@@ -1,6 +1,12 @@
 import torch
 from pytorch_lightning import Callback
 
+try:
+    import torchvision
+except ImportError:
+    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install torchvision`.')
+
 
 class TensorboardGenerativeModelImageSampler(Callback):
     def __init__(self, num_samples: int = 3):
@@ -27,8 +33,6 @@ class TensorboardGenerativeModelImageSampler(Callback):
         self.num_samples = num_samples
 
     def on_epoch_end(self, trainer, pl_module):
-        import torchvision
-
         dim = (self.num_samples, pl_module.hparams.latent_dim)
         z = torch.normal(mean=0.0, std=1.0, size=dim, device=pl_module.device)
 

@@ -1,6 +1,16 @@
-import cv2
 import numpy as np
-import torchvision.transforms as transforms
+
+try:
+    import torchvision.transforms as transforms
+except ImportError:
+    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install torchvision`.')
+
+try:
+    import cv2
+except ImportError:
+    raise ImportError('You want to use `opencv-python` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install opencv-python`.')
 
 
 class SimCLRTrainDataTransform(object):

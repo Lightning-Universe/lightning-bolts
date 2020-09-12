@@ -5,8 +5,14 @@ import torch
 from pytorch_lightning import LightningModule, Trainer
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
-from torchvision import transforms
-from torchvision.datasets import MNIST
+
+
+try:
+    from torchvision import transforms
+    from torchvision.datasets import MNIST
+except ImportError:
+    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install torchvision`.')
 
 
 class LitMNIST(LightningModule):

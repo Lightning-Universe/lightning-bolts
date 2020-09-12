@@ -10,8 +10,13 @@ from contextlib import contextmanager
 import torch
 from sklearn.utils import shuffle
 from torch._six import PY3
-from torchvision.datasets import ImageNet
-from torchvision.datasets.imagenet import load_meta_file
+
+try:
+    from torchvision.datasets import ImageNet
+    from torchvision.datasets.imagenet import load_meta_file
+except ImportError:
+    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install torchvision`.')
 
 
 class UnlabeledImagenet(ImageNet):
