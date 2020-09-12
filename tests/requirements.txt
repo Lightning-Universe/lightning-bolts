@@ -8,3 +8,5 @@ check-manifest
 twine==1.13.0
 atari-py==0.2.6
 torchvision>=0.7
+trains>=0.14.1
+opencv-python
