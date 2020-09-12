@@ -13,7 +13,7 @@ def _collate_fn(batch):
 
 @pytest.mark.skip(reason='failing test')  # TODO
 def test_fasterrcnn(tmpdir):
-
+    # TODO: fix test
     model = FasterRCNN()
 
     image = torch.rand(1, 3, 400, 400)
