@@ -15,7 +15,7 @@ try:
     from sklearn.utils import shuffle
 except ImportError:
     warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-                      ' install it with `pip install sklearn`.')
+         ' install it with `pip install sklearn`.')
 
 try:
     from torchvision.datasets import ImageNet
