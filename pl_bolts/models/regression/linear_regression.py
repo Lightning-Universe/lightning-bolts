@@ -53,21 +53,23 @@ class LinearRegression(pl.LightningModule):
 
         y_hat = self(x)
 
-        loss = F.mse_loss(y_hat, y)
+        loss = F.mse_loss(y_hat, y, reduction='sum')
 
         # L1 regularizer
         if self.hparams.l1_strength is not None:
             l1_reg = torch.tensor(0.)
             for param in self.parameters():
-                l1_reg += torch.norm(param, 1)
+                l1_reg += param.abs().sum()
             loss += self.hparams.l1_strength * l1_reg
 
         # L2 regularizer
         if self.hparams.l2_strength is not None:
             l2_reg = torch.tensor(0.)
             for param in self.parameters():
-                l2_reg += torch.norm(param, 2)
+                l2_reg += param.pow(2).sum()
             loss += self.hparams.l2_strength * l2_reg
+
+        loss /= batch.size(0)
 
         tensorboard_logs = {'train_mse_loss': loss}
         progress_bar_metrics = tensorboard_logs

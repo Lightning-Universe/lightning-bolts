@@ -54,21 +54,23 @@ class LogisticRegression(pl.LightningModule):
         y_hat = self(x)
 
         # PyTorch cross_entropy function combines log_softmax and nll_loss in single function
-        loss = F.cross_entropy(y_hat, y)
+        loss = F.cross_entropy(y_hat, y, reduction='sum')
 
         # L1 regularizer
         if self.hparams.l1_strength > 0:
             l1_reg = torch.tensor(0.)
             for param in self.parameters():
-                l1_reg += torch.norm(param, 1)
+                l1_reg += param.abs().sum()
             loss += self.hparams.l1_strength * l1_reg
 
         # L2 regularizer
         if self.hparams.l2_strength > 0:
             l2_reg = torch.tensor(0.)
             for param in self.parameters():
-                l2_reg += torch.norm(param, 2)
+                l2_reg += param.pow(2).sum()
             loss += self.hparams.l2_strength * l2_reg
+
+        loss /= batch.size(0)
 
         tensorboard_logs = {'train_ce_loss': loss}
         progress_bar_metrics = tensorboard_logs
