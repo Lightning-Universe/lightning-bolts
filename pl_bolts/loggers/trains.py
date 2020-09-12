@@ -35,27 +35,29 @@ class TrainsLogger(LightningLoggerBase):
 
         pip install trains
 
-    Example:
-        >>> from pytorch_lightning import Trainer
-        >>> trains_logger = TrainsLogger(
-        ...     project_name='pytorch lightning',
-        ...     task_name='default',
-        ...     output_uri='.',
-        ... ) # doctest: +ELLIPSIS
-        TRAINS Task: ...
-        TRAINS results page: ...
-        >>> trainer = Trainer(logger=trains_logger)
+    Example::
+
+        from pytorch_lightning import Trainer
+        trains_logger = TrainsLogger(
+            project_name='pytorch lightning',
+            task_name='default',
+            output_uri='.',
+        )
+
+        trainer = Trainer(logger=trains_logger)
 
     Use the logger anywhere in your :class:`~pytorch_lightning.core.lightning.LightningModule` as follows:
 
-    >>> from pytorch_lightning import LightningModule
-    >>> class LitModel(LightningModule):
-    ...     def training_step(self, batch, batch_idx):
-    ...         # example
-    ...         self.logger.experiment.whatever_trains_supports(...)
-    ...
-    ...     def any_lightning_module_function_or_hook(self):
-    ...         self.logger.experiment.whatever_trains_supports(...)
+    Example::
+
+        from pytorch_lightning import LightningModule
+        class LitModel(LightningModule):
+            def training_step(self, batch, batch_idx):
+                # example
+                self.logger.experiment.whatever_trains_supports(...)
+
+            def any_lightning_module_function_or_hook(self):
+                self.logger.experiment.whatever_trains_supports(...)
 
     Args:
         project_name: The name of the experiment's project. Defaults to ``None``.
@@ -69,16 +71,16 @@ class TrainsLogger(LightningLoggerBase):
         auto_resource_monitoring: If ``True``, machine vitals will be
             sent along side the task scalars. Defaults to ``True``.
 
-    Examples:
-        >>> logger = TrainsLogger("pytorch lightning", "default", output_uri=".")  # doctest: +ELLIPSIS
-        TRAINS Task: ...
-        TRAINS results page: ...
-        >>> logger.log_metrics({"val_loss": 1.23}, step=0)
-        >>> logger.log_text("sample test")
-        sample test
-        >>> import numpy as np
-        >>> logger.log_artifact("confusion matrix", np.ones((2, 3)))
-        >>> logger.log_image("passed", "Image 1", np.random.randint(0, 255, (200, 150, 3), dtype=np.uint8))
+    Example::
+
+        logger = TrainsLogger("pytorch lightning", "default", output_uri=".")  # doctest: +ELLIPSIS
+        logger.log_metrics({"val_loss": 1.23}, step=0)
+        logger.log_text("sample test")
+
+        import numpy as np
+        logger.log_artifact("confusion matrix", np.ones((2, 3)))
+        logger.log_image("passed", "Image 1", np.random.randint(0, 255, (200, 150, 3), dtype=np.uint8))
+
     """
 
     _bypass = None
