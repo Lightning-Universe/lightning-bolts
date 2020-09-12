@@ -112,7 +112,7 @@ class AE(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
         result = pl.EvalResult(checkpoint_on=loss)
-        result.log_dict({f"val_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False)
+        result.log_dict({f"val_{k}": v for k, v in logs.items()})
         return result
 
     def configure_optimizers(self):

@@ -29,6 +29,29 @@ You can override any part of this AE to build your own variation.
             encoder = YourSuperFancyEncoder(...)
             return encoder
 
+You can use the pretrained models present in bolts.
+
+CIFAR-10 pretrained model::
+
+    from pl_bolts.models.autoencoders import AE
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/ae/cifar10/checkpoints/epoch%3D99.ckpt'
+    ae = AE.load_from_checkpoint(weight_path, strict=False)
+
+    ae.freeze()
+
+|
+
+- `Tensorboard for CIFAR10 training <https://tensorboard.dev/experiment/W6TmkmFZSEKfRxMkqJTjpA/>`_
+
+Training:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/cpc-cifar10-val.png
+    :width: 200
+    :alt: loss
+
+|
+
 .. autoclass:: pl_bolts.models.autoencoders.AE
    :noindex:
 
@@ -62,6 +85,58 @@ You can override any part of this VAE to build your own variation.
             # P = self.get_distribution(self.prior, loc=torch.zeros_like(mu), scale=torch.ones_like(std))
 
             return P
+
+You can use the pretrained models present in bolts.
+
+CIFAR-10 pretrained model::
+
+    from pl_bolts.models.autoencoders import VAE
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/cifar10/checkpoints/epoch%3D98.ckpt'
+    vae = VAE.load_from_checkpoint(weight_path, strict=False)
+
+    vae.freeze()
+
+|
+
+- `Tensorboard for CIFAR10 training <https://tensorboard.dev/experiment/2OZtEH4yQ2iVSgkxJwM7bw/#scalars>`_
+
+Training:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/cpc-cifar10-val.png
+    :width: 200
+    :alt: reconstruction loss
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/cpc-cifar10-val.png
+    :width: 200
+    :alt: kl
+
+|
+
+STL-10 pretrained model::
+
+    from pl_bolts.models.autoencoders import VAE
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/cifar10/checkpoints/epoch%3D98.ckpt'
+    vae = VAE.load_from_checkpoint(weight_path, strict=False)
+
+    vae.freeze()
+
+|
+
+- `Tensorboard for CIFAR10 training <https://tensorboard.dev/experiment/2OZtEH4yQ2iVSgkxJwM7bw/#scalars>`_
+
+Training:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/cpc-cifar10-val.png
+    :width: 200
+    :alt: reconstruction loss
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/cpc-cifar10-val.png
+    :width: 200
+    :alt: kl
+
+|
 
 .. autoclass:: pl_bolts.models.autoencoders.VAE
    :noindex:
