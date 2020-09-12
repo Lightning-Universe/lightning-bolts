@@ -138,7 +138,7 @@ def cli_main():
         from sklearn.datasets import load_iris
     except ImportError:
         warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-                          ' install it with `pip install sklearn`.')
+             ' install it with `pip install sklearn`.')
 
     X, y = load_iris(return_X_y=True)
     loaders = SklearnDataModule(X, y)

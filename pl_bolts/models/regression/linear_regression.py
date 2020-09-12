@@ -132,7 +132,7 @@ def cli_main():
         from sklearn.datasets import load_boston
     except ImportError:
         warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-                          ' install it with `pip install sklearn`.')
+             ' install it with `pip install sklearn`.')
 
     X, y = load_boston(return_X_y=True)  # these are numpy arrays
     loaders = SklearnDataModule(X, y)
