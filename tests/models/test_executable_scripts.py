@@ -28,6 +28,7 @@ def test_cli_basic_vae(dataset_name):
         --max_epochs 1
         --batch_size 3
         --fast_dev_run
+        --gpus 0
     """.strip().split()
 
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
@@ -47,6 +48,7 @@ def test_cli_basic_ae(dataset_name):
         --max_epochs 1
         --batch_size 3
         --fast_dev_run
+        --gpus 0
     """.strip().split()
 
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
