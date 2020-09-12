@@ -2,7 +2,12 @@ import math
 
 import numpy as np
 import torch
-from sklearn.utils import shuffle as sk_shuffle
+
+try:
+    from sklearn.utils import shuffle as sk_shuffle
+except ImportError:
+    raise ImportError('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install sklearn`.')
 
 
 class Identity(torch.nn.Module):

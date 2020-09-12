@@ -2,7 +2,12 @@ from abc import ABC
 from typing import Callable
 
 import numpy as np
-from sklearn.utils import shuffle
+
+try:
+    from sklearn.utils import shuffle
+except ImportError:
+    raise ImportError('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
+                      ' install it with `pip install sklearn`.')
 
 try:
     from torchvision.datasets import CIFAR10

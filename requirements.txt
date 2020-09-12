@@ -1,4 +1,3 @@
 pytorch-lightning>=0.9.0
 torch>=1.6
-scikit-learn>=0.23
 gym>=0.17.2
