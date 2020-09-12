@@ -26,7 +26,6 @@ def test_cli_basic_gan(dataset_name):
 
 @pytest.mark.parametrize(
     "dataset_name", [
-        pytest.param('mnist', id="mnist"),
         pytest.param('cifar10', id="cifar10")
     ]
 )
@@ -36,9 +35,9 @@ def test_cli_basic_vae(dataset_name):
     cli_args = f"""
         --dataset {dataset_name}
         --max_epochs 1
-        --limit_train_batches 3
-        --limit_val_batches 3
         --batch_size 3
+        --fast_dev_run
+        --gpus 0
     """.strip().split()
 
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
@@ -47,7 +46,6 @@ def test_cli_basic_vae(dataset_name):
 
 @pytest.mark.parametrize(
     "dataset_name", [
-        pytest.param('mnist', id="mnist"),
         pytest.param('cifar10', id="cifar10")
     ]
 )
@@ -57,9 +55,9 @@ def test_cli_basic_ae(dataset_name):
     cli_args = f"""
         --dataset {dataset_name}
         --max_epochs 1
-        --limit_train_batches 3
-        --limit_val_batches 3
         --batch_size 3
+        --fast_dev_run
+        --gpus 0
     """.strip().split()
 
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
