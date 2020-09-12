@@ -66,7 +66,7 @@ class LogisticRegression(pl.LightningModule):
             l2_reg = sum(param.pow(2).sum() for param in self.parameters())
             loss += self.hparams.l2_strength * l2_reg
 
-        loss /= batch.size(0)
+        loss /= x.size(0)
 
         tensorboard_logs = {'train_ce_loss': loss}
         progress_bar_metrics = tensorboard_logs
