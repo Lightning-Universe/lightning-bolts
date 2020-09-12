@@ -6,7 +6,7 @@ from pytorch_lightning import seed_everything
 from pl_bolts.datamodules import CIFAR10DataModule, MNISTDataModule
 from pl_bolts.models.autoencoders import AE, VAE
 from pl_bolts.models.autoencoders.basic_ae import AEEncoder
-from pl_bolts.models.autoencoders.basic_vae import Decoder, Encoder
+from pl_bolts.models.autoencoders.basic_vae import resnet18_encoder, resnet18_decoder
 
 
 @pytest.mark.parametrize(
@@ -64,6 +64,8 @@ def test_basic_ae_encoder(tmpdir, hidden_dim, latent_dim, batch_size, channels, 
 )
 def test_basic_vae_components(tmpdir, hidden_dim, latent_dim, batch_size, channels, height, width):
     seed_everything()
+    enc = resnet18_encoder()
+    dec = resnet18_decoder()
     enc = Encoder(hidden_dim, latent_dim, channels, width, height)
     x = torch.randn(batch_size, channels, width, height)
     mu, sigma = enc(x)

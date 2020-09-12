@@ -9,23 +9,13 @@ import pytorch_lightning as pl
 from pl_bolts.datamodules import (BinaryMNISTDataModule, CIFAR10DataModule,
                                   ImagenetDataModule, MNISTDataModule,
                                   STL10DataModule)
-#from pl_bolts.models.autoencoders.basic_vae.components import resnet18_encoder, resnet18_decoder
-#from pl_bolts.models.autoencoders.basic_vae.components import resnet50_encoder, resnet50_decoder
-from components import resnet18_encoder, resnet18_decoder
-from components import resnet50_encoder, resnet50_decoder
+from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_decoder
+from pl_bolts.models.autoencoders.components import resnet50_encoder, resnet50_decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
 
 pretrained_urls = {
     'cifar10': 'abc'
 }
-
-"""
-# TODO: pretrained url
-# TODO: correct enc, dec for any dataset
-# correct params for class
-# run cifar10
-# run imagenet
-"""
 
 class VAE(pl.LightningModule):
     def __init__(
@@ -58,16 +48,16 @@ class VAE(pl.LightningModule):
 
         Args:
 
-            hidden_dim: encoder and decoder hidden dims
-            latent_dim: latenet code dim
-            input_channels: num of channels of the input image.
-            input_width: image input width
-            input_height: image input height
-            batch_size: the batch size
-            learning_rate" the learning rate
-            data_dir: the directory to store data
-            datamodule: The Lightning DataModule
-            pretrained: Load weights pretrained on a dataset
+            input_height: height of the images
+            enc_type: option between resnet18 or resnet50
+            first_conv: use standard kernel_size 7, stride 2 at start or
+                replace it with kernel_size 3, stride 1 conv
+            maxpool1: use standard maxpool to reduce spatial dim of feat by a factor of 2
+            enc_out_dim: set according to the out_channel count of
+                encoder used (512 for resnet18, 2048 for resnet50)
+            kl_coeff: coefficient for kl term of the loss
+            latent_dim: dim of latent space
+            lr: learning rate for Adam
         """
 
         super(VAE, self).__init__()
@@ -172,9 +162,10 @@ class VAE(pl.LightningModule):
         parser.add_argument("--batch_size", type=int, default=256)
         parser.add_argument("--num_workers", type=int, default=8)
         parser.add_argument("--data_dir", type=str, default=".")
-        
+
         parser.add_argument("--gpus", type=int, default=1)
         parser.add_argument("--max_epochs", type=int, default=200)
+        parser.add_argument("--max_steps", type=int, default=-1)
 
         return parser
 
@@ -199,6 +190,9 @@ def cli_main(args=None):
 
     dm = dm_cls.from_argparse_args(args)
     args.input_height = dm.size()[-1]
+
+    if args.max_steps == -1:
+        args.max_steps = None
 
     model = VAE(**vars(args))
     callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]

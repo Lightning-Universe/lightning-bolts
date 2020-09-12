@@ -1,150 +1,175 @@
+import os
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning import LightningDataModule, LightningModule, Trainer
+import torch. nn as nn
 from torch.nn import functional as F
+import pytorch_lightning as pl
 
-from pl_bolts.datamodules import (CIFAR10DataModule, ImagenetDataModule,
-                                  MNISTDataModule, STL10DataModule)
-from pl_bolts.models.autoencoders.basic_ae.components import AEEncoder
-from pl_bolts.models.autoencoders.basic_vae.components import Decoder
+from pl_bolts.datamodules import (BinaryMNISTDataModule, CIFAR10DataModule,
+                                  ImagenetDataModule, MNISTDataModule,
+                                  STL10DataModule)
+from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_decoder
+from pl_bolts.models.autoencoders.components import resnet50_encoder, resnet50_decoder
+from pl_bolts.utils.pretrained_weights import load_pretrained
 
+# TODO: add this
+pretrained_urls = {
+    'cifar10': 'abc'
+}
 
-class AE(LightningModule):
+class AE(pl.LightningModule):
     def __init__(
         self,
-        input_channels: int,
-        input_height: int,
-        input_width: int,
-        latent_dim=32,
-        hidden_dim=128,
-        learning_rate=0.001,
+        input_height,
+        enc_type='resnet18',
+        first_conv=False,
+        maxpool1=False,
+        enc_out_dim=512,
+        kl_coeff=0.1,
+        latent_dim=256,
+        lr=1e-4,
         **kwargs
     ):
         """
+        Standard AE
+
+        Model is available pretrained on different datasets:
+
+        Example::
+
+            # not pretrained
+            ae = AE()
+
+            # pretrained on imagenet
+            ae = AE.from_pretrained('resnet50-imagenet')
+
+            # pretrained on cifar10
+            ae = AE.from_pretrained('resnet18-cifar10')
+
         Args:
 
-            datamodule: the datamodule (train, val, test splits)
-            input_channels: num of image channels
-            input_height: image height
-            input_width: image width
-            latent_dim: emb dim for encoder
-            batch_size: the batch size
-            hidden_dim: the encoder dim
-            learning_rate: the learning rate
-            num_workers: num dataloader workers
-            data_dir: where to store data
+            input_height: height of the images
+            enc_type: option between resnet18 or resnet50
+            first_conv: use standard kernel_size 7, stride 2 at start or
+                replace it with kernel_size 3, stride 1 conv
+            maxpool1: use standard maxpool to reduce spatial dim of feat by a factor of 2
+            enc_out_dim: set according to the out_channel count of
+                encoder used (512 for resnet18, 2048 for resnet50)
+            latent_dim: dim of latent space
+            lr: learning rate for Adam
         """
-        super().__init__()
+
+        super(AE, self).__init__()
+
         self.save_hyperparameters()
 
-        self.encoder = self.init_encoder(
-            self.hparams.hidden_dim,
-            self.hparams.latent_dim,
-            self.hparams.input_channels,
-            self.hparams.input_width,
-            self.hparams.input_height,
-        )
-        self.decoder = self.init_decoder(self.hparams.hidden_dim, self.hparams.latent_dim)
+        self.lr = lr
+        self.enc_out_dim = enc_out_dim
+        self.latent_dim = latent_dim
+        self.input_height = input_height
 
-    def init_encoder(self, hidden_dim, latent_dim, input_channels, input_height, input_width):
-        encoder = AEEncoder(hidden_dim, latent_dim, input_channels, input_height, input_width)
-        return encoder
+        valid_encoders = {
+            'resnet18': {'enc': resnet18_encoder, 'dec': resnet18_decoder},
+            'resnet50': {'enc': resnet50_encoder, 'dec': resnet50_decoder},
+        }
 
-    def init_decoder(self, hidden_dim, latent_dim):
-        # c, h, w = self.img_dim
-        decoder = Decoder(
-            hidden_dim, latent_dim, self.hparams.input_width, self.hparams.input_height, self.hparams.input_channels
-        )
-        return decoder
+        if enc_type not in valid_encoders:
+            self.encoder = resnet18_encoder(first_conv, maxpool1)
+            self.decoder = resnet18_decoder(self.latent_dim, self.input_height, first_conv, maxpool1)
+        else:
+            self.encoder = valid_encoders[enc_type]['enc'](first_conv, maxpool1)
+            self.decoder = valid_encoders[enc_type]['dec'](self.latent_dim, self.input_height, first_conv, maxpool1)
+
+        self.fc = nn.Linear(self.enc_out_dim, self.latent_dim)
+
+    def from_pretrained(checkpoint_name):
+        pass
 
     def forward(self, z):
         return self.decoder(z)
 
-    def _run_step(self, batch):
-        x, _ = batch
-        z = self.encoder(x)
-        x_hat = self(z)
+    def step(self, batch, batch_idx):
+        x, y = batch
 
-        loss = F.mse_loss(x.view(x.size(0), -1), x_hat)
-        return loss
+        feats = self.encoder(x)
+        z = self.fc(feats)
+        x_hat = self.decoder(z)
+
+        loss = F.mse_loss(x_hat, x, reduction='mean')
+
+        return loss, {"loss": loss}
 
     def training_step(self, batch, batch_idx):
-        loss = self._run_step(batch)
-
-        tensorboard_logs = {
-            "mse_loss": loss,
-        }
-
-        return {"loss": loss, "log": tensorboard_logs}
+        loss, logs = self.step(batch, batch_idx)
+        result = pl.TrainResult(minimize=loss)
+        result.log_dict(
+            {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
+        )
+        return result
 
     def validation_step(self, batch, batch_idx):
-        loss = self._run_step(batch)
-
-        return {
-            "val_loss": loss,
-        }
-
-    def validation_epoch_end(self, outputs):
-        avg_loss = torch.stack([x["val_loss"] for x in outputs]).mean()
-
-        tensorboard_logs = {"mse_loss": avg_loss}
-
-        return {"val_loss": avg_loss, "log": tensorboard_logs}
-
-    def test_step(self, batch, batch_idx):
-        loss = self._run_step(batch)
-
-        return {
-            "test_loss": loss,
-        }
-
-    def test_epoch_end(self, outputs):
-        avg_loss = torch.stack([x["test_loss"] for x in outputs]).mean()
-
-        tensorboard_logs = {"mse_loss": avg_loss}
-
-        return {"test_loss": avg_loss, "log": tensorboard_logs}
+        loss, logs = self.step(batch, batch_idx)
+        result = pl.EvalResult(checkpoint_on=loss)
+        result.log_dict({f"val_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False)
+        return result
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
+        return torch.optim.Adam(self.parameters(), lr=self.lr)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
+
+        parser.add_argument("--enc_type", type=str, default='resnet18', help="resnet18/resnet50")
+        parser.add_argument("--first_conv", action='store_true')
+        parser.add_argument("--maxpool1", action='store_true')
+        parser.add_argument("--lr", type=float, default=1e-4)
+
         parser.add_argument(
-            "--hidden_dim",
-            type=int,
-            default=128,
-            help="itermediate layers dimension before embedding for default encoder/decoder",
+            "--enc_out_dim", type=int, default=512,
+            help="512 for resnet18, 2048 for bigger resnets, adjust for wider resnets"
         )
-        parser.add_argument("--latent_dim", type=int, default=32, help="dimension of latent variables z")
-        parser.add_argument("--learning_rate", type=float, default=1e-3)
+        parser.add_argument("--latent_dim", type=int, default=256)
+
+        parser.add_argument("--batch_size", type=int, default=256)
+        parser.add_argument("--num_workers", type=int, default=8)
+        parser.add_argument("--data_dir", type=str, default=".")
+
+        parser.add_argument("--gpus", type=int, default=1)
+        parser.add_argument("--max_epochs", type=int, default=200)
+        parser.add_argument("--max_steps", type=int, default=-1)
+
         return parser
 
 
 def cli_main(args=None):
+    from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
+
+    # cli_main()
     parser = ArgumentParser()
-    parser.add_argument("--dataset", default="mnist", type=str, help="mnist, cifar10, stl10, imagenet")
+    parser.add_argument("--dataset", default="cifar10", type=str, help="cifar10, stl10, imagenet")
     script_args, _ = parser.parse_known_args(args)
 
-    if script_args.dataset == "mnist":
-        dm_cls = MNISTDataModule
-    elif script_args.dataset == "cifar10":
+    if script_args.dataset == "cifar10":
         dm_cls = CIFAR10DataModule
     elif script_args.dataset == "stl10":
         dm_cls = STL10DataModule
     elif script_args.dataset == "imagenet":
         dm_cls = ImagenetDataModule
 
-    parser = dm_cls.add_argparse_args(parser)
-    parser = Trainer.add_argparse_args(parser)
     parser = AE.add_model_specific_args(parser)
     args = parser.parse_args(args)
 
     dm = dm_cls.from_argparse_args(args)
-    model = AE(*dm.size(), **vars(args))
-    trainer = Trainer.from_argparse_args(args)
+    args.input_height = dm.size()[-1]
+
+    if args.max_steps == -1:
+        args.max_steps = None
+
+    model = AE(**vars(args))
+    callbacks = [TensorboardGenerativeModelImageSampler()]
+    trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model, dm)
     return dm, model, trainer
 
