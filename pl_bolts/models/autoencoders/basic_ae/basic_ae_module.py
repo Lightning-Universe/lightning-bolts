@@ -6,7 +6,6 @@ import torch
 
 import torch. nn as nn
 from torch.nn import functional as F
-import pytorch_lightning as pl
 
 from pl_bolts.datamodules import (BinaryMNISTDataModule, CIFAR10DataModule,
                                   ImagenetDataModule, MNISTDataModule,
@@ -15,7 +14,6 @@ from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_d
 from pl_bolts.models.autoencoders.components import resnet50_encoder, resnet50_decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
 
-# TODO: add this
 pretrained_urls = {
     'cifar10': 'abc'
 }
