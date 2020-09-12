@@ -17,7 +17,7 @@ class LogisticRegression(pl.LightningModule):
                  input_dim: int,
                  num_classes: int,
                  bias: bool = True,
-                 learning_rate: float = 0.0001,
+                 learning_rate: float = 1e-4,
                  optimizer: Optimizer = Adam,
                  l1_strength: float = 0.0,
                  l2_strength: float = 0.0,
@@ -58,16 +58,12 @@ class LogisticRegression(pl.LightningModule):
 
         # L1 regularizer
         if self.hparams.l1_strength > 0:
-            l1_reg = torch.tensor(0.)
-            for param in self.parameters():
-                l1_reg += param.abs().sum()
+            l1_reg = sum(param.abs().sum() for param in self.parameters())
             loss += self.hparams.l1_strength * l1_reg
 
         # L2 regularizer
         if self.hparams.l2_strength > 0:
-            l2_reg = torch.tensor(0.)
-            for param in self.parameters():
-                l2_reg += param.pow(2).sum()
+            l2_reg = sum(param.pow(2).sum() for param in self.parameters())
             loss += self.hparams.l2_strength * l2_reg
 
         loss /= batch.size(0)

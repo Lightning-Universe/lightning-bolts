@@ -16,10 +16,10 @@ class LinearRegression(pl.LightningModule):
                  input_dim: int,
                  output_dim: int = 1,
                  bias: bool = True,
-                 learning_rate: float = 0.0001,
+                 learning_rate: float = 1e-4,
                  optimizer: Optimizer = Adam,
-                 l1_strength: float = None,
-                 l2_strength: float = None,
+                 l1_strength: float = 0.0,
+                 l2_strength: float = 0.0,
                  **kwargs):
         """
         Linear regression model implementing - with optional L1/L2 regularization
@@ -56,17 +56,13 @@ class LinearRegression(pl.LightningModule):
         loss = F.mse_loss(y_hat, y, reduction='sum')
 
         # L1 regularizer
-        if self.hparams.l1_strength is not None:
-            l1_reg = torch.tensor(0.)
-            for param in self.parameters():
-                l1_reg += param.abs().sum()
+        if self.hparams.l1_strength > 0:
+            l1_reg = sum(param.abs().sum() for param in self.parameters())
             loss += self.hparams.l1_strength * l1_reg
 
         # L2 regularizer
-        if self.hparams.l2_strength is not None:
-            l2_reg = torch.tensor(0.)
-            for param in self.parameters():
-                l2_reg += param.pow(2).sum()
+        if self.hparams.l2_strength > 0:
+            l2_reg = sum(param.pow(2).sum() for param in self.parameters())
             loss += self.hparams.l2_strength * l2_reg
 
         loss /= batch.size(0)
