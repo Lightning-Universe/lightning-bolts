@@ -12,12 +12,14 @@ from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_d
 from pl_bolts.models.autoencoders.components import resnet50_encoder, resnet50_decoder
 from pl_bolts.utils.pretrained_weights import load_pretrained
 
-pretrained_urls = {
-    'cifar10': 'abc'
-}
-
 
 class VAE(pl.LightningModule):
+
+    pretrained_urls = {
+        'cifar10-resnet18': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-cifar10/checkpoints/epoch%3D89.ckpt',
+        'stl10-resnet18': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-stl10/checkpoints/epoch%3D89.ckpt'
+    }
+
     def __init__(
         self,
         input_height,
@@ -85,8 +87,15 @@ class VAE(pl.LightningModule):
         self.fc_mu = nn.Linear(self.enc_out_dim, self.latent_dim)
         self.fc_var = nn.Linear(self.enc_out_dim, self.latent_dim)
 
-    def from_pretrained(checkpoint_name):
-        pass
+    @staticmethod
+    def pretrained_weights_available():
+        return list(VAE.pretrained_urls.keys())
+
+    def from_pretrained(self, checkpoint_name):
+        if checkpoint_name not in VAE.pretrained_urls:
+            raise KeyError(str(checkpoint_name) + ' not present in pretrained weights.')
+
+        return self.load_from_checkpoint(VAE.pretrained_urls[checkpoint_name], strict=False)
 
     def forward(self, z):
         return self.decoder(z)
