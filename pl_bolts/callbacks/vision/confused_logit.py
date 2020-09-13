@@ -63,7 +63,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
         # pick the last batch and logits
         x, y = batch
         try:
-            logits = pl_module.last_logits
+            logits = pl_module.last_logits.cpu()
         except AttributeError as e:
             m = """please track the last_logits in the training_step like so:
                 def training_step(...):
