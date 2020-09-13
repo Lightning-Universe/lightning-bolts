@@ -65,9 +65,9 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
         try:
             logits = pl_module.last_logits
         except AttributeError as e:
-            m = """please track the logits in the training_step like so:
+            m = """please track the last_logits in the training_step like so:
                 def training_step(...):
-                    self.logits = your_logits
+                    self.last_logits = your_logits
             """
             raise AttributeError(m)
 
