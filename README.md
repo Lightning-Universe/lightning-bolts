@@ -146,7 +146,7 @@ X, y = load_boston(return_X_y=True)
 loaders = SklearnDataModule(X, y)
 
 model = LinearRegression(input_dim=13)
-trainer = pl.Trainer(num_tpu_cores=1)
+trainer = pl.Trainer(gpus=4)
 trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
 trainer.test(test_dataloaders=loaders.test_dataloader())
 ```
