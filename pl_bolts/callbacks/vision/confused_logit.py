@@ -87,14 +87,13 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
     def _plot(self, confusing_x, confusing_y, trainer, model, mask_idxs):
         from matplotlib import pyplot as plt
 
-        batch_size, c, w, h = confusing_x.size()
-
         confusing_x = confusing_x[:self.top_k]
         confusing_y = confusing_y[:self.top_k]
 
         x_param_a = nn.Parameter(confusing_x)
         x_param_b = nn.Parameter(confusing_x)
 
+        batch_size, c, w, h = confusing_x.size()
         for logit_i, x_param in enumerate((x_param_a, x_param_b)):
             logits = model(x_param.view(batch_size, -1))
             logits[:, mask_idxs[:, logit_i]].sum().backward()
