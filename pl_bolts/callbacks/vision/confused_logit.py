@@ -103,12 +103,12 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
         grad_b = x_param_b.grad.view(batch_size, w, h)
 
         for img_i in range(len(confusing_x)):
-            x = confusing_x[img_i].squeeze(0)
-            y = confusing_y[img_i]
-            ga = grad_a[img_i]
-            gb = grad_b[img_i]
+            x = confusing_x[img_i].squeeze(0).cpu()
+            y = confusing_y[img_i].cpu()
+            ga = grad_a[img_i].cpu()
+            gb = grad_b[img_i].cpu()
 
-            mask_idx = mask_idxs[img_i]
+            mask_idx = mask_idxs[img_i].cpu()
 
             fig, axarr = plt.subplots(nrows=2, ncols=3, figsize=(15, 10))
             self.__draw_sample(fig, axarr, 0, 0, x, f'True: {y}')
