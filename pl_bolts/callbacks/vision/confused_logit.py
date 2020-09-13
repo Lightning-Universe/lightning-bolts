@@ -62,7 +62,14 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
 
         # pick the last batch and logits
         x, y = batch
-        logits = pl_module.last_logits
+        try:
+            logits = pl_module.last_logits
+        except AttributeError as e:
+            m = """please track the logits in the training_step like so:
+                def training_step(...):
+                    self.logits = your_logits
+            """
+            raise AttributeError(m)
 
         # only check when it has opinions (ie: the logit > 5)
         if logits.max() > self.min_logit_value:
