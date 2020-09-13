@@ -89,11 +89,12 @@ train_data = DataLoader(MyDataset(transforms=SimCLRTrainDataTransform(input_heig
 val_data = DataLoader(MyDataset(transforms=SimCLREvalDataTransform(input_height=32)))
 
 # model
-model = SimCLR(pretrained='imagenet2012')
+weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp12_87_52/epoch%3D960.ckpt'
+simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
 
-# train!
-trainer = pl.Trainer(gpus=8)
-trainer.fit(model, train_data, val_data)
+simclr.freeze()
+
+# finetune
 ```
 
 #### Example 2: Subclass and ideate
