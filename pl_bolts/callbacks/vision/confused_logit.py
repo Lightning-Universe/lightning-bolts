@@ -103,7 +103,6 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
         batch_size, c, w, h = confusing_x.size()
         for logit_i, x_param in enumerate((x_param_a, x_param_b)):
             logits = model(x_param.view(batch_size, -1))
-            logits = logits.cpu()
             logits[:, mask_idxs[:, logit_i]].sum().backward()
 
         # reshape grads
