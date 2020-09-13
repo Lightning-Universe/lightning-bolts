@@ -61,7 +61,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
             return
 
         # pick the last batch and logits
-        x, y = pl_module.last_batch
+        x, y = batch
         logits = pl_module.last_logits
 
         # only check when it has opinions (ie: the logit > 5)
