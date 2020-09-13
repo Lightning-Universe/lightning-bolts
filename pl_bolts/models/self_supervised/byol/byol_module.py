@@ -25,8 +25,8 @@ class BYOL(pl.LightningModule):
                  max_epochs: int = 1000,
                  **kwargs):
         """
-        PyTorch Lightning implementation of `Bring Your Own Latent (BYOL)
-        <https://arxiv.org/pdf/2006.07733.pdf.>`_
+        PyTorch Lightning implementation of `Bootstrap Your Own Latent (BYOL)
+        <https://arxiv.org/pdf/2006.07733.pdf>`_
 
         Paper authors: Jean-Bastien Grill ,Florian Strub, Florent Altché, Corentin Tallec, Pierre H. Richemond, \
         Elena Buchatskaya, Carl Doersch, Bernardo Avila Pires, Zhaohan Daniel Guo, Mohammad Gheshlaghi Azar, \
