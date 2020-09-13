@@ -141,6 +141,7 @@ But our implementations work on multiple GPUs, TPUs and scale dramatically...
 from pl_bolts.models.regression import LinearRegression
 from pl_bolts.datamodules import SklearnDataModule
 from sklearn.datasets import load_boston
+import pytorch_lightning as pl
 
 # sklearn dataset
 X, y = load_boston(return_X_y=True)
