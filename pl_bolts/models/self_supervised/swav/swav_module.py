@@ -1,8 +1,7 @@
 """
 TODO:
-- check mlp for eval (verify callback)
+- multi-gpu (need data sampler to adjust length of data_loader)
 - correct stl eval
-- LARC check compare
 - scheduler not using warmup as optimizer is not
 - add swav val data transforms, add val
 - check maxpool is false and is actually 1, 1 in the model
@@ -13,16 +12,21 @@ Adapted from official swav implementation: https://github.com/facebookresearch/s
 """
 from argparse import ArgumentParser
 
+import os
 import numpy as np
 import pytorch_lightning as pl
+import torch
 from torch import nn
 from torch.nn import functional as F
 from torch.optim import Adam, SGD
 
+from pytorch_lightning.callbacks import LearningRateLogger
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50
-from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
-from pl_bolts.models.self_supervised.swav.swav_transforms SwAVTrainDataTransform
+
+from pl_bolts.transforms.dataset_normalizations import stl10_normalization
+from pl_bolts.models.self_supervised.swav.swav_transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
+from pl_bolts.models.self_supervised.swav.swav_online_eval import SwavOnlineEvaluator
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 
 
@@ -30,22 +34,52 @@ class SwAV(pl.LightningModule):
     def __init__(
         self,
         gpus: int,
+        datamodule: pl.LightningDataModule = None,
         hidden_mlp: int = 2048,
         feat_dim: int = 128,
         nmb_prototypes: int = 3072,
+        temperature: float = 0.1,
+        sinkhorn_iterations: int = 3,
+        queue_length: int = 0,  # must be divisible by total batch-size
+        queue_path: str = "queue",
+        epoch_queue_starts: int = 15,
+        crops_for_assign: list = [0, 1],
+        nmb_crops: list = [2, 6],
         first_conv: bool = True,
-        maxpool1: bool = True
+        maxpool1: bool = True,
+        optimizer: str = 'adam',
+        exclude_bn_bias: bool = False,
+        learning_rate: float = 1e-3,
+        weight_decay: float = 1e-6,
+        epsilon: float = 0.05,
+        **kwargs
     ):
         super().__init__()
         self.save_hyperparameters()
 
         self.gpus = gpus
+        self.datamodule = datamodule
+
         self.hidden_mlp = hidden_mlp
         self.feat_dim = feat_dim
         self.nmb_prototypes = nmb_prototypes
+        self.sinkhorn_iterations = sinkhorn_iterations
+
+        self.queue_length = queue_length
+        self.queue_path = queue_path
+        self.epoch_queue_starts = epoch_queue_starts
+        self.crops_for_assign = crops_for_assign
+        self.nmb_crops = nmb_crops
 
         self.first_conv = first_conv
         self.maxpool1 = maxpool1
+
+        self.optim = optimizer
+        self.exclude_bn_bias = exclude_bn_bias
+        self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
+        self.epsilon = epsilon
+        self.temperature = temperature
 
         if self.gpus > 1:
             self.get_assignments = self.distributed_sinkhorn
@@ -54,10 +88,19 @@ class SwAV(pl.LightningModule):
 
         self.model = self.init_model()
 
+        """
         # define LR schedule
         warmup_lr_schedule = np.linspace(
             self.start_lr, self.learning_rate, len(train_loader) * args.warmup_epochs
         )
+        """
+
+        self.queue = None
+        self.queue_path = os.path.join(self.queue_path, "queue" + str(self.global_rank) + ".pth")
+        if os.path.isfile(self.queue_path):
+            self.queue = torch.load(self.queue_path)["queue"]
+
+        self.softmax = nn.Softmax(dim=1)
 
     def init_model(self):
         return resnet50(
@@ -73,11 +116,84 @@ class SwAV(pl.LightningModule):
         # pass single batch from the resnet backbone
         return self.model.forward_backbone(x)
 
+    def on_train_epoch_start(self):
+        if self.queue_length > 0:
+            if self.trainer.current_epoch >= self.epoch_queue_starts and self.queue is None:
+                self.queue = torch.zeros(
+                    len(self.crops_for_assign),
+                    self.queue_length // self.gpus,  # change to nodes * gpus once multi-node
+                    self.feat_dim,
+                ).cuda()
+
+        self.use_the_queue = False
+
+    def on_train_epoch_end(self) -> None:
+        if self.queue is not None:
+            torch.save({"queue": self.queue}, self.queue_path)
+
+    def shared_step(self, batch):
+        if isinstance(self.datamodule, STL10DataModule):
+            unlabeled_batch = batch[0]
+            batch = unlabeled_batch
+
+        inputs, y = batch
+
+        # 1. normalize the prototypes
+        with torch.no_grad():
+            w = self.model.module.prototypes.weight.data.clone()
+            w = nn.functional.normalize(w, dim=1, p=2)
+            self.model.module.prototypes.weight.copy_(w)
+
+        # 2. multi-res forward passes
+        embedding, output = self.model(inputs)
+        embedding = embedding.detach()
+        bs = inputs[0].size(0)
+
+        # 3. swav loss computation
+        loss = 0
+        for i, crop_id in enumerate(self.crops_for_assign):
+            with torch.no_grad():
+                out = output[bs * crop_id: bs * (crop_id + 1)]
+
+                # 4. time to use the queue
+                if self.queue is not None:
+                    if self.use_the_queue or not torch.all(self.queue[i, -1, :] == 0):
+                        self.use_the_queue = True
+                        out = torch.cat((torch.mm(
+                            self.queue[i],
+                            self.model.module.prototypes.weight.t()
+                        ), out))
+                    # fill the queue
+                    self.queue[i, bs:] = self.queue[i, :-bs].clone()
+                    self.queue[i, :bs] = embedding[crop_id * bs: (crop_id + 1) * bs]
+
+                # 5. get assignments
+                q = torch.exp(out / self.epsilon).t()
+                q = self.get_assignments(q, self.sinkhorn_iterations)[-bs:]
+
+            # cluster assignment prediction
+            subloss = 0
+            for v in np.delete(np.arange(np.sum(self.nmb_crops)), crop_id):
+                p = self.softmax(output[bs * v: bs * (v + 1)] / self.temperature)
+                subloss -= torch.mean(torch.sum(q * torch.log(p), dim=1))
+            loss += subloss / (np.sum(self.nmb_crops) - 1)
+        loss /= len(self.crops_for_assign)
+
+        return loss
+
     def training_step(self, batch, batch_idx):
-        pass
+        loss = self.shared_step(batch)
+
+        result = pl.TrainResult(minimize=loss)
+        result.log('train_loss', loss, on_step=True, on_epoch=False)
+        return result
 
     def validation_step(self, batch, batch_idx):
-        pass
+        loss = self.shared_step(batch)
+
+        result = pl.EvalResult(checkpoint_on=loss)
+        result.log('val_loss', loss, on_step=False, on_epoch=True)
+        return result
 
     def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=['bias', 'bn']):
         params = []
@@ -97,8 +213,35 @@ class SwAV(pl.LightningModule):
         ]
 
     def configure_optimizers(self):
-        # use lars wrapper
-        pass
+        if self.exclude_bn_bias:
+            params = self.exclude_from_wt_decay(
+                self.named_parameters(),
+                weight_decay=self.weight_decay
+            )
+        else:
+            params = model.named_parameters()
+
+        if self.optim == 'sgd':
+            optimizer = torch.optim.SGD(
+                params,
+                lr=self.learning_rate,
+                momentum=0.9,
+                weight_decay=self.weight_decay
+            )
+        elif self.optim == 'adam':
+            optimizer = torch.optim.Adam(
+                params,
+                lr=self.learning_rate,
+                weight_decay=self.weight_decay
+            )
+
+        optimizer = LARSWrapper(
+            optimizer,
+            eta=0.001,  # trust coefficient
+            clip=False
+        )
+
+        return optimizer
 
     def optimizer_step(
         self,
@@ -111,10 +254,12 @@ class SwAV(pl.LightningModule):
         using_native_amp=False,
         using_lbfgs= False
     ):
+        """
         # TODO: warm-up + decay schedule placed here since LARSWrapper is not optimizer class
         iteration = epoch * len(train_loader) + it
         for param_group in optimizer.param_groups:
             param_group["lr"] = lr_schedule[iteration]
+        """
 
         # from lightning implementation
         if using_native_amp:
@@ -176,6 +321,7 @@ class SwAV(pl.LightningModule):
         parser.add_argument("--jitter_strength", type=float, default=1.0, help="jitter strength")
         parser.add_argument("--dataset", type=str, default="stl10", help="stl10")
         parser.add_argument("--data_path", type=str, default=".", help="path to download data")
+        parser.add_argument("--queue_path", type=str, default="queue", help="path for queue")
 
         parser.add_argument("--nmb_crops", type=int, default=[2, 4], nargs="+",
                             help="list of number of crops (example: [2, 6])")
@@ -209,29 +355,68 @@ class SwAV(pl.LightningModule):
         parser.add_argument("--sinkhorn_iterations", default=3, type=int,
                             help="number of iterations in Sinkhorn-Knopp algorithm")
         parser.add_argument("--nmb_prototypes", default=256, type=int, help="number of prototypes")
-        parser.add_argument("--queue_length", type=int, default=7680, help="length of the queue (0 for no queue)")
+        parser.add_argument("--queue_length", type=int, default=7680,
+                            help="length of the queue (0 for no queue); must be divisible by total batch size")
         parser.add_argument("--epoch_queue_starts", type=int, default=15,
                             help="from this epoch, we start using a queue")
         parser.add_argument("--freeze_prototypes_nepochs", default=1, type=int,
                             help="freeze the prototypes during this many epochs from the start")
+
+        return parser
         
 
 def cli_main():
+    parser = ArgumentParser()
+
+    # model args
+    parser = SwAV.add_model_specific_args(parser)
+    args = parser.parse_args()
 
     if args.dataset == 'stl10':
-        dm = STL10DataModule()
-        dm.train
+        dm = STL10DataModule(data_dir=args.data_path)
+        dm.train_dataloader = dm.train_dataloader_mixed
+        dm.val_dataloader = dm.val_dataloader_mixed
+
+        dm.train_transforms = SwAVTrainDataTransform(
+            normalize=stl10_normalization(),
+            size_crops=args.size_crops,
+            nmb_crops=args.nmb_crops,
+            min_scale_crops=args.min_scale_crops,
+            max_scale_crops=args.max_scale_crops,
+            gaussian_blur=args.gaussian_blur,
+            jitter_strength=args.jitter_strength
+        )
+
+        dm.val_transforms = SwAVEvalDataTransform(
+            normalize=stl10_normalization(),
+            size_crops=args.size_crops,
+            nmb_crops=args.nmb_crops,
+            min_scale_crops=args.min_scale_crops,
+            max_scale_crops=args.max_scale_crops,
+            gaussian_blur=args.gaussian_blur,
+            jitter_strength=args.jitter_strength
+        )
+
         args.maxpool1 = False
-    elif:
+    else:
         raise NotImplementedError("other datasets have not been implemented till now")
 
     # LR logger callback
+    lr_logger = LearningRateLogger()
+
+    # online eval
+    online_evaluator = SwavOnlineEvaluator(
+        drop_p=0.,
+        hidden_dim=None,
+        z_dim=args.hidden_mlp,
+        num_classes=dm.num_classes()
+    )
 
     trainer = pl.Trainer(
         gpus=args.gpus,
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=16,
-        callbacks=[]
+        callbacks=[lr_logger, online_evaluator]
     )
 
     trainer.fit(model, dm)
