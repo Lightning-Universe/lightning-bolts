@@ -2,7 +2,6 @@ from warnings import warn
 
 from torch.utils.data import random_split
 
-
 try:
     from torchvision.datasets import STL10
     from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet

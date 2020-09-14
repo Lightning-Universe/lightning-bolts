@@ -5,7 +5,6 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
 from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_decoder
 from pl_bolts.models.autoencoders.components import resnet50_encoder, resnet50_decoder
 
