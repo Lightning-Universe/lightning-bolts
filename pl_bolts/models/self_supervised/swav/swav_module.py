@@ -2,9 +2,7 @@
 TODO:
 - multi-gpu (need data sampler to adjust length of data_loader)
 - correct stl eval
-- scheduler not using warmup as optimizer is not
 - add swav val data transforms, add val
-- check maxpool is false and is actually 1, 1 in the model
 - len(train_loader when) DDP with multiple GPUs
 - unlabeled batch issue
 
@@ -13,6 +11,7 @@ Adapted from official swav implementation: https://github.com/facebookresearch/s
 from argparse import ArgumentParser
 
 import os
+import math
 import numpy as np
 import pytorch_lightning as pl
 import torch
@@ -34,10 +33,15 @@ class SwAV(pl.LightningModule):
     def __init__(
         self,
         gpus: int,
-        datamodule: pl.LightningDataModule = None,
+        num_samples: int,
+        batch_size: int,
+        datamodule: pl.LightningDataModule,
         hidden_mlp: int = 2048,
         feat_dim: int = 128,
+        warmup_epochs: int = 10,
+        max_epochs: int = 100,
         nmb_prototypes: int = 3072,
+        freeze_prototypes_epochs: int = 1,
         temperature: float = 0.1,
         sinkhorn_iterations: int = 3,
         queue_length: int = 0,  # must be divisible by total batch-size
@@ -49,7 +53,9 @@ class SwAV(pl.LightningModule):
         maxpool1: bool = True,
         optimizer: str = 'adam',
         exclude_bn_bias: bool = False,
+        start_lr: float = 0.,
         learning_rate: float = 1e-3,
+        final_lr: float = 0.,
         weight_decay: float = 1e-6,
         epsilon: float = 0.05,
         **kwargs
@@ -59,10 +65,13 @@ class SwAV(pl.LightningModule):
 
         self.gpus = gpus
         self.datamodule = datamodule
+        self.num_samples = num_samples
+        self.batch_size = batch_size
 
         self.hidden_mlp = hidden_mlp
         self.feat_dim = feat_dim
         self.nmb_prototypes = nmb_prototypes
+        self.freeze_prototypes_epochs = freeze_prototypes_epochs
         self.sinkhorn_iterations = sinkhorn_iterations
 
         self.queue_length = queue_length
@@ -76,10 +85,15 @@ class SwAV(pl.LightningModule):
 
         self.optim = optimizer
         self.exclude_bn_bias = exclude_bn_bias
-        self.learning_rate = learning_rate
         self.weight_decay = weight_decay
         self.epsilon = epsilon
         self.temperature = temperature
+
+        self.start_lr = start_lr
+        self.final_lr = final_lr
+        self.learning_rate = learning_rate
+        self.warmup_epochs = warmup_epochs
+        self.max_epochs = max_epochs
 
         if self.gpus > 1:
             self.get_assignments = self.distributed_sinkhorn
@@ -88,12 +102,20 @@ class SwAV(pl.LightningModule):
 
         self.model = self.init_model()
 
-        """
+        # compute iters per epoch
+        global_batch_size = self.trainer.world_size * self.batch_size
+        self.train_iters_per_epoch = self.num_samples // global_batch_size
+
         # define LR schedule
         warmup_lr_schedule = np.linspace(
-            self.start_lr, self.learning_rate, len(train_loader) * args.warmup_epochs
+            self.start_lr, self.learning_rate, self.train_iters_per_epoch * self.warmup_epochs
         )
-        """
+        iters = np.arange(self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs))
+        cosine_lr_schedule = np.array([self.final_lr + 0.5 * (self.learning_rate - self.final_lr) * (
+            1 + math.cos(math.pi * t / (self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs)))
+        ) for t in iters])
+
+        self.lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
 
         self.queue = None
         self.queue_path = os.path.join(self.queue_path, "queue" + str(self.global_rank) + ".pth")
@@ -130,6 +152,12 @@ class SwAV(pl.LightningModule):
     def on_train_epoch_end(self) -> None:
         if self.queue is not None:
             torch.save({"queue": self.queue}, self.queue_path)
+
+    def on_after_backward(self):
+        if self.current_epoch < self.freeze_prototypes_epochs:
+            for name, p in self.model.named_parameters():
+                if "prototypes" in name:
+                    p.grad = None
 
     def shared_step(self, batch):
         if isinstance(self.datamodule, STL10DataModule):
@@ -254,12 +282,10 @@ class SwAV(pl.LightningModule):
         using_native_amp=False,
         using_lbfgs= False
     ):
-        """
-        # TODO: warm-up + decay schedule placed here since LARSWrapper is not optimizer class
-        iteration = epoch * len(train_loader) + it
-        for param_group in optimizer.param_groups:
-            param_group["lr"] = lr_schedule[iteration]
-        """
+        # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
+        # adjust LR of optim contained within LARSWrapper
+        for param_group in optimizer.optim.param_groups:
+            param_group["lr"] = lr_schedule[self.trainer.global_step]
 
         # from lightning implementation
         if using_native_amp:
@@ -337,7 +363,7 @@ class SwAV(pl.LightningModule):
         parser.add_argument("-num_workers", default=16, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
         parser.add_argument('--exclude_bn_bias', default=False, type=bool, help="exclude bn/bias from weight decay")
-        parser.add_argument("--epochs", default=100, type=int, help="number of total epochs to run")
+        parser.add_argument("--max_epochs", default=100, type=int, help="number of total epochs to run")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
         parser.add_argument("--batch_size", default=128, type=int, help="batch size per gpu")
 
@@ -359,7 +385,7 @@ class SwAV(pl.LightningModule):
                             help="length of the queue (0 for no queue); must be divisible by total batch size")
         parser.add_argument("--epoch_queue_starts", type=int, default=15,
                             help="from this epoch, we start using a queue")
-        parser.add_argument("--freeze_prototypes_nepochs", default=1, type=int,
+        parser.add_argument("--freeze_prototypes_epochs", default=1, type=int,
                             help="freeze the prototypes during this many epochs from the start")
 
         return parser
@@ -376,6 +402,7 @@ def cli_main():
         dm = STL10DataModule(data_dir=args.data_path)
         dm.train_dataloader = dm.train_dataloader_mixed
         dm.val_dataloader = dm.val_dataloader_mixed
+        args.num_samples = dm.num_unlabeled_samples
 
         dm.train_transforms = SwAVTrainDataTransform(
             normalize=stl10_normalization(),
@@ -401,6 +428,9 @@ def cli_main():
     else:
         raise NotImplementedError("other datasets have not been implemented till now")
 
+    # swav model init
+    model = SwAV(**args.__dict__, datamodule=dm)
+
     # LR logger callback
     lr_logger = LearningRateLogger()
 
@@ -419,7 +449,7 @@ def cli_main():
         callbacks=[lr_logger, online_evaluator]
     )
 
-    trainer.fit(model, dm)
+    trainer.fit(model)
 
 
 if __name__ == '__main__':
