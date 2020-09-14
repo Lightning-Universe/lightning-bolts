@@ -17,6 +17,7 @@ import pytorch_lightning as pl
 import torch
 from torch import nn
 from torch.nn import functional as F
+import torch.distributed as dist
 from torch.optim import Adam, SGD
 
 from pytorch_lightning.callbacks import LearningRateLogger
@@ -287,7 +288,7 @@ class SwAV(pl.LightningModule):
         # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
         # adjust LR of optim contained within LARSWrapper
         for param_group in optimizer.optim.param_groups:
-            param_group["lr"] = lr_schedule[self.trainer.global_step]
+            param_group["lr"] = self.lr_schedule[self.trainer.global_step]
 
         # from lightning implementation
         if using_native_amp:
@@ -322,7 +323,7 @@ class SwAV(pl.LightningModule):
 
             u = torch.zeros(Q.shape[0]).cuda(non_blocking=True)
             r = torch.ones(Q.shape[0]).cuda(non_blocking=True) / Q.shape[0]
-            c = torch.ones(Q.shape[1]).cuda(non_blocking=True) / (args.world_size * Q.shape[1])
+            c = torch.ones(Q.shape[1]).cuda(non_blocking=True) / (self.gpus * Q.shape[1])
 
             curr_sum = torch.sum(Q, dim=1)
             dist.all_reduce(curr_sum)
