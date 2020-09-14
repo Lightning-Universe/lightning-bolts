@@ -1,7 +1,8 @@
+from warnings import warn
+
 import pytest
 import pytorch_lightning as pl
 import torch
-from warnings import warn
 
 try:
     from torchvision import transforms

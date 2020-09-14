@@ -1,8 +1,8 @@
 import math
+from warnings import warn
 
 import numpy as np
 import torch
-from warnings import warn
 
 try:
     from sklearn.utils import shuffle as sk_shuffle

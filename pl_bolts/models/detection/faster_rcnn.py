@@ -1,11 +1,10 @@
 from argparse import ArgumentParser
+from warnings import warn
 
 import pytorch_lightning as pl
 import torch
 
-
 from pl_bolts.datamodules import VOCDetectionDataModule
-from warnings import warn
 
 try:
     from torchvision.models.detection import faster_rcnn, fasterrcnn_resnet50_fpn

@@ -1,11 +1,11 @@
 import os
+from warnings import warn
 
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
-from warnings import warn
 
 try:
     from torchvision import transforms as transform_lib

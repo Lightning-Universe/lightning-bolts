@@ -1,12 +1,11 @@
 import os
 from argparse import ArgumentParser
+from warnings import warn
 
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
-from warnings import warn
-
 
 try:
     from torchvision import transforms

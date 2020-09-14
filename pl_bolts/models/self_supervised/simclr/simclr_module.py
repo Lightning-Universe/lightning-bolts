@@ -1,10 +1,10 @@
 from argparse import ArgumentParser
+from warnings import warn
 
 import pytorch_lightning as pl
 from torch import nn
 from torch.nn import functional as F
 from torch.optim import Adam
-from warnings import warn
 
 try:
     from torchvision.models import densenet

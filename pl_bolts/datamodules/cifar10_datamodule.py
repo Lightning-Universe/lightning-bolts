@@ -1,15 +1,13 @@
 import os
 from typing import Optional, Sequence
+from warnings import warn
 
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
 
-
 from pl_bolts.datamodules.cifar10_dataset import TrialCIFAR10
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
-from warnings import warn
-
 
 try:
     from torchvision import transforms as transform_lib

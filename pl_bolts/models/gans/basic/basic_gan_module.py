@@ -1,4 +1,3 @@
-import os
 from argparse import ArgumentParser
 
 import pytorch_lightning as pl

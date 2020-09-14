@@ -1,5 +1,6 @@
-import torch.nn as nn
 from warnings import warn
+
+import torch.nn as nn
 
 try:
     from torchvision.models.utils import load_state_dict_from_url

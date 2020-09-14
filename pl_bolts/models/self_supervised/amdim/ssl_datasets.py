@@ -1,8 +1,8 @@
 from abc import ABC
 from typing import Callable
+from warnings import warn
 
 import numpy as np
-from warnings import warn
 
 try:
     from sklearn.utils import shuffle

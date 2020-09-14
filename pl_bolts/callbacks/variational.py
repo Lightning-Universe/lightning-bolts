@@ -1,6 +1,7 @@
+from warnings import warn
+
 import torch
 from pytorch_lightning.callbacks import Callback
-from warnings import warn
 
 try:
     import torchvision

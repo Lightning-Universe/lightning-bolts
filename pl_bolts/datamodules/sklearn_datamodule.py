@@ -1,11 +1,11 @@
 import math
 from typing import Any
+from warnings import warn
 
 import numpy as np
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset, DataLoader
-from warnings import warn
 
 try:
     from sklearn.utils import shuffle as sk_shuffle
