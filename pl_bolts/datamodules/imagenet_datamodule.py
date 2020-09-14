@@ -73,7 +73,7 @@ class ImagenetDataModule(LightningDataModule):
         super().__init__(*args, **kwargs)
 
         if not _TORCHVISION_AVAILABLE:
-            raise RuntimeError('You want to use MNIST dataset loaded from `torchvision` which is not installed yet.')
+            raise ImportError('You want to use MNIST dataset loaded from `torchvision` which is not installed yet.')
 
         self.image_size = image_size
         self.dims = (3, self.image_size, self.image_size)

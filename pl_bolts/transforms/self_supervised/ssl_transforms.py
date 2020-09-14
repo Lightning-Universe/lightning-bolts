@@ -27,8 +27,8 @@ class RandomTranslateWithReflect:
 
     def __call__(self, old_image):
         if not _PIL_AVAILABLE:
-            raise RuntimeError('You want to use `Pillow` which is not installed yet,'
-                               ' install it with `pip install Pillow`.')
+            raise ImportError('You want to use `Pillow` which is not installed yet,'
+                              ' install it with `pip install Pillow`.')
         xtranslation, ytranslation = np.random.randint(-self.max_translation,
                                                        self.max_translation + 1,
                                                        size=2)

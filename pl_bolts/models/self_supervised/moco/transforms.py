@@ -165,8 +165,8 @@ class GaussianBlur(object):
 
     def __call__(self, x):
         if not _PIL_AVAILABLE:
-            raise RuntimeError('You want to use `Pillow` which is not installed yet,'
-                               ' install it with `pip install Pillow`.')
+            raise ImportError('You want to use `Pillow` which is not installed yet,'
+                              ' install it with `pip install Pillow`.')
         sigma = random.uniform(self.sigma[0], self.sigma[1])
         x = x.filter(ImageFilter.GaussianBlur(radius=sigma))
         return x

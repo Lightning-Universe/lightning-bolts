@@ -162,7 +162,7 @@ class SklearnDataModule(LightningDataModule):
         if shuffle and _SKLEARN_AVAILABLE:
             X, y = sk_shuffle(X, y, random_state=random_state)
         elif shuffle and not _SKLEARN_AVAILABLE:
-            raise RuntimeError('You want to use shuffle function from `scikit-learn` which is not installed yet.')
+            raise ImportError('You want to use shuffle function from `scikit-learn` which is not installed yet.')
 
         val_split = 0 if x_val is not None or y_val is not None else val_split
         test_split = 0 if x_test is not None or y_test is not None else test_split

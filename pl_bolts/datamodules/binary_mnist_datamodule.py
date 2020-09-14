@@ -65,7 +65,7 @@ class BinaryMNISTDataModule(LightningDataModule):
         super().__init__(*args, **kwargs)
 
         if not _TORCHVISION_AVAILABLE:
-            raise RuntimeError('You want to use MNIST dataset loaded from `torchvision` which is not installed yet.')
+            raise ImportError('You want to use MNIST dataset loaded from `torchvision` which is not installed yet.')
 
         self.dims = (1, 28, 28)
         self.data_dir = data_dir
