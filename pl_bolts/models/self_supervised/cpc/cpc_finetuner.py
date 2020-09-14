@@ -6,9 +6,9 @@ import pytorch_lightning as pl
 from pl_bolts.models.self_supervised import CPCV2, SSLFineTuner
 from pl_bolts.models.self_supervised.cpc.transforms import (
     CPCEvalTransformsCIFAR10,
-     CPCTrainTransformsCIFAR10,
-     CPCTrainTransformsSTL10,
-     CPCEvalTransformsSTL10,
+    CPCTrainTransformsCIFAR10,
+    CPCTrainTransformsSTL10,
+    CPCEvalTransformsSTL10,
 )
 
 
