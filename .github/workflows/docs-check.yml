@@ -1,8 +1,11 @@
 name: "Docs check"
 # https://github.com/marketplace/actions/sphinx-build
 
-on:
-- pull_request
+on:  # Trigger the workflow on push or pull request, but only for the master branch
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
 
 jobs:
   check-docs:
@@ -47,6 +50,8 @@ jobs:
         shell: bash
 
       - name: Test Documentation
+        env:
+          SPHINX_MOCK_REQUIREMENTS: 0
         run: |
           # First run the same pipeline as Read-The-Docs
           apt-get update && sudo apt-get install -y cmake
