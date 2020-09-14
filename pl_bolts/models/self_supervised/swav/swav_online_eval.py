@@ -50,10 +50,11 @@ class SwavOnlineEvaluator(pl.Callback):
     def to_device(self, batch, device):
         # get the labeled batch
         if self.dataset == 'stl10':
-            batch = batch[1]
+            labeled_batch = batch[1]
+            batch = labeled_batch
 
         inputs, y = batch
-        (_, _, x), y = batch
+        x = inputs[0]
         x = x.to(device)
         y = y.to(device)
 

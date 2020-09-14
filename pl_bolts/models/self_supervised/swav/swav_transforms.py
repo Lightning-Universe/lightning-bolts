@@ -69,6 +69,15 @@ class SwAVTrainDataTransform(object):
 
         self.transform = transform
 
+        # add online train transform of the size of global view
+        self.online_train_transform = transforms.Compose([
+            transforms.RandomResizedCrop(self.size_crops[0]),
+            transforms.RandomHorizontalFlip(),
+            self.final_transform
+        ])
+
+        self.transform.append(self.online_train_transform)
+
     def __call__(self, sample):
         multi_crops = list(
             map(lambda transform: transform(sample), self.transform)
@@ -113,8 +122,8 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
             self.final_transform,
         ])
 
-        # replace 1st transform to eval transform in self.transform list
-        self.transform[0] = test_transform
+        # replace last transform to eval transform in self.transform list
+        self.transform[-1] = test_transform
 
 
 class GaussianBlur(object):

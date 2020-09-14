@@ -103,7 +103,7 @@ class SwAV(pl.LightningModule):
         self.model = self.init_model()
 
         # compute iters per epoch
-        global_batch_size = self.trainer.world_size * self.batch_size
+        global_batch_size = self.gpus * self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
         # define LR schedule
@@ -118,11 +118,12 @@ class SwAV(pl.LightningModule):
         self.lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
 
         self.queue = None
-        self.queue_path = os.path.join(self.queue_path, "queue" + str(self.global_rank) + ".pth")
+        self.softmax = nn.Softmax(dim=1)
+
+    def setup(self, stage):
+        self.queue_path = os.path.join(self.queue_path, "queue" + str(self.trainer.global_rank) + ".pth")
         if os.path.isfile(self.queue_path):
             self.queue = torch.load(self.queue_path)["queue"]
-
-        self.softmax = nn.Softmax(dim=1)
 
     def init_model(self):
         return resnet50(
@@ -165,6 +166,7 @@ class SwAV(pl.LightningModule):
             batch = unlabeled_batch
 
         inputs, y = batch
+        inputs = inputs[:-1]  # remove online train/eval transforms at this point
 
         # 1. normalize the prototypes
         with torch.no_grad():
@@ -247,7 +249,7 @@ class SwAV(pl.LightningModule):
                 weight_decay=self.weight_decay
             )
         else:
-            params = model.named_parameters()
+            params = self.parameters()
 
         if self.optim == 'sgd':
             optimizer = torch.optim.SGD(
@@ -445,7 +447,7 @@ def cli_main():
         drop_p=0.,
         hidden_dim=None,
         z_dim=args.hidden_mlp,
-        num_classes=dm.num_classes(),
+        num_classes=dm.num_classes,
         dataset=args.dataset
     )
 
