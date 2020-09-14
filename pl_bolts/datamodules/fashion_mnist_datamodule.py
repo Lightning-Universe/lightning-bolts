@@ -63,7 +63,9 @@ class FashionMNISTDataModule(LightningDataModule):
         super().__init__(*args, **kwargs)
 
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use fashion MNIST dataset loaded from `torchvision` which is not installed yet.')
+            raise ImportError(
+                'You want to use fashion MNIST dataset loaded from `torchvision` which is not installed yet.'
+            )
 
         self.dims = (1, 28, 28)
         self.data_dir = data_dir

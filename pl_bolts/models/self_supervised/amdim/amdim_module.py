@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 
 try:
     from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
-except:
+except ImportError:
     pass
 from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder

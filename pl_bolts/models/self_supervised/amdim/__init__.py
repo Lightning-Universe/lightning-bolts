@@ -9,5 +9,5 @@ try:
         AMDIMTrainTransformsImageNet128,
         AMDIMEvalTransformsImageNet128,
     )
-except:
+except ImportError:
     pass
