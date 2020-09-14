@@ -5,11 +5,15 @@ TODO:
 - LARC check compare
 - scheduler not using warmup as optimizer is not
 - add swav val data transforms, add val
+- check maxpool is false and is actually 1, 1 in the model
+- len(train_loader when) DDP with multiple GPUs
+- unlabeled batch issue
 
 Adapted from official swav implementation: https://github.com/facebookresearch/swav
 """
 from argparse import ArgumentParser
 
+import numpy as np
 import pytorch_lightning as pl
 from torch import nn
 from torch.nn import functional as F
@@ -26,20 +30,48 @@ class SwAV(pl.LightningModule):
     def __init__(
         self,
         gpus: int,
+        hidden_mlp: int = 2048,
+        feat_dim: int = 128,
+        nmb_prototypes: int = 3072,
+        first_conv: bool = True,
+        maxpool1: bool = True
     ):
         super().__init__()
         self.save_hyperparameters()
+
+        self.gpus = gpus
+        self.hidden_mlp = hidden_mlp
+        self.feat_dim = feat_dim
+        self.nmb_prototypes = nmb_prototypes
+
+        self.first_conv = first_conv
+        self.maxpool1 = maxpool1
 
         if self.gpus > 1:
             self.get_assignments = self.distributed_sinkhorn
         else:
             self.get_assignments = self.sinkhorn
 
-    def init_encoder():
-        pass
+        self.model = self.init_model()
+
+        # define LR schedule
+        warmup_lr_schedule = np.linspace(
+            self.start_lr, self.learning_rate, len(train_loader) * args.warmup_epochs
+        )
+
+    def init_model(self):
+        return resnet50(
+            normalize=True,
+            hidden_mlp=self.hidden_mlp,
+            output_dim=self.feat_dim,
+            nmb_prototypes=self.nmb_prototypes,
+            first_conv=self.first_conv,
+            maxpool1=self.maxpool1
+        )
 
     def forward(self, x):
-        pass
+        # pass single batch from the resnet backbone
+        return self.model.forward_backbone(x)
 
     def training_step(self, batch, batch_idx):
         pass
@@ -67,6 +99,28 @@ class SwAV(pl.LightningModule):
     def configure_optimizers(self):
         # use lars wrapper
         pass
+
+    def optimizer_step(
+        self,
+        epoch,
+        batch_idx,
+        optimizer,
+        optimizer_idx,
+        second_order_closure=None,
+        on_tpu=False,
+        using_native_amp=False,
+        using_lbfgs= False
+    ):
+        # TODO: warm-up + decay schedule placed here since LARSWrapper is not optimizer class
+        iteration = epoch * len(train_loader) + it
+        for param_group in optimizer.param_groups:
+            param_group["lr"] = lr_schedule[iteration]
+
+        # from lightning implementation
+        if using_native_amp:
+            self.trainer.scaler.step(optimizer)
+        else:
+            optimizer.step()
 
     def sinkhorn(self, Q, nmb_iters):
         with torch.no_grad():
@@ -163,10 +217,24 @@ class SwAV(pl.LightningModule):
         
 
 def cli_main():
+
+    if args.dataset == 'stl10':
+        dm = STL10DataModule()
+        dm.train
+        args.maxpool1 = False
+    elif:
+        raise NotImplementedError("other datasets have not been implemented till now")
+
+    # LR logger callback
+
     trainer = pl.Trainer(
+        gpus=args.gpus,
         sync_batchnorm=True if args.gpus > 1 else False,
-        precision=16
+        precision=16,
+        callbacks=[]
     )
+
+    trainer.fit(model, dm)
 
 
 if __name__ == '__main__':
