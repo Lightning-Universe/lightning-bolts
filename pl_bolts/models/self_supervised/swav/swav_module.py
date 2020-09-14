@@ -280,7 +280,7 @@ class SwAV(pl.LightningModule):
         second_order_closure=None,
         on_tpu=False,
         using_native_amp=False,
-        using_lbfgs= False
+        using_lbfgs=False
     ):
         # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
         # adjust LR of optim contained within LARSWrapper
@@ -389,7 +389,7 @@ class SwAV(pl.LightningModule):
                             help="freeze the prototypes during this many epochs from the start")
 
         return parser
-        
+
 
 def cli_main():
     parser = ArgumentParser()
