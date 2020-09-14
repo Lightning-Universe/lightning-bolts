@@ -13,6 +13,9 @@ try:
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
+    _TORCHVISION_AVAILABLE = False
+else:
+    _TORCHVISION_AVAILABLE = True
 
 
 class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
@@ -27,8 +30,11 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
             *args,
             **kwargs,
     ):
-
         super().__init__(*args, **kwargs)
+
+        if not _TORCHVISION_AVAILABLE:
+            raise RuntimeError('You want to use MNIST dataset loaded from `torchvision` which is not installed yet.')
+
         self.data_dir = data_dir
         self.num_workers = num_workers
         self.meta_dir = meta_dir

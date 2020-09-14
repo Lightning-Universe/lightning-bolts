@@ -10,6 +10,9 @@ try:
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
+    _TORCHVISION_AVAILABLE = False
+else:
+    _TORCHVISION_AVAILABLE = True
 
 
 class MNISTDataModule(LightningDataModule):
@@ -60,6 +63,10 @@ class MNISTDataModule(LightningDataModule):
             normalize: If true applies image normalize
         """
         super().__init__(*args, **kwargs)
+
+        if not _TORCHVISION_AVAILABLE:
+            raise RuntimeError('You want to use MNIST dataset loaded from `torchvision` which is not installed yet.')
+
         self.dims = (1, 28, 28)
         self.data_dir = data_dir
         self.val_split = val_split

@@ -12,6 +12,9 @@ try:
 except ImportError:
     warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install sklearn`.')
+    _SKLEARN_AVAILABLE = False
+else:
+    _SKLEARN_AVAILABLE = True
 
 
 class SklearnDataset(Dataset):
@@ -156,8 +159,10 @@ class SklearnDataModule(LightningDataModule):
         self.num_workers = num_workers
 
         # shuffle x and y
-        if shuffle:
+        if shuffle and _SKLEARN_AVAILABLE:
             X, y = sk_shuffle(X, y, random_state=random_state)
+        elif shuffle and not _SKLEARN_AVAILABLE:
+            raise RuntimeError('You want to use shuffle function from `scikit-learn` which is not installed yet.')
 
         val_split = 0 if x_val is not None or y_val is not None else val_split
         test_split = 0 if x_test is not None or y_test is not None else test_split
@@ -221,37 +226,38 @@ class SklearnDataModule(LightningDataModule):
         return loader
 
 
-class TensorDataModule(SklearnDataModule):
-    """
-    Automatically generates the train, validation and test splits for a PyTorch tensor dataset. They are set up as
-    dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
-
-    Example:
-
-        >>> from pl_bolts.datamodules import TensorDataModule
-        >>> import torch
-        ...
-        >>> # create dataset
-        >>> X = torch.rand(100, 3)
-        >>> y = torch.rand(100)
-        >>> loaders = TensorDataModule(X, y)
-        ...
-        >>> # train set
-        >>> train_loader = loaders.train_dataloader(batch_size=10)
-        >>> len(train_loader.dataset)
-        70
-        >>> len(train_loader)
-        7
-        >>> # validation set
-        >>> val_loader = loaders.val_dataloader(batch_size=10)
-        >>> len(val_loader.dataset)
-        20
-        >>> len(val_loader)
-        2
-        >>> # test set
-        >>> test_loader = loaders.test_dataloader(batch_size=10)
-        >>> len(test_loader.dataset)
-        10
-        >>> len(test_loader)
-        1
-    """
+# TODO: this seems to be wrong, something missing here, another inherit class?
+# class TensorDataModule(SklearnDataModule):
+#     """
+#     Automatically generates the train, validation and test splits for a PyTorch tensor dataset. They are set up as
+#     dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
+#
+#     Example:
+#
+#         >>> from pl_bolts.datamodules import TensorDataModule
+#         >>> import torch
+#         ...
+#         >>> # create dataset
+#         >>> X = torch.rand(100, 3)
+#         >>> y = torch.rand(100)
+#         >>> loaders = TensorDataModule(X, y)
+#         ...
+#         >>> # train set
+#         >>> train_loader = loaders.train_dataloader(batch_size=10)
+#         >>> len(train_loader.dataset)
+#         70
+#         >>> len(train_loader)
+#         7
+#         >>> # validation set
+#         >>> val_loader = loaders.val_dataloader(batch_size=10)
+#         >>> len(val_loader.dataset)
+#         20
+#         >>> len(val_loader)
+#         2
+#         >>> # test set
+#         >>> test_loader = loaders.test_dataloader(batch_size=10)
+#         >>> len(test_loader.dataset)
+#         10
+#         >>> len(test_loader)
+#         1
+#     """

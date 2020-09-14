@@ -14,6 +14,9 @@ try:
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
+    _TORCHVISION_AVAILABLE = False
+else:
+    _TORCHVISION_AVAILABLE = True
 
 
 class STL10DataModule(LightningDataModule):  # pragma: no cover
@@ -70,6 +73,10 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size: the batch size
         """
         super().__init__(*args, **kwargs)
+
+        if not _TORCHVISION_AVAILABLE:
+            raise RuntimeError('You want to use MNIST dataset loaded from `torchvision` which is not installed yet.')
+
         self.dims = (3, 96, 96)
         self.data_dir = data_dir if data_dir is not None else os.getcwd()
         self.unlabeled_val_split = unlabeled_val_split
