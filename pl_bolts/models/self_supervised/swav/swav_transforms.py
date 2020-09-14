@@ -70,13 +70,13 @@ class SwAVTrainDataTransform(object):
         self.transform = transform
 
         # add online train transform of the size of global view
-        self.online_train_transform = transforms.Compose([
+        online_train_transform = transforms.Compose([
             transforms.RandomResizedCrop(self.size_crops[0]),
             transforms.RandomHorizontalFlip(),
             self.final_transform
         ])
 
-        self.transform.append(self.online_train_transform)
+        self.transform.append(online_train_transform)
 
     def __call__(self, sample):
         multi_crops = list(
@@ -97,14 +97,6 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
         gaussian_blur: bool = True,
         jitter_strength: float = 1.
     ):
-        """
-            Instead of positive samples being 2 views resized to full image size,
-            one of the views will be the original image withoout any transforms applied.
-
-            Validation will check similarity between original image and one other view.
-            This also allows us to evaluate quality of encoder representations using a linear
-            layer in an online manner.
-        """
         super().__init__(
             normalize=normalize,
             size_crops=size_crops,
