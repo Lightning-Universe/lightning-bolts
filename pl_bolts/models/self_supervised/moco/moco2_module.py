@@ -57,14 +57,9 @@ class MocoV2(pl.LightningModule):
 
             - `William Falcon <https://github.com/williamFalcon>`_
 
-        Example:
-
-            >>> from pl_bolts.models.self_supervised import MocoV2
-            ...
-            >>> model = MocoV2()
-
-        Train::
-
+        Example::
+            from pl_bolts.models.self_supervised import MocoV2
+            model = MocoV2()
             trainer = Trainer()
             trainer.fit(model)
 
