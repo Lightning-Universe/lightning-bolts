@@ -75,7 +75,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         super().__init__(*args, **kwargs)
 
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use MNIST dataset loaded from `torchvision` which is not installed yet.')
+            raise ImportError('You want to use STL10 dataset loaded from `torchvision` which is not installed yet.')
 
         self.dims = (3, 96, 96)
         self.data_dir = data_dir if data_dir is not None else os.getcwd()

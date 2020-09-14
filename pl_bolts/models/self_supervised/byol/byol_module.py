@@ -186,7 +186,7 @@ class BYOL(pl.LightningModule):
 
 def cli_main():
     from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
-    from pl_bolts.models.self_supervised.simclr import simclr_transforms
+    from pl_bolts.models.self_supervised.simclr import transforms
     from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
 
     seed_everything(1234)
@@ -206,8 +206,8 @@ def cli_main():
     # init default datamodule
     if args.dataset == 'cifar10':
         dm = CIFAR10DataModule.from_argparse_args(args)
-        dm.train_transforms = simclr_transforms.SimCLRTrainDataTransform(32)
-        dm.val_transforms = simclr_transforms.SimCLREvalDataTransform(32)
+        dm.train_transforms = transforms.SimCLRTrainDataTransform(32)
+        dm.val_transforms = transforms.SimCLREvalDataTransform(32)
         args.num_classes = dm.num_classes
 
     elif args.dataset == 'stl10':
@@ -216,15 +216,15 @@ def cli_main():
         dm.val_dataloader = dm.val_dataloader_mixed
 
         (c, h, w) = dm.size()
-        dm.train_transforms = simclr_transforms.SimCLRTrainDataTransform(h)
-        dm.val_transforms = simclr_transforms.SimCLREvalDataTransform(h)
+        dm.train_transforms = transforms.SimCLRTrainDataTransform(h)
+        dm.val_transforms = transforms.SimCLREvalDataTransform(h)
         args.num_classes = dm.num_classes
 
     elif args.dataset == 'imagenet2012':
         dm = ImagenetDataModule.from_argparse_args(args, image_size=196)
         (c, h, w) = dm.size()
-        dm.train_transforms = simclr_transforms.SimCLRTrainDataTransform(h)
-        dm.val_transforms = simclr_transforms.SimCLREvalDataTransform(h)
+        dm.train_transforms = transforms.SimCLRTrainDataTransform(h)
+        dm.val_transforms = transforms.SimCLREvalDataTransform(h)
         args.num_classes = dm.num_classes
 
     model = BYOL(**args.__dict__)

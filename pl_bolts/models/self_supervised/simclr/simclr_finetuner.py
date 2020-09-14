@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 import pytorch_lightning as pl
 
 from pl_bolts.models.self_supervised import SimCLR, SSLFineTuner
-from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
+from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
 
 def cli_main():  # pragma: no-cover

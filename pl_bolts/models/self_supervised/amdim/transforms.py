@@ -7,6 +7,9 @@ try:
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
+    _TORCHVISION_AVAILABLE = False
+else:
+    _TORCHVISION_AVAILABLE = True
 
 
 class AMDIMTrainTransformsCIFAR10:
@@ -30,6 +33,9 @@ class AMDIMTrainTransformsCIFAR10:
             (view1, view2) = transform(x)
 
         """
+        if not _TORCHVISION_AVAILABLE:
+            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+
         # flipping image along vertical axis
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
 
@@ -72,6 +78,9 @@ class AMDIMEvalTransformsCIFAR10:
             transform = AMDIMEvalTransformsCIFAR10()
             (view1, view2) = transform(x)
         """
+        if not _TORCHVISION_AVAILABLE:
+            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+
         # flipping image along vertical axis
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
         normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -109,6 +118,9 @@ class AMDIMTrainTransformsSTL10:
             transform = AMDIMTrainTransformsSTL10()
             (view1, view2) = transform(x)
         """
+        if not _TORCHVISION_AVAILABLE:
+            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+
         # flipping image along vertical axis
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
         normalize = transforms.Normalize(mean=(0.43, 0.42, 0.39), std=(0.27, 0.26, 0.27))
@@ -152,6 +164,8 @@ class AMDIMEvalTransformsSTL10(object):
             transform = AMDIMTrainTransformsSTL10()
             view1 = transform(x)
         """
+        if not _TORCHVISION_AVAILABLE:
+            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
 
         # flipping image along vertical axis
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
@@ -192,6 +206,9 @@ class AMDIMTrainTransformsImageNet128(object):
             transform = AMDIMTrainTransformsSTL10()
             (view1, view2) = transform(x)
         """
+        if not _TORCHVISION_AVAILABLE:
+            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+
         # image augmentation functions
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
         rand_crop = transforms.RandomResizedCrop(height, scale=(0.3, 1.0), ratio=(0.7, 1.4), interpolation=3)
@@ -235,6 +252,9 @@ class AMDIMEvalTransformsImageNet128(object):
             transform = AMDIMEvalTransformsImageNet128()
             view1 = transform(x)
         """
+        if not _TORCHVISION_AVAILABLE:
+            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+
         # image augmentation functions
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
         post_transform = transforms.Compose([
