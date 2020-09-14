@@ -359,6 +359,7 @@ class SwAV(pl.LightningModule):
                             help="argument in RandomResizedCrop (example: [1., 0.14])")
 
         # training params
+        parser.add_argument("--fast_dev_run", action='store_true')
         parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("-num_workers", default=16, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
@@ -399,7 +400,12 @@ def cli_main():
     args = parser.parse_args()
 
     if args.dataset == 'stl10':
-        dm = STL10DataModule(data_dir=args.data_path)
+        dm = STL10DataModule(
+            data_dir=args.data_path,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers
+        )
+
         dm.train_dataloader = dm.train_dataloader_mixed
         dm.val_dataloader = dm.val_dataloader_mixed
         args.num_samples = dm.num_unlabeled_samples
@@ -443,10 +449,12 @@ def cli_main():
     )
 
     trainer = pl.Trainer(
+        max_epochs=args.max_epochs,
         gpus=args.gpus,
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=16,
-        callbacks=[lr_logger, online_evaluator]
+        callbacks=[lr_logger, online_evaluator],
+        fast_dev_run=args.fast_dev_run
     )
 
     trainer.fit(model)

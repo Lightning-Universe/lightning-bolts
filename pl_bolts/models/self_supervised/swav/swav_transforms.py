@@ -9,7 +9,7 @@ from typing import Optional, List
 class SwAVTrainDataTransform(object):
     def __init__(
         self,
-        normalize: transforms.Normalize,
+        normalize: Optional[transforms.Normalize] = None,
         size_crops: List[int] = [224, 96],
         nmb_crops: List[int] = [2, 6],
         min_scale_crops: List[float] = [0.14, 0.05],
@@ -49,6 +49,11 @@ class SwAVTrainDataTransform(object):
 
         self.color_transform = transforms.Compose(color_transform)
 
+        if normalize is None:
+            self.final_transform = transforms.ToTensor()
+        else:
+            self.final_transform = transforms.Compose([transforms.ToTensor(), normalize])
+
         for i in range(len(self.size_crops)):
             random_resized_crop = transforms.RandomResizedCrop(
                 self.size_crops[i],
@@ -59,8 +64,7 @@ class SwAVTrainDataTransform(object):
                 random_resized_crop,
                 transforms.RandomHorizontalFlip(p=0.5),
                 self.color_transform,
-                transforms.ToTensor(),
-                normalize])
+                self.final_transform])
             ] * self.nmb_crops[i])
 
         self.transform = transform
@@ -73,10 +77,10 @@ class SwAVTrainDataTransform(object):
         return multi_crops
 
 
-class SwAVEvalDataTransform(object):
+class SwAVEvalDataTransform(SwAVTrainDataTransform):
     def __init__(
         self,
-        normalize: transforms.Normalize,
+        normalize: Optional[transforms.Normalize] = None,
         size_crops: List[int] = [224, 96],
         nmb_crops: List[int] = [2, 6],
         min_scale_crops: List[float] = [0.14, 0.05],
@@ -84,60 +88,23 @@ class SwAVEvalDataTransform(object):
         gaussian_blur: bool = True,
         jitter_strength: float = 1.
     ):
-        self.jitter_strength = jitter_strength
-        self.gaussian_blur = gaussian_blur
+    """
+        Instead of positives samples being 2 views resized to full image size,
+        one of the views will be the original image withoout any transforms applied.
 
-        assert len(size_crops) == len(nmb_crops)
-        assert len(min_scale_crops) == len(nmb_crops)
-        assert len(max_scale_crops) == len(nmb_crops)
-
-        self.size_crops = size_crops
-        self.nmb_crops = nmb_crops
-        self.min_scale_crops = min_scale_crops
-        self.max_scale_crops = max_scale_crops
-
-        self.color_jitter = transforms.ColorJitter(
-            0.8 * self.jitter_strength,
-            0.8 * self.jitter_strength,
-            0.8 * self.jitter_strength,
-            0.2 * self.jitter_strength
+        Validation will check similarity between original image and one other view.
+        This also allows us to evaluate quality of encoder representations using a linear
+        layer.
+    """
+        super().__init__(
+            normalize=normalize,
+            size_crops=size_crops,
+            nmb_crops=nmb_crops,
+            min_scale_crops=min_scale_crops,
+            max_scale_crops=max_scale_crops,
+            gaussian_blur=gaussian_blur,
+            jitter_strength=jitter_strength
         )
-
-        transform = []
-        color_transform = [
-            transforms.RandomApply([self.color_jitter], p=0.8),
-            transforms.RandomGrayscale(p=0.2)
-        ]
-
-        if self.gaussian_blur:
-            color_transform.append(
-                GaussianBlur(kernel_size=int(0.1 * self.size_crops[0]), p=0.5)
-            )
-
-        self.color_transform = transforms.Compose(color_transform)
-
-        for i in range(len(self.size_crops)):
-            random_resized_crop = transforms.RandomResizedCrop(
-                self.size_crops[i],
-                scale=(self.min_scale_crops[i], self.max_scale_crops[i]),
-            )
-
-            transform.extend([transforms.Compose([
-                random_resized_crop,
-                transforms.RandomHorizontalFlip(p=0.5),
-                self.color_transform,
-                transforms.ToTensor(),
-                normalize])
-            ] * self.nmb_crops[i])
-
-        self.transform = transform
-
-    def __call__(self, sample):
-        multi_crops = list(
-            map(lambda transform: transform(sample), self.transform)
-        )
-
-        return multi_crops
 
 
 class GaussianBlur(object):
