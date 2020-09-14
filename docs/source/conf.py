@@ -331,8 +331,6 @@ if SPHINX_MOCK_REQUIREMENTS:
 MOCK_MANUAL_PACKAGES = [
     'pytorch_lightning',
     'numpy',
-    'torch',
-    'torchvision',
     'sklearn',
     'PIL',
     'cv2',

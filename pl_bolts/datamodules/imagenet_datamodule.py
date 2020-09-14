@@ -4,12 +4,11 @@ from warnings import warn
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
-from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 
 try:
     from torchvision import transforms as transform_lib
-
+    from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
