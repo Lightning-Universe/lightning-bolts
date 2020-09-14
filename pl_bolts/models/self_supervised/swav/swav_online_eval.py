@@ -13,6 +13,7 @@ class SwavOnlineEvaluator(pl.Callback):
         hidden_dim: Optional[int] = None,
         z_dim: int = None,
         num_classes: int = None,
+        dataset: str = 'stl10'
     ):
         super().__init__()
 
@@ -22,6 +23,7 @@ class SwavOnlineEvaluator(pl.Callback):
 
         self.z_dim = z_dim
         self.num_classes = num_classes
+        self.dataset = dataset
 
         self.loss = []
         self.acc = []
@@ -46,7 +48,11 @@ class SwavOnlineEvaluator(pl.Callback):
         return representations
 
     def to_device(self, batch, device):
-        # TODO: for train and eval
+        # get the labeled batch
+        if self.dataset == 'stl10':
+            batch = batch[1]
+
+        inputs, y = batch
         (_, _, x), y = batch
         x = x.to(device)
         y = y.to(device)

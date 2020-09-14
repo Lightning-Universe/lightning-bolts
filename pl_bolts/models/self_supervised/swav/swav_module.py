@@ -445,7 +445,8 @@ def cli_main():
         drop_p=0.,
         hidden_dim=None,
         z_dim=args.hidden_mlp,
-        num_classes=dm.num_classes()
+        num_classes=dm.num_classes(),
+        dataset=args.dataset
     )
 
     trainer = pl.Trainer(
