@@ -10,7 +10,7 @@ try:
     from torchvision.models import densenet
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-                      ' install it with `pip install torchvision`.')
+         ' install it with `pip install torchvision`.')
 
 from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule

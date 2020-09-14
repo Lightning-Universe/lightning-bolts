@@ -13,7 +13,7 @@ try:
     from torchvision.datasets import STL10
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-                      ' install it with `pip install torchvision`.')
+         ' install it with `pip install torchvision`.')
 
 
 class STL10DataModule(LightningDataModule):  # pragma: no cover

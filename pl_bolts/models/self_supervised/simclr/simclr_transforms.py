@@ -6,13 +6,13 @@ try:
     import torchvision.transforms as transforms
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-                      ' install it with `pip install torchvision`.')
+         ' install it with `pip install torchvision`.')
 
 try:
     import cv2
 except ImportError:
     warn('You want to use `opencv-python` which is not installed yet,'  # pragma: no-cover
-                      ' install it with `pip install opencv-python`.')
+         ' install it with `pip install opencv-python`.')
 
 
 class SimCLRTrainDataTransform(object):

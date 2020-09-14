@@ -1,3 +1,5 @@
+from warnings import warn
+
 from torch.utils.data import random_split
 
 from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
@@ -8,7 +10,7 @@ try:
     from torchvision.datasets import STL10
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-                      ' install it with `pip install torchvision`.')
+         ' install it with `pip install torchvision`.')
 
 
 class AMDIMPretraining():

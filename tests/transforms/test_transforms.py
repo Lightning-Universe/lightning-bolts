@@ -8,7 +8,7 @@ try:
     from torchvision import transforms
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-                      ' install it with `pip install torchvision`.')
+         ' install it with `pip install torchvision`.')
 
 from pl_bolts.models.self_supervised.amdim.transforms import (
     AMDIMEvalTransformsCIFAR10,

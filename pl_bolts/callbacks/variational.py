@@ -7,7 +7,7 @@ try:
     import torchvision
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-                      ' install it with `pip install torchvision`.')
+         ' install it with `pip install torchvision`.')
 
 
 class LatentDimInterpolator(Callback):

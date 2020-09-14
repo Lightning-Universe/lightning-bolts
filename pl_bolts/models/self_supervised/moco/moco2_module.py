@@ -7,6 +7,7 @@ This implementation is: Copyright (c) PyTorch Lightning, Inc. and its affiliates
 
 from argparse import ArgumentParser
 from typing import Union
+from warnings import warn
 
 import pytorch_lightning as pl
 import torch
@@ -17,7 +18,7 @@ try:
     import torchvision
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-                      ' install it with `pip install torchvision`.')
+         ' install it with `pip install torchvision`.')
 
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
