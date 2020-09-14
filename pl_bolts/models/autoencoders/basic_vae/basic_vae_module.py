@@ -185,7 +185,7 @@ def cli_main(args=None):
     pl.seed_everything()
 
     parser = ArgumentParser()
-    parser.add_argument("--dataset", default="cifar10", type=str, help="cifar10, stl10, imagenet")
+    parser.add_argument("--dataset", default="cifar10", type=str, choices=["cifar10", "stl10", "imagenet"])
     script_args, _ = parser.parse_known_args(args)
 
     if script_args.dataset == "cifar10":
@@ -194,6 +194,8 @@ def cli_main(args=None):
         dm_cls = STL10DataModule
     elif script_args.dataset == "imagenet":
         dm_cls = ImagenetDataModule
+    else:
+        raise ValueError(f"undefined dataset {script_args.dataset}")
 
     parser = VAE.add_model_specific_args(parser)
     args = parser.parse_args(args)
@@ -205,7 +207,9 @@ def cli_main(args=None):
         args.max_steps = None
 
     model = VAE(**vars(args))
-    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]
+    # callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]
+
+    print(args)  # todo
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model, dm)
     return dm, model, trainer

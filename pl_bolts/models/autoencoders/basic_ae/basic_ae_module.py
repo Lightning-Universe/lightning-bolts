@@ -153,7 +153,7 @@ def cli_main(args=None):
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
 
     parser = ArgumentParser()
-    parser.add_argument("--dataset", default="cifar10", type=str, help="cifar10, stl10, imagenet")
+    parser.add_argument("--dataset", default="cifar10", type=str, choices=["cifar10", "stl10", "imagenet"])
     script_args, _ = parser.parse_known_args(args)
 
     if script_args.dataset == "cifar10":
@@ -175,8 +175,9 @@ def cli_main(args=None):
         args.max_steps = None
 
     model = AE(**vars(args))
-    callbacks = [TensorboardGenerativeModelImageSampler()]
+    # allbacks = [TensorboardGenerativeModelImageSampler()]
 
+    print(args)  # todo
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model, dm)
     return dm, model, trainer
