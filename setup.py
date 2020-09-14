@@ -43,6 +43,7 @@ def load_long_describtion():
     text = text.replace('.svg', '.png')
     return text
 
+
 extras = {
     'loggers': load_requirements(file_name='loggers.txt'),
     'models': load_requirements(file_name='models.txt'),
