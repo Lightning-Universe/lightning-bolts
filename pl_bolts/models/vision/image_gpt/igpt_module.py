@@ -5,7 +5,6 @@ import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 
-from pl_bolts.datamodules import FashionMNISTDataModule, ImagenetDataModule
 from pl_bolts.models.vision.image_gpt.gpt2 import GPT2
 
 
@@ -134,13 +133,13 @@ class ImageGPT(pl.LightningModule):
         self.save_hyperparameters()
 
         # default to MNIST if no datamodule given
-        if datamodule is None:
-            datamodule = FashionMNISTDataModule(
-                self.hparams.data_dir, num_workers=self.hparams.num_workers
-            )
-            self.hparams.pixels = datamodule.size(1)
-            self.hparams.num_classes = datamodule.num_classes
-
+        # if datamodule is None:
+        #     datamodule = FashionMNISTDataModule(
+        #         self.hparams.data_dir, num_workers=self.hparams.num_workers
+        #     )
+        #     self.hparams.pixels = datamodule.size(1)
+        #     self.hparams.num_classes = datamodule.num_classes
+        assert datamodule
         self.datamodule = datamodule
 
         self.gpt = GPT2(
@@ -243,6 +242,8 @@ class ImageGPT(pl.LightningModule):
 
 
 def cli_main():
+    from pl_bolts.datamodules import FashionMNISTDataModule, ImagenetDataModule
+
     parser = ArgumentParser()
 
     # trainer args

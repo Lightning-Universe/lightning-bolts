@@ -151,8 +151,7 @@ class AE(pl.LightningModule):
 
 def cli_main(args=None):
     from pl_bolts.callbacks import TensorboardGenerativeModelImageSampler
-
-    # cli_main()
+    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
 
     parser = ArgumentParser()
     parser.add_argument("--dataset", default="cifar10", type=str, help="cifar10, stl10, imagenet")

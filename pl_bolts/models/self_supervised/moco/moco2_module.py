@@ -20,8 +20,6 @@ except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
 
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
-from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainCIFAR10Transforms,
@@ -103,11 +101,11 @@ class MocoV2(pl.LightningModule):
         self.save_hyperparameters()
 
         # use CIFAR-10 by default if no datamodule passed in
-        if datamodule is None:
-            datamodule = CIFAR10DataModule(data_dir)
-            datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
-            datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
-
+        # if datamodule is None:
+        #     datamodule = CIFAR10DataModule(data_dir)
+        #     datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
+        #     datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
+        assert datamodule
         self.datamodule = datamodule
 
         # create the encoders
@@ -360,6 +358,7 @@ def concat_all_gather(tensor):
 
 
 def cli_main():
+    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, SSLImagenetDataModule
 
     parser = ArgumentParser()
 
