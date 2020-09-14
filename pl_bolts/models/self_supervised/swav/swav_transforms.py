@@ -88,14 +88,14 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
         gaussian_blur: bool = True,
         jitter_strength: float = 1.
     ):
-    """
-        Instead of positives samples being 2 views resized to full image size,
-        one of the views will be the original image withoout any transforms applied.
+        """
+            Instead of positives samples being 2 views resized to full image size,
+            one of the views will be the original image withoout any transforms applied.
 
-        Validation will check similarity between original image and one other view.
-        This also allows us to evaluate quality of encoder representations using a linear
-        layer.
-    """
+            Validation will check similarity between original image and one other view.
+            This also allows us to evaluate quality of encoder representations using a linear
+            layer.
+        """
         super().__init__(
             normalize=normalize,
             size_crops=size_crops,
@@ -105,6 +105,21 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
             gaussian_blur=gaussian_blur,
             jitter_strength=jitter_strength
         )
+
+        input_height = self.size_crops[0]  # get global view crop
+        test_transform = transforms.Compose([
+            transforms.Resize(int(input_height + 0.1 * input_height)),
+            transforms.CenterCrop(input_height),
+            self.final_transform,
+        ])
+
+        # replace 1st transform to eval transform in self.transform list
+        self.transform[0] = test_transform
+
+        for transform in self.transform:
+            print(transform)
+            print('################')
+        exit(-1)
 
 
 class GaussianBlur(object):
