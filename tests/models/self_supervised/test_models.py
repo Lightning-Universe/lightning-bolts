@@ -86,8 +86,8 @@ def test_swav(tmpdir):
 
     batch_size = 2
     datamodule = STL10DataModule(tmpdir, num_workers=0, batch_size=batch_size)
-    datamodule.train_dataloader = dm.train_dataloader_mixed
-    datamodule.val_dataloader = dm.val_dataloader_mixed
+    datamodule.train_dataloader = datamodule.train_dataloader_mixed
+    datamodule.val_dataloader = datamodule.val_dataloader_mixed
 
     model = SwAV(
         gpus=0, datamodule=datamodule, num_samples=datamodule.num_unlabeled_samples, batch_size=batch_size
