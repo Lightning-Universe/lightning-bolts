@@ -15,15 +15,6 @@ except ImportError:
 else:
     _TORCHVISION_AVAILABLE = True
 
-try:
-    from PIL import Image
-except ImportError:
-    warn('You want to use `Pillow` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install Pillow`.')
-    _PIL_AVAILABLE = False
-else:
-    _PIL_AVAILABLE = True
-
 
 class BinaryMNISTDataModule(LightningDataModule):
 

@@ -5,11 +5,18 @@ from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization, cifar10_normalization, stl10_normalization)
 
 try:
-    from PIL import ImageFilter
     from torchvision import transforms
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
+try:
+    from PIL import ImageFilter
+except ImportError:
+    warn('You want to use `Pillow` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install Pillow`.')
+    _PIL_AVAILABLE = False
+else:
+    _PIL_AVAILABLE = True
 
 
 class Moco2TrainCIFAR10Transforms:
@@ -157,6 +164,9 @@ class GaussianBlur(object):
         self.sigma = sigma
 
     def __call__(self, x):
+        if not _PIL_AVAILABLE:
+            raise RuntimeError('You want to use `Pillow` which is not installed yet,'
+                               ' install it with `pip install Pillow`.')
         sigma = random.uniform(self.sigma[0], self.sigma[1])
         x = x.filter(ImageFilter.GaussianBlur(radius=sigma))
         return x

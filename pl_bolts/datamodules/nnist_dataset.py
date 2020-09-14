@@ -1,10 +1,20 @@
+from warnings import warn
+
 try:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import MNIST
-    from PIL import Image
 except ImportError:
     raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install torchvision`.')
+
+try:
+    from PIL import Image
+except ImportError:
+    warn('You want to use `Pillow` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install Pillow`.')
+    _PIL_AVAILABLE = False
+else:
+    _PIL_AVAILABLE = True
 
 
 class BinaryMNIST(MNIST):
