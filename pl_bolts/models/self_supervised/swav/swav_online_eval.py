@@ -54,14 +54,15 @@ class SwavOnlineEvaluator(pl.Callback):
             batch = labeled_batch
 
         inputs, y = batch
-        x = inputs[0]
+
+        # last input is for online eval
+        x = inputs[-1]
         x = x.to(device)
         y = y.to(device)
 
         return x, y
 
     def on_train_batch_end(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
-        # TODO:
         x, y = self.to_device(batch, pl_module.device)
 
         with torch.no_grad():
@@ -80,11 +81,10 @@ class SwavOnlineEvaluator(pl.Callback):
 
         # log metrics
         acc = accuracy(mlp_preds, y)
-        metrics = {"ft_callback_mlp_loss": mlp_loss, "ft_callback_mlp_acc": acc}
+        metrics = {"train_mlp_loss": mlp_loss, "train_mlp_acc": acc}
         pl_module.logger.log_metrics(metrics, step=trainer.global_step)
 
     def on_validation_batch_end(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
-        # TODO:
         x, y = self.to_device(batch, pl_module.device)
 
         with torch.no_grad():
@@ -101,9 +101,6 @@ class SwavOnlineEvaluator(pl.Callback):
 
         self.loss.append(mlp_loss.item())
         self.acc.append(acc.item())
-
-        metrics = {"ft_callback_mlp_loss": mlp_loss, "ft_callback_mlp_acc": acc}
-        pl_module.logger.log_metrics(metrics, step=trainer.global_step)
 
     def on_validation_epoch_end(self, trainer, pl_module):
         metrics = {"val_mlp_loss": sum(self.loss) / len(self.loss), "val_mlp_acc": sum(self.acc) / len(self.acc)}
