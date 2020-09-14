@@ -175,7 +175,7 @@ class CPCV2(pl.LightningModule):
 
     def shared_step(self, batch):
         try:
-            from pl_bolts.datamodules import STL10DataModule
+            from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
         except ImportError:
             raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
                               ' install it with `pip install torchvision`.')

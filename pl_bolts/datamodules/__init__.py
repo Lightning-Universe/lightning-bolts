@@ -20,4 +20,6 @@ try:
     from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
     from pl_bolts.datamodules.vocdetection_datamodule import VOCDetectionDataModule
 except ImportError:
-    pass
+    print('Missing something...')
+    import traceback
+    traceback.print_exception()

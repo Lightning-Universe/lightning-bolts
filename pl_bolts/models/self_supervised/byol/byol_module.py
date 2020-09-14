@@ -48,7 +48,7 @@ class BYOL(pl.LightningModule):
             import pytorch_lightning as pl
             from pl_bolts.models.self_supervised import BYOL
             from pl_bolts.datamodules import CIFAR10DataModule
-            from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
+            from pl_bolts.models.self_supervised.simclr.transforms import (
                 SimCLREvalDataTransform, SimCLRTrainDataTransform)
 
             # model
