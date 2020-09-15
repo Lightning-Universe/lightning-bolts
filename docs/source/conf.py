@@ -88,9 +88,11 @@ extensions = [
     'recommonmark',
     'sphinx.ext.autosectionlabel',
     # 'm2r',
-    # 'nbsphinx',
+    # 'nbsphinx',  # it seems some sphinx issue
     'sphinx_autodoc_typehints',
+    'sphinx_copybutton',
     'sphinx_paramlinks',
+    'sphinx_togglebutton',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
