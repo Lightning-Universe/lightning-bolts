@@ -227,7 +227,7 @@ class SwAV(pl.LightningModule):
         loss = self.shared_step(batch)
 
         result = pl.EvalResult(checkpoint_on=loss)
-        result.log('val_loss', loss, on_step=True, on_epoch=False)
+        result.log('val_loss', loss, on_step=False, on_epoch=True)
         return result
 
     def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=['bias', 'bn']):
