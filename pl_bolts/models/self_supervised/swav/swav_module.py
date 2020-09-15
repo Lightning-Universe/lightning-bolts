@@ -13,7 +13,7 @@ from torch.nn import functional as F
 import torch.distributed as dist
 from torch.optim import Adam, SGD
 
-from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50
+from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
@@ -28,6 +28,7 @@ class SwAV(pl.LightningModule):
         gpus: int,
         num_samples: int,
         batch_size: int,
+        arch: str = 'resnet50',
         datamodule: pl.LightningDataModule,
         hidden_mlp: int = 2048,
         feat_dim: int = 128,
@@ -58,6 +59,7 @@ class SwAV(pl.LightningModule):
         self.save_hyperparameters()
 
         self.gpus = gpus
+        self.arch = arch
         self.datamodule = datamodule
         self.num_samples = num_samples
         self.batch_size = batch_size
@@ -121,7 +123,12 @@ class SwAV(pl.LightningModule):
             self.queue = torch.load(self.queue_path)["queue"]
 
     def init_model(self):
-        return resnet50(
+        if self.arch == 'resnet18':
+            backbone = resnet18
+        elif self.arch == 'resnet50':
+            backbone = resnet50
+
+        return backbone(
             normalize=True,
             hidden_mlp=self.hidden_mlp,
             output_dim=self.feat_dim,

@@ -53,7 +53,9 @@ def test_cli_run_self_supervised_byol(cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize('cli_args', ['--max_epochs 1 --fast_dev_run --batch_size 2 --gpus 0'])
+@pytest.mark.parametrize(
+    'cli_args', ['--max_epochs 1 --fast_dev_run --batch_size 2 --gpus 0 --arch resnet18 --hidden_mlp 512']
+)
 def test_cli_run_self_supervised_swav(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.self_supervised.swav.swav_module import cli_main
