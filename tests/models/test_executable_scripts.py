@@ -1,12 +1,8 @@
-from distutils.version import LooseVersion
 from unittest import mock
 
 import pytest
-import torch
 
 
-# TODO: fix this test
-@pytest.mark.skipif(LooseVersion(torch.__version__) < LooseVersion("1.5.0"), reason="Seems to hang for older PT...")
 @pytest.mark.parametrize('cli_args', [
     '--dataset mnist --max_epochs 1 --batch_size 2 --limit_train_batches 2 --limit_val_batches 2',
     '--dataset cifar10 --max_epochs 1 --batch_size 2 --limit_train_batches 2 --limit_val_batches 2',
@@ -18,8 +14,6 @@ def test_cli_run_basic_gan(cli_args):
         cli_main()
 
 
-# TODO: fix this test
-@pytest.mark.skipif(LooseVersion(torch.__version__) < LooseVersion("1.5.0"), reason="Seems to hang for older PT...")
 @pytest.mark.parametrize('cli_args', [
     '--max_epochs 1 --limit_train_batches 2 --limit_val_batches 2 --batch_size 2 --encoder resnet18',
 ])
@@ -31,8 +25,6 @@ def test_cli_run_cpc(cli_args):
         cli_main()
 
 
-# TODO: fix this test
-@pytest.mark.skipif(LooseVersion(torch.__version__) < LooseVersion("1.5.0"), reason="Seems to hang for older PT...")
 @pytest.mark.parametrize('cli_args', ['--max_epochs 1 --max_steps 2'])
 def test_cli_run_mnist(cli_args):
     """Test running CLI for an example with default params."""
@@ -43,8 +35,6 @@ def test_cli_run_mnist(cli_args):
         cli_main()
 
 
-# TODO: fix this test
-@pytest.mark.skipif(LooseVersion(torch.__version__) < LooseVersion("1.5.0"), reason="Seems to hang for older PT...")
 @pytest.mark.parametrize('cli_args', [
     '--dataset cifar10 --max_epochs 1 --batch_size 2 --fast_dev_run',
 ])
@@ -57,8 +47,6 @@ def test_cli_run_basic_ae(cli_args):
         cli_main()
 
 
-# TODO: fix this test
-@pytest.mark.skipif(LooseVersion(torch.__version__) < LooseVersion("1.5.0"), reason="Seems to hang for older PT...")
 @pytest.mark.parametrize('cli_args', [
     '--dataset cifar10 --max_epochs 1 --batch_size 2 --fast_dev_run',
 ])
@@ -71,8 +59,6 @@ def test_cli_run_basic_vae(cli_args):
         cli_main()
 
 
-# TODO: fix this test
-@pytest.mark.skipif(LooseVersion(torch.__version__) < LooseVersion("1.5.0"), reason="Seems to hang for older PT...")
 @pytest.mark.parametrize('cli_args', ['--max_epochs 1 --max_steps 2'])
 def test_cli_run_lin_regression(cli_args):
     """Test running CLI for an example with default params."""
@@ -83,8 +69,6 @@ def test_cli_run_lin_regression(cli_args):
         cli_main()
 
 
-# TODO: fix this test
-@pytest.mark.skipif(LooseVersion(torch.__version__) < LooseVersion("1.5.0"), reason="Seems to hang for older PT...")
 @pytest.mark.parametrize('cli_args', ['--max_epochs 1 --max_steps 2'])
 def test_cli_run_log_regression(cli_args):
     """Test running CLI for an example with default params."""
@@ -95,8 +79,6 @@ def test_cli_run_log_regression(cli_args):
         cli_main()
 
 
-# TODO: fix this test
-@pytest.mark.skipif(LooseVersion(torch.__version__) < LooseVersion("1.5.0"), reason="Seems to hang for older PT...")
 @pytest.mark.parametrize('cli_args', ['--max_epochs 1 --max_steps 2'])
 def test_cli_run_vision_image_gpt(cli_args):
     """Test running CLI for an example with default params."""
