@@ -12,7 +12,6 @@ def _collate_fn(batch):
 
 
 def test_fasterrcnn(tmpdir):
-    # TODO: fix test
     model = FasterRCNN()
 
     image = torch.rand(1, 3, 400, 400)
@@ -20,8 +19,6 @@ def test_fasterrcnn(tmpdir):
 
 
 def test_fasterrcnn_train(tmpdir):
-    # TODO: fix test
-
     model = FasterRCNN()
 
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
