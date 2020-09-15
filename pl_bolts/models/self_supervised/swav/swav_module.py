@@ -1,11 +1,4 @@
 """
-TODO:
-- multi-gpu (need data sampler to adjust length of data_loader)
-- correct stl eval
-- add swav val data transforms, add val
-- len(train_loader when) DDP with multiple GPUs
-- unlabeled batch issue
-
 Adapted from official swav implementation: https://github.com/facebookresearch/swav
 """
 from argparse import ArgumentParser
@@ -20,7 +13,6 @@ from torch.nn import functional as F
 import torch.distributed as dist
 from torch.optim import Adam, SGD
 
-from pytorch_lightning.callbacks import LearningRateLogger
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 
@@ -53,6 +45,7 @@ class SwAV(pl.LightningModule):
         first_conv: bool = True,
         maxpool1: bool = True,
         optimizer: str = 'adam',
+        lars_wrapper: bool = True,
         exclude_bn_bias: bool = False,
         start_lr: float = 0.,
         learning_rate: float = 1e-3,
@@ -85,6 +78,7 @@ class SwAV(pl.LightningModule):
         self.maxpool1 = maxpool1
 
         self.optim = optimizer
+        self.lars_wrapper = lars_wrapper
         self.exclude_bn_bias = exclude_bn_bias
         self.weight_decay = weight_decay
         self.epsilon = epsilon
@@ -223,7 +217,7 @@ class SwAV(pl.LightningModule):
         loss = self.shared_step(batch)
 
         result = pl.EvalResult(checkpoint_on=loss)
-        result.log('val_loss', loss, on_step=False, on_epoch=True)
+        result.log('val_loss', loss, on_step=True, on_epoch=False)
         return result
 
     def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=['bias', 'bn']):
@@ -266,11 +260,12 @@ class SwAV(pl.LightningModule):
                 weight_decay=self.weight_decay
             )
 
-        optimizer = LARSWrapper(
-            optimizer,
-            eta=0.001,  # trust coefficient
-            clip=False
-        )
+        if self.lars_wrapper:
+            optimizer = LARSWrapper(
+                optimizer,
+                eta=0.001,  # trust coefficient
+                clip=False
+            )
 
         return optimizer
 
@@ -287,8 +282,16 @@ class SwAV(pl.LightningModule):
     ):
         # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
         # adjust LR of optim contained within LARSWrapper
-        for param_group in optimizer.optim.param_groups:
-            param_group["lr"] = self.lr_schedule[self.trainer.global_step]
+        if self.lars_wrapper:
+            for param_group in optimizer.optim.param_groups:
+                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
+        else:
+            for param_group in optimizer.param_groups:
+                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
+
+        # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
+        learning_rate = {'learning_rate': self.lr_schedule[self.trainer.global_step]}
+        self.logger.log_metrics(learning_rate, step=self.trainer.global_step)
 
         # from lightning implementation
         if using_native_amp:
@@ -366,6 +369,7 @@ class SwAV(pl.LightningModule):
         parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("-num_workers", default=16, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
+        parser.add_argument("--lars_wrapper", action='store_true', help="apple lars wrapper over optimizer used")
         parser.add_argument('--exclude_bn_bias', default=False, type=bool, help="exclude bn/bias from weight decay")
         parser.add_argument("--max_epochs", default=100, type=int, help="number of total epochs to run")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
@@ -440,9 +444,6 @@ def cli_main():
     # swav model init
     model = SwAV(**args.__dict__, datamodule=dm)
 
-    # LR logger callback
-    lr_logger = LearningRateLogger()
-
     # online eval
     online_evaluator = SwavOnlineEvaluator(
         drop_p=0.,
@@ -457,7 +458,7 @@ def cli_main():
         gpus=args.gpus,
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=16,
-        callbacks=[lr_logger, online_evaluator],
+        callbacks=[online_evaluator],
         fast_dev_run=args.fast_dev_run
     )
 
