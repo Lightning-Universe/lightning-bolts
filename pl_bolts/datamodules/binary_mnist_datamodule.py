@@ -7,10 +7,13 @@ from torch.utils.data import DataLoader, random_split
 try:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import MNIST
-    from PIL import Image
+    from pl_bolts.datamodules.mnist_datamodule import BinaryMNIST
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
+    _TORCHVISION_AVAILABLE = False
+else:
+    _TORCHVISION_AVAILABLE = True
 
 
 class BinaryMNISTDataModule(LightningDataModule):
@@ -60,6 +63,10 @@ class BinaryMNISTDataModule(LightningDataModule):
             normalize: If true applies image normalize
         """
         super().__init__(*args, **kwargs)
+
+        if not _TORCHVISION_AVAILABLE:
+            raise ImportError('You want to use MNIST dataset loaded from `torchvision` which is not installed yet.')
+
         self.dims = (1, 28, 28)
         self.data_dir = data_dir
         self.val_split = val_split
@@ -166,30 +173,3 @@ class BinaryMNISTDataModule(LightningDataModule):
             mnist_transforms = transform_lib.ToTensor()
 
         return mnist_transforms
-
-
-class BinaryMNIST(MNIST):
-    def __getitem__(self, idx):
-        """
-        Args:
-            index (int): Index
-        Returns:
-            tuple: (image, target) where target is index of the target class.
-        """
-        img, target = self.data[idx], int(self.targets[idx])
-
-        # doing this so that it is consistent with all other datasets
-        # to return a PIL Image
-        img = Image.fromarray(img.numpy(), mode='L')
-
-        if self.transform is not None:
-            img = self.transform(img)
-
-        if self.target_transform is not None:
-            target = self.target_transform(target)
-
-        # binary
-        img[img < 0.5] = 0.0
-        img[img >= 0.5] = 1.0
-
-        return img, target

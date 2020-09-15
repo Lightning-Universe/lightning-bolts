@@ -5,6 +5,7 @@ from typing import Any
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
+from pytorch_lightning import seed_everything
 from torch.optim import Adam
 
 from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
@@ -47,7 +48,7 @@ class BYOL(pl.LightningModule):
             import pytorch_lightning as pl
             from pl_bolts.models.self_supervised import BYOL
             from pl_bolts.datamodules import CIFAR10DataModule
-            from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
+            from pl_bolts.models.self_supervised.simclr.transforms import (
                 SimCLREvalDataTransform, SimCLRTrainDataTransform)
 
             # model
@@ -184,10 +185,10 @@ class BYOL(pl.LightningModule):
 
 
 def cli_main():
-    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
-    from pl_bolts.models.self_supervised.simclr import simclr_transforms
     from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
-    from pytorch_lightning import seed_everything
+    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
+    from pl_bolts.models.self_supervised.simclr import SimCLRTrainDataTransform, SimCLREvalDataTransform
+
     seed_everything(1234)
 
     parser = ArgumentParser()
@@ -205,8 +206,8 @@ def cli_main():
     # init default datamodule
     if args.dataset == 'cifar10':
         dm = CIFAR10DataModule.from_argparse_args(args)
-        dm.train_transforms = simclr_transforms.SimCLRTrainDataTransform(32)
-        dm.val_transforms = simclr_transforms.SimCLREvalDataTransform(32)
+        dm.train_transforms = SimCLRTrainDataTransform(32)
+        dm.val_transforms = SimCLREvalDataTransform(32)
         args.num_classes = dm.num_classes
 
     elif args.dataset == 'stl10':
@@ -215,15 +216,15 @@ def cli_main():
         dm.val_dataloader = dm.val_dataloader_mixed
 
         (c, h, w) = dm.size()
-        dm.train_transforms = simclr_transforms.SimCLRTrainDataTransform(h)
-        dm.val_transforms = simclr_transforms.SimCLREvalDataTransform(h)
+        dm.train_transforms = SimCLRTrainDataTransform(h)
+        dm.val_transforms = SimCLREvalDataTransform(h)
         args.num_classes = dm.num_classes
 
     elif args.dataset == 'imagenet2012':
         dm = ImagenetDataModule.from_argparse_args(args, image_size=196)
         (c, h, w) = dm.size()
-        dm.train_transforms = simclr_transforms.SimCLRTrainDataTransform(h)
-        dm.val_transforms = simclr_transforms.SimCLREvalDataTransform(h)
+        dm.train_transforms = SimCLRTrainDataTransform(h)
+        dm.val_transforms = SimCLREvalDataTransform(h)
         args.num_classes = dm.num_classes
 
     model = BYOL(**args.__dict__)

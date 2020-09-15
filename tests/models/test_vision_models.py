@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 import torch
 
-from pl_bolts.datamodules import MNISTDataModule
+from pl_bolts.datamodules import MNISTDataModule, FashionMNISTDataModule
 from pl_bolts.models import GPT2, ImageGPT
 
 
@@ -11,15 +11,22 @@ def test_igpt(tmpdir):
     model = ImageGPT(datamodule=dm)
 
     trainer = pl.Trainer(
-        limit_train_batches=2, limit_val_batches=2, limit_test_batches=2, max_epochs=1
+        limit_train_batches=2,
+        limit_val_batches=2,
+        limit_test_batches=2,
+        max_epochs=1,
     )
     trainer.fit(model)
     trainer.test()
     assert trainer.callback_metrics["test_loss"] < 1.7
 
-    model = ImageGPT(classify=True)
+    dm = FashionMNISTDataModule(tmpdir, num_workers=1)
+    model = ImageGPT(classify=True, datamodule=dm)
     trainer = pl.Trainer(
-        limit_train_batches=2, limit_val_batches=2, limit_test_batches=2, max_epochs=1
+        limit_train_batches=2,
+        limit_val_batches=2,
+        limit_test_batches=2,
+        max_epochs=1,
     )
     trainer.fit(model)
 

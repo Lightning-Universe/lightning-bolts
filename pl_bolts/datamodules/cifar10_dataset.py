@@ -2,10 +2,19 @@ import os
 import pickle
 import tarfile
 from typing import Tuple, Optional, Sequence, Callable
+from warnings import warn
 
 import torch
-from PIL import Image
 from torch import Tensor
+
+try:
+    from PIL import Image
+except ImportError:
+    warn('You want to use `Pillow` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install Pillow`.')
+    _PIL_AVAILABLE = False
+else:
+    _PIL_AVAILABLE = True
 
 from pl_bolts.datamodules.base_dataset import LightDataset
 

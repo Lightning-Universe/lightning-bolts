@@ -309,7 +309,7 @@ To Train::
     import pytorch_lightning as pl
     from pl_bolts.models.self_supervised import SimCLR
     from pl_bolts.datamodules import CIFAR10DataModule
-    from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
+    from pl_bolts.models.self_supervised.simclr.transforms import (
         SimCLREvalDataTransform, SimCLRTrainDataTransform)
 
     # data

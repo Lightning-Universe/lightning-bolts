@@ -12,8 +12,6 @@ import torch.optim as optim
 from pytorch_lightning.utilities import rank_zero_warn
 
 from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
-from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc.networks import cpc_resnet101
 from pl_bolts.models.self_supervised.cpc.transforms import (
@@ -75,14 +73,15 @@ class CPCV2(pl.LightningModule):
             self.online_evaluator = True
 
         # link data
-        if datamodule is None:
-            datamodule = CIFAR10DataModule(
-                self.hparams.data_dir,
-                num_workers=self.hparams.num_workers,
-                batch_size=batch_size
-            )
-            datamodule.train_transforms = CPCTrainTransformsCIFAR10()
-            datamodule.val_transforms = CPCEvalTransformsCIFAR10()
+        # if datamodule is None:
+        #     datamodule = CIFAR10DataModule(
+        #         self.hparams.data_dir,
+        #         num_workers=self.hparams.num_workers,
+        #         batch_size=batch_size
+        #     )
+        #     datamodule.train_transforms = CPCTrainTransformsCIFAR10()
+        #     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
+        assert datamodule
         self.datamodule = datamodule
 
         # init encoder
@@ -175,6 +174,12 @@ class CPCV2(pl.LightningModule):
         return result
 
     def shared_step(self, batch):
+        try:
+            from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
+        except ImportError:
+            raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+                              ' install it with `pip install torchvision`.')
+
         if isinstance(self.datamodule, STL10DataModule):
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -210,12 +215,11 @@ class CPCV2(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true')
         parser.add_argument('--task', type=str, default='cpc')
-
         possible_resnets = [
             'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152',
             'resnext50_32x4d', 'resnext101_32x8d', 'wide_resnet50_2', 'wide_resnet101_2'
         ]
-        parser.add_argument('--encoder', default='cpc_encoder', type=str)
+        parser.add_argument('--encoder', default='cpc_encoder', type=str, choices=possible_resnets)
 
         # training params
         parser.add_argument('--batch_size', type=int, default=128)
@@ -233,6 +237,9 @@ class CPCV2(pl.LightningModule):
 
 
 def cli_main():
+    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
+    from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
+
     pl.seed_everything(1234)
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)

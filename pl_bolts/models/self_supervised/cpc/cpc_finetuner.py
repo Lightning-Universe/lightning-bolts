@@ -3,16 +3,18 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 from pl_bolts.models.self_supervised import CPCV2, SSLFineTuner
-from pl_bolts.models.self_supervised.cpc.transforms import \
-    (CPCEvalTransformsCIFAR10,
-     CPCTrainTransformsCIFAR10,
-     CPCTrainTransformsSTL10,
-     CPCEvalTransformsSTL10)
+from pl_bolts.models.self_supervised.cpc.transforms import (
+    CPCEvalTransformsCIFAR10,
+    CPCTrainTransformsCIFAR10,
+    CPCTrainTransformsSTL10,
+    CPCEvalTransformsSTL10,
+)
 
 
 def cli_main():  # pragma: no-cover
+    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
+
     pl.seed_everything(1234)
 
     parser = ArgumentParser()

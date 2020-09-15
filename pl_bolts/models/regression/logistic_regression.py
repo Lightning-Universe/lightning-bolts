@@ -8,8 +8,6 @@ from torch.nn import functional as F
 from torch.optim import Adam
 from torch.optim.optimizer import Optimizer
 
-from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
-
 
 class LogisticRegression(pl.LightningModule):
 
@@ -127,7 +125,7 @@ class LogisticRegression(pl.LightningModule):
 
 
 def cli_main():
-    from warnings import warn
+    from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 
     pl.seed_everything(1234)
 
@@ -135,8 +133,8 @@ def cli_main():
     try:
         from sklearn.datasets import load_iris
     except ImportError:
-        warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-             ' install it with `pip install sklearn`.')
+        raise ImportError('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
+                          ' install it with `pip install sklearn`.')
 
     X, y = load_iris(return_X_y=True)
     loaders = SklearnDataModule(X, y)

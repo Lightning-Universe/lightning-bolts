@@ -19,11 +19,17 @@ builtins.__LIGHTNING_BOLT_SETUP__ = True
 import pl_bolts  # noqa: E402
 
 
-def load_requirements(path_dir=PATH_ROOT, comment_char='#'):
-    with open(os.path.join(path_dir, 'requirements.txt'), 'r') as file:
+def load_requirements(path_dir=PATH_ROOT, file_name='base.txt', comment_char='#'):
+    with open(os.path.join(path_dir, 'requirements', file_name), 'r') as file:
         lines = [ln.strip() for ln in file.readlines()]
-    reqs = [ln[:ln.index(comment_char)] if comment_char in ln else ln for ln in lines]
-    reqs = [ln for ln in reqs if ln]
+    reqs = []
+    for ln in lines:
+        if comment_char in ln:  # filer all comments
+            ln = ln[:ln.index(comment_char)].strip()
+        if ln.startswith('http'):  # skip directly installed dependencies
+            continue
+        if ln:  # if requirement is not empty
+            reqs.append(ln)
     return reqs
 
 
@@ -36,6 +42,15 @@ def load_long_describtion():
     # SVG images are not readable on PyPI, so replace them  with PNG
     text = text.replace('.svg', '.png')
     return text
+
+
+extras = {
+    'loggers': load_requirements(file_name='loggers.txt'),
+    'models': load_requirements(file_name='models.txt'),
+    'test': load_requirements(file_name='test.txt'),
+}
+extras['extra'] = extras['models'] + extras['loggers']
+extras['dev'] = extras['extra'] + extras['test']
 
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
@@ -62,7 +77,8 @@ setup(
     keywords=['deep learning', 'pytorch', 'AI'],
     python_requires='>=3.6',
     setup_requires=[],
-    install_requires=load_requirements(PATH_ROOT),
+    install_requires=load_requirements(),
+    extras_require=extras,
 
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",

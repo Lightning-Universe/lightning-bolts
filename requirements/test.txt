@@ -1,0 +1,14 @@
+coverage>=5.0
+codecov>=2.1
+pytest>=5.0
+pytest-cov
+pytest-flake8
+flake8>=3.6
+flake8-black
+check-manifest
+twine==1.13.0
+
+# atari-py==0.2.6  # needed for RL
+opencv-python
+scikit-learn>=0.23
+# gym>=0.17.2  # needed for RL
