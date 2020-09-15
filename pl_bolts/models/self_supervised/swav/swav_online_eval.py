@@ -66,7 +66,7 @@ class SwavOnlineEvaluator(pl.Callback):
         x, y = self.to_device(batch, pl_module.device)
 
         with torch.no_grad():
-            representations = self.get_representations(pl_module.encoder, x)
+            representations = self.get_representations(pl_module, x)
 
         representations = representations.detach()
 
@@ -88,7 +88,7 @@ class SwavOnlineEvaluator(pl.Callback):
         x, y = self.to_device(batch, pl_module.device)
 
         with torch.no_grad():
-            representations = self.get_representations(pl_module.encoder, x)
+            representations = self.get_representations(pl_module, x)
 
         representations = representations.detach()
 
