@@ -171,9 +171,9 @@ class SwAV(pl.LightningModule):
 
         # 1. normalize the prototypes
         with torch.no_grad():
-            w = self.model.module.prototypes.weight.data.clone()
+            w = self.model.prototypes.weight.data.clone()
             w = nn.functional.normalize(w, dim=1, p=2)
-            self.model.module.prototypes.weight.copy_(w)
+            self.model.prototypes.weight.copy_(w)
 
         # 2. multi-res forward passes
         embedding, output = self.model(inputs)
@@ -192,7 +192,7 @@ class SwAV(pl.LightningModule):
                         self.use_the_queue = True
                         out = torch.cat((torch.mm(
                             self.queue[i],
-                            self.model.module.prototypes.weight.t()
+                            self.model.prototypes.weight.t()
                         ), out))
                     # fill the queue
                     self.queue[i, bs:] = self.queue[i, :-bs].clone()
