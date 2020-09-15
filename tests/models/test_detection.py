@@ -11,18 +11,14 @@ def _collate_fn(batch):
     return tuple(zip(*batch))
 
 
-@pytest.mark.skip(reason='failing test')  # TODO
 def test_fasterrcnn(tmpdir):
-
     model = FasterRCNN()
 
     image = torch.rand(1, 3, 400, 400)
     model(image)
 
 
-@pytest.mark.skip(reason='failing test')  # TODO
 def test_fasterrcnn_train(tmpdir):
-
     model = FasterRCNN()
 
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
