@@ -215,11 +215,11 @@ class CPCV2(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true')
         parser.add_argument('--task', type=str, default='cpc')
-        # possible_resnets = [
-        #     'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152',
-        #     'resnext50_32x4d', 'resnext101_32x8d', 'wide_resnet50_2', 'wide_resnet101_2'
-        # ]
-        parser.add_argument('--encoder', default='cpc_encoder', type=str)
+        possible_resnets = [
+            'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152',
+            'resnext50_32x4d', 'resnext101_32x8d', 'wide_resnet50_2', 'wide_resnet101_2'
+        ]
+        parser.add_argument('--encoder', default='cpc_encoder', type=str, choices=possible_resnets)
 
         # training params
         parser.add_argument('--batch_size', type=int, default=128)
