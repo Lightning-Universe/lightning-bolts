@@ -98,7 +98,7 @@ class SwAV(pl.LightningModule):
         self.model = self.init_model()
 
         # compute iters per epoch
-        global_batch_size = self.gpus * self.batch_size
+        global_batch_size = self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
         # define LR schedule
@@ -141,7 +141,10 @@ class SwAV(pl.LightningModule):
                     len(self.crops_for_assign),
                     self.queue_length // self.gpus,  # change to nodes * gpus once multi-node
                     self.feat_dim,
-                ).cuda()
+                )
+
+                if self.gpus > 0:
+                    self.queue = self.queue.cuda()
 
         self.use_the_queue = False
 
@@ -306,9 +309,14 @@ class SwAV(pl.LightningModule):
 
             K, B = Q.shape
 
-            u = torch.zeros(K).cuda()
-            r = torch.ones(K).cuda() / K
-            c = torch.ones(B).cuda() / B
+            if self.gpus > 0:
+                u = torch.zeros(K).cuda()
+                r = torch.ones(K).cuda() / K
+                c = torch.ones(B).cuda() / B
+            else:
+                u = torch.zeros(K)
+                r = torch.ones(K) / K
+                c = torch.ones(B) / B
 
             for _ in range(nmb_iters):
                 u = torch.sum(Q, dim=1)
@@ -324,9 +332,14 @@ class SwAV(pl.LightningModule):
             dist.all_reduce(sum_Q)
             Q /= sum_Q
 
-            u = torch.zeros(Q.shape[0]).cuda(non_blocking=True)
-            r = torch.ones(Q.shape[0]).cuda(non_blocking=True) / Q.shape[0]
-            c = torch.ones(Q.shape[1]).cuda(non_blocking=True) / (self.gpus * Q.shape[1])
+            if self.gpus > 0:
+                u = torch.zeros(Q.shape[0]).cuda(non_blocking=True)
+                r = torch.ones(Q.shape[0]).cuda(non_blocking=True) / Q.shape[0]
+                c = torch.ones(Q.shape[1]).cuda(non_blocking=True) / (self.gpus * Q.shape[1])
+            else:
+                u = torch.zeros(Q.shape[0])
+                r = torch.ones(Q.shape[0]) / Q.shape[0]
+                c = torch.ones(Q.shape[1]) / (self.gpus * Q.shape[1])
 
             curr_sum = torch.sum(Q, dim=1)
             dist.all_reduce(curr_sum)
