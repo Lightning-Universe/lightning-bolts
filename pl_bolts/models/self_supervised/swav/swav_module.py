@@ -14,7 +14,7 @@ import torch.distributed as dist
 from torch.optim import Adam, SGD
 
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
+from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule
 
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 from pl_bolts.models.self_supervised.swav.swav_transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
