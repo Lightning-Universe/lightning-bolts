@@ -1,7 +1,22 @@
-import cv2
+from warnings import warn
+
 import numpy as np
 import torchvision.datasets as datasets
-import torchvision.transforms as transforms
+
+try:
+    import torchvision.transforms as transforms
+except ImportError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
+    _TORCHVISION_AVAILABLE = False
+else:
+    _TORCHVISION_AVAILABLE = True
+
+try:
+    import cv2
+except ImportError:
+    warn('You want to use `opencv-python` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install opencv-python`.')
 
 from typing import Optional, List
 
@@ -116,6 +131,51 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
 
         # replace last transform to eval transform in self.transform list
         self.transform[-1] = test_transform
+
+
+class SwAVFinetuneTransform(object):
+    def __init__(
+        self,
+        input_height: int = 224,
+        jitter_strength: float = 1.,
+        normalize: Optional[transforms.Normalize] = None,
+        eval_transform: bool = False
+    ) -> None:
+
+        self.jitter_strength = jitter_strength
+        self.input_height = input_height
+        self.gaussian_blur = gaussian_blur
+        self.normalize = normalize
+
+        self.color_jitter = transforms.ColorJitter(
+            0.8 * self.jitter_strength,
+            0.8 * self.jitter_strength,
+            0.8 * self.jitter_strength,
+            0.2 * self.jitter_strength
+        )
+
+        if not eval_transform:
+            data_transforms = [
+                transforms.RandomResizedCrop(size=self.input_height),
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomApply([self.color_jitter], p=0.8),
+                transforms.RandomGrayscale(p=0.2)
+            ]
+        else:
+            data_transforms = [
+                transforms.Resize(int(self.input_height + 0.1 * self.input_height)),
+                transforms.CenterCrop(self.input_height)
+            ]
+
+        if normalize is None:
+            final_transform = transforms.ToTensor()
+        else:
+            final_transform = transforms.Compose([transforms.ToTensor(), normalize])
+
+        self.transform = transforms.Compose([data_transforms, final_transform])
+
+    def __call__(self, sample):
+        return self.transform(sample)
 
 
 class GaussianBlur(object):
