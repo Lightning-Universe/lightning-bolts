@@ -17,7 +17,7 @@ from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
 from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule
 
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
-from pl_bolts.models.self_supervised.swav.swav_transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
+from pl_bolts.models.self_supervised.swav.transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
 from pl_bolts.models.self_supervised.swav.swav_online_eval import SwavOnlineEvaluator
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 

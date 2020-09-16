@@ -428,7 +428,7 @@ To Train::
     import pytorch_lightning as pl
     from pl_bolts.models.self_supervised import SwAV
     from pl_bolts.datamodules import STL10DataModule
-    from pl_bolts.models.self_supervised.swav.swav_transforms import (
+    from pl_bolts.models.self_supervised.swav.transforms import (
         SwAVTrainDataTransform, SwAVEvalDataTransform
     )
     from pl_bolts.transforms.dataset_normalizations import stl10_normalization
