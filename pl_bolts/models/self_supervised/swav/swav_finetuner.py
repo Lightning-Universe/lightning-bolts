@@ -3,7 +3,6 @@ import pytorch_lightning as pl
 from argparse import ArgumentParser
 
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
-from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule
 
 from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner
 from pl_bolts.models.self_supervised.swav.swav_module import SwAV
@@ -12,6 +11,8 @@ from pl_bolts.models.self_supervised.swav.transforms import SwAVFinetuneTransfor
 
 
 def cli_main():  # pragma: no-cover
+    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule
+
     pl.seed_everything(1234)
 
     parser = ArgumentParser()
