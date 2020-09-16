@@ -416,6 +416,8 @@ class SwAV(pl.LightningModule):
         parser.add_argument("--maxpool1", action='store_false')
         parser.add_argument("--hidden_mlp", default=2048, type=int, help="hidden layer dimension in projection head")
         parser.add_argument("--feat_dim", default=128, type=int, help="feature dimension")
+        parser.add_argument("--online_ft", action='store_true')
+        parser.add_argument("--fp32", action='store_true')
 
         # transform params
         parser.add_argument("--gaussian_blur", action="store_true", help="add gaussian blur")
@@ -514,22 +516,24 @@ def cli_main():
     # swav model init
     model = SwAV(**args.__dict__, datamodule=dm)
 
-    # online eval
-    online_evaluator = SwavOnlineEvaluator(
-        drop_p=0.,
-        hidden_dim=None,
-        z_dim=args.hidden_mlp,
-        num_classes=dm.num_classes,
-        dataset=args.dataset
-    )
+    online_evaluator = None
+    if args.online_ft:
+        # online eval
+        online_evaluator = SwavOnlineEvaluator(
+            drop_p=0.,
+            hidden_dim=None,
+            z_dim=args.hidden_mlp,
+            num_classes=dm.num_classes,
+            dataset=args.dataset
+        )
 
     trainer = pl.Trainer(
         max_epochs=args.max_epochs,
         max_steps=None if args.max_steps == -1 else args.max_steps,
         gpus=args.gpus,
         sync_batchnorm=True if args.gpus > 1 else False,
-        precision=16,
-        callbacks=[online_evaluator],
+        precision=32 if args.fp32 else 16,
+        callbacks=[online_evaluator] if args.online_ft else None,
         fast_dev_run=args.fast_dev_run
     )
 

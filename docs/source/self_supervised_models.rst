@@ -536,6 +536,7 @@ To reproduce::
 
     # pretrain
     python swav_module.py
+        --online_ft
         --gpus 1
         --lars_wrapper
         --batch_size 128

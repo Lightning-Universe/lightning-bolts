@@ -99,7 +99,7 @@ def test_swav(tmpdir):
     )
 
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
-    trainer.fit(model, datamodule)
+    trainer.fit(model)
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) > 0
