@@ -122,8 +122,7 @@ class BYOLMAWeightUpdate(pl.Callback):
             model.online_network = ...
             model.target_network = ...
 
-            # make sure to set max_steps in Trainer
-            trainer = Trainer(callbacks=[BYOLMAWeightUpdate()], max_steps=1000)
+            trainer = Trainer(callbacks=[BYOLMAWeightUpdate()])
 
         Args:
             initial_tau: starting tau. Auto-updates with every training step
@@ -144,7 +143,8 @@ class BYOLMAWeightUpdate(pl.Callback):
         self.current_tau = self.update_tau(pl_module, trainer)
 
     def update_tau(self, pl_module, trainer):
-        tau = 1 - (1 - self.initial_tau) * (math.cos(math.pi * pl_module.global_step / trainer.max_steps) + 1) / 2
+        max_steps = len(trainer.train_dataloader) * trainer.max_epochs
+        tau = 1 - (1 - self.initial_tau) * (math.cos(math.pi * pl_module.global_step / max_steps) + 1) / 2
         return tau
 
     def update_weights(self, online_net, target_net):
