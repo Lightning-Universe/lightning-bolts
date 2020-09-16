@@ -27,6 +27,8 @@ class SiameseArm(nn.Module):
             encoder = torchvision_ssl_encoder('resnet50')
         # Encoder
         self.encoder = encoder
+        # Pooler
+        self.pooler = nn.AdaptiveAvgPool2d((1, 1))
         # Projector
         self.projector = MLP()
         # Predictor
@@ -34,6 +36,7 @@ class SiameseArm(nn.Module):
 
     def forward(self, x):
         y = self.encoder(x)[0]
+        y = self.pooler(y)
         y = y.view(y.size(0), -1)
         z = self.projector(y)
         h = self.predictor(z)
