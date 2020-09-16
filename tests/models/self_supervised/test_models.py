@@ -2,6 +2,7 @@ import pytorch_lightning as pl
 from pytorch_lightning import seed_everything
 
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
+from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 from pl_bolts.models.self_supervised import CPCV2, AMDIM, MocoV2, SimCLR, BYOL, SwAV
 from pl_bolts.models.self_supervised.cpc import CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10
 from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
