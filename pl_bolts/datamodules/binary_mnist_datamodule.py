@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader, random_split
 try:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import MNIST
-    from pl_bolts.datamodules.mnist_datamodule import BinaryMNIST
+    from pl_bolts.datamodules.mnist_dataset import BinaryMNIST
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
