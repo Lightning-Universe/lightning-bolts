@@ -57,7 +57,9 @@ def cli_main():
     ).load_from_checkpoint(args.ckpt_path, strict=False)
 
     tuner = SSLFineTuner(backbone, in_features=2048, num_classes=dm.num_classes, hidden_dim=None)
-    trainer = pl.Trainer.from_argparse_args(args, early_stop_callback=True)
+    trainer = pl.Trainer.from_argparse_args(
+        args, gpus=1, precision=16, early_stop_callback=True
+    )
     trainer.fit(tuner, dm)
 
     trainer.test(datamodule=dm)
