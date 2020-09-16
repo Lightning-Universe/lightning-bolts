@@ -55,6 +55,44 @@ class SwAV(pl.LightningModule):
         epsilon: float = 0.05,
         **kwargs
     ):
+        """
+        Args:
+            gpus: number of gpus used in training, passed to SwAV module
+                to manage the queue and select distributed sinkhorn
+            num_samples: number of image samples used for training
+            batch_size: batch size per GPU in ddp
+            datamodule: LightningDataModule object used for training/val
+            arch: encoder architecture used for pre-training
+            hidden_mlp: hidden layer of non-linear projection head, set to 0
+                to use a linear projection head
+            feat_dim: output dim of the projection head
+            warmup_epochs: apply linear warmup for this many epochs
+            max_epochs: epoch count for pre-training
+            nmb_prototypes: count of prototype vectors
+            freeze_prototypes_epochs: epoch till which gradients of prototype layer
+                are frozen
+            temperature: loss temperature
+            sinkhorn_iterations: iterations for sinkhorn normalization
+            queue_length: set queue when batch size is small,
+                must be divisible by total batch-size (i.e. total_gpus * batch_size),
+                set to 0 to remove the queue
+            queue_path: folder within the logs directory
+            epoch_queue_starts: start uing the queue after this epoch
+            crops_for_assign: list of crop ids for computing assignment
+            nmb_crops: number of global and local crops, ex: [2, 6]
+            first_conv: keep first conv same as the original resnet architecture,
+                if set to false it is replace by a kernel 3, stride 1 conv (cifar-10)
+            maxpool1: keep first maxpool layer same as the original resnet architecture,
+                if set to false, first maxpool is turned off (cifar10, maybe stl10)
+            optimizer: optimizer to use
+            lars_wrapper: use LARS wrapper over the optimizer
+            exclude_bn_bias: exclude batchnorm and bias layers from weight decay in optimizers
+            start_lr: starting lr for linear warmup
+            learning_rate: learning rate
+            final_lr: float = final learning rate for cosine weight decay
+            weight_decay: weight decay for optimizer
+            epsilon: epsilon val for swav assignments
+        """
         super().__init__()
         self.save_hyperparameters()
 
@@ -373,6 +411,9 @@ class SwAV(pl.LightningModule):
 
         # model params
         parser.add_argument("--arch", default="resnet50", type=str, help="convnet architecture")
+        # specify flags to store false
+        parser.add_argument("--first_conv", action='store_false')
+        parser.add_argument("--maxpool1", action='store_false')
         parser.add_argument("--hidden_mlp", default=2048, type=int, help="hidden layer dimension in projection head")
         parser.add_argument("--feat_dim", default=128, type=int, help="feature dimension")
 
