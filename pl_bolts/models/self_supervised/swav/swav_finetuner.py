@@ -11,7 +11,7 @@ from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 from pl_bolts.models.self_supervised.swav.transforms import SwAVFinetuneTransform
 
 
-def cli_main():
+def cli_main():  # pragma: no-cover
     pl.seed_everything(1234)
 
     parser = ArgumentParser()
