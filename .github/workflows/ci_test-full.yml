@@ -23,6 +23,8 @@ jobs:
           # TODO: temporary fix till hanging jobs on macOS for py38 is resolved
           - python-version: 3.8
             os: macOS-10.15
+          - python-version: 3.8
+            os: windows-2019
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     timeout-minutes: 35
