@@ -10,10 +10,10 @@ class SwAVTrainDataTransform(object):
     def __init__(
         self,
         normalize: Optional[transforms.Normalize] = None,
-        size_crops: List[int] = [224, 96],
-        nmb_crops: List[int] = [2, 6],
-        min_scale_crops: List[float] = [0.14, 0.05],
-        max_scale_crops: List[float] = [1., 0.14],
+        size_crops: List[int] = [96, 36],
+        nmb_crops: List[int] = [2, 4],
+        min_scale_crops: List[float] = [0.33, 0.10],
+        max_scale_crops: List[float] = [1, 0.33],
         gaussian_blur: bool = True,
         jitter_strength: float = 1.
     ):
@@ -90,10 +90,10 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
     def __init__(
         self,
         normalize: Optional[transforms.Normalize] = None,
-        size_crops: List[int] = [224, 96],
-        nmb_crops: List[int] = [2, 6],
-        min_scale_crops: List[float] = [0.14, 0.05],
-        max_scale_crops: List[float] = [1., 0.14],
+        size_crops: List[int] = [96, 36],
+        nmb_crops: List[int] = [2, 4],
+        min_scale_crops: List[float] = [0.33, 0.10],
+        max_scale_crops: List[float] = [1, 0.33],
         gaussian_blur: bool = True,
         jitter_strength: float = 1.
     ):

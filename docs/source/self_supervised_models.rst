@@ -440,19 +440,11 @@ To Train::
     dm.val_dataloader = dm.val_dataloader_mixed
 
     dm.train_transforms = SwAVTrainDataTransform(
-        normalize=stl10_normalization(),
-        size_crops=[96, 36],
-        nmb_crops=[2, 4],
-        min_scale_crops=[0.33, 0.10],
-        max_scale_crops=[1, 0.33]
+        normalize=stl10_normalization()
     )
 
     dm.val_transforms = SwAVEvalDataTransform(
-        normalize=stl10_normalization(),
-        size_crops=[96, 36],
-        nmb_crops=[2, 4],
-        min_scale_crops=[0.33, 0.10],
-        max_scale_crops=[1, 0.33]
+        normalize=stl10_normalization()
     )
 
     # model

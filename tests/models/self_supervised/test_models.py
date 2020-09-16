@@ -89,6 +89,9 @@ def test_swav(tmpdir):
     datamodule.train_dataloader = datamodule.train_dataloader_mixed
     datamodule.val_dataloader = datamodule.val_dataloader_mixed
 
+    datamodule.train_transforms = SwAVTrainDataTransform(normalize=stl10_normalization())
+    datamodule.val_transforms = SwAVEvalDataTransform(normalize=stl10_normalization())
+
     model = SwAV(
         arch='resnet18',
         hidden_mlp=512,
@@ -98,7 +101,9 @@ def test_swav(tmpdir):
         batch_size=batch_size
     )
 
-    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
+    trainer = pl.Trainer(
+        fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=3
+    )
     trainer.fit(model)
     loss = trainer.progress_bar_dict['loss']
 
