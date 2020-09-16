@@ -327,7 +327,7 @@ class ResNet(nn.Module):
         for end_idx in idx_crops:
             _out = torch.cat(inputs[start_idx: end_idx])
 
-            if self.forward_backbone.conv1.is_cuda:
+            if self.conv1.is_cuda:
                 _out = self.forward_backbone(_out.cuda(non_blocking=True))
             else:
                 _out = self.forward_backbone(_out)
