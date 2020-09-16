@@ -329,7 +329,7 @@ class ResNet(nn.Module):
 
             if 'cuda' in str(self.conv1.weight.device):
                 _out = self.forward_backbone(_out.cuda(non_blocking=True))
-            except AssertionError:
+            else:
                 _out = self.forward_backbone(_out)
 
             if start_idx == 0:
