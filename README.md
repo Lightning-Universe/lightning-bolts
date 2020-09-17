@@ -107,7 +107,7 @@ simclr.freeze()
 
 ```python
 from pl_bolts.models import ImageGPT
-from pl_bolts.self_supervised import SimCLR
+from pl_bolts.models.self_supervised import SimCLR
 
 class VideoGPT(ImageGPT):
 
