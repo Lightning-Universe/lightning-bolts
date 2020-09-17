@@ -15,6 +15,15 @@ from torch.optim import Adam, SGD
 
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
 
+try:
+    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule
+except ImportError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
+    _TORCHVISION_AVAILABLE = False
+else:
+    _TORCHVISION_AVAILABLE = True
+
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 from pl_bolts.models.self_supervised.swav.transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
 from pl_bolts.models.self_supervised.swav.swav_online_eval import SwavOnlineEvaluator
@@ -471,8 +480,6 @@ class SwAV(pl.LightningModule):
 
 
 def cli_main():
-    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule
-
     parser = ArgumentParser()
 
     # model args
