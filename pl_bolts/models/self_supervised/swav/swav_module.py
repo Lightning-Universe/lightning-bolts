@@ -459,8 +459,8 @@ class SwAV(pl.LightningModule):
                             help="regularization parameter for Sinkhorn-Knopp algorithm")
         parser.add_argument("--sinkhorn_iterations", default=3, type=int,
                             help="number of iterations in Sinkhorn-Knopp algorithm")
-        parser.add_argument("--nmb_prototypes", default=256, type=int, help="number of prototypes")
-        parser.add_argument("--queue_length", type=int, default=7680,
+        parser.add_argument("--nmb_prototypes", default=512, type=int, help="number of prototypes")
+        parser.add_argument("--queue_length", type=int, default=0,
                             help="length of the queue (0 for no queue); must be divisible by total batch size")
         parser.add_argument("--epoch_queue_starts", type=int, default=15,
                             help="from this epoch, we start using a queue")
