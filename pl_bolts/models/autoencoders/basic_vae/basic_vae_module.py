@@ -40,11 +40,11 @@ class VAE(pl.LightningModule):
             # not pretrained
             vae = VAE()
 
-            # pretrained on imagenet
-            vae = VAE.from_pretrained('resnet50-imagenet')
-
             # pretrained on cifar10
-            vae = VAE.from_pretrained('resnet18-cifar10')
+            vae = VAE.from_pretrained('cifar10-resnet18')
+
+            # pretrained on stl10
+            vae = VAE.from_pretrained('stl10-resnet18')
 
         Args:
 

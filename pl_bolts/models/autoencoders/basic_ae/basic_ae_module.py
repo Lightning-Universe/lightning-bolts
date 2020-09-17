@@ -38,11 +38,8 @@ class AE(pl.LightningModule):
             # not pretrained
             ae = AE()
 
-            # pretrained on imagenet
-            ae = AE.from_pretrained('resnet50-imagenet')
-
             # pretrained on cifar10
-            ae = AE.from_pretrained('resnet18-cifar10')
+            ae = AE.from_pretrained('cifar10-resnet18')
 
         Args:
 
