@@ -48,8 +48,22 @@ CIFAR-10 pretrained model::
 Training:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/ae/ae-cifar10/ae-val-loss.png
-    :width: 200
+    :width: 400
     :alt: loss
+
+|
+
+Reconstructions:
+
+Both input and generated images are normalized versions as the training was done with such images.
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/ae/ae-cifar10/ae_input.png
+    :width: 400
+    :alt: input
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/ae/ae-cifar10/ae_output.png
+    :width: 400
+    :alt: recon
 
 |
 
@@ -106,12 +120,26 @@ CIFAR-10 pretrained model::
 Training:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-cifar10/vae-val-recon-cifar10.png
-    :width: 200
+    :width: 400
     :alt: reconstruction loss
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-cifar10/vae-val-kl-cifar10.png
-    :width: 200
+    :width: 400
     :alt: kl
+
+|
+
+Reconstructions:
+
+Both input and generated images are normalized versions as the training was done with such images.
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-cifar10/vae_input.png
+    :width: 400
+    :alt: input
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-cifar10/vae_output.png
+    :width: 400
+    :alt: recon
 
 |
 
@@ -132,11 +160,11 @@ STL-10 pretrained model::
 Training:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-stl10/vae-val-recon-stl10.png
-    :width: 200
+    :width: 400
     :alt: reconstruction loss
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-stl10/vae-val-kl-stl10.png
-    :width: 200
+    :width: 400
     :alt: kl
 
 |

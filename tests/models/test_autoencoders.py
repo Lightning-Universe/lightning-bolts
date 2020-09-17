@@ -79,6 +79,12 @@ def test_decoder(tmpdir):
 
 
 def test_from_pretrained(tmpdir):
+    dm = CIFAR10DataModule('.', batch_size=4)
+    dm.setup()
+    dm.prepare_data()
+
+    data_loader = dm.val_dataloader()
+
     vae = VAE(input_height=32)
     ae = AE(input_height=32)
 
@@ -89,9 +95,21 @@ def test_from_pretrained(tmpdir):
 
     try:
         vae = vae.from_pretrained('cifar10-resnet18')
+
+        # test forward method on pre-trained weights
+        for x, y in data_loader:
+            x_hat = vae(x)
+            break
+
         vae = vae.from_pretrained('stl10-resnet18')  # try loading weights not compatible with exact architecture
 
         ae = ae.from_pretrained('cifar10-resnet18')
+
+        # test forward method on pre-trained weights
+        for x, y in data_loader:
+            x_hat = ae(x)
+            break
+
     except Exception as e:
         exception_raised = True
 

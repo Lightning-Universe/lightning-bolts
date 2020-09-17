@@ -95,7 +95,11 @@ class VAE(pl.LightningModule):
 
         return self.load_from_checkpoint(VAE.pretrained_urls[checkpoint_name], strict=False)
 
-    def forward(self, z):
+    def forward(self, x):
+        x = self.encoder(x)
+        mu = self.fc_mu(x)
+        log_var = self.fc_var(x)
+        p, q, z = self.sample(mu, log_var)
         return self.decoder(z)
 
     def _run_step(self, x):
@@ -174,7 +178,6 @@ class VAE(pl.LightningModule):
 
 
 def cli_main(args=None):
-    from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
 
     pl.seed_everything()
@@ -203,10 +206,8 @@ def cli_main(args=None):
         args.max_steps = None
 
     model = VAE(**vars(args))
-    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]
 
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.callbacks += callbacks
     trainer.fit(model, dm)
     return dm, model, trainer
 
