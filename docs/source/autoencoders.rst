@@ -55,7 +55,7 @@ Training:
 
 Reconstructions:
 
-Both input and generated images are normalized versions as the training was done with with such images.
+Both input and generated images are normalized versions as the training was done with such images.
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/ae/ae-cifar10/ae_input.png
     :width: 400
@@ -131,7 +131,7 @@ Training:
 
 Reconstructions:
 
-Both input and generated images are normalized versions as the training was done with with such images.
+Both input and generated images are normalized versions as the training was done with such images.
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-cifar10/vae_input.png
     :width: 400
