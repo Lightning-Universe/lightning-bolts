@@ -90,8 +90,11 @@ class AE(pl.LightningModule):
 
         return self.load_from_checkpoint(AE.pretrained_urls[checkpoint_name], strict=False)
 
-    def forward(self, z):
-        return self.decoder(z)
+    def forward(self, x):
+        feats = self.encoder(x)
+        z = self.fc(feats)
+        x_hat = self.decoder(z)
+        return x_hat
 
     def step(self, batch, batch_idx):
         x, y = batch
@@ -144,7 +147,6 @@ class AE(pl.LightningModule):
 
 
 def cli_main(args=None):
-    from pl_bolts.callbacks import TensorboardGenerativeModelImageSampler
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
 
     parser = ArgumentParser()
@@ -171,10 +173,8 @@ def cli_main(args=None):
         args.max_steps = None
 
     model = AE(**vars(args))
-    callbacks = [TensorboardGenerativeModelImageSampler()]
 
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.callbacks += callbacks
     trainer.fit(model, dm)
     return dm, model, trainer
 
