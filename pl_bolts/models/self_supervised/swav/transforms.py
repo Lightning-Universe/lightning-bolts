@@ -23,7 +23,7 @@ from typing import List
 class SwAVTrainDataTransform(object):
     def __init__(
         self,
-        normalize = None,
+        normalize=None,
         size_crops: List[int] = [96, 36],
         nmb_crops: List[int] = [2, 4],
         min_scale_crops: List[float] = [0.33, 0.10],
@@ -103,7 +103,7 @@ class SwAVTrainDataTransform(object):
 class SwAVEvalDataTransform(SwAVTrainDataTransform):
     def __init__(
         self,
-        normalize = None,
+        normalize=None,
         size_crops: List[int] = [96, 36],
         nmb_crops: List[int] = [2, 4],
         min_scale_crops: List[float] = [0.33, 0.10],
@@ -137,7 +137,7 @@ class SwAVFinetuneTransform(object):
         self,
         input_height: int = 224,
         jitter_strength: float = 1.,
-        normalize = None,
+        normalize=None,
         eval_transform: bool = False
     ) -> None:
 
