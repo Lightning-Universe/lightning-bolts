@@ -14,6 +14,7 @@ import torch.distributed as dist
 from torch.optim import Adam, SGD
 
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
+from warnings import warn
 
 try:
     from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule
