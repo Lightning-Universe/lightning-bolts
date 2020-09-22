@@ -8,7 +8,8 @@ import pytorch_lightning as pl
 
 @dataclass(frozen=True)
 class LitArg:
-
+    """Dataclass to represent init args of an object
+    """
     name: str
     types: tuple
     default: Any
