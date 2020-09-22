@@ -28,6 +28,11 @@ class DummyParentDataModule(pl.LightningDataModule):
         self.c = c
 
 
+def test_lightning_argument_parser():
+    parser = LightningArgumentParser(ignore_required_init_args=False)
+    assert parser.ignore_required_init_args == False
+
+
 def test_lit_arg_immutable():
     arg = LitArg("some_arg", (int,), 1, False)
     with pytest.raises(FrozenInstanceError):
