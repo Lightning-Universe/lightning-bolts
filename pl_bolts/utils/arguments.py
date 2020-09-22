@@ -45,9 +45,7 @@ class LightningArgumentParser(ArgumentParser):
             lit_obj_args = dict()
             for arg in default_args:
                 arg_is_member_of_obj = arg.name in parsed_args_dict
-                arg_should_be_added = not arg.required or (
-                    arg.required and not self.ignore_required_init_args
-                )
+                arg_should_be_added = not arg.required or (arg.required and not self.ignore_required_init_args)
                 if arg_is_member_of_obj and arg_should_be_added:
                     lit_obj_args[arg.name] = parsed_args_dict[arg.name]
             lit_args.__dict__.update(**{name: Namespace(**lit_obj_args)})
@@ -88,24 +86,16 @@ def gather_lit_args(cls, root_cls=None):
                 # If type is empty, that means it hasn't been given type hint. We skip these.
                 arg_is_missing_type_hint = arg_types == (inspect._empty,)
                 # Some args should be ignored by default (self, kwargs, args)
-                arg_is_in_blacklist = (
-                    arg in blacklisted_args and arg_is_missing_type_hint
-                )
+                arg_is_in_blacklist = arg in blacklisted_args and arg_is_missing_type_hint
                 # We only keep the first arg we see of a given name, as it overrides the parents
                 arg_is_duplicate = arg in argument_names
                 # We skip any of the above 3 cases
-                do_skip_this_arg = (
-                    arg_is_in_blacklist or arg_is_missing_type_hint or arg_is_duplicate
-                )
+                do_skip_this_arg = arg_is_in_blacklist or arg_is_missing_type_hint or arg_is_duplicate
 
                 # Positional args have no default, but do have a known type or types.
-                arg_is_positional = (
-                    arg_default == inspect._empty and not arg_is_missing_type_hint
-                )
+                arg_is_positional = arg_default == inspect._empty and not arg_is_missing_type_hint
                 # Kwargs have both a default + known type or types
-                arg_is_kwarg = (
-                    arg_default != inspect._empty and not arg_is_missing_type_hint
-                )
+                arg_is_kwarg = arg_default != inspect._empty and not arg_is_missing_type_hint
 
                 if do_skip_this_arg:
                     continue
