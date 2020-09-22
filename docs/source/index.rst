@@ -96,4 +96,3 @@ Indices and tables
    api/pl_bolts.losses
    api/pl_bolts.optimizers
    api/pl_bolts.transforms
-   api/pl_bolts.utils
