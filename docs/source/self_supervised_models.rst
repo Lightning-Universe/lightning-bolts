@@ -478,22 +478,24 @@ The original paper does not provide baselines on STL10.
      - Hardware
      - LR
    * - Ours
-     - `- <>`_
+     - `86.72 <https://tensorboard.dev/experiment/w2pq3bPPSxC4VIm5udhA2g/>`_
      - SwAV resnet50
      - `LARS <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
      - 128
      - No
-     - 100 (~12 hr)
+     - 100 (~9 hr)
      - 1 V100 (16GB)
      - 1e-3
 
 |
 
+- `Pre-training tensorboard link <https://tensorboard.dev/experiment/68jet8o4RdK34u5kUXLedg/>`_
+
 STL-10 pretrained model::
 
     from pl_bolts.models.self_supervised import SwAV
 
-    weight_path = ''
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/checkpoints/epoch%3D96.ckpt'
     swav = SwAV.load_from_checkpoint(weight_path, strict=False)
 
     swav.freeze()
@@ -502,11 +504,11 @@ STL-10 pretrained model::
 
 Pre-training:
 
-.. figure:: 
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/pretraining-val-loss.png
     :width: 400
     :alt: pretraining validation loss
 
-.. figure:: 
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/online-finetuning-val-acc.png
     :width: 400
     :alt: online finetuning validation acc
 
@@ -514,13 +516,13 @@ Pre-training:
 
 Fine-tuning (Single layer MLP, 1024 hidden units):
 
-.. figure:: 
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/fine-tune-val-acc.png
     :width: 400
     :alt: finetuning validation accuracy
 
-.. figure:: 
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/fine-tune-val-loss.png
     :width: 400
-    :alt: finetuning test accuracy
+    :alt: finetuning validation loss
 
 |
 
@@ -541,7 +543,6 @@ To reproduce::
     # finetune
     python swav_finetuner.py
         --ckpt_path path/to/epoch=xyz.ckpt
-        --gpus 1
 
 SwAV API
 ********
