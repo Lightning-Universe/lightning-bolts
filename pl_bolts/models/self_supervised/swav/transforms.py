@@ -170,7 +170,8 @@ class SwAVFinetuneTransform(object):
         else:
             final_transform = transforms.Compose([transforms.ToTensor(), normalize])
 
-        self.transform = transforms.Compose([data_transforms, final_transform])
+        data_transforms.append(final_transform)
+        self.transform = transforms.Compose(data_transforms)
 
     def __call__(self, sample):
         return self.transform(sample)
