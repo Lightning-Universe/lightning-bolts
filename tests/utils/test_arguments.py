@@ -30,9 +30,9 @@ class DummyParentDataModule(pl.LightningDataModule):
 
 def test_lightning_argument_parser():
     parser = LightningArgumentParser(ignore_required_init_args=False)
-    assert parser.ignore_required_init_args == False
+    assert parser.ignore_required_init_args is False
     parser = LightningArgumentParser(ignore_required_init_args=True)
-    assert parser.ignore_required_init_args == True
+    assert parser.ignore_required_init_args is True
 
 
 def test_lit_arg_immutable():
