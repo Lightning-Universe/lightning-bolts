@@ -30,6 +30,13 @@ class KittiDataModule(LightningDataModule):
         Note: You need to have downloaded the Kitti dataset first and provide the path to where it is saved.
         You can download the dataset here: http://www.cvlibs.net/datasets/kitti/eval_semseg.php?benchmark=semantics2015
 
+        Specs:
+            - 200 samples
+            - Each image is (3 x 1242 x 376)
+
+        In total there are 34 classes but some of these are not useful so by default we use only 19 of the classes
+        specified by `valid_labels`.
+
         Example::
 
             from pl_bolts.datamodules import KittiDataModule
