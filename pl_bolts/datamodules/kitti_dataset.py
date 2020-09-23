@@ -2,7 +2,6 @@ import os
 
 import numpy as np
 import torch
-import torch.nn.functional as F
 import torchvision.transforms as transforms
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
