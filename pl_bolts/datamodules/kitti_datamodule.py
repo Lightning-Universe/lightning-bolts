@@ -1,3 +1,5 @@
+import os
+
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset, DataLoader
@@ -20,8 +22,25 @@ class KittiDataModule(LightningDataModule):
             *args,
             **kwargs,
     ):
+        """
+        Standard Kitti train, val, test splits and transforms.
+
+        Example::
+
+            from pl_bolts.datamodules import KittiDataModule
+
+            dm = KittiDataModule(PATH)
+            model = LitModel()
+
+            Trainer().fit(model, dm)
+
+        Args::
+            data_dir: where to load the data from (note these needs to be downloaded in advance)
+            num_workers: how many workers to use for loading data
+            batch_size: the batch size
+        """
         super().__init__(*args, **kwargs)
-        self.data_dir = data_dir
+        self.data_dir = data_dir if data_dir is not None else os.getcwd()
         self.batch_size = batch_size
 
         self.default_transforms = transforms.Compose([
