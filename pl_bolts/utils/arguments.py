@@ -27,7 +27,7 @@ class LightningArgumentParser(ArgumentParser):
 
             parser.add_object_args("data", MyDataModule)
             parser.add_object_args("model", MyModel)
-            args = parser.parse_args()
+            args = parser.parse_lit_args()
 
             # args.data -> data args
             # args.model -> model args
