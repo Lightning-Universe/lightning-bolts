@@ -15,7 +15,7 @@ class KittiDataModule(LightningDataModule):
 
     def __init__(
             self,
-            data_dir: str = '/Users/annikabrundyn/Documents/data_semantics',
+            data_dir: str,
             val_split: float = 0.2,
             test_split: float = 0.1,
             num_workers: int = 16,
