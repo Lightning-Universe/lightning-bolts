@@ -16,12 +16,12 @@ class SemSegment(pl.LightningModule):
     The default optimizer is Adam with Cosine Annealing learning rate scheduler.
 
     Args:
-        data_dir:
+        data_dir: path to load data from
         batch_size:
-        lr:
-        num_layers:
-        features_start:
-        bilinear:
+        lr: learning rate for the optimizer
+        num_layers: number of layers in each side of U-net (default 5)
+        features_start: number of features in first layer (default 64)
+        bilinear: whether to use bilinear interpolation (True) or transposed convolutions (False) for upsampling.
     """
     def __init__(self,
                  data_dir: str,
