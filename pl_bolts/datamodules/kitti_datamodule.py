@@ -35,7 +35,7 @@ class KittiDataModule(LightningDataModule):
             - Each image is (3 x 1242 x 376)
 
         In total there are 34 classes but some of these are not useful so by default we use only 19 of the classes
-        specified by `valid_labels`.
+        specified by the `valid_labels` parameter.
 
         Example::
 
@@ -52,6 +52,7 @@ class KittiDataModule(LightningDataModule):
             test_split: size of test set (default 0.1)
             num_workers: how many workers to use for loading data
             batch_size: the batch size
+            seed: random seed to be used for train/val/test splits
         """
         super().__init__(*args, **kwargs)
         self.data_dir = data_dir if data_dir is not None else os.getcwd()

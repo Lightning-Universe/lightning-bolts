@@ -27,7 +27,6 @@ class KittiDataset(Dataset):
         img_size: image dimensions (width, height)
         void_labels: useless classes to be excluded from training
         valid_labels: useful classes to include
-
     """
     IMAGE_PATH = os.path.join('training', 'image_2')
     MASK_PATH = os.path.join('training', 'semantic')
