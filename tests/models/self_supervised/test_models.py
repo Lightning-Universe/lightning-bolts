@@ -102,7 +102,7 @@ def test_swav(tmpdir):
         batch_size=batch_size,
         nmb_crops=[2, 1],
         sinkhorn_iterations=1,
-        nmb_prototypes=1
+        nmb_prototypes=2
     )
 
     trainer = pl.Trainer(
