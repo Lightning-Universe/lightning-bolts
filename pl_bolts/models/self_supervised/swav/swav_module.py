@@ -37,7 +37,7 @@ class SwAV(pl.LightningModule):
         gpus: int,
         num_samples: int,
         batch_size: int,
-        datamodule: pl.LightningDataModule,
+        dataset: str = 'stl10',
         arch: str = 'resnet50',
         hidden_mlp: int = 2048,
         feat_dim: int = 128,
@@ -70,7 +70,7 @@ class SwAV(pl.LightningModule):
                 to manage the queue and select distributed sinkhorn
             num_samples: number of image samples used for training
             batch_size: batch size per GPU in ddp
-            datamodule: LightningDataModule object used for training/val
+            dataset: dataset being used for train/val
             arch: encoder architecture used for pre-training
             hidden_mlp: hidden layer of non-linear projection head, set to 0
                 to use a linear projection head
@@ -107,7 +107,7 @@ class SwAV(pl.LightningModule):
 
         self.gpus = gpus
         self.arch = arch
-        self.datamodule = datamodule
+        self.dataset = dataset
         self.num_samples = num_samples
         self.batch_size = batch_size
 
@@ -221,7 +221,7 @@ class SwAV(pl.LightningModule):
                     p.grad = None
 
     def shared_step(self, batch):
-        if isinstance(self.datamodule, STL10DataModule):
+        if self.dataset == 'stl10':
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
 
