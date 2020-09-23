@@ -35,6 +35,14 @@ def test_lightning_argument_parser():
     assert parser.ignore_required_init_args is True
 
 
+@pytest.mark.xfail()
+def test_parser_bad_argument():
+    parser = LightningArgumentParser()
+    parser.add_object_args('dm', DummyParentDataModule)
+    parser.add_object_args('model', DummyParentModel)
+    args = parser.parse_lit_args(['--some-bad-arg', 'asdf'])
+
+
 def test_lit_arg_immutable():
     arg = LitArg("some_arg", (int,), 1, False)
     with pytest.raises(FrozenInstanceError):
