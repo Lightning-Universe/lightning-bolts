@@ -61,8 +61,7 @@ class UNet(nn.Module):
 
 class DoubleConv(nn.Module):
     """
-    Double Convolution and BN and ReLU
-    (3x3 conv -> BN -> ReLU) ** 2
+    [ Conv2d => BatchNorm (optional) => ReLU ] x 2
     """
 
     def __init__(self, in_ch: int, out_ch: int):
@@ -82,7 +81,7 @@ class DoubleConv(nn.Module):
 
 class Down(nn.Module):
     """
-    Combination of MaxPool2d and DoubleConv in series
+    Downscale with MaxPool => DoubleConvolution block
     """
 
     def __init__(self, in_ch: int, out_ch: int):
@@ -100,7 +99,7 @@ class Up(nn.Module):
     """
     Upsampling (by either bilinear interpolation or transpose convolutions)
     followed by concatenation of feature map from contracting path,
-    followed by double 3x3 convolution.
+    followed by DoubleConv.
     """
 
     def __init__(self, in_ch: int, out_ch: int, bilinear: bool = False):
