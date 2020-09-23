@@ -32,14 +32,14 @@ class KittiDataModule(LightningDataModule):
         self.trainset = KittiDataset(self.data_dir, split='train', transform=self.default_transforms)
         self.validset = KittiDataset(self.data_dir, split='valid', transform=self.default_transforms)
 
-        def train_dataloader(self):
-            loader = DataLoader(self.trainset, batch_size=self.batch_size, shuffle=True)
-            return loader
+    def train_dataloader(self):
+        loader = DataLoader(self.trainset, batch_size=self.batch_size, shuffle=True)
+        return loader
 
-        def val_dataloader(self):
-            loader = DataLoader(self.validset, batch_size=self.batch_size, shuffle=False)
-            return loader
+    def val_dataloader(self):
+        loader = DataLoader(self.validset, batch_size=self.batch_size, shuffle=False)
+        return loader
 
-        def test_dataloader(self):
-            return
+    def test_dataloader(self):
+        return
 
