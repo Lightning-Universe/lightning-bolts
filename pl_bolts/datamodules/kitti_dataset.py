@@ -40,7 +40,7 @@ class KittiDataset(Dataset):
 
     def __init__(
         self,
-        data_path: str,
+        data_path: str = '/Users/annikabrundyn/Documents/data_semantics',
         split: str,
         img_size: tuple = (1242, 376),
         void_labels: list = DEFAULT_VOID_LABELS,

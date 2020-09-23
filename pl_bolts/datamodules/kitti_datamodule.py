@@ -20,6 +20,8 @@ class KittiDataModule(LightningDataModule):
             **kwargs,
     ):
         super().__init__(*args, **kwargs)
+        self.trainset = KittiDataset(self.data_path, split='train', transform=self.transform)
+        self.validset = KittiDataset(self.data_path, split='valid', transform=self.transform)
 
         def train_dataloader(self):
             loader = DataLoader(self.trainset, batch_size=self.batch_size, shuffle=True)
