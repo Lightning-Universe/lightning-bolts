@@ -1,14 +1,12 @@
 import os
-import math
 
-import torch
 from pytorch_lightning import LightningDataModule
-from torch.utils.data import Dataset, DataLoader
-import torchvision.transforms as transforms
-
 from pl_bolts.datamodules.kitti_dataset import KittiDataset
 
+from torch.utils.data import DataLoader
+import torchvision.transforms as transforms
 from torch.utils.data.dataset import random_split
+
 
 class KittiDataModule(LightningDataModule):
 
@@ -48,6 +46,7 @@ class KittiDataModule(LightningDataModule):
         super().__init__(*args, **kwargs)
         self.data_dir = data_dir if data_dir is not None else os.getcwd()
         self.batch_size = batch_size
+        self.num_workers = num_workers
 
         self.default_transforms = transforms.Compose([
             transforms.ToTensor(),
@@ -65,13 +64,22 @@ class KittiDataModule(LightningDataModule):
         self.trainset, self.valset, self.testset = random_split(kitti_dataset, lengths=[train_len, val_len, test_len])
 
     def train_dataloader(self):
-        loader = DataLoader(self.trainset, batch_size=self.batch_size, shuffle=True)
+        loader = DataLoader(self.trainset,
+                            batch_size=self.batch_size,
+                            shuffle=True,
+                            num_workers=self.num_workers)
         return loader
 
     def val_dataloader(self):
-        loader = DataLoader(self.valset, batch_size=self.batch_size, shuffle=False)
+        loader = DataLoader(self.valset,
+                            batch_size=self.batch_size,
+                            shuffle=False,
+                            num_workers=self.num_workers)
         return loader
 
     def test_dataloader(self):
-        loader = DataLoader(self.testset, batch_size=self.batch_size, shuffle=False)
+        loader = DataLoader(self.testset,
+                            batch_size=self.batch_size,
+                            shuffle=False,
+                            num_workers=self.num_workers)
 
