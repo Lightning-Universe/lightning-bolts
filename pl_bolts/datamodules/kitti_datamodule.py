@@ -40,7 +40,7 @@ class KittiDataModule(LightningDataModule):
             Trainer().fit(model, dm)
 
         Args::
-            data_dir: where to load the data from (note these needs to be downloaded in advance)
+            data_dir: where to load the data from path, i.e. '/path/to/folder/with/data_semantics/'
             num_workers: how many workers to use for loading data
             batch_size: the batch size
         """

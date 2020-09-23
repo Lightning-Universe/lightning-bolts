@@ -16,7 +16,7 @@ class KittiDataset(Dataset):
     You need to download the Kitti Dataset first.
 
     Args:
-        data_dir (str): where to load the data from
+        data_dir (str): where to load the data from path, i.e. '/path/to/folder/with/data_semantics/'
         img_size:
         void_labels:
         valid_labels:
@@ -27,7 +27,7 @@ class KittiDataset(Dataset):
 
     def __init__(
             self,
-            data_dir: str = '/Users/annikabrundyn/Documents/data_semantics',
+            data_dir: str,
             img_size: tuple = (1242, 376),
             void_labels: list = DEFAULT_VOID_LABELS,
             valid_labels: list = DEFAULT_VALID_LABELS,
