@@ -14,7 +14,6 @@ from torch.nn import functional as F
 class CNN(nn.Module):
     """
     Simple MLP network
-
     Args:
         input_shape: observation shape of the environment
         n_actions: number of discrete actions available in the environment
@@ -40,10 +39,8 @@ class CNN(nn.Module):
     def _get_conv_out(self, shape) -> int:
         """
         Calculates the output size of the last conv layer
-
         Args:
             shape: input dimensions
-
         Returns:
             size of the conv output
         """
@@ -53,10 +50,8 @@ class CNN(nn.Module):
     def forward(self, input_x) -> Tensor:
         """
         Forward pass through network
-
         Args:
             x: input to network
-
         Returns:
             output of network
         """
@@ -67,7 +62,6 @@ class CNN(nn.Module):
 class MLP(nn.Module):
     """
     Simple MLP network
-
     Args:
         input_shape: observation shape of the environment
         n_actions: number of discrete actions available in the environment
@@ -85,10 +79,8 @@ class MLP(nn.Module):
     def forward(self, input_x):
         """
         Forward pass through network
-
         Args:
             x: input to network
-
         Returns:
             output of network
         """
@@ -98,7 +90,6 @@ class MLP(nn.Module):
 class DuelingMLP(nn.Module):
     """
     MLP network with duel heads for val and advantage
-
     Args:
         input_shape: observation shape of the environment
         n_actions: number of discrete actions available in the environment
@@ -126,10 +117,8 @@ class DuelingMLP(nn.Module):
     def forward(self, input_x):
         """
         Forward pass through network. Calculates the Q using the value and advantage
-
         Args:
             x: input to network
-
         Returns:
             Q value
         """
@@ -141,10 +130,8 @@ class DuelingMLP(nn.Module):
         """
         Gets the advantage and value by passing out of the base network through the
         value and advantage heads
-
         Args:
             input_x: input to network
-
         Returns:
             advantage, value
         """
@@ -156,7 +143,6 @@ class DuelingMLP(nn.Module):
 class DuelingCNN(nn.Module):
     """
     CNN network with duel heads for val and advantage
-
     Args:
         input_shape: observation shape of the environment
         n_actions: number of discrete actions available in the environment
@@ -191,10 +177,8 @@ class DuelingCNN(nn.Module):
     def _get_conv_out(self, shape) -> int:
         """
         Calculates the output size of the last conv layer
-
         Args:
             shape: input dimensions
-
         Returns:
             size of the conv output
         """
@@ -204,10 +188,8 @@ class DuelingCNN(nn.Module):
     def forward(self, input_x):
         """
         Forward pass through network. Calculates the Q using the value and advantage
-
         Args:
             input_x: input to network
-
         Returns:
             Q value
         """
@@ -219,10 +201,8 @@ class DuelingCNN(nn.Module):
         """
         Gets the advantage and value by passing out of the base network through the
         value and advantage heads
-
         Args:
             input_x: input to network
-
         Returns:
             advantage, value
         """
@@ -234,7 +214,6 @@ class DuelingCNN(nn.Module):
 class NoisyCNN(nn.Module):
     """
     CNN with Noisy Linear layers for exploration
-
     Args:
         input_shape: observation shape of the environment
         n_actions: number of discrete actions available in the environment
@@ -260,10 +239,8 @@ class NoisyCNN(nn.Module):
     def _get_conv_out(self, shape) -> int:
         """
         Calculates the output size of the last conv layer
-
         Args:
             shape: input dimensions
-
         Returns:
             size of the conv output
         """
@@ -273,10 +250,8 @@ class NoisyCNN(nn.Module):
     def forward(self, input_x) -> Tensor:
         """
         Forward pass through network
-
         Args:
             x: input to network
-
         Returns:
             output of network
         """
@@ -292,10 +267,8 @@ class NoisyCNN(nn.Module):
 class NoisyLinear(nn.Linear):
     """
     Noisy Layer using Independent Gaussian Noise.
-
     based on https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/
     Chapter08/lib/dqn_extra.py#L19
-
     Args:
         in_features: number of inputs
         out_features: number of outputs
@@ -328,10 +301,8 @@ class NoisyLinear(nn.Linear):
     def forward(self, input_x: Tensor) -> Tensor:
         """
         Forward pass of the layer
-
         Args:
             input_x: input tensor
-
         Returns:
             output of the layer
         """

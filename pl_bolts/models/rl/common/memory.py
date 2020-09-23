@@ -16,7 +16,6 @@ Experience = namedtuple(
 class Buffer:
     """
     Basic Buffer for storing a single experience at a time
-
     Args:
         capacity: size of the buffer
     """
@@ -30,7 +29,6 @@ class Buffer:
     def append(self, experience: Experience) -> None:
         """
         Add experience to the buffer
-
         Args:
             experience: tuple (state, action, reward, done, new_state)
         """
@@ -40,7 +38,6 @@ class Buffer:
     def sample(self, *args) -> Union[Tuple, List[Tuple]]:
         """
         returns everything in the buffer so far it is then reset
-
         Returns:
             a batch of tuple np arrays of state, action, reward, done, next_state
         """
@@ -62,7 +59,6 @@ class Buffer:
 class ReplayBuffer(Buffer):
     """
     Replay Buffer for storing past experiences allowing the agent to learn from them
-
     Args:
         capacity: size of the buffer
     """
@@ -72,7 +68,6 @@ class ReplayBuffer(Buffer):
         Takes a sample of the buffer
         Args:
             batch_size: current batch_size
-
         Returns:
             a batch of tuple np arrays of state, action, reward, done, next_state
         """
@@ -94,7 +89,6 @@ class ReplayBuffer(Buffer):
 class MultiStepBuffer:
     """
     N Step Replay Buffer
-
     Deprecated: use the NStepExperienceSource with the standard ReplayBuffer
     """
 
@@ -228,10 +222,8 @@ class PERBuffer(ReplayBuffer):
     def update_beta(self, step) -> float:
         """
         Update the beta value which accounts for the bias in the PER
-
         Args:
             step: current global step
-
         Returns:
             beta value for this indexed experience
         """
@@ -243,7 +235,6 @@ class PERBuffer(ReplayBuffer):
     def append(self, exp) -> None:
         """
         Adds experiences from exp_source to the PER buffer
-
         Args:
             exp: experience tuple being added to the buffer
         """
@@ -264,10 +255,8 @@ class PERBuffer(ReplayBuffer):
     def sample(self, batch_size=32) -> Tuple:
         """
         Takes a prioritized sample from the buffer
-
         Args:
             batch_size: size of sample
-
         Returns:
             sample of experiences chosen with ranked probability
         """
@@ -308,7 +297,6 @@ class PERBuffer(ReplayBuffer):
         """
         Update the priorities from the last batch, this should be called after the loss for this batch has been
         calculated.
-
         Args:
             batch_indices: index of each datum in the batch
             batch_priorities: priority of each datum in the batch

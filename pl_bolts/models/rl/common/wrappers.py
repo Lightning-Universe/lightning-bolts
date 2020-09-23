@@ -164,7 +164,6 @@ class BufferWrapper(gym.ObservationWrapper):
 class DataAugmentation(gym.ObservationWrapper):
     """
     Carries out basic data augmentation on the env observations
-
     - ToTensor
     - GrayScale
     - RandomCrop
