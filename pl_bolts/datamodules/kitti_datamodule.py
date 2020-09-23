@@ -25,10 +25,13 @@ class KittiDataModule(LightningDataModule):
             **kwargs,
     ):
         """
-        Standard Kitti train, val, test splits and transforms.
-        You need to have downloaded the Kitti dataset first and update the data directory.
+        Kitti train, validation and test dataloaders.
 
-        You can download the data here: http://www.cvlibs.net/datasets/kitti/eval_semseg.php?benchmark=semantics2015
+        Note: You need to have downloaded the Kitti dataset first and provide the path to where it is saved.
+        You can download the dataset here: http://www.cvlibs.net/datasets/kitti/eval_semseg.php?benchmark=semantics2015
+
+
+
 
         Example::
 
@@ -41,6 +44,8 @@ class KittiDataModule(LightningDataModule):
 
         Args::
             data_dir: where to load the data from path, i.e. '/path/to/folder/with/data_semantics/'
+            val_split: size of validation test (default 0.2)
+            test_split: size of test set (default 0.1)
             num_workers: how many workers to use for loading data
             batch_size: the batch size
         """
