@@ -1,4 +1,5 @@
 import os
+import math
 
 import torch
 from pytorch_lightning import LightningDataModule
@@ -48,6 +49,32 @@ class KittiDataModule(LightningDataModule):
             transforms.Normalize(mean=[0.35675976, 0.37380189, 0.3764753],
                                  std=[0.32064945, 0.32098866, 0.32325324])
         ])
+
+        hold_out_split = val_split + test_split
+        if hold_out_split > 0:
+            val_split = val_split / hold_out_split
+            hold_out_size = math.floor(len(X) * hold_out_split)
+            x_holdout, y_holdout = X[: hold_out_size], y[: hold_out_size]
+            test_i_start = int(val_split * hold_out_size)
+            x_val_hold_out, y_val_holdout = x_holdout[:test_i_start], y_holdout[:test_i_start]
+            x_test_hold_out, y_test_holdout = x_holdout[test_i_start:], y_holdout[test_i_start:]
+            X, y = X[hold_out_size:], y[hold_out_size:]
+
+        # create validation split
+        if val_split > 0:
+            x_val, y_val = x_val_hold_out, y_val_holdout
+
+        # create test split
+        if test_split > 0:
+            x_test, y_test = x_test_hold_out, y_test_holdout
+
+        self._init_datasets(X, y, x_val, y_val, x_test, y_test)
+
+    def _init_datasets(self, X, y, x_val, y_val, x_test, y_test):
+        self.train_dataset = SklearnDataset(X, y)
+        self.val_dataset = SklearnDataset(x_val, y_val)
+        self.test_dataset = SklearnDataset(x_test, y_test)
+
         self.trainset = KittiDataset(self.data_dir, split='train', transform=self.default_transforms)
         self.validset = KittiDataset(self.data_dir, split='valid', transform=self.default_transforms)
 

@@ -61,14 +61,14 @@ class KittiDataset(Dataset):
         self.img_list = self.get_filenames(self.img_path)
         self.mask_list = self.get_filenames(self.mask_path)
 
-        # Split between train and valid set (80/20)
-        random_inst = random.Random(12345)  # for repeatability
-        n_items = len(self.img_list)
-        idxs = random_inst.sample(range(n_items), n_items // 5)
-        if self.split == 'train':
-            idxs = [idx for idx in range(n_items) if idx not in idxs]
-        self.img_list = [self.img_list[i] for i in idxs]
-        self.mask_list = [self.mask_list[i] for i in idxs]
+        # # Split between train and valid set (80/20)
+        # random_inst = random.Random(12345)  # for repeatability
+        # n_items = len(self.img_list)
+        # idxs = random_inst.sample(range(n_items), n_items // 5)
+        # if self.split == 'train':
+        #     idxs = [idx for idx in range(n_items) if idx not in idxs]
+        # self.img_list = [self.img_list[i] for i in idxs]
+        # self.mask_list = [self.mask_list[i] for i in idxs]
 
     def __len__(self):
         return len(self.img_list)
