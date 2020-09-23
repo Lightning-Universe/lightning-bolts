@@ -39,13 +39,13 @@ class KittiDataset(Dataset):
     MASK_PATH = os.path.join('training', 'semantic')
 
     def __init__(
-        self,
-        data_path: str = '/Users/annikabrundyn/Documents/data_semantics',
-        split: str,
-        img_size: tuple = (1242, 376),
-        void_labels: list = DEFAULT_VOID_LABELS,
-        valid_labels: list = DEFAULT_VALID_LABELS,
-        transform=None
+            self,
+            data_path: str = '/Users/annikabrundyn/Documents/data_semantics',
+            split: str = 0,
+            img_size: tuple = (1242, 376),
+            void_labels: list = DEFAULT_VOID_LABELS,
+            valid_labels: list = DEFAULT_VALID_LABELS,
+            transform=None
     ):
         self.img_size = img_size
         self.void_labels = void_labels
