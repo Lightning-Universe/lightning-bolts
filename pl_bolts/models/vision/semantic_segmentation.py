@@ -1,13 +1,8 @@
-import os
-import random
 from argparse import ArgumentParser, Namespace
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 import torchvision.transforms as transforms
-from PIL import Image
-from torch.utils.data import DataLoader, Dataset
 
 import pytorch_lightning as pl
 from pl_examples.models.unet import UNet
@@ -32,13 +27,16 @@ class SemSegment(pl.LightningModule):
                  data_dir: str,
                  batch_size: int,
                  lr: float,
+                 num_classes: int,
                  num_layers: int,
                  features_start: int,
-                 bilinear: bool, **kwargs):
+                 bilinear: bool = False,
+                 **kwargs):
         super().__init__()
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.lr = lr
+        self.num_classes = num_classes
         self.num_layers = num_layers
         self.features_start = features_start
         self.bilinear = bilinear
@@ -50,8 +48,6 @@ class SemSegment(pl.LightningModule):
             transforms.Normalize(mean=[0.35675976, 0.37380189, 0.3764753],
                                  std=[0.32064945, 0.32098866, 0.32325324])
         ])
-        self.trainset = KITTI(self.data_dir, split='train', transform=self.transform)
-        self.validset = KITTI(self.data_dir, split='valid', transform=self.transform)
 
     def forward(self, x):
         return self.net(x)
@@ -82,12 +78,6 @@ class SemSegment(pl.LightningModule):
         opt = torch.optim.Adam(self.net.parameters(), lr=self.learning_rate)
         sch = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=10)
         return [opt], [sch]
-
-    def train_dataloader(self):
-        return DataLoader(self.trainset, batch_size=self.batch_size, shuffle=True)
-
-    def val_dataloader(self):
-        return DataLoader(self.validset, batch_size=self.batch_size, shuffle=False)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
