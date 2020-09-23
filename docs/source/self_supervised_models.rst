@@ -465,7 +465,7 @@ STL-10 baseline
 The original paper does not provide baselines on STL10.
 
 .. list-table:: STL-10 implementation results
-   :widths: 18 15 25 15 10 20 20 10
+   :widths: 18 15 25 15 10 20 20 20 10
    :header-rows: 1
 
    * - Implementation
