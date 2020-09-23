@@ -27,7 +27,7 @@ class KittiDataset(Dataset):
 
     def __init__(
             self,
-            data_path: str = '/Users/annikabrundyn/Documents/data_semantics',
+            data_dir: str = '/Users/annikabrundyn/Documents/data_semantics',
             img_size: tuple = (1242, 376),
             void_labels: list = DEFAULT_VOID_LABELS,
             valid_labels: list = DEFAULT_VALID_LABELS,
@@ -41,9 +41,9 @@ class KittiDataset(Dataset):
         self.transform = transform
 
         self.split = split
-        self.data_path = data_path
-        self.img_path = os.path.join(self.data_path, self.IMAGE_PATH)
-        self.mask_path = os.path.join(self.data_path, self.MASK_PATH)
+        self.data_dir = data_dir
+        self.img_path = os.path.join(self.data_dir, self.IMAGE_PATH)
+        self.mask_path = os.path.join(self.data_dir, self.MASK_PATH)
         self.img_list = self.get_filenames(self.img_path)
         self.mask_list = self.get_filenames(self.mask_path)
 
