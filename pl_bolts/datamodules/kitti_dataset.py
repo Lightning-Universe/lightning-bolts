@@ -1,9 +1,9 @@
 import os
-
 import numpy as np
+from PIL import Image
+
 import torch
 import torchvision.transforms as transforms
-from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 
 DEFAULT_VOID_LABELS = (0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1)
@@ -26,9 +26,9 @@ class KittiDataset(Dataset):
 
     Args:
         data_dir (str): where to load the data from path, i.e. '/path/to/folder/with/data_semantics/'
-        img_size:
-        void_labels:
-        valid_labels:
+        img_size: image dimensions (width, height)
+        void_labels: useless classes to be excluded from training
+        valid_labels: useful classes to include
 
     """
     IMAGE_PATH = os.path.join('training', 'image_2')
