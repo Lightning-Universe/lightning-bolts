@@ -8,6 +8,8 @@ import torchvision.transforms as transforms
 
 from pl_bolts.datamodules.kitti_dataset import KittiDataset
 
+from torch.utils.data.dataset import random_split
+
 class KittiDataModule(LightningDataModule):
 
     name = 'kitti'
@@ -25,6 +27,9 @@ class KittiDataModule(LightningDataModule):
     ):
         """
         Standard Kitti train, val, test splits and transforms.
+        You need to have downloaded the Kitti dataset first and update the data directory.
+
+        You can download the data here: http://www.cvlibs.net/datasets/kitti/eval_semseg.php?benchmark=semantics2015
 
         Example::
 
@@ -50,42 +55,23 @@ class KittiDataModule(LightningDataModule):
                                  std=[0.32064945, 0.32098866, 0.32325324])
         ])
 
-        hold_out_split = val_split + test_split
-        if hold_out_split > 0:
-            val_split = val_split / hold_out_split
-            hold_out_size = math.floor(len(X) * hold_out_split)
-            x_holdout, y_holdout = X[: hold_out_size], y[: hold_out_size]
-            test_i_start = int(val_split * hold_out_size)
-            x_val_hold_out, y_val_holdout = x_holdout[:test_i_start], y_holdout[:test_i_start]
-            x_test_hold_out, y_test_holdout = x_holdout[test_i_start:], y_holdout[test_i_start:]
-            X, y = X[hold_out_size:], y[hold_out_size:]
+        # split into train, val, test
+        kitti_dataset = KittiDataset(self.data_dir, transform=self.default_transforms)
 
-        # create validation split
-        if val_split > 0:
-            x_val, y_val = x_val_hold_out, y_val_holdout
+        val_len = round(val_split * kitti_dataset.__len__())
+        test_len = round(test_split * kitti_dataset.__len__())
+        train_len = kitti_dataset.__len__() - val_len - test_len
 
-        # create test split
-        if test_split > 0:
-            x_test, y_test = x_test_hold_out, y_test_holdout
-
-        self._init_datasets(X, y, x_val, y_val, x_test, y_test)
-
-    def _init_datasets(self, X, y, x_val, y_val, x_test, y_test):
-        self.train_dataset = SklearnDataset(X, y)
-        self.val_dataset = SklearnDataset(x_val, y_val)
-        self.test_dataset = SklearnDataset(x_test, y_test)
-
-        self.trainset = KittiDataset(self.data_dir, split='train', transform=self.default_transforms)
-        self.validset = KittiDataset(self.data_dir, split='valid', transform=self.default_transforms)
+        self.trainset, self.valset, self.testset = random_split(kitti_dataset, lengths=[train_len, val_len, test_len])
 
     def train_dataloader(self):
         loader = DataLoader(self.trainset, batch_size=self.batch_size, shuffle=True)
         return loader
 
     def val_dataloader(self):
-        loader = DataLoader(self.validset, batch_size=self.batch_size, shuffle=False)
+        loader = DataLoader(self.valset, batch_size=self.batch_size, shuffle=False)
         return loader
 
     def test_dataloader(self):
-        return
+        loader = DataLoader(self.testset, batch_size=self.batch_size, shuffle=False)
 
