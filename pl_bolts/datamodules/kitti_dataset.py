@@ -40,7 +40,6 @@ class KittiDataset(Dataset):
         self.class_map = dict(zip(self.valid_labels, range(len(self.valid_labels))))
         self.transform = transform
 
-        self.split = split
         self.data_dir = data_dir
         self.img_path = os.path.join(self.data_dir, self.IMAGE_PATH)
         self.mask_path = os.path.join(self.data_dir, self.MASK_PATH)
