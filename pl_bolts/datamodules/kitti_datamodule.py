@@ -1,6 +1,8 @@
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset, DataLoader
+import torchvision.transforms as transforms
+
 
 class KittiDataModule(LightningDataModule):
 
@@ -9,6 +11,8 @@ class KittiDataModule(LightningDataModule):
     def __init__(
             self,
             data_dir: str = None,
+            val_split: float = 0.2,
+            test_split: float = 0.1,
             num_workers: int = 16,
             batch_size: int = 32,
             seed: int = 42,
@@ -18,12 +22,22 @@ class KittiDataModule(LightningDataModule):
         super().__init__(*args, **kwargs)
 
         def train_dataloader(self):
-            return
+            loader = DataLoader(self.trainset, batch_size=self.batch_size, shuffle=True)
+            return loader
 
         def val_dataloader(self):
-            return
+            loader = DataLoader(self.validset, batch_size=self.batch_size, shuffle=False)
+            return loader
 
         def test_dataloader(self):
             return
+
+        def default_transforms(self):
+             kitti_transforms = transforms.Compose([
+                 transforms.ToTensor(),
+                 transforms.Normalize(mean=[0.35675976, 0.37380189, 0.3764753],
+                                      std=[0.32064945, 0.32098866, 0.32325324])
+            ])
+             return kitti_transforms
 
 
