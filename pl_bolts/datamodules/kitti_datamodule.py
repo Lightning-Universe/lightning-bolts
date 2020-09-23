@@ -1,4 +1,5 @@
 import os
+import torch
 
 from pytorch_lightning import LightningDataModule
 from pl_bolts.datamodules.kitti_dataset import KittiDataset
@@ -47,6 +48,7 @@ class KittiDataModule(LightningDataModule):
         self.data_dir = data_dir if data_dir is not None else os.getcwd()
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.seed = seed
 
         self.default_transforms = transforms.Compose([
             transforms.ToTensor(),
@@ -57,11 +59,13 @@ class KittiDataModule(LightningDataModule):
         # split into train, val, test
         kitti_dataset = KittiDataset(self.data_dir, transform=self.default_transforms)
 
-        val_len = round(val_split * kitti_dataset.__len__())
-        test_len = round(test_split * kitti_dataset.__len__())
-        train_len = kitti_dataset.__len__() - val_len - test_len
+        val_len = round(val_split * len(kitti_dataset))
+        test_len = round(test_split * len(kitti_dataset))
+        train_len = len(kitti_dataset) - val_len - test_len
 
-        self.trainset, self.valset, self.testset = random_split(kitti_dataset, lengths=[train_len, val_len, test_len])
+        self.trainset, self.valset, self.testset = random_split(kitti_dataset,
+                                                                lengths=[train_len, val_len, test_len],
+                                                                generator=torch.Generator().manual_seed(self.seed))
 
     def train_dataloader(self):
         loader = DataLoader(self.trainset,
