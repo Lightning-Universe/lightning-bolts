@@ -82,4 +82,5 @@ class KittiDataModule(LightningDataModule):
                             batch_size=self.batch_size,
                             shuffle=False,
                             num_workers=self.num_workers)
+        return loader
 
