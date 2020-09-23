@@ -1,6 +1,4 @@
 import os
-import random
-from argparse import ArgumentParser, Namespace
 
 import numpy as np
 import torch
@@ -9,31 +7,20 @@ import torchvision.transforms as transforms
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 
-import pytorch_lightning as pl
-from pl_examples.models.unet import UNet
-from pytorch_lightning.loggers import WandbLogger
-
 DEFAULT_VOID_LABELS = (0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1)
 DEFAULT_VALID_LABELS = (7, 8, 11, 12, 13, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 31, 32, 33)
 
 
 class KittiDataset(Dataset):
     """
-    Class for KITTI Semantic Segmentation Benchmark dataset
-    Dataset link - http://www.cvlibs.net/datasets/kitti/eval_semseg.php?benchmark=semantics2015
-    There are 34 classes in the given labels. However, not all of them are useful for training
-    (like railings on highways, road dividers, etc.).
-    So, these useless classes (the pixel values of these classes) are stored in the `void_labels`.
-    The useful classes are stored in the `valid_labels`.
-    The `encode_segmap` function sets all pixels with any of the `void_labels` to `ignore_index`
-    (250 by default). It also sets all of the valid pixels to the appropriate value between 0 and
-    `len(valid_labels)` (since that is the number of valid classes), so it can be used properly by
-    the loss function when comparing with the output.
-    The `get_filenames` function retrieves the filenames of all images in the given `path` and
-    saves the absolute path in a list.
-    In the `get_item` function, images and masks are resized to the given `img_size`, masks are
-    encoded using `encode_segmap`, and given `transform` (if any) are applied to the image only
-    (mask does not usually require transforms, but they can be implemented in a similar way).
+    You need to download the Kitti Dataset first.
+
+    Args:
+        data_dir (str): where to load the data from
+        img_size:
+        void_labels:
+        valid_labels:
+
     """
     IMAGE_PATH = os.path.join('training', 'image_2')
     MASK_PATH = os.path.join('training', 'semantic')
@@ -41,7 +28,6 @@ class KittiDataset(Dataset):
     def __init__(
             self,
             data_path: str = '/Users/annikabrundyn/Documents/data_semantics',
-            split: str = 0,
             img_size: tuple = (1242, 376),
             void_labels: list = DEFAULT_VOID_LABELS,
             valid_labels: list = DEFAULT_VALID_LABELS,
