@@ -2,9 +2,9 @@
 
 Welcome to the PyTorch Lightning community! We're building the most advanced research platform on the planet to implement the latest, best practices that the amazing PyTorch team rolls out!
 
-## Lightning Design Principles
+## Bolts Design Principles
 
-We encourage all sorts of contributions you're interested in adding! When coding for lightning, please follow these principles.
+We encourage all sorts of contributions you're interested in adding! When coding for Bolts, please follow these principles.
 
 #### Simple Internal Code
 
@@ -21,9 +21,7 @@ When something becomes a best practice, we add it to the framework. This is usua
 
 #### Backward-compatible API
 
-We all hate updating our deep learning packages because we don't want to refactor a bunch of stuff. In Lightning, we make sure every change we make which could break an API is backward compatible with good deprecation warnings.
-
-**You shouldn't be afraid to upgrade Lightning :)**
+We all hate updating our deep learning packages because we don't want to refactor a bunch of stuff. In bolts, we make sure every change we make which could break an API is backward compatible with good deprecation warnings.
 
 #### Gain User Trust
 
@@ -31,7 +29,7 @@ As a researcher, you can't have any part of your code going wrong. So, make thor
 
 #### Interoperability
 
-Pytorch Lightning bolts is highly interoperable with PyTorch Lightning and PyTorch.
+Pytorch Lightning Bolts is highly interoperable with PyTorch Lightning and PyTorch.
 
 ---
 
