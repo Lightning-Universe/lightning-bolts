@@ -47,3 +47,11 @@ def test_gpt2(tmpdir):
         num_classes=10,
     )
     model(x)
+
+
+def test_unet(tmpdir):
+    x = torch.rand(10, 3, 28, 28)
+    model = UNet(num_classes=2)
+    y = model(x)
+    assert y.shape == torch.Size([10, 2, 28, 28])
+
