@@ -31,7 +31,7 @@ As a researcher, you can't have any part of your code going wrong. So, make thor
 
 #### Interoperability
 
-Have a favorite feature from other libraries like fast.ai or transformers? Those should just work with lightning as well. Grab your favorite model or learning rate scheduler from your favorite library and run it in Lightning.
+Pytorch Lightning bolts is highly interoperable with PyTorch Lightning and PyTorch.
 
 ---
 
@@ -87,9 +87,15 @@ Please raise an issue before adding a new model. Please let us know why the part
 
 ### Test cases:
 
-Want to keep Lightning healthy? Love seeing those green tests? So do we! How to we keep it that way? We write tests! We value tests contribution even more than new features.
+Want to keep Lightning Bolts healthy? Love seeing those green tests? So do we! How to we keep it that way? We write tests! We value tests contribution even more than new features.
 
-Most of the tests in PyTorch Lightning train a trial MNIST model under various trainer conditions (ddp, ddp2+amp, etc...). The tests expect the model to perform to a reasonable degree of testing accuracy to pass. Want to add a new test case and not sure how? [Talk to us!](https://join.slack.com/t/pytorch-lightning/shared_invite/zt-f6bl2l0l-JYMK3tbAgAmGRrlNr00f1A)
+Tests are written using [pytest](https://docs.pytest.org/en/stable/). Tests in PyTorch Lightning bolts train model on a datamodule. Datamodule is lightning abstraction of representing dataloader and dataset. Model is checked by simply calling `.fit()` function over the datamodule.
+
+Along with these we have tests for losses, callbacks and transforms as well.
+
+Have a look at sample tests [here](https://github.com/PyTorchLightning/pytorch-lightning-bolts/tree/master/tests).
+
+Want to add a new test case and not sure how? [Talk to us!](https://join.slack.com/t/pytorch-lightning/shared_invite/zt-f6bl2l0l-JYMK3tbAgAmGRrlNr00f1A)
 
 ---
 
@@ -112,3 +118,7 @@ In case you adding new dependencies, make sure that they are compatible with the
 2. **Is there a recommendation for branch names?**
 
    We do not rely on the name convention so far you are working with your own fork. Anyway it would be nice to follow this convention `<type>/<issue-id>_<short-name>` where the types are: `bugfix`, `feature`, `docs`, `tests`, ...
+
+3. **I have a model in other framework than PyTorch, how do I add it here?**
+
+   Since PyTorch Lightning is written on top of PyTorch. We need models in PyTorch only. Also,, we would need same or equivalent results with PyTorch Lightning after converting the models from other frameworks.
