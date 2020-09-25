@@ -1,7 +1,6 @@
 from warnings import warn
 
 import torch.nn as nn
-import torch
 
 try:
     from torchvision.models.utils import load_state_dict_from_url
@@ -261,7 +260,6 @@ class ResNet(nn.Module):
             x0 = self.layer3(x0)
             x0 = self.layer4(x0)
             x0 = self.avgpool(x0)
-            x0 = torch.flatten(x0, 1)
 
             return [x0]
 
