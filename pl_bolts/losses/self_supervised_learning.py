@@ -18,8 +18,8 @@ def nt_xent_loss(out_1, out_2, temperature):
 
     # Negative similarity
     diag = torch.eye(n_samples, device=sim.device)
-    right_upper_pos = torch.diagflat(torch.ones(n_samples//2, device=sim.device), offset=n_samples//2)
-    left_lower_pos = torch.diagflat(torch.ones(n_samples//2, device=sim.device), offset=-n_samples//2)
+    right_upper_pos = torch.diagflat(torch.ones(n_samples // 2, device=sim.device), offset=n_samples // 2)
+    left_lower_pos = torch.diagflat(torch.ones(n_samples // 2, device=sim.device), offset=-n_samples // 2)
     mask = ~(diag + right_upper_pos + left_lower_pos).bool()
     neg = sim.masked_select(mask).view(n_samples, -1).sum(dim=-1)
 
