@@ -21,7 +21,6 @@ class TestPolicyGradient(TestCase):
         self.agent = Agent(self.net)
 
         parent_parser = argparse.ArgumentParser(add_help=False)
-        parent_parser = cli.add_base_args(parent=parent_parser)
         parent_parser = VanillaPolicyGradient.add_model_specific_args(parent_parser)
         args_list = [
             "--episode_length", "100",

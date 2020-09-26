@@ -12,11 +12,8 @@ class TestPolicyModels(TestCase):
 
     def setUp(self) -> None:
         parent_parser = argparse.ArgumentParser(add_help=False)
-        parent_parser = cli.add_base_args(parent=parent_parser)
         parent_parser = VanillaPolicyGradient.add_model_specific_args(parent_parser)
         args_list = [
-            "--algo", "PolicyGradient",
-            "--episode_length", "100",
             "--env", "CartPole-v0"
         ]
         self.hparams = parent_parser.parse_args(args_list)

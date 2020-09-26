@@ -25,12 +25,8 @@ class TestReinforce(TestCase):
         self.exp_source = DiscountedExperienceSource(self.env, self.agent)
 
         parent_parser = argparse.ArgumentParser(add_help=False)
-        parent_parser = cli.add_base_args(parent=parent_parser)
-        parent_parser = DQN.add_model_specific_args(parent_parser)
+        parent_parser = Reinforce.add_model_specific_args(parent_parser)
         args_list = [
-            "--algo", "dqn",
-            "--warm_start_steps", "500",
-            "--episode_length", "100",
             "--env", "CartPole-v0",
             "--batch_size", "32",
             "--gamma", "0.99"
