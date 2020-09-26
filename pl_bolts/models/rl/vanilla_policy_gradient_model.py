@@ -225,10 +225,35 @@ class VanillaPolicyGradient(pl.LightningModule):
         """
 
         arg_parser.add_argument(
+            "--batches_per_epoch", type=int, default=10000, help="number of batches in an epoch"
+        )
+        arg_parser.add_argument(
+            "--batch_size", type=int, default=32, help="size of the batches"
+        )
+        arg_parser.add_argument("--lr", type=float, default=1e-3, help="learning rate")
+
+        arg_parser.add_argument(
+            "--env", type=str, required=True, help="gym environment tag"
+        )
+        arg_parser.add_argument("--gamma", type=float, default=0.99, help="discount factor")
+
+        arg_parser.add_argument(
+            "--seed", type=int, default=123, help="seed for training run"
+        )
+
+        arg_parser.add_argument(
+            "--avg_reward_len",
+            type=int,
+            default=100,
+            help="how many episodes to include in avg reward",
+        )
+
+        arg_parser.add_argument(
             "--entropy_beta", type=float, default=0.01, help="entropy value",
         )
 
         return arg_parser
+
 
 
 def cli_main():
@@ -238,7 +263,6 @@ def cli_main():
     parser = pl.Trainer.add_argparse_args(parser)
 
     # model args
-    parser = cli.add_base_args(parser)
     parser = VanillaPolicyGradient.add_model_specific_args(parser)
     args = parser.parse_args()
 
