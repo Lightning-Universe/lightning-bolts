@@ -45,7 +45,7 @@ class Reinforce(pl.LightningModule):
         Example:
             >>> from pl_bolts.models.rl.reinforce_model import Reinforce
             ...
-            >>> model = Reinforce("PongNoFrameskip-v4")
+            >>> model = Reinforce("CartPole-v0")
 
         Train::
 

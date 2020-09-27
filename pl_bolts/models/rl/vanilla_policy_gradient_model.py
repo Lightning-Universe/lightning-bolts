@@ -38,9 +38,13 @@ class VanillaPolicyGradient(pl.LightningModule):
         1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
         Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
         Model implemented by:
+
             - `Donal Byrne <https://github.com/djbyrne>`
 
-
+        Example:
+            >>> from pl_bolts.models.rl.vanilla_policy_gradient_model import VanillaPolicyGradient
+            ...
+            >>> model = VanillaPolicyGradient("CartPole-v0")
 
         Train::
             trainer = Trainer()
@@ -126,9 +130,7 @@ class VanillaPolicyGradient(pl.LightningModule):
                 self.done_episodes += 1
                 self.state = self.env.reset()
                 self.total_rewards.append(sum(self.episode_rewards))
-                self.avg_rewards = float(
-                            np.mean(self.total_rewards[-self.avg_reward_len:])
-                        )
+                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
 
                 returns = self.compute_returns(self.episode_rewards)
 
@@ -281,6 +283,7 @@ class VanillaPolicyGradient(pl.LightningModule):
         )
 
         return arg_parser
+
 
 def cli_main():
     parser = argparse.ArgumentParser(add_help=False)

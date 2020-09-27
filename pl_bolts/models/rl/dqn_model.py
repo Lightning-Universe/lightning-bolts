@@ -56,7 +56,10 @@ class DQN(pl.LightningModule):
 
             - `Donal Byrne <https://github.com/djbyrne>`
 
-
+        Example:
+            >>> from pl_bolts.models.rl.dqn_model import DQN
+            ...
+            >>> model = DQN("PongNoFrameskip-v4")
 
         Train::
 
