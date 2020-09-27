@@ -22,9 +22,8 @@ from pl_bolts.datamodules.experience_source import (
 from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common import wrappers, cli
 from pl_bolts.models.rl.common.agents import ValueAgent
-from pl_bolts.models.rl.common.memory import ReplayBuffer
+from pl_bolts.models.rl.common.memory import ReplayBuffer, MultiStepBuffer
 from pl_bolts.models.rl.common.networks import CNN
-
 
 
 class DQN(pl.LightningModule):
@@ -46,6 +45,7 @@ class DQN(pl.LightningModule):
         min_episode_reward: int = -21,
         seed: int = 123,
         batches_per_epoch: int = 1000,
+        n_steps: int = 1,
         **kwargs,
     ):
         """
@@ -56,10 +56,7 @@ class DQN(pl.LightningModule):
 
             - `Donal Byrne <https://github.com/djbyrne>`
 
-        Example:
-            >>> from pl_bolts.models.rl.dqn_model import DQN
-            ...
-            >>> model = DQN("PongNoFrameskip-v4")
+
 
         Train::
 
@@ -83,6 +80,7 @@ class DQN(pl.LightningModule):
                 before training begins
             seed: seed value for all RNG used
             batches_per_epoch: number of batches per epoch
+            n_steps: size of n step look ahead
 
         Note:
             This example is based on:
@@ -126,6 +124,7 @@ class DQN(pl.LightningModule):
         self.replay_size = replay_size
         self.warm_start_size = warm_start_size
         self.batches_per_epoch = batches_per_epoch
+        self.n_steps = n_steps
 
         self.save_hyperparameters()
 
@@ -299,13 +298,6 @@ class DQN(pl.LightningModule):
             }
         )
 
-    def test_epoch_end(self, outputs) -> Dict[str, torch.Tensor]:
-        """Log the avg of the test results"""
-        rewards = [x["test_reward"] for x in outputs]
-        avg_reward = sum(rewards) / len(rewards)
-        tensorboard_logs = {"avg_test_reward": avg_reward}
-        return {"avg_test_reward": avg_reward, "log": tensorboard_logs}
-
     def test_step(self, *args, **kwargs) -> Dict[str, torch.Tensor]:
         """Evaluate the agent for 10 episodes"""
         test_reward = self.run_n_episodes(self.test_env, 1, 0)
@@ -326,7 +318,7 @@ class DQN(pl.LightningModule):
 
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""
-        self.buffer = ReplayBuffer(self.replay_size)
+        self.buffer = MultiStepBuffer(self.replay_size, self.n_steps)
         self.populate(self.warm_start_size)
 
         self.dataset = ExperienceSourceDataset(self.train_batch)
@@ -419,6 +411,12 @@ class DQN(pl.LightningModule):
             type=int,
             default=100,
             help="how many episodes to include in avg reward",
+        )
+        arg_parser.add_argument(
+            "--n_steps",
+            type=int,
+            default=1,
+            help="how many frames do we update the target network",
         )
 
         return arg_parser

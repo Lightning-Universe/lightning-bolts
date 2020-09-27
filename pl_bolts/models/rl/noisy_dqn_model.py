@@ -10,7 +10,6 @@ import torch
 import numpy as np
 
 from pl_bolts.datamodules.experience_source import Experience
-from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.networks import NoisyCNN
 from pl_bolts.models.rl.dqn_model import DQN
 

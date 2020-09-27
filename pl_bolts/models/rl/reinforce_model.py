@@ -28,7 +28,6 @@ class Reinforce(pl.LightningModule):
         batch_size: int = 8,
         n_steps: int = 10,
         avg_reward_len: int = 100,
-        num_envs: int = 1,
         entropy_beta: float = 0.01,
         epoch_len: int = 1000,
         num_batch_episodes: int = 4,
@@ -58,7 +57,10 @@ class Reinforce(pl.LightningModule):
             gamma: discount factor
             lr: learning rate
             batch_size: size of minibatch pulled from the DataLoader
-            batch_episodes: how many episodes to rollout for each batch of training
+            n_steps: number of stakes per discounted experience
+            entropy_beta: entropy coefficient
+            epoch_len: how many batches before pseudo epoch
+            num_batch_episodes: how many episodes to rollout for each batch of training
             avg_reward_len: how many episodes to take into account when calculating the avg reward
 
         Note:
@@ -72,7 +74,7 @@ class Reinforce(pl.LightningModule):
 
         # Hyperparameters
         self.lr = lr
-        self.batch_size = batch_size * num_envs
+        self.batch_size = batch_size
         self.batches_per_epoch = self.batch_size * epoch_len
         self.entropy_beta = entropy_beta
         self.gamma = gamma

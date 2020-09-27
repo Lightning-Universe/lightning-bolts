@@ -12,7 +12,6 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.losses.rl import per_dqn_loss
-from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.memory import PERBuffer, Experience
 from pl_bolts.models.rl.dqn_model import DQN
 
@@ -63,7 +62,7 @@ class PERDQN(DQN):
         """
 
     def train_batch(
-            self,
+        self,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
@@ -83,7 +82,13 @@ class PERDQN(DQN):
             episode_reward += r
             episode_steps += 1
 
-            exp = Experience(state=self.state, action=action[0], reward=r, done=is_done, new_state=next_state)
+            exp = Experience(
+                state=self.state,
+                action=action[0],
+                reward=r,
+                done=is_done,
+                new_state=next_state,
+            )
 
             self.agent.update_epsilon(self.global_step)
             self.buffer.append(exp)
@@ -106,12 +111,12 @@ class PERDQN(DQN):
 
             for idx, _ in enumerate(dones):
                 yield (
-                          states[idx],
-                          actions[idx],
-                          rewards[idx],
-                          dones[idx],
-                          new_states[idx],
-                      ), indices[idx], weights[idx]
+                    states[idx],
+                    actions[idx],
+                    rewards[idx],
+                    dones[idx],
+                    new_states[idx],
+                ), indices[idx], weights[idx]
 
     def training_step(self, batch, _) -> OrderedDict:
         """
@@ -188,5 +193,5 @@ def cli_main():
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()
