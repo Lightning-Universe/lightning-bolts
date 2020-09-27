@@ -22,7 +22,6 @@ def test_cli_run_rl_dqn(cli_args):
                                       ' --max_steps 10'
                                       ' --fast_dev_run'
                                       ' --warm_start_size 10'
-                      
                                       ' --n_steps 2'
                                       ' --batch_size 10'])
 def test_cli_run_rl_double_dqn(cli_args):
