@@ -4,7 +4,7 @@ from warnings import warn
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-import detr_loss
+from pl_bolts.models.detection.detr import detr_loss
 
 
 class Detr(pl.LightningModule):
