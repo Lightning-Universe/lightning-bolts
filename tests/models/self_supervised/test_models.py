@@ -1,4 +1,6 @@
+import pytest
 import pytorch_lightning as pl
+import torch
 from pytorch_lightning import seed_everything
 
 from pl_bolts.datamodules import CIFAR10DataModule
@@ -24,6 +26,7 @@ def test_cpcv2(tmpdir):
     assert float(loss) > 0
 
 
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
 def test_byol(tmpdir):
     seed_everything()
 
