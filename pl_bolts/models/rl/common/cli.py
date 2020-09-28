@@ -27,7 +27,8 @@ def add_base_args(parent) -> argparse.ArgumentParser:
     arg_parser.add_argument("--seed", type=int, default=123, help="seed for training run")
     arg_parser.add_argument("--epoch_len", type=int, default=1000, help="how many batches per epoch")
     arg_parser.add_argument("--num_envs", type=int, default=1, help="number of environments to run at once")
-    arg_parser.add_argument("--avg_reward_len", type=int, default=100, help="how many episodes to include in avg reward")
+    arg_parser.add_argument("--avg_reward_len", type=int, default=100,
+                            help="how many episodes to include in avg reward")
 
     arg_parser.add_argument("--seed", type=int, default=123, help="seed for training run")
     return arg_parser
