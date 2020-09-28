@@ -11,7 +11,7 @@ import numpy as np
 import torch
 try:
     import cv2
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `openCV` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install opencv-python`.')
     _OPENCV_AVAILABLE = False
@@ -95,7 +95,7 @@ class ProcessFrame84(gym.ObservationWrapper):
     def __init__(self, env=None):
 
         if not _OPENCV_AVAILABLE:
-            raise ImportError('This class uses OpenCV which it is not installed yet.')
+            raise ModuleNotFoundError('This class uses OpenCV which it is not installed yet.')
 
         super(ProcessFrame84, self).__init__(env)
         self.observation_space = gym.spaces.Box(
@@ -128,7 +128,7 @@ class ImageToPyTorch(gym.ObservationWrapper):
     def __init__(self, env):
 
         if not _OPENCV_AVAILABLE:
-            raise ImportError('This class uses OpenCV which it is not installed yet.')
+            raise ModuleNotFoundError('This class uses OpenCV which it is not installed yet.')
 
         super(ImageToPyTorch, self).__init__(env)
         old_shape = self.observation_space.shape

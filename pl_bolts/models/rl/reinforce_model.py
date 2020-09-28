@@ -1,8 +1,8 @@
 import argparse
 from collections import OrderedDict
 from typing import Tuple, List
+from warnings import warn
 
-import gym
 import numpy as np
 import pytorch_lightning as pl
 import torch
@@ -17,6 +17,13 @@ from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.datamodules.experience_source import Experience
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.networks import MLP
+try:
+    import gym
+except ModuleNotFoundError:
+    warn('You want to use `gym` which is not installed yet, install it with `pip install gym`.')  # pragma: no-cover
+    _GYM_AVAILABLE = False
+else:
+    _GYM_AVAILABLE = True
 
 
 class Reinforce(pl.LightningModule):
@@ -71,6 +78,9 @@ class Reinforce(pl.LightningModule):
             Currently only supports CPU and single GPU training with `distributed_backend=dp`
         """
         super().__init__()
+
+        if not _GYM_AVAILABLE:
+            raise ModuleNotFoundError('This Module requires gym environment which is not installed yet.')
 
         # Hyperparameters
         self.lr = lr
