@@ -5,6 +5,9 @@ from torchvision.ops.boxes import box_area
 from torch import Tensor
 import torchvision
 
+__all__ = ["box_cxcywh_to_xyxy", "box_xyxy_to_cxcywh", "box_iou",
+           "generalized_box_iou", "masks_to_boxes", "accuracy", "interpolate"]
+
 
 def box_cxcywh_to_xyxy(x):
     x_c, y_c, w, h = x.unbind(-1)
