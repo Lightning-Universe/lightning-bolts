@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import DummyDetectionDataset
 from pl_bolts.models.detection import FasterRCNN
+from pl_bolts.models.detection.detr import detr_model
 
 
 def _collate_fn(batch):
@@ -26,3 +27,10 @@ def test_fasterrcnn_train(tmpdir):
 
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, train_dl, valid_dl)
+
+
+def test_detr_train(tmpdir):
+    model = detr_model.Detr()
+
+    image = torch.rand(1, 3, 400, 400)
+    model(image)

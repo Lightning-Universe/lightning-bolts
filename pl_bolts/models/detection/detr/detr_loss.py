@@ -14,6 +14,7 @@ from pl_bolts.models.detection.detr.detr_utils import (box_cxcywh_to_xyxy, box_x
                                                        generalized_box_iou, masks_to_boxes, accuracy, interpolate)
 __all__ = ["HungarianMatcher", "build_matcher", "SetCriterion"]
 
+
 class HungarianMatcher(nn.Module):
     """This class computes an assignment between the targets and the predictions of the network
     For efficiency reasons, the targets don't include the no_object. Because of this, in general,

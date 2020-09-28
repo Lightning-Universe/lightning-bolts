@@ -30,7 +30,7 @@ class Detr(pl.LightningModule):
                 - labels (`Int64Tensor[N]`): the class label for each ground truh box
             CLI command::
                 # PascalVOC
-                python faster_rcnn.py --gpus 1 --pretrained True
+                python detr_model.py --gpus 1 --pretrained True
             Args:
                 learning_rate: the learning rate
                 num_classes: number of detection classes (including background)
@@ -111,3 +111,4 @@ def run_cli():
 
 if __name__ == "__main__":
     run_cli()
+
