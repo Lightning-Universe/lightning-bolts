@@ -2,3 +2,4 @@ torchvision>=0.7
 scikit-learn>=0.23
 Pillow
 opencv-python
+scipy
