@@ -27,7 +27,7 @@ jobs:
             os: windows-2019
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
-    timeout-minutes: 35
+    timeout-minutes: 45
 
     steps:
     - uses: actions/checkout@v2
