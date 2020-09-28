@@ -3,7 +3,6 @@ from unittest import TestCase
 
 import pytorch_lightning as pl
 
-from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.reinforce_model import Reinforce
 from pl_bolts.models.rl.vanilla_policy_gradient_model import VanillaPolicyGradient
 

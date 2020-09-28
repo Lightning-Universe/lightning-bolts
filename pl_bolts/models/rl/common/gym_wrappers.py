@@ -3,12 +3,20 @@ Set of wrapper functions for gym environments taken from
 https://github.com/Shmuma/ptan/blob/master/ptan/common/wrappers.py
 """
 import collections
+from warnings import warn
 
-import cv2
 import gym
 import gym.spaces
 import numpy as np
 import torch
+try:
+    import cv2
+except ImportError:
+    warn('You want to use `openCV` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install opencv-python`.')
+    _OPENCV_AVAILABLE = False
+else:
+    _OPENCV_AVAILABLE = True
 
 
 class ToTensor(gym.Wrapper):
@@ -85,6 +93,10 @@ class ProcessFrame84(gym.ObservationWrapper):
     """preprocessing images from env"""
 
     def __init__(self, env=None):
+
+        if not _OPENCV_AVAILABLE:
+            raise ImportError('This class uses OpenCV which it is not installed yet.')
+
         super(ProcessFrame84, self).__init__(env)
         self.observation_space = gym.spaces.Box(
             low=0, high=255, shape=(84, 84, 1), dtype=np.uint8
@@ -114,6 +126,10 @@ class ImageToPyTorch(gym.ObservationWrapper):
     """converts image to pytorch format"""
 
     def __init__(self, env):
+
+        if not _OPENCV_AVAILABLE:
+            raise ImportError('This class uses OpenCV which it is not installed yet.')
+
         super(ImageToPyTorch, self).__init__(env)
         old_shape = self.observation_space.shape
         new_shape = (old_shape[-1], old_shape[0], old_shape[1])

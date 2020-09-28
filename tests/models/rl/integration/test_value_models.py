@@ -3,7 +3,6 @@ from unittest import TestCase
 
 import pytorch_lightning as pl
 
-from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.double_dqn_model import DoubleDQN
 from pl_bolts.models.rl.dqn_model import DQN
 from pl_bolts.models.rl.dueling_dqn_model import DuelingDQN

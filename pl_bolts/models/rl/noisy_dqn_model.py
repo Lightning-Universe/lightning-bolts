@@ -2,12 +2,11 @@
 Noisy DQN
 """
 import argparse
-
-import pytorch_lightning as pl
 from typing import Tuple
 
-import torch
 import numpy as np
+import pytorch_lightning as pl
+import torch
 
 from pl_bolts.datamodules.experience_source import Experience
 from pl_bolts.models.rl.common.networks import NoisyCNN

@@ -1,5 +1,5 @@
 import argparse
-from collections import OrderedDict, deque
+from collections import OrderedDict
 from typing import Tuple, List
 
 import gym
@@ -14,7 +14,6 @@ from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import ExperienceSourceDataset
-from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.networks import MLP
 
@@ -251,29 +250,13 @@ class VanillaPolicyGradient(pl.LightningModule):
             arg_parser with model specific cargs added
         """
 
-        arg_parser.add_argument(
-            "--entropy_beta", type=float, default=0.01, help="entropy value",
-        )
-
-        arg_parser.add_argument(
-            "--batches_per_epoch", type=int, default=10000, help="number of batches in an epoch"
-        )
-
-        arg_parser.add_argument(
-            "--batch_size", type=int, default=32, help="size of the batches"
-        )
-
+        arg_parser.add_argument("--entropy_beta", type=float, default=0.01, help="entropy value")
+        arg_parser.add_argument("--batches_per_epoch", type=int, default=10000, help="number of batches in an epoch")
+        arg_parser.add_argument("--batch_size", type=int, default=32, help="size of the batches")
         arg_parser.add_argument("--lr", type=float, default=1e-3, help="learning rate")
-
-        arg_parser.add_argument(
-            "--env", type=str, required=True, help="gym environment tag"
-        )
-
+        arg_parser.add_argument("--env", type=str, required=True, help="gym environment tag")
         arg_parser.add_argument("--gamma", type=float, default=0.99, help="discount factor")
-
-        arg_parser.add_argument(
-            "--seed", type=int, default=123, help="seed for training run"
-        )
+        arg_parser.add_argument("--seed", type=int, default=123, help="seed for training run")
 
         arg_parser.add_argument(
             "--avg_reward_len",

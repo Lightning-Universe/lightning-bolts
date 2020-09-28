@@ -16,14 +16,12 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from pl_bolts.datamodules.experience_source import (
-    ExperienceSourceDataset,
-    Experience)
+from pl_bolts.datamodules.experience_source import ExperienceSourceDataset, Experience
 from pl_bolts.losses.rl import dqn_loss
-from pl_bolts.models.rl.common import wrappers, cli
 from pl_bolts.models.rl.common.agents import ValueAgent
-from pl_bolts.models.rl.common.memory import ReplayBuffer, MultiStepBuffer
+from pl_bolts.models.rl.common.memory import MultiStepBuffer
 from pl_bolts.models.rl.common.networks import CNN
+from pl_bolts.models.rl.common.gym_wrappers import make_environment
 
 
 class DQN(pl.LightningModule):
@@ -345,7 +343,7 @@ class DQN(pl.LightningModule):
         Returns:
             gym environment
         """
-        env = wrappers.make_environment(env_name)
+        env = make_environment(env_name)
 
         if seed:
             env.seed(seed)
@@ -386,28 +384,14 @@ class DQN(pl.LightningModule):
             default=150000,
             help="what frame should epsilon stop decaying",
         )
-        arg_parser.add_argument(
-            "--eps_start", type=float, default=1.0, help="starting value of epsilon"
-        )
-        arg_parser.add_argument(
-            "--eps_end", type=float, default=0.02, help="final value of epsilon"
-        )
-        arg_parser.add_argument(
-            "--batches_per_epoch", type=int, default=10000, help="number of batches in an epoch"
-        )
-        arg_parser.add_argument(
-            "--batch_size", type=int, default=32, help="size of the batches"
-        )
+        arg_parser.add_argument("--eps_start", type=float, default=1.0, help="starting value of epsilon")
+        arg_parser.add_argument("--eps_end", type=float, default=0.02, help="final value of epsilon")
+        arg_parser.add_argument("--batches_per_epoch", type=int, default=10000, help="number of batches in an epoch")
+        arg_parser.add_argument("--batch_size", type=int, default=32, help="size of the batches")
         arg_parser.add_argument("--lr", type=float, default=1e-4, help="learning rate")
 
-        arg_parser.add_argument(
-            "--env", type=str, required=True, help="gym environment tag"
-        )
+        arg_parser.add_argument("--env", type=str, required=True, help="gym environment tag")
         arg_parser.add_argument("--gamma", type=float, default=0.99, help="discount factor")
-
-        arg_parser.add_argument(
-            "--seed", type=int, default=123, help="seed for training run"
-        )
 
         arg_parser.add_argument(
             "--avg_reward_len",

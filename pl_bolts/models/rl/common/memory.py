@@ -2,7 +2,6 @@
 
 # Named tuple for storing experience steps gathered in training
 import collections
-import warnings
 from collections import deque, namedtuple
 from typing import Tuple, List, Union
 

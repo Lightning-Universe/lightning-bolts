@@ -6,11 +6,9 @@ import numpy as np
 import torch
 
 from pl_bolts.datamodules.experience_source import DiscountedExperienceSource
-from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.networks import MLP
-from pl_bolts.models.rl.common.wrappers import ToTensor
-from pl_bolts.models.rl.dqn_model import DQN
+from pl_bolts.models.rl.common.gym_wrappers import ToTensor
 from pl_bolts.models.rl.reinforce_model import Reinforce
 
 

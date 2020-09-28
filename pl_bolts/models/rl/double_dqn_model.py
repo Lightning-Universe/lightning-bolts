@@ -9,7 +9,6 @@ import pytorch_lightning as pl
 import torch
 
 from pl_bolts.losses.rl import double_dqn_loss
-from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.dqn_model import DQN
 
 
