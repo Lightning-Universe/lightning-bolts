@@ -1,6 +1,5 @@
 """
 Agent module containing classes for Agent logic
-
 Based on the implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/agent.py
 """
 from abc import ABC
@@ -21,7 +20,6 @@ class Agent(ABC):
     def __call__(self, state: torch.Tensor, device: str, *args, **kwargs) -> List[int]:
         """
         Using the given network, decide what action to carry
-
         Args:
             state: current state of the environment
             device: device used for current batch
@@ -53,14 +51,14 @@ class ValueAgent(Agent):
     def __call__(self, state: torch.Tensor, device: str) -> List[int]:
         """
         Takes in the current state and returns the action based on the agents policy
-
         Args:
             state: current state of the environment
             device: the device used for the current batch
-
         Returns:
             action defined by policy
         """
+        if not isinstance(state, list):
+            state = [state]
 
         if np.random.random() < self.epsilon:
             action = self.get_random_action(state)
@@ -72,8 +70,9 @@ class ValueAgent(Agent):
     def get_random_action(self, state: torch.Tensor) -> int:
         """returns a random action"""
         actions = []
+
         for i in range(len(state)):
-            action = np.random.randint(0, self.action_space - 1)
+            action = np.random.randint(0, self.action_space)
             actions.append(action)
 
         return actions
@@ -97,7 +96,6 @@ class ValueAgent(Agent):
     def update_epsilon(self, step: int) -> None:
         """
         Updates the epsilon value based on the current step
-
         Args:
             step: current global step
         """
@@ -111,22 +109,20 @@ class PolicyAgent(Agent):
     def __call__(self, states: torch.Tensor, device: str) -> List[int]:
         """
         Takes in the current state and returns the action based on the agents policy
-
         Args:
             states: current state of the environment
             device: the device used for the current batch
-
         Returns:
             action defined by policy
         """
-        if not isinstance(states, torch.Tensor):
-            states = torch.FloatTensor(states).to(device)
+        if not isinstance(states, list):
+            states = [states]
 
-        if device.type != "cpu":
-            states = states.cuda(device)
+        if not isinstance(states, torch.Tensor):
+            states = torch.tensor(states, device=device)
 
         # get the logits and pass through softmax for probability distribution
-        probabilities = F.softmax(self.net(states))
+        probabilities = F.softmax(self.net(states)).squeeze(dim=-1)
         prob_np = probabilities.data.cpu().numpy()
 
         # take the numpy values and randomly select action based on prob distribution

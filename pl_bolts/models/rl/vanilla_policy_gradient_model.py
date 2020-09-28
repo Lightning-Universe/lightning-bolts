@@ -1,5 +1,5 @@
 import argparse
-from collections import OrderedDict
+from collections import OrderedDict, deque
 from typing import Tuple, List
 
 import gym
@@ -14,7 +14,6 @@ from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import ExperienceSourceDataset
-from pl_bolts.datamodules.experience_source import DiscountedExperienceSource
 from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.networks import MLP
@@ -29,7 +28,6 @@ class VanillaPolicyGradient(pl.LightningModule):
         batch_size: int = 8,
         n_steps: int = 10,
         avg_reward_len: int = 100,
-        num_envs: int = 4,
         entropy_beta: float = 0.01,
         epoch_len: int = 1000,
         **kwargs
@@ -46,10 +44,9 @@ class VanillaPolicyGradient(pl.LightningModule):
         Example:
             >>> from pl_bolts.models.rl.vanilla_policy_gradient_model import VanillaPolicyGradient
             ...
-            >>> model = VanillaPolicyGradient("PongNoFrameskip-v4")
+            >>> model = VanillaPolicyGradient("CartPole-v0")
 
         Train::
-
             trainer = Trainer()
             trainer.fit(model)
 
@@ -60,6 +57,7 @@ class VanillaPolicyGradient(pl.LightningModule):
             batch_size: size of minibatch pulled from the DataLoader
             batch_episodes: how many episodes to rollout for each batch of training
             entropy_beta: dictates the level of entropy per batch
+            avg_reward_len: how many episodes to take into account when calculating the avg reward
 
         Note:
             This example is based on:
@@ -72,7 +70,7 @@ class VanillaPolicyGradient(pl.LightningModule):
 
         # Hyperparameters
         self.lr = lr
-        self.batch_size = batch_size * num_envs
+        self.batch_size = batch_size
         self.batches_per_epoch = self.batch_size * epoch_len
         self.entropy_beta = entropy_beta
         self.gamma = gamma
@@ -81,29 +79,27 @@ class VanillaPolicyGradient(pl.LightningModule):
         self.save_hyperparameters()
 
         # Model components
-        self.env = [gym.make(env) for _ in range(num_envs)]
-        self.net = MLP(self.env[0].observation_space.shape, self.env[0].action_space.n)
+        self.env = gym.make(env)
+        self.net = MLP(self.env.observation_space.shape, self.env.action_space.n)
         self.agent = PolicyAgent(self.net)
-        self.exp_source = DiscountedExperienceSource(
-            self.env, self.agent, gamma=gamma, n_steps=self.n_steps
-        )
 
         # Tracking metrics
-        self.total_steps = 0
-        self.total_rewards = [0]
+        self.total_rewards = []
+        self.episode_rewards = []
         self.done_episodes = 0
         self.avg_rewards = 0
-        self.reward_sum = 0.0
-        self.baseline = 0
         self.avg_reward_len = avg_reward_len
+        self.eps = np.finfo(np.float32).eps.item()
+        self.batch_states = []
+        self.batch_actions = []
+
+        self.state = self.env.reset()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Passes in a state x through the network and gets the q_values of each action as an output
-
         Args:
             x: environment state
-
         Returns:
             q values
         """
@@ -115,39 +111,76 @@ class VanillaPolicyGradient(pl.LightningModule):
     ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
-
         Returns:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
         """
-        for step_idx, exp in enumerate(self.exp_source.runner(self.device)):
 
-            self.reward_sum += exp.reward
-            self.baseline = self.reward_sum / (self.total_steps + 1)
-            scaled_reward = exp.reward - self.baseline
+        while True:
 
-            new_rewards = self.exp_source.pop_total_rewards()
-            if new_rewards:
-                for reward in new_rewards:
-                    self.done_episodes += 1
-                    self.total_rewards.append(reward)
-                    self.avg_rewards = float(
-                        np.mean(self.total_rewards[-self.avg_reward_len:])
-                    )
+            action = self.agent(self.state, self.device)
 
-            yield exp.state, exp.action, scaled_reward
+            next_state, reward, done, _ = self.env.step(action[0])
 
-            self.total_steps += 1
+            self.episode_rewards.append(reward)
+            self.batch_actions.append(action)
+            self.batch_states.append(self.state)
+            self.state = next_state
 
-            if self.total_steps % self.batches_per_epoch == 0:
-                break
+            if done:
+                self.done_episodes += 1
+                self.state = self.env.reset()
+                self.total_rewards.append(sum(self.episode_rewards))
+                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
 
-    def loss(self, states, actions, scaled_rewards):
+                returns = self.compute_returns(self.episode_rewards)
+
+                for idx in range(len(self.batch_actions)):
+                    yield self.batch_states[idx], self.batch_actions[idx], returns[idx]
+
+                self.batch_states = []
+                self.batch_actions = []
+                self.episode_rewards = []
+
+    def compute_returns(self, rewards):
+        """
+        Calculate the discounted rewards of the batched rewards
+
+        Args:
+            rewards: list of batched rewards
+
+        Returns:
+            list of discounted rewards
+        """
+        reward = 0
+        returns = []
+
+        for r in rewards[::-1]:
+            reward = r + self.gamma * reward
+            returns.insert(0, reward)
+
+        returns = torch.tensor(returns)
+        returns = (returns - returns.mean()) / (returns.std() + self.eps)
+
+        return returns
+
+    def loss(self, states, actions, scaled_rewards) -> torch.Tensor:
+        """
+        Calculates the loss for VPG
+
+        Args:
+            states: batched states
+            actions: batch actions
+            scaled_rewards: batche Q values
+
+        Returns:
+            loss for the current batch
+        """
 
         logits = self.net(states)
 
         # policy loss
         log_prob = log_softmax(logits, dim=1)
-        log_prob_actions = scaled_rewards * log_prob[range(self.batch_size), actions]
+        log_prob_actions = scaled_rewards * log_prob[range(self.batch_size), actions[0]]
         policy_loss = -log_prob_actions.mean()
 
         # entropy loss
@@ -164,11 +197,9 @@ class VanillaPolicyGradient(pl.LightningModule):
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved
-
         Args:
             batch: current mini batch of replay data
             _: batch number, not used
-
         Returns:
             Training loss and log metrics
         """
@@ -180,7 +211,6 @@ class VanillaPolicyGradient(pl.LightningModule):
             "episodes": self.done_episodes,
             "reward": self.total_rewards[-1],
             "avg_reward": self.avg_rewards,
-            "baseline": self.baseline,
         }
         return OrderedDict(
             {
@@ -214,18 +244,42 @@ class VanillaPolicyGradient(pl.LightningModule):
     def add_model_specific_args(arg_parser) -> argparse.ArgumentParser:
         """
         Adds arguments for DQN model
-
         Note: these params are fine tuned for Pong env
-
         Args:
             arg_parser: the current argument parser to add to
-
         Returns:
             arg_parser with model specific cargs added
         """
 
         arg_parser.add_argument(
             "--entropy_beta", type=float, default=0.01, help="entropy value",
+        )
+
+        arg_parser.add_argument(
+            "--batches_per_epoch", type=int, default=10000, help="number of batches in an epoch"
+        )
+
+        arg_parser.add_argument(
+            "--batch_size", type=int, default=32, help="size of the batches"
+        )
+
+        arg_parser.add_argument("--lr", type=float, default=1e-3, help="learning rate")
+
+        arg_parser.add_argument(
+            "--env", type=str, required=True, help="gym environment tag"
+        )
+
+        arg_parser.add_argument("--gamma", type=float, default=0.99, help="discount factor")
+
+        arg_parser.add_argument(
+            "--seed", type=int, default=123, help="seed for training run"
+        )
+
+        arg_parser.add_argument(
+            "--avg_reward_len",
+            type=int,
+            default=100,
+            help="how many episodes to include in avg reward",
         )
 
         return arg_parser
@@ -238,7 +292,6 @@ def cli_main():
     parser = pl.Trainer.add_argparse_args(parser)
 
     # model args
-    parser = cli.add_base_args(parser)
     parser = VanillaPolicyGradient.add_model_specific_args(parser)
     args = parser.parse_args()
 

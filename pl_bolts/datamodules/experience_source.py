@@ -1,6 +1,5 @@
 """
 Datamodules for RL models that rely on experiences generated during training
-
 Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/experience.py
 """
 from abc import ABC
@@ -36,7 +35,6 @@ class ExperienceSourceDataset(IterableDataset):
 class BaseExperienceSource(ABC):
     """
     Simplest form of the experience source
-
     Args:
         env: Environment that is being used
         agent: Agent being used to make decisions
@@ -54,7 +52,6 @@ class BaseExperienceSource(ABC):
 class ExperienceSource(BaseExperienceSource):
     """
     Experience source class handling single and multiple environment steps
-
     Args:
         env: Environment that is being used
         agent: Agent being used to make decisions
@@ -82,10 +79,8 @@ class ExperienceSource(BaseExperienceSource):
     def runner(self, device: torch.device) -> Tuple[Experience]:
         """Experience Source iterator yielding Tuple of experiences for n_steps. These come from the pool
         of environments provided by the user.
-
         Args:
             device: current device to be used for executing experience steps
-
         Returns:
             Tuple of Experiences
         """
@@ -157,7 +152,6 @@ class ExperienceSource(BaseExperienceSource):
     def env_actions(self, device) -> List[List[int]]:
         """
         For each environment in the pool, get the correct action
-
         Returns:
             List of actions for each env, with size (num_envs, action_size)
         """
@@ -174,12 +168,10 @@ class ExperienceSource(BaseExperienceSource):
     def env_step(self, env_idx: int, env: Env, action: List[int]) -> Experience:
         """
         Carries out a step through the given environment using the given action
-
         Args:
             env_idx: index of the current environment
             env: env at index env_idx
             action: action for this environment step
-
         Returns:
             Experience tuple
         """
@@ -196,7 +188,6 @@ class ExperienceSource(BaseExperienceSource):
         """
         To be called at the end of the history tail generation during the termination state. Updates the stats
         tracked for all environments
-
         Args:
             env_idx: index of the environment used to update stats
         """
@@ -209,7 +200,6 @@ class ExperienceSource(BaseExperienceSource):
     def pop_total_rewards(self) -> List[float]:
         """
         Returns the list of the current total rewards collected
-
         Returns:
             list of total rewards for all completed episodes for each environment since last pop
         """
@@ -224,7 +214,6 @@ class ExperienceSource(BaseExperienceSource):
     def pop_rewards_steps(self):
         """
         Returns the list of the current total rewards and steps collected
-
         Returns:
             list of total rewards and steps for all completed episodes for each environment since last pop
         """
@@ -245,10 +234,8 @@ class DiscountedExperienceSource(ExperienceSource):
     def runner(self, device: torch.device) -> Experience:
         """
         Iterates through experience tuple and calculate discounted experience
-
         Args:
             device: current device to be used for executing experience steps
-
         Yields:
             Discounted Experience
         """
@@ -264,10 +251,8 @@ class DiscountedExperienceSource(ExperienceSource):
         """
         Takes in a tuple of experiences and returns the last state and tail experiences based on
         if the last state is the end of an episode
-
         Args:
             experiences: Tuple of N Experience
-
         Returns:
             last state (Array or None) and remaining Experience
         """
@@ -282,10 +267,8 @@ class DiscountedExperienceSource(ExperienceSource):
     def discount_rewards(self, experiences: Tuple[Experience]) -> float:
         """
         Calculates the discounted reward over N experiences
-
         Args:
             experiences: Tuple of Experience
-
         Returns:
             total discounted reward
         """

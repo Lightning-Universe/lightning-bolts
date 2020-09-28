@@ -21,11 +21,10 @@ class TestPolicyGradient(TestCase):
         self.agent = Agent(self.net)
 
         parent_parser = argparse.ArgumentParser(add_help=False)
-        parent_parser = cli.add_base_args(parent=parent_parser)
         parent_parser = VanillaPolicyGradient.add_model_specific_args(parent_parser)
         args_list = [
-            "--episode_length", "100",
             "--env", "CartPole-v0",
+            "--batch_size", "32"
         ]
         self.hparams = parent_parser.parse_args(args_list)
         self.model = VanillaPolicyGradient(**vars(self.hparams))
@@ -52,7 +51,7 @@ class TestPolicyGradient(TestCase):
         self.assertEqual(len(batch), 3)
         self.assertEqual(len(batch[0]), self.model.batch_size)
         self.assertTrue(isinstance(batch, list))
-        self.assertEqual(self.model.baseline, 3.9403989999999998)
         self.assertIsInstance(batch[0], torch.Tensor)
-        self.assertIsInstance(batch[1], torch.Tensor)
+        self.assertIsInstance(batch[1], list)
+        self.assertIsInstance(batch[1][0], torch.Tensor)
         self.assertIsInstance(batch[2], torch.Tensor)

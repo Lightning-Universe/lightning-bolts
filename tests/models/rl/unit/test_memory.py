@@ -160,7 +160,8 @@ class TestPrioReplayBuffer(TestCase):
 class TestMultiStepReplayBuffer(TestCase):
 
     def setUp(self) -> None:
-        self.buffer = MultiStepBuffer(buffer_size=10, n_step=2)
+        self.gamma = 0.9
+        self.buffer = MultiStepBuffer(capacity=10, n_steps=2, gamma=self.gamma)
 
         self.state = np.zeros([32, 32])
         self.state_02 = np.ones([32, 32])
@@ -197,8 +198,8 @@ class TestMultiStepReplayBuffer(TestCase):
 
         self.buffer.append(self.experience01)
 
-        self.assertEqual(len(self.buffer), 0)
-        self.assertEqual(len(self.buffer.n_step_buffer), 1)
+        self.assertEqual(len(self.buffer.exp_history_queue), 0)
+        self.assertEqual(len(self.buffer.history), 1)
 
     def test_append_single_experience2(self):
         """
@@ -210,8 +211,8 @@ class TestMultiStepReplayBuffer(TestCase):
         self.buffer.append(self.experience01)
         self.buffer.append(self.experience02)
 
-        self.assertEqual(len(self.buffer), 1)
-        self.assertEqual(len(self.buffer.n_step_buffer), 2)
+        self.assertEqual(len(self.buffer.buffer), 1)
+        self.assertEqual(len(self.buffer.history), 2)
 
     def test_sample_single_experience(self):
         """if there is only a single experience added, sample should return nothing"""
@@ -237,9 +238,11 @@ class TestMultiStepReplayBuffer(TestCase):
         self.buffer.append(self.experience01)
         self.buffer.append(self.experience02)
 
-        reward, next_state, done = self.buffer.get_transition_info()
+        reward = self.buffer.buffer[0].reward
+        next_state = self.buffer.buffer[0].new_state
+        done = self.buffer.buffer[0].done
 
-        reward_gt = self.experience01.reward + (0.9 * self.experience02.reward) * (1 - done)
+        reward_gt = self.experience01.reward + (self.gamma * self.experience02.reward) * (1 - done)
 
         self.assertEqual(reward, reward_gt)
         self.assertEqual(next_state.all(), self.next_state_02.all())
@@ -247,16 +250,18 @@ class TestMultiStepReplayBuffer(TestCase):
 
     def test_get_transition_info_3_step(self):
         """Test that the accumulated experience is correct with multi step"""
-        self.buffer = MultiStepBuffer(buffer_size=10, n_step=3)
+        self.buffer = MultiStepBuffer(capacity=10, n_steps=3, gamma=self.gamma)
 
         self.buffer.append(self.experience01)
         self.buffer.append(self.experience02)
         self.buffer.append(self.experience02)
 
-        reward, next_state, done = self.buffer.get_transition_info()
+        reward = self.buffer.buffer[0].reward
+        next_state = self.buffer.buffer[0].new_state
+        done = self.buffer.buffer[0].done
 
-        reward_01 = self.experience02.reward + 0.9 * self.experience03.reward * (1 - done)
-        reward_gt = self.experience01.reward + 0.9 * reward_01 * (1 - done)
+        reward_01 = self.experience02.reward + self.gamma * self.experience03.reward * (1 - done)
+        reward_gt = self.experience01.reward + self.gamma * reward_01 * (1 - done)
 
         self.assertEqual(reward, reward_gt)
         self.assertEqual(next_state.all(), self.next_state_02.all())
@@ -264,7 +269,7 @@ class TestMultiStepReplayBuffer(TestCase):
 
     def test_sample_3_step(self):
         """Test that final output of the 3 step sample is correct"""
-        self.buffer = MultiStepBuffer(buffer_size=10, n_step=3)
+        self.buffer = MultiStepBuffer(capacity=10, n_steps=3, gamma=self.gamma)
 
         self.buffer.append(self.experience01)
         self.buffer.append(self.experience02)

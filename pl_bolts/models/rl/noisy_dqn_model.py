@@ -4,8 +4,12 @@ Noisy DQN
 import argparse
 
 import pytorch_lightning as pl
+from typing import Tuple
 
-from pl_bolts.models.rl.common import cli
+import torch
+import numpy as np
+
+from pl_bolts.datamodules.experience_source import Experience
 from pl_bolts.models.rl.common.networks import NoisyCNN
 from pl_bolts.models.rl.dqn_model import DQN
 
@@ -59,6 +63,53 @@ class NoisyDQN(DQN):
         """Set the agents epsilon to 0 as the exploration comes from the network"""
         self.agent.epsilon = 0.0
 
+    def train_batch(
+            self,
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        """
+        Contains the logic for generating a new batch of data to be passed to the DataLoader.
+        This is the same function as the standard DQN except that we dont update epsilon as it is always 0. The
+        exploration comes from the noisy network.
+        Returns:
+            yields a Experience tuple containing the state, action, reward, done and next_state.
+        """
+        episode_reward = 0
+        episode_steps = 0
+
+        while True:
+            self.total_steps += 1
+            action = self.agent(self.state, self.device)
+
+            next_state, r, is_done, _ = self.env.step(action[0])
+
+            episode_reward += r
+            episode_steps += 1
+
+            exp = Experience(state=self.state, action=action[0], reward=r, done=is_done, new_state=next_state)
+
+            self.buffer.append(exp)
+            self.state = next_state
+
+            if is_done:
+                self.done_episodes += 1
+                self.total_rewards.append(episode_reward)
+                self.total_episode_steps.append(episode_steps)
+                self.avg_rewards = float(
+                    np.mean(self.total_rewards[-self.avg_reward_len:])
+                )
+                self.state = self.env.reset()
+                episode_steps = 0
+                episode_reward = 0
+
+            states, actions, rewards, dones, new_states = self.buffer.sample(self.batch_size)
+
+            for idx, _ in enumerate(dones):
+                yield states[idx], actions[idx], rewards[idx], dones[idx], new_states[idx]
+
+            # Simulates epochs
+            if self.total_steps % self.batches_per_epoch == 0:
+                break
+
 
 def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
@@ -67,7 +118,6 @@ def cli_main():
     parser = pl.Trainer.add_argparse_args(parser)
 
     # model args
-    parser = cli.add_base_args(parser)
     parser = NoisyDQN.add_model_specific_args(parser)
     args = parser.parse_args()
 

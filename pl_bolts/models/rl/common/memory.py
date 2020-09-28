@@ -16,7 +16,6 @@ Experience = namedtuple(
 class Buffer:
     """
     Basic Buffer for storing a single experience at a time
-
     Args:
         capacity: size of the buffer
     """
@@ -30,7 +29,6 @@ class Buffer:
     def append(self, experience: Experience) -> None:
         """
         Add experience to the buffer
-
         Args:
             experience: tuple (state, action, reward, done, new_state)
         """
@@ -40,7 +38,6 @@ class Buffer:
     def sample(self, *args) -> Union[Tuple, List[Tuple]]:
         """
         returns everything in the buffer so far it is then reset
-
         Returns:
             a batch of tuple np arrays of state, action, reward, done, next_state
         """
@@ -62,9 +59,6 @@ class Buffer:
 class ReplayBuffer(Buffer):
     """
     Replay Buffer for storing past experiences allowing the agent to learn from them
-
-    Args:
-        capacity: size of the buffer
     """
 
     def sample(self, batch_size: int) -> Tuple:
@@ -72,7 +66,6 @@ class ReplayBuffer(Buffer):
         Takes a sample of the buffer
         Args:
             batch_size: current batch_size
-
         Returns:
             a batch of tuple np arrays of state, action, reward, done, next_state
         """
@@ -91,96 +84,106 @@ class ReplayBuffer(Buffer):
         )
 
 
-class MultiStepBuffer:
+class MultiStepBuffer(ReplayBuffer):
     """
     N Step Replay Buffer
 
-    Deprecated: use the NStepExperienceSource with the standard ReplayBuffer
+    Args:
+        capacity: max number of experiences that will be stored in the buffer
+        n_steps: number of steps used for calculating discounted reward/experience
+        gamma: discount factor when calculating n_step discounted reward of the experience being stored in buffer
     """
 
-    def __init__(self, buffer_size, n_step=2):
-        warnings.warn(
-            "Deprecated, this so no longer be used. Instead use the DiscountedExperienceSource with the "
-            "standard replay buffer.",
-            DeprecationWarning,
-        )
-        self.n_step = n_step
-        self.buffer = deque(maxlen=buffer_size)
-        self.n_step_buffer = deque(maxlen=n_step)
+    def __init__(self, capacity: int, n_steps: int = 1, gamma: float = 0.99) -> None:
+        super().__init__(capacity)
 
-    def __len__(self):
-        return len(self.buffer)
+        self.n_steps = n_steps
+        self.gamma = gamma
+        self.history = deque(maxlen=self.n_steps)
+        self.exp_history_queue = deque()
 
-    def get_transition_info(self, gamma=0.9) -> Tuple[np.float, np.array, np.int]:
+    def append(self, exp: Experience) -> None:
         """
-        get the accumulated transition info for the n_step_buffer
+        Add experience to the buffer
         Args:
-            gamma: discount factor
+            exp: tuple (state, action, reward, done, new_state)
+        """
+        self.update_history_queue(exp)  # add single step experience to history
+        while self.exp_history_queue:  # go through all the n_steps that have been queued
+            experiences = self.exp_history_queue.popleft()  # get the latest n_step experience from queue
+
+            last_exp_state, tail_experiences = self.split_head_tail_exp(experiences)
+
+            total_reward = self.discount_rewards(tail_experiences)
+
+            n_step_exp = Experience(state=experiences[0].state, action=experiences[0].action, reward=total_reward,
+                                    done=experiences[0].done, new_state=last_exp_state)
+
+            self.buffer.append(n_step_exp)  # add n_step experience to buffer
+
+    def update_history_queue(self, exp) -> None:
+        """
+        Updates the experience history queue with the lastest experiences. In the event of an experience step is in
+        the done state, the history will be incrementally appended to the queue, removing the tail of the history
+        each time.
+        Args:
+            env_idx: index of the environment
+            exp: the current experience
+            history: history of experience steps for this environment
+        """
+        self.history.append(exp)
+
+        # If there is a full history of step, append history to queue
+        if len(self.history) == self.n_steps:
+            self.exp_history_queue.append(list(self.history))
+
+        if exp.done:
+            if 0 < len(self.history) < self.n_steps:
+                self.exp_history_queue.append(list(self.history))
+
+            # generate tail of history, incrementally append history to queue
+            while len(self.history) > 2:
+                self.history.popleft()
+                self.exp_history_queue.append(list(self.history))
+
+            # when there are only 2 experiences left in the history,
+            # append to the queue then update the env stats and reset the environment
+            if len(self.history) > 1:
+                self.history.popleft()
+                self.exp_history_queue.append(list(self.history))
+
+            # Clear that last tail in the history once all others have been added to the queue
+            self.history.clear()
+
+    def split_head_tail_exp(self, experiences: Tuple[Experience]) -> Tuple[List, Tuple[Experience]]:
+        """
+        Takes in a tuple of experiences and returns the last state and tail experiences based on
+        if the last state is the end of an episode
+        Args:
+            experiences: Tuple of N Experience
         Returns:
-            multi step reward, final observation and done
+            last state (Array or None) and remaining Experience
         """
-        last_experience = self.n_step_buffer[-1]
-        final_state = last_experience.new_state
-        done = last_experience.done
-        reward = last_experience.reward
+        last_exp_state = experiences[-1].new_state
+        tail_experiences = experiences
 
-        # calculate reward
-        # in reverse order, go through all the experiences up till the first experience
-        for experience in reversed(list(self.n_step_buffer)[:-1]):
-            reward_t = experience.reward
-            new_state_t = experience.new_state
-            done_t = experience.done
+        if experiences[-1].done and len(experiences) <= self.n_steps:
+            tail_experiences = experiences
 
-            reward = reward_t + gamma * reward * (1 - done_t)
-            final_state, done = (new_state_t, done_t) if done_t else (final_state, done)
+        return last_exp_state, tail_experiences
 
-        return reward, final_state, done
-
-    def append(self, experience) -> None:
+    def discount_rewards(self, experiences: Tuple[Experience]) -> float:
         """
-        add an experience to the buffer by collecting n steps of experiences
+        Calculates the discounted reward over N experiences
         Args:
-            experience: tuple (state, action, reward, done, next_state)
-        """
-        self.n_step_buffer.append(experience)
-
-        if len(self.n_step_buffer) >= self.n_step:
-            reward, next_state, done = self.get_transition_info()
-            first_experience = self.n_step_buffer[0]
-            multi_step_experience = Experience(
-                first_experience.state,
-                first_experience.action,
-                reward,
-                done,
-                next_state,
-            )
-
-            self.buffer.append(multi_step_experience)
-
-    def sample(self, batch_size: int) -> Tuple:
-        """
-        Takes a sample of the buffer
-        Args:
-            batch_size: current batch_size
+            experiences: Tuple of Experience
         Returns:
-            a batch of tuple np arrays of Experiences
+            total discounted reward
         """
-        # pylint: disable=no-else-return
-        if len(self.buffer) >= batch_size:
-            indices = np.random.choice(len(self.buffer), batch_size, replace=False)
-            states, actions, rewards, dones, next_states = zip(
-                *[self.buffer[idx] for idx in indices]
-            )
-
-            return (
-                np.array(states),
-                np.array(actions),
-                np.array(rewards, dtype=np.float32),
-                np.array(dones, dtype=np.bool),
-                np.array(next_states),
-            )
-        else:
-            raise Exception("Buffer length is less than the batch size")
+        total_reward = 0.0
+        for exp in reversed(experiences):
+            total_reward = (self.gamma * total_reward) + exp.reward
+        return total_reward
 
 
 class MeanBuffer:
@@ -228,10 +231,8 @@ class PERBuffer(ReplayBuffer):
     def update_beta(self, step) -> float:
         """
         Update the beta value which accounts for the bias in the PER
-
         Args:
             step: current global step
-
         Returns:
             beta value for this indexed experience
         """
@@ -243,7 +244,6 @@ class PERBuffer(ReplayBuffer):
     def append(self, exp) -> None:
         """
         Adds experiences from exp_source to the PER buffer
-
         Args:
             exp: experience tuple being added to the buffer
         """
@@ -264,10 +264,8 @@ class PERBuffer(ReplayBuffer):
     def sample(self, batch_size=32) -> Tuple:
         """
         Takes a prioritized sample from the buffer
-
         Args:
             batch_size: size of sample
-
         Returns:
             sample of experiences chosen with ranked probability
         """
@@ -308,7 +306,6 @@ class PERBuffer(ReplayBuffer):
         """
         Update the priorities from the last batch, this should be called after the loss for this batch has been
         calculated.
-
         Args:
             batch_indices: index of each datum in the batch
             batch_priorities: priority of each datum in the batch

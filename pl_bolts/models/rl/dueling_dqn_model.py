@@ -5,7 +5,6 @@ import argparse
 
 import pytorch_lightning as pl
 
-from pl_bolts.models.rl.common import cli
 from pl_bolts.models.rl.common.networks import DuelingCNN
 from pl_bolts.models.rl.dqn_model import DQN
 
@@ -63,7 +62,6 @@ def cli_main():
     parser = pl.Trainer.add_argparse_args(parser)
 
     # model args
-    parser = cli.add_base_args(parser)
     parser = DuelingDQN.add_model_specific_args(parser)
     args = parser.parse_args()
 
