@@ -1,9 +1,16 @@
 import numpy as np
 import torch.nn as nn
 import torch
-from torchvision.ops.boxes import box_area
 from torch import Tensor
-import torchvision
+from warnings import warn
+
+try:
+    import torchvision
+    from torchvision.ops import box_area
+except ImportError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
+
 
 __all__ = ["box_cxcywh_to_xyxy", "box_xyxy_to_cxcywh", "box_iou",
            "generalized_box_iou", "masks_to_boxes", "accuracy", "interpolate"]
