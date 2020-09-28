@@ -244,8 +244,6 @@ class TestMultiStepReplayBuffer(TestCase):
 
         reward_gt = self.experience01.reward + (self.gamma * self.experience02.reward) * (1 - done)
 
-
-
         self.assertEqual(reward, reward_gt)
         self.assertEqual(next_state.all(), self.next_state_02.all())
         self.assertEqual(self.experience02.done, done)
