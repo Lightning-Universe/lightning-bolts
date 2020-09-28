@@ -12,6 +12,6 @@ def test_mnist(tmpdir):
                          limit_test_batches=0.01, default_root_dir=tmpdir)
     trainer.fit(model)
     trainer.test(model)
-    loss = trainer.callback_metrics['loss']
+    loss = trainer.callback_metrics['train_loss']
 
-    assert loss <= 2.5, 'mnist failed'
+    assert loss <= 2.2, 'mnist failed'
