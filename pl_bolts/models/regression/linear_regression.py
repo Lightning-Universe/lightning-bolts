@@ -126,9 +126,10 @@ def cli_main():
     # create dataset
     try:
         from sklearn.datasets import load_boston
-    except ImportError:
-        raise ImportError('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-                          ' install it with `pip install sklearn`.')
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(  # pragma: no-cover
+            'You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`.'
+        )
 
     X, y = load_boston(return_X_y=True)  # these are numpy arrays
     loaders = SklearnDataModule(X, y)

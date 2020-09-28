@@ -9,7 +9,7 @@ from torch import Tensor
 
 try:
     from PIL import Image
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `Pillow` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install Pillow`.')
     _PIL_AVAILABLE = False

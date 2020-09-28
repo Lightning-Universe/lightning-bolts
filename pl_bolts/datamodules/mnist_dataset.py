@@ -3,13 +3,14 @@ from warnings import warn
 try:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import MNIST
-except ImportError:
-    raise ImportError('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-                      ' install it with `pip install torchvision`.')
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(  # pragma: no-cover
+        'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
+    )
 
 try:
     from PIL import Image
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `Pillow` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install Pillow`.')
     _PIL_AVAILABLE = False

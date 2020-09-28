@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 try:
     from PIL import Image
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `Pillow` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install Pillow`.')
     _PIL_AVAILABLE = False
@@ -27,8 +27,9 @@ class RandomTranslateWithReflect:
 
     def __call__(self, old_image):
         if not _PIL_AVAILABLE:
-            raise ImportError('You want to use `Pillow` which is not installed yet,'
-                              ' install it with `pip install Pillow`.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `Pillow` which is not installed yet, install it with `pip install Pillow`.'
+            )
         xtranslation, ytranslation = np.random.randint(-self.max_translation,
                                                        self.max_translation + 1,
                                                        size=2)

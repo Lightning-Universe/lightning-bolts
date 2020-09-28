@@ -13,7 +13,7 @@ try:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import CIFAR10
 
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
     _TORCHVISION_AVAILABLE = False
@@ -84,7 +84,9 @@ class CIFAR10DataModule(LightningDataModule):
         super().__init__(*args, **kwargs)
 
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use CIFAR10 dataset loaded from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use CIFAR10 dataset loaded from `torchvision` which is not installed yet.'
+            )
 
         self.dims = (3, 32, 32)
         self.DATASET = CIFAR10
