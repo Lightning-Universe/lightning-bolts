@@ -40,12 +40,10 @@ class Detr(pl.LightningModule):
 
         super().__init__()
 
-        model = torch.hub.load('facebookresearch/detr', backbone, pretrained=pretrained)
-        in_features = model.class_embed.in_features
-        model.class_embed = nn.Linear(in_features=in_features, out_features=num_classes)
-        model.num_queries = num_queries
-
-        self.model = model
+        self.model = torch.hub.load('facebookresearch/detr', backbone, pretrained=pretrained)
+        in_features = self.model.class_embed.in_features
+        self.model.class_embed = nn.Linear(in_features=in_features, out_features=num_classes)
+        self.model.num_queries = num_queries
         self.learning_rate = learning_rate
 
         matcher = detr_loss.HungarianMatcher()
@@ -58,6 +56,8 @@ class Detr(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         images, targets = batch
+
+        images = list(image for image in images)
         targets = [{k: v for k, v in t.items()} for t in targets]
         outputs = self.model(images)
 

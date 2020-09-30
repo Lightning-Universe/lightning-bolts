@@ -6,7 +6,7 @@ from warnings import warn
 
 try:
     import torchvision
-    from torchvision.ops import box_area
+    from torchvision.ops.boxes import box_area
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
