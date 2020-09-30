@@ -10,9 +10,9 @@ import torch
 from scipy.optimize import linear_sum_assignment
 from torch import nn
 import torch.nn.functional as F
-from detr_utils import nested_tensor_from_tensor_list
 from pl_bolts.models.detection.detr.detr_utils import (box_cxcywh_to_xyxy, box_xyxy_to_cxcywh, box_iou,
-                                                       generalized_box_iou, masks_to_boxes, accuracy, interpolate)
+                                                       generalized_box_iou, masks_to_boxes, accuracy, interpolate,
+                                                       nested_tensor_from_tensor_list,)
 __all__ = ["HungarianMatcher", "build_matcher", "SetCriterion"]
 
 
