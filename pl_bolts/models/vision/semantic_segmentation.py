@@ -50,9 +50,12 @@ class SemSegment(pl.LightningModule):
 
     def training_step(self, batch, batch_nb):
         img, mask = batch
+        print(img.shape)
+        print(mask.shape)
         img = img.float()
         mask = mask.long()
         out = self(img)
+        print('pred:', out.shape)
         loss_val = F.cross_entropy(out, mask, ignore_index=250)
         log_dict = {'train_loss': loss_val}
         return {'loss': loss_val, 'log': log_dict, 'progress_bar': log_dict}
@@ -62,6 +65,10 @@ class SemSegment(pl.LightningModule):
         img = img.float()
         mask = mask.long()
         out = self(img)
+        print(out.shape)
+        print(out[0])
+        print(mask.shape)
+        print(mask[0])
         loss_val = F.cross_entropy(out, mask, ignore_index=250)
         return {'val_loss': loss_val}
 
