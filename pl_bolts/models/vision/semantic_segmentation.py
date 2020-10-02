@@ -1,28 +1,14 @@
 from argparse import ArgumentParser, Namespace
 
+import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-import torchvision.transforms as transforms
 
-import pytorch_lightning as pl
 from pl_examples.models.unet import UNet
 
 
 class SemSegment(pl.LightningModule):
-    """
-    Basic Semantic Segmentation Module.
-    By default it uses a UNet architecture which can easily be substituted.
-    The default loss function is CrossEntropyLoss and it has been specified for the KITTI dataset.
-    The default optimizer is Adam with Cosine Annealing learning rate scheduler.
 
-    Args:
-        data_dir: path to load data from
-        batch_size:
-        lr: learning rate for the optimizer
-        num_layers: number of layers in each side of U-net (default 5)
-        features_start: number of features in first layer (default 64)
-        bilinear: whether to use bilinear interpolation (True) or transposed convolutions (False) for upsampling.
-    """
     def __init__(self,
                  data_dir: str,
                  batch_size: int = 32,
@@ -31,19 +17,34 @@ class SemSegment(pl.LightningModule):
                  num_layers: int = 5,
                  features_start: int = 64,
                  bilinear: bool = False,
-                 **kwargs):
+                 **kwargs
+    ):
+        """
+        Basic Semantic Segmentation Module using a UNet architecture (which can easily be substituted).
+
+        The default parameters in this model are for the KITTI dataset. Note, if you'd like to use this model as is,
+        you will first need to download the KITTI dataset yourself.
+        You can download the dataset here: http://www.cvlibs.net/datasets/kitti/eval_semseg.php?benchmark=semantics2015
+
+        Args:
+            data_dir: path to load data from
+            num_layers: number of layers in each side of U-net (default 5)
+            features_start: number of features in first layer (default 64)
+            bilinear: whether to use bilinear interpolation (True) or transposed convolutions (default) for upsampling.
+            lr: learning rate for the Adam optimizer with a CosineAnnealing scheduler
+        """
         super().__init__()
         self.data_dir = data_dir
-        self.batch_size = batch_size
-        self.lr = lr
         self.num_classes = num_classes
         self.num_layers = num_layers
         self.features_start = features_start
         self.bilinear = bilinear
+        self.lr = lr
 
-        self.net = UNet(num_classes=19, num_layers=self.num_layers,
-                        features_start=self.features_start, bilinear=self.bilinear)
-
+        self.net = UNet(num_classes=num_classes,
+                        num_layers=self.num_layers,
+                        features_start=self.features_start,
+                        bilinear=self.bilinear)
 
     def forward(self, x):
         return self.net(x)
@@ -107,10 +108,9 @@ def cli_main():
     model = SemSegment(**args.__dict__)
 
     # train
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = pl.Trainer(fast_dev_run=True).from_argparse_args(args)
     trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
 
 
 if __name__ == '__main__':
     cli_main()
-
