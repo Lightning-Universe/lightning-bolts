@@ -50,12 +50,9 @@ class SemSegment(pl.LightningModule):
 
     def training_step(self, batch, batch_nb):
         img, mask = batch
-        print(img.shape)
-        print(mask.shape)
         img = img.float()
         mask = mask.long()
         out = self(img)
-        print('pred:', out.shape)
         loss_val = F.cross_entropy(out, mask, ignore_index=250)
         log_dict = {'train_loss': loss_val}
         return {'loss': loss_val, 'log': log_dict, 'progress_bar': log_dict}
@@ -65,10 +62,6 @@ class SemSegment(pl.LightningModule):
         img = img.float()
         mask = mask.long()
         out = self(img)
-        print(out.shape)
-        print(out[0])
-        print(mask.shape)
-        print(mask[0])
         loss_val = F.cross_entropy(out, mask, ignore_index=250)
         return {'val_loss': loss_val}
 
@@ -86,9 +79,9 @@ class SemSegment(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--data_dir", type=str, help="path where dataset is stored")
-        parser.add_argument("--batch_size", type=int, default=1, help="size of the batches")
+        parser.add_argument("--batch_size", type=int, default=16, help="size of the batches")
         parser.add_argument("--lr", type=float, default=0.01, help="adam: learning rate")
-        parser.add_argument("--num_layers", type=int, default=2, help="number of layers on u-net")
+        parser.add_argument("--num_layers", type=int, default=5, help="number of layers on u-net")
         parser.add_argument("--features_start", type=float, default=64, help="number of features in first layer")
         parser.add_argument("--bilinear", action='store_true', default=False,
                             help="whether to use bilinear interpolation or transposed")
@@ -120,3 +113,4 @@ def cli_main():
 
 if __name__ == '__main__':
     cli_main()
+
