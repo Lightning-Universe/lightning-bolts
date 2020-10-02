@@ -25,11 +25,11 @@ class SemSegment(pl.LightningModule):
     """
     def __init__(self,
                  data_dir: str,
-                 batch_size: int,
-                 lr: float,
-                 num_classes: int,
-                 num_layers: int,
-                 features_start: int,
+                 batch_size: int = 32,
+                 lr: float = 0.01,
+                 num_classes: int = 19,
+                 num_layers: int = 5,
+                 features_start: int = 64,
                  bilinear: bool = False,
                  **kwargs):
         super().__init__()
@@ -43,11 +43,7 @@ class SemSegment(pl.LightningModule):
 
         self.net = UNet(num_classes=19, num_layers=self.num_layers,
                         features_start=self.features_start, bilinear=self.bilinear)
-        self.transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.35675976, 0.37380189, 0.3764753],
-                                 std=[0.32064945, 0.32098866, 0.32325324])
-        ])
+
 
     def forward(self, x):
         return self.net(x)
@@ -75,13 +71,13 @@ class SemSegment(pl.LightningModule):
         return {'log': log_dict, 'val_loss': log_dict['val_loss'], 'progress_bar': log_dict}
 
     def configure_optimizers(self):
-        opt = torch.optim.Adam(self.net.parameters(), lr=self.learning_rate)
+        opt = torch.optim.Adam(self.net.parameters(), lr=self.lr)
         sch = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=10)
         return [opt], [sch]
 
     @staticmethod
     def add_model_specific_args(parent_parser):
-        parser = ArgumentParser()
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--data_dir", type=str, help="path where dataset is stored")
         parser.add_argument("--batch_size", type=int, default=4, help="size of the batches")
         parser.add_argument("--lr", type=float, default=0.001, help="adam: learning rate")
@@ -90,27 +86,29 @@ class SemSegment(pl.LightningModule):
         parser.add_argument("--bilinear", action='store_true', default=False,
                             help="whether to use bilinear interpolation or transposed")
 
+        return parser
 
-def cli_main(hparams: Namespace):
 
+def cli_main():
     from pl_bolts.datamodules import KittiDataModule
-    pl.seed_everything(1234)
 
-    # data
-    loaders = KittiDataModule()
+    pl.seed_everything(1234)
 
     # args
     parser = ArgumentParser()
-    parser = SemSegment.add_model_specific_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)
+    parser = SemSegment.add_model_specific_args(parser)
     args = parser.parse_args()
 
+    # data
+    loaders = KittiDataModule(args.data_dir).from_argparse_args(args)
+
     # model
-    model = SemSegment(**vars(hparams))
+    model = SemSegment(**args.__dict__)
 
     # train
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model, loaders.train_dataloader(args.batch_size), loaders.val_dataloader(args.batch_size))
+    trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
 
 
 if __name__ == '__main__':
