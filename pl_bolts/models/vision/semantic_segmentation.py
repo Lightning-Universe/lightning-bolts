@@ -11,7 +11,6 @@ class SemSegment(pl.LightningModule):
 
     def __init__(self,
                  data_dir: str,
-                 batch_size: int = 32,
                  lr: float = 0.01,
                  num_classes: int = 19,
                  num_layers: int = 5,
@@ -80,9 +79,9 @@ class SemSegment(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--data_dir", type=str, help="path where dataset is stored")
-        parser.add_argument("--batch_size", type=int, default=4, help="size of the batches")
-        parser.add_argument("--lr", type=float, default=0.001, help="adam: learning rate")
-        parser.add_argument("--num_layers", type=int, default=5, help="number of layers on u-net")
+        parser.add_argument("--batch_size", type=int, default=1, help="size of the batches")
+        parser.add_argument("--lr", type=float, default=0.01, help="adam: learning rate")
+        parser.add_argument("--num_layers", type=int, default=2, help="number of layers on u-net")
         parser.add_argument("--features_start", type=float, default=64, help="number of features in first layer")
         parser.add_argument("--bilinear", action='store_true', default=False,
                             help="whether to use bilinear interpolation or transposed")
@@ -108,7 +107,7 @@ def cli_main():
     model = SemSegment(**args.__dict__)
 
     # train
-    trainer = pl.Trainer(fast_dev_run=True).from_argparse_args(args)
+    trainer = pl.Trainer().from_argparse_args(args)
     trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
 
 
