@@ -4,24 +4,6 @@ import torch.nn.functional as F
 
 
 class UNet(nn.Module):
-    """
-    PyTorch Lightning implementation of `U-Net: Convolutional Networks for Biomedical Image Segmentation
-    <https://arxiv.org/abs/1505.04597>`_
-
-    Paper authors: Olaf Ronneberger, Philipp Fischer, Thomas Brox
-
-    Model implemented by:
-        - `Annika Brundyn <https://github.com/annikabrundyn>`_
-        - `Akshay Kulkarni <https://github.com/akshaykvnit>`_
-
-    .. warning:: Work in progress. This implementation is still being verified.
-
-    Args:
-        num_classes: Number of output classes required
-        num_layers: Number of layers in each side of U-net (default 5)
-        features_start: Number of features in first layer (default 64)
-        bilinear (bool): Whether to use bilinear interpolation or transposed convolutions (default) for upsampling.
-    """
 
     def __init__(
             self,
@@ -30,6 +12,22 @@ class UNet(nn.Module):
             features_start: int = 64,
             bilinear: bool = False
     ):
+        """
+        PyTorch Lightning implementation of `U-Net: Convolutional Networks for Biomedical Image Segmentation
+        <https://arxiv.org/abs/1505.04597>`_
+
+        Paper authors: Olaf Ronneberger, Philipp Fischer, Thomas Brox
+
+        Model implemented by:
+            - `Annika Brundyn <https://github.com/annikabrundyn>`_
+            - `Akshay Kulkarni <https://github.com/akshaykvnit>`_
+
+        Args:
+            num_classes: Number of output classes required
+            num_layers: Number of layers in each side of U-net (default 5)
+            features_start: Number of features in first layer (default 64)
+            bilinear (bool): Whether to use bilinear interpolation or transposed convolutions (default) for upsampling.
+        """
         super().__init__()
         self.num_layers = num_layers
 

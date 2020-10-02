@@ -25,6 +25,9 @@ class SemSegment(pl.LightningModule):
         you will first need to download the KITTI dataset yourself.
         You can download the dataset here: http://www.cvlibs.net/datasets/kitti/eval_semseg.php?benchmark=semantics2015
 
+        Model implemented by:
+            - `Annika Brundyn <https://github.com/annikabrundyn>`_
+
         Args:
             data_dir: path to load data from
             num_layers: number of layers in each side of U-net (default 5)
