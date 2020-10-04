@@ -168,10 +168,10 @@ class CPCV2(pl.LightningModule):
     def shared_step(self, batch):
         try:
             from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
-        except ModuleNotFoundError:
+        except ModuleNotFoundError as err:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
-            )
+            ) from err
 
         if isinstance(self.datamodule, STL10DataModule):
             unlabeled_batch = batch[0]
