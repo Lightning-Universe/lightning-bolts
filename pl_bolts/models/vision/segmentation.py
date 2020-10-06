@@ -16,7 +16,6 @@ class SemSegment(pl.LightningModule):
                  num_layers: int = 5,
                  features_start: int = 64,
                  bilinear: bool = False,
-                 network: str = 'unet',
                  **kwargs
                  ):
         """
