@@ -18,7 +18,7 @@ class SemSegment(pl.LightningModule):
                  bilinear: bool = False,
                  network: str = 'unet',
                  **kwargs
-    ):
+                 ):
         """
         Basic model for semantic segmentation. Uses UNet architecture by default.
 
