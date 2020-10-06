@@ -34,3 +34,14 @@ UNet
 
 .. autoclass:: pl_bolts.models.vision.unet.UNet
     :noindex:
+
+-------------
+
+Semantic Segmentation
+---------------------
+Model template to use for semantic segmentation tasks. The model uses a UNet architecture by default. Override any part
+of this model to build your own variation.
+
+
+.. autoclass:: pl_bolts.models.vision.segmentation.SemSegment
+    :noindex:
