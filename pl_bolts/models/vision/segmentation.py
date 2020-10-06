@@ -10,33 +10,49 @@ from pl_examples.models.unet import UNet
 class SemSegment(pl.LightningModule):
 
     def __init__(self,
-                 data_dir: str,
+                 datamodule: pl.LightningDataModule = None,
                  lr: float = 0.01,
                  num_classes: int = 19,
                  num_layers: int = 5,
                  features_start: int = 64,
                  bilinear: bool = False,
+                 network: str = 'unet',
                  **kwargs
     ):
         """
-        Basic Semantic Segmentation Module using a UNet architecture (which can easily be substituted).
+        Basic model for semantic segmentation. Uses UNet architecture by default.
 
         The default parameters in this model are for the KITTI dataset. Note, if you'd like to use this model as is,
-        you will first need to download the KITTI dataset yourself.
-        You can download the dataset here: http://www.cvlibs.net/datasets/kitti/eval_semseg.php?benchmark=semantics2015
+        you will first need to download the KITTI dataset yourself. You can download the dataset `here.
+        <http://www.cvlibs.net/datasets/kitti/eval_semseg.php?benchmark=semantics2015>`_
 
-        Model implemented by:
+        Implemented by:
+
             - `Annika Brundyn <https://github.com/annikabrundyn>`_
 
+        Example::
+
+            >>> from pl_bolts.models.vision import SemSegment
+            >>> from pl_bolts.datamodules import KittiDataModule
+            >>> import pytorch_lightning as pl
+            ...
+            >>> dm = KittiDataModule('path/to/kitt/dataset/', batch_size=4)
+            >>> model = SemSegment(datamodule=dm)
+            >>> trainer = pl.Trainer()
+            >>> trainer.fit(model)
+
         Args:
-            data_dir: path to load data from
+            datamodule: LightningDataModule
             num_layers: number of layers in each side of U-net (default 5)
             features_start: number of features in first layer (default 64)
             bilinear: whether to use bilinear interpolation (True) or transposed convolutions (default) for upsampling.
-            lr: learning rate for the Adam optimizer with a CosineAnnealing scheduler
+            lr: learning (default 0.01)
         """
         super().__init__()
-        self.data_dir = data_dir
+
+        assert datamodule
+        self.datamodule = datamodule
+
         self.num_classes = num_classes
         self.num_layers = num_layers
         self.features_start = features_start
@@ -81,7 +97,6 @@ class SemSegment(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument("--data_dir", type=str, help="path where dataset is stored")
         parser.add_argument("--batch_size", type=int, default=16, help="size of the batches")
         parser.add_argument("--lr", type=float, default=0.01, help="adam: learning rate")
         parser.add_argument("--num_layers", type=int, default=5, help="number of layers on u-net")
@@ -97,21 +112,24 @@ def cli_main():
 
     pl.seed_everything(1234)
 
-    # args
     parser = ArgumentParser()
+
+    # trainer args
     parser = pl.Trainer.add_argparse_args(parser)
+
+    # model args
     parser = SemSegment.add_model_specific_args(parser)
     args = parser.parse_args()
 
     # data
-    loaders = KittiDataModule(args.data_dir).from_argparse_args(args)
+    dm = KittiDataModule(args.data_dir).from_argparse_args(args)
 
     # model
-    model = SemSegment(**args.__dict__)
+    model = SemSegment(**args.__dict__, datamodule=dm)
 
     # train
     trainer = pl.Trainer().from_argparse_args(args)
-    trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
+    trainer.fit(model)
 
 
 if __name__ == '__main__':
