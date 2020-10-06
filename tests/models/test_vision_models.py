@@ -70,3 +70,4 @@ def test_semantic_segmentation(tmpdir):
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) > 0
+
