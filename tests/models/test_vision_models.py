@@ -5,6 +5,7 @@ from pl_bolts.datamodules import MNISTDataModule, FashionMNISTDataModule, DummyD
 from pl_bolts.models import GPT2, ImageGPT, UNet, SemSegment
 from torch.utils.data import DataLoader
 
+
 def test_igpt(tmpdir):
     pl.seed_everything(0)
     dm = MNISTDataModule(tmpdir, normalize=False)
