@@ -26,3 +26,11 @@ Pixel CNN
 
 .. autoclass:: pl_bolts.models.vision.pixel_cnn.PixelCNN
     :noindex:
+
+-------------
+
+UNet
+----
+
+.. autoclass:: pl_bolts.models.vision.unet.UNet
+    :noindex:

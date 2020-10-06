@@ -13,12 +13,13 @@ class UNet(nn.Module):
             bilinear: bool = False
     ):
         """
-        PyTorch Lightning implementation of `U-Net: Convolutional Networks for Biomedical Image Segmentation
+        Paper: `U-Net: Convolutional Networks for Biomedical Image Segmentation
         <https://arxiv.org/abs/1505.04597>`_
 
         Paper authors: Olaf Ronneberger, Philipp Fischer, Thomas Brox
 
-        Model implemented by:
+        Implemented by:
+
             - `Annika Brundyn <https://github.com/annikabrundyn>`_
             - `Akshay Kulkarni <https://github.com/akshaykvnit>`_
 
