@@ -8,5 +8,4 @@ flake8-black
 check-manifest
 twine==1.13.0
 
-# atari-py==0.2.6  # needed for RL
-# gym>=0.17.2  # needed for RL
+atari-py==0.2.6  # needed for RL

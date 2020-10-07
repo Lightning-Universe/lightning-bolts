@@ -87,6 +87,9 @@ class CIFAR10(LightDataset):
         self.train = train  # training set or test set
         self.transform = transform
 
+        if not _PIL_AVAILABLE:
+            raise ImportError('You want to use PIL.Image for loading but it is not installed yet.')
+
         os.makedirs(self.cached_folder_path, exist_ok=True)
         self.prepare_data(download)
 
