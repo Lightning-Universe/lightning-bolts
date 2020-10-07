@@ -10,7 +10,7 @@ Bolts is a Deep learning research and production toolbox of:
 - Losses.
 - Datasets.
 
-**The Main goal of bolts is to enable trying new ideas as fast as possible!**
+**The Main goal of Bolts is to enable trying new ideas as fast as possible!**
 
 All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, GPUs and 16-bit precision.
 
@@ -25,7 +25,7 @@ All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, G
     from pl_bolts.callbacks import PrintTableMetricsCallback
     from pl_bolts.datamodules import FashionMNISTDataModule, CIFAR10DataModule, ImagenetDataModule
 
-**Bolts is built for rapid idea iteration - subclass, override and train!**
+**Bolts are built for rapid idea iteration - subclass, override and train!**
 
 .. code-block:: python
 
@@ -90,7 +90,7 @@ All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, G
 
 Community Built
 ---------------
-Then lightning community builds and contributes bolts.
+Then lightning community builds bolts and contributes them to Bolts.
 The lightning team guarantees that contributions are:
 
 1. Rigorously tested (CPUs, GPUs, TPUs).
@@ -318,7 +318,7 @@ around to guarantee:
     )
 
 
-But when paired with PyTorch LightningModules (all Bolts models), you can plug and play
+But when paired with PyTorch LightningModules (all bolts models), you can plug and play
 full dataset definitions with the same splits, transforms, etc...
 
 
