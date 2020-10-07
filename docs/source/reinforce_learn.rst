@@ -29,8 +29,8 @@ Contributions by: `Donal Byrne <https://github.com/djbyrne>`_
 DQN Models
 ----------
 
-The following models are based on DQN. DQN uses Value based learning where it is deciding what action to take based
-on the models current learned value (V), or the state action value (Q) of the current state. These Values are defined
+The following models are based on DQN. DQN uses value based learning where it is deciding what action to take based
+on the model's current learned value (V), or the state action value (Q) of the current state. These values are defined
 as the discounted total reward of the agents state or state action pair.
 
 ---------------
@@ -47,12 +47,12 @@ The DQN was introduced in `Playing Atari with Deep Reinforcement Learning <https
 researchers at DeepMind. This took the concept of tabular Q learning and scaled it to much larger problems by
 apporximating the Q function using a deep neural network.
 
-The goal behind DQN was to take the simple control method of Q learning and scale it up in order to solve complicated
- tasks. As well as this, the method needed to be stable. The DQN solves these issues with the following additions.
+The goal behind DQN was to take the simple control method of Q learning and scale it up in order to solve complicated \
+tasks. As well as this, the method needed to be stable. The DQN solves these issues with the following additions.
 
 **Approximated Q Function**
 
-Storing Q values in a table works well in theory, but is completely unscalable. Instead, the authors apporximate the
+Storing Q values in a table works well in theory, but is completely unscalable. Instead, the authors approximate the
 Q function using a deep neural network. This allows the DQN to be used for much more complicated tasks
 
 **Replay Buffer**
@@ -173,7 +173,7 @@ value as the 'base reward' from being in state s.
 The advantage tells us how much 'extra' reward we get from taking action a while in state s. The advantage bridges the
 gap between Q(s, a) and V(s) as Q(s, a) = V(s) + A(s, a).
 
-In the paper [Dueling Network Architectures for Deep Reinforcement Learning](https://arxiv.org/abs/1511.06581) the
+In the paper `Dueling Network Architectures for Deep Reinforcement Learning <https://arxiv.org/abs/1511.06581>` the
 network uses two heads, one outputs the value state and the other outputs the advantage. This leads to better
 training stability, faster convergence and overall better results. The V head outputs a single scalar
 (the state value), while the advantage head outputs a tensor equal to the size of the action space, containing
@@ -189,14 +189,14 @@ by subtracting the mean advantage from the Q value. This essentially pulls the m
 Dueling DQN Benefits
 ~~~~~~~~~~~~~~~~~~~~
 
-- Ability to efficiently learn the state value function. In the dueling network, every Q update also updates the Value
-    stream, where as in DQN only the value of the chosen action is updated. This provides a better approximation of the
-    values
+- Ability to efficiently learn the state value function. In the dueling network, every Q update also updates the value 
+  stream, where as in DQN only the value of the chosen action is updated. This provides a better approximation of the
+  values
 - The differences between total Q values for a given state are quite small in relation to the magnitude of Q. The
-    difference in the Q values between the best action and the second best action can be very small, while the average
-    state value can be much larger. The differences in scale can introduce noise, which may lead to the greedy policy
-    switching the priority of these actions. The seperate estimators for state value and advantage makes the Dueling
-    DQN robust to this type of scenario
+  difference in the Q values between the best action and the second best action can be very small, while the average
+  state value can be much larger. The differences in scale can introduce noise, which may lead to the greedy policy
+  switching the priority of these actions. The seperate estimators for state value and advantage makes the Dueling
+  DQN robust to this type of scenario
 
 Dueling DQN Results
 ~~~~~~~~~~~~~~~~~~~
@@ -255,11 +255,11 @@ Vlad Mnih, Remi Munos, Demis Hassabis, Olivier Pietquin, Charles Blundell, Shane
 Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 Up until now the DQN agent uses a seperate exploration policy, generally epsilon-greedy where start and end values
-are set for its exploration. [Noisy Networks For Exploration](https://arxiv.org/abs/1706.10295) introduces
-a new exploration strategy by adding noise parameters to the weightsof the fully connect layers which get updated
+are set for its exploration. `Noisy Networks For Exploration <https://arxiv.org/abs/1706.10295>` introduces
+a new exploration strategy by adding noise parameters to the weights of the fully connect layers which get updated
 during backpropagation of the network. The noise parameters drive
 the exploration of the network instead of simply taking random actions more frequently at the start of training and
-less frequently towards the end.The of authors of
+less frequently towards the end. The of authors of
 propose two ways of doing this.
 
 During the optimization step a new set of noisy parameters are sampled. During training the agent acts according to
@@ -270,23 +270,23 @@ distribution.
 The authors propose two methods of injecting noise to the network.
 
 1) Independent Gaussian Noise: This injects noise per weight. For each weight a random value is taken from
-    the distribution. Noise parameters are stored inside the layer and are updated during backpropagation.
-    The output of the layer is calculated as normal.
+   the distribution. Noise parameters are stored inside the layer and are updated during backpropagation.
+   The output of the layer is calculated as normal.
 2) Factorized Gaussian Noise: This injects nosier per input/ouput. In order to minimize the number of random values
-    this method stores two random vectors, one with the size of the input and the other with the size of the output.
-    Using these two vectors, a random matrix is generated for the layer by calculating the outer products of the vector
+   this method stores two random vectors, one with the size of the input and the other with the size of the output.
+   Using these two vectors, a random matrix is generated for the layer by calculating the outer products of the vector
 
 
 Noisy DQN Benefits
 ~~~~~~~~~~~~~~~~~~
 
 - Improved exploration function. Instead of just performing completely random actions, we add decreasing amount of noise
-    and uncertainty to our policy allowing to explore while still utilising its policy
+  and uncertainty to our policy allowing to explore while still utilising its policy.
 - The fact that this method is automatically tuned means that we do not have to tune hyper parameters for
-    epsilon-greedy!
+  epsilon-greedy!
 
 .. note::
-    for now I have just implemented the Independant Gaussian as it has been reported there isn't much difference
+    For now I have just implemented the Independant Gaussian as it has been reported there isn't much difference
     in results for these benchmark environments.
 
 In order to update the basic DQN to a Noisy DQN we need to do the following
@@ -349,8 +349,8 @@ pair using a single step which looks like this
 
     Q(s_t,a_t)=r_t+{\gamma}\max_aQ(s_{t+1},a_{t+1})
 
-but because the Q function is recursive we can continue to roll this out into multiple steps, looking at the expected
- return for each step into the future.
+but because the Q function is recursive we can continue to roll this out into multiple steps, looking at the expected 
+return for each step into the future.
 
 .. math::
 
@@ -373,14 +373,14 @@ method like DQN with a large replay buffer will make this even worse, as there i
 training on experiences using an old policy that was worse than our current policy.
 
 So we need to strike a balance between looking far enough ahead to improve the convergence of our agent, but not so far
- that are updates become unstable. In general, small values of 2-4 work best.
+that are updates become unstable. In general, small values of 2-4 work best.
 
 N-Step Benefits
 ~~~~~~~~~~~~~~~
 
 - Multi-Step learning is capable of learning faster than typical 1 step learning methods.
 - Note that this method introduces a new hyperparameter n. Although n=4 is generally a good starting point and provides
-    good results across the board.
+  good results across the board.
 
 N-Step Results
 ~~~~~~~~~~~~~~
@@ -464,7 +464,7 @@ PER Benefits
 ~~~~~~~~~~~~
 
 - The benefits of this technique are that the agent sees more samples that it struggled with and gets more
-    chances to improve upon it.
+  chances to improve upon it.
 
 **Memory Buffer**
 
@@ -500,10 +500,10 @@ on an optimal policy faster.
 **DQN vs PER DQN: Pong**
 
 In comparison to the base DQN, the PER DQN does show improved stability and performance. As expected, the loss
- of the PER DQN is siginificantly lower. This is the main objective of PER by focusing on experiences with high loss.
+of the PER DQN is siginificantly lower. This is the main objective of PER by focusing on experiences with high loss.
 
 It is important to note that loss is not the only metric we should be looking at. Although the agent may have very
- low loss during training, it may still perform poorly due to lack of exploration.
+low loss during training, it may still perform poorly due to lack of exploration.
 
 .. image:: _images/rl_benchmark/pong_per_dqn_baseline_v1_results_comp.jpg
   :width: 800
@@ -535,7 +535,7 @@ suggested by our policy gradient in order to find a policy that produces the hig
 Policy Gradient Key Points:
     - Outputs a distribution of actions instead of discrete Q values
     - Optimizes the policy directly, instead of indirectly through the optimization of Q values
-    - The policy distribution of actions allows the model to handle more complex action spaces, such as continuos actions
+    - The policy distribution of actions allows the model to handle more complex action spaces, such as continuous actions
     - The policy distribution introduces stochasticity, providing natural exploration to the model
     - The policy distribution provides a more stable update as a change in weights will only change the total distribution
       slightly, as opposed to changing weights based on the Q value of state S will change all Q values with similar states.
@@ -570,9 +570,8 @@ algorithm is as follows:
 .. math::
 
     L =  - \sum_{k,t} Q_{k,t} \log(\pi(S_{k,t}, A_{k,t}))
-
+    
 5. Perform SGD on the loss and repeat.
-
 
 What this loss function is saying is simply that we want to take the log probability of action A at state S given
 our policy (network output). This is then scaled by the discounted reward that we calculated in the previous step.
@@ -580,7 +579,7 @@ We then take the negative of our sum. This is because the loss is minimized duri
 maximize our policy.
 
 .. note::
-    the current implementation does not actually wait for the batch episodes the complete every time as we pass in a
+    The current implementation does not actually wait for the batch episodes the complete every time as we pass in a
     fixed batch size. For the time being we simply use a large batch size to accomodate this. This approach still works
     well for simple tasks as it still manages to get an accurate Q value by using a large batch size, but it is not
     as accurate or completely correct. This will be updated in a later version.

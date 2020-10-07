@@ -15,7 +15,7 @@ by adding your contribution to bolts you get these **additional** benefits!
     6. We'll pretrain expensive models for you and host weights.
     7. We will improve the speed of your models!
     8. Eligible for invited talks to discuss your implementation.
-    9. Lightning Swag + involvement in the broader contributor community :)
+    9. Lightning swag + involvement in the broader contributor community :)
 
 .. note:: You still get to keep your attribution and be recognized for your work!
 
@@ -98,7 +98,7 @@ We request that each contribution have:
     - Your name and your team's name as the implementation authors.
     - Your team's affiliation
     - Any generated examples, or result plots.
-    - Hyperparameters configurations for the results.
+    - Hyperparameter configurations for the results.
 
 Thank you for all your amazing contributions!
 

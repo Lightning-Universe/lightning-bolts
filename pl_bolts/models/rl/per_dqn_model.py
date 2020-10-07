@@ -54,8 +54,7 @@ class PERDQN(DQN):
 
         .. note::
             This example is based on:
-             https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\
-             /blob/master/Chapter08/05_dqn_prio_replay.py
+             https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter08/05_dqn_prio_replay.py
 
         .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
 
