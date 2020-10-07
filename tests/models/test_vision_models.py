@@ -6,6 +6,7 @@ from pl_bolts.models import GPT2, ImageGPT, UNet, SemSegment
 from torch.utils.data import DataLoader
 
 
+
 def test_igpt(tmpdir):
     pl.seed_everything(0)
     dm = MNISTDataModule(tmpdir, normalize=False)
@@ -55,6 +56,7 @@ def test_unet(tmpdir):
     model = UNet(num_classes=2)
     y = model(x)
     assert y.shape == torch.Size([10, 2, 28, 28])
+<<<<<<< HEAD
 
 
 def test_semantic_segmentation(tmpdir):
@@ -73,3 +75,5 @@ def test_semantic_segmentation(tmpdir):
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) > 0
+=======
+>>>>>>> c3e11f1520100076e1418a35149f62dcf28adf49
