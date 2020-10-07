@@ -9,7 +9,7 @@ half-precision training.
 Linear Regression
 -----------------
 Linear regression fits a linear model between a real-valued target variable :math:`y` and one or more features :math:`X`. We
-estimate the regression coefficients that minimizes the mean squared error between the predicted and true target
+estimate the regression coefficients that minimize the mean squared error between the predicted and true target
 values.
 
 We formulate the linear regression model as a single-layer neural network. By default we include only one neuron in
@@ -69,7 +69,7 @@ Add either L1 or L2 regularization, or both, by specifying the regularization st
 
     trainer.test(test_dataloaders=dm.test_dataloader(batch_size=12))
 
-Any input will be flattened across all dimensions except the firs one (batch).
+Any input will be flattened across all dimensions except the first one (batch).
 This means images, sound, etc... work out of the box.
 
 .. code-block:: python
