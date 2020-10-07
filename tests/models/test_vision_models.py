@@ -57,6 +57,9 @@ def test_unet(tmpdir):
     y = model(x)
     assert y.shape == torch.Size([10, 2, 28, 28])
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2a7c1d688a2bdbc9fe8fb001bdde82b099a19ae6
 
 
 def test_semantic_segmentation(tmpdir):
@@ -75,5 +78,8 @@ def test_semantic_segmentation(tmpdir):
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) > 0
+<<<<<<< HEAD
 =======
 >>>>>>> c3e11f1520100076e1418a35149f62dcf28adf49
+=======
+>>>>>>> 2a7c1d688a2bdbc9fe8fb001bdde82b099a19ae6
