@@ -8,16 +8,15 @@ from pl_bolts.models.vision.unet import UNet
 
 
 class SemSegment(pl.LightningModule):
-
-    def __init__(self,
-                 datamodule: pl.LightningDataModule = None,
-                 lr: float = 0.01,
-                 num_classes: int = 19,
-                 num_layers: int = 5,
-                 features_start: int = 64,
-                 bilinear: bool = False,
-                 **kwargs
-                 ):
+    def __init__(
+            self,
+            datamodule: pl.LightningDataModule = None,
+            lr: float = 0.01,
+            num_classes: int = 19,
+            num_layers: int = 5,
+            features_start: int = 64,
+            bilinear: bool = False
+    ):
         """
         Basic model for semantic segmentation. Uses UNet architecture by default.
 
@@ -28,17 +27,6 @@ class SemSegment(pl.LightningModule):
         Implemented by:
 
             - `Annika Brundyn <https://github.com/annikabrundyn>`_
-
-        Example::
-
-            >>> from pl_bolts.models.vision import SemSegment
-            >>> from pl_bolts.datamodules import KittiDataModule
-            >>> import pytorch_lightning as pl
-            ...
-            >>> dm = KittiDataModule('path/to/kitt/dataset/', batch_size=4)
-            >>> model = SemSegment(datamodule=dm)
-            >>> trainer = pl.Trainer()
-            >>> trainer.fit(model)
 
         Args:
             datamodule: LightningDataModule
