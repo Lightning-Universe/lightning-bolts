@@ -70,7 +70,7 @@ class SSLFineTuner(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         loss, acc = self.shared_step(batch)
         self.log_dict({'test_acc': acc, 'test_loss': loss})
-        return result
+        return loss
 
     def shared_step(self, batch):
         x, y = batch
