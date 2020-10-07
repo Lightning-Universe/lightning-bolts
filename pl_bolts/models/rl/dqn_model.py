@@ -92,8 +92,7 @@ class DQN(pl.LightningModule):
 
         Note:
             This example is based on:
-            https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\
-            /blob/master/Chapter06/02_dqn_pong.py
+            https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter06/02_dqn_pong.py
 
         Note:
             Currently only supports CPU and single GPU training with `distributed_backend=dp`

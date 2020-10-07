@@ -29,7 +29,7 @@ class BYOL(pl.LightningModule):
         PyTorch Lightning implementation of `Bootstrap Your Own Latent (BYOL)
         <https://arxiv.org/pdf/2006.07733.pdf>`_
 
-        Paper authors: Jean-Bastien Grill ,Florian Strub, Florent Altché, Corentin Tallec, Pierre H. Richemond, \
+        Paper authors: Jean-Bastien Grill, Florian Strub, Florent Altché, Corentin Tallec, Pierre H. Richemond, \
         Elena Buchatskaya, Carl Doersch, Bernardo Avila Pires, Zhaohan Daniel Guo, Mohammad Gheshlaghi Azar, \
         Bilal Piot, Koray Kavukcuoglu, Rémi Munos, Michal Valko.
 
