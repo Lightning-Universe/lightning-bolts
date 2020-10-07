@@ -160,18 +160,16 @@ class CPCV2(pl.LightningModule):
         nce_loss = self.shared_step(batch)
 
         # result
-        result = pl.TrainResult(nce_loss)
-        result.log('train_nce_loss', nce_loss)
-        return result
+        self.log('train_nce_loss', nce_loss)
+        return nce_loss
 
     def validation_step(self, batch, batch_nb):
         # calculate loss
         nce_loss = self.shared_step(batch)
 
         # result
-        result = pl.EvalResult(checkpoint_on=nce_loss)
-        result.log('val_nce', nce_loss, prog_bar=True)
-        return result
+        self.log('val_nce', nce_loss, prog_bar=True)
+        return nce_loss
 
     def shared_step(self, batch):
         try:

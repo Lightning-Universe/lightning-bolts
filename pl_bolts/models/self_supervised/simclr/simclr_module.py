@@ -157,16 +157,14 @@ class SimCLR(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         loss = self.shared_step(batch, batch_idx)
 
-        result = pl.TrainResult(minimize=loss)
-        result.log('train_loss', loss, on_epoch=True)
-        return result
+        self.log('train_loss', loss, on_epoch=True)
+        return loss
 
     def validation_step(self, batch, batch_idx):
         loss = self.shared_step(batch, batch_idx)
 
-        result = pl.EvalResult(checkpoint_on=loss)
-        result.log('avg_val_loss', loss)
-        return result
+        self.log('avg_val_loss', loss)
+        return loss
 
     def shared_step(self, batch, batch_idx):
         (img1, img2), y = batch
