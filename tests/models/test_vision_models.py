@@ -4,6 +4,7 @@ import torch
 from pl_bolts.datamodules import MNISTDataModule, FashionMNISTDataModule
 from pl_bolts.models import GPT2, ImageGPT, UNet
 
+
 def test_igpt(tmpdir):
     pl.seed_everything(0)
     dm = MNISTDataModule(tmpdir, normalize=False)
@@ -53,4 +54,3 @@ def test_unet(tmpdir):
     model = UNet(num_classes=2)
     y = model(x)
     assert y.shape == torch.Size([10, 2, 28, 28])
-
