@@ -35,7 +35,7 @@ class CPCV2(pl.LightningModule):
     def __init__(
             self,
             datamodule: pl.LightningDataModule = None,
-            encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'cpc_encoder',
+            encoder_name: str = 'cpc_encoder',
             patch_size: int = 8,
             patch_overlap: int = 4,
             online_ft: int = True,
@@ -50,7 +50,7 @@ class CPCV2(pl.LightningModule):
         """
         Args:
             datamodule: A Datamodule (optional). Otherwise set the dataloaders directly
-            encoder: A string for any of the resnets in torchvision, or the original CPC encoder,
+            encoder_name: A string for any of the resnets in torchvision, or the original CPC encoder,
                 or a custon nn.Module encoder
             patch_size: How big to make the image patches
             patch_overlap: How much overlap should each patch have.
@@ -66,28 +66,20 @@ class CPCV2(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
+        # HACK - datamodule not pickleable so we remove it from hparams.
+        # TODO - remove datamodule from init. data should be decoupled from models.
+        del self.hparams['datamodule']
+
         self.online_evaluator = self.hparams.online_ft
 
         if pretrained:
             self.hparams.dataset = pretrained
             self.online_evaluator = True
 
-        # link data
-        # if datamodule is None:
-        #     datamodule = CIFAR10DataModule(
-        #         self.hparams.data_dir,
-        #         num_workers=self.hparams.num_workers,
-        #         batch_size=batch_size
-        #     )
-        #     datamodule.train_transforms = CPCTrainTransformsCIFAR10()
-        #     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
         assert datamodule
         self.datamodule = datamodule
 
-        # init encoder
-        self.encoder = encoder
-        if isinstance(encoder, str):
-            self.encoder = self.init_encoder()
+        self.encoder = self.init_encoder()
 
         # info nce loss
         c, h = self.__compute_final_nb_c(self.hparams.patch_size)
@@ -97,20 +89,22 @@ class CPCV2(pl.LightningModule):
         self.num_classes = self.datamodule.num_classes
 
         if pretrained:
-            self.load_pretrained(encoder)
+            self.load_pretrained(self.hparams.encoder_name)
 
-    def load_pretrained(self, encoder):
+        print(self.hparams)
+
+    def load_pretrained(self, encoder_name):
         available_weights = {'resnet18'}
 
-        if encoder in available_weights:
-            load_pretrained(self, f'CPCV2-{encoder}')
-        elif available_weights not in available_weights:
-            rank_zero_warn(f'{encoder} not yet available')
+        if encoder_name in available_weights:
+            load_pretrained(self, f'CPCV2-{encoder_name}')
+        elif encoder_name not in available_weights:
+            rank_zero_warn(f'{encoder_name} not yet available')
 
     def init_encoder(self):
         dummy_batch = torch.zeros((2, 3, self.hparams.patch_size, self.hparams.patch_size))
 
-        encoder_name = self.hparams.encoder
+        encoder_name = self.hparams.encoder_name
         if encoder_name == 'cpc_encoder':
             return cpc_resnet101(dummy_batch)
         else:
