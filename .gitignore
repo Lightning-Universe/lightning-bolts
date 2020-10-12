@@ -138,7 +138,6 @@ MNIST
 
 # Lightning logs
 lightning_logs
-datasets
 *.gz
 *-batches-py
 simclr.py

@@ -53,5 +53,5 @@ else:
         'metrics',
         'callbacks',
         'datamodules',
-        'datasets'
+        'datasets',
     ]
