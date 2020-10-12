@@ -53,8 +53,14 @@ PyTorch-Lightning-Bolts documentation
    :caption: Models
 
    models_howto
-   autoencoders
    classic_ml
+
+.. toctree::
+   :maxdepth: 2
+   :name: vision
+   :caption: Vision models
+
+   autoencoders
    convolutional
    gans
    self_supervised_models

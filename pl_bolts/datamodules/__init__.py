@@ -1,5 +1,4 @@
 from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
-from pl_bolts.datamodules.dummy_dataset import DummyDataset, DummyDetectionDataset
 
 try:
     from pl_bolts.datamodules.binary_mnist_datamodule import BinaryMNISTDataModule
