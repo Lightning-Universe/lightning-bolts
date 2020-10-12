@@ -11,11 +11,3 @@ Example::
 
 .. autoclass:: pl_bolts.datamodules.async_dataloader.AsynchronousLoader
    :noindex:
-
-------------------
-
-DummyDataset
-------------
-
-.. autoclass:: pl_bolts.datamodules.dummy_dataset.DummyDataset
-   :noindex:

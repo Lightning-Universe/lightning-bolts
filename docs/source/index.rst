@@ -35,6 +35,13 @@ PyTorch-Lightning-Bolts documentation
 
 .. toctree::
    :maxdepth: 2
+   :name: datasets
+   :caption: Datasets
+
+   datasets
+
+.. toctree::
+   :maxdepth: 2
    :name: dataloaders
    :caption: DataLoaders
 
@@ -96,6 +103,7 @@ Indices and tables
    readme
    api/pl_bolts.callbacks
    api/pl_bolts.datamodules
+   api/pl_bolts.datasets
    api/pl_bolts.metrics
    api/pl_bolts.models
    api/pl_bolts.callbacks
