@@ -27,7 +27,7 @@ jobs:
             os: windows-2019
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
-    timeout-minutes: 35
+    timeout-minutes: 45
 
     steps:
     - uses: actions/checkout@v2
@@ -45,7 +45,7 @@ jobs:
     - name: Set min. dependencies
       if: matrix.requires == 'minimal'
       run: |
-        python -c "fpath = 'requirements/base.txt' ; req = open(fpath).read().replace('>=', '==') ; open(fpath, 'w').write(req)"
+        python -c "fpath = 'requirements.txt' ; req = open(fpath).read().replace('>=', '==') ; open(fpath, 'w').write(req)"
         python -c "fpath = 'requirements/models.txt' ; req = open(fpath).read().replace('>=', '==') ; open(fpath, 'w').write(req)"
         python -c "fpath = 'requirements/loggers.txt' ; req = open(fpath).read().replace('>=', '==') ; open(fpath, 'w').write(req)"
         python -c "fpath = 'requirements/test.txt' ; req = open(fpath).read().replace('>=', '==') ; open(fpath, 'w').write(req)"
@@ -61,7 +61,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ steps.pip-cache.outputs.dir }}
-        key: ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-${{ hashFiles('requirements/base.txt') }}-${{ hashFiles('requirements/modules.txt') }}
+        key: ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements/modules.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-
 

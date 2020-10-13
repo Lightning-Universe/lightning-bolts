@@ -136,18 +136,16 @@ class GAN(pl.LightningModule):
 
         # log to prog bar on each step AND for the full epoch
         # use the generator loss for checkpointing
-        result = pl.TrainResult(minimize=g_loss, checkpoint_on=g_loss)
-        result.log('g_loss', g_loss, on_epoch=True, prog_bar=True)
-        return result
+        self.log('g_loss', g_loss, on_epoch=True, prog_bar=True)
+        return g_loss
 
     def discriminator_step(self, x):
         # Measure discriminator's ability to classify real from generated samples
         d_loss = self.discriminator_loss(x)
 
         # log to prog bar on each step AND for the full epoch
-        result = pl.TrainResult(minimize=d_loss)
-        result.log('d_loss', d_loss, on_epoch=True, prog_bar=True)
-        return result
+        self.log('d_loss', d_loss, on_epoch=True, prog_bar=True)
+        return d_loss
 
     def configure_optimizers(self):
         lr = self.hparams.learning_rate

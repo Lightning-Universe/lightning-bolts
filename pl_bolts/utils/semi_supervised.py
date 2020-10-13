@@ -6,7 +6,7 @@ import torch
 
 try:
     from sklearn.utils import shuffle as sk_shuffle
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install sklearn`.')
 

@@ -4,7 +4,7 @@ import torch.nn as nn
 
 try:
     from torchvision.models.utils import load_state_dict_from_url
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
 

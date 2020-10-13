@@ -4,7 +4,7 @@ from pl_bolts.transforms.self_supervised import RandomTranslateWithReflect
 
 try:
     from torchvision import transforms
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
     _TORCHVISION_AVAILABLE = False
@@ -34,7 +34,9 @@ class AMDIMTrainTransformsCIFAR10:
 
         """
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         # flipping image along vertical axis
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
@@ -79,7 +81,9 @@ class AMDIMEvalTransformsCIFAR10:
             (view1, view2) = transform(x)
         """
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         # flipping image along vertical axis
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
@@ -119,7 +123,9 @@ class AMDIMTrainTransformsSTL10:
             (view1, view2) = transform(x)
         """
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         # flipping image along vertical axis
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
@@ -165,7 +171,9 @@ class AMDIMEvalTransformsSTL10(object):
             view1 = transform(x)
         """
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         # flipping image along vertical axis
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
@@ -207,7 +215,9 @@ class AMDIMTrainTransformsImageNet128(object):
             (view1, view2) = transform(x)
         """
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         # image augmentation functions
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
@@ -253,7 +263,9 @@ class AMDIMEvalTransformsImageNet128(object):
             view1 = transform(x)
         """
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         # image augmentation functions
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)

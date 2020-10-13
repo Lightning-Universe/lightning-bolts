@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader, random_split
 try:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import FashionMNIST
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
     _TORCHVISION_AVAILABLE = False
@@ -63,7 +63,7 @@ class FashionMNISTDataModule(LightningDataModule):
         super().__init__(*args, **kwargs)
 
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError(
+            raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use fashion MNIST dataset loaded from `torchvision` which is not installed yet.'
             )
 

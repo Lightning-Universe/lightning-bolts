@@ -4,7 +4,7 @@ import numpy as np
 
 try:
     import torchvision.transforms as transforms
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
     _TORCHVISION_AVAILABLE = False
@@ -13,7 +13,7 @@ else:
 
 try:
     import cv2
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `opencv-python` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install opencv-python`.')
 
@@ -41,7 +41,9 @@ class SimCLRTrainDataTransform(object):
     """
     def __init__(self, input_height, s=1):
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         self.s = s
         self.input_height = input_height
@@ -81,7 +83,9 @@ class SimCLREvalDataTransform(object):
     """
     def __init__(self, input_height, s=1):
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         self.s = s
         self.input_height = input_height
@@ -102,7 +106,9 @@ class GaussianBlur(object):
     # Implements Gaussian blur as described in the SimCLR paper
     def __init__(self, kernel_size, min=0.1, max=2.0):
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         self.min = min
         self.max = max

@@ -7,7 +7,7 @@ try:
     from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
     from pl_bolts.datamodules.ssl_amdim_datasets import CIFAR10Mixed
     from pl_bolts.models.self_supervised.amdim import transforms as amdim_transforms
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
 

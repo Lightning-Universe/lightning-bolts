@@ -3,7 +3,7 @@ import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader
 
-from pl_bolts.datamodules import DummyDetectionDataset
+from pl_bolts.datasets import DummyDetectionDataset
 from pl_bolts.models.detection import FasterRCNN
 
 

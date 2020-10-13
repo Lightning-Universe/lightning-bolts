@@ -139,17 +139,15 @@ class VAE(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
-        result = pl.TrainResult(minimize=loss)
-        result.log_dict(
+        self.log_dict(
             {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
         )
-        return result
+        return loss
 
     def validation_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
-        result = pl.EvalResult(checkpoint_on=loss)
-        result.log_dict({f"val_{k}": v for k, v in logs.items()})
-        return result
+        self.log_dict({f"val_{k}": v for k, v in logs.items()})
+        return loss
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)

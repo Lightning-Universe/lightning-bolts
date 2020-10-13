@@ -1,5 +1,4 @@
 from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
-from pl_bolts.datamodules.dummy_dataset import DummyDataset, DummyDetectionDataset
 
 try:
     from pl_bolts.datamodules.binary_mnist_datamodule import BinaryMNISTDataModule
@@ -26,5 +25,5 @@ try:
 
     from pl_bolts.datamodules.kitti_dataset import KittiDataset
     from pl_bolts.datamodules.kitti_datamodule import KittiDataModule
-except ImportError:
+except ModuleNotFoundError:
     pass

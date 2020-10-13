@@ -6,13 +6,13 @@ import numpy as np
 
 try:
     from sklearn.utils import shuffle
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install sklearn`.')
 
 try:
     from torchvision.datasets import CIFAR10
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
 

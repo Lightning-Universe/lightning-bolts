@@ -136,19 +136,17 @@ class BYOL(pl.LightningModule):
         loss_a, loss_b, total_loss = self.shared_step(batch, batch_idx)
 
         # log results
-        result = pl.TrainResult(minimize=total_loss)
-        result.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'train_loss': total_loss})
+        self.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'train_loss': total_loss})
 
-        return result
+        return total_loss
 
     def validation_step(self, batch, batch_idx):
         loss_a, loss_b, total_loss = self.shared_step(batch, batch_idx)
 
         # log results
-        result = pl.EvalResult(early_stop_on=total_loss, checkpoint_on=total_loss)
-        result.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'train_loss': total_loss})
+        self.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'train_loss': total_loss})
 
-        return result
+        return total_loss
 
     def configure_optimizers(self):
         optimizer = Adam(self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)

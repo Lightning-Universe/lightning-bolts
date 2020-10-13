@@ -4,7 +4,7 @@ from pl_bolts.transforms.self_supervised import RandomTranslateWithReflect, Patc
 
 try:
     from torchvision import transforms
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
     _TORCHVISION_AVAILABLE = False
@@ -44,7 +44,9 @@ class CPCTrainTransformsCIFAR10:
 
         """
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         self.patch_size = patch_size
         self.overlap = overlap
@@ -100,7 +102,9 @@ class CPCEvalTransformsCIFAR10:
 
         """
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         # flipping image along vertical axis
         self.patch_size = patch_size
@@ -154,7 +158,9 @@ class CPCTrainTransformsSTL10:
 
         """
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         # flipping image along vertical axis
         self.patch_size = patch_size
@@ -211,7 +217,9 @@ class CPCEvalTransformsSTL10:
 
         """
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         # flipping image along vertical axis
         self.patch_size = patch_size
@@ -259,7 +267,9 @@ class CPCTrainTransformsImageNet128:
             train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsImageNet128())
         """
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         # image augmentation functions
         self.patch_size = patch_size
@@ -316,7 +326,9 @@ class CPCEvalTransformsImageNet128:
             train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsImageNet128())
         """
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use `transforms` from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         # image augmentation functions
         self.patch_size = patch_size
