@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+import torch
 
 
 @pytest.mark.parametrize('cli_args', [
@@ -14,6 +15,7 @@ def test_cli_run_basic_gan(cli_args):
         cli_main()
 
 
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
 @pytest.mark.parametrize('cli_args', [
     '--max_epochs 1 --limit_train_batches 2 --limit_val_batches 2 --batch_size 2 --encoder resnet18',
 ])
