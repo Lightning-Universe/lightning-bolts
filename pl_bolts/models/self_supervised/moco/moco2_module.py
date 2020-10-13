@@ -70,7 +70,6 @@ class MocoV2(pl.LightningModule):
                  learning_rate: float = 0.03,
                  momentum: float = 0.9,
                  weight_decay: float = 1e-4,
-                 datamodule: pl.LightningDataModule = None,
                  data_dir: str = './',
                  batch_size: int = 256,
                  use_mlp: bool = False,
@@ -95,14 +94,6 @@ class MocoV2(pl.LightningModule):
 
         super().__init__()
         self.save_hyperparameters()
-
-        # use CIFAR-10 by default if no datamodule passed in
-        # if datamodule is None:
-        #     datamodule = CIFAR10DataModule(data_dir)
-        #     datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
-        #     datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
-        assert datamodule
-        self.datamodule = datamodule
 
         # create the encoders
         # num_classes is the output fc dimension
@@ -259,7 +250,7 @@ class MocoV2(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         # in STL10 we pass in both lab+unl for online ft
-        if self.hparams.datamodule.name == 'stl10':
+        if self.datamodule.name == 'stl10':
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -280,7 +271,7 @@ class MocoV2(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         # in STL10 we pass in both lab+unl for online ft
-        if self.hparams.datamodule.name == 'stl10':
+        if self.datamodule.name == 'stl10':
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -386,10 +377,10 @@ def cli_main():
         # replace with your own dataset, otherwise CIFAR-10 will be used by default if `None` passed in
         datamodule = None 
 
-    model = MocoV2(**args.__dict__, datamodule=datamodule)
+    model = MocoV2(**args.__dict__)
 
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model)
+    trainer.fit(model, datamodule=datamodule)
 
 
 if __name__ == '__main__':
