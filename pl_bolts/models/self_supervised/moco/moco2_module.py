@@ -267,7 +267,8 @@ class MocoV2(pl.LightningModule):
             'train_acc1': acc1,
             'train_acc5': acc5
         }
-        return {'loss': loss, 'log': log, 'progress_bar': log}
+        self.log_dict(log)
+        return loss
 
     def validation_step(self, batch, batch_idx):
         # in STL10 we pass in both lab+unl for online ft
@@ -300,7 +301,7 @@ class MocoV2(pl.LightningModule):
             'val_acc1': val_acc1,
             'val_acc5': val_acc5
         }
-        return {'val_loss': val_loss, 'log': log, 'progress_bar': log}
+        self.log_dict(log)
 
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(self.parameters(), self.hparams.learning_rate,
@@ -372,10 +373,10 @@ def cli_main():
         datamodule = SSLImagenetDataModule.from_argparse_args(args)
         datamodule.train_transforms = Moco2TrainImagenetTransforms()
         datamodule.val_transforms = Moco2EvalImagenetTransforms()
-    
+
     else:
         # replace with your own dataset, otherwise CIFAR-10 will be used by default if `None` passed in
-        datamodule = None 
+        datamodule = None
 
     model = MocoV2(**args.__dict__)
 
