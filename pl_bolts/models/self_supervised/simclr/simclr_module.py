@@ -8,7 +8,7 @@ from torch.optim import Adam
 
 try:
     from torchvision.models import densenet
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
 

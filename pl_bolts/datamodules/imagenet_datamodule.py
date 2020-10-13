@@ -9,7 +9,7 @@ from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 try:
     from torchvision import transforms as transform_lib
     from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
     _TORCHVISION_AVAILABLE = False
@@ -72,7 +72,9 @@ class ImagenetDataModule(LightningDataModule):
         super().__init__(*args, **kwargs)
 
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use ImageNet dataset loaded from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use ImageNet dataset loaded from `torchvision` which is not installed yet.'
+            )
 
         self.image_size = image_size
         self.dims = (3, self.image_size, self.image_size)

@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 
 try:
     from sklearn.utils import shuffle as sk_shuffle
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install sklearn`.')
     _SKLEARN_AVAILABLE = False
@@ -162,7 +162,9 @@ class SklearnDataModule(LightningDataModule):
         if shuffle and _SKLEARN_AVAILABLE:
             X, y = sk_shuffle(X, y, random_state=random_state)
         elif shuffle and not _SKLEARN_AVAILABLE:
-            raise ImportError('You want to use shuffle function from `scikit-learn` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use shuffle function from `scikit-learn` which is not installed yet.'
+            )
 
         val_split = 0 if x_val is not None or y_val is not None else val_split
         test_split = 0 if x_test is not None or y_test is not None else test_split

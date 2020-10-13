@@ -132,9 +132,10 @@ def cli_main():
     # Example: Iris dataset in Sklearn (4 features, 3 class labels)
     try:
         from sklearn.datasets import load_iris
-    except ImportError:
-        raise ImportError('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-                          ' install it with `pip install sklearn`.')
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(  # pragma: no-cover
+            'You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`.'
+        )
 
     X, y = load_iris(return_X_y=True)
     loaders = SklearnDataModule(X, y)

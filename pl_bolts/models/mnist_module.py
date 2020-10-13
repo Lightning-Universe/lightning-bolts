@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader, random_split
 try:
     from torchvision import transforms
     from torchvision.datasets import MNIST
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
 
