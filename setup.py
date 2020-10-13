@@ -19,8 +19,8 @@ builtins.__LIGHTNING_BOLT_SETUP__ = True
 import pl_bolts  # noqa: E402
 
 
-def load_requirements(path_dir=PATH_ROOT, file_name='base.txt', comment_char='#'):
-    with open(os.path.join(path_dir, 'requirements', file_name), 'r') as file:
+def load_requirements(path_dir=PATH_ROOT, file_name='requirements.txt', comment_char='#'):
+    with open(os.path.join(path_dir, file_name), 'r') as file:
         lines = [ln.strip() for ln in file.readlines()]
     reqs = []
     for ln in lines:
@@ -45,9 +45,9 @@ def load_long_describtion():
 
 
 extras = {
-    'loggers': load_requirements(file_name='loggers.txt'),
-    'models': load_requirements(file_name='models.txt'),
-    'test': load_requirements(file_name='test.txt'),
+    'loggers': load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='loggers.txt'),
+    'models': load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='models.txt'),
+    'test': load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='test.txt'),
 }
 extras['extra'] = extras['models'] + extras['loggers']
 extras['dev'] = extras['extra'] + extras['test']
