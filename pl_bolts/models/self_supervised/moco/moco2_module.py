@@ -381,6 +381,10 @@ def cli_main():
         datamodule = SSLImagenetDataModule.from_argparse_args(args)
         datamodule.train_transforms = Moco2TrainImagenetTransforms()
         datamodule.val_transforms = Moco2EvalImagenetTransforms()
+    
+    else:
+        # replace with your own dataset, otherwise CIFAR-10 will be used by default if `None` passed in
+        datamodule = None 
 
     model = MocoV2(**args.__dict__, datamodule=datamodule)
 
