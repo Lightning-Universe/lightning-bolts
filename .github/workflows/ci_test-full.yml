@@ -45,7 +45,7 @@ jobs:
     - name: Set min. dependencies
       if: matrix.requires == 'minimal'
       run: |
-        python -c "fpath = 'requirements/base.txt' ; req = open(fpath).read().replace('>=', '==') ; open(fpath, 'w').write(req)"
+        python -c "fpath = 'requirements.txt' ; req = open(fpath).read().replace('>=', '==') ; open(fpath, 'w').write(req)"
         python -c "fpath = 'requirements/models.txt' ; req = open(fpath).read().replace('>=', '==') ; open(fpath, 'w').write(req)"
         python -c "fpath = 'requirements/loggers.txt' ; req = open(fpath).read().replace('>=', '==') ; open(fpath, 'w').write(req)"
         python -c "fpath = 'requirements/test.txt' ; req = open(fpath).read().replace('>=', '==') ; open(fpath, 'w').write(req)"
