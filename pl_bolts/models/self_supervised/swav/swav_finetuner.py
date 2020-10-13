@@ -6,7 +6,7 @@ from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
 
 from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner
 from pl_bolts.models.self_supervised.swav.swav_module import SwAV
-from pl_bolts.transforms.dataset_normalizations import stl10_normalization
+from pl_bolts.transforms.dataset_normalizations import stl10_normalization, imagenet_normalization
 from pl_bolts.models.self_supervised.swav.transforms import SwAVFinetuneTransform
 
 
@@ -48,6 +48,26 @@ def cli_main():  # pragma: no-cover
         )
 
         args.maxpool1 = False
+    elif args.dataset == 'imagenet':
+        dm = ImagenetDataModule(
+            data_dir=args.data_path,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers
+        )
+
+        dm.train_transforms = SwAVFinetuneTransform(
+            normalize=imagenet_normalization(),
+            input_height=dm.size()[-1],
+            eval_transform=False
+        )
+        dm.val_transforms = SwAVFinetuneTransform(
+            normalize=imagenet_normalization(),
+            input_height=dm.size()[-1],
+            eval_transform=True
+        )
+
+        args.num_samples = 0
+        args.maxpool1 = True
     else:
         raise NotImplementedError("other datasets have not been implemented till now")
 
@@ -55,7 +75,8 @@ def cli_main():  # pragma: no-cover
         gpus=1,
         num_samples=args.num_samples,
         batch_size=args.batch_size,
-        datamodule=dm
+        datamodule=dm,
+        maxpool1=args.maxpool1
     ).load_from_checkpoint(args.ckpt_path, strict=False)
 
     tuner = SSLFineTuner(backbone, in_features=2048, num_classes=dm.num_classes, hidden_dim=None)
