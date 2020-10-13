@@ -250,7 +250,7 @@ class MocoV2(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         # in STL10 we pass in both lab+unl for online ft
-        if self.datamodule.name == 'stl10':
+        if self.trainer.datamodule.name == 'stl10':
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -271,7 +271,7 @@ class MocoV2(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         # in STL10 we pass in both lab+unl for online ft
-        if self.datamodule.name == 'stl10':
+        if self.trainer.datamodule.name == 'stl10':
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
