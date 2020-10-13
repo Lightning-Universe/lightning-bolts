@@ -15,6 +15,7 @@ def test_cli_run_basic_gan(cli_args):
         cli_main()
 
 
+# TODO: this test is hanging (runs for more then 10min) so we need to use GPU or optimize it...
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
 @pytest.mark.parametrize('cli_args', [
     '--max_epochs 1 --limit_train_batches 2 --limit_val_batches 2 --batch_size 2 --encoder resnet18',

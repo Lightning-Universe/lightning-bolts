@@ -11,6 +11,7 @@ from pl_bolts.models.self_supervised.moco.transforms import (Moco2TrainCIFAR10Tr
 from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
 
+# TODO: this test is hanging (runs for more then 10min) so we need to use GPU or optimize it...
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
 def test_cpcv2(tmpdir):
     seed_everything()
@@ -27,6 +28,7 @@ def test_cpcv2(tmpdir):
     assert float(loss) > 0
 
 
+# TODO: this test is hanging (runs for more then 10min) so we need to use GPU or optimize it...
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
 def test_byol(tmpdir):
     seed_everything()
