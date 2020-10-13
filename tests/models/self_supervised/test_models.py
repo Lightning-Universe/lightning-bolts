@@ -11,6 +11,7 @@ from pl_bolts.models.self_supervised.moco.transforms import (Moco2TrainCIFAR10Tr
 from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
 
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
 def test_cpcv2(tmpdir):
     seed_everything()
 
