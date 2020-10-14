@@ -21,6 +21,7 @@ from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common.agents import ValueAgent
 from pl_bolts.models.rl.common.memory import MultiStepBuffer
 from pl_bolts.models.rl.common.networks import CNN
+
 try:
     from pl_bolts.models.rl.common.gym_wrappers import gym, make_environment
 except ModuleNotFoundError:

@@ -4,7 +4,6 @@ CPC V2
 """
 import math
 from argparse import ArgumentParser
-from typing import Union
 
 import pytorch_lightning as pl
 import torch

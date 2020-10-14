@@ -9,6 +9,7 @@ import gym
 import gym.spaces
 import numpy as np
 import torch
+
 try:
     import cv2
 except ModuleNotFoundError:
