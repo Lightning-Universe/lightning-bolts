@@ -2,7 +2,7 @@ import os
 import torch
 
 from pytorch_lightning import LightningDataModule
-from pl_bolts.datamodules.kitti_dataset import KittiDataset
+from pl_bolts.datasets.kitti_dataset import KittiDataset
 
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
