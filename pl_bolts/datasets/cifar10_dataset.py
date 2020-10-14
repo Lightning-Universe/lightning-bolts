@@ -16,7 +16,7 @@ except ModuleNotFoundError:
 else:
     _PIL_AVAILABLE = True
 
-from pl_bolts.datamodules.base_dataset import LightDataset
+from pl_bolts.datasets.base_dataset import LightDataset
 
 
 class CIFAR10(LightDataset):
