@@ -20,10 +20,10 @@ except ModuleNotFoundError:
 try:
     from torchvision.datasets import ImageNet
     from torchvision.datasets.imagenet import load_meta_file
-except ModuleNotFoundError:
+except ModuleNotFoundError as err:
     raise ModuleNotFoundError(  # pragma: no-cover
         'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
-    )
+    ) from err
 
 
 class UnlabeledImagenet(ImageNet):
