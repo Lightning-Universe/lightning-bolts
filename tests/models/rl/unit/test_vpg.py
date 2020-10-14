@@ -5,8 +5,8 @@ import gym
 import torch
 
 from pl_bolts.models.rl.common.agents import Agent
-from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.common.gym_wrappers import ToTensor
+from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.vanilla_policy_gradient_model import VanillaPolicyGradient
 
 

@@ -1,4 +1,3 @@
-import pytest
 import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader

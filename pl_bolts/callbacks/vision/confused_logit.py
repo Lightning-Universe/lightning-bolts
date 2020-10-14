@@ -64,12 +64,12 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
         x, y = batch
         try:
             logits = pl_module.last_logits
-        except AttributeError as e:
+        except AttributeError as err:
             m = """please track the last_logits in the training_step like so:
                 def training_step(...):
                     self.last_logits = your_logits
             """
-            raise AttributeError(m)
+            raise AttributeError(m) from err
 
         # only check when it has opinions (ie: the logit > 5)
         if logits.max() > self.min_logit_value:

@@ -1,5 +1,6 @@
-from pl_bolts.datasets import DummyDataset, RandomDataset, RandomDictDataset, RandomDictStringDataset
 from torch.utils.data import DataLoader
+
+from pl_bolts.datasets import DummyDataset, RandomDataset, RandomDictDataset, RandomDictStringDataset
 
 
 def test_dummy_ds(tmpdir):

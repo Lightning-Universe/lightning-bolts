@@ -16,6 +16,7 @@ from torch.utils.data import DataLoader
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.networks import MLP
+
 try:
     import gym
 except ModuleNotFoundError:

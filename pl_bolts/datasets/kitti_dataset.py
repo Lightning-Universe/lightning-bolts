@@ -1,7 +1,7 @@
 import os
+
 import numpy as np
 from PIL import Image
-
 from torch.utils.data import Dataset
 
 DEFAULT_VOID_LABELS = (0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1)

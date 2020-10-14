@@ -8,8 +8,8 @@ import numpy as np
 import torch
 
 from pl_bolts.losses.rl import dqn_loss, double_dqn_loss, per_dqn_loss
-from pl_bolts.models.rl.common.networks import CNN
 from pl_bolts.models.rl.common.gym_wrappers import make_environment
+from pl_bolts.models.rl.common.networks import CNN
 
 
 class TestRLLoss(TestCase):
