@@ -32,6 +32,34 @@ from pl_bolts.models.self_supervised.moco.transforms import (
 
 
 class MocoV2(pl.LightningModule):
+    """
+    PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
+
+    Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.
+
+    Code adapted from `facebookresearch/moco <https://github.com/facebookresearch/moco>`_ to Lightning by:
+
+        - `William Falcon <https://github.com/williamFalcon>`_
+
+    Example::
+        from pl_bolts.models.self_supervised import MocoV2
+        model = MocoV2()
+        trainer = Trainer()
+        trainer.fit(model)
+
+    CLI command::
+
+        # cifar10
+        python moco2_module.py --gpus 1
+
+        # imagenet
+        python moco2_module.py
+            --gpus 8
+            --dataset imagenet2012
+            --data_dir /path/to/imagenet/
+            --meta_dir /path/to/folder/with/meta.bin/
+            --batch_size 32
+    """
 
     def __init__(self,
                  base_encoder: Union[str, torch.nn.Module] = 'resnet18',
@@ -49,33 +77,6 @@ class MocoV2(pl.LightningModule):
                  num_workers: int = 8,
                  *args, **kwargs):
         """
-        PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
-
-        Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.
-
-        Code adapted from `facebookresearch/moco <https://github.com/facebookresearch/moco>`_ to Lightning by:
-
-            - `William Falcon <https://github.com/williamFalcon>`_
-
-        Example::
-            from pl_bolts.models.self_supervised import MocoV2
-            model = MocoV2()
-            trainer = Trainer()
-            trainer.fit(model)
-
-        CLI command::
-
-            # cifar10
-            python moco2_module.py --gpus 1
-
-            # imagenet
-            python moco2_module.py
-                --gpus 8
-                --dataset imagenet2012
-                --data_dir /path/to/imagenet/
-                --meta_dir /path/to/folder/with/meta.bin/
-                --batch_size 32
-
         Args:
             base_encoder: torchvision model name or torch.nn.Module
             emb_dim: feature dimension (default: 128)

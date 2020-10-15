@@ -15,11 +15,13 @@ Experience = namedtuple(
 class Buffer:
     """
     Basic Buffer for storing a single experience at a time
-    Args:
-        capacity: size of the buffer
     """
 
     def __init__(self, capacity: int) -> None:
+        """
+        Args:
+            capacity: size of the buffer
+        """
         self.buffer = deque(maxlen=capacity)
 
     def __len__(self) -> None:
@@ -86,14 +88,15 @@ class ReplayBuffer(Buffer):
 class MultiStepBuffer(ReplayBuffer):
     """
     N Step Replay Buffer
-
-    Args:
-        capacity: max number of experiences that will be stored in the buffer
-        n_steps: number of steps used for calculating discounted reward/experience
-        gamma: discount factor when calculating n_step discounted reward of the experience being stored in buffer
     """
 
     def __init__(self, capacity: int, n_steps: int = 1, gamma: float = 0.99) -> None:
+        """
+        Args:
+            capacity: max number of experiences that will be stored in the buffer
+            n_steps: number of steps used for calculating discounted reward/experience
+            gamma: discount factor when calculating n_step discounted reward of the experience being stored in buffer
+        """
         super().__init__(capacity)
 
         self.n_steps = n_steps

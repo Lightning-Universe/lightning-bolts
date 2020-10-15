@@ -23,10 +23,6 @@ class SSLDatasetMixin(ABC):
     def generate_train_val_split(cls, examples, labels, pct_val):
         """
         Splits dataset uniformly across classes
-        :param examples:
-        :param labels:
-        :param pct_val:
-        :return:
         """
         nb_classes = len(set(labels))
 
@@ -58,10 +54,6 @@ class SSLDatasetMixin(ABC):
         """
         Splits a dataset into two parts.
         The labeled split has nb_imgs_in_val per class
-        :param examples:
-        :param labels:
-        :param nb_imgs_in_val:
-        :return:
         """
         nb_classes = len(set(labels))
 

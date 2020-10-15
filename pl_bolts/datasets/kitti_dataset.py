@@ -21,12 +21,6 @@ class KittiDataset(Dataset):
     (250 by default). It also sets all of the valid pixels to the appropriate value between 0 and
     `len(valid_labels)` (since that is the number of valid classes), so it can be used properly by
     the loss function when comparing with the output.
-
-    Args:
-        data_dir (str): where to load the data from path, i.e. '/path/to/folder/with/data_semantics/'
-        img_size: image dimensions (width, height)
-        void_labels: useless classes to be excluded from training
-        valid_labels: useful classes to include
     """
     IMAGE_PATH = os.path.join('training', 'image_2')
     MASK_PATH = os.path.join('training', 'semantic')
@@ -39,6 +33,13 @@ class KittiDataset(Dataset):
             valid_labels: list = DEFAULT_VALID_LABELS,
             transform=None
     ):
+        """
+        Args:
+            data_dir (str): where to load the data from path, i.e. '/path/to/folder/with/data_semantics/'
+            img_size: image dimensions (width, height)
+            void_labels: useless classes to be excluded from training
+            valid_labels: useful classes to include
+        """
         self.img_size = img_size
         self.void_labels = void_labels
         self.valid_labels = valid_labels

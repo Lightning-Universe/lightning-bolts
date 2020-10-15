@@ -165,18 +165,6 @@ class TrialCIFAR10(CIFAR10):
     """
     Customized `CIFAR10 <http://www.cs.toronto.edu/~kriz/cifar.html>`_ dataset for testing Pytorch Lightning
     without the torchvision dependency.
-
-    Args:
-        data_dir: Root directory of dataset where ``CIFAR10/processed/training.pt``
-            and  ``CIFAR10/processed/test.pt`` exist.
-        train: If ``True``, creates dataset from ``training.pt``,
-            otherwise from ``test.pt``.
-        download: If true, downloads the dataset from the internet and
-            puts it in root directory. If dataset is already downloaded, it is not
-            downloaded again.
-        num_samples: number of examples per selected class/digit
-        labels: list selected CIFAR10 digits/classes
-
     Examples:
 
         >>> dataset = TrialCIFAR10(download=True, num_samples=150, labels=(1, 5, 8))
@@ -200,6 +188,18 @@ class TrialCIFAR10(CIFAR10):
             labels: Optional[Sequence] = (1, 5, 8),
             relabel: bool = True,
     ):
+        """
+        Args:
+            data_dir: Root directory of dataset where ``CIFAR10/processed/training.pt``
+                and  ``CIFAR10/processed/test.pt`` exist.
+            train: If ``True``, creates dataset from ``training.pt``,
+                otherwise from ``test.pt``.
+            download: If true, downloads the dataset from the internet and
+                puts it in root directory. If dataset is already downloaded, it is not
+                downloaded again.
+            num_samples: number of examples per selected class/digit
+            labels: list selected CIFAR10 digits/classes
+        """
         # number of examples per class
         self.num_samples = num_samples
         # take just a subset of CIFAR dataset

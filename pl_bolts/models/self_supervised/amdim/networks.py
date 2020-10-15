@@ -70,9 +70,9 @@ class AMDIMEncoder(nn.Module):
         )
 
     def init_weights(self, init_scale=1.):
-        '''
+        """
         Run custom weight init for modules...
-        '''
+        """
         for layer in self.layer_list:
             if isinstance(layer, (ConvResNxN, ConvResBlock)):
                 layer.init_weights(init_scale)
@@ -83,9 +83,9 @@ class AMDIMEncoder(nn.Module):
                 layer.init_weights(init_scale)
 
     def _config_modules(self, x, output_widths, n_rkhs, use_bn):
-        '''
+        """
         Configure the modules for extracting fake rkhs embeddings for infomax.
-        '''
+        """
         # get activations from each block to see output dims
         enc_acts = self._forward_acts(x)
 
@@ -110,9 +110,9 @@ class AMDIMEncoder(nn.Module):
         self.rkhs_block_7 = FakeRKHSConvNet(ndf_7, n_rkhs, use_bn)
 
     def _forward_acts(self, x):
-        '''
+        """
         Return activations from all layers.
-        '''
+        """
         # run forward pass through all layers
         layer_acts = [x]
         for _, layer in enumerate(self.layer_list):
@@ -177,9 +177,9 @@ class ConvResBlock(nn.Module):
         self.layer_list = nn.Sequential(*layer_list)
 
     def init_weights(self, init_scale=1.):
-        '''
+        """
         Do a fixup-ish init for each ConvResNxN in this block.
-        '''
+        """
         for m in self.layer_list:
             m.init_weights(init_scale)
 
