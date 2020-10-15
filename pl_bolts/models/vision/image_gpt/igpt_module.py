@@ -98,7 +98,6 @@ class ImageGPT(pl.LightningModule):
     """
     def __init__(
         self,
-        datamodule: pl.LightningDataModule = None,
         embed_dim: int = 16,
         heads: int = 2,
         layers: int = 2,
@@ -115,7 +114,6 @@ class ImageGPT(pl.LightningModule):
     ):
         """
         Args:
-            datamodule: LightningDataModule
             embed_dim: the embedding dim
             heads: number of attention heads
             layers: number of layers
@@ -129,7 +127,7 @@ class ImageGPT(pl.LightningModule):
             data_dir: where to store data
             num_workers: num_data workers
         """
-        super(ImageGPT, self).__init__()
+        super().__init__()
         self.save_hyperparameters()
 
         # default to MNIST if no datamodule given
@@ -139,8 +137,6 @@ class ImageGPT(pl.LightningModule):
         #     )
         #     self.hparams.pixels = datamodule.size(1)
         #     self.hparams.num_classes = datamodule.num_classes
-        assert datamodule
-        self.datamodule = datamodule
 
         self.gpt = GPT2(
             embed_dim=self.hparams.embed_dim,
@@ -259,10 +255,10 @@ def cli_main():
     elif args.dataset == "imagenet128":
         datamodule = ImagenetDataModule.from_argparse_args(args)
 
-    model = ImageGPT(**args.__dict__, datamodule=datamodule)
+    model = ImageGPT(**args.__dict__)
 
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model)
+    trainer.fit(model, datamodule)
 
 
 if __name__ == '__main__':

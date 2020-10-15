@@ -8,7 +8,7 @@ from pl_bolts.models import GPT2, ImageGPT, UNet
 def test_igpt(tmpdir):
     pl.seed_everything(0)
     dm = MNISTDataModule(tmpdir, normalize=False)
-    model = ImageGPT(datamodule=dm)
+    model = ImageGPT()
 
     trainer = pl.Trainer(
         limit_train_batches=2,
@@ -16,19 +16,19 @@ def test_igpt(tmpdir):
         limit_test_batches=2,
         max_epochs=1,
     )
-    trainer.fit(model)
-    trainer.test()
+    trainer.fit(model, dm)
+    trainer.test(datamodule=dm)
     assert trainer.callback_metrics["test_loss"] < 1.7
 
     dm = FashionMNISTDataModule(tmpdir, num_workers=1)
-    model = ImageGPT(classify=True, datamodule=dm)
+    model = ImageGPT(classify=True)
     trainer = pl.Trainer(
         limit_train_batches=2,
         limit_val_batches=2,
         limit_test_batches=2,
         max_epochs=1,
     )
-    trainer.fit(model)
+    trainer.fit(model, dm)
 
 
 def test_gpt2(tmpdir):
