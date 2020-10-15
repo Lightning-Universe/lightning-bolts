@@ -72,7 +72,7 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
 
         return x, y
 
-    def on_train_batch_end(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         x, y = self.to_device(batch, pl_module.device)
 
         with torch.no_grad():
@@ -131,7 +131,7 @@ class BYOLMAWeightUpdate(pl.Callback):
         self.initial_tau = initial_tau
         self.current_tau = initial_tau
 
-    def on_train_batch_end(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         # get networks
         online_net = pl_module.online_network
         target_net = pl_module.target_network
