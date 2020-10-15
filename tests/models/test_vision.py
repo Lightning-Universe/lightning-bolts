@@ -16,7 +16,7 @@ def test_igpt(tmpdir):
         limit_test_batches=2,
         max_epochs=1,
     )
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
     trainer.test(datamodule=dm)
     assert trainer.callback_metrics["test_loss"] < 1.7
 
@@ -28,7 +28,7 @@ def test_igpt(tmpdir):
         limit_test_batches=2,
         max_epochs=1,
     )
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
 
 
 def test_gpt2(tmpdir):

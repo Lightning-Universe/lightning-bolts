@@ -65,7 +65,7 @@ def test_moco(tmpdir):
 
     model = MocoV2(data_dir=tmpdir, batch_size=2, online_ft=True)
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, callbacks=[MocoLRScheduler()])
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) > 0

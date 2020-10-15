@@ -258,7 +258,7 @@ def cli_main():
     model = ImageGPT(**args.__dict__)
 
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule=datamodule)
 
 
 if __name__ == '__main__':
