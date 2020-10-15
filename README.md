@@ -188,3 +188,5 @@ To cite bolts use:
   year={2020}
 }
 ```
+
+To cite other contributed models or modules, please cite the authors directly (if they don't have bibtex, ping the authors on a GH issue)
