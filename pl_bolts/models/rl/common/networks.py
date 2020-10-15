@@ -14,12 +14,14 @@ from torch.nn import functional as F
 class CNN(nn.Module):
     """
     Simple MLP network
-    Args:
-        input_shape: observation shape of the environment
-        n_actions: number of discrete actions available in the environment
     """
 
     def __init__(self, input_shape, n_actions):
+        """
+        Args:
+            input_shape: observation shape of the environment
+            n_actions: number of discrete actions available in the environment
+        """
         super(CNN, self).__init__()
 
         self.conv = nn.Sequential(
@@ -62,13 +64,15 @@ class CNN(nn.Module):
 class MLP(nn.Module):
     """
     Simple MLP network
-    Args:
-        input_shape: observation shape of the environment
-        n_actions: number of discrete actions available in the environment
-        hidden_size: size of hidden layers
     """
 
     def __init__(self, input_shape: Tuple, n_actions: int, hidden_size: int = 128):
+        """
+        Args:
+            input_shape: observation shape of the environment
+            n_actions: number of discrete actions available in the environment
+            hidden_size: size of hidden layers
+        """
         super(MLP, self).__init__()
         self.net = nn.Sequential(
             nn.Linear(input_shape[0], hidden_size),
@@ -90,13 +94,15 @@ class MLP(nn.Module):
 class DuelingMLP(nn.Module):
     """
     MLP network with duel heads for val and advantage
-    Args:
-        input_shape: observation shape of the environment
-        n_actions: number of discrete actions available in the environment
-        hidden_size: size of hidden layers
     """
 
     def __init__(self, input_shape: Tuple, n_actions: int, hidden_size: int = 128):
+        """
+        Args:
+            input_shape: observation shape of the environment
+            n_actions: number of discrete actions available in the environment
+            hidden_size: size of hidden layers
+        """
         super(DuelingMLP, self).__init__()
 
         self.net = nn.Sequential(
@@ -143,14 +149,15 @@ class DuelingMLP(nn.Module):
 class DuelingCNN(nn.Module):
     """
     CNN network with duel heads for val and advantage
-    Args:
-        input_shape: observation shape of the environment
-        n_actions: number of discrete actions available in the environment
-        hidden_size: size of hidden layers
     """
 
     def __init__(self, input_shape: Tuple, n_actions: int, _: int = 128):
-
+        """
+        Args:
+            input_shape: observation shape of the environment
+            n_actions: number of discrete actions available in the environment
+            hidden_size: size of hidden layers
+        """
         super().__init__()
 
         self.conv = nn.Sequential(
@@ -214,12 +221,14 @@ class DuelingCNN(nn.Module):
 class NoisyCNN(nn.Module):
     """
     CNN with Noisy Linear layers for exploration
-    Args:
-        input_shape: observation shape of the environment
-        n_actions: number of discrete actions available in the environment
     """
 
     def __init__(self, input_shape, n_actions):
+        """
+        Args:
+            input_shape: observation shape of the environment
+            n_actions: number of discrete actions available in the environment
+        """
         super().__init__()
 
         self.conv = nn.Sequential(
@@ -269,14 +278,16 @@ class NoisyLinear(nn.Linear):
     Noisy Layer using Independent Gaussian Noise.
     based on https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/
     Chapter08/lib/dqn_extra.py#L19
-    Args:
-        in_features: number of inputs
-        out_features: number of outputs
-        sigma_init: initial fill value of noisy weights
-        bias: flag to include bias to linear layer
     """
 
     def __init__(self, in_features, out_features, sigma_init=0.017, bias=True):
+        """
+        Args:
+            in_features: number of inputs
+            out_features: number of outputs
+            sigma_init: initial fill value of noisy weights
+            bias: flag to include bias to linear layer
+        """
         super(NoisyLinear, self).__init__(in_features, out_features, bias=bias)
 
         weights = torch.full((out_features, in_features), sigma_init)

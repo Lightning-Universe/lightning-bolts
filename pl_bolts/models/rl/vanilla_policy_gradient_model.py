@@ -27,6 +27,31 @@ else:
 
 
 class VanillaPolicyGradient(pl.LightningModule):
+    """
+    PyTorch Lightning implementation of `Vanilla Policy Gradient
+    <https://papers.nips.cc/paper/
+    1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
+    Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
+    Model implemented by:
+
+        - `Donal Byrne <https://github.com/djbyrne>`
+
+    Example:
+        >>> from pl_bolts.models.rl.vanilla_policy_gradient_model import VanillaPolicyGradient
+        ...
+        >>> model = VanillaPolicyGradient("CartPole-v0")
+
+    Train::
+        trainer = Trainer()
+        trainer.fit(model)
+
+    Note:
+        This example is based on:
+        https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/04_cartpole_pg.py
+
+    Note:
+        Currently only supports CPU and single GPU training with `distributed_backend=dp`
+    """
     def __init__(
         self,
         env: str,
@@ -40,23 +65,6 @@ class VanillaPolicyGradient(pl.LightningModule):
         **kwargs
     ) -> None:
         """
-        PyTorch Lightning implementation of `Vanilla Policy Gradient
-        <https://papers.nips.cc/paper/
-        1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
-        Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
-        Model implemented by:
-
-            - `Donal Byrne <https://github.com/djbyrne>`
-
-        Example:
-            >>> from pl_bolts.models.rl.vanilla_policy_gradient_model import VanillaPolicyGradient
-            ...
-            >>> model = VanillaPolicyGradient("CartPole-v0")
-
-        Train::
-            trainer = Trainer()
-            trainer.fit(model)
-
         Args:
             env: gym environment tag
             gamma: discount factor
@@ -65,13 +73,6 @@ class VanillaPolicyGradient(pl.LightningModule):
             batch_episodes: how many episodes to rollout for each batch of training
             entropy_beta: dictates the level of entropy per batch
             avg_reward_len: how many episodes to take into account when calculating the avg reward
-
-        Note:
-            This example is based on:
-            https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/04_cartpole_pg.py
-
-        Note:
-            Currently only supports CPU and single GPU training with `distributed_backend=dp`
         """
         super().__init__()
 

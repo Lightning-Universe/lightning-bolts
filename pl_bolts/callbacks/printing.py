@@ -7,32 +7,33 @@ from pytorch_lightning.utilities import rank_zero_info
 
 
 class PrintTableMetricsCallback(Callback):
+    """
+    Prints a table with the metrics in columns on every epoch end
+
+    Example::
+
+        from pl_bolts.callbacks import PrintTableMetricsCallback
+
+        callback = PrintTableMetricsCallback()
+
+    pass into trainer like so:
+
+    .. code-block:: python
+
+        trainer = pl.Trainer(callbacks=[callback])
+        trainer.fit(...)
+
+        # ------------------------------
+        # at the end of every epoch it will print
+        # ------------------------------
+
+        # loss│train_loss│val_loss│epoch
+        # ──────────────────────────────
+        # 2.2541470527648926│2.2541470527648926│2.2158432006835938│0
+
+    """
+
     def __init__(self):
-        """
-        Prints a table with the metrics in columns on every epoch end
-
-        Example::
-
-            from pl_bolts.callbacks import PrintTableMetricsCallback
-
-            callback = PrintTableMetricsCallback()
-
-        pass into trainer like so:
-
-        .. code-block:: python
-
-            trainer = pl.Trainer(callbacks=[callback])
-            trainer.fit(...)
-
-            # ------------------------------
-            # at the end of every epoch it will print
-            # ------------------------------
-
-            # loss│train_loss│val_loss│epoch
-            # ──────────────────────────────
-            # 2.2541470527648926│2.2541470527648926│2.2158432006835938│0
-
-        """
         self.metrics = []
 
     def on_epoch_end(self, trainer, pl_module):

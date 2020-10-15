@@ -18,6 +18,34 @@ else:
 
 
 class ImagenetDataModule(LightningDataModule):
+    """
+    .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/wp-content/uploads/2017/08/
+        Sample-of-Images-from-the-ImageNet-Dataset-used-in-the-ILSVRC-Challenge.png
+        :width: 400
+        :alt: Imagenet
+
+    Specs:
+        - 1000 classes
+        - Each image is (3 x varies x varies) (here we default to 3 x 224 x 224)
+
+    Imagenet train, val and test dataloaders.
+
+    The train set is the imagenet train.
+
+    The val set is taken from the train set with `num_imgs_per_val_class` images per class.
+    For example if `num_imgs_per_val_class=2` then there will be 2,000 images in the validation set.
+
+    The test set is the official imagenet validation set.
+
+     Example::
+
+        from pl_bolts.datamodules import ImagenetDataModule
+
+        dm = ImagenetDataModule(IMAGENET_PATH)
+        model = LitModel()
+
+        Trainer().fit(model, dm)
+    """
 
     name = 'imagenet'
 
@@ -33,35 +61,7 @@ class ImagenetDataModule(LightningDataModule):
             **kwargs,
     ):
         """
-        .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/wp-content/uploads/2017/08/
-            Sample-of-Images-from-the-ImageNet-Dataset-used-in-the-ILSVRC-Challenge.png
-            :width: 400
-            :alt: Imagenet
-
-        Specs:
-            - 1000 classes
-            - Each image is (3 x varies x varies) (here we default to 3 x 224 x 224)
-
-        Imagenet train, val and test dataloaders.
-
-        The train set is the imagenet train.
-
-        The val set is taken from the train set with `num_imgs_per_val_class` images per class.
-        For example if `num_imgs_per_val_class=2` then there will be 2,000 images in the validation set.
-
-        The test set is the official imagenet validation set.
-
-         Example::
-
-            from pl_bolts.datamodules import ImagenetDataModule
-
-            dm = ImagenetDataModule(IMAGENET_PATH)
-            model = LitModel()
-
-            Trainer().fit(model, dm)
-
         Args:
-
             data_dir: path to the imagenet dataset file
             meta_dir: path to meta.bin file
             num_imgs_per_val_class: how many images per class for the validation set

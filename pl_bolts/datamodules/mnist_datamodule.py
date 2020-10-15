@@ -16,6 +16,32 @@ else:
 
 
 class MNISTDataModule(LightningDataModule):
+    """
+    .. figure:: https://miro.medium.com/max/744/1*AO2rIhzRYzFVQlFLx9DM9A.png
+        :width: 400
+        :alt: MNIST
+
+    Specs:
+        - 10 classes (1 per digit)
+        - Each image is (1 x 28 x 28)
+
+    Standard MNIST, train, val, test splits and transforms
+
+    Transforms::
+
+        mnist_transforms = transform_lib.Compose([
+            transform_lib.ToTensor()
+        ])
+
+    Example::
+
+        from pl_bolts.datamodules import MNISTDataModule
+
+        dm = MNISTDataModule('.')
+        model = LitModel()
+
+        Trainer().fit(model, dm)
+    """
 
     name = "mnist"
 
@@ -31,31 +57,6 @@ class MNISTDataModule(LightningDataModule):
         **kwargs,
     ):
         """
-        .. figure:: https://miro.medium.com/max/744/1*AO2rIhzRYzFVQlFLx9DM9A.png
-            :width: 400
-            :alt: MNIST
-
-        Specs:
-            - 10 classes (1 per digit)
-            - Each image is (1 x 28 x 28)
-
-        Standard MNIST, train, val, test splits and transforms
-
-        Transforms::
-
-            mnist_transforms = transform_lib.Compose([
-                transform_lib.ToTensor()
-            ])
-
-        Example::
-
-            from pl_bolts.datamodules import MNISTDataModule
-
-            dm = MNISTDataModule('.')
-            model = LitModel()
-
-            Trainer().fit(model, dm)
-
         Args:
             data_dir: where to save/load the data
             val_split: how many of the training images to use for the validation split

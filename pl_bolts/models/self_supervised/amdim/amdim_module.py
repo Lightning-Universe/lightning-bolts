@@ -17,6 +17,28 @@ from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
 
 class AMDIM(pl.LightningModule):
+    """
+    PyTorch Lightning implementation of
+    `Augmented Multiscale Deep InfoMax (AMDIM) <https://arxiv.org/abs/1906.00910.>`_
+
+    Paper authors: Philip Bachman, R Devon Hjelm, William Buchwalter.
+
+    Model implemented by: `William Falcon <https://github.com/williamFalcon>`_
+
+    This code is adapted to Lightning using the original author repo
+    (`the original repo <https://github.com/Philip-Bachman/amdim-public>`_).
+
+    Example:
+
+        >>> from pl_bolts.models.self_supervised import AMDIM
+        ...
+        >>> model = AMDIM(encoder='resnet18')
+
+    Train::
+
+        trainer = Trainer()
+        trainer.fit(model)
+    """
 
     def __init__(
             self,
@@ -37,27 +59,6 @@ class AMDIM(pl.LightningModule):
             **kwargs,
     ):
         """
-        PyTorch Lightning implementation of
-        `Augmented Multiscale Deep InfoMax (AMDIM) <https://arxiv.org/abs/1906.00910.>`_
-
-        Paper authors: Philip Bachman, R Devon Hjelm, William Buchwalter.
-
-        Model implemented by: `William Falcon <https://github.com/williamFalcon>`_
-
-        This code is adapted to Lightning using the original author repo
-        (`the original repo <https://github.com/Philip-Bachman/amdim-public>`_).
-
-        Example:
-
-            >>> from pl_bolts.models.self_supervised import AMDIM
-            ...
-            >>> model = AMDIM(encoder='resnet18')
-
-        Train::
-
-            trainer = Trainer()
-            trainer.fit(model)
-
         Args:
             datamodule: A LightningDatamodule
             encoder: an encoder string or model

@@ -13,35 +13,35 @@ else:
 
 
 class CPCTrainTransformsCIFAR10:
+    """
+    Transforms used for CPC:
+
+    Transforms::
+
+        random_flip
+        img_jitter
+        col_jitter
+        rnd_gray
+        transforms.ToTensor()
+        normalize
+        Patchify(patch_size=patch_size, overlap_size=patch_size // 2)
+
+    Example::
+
+        # in a regular dataset
+        CIFAR10(..., transforms=CPCTrainTransformsCIFAR10())
+
+        # in a DataModule
+        module = CIFAR10DataModule(PATH)
+        train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsCIFAR10())
+
+    """
 
     def __init__(self, patch_size=8, overlap=4):
         """
-        Transforms used for CPC:
-
         Args:
-
             patch_size: size of patches when cutting up the image into overlapping patches
             overlap: how much to overlap patches
-
-        Transforms::
-
-            random_flip
-            img_jitter
-            col_jitter
-            rnd_gray
-            transforms.ToTensor()
-            normalize
-            Patchify(patch_size=patch_size, overlap_size=patch_size // 2)
-
-        Example::
-
-            # in a regular dataset
-            CIFAR10(..., transforms=CPCTrainTransformsCIFAR10())
-
-            # in a DataModule
-            module = CIFAR10DataModule(PATH)
-            train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsCIFAR10())
-
         """
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
@@ -74,32 +74,32 @@ class CPCTrainTransformsCIFAR10:
 
 
 class CPCEvalTransformsCIFAR10:
+    """
+    Transforms used for CPC:
+
+    Transforms::
+
+        random_flip
+        transforms.ToTensor()
+        normalize
+        Patchify(patch_size=patch_size, overlap_size=overlap)
+
+    Example::
+
+        # in a regular dataset
+        CIFAR10(..., transforms=CPCEvalTransformsCIFAR10())
+
+        # in a DataModule
+        module = CIFAR10DataModule(PATH)
+        train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsCIFAR10())
+
+    """
 
     def __init__(self, patch_size=8, overlap=4):
         """
-        Transforms used for CPC:
-
         Args:
-
             patch_size: size of patches when cutting up the image into overlapping patches
             overlap: how much to overlap patches
-
-        Transforms::
-
-            random_flip
-            transforms.ToTensor()
-            normalize
-            Patchify(patch_size=patch_size, overlap_size=overlap)
-
-        Example::
-
-            # in a regular dataset
-            CIFAR10(..., transforms=CPCEvalTransformsCIFAR10())
-
-            # in a DataModule
-            module = CIFAR10DataModule(PATH)
-            train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsCIFAR10())
-
         """
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
@@ -126,36 +126,34 @@ class CPCEvalTransformsCIFAR10:
 
 
 class CPCTrainTransformsSTL10:
+    """
+    Transforms used for CPC:
+
+    Transforms::
+
+        random_flip
+        img_jitter
+        col_jitter
+        rnd_gray
+        transforms.ToTensor()
+        normalize
+        Patchify(patch_size=patch_size, overlap_size=patch_size // 2)
+
+    Example::
+
+        # in a regular dataset
+        STL10(..., transforms=CPCTrainTransformsSTL10())
+
+        # in a DataModule
+        module = STL10DataModule(PATH)
+        train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsSTL10())
+    """
 
     def __init__(self, patch_size=16, overlap=8):
         """
-        Transforms used for CPC:
-
         Args:
-
             patch_size: size of patches when cutting up the image into overlapping patches
             overlap: how much to overlap patches
-
-        Transforms::
-
-            random_flip
-            img_jitter
-            col_jitter
-            rnd_gray
-            transforms.ToTensor()
-            normalize
-            Patchify(patch_size=patch_size, overlap_size=patch_size // 2)
-
-        Example::
-
-            # in a regular dataset
-            STL10(..., transforms=CPCTrainTransformsSTL10())
-
-            # in a DataModule
-            module = STL10DataModule(PATH)
-            train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsSTL10())
-
-
         """
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
@@ -189,32 +187,32 @@ class CPCTrainTransformsSTL10:
 
 
 class CPCEvalTransformsSTL10:
+    """
+    Transforms used for CPC:
+
+    Transforms::
+
+        random_flip
+        transforms.ToTensor()
+        normalize
+        Patchify(patch_size=patch_size, overlap_size=patch_size // 2)
+
+    Example::
+
+        # in a regular dataset
+        STL10(..., transforms=CPCEvalTransformsSTL10())
+
+        # in a DataModule
+        module = STL10DataModule(PATH)
+        train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsSTL10())
+
+    """
 
     def __init__(self, patch_size=16, overlap=8):
         """
-        Transforms used for CPC:
-
         Args:
-
             patch_size: size of patches when cutting up the image into overlapping patches
             overlap: how much to overlap patches
-
-        Transforms::
-
-            random_flip
-            transforms.ToTensor()
-            normalize
-            Patchify(patch_size=patch_size, overlap_size=patch_size // 2)
-
-        Example::
-
-            # in a regular dataset
-            STL10(..., transforms=CPCEvalTransformsSTL10())
-
-            # in a DataModule
-            module = STL10DataModule(PATH)
-            train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsSTL10())
-
         """
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
@@ -241,30 +239,30 @@ class CPCEvalTransformsSTL10:
 
 
 class CPCTrainTransformsImageNet128:
+    """
+    Transforms used for CPC:
+
+    Transforms::
+
+        random_flip
+        transforms.ToTensor()
+        normalize
+        Patchify(patch_size=patch_size, overlap_size=patch_size // 2)
+
+    Example::
+
+        # in a regular dataset
+        Imagenet(..., transforms=CPCTrainTransformsImageNet128())
+
+        # in a DataModule
+        module = ImagenetDataModule(PATH)
+        train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsImageNet128())
+    """
     def __init__(self, patch_size=32, overlap=16):
         """
-        Transforms used for CPC:
-
         Args:
-
             patch_size: size of patches when cutting up the image into overlapping patches
             overlap: how much to overlap patches
-
-        Transforms::
-
-            random_flip
-            transforms.ToTensor()
-            normalize
-            Patchify(patch_size=patch_size, overlap_size=patch_size // 2)
-
-        Example::
-
-            # in a regular dataset
-            Imagenet(..., transforms=CPCTrainTransformsImageNet128())
-
-            # in a DataModule
-            module = ImagenetDataModule(PATH)
-            train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsImageNet128())
         """
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
@@ -300,30 +298,31 @@ class CPCTrainTransformsImageNet128:
 
 
 class CPCEvalTransformsImageNet128:
+    """
+    Transforms used for CPC:
+
+    Transforms::
+
+        random_flip
+        transforms.ToTensor()
+        normalize
+        Patchify(patch_size=patch_size, overlap_size=patch_size // 2)
+
+    Example::
+
+        # in a regular dataset
+        Imagenet(..., transforms=CPCEvalTransformsImageNet128())
+
+        # in a DataModule
+        module = ImagenetDataModule(PATH)
+        train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsImageNet128())
+    """
+
     def __init__(self, patch_size=32, overlap=16):
         """
-        Transforms used for CPC:
-
         Args:
-
             patch_size: size of patches when cutting up the image into overlapping patches
             overlap: how much to overlap patches
-
-        Transforms::
-
-            random_flip
-            transforms.ToTensor()
-            normalize
-            Patchify(patch_size=patch_size, overlap_size=patch_size // 2)
-
-        Example::
-
-            # in a regular dataset
-            Imagenet(..., transforms=CPCEvalTransformsImageNet128())
-
-            # in a DataModule
-            module = ImagenetDataModule(PATH)
-            train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsImageNet128())
         """
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover

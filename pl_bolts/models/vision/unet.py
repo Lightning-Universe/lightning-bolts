@@ -15,12 +15,6 @@ class UNet(nn.Module):
         - `Akshay Kulkarni <https://github.com/akshaykvnit>`_
 
     .. warning:: Work in progress. This implementation is still being verified.
-
-    Args:
-        num_classes: Number of output classes required
-        num_layers: Number of layers in each side of U-net (default 5)
-        features_start: Number of features in first layer (default 64)
-        bilinear (bool): Whether to use bilinear interpolation or transposed convolutions (default) for upsampling.
     """
 
     def __init__(
@@ -30,6 +24,13 @@ class UNet(nn.Module):
             features_start: int = 64,
             bilinear: bool = False
     ):
+        """
+        Args:
+            num_classes: Number of output classes required
+            num_layers: Number of layers in each side of U-net (default 5)
+            features_start: Number of features in first layer (default 64)
+            bilinear (bool): Whether to use bilinear interpolation or transposed convolutions (default) for upsampling.
+        """
         super().__init__()
         self.num_layers = num_layers
 
@@ -98,8 +99,7 @@ class Down(nn.Module):
 class Up(nn.Module):
     """
     Upsampling (by either bilinear interpolation or transpose convolutions)
-    followed by concatenation of feature map from contracting path,
-    followed by DoubleConv.
+    followed by concatenation of feature map from contracting path, followed by DoubleConv.
     """
 
     def __init__(self, in_ch: int, out_ch: int, bilinear: bool = False):

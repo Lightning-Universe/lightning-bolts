@@ -28,6 +28,32 @@ else:
 
 
 class Reinforce(pl.LightningModule):
+    """
+    PyTorch Lightning implementation of `REINFORCE
+    <https://papers.nips.cc/paper/
+    1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
+    Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
+    Model implemented by:
+
+        - `Donal Byrne <https://github.com/djbyrne>`
+
+    Example:
+        >>> from pl_bolts.models.rl.reinforce_model import Reinforce
+        ...
+        >>> model = Reinforce("CartPole-v0")
+
+    Train::
+
+        trainer = Trainer()
+        trainer.fit(model)
+
+    Note:
+        This example is based on:
+        https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/02_cartpole_reinforce.py
+
+    Note:
+        Currently only supports CPU and single GPU training with `distributed_backend=dp`
+    """
     def __init__(
         self,
         env: str,
@@ -42,24 +68,6 @@ class Reinforce(pl.LightningModule):
         **kwargs
     ) -> None:
         """
-        PyTorch Lightning implementation of `REINFORCE
-        <https://papers.nips.cc/paper/
-        1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
-        Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
-        Model implemented by:
-
-            - `Donal Byrne <https://github.com/djbyrne>`
-
-        Example:
-            >>> from pl_bolts.models.rl.reinforce_model import Reinforce
-            ...
-            >>> model = Reinforce("CartPole-v0")
-
-        Train::
-
-            trainer = Trainer()
-            trainer.fit(model)
-
         Args:
             env: gym environment tag
             gamma: discount factor
@@ -70,13 +78,6 @@ class Reinforce(pl.LightningModule):
             epoch_len: how many batches before pseudo epoch
             num_batch_episodes: how many episodes to rollout for each batch of training
             avg_reward_len: how many episodes to take into account when calculating the avg reward
-
-        Note:
-            This example is based on:
-            https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/02_cartpole_reinforce.py
-
-        Note:
-            Currently only supports CPU and single GPU training with `distributed_backend=dp`
         """
         super().__init__()
 
