@@ -18,20 +18,22 @@ class LitArg:
 
 
 class LightningArgumentParser(ArgumentParser):
+    """
+    Extension of argparse.ArgumentParser that lets you parse arbitrary object init args.
+
+    Example::
+
+        from pl_bolts.utils.arguments import LightningArgumentParser
+
+        parser.add_object_args("data", MyDataModule)
+        parser.add_object_args("model", MyModel)
+        args = parser.parse_lit_args()
+
+        # args.data -> data args
+        # args.model -> model args
+    """
     def __init__(self, *args, ignore_required_init_args=True, **kwargs):
-        """Extension of argparse.ArgumentParser that lets you parse arbitrary object init args.
-
-        Example::
-
-            from pl_bolts.utils.arguments import LightningArgumentParser
-
-            parser.add_object_args("data", MyDataModule)
-            parser.add_object_args("model", MyModel)
-            args = parser.parse_lit_args()
-
-            # args.data -> data args
-            # args.model -> model args
-
+        """
         Args:
             ignore_required_init_args (bool, optional): Whether to include positional args when adding
             object args. Defaults to True.

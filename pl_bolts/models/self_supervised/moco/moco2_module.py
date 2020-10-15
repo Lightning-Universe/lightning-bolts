@@ -32,6 +32,34 @@ from pl_bolts.models.self_supervised.moco.transforms import (
 
 
 class MocoV2(pl.LightningModule):
+    """
+    PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
+
+    Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.
+
+    Code adapted from `facebookresearch/moco <https://github.com/facebookresearch/moco>`_ to Lightning by:
+
+        - `William Falcon <https://github.com/williamFalcon>`_
+
+    Example::
+        from pl_bolts.models.self_supervised import MocoV2
+        model = MocoV2()
+        trainer = Trainer()
+        trainer.fit(model)
+
+    CLI command::
+
+        # cifar10
+        python moco2_module.py --gpus 1
+
+        # imagenet
+        python moco2_module.py
+            --gpus 8
+            --dataset imagenet2012
+            --data_dir /path/to/imagenet/
+            --meta_dir /path/to/folder/with/meta.bin/
+            --batch_size 32
+    """
 
     def __init__(self,
                  base_encoder: Union[str, torch.nn.Module] = 'resnet18',
@@ -42,40 +70,12 @@ class MocoV2(pl.LightningModule):
                  learning_rate: float = 0.03,
                  momentum: float = 0.9,
                  weight_decay: float = 1e-4,
-                 datamodule: pl.LightningDataModule = None,
                  data_dir: str = './',
                  batch_size: int = 256,
                  use_mlp: bool = False,
                  num_workers: int = 8,
                  *args, **kwargs):
         """
-        PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
-
-        Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.
-
-        Code adapted from `facebookresearch/moco <https://github.com/facebookresearch/moco>`_ to Lightning by:
-
-            - `William Falcon <https://github.com/williamFalcon>`_
-
-        Example::
-            from pl_bolts.models.self_supervised import MocoV2
-            model = MocoV2()
-            trainer = Trainer()
-            trainer.fit(model)
-
-        CLI command::
-
-            # cifar10
-            python moco2_module.py --gpus 1
-
-            # imagenet
-            python moco2_module.py
-                --gpus 8
-                --dataset imagenet2012
-                --data_dir /path/to/imagenet/
-                --meta_dir /path/to/folder/with/meta.bin/
-                --batch_size 32
-
         Args:
             base_encoder: torchvision model name or torch.nn.Module
             emb_dim: feature dimension (default: 128)
@@ -94,14 +94,6 @@ class MocoV2(pl.LightningModule):
 
         super().__init__()
         self.save_hyperparameters()
-
-        # use CIFAR-10 by default if no datamodule passed in
-        # if datamodule is None:
-        #     datamodule = CIFAR10DataModule(data_dir)
-        #     datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
-        #     datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
-        assert datamodule
-        self.datamodule = datamodule
 
         # create the encoders
         # num_classes is the output fc dimension
@@ -258,7 +250,7 @@ class MocoV2(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         # in STL10 we pass in both lab+unl for online ft
-        if self.hparams.datamodule.name == 'stl10':
+        if self.trainer.datamodule.name == 'stl10':
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -275,11 +267,12 @@ class MocoV2(pl.LightningModule):
             'train_acc1': acc1,
             'train_acc5': acc5
         }
-        return {'loss': loss, 'log': log, 'progress_bar': log}
+        self.log_dict(log)
+        return loss
 
     def validation_step(self, batch, batch_idx):
         # in STL10 we pass in both lab+unl for online ft
-        if self.hparams.datamodule.name == 'stl10':
+        if self.trainer.datamodule.name == 'stl10':
             labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
@@ -308,7 +301,7 @@ class MocoV2(pl.LightningModule):
             'val_acc1': val_acc1,
             'val_acc5': val_acc5
         }
-        return {'val_loss': val_loss, 'log': log, 'progress_bar': log}
+        self.log_dict(log)
 
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(self.parameters(), self.hparams.learning_rate,
@@ -381,10 +374,14 @@ def cli_main():
         datamodule.train_transforms = Moco2TrainImagenetTransforms()
         datamodule.val_transforms = Moco2EvalImagenetTransforms()
 
-    model = MocoV2(**args.__dict__, datamodule=datamodule)
+    else:
+        # replace with your own dataset, otherwise CIFAR-10 will be used by default if `None` passed in
+        datamodule = None
+
+    model = MocoV2(**args.__dict__)
 
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model)
+    trainer.fit(model, datamodule=datamodule)
 
 
 if __name__ == '__main__':

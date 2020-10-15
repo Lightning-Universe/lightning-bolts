@@ -33,7 +33,33 @@ else:
 
 
 class DQN(pl.LightningModule):
-    """ Basic DQN Model """
+    """
+    Basic DQN Model
+
+    PyTorch Lightning implementation of `DQN <https://arxiv.org/abs/1312.5602>`_
+    Paper authors: Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves,
+    Ioannis Antonoglou, Daan Wierstra, Martin Riedmiller.
+    Model implemented by:
+
+        - `Donal Byrne <https://github.com/djbyrne>`
+
+    Example:
+        >>> from pl_bolts.models.rl.dqn_model import DQN
+        ...
+        >>> model = DQN("PongNoFrameskip-v4")
+
+    Train::
+
+        trainer = Trainer()
+        trainer.fit(model)
+
+    Note:
+        This example is based on:
+        https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter06/02_dqn_pong.py
+
+    Note:
+        Currently only supports CPU and single GPU training with `distributed_backend=dp`
+    """
 
     def __init__(
         self,
@@ -55,23 +81,6 @@ class DQN(pl.LightningModule):
         **kwargs,
     ):
         """
-        PyTorch Lightning implementation of `DQN <https://arxiv.org/abs/1312.5602>`_
-        Paper authors: Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves,
-        Ioannis Antonoglou, Daan Wierstra, Martin Riedmiller.
-        Model implemented by:
-
-            - `Donal Byrne <https://github.com/djbyrne>`
-
-        Example:
-            >>> from pl_bolts.models.rl.dqn_model import DQN
-            ...
-            >>> model = DQN("PongNoFrameskip-v4")
-
-        Train::
-
-            trainer = Trainer()
-            trainer.fit(model)
-
         Args:
             env: gym environment tag
             eps_start: starting value of epsilon for the epsilon-greedy exploration
@@ -90,13 +99,6 @@ class DQN(pl.LightningModule):
             seed: seed value for all RNG used
             batches_per_epoch: number of batches per epoch
             n_steps: size of n step look ahead
-
-        Note:
-            This example is based on:
-            https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter06/02_dqn_pong.py
-
-        Note:
-            Currently only supports CPU and single GPU training with `distributed_backend=dp`
         """
         super().__init__()
 

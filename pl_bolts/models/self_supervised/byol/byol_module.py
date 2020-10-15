@@ -15,6 +15,61 @@ from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
 class BYOL(pl.LightningModule):
+    """
+    PyTorch Lightning implementation of `Bootstrap Your Own Latent (BYOL)
+    <https://arxiv.org/pdf/2006.07733.pdf>`_
+
+    Paper authors: Jean-Bastien Grill, Florian Strub, Florent Altché, Corentin Tallec, Pierre H. Richemond, \
+    Elena Buchatskaya, Carl Doersch, Bernardo Avila Pires, Zhaohan Daniel Guo, Mohammad Gheshlaghi Azar, \
+    Bilal Piot, Koray Kavukcuoglu, Rémi Munos, Michal Valko.
+
+    Model implemented by:
+        - `Annika Brundyn <https://github.com/annikabrundyn>`_
+
+    .. warning:: Work in progress. This implementation is still being verified.
+
+    TODOs:
+        - verify on CIFAR-10
+        - verify on STL-10
+        - pre-train on imagenet
+
+    Example::
+
+        import pytorch_lightning as pl
+        from pl_bolts.models.self_supervised import BYOL
+        from pl_bolts.datamodules import CIFAR10DataModule
+        from pl_bolts.models.self_supervised.simclr.transforms import (
+            SimCLREvalDataTransform, SimCLRTrainDataTransform)
+
+        # model
+        model = BYOL(num_classes=10)
+
+        # data
+        dm = CIFAR10DataModule(num_workers=0)
+        dm.train_transforms = SimCLRTrainDataTransform(32)
+        dm.val_transforms = SimCLREvalDataTransform(32)
+
+        trainer = pl.Trainer()
+        trainer.fit(model, dm)
+
+    Train::
+
+        trainer = Trainer()
+        trainer.fit(model)
+
+    CLI command::
+
+        # cifar10
+        python byol_module.py --gpus 1
+
+        # imagenet
+        python byol_module.py
+            --gpus 8
+            --dataset imagenet2012
+            --data_dir /path/to/imagenet/
+            --meta_dir /path/to/folder/with/meta.bin/
+            --batch_size 32
+    """
     def __init__(self,
                  num_classes,
                  learning_rate: float = 0.2,
@@ -26,60 +81,6 @@ class BYOL(pl.LightningModule):
                  max_epochs: int = 1000,
                  **kwargs):
         """
-        PyTorch Lightning implementation of `Bootstrap Your Own Latent (BYOL)
-        <https://arxiv.org/pdf/2006.07733.pdf>`_
-
-        Paper authors: Jean-Bastien Grill, Florian Strub, Florent Altché, Corentin Tallec, Pierre H. Richemond, \
-        Elena Buchatskaya, Carl Doersch, Bernardo Avila Pires, Zhaohan Daniel Guo, Mohammad Gheshlaghi Azar, \
-        Bilal Piot, Koray Kavukcuoglu, Rémi Munos, Michal Valko.
-
-        Model implemented by:
-            - `Annika Brundyn <https://github.com/annikabrundyn>`_
-
-        .. warning:: Work in progress. This implementation is still being verified.
-
-        TODOs:
-            - verify on CIFAR-10
-            - verify on STL-10
-            - pre-train on imagenet
-
-        Example::
-
-            import pytorch_lightning as pl
-            from pl_bolts.models.self_supervised import BYOL
-            from pl_bolts.datamodules import CIFAR10DataModule
-            from pl_bolts.models.self_supervised.simclr.transforms import (
-                SimCLREvalDataTransform, SimCLRTrainDataTransform)
-
-            # model
-            model = BYOL(num_classes=10)
-
-            # data
-            dm = CIFAR10DataModule(num_workers=0)
-            dm.train_transforms = SimCLRTrainDataTransform(32)
-            dm.val_transforms = SimCLREvalDataTransform(32)
-
-            trainer = pl.Trainer()
-            trainer.fit(model, dm)
-
-        Train::
-
-            trainer = Trainer()
-            trainer.fit(model)
-
-        CLI command::
-
-            # cifar10
-            python byol_module.py --gpus 1
-
-            # imagenet
-            python byol_module.py
-                --gpus 8
-                --dataset imagenet2012
-                --data_dir /path/to/imagenet/
-                --meta_dir /path/to/folder/with/meta.bin/
-                --batch_size 32
-
         Args:
             datamodule: The datamodule
             learning_rate: the learning rate
@@ -97,9 +98,9 @@ class BYOL(pl.LightningModule):
         self.target_network = deepcopy(self.online_network)
         self.weight_callback = BYOLMAWeightUpdate()
 
-    def on_train_batch_end(self, batch: Any, batch_idx: int, dataloader_idx: int) -> None:
+    def on_train_batch_end(self, outputs, batch: Any, batch_idx: int, dataloader_idx: int) -> None:
         # Add callback for user automatically since it's key to BYOL weight update
-        self.weight_callback.on_train_batch_end(self.trainer, self, batch, batch_idx, dataloader_idx)
+        self.weight_callback.on_train_batch_end(self.trainer, self, outputs, batch, batch_idx, dataloader_idx)
 
     def forward(self, x):
         y, _, _ = self.online_network(x)

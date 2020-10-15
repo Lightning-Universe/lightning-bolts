@@ -35,12 +35,14 @@ class ExperienceSourceDataset(IterableDataset):
 class BaseExperienceSource(ABC):
     """
     Simplest form of the experience source
-    Args:
-        env: Environment that is being used
-        agent: Agent being used to make decisions
     """
 
     def __init__(self, env, agent) -> None:
+        """
+        Args:
+            env: Environment that is being used
+            agent: Agent being used to make decisions
+        """
         self.env = env
         self.agent = agent
 
@@ -52,13 +54,15 @@ class BaseExperienceSource(ABC):
 class ExperienceSource(BaseExperienceSource):
     """
     Experience source class handling single and multiple environment steps
-    Args:
-        env: Environment that is being used
-        agent: Agent being used to make decisions
-        n_steps: Number of steps to return from each environment at once
     """
 
     def __init__(self, env, agent, n_steps: int = 1) -> None:
+        """
+        Args:
+            env: Environment that is being used
+            agent: Agent being used to make decisions
+            n_steps: Number of steps to return from each environment at once
+        """
         super().__init__(env, agent)
 
         self.pool = env if isinstance(env, (list, tuple)) else [env]

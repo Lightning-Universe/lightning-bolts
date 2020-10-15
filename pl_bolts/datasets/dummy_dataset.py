@@ -6,10 +6,6 @@ class DummyDataset(Dataset):
     """
     Generate a dummy dataset
 
-    Args:
-        *shapes: list of shapes
-        num_samples: how many samples to use in this dataset
-
     Example::
 
         from pl_bolts.datasets import DummyDataset
@@ -26,6 +22,11 @@ class DummyDataset(Dataset):
         torch.Size([7, 1])
     """
     def __init__(self, *shapes, num_samples: int = 10000):
+        """
+        Args:
+            *shapes: list of shapes
+            num_samples: how many samples to use in this dataset
+        """
         super().__init__()
         self.shapes = shapes
         self.num_samples = num_samples
@@ -45,10 +46,6 @@ class DummyDetectionDataset(Dataset):
     """
     Generate a dummy dataset for detection
 
-    Args:
-        *shapes: list of shapes
-        num_samples: how many samples to use in this dataset
-
     Example::
 
         from pl_bolts.datasets import DummyDetectionDataset
@@ -59,6 +56,11 @@ class DummyDetectionDataset(Dataset):
     def __init__(
         self, img_shape: tuple = (3, 256, 256), num_boxes: int = 1, num_classes: int = 2, num_samples: int = 10000
     ):
+        """
+        Args:
+            *shapes: list of shapes
+            num_samples: how many samples to use in this dataset
+        """
         super().__init__()
         self.img_shape = img_shape
         self.num_samples = num_samples
@@ -85,10 +87,6 @@ class RandomDictDataset(Dataset):
     """
     Generate a dummy dataset with a dict structure
 
-    Args:
-        size: tuple
-        num_samples: number of samples
-
     Example::
 
         from pl_bolts.datasets import RandomDictDataset
@@ -97,6 +95,11 @@ class RandomDictDataset(Dataset):
         >>> dl = DataLoader(ds, batch_size=7)
     """
     def __init__(self, size: int, num_samples: int = 250):
+        """
+        Args:
+            size: tuple
+            num_samples: number of samples
+        """
         self.len = num_samples
         self.data = torch.randn(num_samples, size)
 
@@ -113,10 +116,6 @@ class RandomDictStringDataset(Dataset):
     """
     Generate a dummy dataset with strings
 
-    Args:
-        size: tuple
-        num_samples: number of samples
-
     Example::
 
         from pl_bolts.datasets import RandomDictStringDataset
@@ -125,6 +124,11 @@ class RandomDictStringDataset(Dataset):
         >>> dl = DataLoader(ds, batch_size=7)
     """
     def __init__(self, size: int, num_samples: int = 250):
+        """
+        Args:
+            size: tuple
+            num_samples: number of samples
+        """
         self.len = num_samples
         self.data = torch.randn(num_samples, size)
 
@@ -139,10 +143,6 @@ class RandomDataset(Dataset):
     """
     Generate a dummy dataset
 
-    Args:
-        size: tuple
-        num_samples: number of samples
-
     Example::
 
         from pl_bolts.datasets import RandomDataset
@@ -151,6 +151,11 @@ class RandomDataset(Dataset):
         >>> dl = DataLoader(ds, batch_size=7)
     """
     def __init__(self, size: int, num_samples: int = 250):
+        """
+        Args:
+            size: tuple
+            num_samples: number of samples
+        """
         self.len = num_samples
         self.data = torch.randn(num_samples, size)
 

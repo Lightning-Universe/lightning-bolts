@@ -103,6 +103,10 @@ def _prepare_voc_instance(image, target):
 
 
 class VOCDetectionDataModule(LightningDataModule):
+    """
+    TODO(teddykoker) docstring
+    """
+
     name = "vocdetection"
 
     def __init__(
@@ -114,9 +118,6 @@ class VOCDetectionDataModule(LightningDataModule):
         *args,
         **kwargs,
     ):
-        """
-        TODO(teddykoker) docstring
-        """
         super().__init__(*args, **kwargs)
 
         if not _TORCHVISION_AVAILABLE:
