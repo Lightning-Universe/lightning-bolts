@@ -10,6 +10,19 @@ from pl_bolts.models.autoencoders.components import resnet50_encoder, resnet50_d
 
 
 class AE(pl.LightningModule):
+    """
+    Standard AE
+
+    Model is available pretrained on different datasets:
+
+    Example::
+
+        # not pretrained
+        ae = AE()
+
+        # pretrained on cifar10
+        ae = AE.from_pretrained('cifar10-resnet18')
+    """
 
     pretrained_urls = {
         'cifar10-resnet18':
@@ -29,20 +42,7 @@ class AE(pl.LightningModule):
         **kwargs
     ):
         """
-        Standard AE
-
-        Model is available pretrained on different datasets:
-
-        Example::
-
-            # not pretrained
-            ae = AE()
-
-            # pretrained on cifar10
-            ae = AE.from_pretrained('cifar10-resnet18')
-
         Args:
-
             input_height: height of the images
             enc_type: option between resnet18 or resnet50
             first_conv: use standard kernel_size 7, stride 2 at start or

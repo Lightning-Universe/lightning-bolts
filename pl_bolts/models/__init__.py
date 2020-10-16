@@ -7,6 +7,9 @@ from pl_bolts.models.autoencoders.basic_vae.basic_vae_module import VAE
 from pl_bolts.models.mnist_module import LitMNIST
 from pl_bolts.models.regression import LinearRegression, LogisticRegression
 from pl_bolts.models.vision import PixelCNN
-from pl_bolts.models.vision.image_gpt.igpt_module import GPT2, ImageGPT
 from pl_bolts.models.vision import UNet
+<<<<<<< HEAD
 from pl_bolts.models.vision import SemSegment
+=======
+from pl_bolts.models.vision.image_gpt.igpt_module import GPT2, ImageGPT
+>>>>>>> f48357be353b7acdd882379ac3308fbec95dc40d

@@ -177,3 +177,16 @@ with your implementation.
 
 Bolts is supported by the PyTorch Lightning team and the PyTorch Lightning community!
 
+## Citation
+To cite bolts use:
+
+```
+@article{falcon2020framework,
+  title={A Framework For Contrastive Self-Supervised Learning And Designing A New Approach},
+  author={Falcon, William and Cho, Kyunghyun},
+  journal={arXiv preprint arXiv:2009.00104},
+  year={2020}
+}
+```
+
+To cite other contributed models or modules, please cite the authors directly (if they don't have bibtex, ping the authors on a GH issue)

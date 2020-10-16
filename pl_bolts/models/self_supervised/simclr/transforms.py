@@ -103,7 +103,10 @@ class SimCLREvalDataTransform(object):
 
 
 class GaussianBlur(object):
-    # Implements Gaussian blur as described in the SimCLR paper
+    """
+    Implements Gaussian blur as described in the SimCLR paper
+    """
+
     def __init__(self, kernel_size, min=0.1, max=2.0):
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover

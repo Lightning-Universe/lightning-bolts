@@ -10,6 +10,22 @@ from pl_bolts.models.autoencoders.components import resnet50_encoder, resnet50_d
 
 
 class VAE(pl.LightningModule):
+    """
+    Standard VAE with Gaussian Prior and approx posterior.
+
+    Model is available pretrained on different datasets:
+
+    Example::
+
+        # not pretrained
+        vae = VAE()
+
+        # pretrained on cifar10
+        vae = VAE.from_pretrained('cifar10-resnet18')
+
+        # pretrained on stl10
+        vae = VAE.from_pretrained('stl10-resnet18')
+    """
 
     pretrained_urls = {
         'cifar10-resnet18':
@@ -31,23 +47,7 @@ class VAE(pl.LightningModule):
         **kwargs
     ):
         """
-        Standard VAE with Gaussian Prior and approx posterior.
-
-        Model is available pretrained on different datasets:
-
-        Example::
-
-            # not pretrained
-            vae = VAE()
-
-            # pretrained on cifar10
-            vae = VAE.from_pretrained('cifar10-resnet18')
-
-            # pretrained on stl10
-            vae = VAE.from_pretrained('stl10-resnet18')
-
         Args:
-
             input_height: height of the images
             enc_type: option between resnet18 or resnet50
             first_conv: use standard kernel_size 7, stride 2 at start or

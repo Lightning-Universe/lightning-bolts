@@ -1,12 +1,12 @@
 import os
+
 import torch
-
-from pytorch_lightning import LightningDataModule
-from pl_bolts.datamodules.kitti_dataset import KittiDataset
-
-from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
+from pytorch_lightning import LightningDataModule
+from torch.utils.data import DataLoader
 from torch.utils.data.dataset import random_split
+
+from pl_bolts.datasets.kitti_dataset import KittiDataset
 
 
 class KittiDataModule(LightningDataModule):

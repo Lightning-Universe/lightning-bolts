@@ -30,6 +30,28 @@ class Block(nn.Module):
 
 
 class GPT2(pl.LightningModule):
+    """
+    GPT-2 from `language Models are Unsupervised Multitask Learners <https://d4mucfpksywv.cloudfront.net/
+    better-language-models/language-models.pdf>`_
+
+    Paper by:  Alec Radford, Jeffrey Wu, Rewon Child, David Luan, Dario Amodei, Ilya Sutskever
+
+    Implementation contributed by:
+
+        - `Teddy Koker <https://github.com/teddykoker>`_
+
+    Example::
+
+        from pl_bolts.models import GPT2
+
+        seq_len = 17
+        batch_size = 32
+        vocab_size = 16
+        x = torch.randint(0, vocab_size, (seq_len, batch_size))
+        model = GPT2(embed_dim=32, heads=2, layers=2, num_positions=seq_len, vocab_size=vocab_size, num_classes=4)
+        results = model(x)
+    """
+
     def __init__(
         self,
         embed_dim: int,
@@ -39,27 +61,6 @@ class GPT2(pl.LightningModule):
         vocab_size: int,
         num_classes: int,
     ):
-        """
-        GPT-2 from `language Models are Unsupervised Multitask Learners <https://d4mucfpksywv.cloudfront.net/
-        better-language-models/language-models.pdf>`_
-
-        Paper by:  Alec Radford, Jeffrey Wu, Rewon Child, David Luan, Dario Amodei, Ilya Sutskever
-
-        Implementation contributed by:
-
-            - `Teddy Koker <https://github.com/teddykoker>`_
-
-        Example::
-
-            from pl_bolts.models import GPT2
-
-            seq_len = 17
-            batch_size = 32
-            vocab_size = 16
-            x = torch.randint(0, vocab_size, (seq_len, batch_size))
-            model = GPT2(embed_dim=32, heads=2, layers=2, num_positions=seq_len, vocab_size=vocab_size, num_classes=4)
-            results = model(x)
-        """
         super(GPT2, self).__init__()
         self.save_hyperparameters()
 

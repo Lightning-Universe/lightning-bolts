@@ -7,38 +7,39 @@ from pl_bolts.models.self_supervised import SSLEvaluator
 
 
 class SSLFineTuner(pl.LightningModule):
+    """
+    Finetunes a self-supervised learning backbone using the standard evaluation protocol of a singler layer MLP
+    with 1024 units
+
+    Example::
+
+        from pl_bolts.utils.self_supervised import SSLFineTuner
+        from pl_bolts.models.self_supervised import CPCV2
+        from pl_bolts.datamodules import CIFAR10DataModule
+        from pl_bolts.models.self_supervised.cpc.transforms import CPCEvalTransformsCIFAR10,
+                                                                    CPCTrainTransformsCIFAR10
+
+        # pretrained model
+        backbone = CPCV2.load_from_checkpoint(PATH, strict=False)
+
+        # dataset + transforms
+        dm = CIFAR10DataModule(data_dir='.')
+        dm.train_transforms = CPCTrainTransformsCIFAR10()
+        dm.val_transforms = CPCEvalTransformsCIFAR10()
+
+        # finetuner
+        finetuner = SSLFineTuner(backbone, in_features=backbone.z_dim, num_classes=backbone.num_classes)
+
+        # train
+        trainer = pl.Trainer()
+        trainer.fit(finetuner, dm)
+
+        # test
+        trainer.test(datamodule=dm)
+    """
 
     def __init__(self, backbone, in_features, num_classes, hidden_dim=1024):
         """
-        Finetunes a self-supervised learning backbone using the standard evaluation protocol of a singler layer MLP
-        with 1024 units
-
-        Example::
-
-            from pl_bolts.utils.self_supervised import SSLFineTuner
-            from pl_bolts.models.self_supervised import CPCV2
-            from pl_bolts.datamodules import CIFAR10DataModule
-            from pl_bolts.models.self_supervised.cpc.transforms import CPCEvalTransformsCIFAR10,
-                                                                        CPCTrainTransformsCIFAR10
-
-            # pretrained model
-            backbone = CPCV2.load_from_checkpoint(PATH, strict=False)
-
-            # dataset + transforms
-            dm = CIFAR10DataModule(data_dir='.')
-            dm.train_transforms = CPCTrainTransformsCIFAR10()
-            dm.val_transforms = CPCEvalTransformsCIFAR10()
-
-            # finetuner
-            finetuner = SSLFineTuner(backbone, in_features=backbone.z_dim, num_classes=backbone.num_classes)
-
-            # train
-            trainer = pl.Trainer()
-            trainer.fit(finetuner, dm)
-
-            # test
-            trainer.test(datamodule=dm)
-
         Args:
             backbone: a pretrained model
             in_features: feature dim of backbone outputs

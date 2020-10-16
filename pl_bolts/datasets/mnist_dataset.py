@@ -3,10 +3,10 @@ from warnings import warn
 try:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import MNIST
-except ModuleNotFoundError:
+except ModuleNotFoundError as err:
     raise ModuleNotFoundError(  # pragma: no-cover
         'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
-    )
+    ) from err
 
 try:
     from PIL import Image

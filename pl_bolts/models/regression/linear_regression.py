@@ -9,6 +9,10 @@ from torch.optim.optimizer import Optimizer
 
 
 class LinearRegression(pl.LightningModule):
+    """
+    Linear regression model implementing - with optional L1/L2 regularization
+    $$min_{W} ||(Wx + b) - y ||_2^2 $$
+    """
 
     def __init__(self,
                  input_dim: int,
@@ -20,9 +24,6 @@ class LinearRegression(pl.LightningModule):
                  l2_strength: float = 0.0,
                  **kwargs):
         """
-        Linear regression model implementing - with optional L1/L2 regularization
-        $$min_{W} ||(Wx + b) - y ||_2^2 $$
-
         Args:
             input_dim: number of dimensions of the input (1+)
             output_dim: number of dimensions of the output (default=1)
@@ -31,7 +32,6 @@ class LinearRegression(pl.LightningModule):
             optimizer: the optimizer to use (default='Adam')
             l1_strength: L1 regularization strength (default=None)
             l2_strength: L2 regularization strength (default=None)
-
         """
         super().__init__()
         self.save_hyperparameters()
@@ -126,10 +126,10 @@ def cli_main():
     # create dataset
     try:
         from sklearn.datasets import load_boston
-    except ModuleNotFoundError:
+    except ModuleNotFoundError as err:
         raise ModuleNotFoundError(  # pragma: no-cover
             'You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`.'
-        )
+        ) from err
 
     X, y = load_boston(return_X_y=True)  # these are numpy arrays
     loaders = SklearnDataModule(X, y)

@@ -24,6 +24,24 @@ def _evaluate_iou(target, pred):
 
 
 class FasterRCNN(pl.LightningModule):
+    """
+    PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with
+    Region Proposal Networks <https://arxiv.org/abs/1506.01497>`_.
+
+    Paper authors: Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun
+
+    Model implemented by:
+        - `Teddy Koker <https://github.com/teddykoker>`
+
+    During training, the model expects both the input tensors, as well as targets (list of dictionary), containing:
+        - boxes (`FloatTensor[N, 4]`): the ground truth boxes in `[x1, y1, x2, y2]` format.
+        - labels (`Int64Tensor[N]`): the class label for each ground truh box
+
+    CLI command::
+
+        # PascalVOC
+        python faster_rcnn.py --gpus 1 --pretrained True
+    """
     def __init__(
         self,
         learning_rate: float = 0.0001,
@@ -35,23 +53,6 @@ class FasterRCNN(pl.LightningModule):
         **kwargs,
     ):
         """
-        PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with
-        Region Proposal Networks <https://arxiv.org/abs/1506.01497>`_.
-
-        Paper authors: Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun
-
-        Model implemented by:
-            - `Teddy Koker <https://github.com/teddykoker>`
-
-        During training, the model expects both the input tensors, as well as targets (list of dictionary), containing:
-            - boxes (`FloatTensor[N, 4]`): the ground truth boxes in `[x1, y1, x2, y2]` format.
-            - labels (`Int64Tensor[N]`): the class label for each ground truh box
-
-        CLI command::
-
-            # PascalVOC
-            python faster_rcnn.py --gpus 1 --pretrained True
-
         Args:
             learning_rate: the learning rate
             num_classes: number of detection classes (including background)

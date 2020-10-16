@@ -20,13 +20,19 @@ except ModuleNotFoundError:
 try:
     from torchvision.datasets import ImageNet
     from torchvision.datasets.imagenet import load_meta_file
-except ModuleNotFoundError:
+except ModuleNotFoundError as err:
     raise ModuleNotFoundError(  # pragma: no-cover
         'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
-    )
+    ) from err
 
 
 class UnlabeledImagenet(ImageNet):
+    """
+    Official train set gets split into train, val. (using nb_imgs_per_val_class for each class).
+    Official validation becomes test set
+
+    Within each class, we further allow limiting the number of samples per class (for semi-sup lng)
+    """
 
     def __init__(
             self,
@@ -39,11 +45,6 @@ class UnlabeledImagenet(ImageNet):
             **kwargs,
     ):
         """
-        Official train set gets split into train, val. (using nb_imgs_per_val_class for each class).
-        Official validation becomes test set
-
-        Within each class, we further allow limiting the number of samples per class (for semi-sup lng)
-
         Args:
             root: path of dataset
             split:

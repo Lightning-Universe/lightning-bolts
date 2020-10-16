@@ -25,14 +25,6 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         epoch param to :func:`.step()`, the user should call the :func:`.step()` function before calling
         train and validation methods.
 
-    Args:
-        optimizer (Optimizer): Wrapped optimizer.
-        warmup_epochs (int): Maximum number of iterations for linear warmup
-        max_epochs (int): Maximum number of iterations
-        warmup_start_lr (float): Learning rate to start the linear warmup. Default: 0.
-        eta_min (float): Minimum learning rate. Default: 0.
-        last_epoch (int): The index of last epoch. Default: -1.
-
     Example:
         >>> layer = nn.Linear(10, 1)
         >>> optimizer = Adam(layer.parameters(), lr=0.02)
@@ -60,7 +52,15 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         eta_min: float = 0.0,
         last_epoch: int = -1,
     ) -> None:
-
+        """
+        Args:
+            optimizer (Optimizer): Wrapped optimizer.
+            warmup_epochs (int): Maximum number of iterations for linear warmup
+            max_epochs (int): Maximum number of iterations
+            warmup_start_lr (float): Learning rate to start the linear warmup. Default: 0.
+            eta_min (float): Minimum learning rate. Default: 0.
+            last_epoch (int): The index of last epoch. Default: -1.
+        """
         self.warmup_epochs = warmup_epochs
         self.max_epochs = max_epochs
         self.warmup_start_lr = warmup_start_lr
