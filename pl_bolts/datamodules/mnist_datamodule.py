@@ -1,50 +1,62 @@
+from warnings import warn
+
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
-from torchvision import transforms as transform_lib
-from torchvision.datasets import MNIST
+
+try:
+    from torchvision import transforms as transform_lib
+    from torchvision.datasets import MNIST
+except ModuleNotFoundError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
+    _TORCHVISION_AVAILABLE = False
+else:
+    _TORCHVISION_AVAILABLE = True
 
 
 class MNISTDataModule(LightningDataModule):
+    """
+    .. figure:: https://miro.medium.com/max/744/1*AO2rIhzRYzFVQlFLx9DM9A.png
+        :width: 400
+        :alt: MNIST
 
-    name = 'mnist'
+    Specs:
+        - 10 classes (1 per digit)
+        - Each image is (1 x 28 x 28)
+
+    Standard MNIST, train, val, test splits and transforms
+
+    Transforms::
+
+        mnist_transforms = transform_lib.Compose([
+            transform_lib.ToTensor()
+        ])
+
+    Example::
+
+        from pl_bolts.datamodules import MNISTDataModule
+
+        dm = MNISTDataModule('.')
+        model = LitModel()
+
+        Trainer().fit(model, dm)
+    """
+
+    name = "mnist"
 
     def __init__(
-            self,
-            data_dir: str,
-            val_split: int = 5000,
-            num_workers: int = 16,
-            normalize: bool = False,
-            seed: int = 42,
-            *args,
-            **kwargs,
+        self,
+        data_dir: str = "./",
+        val_split: int = 5000,
+        num_workers: int = 16,
+        normalize: bool = False,
+        seed: int = 42,
+        batch_size: int = 32,
+        *args,
+        **kwargs,
     ):
         """
-        .. figure:: https://miro.medium.com/max/744/1*AO2rIhzRYzFVQlFLx9DM9A.png
-            :width: 400
-            :alt: MNIST
-
-        Specs:
-            - 10 classes (1 per digit)
-            - Each image is (1 x 28 x 28)
-
-        Standard MNIST, train, val, test splits and transforms
-
-        Transforms::
-
-            mnist_transforms = transform_lib.Compose([
-                transform_lib.ToTensor()
-            ])
-
-        Example::
-
-            from pl_bolts.datamodules import MNISTDataModule
-
-            dm = MNISTDataModule('.')
-            model = LitModel()
-
-            Trainer().fit(model, dm)
-
         Args:
             data_dir: where to save/load the data
             val_split: how many of the training images to use for the validation split
@@ -52,6 +64,12 @@ class MNISTDataModule(LightningDataModule):
             normalize: If true applies image normalize
         """
         super().__init__(*args, **kwargs)
+
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use MNIST dataset loaded from `torchvision` which is not installed yet.'
+            )
+
         self.dims = (1, 28, 28)
         self.data_dir = data_dir
         self.val_split = val_split
@@ -87,9 +105,7 @@ class MNISTDataModule(LightningDataModule):
         dataset = MNIST(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
         dataset_train, _ = random_split(
-            dataset,
-            [train_length - self.val_split, self.val_split],
-            generator=torch.Generator().manual_seed(self.seed)
+            dataset, [train_length - self.val_split, self.val_split], generator=torch.Generator().manual_seed(self.seed)
         )
         loader = DataLoader(
             dataset_train,
@@ -97,7 +113,7 @@ class MNISTDataModule(LightningDataModule):
             shuffle=True,
             num_workers=self.num_workers,
             drop_last=True,
-            pin_memory=True
+            pin_memory=True,
         )
         return loader
 
@@ -113,9 +129,7 @@ class MNISTDataModule(LightningDataModule):
         dataset = MNIST(self.data_dir, train=True, download=True, transform=transforms)
         train_length = len(dataset)
         _, dataset_val = random_split(
-            dataset,
-            [train_length - self.val_split, self.val_split],
-            generator=torch.Generator().manual_seed(self.seed)
+            dataset, [train_length - self.val_split, self.val_split], generator=torch.Generator().manual_seed(self.seed)
         )
         loader = DataLoader(
             dataset_val,
@@ -123,7 +137,7 @@ class MNISTDataModule(LightningDataModule):
             shuffle=False,
             num_workers=self.num_workers,
             drop_last=True,
-            pin_memory=True
+            pin_memory=True,
         )
         return loader
 
@@ -139,21 +153,15 @@ class MNISTDataModule(LightningDataModule):
 
         dataset = MNIST(self.data_dir, train=False, download=False, transform=transforms)
         loader = DataLoader(
-            dataset,
-            batch_size=batch_size,
-            shuffle=False,
-            num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            dataset, batch_size=batch_size, shuffle=False, num_workers=self.num_workers, drop_last=True, pin_memory=True
         )
         return loader
 
     def _default_transforms(self):
         if self.normalize:
-            mnist_transforms = transform_lib.Compose([
-                transform_lib.ToTensor(),
-                transform_lib.Normalize(mean=(0.5,), std=(0.5,)),
-            ])
+            mnist_transforms = transform_lib.Compose(
+                [transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5,), std=(0.5,))]
+            )
         else:
             mnist_transforms = transform_lib.ToTensor()
 

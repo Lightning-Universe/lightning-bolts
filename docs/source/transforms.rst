@@ -128,10 +128,10 @@ Transforms used for SimCLR
 
 Train (sc)
 ^^^^^^^^^^
-.. autoclass:: pl_bolts.models.self_supervised.simclr.simclr_transforms.SimCLRTrainDataTransform
+.. autoclass:: pl_bolts.models.self_supervised.simclr.transforms.SimCLRTrainDataTransform
     :noindex:
 
 Eval (sc)
 ^^^^^^^^^
-.. autoclass:: pl_bolts.models.self_supervised.simclr.simclr_transforms.SimCLREvalDataTransform
+.. autoclass:: pl_bolts.models.self_supervised.simclr.transforms.SimCLREvalDataTransform
     :noindex:

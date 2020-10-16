@@ -1,14 +1,15 @@
-import torch
-from torch import nn
-from torchvision.models.detection import faster_rcnn, fasterrcnn_resnet50_fpn
-from torchvision.ops import box_iou
+from argparse import ArgumentParser
+from warnings import warn
 
 import pytorch_lightning as pl
+import torch
 
-from pytorch_lightning.metrics import IoU
-from argparse import ArgumentParser
-
-from pl_bolts.datamodules import VOCDetectionDataModule
+try:
+    from torchvision.models.detection import faster_rcnn, fasterrcnn_resnet50_fpn
+    from torchvision.ops import box_iou
+except ModuleNotFoundError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
 
 
 def _evaluate_iou(target, pred):
@@ -23,6 +24,24 @@ def _evaluate_iou(target, pred):
 
 
 class FasterRCNN(pl.LightningModule):
+    """
+    PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with
+    Region Proposal Networks <https://arxiv.org/abs/1506.01497>`_.
+
+    Paper authors: Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun
+
+    Model implemented by:
+        - `Teddy Koker <https://github.com/teddykoker>`
+
+    During training, the model expects both the input tensors, as well as targets (list of dictionary), containing:
+        - boxes (`FloatTensor[N, 4]`): the ground truth boxes in `[x1, y1, x2, y2]` format.
+        - labels (`Int64Tensor[N]`): the class label for each ground truh box
+
+    CLI command::
+
+        # PascalVOC
+        python faster_rcnn.py --gpus 1 --pretrained True
+    """
     def __init__(
         self,
         learning_rate: float = 0.0001,
@@ -34,23 +53,6 @@ class FasterRCNN(pl.LightningModule):
         **kwargs,
     ):
         """
-        PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with
-        Region Proposal Networks <https://arxiv.org/abs/1506.01497>`_.
-
-        Paper authors: Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun
-
-        Model implemented by:
-            - `Teddy Koker <https://github.com/teddykoker>`
-
-        During training, the model expects both the input tensors, as well as targets (list of dictionary), containing:
-            - boxes (`FloatTensor[N, 4]`): the ground truth boxes in `[x1, y1, x2, y2]` format.
-            - labels (`Int64Tensor[N]`): the class label for each ground truh box
-
-        CLI command::
-
-            # PascalVOC
-            python faster_rcnn.py --gpus 1 --pretrained True
-
         Args:
             learning_rate: the learning rate
             num_classes: number of detection classes (including background)
@@ -127,6 +129,8 @@ class FasterRCNN(pl.LightningModule):
 
 
 def run_cli():
+    from pl_bolts.datamodules import VOCDetectionDataModule
+
     pl.seed_everything(42)
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)

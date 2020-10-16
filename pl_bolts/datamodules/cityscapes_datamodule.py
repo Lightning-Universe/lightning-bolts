@@ -1,11 +1,59 @@
+from warnings import warn
+
+import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
-from torchvision import transforms as transform_lib
-from torchvision.datasets import Cityscapes
-import torch
+
+try:
+    from torchvision import transforms as transform_lib
+    from torchvision.datasets import Cityscapes
+except ModuleNotFoundError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
+    _TORCHVISION_AVAILABLE = False
+else:
+    _TORCHVISION_AVAILABLE = True
 
 
 class CityscapesDataModule(LightningDataModule):
+    """
+    .. figure:: https://www.cityscapes-dataset.com/wordpress/wp-content/uploads/2015/07/muenster00-1024x510.png
+        :width: 400
+        :alt: Cityscape
+
+    Standard Cityscapes, train, val, test splits and transforms
+
+    Specs:
+        - 30 classes (road, person, sidewalk, etc...)
+        - (image, target) - image dims: (3 x 32 x 32), target dims: (3 x 32 x 32)
+
+    Transforms::
+
+        transforms = transform_lib.Compose([
+            transform_lib.ToTensor(),
+            transform_lib.Normalize(
+                mean=[0.28689554, 0.32513303, 0.28389177],
+                std=[0.18696375, 0.19017339, 0.18720214]
+            )
+        ])
+
+    Example::
+
+        from pl_bolts.datamodules import CityscapesDataModule
+
+        dm = CityscapesDataModule(PATH)
+        model = LitModel()
+
+        Trainer().fit(model, dm)
+
+    Or you can set your own transforms
+
+    Example::
+
+        dm.train_transforms = ...
+        dm.test_transforms = ...
+        dm.val_transforms  = ...
+    """
 
     name = 'Cityscapes'
     extra_args = {}
@@ -21,43 +69,6 @@ class CityscapesDataModule(LightningDataModule):
             **kwargs,
     ):
         """
-        .. figure:: https://www.cityscapes-dataset.com/wordpress/wp-content/uploads/2015/07/muenster00-1024x510.png
-            :width: 400
-            :alt: Cityscape
-
-        Standard Cityscapes, train, val, test splits and transforms
-
-        Specs:
-            - 30 classes (road, person, sidewalk, etc...)
-            - (image, target) - image dims: (3 x 32 x 32), target dims: (3 x 32 x 32)
-
-        Transforms::
-
-            transforms = transform_lib.Compose([
-                transform_lib.ToTensor(),
-                transform_lib.Normalize(
-                    mean=[0.28689554, 0.32513303, 0.28389177],
-                    std=[0.18696375, 0.19017339, 0.18720214]
-                )
-            ])
-
-        Example::
-
-            from pl_bolts.datamodules import CityscapesDataModule
-
-            dm = CityscapesDataModule(PATH)
-            model = LitModel()
-
-            Trainer().fit(model, dm)
-
-        Or you can set your own transforms
-
-        Example::
-
-            dm.train_transforms = ...
-            dm.test_transforms = ...
-            dm.val_transforms  = ...
-
         Args:
             data_dir: where to save/load the data
             val_split: how many of the training images to use for the validation split
@@ -65,6 +76,12 @@ class CityscapesDataModule(LightningDataModule):
             batch_size: number of examples per training/eval step
         """
         super().__init__(*args, **kwargs)
+
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use CityScapes dataset loaded from `torchvision` which is not installed yet.'
+            )
+
         self.dims = (3, 32, 32)
         self.DATASET = Cityscapes
         self.data_dir = data_dir

@@ -88,9 +88,11 @@ extensions = [
     'recommonmark',
     'sphinx.ext.autosectionlabel',
     # 'm2r',
-    'nbsphinx',
+    # 'nbsphinx',  # it seems some sphinx issue
     'sphinx_autodoc_typehints',
+    'sphinx_copybutton',
     'sphinx_paramlinks',
+    'sphinx_togglebutton',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -133,6 +135,7 @@ exclude_patterns = [
     'api/pl_bolts.rst',
     'api/modules.rst',
     'api/pl_bolts.submit.rst',
+    'api/pl_bolts.utils.*',
     'PULL_REQUEST_TEMPLATE.md',
 ]
 
@@ -326,12 +329,12 @@ MOCK_PACKAGES = []
 if SPHINX_MOCK_REQUIREMENTS:
     # mock also base packages when we are on RTD since we don't install them there
     MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements.txt'))
+    MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements', 'models.txt'))
+    MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements', 'loggers.txt'))
 
 MOCK_MANUAL_PACKAGES = [
     'pytorch_lightning',
     'numpy',
-    'torch',
-    'torchvision',
     'sklearn',
     'PIL',
     'cv2',
@@ -410,19 +413,19 @@ autosectionlabel_prefix_document = True
 
 # only run doctests marked with a ".. doctest::" directive
 doctest_test_doctest_blocks = ''
-doctest_global_setup = """
-
-import importlib
-import os
-import torch
-
-import pytorch_lightning as pl
-from pytorch_lightning import Trainer, LightningModule
-from pytorch_lightning.utilities import NATIVE_AMP_AVALAIBLE
-APEX_AVAILABLE = importlib.util.find_spec("apex") is not None
-XLA_AVAILABLE = importlib.util.find_spec("torch_xla") is not None
-TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
-
-
-"""
+# doctest_global_setup = """
+#
+# import importlib
+# import os
+# import torch
+#
+# import pytorch_lightning as pl
+# from pytorch_lightning import Trainer, LightningModule
+# from pytorch_lightning.utilities import NATIVE_AMP_AVALAIBLE
+# APEX_AVAILABLE = importlib.util.find_spec("apex") is not None
+# XLA_AVAILABLE = importlib.util.find_spec("torch_xla") is not None
+# TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
+#
+#
+# """
 coverage_skip_undoc_in_source = True

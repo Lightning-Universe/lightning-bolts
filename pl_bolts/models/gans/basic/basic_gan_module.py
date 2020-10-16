@@ -1,75 +1,61 @@
-import os
 from argparse import ArgumentParser
 
-import torch
 import pytorch_lightning as pl
+import torch
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models.gans.basic.components import Generator, Discriminator
 
 
 class GAN(pl.LightningModule):
+    """
+    Vanilla GAN implementation.
 
-    def __init__(self,
-                 datamodule: pl.LightningDataModule = None,
-                 latent_dim: int = 32,
-                 batch_size: int = 100,
-                 learning_rate: float = 0.0002,
-                 data_dir: str = '',
-                 num_workers: int = 8,
-                 **kwargs):
+    Example::
+
+        from pl_bolts.models.gan import GAN
+
+        m = GAN()
+        Trainer(gpus=2).fit(m)
+
+    Example CLI::
+
+        # mnist
+        python  basic_gan_module.py --gpus 1
+
+        # imagenet
+        python  basic_gan_module.py --gpus 1 --dataset 'imagenet2012'
+        --data_dir /path/to/imagenet/folder/ --meta_dir ~/path/to/meta/bin/folder
+        --batch_size 256 --learning_rate 0.0001
+    """
+
+    def __init__(
+        self,
+        input_channels: int,
+        input_height: int,
+        input_width: int,
+        latent_dim: int = 32,
+        learning_rate: float = 0.0002,
+        **kwargs
+    ):
         """
-        Vanilla GAN implementation.
-
-        Example::
-
-            from pl_bolts.models.gan import GAN
-
-            m = GAN()
-            Trainer(gpus=2).fit(m)
-
-        Example CLI::
-
-            # mnist
-            python  basic_gan_module.py --gpus 1
-
-            # imagenet
-            python  basic_gan_module.py --gpus 1 --dataset 'imagenet2012'
-            --data_dir /path/to/imagenet/folder/ --meta_dir ~/path/to/meta/bin/folder
-            --batch_size 256 --learning_rate 0.0001
-
         Args:
-
             datamodule: the datamodule (train, val, test splits)
             latent_dim: emb dim for encoder
             batch_size: the batch size
             learning_rate: the learning rate
             data_dir: where to store data
             num_workers: data workers
-
         """
         super().__init__()
 
         # makes self.hparams under the hood and saves to ckpt
         self.save_hyperparameters()
-
-        self._set_default_datamodule(datamodule)
+        self.img_dim = (input_channels, input_height, input_width)
 
         # networks
         self.generator = self.init_generator(self.img_dim)
         self.discriminator = self.init_discriminator(self.img_dim)
-
-    def _set_default_datamodule(self, datamodule):
-        # link default data
-        if datamodule is None:
-            datamodule = MNISTDataModule(
-                data_dir=self.hparams.data_dir,
-                num_workers=self.hparams.num_workers,
-                normalize=True
-            )
-        self.datamodule = datamodule
-        self.img_dim = self.datamodule.size()
 
     def init_generator(self, img_dim):
         generator = Generator(latent_dim=self.hparams.latent_dim, img_shape=img_dim)
@@ -149,18 +135,16 @@ class GAN(pl.LightningModule):
 
         # log to prog bar on each step AND for the full epoch
         # use the generator loss for checkpointing
-        result = pl.TrainResult(minimize=g_loss, checkpoint_on=g_loss)
-        result.log('g_loss', g_loss, on_epoch=True, prog_bar=True)
-        return result
+        self.log('g_loss', g_loss, on_epoch=True, prog_bar=True)
+        return g_loss
 
     def discriminator_step(self, x):
         # Measure discriminator's ability to classify real from generated samples
         d_loss = self.discriminator_loss(x)
 
         # log to prog bar on each step AND for the full epoch
-        result = pl.TrainResult(minimize=d_loss)
-        result.log('d_loss', d_loss, on_epoch=True, prog_bar=True)
-        return result
+        self.log('d_loss', d_loss, on_epoch=True, prog_bar=True)
+        return d_loss
 
     def configure_optimizers(self):
         lr = self.hparams.learning_rate
@@ -179,44 +163,40 @@ class GAN(pl.LightningModule):
                             help="adam: decay of first order momentum of gradient")
         parser.add_argument('--latent_dim', type=int, default=100,
                             help="generator embedding dim")
-        parser.add_argument('--batch_size', type=int, default=64, help="size of the batches")
-        parser.add_argument('--num_workers', type=int, default=8, help="num dataloader workers")
-        parser.add_argument('--data_dir', type=str, default=os.getcwd())
-
         return parser
 
 
-def cli_main():
+def cli_main(args=None):
     from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
-    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule
+    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, MNISTDataModule, STL10DataModule
 
     pl.seed_everything(1234)
 
     parser = ArgumentParser()
-    parser.add_argument('--dataset', type=str, default='mnist', help='mnist, stl10, imagenet2012')
+    parser.add_argument("--dataset", default="mnist", type=str, help="mnist, cifar10, stl10, imagenet")
+    script_args, _ = parser.parse_known_args(args)
 
+    if script_args.dataset == "mnist":
+        dm_cls = MNISTDataModule
+    elif script_args.dataset == "cifar10":
+        dm_cls = CIFAR10DataModule
+    elif script_args.dataset == "stl10":
+        dm_cls = STL10DataModule
+    elif script_args.dataset == "imagenet":
+        dm_cls = ImagenetDataModule
+
+    parser = dm_cls.add_argparse_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)
     parser = GAN.add_model_specific_args(parser)
-    parser = ImagenetDataModule.add_argparse_args(parser)
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
-    # default is mnist
-    datamodule = None
-    if args.dataset == 'imagenet2012':
-        datamodule = ImagenetDataModule.from_argparse_args(args)
-    elif args.dataset == 'stl10':
-        datamodule = STL10DataModule.from_argparse_args(args)
-
-    gan = GAN(**vars(args), datamodule=datamodule)
-    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator()]
-
-    trainer = pl.Trainer.from_argparse_args(
-        args,
-        callbacks=callbacks,
-        progress_bar_refresh_rate=10
-    )
-    trainer.fit(gan)
+    dm = dm_cls.from_argparse_args(args)
+    model = GAN(*dm.size(), **vars(args))
+    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]
+    trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks, progress_bar_refresh_rate=20)
+    trainer.fit(model, dm)
+    return dm, model, trainer
 
 
 if __name__ == '__main__':
-    cli_main()
+    dm, model, trainer = cli_main()

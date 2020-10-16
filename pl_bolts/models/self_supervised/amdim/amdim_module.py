@@ -7,13 +7,38 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
+try:
+    from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
+except ModuleNotFoundError:
+    pass
 from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
-from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
 
 class AMDIM(pl.LightningModule):
+    """
+    PyTorch Lightning implementation of
+    `Augmented Multiscale Deep InfoMax (AMDIM) <https://arxiv.org/abs/1906.00910.>`_
+
+    Paper authors: Philip Bachman, R Devon Hjelm, William Buchwalter.
+
+    Model implemented by: `William Falcon <https://github.com/williamFalcon>`_
+
+    This code is adapted to Lightning using the original author repo
+    (`the original repo <https://github.com/Philip-Bachman/amdim-public>`_).
+
+    Example:
+
+        >>> from pl_bolts.models.self_supervised import AMDIM
+        ...
+        >>> model = AMDIM(encoder='resnet18')
+
+    Train::
+
+        trainer = Trainer()
+        trainer.fit(model)
+    """
 
     def __init__(
             self,
@@ -34,27 +59,6 @@ class AMDIM(pl.LightningModule):
             **kwargs,
     ):
         """
-        PyTorch Lightning implementation of
-        `Augmented Multiscale Deep InfoMax (AMDIM) <https://arxiv.org/abs/1906.00910.>`_
-
-        Paper authors: Philip Bachman, R Devon Hjelm, William Buchwalter.
-
-        Model implemented by: `William Falcon <https://github.com/williamFalcon>`_
-
-        This code is adapted to Lightning using the original author repo
-        (`the original repo <https://github.com/Philip-Bachman/amdim-public>`_).
-
-        Example:
-
-            >>> from pl_bolts.models.self_supervised import AMDIM
-            ...
-            >>> model = AMDIM(encoder='resnet18')
-
-        Train::
-
-            trainer = Trainer()
-            trainer.fit(model)
-
         Args:
             datamodule: A LightningDatamodule
             encoder: an encoder string or model
@@ -373,8 +377,7 @@ class AMDIM(pl.LightningModule):
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def cli_main():
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
     parser = AMDIM.add_model_specific_args(parser)
@@ -384,3 +387,7 @@ if __name__ == '__main__':
     model = AMDIM(**vars(args), encoder='resnet18')
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
+
+
+if __name__ == '__main__':
+    cli_main()

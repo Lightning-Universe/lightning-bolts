@@ -1,9 +1,15 @@
-from torch.utils.data import random_split
-from torchvision.datasets import STL10
+from warnings import warn
 
-from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
-from pl_bolts.models.self_supervised.amdim import transforms as amdim_transforms
-from pl_bolts.models.self_supervised.amdim.ssl_datasets import CIFAR10Mixed
+from torch.utils.data import random_split
+
+try:
+    from torchvision.datasets import STL10
+    from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
+    from pl_bolts.datasets.ssl_amdim_datasets import CIFAR10Mixed
+    from pl_bolts.models.self_supervised.amdim import transforms as amdim_transforms
+except ModuleNotFoundError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
 
 
 class AMDIMPretraining():

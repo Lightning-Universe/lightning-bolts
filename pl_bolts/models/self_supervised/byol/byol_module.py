@@ -1,21 +1,79 @@
+from argparse import ArgumentParser
 from copy import deepcopy
-import torch
-import torch.nn.functional as F
-from torch.optim import Adam
-import pytorch_lightning as pl
 from typing import Any
 
+import pytorch_lightning as pl
+import torch
+import torch.nn.functional as F
+from pytorch_lightning import seed_everything
+from torch.optim import Adam
+
+from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
+from pl_bolts.models.self_supervised.byol.models import SiameseArm
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-from pl_bolts.models.self_supervised.byol.models import SiameseArm
-from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
 
 
 class BYOL(pl.LightningModule):
+    """
+    PyTorch Lightning implementation of `Bootstrap Your Own Latent (BYOL)
+    <https://arxiv.org/pdf/2006.07733.pdf>`_
+
+    Paper authors: Jean-Bastien Grill, Florian Strub, Florent Altché, Corentin Tallec, Pierre H. Richemond, \
+    Elena Buchatskaya, Carl Doersch, Bernardo Avila Pires, Zhaohan Daniel Guo, Mohammad Gheshlaghi Azar, \
+    Bilal Piot, Koray Kavukcuoglu, Rémi Munos, Michal Valko.
+
+    Model implemented by:
+        - `Annika Brundyn <https://github.com/annikabrundyn>`_
+
+    .. warning:: Work in progress. This implementation is still being verified.
+
+    TODOs:
+        - verify on CIFAR-10
+        - verify on STL-10
+        - pre-train on imagenet
+
+    Example::
+
+        import pytorch_lightning as pl
+        from pl_bolts.models.self_supervised import BYOL
+        from pl_bolts.datamodules import CIFAR10DataModule
+        from pl_bolts.models.self_supervised.simclr.transforms import (
+            SimCLREvalDataTransform, SimCLRTrainDataTransform)
+
+        # model
+        model = BYOL(num_classes=10)
+
+        # data
+        dm = CIFAR10DataModule(num_workers=0)
+        dm.train_transforms = SimCLRTrainDataTransform(32)
+        dm.val_transforms = SimCLREvalDataTransform(32)
+
+        trainer = pl.Trainer()
+        trainer.fit(model, dm)
+
+    Train::
+
+        trainer = Trainer()
+        trainer.fit(model)
+
+    CLI command::
+
+        # cifar10
+        python byol_module.py --gpus 1
+
+        # imagenet
+        python byol_module.py
+            --gpus 8
+            --dataset imagenet2012
+            --data_dir /path/to/imagenet/
+            --meta_dir /path/to/folder/with/meta.bin/
+            --batch_size 32
+    """
     def __init__(self,
                  num_classes,
                  learning_rate: float = 0.2,
-                 weight_decay: float = 15e-6,
+                 weight_decay: float = 1.5e-6,
                  input_height: int = 32,
                  batch_size: int = 32,
                  num_workers: int = 0,
@@ -23,60 +81,6 @@ class BYOL(pl.LightningModule):
                  max_epochs: int = 1000,
                  **kwargs):
         """
-        PyTorch Lightning implementation of `Bring Your Own Latent (BYOL)
-        <https://arxiv.org/pdf/2006.07733.pdf.>`_
-
-        Paper authors: Jean-Bastien Grill ,Florian Strub, Florent Altché, Corentin Tallec, Pierre H. Richemond, \
-        Elena Buchatskaya, Carl Doersch, Bernardo Avila Pires, Zhaohan Daniel Guo, Mohammad Gheshlaghi Azar, \
-        Bilal Piot, Koray Kavukcuoglu, Rémi Munos, Michal Valko.
-
-        Model implemented by:
-            - `Annika Brundyn <https://github.com/annikabrundyn>`_
-
-        .. warning:: Work in progress. This implementation is still being verified.
-
-        TODOs:
-            - verify on CIFAR-10
-            - verify on STL-10
-            - pre-train on imagenet
-
-        Example::
-
-            import pytorch_lightning as pl
-            from pl_bolts.models.self_supervised import BYOL
-            from pl_bolts.datamodules import CIFAR10DataModule
-            from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
-                SimCLREvalDataTransform, SimCLRTrainDataTransform)
-
-            # model
-            model = BYOL(num_classes=10)
-
-            # data
-            dm = CIFAR10DataModule(num_workers=0)
-            dm.train_transforms = SimCLRTrainDataTransform(32)
-            dm.val_transforms = SimCLREvalDataTransform(32)
-
-            trainer = pl.Trainer()
-            trainer.fit(model, dm)
-
-        Train::
-
-            trainer = Trainer()
-            trainer.fit(model)
-
-        CLI command::
-
-            # cifar10
-            python byol_module.py --gpus 1
-
-            # imagenet
-            python byol_module.py
-                --gpus 8
-                --dataset imagenet2012
-                --data_dir /path/to/imagenet/
-                --meta_dir /path/to/folder/with/meta.bin/
-                --batch_size 32
-
         Args:
             datamodule: The datamodule
             learning_rate: the learning rate
@@ -94,13 +98,19 @@ class BYOL(pl.LightningModule):
         self.target_network = deepcopy(self.online_network)
         self.weight_callback = BYOLMAWeightUpdate()
 
-    def on_train_batch_end(self, batch: Any, batch_idx: int, dataloader_idx: int) -> None:
+    def on_train_batch_end(self, outputs, batch: Any, batch_idx: int, dataloader_idx: int) -> None:
         # Add callback for user automatically since it's key to BYOL weight update
-        self.weight_callback.on_train_batch_end(self.trainer, self, batch, batch_idx, dataloader_idx)
+        self.weight_callback.on_train_batch_end(self.trainer, self, outputs, batch, batch_idx, dataloader_idx)
 
     def forward(self, x):
         y, _, _ = self.online_network(x)
         return y
+
+    def cosine_similarity(self, a, b):
+        a = F.normalize(a, dim=-1)
+        b = F.normalize(b, dim=-1)
+        sim = (a * b).sum(-1).mean()
+        return sim
 
     def shared_step(self, batch, batch_idx):
         (img_1, img_2), y = batch
@@ -109,19 +119,14 @@ class BYOL(pl.LightningModule):
         y1, z1, h1 = self.online_network(img_1)
         with torch.no_grad():
             y2, z2, h2 = self.target_network(img_2)
-        # L2 normalize
-        h1_norm = F.normalize(h1, p=2, dim=1)
-        z2_norm = F.normalize(z2, p=2, dim=1)
-        loss_a = F.mse_loss(h1_norm, z2_norm)
+        loss_a = - 2 * self.cosine_similarity(h1, z2)
 
         # Image 2 to image 1 loss
         y1, z1, h1 = self.online_network(img_2)
         with torch.no_grad():
             y2, z2, h2 = self.target_network(img_1)
         # L2 normalize
-        h1_norm = F.normalize(h1, p=2, dim=1)
-        z2_norm = F.normalize(z2, p=2, dim=1)
-        loss_b = F.mse_loss(h1_norm, z2_norm)
+        loss_b = - 2 * self.cosine_similarity(h1, z2)
 
         # Final loss
         total_loss = loss_a + loss_b
@@ -132,19 +137,17 @@ class BYOL(pl.LightningModule):
         loss_a, loss_b, total_loss = self.shared_step(batch, batch_idx)
 
         # log results
-        result = pl.TrainResult(minimize=total_loss)
-        result.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'train_loss': total_loss})
+        self.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'train_loss': total_loss})
 
-        return result
+        return total_loss
 
     def validation_step(self, batch, batch_idx):
         loss_a, loss_b, total_loss = self.shared_step(batch, batch_idx)
 
         # log results
-        result = pl.EvalResult(early_stop_on=total_loss, checkpoint_on=total_loss)
-        result.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'train_loss': total_loss})
+        self.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'train_loss': total_loss})
 
-        return result
+        return total_loss
 
     def configure_optimizers(self):
         optimizer = Adam(self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
@@ -171,7 +174,7 @@ class BYOL(pl.LightningModule):
         # optim
         parser.add_argument('--batch_size', type=int, default=256)
         parser.add_argument('--learning_rate', type=float, default=1e-3)
-        parser.add_argument('--weight_decay', type=float, default=15e-6)
+        parser.add_argument('--weight_decay', type=float, default=1.5e-6)
         parser.add_argument('--warmup_epochs', type=float, default=10)
 
         # Model
@@ -180,11 +183,12 @@ class BYOL(pl.LightningModule):
         return parser
 
 
-if __name__ == '__main__':
-    from argparse import ArgumentParser
-    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
-    from pl_bolts.models.self_supervised.simclr import simclr_transforms
+def cli_main():
     from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
+    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
+    from pl_bolts.models.self_supervised.simclr import SimCLRTrainDataTransform, SimCLREvalDataTransform
+
+    seed_everything(1234)
 
     parser = ArgumentParser()
 
@@ -201,8 +205,8 @@ if __name__ == '__main__':
     # init default datamodule
     if args.dataset == 'cifar10':
         dm = CIFAR10DataModule.from_argparse_args(args)
-        dm.train_transforms = simclr_transforms.SimCLRTrainDataTransform(32)
-        dm.val_transforms = simclr_transforms.SimCLREvalDataTransform(32)
+        dm.train_transforms = SimCLRTrainDataTransform(32)
+        dm.val_transforms = SimCLREvalDataTransform(32)
         args.num_classes = dm.num_classes
 
     elif args.dataset == 'stl10':
@@ -211,15 +215,15 @@ if __name__ == '__main__':
         dm.val_dataloader = dm.val_dataloader_mixed
 
         (c, h, w) = dm.size()
-        dm.train_transforms = simclr_transforms.SimCLRTrainDataTransform(h)
-        dm.val_transforms = simclr_transforms.SimCLREvalDataTransform(h)
+        dm.train_transforms = SimCLRTrainDataTransform(h)
+        dm.val_transforms = SimCLREvalDataTransform(h)
         args.num_classes = dm.num_classes
 
     elif args.dataset == 'imagenet2012':
         dm = ImagenetDataModule.from_argparse_args(args, image_size=196)
         (c, h, w) = dm.size()
-        dm.train_transforms = simclr_transforms.SimCLRTrainDataTransform(h)
-        dm.val_transforms = simclr_transforms.SimCLREvalDataTransform(h)
+        dm.train_transforms = SimCLRTrainDataTransform(h)
+        dm.val_transforms = SimCLREvalDataTransform(h)
         args.num_classes = dm.num_classes
 
     model = BYOL(**args.__dict__)
@@ -234,5 +238,10 @@ if __name__ == '__main__':
     online_eval = SSLOnlineEvaluator(z_dim=2048, num_classes=dm.num_classes)
     online_eval.to_device = to_device
 
-    trainer = pl.Trainer.from_argparse_args(args, max_steps=100000, callbacks=[online_eval])
+    trainer = pl.Trainer.from_argparse_args(args, max_steps=300000, callbacks=[online_eval])
+
     trainer.fit(model, dm)
+
+
+if __name__ == '__main__':
+    cli_main()

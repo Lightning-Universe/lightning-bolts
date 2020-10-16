@@ -1,10 +1,26 @@
 import random
+from warnings import warn
 
-from PIL import ImageFilter
-from torchvision import transforms
+from pl_bolts.transforms.dataset_normalizations import (
+    imagenet_normalization, cifar10_normalization, stl10_normalization)
 
-from pl_bolts.transforms.dataset_normalizations import \
-    imagenet_normalization, cifar10_normalization, stl10_normalization
+try:
+    from torchvision import transforms
+except ModuleNotFoundError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
+    _TORCHVISION_AVAILABLE = False
+else:
+    _TORCHVISION_AVAILABLE = True
+
+try:
+    from PIL import ImageFilter
+except ModuleNotFoundError:
+    warn('You want to use `Pillow` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install Pillow`.')
+    _PIL_AVAILABLE = False
+else:
+    _PIL_AVAILABLE = True
 
 
 class Moco2TrainCIFAR10Transforms:
@@ -14,6 +30,11 @@ class Moco2TrainCIFAR10Transforms:
 
     """
     def __init__(self, height=32):
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
+
         # image augmentation functions
         self.train_transform = transforms.Compose([
             transforms.RandomResizedCrop(height, scale=(0.2, 1.)),
@@ -40,6 +61,11 @@ class Moco2EvalCIFAR10Transforms:
 
     """
     def __init__(self, height=32):
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
+
         self.test_transform = transforms.Compose([
             transforms.Resize(height + 12),
             transforms.CenterCrop(height),
@@ -59,6 +85,10 @@ class Moco2TrainSTL10Transforms:
     https://arxiv.org/pdf/2003.04297.pdf
     """
     def __init__(self, height=64):
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
 
         # image augmentation functions
         self.train_transform = transforms.Compose([
@@ -85,6 +115,11 @@ class Moco2EvalSTL10Transforms:
     https://arxiv.org/pdf/2003.04297.pdf
     """
     def __init__(self, height=64):
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
+
         self.test_augmentation = transforms.Compose([
             transforms.Resize(height + 11),
             transforms.CenterCrop(height),
@@ -106,6 +141,11 @@ class Moco2TrainImagenetTransforms:
     """
 
     def __init__(self, height=128):
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
+
         # image augmentation functions
         self.train_transform = transforms.Compose([
             transforms.RandomResizedCrop(height, scale=(0.2, 1.)),
@@ -132,6 +172,11 @@ class Moco2EvalImagenetTransforms:
 
     """
     def __init__(self, height=128):
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
+
         self.test_transform = transforms.Compose([
             transforms.Resize(height + 32),
             transforms.CenterCrop(height),
@@ -149,6 +194,10 @@ class GaussianBlur(object):
     """Gaussian blur augmentation in SimCLR https://arxiv.org/abs/2002.05709"""
 
     def __init__(self, sigma=(0.1, 2.0)):
+        if not _PIL_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `Pillow` which is not installed yet, install it with `pip install Pillow`.'
+            )
         self.sigma = sigma
 
     def __call__(self, x):

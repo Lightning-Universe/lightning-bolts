@@ -13,13 +13,11 @@ def dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], net: nn.Module,
              target_net: nn.Module, gamma: float = 0.99) -> torch.Tensor:
     """
     Calculates the mse loss using a mini batch from the replay buffer
-
     Args:
         batch: current mini batch of replay data
         net: main training network
         target_net: target network of the main training network
         gamma: discount factor
-
     Returns:
         loss
     """
@@ -47,25 +45,21 @@ def double_dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], net: nn.Module,
     Calculates the mse loss using a mini batch from the replay buffer. This uses an improvement to the original
     DQN loss by using the double dqn. This is shown by using the actions of the train network to pick the
     value from the target network. This code is heavily commented in order to explain the process clearly
-
     Args:
         batch: current mini batch of replay data
         net: main training network
         target_net: target network of the main training network
         gamma: discount factor
-
     Returns:
         loss
     """
     states, actions, rewards, dones, next_states = batch  # batch of experiences, batch_size = 16
 
-    actions = actions.unsqueeze(-1)  # adds a dimension, 16 -> [16, 1]
-    output = net(states)  # shape [16, 2], [batch, action space]
+    actions = actions.long().squeeze(-1)
 
-    actions = actions.long()
-
-    # gather the value of the outputs according to the actions index from the batch
-    state_action_values = output.gather(1, actions).squeeze(-1)
+    state_action_values = (
+        net(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
+    )
 
     # dont want to mess with gradients when using the target network
     with torch.no_grad():
@@ -95,14 +89,12 @@ def per_dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], batch_weights: List, 
                  target_net: nn.Module, gamma: float = 0.99) -> Tuple[torch.Tensor, np.ndarray]:
     """
     Calculates the mse loss with the priority weights of the batch from the PER buffer
-
     Args:
         batch: current mini batch of replay data
         batch_weights: how each of these samples are weighted in terms of priority
         net: main training network
         target_net: target network of the main training network
         gamma: discount factor
-
     Returns:
         loss and batch_weights
     """
@@ -113,8 +105,10 @@ def per_dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], batch_weights: List, 
     batch_weights = torch.tensor(batch_weights)
 
     actions_v = actions.unsqueeze(-1)
-    state_action_vals = net(states).gather(1, actions_v)
+    outputs = net(states)
+    state_action_vals = outputs.gather(1, actions_v)
     state_action_vals = state_action_vals.squeeze(-1)
+
     with torch.no_grad():
         next_s_vals = target_net(next_states).max(1)[0]
         next_s_vals[dones] = 0.0

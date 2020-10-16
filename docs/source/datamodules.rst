@@ -7,9 +7,9 @@ DataModules (introduced in PyTorch Lightning 0.9.0) decouple the data from a mod
 is simply a collection of a training dataloder, val dataloader and test dataloader. In addition,
 it specifies how to:
 
-- Downloading/preparing data.
+- Download/prepare data.
 - Train/val/test splits.
-- Transforms
+- Transform
 
 Then you can use it like this:
 

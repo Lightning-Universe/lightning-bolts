@@ -1,12 +1,48 @@
+from warnings import warn
+
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
-from torchvision import transforms as transform_lib
-from torchvision.datasets import MNIST
-from PIL import Image
+
+try:
+    from torchvision import transforms as transform_lib
+    from torchvision.datasets import MNIST
+    from pl_bolts.datasets.mnist_dataset import BinaryMNIST
+except ModuleNotFoundError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
+    _TORCHVISION_AVAILABLE = False
+else:
+    _TORCHVISION_AVAILABLE = True
 
 
 class BinaryMNISTDataModule(LightningDataModule):
+    """
+    .. figure:: https://miro.medium.com/max/744/1*AO2rIhzRYzFVQlFLx9DM9A.png
+        :width: 400
+        :alt: MNIST
+
+    Specs:
+        - 10 classes (1 per digit)
+        - Each image is (1 x 28 x 28)
+
+    Binary MNIST, train, val, test splits and transforms
+
+    Transforms::
+
+        mnist_transforms = transform_lib.Compose([
+            transform_lib.ToTensor()
+        ])
+
+    Example::
+
+        from pl_bolts.datamodules import BinaryMNISTDataModule
+
+        dm = BinaryMNISTDataModule('.')
+        model = LitModel()
+
+        Trainer().fit(model, dm)
+    """
 
     name = 'mnist'
 
@@ -21,31 +57,6 @@ class BinaryMNISTDataModule(LightningDataModule):
             **kwargs,
     ):
         """
-        .. figure:: https://miro.medium.com/max/744/1*AO2rIhzRYzFVQlFLx9DM9A.png
-            :width: 400
-            :alt: MNIST
-
-        Specs:
-            - 10 classes (1 per digit)
-            - Each image is (1 x 28 x 28)
-
-        Binary MNIST, train, val, test splits and transforms
-
-        Transforms::
-
-            mnist_transforms = transform_lib.Compose([
-                transform_lib.ToTensor()
-            ])
-
-        Example::
-
-            from pl_bolts.datamodules import BinaryMNISTDataModule
-
-            dm = BinaryMNISTDataModule('.')
-            model = LitModel()
-
-            Trainer().fit(model, dm)
-
         Args:
             data_dir: where to save/load the data
             val_split: how many of the training images to use for the validation split
@@ -53,6 +64,12 @@ class BinaryMNISTDataModule(LightningDataModule):
             normalize: If true applies image normalize
         """
         super().__init__(*args, **kwargs)
+
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use MNIST dataset loaded from `torchvision` which is not installed yet.'
+            )
+
         self.dims = (1, 28, 28)
         self.data_dir = data_dir
         self.val_split = val_split
@@ -159,30 +176,3 @@ class BinaryMNISTDataModule(LightningDataModule):
             mnist_transforms = transform_lib.ToTensor()
 
         return mnist_transforms
-
-
-class BinaryMNIST(MNIST):
-    def __getitem__(self, idx):
-        """
-        Args:
-            index (int): Index
-        Returns:
-            tuple: (image, target) where target is index of the target class.
-        """
-        img, target = self.data[idx], int(self.targets[idx])
-
-        # doing this so that it is consistent with all other datasets
-        # to return a PIL Image
-        img = Image.fromarray(img.numpy(), mode='L')
-
-        if self.transform is not None:
-            img = self.transform(img)
-
-        if self.target_transform is not None:
-            target = self.target_transform(target)
-
-        # binary
-        img[img < 0.5] = 0.0
-        img[img >= 0.5] = 1.0
-
-        return img, target

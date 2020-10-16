@@ -1,21 +1,35 @@
+from warnings import warn
+
 import numpy as np
 import torch.nn.functional as F
-from PIL import Image
+
+try:
+    from PIL import Image
+except ModuleNotFoundError:
+    warn('You want to use `Pillow` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install Pillow`.')
+    _PIL_AVAILABLE = False
+else:
+    _PIL_AVAILABLE = True
 
 
 class RandomTranslateWithReflect:
-    '''
+    """
     Translate image randomly
     Translate vertically and horizontally by n pixels where
     n is integer drawn uniformly independently for each axis
     from [-max_translation, max_translation].
     Fill the uncovered blank area with reflect padding.
-    '''
+    """
 
     def __init__(self, max_translation):
         self.max_translation = max_translation
 
     def __call__(self, old_image):
+        if not _PIL_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `Pillow` which is not installed yet, install it with `pip install Pillow`.'
+            )
         xtranslation, ytranslation = np.random.randint(-self.max_translation,
                                                        self.max_translation + 1,
                                                        size=2)

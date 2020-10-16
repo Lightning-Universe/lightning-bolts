@@ -1,34 +1,35 @@
-import pytorch_lightning as pl
-from pl_bolts.models.regression import LinearRegression, LogisticRegression
-from pl_bolts.datamodules.sklearn_datamodule import SklearnDataset
-from pl_bolts.datamodules import MNISTDataModule
 import numpy as np
-from tests import reset_seed
+import pytorch_lightning as pl
+from pytorch_lightning import seed_everything
 from torch.utils.data import DataLoader
+
+from pl_bolts.datamodules import MNISTDataModule
+from pl_bolts.datamodules.sklearn_datamodule import SklearnDataset
+from pl_bolts.models.regression import LinearRegression, LogisticRegression
 
 
 def test_linear_regression_model(tmpdir):
-    reset_seed()
+    seed_everything()
 
     # --------------------
     # numpy data
     # --------------------
-    X = np.array([[1.0, 1], [1, 2], [2, 2], [2, 3]])
+    X = np.array([[1.0, 1], [1, 2], [2, 2], [2, 3], [3, 3], [3, 4], [4, 4], [4, 5]])
     y = np.dot(X, np.array([1.0, 2])) + 3
     y = y[:, np.newaxis]
     loader = DataLoader(SklearnDataset(X, y), batch_size=2)
 
-    model = LinearRegression(input_dim=2, learning_rate=1.0)
-    trainer = pl.Trainer(max_epochs=200, default_root_dir=tmpdir, progress_bar_refresh_rate=0)
+    model = LinearRegression(input_dim=2, learning_rate=0.5)
+    trainer = pl.Trainer(max_epochs=300, default_root_dir=tmpdir, progress_bar_refresh_rate=0)
     trainer.fit(
         model,
         loader,
-        loader
+        loader,
     )
 
     coeffs = model.linear.weight.detach().numpy().flatten()
-    assert len(coeffs) == 2
-    assert coeffs[0] == 1 and coeffs[1] == 2
+    # assert len(coeffs) == 2
+    np.testing.assert_allclose(coeffs, [1, 2], rtol=1e-3)
     trainer.test(model, loader)
 
 
@@ -47,4 +48,4 @@ def test_logistic_regression_model(tmpdir):
     trainer = pl.Trainer(max_epochs=3, default_root_dir=tmpdir, progress_bar_refresh_rate=0)
     trainer.fit(model)
     trainer.test(model)
-    assert trainer.progress_bar_metrics['test_acc'] >= 0.9
+    assert trainer.progress_bar_dict['test_acc'] >= 0.9

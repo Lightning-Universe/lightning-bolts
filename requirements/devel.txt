@@ -1,0 +1,9 @@
+# install all mandatory dependencies
+-r ../requirements.txt
+
+# install all extra dependencies for full package experience
+-r ./models.txt
+-r ./loggers.txt
+
+# extended list of dependencies to run lint and tests
+-r ./test.txt

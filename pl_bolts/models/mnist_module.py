@@ -1,12 +1,18 @@
 import os
 from argparse import ArgumentParser
+from warnings import warn
 
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
-from torchvision import transforms
-from torchvision.datasets import MNIST
+
+try:
+    from torchvision import transforms
+    from torchvision.datasets import MNIST
+except ModuleNotFoundError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
 
 
 class LitMNIST(LightningModule):
@@ -30,43 +36,20 @@ class LitMNIST(LightningModule):
         x, y = batch
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
-        tensorboard_logs = {'train_loss': loss}
-        progress_bar_metrics = tensorboard_logs
-        return {
-            'loss': loss,
-            'log': tensorboard_logs,
-            'progress_bar': progress_bar_metrics
-        }
+        self.log('train_loss', loss)
+        return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
-        return {'val_loss': F.cross_entropy(y_hat, y)}
-
-    def validation_epoch_end(self, outputs):
-        avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
-        tensorboard_logs = {'val_loss': avg_loss}
-        progress_bar_metrics = tensorboard_logs
-        return {
-            'val_loss': avg_loss,
-            'log': tensorboard_logs,
-            'progress_bar': progress_bar_metrics
-        }
+        loss = F.cross_entropy(y_hat, y)
+        self.log('val_loss', loss)
 
     def test_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
-        return {'test_loss': F.cross_entropy(y_hat, y)}
-
-    def test_epoch_end(self, outputs):
-        avg_loss = torch.stack([x['test_loss'] for x in outputs]).mean()
-        tensorboard_logs = {'test_loss': avg_loss}
-        progress_bar_metrics = tensorboard_logs
-        return {
-            'test_loss': avg_loss,
-            'log': tensorboard_logs,
-            'progress_bar': progress_bar_metrics
-        }
+        loss = F.cross_entropy(y_hat, y)
+        self.log('test_loss', loss)
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
@@ -102,7 +85,7 @@ class LitMNIST(LightningModule):
         return parser
 
 
-def run_cli():
+def cli_main():
     # args
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
@@ -118,4 +101,4 @@ def run_cli():
 
 
 if __name__ == '__main__':  # pragma: no cover
-    run_cli()
+    cli_main()

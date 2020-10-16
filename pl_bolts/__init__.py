@@ -2,10 +2,10 @@
 
 import os
 
-__version__ = '0.1.1'
+__version__ = '0.2.5'
 __author__ = 'PyTorchLightning et al.'
 __author_email__ = 'name@pytorchlightning.ai'
-__license__ = 'TBD'
+__license__ = 'Apache-2.0'
 __copyright__ = 'Copyright (c) 2020-2020, %s.' % __author__
 __homepage__ = 'https://github.com/PyTorchLightning/pytorch-lightning-bolts'
 __docs__ = "PyTorch Lightning Bolts is a community contribution for ML researchers."
@@ -44,14 +44,14 @@ if __LIGHTNING_BOLT_SETUP__:
     # We are not importing the rest of the lightning during the build process, as it may not be compiled yet
 else:
 
-    from pl_bolts.models.mnist_module import LitMNIST
-    from pl_bolts import models, metrics, loggers, callbacks, datamodules, transforms
+    # from pl_bolts.models.mnist_module import LitMNIST
+    from pl_bolts import models, metrics, callbacks, datamodules, transforms, datasets
 
     __all__ = [
-        'LitMNIST',
+        # 'LitMNIST',
         'models',
         'metrics',
-        'loggers',
         'callbacks',
-        'datamodules'
+        'datamodules',
+        'datasets',
     ]

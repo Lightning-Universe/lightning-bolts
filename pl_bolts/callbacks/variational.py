@@ -1,22 +1,31 @@
+from warnings import warn
+
 import torch
 from pytorch_lightning.callbacks import Callback
 
+try:
+    import torchvision
+except ModuleNotFoundError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
+
 
 class LatentDimInterpolator(Callback):
+    """
+    Interpolates the latent space for a model by setting all dims to zero and stepping
+    through the first two dims increasing one unit at a time.
+
+    Default interpolates between [-5, 5] (-5, -4, -3, ..., 3, 4, 5)
+
+    Example::
+
+        from pl_bolts.callbacks import LatentDimInterpolator
+
+        Trainer(callbacks=[LatentDimInterpolator()])
+    """
 
     def __init__(self, interpolate_epoch_interval=20, range_start=-5, range_end=5, num_samples=2):
         """
-        Interpolates the latent space for a model by setting all dims to zero and stepping
-        through the first two dims increasing one unit at a time.
-
-        Default interpolates between [-5, 5] (-5, -4, -3, ..., 3, 4, 5)
-
-        Example::
-
-            from pl_bolts.callbacks import LatentDimInterpolator
-
-            Trainer(callbacks=[LatentDimInterpolator()])
-
         Args:
             interpolate_epoch_interval:
             range_start: default -5
@@ -30,7 +39,6 @@ class LatentDimInterpolator(Callback):
         self.num_samples = num_samples
 
     def on_epoch_end(self, trainer, pl_module):
-        import torchvision
         import math
 
         if (trainer.current_epoch + 1) % self.interpolate_epoch_interval == 0:

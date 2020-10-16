@@ -1,5 +1,5 @@
-import torch
 import numpy as np
+import torch
 
 
 def tile(a, dim, n_tile):

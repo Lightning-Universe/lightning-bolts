@@ -35,6 +35,13 @@ PyTorch-Lightning-Bolts documentation
 
 .. toctree::
    :maxdepth: 2
+   :name: datasets
+   :caption: Datasets
+
+   datasets
+
+.. toctree::
+   :maxdepth: 2
    :name: dataloaders
    :caption: DataLoaders
 
@@ -49,19 +56,18 @@ PyTorch-Lightning-Bolts documentation
 
 .. toctree::
    :maxdepth: 2
-   :name: loggers
-   :caption: Experimental Loggers
-
-   loggers
-
-.. toctree::
-   :maxdepth: 2
    :name: models
    :caption: Models
 
    models_howto
-   autoencoders
    classic_ml
+
+.. toctree::
+   :maxdepth: 2
+   :name: vision
+   :caption: Vision models
+
+   autoencoders
    convolutional
    gans
    reinforce_learn
@@ -98,11 +104,10 @@ Indices and tables
    readme
    api/pl_bolts.callbacks
    api/pl_bolts.datamodules
+   api/pl_bolts.datasets
    api/pl_bolts.metrics
    api/pl_bolts.models
    api/pl_bolts.callbacks
    api/pl_bolts.losses
-   api/pl_bolts.loggers
    api/pl_bolts.optimizers
    api/pl_bolts.transforms
-   api/pl_bolts.utils

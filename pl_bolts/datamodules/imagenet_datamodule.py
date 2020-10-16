@@ -1,14 +1,51 @@
 import os
+from warnings import warn
 
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
-from torchvision import transforms as transform_lib
 
-from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
+
+try:
+    from torchvision import transforms as transform_lib
+    from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
+except ModuleNotFoundError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
+    _TORCHVISION_AVAILABLE = False
+else:
+    _TORCHVISION_AVAILABLE = True
 
 
 class ImagenetDataModule(LightningDataModule):
+    """
+    .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/wp-content/uploads/2017/08/
+        Sample-of-Images-from-the-ImageNet-Dataset-used-in-the-ILSVRC-Challenge.png
+        :width: 400
+        :alt: Imagenet
+
+    Specs:
+        - 1000 classes
+        - Each image is (3 x varies x varies) (here we default to 3 x 224 x 224)
+
+    Imagenet train, val and test dataloaders.
+
+    The train set is the imagenet train.
+
+    The val set is taken from the train set with `num_imgs_per_val_class` images per class.
+    For example if `num_imgs_per_val_class=2` then there will be 2,000 images in the validation set.
+
+    The test set is the official imagenet validation set.
+
+     Example::
+
+        from pl_bolts.datamodules import ImagenetDataModule
+
+        dm = ImagenetDataModule(IMAGENET_PATH)
+        model = LitModel()
+
+        Trainer().fit(model, dm)
+    """
 
     name = 'imagenet'
 
@@ -24,35 +61,7 @@ class ImagenetDataModule(LightningDataModule):
             **kwargs,
     ):
         """
-        .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/wp-content/uploads/2017/08/
-            Sample-of-Images-from-the-ImageNet-Dataset-used-in-the-ILSVRC-Challenge.png
-            :width: 400
-            :alt: Imagenet
-
-        Specs:
-            - 1000 classes
-            - Each image is (3 x varies x varies) (here we default to 3 x 224 x 224)
-
-        Imagenet train, val and test dataloaders.
-
-        The train set is the imagenet train.
-
-        The val set is taken from the train set with `num_imgs_per_val_class` images per class.
-        For example if `num_imgs_per_val_class=2` then there will be 2,000 images in the validation set.
-
-        The test set is the official imagenet validation set.
-
-         Example::
-
-            from pl_bolts.datamodules import ImagenetDataModule
-
-            dm = ImagenetDataModule(IMAGENET_PATH)
-            model = LitModel()
-
-            Trainer().fit(model, dm)
-
         Args:
-
             data_dir: path to the imagenet dataset file
             meta_dir: path to meta.bin file
             num_imgs_per_val_class: how many images per class for the validation set
@@ -61,6 +70,12 @@ class ImagenetDataModule(LightningDataModule):
             batch_size: batch_size
         """
         super().__init__(*args, **kwargs)
+
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use ImageNet dataset loaded from `torchvision` which is not installed yet.'
+            )
+
         self.image_size = image_size
         self.dims = (3, self.image_size, self.image_size)
         self.data_dir = data_dir

@@ -1,4 +1,4 @@
-from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
+from pl_bolts.models.self_supervised.simclr.transforms import (
     SimCLREvalDataTransform,
     SimCLRTrainDataTransform
 )

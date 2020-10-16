@@ -1,17 +1,24 @@
+from argparse import ArgumentParser
+from warnings import warn
+
 import pytorch_lightning as pl
-from torch.optim import Adam
 from torch import nn
 from torch.nn import functional as F
-from torchvision.models import densenet
+from torch.optim import Adam
 
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
-from pl_bolts.losses.self_supervised_learning import nt_xent_loss
-from pl_bolts.models.self_supervised.simclr.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
-from pl_bolts.optimizers.lars_scheduling import LARSWrapper
-from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
+try:
+    from torchvision.models import densenet
+except ModuleNotFoundError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
+
 from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
+from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.models.self_supervised.evaluator import Flatten
 from pl_bolts.models.self_supervised.resnets import resnet50_bn
+from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
+from pl_bolts.optimizers.lars_scheduling import LARSWrapper
+from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
 class DensenetEncoder(nn.Module):
@@ -150,16 +157,14 @@ class SimCLR(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         loss = self.shared_step(batch, batch_idx)
 
-        result = pl.TrainResult(minimize=loss)
-        result.log('train_loss', loss, on_epoch=True)
-        return result
+        self.log('train_loss', loss, on_epoch=True)
+        return loss
 
     def validation_step(self, batch, batch_idx):
         loss = self.shared_step(batch, batch_idx)
 
-        result = pl.EvalResult(checkpoint_on=loss)
-        result.log('avg_val_loss', loss)
-        return result
+        self.log('avg_val_loss', loss)
+        return loss
 
     def shared_step(self, batch, batch_idx):
         (img1, img2), y = batch
@@ -212,9 +217,8 @@ class SimCLR(pl.LightningModule):
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
-    from argparse import ArgumentParser
+def cli_main():
+    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 
     parser = ArgumentParser()
 
@@ -262,3 +266,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer.from_argparse_args(args, callbacks=[online_eval])
     trainer.fit(model, dm)
+
+
+if __name__ == '__main__':
+    cli_main()

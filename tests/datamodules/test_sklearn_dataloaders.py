@@ -1,12 +1,19 @@
+from warnings import warn
+
 import numpy as np
-from sklearn.utils import shuffle as sk_shuffle
+from pytorch_lightning import seed_everything
 
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
-from tests import reset_seed
+
+try:
+    from sklearn.utils import shuffle as sk_shuffle
+except ImportError:
+    warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install sklearn`.')
 
 
 def test_dataloader(tmpdir):
-    reset_seed()
+    seed_everything()
 
     X = np.random.rand(5, 2)
     y = np.random.rand(5)

@@ -1,28 +1,29 @@
+from argparse import ArgumentParser
+
 import pytorch_lightning as pl
 import torch
-from pytorch_lightning.metrics.classification import accuracy
+from pytorch_lightning.metrics.functional import accuracy
 from torch import nn
 from torch.nn import functional as F
 from torch.optim import Adam
 from torch.optim.optimizer import Optimizer
 
-from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
-
 
 class LogisticRegression(pl.LightningModule):
+    """
+    Logistic regression model
+    """
 
     def __init__(self,
                  input_dim: int,
                  num_classes: int,
                  bias: bool = True,
-                 learning_rate: float = 0.0001,
+                 learning_rate: float = 1e-4,
                  optimizer: Optimizer = Adam,
                  l1_strength: float = 0.0,
                  l2_strength: float = 0.0,
                  **kwargs):
         """
-        Logistic regression model
-
         Args:
             input_dim: number of dimensions of the input (at least 1)
             num_classes: number of class labels (binary: 2, multi-class: >2)
@@ -31,7 +32,6 @@ class LogisticRegression(pl.LightningModule):
             optimizer: the optimizer to use (default='Adam')
             l1_strength: L1 regularization strength (default=None)
             l2_strength: L2 regularization strength (default=None)
-
         """
         super().__init__()
         self.save_hyperparameters()
@@ -52,21 +52,19 @@ class LogisticRegression(pl.LightningModule):
         y_hat = self(x)
 
         # PyTorch cross_entropy function combines log_softmax and nll_loss in single function
-        loss = F.cross_entropy(y_hat, y)
+        loss = F.cross_entropy(y_hat, y, reduction='sum')
 
         # L1 regularizer
         if self.hparams.l1_strength > 0:
-            l1_reg = torch.tensor(0.)
-            for param in self.parameters():
-                l1_reg += torch.norm(param, 1)
+            l1_reg = sum(param.abs().sum() for param in self.parameters())
             loss += self.hparams.l1_strength * l1_reg
 
         # L2 regularizer
         if self.hparams.l2_strength > 0:
-            l2_reg = torch.tensor(0.)
-            for param in self.parameters():
-                l2_reg += torch.norm(param, 2)
+            l2_reg = sum(param.pow(2).sum() for param in self.parameters())
             loss += self.hparams.l2_strength * l2_reg
+
+        loss /= x.size(0)
 
         tensorboard_logs = {'train_ce_loss': loss}
         progress_bar_metrics = tensorboard_logs
@@ -126,13 +124,19 @@ class LogisticRegression(pl.LightningModule):
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':  # pragma: no cover
-    from argparse import ArgumentParser
+def cli_main():
+    from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
+
     pl.seed_everything(1234)
 
     # Example: Iris dataset in Sklearn (4 features, 3 class labels)
-    from sklearn.datasets import load_iris
+    try:
+        from sklearn.datasets import load_iris
+    except ModuleNotFoundError as err:
+        raise ModuleNotFoundError(  # pragma: no-cover
+            'You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`.'
+        ) from err
+
     X, y = load_iris(return_X_y=True)
     loaders = SklearnDataModule(X, y)
 
@@ -149,3 +153,7 @@ if __name__ == '__main__':  # pragma: no cover
     # train
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model, loaders.train_dataloader(args.batch_size), loaders.val_dataloader(args.batch_size))
+
+
+if __name__ == '__main__':
+    cli_main()

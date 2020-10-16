@@ -12,8 +12,7 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.losses.rl import per_dqn_loss
-from pl_bolts.models.rl.common import cli
-from pl_bolts.models.rl.common.memory import PERBuffer
+from pl_bolts.models.rl.common.memory import PERBuffer, Experience
 from pl_bolts.models.rl.dqn_model import DQN
 
 
@@ -38,27 +37,26 @@ class PERDQN(DQN):
         trainer = Trainer()
         trainer.fit(model)
 
-        Args:
-            env: gym environment tag
-            gpus: number of gpus being used
-            eps_start: starting value of epsilon for the epsilon-greedy exploration
-            eps_end: final value of epsilon for the epsilon-greedy exploration
-            eps_last_frame: the final frame in for the decrease of epsilon. At this frame espilon = eps_end
-            sync_rate: the number of iterations between syncing up the target network with the train network
-            gamma: discount factor
-            learning_rate: learning rate
-            batch_size: size of minibatch pulled from the DataLoader
-            replay_size: total capacity of the replay buffer
-            warm_start_size: how many random steps through the environment to be carried out at the start of
-                training to fill the buffer with a starting point
-            num_samples: the number of samples to pull from the dataset iterator and feed to the DataLoader
+    Args:
+        env: gym environment tag
+        gpus: number of gpus being used
+        eps_start: starting value of epsilon for the epsilon-greedy exploration
+        eps_end: final value of epsilon for the epsilon-greedy exploration
+        eps_last_frame: the final frame in for the decrease of epsilon. At this frame espilon = eps_end
+        sync_rate: the number of iterations between syncing up the target network with the train network
+        gamma: discount factor
+        learning_rate: learning rate
+        batch_size: size of minibatch pulled from the DataLoader
+        replay_size: total capacity of the replay buffer
+        warm_start_size: how many random steps through the environment to be carried out at the start of
+            training to fill the buffer with a starting point
+        num_samples: the number of samples to pull from the dataset iterator and feed to the DataLoader
 
-        .. note::
-            This example is based on:
-             https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition\
-             /blob/master/Chapter08/05_dqn_prio_replay.py
+    .. note::
+        This example is based on:
+         https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter08/05_dqn_prio_replay.py
 
-        .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
+    .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
 
         """
 
@@ -71,21 +69,40 @@ class PERDQN(DQN):
             yields a Experience tuple containing the state, action, reward, done and next_state.
         """
 
-        for step_idx, exp in enumerate(self.source.runner(self.device)):
+        episode_reward = 0
+        episode_steps = 0
+
+        while True:
+            self.total_steps += 1
+            action = self.agent(self.state, self.device)
+
+            next_state, r, is_done, _ = self.env.step(action[0])
+
+            episode_reward += r
+            episode_steps += 1
+
+            exp = Experience(
+                state=self.state,
+                action=action[0],
+                reward=r,
+                done=is_done,
+                new_state=next_state,
+            )
 
             self.agent.update_epsilon(self.global_step)
             self.buffer.append(exp)
+            self.state = next_state
 
-            episode_reward_steps = self.source.pop_rewards_steps()
-
-            if episode_reward_steps:
-                for reward, steps in episode_reward_steps:
-                    self.done_episodes += 1
-                    self.total_rewards.append(reward)
-                    self.episode_steps.append(steps)
-                    self.avg_rewards = float(
-                        np.mean(self.total_rewards[-self.avg_reward_len:])
-                    )
+            if is_done:
+                self.done_episodes += 1
+                self.total_rewards.append(episode_reward)
+                self.total_episode_steps.append(episode_steps)
+                self.avg_rewards = float(
+                    np.mean(self.total_rewards[-self.avg_reward_len:])
+                )
+                self.state = self.env.reset()
+                episode_steps = 0
+                episode_reward = 0
 
             samples, indices, weights = self.buffer.sample(self.batch_size)
 
@@ -104,11 +121,9 @@ class PERDQN(DQN):
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved
-
         Args:
             batch: current mini batch of replay data
             _: batch number, not used
-
         Returns:
             Training loss and log metrics
         """
@@ -161,15 +176,13 @@ class PERDQN(DQN):
         return DataLoader(dataset=self.dataset, batch_size=self.batch_size)
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
+def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
     parser = pl.Trainer.add_argparse_args(parser)
 
     # model args
-    parser = cli.add_base_args(parser)
     parser = PERDQN.add_model_specific_args(parser)
     args = parser.parse_args()
 
@@ -177,3 +190,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
+
+
+if __name__ == "__main__":
+    cli_main()

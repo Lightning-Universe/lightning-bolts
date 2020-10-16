@@ -1,15 +1,15 @@
-import torch
-from torchvision import transforms
-import pytorch_lightning as pl
+from warnings import warn
+
 import pytest
-from pl_bolts.models.self_supervised.cpc.transforms import (
-    CPCTrainTransformsCIFAR10,
-    CPCEvalTransformsCIFAR10,
-    CPCTrainTransformsSTL10,
-    CPCEvalTransformsSTL10,
-    CPCTrainTransformsImageNet128,
-    CPCEvalTransformsImageNet128
-)
+import pytorch_lightning as pl
+import torch
+
+try:
+    from torchvision import transforms
+except ImportError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
+
 from pl_bolts.models.self_supervised.amdim.transforms import (
     AMDIMEvalTransformsCIFAR10,
     AMDIMTrainTransformsCIFAR10,
@@ -17,6 +17,14 @@ from pl_bolts.models.self_supervised.amdim.transforms import (
     AMDIMEvalTransformsSTL10,
     AMDIMTrainTransformsImageNet128,
     AMDIMEvalTransformsImageNet128
+)
+from pl_bolts.models.self_supervised.cpc.transforms import (
+    CPCTrainTransformsCIFAR10,
+    CPCEvalTransformsCIFAR10,
+    CPCTrainTransformsSTL10,
+    CPCEvalTransformsSTL10,
+    CPCTrainTransformsImageNet128,
+    CPCEvalTransformsImageNet128
 )
 from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainCIFAR10Transforms,
@@ -26,7 +34,7 @@ from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainImagenetTransforms,
     Moco2EvalImagenetTransforms
 )
-from pl_bolts.models.self_supervised.simclr.simclr_transforms import (
+from pl_bolts.models.self_supervised.simclr.transforms import (
     SimCLREvalDataTransform,
     SimCLRTrainDataTransform
 )

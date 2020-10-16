@@ -9,15 +9,18 @@
 [![PyPI Status](https://badge.fury.io/py/pytorch-lightning-bolts.svg)](https://badge.fury.io/py/pytorch-lightning-bolts)
 [![PyPI Status](https://pepy.tech/badge/pytorch-lightning-bolts)](https://pepy.tech/project/pytorch-lightning-bolts)
 [![codecov](https://codecov.io/gh/PyTorchLightning/pytorch-lightning-bolts/branch/master/graph/badge.svg)](https://codecov.io/gh/PyTorchLightning/pytorch-lightning-bolts)
+[![CodeFactor](https://www.codefactor.io/repository/github/pytorchlightning/pytorch-lightning-bolts/badge)](https://www.codefactor.io/repository/github/pytorchlightning/pytorch-lightning-bolts)
 
 [![Documentation Status](https://readthedocs.org/projects/pytorch-lightning-bolts/badge/?version=latest)](https://pytorch-lightning-bolts.readthedocs.io/en/latest/)
 [![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://join.slack.com/t/pytorch-lightning/shared_invite/zt-f6bl2l0l-JYMK3tbAgAmGRrlNr00f1A)
+[![Discourse status](https://img.shields.io/discourse/status?server=https%3A%2F%2Fforums.pytorchlightning.ai)](https://forums.pytorchlightning.ai/)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/PytorchLightning/pytorch-lightning/blob/master/LICENSE)
-[![Next Release](https://img.shields.io/badge/Next%20Release-June%2020-purple.svg)](https://shields.io/)
+[![Next Release](https://img.shields.io/badge/Next%20Release-Oct%2005-purple.svg)](https://shields.io/)
 
 </div>
 
----   
+---
+
 ## Trending contributors
 
 [![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/0)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/0)
@@ -31,25 +34,43 @@
 
 
 ## Continuous Integration
+
 <center>
 
-| System / PyTorch ver. | 1.4 (min. req.) | 1.5 (latest) |
+| System / PyTorch ver. | 1.6 (min. req.) | 1.6 (latest) |
 | :---: | :---: | :---: |
-| Linux py3.6 / py3.7 / py3.8 | ![CI testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20testing/badge.svg?branch=master) | ![CI testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20testing/badge.svg?branch=master) |
-| OSX py3.6 / py3.7 / py3.8 | ![CI testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20testing/badge.svg?branch=master) | ![CI testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20testing/badge.svg?branch=master) |
-| Windows py3.6 / py3.7 / py3.8 | wip | wip |
+| Linux py3.6 / py3.7 / py3.8 | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
+| OSX py3.6 / py3.7 | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
+| Windows py3.6 / py3.7 | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
 
 </center>
 
 ## Install
-```pip install pytorch-lightning-bolts```
+
+Simple installation from PyPI
+```bash
+pip install pytorch-lightning-bolts
+```
+
+Install bleeding-edge (no guarantees)   
+```bash
+pip install git+https://github.com/PytorchLightning/pytorch-lightning-bolts.git@master --upgrade
+```
+
+In case you want to have full experience you can install all optional packages at once
+```bash
+pip install pytorch-lightning-bolts["extra"]
+```
 
 ## Docs
+
 - [master](https://pytorch-lightning-bolts.readthedocs.io/en/latest)
 - [stable](https://pytorch-lightning-bolts.readthedocs.io/en/stable)
-- [0.1.0](https://pytorch-lightning-bolts.readthedocs.io/en/0.1.0/)
+- [0.2.0](https://pytorch-lightning-bolts.readthedocs.io/en/0.2.0/)
+- [0.1.1](https://pytorch-lightning-bolts.readthedocs.io/en/0.1.1/)
 
 ## What is Bolts
+
 Bolts is a Deep learning research and production toolbox of:
 
 - SOTA pretrained models.
@@ -59,6 +80,7 @@ Bolts is a Deep learning research and production toolbox of:
 - Datasets.
 
 ## Main Goals of Bolts
+
 The main goal of Bolts is to enable rapid model idea iteration.
 
 #### Example 1: Finetuning on data
@@ -73,18 +95,19 @@ train_data = DataLoader(MyDataset(transforms=SimCLRTrainDataTransform(input_heig
 val_data = DataLoader(MyDataset(transforms=SimCLREvalDataTransform(input_height=32)))
 
 # model
-model = SimCLR(pretrained='imagenet2012')
+weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp12_87_52/epoch%3D960.ckpt'
+simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
 
-# train!
-trainer = pl.Trainer(gpus=8)
-trainer.fit(model, train_data, val_data)
+simclr.freeze()
+
+# finetune
 ```
 
 #### Example 2: Subclass and ideate
 
 ```python
 from pl_bolts.models import ImageGPT
-from pl_bolts.self_supervised import SimCLR
+from pl_bolts.models.self_supervised import SimCLR
 
 class VideoGPT(ImageGPT):
 
@@ -106,12 +129,14 @@ class VideoGPT(ImageGPT):
 ```
 
 ## Who is Bolts for?
+
 - Corporate production teams
 - Professional researchers
 - Ph.D. students
 - Linear + Logistic regression heroes
 
 ## I don't need deep learning
+
 Great! 
 We have LinearRegression and LogisticRegression implementations with numpy and sklearn bridges for datasets!
 But our implementations work on multiple GPUs, TPUs and scale dramatically...
@@ -121,18 +146,24 @@ But our implementations work on multiple GPUs, TPUs and scale dramatically...
 ```python
 from pl_bolts.models.regression import LinearRegression
 from pl_bolts.datamodules import SklearnDataModule
+from sklearn.datasets import load_boston
+import pytorch_lightning as pl
 
 # sklearn dataset
 X, y = load_boston(return_X_y=True)
 loaders = SklearnDataModule(X, y)
 
 model = LinearRegression(input_dim=13)
-trainer = pl.Trainer(num_tpu_cores=1)
+
+# try with gpus=4!
+# trainer = pl.Trainer(gpus=4)
+trainer = pl.Trainer()
 trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
 trainer.test(test_dataloaders=loaders.test_dataloader())
 ```
 
 ## Is this another model zoo?
+
 No! 
 
 Bolts is unique because models are implemented using PyTorch Lightning and structured so that they can be easily
@@ -143,5 +174,19 @@ The best part is that all the models are benchmarked so you won't waste time try
 with your implementation.
 
 ## Team
+
 Bolts is supported by the PyTorch Lightning team and the PyTorch Lightning community!
 
+## Citation
+To cite bolts use:
+
+```
+@article{falcon2020framework,
+  title={A Framework For Contrastive Self-Supervised Learning And Designing A New Approach},
+  author={Falcon, William and Cho, Kyunghyun},
+  journal={arXiv preprint arXiv:2009.00104},
+  year={2020}
+}
+```
+
+To cite other contributed models or modules, please cite the authors directly (if they don't have bibtex, ping the authors on a GH issue)

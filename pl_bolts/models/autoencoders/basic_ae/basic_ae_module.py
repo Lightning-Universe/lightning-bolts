@@ -1,150 +1,178 @@
 from argparse import ArgumentParser
 
+import pytorch_lightning as pl
 import torch
-from pytorch_lightning import LightningDataModule, LightningModule, Trainer
+import torch.nn as nn
 from torch.nn import functional as F
 
-from pl_bolts.datamodules import MNISTDataModule
-from pl_bolts.models.autoencoders.basic_ae.components import AEEncoder
-from pl_bolts.models.autoencoders.basic_vae.components import Decoder
+from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_decoder
+from pl_bolts.models.autoencoders.components import resnet50_encoder, resnet50_decoder
 
 
-class AE(LightningModule):
+class AE(pl.LightningModule):
+    """
+    Standard AE
+
+    Model is available pretrained on different datasets:
+
+    Example::
+
+        # not pretrained
+        ae = AE()
+
+        # pretrained on cifar10
+        ae = AE.from_pretrained('cifar10-resnet18')
+    """
+
+    pretrained_urls = {
+        'cifar10-resnet18':
+            'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/ae/ae-cifar10/checkpoints/epoch%3D96.ckpt'
+    }
 
     def __init__(
-            self,
-            datamodule: LightningDataModule = None,
-            input_channels=1,
-            input_height=28,
-            input_width=28,
-            latent_dim=32,
-            batch_size=32,
-            hidden_dim=128,
-            learning_rate=0.001,
-            num_workers=8,
-            data_dir='.',
-            **kwargs
+        self,
+        input_height,
+        enc_type='resnet18',
+        first_conv=False,
+        maxpool1=False,
+        enc_out_dim=512,
+        kl_coeff=0.1,
+        latent_dim=256,
+        lr=1e-4,
+        **kwargs
     ):
         """
-        Arg:
-
-            datamodule: the datamodule (train, val, test splits)
-            input_channels: num of image channels
-            input_height: image height
-            input_width: image width
-            latent_dim: emb dim for encoder
-            batch_size: the batch size
-            hidden_dim: the encoder dim
-            learning_rate: the learning rate
-            num_workers: num dataloader workers
-            data_dir: where to store data
+        Args:
+            input_height: height of the images
+            enc_type: option between resnet18 or resnet50
+            first_conv: use standard kernel_size 7, stride 2 at start or
+                replace it with kernel_size 3, stride 1 conv
+            maxpool1: use standard maxpool to reduce spatial dim of feat by a factor of 2
+            enc_out_dim: set according to the out_channel count of
+                encoder used (512 for resnet18, 2048 for resnet50)
+            latent_dim: dim of latent space
+            lr: learning rate for Adam
         """
-        super().__init__()
+
+        super(AE, self).__init__()
+
         self.save_hyperparameters()
 
-        # link default data
-        if datamodule is None:
-            datamodule = MNISTDataModule(data_dir=self.hparams.data_dir, num_workers=self.hparams.num_workers)
+        self.lr = lr
+        self.enc_out_dim = enc_out_dim
+        self.latent_dim = latent_dim
+        self.input_height = input_height
 
-        self.datamodule = datamodule
+        valid_encoders = {
+            'resnet18': {'enc': resnet18_encoder, 'dec': resnet18_decoder},
+            'resnet50': {'enc': resnet50_encoder, 'dec': resnet50_decoder},
+        }
 
-        self.img_dim = self.datamodule.size()
+        if enc_type not in valid_encoders:
+            self.encoder = resnet18_encoder(first_conv, maxpool1)
+            self.decoder = resnet18_decoder(self.latent_dim, self.input_height, first_conv, maxpool1)
+        else:
+            self.encoder = valid_encoders[enc_type]['enc'](first_conv, maxpool1)
+            self.decoder = valid_encoders[enc_type]['dec'](self.latent_dim, self.input_height, first_conv, maxpool1)
 
-        self.encoder = self.init_encoder(self.hparams.hidden_dim, self.hparams.latent_dim,
-                                         self.hparams.input_width, self.hparams.input_height)
-        self.decoder = self.init_decoder(self.hparams.hidden_dim, self.hparams.latent_dim)
+        self.fc = nn.Linear(self.enc_out_dim, self.latent_dim)
 
-    def init_encoder(self, hidden_dim, latent_dim, input_width, input_height):
-        encoder = AEEncoder(hidden_dim, latent_dim, input_width, input_height)
-        return encoder
+    @staticmethod
+    def pretrained_weights_available():
+        return list(AE.pretrained_urls.keys())
 
-    def init_decoder(self, hidden_dim, latent_dim):
-        c, h, w = self.img_dim
-        decoder = Decoder(hidden_dim, latent_dim, w, h, c)
-        return decoder
+    def from_pretrained(self, checkpoint_name):
+        if checkpoint_name not in AE.pretrained_urls:
+            raise KeyError(str(checkpoint_name) + ' not present in pretrained weights.')
 
-    def forward(self, z):
-        return self.decoder(z)
+        return self.load_from_checkpoint(AE.pretrained_urls[checkpoint_name], strict=False)
 
-    def _run_step(self, batch):
-        x, _ = batch
-        z = self.encoder(x)
-        x_hat = self(z)
+    def forward(self, x):
+        feats = self.encoder(x)
+        z = self.fc(feats)
+        x_hat = self.decoder(z)
+        return x_hat
 
-        loss = F.mse_loss(x.view(x.size(0), -1), x_hat)
-        return loss
+    def step(self, batch, batch_idx):
+        x, y = batch
+
+        feats = self.encoder(x)
+        z = self.fc(feats)
+        x_hat = self.decoder(z)
+
+        loss = F.mse_loss(x_hat, x, reduction='mean')
+
+        return loss, {"loss": loss}
 
     def training_step(self, batch, batch_idx):
-        loss = self._run_step(batch)
-
-        tensorboard_logs = {
-            'mse_loss': loss,
-        }
-
-        return {'loss': loss, 'log': tensorboard_logs}
+        loss, logs = self.step(batch, batch_idx)
+        self.log_dict(
+            {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
+        )
+        return loss
 
     def validation_step(self, batch, batch_idx):
-        loss = self._run_step(batch)
-
-        return {
-            'val_loss': loss,
-        }
-
-    def validation_epoch_end(self, outputs):
-        avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
-
-        tensorboard_logs = {'mse_loss': avg_loss}
-
-        return {
-            'val_loss': avg_loss,
-            'log': tensorboard_logs
-        }
-
-    def test_step(self, batch, batch_idx):
-        loss = self._run_step(batch)
-
-        return {
-            'test_loss': loss,
-        }
-
-    def test_epoch_end(self, outputs):
-        avg_loss = torch.stack([x['test_loss'] for x in outputs]).mean()
-
-        tensorboard_logs = {'mse_loss': avg_loss}
-
-        return {
-            'test_loss': avg_loss,
-            'log': tensorboard_logs
-        }
+        loss, logs = self.step(batch, batch_idx)
+        self.log_dict({f"val_{k}": v for k, v in logs.items()})
+        return loss
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
+        return torch.optim.Adam(self.parameters(), lr=self.lr)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--hidden_dim', type=int, default=128,
-                            help='itermediate layers dimension before embedding for default encoder/decoder')
-        parser.add_argument('--latent_dim', type=int, default=32,
-                            help='dimension of latent variables z')
-        parser.add_argument('--input_width', type=int, default=28,
-                            help='input image width - 28 for MNIST (must be even)')
-        parser.add_argument('--input_height', type=int, default=28,
-                            help='input image height - 28 for MNIST (must be even)')
-        parser.add_argument('--batch_size', type=int, default=32)
-        parser.add_argument('--num_workers', type=int, default=8, help="num dataloader workers")
-        parser.add_argument('--learning_rate', type=float, default=1e-3)
-        parser.add_argument('--data_dir', type=str, default='')
+
+        parser.add_argument("--enc_type", type=str, default='resnet18', help="resnet18/resnet50")
+        parser.add_argument("--first_conv", action='store_true')
+        parser.add_argument("--maxpool1", action='store_true')
+        parser.add_argument("--lr", type=float, default=1e-4)
+
+        parser.add_argument(
+            "--enc_out_dim", type=int, default=512,
+            help="512 for resnet18, 2048 for bigger resnets, adjust for wider resnets"
+        )
+        parser.add_argument("--latent_dim", type=int, default=256)
+
+        parser.add_argument("--batch_size", type=int, default=256)
+        parser.add_argument("--num_workers", type=int, default=8)
+        parser.add_argument("--data_dir", type=str, default=".")
+
         return parser
 
 
-# todo: covert to CLI func and add test
-if __name__ == '__main__':
-    parser = ArgumentParser()
-    parser = Trainer.add_argparse_args(parser)
-    parser = AE.add_model_specific_args(parser)
-    args = parser.parse_args()
+def cli_main(args=None):
+    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
 
-    ae = AE(**vars(args))
-    trainer = Trainer.from_argparse_args(args)
-    trainer.fit(ae)
+    parser = ArgumentParser()
+    parser.add_argument("--dataset", default="cifar10", type=str, choices=["cifar10", "stl10", "imagenet"])
+    script_args, _ = parser.parse_known_args(args)
+
+    if script_args.dataset == "cifar10":
+        dm_cls = CIFAR10DataModule
+    elif script_args.dataset == "stl10":
+        dm_cls = STL10DataModule
+    elif script_args.dataset == "imagenet":
+        dm_cls = ImagenetDataModule
+    else:
+        raise ValueError(f"undefined dataset {script_args.dataset}")
+
+    parser = AE.add_model_specific_args(parser)
+    parser = pl.Trainer.add_argparse_args(parser)
+    args = parser.parse_args(args)
+
+    dm = dm_cls.from_argparse_args(args)
+    args.input_height = dm.size()[-1]
+
+    if args.max_steps == -1:
+        args.max_steps = None
+
+    model = AE(**vars(args))
+
+    trainer = pl.Trainer.from_argparse_args(args)
+    trainer.fit(model, dm)
+    return dm, model, trainer
+
+
+if __name__ == "__main__":
+    dm, model, trainer = cli_main()
