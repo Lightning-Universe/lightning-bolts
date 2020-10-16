@@ -1,7 +1,8 @@
 import pytorch_lightning as pl
 import torch
 
-from pl_bolts.datamodules import MNISTDataModule, FashionMNISTDataModule, DummyDataset
+from pl_bolts.datamodules import MNISTDataModule, FashionMNISTDataModule
+from pl_bolts.datasets import DummyDataset
 from pl_bolts.models import GPT2, ImageGPT, UNet, SemSegment
 from torch.utils.data import DataLoader
 
