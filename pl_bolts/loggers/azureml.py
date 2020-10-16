@@ -75,7 +75,7 @@ class AzureMlLogger(MLFlowLogger):
 
         if run is None:
             run = AzureMlRun.get_context(allow_offline=True)
-        
+
         try:
             experiment = run.experiment
             tracking_uri = experiment.workspace.get_mlflow_tracking_uri()
