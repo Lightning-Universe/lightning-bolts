@@ -14,21 +14,13 @@ class UNet(nn.Module):
 
         - `Annika Brundyn <https://github.com/annikabrundyn>`_
         - `Akshay Kulkarni <https://github.com/akshaykvnit>`_
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> eb6715c95fb802ee27a739d13864f28316e4485a
     Args:
         num_classes: Number of output classes required
         num_layers: Number of layers in each side of U-net (default 5)
         features_start: Number of features in first layer (default 64)
         bilinear (bool): Whether to use bilinear interpolation or transposed convolutions (default) for upsampling.
     """
-<<<<<<< HEAD
-=======
-
->>>>>>> eb6715c95fb802ee27a739d13864f28316e4485a
     def __init__(
             self,
             num_classes: int,
@@ -36,10 +28,6 @@ class UNet(nn.Module):
             features_start: int = 64,
             bilinear: bool = False
     ):
-<<<<<<< HEAD
-=======
-
->>>>>>> eb6715c95fb802ee27a739d13864f28316e4485a
         super().__init__()
         self.num_layers = num_layers
 
