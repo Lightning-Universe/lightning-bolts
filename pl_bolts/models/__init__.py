@@ -10,7 +10,3 @@ from pl_bolts.models.vision import PixelCNN
 from pl_bolts.models.vision import UNet
 from pl_bolts.models.vision import SemSegment
 from pl_bolts.models.vision.image_gpt.igpt_module import GPT2, ImageGPT
-<<<<<<< HEAD
-
-=======
->>>>>>> eb6715c95fb802ee27a739d13864f28316e4485a
