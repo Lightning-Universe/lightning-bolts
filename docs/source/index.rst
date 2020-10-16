@@ -90,7 +90,7 @@ PyTorch-Lightning-Bolts documentation
    vision_tasks
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :name: loggers
    :caption: Loggers
 
@@ -111,6 +111,7 @@ Indices and tables
    api/pl_bolts.callbacks
    api/pl_bolts.datamodules
    api/pl_bolts.datasets
+   api/pl_bolts.loggers
    api/pl_bolts.metrics
    api/pl_bolts.models
    api/pl_bolts.callbacks
