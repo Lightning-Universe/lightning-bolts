@@ -21,7 +21,13 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
         model.num_classes = ... # the num of classes in the model
     """
 
-    def __init__(self, drop_p: float = 0.2, hidden_dim: int = 1024, z_dim: Optional[int] = None, num_classes: Optional[int] = None):
+    def __init__(
+        self,
+        drop_p: float = 0.2,
+        hidden_dim: int = 1024,
+        z_dim: Optional[int] = None,
+        num_classes: Optional[int] = None,
+    ):
         """
         Args:
             drop_p: (0.2) dropout probability
@@ -45,10 +51,7 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
             self.num_classes = pl_module.num_classes
 
         pl_module.non_linear_evaluator = SSLEvaluator(
-            n_input=self.z_dim,
-            n_classes=self.num_classes,
-            p=self.drop_p,
-            n_hidden=self.hidden_dim
+            n_input=self.z_dim, n_classes=self.num_classes, p=self.drop_p, n_hidden=self.hidden_dim
         ).to(pl_module.device)
 
         self.optimizer = torch.optim.SGD(pl_module.non_linear_evaluator.parameters(), lr=1e-3)
