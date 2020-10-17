@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Callable
+from typing import Callable, Optional
 from warnings import warn
 
 import numpy as np
@@ -100,10 +100,10 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
             self,
             root: str,
             split: str = 'val',
-            transform: Callable = None,
-            target_transform: Callable = None,
+            transform: Optional[Callable] = None,
+            target_transform: Optional[Callable] = None,
             download: bool = False,
-            nb_labeled_per_class: int = None,
+            nb_labeled_per_class: Optional[int] = None,
             val_pct: float = 0.10
     ):
 

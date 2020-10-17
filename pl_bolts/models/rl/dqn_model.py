@@ -4,7 +4,7 @@ Deep Q Network
 
 import argparse
 from collections import OrderedDict
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Optional
 from warnings import warn
 
 import numpy as np
@@ -343,7 +343,7 @@ class DQN(pl.LightningModule):
         return self._dataloader()
 
     @staticmethod
-    def make_environment(env_name: str, seed: int = None) -> gym.Env:
+    def make_environment(env_name: str, seed: Optional[int] = None) -> gym.Env:
         """
         Initialise gym  environment
         Args:

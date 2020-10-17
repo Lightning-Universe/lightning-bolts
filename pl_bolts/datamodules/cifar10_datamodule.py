@@ -67,7 +67,7 @@ class CIFAR10DataModule(LightningDataModule):
 
     def __init__(
             self,
-            data_dir: str = None,
+            data_dir: Optional[str] = None,
             val_split: int = 5000,
             num_workers: int = 16,
             batch_size: int = 32,

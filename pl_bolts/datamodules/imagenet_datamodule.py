@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 from warnings import warn
 
 from pytorch_lightning import LightningDataModule
@@ -52,7 +53,7 @@ class ImagenetDataModule(LightningDataModule):
     def __init__(
             self,
             data_dir: str,
-            meta_dir: str = None,
+            meta_dir: Optional[str] = None,
             num_imgs_per_val_class: int = 50,
             image_size: int = 224,
             num_workers: int = 16,

@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 from warnings import warn
 
 import torch
@@ -56,7 +57,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
 
     def __init__(
             self,
-            data_dir: str = None,
+            data_dir: Optional[str] = None,
             unlabeled_val_split: int = 5000,
             train_val_split: int = 500,
             num_workers: int = 16,
