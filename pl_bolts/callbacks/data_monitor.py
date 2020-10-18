@@ -124,7 +124,7 @@ class ModuleDataMonitor(DataMonitorBase):
                 interval defined in the Trainer. Use this to override the Trainer default.
 
         Note:
-            A too low value for `row_log_interval` may have a significant performance impact
+            A too low value for `log_every_n_steps` may have a significant performance impact
             especially when many submodules are involved, since the logging occurs during the forward pass.
             It should only be used for debugging purposes.
 
