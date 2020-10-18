@@ -44,7 +44,7 @@ class DataMonitorBase(Callback):
         self._trainer = trainer
 
     def on_train_batch_start(
-            self, trainer, pl_module, batch, batch_idx, dataloader_idx
+        self, trainer, pl_module, batch, batch_idx, dataloader_idx
     ):
         self._train_batch_idx = batch_idx
 
@@ -110,9 +110,9 @@ class ModuleDataMonitor(DataMonitorBase):
     GROUP_NAME_OUTPUT = "output"
 
     def __init__(
-            self,
-            submodules: Optional[Union[bool, List[str]]] = None,
-            log_every_n_steps: int = None,
+        self,
+        submodules: Optional[Union[bool, List[str]]] = None,
+        log_every_n_steps: int = None,
     ):
         """
         Args:
@@ -224,7 +224,7 @@ class TrainingDataMonitor(DataMonitorBase):
 
 
 def collect_and_name_tensors(
-        data: Any, output: Dict[str, Tensor], parent_name: str = "input"
+    data: Any, output: Dict[str, Tensor], parent_name: str = "input"
 ) -> None:
     """
     Recursively fetches all tensors in a (nested) collection of data (depth-first search) and names them.
