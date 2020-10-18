@@ -1,4 +1,5 @@
 from warnings import warn
+from typing import Optional
 
 from torch.utils.data import random_split
 
@@ -52,7 +53,7 @@ class AMDIMPretraining():
         return dataset
 
     @staticmethod
-    def stl(dataset_root, split: str = None):
+    def stl(dataset_root, split: Optional[str] = None):
         dataset = STL10(
             root=dataset_root,
             split='unlabeled',
@@ -93,7 +94,7 @@ class AMDIMPatchesPretraining():
         return dataset
 
     @staticmethod
-    def stl(dataset_root, patch_size, patch_overlap, split: str = None):
+    def stl(dataset_root, patch_size, patch_overlap, split: Optional[str] = None):
         train_transform = amdim_transforms.TransformsSTL10Patches(
             patch_size=patch_size,
             overlap=patch_overlap

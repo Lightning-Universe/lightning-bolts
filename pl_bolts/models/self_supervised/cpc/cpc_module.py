@@ -4,6 +4,7 @@ CPC V2
 """
 import math
 from argparse import ArgumentParser
+from typing import Optional
 
 import pytorch_lightning as pl
 import torch
@@ -33,7 +34,7 @@ class CPCV2(pl.LightningModule):
 
     def __init__(
             self,
-            datamodule: pl.LightningDataModule = None,
+            datamodule: Optional[pl.LightningDataModule] = None,
             encoder_name: str = 'cpc_encoder',
             patch_size: int = 8,
             patch_overlap: int = 4,
@@ -43,7 +44,7 @@ class CPCV2(pl.LightningModule):
             learning_rate: int = 1e-4,
             data_dir: str = '',
             batch_size: int = 32,
-            pretrained: str = None,
+            pretrained: Optional[str] = None,
             **kwargs,
     ):
         """
