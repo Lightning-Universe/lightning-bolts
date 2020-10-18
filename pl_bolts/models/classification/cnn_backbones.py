@@ -112,4 +112,3 @@ def create_torchvision_backbone(model_name: str, num_classes: int, pretrained: b
 
     else:
         raise ValueError("No such model implemented in torchvision")
-
