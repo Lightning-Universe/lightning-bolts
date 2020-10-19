@@ -25,7 +25,7 @@ except ImportError:
 else:
     _TORCHVISION_AVAILABLE = True
 
-from pl_bolts.transforms.dataset_normalizations import stl10_normalization
+from pl_bolts.transforms.dataset_normalizations import stl10_normalization, cifar10_normalization
 from pl_bolts.models.self_supervised.swav.transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
 from pl_bolts.models.self_supervised.swav.swav_online_eval import SwavOnlineEvaluator
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
@@ -431,7 +431,7 @@ class SwAV(pl.LightningModule):
         # transform params
         parser.add_argument("--gaussian_blur", action="store_true", help="add gaussian blur")
         parser.add_argument("--jitter_strength", type=float, default=1.0, help="jitter strength")
-        parser.add_argument("--dataset", type=str, default="stl10", help="stl10")
+        parser.add_argument("--dataset", type=str, default="stl10", help="stl10, cifar10")
         parser.add_argument("--data_path", type=str, default=".", help="path to download data")
         parser.add_argument("--queue_path", type=str, default="queue", help="path for queue")
 
@@ -498,29 +498,53 @@ def cli_main():
         dm.val_dataloader = dm.val_dataloader_mixed
         args.num_samples = dm.num_unlabeled_samples
 
-        dm.train_transforms = SwAVTrainDataTransform(
-            normalize=stl10_normalization(),
-            size_crops=args.size_crops,
-            nmb_crops=args.nmb_crops,
-            min_scale_crops=args.min_scale_crops,
-            max_scale_crops=args.max_scale_crops,
-            gaussian_blur=args.gaussian_blur,
-            jitter_strength=args.jitter_strength
+        args.maxpool1 = False
+
+        normalization = stl10_normalization()
+    elif args.dataset == 'cifar10':
+        args.batch_size = 2
+        args.num_workers = 0
+
+        dm = CIFAR10DataModule(
+            data_dir=args.data_path,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers
         )
 
-        dm.val_transforms = SwAVEvalDataTransform(
-            normalize=stl10_normalization(),
-            size_crops=args.size_crops,
-            nmb_crops=args.nmb_crops,
-            min_scale_crops=args.min_scale_crops,
-            max_scale_crops=args.max_scale_crops,
-            gaussian_blur=args.gaussian_blur,
-            jitter_strength=args.jitter_strength
-        )
+        args.num_samples = dm.num_samples
 
         args.maxpool1 = False
+        args.first_conv = False
+
+        normalization = cifar10_normalization()
+
+        # cifar10 specific params
+        args.size_crops = [32, 16]
+        args.nmb_crops = [2, 1]
+        args.gaussian_blur = False
+
     else:
         raise NotImplementedError("other datasets have not been implemented till now")
+
+    dm.train_transforms = SwAVTrainDataTransform(
+        normalize=stl10_normalization(),
+        size_crops=args.size_crops,
+        nmb_crops=args.nmb_crops,
+        min_scale_crops=args.min_scale_crops,
+        max_scale_crops=args.max_scale_crops,
+        gaussian_blur=args.gaussian_blur,
+        jitter_strength=args.jitter_strength
+    )
+
+    dm.val_transforms = SwAVEvalDataTransform(
+        normalize=stl10_normalization(),
+        size_crops=args.size_crops,
+        nmb_crops=args.nmb_crops,
+        min_scale_crops=args.min_scale_crops,
+        max_scale_crops=args.max_scale_crops,
+        gaussian_blur=args.gaussian_blur,
+        jitter_strength=args.jitter_strength
+    )
 
     # swav model init
     model = SwAV(**args.__dict__, datamodule=dm)
