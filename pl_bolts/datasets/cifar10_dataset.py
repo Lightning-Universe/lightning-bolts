@@ -79,7 +79,7 @@ class CIFAR10(LightDataset):
             self,
             data_dir: str = '.',
             train: bool = True,
-            transform: Callable = None,
+            transform: Optional[Callable] = None,
             download: bool = True
     ):
         super().__init__()
@@ -182,7 +182,7 @@ class TrialCIFAR10(CIFAR10):
             self,
             data_dir: str = '.',
             train: bool = True,
-            transform: Callable = None,
+            transform: Optional[Callable] = None,
             download: bool = False,
             num_samples: int = 100,
             labels: Optional[Sequence] = (1, 5, 8),

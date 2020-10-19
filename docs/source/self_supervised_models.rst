@@ -205,7 +205,7 @@ CIFAR-10 pretrained model::
 Pre-training:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/cpc-cifar10-val.png
-    :width: 200
+    :width: 400
     :alt: pretraining validation loss
 
 |
@@ -213,7 +213,7 @@ Pre-training:
 Fine-tuning:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/online-finetuning-cpc-cifar10.png
-    :width: 200
+    :width: 400
     :alt: online finetuning accuracy
 
 |
@@ -234,7 +234,7 @@ STL-10 pretrained model::
 Pre-training:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/cpc-stl10-val.png
-    :width: 200
+    :width: 400
     :alt: pretraining validation loss
 
 |
@@ -242,7 +242,7 @@ Pre-training:
 Fine-tuning:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/online-finetuning-cpc-stl10.png
-    :width: 200
+    :width: 400
     :alt: online finetuning accuracy
 
 |
@@ -263,7 +263,7 @@ ImageNet pretrained model::
 Pre-training:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpcv2_weights/cpc-imagenet-val.png
-    :width: 200
+    :width: 400
     :alt: pretraining validation loss
 
 |
@@ -271,7 +271,7 @@ Pre-training:
 Fine-tuning:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpcv2_weights/online-finetuning-cpc-imagenet.png
-    :width: 200
+    :width: 400
     :alt: online finetuning accuracy
 
 |
@@ -371,7 +371,7 @@ CIFAR-10 pretrained model::
 Pre-training:
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp2_acc_867/val_loss.png
-    :width: 200
+    :width: 400
     :alt: pretraining validation loss
 
 |
@@ -379,11 +379,11 @@ Pre-training:
 Fine-tuning (Single layer MLP, 1024 hidden units):
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp2_acc_867/val_acc.png
-    :width: 200
+    :width: 400
     :alt: finetuning validation accuracy
 
 .. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp2_acc_867/test_acc.png
-    :width: 200
+    :width: 400
     :alt: finetuning test accuracy
 
 |
@@ -407,4 +407,145 @@ SimCLR API
 **********
 
 .. autoclass:: pl_bolts.models.self_supervised.SimCLR
+   :noindex:
+
+---------
+
+SwAV
+^^^^
+
+PyTorch Lightning implementation of `SwAV <https://arxiv.org/abs/2006.09882>`_
+Adapted from the `official implementation <https://github.com/facebookresearch/swav>`_
+
+Paper authors: Mathilde Caron, Ishan Misra, Julien Mairal, Priya Goyal, Piotr Bojanowski, Armand Joulin.
+
+Implementation adapted by:
+
+    - `Ananya Harsh Jha <https://github.com/ananyahjha93>`_
+
+To Train::
+
+    import pytorch_lightning as pl
+    from pl_bolts.models.self_supervised import SwAV
+    from pl_bolts.datamodules import STL10DataModule
+    from pl_bolts.models.self_supervised.swav.transforms import (
+        SwAVTrainDataTransform, SwAVEvalDataTransform
+    )
+    from pl_bolts.transforms.dataset_normalizations import stl10_normalization
+
+    # data
+    batch_size = 128
+    dm = STL10DataModule(data_dir='.', batch_size=batch_size)
+    dm.train_dataloader = dm.train_dataloader_mixed
+    dm.val_dataloader = dm.val_dataloader_mixed
+
+    dm.train_transforms = SwAVTrainDataTransform(
+        normalize=stl10_normalization()
+    )
+
+    dm.val_transforms = SwAVEvalDataTransform(
+        normalize=stl10_normalization()
+    )
+
+    # model
+    model = SwAV(
+        gpus=1,
+        num_samples=dm.num_unlabeled_samples,
+        datamodule=dm,
+        batch_size=batch_size
+    )
+
+    # fit
+    trainer = pl.Trainer(precision=16)
+    trainer.fit(model)
+
+STL-10 baseline
+*****************
+
+The original paper does not provide baselines on STL10.
+
+.. list-table:: STL-10 implementation results
+   :widths: 18 15 25 15 10 20 20 20 10
+   :header-rows: 1
+
+   * - Implementation
+     - test acc
+     - Encoder
+     - Optimizer
+     - Batch
+     - Queue used
+     - Epochs
+     - Hardware
+     - LR
+   * - Ours
+     - `86.72 <https://tensorboard.dev/experiment/w2pq3bPPSxC4VIm5udhA2g/>`_
+     - SwAV resnet50
+     - `LARS <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - 128
+     - No
+     - 100 (~9 hr)
+     - 1 V100 (16GB)
+     - 1e-3
+
+|
+
+- `Pre-training tensorboard link <https://tensorboard.dev/experiment/68jet8o4RdK34u5kUXLedg/>`_
+
+STL-10 pretrained model::
+
+    from pl_bolts.models.self_supervised import SwAV
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/checkpoints/epoch%3D96.ckpt'
+    swav = SwAV.load_from_checkpoint(weight_path, strict=False)
+
+    swav.freeze()
+
+|
+
+Pre-training:
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/pretraining-val-loss.png
+    :width: 400
+    :alt: pretraining validation loss
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/online-finetuning-val-acc.png
+    :width: 400
+    :alt: online finetuning validation acc
+
+|
+
+Fine-tuning (Single layer MLP, 1024 hidden units):
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/fine-tune-val-acc.png
+    :width: 400
+    :alt: finetuning validation accuracy
+
+.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/fine-tune-val-loss.png
+    :width: 400
+    :alt: finetuning validation loss
+
+|
+
+To reproduce::
+
+    # pretrain
+    python swav_module.py
+        --online_ft
+        --gpus 1
+        --lars_wrapper
+        --batch_size 128
+        --learning_rate 1e-3
+        --gaussian_blur
+        --queue_length 0
+        --jitter_strength 1.
+        --nmb_prototypes 512
+
+    # finetune
+    python swav_finetuner.py
+        --ckpt_path path/to/epoch=xyz.ckpt
+
+SwAV API
+********
+
+.. autoclass:: pl_bolts.models.self_supervised.SwAV
    :noindex:
