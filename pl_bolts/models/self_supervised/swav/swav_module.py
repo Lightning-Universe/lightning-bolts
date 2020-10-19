@@ -37,7 +37,7 @@ class SwAV(pl.LightningModule):
         gpus: int,
         num_samples: int,
         batch_size: int,
-        dataset: str = 'stl10',
+        dataset: str,
         arch: str = 'resnet50',
         hidden_mlp: int = 2048,
         feat_dim: int = 128,
@@ -544,7 +544,7 @@ def cli_main():
     )
 
     # swav model init
-    model = SwAV(**args.__dict__, datamodule=dm)
+    model = SwAV(**args.__dict__)
 
     online_evaluator = None
     if args.online_ft:

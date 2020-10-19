@@ -88,7 +88,6 @@ def test_simclr(tmpdir):
     assert float(loss) > 0
 
 
-"""
 def test_swav(tmpdir):
     seed_everything()
 
@@ -124,7 +123,8 @@ def test_swav(tmpdir):
         sinkhorn_iterations=1,
         nmb_prototypes=2,
         maxpool1=False,
-        first_conv=False
+        first_conv=False,
+        dataset='cifar10'
     )
 
     trainer = pl.Trainer(
@@ -134,4 +134,3 @@ def test_swav(tmpdir):
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) > 0
-"""
