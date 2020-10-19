@@ -210,7 +210,7 @@ class SwAV(pl.LightningModule):
 
         self.use_the_queue = False
 
-    def on_train_epoch_end(self) -> None:
+    def on_train_epoch_end(self, outputs) -> None:
         if self.queue is not None:
             torch.save({"queue": self.queue}, self.queue_path)
 
@@ -225,11 +225,7 @@ class SwAV(pl.LightningModule):
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
 
-        if len(batch) == 2:
-            inputs, y = batch
-        else:
-            inputs = batch[:-1]  # remove y label from batch
-
+        inputs, y = batch
         inputs = inputs[:-1]  # remove online train/eval transforms at this point
 
         # 1. normalize the prototypes
@@ -278,16 +274,14 @@ class SwAV(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
 
-        result = pl.TrainResult(minimize=loss)
-        result.log('train_loss', loss, on_step=True, on_epoch=False)
-        return result
+        self.log('train_loss', loss, on_step=True, on_epoch=False)
+        return loss
 
     def validation_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
 
-        result = pl.EvalResult(checkpoint_on=loss)
-        result.log('val_loss', loss, on_step=False, on_epoch=True)
-        return result
+        self.log('val_loss', loss, on_step=False, on_epoch=True)
+        return loss
 
     def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=['bias', 'bn']):
         params = []
