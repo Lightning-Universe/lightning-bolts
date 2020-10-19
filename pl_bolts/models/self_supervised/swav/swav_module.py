@@ -1,20 +1,18 @@
 """
 Adapted from official swav implementation: https://github.com/facebookresearch/swav
 """
-from argparse import ArgumentParser
-
-import os
 import math
+import os
+from argparse import ArgumentParser
+from warnings import warn
+
 import numpy as np
 import pytorch_lightning as pl
 import torch
-from torch import nn
-from torch.nn import functional as F
 import torch.distributed as dist
-from torch.optim import Adam, SGD
+from torch import nn
 
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
-from warnings import warn
 
 try:
     from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule, CIFAR10DataModule

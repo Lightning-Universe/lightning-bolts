@@ -1,9 +1,11 @@
-import torch
-import math
-import pytorch_lightning as pl
-from torch.nn import functional as F
-from pytorch_lightning.metrics.functional import accuracy
 from typing import Optional
+
+import pytorch_lightning as pl
+import torch
+from pytorch_lightning.metrics.functional import accuracy
+from torch.nn import functional as F
+
+from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 
