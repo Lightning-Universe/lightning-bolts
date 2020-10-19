@@ -27,9 +27,10 @@ else:
     _AZURE_ML_AVAILABLE = True
 
 
-from pytorch_lightning.loggers import MLFlowLogger
-from typing import Optional
 import uuid
+from typing import Optional
+
+from pytorch_lightning.loggers import MLFlowLogger
 
 
 class AzureMlLogger(MLFlowLogger):

@@ -1,2 +1,3 @@
 # test_tube>=0.7.5
 # trains>=0.14.1
+azureml-mlflow>=1.16.0
