@@ -9,14 +9,14 @@ from torch import Tensor
 
 try:
     from PIL import Image
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `Pillow` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install Pillow`.')
     _PIL_AVAILABLE = False
 else:
     _PIL_AVAILABLE = True
 
-from pl_bolts.datamodules.base_dataset import LightDataset
+from pl_bolts.datasets.base_dataset import LightDataset
 
 
 class CIFAR10(LightDataset):
@@ -79,13 +79,16 @@ class CIFAR10(LightDataset):
             self,
             data_dir: str = '.',
             train: bool = True,
-            transform: Callable = None,
+            transform: Optional[Callable] = None,
             download: bool = True
     ):
         super().__init__()
         self.dir_path = data_dir
         self.train = train  # training set or test set
         self.transform = transform
+
+        if not _PIL_AVAILABLE:
+            raise ImportError('You want to use PIL.Image for loading but it is not installed yet.')
 
         os.makedirs(self.cached_folder_path, exist_ok=True)
         self.prepare_data(download)
@@ -162,18 +165,6 @@ class TrialCIFAR10(CIFAR10):
     """
     Customized `CIFAR10 <http://www.cs.toronto.edu/~kriz/cifar.html>`_ dataset for testing Pytorch Lightning
     without the torchvision dependency.
-
-    Args:
-        data_dir: Root directory of dataset where ``CIFAR10/processed/training.pt``
-            and  ``CIFAR10/processed/test.pt`` exist.
-        train: If ``True``, creates dataset from ``training.pt``,
-            otherwise from ``test.pt``.
-        download: If true, downloads the dataset from the internet and
-            puts it in root directory. If dataset is already downloaded, it is not
-            downloaded again.
-        num_samples: number of examples per selected class/digit
-        labels: list selected CIFAR10 digits/classes
-
     Examples:
 
         >>> dataset = TrialCIFAR10(download=True, num_samples=150, labels=(1, 5, 8))
@@ -191,12 +182,24 @@ class TrialCIFAR10(CIFAR10):
             self,
             data_dir: str = '.',
             train: bool = True,
-            transform: Callable = None,
+            transform: Optional[Callable] = None,
             download: bool = False,
             num_samples: int = 100,
             labels: Optional[Sequence] = (1, 5, 8),
             relabel: bool = True,
     ):
+        """
+        Args:
+            data_dir: Root directory of dataset where ``CIFAR10/processed/training.pt``
+                and  ``CIFAR10/processed/test.pt`` exist.
+            train: If ``True``, creates dataset from ``training.pt``,
+                otherwise from ``test.pt``.
+            download: If true, downloads the dataset from the internet and
+                puts it in root directory. If dataset is already downloaded, it is not
+                downloaded again.
+            num_samples: number of examples per selected class/digit
+            labels: list selected CIFAR10 digits/classes
+        """
         # number of examples per class
         self.num_samples = num_samples
         # take just a subset of CIFAR dataset

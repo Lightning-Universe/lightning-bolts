@@ -54,5 +54,5 @@ class LightDataset(ABC, Dataset):
         fpath = os.path.join(data_folder, file_name)
         try:
             urllib.request.urlretrieve(url, fpath)
-        except HTTPError:
-            raise RuntimeError(f'Failed download from {url}')
+        except HTTPError as err:
+            raise RuntimeError(f'Failed download from {url}') from err

@@ -1,11 +1,15 @@
 from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
-from pl_bolts.datamodules.dummy_dataset import DummyDetectionDataset
 
 try:
     from pl_bolts.datamodules.binary_mnist_datamodule import BinaryMNISTDataModule
     from pl_bolts.datamodules.cifar10_datamodule import (
         CIFAR10DataModule,
         TinyCIFAR10DataModule,
+    )
+    from pl_bolts.datamodules.experience_source import (
+        ExperienceSourceDataset,
+        ExperienceSource,
+        DiscountedExperienceSource,
     )
     from pl_bolts.datamodules.fashion_mnist_datamodule import FashionMNISTDataModule
     from pl_bolts.datamodules.imagenet_datamodule import ImagenetDataModule
@@ -18,5 +22,8 @@ try:
     from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
     from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
     from pl_bolts.datamodules.vocdetection_datamodule import VOCDetectionDataModule
-except ImportError:
+
+    from pl_bolts.datasets.kitti_dataset import KittiDataset
+    from pl_bolts.datamodules.kitti_datamodule import KittiDataModule
+except ModuleNotFoundError:
     pass

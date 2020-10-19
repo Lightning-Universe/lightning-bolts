@@ -10,7 +10,7 @@ Bolts is a Deep learning research and production toolbox of:
 - Losses.
 - Datasets.
 
-**The Main goal of bolts is to enable trying new ideas as fast as possible!**
+**The Main goal of Bolts is to enable trying new ideas as fast as possible!**
 
 All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, GPUs and 16-bit precision.
 
@@ -90,11 +90,11 @@ All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, G
 
 Community Built
 ---------------
-Bolts are built-by the Lightning community and contributed to bolts.
+Then lightning community builds bolts and contributes them to Bolts.
 The lightning team guarantees that contributions are:
 
-1. Rigorously Tested (CPUs, GPUs, TPUs).
-2. Rigorously Documented.
+1. Rigorously tested (CPUs, GPUs, TPUs).
+2. Rigorously documented.
 3. Standardized via PyTorch Lightning.
 4. Optimized for speed.
 5. Checked for correctness.
@@ -351,7 +351,7 @@ In case your job or research doesn't need a "hammer", we offer implementations o
 which benefit from lightning's multi-GPU and TPU support.
 
 So, now you can run huge workloads scalably, without needing to do any engineering.
-For instance, here we can run Logistic Regression on Imagenet (each epoch takes about 3 minutes)!
+For instance, here we can run logistic Regression on Imagenet (each epoch takes about 3 minutes)!
 
 .. code-block:: python
 
@@ -414,7 +414,7 @@ But more importantly, you can scale up to many GPUs, TPUs or even CPUs
 
 Logistic Regression
 ^^^^^^^^^^^^^^^^^^^
-Here's an example for Logistic regression
+Here's an example for logistic regression
 
 .. code-block:: python
 
@@ -436,7 +436,7 @@ Here's an example for Logistic regression
 
     trainer.test(test_dataloaders=dm.test_dataloader(batch_size=12))
 
-Any input will be flattened across all dimensions except the firs one (batch).
+Any input will be flattened across all dimensions except the first one (batch).
 This means images, sound, etc... work out of the box.
 
 .. code-block:: python

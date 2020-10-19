@@ -1,18 +1,18 @@
 from abc import ABC
-from typing import Callable
+from typing import Callable, Optional
 from warnings import warn
 
 import numpy as np
 
 try:
     from sklearn.utils import shuffle
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install sklearn`.')
 
 try:
     from torchvision.datasets import CIFAR10
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
 
@@ -23,10 +23,6 @@ class SSLDatasetMixin(ABC):
     def generate_train_val_split(cls, examples, labels, pct_val):
         """
         Splits dataset uniformly across classes
-        :param examples:
-        :param labels:
-        :param pct_val:
-        :return:
         """
         nb_classes = len(set(labels))
 
@@ -58,10 +54,6 @@ class SSLDatasetMixin(ABC):
         """
         Splits a dataset into two parts.
         The labeled split has nb_imgs_in_val per class
-        :param examples:
-        :param labels:
-        :param nb_imgs_in_val:
-        :return:
         """
         nb_classes = len(set(labels))
 
@@ -108,10 +100,10 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
             self,
             root: str,
             split: str = 'val',
-            transform: Callable = None,
-            target_transform: Callable = None,
+            transform: Optional[Callable] = None,
+            target_transform: Optional[Callable] = None,
             download: bool = False,
-            nb_labeled_per_class: int = None,
+            nb_labeled_per_class: Optional[int] = None,
             val_pct: float = 0.10
     ):
 

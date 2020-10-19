@@ -92,22 +92,24 @@ class CPCTask(nn.Module):
 
 
 class AmdimNCELoss(nn.Module):
+    """
+    Compute the NCE scores for predicting r_src->r_trg.
+    """
     def __init__(self, tclip):
         super().__init__()
         self.tclip = tclip
 
     def forward(self, anchor_representations, positive_representations, mask_mat):
         """
-        Compute the NCE scores for predicting r_src->r_trg.
         Args:
-          anchor_representations   : (batch_size, emb_dim)
-          positive_representations : (emb_dim, n_batch * w* h) (ie: nb_feat_vectors x embedding_dim)
-          mask_mat                 : (n_batch_gpu, n_batch)
+            anchor_representations: (batch_size, emb_dim)
+            positive_representations: (emb_dim, n_batch * w* h) (ie: nb_feat_vectors x embedding_dim)
+            mask_mat: (n_batch_gpu, n_batch)
 
         Output:
-          raw_scores : (n_batch_gpu, n_locs)
-          nce_scores : (n_batch_gpu, n_locs)
-          lgt_reg    : scalar
+            raw_scores: (n_batch_gpu, n_locs)
+            nce_scores: (n_batch_gpu, n_locs)
+            lgt_reg : scalar
         """
         r_src = anchor_representations
         r_trg = positive_representations
@@ -140,11 +142,11 @@ class AmdimNCELoss(nn.Module):
         # trick 2: tanh clip
         raw_scores = tanh_clip(raw_scores, clip_val=self.tclip)
 
-        '''
+        """
         pos_scores includes scores for all the positive samples
         neg_scores includes scores for all the negative samples, with
         scores for positive samples set to the min score (-self.tclip here)
-        '''
+        """
         # ----------------------
         # EXTRACT POSITIVE SCORES
         # use the index mask to pull all the diagonals which are b1 x b1
@@ -186,44 +188,44 @@ class AmdimNCELoss(nn.Module):
 
 
 class FeatureMapContrastiveTask(nn.Module):
+    """
+    Performs an anchor, positive negative pair comparison for each each tuple of feature maps passed.
+
+    .. code-block:: python
+
+        # extract feature maps
+        pos_0, pos_1, pos_2 = encoder(x_pos)
+        anc_0, anc_1, anc_2 = encoder(x_anchor)
+
+        # compare only the 0th feature maps
+        task = FeatureMapContrastiveTask('00')
+        loss, regularizer = task((pos_0), (anc_0))
+
+        # compare (pos_0 to anc_1) and (pos_0, anc_2)
+        task = FeatureMapContrastiveTask('01, 02')
+        losses, regularizer = task((pos_0, pos_1, pos_2), (anc_0, anc_1, anc_2))
+        loss = losses.sum()
+
+        # compare (pos_1 vs a anc_random)
+        task = FeatureMapContrastiveTask('0r')
+        loss, regularizer = task((pos_0, pos_1, pos_2), (anc_0, anc_1, anc_2))
+
+    .. code-block:: python
+
+        # with bidirectional the comparisons are done both ways
+        task = FeatureMapContrastiveTask('01, 02')
+
+        # will compare the following:
+        # 01: (pos_0, anc_1), (anc_0, pos_1)
+        # 02: (pos_0, anc_2), (anc_0, pos_2)
+    """
 
     def __init__(self, comparisons: str = '00, 11', tclip: float = 10.0, bidirectional: bool = True):
         """
-        Performs an anchor, positive negative pair comparison for each each tuple of feature maps passed.
-
-        .. code-block:: python
-
-            # extract feature maps
-            pos_0, pos_1, pos_2 = encoder(x_pos)
-            anc_0, anc_1, anc_2 = encoder(x_anchor)
-
-            # compare only the 0th feature maps
-            task = FeatureMapContrastiveTask('00')
-            loss, regularizer = task((pos_0), (anc_0))
-
-            # compare (pos_0 to anc_1) and (pos_0, anc_2)
-            task = FeatureMapContrastiveTask('01, 02')
-            losses, regularizer = task((pos_0, pos_1, pos_2), (anc_0, anc_1, anc_2))
-            loss = losses.sum()
-
-            # compare (pos_1 vs a anc_random)
-            task = FeatureMapContrastiveTask('0r')
-            loss, regularizer = task((pos_0, pos_1, pos_2), (anc_0, anc_1, anc_2))
-
         Args:
             comparisons: groupings of feature map indices to compare (zero indexed, 'r' means random) ex: '00, 1r'
             tclip: stability clipping value
             bidirectional: if true, does the comparison both ways
-
-        .. code-block:: python
-
-            # with bidirectional the comparisons are done both ways
-            task = FeatureMapContrastiveTask('01, 02')
-
-            # will compare the following:
-            # 01: (pos_0, anc_1), (anc_0, pos_1)
-            # 02: (pos_0, anc_2), (anc_0, pos_2)
-
         """
         super().__init__()
         self.tclip = tclip

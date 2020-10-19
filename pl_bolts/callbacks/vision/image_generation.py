@@ -5,32 +5,33 @@ from pytorch_lightning import Callback
 
 try:
     import torchvision
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
 
 
 class TensorboardGenerativeModelImageSampler(Callback):
+    """
+    Generates images and logs to tensorboard.
+    Your model must implement the forward function for generation
+
+    Requirements::
+
+        # model must have img_dim arg
+        model.img_dim = (1, 28, 28)
+
+        # model forward must work for sampling
+        z = torch.rand(batch_size, latent_dim)
+        img_samples = your_model(z)
+
+    Example::
+
+        from pl_bolts.callbacks import TensorboardGenerativeModelImageSampler
+
+        trainer = Trainer(callbacks=[TensorboardGenerativeModelImageSampler()])
+    """
+
     def __init__(self, num_samples: int = 3):
-        """
-        Generates images and logs to tensorboard.
-        Your model must implement the forward function for generation
-
-        Requirements::
-
-            # model must have img_dim arg
-            model.img_dim = (1, 28, 28)
-
-            # model forward must work for sampling
-            z = torch.rand(batch_size, latent_dim)
-            img_samples = your_model(z)
-
-        Example::
-
-            from pl_bolts.callbacks import TensorboardGenerativeModelImageSampler
-
-            trainer = Trainer(callbacks=[TensorboardGenerativeModelImageSampler()])
-        """
         super().__init__()
         self.num_samples = num_samples
 

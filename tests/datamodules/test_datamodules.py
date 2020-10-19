@@ -1,4 +1,4 @@
-from pl_bolts.datamodules.cifar10_dataset import CIFAR10
+from pl_bolts.datasets.cifar10_dataset import CIFAR10
 
 
 def test_dev_datasets(tmpdir):

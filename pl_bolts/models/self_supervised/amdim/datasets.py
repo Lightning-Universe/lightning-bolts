@@ -1,13 +1,14 @@
 from warnings import warn
+from typing import Optional
 
 from torch.utils.data import random_split
 
 try:
     from torchvision.datasets import STL10
-    from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
-    from pl_bolts.datamodules.ssl_amdim_datasets import CIFAR10Mixed
+    from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
+    from pl_bolts.datasets.ssl_amdim_datasets import CIFAR10Mixed
     from pl_bolts.models.self_supervised.amdim import transforms as amdim_transforms
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
 
@@ -52,7 +53,7 @@ class AMDIMPretraining():
         return dataset
 
     @staticmethod
-    def stl(dataset_root, split: str = None):
+    def stl(dataset_root, split: Optional[str] = None):
         dataset = STL10(
             root=dataset_root,
             split='unlabeled',
@@ -93,7 +94,7 @@ class AMDIMPatchesPretraining():
         return dataset
 
     @staticmethod
-    def stl(dataset_root, patch_size, patch_overlap, split: str = None):
+    def stl(dataset_root, patch_size, patch_overlap, split: Optional[str] = None):
         train_transform = amdim_transforms.TransformsSTL10Patches(
             patch_size=patch_size,
             overlap=patch_overlap

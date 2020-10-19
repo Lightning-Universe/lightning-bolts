@@ -1,4 +1,5 @@
 import math
+from typing import Optional
 
 import pytorch_lightning as pl
 import torch
@@ -7,20 +8,27 @@ from torch.nn import functional as F
 
 
 class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
+    """
+    Attaches a MLP for finetuning using the standard self-supervised protocol.
 
-    def __init__(self, drop_p: float = 0.2, hidden_dim: int = 1024, z_dim: int = None, num_classes: int = None):
+    Example::
+
+        from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
+
+        # your model must have 2 attributes
+        model = Model()
+        model.z_dim = ... # the representation dim
+        model.num_classes = ... # the num of classes in the model
+    """
+
+    def __init__(
+        self,
+        drop_p: float = 0.2,
+        hidden_dim: int = 1024,
+        z_dim: Optional[int] = None,
+        num_classes: Optional[int] = None,
+    ):
         """
-        Attaches a MLP for finetuning using the standard self-supervised protocol.
-
-        Example::
-
-            from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
-
-            # your model must have 2 attributes
-            model = Model()
-            model.z_dim = ... # the representation dim
-            model.num_classes = ... # the num of classes in the model
-
         Args:
             drop_p: (0.2) dropout probability
             hidden_dim: (1024) the hidden dimension for the finetune MLP
@@ -43,10 +51,7 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
             self.num_classes = pl_module.num_classes
 
         pl_module.non_linear_evaluator = SSLEvaluator(
-            n_input=self.z_dim,
-            n_classes=self.num_classes,
-            p=self.drop_p,
-            n_hidden=self.hidden_dim
+            n_input=self.z_dim, n_classes=self.num_classes, p=self.drop_p, n_hidden=self.hidden_dim
         ).to(pl_module.device)
 
         self.optimizer = torch.optim.SGD(pl_module.non_linear_evaluator.parameters(), lr=1e-3)
@@ -54,6 +59,7 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
     def get_representations(self, pl_module, x):
         """
         Override this to customize for the particular model
+
         Args:
             pl_module:
             x:
@@ -72,7 +78,7 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
 
         return x, y
 
-    def on_train_batch_end(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         x, y = self.to_device(batch, pl_module.device)
 
         with torch.no_grad():
@@ -98,32 +104,33 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
 
 
 class BYOLMAWeightUpdate(pl.Callback):
+    """
+    Weight update rule from BYOL.
+
+    Your model should have a:
+
+        - self.online_network.
+        - self.target_network.
+
+    Updates the target_network params using an exponential moving average update rule weighted by tau.
+    BYOL claims this keeps the online_network from collapsing.
+
+    .. note:: Automatically increases tau from `initial_tau` to 1.0 with every training step
+
+    Example::
+
+        from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
+
+        # model must have 2 attributes
+        model = Model()
+        model.online_network = ...
+        model.target_network = ...
+
+        trainer = Trainer(callbacks=[BYOLMAWeightUpdate()])
+    """
 
     def __init__(self, initial_tau=0.996):
         """
-        Weight update rule from BYOL.
-
-        Your model should have a:
-
-            - self.online_network.
-            - self.target_network.
-
-        Updates the target_network params using an exponential moving average update rule weighted by tau.
-        BYOL claims this keeps the online_network from collapsing.
-
-        .. note:: Automatically increases tau from `initial_tau` to 1.0 with every training step
-
-        Example::
-
-            from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
-
-            # model must have 2 attributes
-            model = Model()
-            model.online_network = ...
-            model.target_network = ...
-
-            trainer = Trainer(callbacks=[BYOLMAWeightUpdate()])
-
         Args:
             initial_tau: starting tau. Auto-updates with every training step
         """
@@ -131,7 +138,7 @@ class BYOLMAWeightUpdate(pl.Callback):
         self.initial_tau = initial_tau
         self.current_tau = initial_tau
 
-    def on_train_batch_end(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         # get networks
         online_net = pl_module.online_network
         target_net = pl_module.target_network

@@ -2,7 +2,7 @@
 
 import os
 
-__version__ = '0.2.2'
+__version__ = '0.2.5'
 __author__ = 'PyTorchLightning et al.'
 __author_email__ = 'name@pytorchlightning.ai'
 __license__ = 'Apache-2.0'
@@ -45,12 +45,13 @@ if __LIGHTNING_BOLT_SETUP__:
 else:
 
     # from pl_bolts.models.mnist_module import LitMNIST
-    from pl_bolts import models, metrics, callbacks, datamodules, transforms
+    from pl_bolts import models, metrics, callbacks, datamodules, transforms, datasets
 
     __all__ = [
         # 'LitMNIST',
         'models',
         'metrics',
         'callbacks',
-        'datamodules'
+        'datamodules',
+        'datasets',
     ]

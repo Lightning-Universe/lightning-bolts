@@ -1,38 +1,39 @@
 import copy
 from itertools import zip_longest
-from typing import List, Any, Dict, Callable
+from typing import List, Any, Dict, Callable, Optional
 
 from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.utilities import rank_zero_info
 
 
 class PrintTableMetricsCallback(Callback):
+    """
+    Prints a table with the metrics in columns on every epoch end
+
+    Example::
+
+        from pl_bolts.callbacks import PrintTableMetricsCallback
+
+        callback = PrintTableMetricsCallback()
+
+    pass into trainer like so:
+
+    .. code-block:: python
+
+        trainer = pl.Trainer(callbacks=[callback])
+        trainer.fit(...)
+
+        # ------------------------------
+        # at the end of every epoch it will print
+        # ------------------------------
+
+        # loss│train_loss│val_loss│epoch
+        # ──────────────────────────────
+        # 2.2541470527648926│2.2541470527648926│2.2158432006835938│0
+
+    """
+
     def __init__(self):
-        """
-        Prints a table with the metrics in columns on every epoch end
-
-        Example::
-
-            from pl_bolts.callbacks import PrintTableMetricsCallback
-
-            callback = PrintTableMetricsCallback()
-
-        pass into trainer like so:
-
-        .. code-block:: python
-
-            trainer = pl.Trainer(callbacks=[callback])
-            trainer.fit(...)
-
-            # ------------------------------
-            # at the end of every epoch it will print
-            # ------------------------------
-
-            # loss│train_loss│val_loss│epoch
-            # ──────────────────────────────
-            # 2.2541470527648926│2.2541470527648926│2.2158432006835938│0
-
-        """
         self.metrics = []
 
     def on_epoch_end(self, trainer, pl_module):
@@ -42,13 +43,13 @@ class PrintTableMetricsCallback(Callback):
 
 
 def dicts_to_table(dicts: List[Dict],
-                   keys: List[str] = None,
-                   pads: List[str] = None,
-                   fcodes: List[str] = None,
-                   convert_headers: Dict[str, Callable] = None,
-                   header_names: List[str] = None,
+                   keys: Optional[List[str]] = None,
+                   pads: Optional[List[str]] = None,
+                   fcodes: Optional[List[str]] = None,
+                   convert_headers: Optional[Dict[str, Callable]] = None,
+                   header_names: Optional[List[str]] = None,
                    skip_none_lines: bool = False,
-                   replace_values: Dict[str, Any] = None):
+                   replace_values: Optional[Dict[str, Any]] = None):
     """
     Generate ascii table from dictionary
     Taken from (https://stackoverflow.com/questions/40056747/print-a-list-of-dictionaries-in-table-form)

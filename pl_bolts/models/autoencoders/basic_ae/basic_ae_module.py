@@ -10,6 +10,19 @@ from pl_bolts.models.autoencoders.components import resnet50_encoder, resnet50_d
 
 
 class AE(pl.LightningModule):
+    """
+    Standard AE
+
+    Model is available pretrained on different datasets:
+
+    Example::
+
+        # not pretrained
+        ae = AE()
+
+        # pretrained on cifar10
+        ae = AE.from_pretrained('cifar10-resnet18')
+    """
 
     pretrained_urls = {
         'cifar10-resnet18':
@@ -29,20 +42,7 @@ class AE(pl.LightningModule):
         **kwargs
     ):
         """
-        Standard AE
-
-        Model is available pretrained on different datasets:
-
-        Example::
-
-            # not pretrained
-            ae = AE()
-
-            # pretrained on cifar10
-            ae = AE.from_pretrained('cifar10-resnet18')
-
         Args:
-
             input_height: height of the images
             enc_type: option between resnet18 or resnet50
             first_conv: use standard kernel_size 7, stride 2 at start or
@@ -106,17 +106,15 @@ class AE(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
-        result = pl.TrainResult(minimize=loss)
-        result.log_dict(
+        self.log_dict(
             {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
         )
-        return result
+        return loss
 
     def validation_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
-        result = pl.EvalResult(checkpoint_on=loss)
-        result.log_dict({f"val_{k}": v for k, v in logs.items()})
-        return result
+        self.log_dict({f"val_{k}": v for k, v in logs.items()})
+        return loss
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)

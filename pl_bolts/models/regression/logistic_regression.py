@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import torch
-from pytorch_lightning.metrics.classification import accuracy
+from pytorch_lightning.metrics.functional import accuracy
 from torch import nn
 from torch.nn import functional as F
 from torch.optim import Adam
@@ -10,6 +10,9 @@ from torch.optim.optimizer import Optimizer
 
 
 class LogisticRegression(pl.LightningModule):
+    """
+    Logistic regression model
+    """
 
     def __init__(self,
                  input_dim: int,
@@ -21,8 +24,6 @@ class LogisticRegression(pl.LightningModule):
                  l2_strength: float = 0.0,
                  **kwargs):
         """
-        Logistic regression model
-
         Args:
             input_dim: number of dimensions of the input (at least 1)
             num_classes: number of class labels (binary: 2, multi-class: >2)
@@ -31,7 +32,6 @@ class LogisticRegression(pl.LightningModule):
             optimizer: the optimizer to use (default='Adam')
             l1_strength: L1 regularization strength (default=None)
             l2_strength: L2 regularization strength (default=None)
-
         """
         super().__init__()
         self.save_hyperparameters()
@@ -132,9 +132,10 @@ def cli_main():
     # Example: Iris dataset in Sklearn (4 features, 3 class labels)
     try:
         from sklearn.datasets import load_iris
-    except ImportError:
-        raise ImportError('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-                          ' install it with `pip install sklearn`.')
+    except ModuleNotFoundError as err:
+        raise ModuleNotFoundError(  # pragma: no-cover
+            'You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`.'
+        ) from err
 
     X, y = load_iris(return_X_y=True)
     loaders = SklearnDataModule(X, y)

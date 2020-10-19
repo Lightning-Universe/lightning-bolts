@@ -1,17 +1,18 @@
 import os
+from typing import Optional
 from warnings import warn
 
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
 
-from pl_bolts.datamodules.concat_dataset import ConcatDataset
+from pl_bolts.datasets.concat_dataset import ConcatDataset
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 
 try:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import STL10
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
     _TORCHVISION_AVAILABLE = False
@@ -20,12 +21,43 @@ else:
 
 
 class STL10DataModule(LightningDataModule):  # pragma: no cover
+    """
+    .. figure:: https://samyzaf.com/ML/cifar10/cifar1.jpg
+        :width: 400
+        :alt: STL-10
+
+    Specs:
+        - 10 classes (1 per type)
+        - Each image is (3 x 96 x 96)
+
+    Standard STL-10, train, val, test splits and transforms.
+    STL-10 has support for doing validation splits on the labeled or unlabeled splits
+
+    Transforms::
+
+        mnist_transforms = transform_lib.Compose([
+            transform_lib.ToTensor(),
+            transforms.Normalize(
+                mean=(0.43, 0.42, 0.39),
+                std=(0.27, 0.26, 0.27)
+            )
+        ])
+
+    Example::
+
+        from pl_bolts.datamodules import STL10DataModule
+
+        dm = STL10DataModule(PATH)
+        model = LitModel()
+
+        Trainer().fit(model, dm)
+    """
 
     name = 'stl10'
 
     def __init__(
             self,
-            data_dir: str = None,
+            data_dir: Optional[str] = None,
             unlabeled_val_split: int = 5000,
             train_val_split: int = 500,
             num_workers: int = 16,
@@ -35,36 +67,6 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             **kwargs,
     ):
         """
-        .. figure:: https://samyzaf.com/ML/cifar10/cifar1.jpg
-            :width: 400
-            :alt: STL-10
-
-        Specs:
-            - 10 classes (1 per type)
-            - Each image is (3 x 96 x 96)
-
-        Standard STL-10, train, val, test splits and transforms.
-        STL-10 has support for doing validation splits on the labeled or unlabeled splits
-
-        Transforms::
-
-            mnist_transforms = transform_lib.Compose([
-                transform_lib.ToTensor(),
-                transforms.Normalize(
-                    mean=(0.43, 0.42, 0.39),
-                    std=(0.27, 0.26, 0.27)
-                )
-            ])
-
-        Example::
-
-            from pl_bolts.datamodules import STL10DataModule
-
-            dm = STL10DataModule(PATH)
-            model = LitModel()
-
-            Trainer().fit(model, dm)
-
         Args:
             data_dir: where to save/load the data
             unlabeled_val_split: how many images from the unlabeled training split to use for validation
@@ -75,7 +77,9 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         super().__init__(*args, **kwargs)
 
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use STL10 dataset loaded from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use STL10 dataset loaded from `torchvision` which is not installed yet.'
+            )
 
         self.dims = (3, 96, 96)
         self.data_dir = data_dir if data_dir is not None else os.getcwd()

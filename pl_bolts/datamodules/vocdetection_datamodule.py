@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 try:
     from torchvision.datasets import VOCDetection
 
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
     _TORCHVISION_AVAILABLE = False
@@ -103,6 +103,10 @@ def _prepare_voc_instance(image, target):
 
 
 class VOCDetectionDataModule(LightningDataModule):
+    """
+    TODO(teddykoker) docstring
+    """
+
     name = "vocdetection"
 
     def __init__(
@@ -114,13 +118,12 @@ class VOCDetectionDataModule(LightningDataModule):
         *args,
         **kwargs,
     ):
-        """
-        TODO(teddykoker) docstring
-        """
         super().__init__(*args, **kwargs)
 
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use VOC dataset loaded from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use VOC dataset loaded from `torchvision` which is not installed yet.'
+            )
 
         self.year = year
         self.data_dir = data_dir

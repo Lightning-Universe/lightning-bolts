@@ -135,6 +135,7 @@ exclude_patterns = [
     'api/pl_bolts.rst',
     'api/modules.rst',
     'api/pl_bolts.submit.rst',
+    'api/pl_bolts.utils.*',
     'PULL_REQUEST_TEMPLATE.md',
 ]
 
@@ -327,7 +328,7 @@ def package_list_from_file(file):
 MOCK_PACKAGES = []
 if SPHINX_MOCK_REQUIREMENTS:
     # mock also base packages when we are on RTD since we don't install them there
-    MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements', 'base.txt'))
+    MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements.txt'))
     MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements', 'models.txt'))
     MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements', 'loggers.txt'))
 

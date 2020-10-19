@@ -6,14 +6,14 @@ import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
 
-from pl_bolts.datamodules.cifar10_dataset import TrialCIFAR10
+from pl_bolts.datasets.cifar10_dataset import TrialCIFAR10
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 
 try:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import CIFAR10
 
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
     _TORCHVISION_AVAILABLE = False
@@ -22,13 +22,52 @@ else:
 
 
 class CIFAR10DataModule(LightningDataModule):
+    """
+    .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/wp-content/uploads/2019/01/
+        Plot-of-a-Subset-of-Images-from-the-CIFAR-10-Dataset.png
+        :width: 400
+        :alt: CIFAR-10
+
+    Specs:
+        - 10 classes (1 per class)
+        - Each image is (3 x 32 x 32)
+
+    Standard CIFAR10, train, val, test splits and transforms
+
+    Transforms::
+
+        mnist_transforms = transform_lib.Compose([
+            transform_lib.ToTensor(),
+            transforms.Normalize(
+                mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
+                std=[x / 255.0 for x in [63.0, 62.1, 66.7]]
+            )
+        ])
+
+    Example::
+
+        from pl_bolts.datamodules import CIFAR10DataModule
+
+        dm = CIFAR10DataModule(PATH)
+        model = LitModel()
+
+        Trainer().fit(model, dm)
+
+    Or you can set your own transforms
+
+    Example::
+
+        dm.train_transforms = ...
+        dm.test_transforms = ...
+        dm.val_transforms  = ...
+    """
 
     name = 'cifar10'
     extra_args = {}
 
     def __init__(
             self,
-            data_dir: str = None,
+            data_dir: Optional[str] = None,
             val_split: int = 5000,
             num_workers: int = 16,
             batch_size: int = 32,
@@ -37,44 +76,6 @@ class CIFAR10DataModule(LightningDataModule):
             **kwargs,
     ):
         """
-        .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/wp-content/uploads/2019/01/
-            Plot-of-a-Subset-of-Images-from-the-CIFAR-10-Dataset.png
-            :width: 400
-            :alt: CIFAR-10
-
-        Specs:
-            - 10 classes (1 per class)
-            - Each image is (3 x 32 x 32)
-
-        Standard CIFAR10, train, val, test splits and transforms
-
-        Transforms::
-
-            mnist_transforms = transform_lib.Compose([
-                transform_lib.ToTensor(),
-                transforms.Normalize(
-                    mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
-                    std=[x / 255.0 for x in [63.0, 62.1, 66.7]]
-                )
-            ])
-
-        Example::
-
-            from pl_bolts.datamodules import CIFAR10DataModule
-
-            dm = CIFAR10DataModule(PATH)
-            model = LitModel()
-
-            Trainer().fit(model, dm)
-
-        Or you can set your own transforms
-
-        Example::
-
-            dm.train_transforms = ...
-            dm.test_transforms = ...
-            dm.val_transforms  = ...
-
         Args:
             data_dir: where to save/load the data
             val_split: how many of the training images to use for the validation split
@@ -84,7 +85,9 @@ class CIFAR10DataModule(LightningDataModule):
         super().__init__(*args, **kwargs)
 
         if not _TORCHVISION_AVAILABLE:
-            raise ImportError('You want to use CIFAR10 dataset loaded from `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use CIFAR10 dataset loaded from `torchvision` which is not installed yet.'
+            )
 
         self.dims = (3, 32, 32)
         self.DATASET = CIFAR10
@@ -182,6 +185,24 @@ class CIFAR10DataModule(LightningDataModule):
 
 
 class TinyCIFAR10DataModule(CIFAR10DataModule):
+    """
+    Standard CIFAR10, train, val, test splits and transforms
+
+    Transforms::
+
+        mnist_transforms = transform_lib.Compose([
+            transform_lib.ToTensor(),
+            transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
+                                 std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
+        ])
+
+    Example::
+
+        from pl_bolts.datamodules import CIFAR10DataModule
+
+        dm = CIFAR10DataModule(PATH)
+        model = LitModel(datamodule=dm)
+    """
 
     def __init__(
             self,
@@ -194,23 +215,6 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
             **kwargs,
     ):
         """
-        Standard CIFAR10, train, val, test splits and transforms
-
-        Transforms::
-
-            mnist_transforms = transform_lib.Compose([
-                transform_lib.ToTensor(),
-                transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
-                                     std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
-            ])
-
-        Example::
-
-            from pl_bolts.datamodules import CIFAR10DataModule
-
-            dm = CIFAR10DataModule(PATH)
-            model = LitModel(datamodule=dm)
-
         Args:
             data_dir: where to save/load the data
             val_split: how many of the training images to use for the validation split

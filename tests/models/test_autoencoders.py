@@ -110,7 +110,7 @@ def test_from_pretrained(tmpdir):
             x_hat = ae(x)
             break
 
-    except Exception as e:
+    except Exception:
         exception_raised = True
 
     assert exception_raised is False, "error in loading weights"

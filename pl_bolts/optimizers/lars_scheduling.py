@@ -9,10 +9,12 @@ from torch.optim import Optimizer
 
 
 class LARSWrapper(object):
+    """
+    Wrapper that adds LARS scheduling to any optimizer. This helps stability with huge batch sizes.
+    """
+
     def __init__(self, optimizer, eta=0.02, clip=True, eps=1e-8):
         """
-        Wrapper that adds LARS scheduling to any optimizer. This helps stability with huge batch sizes.
-
         Args:
             optimizer: torch optimizer
             eta: LARS coefficient (trust)

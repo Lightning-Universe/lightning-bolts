@@ -16,9 +16,88 @@ def _shape_input(x):
 
 
 class ImageGPT(pl.LightningModule):
+    """
+    **Paper**: `Generative Pretraining from Pixels
+    <https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf>`_
+    [original paper `code <https://github.com/openai/image-gpt>`_].
+
+    **Paper by:** Mark Che, Alec Radford, Rewon Child, Jeff Wu, Heewoo Jun,
+    Prafulla Dhariwal, David Luan, Ilya Sutskever
+
+    **Implementation contributed by**:
+
+        - `Teddy Koker <https://github.com/teddykoker>`_
+
+    **Original repo with results and more implementation details**:
+
+        - `https://github.com/teddykoker/image-gpt <https://github.com/teddykoker/image-gpt>`_
+
+    **Example Results (Photo credits: Teddy Koker)**:
+
+    .. image:: https://raw.githubusercontent.com/teddykoker/image-gpt/master/figures/mnist.png
+        :width: 250
+        :alt: credit-Teddy-Koker
+
+    .. image:: https://raw.githubusercontent.com/teddykoker/image-gpt/master/figures/fmnist.png
+        :width: 250
+        :alt: credit-Teddy-Koker
+
+    **Default arguments:**
+
+    .. list-table:: Argument Defaults
+        :widths: 50 25 25
+        :header-rows: 1
+
+        * - Argument
+          - Default
+          - iGPT-S (`Chen et al. <https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf>`_)
+        * - `--embed_dim`
+          - 16
+          - 512
+        * - `--heads`
+          - 2
+          - 8
+        * - `--layers`
+          - 8
+          - 24
+        * - `--pixels`
+          - 28
+          - 32
+        * - `--vocab_size`
+          - 16
+          - 512
+        * - `--num_classes`
+          - 10
+          - 10
+        * - `--batch_size`
+          - 64
+          - 128
+        * - `--learning_rate`
+          - 0.01
+          - 0.01
+        * - `--steps`
+          - 25000
+          - 1000000
+
+    Example::
+
+        import pytorch_lightning as pl
+        from pl_bolts.models.vision import ImageGPT
+
+        dm = MNISTDataModule('.')
+        model = ImageGPT(dm)
+
+        pl.Trainer(gpu=4).fit(model)
+
+    As script:
+
+    .. code-block:: bash
+
+        cd pl_bolts/models/vision/image_gpt
+        python igpt_module.py --learning_rate 1e-2 --batch_size 32 --gpus 4
+    """
     def __init__(
         self,
-        datamodule: pl.LightningDataModule = None,
         embed_dim: int = 16,
         heads: int = 2,
         layers: int = 2,
@@ -34,88 +113,7 @@ class ImageGPT(pl.LightningModule):
         **kwargs,
     ):
         """
-        **Paper**: `Generative Pretraining from Pixels
-        <https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf>`_
-        [original paper `code <https://github.com/openai/image-gpt>`_].
-
-        **Paper by:** Mark Che, Alec Radford, Rewon Child, Jeff Wu, Heewoo Jun,
-        Prafulla Dhariwal, David Luan, Ilya Sutskever
-
-        **Implementation contributed by**:
-
-            - `Teddy Koker <https://github.com/teddykoker>`_
-
-        **Original repo with results and more implementation details**:
-
-            - `https://github.com/teddykoker/image-gpt <https://github.com/teddykoker/image-gpt>`_
-
-        **Example Results (Photo credits: Teddy Koker)**:
-
-        .. image:: https://raw.githubusercontent.com/teddykoker/image-gpt/master/figures/mnist.png
-            :width: 250
-            :alt: credit-Teddy-Koker
-
-        .. image:: https://raw.githubusercontent.com/teddykoker/image-gpt/master/figures/fmnist.png
-            :width: 250
-            :alt: credit-Teddy-Koker
-
-        **Default arguments:**
-
-        .. list-table:: Argument Defaults
-            :widths: 50 25 25
-            :header-rows: 1
-
-            * - Argument
-              - Default
-              - iGPT-S (`Chen et al. <https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf>`_)
-            * - `--embed_dim`
-              - 16
-              - 512
-            * - `--heads`
-              - 2
-              - 8
-            * - `--layers`
-              - 8
-              - 24
-            * - `--pixels`
-              - 28
-              - 32
-            * - `--vocab_size`
-              - 16
-              - 512
-            * - `--num_classes`
-              - 10
-              - 10
-            * - `--batch_size`
-              - 64
-              - 128
-            * - `--learning_rate`
-              - 0.01
-              - 0.01
-            * - `--steps`
-              - 25000
-              - 1000000
-
-        Example::
-
-            import pytorch_lightning as pl
-            from pl_bolts.models.vision import ImageGPT
-
-            dm = MNISTDataModule('.')
-            model = ImageGPT(dm)
-
-            pl.Trainer(gpu=4).fit(model)
-
-        As script:
-
-        .. code-block:: bash
-
-            cd pl_bolts/models/vision/image_gpt
-            python igpt_module.py --learning_rate 1e-2 --batch_size 32 --gpus 4
-
         Args:
-
-            datamodule: LightningDataModule
             embed_dim: the embedding dim
             heads: number of attention heads
             layers: number of layers
@@ -129,7 +127,7 @@ class ImageGPT(pl.LightningModule):
             data_dir: where to store data
             num_workers: num_data workers
         """
-        super(ImageGPT, self).__init__()
+        super().__init__()
         self.save_hyperparameters()
 
         # default to MNIST if no datamodule given
@@ -139,8 +137,6 @@ class ImageGPT(pl.LightningModule):
         #     )
         #     self.hparams.pixels = datamodule.size(1)
         #     self.hparams.num_classes = datamodule.num_classes
-        assert datamodule
-        self.datamodule = datamodule
 
         self.gpt = GPT2(
             embed_dim=self.hparams.embed_dim,
@@ -259,10 +255,10 @@ def cli_main():
     elif args.dataset == "imagenet128":
         datamodule = ImagenetDataModule.from_argparse_args(args)
 
-    model = ImageGPT(**args.__dict__, datamodule=datamodule)
+    model = ImageGPT(**args.__dict__)
 
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model)
+    trainer.fit(model, datamodule=datamodule)
 
 
 if __name__ == '__main__':

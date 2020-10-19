@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 
 try:
     from sklearn.utils import shuffle as sk_shuffle
-except ImportError:
+except ModuleNotFoundError:
     warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install sklearn`.')
     _SKLEARN_AVAILABLE = False
@@ -18,25 +18,25 @@ else:
 
 
 class SklearnDataset(Dataset):
+    """
+    Mapping between numpy (or sklearn) datasets to PyTorch datasets.
+
+    Example:
+        >>> from sklearn.datasets import load_boston
+        >>> from pl_bolts.datamodules import SklearnDataset
+        ...
+        >>> X, y = load_boston(return_X_y=True)
+        >>> dataset = SklearnDataset(X, y)
+        >>> len(dataset)
+        506
+    """
     def __init__(self, X: np.ndarray, y: np.ndarray, X_transform: Any = None, y_transform: Any = None):
         """
-        Mapping between numpy (or sklearn) datasets to PyTorch datasets.
-
         Args:
             X: Numpy ndarray
             y: Numpy ndarray
             X_transform: Any transform that works with Numpy arrays
             y_transform: Any transform that works with Numpy arrays
-
-        Example:
-            >>> from sklearn.datasets import load_boston
-            >>> from pl_bolts.datamodules import SklearnDataset
-            ...
-            >>> X, y = load_boston(return_X_y=True)
-            >>> dataset = SklearnDataset(X, y)
-            >>> len(dataset)
-            506
-
         """
         super().__init__()
         self.X = X
@@ -65,25 +65,25 @@ class SklearnDataset(Dataset):
 
 
 class TensorDataset(Dataset):
+    """
+    Prepare PyTorch tensor dataset for data loaders.
+
+    Example:
+        >>> from pl_bolts.datamodules import TensorDataset
+        ...
+        >>> X = torch.rand(10, 3)
+        >>> y = torch.rand(10)
+        >>> dataset = TensorDataset(X, y)
+        >>> len(dataset)
+        10
+    """
     def __init__(self, X: torch.Tensor, y: torch.Tensor, X_transform: Any = None, y_transform: Any = None):
         """
-        Prepare PyTorch tensor dataset for data loaders.
-
         Args:
             X: PyTorch tensor
             y: PyTorch tensor
             X_transform: Any transform that works with PyTorch tensors
             y_transform: Any transform that works with PyTorch tensors
-
-        Example:
-            >>> from pl_bolts.datamodules import TensorDataset
-            ...
-            >>> X = torch.rand(10, 3)
-            >>> y = torch.rand(10)
-            >>> dataset = TensorDataset(X, y)
-            >>> len(dataset)
-            10
-
         """
         super().__init__()
         self.X = X
@@ -108,6 +108,37 @@ class TensorDataset(Dataset):
 
 
 class SklearnDataModule(LightningDataModule):
+    """
+    Automatically generates the train, validation and test splits for a Numpy dataset. They are set up as
+    dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
+
+    Example:
+
+        >>> from sklearn.datasets import load_boston
+        >>> from pl_bolts.datamodules import SklearnDataModule
+        ...
+        >>> X, y = load_boston(return_X_y=True)
+        >>> loaders = SklearnDataModule(X, y)
+        ...
+        >>> # train set
+        >>> train_loader = loaders.train_dataloader(batch_size=32)
+        >>> len(train_loader.dataset)
+        355
+        >>> len(train_loader)
+        11
+        >>> # validation set
+        >>> val_loader = loaders.val_dataloader(batch_size=32)
+        >>> len(val_loader.dataset)
+        100
+        >>> len(val_loader)
+        3
+        >>> # test set
+        >>> test_loader = loaders.test_dataloader(batch_size=32)
+        >>> len(test_loader.dataset)
+        51
+        >>> len(test_loader)
+        1
+    """
 
     name = 'sklearn'
 
@@ -122,38 +153,6 @@ class SklearnDataModule(LightningDataModule):
             *args,
             **kwargs,
     ):
-        """
-        Automatically generates the train, validation and test splits for a Numpy dataset. They are set up as
-        dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
-
-        Example:
-
-            >>> from sklearn.datasets import load_boston
-            >>> from pl_bolts.datamodules import SklearnDataModule
-            ...
-            >>> X, y = load_boston(return_X_y=True)
-            >>> loaders = SklearnDataModule(X, y)
-            ...
-            >>> # train set
-            >>> train_loader = loaders.train_dataloader(batch_size=32)
-            >>> len(train_loader.dataset)
-            355
-            >>> len(train_loader)
-            11
-            >>> # validation set
-            >>> val_loader = loaders.val_dataloader(batch_size=32)
-            >>> len(val_loader.dataset)
-            100
-            >>> len(val_loader)
-            3
-            >>> # test set
-            >>> test_loader = loaders.test_dataloader(batch_size=32)
-            >>> len(test_loader.dataset)
-            51
-            >>> len(test_loader)
-            1
-
-        """
 
         super().__init__(*args, **kwargs)
         self.num_workers = num_workers
@@ -162,7 +161,9 @@ class SklearnDataModule(LightningDataModule):
         if shuffle and _SKLEARN_AVAILABLE:
             X, y = sk_shuffle(X, y, random_state=random_state)
         elif shuffle and not _SKLEARN_AVAILABLE:
-            raise ImportError('You want to use shuffle function from `scikit-learn` which is not installed yet.')
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use shuffle function from `scikit-learn` which is not installed yet.'
+            )
 
         val_split = 0 if x_val is not None or y_val is not None else val_split
         test_split = 0 if x_test is not None or y_test is not None else test_split
