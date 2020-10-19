@@ -41,6 +41,7 @@ class CNN(nn.Module):
     def _get_conv_out(self, shape) -> int:
         """
         Calculates the output size of the last conv layer
+
         Args:
             shape: input dimensions
         Returns:
@@ -52,6 +53,7 @@ class CNN(nn.Module):
     def forward(self, input_x) -> Tensor:
         """
         Forward pass through network
+
         Args:
             x: input to network
         Returns:
@@ -83,8 +85,10 @@ class MLP(nn.Module):
     def forward(self, input_x):
         """
         Forward pass through network
+
         Args:
             x: input to network
+
         Returns:
             output of network
         """
@@ -123,8 +127,10 @@ class DuelingMLP(nn.Module):
     def forward(self, input_x):
         """
         Forward pass through network. Calculates the Q using the value and advantage
+
         Args:
             x: input to network
+
         Returns:
             Q value
         """
@@ -136,8 +142,10 @@ class DuelingMLP(nn.Module):
         """
         Gets the advantage and value by passing out of the base network through the
         value and advantage heads
+
         Args:
             input_x: input to network
+
         Returns:
             advantage, value
         """
@@ -184,8 +192,10 @@ class DuelingCNN(nn.Module):
     def _get_conv_out(self, shape) -> int:
         """
         Calculates the output size of the last conv layer
+
         Args:
             shape: input dimensions
+
         Returns:
             size of the conv output
         """
@@ -195,8 +205,10 @@ class DuelingCNN(nn.Module):
     def forward(self, input_x):
         """
         Forward pass through network. Calculates the Q using the value and advantage
+
         Args:
             input_x: input to network
+
         Returns:
             Q value
         """
@@ -208,8 +220,10 @@ class DuelingCNN(nn.Module):
         """
         Gets the advantage and value by passing out of the base network through the
         value and advantage heads
+
         Args:
             input_x: input to network
+
         Returns:
             advantage, value
         """
@@ -248,8 +262,10 @@ class NoisyCNN(nn.Module):
     def _get_conv_out(self, shape) -> int:
         """
         Calculates the output size of the last conv layer
+
         Args:
             shape: input dimensions
+
         Returns:
             size of the conv output
         """
@@ -259,8 +275,10 @@ class NoisyCNN(nn.Module):
     def forward(self, input_x) -> Tensor:
         """
         Forward pass through network
+
         Args:
             x: input to network
+
         Returns:
             output of network
         """
@@ -312,8 +330,10 @@ class NoisyLinear(nn.Linear):
     def forward(self, input_x: Tensor) -> Tensor:
         """
         Forward pass of the layer
+
         Args:
             input_x: input tensor
+
         Returns:
             output of the layer
         """

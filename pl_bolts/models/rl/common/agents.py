@@ -20,9 +20,11 @@ class Agent(ABC):
     def __call__(self, state: torch.Tensor, device: str, *args, **kwargs) -> List[int]:
         """
         Using the given network, decide what action to carry
+
         Args:
             state: current state of the environment
             device: device used for current batch
+
         Returns:
             action
         """
@@ -51,9 +53,11 @@ class ValueAgent(Agent):
     def __call__(self, state: torch.Tensor, device: str) -> List[int]:
         """
         Takes in the current state and returns the action based on the agents policy
+
         Args:
             state: current state of the environment
             device: the device used for the current batch
+
         Returns:
             action defined by policy
         """
@@ -79,12 +83,14 @@ class ValueAgent(Agent):
 
     def get_action(self, state: torch.Tensor, device: torch.device):
         """
-            Returns the best action based on the Q values of the network
-            Args:
-                state: current state of the environment
-                device: the device used for the current batch
-            Returns:
-                action defined by Q values
+        Returns the best action based on the Q values of the network
+
+        Args:
+            state: current state of the environment
+            device: the device used for the current batch
+
+        Returns:
+            action defined by Q values
         """
         if not isinstance(state, torch.Tensor):
             state = torch.tensor(state, device=device)
@@ -96,6 +102,7 @@ class ValueAgent(Agent):
     def update_epsilon(self, step: int) -> None:
         """
         Updates the epsilon value based on the current step
+
         Args:
             step: current global step
         """
@@ -109,9 +116,11 @@ class PolicyAgent(Agent):
     def __call__(self, states: torch.Tensor, device: str) -> List[int]:
         """
         Takes in the current state and returns the action based on the agents policy
+
         Args:
             states: current state of the environment
             device: the device used for the current batch
+
         Returns:
             action defined by policy
         """

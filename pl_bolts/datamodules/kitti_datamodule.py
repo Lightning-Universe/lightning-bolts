@@ -46,7 +46,7 @@ class KittiDataModule(LightningDataModule):
 
             Trainer().fit(model, dm)
 
-        Args::
+        Args:
             data_dir: where to load the data from path, i.e. '/path/to/folder/with/data_semantics/'
             val_split: size of validation test (default 0.2)
             test_split: size of test set (default 0.1)

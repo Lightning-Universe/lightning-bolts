@@ -59,6 +59,7 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
     def get_representations(self, pl_module, x):
         """
         Override this to customize for the particular model
+
         Args:
             pl_module:
             x:

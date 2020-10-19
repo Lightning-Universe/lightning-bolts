@@ -61,9 +61,11 @@ class DoubleDQN(DQN):
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved
+
         Args:
             batch: current mini batch of replay data
             _: batch number, not used
+
         Returns:
             Training loss and log metrics
         """

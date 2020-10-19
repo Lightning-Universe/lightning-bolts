@@ -109,8 +109,10 @@ class VanillaPolicyGradient(pl.LightningModule):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Passes in a state x through the network and gets the q_values of each action as an output
+
         Args:
             x: environment state
+
         Returns:
             q values
         """
@@ -208,9 +210,11 @@ class VanillaPolicyGradient(pl.LightningModule):
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved
+
         Args:
             batch: current mini batch of replay data
             _: batch number, not used
+
         Returns:
             Training loss and log metrics
         """
@@ -255,9 +259,12 @@ class VanillaPolicyGradient(pl.LightningModule):
     def add_model_specific_args(arg_parser) -> argparse.ArgumentParser:
         """
         Adds arguments for DQN model
+
         Note: these params are fine tuned for Pong env
+
         Args:
             arg_parser: the current argument parser to add to
+
         Returns:
             arg_parser with model specific cargs added
         """
