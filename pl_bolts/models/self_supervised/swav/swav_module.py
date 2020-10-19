@@ -17,7 +17,7 @@ from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
 from warnings import warn
 
 try:
-    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule
+    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule, CIFAR10DataModule
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
@@ -522,7 +522,6 @@ def cli_main():
         args.size_crops = [32, 16]
         args.nmb_crops = [2, 1]
         args.gaussian_blur = False
-
     else:
         raise NotImplementedError("other datasets have not been implemented till now")
 
