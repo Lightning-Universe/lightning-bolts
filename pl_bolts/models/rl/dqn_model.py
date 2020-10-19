@@ -161,6 +161,7 @@ class DQN(pl.LightningModule):
     def run_n_episodes(self, env, n_epsiodes: int = 1, epsilon: float = 1.0) -> List[int]:
         """
         Carries out N episodes of the environment with the current agent
+
         Args:
             env: environment to use, either train environment or test environment
             n_epsiodes: number of episodes to run
@@ -208,8 +209,10 @@ class DQN(pl.LightningModule):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Passes in a state x through the network and gets the q_values of each action as an output
+
         Args:
             x: environment state
+
         Returns:
             q values
         """
@@ -266,9 +269,11 @@ class DQN(pl.LightningModule):
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved
+
         Args:
             batch: current mini batch of replay data
             _: batch number, not used
+
         Returns:
             Training loss and log metrics
         """
@@ -346,9 +351,11 @@ class DQN(pl.LightningModule):
     def make_environment(env_name: str, seed: Optional[int] = None) -> gym.Env:
         """
         Initialise gym  environment
+
         Args:
             env_name: environment name or tag
             seed: value to seed the environment RNG for reproducibility
+
         Returns:
             gym environment
         """
@@ -365,7 +372,9 @@ class DQN(pl.LightningModule):
     ) -> argparse.ArgumentParser:
         """
         Adds arguments for DQN model
+
         Note: these params are fine tuned for Pong env
+
         Args:
             arg_parser: parent parser
         """

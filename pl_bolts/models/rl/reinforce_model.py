@@ -119,8 +119,10 @@ class Reinforce(pl.LightningModule):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Passes in a state x through the network and gets the q_values of each action as an output
+
         Args:
             x: environment state
+
         Returns:
             q values
         """
@@ -129,8 +131,10 @@ class Reinforce(pl.LightningModule):
 
     def calc_qvals(self, rewards: List[float]) -> List[float]:
         """Calculate the discounted rewards of all rewards in list
+
         Args:
             rewards: list of rewards from latest batch
+
         Returns:
             list of discounted rewards
         """
@@ -148,8 +152,10 @@ class Reinforce(pl.LightningModule):
     def discount_rewards(self, experiences: Tuple[Experience]) -> float:
         """
         Calculates the discounted reward over N experiences
+
         Args:
             experiences: Tuple of Experience
+
         Returns:
             total discounted reward
         """
@@ -217,9 +223,11 @@ class Reinforce(pl.LightningModule):
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved
+
         Args:
             batch: current mini batch of replay data
             _: batch number, not used
+
         Returns:
             Training loss and log metrics
         """
@@ -265,9 +273,12 @@ class Reinforce(pl.LightningModule):
     def add_model_specific_args(arg_parser) -> argparse.ArgumentParser:
         """
         Adds arguments for DQN model
+
         Note: these params are fine tuned for Pong env
+
         Args:
             arg_parser: the current argument parser to add to
+
         Returns:
             arg_parser with model specific cargs added
         """
