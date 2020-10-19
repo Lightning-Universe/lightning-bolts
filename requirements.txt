@@ -1,2 +1,2 @@
-pytorch-lightning>=1.0
+pytorch-lightning>=1.02
 torch>=1.6
