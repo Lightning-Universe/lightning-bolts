@@ -1,12 +1,14 @@
 from typing import Optional
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import Callback
 from pytorch_lightning.metrics.functional import accuracy
 from torch.nn import functional as F
 
+from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 
-class SwavOnlineEvaluator(pl.Callback):
+
+class SwavOnlineEvaluator(Callback):
     def __init__(
         self,
         drop_p: float = 0.2,
@@ -29,8 +31,6 @@ class SwavOnlineEvaluator(pl.Callback):
         self.acc = []
 
     def on_pretrain_routine_start(self, trainer, pl_module):
-        from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-
         pl_module.non_linear_evaluator = SSLEvaluator(
             n_input=self.z_dim,
             n_classes=self.num_classes,
