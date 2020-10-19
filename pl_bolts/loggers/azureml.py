@@ -18,6 +18,11 @@ Azure Machine Learning
 """
 
 
+import uuid
+from typing import Optional
+
+from pytorch_lightning.loggers import MLFlowLogger
+
 try:
     from azureml.core import Run as AzureMlRun
 except ImportError:  # pragma: no-cover
@@ -27,12 +32,6 @@ else:
     _AZURE_ML_AVAILABLE = True
 
 
-import uuid
-from typing import Optional
-
-from pytorch_lightning.loggers import MLFlowLogger
-
-
 class AzureMlLogger(MLFlowLogger):
     r"""
     Log using `Azure Machine Learning <https://docs.microsoft.com/en-us/azure/machine-learning/>`_.
@@ -40,7 +39,7 @@ class AzureMlLogger(MLFlowLogger):
 
     .. code-block:: bash
 
-        pip install azureml-mlflow
+        pip install mlflow azureml-mlflow
 
     The Azure Machine Learning logger will log to standard output if running in
     offline mode, or to
@@ -51,7 +50,7 @@ class AzureMlLogger(MLFlowLogger):
 
     **Online and offline mode**
 
-    .. code-block:: python
+    Example::
 
         from azureml.core import Run
         from pytorch_lightning.loggers import AzureMlLogger
