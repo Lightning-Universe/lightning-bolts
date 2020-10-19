@@ -1,13 +1,12 @@
 import os
-import pytorch_lightning as pl
 from argparse import ArgumentParser
 
-from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
+import pytorch_lightning as pl
 
 from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner
 from pl_bolts.models.self_supervised.swav.swav_module import SwAV
-from pl_bolts.transforms.dataset_normalizations import stl10_normalization, imagenet_normalization
 from pl_bolts.models.self_supervised.swav.transforms import SwAVFinetuneTransform
+from pl_bolts.transforms.dataset_normalizations import stl10_normalization, imagenet_normalization
 
 
 def cli_main():  # pragma: no-cover

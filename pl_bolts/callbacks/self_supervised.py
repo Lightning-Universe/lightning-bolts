@@ -6,6 +6,8 @@ import torch
 from pytorch_lightning.metrics.functional import accuracy
 from torch.nn import functional as F
 
+from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
+
 
 class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
     """
@@ -41,8 +43,6 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
         self.num_classes = num_classes
 
     def on_pretrain_routine_start(self, trainer, pl_module):
-        from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-
         # attach the evaluator to the module
 
         if hasattr(pl_module, 'z_dim'):
