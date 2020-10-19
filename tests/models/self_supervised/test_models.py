@@ -89,7 +89,7 @@ def test_simclr(tmpdir):
 
 
 def test_swav(tmpdir):
-    seed_everything()
+    seed_everything(42)
 
     batch_size = 2
 

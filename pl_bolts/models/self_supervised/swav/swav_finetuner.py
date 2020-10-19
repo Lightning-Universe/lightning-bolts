@@ -72,7 +72,7 @@ def cli_main():  # pragma: no-cover
         raise NotImplementedError("other datasets have not been implemented till now")
 
     backbone = SwAV(
-        gpus=1,
+        gpus=args.gpus,
         num_samples=args.num_samples,
         batch_size=args.batch_size,
         datamodule=dm,
@@ -81,7 +81,7 @@ def cli_main():  # pragma: no-cover
 
     tuner = SSLFineTuner(backbone, in_features=2048, num_classes=dm.num_classes, hidden_dim=None)
     trainer = pl.Trainer.from_argparse_args(
-        args, gpus=1, precision=16, early_stop_callback=True
+        args, gpus=args.gpus, precision=16, early_stop_callback=True
     )
     trainer.fit(tuner, dm)
 
