@@ -103,7 +103,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
         pl_module.logger.log_metrics(metrics, step=trainer.global_step)
 
 
-class BYOLMAWeightUpdate(pl.Callback):
+class BYOLMAWeightUpdate(Callback):
     """
     Weight update rule from BYOL.
 
