@@ -4,7 +4,7 @@ import torch
 from pytorch_lightning import seed_everything
 
 from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
-from pl_bolts.transforms.dataset_normalizations import stl10_normalization
+from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 from pl_bolts.models.self_supervised import CPCV2, AMDIM, MocoV2, SimCLR, BYOL, SwAV
 from pl_bolts.models.self_supervised.cpc import CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10
 from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
@@ -92,23 +92,38 @@ def test_swav(tmpdir):
     seed_everything()
 
     batch_size = 2
-    datamodule = STL10DataModule(tmpdir, num_workers=0, batch_size=batch_size)
-    datamodule.train_dataloader = datamodule.train_dataloader_mixed
-    datamodule.val_dataloader = datamodule.val_dataloader_mixed
 
-    datamodule.train_transforms = SwAVTrainDataTransform(normalize=stl10_normalization())
-    datamodule.val_transforms = SwAVEvalDataTransform(normalize=stl10_normalization())
+    datamodule = CIFAR10DataModule(
+        data_dir=tmpdir,
+        batch_size=batch_size,
+        num_workers=0
+    )
+
+    datamodule.train_transforms = SwAVTrainDataTransform(
+        normalize=cifar10_normalization(),
+        size_crops=[32, 16],
+        nmb_crops=[2, 1],
+        gaussian_blur=False
+    )
+    datamodule.val_transforms = SwAVEvalDataTransform(
+        normalize=cifar10_normalization(),
+        size_crops=[32, 16],
+        nmb_crops=[2, 1],
+        gaussian_blur=False
+    )
 
     model = SwAV(
         arch='resnet18',
         hidden_mlp=512,
         gpus=0,
         datamodule=datamodule,
-        num_samples=datamodule.num_unlabeled_samples,
+        num_samples=datamodule.num_samples,
         batch_size=batch_size,
         nmb_crops=[2, 1],
         sinkhorn_iterations=1,
-        nmb_prototypes=2
+        nmb_prototypes=2,
+        maxpool1=False,
+        first_conv=False
     )
 
     trainer = pl.Trainer(

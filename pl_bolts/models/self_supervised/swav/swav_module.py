@@ -225,7 +225,11 @@ class SwAV(pl.LightningModule):
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
 
-        inputs, y = batch
+        if len(batch) == 2:
+            inputs, y = batch
+        else:
+            inputs = batch[:-1]  # remove y label from batch
+
         inputs = inputs[:-1]  # remove online train/eval transforms at this point
 
         # 1. normalize the prototypes
