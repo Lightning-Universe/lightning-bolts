@@ -38,7 +38,6 @@ def balance_classes(X: np.ndarray, Y: list, batch_size: int):
     Perfect balance
 
     Args:
-
         X: input features
         Y: mixed labels (ints)
         batch_size: the ultimate batch size
