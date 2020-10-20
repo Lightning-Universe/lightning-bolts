@@ -6,9 +6,11 @@ import torch
 
 try:
     from sklearn.utils import shuffle as sk_shuffle
+    _SKLEARN_AVAILABLE = True
 except ModuleNotFoundError:
     warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install sklearn`.')
+    _SKLEARN_AVAILABLE = False
 
 
 class Identity(torch.nn.Module):
@@ -41,6 +43,11 @@ def balance_classes(X: np.ndarray, Y: list, batch_size: int):
         Y: mixed labels (ints)
         batch_size: the ultimate batch size
     """
+    if not _SKLEARN_AVAILABLE:
+        raise ModuleNotFoundError(  # pragma: no-cover
+            'You want to use `shuffle` function from `scikit-learn` which is not installed yet.'
+        )
+
     nb_classes = len(set(Y))
 
     nb_batches = math.ceil(len(Y) / batch_size)
