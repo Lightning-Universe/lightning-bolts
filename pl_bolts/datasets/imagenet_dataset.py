@@ -13,9 +13,11 @@ from torch._six import PY3
 
 try:
     from sklearn.utils import shuffle
+    _SKLEARN_AVAILABLE = True
 except ModuleNotFoundError:
     warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install sklearn`.')
+    _SKLEARN_AVAILABLE = False
 
 try:
     from torchvision.datasets import ImageNet
@@ -72,6 +74,11 @@ class UnlabeledImagenet(ImageNet):
         super(ImageNet, self).__init__(self.split_folder, **kwargs)
         self.root = root
 
+        if not _SKLEARN_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `shuffle` function from `scikit-learn` which is not installed yet.'
+            )
+        
         # shuffle images first
         self.imgs = shuffle(self.imgs, random_state=1234)
 
