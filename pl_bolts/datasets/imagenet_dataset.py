@@ -78,7 +78,7 @@ class UnlabeledImagenet(ImageNet):
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `shuffle` function from `scikit-learn` which is not installed yet.'
             )
-        
+
         # shuffle images first
         self.imgs = shuffle(self.imgs, random_state=1234)
 
