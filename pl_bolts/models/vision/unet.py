@@ -29,7 +29,7 @@ class UNet(nn.Module):
             num_classes: Number of output classes required
             num_layers: Number of layers in each side of U-net (default 5)
             features_start: Number of features in first layer (default 64)
-            bilinear (bool): Whether to use bilinear interpolation or transposed convolutions (default) for upsampling.
+            bilinear: Whether to use bilinear interpolation or transposed convolutions (default) for upsampling.
         """
         super().__init__()
         self.num_layers = num_layers
