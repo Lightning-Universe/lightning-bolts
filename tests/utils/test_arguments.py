@@ -3,7 +3,8 @@ from dataclasses import FrozenInstanceError
 import pytest
 import pytorch_lightning as pl
 
-from pl_bolts.utils.arguments import LightningArgumentParser, LitArg, gather_lit_args
+from pl_bolts.utils.arguments import (LightningArgumentParser, LitArg,
+                                      gather_lit_args)
 
 
 class DummyBaseModel(pl.LightningModule):
@@ -71,16 +72,12 @@ def test_lit_arg_immutable():
         ),
         pytest.param(
             DummyBaseDataModule,
-            {
-                "root": (str, None, True),
-                "batch_size": (int, 16, False),
-                "num_workers": (int, 8, False)
-            },
+            {"root": (str, None, True), "batch_size": (int, 16, False), "num_workers": (int, 8, False)},
             id="dummy-base-dm",
         ),
         pytest.param(
             DummyChildModel,
-            {   
+            {
                 "num_classes": (int, None, True),
                 "freeze_encoder": (bool, False, False),
                 "input_dim": (int, None, True),
@@ -122,14 +119,23 @@ def test_gather_lit_args(obj, expected):
             {},
             id="child-model",
         ),
-    ]
+        pytest.param(
+            DummyBaseDataModule,
+            DummyChildModel,
+            '--batch_size 12 --num_workers 4 --hidden_dim 32 --freeze_encoder True'.split(),
+            {'batch_size': 12, 'num_workers': 4},
+            {'batch_size': 12, 'hidden_dim': 32, 'freeze_encoder': True},
+            {},
+            id="child-model",
+        ),
+    ],
 )
 def test_base_usage(dm_cls, model_cls, mocked_args, expected_dm_args, expected_model_args, expected_trainer_args):
     parser = LightningArgumentParser()
     parser.add_datamodule_args(dm_cls)
     parser.add_model_args(model_cls)
     parser.add_trainer_args()
-    args = parser.parse_lit_args('')
+    args = parser.parse_lit_args(mocked_args)
 
     for arg_name, expected_value in expected_dm_args.items():
         assert getattr(args.datamodule, arg_name, None) == expected_value
