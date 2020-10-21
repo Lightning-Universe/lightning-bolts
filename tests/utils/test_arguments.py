@@ -6,29 +6,36 @@ import pytorch_lightning as pl
 from pl_bolts.utils.arguments import LightningArgumentParser, LitArg, gather_lit_args
 
 
-class DummyParentModel(pl.LightningModule):
+class DummyBaseModel(pl.LightningModule):
 
-    name = "parent-model"
+    name = "base-model"
 
-    def __init__(self, a: int, b: str, c: str = "parent_model_c"):
+    def __init__(self, input_dim: int, hidden_dim: int = 64, batch_size: int = 32):
         super().__init__()
         self.save_hyperparameters()
 
-    def forward(self, x):
-        pass
+
+class DummyChildModel(DummyBaseModel):
+
+    name = "child-model"
+
+    def __init__(self, *args, num_classes: int, freeze_encoder: bool = False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.save_hyperparameters()
 
 
-class DummyParentDataModule(pl.LightningDataModule):
+class DummyBaseDataModule(pl.LightningDataModule):
 
-    name = "parent-dm"
+    name = "base-dm"
 
-    def __init__(self, d: str, c: str = "parent_dm_c"):
+    def __init__(self, root: str, batch_size: int = 16, num_workers: int = 8):
         super().__init__()
-        self.d = d
-        self.c = c
+        self.root = root
+        self.batch_size = batch_size
+        self.num_workers = num_workers
 
 
-def test_lightning_argument_parser():
+def test_lit_argument_parser_required_init_args():
     parser = LightningArgumentParser(ignore_required_init_args=False)
     assert parser.ignore_required_init_args is False
     parser = LightningArgumentParser(ignore_required_init_args=True)
@@ -38,8 +45,8 @@ def test_lightning_argument_parser():
 @pytest.mark.xfail()
 def test_parser_bad_argument():
     parser = LightningArgumentParser()
-    parser.add_object_args('dm', DummyParentDataModule)
-    parser.add_object_args('model', DummyParentModel)
+    parser.add_datamodule_args(DummyBaseDataModule)
+    parser.add_model_args(DummyBaseModel)
     args = parser.parse_lit_args(['--some-bad-arg', 'asdf'])
 
 
@@ -54,12 +61,33 @@ def test_lit_arg_immutable():
     "obj,expected",
     [
         pytest.param(
-            DummyParentModel,
-            {"a": (int, None, True), "b": (str, None, True), "c": (str, "parent_model_c", False),},
-            id="dummy-parent-model",
+            DummyBaseModel,
+            {
+                "input_dim": (int, None, True),  # Tuples here are (expected type, default, is_required)
+                "hidden_dim": (int, 64, False),
+                "batch_size": (int, 32, False),
+            },
+            id="dummy-base-model",
         ),
         pytest.param(
-            DummyParentDataModule, {"d": (str, None, True), "c": (str, "parent_dm_c", False)}, id="dummy-parent-dm",
+            DummyBaseDataModule,
+            {
+                "root": (str, None, True),
+                "batch_size": (int, 16, False),
+                "num_workers": (int, 8, False)
+            },
+            id="dummy-base-dm",
+        ),
+        pytest.param(
+            DummyChildModel,
+            {   
+                "num_classes": (int, None, True),
+                "freeze_encoder": (bool, False, False),
+                "input_dim": (int, None, True),
+                "hidden_dim": (int, 64, False),
+                "batch_size": (int, 32, False),
+            },
+            id="dummy-child-model",
         ),
     ],
 )
@@ -74,20 +102,40 @@ def test_gather_lit_args(obj, expected):
 
 
 @pytest.mark.parametrize(
-    "ignore_required_init_args,dm_cls,model_cls,a,b,c,d",
-    [pytest.param(True, DummyParentDataModule, DummyParentModel, 999, "bbb", "ccc", "ddd", id="base",),],
+    "dm_cls,model_cls,mocked_args,expected_dm_args,expected_model_args,expected_trainer_args",
+    [
+        pytest.param(
+            DummyBaseDataModule,
+            DummyBaseModel,
+            '',
+            {'batch_size': 16, 'num_workers': 8},
+            {'batch_size': 16, 'hidden_dim': 64},
+            {},
+            id="base",
+        ),
+        pytest.param(
+            DummyBaseDataModule,
+            DummyChildModel,
+            '',
+            {'batch_size': 16, 'num_workers': 8},
+            {'batch_size': 16, 'hidden_dim': 64, 'freeze_encoder': False},
+            {},
+            id="child-model",
+        ),
+    ]
 )
-def test_lightning_arguments(ignore_required_init_args, dm_cls, model_cls, a, b, c, d):
-    parser = LightningArgumentParser(ignore_required_init_args=ignore_required_init_args)
-    parser.add_object_args("dm", dm_cls)
-    parser.add_object_args("model", model_cls)
+def test_base_usage(dm_cls, model_cls, mocked_args, expected_dm_args, expected_model_args, expected_trainer_args):
+    parser = LightningArgumentParser()
+    parser.add_datamodule_args(dm_cls)
+    parser.add_model_args(model_cls)
+    parser.add_trainer_args()
+    args = parser.parse_lit_args('')
 
-    mocked_args = f"""
-        --a 1
-        --b {b}
-        --c {c}
-        --d {d}
-    """.strip().split()
-    args = parser.parse_lit_args(mocked_args)
-    assert vars(args.dm)["c"] == vars(args.model)["c"] == c
-    assert "d" not in args.dm
+    for arg_name, expected_value in expected_dm_args.items():
+        assert getattr(args.datamodule, arg_name, None) == expected_value
+
+    for arg_name, expected_value in expected_model_args.items():
+        assert getattr(args.model, arg_name, None) == expected_value
+
+    for arg_name, expected_value in expected_trainer_args.items():
+        assert getattr(args.trainer, arg_name, None) == expected_value
