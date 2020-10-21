@@ -25,12 +25,10 @@ class LightningArgumentParser(ArgumentParser):
 
         from pl_bolts.utils.arguments import LightningArgumentParser
 
-        parser.add_object_args("data", MyDataModule)
-        parser.add_object_args("model", MyModel)
+        parser.add_datamodule_args(MyDataModule)
+        parser.add_model_args(MyModel)
+        parser.add_trainer_args()
         args = parser.parse_lit_args()
-
-        # args.data -> data args
-        # args.model -> model args
     """
     def __init__(self, *args, ignore_required_init_args=True, **kwargs):
         """
@@ -44,7 +42,14 @@ class LightningArgumentParser(ArgumentParser):
         self._default_obj_args = dict()
         self._added_arg_names = []
 
-    def _add_object_args(self, name, obj, root_cls=None):
+    def _add_object_args(self, name: str, obj: object, root_cls: object = None):
+        """Add any arbitrary class's init args to parser under grouped Namespace.
+
+        Args:
+            name (str): Name of the object group you want to add.
+            obj (object): Any arbitrary object you want arguments for. Must have type annotations in `__init__` signature.
+            root_cls (object, optional): Parse args up inheritence tree until you hit this object. Defaults to None.
+        """        
         default_args = gather_lit_args(obj, root_cls)
         self._default_obj_args[name] = default_args
         for arg in default_args:
@@ -58,13 +63,28 @@ class LightningArgumentParser(ArgumentParser):
                 kwargs["default"] = arg.default
             self.add_argument(f"--{arg.name}", **kwargs)
 
-    def add_model_args(self, model_obj):
+    def add_model_args(self, model_obj: pl.LightningModule):
+        """Add arguments from model_obj to the parser
+
+        Args:
+            model_obj (pl.LightningModule): Any LightningModule subclass
+        """        
         self._add_object_args('model', model_obj, pl.LightningModule)
 
     def add_datamodule_args(self, datamodule_obj):
+        """Add arguments from datamodule_obj to the parser
+
+        Args:
+            datamodule_obj (pl.LightningDataModule): Any LightningDataModule subclass
+        """        
         self._add_object_args('datamodule', datamodule_obj, pl.LightningDataModule)
 
-    def add_trainer_args(self, trainer_obj=pl.Trainer):
+    def add_trainer_args(self, trainer_obj: pl.Trainer = pl.Trainer):
+        """Add Lightning's Trainer args to the parser.
+
+        Args:
+            trainer_obj (pl.Trainer, optional): The trainer object to add arguments from. Defaults to pl.Trainer.
+        """
         self._add_object_args('trainer', trainer_obj, pl.Trainer)
 
     def parse_lit_args(self, *args, **kwargs):
