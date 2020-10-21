@@ -49,7 +49,7 @@ class LightningArgumentParser(ArgumentParser):
 
         Args:
             name (str): Name of the object group you want to add.
-            obj (object): Any arbitrary object you want arguments for. Must have type annotations in `__init__` signature.
+            obj (object): Any arbitrary object you want arguments for. Must have type annotations in __init__ signature.
             root_cls (object, optional): Parse args up inheritence tree until you hit this object. Defaults to None.
         """
         default_args = gather_lit_args(obj, root_cls)
