@@ -224,6 +224,7 @@ class DQN(pl.LightningModule):
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
+
         Returns:
             yields a Experience tuple containing the state, action, reward, done and next_state.
         """

@@ -36,14 +36,14 @@ class VAE(pl.LightningModule):
 
     def __init__(
         self,
-        input_height,
-        enc_type='resnet18',
-        first_conv=False,
-        maxpool1=False,
-        enc_out_dim=512,
-        kl_coeff=0.1,
-        latent_dim=256,
-        lr=1e-4,
+        input_height: int,
+        enc_type: str = 'resnet18',
+        first_conv: bool = False,
+        maxpool1: bool = False,
+        enc_out_dim: int = 512,
+        kl_coeff: float = 0.1,
+        latent_dim: int = 256,
+        lr: float = 1e-4,
         **kwargs
     ):
         """
