@@ -2,7 +2,9 @@ import pytorch_lightning as pl
 import torch
 
 from pl_bolts.datamodules import MNISTDataModule, FashionMNISTDataModule
-from pl_bolts.models import GPT2, ImageGPT, UNet
+from pl_bolts.datasets import DummyDataset
+from pl_bolts.models import GPT2, ImageGPT, UNet, SemSegment
+from torch.utils.data import DataLoader
 
 
 def test_igpt(tmpdir):
@@ -54,3 +56,21 @@ def test_unet(tmpdir):
     model = UNet(num_classes=2)
     y = model(x)
     assert y.shape == torch.Size([10, 2, 28, 28])
+
+
+def test_semantic_segmentation(tmpdir):
+
+    class DummyDataModule(pl.LightningDataModule):
+        def train_dataloader(self):
+            train_ds = DummyDataset((3, 35, 120), (35, 120), num_samples=100)
+            return DataLoader(train_ds, batch_size=1)
+
+    dm = DummyDataModule()
+
+    model = SemSegment(datamodule=dm, num_classes=19)
+
+    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1)
+    trainer.fit(model)
+    loss = trainer.progress_bar_dict['loss']
+
+    assert float(loss) > 0
