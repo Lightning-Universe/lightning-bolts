@@ -56,12 +56,12 @@ class Projection(nn.Module):
 
 class SimCLR(pl.LightningModule):
     def __init__(self,
-                 batch_size,
-                 num_samples,
-                 warmup_epochs=10,
-                 lr=1e-4,
-                 opt_weight_decay=1e-6,
-                 loss_temperature=0.5,
+                 batch_size: int,
+                 num_samples: int,
+                 warmup_epochs: int = 10,
+                 lr: float = 1e-4,
+                 opt_weight_decay: float = 1e-6,
+                 loss_temperature: float = 0.5,
                  **kwargs):
         """
         Args:

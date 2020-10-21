@@ -39,7 +39,7 @@ class SimCLRTrainDataTransform(object):
         x = sample()
         (xi, xj) = transform(x)
     """
-    def __init__(self, input_height, s=1):
+    def __init__(self, input_height: int, s: int = 1):
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
@@ -81,7 +81,7 @@ class SimCLREvalDataTransform(object):
         x = sample()
         (xi, xj) = transform(x)
     """
-    def __init__(self, input_height, s=1):
+    def __init__(self, input_height: int, s: int = 1):
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
@@ -107,7 +107,7 @@ class GaussianBlur(object):
     Implements Gaussian blur as described in the SimCLR paper
     """
 
-    def __init__(self, kernel_size, min=0.1, max=2.0):
+    def __init__(self, kernel_size: int, min: float = 0.1, max: float = 2.0):
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
