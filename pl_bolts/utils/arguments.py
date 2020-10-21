@@ -10,6 +10,7 @@ import pytorch_lightning as pl
 class LitArg:
     """Dataclass to represent init args of an object
     """
+
     name: str
     types: tuple
     default: Any
@@ -30,6 +31,7 @@ class LightningArgumentParser(ArgumentParser):
         parser.add_trainer_args()
         args = parser.parse_lit_args()
     """
+
     def __init__(self, *args, ignore_required_init_args=True, **kwargs):
         """
         Args:
@@ -49,7 +51,7 @@ class LightningArgumentParser(ArgumentParser):
             name (str): Name of the object group you want to add.
             obj (object): Any arbitrary object you want arguments for. Must have type annotations in `__init__` signature.
             root_cls (object, optional): Parse args up inheritence tree until you hit this object. Defaults to None.
-        """        
+        """
         default_args = gather_lit_args(obj, root_cls)
         self._default_obj_args[name] = default_args
         for arg in default_args:
@@ -68,7 +70,7 @@ class LightningArgumentParser(ArgumentParser):
 
         Args:
             model_obj (pl.LightningModule): Any LightningModule subclass
-        """        
+        """
         self._add_object_args('model', model_obj, pl.LightningModule)
 
     def add_datamodule_args(self, datamodule_obj):
@@ -76,7 +78,7 @@ class LightningArgumentParser(ArgumentParser):
 
         Args:
             datamodule_obj (pl.LightningDataModule): Any LightningDataModule subclass
-        """        
+        """
         self._add_object_args('datamodule', datamodule_obj, pl.LightningDataModule)
 
     def add_trainer_args(self, trainer_obj: pl.Trainer = pl.Trainer):
