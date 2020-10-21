@@ -44,8 +44,8 @@ class LightningArgumentParser(ArgumentParser):
         self._default_obj_args = dict()
         self._added_arg_names = []
 
-    def add_object_args(self, name, obj):
-        default_args = gather_lit_args(obj)
+    def _add_object_args(self, name, obj, root_cls=None):
+        default_args = gather_lit_args(obj, root_cls)
         self._default_obj_args[name] = default_args
         for arg in default_args:
             if arg.name in self._added_arg_names:
@@ -57,6 +57,15 @@ class LightningArgumentParser(ArgumentParser):
             else:
                 kwargs["default"] = arg.default
             self.add_argument(f"--{arg.name}", **kwargs)
+
+    def add_model_args(self, model_obj):
+        self._add_object_args('model', model_obj, pl.LightningModule)
+
+    def add_datamodule_args(self, datamodule_obj):
+        self._add_object_args('datamodule', datamodule_obj, pl.LightningDataModule)
+
+    def add_trainer_args(self, trainer_obj=pl.Trainer):
+        self._add_object_args('trainer', trainer_obj, pl.Trainer)
 
     def parse_lit_args(self, *args, **kwargs):
         parsed_args_dict = vars(self.parse_args(*args, **kwargs))
