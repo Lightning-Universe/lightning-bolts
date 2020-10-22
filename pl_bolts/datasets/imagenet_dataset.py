@@ -14,7 +14,7 @@ from torch._six import PY3
 
 _SKLEARN_AVAILABLE = importlib.util.find_spec("sklearn") is not None
 if _SKLEARN_AVAILABLE:
-    from sklearn.utils import shuffle
+    from sklearn.utils import shuffle as sk_shuffle
 else:
     warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install sklearn`.')
@@ -80,7 +80,7 @@ class UnlabeledImagenet(ImageNet):
             )
 
         # shuffle images first
-        self.imgs = shuffle(self.imgs, random_state=1234)
+        self.imgs = sk_shuffle(self.imgs, random_state=1234)
 
         # partition train set into [train, val]
         if split == 'train':
@@ -105,7 +105,7 @@ class UnlabeledImagenet(ImageNet):
         # limit the number of classes
         if num_classes != -1:
             # choose the classes at random (but deterministic)
-            ok_classes = shuffle(list(range(num_classes)), random_state=1234)
+            ok_classes = sk_shuffle(list(range(num_classes)), random_state=1234)
             ok_classes = ok_classes[:num_classes]
             ok_classes = set(ok_classes)
 
@@ -117,7 +117,7 @@ class UnlabeledImagenet(ImageNet):
             self.imgs = clean_imgs
 
         # shuffle again for final exit
-        self.imgs = shuffle(self.imgs, random_state=1234)
+        self.imgs = sk_shuffle(self.imgs, random_state=1234)
 
         # list of class_nbs for each image
         idcs = [idx for _, idx in self.imgs]

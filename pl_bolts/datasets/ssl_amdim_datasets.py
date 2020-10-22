@@ -7,7 +7,7 @@ import numpy as np
 
 _SKLEARN_AVAILABLE = importlib.util.find_spec("sklearn") is not None
 if _SKLEARN_AVAILABLE:
-    from sklearn.utils import shuffle
+    from sklearn.utils import shuffle as sk_shuffle
 else:
     warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install sklearn`.')
@@ -90,7 +90,7 @@ class SSLDatasetMixin(ABC):
 
         n = len(x)
         idxs = list(range(0, n))
-        idxs = shuffle(idxs, random_state=1234)
+        idxs = sk_shuffle(idxs, random_state=1234)
 
         x = x[idxs]
 
