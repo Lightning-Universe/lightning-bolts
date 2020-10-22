@@ -18,7 +18,6 @@ if _SKLEARN_AVAILABLE:
 else:
     warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install sklearn`.')
-    _SKLEARN_AVAILABLE = False
 
 try:
     from torchvision.datasets import ImageNet
