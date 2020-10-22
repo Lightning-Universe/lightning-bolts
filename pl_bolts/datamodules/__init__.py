@@ -84,6 +84,13 @@ else:
     __all__ += ['VOCDetectionDataModule']
 
 try:
+    from pl_bolts.datamodules.cityscapes_datamodule import CityscapesDataModule
+except ModuleNotFoundError:  # pragma: no-cover
+    pass
+else:
+    __all__ += ['CityscapesDataModule']
+
+try:
     from pl_bolts.datasets.kitti_dataset import KittiDataset
 except ModuleNotFoundError:
     pass
