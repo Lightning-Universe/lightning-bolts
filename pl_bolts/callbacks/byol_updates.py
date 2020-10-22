@@ -19,8 +19,6 @@ class BYOLMAWeightUpdate(Callback):
 
     Example::
 
-        from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
-
         # model must have 2 attributes
         model = Model()
         model.online_network = ...
