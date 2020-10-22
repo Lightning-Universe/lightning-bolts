@@ -14,8 +14,6 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
 
     Example::
 
-        from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
-
         # your model must have 2 attributes
         model = Model()
         model.z_dim = ... # the representation dim

@@ -20,5 +20,5 @@ SSLOnlineEvaluator
 ------------------
 Appends a MLP for fine-tuning to the given model. Callback has its own mini-inner loop.
 
-.. autoclass:: pl_bolts.callbacks.self_supervised.SSLOnlineEvaluator
+.. autoclass:: pl_bolts.callbacks.ssl_online.SSLOnlineEvaluator
    :noindex:
