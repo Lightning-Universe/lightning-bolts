@@ -1,12 +1,14 @@
+import importlib
 import math
 from warnings import warn
 
 import numpy as np
 import torch
 
-try:
+_SKLEARN_AVAILABLE = importlib.util.find_spec("sklearn") is not None
+if _SKLEARN_AVAILABLE:
     from sklearn.utils import shuffle as sk_shuffle
-except ModuleNotFoundError:
+else:
     warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install sklearn`.')
 
@@ -36,11 +38,15 @@ def balance_classes(X: np.ndarray, Y: list, batch_size: int):
     Perfect balance
 
     Args:
-
         X: input features
         Y: mixed labels (ints)
         batch_size: the ultimate batch size
     """
+    if not _SKLEARN_AVAILABLE:
+        raise ModuleNotFoundError(  # pragma: no-cover
+            'You want to use `shuffle` function from `scikit-learn` which is not installed yet.'
+        )
+
     nb_classes = len(set(Y))
 
     nb_batches = math.ceil(len(Y) / batch_size)
