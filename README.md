@@ -6,6 +6,17 @@
 
 **Pretrained SOTA Deep Learning models, callbacks and more for research and production with PyTorch Lightning and PyTorch**
 
+<p align="center">
+  <a href="https://www.pytorchlightning.ai/">Website</a> •
+  <a href="#install">Installation</a> •
+  <a href="#main-Goals-of-Bolts">Main goals</a> •
+  <a href="https://pytorch-lightning-bolts.readthedocs.io/en/latest/">latest Docs</a> •
+  <a href="https://pytorch-lightning-bolts.readthedocs.io/en/stable/">stable Docs</a> •
+  <a href="#team">Community</a> •
+  <a href="https://www.grid.ai/">Grid AI</a> •
+  <a href="#licence">Licence</a>
+</p>
+
 [![PyPI Status](https://badge.fury.io/py/pytorch-lightning-bolts.svg)](https://badge.fury.io/py/pytorch-lightning-bolts)
 [![PyPI Status](https://pepy.tech/badge/pytorch-lightning-bolts)](https://pepy.tech/project/pytorch-lightning-bolts)
 [![codecov](https://codecov.io/gh/PyTorchLightning/pytorch-lightning-bolts/branch/master/graph/badge.svg)](https://codecov.io/gh/PyTorchLightning/pytorch-lightning-bolts)
@@ -61,13 +72,6 @@ In case you want to have full experience you can install all optional packages a
 ```bash
 pip install pytorch-lightning-bolts["extra"]
 ```
-
-## Docs
-
-- [master](https://pytorch-lightning-bolts.readthedocs.io/en/latest)
-- [stable](https://pytorch-lightning-bolts.readthedocs.io/en/stable)
-- [0.2.0](https://pytorch-lightning-bolts.readthedocs.io/en/0.2.0/)
-- [0.1.1](https://pytorch-lightning-bolts.readthedocs.io/en/0.1.1/)
 
 ## What is Bolts
 
@@ -176,6 +180,13 @@ with your implementation.
 ## Team
 
 Bolts is supported by the PyTorch Lightning team and the PyTorch Lightning community!
+
+---
+
+## Licence
+
+Please observe the Apache 2.0 license that is listed in this repository.
+ In addition the Lightning framework is Patent Pending.
 
 ## Citation
 To cite bolts use:
