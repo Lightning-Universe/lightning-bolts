@@ -16,7 +16,7 @@ class CNN(nn.Module):
     Simple MLP network
     """
 
-    def __init__(self, input_shape, n_actions):
+    def __init__(self, input_shape: Tuple[int], n_actions: int):
         """
         Args:
             input_shape: observation shape of the environment
@@ -68,7 +68,7 @@ class MLP(nn.Module):
     Simple MLP network
     """
 
-    def __init__(self, input_shape: Tuple, n_actions: int, hidden_size: int = 128):
+    def __init__(self, input_shape: Tuple[int], n_actions: int, hidden_size: int = 128):
         """
         Args:
             input_shape: observation shape of the environment
@@ -100,7 +100,7 @@ class DuelingMLP(nn.Module):
     MLP network with duel heads for val and advantage
     """
 
-    def __init__(self, input_shape: Tuple, n_actions: int, hidden_size: int = 128):
+    def __init__(self, input_shape: Tuple[int], n_actions: int, hidden_size: int = 128):
         """
         Args:
             input_shape: observation shape of the environment
@@ -159,7 +159,7 @@ class DuelingCNN(nn.Module):
     CNN network with duel heads for val and advantage
     """
 
-    def __init__(self, input_shape: Tuple, n_actions: int, _: int = 128):
+    def __init__(self, input_shape: Tuple[int], n_actions: int, _: int = 128):
         """
         Args:
             input_shape: observation shape of the environment
@@ -237,7 +237,7 @@ class NoisyCNN(nn.Module):
     CNN with Noisy Linear layers for exploration
     """
 
-    def __init__(self, input_shape, n_actions):
+    def __init__(self, input_shape: Tuple[int], n_actions: int):
         """
         Args:
             input_shape: observation shape of the environment
@@ -298,7 +298,7 @@ class NoisyLinear(nn.Linear):
     Chapter08/lib/dqn_extra.py#L19
     """
 
-    def __init__(self, in_features, out_features, sigma_init=0.017, bias=True):
+    def __init__(self, in_features: int, out_features: int, sigma_init: float = 0.017, bias: bool = True):
         """
         Args:
             in_features: number of inputs

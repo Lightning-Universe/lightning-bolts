@@ -38,7 +38,7 @@ class SSLFineTuner(pl.LightningModule):
         trainer.test(datamodule=dm)
     """
 
-    def __init__(self, backbone, in_features, num_classes, hidden_dim=1024):
+    def __init__(self, backbone: pl.LightningModule, in_features: int, num_classes: int, hidden_dim: int = 1024):
         """
         Args:
             backbone: a pretrained model
@@ -85,7 +85,5 @@ class SSLFineTuner(pl.LightningModule):
 
         return loss, acc
 
-    def configure_optimizers(
-        self,
-    ):
+    def configure_optimizers(self):
         return torch.optim.Adam(self.ft_network.parameters(), lr=0.0002)

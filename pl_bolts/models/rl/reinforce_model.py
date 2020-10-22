@@ -169,6 +169,7 @@ class Reinforce(pl.LightningModule):
     ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
+
         Yield:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
         """

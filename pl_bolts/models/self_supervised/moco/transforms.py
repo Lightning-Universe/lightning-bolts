@@ -27,9 +27,8 @@ class Moco2TrainCIFAR10Transforms:
     """
     Moco 2 augmentation:
     https://arxiv.org/pdf/2003.04297.pdf
-
     """
-    def __init__(self, height=32):
+    def __init__(self, height: int = 32):
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
@@ -58,9 +57,8 @@ class Moco2EvalCIFAR10Transforms:
     """
     Moco 2 augmentation:
     https://arxiv.org/pdf/2003.04297.pdf
-
     """
-    def __init__(self, height=32):
+    def __init__(self, height: int = 32):
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
@@ -84,7 +82,7 @@ class Moco2TrainSTL10Transforms:
     Moco 2 augmentation:
     https://arxiv.org/pdf/2003.04297.pdf
     """
-    def __init__(self, height=64):
+    def __init__(self, height: int = 64):
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
@@ -114,7 +112,7 @@ class Moco2EvalSTL10Transforms:
     Moco 2 augmentation:
     https://arxiv.org/pdf/2003.04297.pdf
     """
-    def __init__(self, height=64):
+    def __init__(self, height: int = 64):
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
@@ -140,7 +138,7 @@ class Moco2TrainImagenetTransforms:
 
     """
 
-    def __init__(self, height=128):
+    def __init__(self, height: int = 128):
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
@@ -169,9 +167,8 @@ class Moco2EvalImagenetTransforms:
     """
     Moco 2 augmentation:
     https://arxiv.org/pdf/2003.04297.pdf
-
     """
-    def __init__(self, height=128):
+    def __init__(self, height: int = 128):
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `transforms` from `torchvision` which is not installed yet.'

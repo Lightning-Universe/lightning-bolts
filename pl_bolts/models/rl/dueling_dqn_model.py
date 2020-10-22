@@ -30,21 +30,6 @@ class DuelingDQN(DQN):
         trainer = Trainer()
         trainer.fit(model)
 
-    Args:
-        env: gym environment tag
-        gpus: number of gpus being used
-        eps_start: starting value of epsilon for the epsilon-greedy exploration
-        eps_end: final value of epsilon for the epsilon-greedy exploration
-        eps_last_frame: the final frame in for the decrease of epsilon. At this frame espilon = eps_end
-        sync_rate: the number of iterations between syncing up the target network with the train network
-        gamma: discount factor
-        lr: learning rate
-        batch_size: size of minibatch pulled from the DataLoader
-        replay_size: total capacity of the replay buffer
-        warm_start_size: how many random steps through the environment to be carried out at the start of
-            training to fill the buffer with a starting point
-        sample_len: the number of samples to pull from the dataset iterator and feed to the DataLoader
-
     .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
 
     """
