@@ -4,13 +4,12 @@ from warnings import warn
 import numpy as np
 import torch
 
-try:
+_SKLEARN_AVAILABLE = importlib.util.find_spec("sklearn") is not None
+if _SKLEARN_AVAILABLE:
     from sklearn.utils import shuffle as sk_shuffle
-    _SKLEARN_AVAILABLE = True
-except ModuleNotFoundError:
+else:
     warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install sklearn`.')
-    _SKLEARN_AVAILABLE = False
 
 
 class Identity(torch.nn.Module):
