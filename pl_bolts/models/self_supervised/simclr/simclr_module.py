@@ -12,7 +12,6 @@ except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
 
-from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.models.self_supervised.evaluator import Flatten
 from pl_bolts.models.self_supervised.resnets import resnet50_bn
@@ -218,6 +217,7 @@ class SimCLR(pl.LightningModule):
 
 
 def cli_main():
+    from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
 
     parser = ArgumentParser()

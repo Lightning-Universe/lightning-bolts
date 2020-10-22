@@ -1,4 +1,3 @@
-import math
 from typing import Optional
 
 import torch
@@ -11,7 +10,7 @@ from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 
 class SSLOnlineEvaluator(Callback):  # pragma: no-cover
     """
-    Attaches a MLP for finetuning using the standard self-supervised protocol.
+    Attaches a MLP for fine-tuning using the standard self-supervised protocol.
 
     Example::
 
@@ -32,8 +31,8 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
     ):
         """
         Args:
-            drop_p: (0.2) dropout probability
-            hidden_dim: (1024) the hidden dimension for the finetune MLP
+            drop_p: dropout probability
+            hidden_dim: the hidden dimension for the fine-tune MLP
         """
         super().__init__()
         self.hidden_dim = hidden_dim
@@ -101,61 +100,3 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
 
         metrics = {'ft_callback_mlp_loss': mlp_loss, 'ft_callback_mlp_acc': acc}
         pl_module.logger.log_metrics(metrics, step=trainer.global_step)
-
-
-class BYOLMAWeightUpdate(Callback):
-    """
-    Weight update rule from BYOL.
-
-    Your model should have a:
-
-        - self.online_network.
-        - self.target_network.
-
-    Updates the target_network params using an exponential moving average update rule weighted by tau.
-    BYOL claims this keeps the online_network from collapsing.
-
-    .. note:: Automatically increases tau from `initial_tau` to 1.0 with every training step
-
-    Example::
-
-        from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
-
-        # model must have 2 attributes
-        model = Model()
-        model.online_network = ...
-        model.target_network = ...
-
-        trainer = Trainer(callbacks=[BYOLMAWeightUpdate()])
-    """
-
-    def __init__(self, initial_tau=0.996):
-        """
-        Args:
-            initial_tau: starting tau. Auto-updates with every training step
-        """
-        super().__init__()
-        self.initial_tau = initial_tau
-        self.current_tau = initial_tau
-
-    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
-        # get networks
-        online_net = pl_module.online_network
-        target_net = pl_module.target_network
-
-        # update weights
-        self.update_weights(online_net, target_net)
-
-        # update tau after
-        self.current_tau = self.update_tau(pl_module, trainer)
-
-    def update_tau(self, pl_module, trainer):
-        max_steps = len(trainer.train_dataloader) * trainer.max_epochs
-        tau = 1 - (1 - self.initial_tau) * (math.cos(math.pi * pl_module.global_step / max_steps) + 1) / 2
-        return tau
-
-    def update_weights(self, online_net, target_net):
-        # apply MA weight update
-        for (name, online_p), (_, target_p) in zip(online_net.named_parameters(), target_net.named_parameters()):
-            if 'weight' in name:
-                target_p.data = self.current_tau * target_p.data + (1 - self.current_tau) * online_p.data
