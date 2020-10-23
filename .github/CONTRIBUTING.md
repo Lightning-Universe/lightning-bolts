@@ -41,7 +41,7 @@ A lot of good work has already been done in project mechanics (requirements/base
 
 ### Bug Fixes:
 
-1. If you find a bug please submit a github issue.
+1. If you find a bug please submit a GitHub issue.
 
    - Make sure the title explains the issue.
    - Describe your setup, what you are trying to do, expected vs. actual behaviour. Please add configs and code samples.
@@ -60,7 +60,7 @@ _**Note**, even if you do not find the solution, sending a PR with a test coveri
 
 ### New Features:
 
-1. Submit a github issue - describe what is the motivation of such feature (adding the use case or an example is helpful).
+1. Submit a GitHub issue - describe what is the motivation of such feature (adding the use case or an example is helpful).
 2. Let's discuss to determine the feature scope.
 3. Submit a PR! We recommend test driven approach to adding new features as well:
 
@@ -73,13 +73,13 @@ _**Note**, even if you do not find the solution, sending a PR with a test coveri
 
 ### New Models:
 
-PyTorch Lightning Bolts makes several research models for ready usage. Following are general guideliness for adding new models. 
+PyTorch Lightning Bolts makes several research models for ready usage. Following are general guidelines for adding new models.
 
 1. Models which are standard baselines
 2. Whose results are reproduced properly either by us or by authors.
-3. Top models which are not SOTA but highly cited for production usage / for other uses. (E.g. Moible BERT, MobileNets, FBNets).
+3. Top models which are not SOTA but highly cited for production usage / for other uses. (E.g. Mobile BERT, MobileNets, FBNets).
 4. Do not reinvent the wheel, natively support torchvision, torchtext, torchaudio models.
-5. Use open source licensed moodels.
+5. Use open source licensed models.
 
 Please raise an issue before adding a new model. Please let us know why the particular model is important for bolts. There are tons of models that keep coming. It is very difficult to support every model.
 
@@ -99,7 +99,7 @@ Want to add a new test case and not sure how? [Talk to us!](https://join.slack.c
 
 ## Guidelines
 
-For this section we refer to read the [parent PL guidelines](https://pytorch-lightning.readthedocs.io/en/latest/CONTRIBUTING.html)
+For this section, we refer to read the [parent PL guidelines](https://pytorch-lightning.readthedocs.io/en/latest/CONTRIBUTING.html)
 
 **Reminder**
 
@@ -119,4 +119,4 @@ In case you adding new dependencies, make sure that they are compatible with the
 
 3. **I have a model in other framework than PyTorch, how do I add it here?**
 
-   Since PyTorch Lightning is written on top of PyTorch. We need models in PyTorch only. Also,, we would need same or equivalent results with PyTorch Lightning after converting the models from other frameworks.
+   Since PyTorch Lightning is written on top of PyTorch. We need models in PyTorch only. Also, we would need same or equivalent results with PyTorch Lightning after converting the models from other frameworks.
