@@ -98,6 +98,7 @@ def cli_main():  # pragma: no-cover
         datamodule=dm,
         maxpool1=args.maxpool1,
         first_conv=args.first_conv,
+        dataset='imagenet',
     ).load_from_checkpoint(args.ckpt_path, strict=False)
 
     tuner = SSLFineTuner(
