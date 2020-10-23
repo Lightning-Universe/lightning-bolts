@@ -16,7 +16,7 @@ def cli_main():  # pragma: no-cover
 
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
-    parser.add_argument('', type=str, help='cifar10, imagenet', default='stl10')
+    parser.add_argument('--dataset', type=str, help='cifar10, imagenet', default='stl10')
     parser.add_argument('--ckpt_path', type=str, help='path to ckpt')
     parser.add_argument('--data_path', type=str, help='path to ckpt', default=os.getcwd())
 
@@ -115,8 +115,7 @@ def cli_main():  # pragma: no-cover
         final_lr=args.final_lr
     )
 
-    trainer = pl.Trainer.from_argparse_args(
-        args,
+    trainer = pl.Trainer(
         gpus=args.gpus,
         precision=16,
         early_stop_callback=True,
