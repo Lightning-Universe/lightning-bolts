@@ -1,6 +1,5 @@
 import math
 from typing import Any
-from warnings import warn
 
 import numpy as np
 import torch
@@ -10,8 +9,8 @@ from torch.utils.data import Dataset, DataLoader
 try:
     from sklearn.utils import shuffle as sk_shuffle
 except ModuleNotFoundError:
-    warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install sklearn`.')
+    raise ModuleNotFoundError('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
+                              ' install it with `pip install sklearn`.')
     _SKLEARN_AVAILABLE = False
 else:
     _SKLEARN_AVAILABLE = True

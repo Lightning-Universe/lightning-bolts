@@ -9,6 +9,14 @@ from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 
 try:
     from torchvision import transforms as transform_lib
+except ModuleNotFoundError:
+    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
+         ' install it with `pip install torchvision`.')
+    _TORCHVISION_AVAILABLE = False
+else:
+    _TORCHVISION_AVAILABLE = True
+
+try:
     from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
 except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover

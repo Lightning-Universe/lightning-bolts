@@ -1,16 +1,8 @@
 from abc import ABC
-import importlib
 from typing import Callable, Optional
 from warnings import warn
 
 import numpy as np
-
-_SKLEARN_AVAILABLE = importlib.util.find_spec("sklearn") is not None
-if _SKLEARN_AVAILABLE:
-    from sklearn.utils import shuffle as sk_shuffle
-else:
-    warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install sklearn`.')
 
 try:
     from torchvision.datasets import CIFAR10
@@ -83,14 +75,11 @@ class SSLDatasetMixin(ABC):
 
     @classmethod
     def deterministic_shuffle(cls, x, y):
-        if not _SKLEARN_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
-                'You want to use `shuffle` function from `scikit-learn` which is not installed yet.'
-            )
 
         n = len(x)
         idxs = list(range(0, n))
-        idxs = sk_shuffle(idxs, random_state=1234)
+        np.random.seed(1234)
+        np.random.shuffle(idxs)
 
         x = x[idxs]
 

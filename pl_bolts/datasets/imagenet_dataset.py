@@ -1,23 +1,15 @@
 import gzip
 import hashlib
-import importlib
 import os
 import shutil
 import tarfile
 import tempfile
 import zipfile
 from contextlib import contextmanager
-from warnings import warn
 
+import numpy as np
 import torch
 from torch._six import PY3
-
-_SKLEARN_AVAILABLE = importlib.util.find_spec("sklearn") is not None
-if _SKLEARN_AVAILABLE:
-    from sklearn.utils import shuffle as sk_shuffle
-else:
-    warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install sklearn`.')
 
 try:
     from torchvision.datasets import ImageNet
@@ -74,13 +66,9 @@ class UnlabeledImagenet(ImageNet):
         super(ImageNet, self).__init__(self.split_folder, **kwargs)
         self.root = root
 
-        if not _SKLEARN_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
-                'You want to use `shuffle` function from `scikit-learn` which is not installed yet.'
-            )
-
         # shuffle images first
-        self.imgs = sk_shuffle(self.imgs, random_state=1234)
+
+        shuffle(self.imgs, random_state=1234)
 
         # partition train set into [train, val]
         if split == 'train':
@@ -105,7 +93,9 @@ class UnlabeledImagenet(ImageNet):
         # limit the number of classes
         if num_classes != -1:
             # choose the classes at random (but deterministic)
-            ok_classes = sk_shuffle(list(range(num_classes)), random_state=1234)
+            ok_classes = list(range(num_classes))
+            np.random.seed(1234)
+            np.random.shuffle(ok_classes)
             ok_classes = ok_classes[:num_classes]
             ok_classes = set(ok_classes)
 
@@ -117,7 +107,8 @@ class UnlabeledImagenet(ImageNet):
             self.imgs = clean_imgs
 
         # shuffle again for final exit
-        self.imgs = sk_shuffle(self.imgs, random_state=1234)
+        np.random.seed(1234)
+        np.random.shuffle(self.imgs)
 
         # list of class_nbs for each image
         idcs = [idx for _, idx in self.imgs]
