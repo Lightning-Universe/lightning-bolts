@@ -7,7 +7,7 @@ from pytorch_lightning.metrics import Accuracy
 from torch.nn import functional as F
 
 
-class SSLOnlineEvaluator(pl.Callback):
+class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
     """
     Attaches a MLP for finetuning using the standard self-supervised protocol.
 
@@ -82,7 +82,7 @@ class SSLOnlineEvaluator(pl.Callback):
 
         return x, y
 
-    def on_train_batch_end(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         x, y = self.to_device(batch, pl_module.device)
 
         with torch.no_grad():
@@ -105,7 +105,7 @@ class SSLOnlineEvaluator(pl.Callback):
         self.log('train_acc_epoch', self.train_acc)
         pl_module.log('train_mlp_loss', mlp_loss)
 
-    def on_validation_batch_end(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+    def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         x, y = self.to_device(batch, pl_module.device)
 
         with torch.no_grad():
