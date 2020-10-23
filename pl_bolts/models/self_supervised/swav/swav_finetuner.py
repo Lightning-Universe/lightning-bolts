@@ -22,7 +22,7 @@ def cli_main():  # pragma: no-cover
 
     parser.add_argument("--batch_size", default=64, type=int, help="batch size per gpu")
     parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
-    parser.add_argument("--gpus", default=4, type=int, help="number of GPUs")
+    parser.add_argument("--num_gpus", default=4, type=int, help="number of GPUs")
     parser.add_argument('--num_epochs', default=100, type=int, help="number of epochs")
 
     # fine-tuner params
@@ -92,7 +92,7 @@ def cli_main():  # pragma: no-cover
         raise NotImplementedError("other datasets have not been implemented till now")
 
     backbone = SwAV(
-        gpus=args.gpus,
+        gpus=args.num_gpus,
         num_samples=args.num_samples,
         batch_size=args.batch_size,
         datamodule=dm,
@@ -116,7 +116,7 @@ def cli_main():  # pragma: no-cover
     )
 
     trainer = pl.Trainer(
-        gpus=args.gpus,
+        gpus=args.num_gpus,
         precision=16,
         early_stop_callback=True,
         max_epochs=args.num_epochs
