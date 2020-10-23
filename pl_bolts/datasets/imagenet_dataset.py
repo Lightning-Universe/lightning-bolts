@@ -67,8 +67,8 @@ class UnlabeledImagenet(ImageNet):
         self.root = root
 
         # shuffle images first
-
-        shuffle(self.imgs, random_state=1234)
+        np.random.seed(1234)
+        np.random.shuffle(self.imgs)
 
         # partition train set into [train, val]
         if split == 'train':
