@@ -119,8 +119,9 @@ def cli_main():  # pragma: no-cover
     trainer = pl.Trainer(
         gpus=args.num_gpus,
         precision=16,
-        early_stop_callback=True,
-        max_epochs=args.num_epochs
+        max_epochs=args.num_epochs,
+        distributed_backend='ddp',
+        sync_batchnorm=True if args.num_gpus > 1 else False,
     )
 
     trainer.fit(tuner, dm)
