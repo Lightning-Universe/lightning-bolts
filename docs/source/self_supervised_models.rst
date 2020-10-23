@@ -459,6 +459,25 @@ To Train::
     trainer = pl.Trainer(precision=16)
     trainer.fit(model)
 
+ImageNet baseline
+*****************
+
+We have included an option to directly load
+`ImageNet weights <https://github.com/facebookresearch/swav>`_ provided by FAIR into bolts.
+
+You can load the pretrained model using:
+
+ImageNet pretrained model::
+
+    from pl_bolts.models.self_supervised import SwAV
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/swav_imagenet/swav_imagenet.pth.tar'
+    swav = SwAV.load_from_checkpoint(weight_path, strict=True)
+
+    swav.freeze()
+
+|
+
 STL-10 baseline
 *****************
 
