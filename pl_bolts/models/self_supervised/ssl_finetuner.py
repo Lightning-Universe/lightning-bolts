@@ -150,4 +150,4 @@ class SSLFineTuner(pl.LightningModule):
                 optimizer, self.epochs, eta_min=self.final_lr  # total epochs to run
             )
 
-        return optimizer, scheduler
+        return [optimizer], [scheduler]
