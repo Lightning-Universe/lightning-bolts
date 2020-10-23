@@ -45,9 +45,6 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
         self.num_classes = num_classes
         self.dataset = dataset
 
-        self.train_acc = Accuracy(dist_sync_on_step=False)
-        self.val_acc = Accuracy(compute_on_step=False)
-
     def on_pretrain_routine_start(self, trainer, pl_module):
         from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 
@@ -57,6 +54,10 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
             p=self.drop_p,
             n_hidden=self.hidden_dim,
         ).to(pl_module.device)
+
+        # callbacks aren't nn.Modules
+        pl_module.non_linear_evaluator.train_acc = Accuracy(dist_sync_on_step=False)
+        pl_module.non_linear_evaluator.val_acc = Accuracy(compute_on_step=False)
 
         self.optimizer = torch.optim.Adam(
             pl_module.non_linear_evaluator.parameters(), lr=1e-4
@@ -100,9 +101,9 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
         self.optimizer.zero_grad()
 
         # log metrics
-        acc = self.train_acc(mlp_preds, y)
+        acc = pl_module.non_linear_evaluator.train_acc(mlp_preds, y)
         self.log('train_acc_step', acc, prog_bar=True)
-        self.log('train_acc_epoch', self.train_acc)
+        self.log('train_acc_epoch', pl_module.non_linear_evaluator.train_acc)
         pl_module.log('train_mlp_loss', mlp_loss)
 
     def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
@@ -118,8 +119,8 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
         mlp_loss = F.cross_entropy(mlp_preds, y)
 
         # log metrics
-        self.val_acc(mlp_preds, y)
-        pl_module.log('val_acc', self.val_acc)
+        pl_module.non_linear_evaluator.val_acc(mlp_preds, y)
+        pl_module.log('val_acc', pl_module.non_linear_evaluator.val_acc)
         pl_module.log('val_mlp_loss', mlp_loss)
 
 

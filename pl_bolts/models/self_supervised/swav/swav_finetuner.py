@@ -16,13 +16,14 @@ def cli_main():  # pragma: no-cover
 
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
-    parser.add_argument('--dataset', type=str, help='cifar10, imagenet', default='stl10')
+    parser.add_argument('', type=str, help='cifar10, imagenet', default='stl10')
     parser.add_argument('--ckpt_path', type=str, help='path to ckpt')
     parser.add_argument('--data_path', type=str, help='path to ckpt', default=os.getcwd())
 
     parser.add_argument("--batch_size", default=64, type=int, help="batch size per gpu")
     parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
     parser.add_argument("--gpus", default=4, type=int, help="number of GPUs")
+    parser.add_argument('--num_epochs', default=100, type=int, help="number of epochs")
 
     # fine-tuner params
     parser.add_argument('--in_features', type=int, default=2048)
@@ -115,7 +116,11 @@ def cli_main():  # pragma: no-cover
     )
 
     trainer = pl.Trainer.from_argparse_args(
-        args, gpus=args.gpus, precision=16, early_stop_callback=True
+        args,
+        gpus=args.gpus,
+        precision=16,
+        early_stop_callback=True,
+        max_epochs=args.num_epochs
     )
 
     trainer.fit(tuner, dm)
