@@ -125,7 +125,7 @@ class ImagenetDataModule(LightningDataModule):
 
                 To generate the meta.bin do the following:
 
-                from pl_bolts.datamodules.imagenet_dataset import UnlabeledImagenet
+                from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
                 path = '/path/to/folder/with/ILSVRC2012_devkit_t12.tar.gz/'
                 UnlabeledImagenet.generate_meta_bins(path)
                 """)

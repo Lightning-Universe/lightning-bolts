@@ -25,7 +25,7 @@ else:
 
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization, cifar10_normalization
 from pl_bolts.models.self_supervised.swav.transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
-from pl_bolts.models.self_supervised.swav.swav_online_eval import SwavOnlineEvaluator
+from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 
 
@@ -41,7 +41,7 @@ class SwAV(pl.LightningModule):
         feat_dim: int = 128,
         warmup_epochs: int = 10,
         max_epochs: int = 100,
-        nmb_prototypes: int = 3072,
+        nmb_prototypes: int = 3000,
         freeze_prototypes_epochs: int = 1,
         temperature: float = 0.1,
         sinkhorn_iterations: int = 3,
@@ -547,7 +547,7 @@ def cli_main():
     online_evaluator = None
     if args.online_ft:
         # online eval
-        online_evaluator = SwavOnlineEvaluator(
+        online_evaluator = SSLOnlineEvaluator(
             drop_p=0.,
             hidden_dim=None,
             z_dim=args.hidden_mlp,

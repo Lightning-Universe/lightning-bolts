@@ -3,11 +3,11 @@ from typing import Optional
 
 import pytorch_lightning as pl
 import torch
-from pytorch_lightning.metrics.functional import accuracy
+from pytorch_lightning.metrics import Accuracy
 from torch.nn import functional as F
 
 
-class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
+class SSLOnlineEvaluator(pl.Callback):
     """
     Attaches a MLP for finetuning using the standard self-supervised protocol.
 
@@ -19,70 +19,76 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
         model = Model()
         model.z_dim = ... # the representation dim
         model.num_classes = ... # the num of classes in the model
-    """
 
+        online_eval = SSLOnlineEvaluator(
+            z_dim=model.z_dim,
+            num_classes=model.num_classes,
+            dataset='imagenet'
+        )
+
+    """
     def __init__(
         self,
         drop_p: float = 0.2,
-        hidden_dim: int = 1024,
-        z_dim: Optional[int] = None,
-        num_classes: Optional[int] = None,
+        hidden_dim: Optional[int] = None,
+        z_dim: int = None,
+        num_classes: int = None,
+        dataset: str = 'stl10'
     ):
-        """
-        Args:
-            drop_p: (0.2) dropout probability
-            hidden_dim: (1024) the hidden dimension for the finetune MLP
-        """
         super().__init__()
+
         self.hidden_dim = hidden_dim
         self.drop_p = drop_p
         self.optimizer = None
+
         self.z_dim = z_dim
         self.num_classes = num_classes
+        self.dataset = dataset
+
+        self.train_acc = Accuracy(dist_sync_on_step=False)
+        self.val_acc = Accuracy(compute_on_step=False)
 
     def on_pretrain_routine_start(self, trainer, pl_module):
         from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 
-        # attach the evaluator to the module
-
-        if hasattr(pl_module, 'z_dim'):
-            self.z_dim = pl_module.z_dim
-        if hasattr(pl_module, 'num_classes'):
-            self.num_classes = pl_module.num_classes
-
         pl_module.non_linear_evaluator = SSLEvaluator(
-            n_input=self.z_dim, n_classes=self.num_classes, p=self.drop_p, n_hidden=self.hidden_dim
+            n_input=self.z_dim,
+            n_classes=self.num_classes,
+            p=self.drop_p,
+            n_hidden=self.hidden_dim,
         ).to(pl_module.device)
 
-        self.optimizer = torch.optim.SGD(pl_module.non_linear_evaluator.parameters(), lr=1e-3)
+        self.optimizer = torch.optim.Adam(
+            pl_module.non_linear_evaluator.parameters(), lr=1e-4
+        )
 
     def get_representations(self, pl_module, x):
-        """
-        Override this to customize for the particular model
-
-        Args:
-            pl_module:
-            x:
-        """
-        if len(x) == 2 and isinstance(x, list):
-            x = x[0]
-
         representations = pl_module(x)
         representations = representations.reshape(representations.size(0), -1)
         return representations
 
     def to_device(self, batch, device):
-        x, y = batch
+        # get the labeled batch
+        if self.dataset == 'stl10':
+            labeled_batch = batch[1]
+            batch = labeled_batch
+
+        inputs, y = batch
+
+        # last input is for online eval
+        x = inputs[-1]
         x = x.to(device)
         y = y.to(device)
 
         return x, y
 
-    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
+    def on_train_batch_end(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
         x, y = self.to_device(batch, pl_module.device)
 
         with torch.no_grad():
             representations = self.get_representations(pl_module, x)
+
+        representations = representations.detach()
 
         # forward pass
         mlp_preds = pl_module.non_linear_evaluator(representations)
@@ -94,13 +100,27 @@ class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
         self.optimizer.zero_grad()
 
         # log metrics
-        if trainer.datamodule is not None:
-            acc = accuracy(mlp_preds, y, num_classes=trainer.datamodule.num_classes)
-        else:
-            acc = accuracy(mlp_preds, y)
+        acc = self.train_acc(mlp_preds, y)
+        self.log('train_acc_step', acc, prog_bar=True)
+        self.log('train_acc_epoch', self.train_acc)
+        pl_module.log('train_mlp_loss', mlp_loss)
 
-        metrics = {'ft_callback_mlp_loss': mlp_loss, 'ft_callback_mlp_acc': acc}
-        pl_module.logger.log_metrics(metrics, step=trainer.global_step)
+    def on_validation_batch_end(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+        x, y = self.to_device(batch, pl_module.device)
+
+        with torch.no_grad():
+            representations = self.get_representations(pl_module, x)
+
+        representations = representations.detach()
+
+        # forward pass
+        mlp_preds = pl_module.non_linear_evaluator(representations)
+        mlp_loss = F.cross_entropy(mlp_preds, y)
+
+        # log metrics
+        self.val_acc(mlp_preds, y)
+        pl_module.log('val_acc', self.val_acc)
+        pl_module.log('val_mlp_loss', mlp_loss)
 
 
 class BYOLMAWeightUpdate(pl.Callback):

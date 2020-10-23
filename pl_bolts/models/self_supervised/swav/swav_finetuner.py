@@ -16,12 +16,24 @@ def cli_main():  # pragma: no-cover
 
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
-    parser.add_argument('--dataset', type=str, help='cifar10', default='stl10')
+    parser.add_argument('--dataset', type=str, help='cifar10, imagenet', default='stl10')
     parser.add_argument('--ckpt_path', type=str, help='path to ckpt')
     parser.add_argument('--data_path', type=str, help='path to ckpt', default=os.getcwd())
 
-    parser.add_argument("--batch_size", default=128, type=int, help="batch size per gpu")
-    parser.add_argument("--num_workers", default=16, type=int, help="num of workers per GPU")
+    parser.add_argument("--batch_size", default=64, type=int, help="batch size per gpu")
+    parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
+    parser.add_argument("--gpus", default=4, type=int, help="number of GPUs")
+
+    # fine-tuner params
+    parser.add_argument('--in_features', type=int, default=2048)
+    parser.add_argument('--dropout', type=float, default=0.)
+    parser.add_argument('--learning_rate', type=float, default=0.3)
+    parser.add_argument('--weight_decay', type=float, default=1e-6)
+    parser.add_argument('--nesterov', type=bool, default=False)
+    parser.add_argument('--scheduler_type', type=str, default='cosine')
+    parser.add_argument('--gamma', type=float, default=0.1)
+    parser.add_argument('--final_lr', type=float, default=0.)
+
     args = parser.parse_args()
 
     if args.dataset == 'stl10':
@@ -47,6 +59,7 @@ def cli_main():  # pragma: no-cover
         )
 
         args.maxpool1 = False
+        args.first_conv = True
     elif args.dataset == 'imagenet':
         dm = ImagenetDataModule(
             data_dir=args.data_path,
@@ -65,8 +78,15 @@ def cli_main():  # pragma: no-cover
             eval_transform=True
         )
 
-        args.num_samples = 0
+        dm.test_transforms = SwAVFinetuneTransform(
+            normalize=imagenet_normalization(),
+            input_height=dm.size()[-1],
+            eval_transform=True
+        )
+
+        args.num_samples = 1
         args.maxpool1 = True
+        args.first_conv = True
     else:
         raise NotImplementedError("other datasets have not been implemented till now")
 
@@ -75,15 +95,30 @@ def cli_main():  # pragma: no-cover
         num_samples=args.num_samples,
         batch_size=args.batch_size,
         datamodule=dm,
-        maxpool1=args.maxpool1
+        maxpool1=args.maxpool1,
+        first_conv=args.first_conv,
     ).load_from_checkpoint(args.ckpt_path, strict=False)
 
-    tuner = SSLFineTuner(backbone, in_features=2048, num_classes=dm.num_classes, hidden_dim=None)
+    tuner = SSLFineTuner(
+        backbone,
+        in_features=args.in_features,
+        num_classes=dm.num_classes,
+        hidden_dim=None,
+        dropout=args.dropout,
+        learning_rate=args.learning_rate,
+        weight_decay=args.weight_decay,
+        nesterov=args.nesterov,
+        scheduler_type=args.scheduler_type,
+        decay_epochs=args.decay_epochs,
+        gamma=args.gamma,
+        final_lr=args.final_lr
+    )
+
     trainer = pl.Trainer.from_argparse_args(
         args, gpus=args.gpus, precision=16, early_stop_callback=True
     )
-    trainer.fit(tuner, dm)
 
+    trainer.fit(tuner, dm)
     trainer.test(datamodule=dm)
 
 
