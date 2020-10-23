@@ -14,17 +14,14 @@ from torch import nn
 
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
 
-"""
 try:
-    
+    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule, CIFAR10DataModule
 except ImportError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
     _TORCHVISION_AVAILABLE = False
 else:
     _TORCHVISION_AVAILABLE = True
-"""
-from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule, CIFAR10DataModule
 
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization, cifar10_normalization
 from pl_bolts.models.self_supervised.swav.transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
@@ -562,6 +559,7 @@ def cli_main():
         max_epochs=args.max_epochs,
         max_steps=None if args.max_steps == -1 else args.max_steps,
         gpus=args.gpus,
+        distributed_backend='ddp',
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=32 if args.fp32 else 16,
         callbacks=[online_evaluator] if args.online_ft else None,
