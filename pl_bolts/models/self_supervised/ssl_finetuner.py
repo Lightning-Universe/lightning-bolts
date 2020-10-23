@@ -45,6 +45,7 @@ class SSLFineTuner(pl.LightningModule):
         backbone: torch.nn.Module,
         in_features: int = 2048,
         num_classes: int = 1000,
+        epochs: int = 100,
         hidden_dim: Optional[int] = None,
         dropout: float = 0.,
         learning_rate: float = 0.1,

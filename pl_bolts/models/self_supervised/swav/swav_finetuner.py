@@ -32,7 +32,6 @@ def cli_main():  # pragma: no-cover
     parser.add_argument('--weight_decay', type=float, default=1e-6)
     parser.add_argument('--nesterov', type=bool, default=False)
     parser.add_argument('--scheduler_type', type=str, default='cosine')
-    parser.add_argument('--decay_epochs', type=list, default=[60, 80])
     parser.add_argument('--gamma', type=float, default=0.1)
     parser.add_argument('--final_lr', type=float, default=0.)
 
@@ -106,13 +105,13 @@ def cli_main():  # pragma: no-cover
         backbone,
         in_features=args.in_features,
         num_classes=dm.num_classes,
+        epochs=args.num_epochs,
         hidden_dim=None,
         dropout=args.dropout,
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
         nesterov=args.nesterov,
         scheduler_type=args.scheduler_type,
-        decay_epochs=args.decay_epochs,
         gamma=args.gamma,
         final_lr=args.final_lr
     )
