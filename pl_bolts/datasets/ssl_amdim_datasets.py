@@ -5,12 +5,6 @@ from warnings import warn
 import numpy as np
 
 try:
-    from sklearn.utils import shuffle
-except ModuleNotFoundError:
-    warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install sklearn`.')
-
-try:
     from torchvision.datasets import CIFAR10
 except ModuleNotFoundError:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
@@ -81,9 +75,11 @@ class SSLDatasetMixin(ABC):
 
     @classmethod
     def deterministic_shuffle(cls, x, y):
+
         n = len(x)
         idxs = list(range(0, n))
-        idxs = shuffle(idxs, random_state=1234)
+        np.random.seed(1234)
+        np.random.shuffle(idxs)
 
         x = x[idxs]
 

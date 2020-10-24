@@ -1,19 +1,17 @@
-import math
 from typing import Optional
 
-import pytorch_lightning as pl
 import torch
 from pytorch_lightning.metrics import Accuracy
 from torch.nn import functional as F
 
+from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 
-class SSLOnlineEvaluator(pl.Callback):  # pragma: no-cover
+
+class SSLOnlineEvaluator(Callback):  # pragma: no-cover
     """
-    Attaches a MLP for finetuning using the standard self-supervised protocol.
+    Attaches a MLP for fine-tuning using the standard self-supervised protocol.
 
     Example::
-
-        from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
 
         # your model must have 2 attributes
         model = Model()

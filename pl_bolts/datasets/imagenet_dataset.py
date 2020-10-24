@@ -6,16 +6,10 @@ import tarfile
 import tempfile
 import zipfile
 from contextlib import contextmanager
-from warnings import warn
 
+import numpy as np
 import torch
 from torch._six import PY3
-
-try:
-    from sklearn.utils import shuffle
-except ModuleNotFoundError:
-    warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install sklearn`.')
 
 try:
     from torchvision.datasets import ImageNet
@@ -73,7 +67,8 @@ class UnlabeledImagenet(ImageNet):
         self.root = root
 
         # shuffle images first
-        self.imgs = shuffle(self.imgs, random_state=1234)
+        np.random.seed(1234)
+        np.random.shuffle(self.imgs)
 
         # partition train set into [train, val]
         if split == 'train':
@@ -98,7 +93,9 @@ class UnlabeledImagenet(ImageNet):
         # limit the number of classes
         if num_classes != -1:
             # choose the classes at random (but deterministic)
-            ok_classes = shuffle(list(range(num_classes)), random_state=1234)
+            ok_classes = list(range(num_classes))
+            np.random.seed(1234)
+            np.random.shuffle(ok_classes)
             ok_classes = ok_classes[:num_classes]
             ok_classes = set(ok_classes)
 
@@ -110,7 +107,8 @@ class UnlabeledImagenet(ImageNet):
             self.imgs = clean_imgs
 
         # shuffle again for final exit
-        self.imgs = shuffle(self.imgs, random_state=1234)
+        np.random.seed(1234)
+        np.random.shuffle(self.imgs)
 
         # list of class_nbs for each image
         idcs = [idx for _, idx in self.imgs]

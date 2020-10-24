@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from pytorch_lightning import seed_everything
 from torch.optim import Adam
 
-from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
+from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
 from pl_bolts.models.self_supervised.byol.models import SiameseArm
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
@@ -35,16 +35,8 @@ class BYOL(pl.LightningModule):
 
     Example::
 
-        import pytorch_lightning as pl
-        from pl_bolts.models.self_supervised import BYOL
-        from pl_bolts.datamodules import CIFAR10DataModule
-        from pl_bolts.models.self_supervised.simclr.transforms import (
-            SimCLREvalDataTransform, SimCLRTrainDataTransform)
-
-        # model
         model = BYOL(num_classes=10)
 
-        # data
         dm = CIFAR10DataModule(num_workers=0)
         dm.train_transforms = SimCLRTrainDataTransform(32)
         dm.val_transforms = SimCLREvalDataTransform(32)
@@ -184,7 +176,7 @@ class BYOL(pl.LightningModule):
 
 
 def cli_main():
-    from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
+    from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
     from pl_bolts.models.self_supervised.simclr import SimCLRTrainDataTransform, SimCLREvalDataTransform
 

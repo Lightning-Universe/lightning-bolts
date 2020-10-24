@@ -3,14 +3,14 @@ import pytorch_lightning as pl
 import torch
 from pytorch_lightning import seed_everything
 
-from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
-from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
+from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.models.self_supervised import CPCV2, AMDIM, MocoV2, SimCLR, BYOL, SwAV
 from pl_bolts.models.self_supervised.cpc import CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10
 from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
 from pl_bolts.models.self_supervised.moco.transforms import (Moco2TrainCIFAR10Transforms, Moco2EvalCIFAR10Transforms)
 from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from pl_bolts.models.self_supervised.swav.transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
+from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 
 
 # TODO: this test is hanging (runs for more then 10min) so we need to use GPU or optimize it...
