@@ -29,7 +29,8 @@ class KittiDataModule(LightningDataModule):
 
         Note:
             You need to have downloaded the Kitti dataset first and provide the path to where it is saved.
-            You can download the dataset here: http://www.cvlibs.net/datasets/kitti/eval_semseg.php?benchmark=semantics2015
+            You can download the dataset here:
+            http://www.cvlibs.net/datasets/kitti/eval_semseg.php?benchmark=semantics2015
 
         Specs:
             - 200 samples
