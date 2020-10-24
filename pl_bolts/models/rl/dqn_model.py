@@ -374,7 +374,8 @@ class DQN(pl.LightningModule):
         """
         Adds arguments for DQN model
 
-        Note: these params are fine tuned for Pong env
+        Note:
+            These params are fine tuned for Pong env.
 
         Args:
             arg_parser: parent parser

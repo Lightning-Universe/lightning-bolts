@@ -10,7 +10,8 @@ DEFAULT_VALID_LABELS = (7, 8, 11, 12, 13, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27
 
 class KittiDataset(Dataset):
     """
-    Note: You need to have downloaded the Kitti dataset first and provide the path to where it is saved.
+    Note:
+        You need to have downloaded the Kitti dataset first and provide the path to where it is saved.
     You can download the dataset here: http://www.cvlibs.net/datasets/kitti/eval_semseg.php?benchmark=semantics2015
 
     There are 34 classes, however not all of them are useful for training (e.g. railings on highways). These
