@@ -12,7 +12,7 @@ class KittiDataset(Dataset):
     """
     Note:
         You need to have downloaded the Kitti dataset first and provide the path to where it is saved.
-    You can download the dataset here: http://www.cvlibs.net/datasets/kitti/eval_semseg.php?benchmark=semantics2015
+        You can download the dataset here: http://www.cvlibs.net/datasets/kitti/eval_semseg.php?benchmark=semantics2015
 
     There are 34 classes, however not all of them are useful for training (e.g. railings on highways). These
     useless classes (the pixel values of these classes) are stored in `void_labels`. Useful classes are stored
