@@ -20,7 +20,7 @@ class UNet(nn.Module):
         input_channels: Number of channels in input images (default 3)
         num_layers: Number of layers in each side of U-net (default 5)
         features_start: Number of features in first layer (default 64)
-        bilinear (bool): Whether to use bilinear interpolation or transposed convolutions (default) for upsampling.
+        bilinear: Whether to use bilinear interpolation or transposed convolutions (default) for upsampling.
     """
     def __init__(
             self,
