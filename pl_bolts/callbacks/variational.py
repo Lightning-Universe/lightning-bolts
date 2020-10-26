@@ -25,7 +25,9 @@ class LatentDimInterpolator(Callback):
         Trainer(callbacks=[LatentDimInterpolator()])
     """
 
-    def __init__(self, interpolate_epoch_interval: int = 20, range_start: int = -5, range_end: int = 5, num_samples: int = 2):
+    def __init__(
+        self, interpolate_epoch_interval: int = 20, range_start: int = -5, range_end: int = 5, num_samples: int = 2
+    ):
         """
         Args:
             interpolate_epoch_interval: default 20
