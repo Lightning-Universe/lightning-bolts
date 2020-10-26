@@ -24,10 +24,10 @@ class LatentDimInterpolator(Callback):
         Trainer(callbacks=[LatentDimInterpolator()])
     """
 
-    def __init__(self, interpolate_epoch_interval=20, range_start=-5, range_end=5, num_samples=2):
+    def __init__(self, interpolate_epoch_interval: int = 20, range_start: int = -5, range_end: int = 5, num_samples: int = 2):
         """
         Args:
-            interpolate_epoch_interval:
+            interpolate_epoch_interval: default 20
             range_start: default -5
             range_end: default 5
             num_samples: default 2

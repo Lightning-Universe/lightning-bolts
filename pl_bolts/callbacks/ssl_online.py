@@ -1,8 +1,8 @@
-from typing import Optional
+from typing import List, Optional, Union
 
-import torch
-from pytorch_lightning import Callback
+from pytorch_lightning import Callback, LightningModule
 from pytorch_lightning.metrics.functional import accuracy
+import torch
 from torch.nn import functional as F
 
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
@@ -29,8 +29,10 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
     ):
         """
         Args:
-            drop_p: dropout probability
-            hidden_dim: the hidden dimension for the fine-tune MLP
+            drop_p: Dropout probability
+            hidden_dim: Hidden dimension for the fine-tune MLP
+            z_dim: Representation dimension
+            num_classes: Number of classes
         """
         super().__init__()
         self.hidden_dim = hidden_dim
@@ -53,13 +55,13 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
 
         self.optimizer = torch.optim.SGD(pl_module.non_linear_evaluator.parameters(), lr=1e-3)
 
-    def get_representations(self, pl_module, x):
+    def get_representations(self, pl_module: LightningModule, x: Union[torch.Tensor, List[torch.Tensor]]):
         """
         Override this to customize for the particular model
 
         Args:
-            pl_module:
-            x:
+            pl_module: Model to get representations from
+            x: Input to feed into ``pl_module``
         """
         if len(x) == 2 and isinstance(x, list):
             x = x[0]
