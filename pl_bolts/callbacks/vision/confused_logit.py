@@ -23,9 +23,9 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
         trainer = Trainer(callbacks=[ConfusedLogitCallback()])
 
 
-    .. note:: whenever called, this model will look for self.last_batch and self.last_logits in the LightningModule
+    .. note:: Whenever called, this model will look for ``self.last_batch`` and ``self.last_logits`` in the LightningModule.
 
-    .. note:: this callback supports tensorboard only right now
+    .. note:: This callback supports tensorboard only right now.
 
     Authored by:
 
@@ -34,19 +34,19 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
 
     def __init__(
             self,
-            top_k,
-            projection_factor=3,
-            min_logit_value=5.0,
-            logging_batch_interval=20,
-            max_logit_difference=0.1
+            top_k: int,
+            projection_factor: int = 3,
+            min_logit_value: float = 5.0,
+            logging_batch_interval: int = 20,
+            max_logit_difference: float = 0.1
     ):
         """
         Args:
             top_k: How many "offending" images we should plot
             projection_factor: How much to multiply the input image to make it look more like this logit label
             min_logit_value: Only consider logit values above this threshold
-            logging_batch_interval: how frequently to inspect/potentially plot something
-            max_logit_difference: when the top 2 logits are within this threshold we consider them confused
+            logging_batch_interval: How frequently to inspect/potentially plot something
+            max_logit_difference: When the top 2 logits are within this threshold we consider them confused
         """
         super().__init__()
         self.top_k = top_k
