@@ -1,3 +1,4 @@
+import math
 from warnings import warn
 
 import torch
@@ -39,8 +40,6 @@ class LatentDimInterpolator(Callback):
         self.num_samples = num_samples
 
     def on_epoch_end(self, trainer, pl_module):
-        import math
-
         if (trainer.current_epoch + 1) % self.interpolate_epoch_interval == 0:
             images = self.interpolate_latent_space(pl_module, latent_dim=pl_module.hparams.latent_dim)
             images = torch.cat(images, dim=0)
