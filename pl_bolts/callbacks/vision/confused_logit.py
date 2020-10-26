@@ -23,7 +23,8 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
         trainer = Trainer(callbacks=[ConfusedLogitCallback()])
 
 
-    .. note:: Whenever called, this model will look for ``self.last_batch`` and ``self.last_logits`` in the LightningModule.
+    .. note:: Whenever called, this model will look for ``self.last_batch`` and ``self.last_logits``
+              in the LightningModule.
 
     .. note:: This callback supports tensorboard only right now.
 
