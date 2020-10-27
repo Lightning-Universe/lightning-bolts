@@ -52,7 +52,7 @@ class LARSWrapper(object):
         self.optim.param_groups = value
 
     @torch.no_grad()
-    def step(self):
+    def step(self, closure):
         weight_decays = []
 
         for group in self.optim.param_groups:
@@ -66,7 +66,7 @@ class LARSWrapper(object):
             [self.update_p(p, group, weight_decay) for p in group['params'] if p.grad is not None]
 
         # update the optimizer
-        self.optim.step()
+        self.optim.step(closure=closure)
 
         # return weight decay control to optimizer
         for group_idx, group in enumerate(self.optim.param_groups):
