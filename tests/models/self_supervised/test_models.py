@@ -89,9 +89,9 @@ def test_simclr(tmpdir):
 
 
 def test_swav(tmpdir):
-    seed_everything(42)
+    seed_everything()
 
-    batch_size = 2
+    batch_size = 8
 
     # inputs, y = batch  (doesn't receive y for some reason)
     datamodule = CIFAR10DataModule(
@@ -120,8 +120,8 @@ def test_swav(tmpdir):
         num_samples=datamodule.num_samples,
         batch_size=batch_size,
         nmb_crops=[2, 1],
-        sinkhorn_iterations=1,
-        nmb_prototypes=2,
+        sinkhorn_iterations=3,
+        nmb_prototypes=3,
         maxpool1=False,
         first_conv=False,
         dataset='cifar10'

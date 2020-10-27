@@ -247,35 +247,6 @@ Fine-tuning:
 
 |
 
-ImageNet pretrained model::
-
-    from pl_bolts.models.self_supervised import CPCV2
-
-    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpcv2_weights/checkpoints/epoch%3D526.ckpt'
-    cpc_v2 = CPCV2.load_from_checkpoint(weight_path, strict=False)
-
-    cpc_v2.freeze()
-
-|
-
-- `Tensorboard for ImageNet <https://tensorboard.dev/experiment/7li8AqcnQdigDA33LzfDMA/#scalars>`_
-
-Pre-training:
-
-.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpcv2_weights/cpc-imagenet-val.png
-    :width: 400
-    :alt: pretraining validation loss
-
-|
-
-Fine-tuning:
-
-.. figure:: https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpcv2_weights/online-finetuning-cpc-imagenet.png
-    :width: 400
-    :alt: online finetuning accuracy
-
-|
-
 CPCV2 API
 *********
 
