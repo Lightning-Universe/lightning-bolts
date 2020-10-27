@@ -103,13 +103,13 @@ def test_swav(tmpdir):
     datamodule.train_transforms = SwAVTrainDataTransform(
         normalize=cifar10_normalization(),
         size_crops=[32, 16],
-        nmb_crops=[2, 1],
+        nmb_crops=[2, 2],
         gaussian_blur=False
     )
     datamodule.val_transforms = SwAVEvalDataTransform(
         normalize=cifar10_normalization(),
         size_crops=[32, 16],
-        nmb_crops=[2, 1],
+        nmb_crops=[2, 2],
         gaussian_blur=False
     )
 
@@ -119,9 +119,9 @@ def test_swav(tmpdir):
         gpus=0,
         num_samples=datamodule.num_samples,
         batch_size=batch_size,
-        nmb_crops=[2, 1],
-        sinkhorn_iterations=3,
-        nmb_prototypes=3,
+        nmb_crops=[2, 2],
+        sinkhorn_iterations=1,
+        nmb_prototypes=4,
         maxpool1=False,
         first_conv=False,
         dataset='cifar10'
