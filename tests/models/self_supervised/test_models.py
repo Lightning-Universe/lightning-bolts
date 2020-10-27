@@ -91,7 +91,7 @@ def test_simclr(tmpdir):
 def test_swav(tmpdir):
     seed_everything()
 
-    batch_size = 8
+    batch_size = 2
 
     # inputs, y = batch  (doesn't receive y for some reason)
     datamodule = CIFAR10DataModule(
@@ -103,13 +103,13 @@ def test_swav(tmpdir):
     datamodule.train_transforms = SwAVTrainDataTransform(
         normalize=cifar10_normalization(),
         size_crops=[32, 16],
-        nmb_crops=[2, 2],
+        nmb_crops=[2, 1],
         gaussian_blur=False
     )
     datamodule.val_transforms = SwAVEvalDataTransform(
         normalize=cifar10_normalization(),
         size_crops=[32, 16],
-        nmb_crops=[2, 2],
+        nmb_crops=[2, 1],
         gaussian_blur=False
     )
 
@@ -119,9 +119,9 @@ def test_swav(tmpdir):
         gpus=0,
         num_samples=datamodule.num_samples,
         batch_size=batch_size,
-        nmb_crops=[2, 2],
+        nmb_crops=[2, 1],
         sinkhorn_iterations=1,
-        nmb_prototypes=4,
+        nmb_prototypes=2,
         maxpool1=False,
         first_conv=False,
         dataset='cifar10'
@@ -130,7 +130,6 @@ def test_swav(tmpdir):
     trainer = pl.Trainer(
         gpus=0, fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=3
     )
-    trainer.fit(model, datamodule)
-    loss = trainer.progress_bar_dict['loss']
 
-    assert float(loss) > 0
+    results = trainer.fit(model, datamodule)
+    assert results == 1
