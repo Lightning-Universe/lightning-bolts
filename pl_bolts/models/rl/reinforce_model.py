@@ -275,7 +275,8 @@ class Reinforce(pl.LightningModule):
         """
         Adds arguments for DQN model
 
-        Note: these params are fine tuned for Pong env
+        Note:
+            These params are fine tuned for Pong env.
 
         Args:
             arg_parser: the current argument parser to add to

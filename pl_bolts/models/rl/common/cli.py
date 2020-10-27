@@ -7,7 +7,8 @@ def add_base_args(parent) -> argparse.ArgumentParser:
     """
     Adds arguments for DQN model
 
-    Note: these params are fine tuned for Pong env
+    Note:
+        These params are fine tuned for Pong env.
 
     Args:
         parent
