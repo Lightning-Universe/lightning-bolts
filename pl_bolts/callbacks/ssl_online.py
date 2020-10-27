@@ -1,7 +1,7 @@
 from typing import Optional
 
 import torch
-from pytorch_lightning.metrics import Accuracy
+from pytorch_lightning.metrics.functional import accuracy
 from torch.nn import functional as F
 
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
@@ -53,10 +53,6 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
             n_hidden=self.hidden_dim,
         ).to(pl_module.device)
 
-        # callbacks aren't nn.Modules
-        pl_module.non_linear_evaluator.train_acc = Accuracy(dist_sync_on_step=False)
-        pl_module.non_linear_evaluator.val_acc = Accuracy(compute_on_step=False)
-
         self.optimizer = torch.optim.Adam(
             pl_module.non_linear_evaluator.parameters(), lr=1e-4
         )
@@ -99,10 +95,9 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
         self.optimizer.zero_grad()
 
         # log metrics
-        acc = pl_module.non_linear_evaluator.train_acc(mlp_preds, y)
-        self.log('train_acc_step', acc, prog_bar=True)
-        self.log('train_acc_epoch', pl_module.non_linear_evaluator.train_acc)
-        pl_module.log('train_mlp_loss', mlp_loss)
+        train_acc = accuracy(mlp_preds, y)
+        pl_module.log('train_acc', train_acc, on_step=True, on_epoch=False)
+        pl_module.log('train_mlp_loss', mlp_loss, on_step=True, on_epoch=False)
 
     def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         x, y = self.to_device(batch, pl_module.device)
@@ -117,64 +112,6 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
         mlp_loss = F.cross_entropy(mlp_preds, y)
 
         # log metrics
-        pl_module.non_linear_evaluator.val_acc(mlp_preds, y)
-        pl_module.log('val_acc', pl_module.non_linear_evaluator.val_acc)
-        pl_module.log('val_mlp_loss', mlp_loss)
-
-
-class BYOLMAWeightUpdate(pl.Callback):
-    """
-    Weight update rule from BYOL.
-
-    Your model should have a:
-
-        - self.online_network.
-        - self.target_network.
-
-    Updates the target_network params using an exponential moving average update rule weighted by tau.
-    BYOL claims this keeps the online_network from collapsing.
-
-    .. note:: Automatically increases tau from `initial_tau` to 1.0 with every training step
-
-    Example::
-
-        from pl_bolts.callbacks.self_supervised import BYOLMAWeightUpdate
-
-        # model must have 2 attributes
-        model = Model()
-        model.online_network = ...
-        model.target_network = ...
-
-        trainer = Trainer(callbacks=[BYOLMAWeightUpdate()])
-    """
-
-    def __init__(self, initial_tau=0.996):
-        """
-        Args:
-            initial_tau: starting tau. Auto-updates with every training step
-        """
-        super().__init__()
-        self.initial_tau = initial_tau
-        self.current_tau = initial_tau
-
-    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
-        # get networks
-        online_net = pl_module.online_network
-        target_net = pl_module.target_network
-
-        # update weights
-        self.update_weights(online_net, target_net)
-
-        # update tau after
-        self.current_tau = self.update_tau(pl_module, trainer)
-
-    def update_tau(self, pl_module, trainer):
-        max_steps = len(trainer.train_dataloader) * trainer.max_epochs
-        tau = 1 - (1 - self.initial_tau) * (math.cos(math.pi * pl_module.global_step / max_steps) + 1) / 2
-        return tau
-
-    def update_weights(self, online_net, target_net):
-        # apply MA weight update
-        for (name, online_p), (_, target_p) in zip(online_net.named_parameters(), target_net.named_parameters()):
-            if 'weight' in name:
-                target_p.data = self.current_tau * target_p.data + (1 - self.current_tau) * online_p.data
+        val_acc = accuracy(mlp_preds, y)
+        pl_module.log('val_acc', val_acc, on_step=False, on_epoch=True, sync_dist=True)
+        pl_module.log('val_mlp_loss', mlp_loss, on_step=False, on_epoch=True, sync_dist=True)
