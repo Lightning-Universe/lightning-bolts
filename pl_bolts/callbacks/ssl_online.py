@@ -5,7 +5,6 @@ from pytorch_lightning.metrics.functional import accuracy
 from torch.nn import functional as F
 
 from pytorch_lightning import Callback
-from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 
 
 class SSLOnlineEvaluator(Callback):  # pragma: no-cover
