@@ -14,18 +14,7 @@ from torch import nn
 
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
 
-try:
-    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule, CIFAR10DataModule
-except ImportError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
-
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization, cifar10_normalization
-from pl_bolts.models.self_supervised.swav.transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
-from pl_bolts.callbacks.self_supervised import SSLOnlineEvaluator
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 
 
@@ -477,6 +466,10 @@ class SwAV(pl.LightningModule):
 
 
 def cli_main():
+    from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
+    from pl_bolts.models.self_supervised.swav.transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
+    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule, CIFAR10DataModule
+
     parser = ArgumentParser()
 
     # model args
