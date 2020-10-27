@@ -15,7 +15,7 @@ def cli_main():  # pragma: no-cover
     pl.seed_everything(1234)
 
     parser = ArgumentParser()
-    parser.add_argument('--dataset', type=str, help='cifar10, imagenet', default='stl10')
+    parser.add_argument('--dataset', type=str, help='stl10, imagenet', default='stl10')
     parser.add_argument('--ckpt_path', type=str, help='path to ckpt')
     parser.add_argument('--data_path', type=str, help='path to ckpt', default=os.getcwd())
 
