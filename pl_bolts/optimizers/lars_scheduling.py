@@ -52,7 +52,7 @@ class LARSWrapper(object):
         self.optim.param_groups = value
 
     @torch.no_grad()
-    def step(self, closure):
+    def step(self, closure=None):
         weight_decays = []
 
         for group in self.optim.param_groups:
