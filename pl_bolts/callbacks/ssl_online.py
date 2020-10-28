@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional, Union
 
 import torch
 from pytorch_lightning.metrics.functional import accuracy
@@ -33,6 +33,13 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
         num_classes: int = None,
         dataset: str = 'stl10'
     ):
+        """
+        Args:
+            drop_p: Dropout probability
+            hidden_dim: Hidden dimension for the fine-tune MLP
+            z_dim: Representation dimension
+            num_classes: Number of classes
+        """
         super().__init__()
 
         self.hidden_dim = hidden_dim

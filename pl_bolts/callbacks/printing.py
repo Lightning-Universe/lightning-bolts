@@ -16,7 +16,7 @@ class PrintTableMetricsCallback(Callback):
 
         callback = PrintTableMetricsCallback()
 
-    pass into trainer like so:
+    Pass into trainer like so:
 
     .. code-block:: python
 

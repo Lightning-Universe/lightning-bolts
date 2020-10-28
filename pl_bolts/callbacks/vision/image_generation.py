@@ -13,7 +13,7 @@ except ModuleNotFoundError:
 class TensorboardGenerativeModelImageSampler(Callback):
     """
     Generates images and logs to tensorboard.
-    Your model must implement the forward function for generation
+    Your model must implement the ``forward`` function for generation
 
     Requirements::
 
