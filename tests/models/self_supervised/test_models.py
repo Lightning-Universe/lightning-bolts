@@ -89,7 +89,7 @@ def test_simclr(tmpdir):
 
 
 def test_swav(tmpdir):
-    seed_everything(42)
+    seed_everything()
 
     batch_size = 2
 
@@ -130,7 +130,6 @@ def test_swav(tmpdir):
     trainer = pl.Trainer(
         gpus=0, fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=3
     )
-    trainer.fit(model, datamodule)
-    loss = trainer.progress_bar_dict['loss']
 
-    assert float(loss) > 0
+    results = trainer.fit(model, datamodule)
+    assert results == 1
