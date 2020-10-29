@@ -163,9 +163,9 @@ html_theme_options = {
     'logo_only': False,
 }
 
-html_logo = '_images/logos/lightning_logo-name.svg'
+html_logo = '_images/logos/bolts_logo.png'
 
-html_favicon = '_images/logos/lightning_icon.svg'
+html_favicon = '_images/logos/lightning_icon.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
