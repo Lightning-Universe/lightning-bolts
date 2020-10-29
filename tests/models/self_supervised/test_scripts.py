@@ -1,4 +1,3 @@
-from tests.conftest import data_dir
 from unittest import mock
 
 import pytest
