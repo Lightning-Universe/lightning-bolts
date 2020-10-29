@@ -12,7 +12,7 @@ from pl_bolts.models.gans import GAN
 def test_gan(tmpdir, dm_cls):
     seed_everything()
 
-    dm = dm_cls()
+    dm = dm_cls(tmpdir)
     model = GAN(*dm.size())
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, dm)

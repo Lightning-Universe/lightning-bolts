@@ -4,7 +4,7 @@ from pl_bolts.callbacks import LatentDimInterpolator
 from pl_bolts.models.gans import GAN
 
 
-def test_latent_dim_interpolator(tmpdir):
+def test_latent_dim_interpolator():
 
     class FakeTrainer(object):
         def __init__(self):

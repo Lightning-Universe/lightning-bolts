@@ -6,7 +6,7 @@ from torch import nn
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
 
 
-def test_byol_ma_weight_update_callback(tmpdir):
+def test_byol_ma_weight_update_callback():
     a = nn.Linear(100, 10)
     b = deepcopy(a)
     a_original = deepcopy(a)

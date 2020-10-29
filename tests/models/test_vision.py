@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 
 def test_igpt(tmpdir):
     pl.seed_everything(0)
-    dm = MNISTDataModule(tmpdir, normalize=False)
+    dm = MNISTDataModule(data_dir=tmpdir, normalize=False)
     model = ImageGPT()
 
     trainer = pl.Trainer(
@@ -22,7 +22,7 @@ def test_igpt(tmpdir):
     trainer.test(datamodule=dm)
     assert trainer.callback_metrics["test_loss"] < 1.7
 
-    dm = FashionMNISTDataModule(tmpdir, num_workers=1)
+    dm = FashionMNISTDataModule(data_dir=tmpdir, num_workers=1)
     model = ImageGPT(classify=True)
     trainer = pl.Trainer(
         limit_train_batches=2,
@@ -33,7 +33,7 @@ def test_igpt(tmpdir):
     trainer.fit(model, datamodule=dm)
 
 
-def test_gpt2(tmpdir):
+def test_gpt2():
 
     seq_len = 17
     batch_size = 32
@@ -51,14 +51,14 @@ def test_gpt2(tmpdir):
     model(x)
 
 
-def test_unet(tmpdir):
+def test_unet():
     x = torch.rand(10, 3, 28, 28)
     model = UNet(num_classes=2)
     y = model(x)
     assert y.shape == torch.Size([10, 2, 28, 28])
 
 
-def test_semantic_segmentation(tmpdir):
+def test_semantic_segmentation():
 
     class DummyDataModule(pl.LightningDataModule):
         def train_dataloader(self):

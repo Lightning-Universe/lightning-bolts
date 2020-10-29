@@ -61,7 +61,7 @@ def test_amdim(tmpdir):
 def test_moco(tmpdir):
     seed_everything()
 
-    datamodule = CIFAR10DataModule(tmpdir, num_workers=0, batch_size=2)
+    datamodule = CIFAR10DataModule(data_dir=tmpdir, num_workers=0, batch_size=2)
     datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
     datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
 
@@ -76,7 +76,7 @@ def test_moco(tmpdir):
 def test_simclr(tmpdir):
     seed_everything()
 
-    datamodule = CIFAR10DataModule(tmpdir, num_workers=0, batch_size=2)
+    datamodule = CIFAR10DataModule(data_dir=tmpdir, num_workers=0, batch_size=2)
     datamodule.train_transforms = SimCLRTrainDataTransform(32)
     datamodule.val_transforms = SimCLREvalDataTransform(32)
 
