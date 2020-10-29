@@ -4,9 +4,12 @@ import pytest
 import torch
 
 
+data_dir = "./datasets"
+
+
 @pytest.mark.parametrize('cli_args', [
-    '--dataset mnist --max_epochs 1 --batch_size 2 --limit_train_batches 2 --limit_val_batches 2',
-    '--dataset cifar10 --max_epochs 1 --batch_size 2 --limit_train_batches 2 --limit_val_batches 2',
+    f'--dataset mnist --data_dir {data_dir} --max_epochs 1 --batch_size 2 --limit_train_batches 2 --limit_val_batches 2',
+    f'--dataset cifar10 --data_dir {data_dir} --max_epochs 1 --batch_size 2 --limit_train_batches 2 --limit_val_batches 2',
 ])
 def test_cli_run_basic_gan(cli_args):
     from pl_bolts.models.gans.basic.basic_gan_module import cli_main
@@ -18,7 +21,7 @@ def test_cli_run_basic_gan(cli_args):
 # TODO: this test is hanging (runs for more then 10min) so we need to use GPU or optimize it...
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
 @pytest.mark.parametrize('cli_args', [
-    '--max_epochs 1 --limit_train_batches 2 --limit_val_batches 2 --batch_size 2 --encoder resnet18',
+    f'--data_dir {data_dir} --max_epochs 1  --limit_train_batches 2 --limit_val_batches 2 --batch_size 2 --encoder resnet18',
 ])
 def test_cli_run_cpc(cli_args):
     from pl_bolts.models.self_supervised.cpc.cpc_module import cli_main
@@ -28,7 +31,7 @@ def test_cli_run_cpc(cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize('cli_args', ['--max_epochs 1 --max_steps 2'])
+@pytest.mark.parametrize('cli_args', [f'--data_dir {data_dir} --max_epochs 1 --max_steps 2'])
 def test_cli_run_mnist(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.mnist_module import cli_main
@@ -39,7 +42,7 @@ def test_cli_run_mnist(cli_args):
 
 
 @pytest.mark.parametrize('cli_args', [
-    '--dataset cifar10 --max_epochs 1 --batch_size 2 --fast_dev_run',
+    f'--dataset cifar10 --data_dir {data_dir} --max_epochs 1 --batch_size 2 --fast_dev_run',
 ])
 def test_cli_run_basic_ae(cli_args):
     """Test running CLI for an example with default params."""
@@ -51,7 +54,7 @@ def test_cli_run_basic_ae(cli_args):
 
 
 @pytest.mark.parametrize('cli_args', [
-    '--dataset cifar10 --max_epochs 1 --batch_size 2 --fast_dev_run',
+    f'--dataset cifar10 --data_dir {data_dir} --max_epochs 1 --batch_size 2 --fast_dev_run',
 ])
 def test_cli_run_basic_vae(cli_args):
     """Test running CLI for an example with default params."""
@@ -82,7 +85,7 @@ def test_cli_run_log_regression(cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize('cli_args', ['--max_epochs 1 --max_steps 2'])
+@pytest.mark.parametrize('cli_args', [f'--data_dir {data_dir} --max_epochs 1 --max_steps 2'])
 def test_cli_run_vision_image_gpt(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.vision.image_gpt.igpt_module import cli_main
