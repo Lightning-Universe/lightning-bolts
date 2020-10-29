@@ -4,10 +4,10 @@ from pytorch_lightning import seed_everything
 from pl_bolts.models import LitMNIST
 
 
-def test_mnist(tmpdir):
+def test_mnist(tmpdir, data_dir):
     seed_everything()
 
-    model = LitMNIST(data_dir=tmpdir, num_workers=0)
+    model = LitMNIST(data_dir=data_dir, num_workers=0)
     trainer = pl.Trainer(limit_train_batches=0.01, limit_val_batches=0.01, max_epochs=1,
                          limit_test_batches=0.01, default_root_dir=tmpdir)
     trainer.fit(model)

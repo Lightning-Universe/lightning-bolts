@@ -7,9 +7,9 @@ from pl_bolts.models import GPT2, ImageGPT, UNet, SemSegment
 from torch.utils.data import DataLoader
 
 
-def test_igpt(tmpdir):
+def test_igpt(data_dir):
     pl.seed_everything(0)
-    dm = MNISTDataModule(data_dir=tmpdir, normalize=False)
+    dm = MNISTDataModule(data_dir=data_dir, normalize=False)
     model = ImageGPT()
 
     trainer = pl.Trainer(
@@ -22,7 +22,7 @@ def test_igpt(tmpdir):
     trainer.test(datamodule=dm)
     assert trainer.callback_metrics["test_loss"] < 1.7
 
-    dm = FashionMNISTDataModule(data_dir=tmpdir, num_workers=1)
+    dm = FashionMNISTDataModule(data_dir=data_dir, num_workers=1)
     model = ImageGPT(classify=True)
     trainer = pl.Trainer(
         limit_train_batches=2,
@@ -34,7 +34,6 @@ def test_igpt(tmpdir):
 
 
 def test_gpt2():
-
     seq_len = 17
     batch_size = 32
     vocab_size = 16

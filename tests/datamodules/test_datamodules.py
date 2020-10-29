@@ -6,8 +6,9 @@ from pl_bolts.datasets.cifar10_dataset import CIFAR10
 from pl_bolts.datamodules import CityscapesDataModule
 
 
-def test_dev_datasets(tmpdir):
-    ds = CIFAR10(tmpdir)
+def test_dev_datasets(data_dir):
+
+    ds = CIFAR10(data_dir=data_dir)
     for b in ds:
         pass
 

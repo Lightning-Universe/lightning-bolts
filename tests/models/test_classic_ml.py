@@ -33,11 +33,11 @@ def test_linear_regression_model(tmpdir):
     trainer.test(model, loader)
 
 
-def test_logistic_regression_model(tmpdir):
+def test_logistic_regression_model(tmpdir, data_dir):
     pl.seed_everything(0)
 
     # create dataset
-    dm = MNISTDataModule(num_workers=0, data_dir=tmpdir)
+    dm = MNISTDataModule(num_workers=0, data_dir=data_dir)
 
     model = LogisticRegression(input_dim=28 * 28, num_classes=10, learning_rate=0.001)
     model.prepare_data = dm.prepare_data

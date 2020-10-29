@@ -10,10 +10,10 @@ from pl_bolts.models.autoencoders import resnet50_encoder
 
 
 @pytest.mark.parametrize("dm_cls", [pytest.param(CIFAR10DataModule, id="cifar10")])
-def test_vae(tmpdir, dm_cls):
+def test_vae(tmpdir, data_dir, dm_cls):
     seed_everything()
 
-    dm = dm_cls(data_dir=tmpdir, batch_size=4)
+    dm = dm_cls(data_dir=data_dir, batch_size=4)
     model = VAE(input_height=dm.size()[-1])
     trainer = pl.Trainer(
         fast_dev_run=True,
@@ -27,10 +27,10 @@ def test_vae(tmpdir, dm_cls):
 
 
 @pytest.mark.parametrize("dm_cls", [pytest.param(CIFAR10DataModule, id="cifar10")])
-def test_ae(tmpdir, dm_cls):
+def test_ae(tmpdir, data_dir, dm_cls):
     seed_everything()
 
-    dm = dm_cls(data_dir=tmpdir, batch_size=4)
+    dm = dm_cls(data_dir=data_dir, batch_size=4)
     model = AE(input_height=dm.size()[-1])
     trainer = pl.Trainer(
         fast_dev_run=True,
@@ -78,8 +78,8 @@ def test_decoder():
     assert out4.shape == (2, 3, 288, 288)
 
 
-def test_from_pretrained(tmpdir):
-    dm = CIFAR10DataModule(data_dir=tmpdir, batch_size=4)
+def test_from_pretrained(data_dir):
+    dm = CIFAR10DataModule(data_dir=data_dir, batch_size=4)
     dm.setup()
     dm.prepare_data()
 
