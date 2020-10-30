@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 import torch
 
-from tests.conftest improt DATA_DIR
+from tests.conftest import DATA_DIR
 
 
 @pytest.mark.parametrize('cli_args', [
