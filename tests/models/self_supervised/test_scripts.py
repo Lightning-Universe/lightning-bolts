@@ -3,12 +3,11 @@ from unittest import mock
 import pytest
 import torch
 
-
-data_dir = "./datasets"
+from tests.conftest improt DATA_DIR
 
 
 @pytest.mark.parametrize('cli_args', [
-    f"--data_dir {data_dir} --max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2"
+    f"--data_dir {DATA_DIR} --max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2"
 ])
 def test_cli_run_self_supervised_amdim(cli_args):
     """Test running CLI for an example with default params."""
@@ -22,7 +21,7 @@ def test_cli_run_self_supervised_amdim(cli_args):
 # TODO: this test is hanging (runs for more then 10min) so we need to use GPU or optimize it...
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
 @pytest.mark.parametrize('cli_args', [
-    f'--data_dir {data_dir} --max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2 --encoder resnet18'
+    f'--data_dir {DATA_DIR} --max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2 --encoder resnet18'
 ])
 def test_cli_run_self_supervised_cpc(cli_args):
     """Test running CLI for an example with default params."""
@@ -34,7 +33,7 @@ def test_cli_run_self_supervised_cpc(cli_args):
 
 
 @pytest.mark.parametrize('cli_args', [
-    f'--data_dir {data_dir} --max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2'
+    f'--data_dir {DATA_DIR} --max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2'
 ])
 def test_cli_run_self_supervised_moco(cli_args):
     """Test running CLI for an example with default params."""
@@ -46,7 +45,7 @@ def test_cli_run_self_supervised_moco(cli_args):
 
 
 @pytest.mark.parametrize('cli_args', [
-    f'--data_dir {data_dir} --max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2 --online_ft'
+    f'--data_dir {DATA_DIR} --max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2 --online_ft'
 ])
 def test_cli_run_self_supervised_simclr(cli_args):
     """Test running CLI for an example with default params."""
@@ -58,7 +57,7 @@ def test_cli_run_self_supervised_simclr(cli_args):
 
 
 @pytest.mark.parametrize('cli_args', [
-    f'--data_dir {data_dir} --max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2 --online_ft'
+    f'--data_dir {DATA_DIR} --max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2 --online_ft'
 ])
 def test_cli_run_self_supervised_byol(cli_args):
     """Test running CLI for an example with default params."""
@@ -71,7 +70,7 @@ def test_cli_run_self_supervised_byol(cli_args):
 
 @pytest.mark.parametrize(
     'cli_args', [
-        f'--dataset cifar10 --data_path {data_dir} --max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2'
+        f'--dataset cifar10 --data_path {DATA_DIR} --max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2'
         ' --gpus 0 --arch resnet18 --hidden_mlp 512 --fp32 --sinkhorn_iterations 1 --nmb_prototypes 2'
     ]
 )
