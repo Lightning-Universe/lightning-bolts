@@ -34,7 +34,7 @@ class DepthInvariantNeuralODE(pl.LightningModule):
         """
         Args:
             input_dim: size of input data
-            hidden_dim: size of hidden state 
+            hidden_dim: size of hidden state
             absolute_tol: absolute tolerance of the numerical solver
             relative_tol: relative tolerance of the numerical solver
             integration_span: mesh grid of evaluation points for the ODE
@@ -68,7 +68,7 @@ class DepthInvariantNeuralODE(pl.LightningModule):
 
     def forward(self, z):
         """
-        Solve the NeuralODE in its integration interval with `z0` as initial condition, 
+        Solve the NeuralODE in its integration interval with `z0` as initial condition,
         obtaining data features `zS` at final depth `S`
 
         Example::
