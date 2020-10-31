@@ -12,8 +12,9 @@ import torch
 import torch.distributed as dist
 from torch import nn
 
-from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
+from pytorch_lightning.utilities import AMPType
 
+from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization, cifar10_normalization
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 
@@ -325,11 +326,11 @@ class SwAV(pl.LightningModule):
         batch_idx,
         optimizer,
         optimizer_idx,
-        second_order_closure=None,
-        on_tpu=False,
-        using_native_amp=False,
-        using_lbfgs=False
-    ):
+        optimizer_closure,
+        on_tpu,
+        using_native_amp,
+        using_lbfgs,
+    ) -> None:
         # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
         # adjust LR of optim contained within LARSWrapper
         if self.lars_wrapper:
@@ -340,14 +341,23 @@ class SwAV(pl.LightningModule):
                 param_group["lr"] = self.lr_schedule[self.trainer.global_step]
 
         # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
-        learning_rate = {'learning_rate': self.lr_schedule[self.trainer.global_step]}
-        self.logger.log_metrics(learning_rate, step=self.trainer.global_step)
+        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
 
         # from lightning implementation
-        if using_native_amp:
+        if on_tpu:
+            xm.optimizer_step(optimizer, optimizer_args={'closure': optimizer_closure})
+        elif self.trainer.amp_backend == AMPType.NATIVE:
+            # native amp does not yet support closures.
+            # TODO: pass the closure to the step ASAP
+            optimizer_closure()
             self.trainer.scaler.step(optimizer)
-        else:
+        elif self.trainer.amp_backend == AMPType.APEX:
+            # apex amp does not yet support closures.
+            # TODO: pass the closure to the step ASAP
+            optimizer_closure()
             optimizer.step()
+        else:
+            optimizer.step(closure=optimizer_closure)
 
     def sinkhorn(self, Q, nmb_iters):
         with torch.no_grad():
