@@ -127,6 +127,7 @@ class VAE(pl.LightningModule):
 
         kl = log_qz - log_pz
         kl = kl.mean()
+        kl *= self.kl_coeff
 
         loss = kl + recon_loss
 
