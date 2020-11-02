@@ -349,13 +349,9 @@ class SwAV(pl.LightningModule):
         if on_tpu:
             xm.optimizer_step(optimizer, optimizer_args={'closure': optimizer_closure})
         elif self.trainer.amp_backend == AMPType.NATIVE:
-            # native amp does not yet support closures.
-            # TODO: pass the closure to the step ASAP
             optimizer_closure()
             self.trainer.scaler.step(optimizer)
         elif self.trainer.amp_backend == AMPType.APEX:
-            # apex amp does not yet support closures.
-            # TODO: pass the closure to the step ASAP
             optimizer_closure()
             optimizer.step()
         else:
