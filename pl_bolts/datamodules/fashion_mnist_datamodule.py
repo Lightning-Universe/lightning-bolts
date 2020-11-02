@@ -126,7 +126,7 @@ class FashionMNISTDataModule(LightningDataModule):
         """
         transforms = transforms or self.val_transforms or self._default_transforms()
 
-        dataset = FashionMNIST(self.data_dir, train=True, download=True, transform=transforms)
+        dataset = FashionMNIST(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
         _, dataset_val = random_split(
             dataset,

@@ -126,7 +126,7 @@ class MNISTDataModule(LightningDataModule):
             transforms: custom transforms
         """
         transforms = transforms or self.val_transforms or self._default_transforms()
-        dataset = MNIST(self.data_dir, train=True, download=True, transform=transforms)
+        dataset = MNIST(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
         _, dataset_val = random_split(
             dataset, [train_length - self.val_split, self.val_split], generator=torch.Generator().manual_seed(self.seed)

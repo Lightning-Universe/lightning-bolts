@@ -128,7 +128,7 @@ class BinaryMNISTDataModule(LightningDataModule):
             transforms: custom transforms
         """
         transforms = transforms or self.val_transforms or self._default_transforms()
-        dataset = BinaryMNIST(self.data_dir, train=True, download=True, transform=transforms)
+        dataset = BinaryMNIST(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
         _, dataset_val = random_split(
             dataset,
