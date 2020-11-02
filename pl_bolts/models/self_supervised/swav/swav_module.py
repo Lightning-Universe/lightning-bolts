@@ -322,14 +322,14 @@ class SwAV(pl.LightningModule):
 
     def optimizer_step(
         self,
-        epoch,
-        batch_idx,
-        optimizer,
-        optimizer_idx,
-        optimizer_closure,
-        on_tpu,
-        using_native_amp,
-        using_lbfgs,
+        epoch: int,
+        batch_idx: int,
+        optimizer: Optimizer,
+        optimizer_idx: int,
+        optimizer_closure: Optional[Callable] = None,
+        on_tpu: bool = False,
+        using_native_amp: bool = False,
+        using_lbfgs: bool = False,
     ) -> None:
         # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
         # adjust LR of optim contained within LARSWrapper
