@@ -20,6 +20,13 @@ from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization, cifar10_normalization
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 
+from pytorch_lightning.utilities.xla_device_utils import XLADeviceUtils
+
+TPU_AVAILABLE = XLADeviceUtils.tpu_device_exists()
+
+if TPU_AVAILABLE:
+    import torch_xla.core.xla_model as xm
+
 
 class SwAV(pl.LightningModule):
     def __init__(
