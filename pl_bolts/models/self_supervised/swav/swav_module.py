@@ -11,7 +11,9 @@ import pytorch_lightning as pl
 import torch
 import torch.distributed as dist
 from torch import nn
+from torch.optim.optimizer import Optimizer
 
+from typing import Callable, Optional
 from pytorch_lightning.utilities import AMPType
 
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
