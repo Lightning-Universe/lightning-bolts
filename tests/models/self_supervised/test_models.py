@@ -131,5 +131,7 @@ def test_swav(tmpdir):
         gpus=0, fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=3
     )
 
-    results = trainer.fit(model, datamodule)
-    assert results == 1
+    trainer.fit(model, datamodule)
+    loss = trainer.progress_bar_dict['loss']
+
+    assert float(loss) > 0

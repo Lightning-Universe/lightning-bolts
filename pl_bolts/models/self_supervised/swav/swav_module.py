@@ -11,9 +11,12 @@ import pytorch_lightning as pl
 import torch
 import torch.distributed as dist
 from torch import nn
+from torch.optim.optimizer import Optimizer
+
+from typing import Callable, Optional
+from pytorch_lightning.utilities import AMPType
 
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
-
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization, cifar10_normalization
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 
@@ -321,15 +324,15 @@ class SwAV(pl.LightningModule):
 
     def optimizer_step(
         self,
-        epoch,
-        batch_idx,
-        optimizer,
-        optimizer_idx,
-        second_order_closure=None,
-        on_tpu=False,
-        using_native_amp=False,
-        using_lbfgs=False
-    ):
+        epoch: int,
+        batch_idx: int,
+        optimizer: Optimizer,
+        optimizer_idx: int,
+        optimizer_closure: Optional[Callable] = None,
+        on_tpu: bool = False,
+        using_native_amp: bool = False,
+        using_lbfgs: bool = False,
+    ) -> None:
         # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
         # adjust LR of optim contained within LARSWrapper
         if self.lars_wrapper:
@@ -340,14 +343,18 @@ class SwAV(pl.LightningModule):
                 param_group["lr"] = self.lr_schedule[self.trainer.global_step]
 
         # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
-        learning_rate = {'learning_rate': self.lr_schedule[self.trainer.global_step]}
-        self.logger.log_metrics(learning_rate, step=self.trainer.global_step)
+        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
 
-        # from lightning implementation
-        if using_native_amp:
-            self.trainer.scaler.step(optimizer)
-        else:
-            optimizer.step()
+        super().optimizer_step(
+            epoch=epoch,
+            batch_idx=batch_idx,
+            optimizer=optimizer,
+            optimizer_idx=optimizer_idx,
+            optimizer_closure=optimizer_closure,
+            on_tpu=on_tpu,
+            using_native_amp=using_native_amp,
+            using_lbfgs=using_lbfgs,
+        )
 
     def sinkhorn(self, Q, nmb_iters):
         with torch.no_grad():
