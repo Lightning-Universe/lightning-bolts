@@ -40,10 +40,11 @@ class GAN(pl.LightningModule):
     ):
         """
         Args:
+            input_channels: number of channels of an image
+            input_height: image height
+            input_width: image width
             latent_dim: emb dim for encoder
-            batch_size: the batch size
             learning_rate: the learning rate
-            num_workers: data workers
         """
         super().__init__()
 
