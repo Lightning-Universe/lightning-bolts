@@ -7,18 +7,17 @@ from pl_bolts.datamodules import CityscapesDataModule
 
 
 def test_dev_datasets(tmpdir):
-
     ds = CIFAR10(tmpdir)
     for b in ds:
         pass
 
 
-def test_cityscapes_datamodule(tmpdir):
+def _create_synth_Cityscapes_dataset(path_dir):
+    """Create synthetic dataset with random images, just to simulate that the dataset have been already downloaded."""
     non_existing_citites = ['dummy_city_1', 'dummy_city_2']
-    fine_labels_dir = Path(tmpdir) / 'gtFine'
-    images_dir = Path(tmpdir) / 'leftImg8bit'
+    fine_labels_dir = Path(path_dir) / 'gtFine'
+    images_dir = Path(path_dir) / 'leftImg8bit'
     dataset_splits = ['train', 'val', 'test']
-    batch_size = 1
 
     for split in dataset_splits:
         for city in non_existing_citites:
@@ -35,6 +34,12 @@ def test_cityscapes_datamodule(tmpdir):
             Image.new('L', (2048, 1024)).save(
                 fine_labels_dir / split / city / semantic_target_name)
 
+
+def test_cityscapes_datamodule(tmpdir):
+
+    _create_synth_Cityscapes_dataset(tmpdir)
+
+    batch_size = 1
     target_types = ['semantic', 'instance']
     for target_type in target_types:
         dm = CityscapesDataModule(tmpdir,
