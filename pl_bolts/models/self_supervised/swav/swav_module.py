@@ -20,11 +20,6 @@ from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization, cifar10_normalization
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 
-TPU_AVAILABLE = XLADeviceUtils.tpu_device_exists()
-
-if TPU_AVAILABLE:
-    import torch_xla.core.xla_model as xm
-
 
 class SwAV(pl.LightningModule):
     def __init__(
@@ -351,9 +346,7 @@ class SwAV(pl.LightningModule):
         self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
 
         # from lightning
-        if on_tpu:
-            xm.optimizer_step(optimizer, optimizer_args={'closure': optimizer_closure})
-        elif self.trainer.amp_backend == AMPType.NATIVE:
+        if self.trainer.amp_backend == AMPType.NATIVE:
             optimizer_closure()
             self.trainer.scaler.step(optimizer)
         elif self.trainer.amp_backend == AMPType.APEX:
