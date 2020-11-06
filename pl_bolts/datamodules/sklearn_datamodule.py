@@ -1,3 +1,4 @@
+from importlib.util import find_spec
 import math
 from typing import Any
 
@@ -6,14 +7,10 @@ import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset, DataLoader
 
-try:
+
+_SKLEARN_AVAILABLE = find_spec("sklearn") is not None
+if _SKLEARN_AVAILABLE:
     from sklearn.utils import shuffle as sk_shuffle
-except ModuleNotFoundError:
-    raise ModuleNotFoundError('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-                              ' install it with `pip install sklearn`.')
-    _SKLEARN_AVAILABLE = False
-else:
-    _SKLEARN_AVAILABLE = True
 
 
 class SklearnDataset(Dataset):
