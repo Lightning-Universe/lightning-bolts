@@ -5,8 +5,8 @@ from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
 
 
-def test_async_dataloader(data_dir):
-    ds = CIFAR10(data_dir=data_dir)
+def test_async_dataloader(datadir):
+    ds = CIFAR10(data_dir=datadir)
 
     if torch.cuda.device_count() > 0:  # Can only run this test with a GPU
         device = torch.device('cuda', 0)
