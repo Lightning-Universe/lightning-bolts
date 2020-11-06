@@ -1,4 +1,3 @@
-import os
 from argparse import ArgumentParser
 from warnings import warn
 
@@ -70,7 +69,7 @@ class LitMNIST(LightningModule):
         return loader
 
     def test_dataloader(self):
-        test_dataset = MNIST(os.getcwd(), train=False, download=True, transform=transforms.ToTensor())
+        test_dataset = MNIST(self.hparams.data_dir, train=False, download=True, transform=transforms.ToTensor())
         loader = DataLoader(test_dataset, batch_size=self.hparams.batch_size, num_workers=self.hparams.num_workers)
         return loader
 

@@ -6,7 +6,7 @@ import torch
 from pl_bolts.utils.semi_supervised import balance_classes, generate_half_labeled_batches
 
 
-def test_balance_classes(tmpdir):
+def test_balance_classes():
     X = torch.rand(100, 3, 32, 32)
     c1 = torch.zeros(20, 1)
     c2 = torch.zeros(20, 1) + 1
@@ -16,7 +16,7 @@ def test_balance_classes(tmpdir):
     (balanced_X, balanced_Y) = balance_classes(X, y, batch_size=10)
 
 
-def test_generate_half_labeled_batches(tmpdir):
+def test_generate_half_labeled_batches():
     smaller_set_X = np.random.rand(100, 3, 32, 32)
     smaller_set_Y = np.random.randint(0, 3, (100, 1))
     larger_set_X = np.random.rand(100, 3, 32, 32)

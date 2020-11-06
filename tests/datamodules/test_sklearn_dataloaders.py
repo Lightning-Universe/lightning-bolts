@@ -12,7 +12,7 @@ except ImportError:
          ' install it with `pip install sklearn`.')
 
 
-def test_dataloader(tmpdir):
+def test_dataloader():
     seed_everything()
 
     X = np.random.rand(5, 2)
