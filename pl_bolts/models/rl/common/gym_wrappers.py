@@ -3,18 +3,18 @@ Set of wrapper functions for gym environments taken from
 https://github.com/Shmuma/ptan/blob/master/ptan/common/wrappers.py
 """
 import collections
-from warnings import warn
 
 import gym
 import gym.spaces
 import numpy as np
 import torch
 
+from pl_bolts.utils.warnings import warn_missing_pkg
+
 try:
     import cv2
 except ModuleNotFoundError:
-    warn('You want to use `openCV` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install opencv-python`.')
+    warn_missing_pkg('cv2', pypi_name='opencv-python')  # pragma: no-cover
     _OPENCV_AVAILABLE = False
 else:
     _OPENCV_AVAILABLE = True

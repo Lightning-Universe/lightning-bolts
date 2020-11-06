@@ -4,15 +4,13 @@ from typing import List, Optional, Union
 import numpy as np
 import torch
 import torch.nn as nn
-from torch import Tensor
-from torch.utils.hooks import RemovableHandle
-
 from pytorch_lightning import Callback
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 from pytorch_lightning.utilities import rank_zero_warn
 from pytorch_lightning.utilities.apply_func import apply_to_collection
-
+from torch import Tensor
+from torch.utils.hooks import RemovableHandle
 
 try:
     import wandb

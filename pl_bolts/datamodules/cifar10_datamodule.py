@@ -1,6 +1,5 @@
 import os
 from typing import Optional, Sequence
-from warnings import warn
 
 import torch
 from pytorch_lightning import LightningDataModule
@@ -8,14 +7,14 @@ from torch.utils.data import DataLoader, random_split
 
 from pl_bolts.datasets.cifar10_dataset import TrialCIFAR10
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import CIFAR10
 
 except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+    warn_missing_pkg('torchvision')  # pragma: no-cover
     _TORCHVISION_AVAILABLE = False
 else:
     _TORCHVISION_AVAILABLE = True
