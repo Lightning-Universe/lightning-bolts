@@ -23,7 +23,6 @@ from pl_bolts.datamodules.vocdetection_datamodule import VOCDetectionDataModule
 from pl_bolts.datamodules.cityscapes_datamodule import CityscapesDataModule
 from pl_bolts.datasets.kitti_dataset import KittiDataset
 from pl_bolts.datamodules.kitti_datamodule import KittiDataModule
-from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
 
 
 __all__ = [
