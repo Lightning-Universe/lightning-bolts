@@ -22,8 +22,8 @@ def _create_synth_Cityscapes_dataset(path_dir):
 
     for split in dataset_splits:
         for city in non_existing_citites:
-            (images_dir / split / city).mkdir(parents=True)
-            (fine_labels_dir / split / city).mkdir(parents=True)
+            (images_dir / split / city).mkdir(parents=True, exist_ok=True)
+            (fine_labels_dir / split / city).mkdir(parents=True, exist_ok=True)
             base_name = str(uuid.uuid4())
             image_name = f'{base_name}_leftImg8bit.png'
             instance_target_name = f'{base_name}_gtFine_instanceIds.png'
