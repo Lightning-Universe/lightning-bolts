@@ -52,7 +52,7 @@ class UnlabeledImagenet(ImageNet):
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
             )
-        
+
         root = self.root = os.path.expanduser(root)
 
         # [train], [val] --> [train, val], [test]

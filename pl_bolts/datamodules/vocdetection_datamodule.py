@@ -120,7 +120,7 @@ class VOCDetectionDataModule(LightningDataModule):
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use VOC dataset loaded from `torchvision` which is not installed yet.'
             )
-        
+
         super().__init__(*args, **kwargs)
 
         self.year = year

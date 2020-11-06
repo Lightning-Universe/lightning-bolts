@@ -64,7 +64,7 @@ class KittiDataModule(LightningDataModule):
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
-        
+
         super().__init__(*args, **kwargs)
         self.data_dir = data_dir if data_dir is not None else os.getcwd()
         self.batch_size = batch_size

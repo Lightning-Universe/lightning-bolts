@@ -50,7 +50,7 @@ class KittiDataset(Dataset):
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `Pillow` which is not installed yet.'
             )
-        
+
         self.img_size = img_size
         self.void_labels = void_labels
         self.valid_labels = valid_labels
