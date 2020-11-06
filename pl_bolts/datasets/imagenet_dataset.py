@@ -1,5 +1,6 @@
 import gzip
 import hashlib
+import importlib
 import os
 import shutil
 import tarfile
@@ -11,13 +12,12 @@ import numpy as np
 import torch
 from torch._six import PY3
 
-try:
+_TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
+if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import ImageNet
     from torchvision.datasets.imagenet import load_meta_file
-except ModuleNotFoundError as err:
-    raise ModuleNotFoundError(  # pragma: no-cover
-        'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
-    ) from err
+else:
+    ImageNet = object  # pragma: no-cover
 
 
 class UnlabeledImagenet(ImageNet):
@@ -48,6 +48,11 @@ class UnlabeledImagenet(ImageNet):
             download:
             kwargs:
         """
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
+            )
+        
         root = self.root = os.path.expanduser(root)
 
         # [train], [val] --> [train, val], [test]

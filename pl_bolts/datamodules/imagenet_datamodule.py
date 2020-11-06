@@ -1,3 +1,4 @@
+import importlib
 import os
 from typing import Optional
 from warnings import warn
@@ -7,23 +8,13 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 
-try:
+_TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
+if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
-except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
-
-try:
     from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
-except ModuleNotFoundError:
+else:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
 
 
 class ImagenetDataModule(LightningDataModule):
