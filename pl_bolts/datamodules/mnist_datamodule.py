@@ -61,6 +61,7 @@ class MNISTDataModule(LightningDataModule):
             val_split: how many of the training images to use for the validation split
             num_workers: how many workers to use for loading data
             normalize: If true applies image normalize
+            batch_size: size of batch
         """
         super().__init__(*args, **kwargs)
 
@@ -95,9 +96,6 @@ class MNISTDataModule(LightningDataModule):
     def train_dataloader(self):
         """
         MNIST train set removes a subset to use for validation
-
-        Args:
-            transforms: custom transforms
         """
         transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
 
@@ -119,9 +117,6 @@ class MNISTDataModule(LightningDataModule):
     def val_dataloader(self):
         """
         MNIST val set uses a subset of the training set for validation
-
-        Args:
-            transforms: custom transforms
         """
         transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
         dataset = MNIST(self.data_dir, train=True, download=False, transform=transforms)
@@ -142,9 +137,6 @@ class MNISTDataModule(LightningDataModule):
     def test_dataloader(self):
         """
         MNIST test set uses the test split
-
-        Args:
-            transforms: custom transforms
         """
         transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
 

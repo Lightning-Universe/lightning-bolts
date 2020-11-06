@@ -150,12 +150,14 @@ class SklearnDataModule(LightningDataModule):
             num_workers=2,
             random_state=1234,
             shuffle=True,
+            batch_size: int = 16,
             *args,
             **kwargs,
     ):
 
         super().__init__(*args, **kwargs)
         self.num_workers = num_workers
+        self.batch_size = batch_size
 
         # shuffle x and y
         if shuffle and _SKLEARN_AVAILABLE:
@@ -193,10 +195,10 @@ class SklearnDataModule(LightningDataModule):
         self.val_dataset = SklearnDataset(x_val, y_val)
         self.test_dataset = SklearnDataset(x_test, y_test)
 
-    def train_dataloader(self, batch_size: int = 16):
+    def train_dataloader(self):
         loader = DataLoader(
             self.train_dataset,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=True,
             num_workers=self.num_workers,
             drop_last=True,
@@ -204,10 +206,10 @@ class SklearnDataModule(LightningDataModule):
         )
         return loader
 
-    def val_dataloader(self, batch_size: int = 16):
+    def val_dataloader(self):
         loader = DataLoader(
             self.val_dataset,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
             drop_last=True,
@@ -215,10 +217,10 @@ class SklearnDataModule(LightningDataModule):
         )
         return loader
 
-    def test_dataloader(self, batch_size: int = 16):
+    def test_dataloader(self):
         loader = DataLoader(
             self.test_dataset,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
             drop_last=True,
