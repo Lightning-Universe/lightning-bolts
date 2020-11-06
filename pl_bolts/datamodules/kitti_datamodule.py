@@ -8,8 +8,8 @@ from torch.utils.data.dataset import random_split
 
 from pl_bolts.datasets.kitti_dataset import KittiDataset
 
-_TORCHVIVION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
-if _TORCHVIVION_AVAILABLE:
+_TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
+if _TORCHVISION_AVAILABLE:
     import torchvision.transforms as transforms
 
 
