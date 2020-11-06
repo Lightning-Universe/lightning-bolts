@@ -7,12 +7,13 @@ from pytorch_lightning import LightningModule, Trainer
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
 
+from pl_bolts.utils.warnings import warn_missing_pkg
+
 try:
     from torchvision import transforms
     from torchvision.datasets import MNIST
 except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
 class LitMNIST(LightningModule):

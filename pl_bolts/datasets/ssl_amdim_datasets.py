@@ -4,11 +4,12 @@ from warnings import warn
 
 import numpy as np
 
+from pl_bolts.utils.warnings import warn_missing_pkg
+
 try:
     from torchvision.datasets import CIFAR10
 except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
 class SSLDatasetMixin(ABC):

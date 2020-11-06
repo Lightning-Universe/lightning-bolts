@@ -376,7 +376,7 @@ def linkcode_resolve(domain, info):
     except Exception:
         filename = info['module'].replace('.', '/') + '.py'
     # import subprocess
-    # tag = subprocess.Popen(['git', 'rev-parse', 'HEAD'], stdout_func=subprocess.PIPE,
+    # tag = subprocess.Popen(['git', 'rev-parse', 'HEAD'], stdout=subprocess.PIPE,
     #                        universal_newlines=True).communicate()[0][:-1]
     branch = filename.split('/')[0]
     # do mapping from latest tags to master

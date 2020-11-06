@@ -17,11 +17,12 @@ from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.datamodules.experience_source import Experience
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.networks import MLP
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     import gym
 except ModuleNotFoundError:
-    warn('You want to use `gym` which is not installed yet, install it with `pip install gym`.')  # pragma: no-cover
+    warn_missing_pkg('gym')  # pragma: no-cover
     _GYM_AVAILABLE = False
 else:
     _GYM_AVAILABLE = True

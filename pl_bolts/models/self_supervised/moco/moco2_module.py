@@ -19,11 +19,12 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
+from pl_bolts.utils.warnings import warn_missing_pkg
+
 try:
     import torchvision
 except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 from pl_bolts.metrics import precision_at_k, mean
 from pl_bolts.models.self_supervised.moco.transforms import (
