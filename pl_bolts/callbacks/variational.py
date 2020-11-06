@@ -1,5 +1,4 @@
 import math
-from warnings import warn
 
 import torch
 from pytorch_lightning.callbacks import Callback

@@ -1,5 +1,3 @@
-from warnings import warn
-
 import torch
 import torchvision.transforms as T
 from pytorch_lightning import LightningDataModule

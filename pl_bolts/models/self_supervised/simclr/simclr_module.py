@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from warnings import warn
 
 import pytorch_lightning as pl
 from torch import nn

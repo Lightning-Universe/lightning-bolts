@@ -1,5 +1,4 @@
 from typing import Optional
-from warnings import warn
 
 from torch.utils.data import random_split
 

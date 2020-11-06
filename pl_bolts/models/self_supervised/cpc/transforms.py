@@ -1,5 +1,3 @@
-from warnings import warn
-
 from pl_bolts.transforms.self_supervised import RandomTranslateWithReflect, Patchify
 from pl_bolts.utils.warnings import warn_missing_pkg
 

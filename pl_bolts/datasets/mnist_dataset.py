@@ -1,5 +1,3 @@
-from warnings import warn
-
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:

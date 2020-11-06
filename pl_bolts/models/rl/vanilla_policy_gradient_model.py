@@ -1,7 +1,6 @@
 import argparse
 from collections import OrderedDict
 from typing import Tuple, List
-from warnings import warn
 
 import numpy as np
 import pytorch_lightning as pl

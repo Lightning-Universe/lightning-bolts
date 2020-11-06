@@ -1,8 +1,5 @@
-from warnings import warn
-
-import torch
 from pytorch_lightning import LightningDataModule
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 
 from pl_bolts.utils.warnings import warn_missing_pkg
 

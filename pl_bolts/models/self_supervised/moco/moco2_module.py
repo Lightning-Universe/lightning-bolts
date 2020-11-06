@@ -12,7 +12,6 @@ You may obtain a copy of the License from the LICENSE file present in this folde
 
 from argparse import ArgumentParser
 from typing import Union
-from warnings import warn
 
 import pytorch_lightning as pl
 import torch

@@ -1,6 +1,5 @@
 import os
 from typing import Optional, Sequence
-from warnings import warn
 
 import torch
 from pytorch_lightning import LightningDataModule

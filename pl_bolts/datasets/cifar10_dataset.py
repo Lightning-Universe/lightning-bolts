@@ -2,7 +2,6 @@ import os
 import pickle
 import tarfile
 from typing import Tuple, Optional, Sequence, Callable
-from warnings import warn
 
 import torch
 from torch import Tensor

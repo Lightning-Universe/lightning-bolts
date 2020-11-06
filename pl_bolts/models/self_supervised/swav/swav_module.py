@@ -4,21 +4,19 @@ Adapted from official swav implementation: https://github.com/facebookresearch/s
 import math
 import os
 from argparse import ArgumentParser
-from warnings import warn
+from typing import Callable, Optional
 
 import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.distributed as dist
+from pytorch_lightning.utilities import AMPType
 from torch import nn
 from torch.optim.optimizer import Optimizer
 
-from typing import Callable, Optional
-from pytorch_lightning.utilities import AMPType
-
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
-from pl_bolts.transforms.dataset_normalizations import stl10_normalization, cifar10_normalization
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
+from pl_bolts.transforms.dataset_normalizations import stl10_normalization, cifar10_normalization
 
 
 class SwAV(pl.LightningModule):
@@ -474,7 +472,7 @@ class SwAV(pl.LightningModule):
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.models.self_supervised.swav.transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
-    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule, CIFAR10DataModule
+    from pl_bolts.datamodules import STL10DataModule, CIFAR10DataModule
 
     parser = ArgumentParser()
 

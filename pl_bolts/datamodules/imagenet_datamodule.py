@@ -1,6 +1,5 @@
 import os
 from typing import Optional
-from warnings import warn
 
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader

@@ -1,6 +1,5 @@
 from abc import ABC
 from typing import Callable, Optional
-from warnings import warn
 
 import numpy as np
 

@@ -1,5 +1,4 @@
 import random
-from warnings import warn
 
 from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization, cifar10_normalization, stl10_normalization)
