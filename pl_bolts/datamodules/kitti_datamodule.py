@@ -1,12 +1,16 @@
+import importlib
 import os
 
 import torch
-import torchvision.transforms as transforms
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import random_split
 
 from pl_bolts.datasets.kitti_dataset import KittiDataset
+
+_TORCHVIVION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
+if _TORCHVIVION_AVAILABLE:
+    import torchvision.transforms as transforms
 
 
 class KittiDataModule(LightningDataModule):
@@ -56,6 +60,11 @@ class KittiDataModule(LightningDataModule):
             batch_size: the batch size
             seed: random seed to be used for train/val/test splits
         """
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `transforms` from `torchvision` which is not installed yet.'
+            )
+        
         super().__init__(*args, **kwargs)
         self.data_dir = data_dir if data_dir is not None else os.getcwd()
         self.batch_size = batch_size
