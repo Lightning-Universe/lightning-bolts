@@ -1,19 +1,17 @@
+import importlib
 from warnings import warn
 
 import torch
-import torchvision.transforms as T
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
-try:
+_TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
+if _TORCHVISION_AVAILABLE:
+    import torchvision.transforms as T
     from torchvision.datasets import VOCDetection
-
-except ModuleNotFoundError:
+else:
     warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
          ' install it with `pip install torchvision`.')
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
 
 
 class Compose(object):
@@ -118,12 +116,12 @@ class VOCDetectionDataModule(LightningDataModule):
         *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
-
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use VOC dataset loaded from `torchvision` which is not installed yet.'
             )
+        
+        super().__init__(*args, **kwargs)
 
         self.year = year
         self.data_dir = data_dir
