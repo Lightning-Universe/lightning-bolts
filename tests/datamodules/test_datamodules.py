@@ -36,14 +36,14 @@ def _create_synth_Cityscapes_dataset(path_dir):
                 fine_labels_dir / split / city / semantic_target_name)
 
 
-def test_cityscapes_datamodule(tmpdir):
+def test_cityscapes_datamodule(datadir):
 
-    _create_synth_Cityscapes_dataset(tmpdir)
+    _create_synth_Cityscapes_dataset(datadir)
 
     batch_size = 1
     target_types = ['semantic', 'instance']
     for target_type in target_types:
-        dm = CityscapesDataModule(tmpdir,
+        dm = CityscapesDataModule(datadir,
                                   num_workers=0,
                                   batch_size=batch_size,
                                   target_type=target_type)
