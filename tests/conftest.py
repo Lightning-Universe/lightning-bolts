@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 
@@ -10,4 +12,4 @@ from tests import DATASETS_PATH
 
 @pytest.fixture(scope="session")
 def datadir():
-    return DATASETS_PATH
+    return Path(DATASETS_PATH)
