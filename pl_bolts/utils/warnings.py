@@ -26,6 +26,6 @@ def warn_missing_pkg(pkg_name: str, pypi_name: str = None, extra_text: str = Non
                     f' install it with `pip install {pypi_name}`.' + extra_text)
         MISSING_PACKAGE_WARNINGS[pkg_name] = 1
     else:
-       MISSING_PACKAGE_WARNINGS[pkg_name] += 1
+        MISSING_PACKAGE_WARNINGS[pkg_name] += 1
 
     return MISSING_PACKAGE_WARNINGS[pkg_name]
