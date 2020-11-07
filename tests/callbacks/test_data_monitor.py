@@ -1,14 +1,14 @@
 from unittest import mock
-from unittest.mock import call, ANY
+from unittest.mock import ANY, call
 
 import pytest
 import torch
 import torch.nn as nn
-
-from pl_bolts.callbacks import TrainingDataMonitor, ModuleDataMonitor
-from pl_bolts.models import LitMNIST
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import LoggerCollection, TensorBoardLogger
+
+from pl_bolts.callbacks import ModuleDataMonitor, TrainingDataMonitor
+from pl_bolts.models import LitMNIST
 
 
 @pytest.mark.parametrize(

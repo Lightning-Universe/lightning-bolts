@@ -1,12 +1,10 @@
-from typing import Any, Sequence, Dict
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 import numpy as np
 import torch
 import torch.nn as nn
-from pytorch_lightning import Callback
-from pytorch_lightning import LightningModule, Trainer
-from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
+from pytorch_lightning import Callback, LightningModule, Trainer
+from pytorch_lightning.loggers import TensorBoardLogger, WandbLogger
 from pytorch_lightning.utilities import rank_zero_warn
 from pytorch_lightning.utilities.apply_func import apply_to_collection
 from torch import Tensor

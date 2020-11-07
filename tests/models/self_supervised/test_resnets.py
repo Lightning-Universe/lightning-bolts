@@ -12,7 +12,7 @@ from pl_bolts.models.self_supervised.resnets import (
     resnext50_32x4d,
     resnext101_32x8d,
     wide_resnet50_2,
-    wide_resnet101_2
+    wide_resnet101_2,
 )
 
 

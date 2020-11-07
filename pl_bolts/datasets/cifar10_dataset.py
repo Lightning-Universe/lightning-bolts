@@ -1,7 +1,7 @@
 import os
 import pickle
 import tarfile
-from typing import Tuple, Optional, Sequence, Callable
+from typing import Callable, Optional, Sequence, Tuple
 
 import torch
 from torch import Tensor

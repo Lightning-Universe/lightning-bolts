@@ -14,12 +14,12 @@ from pytorch_lightning.utilities import rank_zero_warn
 from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc.networks import cpc_resnet101
 from pl_bolts.models.self_supervised.cpc.transforms import (
-    CPCTrainTransformsCIFAR10,
     CPCEvalTransformsCIFAR10,
-    CPCTrainTransformsSTL10,
+    CPCEvalTransformsImageNet128,
     CPCEvalTransformsSTL10,
+    CPCTrainTransformsCIFAR10,
     CPCTrainTransformsImageNet128,
-    CPCEvalTransformsImageNet128
+    CPCTrainTransformsSTL10,
 )
 from pl_bolts.utils.pretrained_weights import load_pretrained
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder

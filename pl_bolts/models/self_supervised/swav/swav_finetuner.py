@@ -6,11 +6,11 @@ import pytorch_lightning as pl
 from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner
 from pl_bolts.models.self_supervised.swav.swav_module import SwAV
 from pl_bolts.models.self_supervised.swav.transforms import SwAVFinetuneTransform
-from pl_bolts.transforms.dataset_normalizations import stl10_normalization, imagenet_normalization
+from pl_bolts.transforms.dataset_normalizations import imagenet_normalization, stl10_normalization
 
 
 def cli_main():  # pragma: no-cover
-    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule
+    from pl_bolts.datamodules import ImagenetDataModule, STL10DataModule
 
     pl.seed_everything(1234)
 

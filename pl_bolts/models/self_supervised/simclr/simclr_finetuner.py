@@ -8,7 +8,7 @@ from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTran
 
 
 def cli_main():  # pragma: no-cover
-    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
+    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
 
     pl.seed_everything(1234)
 

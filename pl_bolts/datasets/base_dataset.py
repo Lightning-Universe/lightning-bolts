@@ -2,7 +2,7 @@ import logging
 import os
 import urllib.request
 from abc import ABC
-from typing import Tuple, Sequence
+from typing import Sequence, Tuple
 from urllib.error import HTTPError
 
 import torch
