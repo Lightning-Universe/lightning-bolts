@@ -1,4 +1,4 @@
-from warnings import warn
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     from torchvision import transforms as transform_lib
@@ -11,8 +11,7 @@ except ModuleNotFoundError as err:
 try:
     from PIL import Image
 except ModuleNotFoundError:
-    warn('You want to use `Pillow` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install Pillow`.')
+    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
     _PIL_AVAILABLE = False
 else:
     _PIL_AVAILABLE = True

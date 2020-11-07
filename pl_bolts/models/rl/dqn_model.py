@@ -5,7 +5,6 @@ Deep Q Network
 import argparse
 from collections import OrderedDict
 from typing import Tuple, List, Dict, Optional
-from warnings import warn
 
 import numpy as np
 import pytorch_lightning as pl
@@ -21,12 +20,12 @@ from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common.agents import ValueAgent
 from pl_bolts.models.rl.common.memory import MultiStepBuffer
 from pl_bolts.models.rl.common.networks import CNN
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     from pl_bolts.models.rl.common.gym_wrappers import gym, make_environment
 except ModuleNotFoundError:
-    warn('You want to use `gym` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install gym`.')
+    warn_missing_pkg('gym')  # pragma: no-cover
     _GYM_AVAILABLE = False
 else:
     _GYM_AVAILABLE = True

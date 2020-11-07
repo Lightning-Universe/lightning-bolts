@@ -1,15 +1,13 @@
-from warnings import warn
-
-import torch
 from pytorch_lightning import LightningDataModule
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
+
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import Cityscapes
 except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+    warn_missing_pkg('torchvision')  # pragma: no-cover
     _TORCHVISION_AVAILABLE = False
 else:
     _TORCHVISION_AVAILABLE = True

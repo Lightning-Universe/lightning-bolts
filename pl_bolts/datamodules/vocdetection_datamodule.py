@@ -1,17 +1,17 @@
 import importlib
-from warnings import warn
 
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
+
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 _TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
 if _TORCHVISION_AVAILABLE:
     import torchvision.transforms as T
     from torchvision.datasets import VOCDetection
 else:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
 class Compose(object):

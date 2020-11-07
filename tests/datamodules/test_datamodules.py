@@ -6,8 +6,9 @@ from pl_bolts.datasets.cifar10_dataset import CIFAR10
 from pl_bolts.datamodules import CityscapesDataModule
 
 
-def test_dev_datasets(tmpdir):
-    ds = CIFAR10(tmpdir)
+def test_dev_datasets(datadir):
+
+    ds = CIFAR10(data_dir=datadir)
     for b in ds:
         pass
 
@@ -21,8 +22,8 @@ def _create_synth_Cityscapes_dataset(path_dir):
 
     for split in dataset_splits:
         for city in non_existing_citites:
-            (images_dir / split / city).mkdir(parents=True)
-            (fine_labels_dir / split / city).mkdir(parents=True)
+            (images_dir / split / city).mkdir(parents=True, exist_ok=True)
+            (fine_labels_dir / split / city).mkdir(parents=True, exist_ok=True)
             base_name = str(uuid.uuid4())
             image_name = f'{base_name}_leftImg8bit.png'
             instance_target_name = f'{base_name}_gtFine_instanceIds.png'
@@ -35,14 +36,14 @@ def _create_synth_Cityscapes_dataset(path_dir):
                 fine_labels_dir / split / city / semantic_target_name)
 
 
-def test_cityscapes_datamodule(tmpdir):
+def test_cityscapes_datamodule(datadir):
 
-    _create_synth_Cityscapes_dataset(tmpdir)
+    _create_synth_Cityscapes_dataset(datadir)
 
     batch_size = 1
     target_types = ['semantic', 'instance']
     for target_type in target_types:
-        dm = CityscapesDataModule(tmpdir,
+        dm = CityscapesDataModule(datadir,
                                   num_workers=0,
                                   batch_size=batch_size,
                                   target_type=target_type)

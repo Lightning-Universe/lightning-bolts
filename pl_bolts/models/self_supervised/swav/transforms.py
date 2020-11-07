@@ -1,12 +1,11 @@
-from warnings import warn
-
 import numpy as np
+
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     import torchvision.transforms as transforms
 except ImportError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+    warn_missing_pkg('torchvision')  # pragma: no-cover
     _TORCHVISION_AVAILABLE = False
 else:
     _TORCHVISION_AVAILABLE = True
@@ -14,8 +13,7 @@ else:
 try:
     import cv2
 except ImportError:
-    warn('You want to use `opencv-python` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install opencv-python`.')
+    warn_missing_pkg('cv2', pypi_name='opencv-python')  # pragma: no-cover
 
 from typing import List
 

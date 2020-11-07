@@ -1,12 +1,10 @@
-from warnings import warn
-
 from pl_bolts.transforms.self_supervised import RandomTranslateWithReflect
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     from torchvision import transforms
 except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+    warn_missing_pkg('torchvision')  # pragma: no-cover
     _TORCHVISION_AVAILABLE = False
 else:
     _TORCHVISION_AVAILABLE = True

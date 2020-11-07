@@ -10,10 +10,10 @@ from pl_bolts.models.autoencoders import resnet50_encoder
 
 
 @pytest.mark.parametrize("dm_cls", [pytest.param(CIFAR10DataModule, id="cifar10")])
-def test_vae(tmpdir, dm_cls):
+def test_vae(tmpdir, datadir, dm_cls):
     seed_everything()
 
-    dm = dm_cls(batch_size=4)
+    dm = dm_cls(data_dir=datadir, batch_size=4)
     model = VAE(input_height=dm.size()[-1])
     trainer = pl.Trainer(
         fast_dev_run=True,
@@ -27,10 +27,10 @@ def test_vae(tmpdir, dm_cls):
 
 
 @pytest.mark.parametrize("dm_cls", [pytest.param(CIFAR10DataModule, id="cifar10")])
-def test_ae(tmpdir, dm_cls):
+def test_ae(tmpdir, datadir, dm_cls):
     seed_everything()
 
-    dm = dm_cls(batch_size=4)
+    dm = dm_cls(data_dir=datadir, batch_size=4)
     model = AE(input_height=dm.size()[-1])
     trainer = pl.Trainer(
         fast_dev_run=True,
@@ -43,7 +43,7 @@ def test_ae(tmpdir, dm_cls):
     assert result == 1
 
 
-def test_encoder(tmpdir):
+def test_encoder():
     img = torch.rand(16, 3, 224, 224)
 
     encoder1 = resnet18_encoder(first_conv=False, maxpool1=True)
@@ -56,7 +56,7 @@ def test_encoder(tmpdir):
     assert out2.shape == (16, 2048)
 
 
-def test_decoder(tmpdir):
+def test_decoder():
     latent_dim = 128
     input_height = 288  # random but has to be a multiple of 32 for first_conv=True, maxpool1=True
 
@@ -78,8 +78,8 @@ def test_decoder(tmpdir):
     assert out4.shape == (2, 3, 288, 288)
 
 
-def test_from_pretrained(tmpdir):
-    dm = CIFAR10DataModule('.', batch_size=4)
+def test_from_pretrained(datadir):
+    dm = CIFAR10DataModule(data_dir=datadir, batch_size=4)
     dm.setup()
     dm.prepare_data()
 

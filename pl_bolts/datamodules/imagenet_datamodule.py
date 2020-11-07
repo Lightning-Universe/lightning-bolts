@@ -1,20 +1,19 @@
 import importlib
 import os
 from typing import Optional
-from warnings import warn
 
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 _TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
 else:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
 class ImagenetDataModule(LightningDataModule):
