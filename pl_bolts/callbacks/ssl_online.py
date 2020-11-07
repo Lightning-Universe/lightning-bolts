@@ -1,10 +1,9 @@
-from typing import List, Optional, Union
+from typing import Optional
 
 import torch
+from pytorch_lightning import Callback
 from pytorch_lightning.metrics.functional import accuracy
 from torch.nn import functional as F
-
-from pytorch_lightning import Callback
 
 
 class SSLOnlineEvaluator(Callback):  # pragma: no-cover

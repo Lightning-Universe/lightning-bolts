@@ -4,18 +4,19 @@ Adapted from official swav implementation: https://github.com/facebookresearch/s
 import math
 import os
 from argparse import ArgumentParser
-from warnings import warn
+from typing import Callable, Optional
 
 import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.distributed as dist
+from pytorch_lightning.utilities import AMPType
 from torch import nn
+from torch.optim.optimizer import Optimizer
 
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
-
-from pl_bolts.transforms.dataset_normalizations import stl10_normalization, cifar10_normalization
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
+from pl_bolts.transforms.dataset_normalizations import stl10_normalization, cifar10_normalization
 
 
 class SwAV(pl.LightningModule):
@@ -321,15 +322,15 @@ class SwAV(pl.LightningModule):
 
     def optimizer_step(
         self,
-        epoch,
-        batch_idx,
-        optimizer,
-        optimizer_idx,
-        second_order_closure=None,
-        on_tpu=False,
-        using_native_amp=False,
-        using_lbfgs=False
-    ):
+        epoch: int,
+        batch_idx: int,
+        optimizer: Optimizer,
+        optimizer_idx: int,
+        optimizer_closure: Optional[Callable] = None,
+        on_tpu: bool = False,
+        using_native_amp: bool = False,
+        using_lbfgs: bool = False,
+    ) -> None:
         # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
         # adjust LR of optim contained within LARSWrapper
         if self.lars_wrapper:
@@ -340,14 +341,17 @@ class SwAV(pl.LightningModule):
                 param_group["lr"] = self.lr_schedule[self.trainer.global_step]
 
         # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
-        learning_rate = {'learning_rate': self.lr_schedule[self.trainer.global_step]}
-        self.logger.log_metrics(learning_rate, step=self.trainer.global_step)
+        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
 
-        # from lightning implementation
-        if using_native_amp:
+        # from lightning
+        if self.trainer.amp_backend == AMPType.NATIVE:
+            optimizer_closure()
             self.trainer.scaler.step(optimizer)
-        else:
+        elif self.trainer.amp_backend == AMPType.APEX:
+            optimizer_closure()
             optimizer.step()
+        else:
+            optimizer.step(closure=optimizer_closure)
 
     def sinkhorn(self, Q, nmb_iters):
         with torch.no_grad():
@@ -468,7 +472,7 @@ class SwAV(pl.LightningModule):
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.models.self_supervised.swav.transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
-    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule, CIFAR10DataModule
+    from pl_bolts.datamodules import STL10DataModule, CIFAR10DataModule
 
     parser = ArgumentParser()
 

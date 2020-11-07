@@ -45,7 +45,7 @@ from pl_bolts.models.self_supervised.simclr.transforms import (
     (3, 96, 96),
     (3, 160, 160),
 ])
-def test_simclr_transforms(tmpdir, img_size):
+def test_simclr_transforms(img_size):
     pl.seed_everything(0)
 
     (c, h, w) = img_size
@@ -67,7 +67,7 @@ def test_simclr_transforms(tmpdir, img_size):
     Moco2TrainCIFAR10Transforms,
     Moco2EvalCIFAR10Transforms,
 ])
-def test_cifar10_transforms(tmpdir, transform):
+def test_cifar10_transforms(transform):
     x = torch.rand(3, 32, 32)
     x = transforms.ToPILImage(mode='RGB')(x)
 
@@ -83,7 +83,7 @@ def test_cifar10_transforms(tmpdir, transform):
     Moco2TrainSTL10Transforms,
     Moco2EvalSTL10Transforms,
 ])
-def test_stl10_transforms(tmpdir, transform):
+def test_stl10_transforms(transform):
     x = torch.rand(3, 64, 64)
     x = transforms.ToPILImage(mode='RGB')(x)
 
@@ -99,7 +99,7 @@ def test_stl10_transforms(tmpdir, transform):
     Moco2TrainImagenetTransforms,
     Moco2EvalImagenetTransforms
 ])
-def test_imagenet_transforms(tmpdir, transform):
+def test_imagenet_transforms(transform):
     x = torch.rand(3, 128, 128)
     x = transforms.ToPILImage(mode='RGB')(x)
 

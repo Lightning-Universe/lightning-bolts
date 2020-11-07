@@ -1,16 +1,16 @@
 from argparse import ArgumentParser
-from warnings import warn
 
 import pytorch_lightning as pl
 from torch import nn
 from torch.nn import functional as F
 from torch.optim import Adam
 
+from pl_bolts.utils.warnings import warn_missing_pkg
+
 try:
     from torchvision.models import densenet
 except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 from pl_bolts.losses.self_supervised_learning import nt_xent_loss
 from pl_bolts.models.self_supervised.evaluator import Flatten

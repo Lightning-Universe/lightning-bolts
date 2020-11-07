@@ -36,7 +36,6 @@ class AE(pl.LightningModule):
         first_conv: bool = False,
         maxpool1: bool = False,
         enc_out_dim: int = 512,
-        kl_coeff: float = 0.1,
         latent_dim: int = 256,
         lr: float = 1e-4,
         **kwargs
