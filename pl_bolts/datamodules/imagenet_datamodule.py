@@ -90,7 +90,7 @@ class ImagenetDataModule(LightningDataModule):
         self.meta_dir = meta_dir
         self.num_imgs_per_val_class = num_imgs_per_val_class
         self.batch_size = batch_size
-        self.num_samples = 1231167 - self.num_imgs_per_val_class * self.num_classes
+        self.num_samples = 1281167 - self.num_imgs_per_val_class * self.num_classes
 
     @property
     def num_classes(self):
@@ -145,7 +145,7 @@ class ImagenetDataModule(LightningDataModule):
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class=-1,
-                                    num_imgs_per_class_val_split=self.num_imgs_per_val_class,
+                                    #num_imgs_per_class_val_split=self.num_imgs_per_val_class,
                                     meta_dir=self.meta_dir,
                                     split='train',
                                     transform=transforms)
