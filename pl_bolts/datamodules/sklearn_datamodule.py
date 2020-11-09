@@ -118,22 +118,22 @@ class SklearnDataModule(LightningDataModule):
         >>> from pl_bolts.datamodules import SklearnDataModule
         ...
         >>> X, y = load_boston(return_X_y=True)
-        >>> loaders = SklearnDataModule(X, y)
+        >>> loaders = SklearnDataModule(X, y, batch_size=32)
         ...
         >>> # train set
-        >>> train_loader = loaders.train_dataloader(batch_size=32)
+        >>> train_loader = loaders.train_dataloader()
         >>> len(train_loader.dataset)
         355
         >>> len(train_loader)
         11
         >>> # validation set
-        >>> val_loader = loaders.val_dataloader(batch_size=32)
+        >>> val_loader = loaders.val_dataloader()
         >>> len(val_loader.dataset)
         100
         >>> len(val_loader)
         3
         >>> # test set
-        >>> test_loader = loaders.test_dataloader(batch_size=32)
+        >>> test_loader = loaders.test_dataloader()
         >>> len(test_loader.dataset)
         51
         >>> len(test_loader)
