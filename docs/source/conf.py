@@ -349,6 +349,7 @@ autodoc_mock_imports = MOCK_PACKAGES + MOCK_MANUAL_PACKAGES
 # for mod_name in MOCK_REQUIRE_PACKAGES:
 #     sys.modules[mod_name] = mock.Mock()
 
+
 # Resolve function
 # This function is used to populate the (source) links in the API
 def linkcode_resolve(domain, info):
