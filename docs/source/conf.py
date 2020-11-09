@@ -64,6 +64,10 @@ for dir_name in (os.path.basename(p) for p in glob.glob(os.path.join(PATH_ROOT, 
 with open('readme.md', 'w') as fp:
     fp.write(readme)
 
+# copy all documents from GH templates like contribution guide
+for md in glob.glob(os.path.join(PATH_ROOT, '.github', '*.md')):
+    shutil.copy(md, os.path.join(PATH_HERE, os.path.basename(md)))
+
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -108,9 +112,6 @@ nbsphinx_requirejs_path = ''
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-#
-# source_suffix = ['.rst', '.md']
-# source_suffix = ['.rst', '.md', '.ipynb']
 source_suffix = {
     '.rst': 'restructuredtext',
     '.txt': 'markdown',

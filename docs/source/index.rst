@@ -89,6 +89,14 @@ PyTorch-Lightning-Bolts documentation
 
    vision_tasks
 
+.. toctree::
+   :maxdepth: 1
+   :name: community
+   :caption: Community
+
+   CONTRIBUTING.md
+   governance.md
+
 
 Indices and tables
 ==================
