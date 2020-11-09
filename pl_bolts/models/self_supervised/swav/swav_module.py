@@ -16,13 +16,18 @@ from torch.optim.optimizer import Optimizer
 
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet18, resnet50
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
-from pl_bolts.transforms.dataset_normalizations import cifar10_normalization, stl10_normalization
+from pl_bolts.transforms.dataset_normalizations (
+    import stl10_normalization,
+    cifar10_normalization,
+    imagenet_normalization
+)
 
 
 class SwAV(pl.LightningModule):
     def __init__(
         self,
         gpus: int,
+        nodes: int,
         num_samples: int,
         batch_size: int,
         dataset: str,
@@ -54,8 +59,9 @@ class SwAV(pl.LightningModule):
     ):
         """
         Args:
-            gpus: number of gpus used in training, passed to SwAV module
+            gpus: number of gpus per node used in training, passed to SwAV module
                 to manage the queue and select distributed sinkhorn
+            nodes: number of nodes to train on
             num_samples: number of image samples used for training
             batch_size: batch size per GPU in ddp
             dataset: dataset being used for train/val
@@ -94,6 +100,7 @@ class SwAV(pl.LightningModule):
         self.save_hyperparameters()
 
         self.gpus = gpus
+        self.nodes = nodes
         self.arch = arch
         self.dataset = dataset
         self.num_samples = num_samples
@@ -127,7 +134,7 @@ class SwAV(pl.LightningModule):
         self.warmup_epochs = warmup_epochs
         self.max_epochs = max_epochs
 
-        if self.gpus > 1:
+        if self.gpus * self.nodes > 1:
             self.get_assignments = self.distributed_sinkhorn
         else:
             self.get_assignments = self.sinkhorn
@@ -135,7 +142,7 @@ class SwAV(pl.LightningModule):
         self.model = self.init_model()
 
         # compute iters per epoch
-        global_batch_size = self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
+        global_batch_size = self.nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
         # define LR schedule
@@ -472,8 +479,8 @@ class SwAV(pl.LightningModule):
 
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
-    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
-    from pl_bolts.models.self_supervised.swav.transforms import SwAVEvalDataTransform, SwAVTrainDataTransform
+    from pl_bolts.models.self_supervised.swav.transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
+    from pl_bolts.datamodules import STL10DataModule, CIFAR10DataModule, ImagenetDataModule
 
     parser = ArgumentParser()
 
