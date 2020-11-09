@@ -344,14 +344,10 @@ if SPHINX_MOCK_REQUIREMENTS:
 # replace PyPI packages by importing ones
 MOCK_PACKAGES = [PACKAGE_MAPPING.get(pkg, pkg) for pkg in MOCK_PACKAGES]
 
-MOCK_MANUAL_PACKAGES = [
-    'torch',
-    'torchvision',
-]
+MOCK_MANUAL_PACKAGES = []
 autodoc_mock_imports = MOCK_PACKAGES + MOCK_MANUAL_PACKAGES
 # for mod_name in MOCK_REQUIRE_PACKAGES:
 #     sys.modules[mod_name] = mock.Mock()
-
 
 # Resolve function
 # This function is used to populate the (source) links in the API

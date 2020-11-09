@@ -107,7 +107,7 @@ You can use the pretrained models present in bolts.
 
 CIFAR-10 pretrained model:
 
-.. testcode::
+.. code-block::
 
     from pl_bolts.models.autoencoders import VAE
 
