@@ -16,8 +16,8 @@ from torch.optim.optimizer import Optimizer
 
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet18, resnet50
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
-from pl_bolts.transforms.dataset_normalizations (
-    import stl10_normalization,
+from pl_bolts.transforms.dataset_normalizations import (
+    stl10_normalization,
     cifar10_normalization,
     imagenet_normalization
 )
