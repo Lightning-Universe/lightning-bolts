@@ -145,7 +145,7 @@ class ImagenetDataModule(LightningDataModule):
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class=-1,
-                                    #num_imgs_per_class_val_split=self.num_imgs_per_val_class,
+                                    num_imgs_per_class_val_split=self.num_imgs_per_val_class,
                                     meta_dir=self.meta_dir,
                                     split='train',
                                     transform=transforms)
