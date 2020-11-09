@@ -66,10 +66,10 @@ def test_semantic_segmentation():
 
     dm = DummyDataModule()
 
-    model = SemSegment(datamodule=dm, num_classes=19)
+    model = SemSegment(num_classes=19)
 
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1)
-    trainer.fit(model)
+    trainer.fit(model, dm)
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) > 0
