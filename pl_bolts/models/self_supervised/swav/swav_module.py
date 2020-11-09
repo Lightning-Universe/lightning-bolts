@@ -14,9 +14,9 @@ from pytorch_lightning.utilities import AMPType
 from torch import nn
 from torch.optim.optimizer import Optimizer
 
-from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
+from pl_bolts.models.self_supervised.swav.swav_resnet import resnet18, resnet50
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
-from pl_bolts.transforms.dataset_normalizations import stl10_normalization, cifar10_normalization
+from pl_bolts.transforms.dataset_normalizations import cifar10_normalization, stl10_normalization
 
 
 class SwAV(pl.LightningModule):
@@ -471,8 +471,8 @@ class SwAV(pl.LightningModule):
 
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
-    from pl_bolts.models.self_supervised.swav.transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
-    from pl_bolts.datamodules import STL10DataModule, CIFAR10DataModule
+    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
+    from pl_bolts.models.self_supervised.swav.transforms import SwAVEvalDataTransform, SwAVTrainDataTransform
 
     parser = ArgumentParser()
 

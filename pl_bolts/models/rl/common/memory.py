@@ -3,7 +3,7 @@
 # Named tuple for storing experience steps gathered in training
 import collections
 from collections import deque, namedtuple
-from typing import Tuple, List, Union
+from typing import List, Tuple, Union
 
 import numpy as np
 

@@ -4,7 +4,7 @@ Deep Q Network
 
 import argparse
 from collections import OrderedDict
-from typing import Tuple, List, Dict, Optional
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pytorch_lightning as pl
@@ -15,7 +15,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from pl_bolts.datamodules.experience_source import ExperienceSourceDataset, Experience
+from pl_bolts.datamodules.experience_source import Experience, ExperienceSourceDataset
 from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common.agents import ValueAgent
 from pl_bolts.models.rl.common.memory import MultiStepBuffer

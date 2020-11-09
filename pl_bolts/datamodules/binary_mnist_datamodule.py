@@ -7,6 +7,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 try:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import MNIST
+
     from pl_bolts.datasets.mnist_dataset import BinaryMNIST
 except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover

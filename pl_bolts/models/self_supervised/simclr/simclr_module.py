@@ -218,7 +218,7 @@ class SimCLR(pl.LightningModule):
 
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
-    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
+    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
 
     parser = ArgumentParser()
 

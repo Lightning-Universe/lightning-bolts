@@ -6,6 +6,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     from torchvision.datasets import STL10
+
     from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
     from pl_bolts.datasets.ssl_amdim_datasets import CIFAR10Mixed
     from pl_bolts.models.self_supervised.amdim import transforms as amdim_transforms

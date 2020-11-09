@@ -1,0 +1,4 @@
+[tool.isort]
+profile = "black"
+src_paths = ["pl_bolts", "tests"]
+line_length = 120

@@ -4,7 +4,7 @@ import pytorch_lightning as pl
 import torch
 from torch.nn import functional as F
 
-from pl_bolts.models.gans.basic.components import Generator, Discriminator
+from pl_bolts.models.gans.basic.components import Discriminator, Generator
 
 
 class GAN(pl.LightningModule):

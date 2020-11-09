@@ -10,10 +10,7 @@ else:
     __all__ += ['BinaryMNISTDataModule']
 
 try:
-    from pl_bolts.datamodules.cifar10_datamodule import (
-        CIFAR10DataModule,
-        TinyCIFAR10DataModule,
-    )
+    from pl_bolts.datamodules.cifar10_datamodule import CIFAR10DataModule, TinyCIFAR10DataModule
 except ModuleNotFoundError:
     pass
 else:
@@ -21,9 +18,9 @@ else:
 
 try:
     from pl_bolts.datamodules.experience_source import (
-        ExperienceSourceDataset,
-        ExperienceSource,
         DiscountedExperienceSource,
+        ExperienceSource,
+        ExperienceSourceDataset,
     )
 except ModuleNotFoundError:
     pass
@@ -52,11 +49,7 @@ else:
     __all__ += ['MNISTDataModule']
 
 try:
-    from pl_bolts.datamodules.sklearn_datamodule import (
-        SklearnDataset,
-        SklearnDataModule,
-        TensorDataset,
-    )
+    from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule, SklearnDataset, TensorDataset
 except ModuleNotFoundError:
     pass
 else:

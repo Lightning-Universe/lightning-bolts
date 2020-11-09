@@ -25,14 +25,14 @@ try:
 except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
-from pl_bolts.metrics import precision_at_k, mean
+from pl_bolts.metrics import mean, precision_at_k
 from pl_bolts.models.self_supervised.moco.transforms import (
-    Moco2TrainCIFAR10Transforms,
     Moco2EvalCIFAR10Transforms,
-    Moco2TrainSTL10Transforms,
+    Moco2EvalImagenetTransforms,
     Moco2EvalSTL10Transforms,
+    Moco2TrainCIFAR10Transforms,
     Moco2TrainImagenetTransforms,
-    Moco2EvalImagenetTransforms
+    Moco2TrainSTL10Transforms,
 )
 
 
@@ -351,7 +351,7 @@ def concat_all_gather(tensor):
 
 
 def cli_main():
-    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, SSLImagenetDataModule
+    from pl_bolts.datamodules import CIFAR10DataModule, SSLImagenetDataModule, STL10DataModule
 
     parser = ArgumentParser()
 

@@ -1,9 +1,11 @@
-import torch
 import uuid
-from PIL import Image
 from pathlib import Path
-from pl_bolts.datasets.cifar10_dataset import CIFAR10
+
+import torch
+from PIL import Image
+
 from pl_bolts.datamodules import CityscapesDataModule
+from pl_bolts.datasets.cifar10_dataset import CIFAR10
 
 
 def test_dev_datasets(datadir):
