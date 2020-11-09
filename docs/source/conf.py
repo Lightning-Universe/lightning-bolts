@@ -68,7 +68,7 @@ with open('readme.md', 'w') as fp:
 
 # If your documentation needs a minimal Sphinx version, state it here.
 
-needs_sphinx = '2.0'
+needs_sphinx = '2.4'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -328,20 +328,23 @@ def package_list_from_file(file):
     return mocked_packages
 
 
+# define mapping from PyPI names to python imports
+PACKAGE_MAPPING = {
+    'pytorch-lightning': 'pytorch_lightning',
+    'scikit-learn': 'sklearn',
+    'Pillow': 'PIL',
+    'opencv-python': 'cv2',
+}
 MOCK_PACKAGES = []
 if SPHINX_MOCK_REQUIREMENTS:
     # mock also base packages when we are on RTD since we don't install them there
     MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements.txt'))
     MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements', 'models.txt'))
     MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements', 'loggers.txt'))
+# replace PyPI packages by importing ones
+MOCK_PACKAGES = [PACKAGE_MAPPING.get(pkg, pkg) for pkg in MOCK_PACKAGES]
 
-MOCK_MANUAL_PACKAGES = [
-    'pytorch_lightning',
-    'numpy',
-    'sklearn',
-    'PIL',
-    'cv2',
-]
+MOCK_MANUAL_PACKAGES = []
 autodoc_mock_imports = MOCK_PACKAGES + MOCK_MANUAL_PACKAGES
 # for mod_name in MOCK_REQUIRE_PACKAGES:
 #     sys.modules[mod_name] = mock.Mock()
@@ -416,19 +419,18 @@ autosectionlabel_prefix_document = True
 
 # only run doctests marked with a ".. doctest::" directive
 doctest_test_doctest_blocks = ''
-# doctest_global_setup = """
-#
-# import importlib
-# import os
-# import torch
-#
-# import pytorch_lightning as pl
-# from pytorch_lightning import Trainer, LightningModule
-# from pytorch_lightning.utilities import NATIVE_AMP_AVALAIBLE
-# APEX_AVAILABLE = importlib.util.find_spec("apex") is not None
-# XLA_AVAILABLE = importlib.util.find_spec("torch_xla") is not None
-# TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
-#
-#
-# """
+doctest_global_setup = """
+
+import importlib
+import os
+import torch
+
+import pytorch_lightning as pl
+from pytorch_lightning import Trainer, LightningModule
+from pytorch_lightning.utilities import NATIVE_AMP_AVALAIBLE
+APEX_AVAILABLE = importlib.util.find_spec("apex") is not None
+XLA_AVAILABLE = importlib.util.find_spec("torch_xla") is not None
+TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
+
+"""
 coverage_skip_undoc_in_source = True
