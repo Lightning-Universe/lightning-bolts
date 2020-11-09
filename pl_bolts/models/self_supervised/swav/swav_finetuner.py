@@ -94,10 +94,9 @@ def cli_main():  # pragma: no-cover
         gpus=args.gpus,
         num_samples=args.num_samples,
         batch_size=args.batch_size,
-        datamodule=dm,
         maxpool1=args.maxpool1,
         first_conv=args.first_conv,
-        dataset='imagenet',
+        dataset=args.dataset,
     ).load_from_checkpoint(args.ckpt_path, strict=False)
 
     tuner = SSLFineTuner(

@@ -435,6 +435,7 @@ class SwAV(pl.LightningModule):
 
         # training params
         parser.add_argument("--fast_dev_run", action='store_true')
+        parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
         parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=16, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
@@ -515,11 +516,44 @@ def cli_main():
         args.size_crops = [32, 16]
         args.nmb_crops = [2, 1]
         args.gaussian_blur = False
+    elif args.dataset == 'imagenet':
+        dm = ImagenetDataModule(
+            data_dir=args.data_path,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers
+        )
+
+        args.num_samples = dm.num_samples
+        args.input_height = dm.size()[-1]
+
+        args.maxpool1 = True
+        args.first_conv = True
+        normalization = imagenet_normalization()
+
+        args.size_crops = [224, 96]
+        args.min_scale_crops = [0.14, 0.05]
+        args.max_scale_crops = [1., 0.14]
+        args.gaussian_blur = True
+        args.jitter_strength = 1.
+
+        args.batch_size = 64
+        args.nodes = 8
+        args.gpus = 8  # per-node
+        args.max_epochs = 800
+
+        args.optimizer = 'sgd'
+        args.lars_wrapper = True
+        args.learning_rate = 4.8
+        args.final_lr = 0.0048
+        args.start_lr = 0.3
+
+        args.nmb_prototypes = 3000
+        args.online_ft = True
     else:
         raise NotImplementedError("other datasets have not been implemented till now")
 
     dm.train_transforms = SwAVTrainDataTransform(
-        normalize=stl10_normalization(),
+        normalize=normalization,
         size_crops=args.size_crops,
         nmb_crops=args.nmb_crops,
         min_scale_crops=args.min_scale_crops,
@@ -529,7 +563,7 @@ def cli_main():
     )
 
     dm.val_transforms = SwAVEvalDataTransform(
-        normalize=stl10_normalization(),
+        normalize=normalization,
         size_crops=args.size_crops,
         nmb_crops=args.nmb_crops,
         min_scale_crops=args.min_scale_crops,
@@ -556,6 +590,7 @@ def cli_main():
         max_epochs=args.max_epochs,
         max_steps=None if args.max_steps == -1 else args.max_steps,
         gpus=args.gpus,
+        num_nodes=args.nodes,
         distributed_backend='ddp' if args.gpus > 1 else None,
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=32 if args.fp32 else 16,
