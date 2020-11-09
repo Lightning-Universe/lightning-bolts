@@ -56,7 +56,8 @@ class SwAVTrainDataTransform(object):
 
         if self.gaussian_blur:
             kernel_size = int(0.1 * self.size_crops[0])
-            kernel_size = kernel_size - 1 if kernel_size % 2 == 1
+            if kernel_size % 2 == 1:
+                kernel_size -= 1
 
             color_transform.append(
                 GaussianBlur(kernel_size=kernel_size, p=0.5)
