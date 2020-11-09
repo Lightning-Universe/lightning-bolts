@@ -24,7 +24,7 @@ jobs:
         run: |
           flake8 .
 
-  isort:
+  imports-check-isort:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@master
