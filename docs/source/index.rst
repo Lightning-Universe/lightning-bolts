@@ -94,7 +94,6 @@ PyTorch-Lightning-Bolts documentation
    :name: community
    :caption: Community
 
-
    CONTRIBUTING.md
    governance.md
 
