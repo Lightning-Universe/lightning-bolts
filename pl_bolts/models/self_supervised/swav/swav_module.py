@@ -524,15 +524,6 @@ def cli_main():
         args.nmb_crops = [2, 1]
         args.gaussian_blur = False
     elif args.dataset == 'imagenet':
-        dm = ImagenetDataModule(
-            data_dir=args.data_path,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers
-        )
-
-        args.num_samples = dm.num_samples
-        args.input_height = dm.size()[-1]
-
         args.maxpool1 = True
         args.first_conv = True
         normalization = imagenet_normalization()
@@ -556,6 +547,15 @@ def cli_main():
 
         args.nmb_prototypes = 3000
         args.online_ft = True
+
+        dm = ImagenetDataModule(
+            data_dir=args.data_path,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers
+        )
+
+        args.num_samples = dm.num_samples
+        args.input_height = dm.size()[-1]
     else:
         raise NotImplementedError("other datasets have not been implemented till now")
 
