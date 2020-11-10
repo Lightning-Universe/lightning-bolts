@@ -4,3 +4,6 @@ Pillow
 opencv-python
 gym>=0.17.2  # needed for RL
 torchdyn # needed for Neural Differential Equations
+
+# needed for Neural Stochastic Differential Equations (will be included in next torchdyn pip release)
+git+https://github.com/google-research/torchsde.git#egg=torchsde
