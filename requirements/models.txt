@@ -3,3 +3,4 @@ scikit-learn>=0.23
 Pillow
 opencv-python
 gym>=0.17.2  # needed for RL
+torchdyn # needed for Neural Differential Equations
