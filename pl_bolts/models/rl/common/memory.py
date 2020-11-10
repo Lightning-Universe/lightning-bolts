@@ -6,6 +6,8 @@ from collections import deque, namedtuple
 from typing import List, Tuple, Union
 
 import numpy as np
+import torch
+import torch.multiprocessing as mp
 
 Experience = namedtuple(
     "Experience", field_names=["state", "action", "reward", "done", "new_state"]
@@ -329,3 +331,97 @@ class PERBuffer(ReplayBuffer):
         """
         for idx, prio in zip(batch_indices, batch_priorities):
             self.priorities[idx] = prio
+
+
+class SharedReplayBuffer:
+    """
+    This replay buffer is shared across the workers
+    """
+
+    def __init__(self, capacity: int, state_shape, action_shape):
+        """
+        Args:
+            capacity: max number of experiences that will be stored in the buffer
+            state_shape: the shape of states being stored
+            action_shape: the shape of actions being stored
+        """
+        self.count = torch.tensor([0], dtype=torch.int64)
+        self.capacity = capacity
+        self.pos = torch.tensor([0], dtype=torch.int64)
+
+        self.states = torch.zeros((capacity, state_shape), dtype=torch.float32)
+        self.next_states = torch.zeros((capacity, state_shape), dtype=torch.float32)
+        self.actions = torch.zeros((capacity, action_shape), dtype=torch.float32)
+        self.rewards = torch.zeros((capacity,), dtype=torch.float32)
+        self.dones = torch.zeros((capacity,), dtype=torch.bool)
+
+        self.count.share_memory_()
+        self.pos.share_memory_()
+        self.states.share_memory_()
+        self.actions.share_memory_()
+        self.next_states.share_memory_()
+        self.rewards.share_memory_()
+        self.dones.share_memory_()
+
+        self.lock = mp.Lock()
+
+    def __len__(self):
+        return self.count
+
+    def sample(self, batch_size: int):
+        """
+        Randomly samples a number of experiences from the stored buffer
+
+        Args:
+            batch_size: number of experiences to sample
+
+        Returns:
+            a batch of tuple np arrays of state, action, reward, done, next_state
+        """
+        if self.count <= batch_size:
+            with self.lock:
+                nr = self.count[0]
+                return [
+                    self.states[:nr].detach().cpu().numpy(),
+                    self.actions[:nr].detach().cpu().numpy(),
+                    self.rewards[:nr].detach().cpu().numpy(),
+                    self.dones[:nr].detach().cpu().numpy(),
+                    self.next_states[:nr].detach().cpu().numpy()
+                ]
+
+        # Warning: replace=False makes random.choice O(n)
+        keys = np.random.choice(min(self.count[0], self.capacity), batch_size, replace=True)
+        with self.lock:
+            return (
+                self.states[keys].detach().cpu().numpy(),
+                self.actions[keys].detach().cpu().numpy(),
+                self.rewards[keys].detach().cpu().numpy(),
+                self.dones[keys].detach().cpu().numpy(),
+                self.next_states[keys].detach().cpu().numpy()
+            )
+
+    def append(self, exp: Experience):
+        """
+        Adds a new experience to the buffer. Currently only handles one Experience at a time.
+
+        Args:
+            exp: tuple (state, action, reward, done, new_state)
+        """
+
+        with self.lock:
+            if self.count[0] < self.capacity:
+                self.count[0] += 1
+
+            pos = self.pos[0]
+            self.states[pos] = torch.tensor(exp.state, dtype=torch.float32)
+            self.actions[pos] = torch.tensor(exp.action, dtype=torch.float32)
+            self.rewards[pos] = torch.tensor(exp.reward, dtype=torch.float32)
+            self.dones[pos] = torch.tensor(exp.done, dtype=torch.bool)
+            self.next_states[pos] = torch.tensor(exp.new_state, dtype=torch.float32)
+
+            self.pos[0] = (self.pos[0] + 1) % self.capacity
+
+    def empty(self):
+        with self.lock:
+            self.count[0] = 0
+            self.pos[0] = 0
