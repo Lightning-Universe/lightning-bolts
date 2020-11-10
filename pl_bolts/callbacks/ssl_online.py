@@ -102,8 +102,8 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
 
         # log metrics
         train_acc = accuracy(mlp_preds, y)
-        pl_module.log('train_acc', train_acc, on_step=True, on_epoch=False)
-        pl_module.log('train_mlp_loss', mlp_loss, on_step=True, on_epoch=False)
+        pl_module.log('online_train_acc', train_acc, on_step=True, on_epoch=False)
+        pl_module.log('online_train_loss', mlp_loss, on_step=True, on_epoch=False)
 
     def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         x, y = self.to_device(batch, pl_module.device)
@@ -119,5 +119,5 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
 
         # log metrics
         val_acc = accuracy(mlp_preds, y)
-        pl_module.log('val_acc', val_acc, on_step=False, on_epoch=True, sync_dist=True)
-        pl_module.log('val_mlp_loss', mlp_loss, on_step=False, on_epoch=True, sync_dist=True)
+        pl_module.log('online_val_acc', val_acc, on_step=False, on_epoch=True, sync_dist=True)
+        pl_module.log('online_val_loss', mlp_loss, on_step=False, on_epoch=True, sync_dist=True)
