@@ -92,6 +92,7 @@ def cli_main():  # pragma: no-cover
 
     backbone = SwAV(
         gpus=args.gpus,
+        nodes=1,
         num_samples=args.num_samples,
         batch_size=args.batch_size,
         maxpool1=args.maxpool1,
