@@ -117,6 +117,7 @@ def cli_main():  # pragma: no-cover
 
     trainer = pl.Trainer(
         gpus=args.gpus,
+        num_nodes=1,
         precision=16,
         max_epochs=args.num_epochs,
         distributed_backend='ddp',
