@@ -118,7 +118,7 @@ class BinaryMNISTDataModule(LightningDataModule):
         )
         return loader
 
-    def val_dataloader(self,):
+    def val_dataloader(self):
         """
         MNIST val set uses a subset of the training set for validation
         """
