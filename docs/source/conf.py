@@ -68,6 +68,21 @@ with open('readme.md', 'w') as fp:
 for md in glob.glob(os.path.join(PATH_ROOT, '.github', '*.md')):
     shutil.copy(md, os.path.join(PATH_HERE, os.path.basename(md)))
 
+# export the changelog
+with open(os.path.join(PATH_ROOT, 'CHANGELOG.md'), 'r') as fp:
+    chlog_lines = fp.readlines()
+# enrich short subsub-titles to be unique
+chlog_ver = ''
+for i, ln in enumerate(chlog_lines):
+    if ln.startswith('## '):
+        chlog_ver = ln[2:].split('-')[0].strip()
+    elif ln.startswith('### '):
+        ln = ln.replace('###', f'### {chlog_ver} -')
+        chlog_lines[i] = ln
+with open(os.path.join(PATH_HERE, 'CHANGELOG.md'), 'w') as fp:
+    fp.writelines(chlog_lines)
+
+
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
