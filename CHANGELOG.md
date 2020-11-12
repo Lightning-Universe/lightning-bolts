@@ -18,13 +18,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.5] - 2020-10-12
 
+### Added
+
+- Enabled PyTorch Lightning 1.0 compatibility
+
 ## [0.2.4] - 2020-10-12
 
 ## [0.2.3] - 2020-10-12
 
+### Added
+
+- Enabled PyTorch Lightning 0.10 compatibility
+
 ## [0.2.2] - 2020-09-14
 
 ## [0.2.1] - 2020-09-13
+
+### Added
+
+- Added pretrained VAE with resnet encoders and decoders
+- Added pretrained AE with resnet encoders and decoders
+- Added CPC pretrained on CIFAR10 and STL10
+- Verified BYOL implementation
+
+### Changed
+
+- Dropped all dependencies except PyTorch Lightning and PyTorch
 
 ## [0.2.0] - 2020-09-10
 
