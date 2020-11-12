@@ -8,9 +8,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `input_channels` argument to UNet ([#297](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/297))
+
+- Added SwAV ([#239](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/239), [#348](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/348), [#323](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/323))
+
+- Added data monitor callbacks `ModuleDataMonitor` and `TrainingDataMonitor` ([#285](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/285))
+
 ### Changed
 
+- Decoupled datamodules from models ([#332](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/332), [#270](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/270))
+
+- Set PyTorch Lightning 1.0 as the minimum requirement ([#274](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/274))
+
+- Move `pl_bolts.callbacks.self_supervised.BYOLMAWeightUpdate` to  `pl_bolts.callbacks.byol_updates.BYOLMAWeightUpdate` ([#288](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/288))
+
+- Move `pl_bolts.callbacks.self_supervised.SSLOnlineEvaluator` to `pl_bolts.callbacks.ssl_online.SSLOnlineEvaluator` ([#288](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/288))
+
+- Move `pl_bolts.datamodules.*_dataset` to `pl_bolts.datasets.*_dataset` ([#275](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/275))
+
 ### Fixed
+
+- Fixed duplicate warnings when optional packages are unavailable ([#341](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/341))
+
+- Fixed ModuleNotFoundError when importing datamoules ([#303](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/303))
+
+- Fixed cyclic imports in `pl_bolts.utils.self_suprvised` ([#350](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/350))
+
+- Fixed VAE loss to use KL term of ELBO ([#330](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/330))
+
+- Fixed dataloders of `MNISTDataModule` to use `self.batch_size` ([#331](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/331))
+
+- Fixed missing `outputs` in SSL hooks for PyTorch Lightning 1.0 ([#277](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/277))
 
 ### Removed
 
