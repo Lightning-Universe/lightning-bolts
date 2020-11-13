@@ -139,7 +139,8 @@ class SimCLR(pl.LightningModule):
         )
 
     def forward(self, x):
-        return self.encoder(x)
+        # bolts resnet returns a list
+        return self.encoder(x)[-1]
 
     def shared_step(self, batch, batch_idx):
         if self.dataset == 'stl10':
@@ -149,9 +150,9 @@ class SimCLR(pl.LightningModule):
         # final image in tuple is for online eval
         (img1, img2, _), y = batch
 
-        # get h representations
-        h1 = self.encoder(img1)
-        h2 = self.encoder(img2)
+        # get h representations, bolts resnet returns a list
+        h1 = self.encoder(img1)[-1]
+        h2 = self.encoder(img2)[-1]
 
         # get z representations
         z1 = self.projection(h1)

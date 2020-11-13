@@ -12,7 +12,6 @@ __all__ = [
     'resnet18',
     'resnet34',
     'resnet50',
-    'resnet50_bn',
     'resnet101',
     'resnet152',
     'resnext50_32x4d',
@@ -25,7 +24,7 @@ __all__ = [
 MODEL_URLS = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
     'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
-    'resnet50_bn': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
+    'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
     'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
     'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
     'resnext50_32x4d': 'https://download.pytorch.org/models/resnext50_32x4d-7cdf4587.pth',
@@ -92,49 +91,6 @@ class Bottleneck(nn.Module):
     def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
                  base_width=64, dilation=1, norm_layer=None):
         super(Bottleneck, self).__init__()
-        # if norm_layer is None:
-        #     norm_layer = nn.BatchNorm2d
-        width = int(planes * (base_width / 64.)) * groups
-        # Both self.conv2 and self.downsample layers downsample the input when stride != 1
-        self.conv1 = conv1x1(inplanes, width)
-        # self.bn1 = norm_layer(width)
-        self.conv2 = conv3x3(width, width, stride, groups, dilation)
-        # self.bn2 = norm_layer(width)
-        self.conv3 = conv1x1(width, planes * self.expansion)
-        # self.bn3 = norm_layer(planes * self.expansion)
-        self.relu = nn.ReLU(inplace=True)
-        self.downsample = downsample
-        self.stride = stride
-
-    def forward(self, x):
-        identity = x
-
-        out = self.conv1(x)
-        # out = self.bn1(out)
-        out = self.relu(out)
-
-        out = self.conv2(out)
-        # out = self.bn2(out)
-        out = self.relu(out)
-
-        out = self.conv3(out)
-        # out = self.bn3(out)
-
-        if self.downsample is not None:
-            identity = self.downsample(x)
-
-        out += identity
-        out = self.relu(out)
-
-        return out
-
-
-class BottleneckBN(nn.Module):
-    expansion = 4
-
-    def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
-                 base_width=64, dilation=1, norm_layer=None):
-        super(BottleneckBN, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         width = int(planes * (base_width / 64.)) * groups
@@ -269,6 +225,9 @@ class ResNet(nn.Module):
             x0 = self.layer3(x0)
             x0 = self.layer4(x0)
 
+            x0 = self.avgpool(x0)
+            x0 = torch.flatten(x0, 1)
+
             return [x0]
 
 
@@ -314,17 +273,6 @@ def resnet50(pretrained: bool = False, progress: bool = True, **kwargs):
     return _resnet('resnet50', Bottleneck, [3, 4, 6, 3], pretrained, progress, **kwargs)
 
 
-def resnet50_bn(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""ResNet-50 model from
-    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
-
-    Args:
-        pretrained: If True, returns a model pre-trained on ImageNet
-        progress: If True, displays a progress bar of the download to stderr
-    """
-    return _resnet('resnet50_bn', BottleneckBN, [3, 4, 6, 3], pretrained, progress, **kwargs)
-
-
 def resnet101(pretrained: bool = False, progress: bool = True, **kwargs):
     r"""ResNet-101 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
@@ -333,7 +281,7 @@ def resnet101(pretrained: bool = False, progress: bool = True, **kwargs):
         pretrained: If True, returns a model pre-trained on ImageNet
         progress: If True, displays a progress bar of the download to stderr
     """
-    return _resnet('resnet101', BottleneckBN, [3, 4, 23, 3], pretrained, progress, **kwargs)
+    return _resnet('resnet101', Bottleneck, [3, 4, 23, 3], pretrained, progress, **kwargs)
 
 
 def resnet152(pretrained: bool = False, progress: bool = True, **kwargs):
