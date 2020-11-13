@@ -295,7 +295,7 @@ class SimCLR(pl.LightningModule):
         # transform params
         parser.add_argument("--gaussian_blur", action="store_true", help="add gaussian blur")
         parser.add_argument("--jitter_strength", type=float, default=1.0, help="jitter strength")
-        parser.add_argument("--dataset", type=str, default="stl10", help="stl10, cifar10")
+        parser.add_argument("--dataset", type=str, default="cifar10", help="stl10, cifar10")
         parser.add_argument("--data_path", type=str, default=".", help="path to download data")
 
         # training params

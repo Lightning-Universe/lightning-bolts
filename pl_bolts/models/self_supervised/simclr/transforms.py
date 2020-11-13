@@ -42,7 +42,7 @@ class SimCLRTrainDataTransform(object):
         input_height: int = 224,
         gaussian_blur: bool = True,
         jitter_strength: float = 1.,
-        normalize: Optional[transforms.Normalize] = None
+        normalize=None
     ) -> None:
 
         if not _TORCHVISION_AVAILABLE:
@@ -118,7 +118,7 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
         input_height: int = 224,
         gaussian_blur: bool = True,
         jitter_strength: float = 1.,
-        normalize: Optional[transforms.Normalize] = None
+        normalize=None
     ):
         super().__init__(
             normalize=normalize,
