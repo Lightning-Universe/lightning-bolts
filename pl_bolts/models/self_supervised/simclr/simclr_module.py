@@ -107,9 +107,9 @@ class SimCLR(pl.LightningModule):
         self.encoder = self.init_model()
 
         self.projection = Projection(
-            input_dim=args.hidden_mlp,
-            hidden_dim=args.hidden_mlp,
-            output_dim=args.feat_dim
+            input_dim=self.hidden_mlp,
+            hidden_dim=self.hidden_mlp,
+            output_dim=self.feat_dim
         )
 
         # compute iters per epoch
