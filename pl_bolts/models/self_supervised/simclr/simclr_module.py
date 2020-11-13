@@ -40,7 +40,6 @@ class Projection(nn.Module):
 """
 TODO:
 - update transform for onlnie_ft and finetuning later?
-1. update resent
 2. update loss func
 4. update finetuner
 """
