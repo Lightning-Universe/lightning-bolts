@@ -141,7 +141,7 @@ class SimCLR(pl.LightningModule):
         # bolts resnet returns a list
         return self.encoder(x)[-1]
 
-    def shared_step(self, batch, batch_idx):
+    def shared_step(self, batch):
         if self.dataset == 'stl10':
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
