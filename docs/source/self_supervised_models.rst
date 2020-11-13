@@ -274,6 +274,7 @@ Model implemented by:
 
     - `William Falcon <https://github.com/williamFalcon>`_
     - `Tullie Murrell <https://github.com/tullie>`_
+    - `Ananya Harsh Jha <https://github.com/ananyahjha93>`_
 
 To Train::
 
