@@ -72,12 +72,19 @@ class SimCLRTrainDataTransform(object):
         if self.gaussian_blur:
             data_transforms.append(GaussianBlur(kernel_size=int(0.1 * self.input_height, p=0.5)))
 
-        data_transforms.append(transforms.ToTensor())
+        if normalize is None:
+            self.final_transform = transforms.ToTensor()
+        else:
+            self.final_transform = transforms.Compose([transforms.ToTensor(), normalize])
 
-        if self.normalize:
-            data_transforms.append(normalize)
+        self.train_transform = transforms.Compose([data_transforms, self.final_transform])
 
-        self.train_transform = transforms.Compose(data_transforms)
+        # add online train transform of the size of global view
+        self.online_transform = transforms.Compose([
+            transforms.RandomResizedCrop(self.input_height),
+            transforms.RandomHorizontalFlip(),
+            self.final_transform
+        ])
 
     def __call__(self, sample):
         transform = self.train_transform
@@ -85,10 +92,10 @@ class SimCLRTrainDataTransform(object):
         xi = transform(sample)
         xj = transform(sample)
 
-        return xi, xj
+        return xi, xj, self.online_transform(sample)
 
 
-class SimCLREvalDataTransform(object):
+class SimCLREvalDataTransform(SimCLRTrainDataTransform):
     """
     Transforms for SimCLR
 
@@ -109,29 +116,23 @@ class SimCLREvalDataTransform(object):
     def __init__(
         self,
         input_height: int = 224,
+        gaussian_blur: bool = True,
+        jitter_strength: float = 1.,
         normalize: Optional[transforms.Normalize] = None
     ):
-        self.input_height = input_height
-        self.normalize = normalize
+        super().__init__(
+            normalize=normalize,
+            input_height=input_height,
+            gaussian_blur=gaussian_blur,
+            jitter_strength=jitter_strength
+        )
 
-        # TODO: simple resize of random resized crop
-        data_transforms = [
-            transforms.Resize(self.input_height),
-            transforms.ToTensor()
-        ]
-
-        if self.normalize:
-            data_transforms.append(normalize)
-
-        self.test_transform = transforms.Compose(data_transforms)
-
-    def __call__(self, sample):
-        transform = self.test_transform
-
-        xi = transform(sample)
-        xj = transform(sample)
-
-        return xi, xj
+        # replace online transform with eval time transform
+        self.online_transform = transforms.Compose([
+            transforms.Resize(int(self.input_height + 0.1 * self.input_height)),
+            transforms.CenterCrop(self.input_height),
+            self.final_transform,
+        ])
 
 
 class GaussianBlur(object):

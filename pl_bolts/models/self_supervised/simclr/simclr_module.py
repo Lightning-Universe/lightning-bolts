@@ -146,7 +146,8 @@ class SimCLR(pl.LightningModule):
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
 
-        (img1, img2), y = batch
+        # final image in tuple is for online eval
+        (img1, img2, _), y = batch
 
         # get h representations
         h1 = self.encoder(img1)
@@ -272,6 +273,7 @@ class SimCLR(pl.LightningModule):
         # Positive similarity :
         pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
         pos = torch.cat([pos, pos], dim=0)
+        # TODO: softmax cross-entropy for stability or add epsilon term
         loss = -torch.log(pos / neg).mean()
 
         return loss
@@ -405,6 +407,8 @@ def cli_main():
 
     dm.val_transforms = SimCLREvalDataTransform(
         input_height=args.input_height,
+        gaussian_blur=args.gaussian_blur,
+        jitter_strength=args.jitter_strength,
         normalize=normalization,
     )
 
