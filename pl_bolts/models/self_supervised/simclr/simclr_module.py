@@ -151,8 +151,8 @@ class SimCLR(pl.LightningModule):
         (img1, img2, _), y = batch
 
         # get h representations, bolts resnet returns a list
-        h1 = self.encoder(img1)[-1]
-        h2 = self.encoder(img2)[-1]
+        h1 = self(img1)
+        h2 = self(img2)
 
         # get z representations
         z1 = self.projection(h1)
