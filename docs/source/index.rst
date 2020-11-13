@@ -96,6 +96,7 @@ PyTorch-Lightning-Bolts documentation
 
    CONTRIBUTING.md
    governance.md
+   CHANGELOG.md
 
 
 Indices and tables
