@@ -1,22 +1,23 @@
+import math
+import os
 from argparse import ArgumentParser
+from typing import Callable, Optional
 
+import numpy as np
 import pytorch_lightning as pl
+import torch
+import torch.distributed as dist
+from pytorch_lightning.utilities import AMPType
 from torch import nn
-from torch.nn import functional as F
-from torch.optim import Adam
+from torch.optim.optimizer import Optimizer
 
-from pl_bolts.utils.warnings import warn_missing_pkg
-
-try:
-    from torchvision.models import densenet
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-
-from pl_bolts.losses.self_supervised_learning import nt_xent_loss
-from pl_bolts.models.self_supervised.evaluator import Flatten
 from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
-from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
+from pl_bolts.transforms.dataset_normalizations import (
+    stl10_normalization,
+    cifar10_normalization,
+    imagenet_normalization
+)
 
 
 class Projection(nn.Module):
