@@ -56,7 +56,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Enabled PyTorch Lightning 0.10 compatibility
+- Enabled PyTorch Lightning 0.10 compatibility ([#264]())
+- Added dummy datasets ([#266](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/266))
+- Added semantic segmentation model `SemSegment` with `UNet` backend ([#259](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/259))
+- Added `KittiDataModule` ([#248](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/248))
+- Added `UNet` ([#247](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/247))
+- Added reinforcement learning models, losses and datamodules ([#257](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/257))
 
 ## [0.2.2] - 2020-09-14
 
