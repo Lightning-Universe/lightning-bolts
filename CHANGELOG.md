@@ -46,17 +46,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.5] - 2020-10-12
 
-### Added
-
 - Enabled PyTorch Lightning 1.0 compatibility
 
 ## [0.2.4] - 2020-10-12
+
+- Enabled manual returns ([#267](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/267))
 
 ## [0.2.3] - 2020-10-12
 
 ### Added
 
-- Enabled PyTorch Lightning 0.10 compatibility ([#264]())
+- Enabled PyTorch Lightning 0.10 compatibility ([#264](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/264))
 - Added dummy datasets ([#266](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/266))
 - Added semantic segmentation model `SemSegment` with `UNet` backend ([#259](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/259))
 - Added `KittiDataModule` ([#248](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/248))
@@ -64,6 +64,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added reinforcement learning models, losses and datamodules ([#257](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/257))
 
 ## [0.2.2] - 2020-09-14
+
+- Fixed confused logit ([#222](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/222))
 
 ## [0.2.1] - 2020-09-13
 
@@ -77,10 +79,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Dropped all dependencies except PyTorch Lightning and PyTorch
+- Decoupled datamodules from GAN ([#206](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/206))
+- Modularize AE & VAE ([#196](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/196))
+
+### Fixed
+
+- Fixed gym ([#221](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/221))
+- Fix L1/L2 regularization ([#216](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/216))
+- Fix max_depth recursion crash in AsynchronousLoader ([#191](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/191))
 
 ## [0.2.0] - 2020-09-10
 
+### Added
+
+- Enabled Apache License, Version 2.0
+
+### Changed
+
+- Moved unnecessary dependencies to `__main__` section in BYOL ([#176](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/176))
+
+### Fixed
+
+- Fixed CPC STL10 finetune ([#173](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/173))
+
 ## [0.1.1] - 2020-08-23
+
+### Added
+
+- Added Faster RCNN + Pscal VOC DataModule ([#157](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/157))
+- Added a better lars scheduling `LARSWrapper` ([#162](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/162))
+- Added CPC finetuner ([#158](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/158))
+- Added `BinaryMNISTDataModule` ([#153](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/153))
+- Added learning rate scheduler to BYOL ([#148](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/148))
+- Added Cityscapes DataModule ([#136](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/136))
+- Added learning rate scheduler `LinearWarmupCosineAnnealingLR` ([#138](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/138))
+- Added BYOL ([#144](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/144))
+- Added `ConfusedLogitCallback` ([#118](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/118))
+- Added an asynchronous single GPU dataloader. ([#1521](https://github.com/PyTorchLightning/pytorch-lightning/pull/1521))
+
+### Fixed
+
+- Fixed simclr finetuner ([#165](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/165))
+- Fixed STL10 finetuner ([#164](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/164))
+- Fixed Image GPT ([#108](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/108))
+- Fixed unused MNIST transforms in tran/val/test ([#109](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/109))
+
+### Changed
+
+- Enhanced train batch function ([#107](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/107))
 
 ## [0.1.0] - 2020-07-02
 
@@ -105,7 +151,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Linear and Logistic Regression tests
 - Added Image GPT
 - Added Recommenders module
-- Added an asynchronous single GPU dataloader. ([#1521](https://github.com/PyTorchLightning/pytorch-lightning/pull/1521))
 
 ### Changed
 
@@ -128,6 +173,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI pipeline
 - Imports and pkg
 - CPC fixes
-
-
-
