@@ -29,7 +29,7 @@ As a researcher, you can't have any part of your code going wrong. So, make thor
 
 #### Interoperability
 
-Pytorch Lightning Bolts is highly interoperable with PyTorch Lightning and PyTorch.
+PyTorch Lightning Bolts is highly interoperable with PyTorch Lightning and PyTorch.
 
 ---
 
@@ -93,8 +93,15 @@ Along with these we have tests for losses, callbacks and transforms as well.
 
 Have a look at sample tests [here](https://github.com/PyTorchLightning/pytorch-lightning-bolts/tree/master/tests).
 
+After you have added the respective tests, you can run the tests locally with make script:
+
+```bash
+make test
+```
+
 Want to add a new test case and not sure how? [Talk to us!](https://join.slack.com/t/pytorch-lightning/shared_invite/zt-f6bl2l0l-JYMK3tbAgAmGRrlNr00f1A)
 
+**Note before submitting the PR, make sure you have run `make isort`.**
 ---
 
 ## Guidelines

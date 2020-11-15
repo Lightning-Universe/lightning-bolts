@@ -11,3 +11,6 @@ test:
 	rm -rf ./lightning_logs
 	python -m coverage run --source pl_bolts -m pytest pl_bolts tests -v --flake8
 	python -m coverage report -m
+
+isort:
+	isort .
