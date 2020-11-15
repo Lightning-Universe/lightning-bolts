@@ -70,7 +70,12 @@ class SimCLRTrainDataTransform(object):
         ]
 
         if self.gaussian_blur:
-            data_transforms.append(GaussianBlur(kernel_size=int(0.1 * self.input_height), p=0.5))
+            kernel_size = int(0.1 * self.input_height)
+            if kernel_size % 2 == 0:
+                kernel_size += 1
+
+            data_transforms.append(GaussianBlur(kernel_size=kernel_size, p=0.5))
+
         data_transforms = transforms.Compose(data_transforms)
 
         if normalize is None:
