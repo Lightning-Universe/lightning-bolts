@@ -16,7 +16,7 @@ def giou_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
                 [x_min, y_min, x_max, y_max]
 
     Returns:
-        loss
+        GIoU loss
     """
     eps = 1e-6
     x_min = torch.max(pred[:, 0], target[:, 0])
