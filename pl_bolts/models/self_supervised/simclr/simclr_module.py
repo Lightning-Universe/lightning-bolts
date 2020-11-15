@@ -22,17 +22,15 @@ from pl_bolts.transforms.dataset_normalizations import (
 )
 
 
-def concat_all_gather(tensor):
-    """
-    Performs all_gather operation on the provided tensors.
-    *** Warning ***: torch.distributed.all_gather has no gradient.
-    """
-    with torch.no_grad():
-        tensors_gather = [torch.ones_like(tensor)
-                        for _ in range(torch.distributed.get_world_size())]
-        torch.distributed.all_gather(tensors_gather, tensor, async_op=False)
+def _gather_representations(tensor):
+    # create zeros tensor and replace with tensor on current GPU
+    reduction_tensor = torch.zeros((torch.distributed.get_world_size(), ) + tuple(tensor.shape)).to(tensor.device)
+    reduction_tensor[torch.distributed.get_rank()] = tensor
 
-        output = torch.cat(tensors_gather, dim=0)
+    # reduce and reshape
+    torch.distributed.all_reduce(reduction_tensor, async_op=False)
+    output = reduction_tensor.view(-1, reduction_tensor.shape[-1]).contiguous()
+
     return output
 
 
@@ -272,13 +270,10 @@ class SimCLR(pl.LightningModule):
             optimizer.step(closure=optimizer_closure)
 
     def nt_xent_loss(self, out_1, out_2, temperature):
-        """
-        Loss used in SimCLR
-        """
-
+        # gather representations in case of distributed training
         if torch.distributed.is_available() and torch.distributed.is_initialized():
-            out_1 = concat_all_gather(out_1)
-            out_2 = concat_all_gather(out_2)
+            out_1 = _gather_representations(out_1)
+            out_2 = _gather_representations(out_2)
 
         out = torch.cat([out_1, out_2], dim=0)
         n_samples = len(out)
