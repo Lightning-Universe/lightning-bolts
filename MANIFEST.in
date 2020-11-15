@@ -31,6 +31,9 @@ recursive-include requirements *.txt
 # Exclude build configs
 exclude *.yml
 
+# Exclude Makefile
+exclude Makefile
+
 prune .git
 prune .github
 prune .circleci
