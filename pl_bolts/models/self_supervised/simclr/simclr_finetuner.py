@@ -66,7 +66,6 @@ def cli_main():  # pragma: no-cover
         args.maxpool1 = False
         args.first_conv = False
         args.num_samples = 1
-
     elif args.dataset == 'stl10':
         dm = STL10DataModule(
             data_dir=args.data_path,
