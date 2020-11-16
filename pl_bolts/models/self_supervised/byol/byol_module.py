@@ -105,7 +105,7 @@ class BYOL(pl.LightningModule):
         return sim
 
     def shared_step(self, batch, batch_idx):
-        (img_1, img_2), y = batch
+        (img_1, img_2, _), y = batch
 
         # Image 1 to image 2 loss
         y1, z1, h1 = self.online_network(img_1)
@@ -220,15 +220,8 @@ def cli_main():
 
     model = BYOL(**args.__dict__)
 
-    def to_device(batch, device):
-        (x1, x2), y = batch
-        x1 = x1.to(device)
-        y = y.to(device)
-        return x1, y
-
     # finetune in real-time
     online_eval = SSLOnlineEvaluator(z_dim=2048, num_classes=dm.num_classes)
-    online_eval.to_device = to_device
 
     trainer = pl.Trainer.from_argparse_args(args, max_steps=300000, callbacks=[online_eval])
 
