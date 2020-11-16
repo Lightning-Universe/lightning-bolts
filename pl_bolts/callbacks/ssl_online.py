@@ -26,14 +26,15 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
     """
     def __init__(
         self,
+        dataset: str,
         drop_p: float = 0.2,
         hidden_dim: Optional[int] = None,
         z_dim: int = None,
         num_classes: int = None,
-        dataset: str = 'stl10'
     ):
         """
         Args:
+            dataset: if stl10, need to get the labeled batch
             drop_p: Dropout probability
             hidden_dim: Hidden dimension for the fine-tune MLP
             z_dim: Representation dimension

@@ -221,7 +221,7 @@ def cli_main():
     model = BYOL(**args.__dict__)
 
     # finetune in real-time
-    online_eval = SSLOnlineEvaluator(z_dim=2048, num_classes=dm.num_classes)
+    online_eval = SSLOnlineEvaluator(dataset=args.dataset, z_dim=2048, num_classes=dm.num_classes)
 
     trainer = pl.Trainer.from_argparse_args(args, max_steps=300000, callbacks=[online_eval])
 
