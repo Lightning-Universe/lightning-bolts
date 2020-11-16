@@ -366,6 +366,7 @@ def cli_main():
             data_dir=args.data_path,
             batch_size=args.batch_size,
             num_workers=args.num_workers
+            val_split=args.nodes * args.gpus * args.batch_size if args.nodes * args.gpus * args.batch_size > 5000
         )
 
         args.num_samples = dm.num_samples
