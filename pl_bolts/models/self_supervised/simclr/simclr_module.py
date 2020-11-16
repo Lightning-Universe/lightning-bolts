@@ -362,11 +362,15 @@ def cli_main():
         args.gaussian_blur = True
         args.jitter_strength = 1.
     elif args.dataset == 'cifar10':
+        val_split = 5000
+        if args.nodes * args.gpus * args.batch_size > val_split:
+            val_split = args.nodes * args.gpus * args.batch_size
+
         dm = CIFAR10DataModule(
             data_dir=args.data_path,
             batch_size=args.batch_size,
-            num_workers=args.num_workers
-            val_split=args.nodes * args.gpus * args.batch_size if args.nodes * args.gpus * args.batch_size > 5000
+            num_workers=args.num_workers,
+            val_split=val_split
         )
 
         args.num_samples = dm.num_samples
