@@ -485,7 +485,7 @@ STL-10 pretrained model::
 
     from pl_bolts.models.self_supervised import SwAV
 
-    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/checkpoints/epoch%3D96.ckpt'
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/checkpoints/swav_stl10.pth.tar'
     swav = SwAV.load_from_checkpoint(weight_path, strict=False)
 
     swav.freeze()
