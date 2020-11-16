@@ -38,7 +38,9 @@ class SyncFunction(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_output):
-        return grad_output[torch.distributed.get_rank() * ctx.batch_size:(torch.distributed.get_rank() + 1) * ctx.batch_size]
+        return grad_output[
+            torch.distributed.get_rank() * ctx.batch_size:(torch.distributed.get_rank() + 1) * ctx.batch_size
+        ]
 
 
 class Projection(nn.Module):
