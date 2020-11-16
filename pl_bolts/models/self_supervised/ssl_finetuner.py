@@ -105,8 +105,8 @@ class SSLFineTuner(pl.LightningModule):
         loss, logits, y = self.shared_step(batch)
         acc = self.val_acc(logits, y)
 
-        self.log('val_loss', loss, prog_bar=True)
-        self.log('val_acc', self.val_acc)
+        self.log('val_loss', loss, prog_bar=True, sync_dist=True)
+        self.log('val_acc', self.val_acc, sync_dist=True)
 
         return loss
 
@@ -114,8 +114,8 @@ class SSLFineTuner(pl.LightningModule):
         loss, logits, y = self.shared_step(batch)
         acc = self.test_acc(logits, y)
 
-        self.log('test_loss', loss)
-        self.log('test_acc', self.test_acc)
+        self.log('test_loss', loss, sync_dist=True)
+        self.log('test_acc', self.test_acc, sync_dist=True)
 
         return loss
 
