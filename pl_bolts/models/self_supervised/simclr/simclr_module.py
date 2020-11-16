@@ -22,13 +22,38 @@ from pl_bolts.transforms.dataset_normalizations import (
 )
 
 
+"""
+class SyncFunction(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, input):
+        return 
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        return
+"""
+
+
+class AllReduce(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, input):
+        output = torch.distributed.all_reduce(input)
+        ctx.save_for_backward(input, output)
+        return output
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        input, output = ctx.saved_tensors
+        return grad_output
+
+
 def _gather_representations(tensor):
     # create zeros tensor and replace with tensor on current GPU
     reduction_tensor = torch.zeros((torch.distributed.get_world_size(), ) + tuple(tensor.shape)).to(tensor.device)
     reduction_tensor[torch.distributed.get_rank()] = tensor
 
     # reduce and reshape
-    torch.distributed.all_reduce(reduction_tensor, async_op=False)
+    AllReduce.apply(reduction_tensor)
     output = reduction_tensor.view(-1, reduction_tensor.shape[-1]).contiguous()
 
     return output
