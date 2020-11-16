@@ -378,6 +378,7 @@ def cli_main():
         args.maxpool1 = False
         args.first_conv = False
         args.input_height = dm.size()[-1]
+        args.temperature = 0.5
 
         normalization = cifar10_normalization()
 
