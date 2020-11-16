@@ -22,41 +22,23 @@ from pl_bolts.transforms.dataset_normalizations import (
 )
 
 
-"""
 class SyncFunction(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, input):
-        return 
+    def forward(ctx, tensor):
+        ctx.batch_size = tensor.shape[0]
+
+        gathered_tensor = [
+            torch.zeros_like(tensor) for _ in range(torch.distributed.get_world_size())
+        ]
+
+        torch.distributed.all_gather(gathered_tensor, tensor)
+        gathered_tensor = torch.cat(gathered_tensor, 0)
+
+        return gathered_tensor
 
     @staticmethod
     def backward(ctx, grad_output):
-        return
-"""
-
-
-class AllReduce(torch.autograd.Function):
-    @staticmethod
-    def forward(ctx, input):
-        output = torch.distributed.all_reduce(input)
-        ctx.save_for_backward(input, output)
-        return output
-
-    @staticmethod
-    def backward(ctx, grad_output):
-        input, output = ctx.saved_tensors
-        return grad_output
-
-
-def _gather_representations(tensor):
-    # create zeros tensor and replace with tensor on current GPU
-    reduction_tensor = torch.zeros((torch.distributed.get_world_size(), ) + tuple(tensor.shape)).to(tensor.device)
-    reduction_tensor[torch.distributed.get_rank()] = tensor
-
-    # reduce and reshape
-    AllReduce.apply(reduction_tensor)
-    output = reduction_tensor.view(-1, reduction_tensor.shape[-1]).contiguous()
-
-    return output
+        return grad_output[torch.distributed.get_rank() * ctx.batch_size:(torch.distributed.get_rank() + 1) * ctx.batch_size]
 
 
 class Projection(nn.Module):
@@ -299,8 +281,8 @@ class SimCLR(pl.LightningModule):
         # out_1_dist: [batch_size * world_size, dim]
         # out_2_dist: [batch_size * world_size, dim]
         if torch.distributed.is_available() and torch.distributed.is_initialized():
-            out_1_dist = _gather_representations(out_1)
-            out_2_dist = _gather_representations(out_2)
+            out_1_dist = SyncFunction.apply(out_1)
+            out_2_dist = SyncFunction.apply(out_2)
         else:
             out_1_dist = out_1
             out_2_dist = out_2
