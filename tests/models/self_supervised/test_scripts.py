@@ -46,7 +46,7 @@ def test_cli_run_self_supervised_moco(cli_args):
 
 @pytest.mark.parametrize('cli_args', [
     f'--data_path {DATASETS_PATH} --gpus 0 --fp32 --max_epochs 1 --max_steps 3 --fast_dev_run'
-    '  --batch_size 2 --online_ft'
+    ' --batch_size 2 --online_ft'
 ])
 def test_cli_run_self_supervised_simclr(cli_args):
     """Test running CLI for an example with default params."""
