@@ -49,7 +49,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
 
         if split not in dirs:
             raise FileNotFoundError(f'a {split} Imagenet split was not found in {data_dir}, make sure the'
-                                    f'folder contains a subfolder named {split}')
+                                    f' folder contains a subfolder named {split}')
 
     def prepare_data(self):
         # imagenet cannot be downloaded... must provide path to folder with the train/val splits
