@@ -51,12 +51,7 @@ class Projection(nn.Module):
         x = self.model(x)
         return F.normalize(x, dim=1)
 
-"""
-TODO:
-- update transform for onlnie_ft and finetuning later?
-2. update loss func
-4. update finetuner
-"""
+
 class SimCLR(pl.LightningModule):
     def __init__(
         self,
@@ -289,7 +284,7 @@ class SimCLR(pl.LightningModule):
         # Positive similarity :
         pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
         pos = torch.cat([pos, pos], dim=0)
-        # TODO: softmax cross-entropy for stability or add epsilon term
+
         loss = -torch.log(pos / neg).mean()
 
         return loss

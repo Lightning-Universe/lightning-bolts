@@ -44,7 +44,7 @@ def cli_main():  # pragma: no-cover
         dm = CIFAR10DataModule(
             data_dir=args.data_path,
             batch_size=args.batch_size,
-            num_workers=args.num_workers        
+            num_workers=args.num_workers
         )
 
         dm.train_transforms = SimCLRFinetuneTransform(
