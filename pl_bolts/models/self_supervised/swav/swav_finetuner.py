@@ -57,6 +57,11 @@ def cli_main():  # pragma: no-cover
             input_height=dm.size()[-1],
             eval_transform=True
         )
+        dm.test_transforms = SwAVFinetuneTransform(
+            normalize=stl10_normalization(),
+            input_height=dm.size()[-1],
+            eval_transform=True
+        )
 
         args.maxpool1 = False
         args.first_conv = True

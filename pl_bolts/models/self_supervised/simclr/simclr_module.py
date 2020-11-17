@@ -1,36 +1,49 @@
+import math
+import os
 from argparse import ArgumentParser
+from typing import Callable, Optional
 
+import numpy as np
 import pytorch_lightning as pl
+import torch
+import torch.distributed as dist
+import torch.nn.functional as F
+
+from pytorch_lightning.utilities import AMPType
 from torch import nn
-from torch.nn import functional as F
-from torch.optim import Adam
+from torch.optim.optimizer import Optimizer
 
-from pl_bolts.utils.warnings import warn_missing_pkg
-
-try:
-    from torchvision.models import densenet
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-
-from pl_bolts.losses.self_supervised_learning import nt_xent_loss
-from pl_bolts.models.self_supervised.evaluator import Flatten
-from pl_bolts.models.self_supervised.resnets import resnet50_bn
-from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
+from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
-from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
+from pl_bolts.transforms.dataset_normalizations import (
+    stl10_normalization,
+    cifar10_normalization,
+    imagenet_normalization
+)
 
 
-class DensenetEncoder(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.model = densenet.densenet121(pretrained=False, num_classes=1)
-        del self.model.classifier
+class SyncFunction(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, tensor):
+        ctx.batch_size = tensor.shape[0]
 
-    def forward(self, x):
-        features = self.model.features(x)
-        out = F.relu(features, inplace=True)
-        out = F.adaptive_avg_pool2d(out, (1, 1)).view(features.size(0), -1)
-        return out
+        gathered_tensor = [
+            torch.zeros_like(tensor) for _ in range(torch.distributed.get_world_size())
+        ]
+
+        torch.distributed.all_gather(gathered_tensor, tensor)
+        gathered_tensor = torch.cat(gathered_tensor, 0)
+
+        return gathered_tensor
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        grad_input = grad_output.clone()
+        torch.distributed.all_reduce(grad_input, op=torch.distributed.ReduceOp.SUM, async_op=False)
+
+        return grad_input[
+            torch.distributed.get_rank() * ctx.batch_size:(torch.distributed.get_rank() + 1) * ctx.batch_size
+        ]
 
 
 class Projection(nn.Module):
@@ -41,9 +54,7 @@ class Projection(nn.Module):
         self.hidden_dim = hidden_dim
 
         self.model = nn.Sequential(
-            nn.AdaptiveAvgPool2d((1, 1)),
-            Flatten(),
-            nn.Linear(self.input_dim, self.hidden_dim, bias=True),
+            nn.Linear(self.input_dim, self.hidden_dim),
             nn.BatchNorm1d(self.hidden_dim),
             nn.ReLU(),
             nn.Linear(self.hidden_dim, self.output_dim, bias=False))
@@ -54,14 +65,30 @@ class Projection(nn.Module):
 
 
 class SimCLR(pl.LightningModule):
-    def __init__(self,
-                 batch_size: int,
-                 num_samples: int,
-                 warmup_epochs: int = 10,
-                 lr: float = 1e-4,
-                 opt_weight_decay: float = 1e-6,
-                 loss_temperature: float = 0.5,
-                 **kwargs):
+    def __init__(
+        self,
+        gpus: int,
+        num_samples: int,
+        batch_size: int,
+        dataset: str,
+        nodes: int = 1,
+        arch: str = 'resnet50',
+        hidden_mlp: int = 2048,
+        feat_dim: int = 128,
+        warmup_epochs: int = 10,
+        max_epochs: int = 100,
+        temperature: float = 0.1,
+        first_conv: bool = True,
+        maxpool1: bool = True,
+        optimizer: str = 'adam',
+        lars_wrapper: bool = True,
+        exclude_bn_bias: bool = False,
+        start_lr: float = 0.,
+        learning_rate: float = 1e-3,
+        final_lr: float = 0.,
+        weight_decay: float = 1e-6,
+        **kwargs
+    ):
         """
         Args:
             batch_size: the batch size
@@ -74,24 +101,98 @@ class SimCLR(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.nt_xent_loss = nt_xent_loss
-        self.encoder = self.init_encoder()
+        self.gpus = gpus
+        self.nodes = nodes
+        self.arch = arch
+        self.dataset = dataset
+        self.num_samples = num_samples
+        self.batch_size = batch_size
 
-        # h -> || -> z
-        self.projection = Projection()
+        self.hidden_mlp = hidden_mlp
+        self.feat_dim = feat_dim
+        self.first_conv = first_conv
+        self.maxpool1 = maxpool1
 
-    def init_encoder(self):
-        encoder = resnet50_bn(return_all_feature_maps=False)
+        self.optim = optimizer
+        self.lars_wrapper = lars_wrapper
+        self.exclude_bn_bias = exclude_bn_bias
+        self.weight_decay = weight_decay
+        self.temperature = temperature
 
-        # when using cifar10, replace the first conv so image doesn't shrink away
-        encoder.conv1 = nn.Conv2d(
-            3, 64,
-            kernel_size=3,
-            stride=1,
-            padding=1,
-            bias=False
+        self.start_lr = start_lr
+        self.final_lr = final_lr
+        self.learning_rate = learning_rate
+        self.warmup_epochs = warmup_epochs
+        self.max_epochs = max_epochs
+
+        self.encoder = self.init_model()
+
+        self.projection = Projection(
+            input_dim=self.hidden_mlp,
+            hidden_dim=self.hidden_mlp,
+            output_dim=self.feat_dim
         )
-        return encoder
+
+        # compute iters per epoch
+        global_batch_size = self.nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
+        self.train_iters_per_epoch = self.num_samples // global_batch_size
+
+        # define LR schedule
+        warmup_lr_schedule = np.linspace(
+            self.start_lr, self.learning_rate, self.train_iters_per_epoch * self.warmup_epochs
+        )
+        iters = np.arange(self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs))
+        cosine_lr_schedule = np.array([self.final_lr + 0.5 * (self.learning_rate - self.final_lr) * (
+            1 + math.cos(math.pi * t / (self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs)))
+        ) for t in iters])
+
+        self.lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
+
+    def init_model(self):
+        if self.arch == 'resnet18':
+            backbone = resnet18
+        elif self.arch == 'resnet50':
+            backbone = resnet50
+
+        return backbone(
+            first_conv=self.first_conv, maxpool1=self.maxpool1, return_all_feature_maps=False
+        )
+
+    def forward(self, x):
+        # bolts resnet returns a list
+        return self.encoder(x)[-1]
+
+    def shared_step(self, batch):
+        if self.dataset == 'stl10':
+            unlabeled_batch = batch[0]
+            batch = unlabeled_batch
+
+        # final image in tuple is for online eval
+        (img1, img2, _), y = batch
+
+        # get h representations, bolts resnet returns a list
+        h1 = self(img1)
+        h2 = self(img2)
+
+        # get z representations
+        z1 = self.projection(h1)
+        z2 = self.projection(h2)
+
+        loss = self.nt_xent_loss(z1, z2, self.temperature)
+
+        return loss
+
+    def training_step(self, batch, batch_idx):
+        loss = self.shared_step(batch)
+
+        self.log('train_loss', loss, on_step=True, on_epoch=False)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        loss = self.shared_step(batch)
+
+        self.log('val_loss', loss, on_step=False, on_epoch=True)
+        return loss
 
     def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=['bias', 'bn']):
         params = []
@@ -110,161 +211,275 @@ class SimCLR(pl.LightningModule):
             {'params': excluded_params, 'weight_decay': 0.}
         ]
 
-    def setup(self, stage):
-        global_batch_size = self.trainer.world_size * self.hparams.batch_size
-        self.train_iters_per_epoch = self.hparams.num_samples // global_batch_size
-
     def configure_optimizers(self):
-        # TRICK 1 (Use lars + filter weights)
-        # exclude certain parameters
-        parameters = self.exclude_from_wt_decay(
-            self.named_parameters(),
-            weight_decay=self.hparams.opt_weight_decay
-        )
+        if self.exclude_bn_bias:
+            params = self.exclude_from_wt_decay(
+                self.named_parameters(),
+                weight_decay=self.weight_decay
+            )
+        else:
+            params = self.parameters()
 
-        optimizer = LARSWrapper(Adam(parameters, lr=self.hparams.lr))
+        if self.optim == 'sgd':
+            optimizer = torch.optim.SGD(
+                params,
+                lr=self.learning_rate,
+                momentum=0.9,
+                weight_decay=self.weight_decay
+            )
+        elif self.optim == 'adam':
+            optimizer = torch.optim.Adam(
+                params,
+                lr=self.learning_rate,
+                weight_decay=self.weight_decay
+            )
 
-        # Trick 2 (after each step)
-        self.hparams.warmup_epochs = self.hparams.warmup_epochs * self.train_iters_per_epoch
-        max_epochs = self.trainer.max_epochs * self.train_iters_per_epoch
+        if self.lars_wrapper:
+            optimizer = LARSWrapper(
+                optimizer,
+                eta=0.001,  # trust coefficient
+                clip=False
+            )
 
-        linear_warmup_cosine_decay = LinearWarmupCosineAnnealingLR(
-            optimizer,
-            warmup_epochs=self.hparams.warmup_epochs,
-            max_epochs=max_epochs,
-            warmup_start_lr=0,
-            eta_min=0
-        )
+        return optimizer
 
-        scheduler = {
-            'scheduler': linear_warmup_cosine_decay,
-            'interval': 'step',
-            'frequency': 1
-        }
+    def optimizer_step(
+        self,
+        epoch: int,
+        batch_idx: int,
+        optimizer: Optimizer,
+        optimizer_idx: int,
+        optimizer_closure: Optional[Callable] = None,
+        on_tpu: bool = False,
+        using_native_amp: bool = False,
+        using_lbfgs: bool = False,
+    ) -> None:
+        # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
+        # adjust LR of optim contained within LARSWrapper
+        if self.lars_wrapper:
+            for param_group in optimizer.optim.param_groups:
+                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
+        else:
+            for param_group in optimizer.param_groups:
+                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
 
-        return [optimizer], [scheduler]
+        # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
+        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
 
-    def forward(self, x):
-        if isinstance(x, list):
-            x = x[0]
+        # from lightning
+        if self.trainer.amp_backend == AMPType.NATIVE:
+            optimizer_closure()
+            self.trainer.scaler.step(optimizer)
+        elif self.trainer.amp_backend == AMPType.APEX:
+            optimizer_closure()
+            optimizer.step()
+        else:
+            optimizer.step(closure=optimizer_closure)
 
-        result = self.encoder(x)
-        if isinstance(result, list):
-            result = result[-1]
-        return result
+    def nt_xent_loss(self, out_1, out_2, temperature, eps=1e-6):
+        """
+            assume out_1 and out_2 are normalized
+            out_1: [batch_size, dim]
+            out_2: [batch_size, dim]
+        """
+        # gather representations in case of distributed training
+        # out_1_dist: [batch_size * world_size, dim]
+        # out_2_dist: [batch_size * world_size, dim]
+        if torch.distributed.is_available() and torch.distributed.is_initialized():
+            out_1_dist = SyncFunction.apply(out_1)
+            out_2_dist = SyncFunction.apply(out_2)
+        else:
+            out_1_dist = out_1
+            out_2_dist = out_2
 
-    def training_step(self, batch, batch_idx):
-        loss = self.shared_step(batch, batch_idx)
+        # out: [2 * batch_size, dim]
+        # out_dist: [2 * batch_size * world_size, dim]
+        out = torch.cat([out_1, out_2], dim=0)
+        out_dist = torch.cat([out_1_dist, out_2_dist], dim=0)
 
-        self.log('train_loss', loss, on_epoch=True)
-        return loss
+        # cov and sim: [2 * batch_size, 2 * batch_size * world_size]
+        # neg: [2 * batch_size]
+        cov = torch.mm(out, out_dist.t().contiguous())
+        sim = torch.exp(cov / temperature)
+        neg = sim.sum(dim=-1)
 
-    def validation_step(self, batch, batch_idx):
-        loss = self.shared_step(batch, batch_idx)
+        # from each row, subtract e^1 to remove similarity measure for x1.x1
+        row_sub = torch.Tensor(neg.shape).fill_(math.e).to(neg.device)
+        neg = torch.clamp(neg - row_sub, min=eps)  # clamp for numerical stability
 
-        self.log('avg_val_loss', loss)
-        return loss
+        # Positive similarity, pos becomes [2 * batch_size]
+        pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
+        pos = torch.cat([pos, pos], dim=0)
 
-    def shared_step(self, batch, batch_idx):
-        (img1, img2), y = batch
-
-        # ENCODE
-        # encode -> representations
-        # (b, 3, 32, 32) -> (b, 2048, 2, 2)
-        h1 = self.encoder(img1)
-        h2 = self.encoder(img2)
-
-        # the bolts resnets return a list of feature maps
-        if isinstance(h1, list):
-            h1 = h1[-1]
-            h2 = h2[-1]
-
-        # PROJECT
-        # img -> E -> h -> || -> z
-        # (b, 2048, 2, 2) -> (b, 128)
-        z1 = self.projection(h1)
-        z2 = self.projection(h2)
-
-        loss = self.nt_xent_loss(z1, z2, self.hparams.loss_temperature)
+        loss = -torch.log(pos / (neg + eps)).mean()
 
         return loss
 
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--online_ft', action='store_true', help='run online finetuner')
-        parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, imagenet2012, stl10')
 
-        (args, _) = parser.parse_known_args()
-        # Data
-        parser.add_argument('--data_dir', type=str, default='.')
+        # model params
+        parser.add_argument("--arch", default="resnet50", type=str, help="convnet architecture")
+        # specify flags to store false
+        parser.add_argument("--first_conv", action='store_false')
+        parser.add_argument("--maxpool1", action='store_false')
+        parser.add_argument("--hidden_mlp", default=2048, type=int, help="hidden layer dimension in projection head")
+        parser.add_argument("--feat_dim", default=128, type=int, help="feature dimension")
+        parser.add_argument("--online_ft", action='store_true')
+        parser.add_argument("--fp32", action='store_true')
 
-        # Training
-        parser.add_argument('--optimizer', choices=['adam', 'lars'], default='lars')
-        parser.add_argument('--batch_size', type=int, default=512)
-        parser.add_argument('--learning_rate', type=float, default=1.0)
-        parser.add_argument('--lars_momentum', type=float, default=0.9)
-        parser.add_argument('--lars_eta', type=float, default=0.001)
-        parser.add_argument('--lr_sched_step', type=float, default=30, help='lr scheduler step')
-        parser.add_argument('--lr_sched_gamma', type=float, default=0.5, help='lr scheduler step')
-        parser.add_argument('--weight_decay', type=float, default=1e-4)
-        # Model
-        parser.add_argument('--loss_temperature', type=float, default=0.5)
-        parser.add_argument('--num_workers', default=0, type=int)
-        parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
+        # transform params
+        parser.add_argument("--gaussian_blur", action="store_true", help="add gaussian blur")
+        parser.add_argument("--jitter_strength", type=float, default=1.0, help="jitter strength")
+        parser.add_argument("--dataset", type=str, default="cifar10", help="stl10, cifar10")
+        parser.add_argument("--data_path", type=str, default=".", help="path to download data")
+
+        # training params
+        parser.add_argument("--fast_dev_run", action='store_true')
+        parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
+        parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
+        parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
+        parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
+        parser.add_argument("--lars_wrapper", action='store_true', help="apple lars wrapper over optimizer used")
+        parser.add_argument('--exclude_bn_bias', action='store_true', help="exclude bn/bias from weight decay")
+        parser.add_argument("--max_epochs", default=100, type=int, help="number of total epochs to run")
+        parser.add_argument("--max_steps", default=-1, type=int, help="max steps")
+        parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
+        parser.add_argument("--batch_size", default=128, type=int, help="batch size per gpu")
+
+        parser.add_argument("--temperature", default=0.1, type=float, help="temperature parameter in training loss")
+        parser.add_argument("--weight_decay", default=1e-6, type=float, help="weight decay")
+        parser.add_argument("--learning_rate", default=1e-3, type=float, help="base learning rate")
+        parser.add_argument("--start_lr", default=0, type=float, help="initial warmup learning rate")
+        parser.add_argument("--final_lr", type=float, default=1e-6, help="final learning rate")
 
         return parser
 
 
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
-    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
+    from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
+    from pl_bolts.datamodules import STL10DataModule, CIFAR10DataModule, ImagenetDataModule
 
     parser = ArgumentParser()
-
-    # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
 
     # model args
     parser = SimCLR.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    # init default datamodule
-    if args.dataset == 'cifar10':
-        dm = CIFAR10DataModule.from_argparse_args(args)
-        dm.train_transforms = SimCLRTrainDataTransform(32)
-        dm.val_transforms = SimCLREvalDataTransform(32)
-        args.num_samples = dm.num_samples
+    if args.dataset == 'stl10':
+        dm = STL10DataModule(
+            data_dir=args.data_path,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers
+        )
 
-    elif args.dataset == 'stl10':
-        dm = STL10DataModule.from_argparse_args(args)
         dm.train_dataloader = dm.train_dataloader_mixed
         dm.val_dataloader = dm.val_dataloader_mixed
         args.num_samples = dm.num_unlabeled_samples
 
-        (c, h, w) = dm.size()
-        dm.train_transforms = SimCLRTrainDataTransform(h)
-        dm.val_transforms = SimCLREvalDataTransform(h)
+        args.maxpool1 = False
+        args.first_conv = True
+        args.input_height = dm.size()[-1]
 
-    elif args.dataset == 'imagenet2012':
-        dm = ImagenetDataModule.from_argparse_args(args, image_size=196)
-        (c, h, w) = dm.size()
-        dm.train_transforms = SimCLRTrainDataTransform(h)
-        dm.val_transforms = SimCLREvalDataTransform(h)
+        normalization = stl10_normalization()
+
+        args.gaussian_blur = True
+        args.jitter_strength = 1.
+    elif args.dataset == 'cifar10':
+        val_split = 5000
+        if args.nodes * args.gpus * args.batch_size > val_split:
+            val_split = args.nodes * args.gpus * args.batch_size
+
+        dm = CIFAR10DataModule(
+            data_dir=args.data_path,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers,
+            val_split=val_split
+        )
+
+        args.num_samples = dm.num_samples
+
+        args.maxpool1 = False
+        args.first_conv = False
+        args.input_height = dm.size()[-1]
+        args.temperature = 0.5
+
+        normalization = cifar10_normalization()
+
+        args.gaussian_blur = False
+        args.jitter_strength = 0.5
+    elif args.dataset == 'imagenet':
+        args.maxpool1 = True
+        args.first_conv = True
+        normalization = imagenet_normalization()
+
+        args.gaussian_blur = True
+        args.jitter_strength = 1.
+
+        args.batch_size = 64
+        args.nodes = 8
+        args.gpus = 8  # per-node
+        args.max_epochs = 800
+
+        args.optimizer = 'sgd'
+        args.lars_wrapper = True
+        args.learning_rate = 4.8
+        args.final_lr = 0.0048
+        args.start_lr = 0.3
+        args.online_ft = True
+
+        dm = ImagenetDataModule(
+            data_dir=args.data_path,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers
+        )
+
+        args.num_samples = dm.num_samples
+        args.input_height = dm.size()[-1]
+    else:
+        raise NotImplementedError("other datasets have not been implemented till now")
+
+    dm.train_transforms = SimCLRTrainDataTransform(
+        input_height=args.input_height,
+        gaussian_blur=args.gaussian_blur,
+        jitter_strength=args.jitter_strength,
+        normalize=normalization,
+    )
+
+    dm.val_transforms = SimCLREvalDataTransform(
+        input_height=args.input_height,
+        gaussian_blur=args.gaussian_blur,
+        jitter_strength=args.jitter_strength,
+        normalize=normalization,
+    )
 
     model = SimCLR(**args.__dict__)
 
-    # finetune in real-time
-    def to_device(batch, device):
-        (x1, x2), y = batch
-        x1 = x1.to(device)
-        y = y.to(device)
-        return x1, y
+    online_evaluator = None
+    if args.online_ft:
+        # online eval
+        online_evaluator = SSLOnlineEvaluator(
+            drop_p=0.,
+            hidden_dim=None,
+            z_dim=args.hidden_mlp,
+            num_classes=dm.num_classes,
+            dataset=args.dataset
+        )
 
-    online_eval = SSLOnlineEvaluator(z_dim=2048 * 2 * 2, num_classes=dm.num_classes)
-    online_eval.to_device = to_device
+    trainer = pl.Trainer(
+        max_epochs=args.max_epochs,
+        max_steps=None if args.max_steps == -1 else args.max_steps,
+        gpus=args.gpus,
+        num_nodes=args.nodes,
+        distributed_backend='ddp' if args.gpus > 1 else None,
+        sync_batchnorm=True if args.gpus > 1 else False,
+        precision=32 if args.fp32 else 16,
+        callbacks=[online_evaluator] if args.online_ft else None,
+        fast_dev_run=args.fast_dev_run
+    )
 
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=[online_eval])
     trainer.fit(model, dm)
 
 
