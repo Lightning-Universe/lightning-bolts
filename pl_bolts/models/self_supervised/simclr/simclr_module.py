@@ -42,7 +42,9 @@ class SyncFunction(torch.autograd.Function):
         torch.distributed.all_reduce(grad_input, op=torch.distributed.ReduceOp.SUM, async_op=False)
         grad_input.div_(torch.distributed.get_world_size())
 
-        return grad_input[torch.distributed.get_rank() * ctx.batch_size:(torch.distributed.get_rank() + 1) * ctx.batch_size]
+        return grad_input[
+            torch.distributed.get_rank() * ctx.batch_size:(torch.distributed.get_rank() + 1) * ctx.batch_size
+        ]
 
 
 class Projection(nn.Module):
