@@ -290,7 +290,7 @@ To Train::
     dm.val_transforms = SimCLREvalDataTransform(32)
 
     # model
-    model = SimCLR(num_samples=dm.num_samples, batch_size=dm.batch_size)
+    model = SimCLR(num_samples=dm.num_samples, batch_size=dm.batch_size, dataset='cifar10')
 
     # fit
     trainer = pl.Trainer()
@@ -323,7 +323,7 @@ CIFAR-10 baseline
      - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
      - `LARS-SGD <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
      - 2048
-     - 800 (~4.5 hours)
+     - 800 (~4 hours)
      - 8 V100 (16GB)
      - 1.5
    * - Ours
@@ -331,7 +331,7 @@ CIFAR-10 baseline
      - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
      - `LARS-Adam <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
      - 2048
-     - 800 (~4.5 hours)
+     - 800 (~4 hours)
      - 8 V100 (16GB)
      - 1e-3
 
@@ -431,7 +431,7 @@ To Train::
     model = SwAV(
         gpus=1,
         num_samples=dm.num_unlabeled_samples,
-        datamodule=dm,
+        dataset='stl10,
         batch_size=batch_size
     )
 

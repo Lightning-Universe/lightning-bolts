@@ -68,10 +68,10 @@ class SimCLR(pl.LightningModule):
     def __init__(
         self,
         gpus: int,
-        nodes: int,
         num_samples: int,
         batch_size: int,
         dataset: str,
+        nodes: int = 1,
         arch: str = 'resnet50',
         hidden_mlp: int = 2048,
         feat_dim: int = 128,
