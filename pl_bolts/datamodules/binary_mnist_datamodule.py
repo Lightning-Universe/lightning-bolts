@@ -39,7 +39,6 @@ class BinaryMNISTDataModule(LightningDataModule):
         from pl_bolts.datamodules import BinaryMNISTDataModule
 
         dm = BinaryMNISTDataModule('.')
-        dm.prepare_data()
         model = LitModel()
 
         Trainer().fit(model, dm)
