@@ -10,7 +10,7 @@ try:
 
     from pl_bolts.datasets.mnist_dataset import BinaryMNIST
 except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover12
+    warn_missing_pkg('torchvision')  # pragma: no-cover
     _TORCHVISION_AVAILABLE = False
 else:
     _TORCHVISION_AVAILABLE = True
