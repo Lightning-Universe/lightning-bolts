@@ -4,8 +4,8 @@ Test Generalized Intersection over Union
 
 from unittest import TestCase
 
-import torch
 import pytest
+import torch
 
 from pl_bolts.losses.giou import giou_loss
 
