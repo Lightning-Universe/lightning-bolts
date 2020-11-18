@@ -34,7 +34,7 @@ def giou_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     C_x_max = torch.max(pred[:, 2], target[:, 2])
     C_y_max = torch.max(pred[:, 3], target[:, 3])
     C_area = (C_x_max - C_x_min) * (C_y_max - C_y_min)
-    iou = torch.true_divide(intersection, union + eps)
+    iou = torch.true_divide(intersection, union)
     giou = iou - torch.true_divide((C_area - union), C_area)
 
     return 1 - giou
