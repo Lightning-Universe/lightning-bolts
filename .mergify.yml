@@ -15,3 +15,4 @@ pull_request_rules:
       request_reviews:
         users:
           - Borda
+          - akihironitta
