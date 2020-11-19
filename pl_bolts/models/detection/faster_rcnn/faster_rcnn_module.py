@@ -6,10 +6,10 @@ import torch
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
-    from torchvision.models.detection.faster_rcnn import fasterrcnn_resnet50_fpn, FasterRCNN, FastRCNNPredictor
-    from torchvision.ops import box_iou
     from pl_bolts.models.detection.components import create_torchvision_backbone
     from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
+    from torchvision.models.detection.faster_rcnn import fasterrcnn_resnet50_fpn, FasterRCNN, FastRCNNPredictor
+    from torchvision.ops import box_iou
 except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
