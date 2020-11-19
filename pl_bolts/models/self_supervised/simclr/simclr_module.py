@@ -14,9 +14,9 @@ from torch.optim.optimizer import Optimizer
 from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.transforms.dataset_normalizations import (
-    stl10_normalization,
     cifar10_normalization,
-    imagenet_normalization
+    imagenet_normalization,
+    stl10_normalization,
 )
 
 
@@ -357,8 +357,8 @@ class SimCLR(pl.LightningModule):
 
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
+    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
     from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
-    from pl_bolts.datamodules import STL10DataModule, CIFAR10DataModule, ImagenetDataModule
 
     parser = ArgumentParser()
 
