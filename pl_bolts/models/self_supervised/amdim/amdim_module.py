@@ -19,7 +19,7 @@ from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 class AMDIM(pl.LightningModule):
     """
     PyTorch Lightning implementation of
-    `Augmented Multiscale Deep InfoMax (AMDIM) <https://arxiv.org/abs/1906.00910.>`_
+    `Augmented Multiscale Deep InfoMax (AMDIM) <https://arxiv.org/abs/1906.00910>`_.
 
     Paper authors: Philip Bachman, R Devon Hjelm, William Buchwalter.
 
