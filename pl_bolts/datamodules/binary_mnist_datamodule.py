@@ -44,7 +44,7 @@ class BinaryMNISTDataModule(LightningDataModule):
         Trainer().fit(model, dm)
     """
 
-    name = 'mnist'
+    name = "binary_mnist"
 
     def __init__(
             self,
@@ -89,8 +89,8 @@ class BinaryMNISTDataModule(LightningDataModule):
         """
         Saves MNIST files to data_dir
         """
-        MNIST(self.data_dir, train=True, download=True, transform=transform_lib.ToTensor())
-        MNIST(self.data_dir, train=False, download=True, transform=transform_lib.ToTensor())
+        BinaryMNIST(self.data_dir, train=True, download=True, transform=transform_lib.ToTensor())
+        BinaryMNIST(self.data_dir, train=False, download=True, transform=transform_lib.ToTensor())
 
     def train_dataloader(self, batch_size=32, transforms=None):
         """
