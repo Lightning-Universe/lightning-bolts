@@ -6,8 +6,10 @@ import torch
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
-    from torchvision.models.detection import faster_rcnn, fasterrcnn_resnet50_fpn
+    from torchvision.models.detection import faster_rcnn, fasterrcnn_resnet50_fpn, FasterRCNN, FastRCNNPredictor
     from torchvision.ops import box_iou
+    from pl_bolts.models.detection.components import create_torchvision_backbone
+    from pl_bolts.models.detection.faster_rcnn import create_fastercnn_backbone
 except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
@@ -23,7 +25,7 @@ def _evaluate_iou(target, pred):
     return box_iou(target["boxes"], pred["boxes"]).diag().mean()
 
 
-class FasterRCNN(pl.LightningModule):
+class FRCNN(pl.LightningModule):
     """
     PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with
     Region Proposal Networks <https://arxiv.org/abs/1506.01497>`_.
@@ -46,6 +48,8 @@ class FasterRCNN(pl.LightningModule):
         self,
         learning_rate: float = 0.0001,
         num_classes: int = 91,
+        backbone: str = None,
+        fpn: bool = True,
         pretrained: bool = False,
         pretrained_backbone: bool = True,
         trainable_backbone_layers: int = 3,
@@ -62,22 +66,20 @@ class FasterRCNN(pl.LightningModule):
         """
         super().__init__()
 
-        model = fasterrcnn_resnet50_fpn(
-            # num_classes=num_classes,
-            pretrained=pretrained,
-            pretrained_backbone=pretrained_backbone,
-            trainable_backbone_layers=trainable_backbone_layers,
-        )
-
-        if replace_head:
-            in_features = model.roi_heads.box_predictor.cls_score.in_features
-            head = faster_rcnn.FastRCNNPredictor(in_features, num_classes)
-            model.roi_heads.box_predictor = head
-        else:
-            assert num_classes == 91, "replace_head must be true to change num_classes"
-
-        self.model = model
         self.learning_rate = learning_rate
+        self.num_classes = num_classes
+        self.backbone = backbone
+        if backbone is None:
+            self.model = fasterrcnn_resnet50_fpn(pretrained=True,
+                                                 trainable_backbone_layers=trainable_backbone_layers,)
+
+            in_features = self.model.roi_heads.box_predictor.cls_score.in_features
+            self.model.roi_heads.box_predictor = FastRCNNPredictor(in_features, self.num_classes)
+
+        else:
+            backbone_model = create_fastercnn_backbone(self.backbone, fpn, pretrained_backbone,
+                                                       trainable_backbone_layers, **kwargs)
+            self.model = FasterRCNN(backbone_model, num_classes=num_classes, **kwargs)
 
     def forward(self, x):
         self.model.eval()
