@@ -1,6 +1,7 @@
 import torch.nn as nn
-from pl_bolts.utils.warnings import warn_missing_pkg
+
 from pl_bolts.models.detection.components import create_torchvision_backbone
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     from torchvision.models.detection.backbone_utils import resnet_fpn_backbone

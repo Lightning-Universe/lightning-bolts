@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 
-import pytorch_lightning as pl
 import torch
 
+import pytorch_lightning as pl
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
