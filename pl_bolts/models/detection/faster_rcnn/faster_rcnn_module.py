@@ -9,7 +9,7 @@ try:
     from torchvision.models.detection.faster_rcnn import fasterrcnn_resnet50_fpn, FasterRCNN, FastRCNNPredictor
     from torchvision.ops import box_iou
     from pl_bolts.models.detection.components import create_torchvision_backbone
-    from pl_bolts.models.detection.faster_rcnn import create_fastercnn_backbone
+    from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
@@ -77,8 +77,8 @@ class FRCNN(pl.LightningModule):
             self.model.roi_heads.box_predictor = FastRCNNPredictor(in_features, self.num_classes)
 
         else:
-            backbone_model = create_fastercnn_backbone(self.backbone, fpn, pretrained_backbone,
-                                                       trainable_backbone_layers, **kwargs)
+            backbone_model = create_fasterrcnn_backbone(self.backbone, fpn, pretrained_backbone,
+                                                        trainable_backbone_layers, **kwargs)
             self.model = FasterRCNN(backbone_model, num_classes=num_classes, **kwargs)
 
     def forward(self, x):

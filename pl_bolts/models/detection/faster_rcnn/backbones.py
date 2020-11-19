@@ -8,8 +8,8 @@ except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
-def create_fastercnn_backbone(backbone: str, fpn: bool = True, pretrained: str = None,
-                              trainable_backbone_layers: int = 3, **kwargs) -> nn.Module:
+def create_fasterrcnn_backbone(backbone: str, fpn: bool = True, pretrained: str = None,
+                               trainable_backbone_layers: int = 3, **kwargs) -> nn.Module:
 
     """
     Args:
