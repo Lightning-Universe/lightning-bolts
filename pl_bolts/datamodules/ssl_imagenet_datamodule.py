@@ -77,7 +77,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
                 """)
 
     def train_dataloader(self, num_images_per_class=-1, add_normalize=False):
-        transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
+        transforms = self._default_transforms() if self.train_transforms is None else self.train_transforms
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class=num_images_per_class,
@@ -95,7 +95,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         return loader
 
     def val_dataloader(self, num_images_per_class=50, add_normalize=False):
-        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+        transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class_val_split=num_images_per_class,
@@ -112,7 +112,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         return loader
 
     def test_dataloader(self, num_images_per_class, add_normalize=False):
-        transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
+        transforms = self._default_transforms() if self.test_transforms is None else self.test_transforms
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class=num_images_per_class,
@@ -129,7 +129,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def default_transforms(self):
+    def _default_transforms(self):
         mnist_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             imagenet_normalization()

@@ -95,7 +95,7 @@ class FashionMNISTDataModule(LightningDataModule):
         """
         FashionMNIST train set removes a subset to use for validation
         """
-        transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
+        transforms = self._default_transforms() if self.train_transforms is None else self.train_transforms
 
         dataset = FashionMNIST(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
@@ -118,7 +118,7 @@ class FashionMNISTDataModule(LightningDataModule):
         """
         FashionMNIST val set uses a subset of the training set for validation
         """
-        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+        transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
 
         dataset = FashionMNIST(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
@@ -141,7 +141,7 @@ class FashionMNISTDataModule(LightningDataModule):
         """
         FashionMNIST test set uses the test split
         """
-        transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
+        transforms = self._default_transforms() if self.test_transforms is None else self.test_transforms
 
         dataset = FashionMNIST(self.data_dir, train=False, download=False, transform=transforms)
         loader = DataLoader(
@@ -154,7 +154,7 @@ class FashionMNISTDataModule(LightningDataModule):
         )
         return loader
 
-    def default_transforms(self):
+    def _default_transforms(self):
         mnist_transforms = transform_lib.Compose([
             transform_lib.ToTensor()
         ])

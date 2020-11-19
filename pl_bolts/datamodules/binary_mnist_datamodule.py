@@ -99,7 +99,7 @@ class BinaryMNISTDataModule(LightningDataModule):
         """
         MNIST train set removes a subset to use for validation
         """
-        transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
+        transforms = self._default_transforms() if self.train_transforms is None else self.train_transforms
 
         dataset = BinaryMNIST(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
@@ -122,7 +122,7 @@ class BinaryMNISTDataModule(LightningDataModule):
         """
         MNIST val set uses a subset of the training set for validation
         """
-        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+        transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
         dataset = BinaryMNIST(self.data_dir, train=True, download=False, transform=transforms)
         train_length = len(dataset)
         _, dataset_val = random_split(
@@ -144,7 +144,7 @@ class BinaryMNISTDataModule(LightningDataModule):
         """
         MNIST test set uses the test split
         """
-        transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
+        transforms = self._default_transforms() if self.test_transforms is None else self.test_transforms
 
         dataset = BinaryMNIST(self.data_dir, train=False, download=False, transform=transforms)
         loader = DataLoader(
@@ -157,7 +157,7 @@ class BinaryMNISTDataModule(LightningDataModule):
         )
         return loader
 
-    def default_transforms(self):
+    def _default_transforms(self):
         if self.normalize:
             mnist_transforms = transform_lib.Compose([
                 transform_lib.ToTensor(),

@@ -105,7 +105,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         """
         Loads the 'unlabeled' split minus a portion set aside for validation via `unlabeled_val_split`.
         """
-        transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
+        transforms = self._default_transforms() if self.train_transforms is None else self.train_transforms
 
         dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
@@ -132,7 +132,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size: the batch size
             transforms: a sequence of transforms
         """
-        transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
+        transforms = self._default_transforms() if self.train_transforms is None else self.train_transforms
 
         unlabeled_dataset = STL10(self.data_dir,
                                   split='unlabeled',
@@ -170,7 +170,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size: the batch size
             transforms: a sequence of transforms
         """
-        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+        transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
 
         dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
@@ -202,7 +202,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size: the batch size
             transforms: a sequence of transforms
         """
-        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+        transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
         unlabeled_dataset = STL10(self.data_dir,
                                   split='unlabeled',
                                   download=False,
@@ -237,7 +237,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size: the batch size
             transforms: the transforms
         """
-        transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
+        transforms = self._default_transforms() if self.test_transforms is None else self.test_transforms
 
         dataset = STL10(self.data_dir, split='test', download=False, transform=transforms)
         loader = DataLoader(
@@ -251,7 +251,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         return loader
 
     def train_dataloader_labeled(self):
-        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+        transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
 
         dataset = STL10(self.data_dir, split='train', download=False, transform=transforms)
         train_length = len(dataset)
@@ -268,7 +268,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         return loader
 
     def val_dataloader_labeled(self):
-        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+        transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
         dataset = STL10(self.data_dir,
                         split='train',
                         download=False,
@@ -288,7 +288,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def default_transforms(self):
+    def _default_transforms(self):
         data_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             stl10_normalization()
