@@ -62,6 +62,9 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             num_workers: int = 16,
             batch_size: int = 32,
             seed: int = 42,
+            shuffle: bool = False,
+            pin_memory: bool = False,
+            drop_last: bool = False,
             *args,
             **kwargs,
     ):
@@ -72,6 +75,11 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             train_val_split: how many images from the labeled training split to use for validation
             num_workers: how many workers to use for loading data
             batch_size: the batch size
+            seed: random seed to be used for train/val/test splits
+            shuffle: If true shuffles the data every epoch
+            pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
+                        returning them
+            drop_last: If true drops the last incomplete batch
         """
         super().__init__(*args, **kwargs)
 
@@ -87,6 +95,9 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         self.num_workers = num_workers
         self.batch_size = batch_size
         self.seed = seed
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
         self.num_unlabeled_samples = 100000 - unlabeled_val_split
 
     @property
@@ -115,10 +126,10 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             dataset_train,
             batch_size=self.batch_size,
-            shuffle=True,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -153,10 +164,10 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
-            shuffle=True,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 

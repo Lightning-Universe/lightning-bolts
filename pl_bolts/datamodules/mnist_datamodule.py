@@ -52,6 +52,9 @@ class MNISTDataModule(LightningDataModule):
         normalize: bool = False,
         seed: int = 42,
         batch_size: int = 32,
+        shuffle: bool = False,
+        pin_memory: bool = False,
+        drop_last: bool = False,
         *args,
         **kwargs,
     ):
@@ -61,6 +64,12 @@ class MNISTDataModule(LightningDataModule):
             val_split: how many of the training images to use for the validation split
             num_workers: how many workers to use for loading data
             normalize: If true applies image normalize
+            batch_size: size of batch
+            seed: random seed to be used for train/val/test splits
+            shuffle: If true shuffles the data every epoch
+            pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
+                        returning them
+            drop_last: If true drops the last incomplete batch
         """
         super().__init__(*args, **kwargs)
 
@@ -74,8 +83,11 @@ class MNISTDataModule(LightningDataModule):
         self.val_split = val_split
         self.num_workers = num_workers
         self.normalize = normalize
-        self.seed = seed
         self.batch_size = batch_size
+        self.seed = seed
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
 
     @property
     def num_classes(self):
@@ -109,10 +121,10 @@ class MNISTDataModule(LightningDataModule):
         loader = DataLoader(
             dataset_train,
             batch_size=self.batch_size,
-            shuffle=True,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True,
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
