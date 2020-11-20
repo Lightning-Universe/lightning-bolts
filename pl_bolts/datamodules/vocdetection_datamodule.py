@@ -113,6 +113,9 @@ class VOCDetectionDataModule(LightningDataModule):
         year: str = "2012",
         num_workers: int = 16,
         normalize: bool = False,
+        shuffle: bool = False,
+        pin_memory: bool = False,
+        drop_last: bool = False,
         *args,
         **kwargs,
     ):
@@ -127,6 +130,9 @@ class VOCDetectionDataModule(LightningDataModule):
         self.data_dir = data_dir
         self.num_workers = num_workers
         self.normalize = normalize
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
 
     @property
     def num_classes(self):
@@ -163,9 +169,9 @@ class VOCDetectionDataModule(LightningDataModule):
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
-            shuffle=True,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            pin_memory=True,
+            pin_memory=self.pin_memory,
             collate_fn=_collate_fn,
         )
         return loader

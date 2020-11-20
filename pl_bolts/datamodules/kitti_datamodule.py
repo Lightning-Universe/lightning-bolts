@@ -28,6 +28,7 @@ class KittiDataModule(LightningDataModule):
             num_workers: int = 16,
             batch_size: int = 32,
             seed: int = 42,
+            shuffle: bool = False,
             *args,
             **kwargs,
     ):
@@ -62,6 +63,7 @@ class KittiDataModule(LightningDataModule):
             num_workers: how many workers to use for loading data
             batch_size: the batch size
             seed: random seed to be used for train/val/test splits
+            shuffle: If true shuffles the data every epoch
         """
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
@@ -73,6 +75,7 @@ class KittiDataModule(LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.seed = seed
+        self.shuffle = shuffle
 
         # split into train, val, test
         kitti_dataset = KittiDataset(self.data_dir, transform=self._default_transforms())
@@ -88,21 +91,21 @@ class KittiDataModule(LightningDataModule):
     def train_dataloader(self):
         loader = DataLoader(self.trainset,
                             batch_size=self.batch_size,
-                            shuffle=True,
+                            shuffle=self.shuffle,
                             num_workers=self.num_workers)
         return loader
 
     def val_dataloader(self):
         loader = DataLoader(self.valset,
                             batch_size=self.batch_size,
-                            shuffle=False,
+                            shuffle=self.shuffle,
                             num_workers=self.num_workers)
         return loader
 
     def test_dataloader(self):
         loader = DataLoader(self.testset,
                             batch_size=self.batch_size,
-                            shuffle=False,
+                            shuffle=self.shuffle,
                             num_workers=self.num_workers)
         return loader
 
