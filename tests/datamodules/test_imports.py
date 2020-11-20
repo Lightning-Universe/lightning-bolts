@@ -23,9 +23,9 @@ import pytest
     ("VOCDetectionDataModule", ["torchvision"]),
     ("CityscapesDataModule", ["torchvision"]),
     ("KittiDataset", ["PIL"]),
-    ("KittiDataModule", ["PIL"]),
+    ("KittiDataModule", ["torchvision"]),
 ])
 def test_import(dm_cls, deps):
     with mock.patch.dict("sys.modules", {pkg: None for pkg in deps}):
         dms_module = importlib.import_module("pl_bolts.datamodules")
-        assert hasattr(dms_module, dm_cls)
+        assert hasattr(dms_module, dm_cls), f"`from pl_bolts.datamodules import {dm_cls}` failed."
