@@ -2,13 +2,22 @@
 Datamodules for RL models that rely on experiences generated during training
 Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/experience.py
 """
+import importlib
 from abc import ABC
 from collections import deque, namedtuple
 from typing import Callable, Iterable, List, Tuple
 
 import torch
-from gym import Env
 from torch.utils.data import IterableDataset
+
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+_GYM_AVAILABLE = importlib.util.find_spec("gym") is not None
+if _GYM_AVAILABLE:
+    from gym import Env
+else:
+    warn_missing_pkg("gym")  # pragma: no-cover
+
 
 # Datasets
 
@@ -172,7 +181,7 @@ class ExperienceSource(BaseExperienceSource):
 
         return actions
 
-    def env_step(self, env_idx: int, env: Env, action: List[int]) -> Experience:
+    def env_step(self, env_idx: int, env: "Env", action: List[int]) -> Experience:
         """
         Carries out a step through the given environment using the given action
 
@@ -236,7 +245,7 @@ class ExperienceSource(BaseExperienceSource):
 class DiscountedExperienceSource(ExperienceSource):
     """Outputs experiences with a discounted reward over N steps"""
 
-    def __init__(self, env: Env, agent, n_steps: int = 1, gamma: float = 0.99):
+    def __init__(self, env: "Env", agent, n_steps: int = 1, gamma: float = 0.99):
         super().__init__(env, agent, (n_steps + 1))
         self.gamma = gamma
         self.steps = n_steps
