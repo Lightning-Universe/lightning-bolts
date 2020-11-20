@@ -11,13 +11,14 @@ import numpy as np
 import torch
 from torch._six import PY3
 
+from pl_bolts.utils.warnings import warn_missing_pkg
+
 try:
     from torchvision.datasets import ImageNet
     from torchvision.datasets.imagenet import load_meta_file
-except ModuleNotFoundError as err:
-    raise ModuleNotFoundError(  # pragma: no-cover
-        'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
-    ) from err
+except ModuleNotFoundError:
+    warn_missing_pkg('torchvision')  # pragma: no-cover
+    ImageNet = object
 
 
 class UnlabeledImagenet(ImageNet):
