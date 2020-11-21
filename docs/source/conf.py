@@ -416,7 +416,7 @@ autodoc_default_options = {
     'special-members': '__call__',
     'exclude-members': '_abc_impl',
     'show-inheritance': True,
-    'private-members': True,
+    'private-members': False,
     'noindex': True,
 }
 
