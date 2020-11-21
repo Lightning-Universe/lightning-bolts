@@ -133,6 +133,10 @@ dmypy.json
 # PyCharm
 .idea/
 
+# Visual Studio (Code)
+*.vs
+*.vscode
+
 # macOS
 .DS_Store
 
