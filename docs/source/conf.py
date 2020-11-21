@@ -410,13 +410,11 @@ autoclass_content = 'both'
 # the options are fixed and will be soon in release,
 #  see https://github.com/sphinx-doc/sphinx/issues/5459
 autodoc_default_options = {
-    'members': None,
-    'methods': None,
-    # 'attributes': None,
+    'members': True,
+    'methods': True,
     'special-members': '__call__',
     'exclude-members': '_abc_impl',
     'show-inheritance': True,
-    'private-members': False,
     'noindex': True,
 }
 
