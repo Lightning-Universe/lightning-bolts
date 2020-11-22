@@ -215,7 +215,7 @@ class Reinforce(pl.LightningModule):
 
         # policy loss
         log_prob = log_softmax(logits, dim=1)
-        log_prob_actions = scaled_rewards * log_prob[range(self.batch_size), actions]
+        log_prob_actions = scaled_rewards * log_prob[range(len(log_prob)), actions]
         loss = -log_prob_actions.mean()
 
         return loss
