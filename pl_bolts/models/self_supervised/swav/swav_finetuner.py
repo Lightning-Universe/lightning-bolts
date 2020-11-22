@@ -17,7 +17,7 @@ def cli_main():  # pragma: no-cover
     parser = ArgumentParser()
     parser.add_argument('--dataset', type=str, help='stl10, imagenet', default='stl10')
     parser.add_argument('--ckpt_path', type=str, help='path to ckpt')
-    parser.add_argument('--data_path', type=str, help='path to ckpt', default=os.getcwd())
+    parser.add_argument('--data_dir', type=str, help='path to dataset', default=os.getcwd())
 
     parser.add_argument("--batch_size", default=64, type=int, help="batch size per gpu")
     parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
@@ -38,7 +38,7 @@ def cli_main():  # pragma: no-cover
 
     if args.dataset == 'stl10':
         dm = STL10DataModule(
-            data_dir=args.data_path,
+            data_dir=args.data_dir,
             batch_size=args.batch_size,
             num_workers=args.num_workers
         )
@@ -67,7 +67,7 @@ def cli_main():  # pragma: no-cover
         args.first_conv = True
     elif args.dataset == 'imagenet':
         dm = ImagenetDataModule(
-            data_dir=args.data_path,
+            data_dir=args.data_dir,
             batch_size=args.batch_size,
             num_workers=args.num_workers
         )

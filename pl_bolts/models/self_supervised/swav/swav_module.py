@@ -428,7 +428,7 @@ class SwAV(pl.LightningModule):
         parser.add_argument("--gaussian_blur", action="store_true", help="add gaussian blur")
         parser.add_argument("--jitter_strength", type=float, default=1.0, help="jitter strength")
         parser.add_argument("--dataset", type=str, default="stl10", help="stl10, cifar10")
-        parser.add_argument("--data_path", type=str, default=".", help="path to download data")
+        parser.add_argument("--data_dir", type=str, default=".", help="path to download data")
         parser.add_argument("--queue_path", type=str, default="queue", help="path for queue")
 
         parser.add_argument("--nmb_crops", type=int, default=[2, 4], nargs="+",
@@ -490,7 +490,7 @@ def cli_main():
 
     if args.dataset == 'stl10':
         dm = STL10DataModule(
-            data_dir=args.data_path,
+            data_dir=args.data_dir,
             batch_size=args.batch_size,
             num_workers=args.num_workers
         )
@@ -507,7 +507,7 @@ def cli_main():
         args.num_workers = 0
 
         dm = CIFAR10DataModule(
-            data_dir=args.data_path,
+            data_dir=args.data_dir,
             batch_size=args.batch_size,
             num_workers=args.num_workers
         )
@@ -549,7 +549,7 @@ def cli_main():
         args.online_ft = True
 
         dm = ImagenetDataModule(
-            data_dir=args.data_path,
+            data_dir=args.data_dir,
             batch_size=args.batch_size,
             num_workers=args.num_workers
         )
