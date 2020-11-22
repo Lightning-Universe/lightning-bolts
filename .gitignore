@@ -133,23 +133,33 @@ dmypy.json
 # PyCharm
 .idea/
 
+# Visual Studio (Code)
+*.vs
+*.vscode
+
+# macOS
+.DS_Store
+
 # Datasets
-MNIST
+/datasets/
+MNIST/
+CIFAR10/
+FashionMNIST/
+gtFine/
+leftImg8bit/
+*.gz
+*-batches-py
 
 # Lightning logs
 lightning_logs
-*.gz
-*-batches-py
 simclr.py
-.DS_Store
 .*_submit.py
 
 source/api/
 test-reports
 tests/test-reports/
-**/CIFAR10
-**/MNIST
-**/FashionMNIST
 **/dac
 **_binary
-**MNIST
+
+# MLflow
+mlruns/
