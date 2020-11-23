@@ -26,6 +26,12 @@ import pytest
     ("KittiDataModule", ["torchvision"]),
 ])
 def test_import(dm_cls, deps):
+    """Tests importing when dependencies are not met.
+
+    Set the followings in @pytest.mark.parametrize:
+        dm_cls: class to test importing
+        deps: packages required for dm_cls
+    """
     with mock.patch.dict("sys.modules", {pkg: None for pkg in deps}):
         dms_module = importlib.import_module("pl_bolts.datamodules")
         assert hasattr(dms_module, dm_cls), f"`from pl_bolts.datamodules import {dm_cls}` failed."
