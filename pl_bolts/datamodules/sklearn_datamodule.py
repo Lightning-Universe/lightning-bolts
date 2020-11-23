@@ -11,7 +11,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 try:
     from sklearn.utils import shuffle as sk_shuffle
 except ModuleNotFoundError:
-    warn_missing_pkg("sklearn")
+    warn_missing_pkg("sklearn")  # pragma: no-cover
     _SKLEARN_AVAILABLE = False
 else:
     _SKLEARN_AVAILABLE = True
