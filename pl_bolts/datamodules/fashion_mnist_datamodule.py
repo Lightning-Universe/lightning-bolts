@@ -1,8 +1,7 @@
 from typing import Optional
 
-from pytorch_lightning import LightningDataModule
-
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.datamodules.base_datamodule import BaseDataModule
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -12,7 +11,7 @@ else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
-class FashionMNISTDataModule(LightningDataModule):
+class FashionMNISTDataModule(BaseDataModule):
     """
     .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/
         wp-content/uploads/2019/02/Plot-of-a-Subset-of-Images-from-the-Fashion-MNIST-Dataset.png

@@ -41,6 +41,12 @@ class BaseDataModule(LightningDataModule):
             num_workers: how many workers to use for loading data
             normalize: If true applies image normalize
         """
+
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                "You want to use VisionDataset loaded from `torchvision` which is not installed yet."
+            )
+
         super().__init__(*args, **kwargs)
 
         self.dataset_cls = dataset_cls
