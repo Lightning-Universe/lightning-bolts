@@ -9,7 +9,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     from torchvision import transforms as transform_lib
-    from torchvision.datasets import MNIST, VisionDataset
+    from torchvision.datasets import VisionDataset
 except ModuleNotFoundError:
     warn_missing_pkg("torchvision")  # pragma: no-cover
     _TORCHVISION_AVAILABLE = False
@@ -42,11 +42,6 @@ class BaseDataModule(LightningDataModule):
             normalize: If true applies image normalize
         """
         super().__init__(*args, **kwargs)
-
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
-                "You want to use MNIST dataset loaded from `torchvision` which is not installed yet."
-            )
 
         self.dataset_cls = dataset_cls
         self.dims = dims

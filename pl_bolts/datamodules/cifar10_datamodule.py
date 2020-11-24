@@ -76,8 +76,14 @@ class CIFAR10DataModule(BaseDataModule):
             batch_size: number of examples per training/eval step
         """
 
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use CIFAR10 dataset loaded from `torchvision` which is not installed yet.'
+            )
+
         dataset_cls = CIFAR10
         dims = (3, 32, 32)
+
         super().__init__(
             dataset_cls=dataset_cls,
             dims=dims,

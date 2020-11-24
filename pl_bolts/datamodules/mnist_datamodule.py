@@ -61,8 +61,14 @@ class MNISTDataModule(BaseDataModule):
             batch_size: size of batch
         """
 
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                "You want to use MNIST dataset loaded from `torchvision` which is not installed yet."
+            )
+
         dataset_cls = MNIST
         dims = (1, 28, 28)
+
         super().__init__(
             dataset_cls=dataset_cls,
             dims=dims,
