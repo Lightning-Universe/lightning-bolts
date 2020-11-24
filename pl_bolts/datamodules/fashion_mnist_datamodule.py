@@ -1,6 +1,6 @@
-import torch
+from typing import Optional
+
 from pytorch_lightning import LightningDataModule
-from torch.utils.data import DataLoader, random_split
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -44,14 +44,15 @@ class FashionMNISTDataModule(LightningDataModule):
     name = 'fashion_mnist'
 
     def __init__(
-            self,
-            data_dir: str,
-            val_split: int = 5000,
-            num_workers: int = 16,
-            seed: int = 42,
-            batch_size: int = 32,
-            *args,
-            **kwargs,
+        self,
+        data_dir: Optional[str] = None,
+        val_split: int = 5000,
+        num_workers: int = 16,
+        normalize: bool = False,
+        seed: int = 42,
+        batch_size: int = 32,
+        *args,
+        **kwargs,
     ):
         """
         Args:
@@ -60,19 +61,27 @@ class FashionMNISTDataModule(LightningDataModule):
             num_workers: how many workers to use for loading data
             batch_size: size of batch
         """
-        super().__init__(*args, **kwargs)
 
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
-                'You want to use fashion MNIST dataset loaded from `torchvision` which is not installed yet.'
+                "You want to use FashionMNIST dataset loaded from `torchvision` which is not installed yet."
             )
 
-        self.dims = (1, 28, 28)
-        self.data_dir = data_dir
-        self.val_split = val_split
-        self.num_workers = num_workers
-        self.seed = seed
-        self.batch_size = batch_size
+        dataset_cls = FashionMNIST
+        dims = (1, 28, 28)
+
+        super().__init__(
+            dataset_cls=dataset_cls,
+            dims=dims,
+            data_dir=data_dir,
+            val_split=val_split,
+            num_workers=num_workers,
+            normalize=normalize,
+            seed=seed,
+            batch_size=batch_size,
+            *args,
+            **kwargs,
+        )
 
     @property
     def num_classes(self):
@@ -82,78 +91,12 @@ class FashionMNISTDataModule(LightningDataModule):
         """
         return 10
 
-    def prepare_data(self):
-        """
-        Saves FashionMNIST files to data_dir
-        """
-        FashionMNIST(self.data_dir, train=True, download=True, transform=transform_lib.ToTensor())
-        FashionMNIST(self.data_dir, train=False, download=True, transform=transform_lib.ToTensor())
+    def default_transforms(self):
+        if self.normalize:
+            mnist_transforms = transform_lib.Compose(
+                [transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5,), std=(0.5,))]
+            )
+        else:
+            mnist_transforms = transform_lib.ToTensor()
 
-    def train_dataloader(self):
-        """
-        FashionMNIST train set removes a subset to use for validation
-        """
-        transforms = self._default_transforms() if self.train_transforms is None else self.train_transforms
-
-        dataset = FashionMNIST(self.data_dir, train=True, download=False, transform=transforms)
-        train_length = len(dataset)
-        dataset_train, _ = random_split(
-            dataset,
-            [train_length - self.val_split, self.val_split],
-            generator=torch.Generator().manual_seed(self.seed)
-        )
-        loader = DataLoader(
-            dataset_train,
-            batch_size=self.batch_size,
-            shuffle=True,
-            num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
-        )
-        return loader
-
-    def val_dataloader(self):
-        """
-        FashionMNIST val set uses a subset of the training set for validation
-        """
-        transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
-
-        dataset = FashionMNIST(self.data_dir, train=True, download=False, transform=transforms)
-        train_length = len(dataset)
-        _, dataset_val = random_split(
-            dataset,
-            [train_length - self.val_split, self.val_split],
-            generator=torch.Generator().manual_seed(self.seed)
-        )
-        loader = DataLoader(
-            dataset_val,
-            batch_size=self.batch_size,
-            shuffle=False,
-            num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
-        )
-        return loader
-
-    def test_dataloader(self):
-        """
-        FashionMNIST test set uses the test split
-        """
-        transforms = self._default_transforms() if self.test_transforms is None else self.test_transforms
-
-        dataset = FashionMNIST(self.data_dir, train=False, download=False, transform=transforms)
-        loader = DataLoader(
-            dataset,
-            batch_size=self.batch_size,
-            shuffle=False,
-            num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
-        )
-        return loader
-
-    def _default_transforms(self):
-        mnist_transforms = transform_lib.Compose([
-            transform_lib.ToTensor()
-        ])
         return mnist_transforms
