@@ -9,7 +9,6 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     from torchvision import transforms as transform_lib
-    from torchvision.datasets import VisionDataset
 except ModuleNotFoundError:
     warn_missing_pkg("torchvision")  # pragma: no-cover
     _TORCHVISION_AVAILABLE = False
@@ -23,7 +22,7 @@ class BaseDataModule(LightningDataModule):
 
     def __init__(
         self,
-        dataset_cls: VisionDataset,
+        dataset_cls,
         dims: Tuple[int, int, int],
         data_dir: Optional[str] = None,
         val_split: int = 5000,
@@ -41,11 +40,6 @@ class BaseDataModule(LightningDataModule):
             num_workers: how many workers to use for loading data
             normalize: If true applies image normalize
         """
-
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
-                "You want to use VisionDataset loaded from `torchvision` which is not installed yet."
-            )
 
         super().__init__(*args, **kwargs)
 
