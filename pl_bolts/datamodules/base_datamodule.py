@@ -2,7 +2,7 @@ from typing import Tuple
 
 import torch
 from pytorch_lightning import LightningDataModule
-from torch.utils.data import random_split, DataLoader
+from torch.utils.data import DataLoader, random_split
 from torchvision import transforms as transform_lib
 from torchvision.datasets import VisionDataset
 
