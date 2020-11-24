@@ -313,7 +313,7 @@ class DQN(pl.LightningModule):
         """Log the avg of the test results"""
         rewards = [x["test_reward"] for x in outputs]
         avg_reward = sum(rewards) / len(rewards)
-        self.log("avg_test_reward",avg_reward)
+        self.log("avg_test_reward", avg_reward)
         return {"avg_test_reward": avg_reward}
 
     def configure_optimizers(self) -> List[Optimizer]:
