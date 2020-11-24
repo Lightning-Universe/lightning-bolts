@@ -1,13 +1,12 @@
 import torch
-import torchvision.transforms as T
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
+    import torchvision.transforms as T
     from torchvision.datasets import VOCDetection
-
 except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
     _TORCHVISION_AVAILABLE = False

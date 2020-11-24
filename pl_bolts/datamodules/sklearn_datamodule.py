@@ -6,11 +6,12 @@ import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
 
+from pl_bolts.utils.warnings import warn_missing_pkg
+
 try:
     from sklearn.utils import shuffle as sk_shuffle
 except ModuleNotFoundError:
-    raise ModuleNotFoundError('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-                              ' install it with `pip install sklearn`.')
+    warn_missing_pkg("sklearn")  # pragma: no-cover
     _SKLEARN_AVAILABLE = False
 else:
     _SKLEARN_AVAILABLE = True
