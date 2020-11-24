@@ -1,5 +1,4 @@
-import torch
-from torch.utils.data import DataLoader, random_split
+from typing import Optional
 
 from pl_bolts.datamodules import BaseDataModule
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -44,7 +43,7 @@ class MNISTDataModule(BaseDataModule):
 
     def __init__(
         self,
-        data_dir: str = "./",
+        data_dir: Optional[str] = None,
         val_split: int = 5000,
         num_workers: int = 16,
         normalize: bool = False,
@@ -65,7 +64,16 @@ class MNISTDataModule(BaseDataModule):
         dataset_cls = MNIST
         dims = (1, 28, 28)
         super().__init__(
-            dataset_cls, dims, data_dir, val_split, num_workers, normalize, seed, batch_size, *args, **kwargs
+            dataset_cls=dataset_cls,
+            dims=dims,
+            data_dir=data_dir,
+            val_split=val_split,
+            num_workers=num_workers,
+            normalize=normalize,
+            seed=seed,
+            batch_size=batch_size,
+            *args,
+            **kwargs,
         )
 
     @property
