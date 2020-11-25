@@ -48,8 +48,7 @@ class BinaryMNISTDataModule(BaseDataModule):
         num_workers: int = 16,
         normalize: bool = False,
         seed: int = 42,
-        train_batch_size: int = 32,
-        eval_batch_size: int = 32,
+        batch_size: int = 32,
         *args,
         **kwargs,
     ):
@@ -78,8 +77,7 @@ class BinaryMNISTDataModule(BaseDataModule):
             num_workers=num_workers,
             normalize=normalize,
             seed=seed,
-            train_batch_size=train_batch_size,
-            eval_batch_size=eval_batch_size,
+            batch_size=batch_size,
             *args,
             **kwargs,
         )

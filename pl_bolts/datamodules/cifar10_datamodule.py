@@ -64,8 +64,7 @@ class CIFAR10DataModule(BaseDataModule):
         num_workers: int = 16,
         normalize: bool = False,
         seed: int = 42,
-        train_batch_size: int = 32,
-        eval_batch_size: int = 32,
+        batch_size: int = 32,
         *args,
         **kwargs,
     ):
@@ -74,7 +73,7 @@ class CIFAR10DataModule(BaseDataModule):
             data_dir: where to save/load the data
             val_split: how many of the training images to use for the validation split
             num_workers: how many workers to use for loading data
-            train_batch_size: number of examples per training/eval step
+            batch_size: number of examples per training/eval step
         """
 
         if not _TORCHVISION_AVAILABLE:
@@ -93,8 +92,7 @@ class CIFAR10DataModule(BaseDataModule):
             num_workers=num_workers,
             normalize=normalize,
             seed=seed,
-            train_batch_size=train_batch_size,
-            eval_batch_size=eval_batch_size,
+            batch_size=batch_size,
             *args,
             **kwargs,
         )

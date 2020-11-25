@@ -29,8 +29,7 @@ class BaseDataModule(LightningDataModule):
         num_workers: int = 16,
         normalize: bool = False,
         seed: int = 42,
-        train_batch_size: int = 32,
-        eval_batch_size: int = 32,
+        batch_size: int = 32,
         *args,
         **kwargs,
     ):
@@ -51,8 +50,7 @@ class BaseDataModule(LightningDataModule):
         self.num_workers = num_workers
         self.normalize = normalize
         self.seed = seed
-        self.train_batch_size = train_batch_size
-        self.eval_batch_size = eval_batch_size
+        self.batch_size = batch_size
 
     def prepare_data(self):
         """
@@ -107,24 +105,24 @@ class BaseDataModule(LightningDataModule):
         """
         Train set removes a subset to use for validation
         """
-        return self._data_loader(self.dataset_train, self.train_batch_size, shuffle=True)
+        return self._data_loader(self.dataset_train, shuffle=True)
 
     def val_dataloader(self):
         """
         Val set uses a subset of the training set for validation
         """
-        return self._data_loader(self.dataset_val, self.eval_batch_size)
+        return self._data_loader(self.dataset_val)
 
     def test_dataloader(self):
         """
         Test set uses the test split
         """
-        return self._data_loader(self.dataset_test, self.eval_batch_size)
+        return self._data_loader(self.dataset_test)
 
-    def _data_loader(self, dataset, batch_size, shuffle=False):
+    def _data_loader(self, dataset, shuffle=False):
         return DataLoader(
             dataset,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=shuffle,
             num_workers=self.num_workers,
             drop_last=True,
