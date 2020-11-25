@@ -14,14 +14,14 @@ def create_fasterrcnn_backbone(backbone: str, fpn: bool = True, pretrained: str 
 
     """
     Args:
-        backbone (str):
+        backbone:
             Supported backones are: "resnet18", "resnet34","resnet50", "resnet101", "resnet152",
             "resnext50_32x4d", "resnext101_32x8d", "wide_resnet50_2", "wide_resnet101_2",
             as resnets with fpn backbones.
             Without fpn backbones supported are: "resnet18", "resnet34", "resnet50","resnet101",
             "resnet152", "resnext101_32x8d", "mobilenet_v2", "vgg11", "vgg13", "vgg16", "vgg19",
-        fpn (bool): If True then constructs fpn as well.
-        pretrained (str): If None creates imagenet weights backbone.
+        fpn: If True then constructs fpn as well.
+        pretrained: If None creates imagenet weights backbone.
     """
 
     if fpn:
