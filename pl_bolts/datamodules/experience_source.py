@@ -15,8 +15,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
     from gym import Env
-else:
-    warn_missing_pkg("gym")  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg("gym")
 
 
 Experience = namedtuple(

@@ -8,7 +8,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import CIFAR10
-else:  # pragma: no-cover
+else:  # pragma: no cover
     warn_missing_pkg('torchvision')
     CIFAR10 = object
 

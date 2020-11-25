@@ -12,7 +12,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _PIL_AVAILABLE:
     from PIL import Image
-else:  # pragma: no-cover
+else:  # pragma: no cover
     warn_missing_pkg('PIL', pypi_name='Pillow')
 
 

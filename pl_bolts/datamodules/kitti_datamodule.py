@@ -11,8 +11,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     import torchvision.transforms as transforms
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 
 class KittiDataModule(LightningDataModule):
@@ -62,8 +62,8 @@ class KittiDataModule(LightningDataModule):
             batch_size: the batch size
             seed: random seed to be used for train/val/test splits
         """
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `torchvision` which is not installed yet.'
             )
 

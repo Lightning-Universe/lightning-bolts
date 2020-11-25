@@ -11,8 +11,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _SKLEARN_AVAILABLE:
     from sklearn.utils import shuffle as sk_shuffle
-else:
-    warn_missing_pkg("sklearn")  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg("sklearn")
 
 
 class SklearnDataset(Dataset):
@@ -158,8 +158,8 @@ class SklearnDataModule(LightningDataModule):
         # shuffle x and y
         if shuffle and _SKLEARN_AVAILABLE:
             X, y = sk_shuffle(X, y, random_state=random_state)
-        elif shuffle and not _SKLEARN_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        elif shuffle and not _SKLEARN_AVAILABLE:   # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use shuffle function from `scikit-learn` which is not installed yet.'
             )
 

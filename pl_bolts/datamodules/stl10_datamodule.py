@@ -13,7 +13,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import STL10
-else:  # pragma: no-cover
+else:  # pragma: no cover
     warn_missing_pkg('torchvision')
 
 
@@ -73,8 +73,8 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         """
         super().__init__(*args, **kwargs)
 
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use STL10 dataset loaded from `torchvision` which is not installed yet.'
             )
 

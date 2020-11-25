@@ -10,8 +10,8 @@ if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import MNIST
 
     from pl_bolts.datasets.mnist_dataset import BinaryMNIST
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 
 class BinaryMNISTDataModule(LightningDataModule):
@@ -63,8 +63,8 @@ class BinaryMNISTDataModule(LightningDataModule):
         """
         super().__init__(*args, **kwargs)
 
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use MNIST dataset loaded from `torchvision` which is not installed yet.'
             )
 

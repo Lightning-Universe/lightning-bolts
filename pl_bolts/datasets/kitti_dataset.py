@@ -8,7 +8,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _PIL_AVAILABLE:
     from PIL import Image
-else:  # pragma: no-cover
+else:  # pragma: no cover
     warn_missing_pkg('PIL')
 
 
@@ -49,7 +49,7 @@ class KittiDataset(Dataset):
             void_labels: useless classes to be excluded from training
             valid_labels: useful classes to include
         """
-        if not _PIL_AVAILABLE:  # pragma: no-cover
+        if not _PIL_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
                 'You want to use `PIL` which is not installed yet.'
             )

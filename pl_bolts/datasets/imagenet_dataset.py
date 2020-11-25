@@ -18,7 +18,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import ImageNet
     from torchvision.datasets.imagenet import load_meta_file
-else:  # pragma: no-cover
+else:  # pragma: no cover
     warn_missing_pkg('torchvision')
     ImageNet = object
 
@@ -51,8 +51,8 @@ class UnlabeledImagenet(ImageNet):
             download:
             kwargs:
         """
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
             )
 
