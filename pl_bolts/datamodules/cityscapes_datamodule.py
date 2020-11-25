@@ -3,14 +3,11 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import Cityscapes
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
+else:  # pragma: no-cover
+    warn_missing_pkg('torchvision')
 
 
 class CityscapesDataModule(LightningDataModule):
