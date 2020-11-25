@@ -3,14 +3,25 @@ from argparse import ArgumentParser
 import pytorch_lightning as pl
 import torch
 from torch import nn
+from torchvision import transforms as transform_lib
 
 from pl_bolts.models.gans.dcgan.components import DCGANDiscriminator, DCGANGenerator
 
 
-class GANModule(pl.LightningModule):
-    def __init__(self, hparams):
+class DCGAN(pl.LightningModule):
+    def __init__(
+        self,
+        beta1: float = 0.5,
+        beta2: float = 0.999,
+        feature_maps_gen: int = 64,
+        feature_maps_disc: int = 64,
+        image_channels: int = 1,
+        latent_dim: int = 100,
+        learning_rate: float = 0.0002,
+        **kwargs
+    ):
         super().__init__()
-        self.save_hyperparameters(hparams)
+        self.save_hyperparameters()
 
         self.generator = self._get_generator()
         self.discriminator = self._get_discriminator()
@@ -28,7 +39,7 @@ class GANModule(pl.LightningModule):
         return discriminator
 
     @staticmethod
-    def weights_init(m):
+    def _weights_init(m):
         classname = m.__class__.__name__
         if classname.find("Conv") != -1:
             torch.nn.init.normal_(m.weight, 0.0, 0.02)
@@ -115,7 +126,43 @@ class GANModule(pl.LightningModule):
         parser.add_argument("--beta2", default=0.999, type=float)
         parser.add_argument("--feature_maps_gen", default=64, type=int)
         parser.add_argument("--feature_maps_disc", default=64, type=int)
-        parser.add_argument("--image_channels", default=3, type=int)
+        parser.add_argument("--image_channels", default=1, type=int)
         parser.add_argument("--latent_dim", default=100, type=int)
         parser.add_argument("--learning_rate", default=0.0002, type=float)
         return parser
+
+
+def cli_main(args=None):
+    from pl_bolts.datamodules import CIFAR10DataModule, MNISTDataModule
+
+    pl.seed_everything(1234)
+
+    parser = ArgumentParser()
+    parser.add_argument("--dataset", default="mnist", type=str, help="mnist, cifar10")
+    parser.add_argument("--image_size", default=64, type=int)
+    script_args, _ = parser.parse_known_args(args)
+
+    if script_args.dataset == "mnist":
+        dm_cls = MNISTDataModule
+    elif script_args.dataset == "cifar10":
+        dm_cls = CIFAR10DataModule
+
+    parser = dm_cls.add_argparse_args(parser)
+    parser = pl.Trainer.add_argparse_args(parser)
+    parser = DCGAN.add_model_specific_args(parser)
+    args = parser.parse_args(args)
+
+    transforms = transform_lib.Compose([transform_lib.Resize(args.image_size), transform_lib.ToTensor()])
+    dm = dm_cls.from_argparse_args(args)
+    dm.train_transforms = transforms
+    dm.val_transforms = transforms
+    dm.test_transforms = transforms
+
+    model = DCGAN(**vars(args))
+    trainer = pl.Trainer.from_argparse_args(args)
+    trainer.fit(model, dm)
+    return dm, model, trainer
+
+
+if __name__ == "__main__":
+    dm, model, trainer = cli_main()
