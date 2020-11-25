@@ -14,6 +14,51 @@ from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
 class SimSiam(pl.LightningModule):
+"""
+    PyTorch Lightning implementation of `Exploring Simple Siamese Representation Learning (SimSiam)
+    <https://arxiv.org/pdf/2011.10566v1.pdf>`_
+
+    Paper authors: Xinlei Chen, Kaiming He.
+
+    Model implemented by:
+        - `Zvi Lapp <https://github.com/zlapp>`_
+
+    .. warning:: Work in progress. This implementation is still being verified.
+
+    TODOs:
+        - verify on CIFAR-10
+        - verify on STL-10
+        - pre-train on imagenet
+
+    Example::
+
+        model = SimSiam(num_classes=10)
+
+        dm = CIFAR10DataModule(num_workers=0)
+        dm.train_transforms = SimCLRTrainDataTransform(32)
+        dm.val_transforms = SimCLREvalDataTransform(32)
+
+        trainer = pl.Trainer()
+        trainer.fit(model, dm)
+
+    Train::
+
+        trainer = Trainer()
+        trainer.fit(model)
+
+    CLI command::
+
+        # cifar10
+        python simsiam_module.py --gpus 1
+
+        # imagenet
+        python simsiam_module.py
+            --gpus 8
+            --dataset imagenet2012
+            --data_dir /path/to/imagenet/
+            --meta_dir /path/to/folder/with/meta.bin/
+            --batch_size 32
+    """
     def __init__(self,
                  num_classes,
                  learning_rate: float = 0.2,
