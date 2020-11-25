@@ -1,4 +1,9 @@
-import torchvision
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+try:
+    import torchvision
+except ModuleNotFoundError:
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 model_zoo = {
     "vgg11": torchvision.models.vgg11,
