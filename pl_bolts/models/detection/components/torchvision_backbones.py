@@ -17,6 +17,7 @@ __all__ = ["create_torchvision_backbone"]
 def _create_backbone_generic(model, out_channels: int):
     """
     Generic Backbone creater. It removes the last linear layer.
+
     Args:
         model: torch.nn model
         out_channels: Number of out_channels in last layer.
