@@ -1,4 +1,5 @@
 import os
+from abc import abstractmethod
 from typing import Optional, Tuple, Union
 
 import torch
@@ -35,10 +36,14 @@ class BaseDataModule(LightningDataModule):
     ):
         """
         Args:
-            data_dir: where to save/load the data
-            val_split: how many of the training images to use for the validation split
-            num_workers: how many workers to use for loading data
+            dataset_cls: Dataset class to use
+            dims: A tuple describing the shape of the data
+            data_dir: Where to save/load the data
+            val_split: Percent (float) or number (int) of samples to use for the validation split
+            num_workers: How many workers to use for loading data
             normalize: If true applies image normalize
+            seed: Seed to fix the validation split
+            batch_size: How many samples per batch to load
         """
 
         super().__init__(*args, **kwargs)
@@ -60,6 +65,9 @@ class BaseDataModule(LightningDataModule):
         self.dataset_cls(self.data_dir, train=False, download=True)
 
     def setup(self, stage=None):
+        """
+        Creates train, val, and test dataset
+        """
         if stage == "fit" or stage is None:
             train_transforms = (
                 self.default_transforms() if self.train_transforms is None else self.train_transforms
@@ -82,6 +90,9 @@ class BaseDataModule(LightningDataModule):
             )
 
     def _split_dataset(self, dataset, train=True):
+        """
+        Splits the dataset into train and validation set
+        """
         len_dataset = len(dataset)
         splits = self._get_splits(len_dataset)
         dataset_train, dataset_val = random_split(
@@ -93,6 +104,9 @@ class BaseDataModule(LightningDataModule):
         return dataset_val
 
     def _get_splits(self, len_dataset):
+        """
+        Computes split lengths for train and validation set
+        """
         if isinstance(self.val_split, int):
             train_len = len_dataset - self.val_split
             splits = [train_len, self.val_split]
@@ -103,24 +117,28 @@ class BaseDataModule(LightningDataModule):
 
         return splits
 
+    @abstractmethod
     def default_transforms(self):
-        return transform_lib.ToTensor()
+        """
+        Default transform for the dataset
+        """
+        pass
 
     def train_dataloader(self):
         """
-        Train set removes a subset to use for validation
+        The train dataloader
         """
         return self._data_loader(self.dataset_train, shuffle=True)
 
     def val_dataloader(self):
         """
-        Val set uses a subset of the training set for validation
+        The val dataloader
         """
         return self._data_loader(self.dataset_val)
 
     def test_dataloader(self):
         """
-        Test set uses the test split
+        The test dataloader
         """
         return self._data_loader(self.dataset_test)
 

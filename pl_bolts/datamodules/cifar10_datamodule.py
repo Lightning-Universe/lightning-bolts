@@ -70,10 +70,12 @@ class CIFAR10DataModule(BaseDataModule):
     ):
         """
         Args:
-            data_dir: where to save/load the data
-            val_split: how many of the training images to use for the validation split
-            num_workers: how many workers to use for loading data
-            batch_size: number of examples per training/eval step
+            data_dir: Where to save/load the data
+            val_split: Percent (float) or number (int) of samples to use for the validation split
+            num_workers: How many workers to use for loading data
+            normalize: If true applies image normalize
+            seed: Seed to fix the validation split
+            batch_size: How many samples per batch to load
         """
 
         if not _TORCHVISION_AVAILABLE:
