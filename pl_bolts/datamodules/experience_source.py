@@ -17,6 +17,7 @@ if _GYM_AVAILABLE:
     from gym import Env
 else:  # pragma: no cover
     warn_missing_pkg("gym")
+    Env = object
 
 
 Experience = namedtuple(
@@ -179,7 +180,7 @@ class ExperienceSource(BaseExperienceSource):
 
         return actions
 
-    def env_step(self, env_idx: int, env: "Env", action: List[int]) -> Experience:
+    def env_step(self, env_idx: int, env: Env, action: List[int]) -> Experience:
         """
         Carries out a step through the given environment using the given action
 
@@ -243,7 +244,7 @@ class ExperienceSource(BaseExperienceSource):
 class DiscountedExperienceSource(ExperienceSource):
     """Outputs experiences with a discounted reward over N steps"""
 
-    def __init__(self, env: "Env", agent, n_steps: int = 1, gamma: float = 0.99):
+    def __init__(self, env: Env, agent, n_steps: int = 1, gamma: float = 0.99):
         super().__init__(env, agent, (n_steps + 1))
         self.gamma = gamma
         self.steps = n_steps
