@@ -5,7 +5,7 @@ try:
 except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
-model_zoo = {
+TORCHVISION_MODEL_ZOO = {
     "vgg11": torchvision.models.vgg11,
     "vgg13": torchvision.models.vgg13,
     "vgg16": torchvision.models.vgg16,
