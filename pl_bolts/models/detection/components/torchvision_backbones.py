@@ -3,10 +3,9 @@ import torch.nn as nn
 
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-from ._supported_models import model_zoo
-
 try:
     import torchvision
+    from ._supported_models import model_zoo
 except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
