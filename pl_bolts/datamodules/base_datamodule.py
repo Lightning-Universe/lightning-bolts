@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import torch
 from pytorch_lightning import LightningDataModule
@@ -25,11 +25,12 @@ class BaseDataModule(LightningDataModule):
         dataset_cls,
         dims: Tuple[int, int, int],
         data_dir: Optional[str] = None,
-        val_split: int = 5000,
+        val_split: Union[int, float] = 0.2,
         num_workers: int = 16,
         normalize: bool = False,
         seed: int = 42,
-        batch_size: int = 32,
+        train_batch_size: int = 32,
+        eval_batch_size: int = 32,
         *args,
         **kwargs,
     ):
@@ -50,71 +51,82 @@ class BaseDataModule(LightningDataModule):
         self.num_workers = num_workers
         self.normalize = normalize
         self.seed = seed
-        self.batch_size = batch_size
+        self.train_batch_size = train_batch_size
+        self.eval_batch_size = eval_batch_size
 
     def prepare_data(self):
         """
         Saves files to data_dir
         """
-        self.dataset_cls(
-            self.data_dir, train=True, download=True, transform=transform_lib.ToTensor(), **self.extra_args
+        self.dataset_cls(self.data_dir, train=True, download=True)
+        self.dataset_cls(self.data_dir, train=False, download=True)
+
+    def setup(self, stage=None):
+        if stage == "fit" or stage is None:
+            dataset_dev = self.dataset_cls(self.data_dir, train=True, download=False, **self.extra_args)
+
+            # Split
+            self.dataset_train, self.dataset_val = self._split_dataset(dataset_dev)
+
+            # Update transforms
+            self.dataset_train.transform = (
+                self.default_transforms() if self.train_transforms is None else self.train_transforms
+            )
+            self.dataset_val.transform = (
+                self.default_transforms() if self.val_transforms is None else self.val_transforms
+            )
+
+        if stage == "test" or stage is None:
+            test_transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
+            self.dataset_test = self.dataset_cls(
+                self.data_dir, train=False, download=False, transform=test_transforms, **self.extra_args
+            )
+
+    def _split_dataset(self, dataset_dev):
+        dev_len = len(dataset_dev)
+        splits = self._get_splits(dev_len)
+        dataset_train, dataset_val = random_split(
+            dataset_dev, splits, generator=torch.Generator().manual_seed(self.seed)
         )
-        self.dataset_cls(
-            self.data_dir, train=False, download=True, transform=transform_lib.ToTensor(), **self.extra_args
-        )
+        return dataset_train, dataset_val
+
+    def _get_splits(self, dev_len):
+        if isinstance(self.val_split, int):
+            train_len = dev_len - self.val_split
+            return [train_len, self.val_split]
+
+        elif isinstance(self.val_split, float):
+            val_len = int(self.val_split * dev_len)
+            train_len = dev_len - val_len
+            return [train_len, val_len]
+
+    def default_transforms(self):
+        return transform_lib.ToTensor()
 
     def train_dataloader(self):
         """
         Train set removes a subset to use for validation
         """
-        transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
-        dataset = self.dataset_cls(self.data_dir, train=True, download=False, transform=transforms, **self.extra_args)
-        train_length = len(dataset)
-        dataset_train, _ = random_split(
-            dataset, [train_length - self.val_split, self.val_split], generator=torch.Generator().manual_seed(self.seed)
-        )
-        loader = DataLoader(
-            dataset_train,
-            batch_size=self.batch_size,
-            shuffle=True,
-            num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True,
-        )
-        return loader
+        return self._data_loader(self.dataset_train, self.train_batch_size, shuffle=True)
 
     def val_dataloader(self):
         """
         Val set uses a subset of the training set for validation
         """
-        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
-        dataset = self.dataset_cls(self.data_dir, train=True, download=False, transform=transforms, **self.extra_args)
-        train_length = len(dataset)
-        _, dataset_val = random_split(
-            dataset, [train_length - self.val_split, self.val_split], generator=torch.Generator().manual_seed(self.seed)
-        )
-        loader = DataLoader(
-            dataset_val,
-            batch_size=self.batch_size,
-            shuffle=False,
-            num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True,
-        )
-        return loader
+        return self._data_loader(self.dataset_val, self.eval_batch_size)
 
     def test_dataloader(self):
         """
         Test set uses the test split
         """
-        transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
-        dataset = self.dataset_cls(self.data_dir, train=False, download=False, transform=transforms, **self.extra_args)
-        loader = DataLoader(
+        return self._data_loader(self.dataset_test, self.eval_batch_size)
+
+    def _data_loader(self, dataset, batch_size, shuffle=False):
+        return DataLoader(
             dataset,
-            batch_size=self.batch_size,
-            shuffle=False,
+            batch_size=batch_size,
+            shuffle=shuffle,
             num_workers=self.num_workers,
             drop_last=True,
             pin_memory=True,
         )
-        return loader

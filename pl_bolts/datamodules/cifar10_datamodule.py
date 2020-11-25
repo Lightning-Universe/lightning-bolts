@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Union
 
 from pl_bolts.datamodules.base_datamodule import BaseDataModule
 from pl_bolts.datasets.cifar10_dataset import TrialCIFAR10
@@ -60,11 +60,12 @@ class CIFAR10DataModule(BaseDataModule):
     def __init__(
         self,
         data_dir: Optional[str] = None,
-        val_split: int = 5000,
+        val_split: Union[int, float] = 0.2,
         num_workers: int = 16,
         normalize: bool = False,
         seed: int = 42,
-        batch_size: int = 32,
+        train_batch_size: int = 32,
+        eval_batch_size: int = 32,
         *args,
         **kwargs,
     ):
@@ -73,12 +74,12 @@ class CIFAR10DataModule(BaseDataModule):
             data_dir: where to save/load the data
             val_split: how many of the training images to use for the validation split
             num_workers: how many workers to use for loading data
-            batch_size: number of examples per training/eval step
+            train_batch_size: number of examples per training/eval step
         """
 
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
-                'You want to use CIFAR10 dataset loaded from `torchvision` which is not installed yet.'
+                "You want to use CIFAR10 dataset loaded from `torchvision` which is not installed yet."
             )
 
         dataset_cls = CIFAR10
@@ -92,7 +93,8 @@ class CIFAR10DataModule(BaseDataModule):
             num_workers=num_workers,
             normalize=normalize,
             seed=seed,
-            batch_size=batch_size,
+            train_batch_size=train_batch_size,
+            eval_batch_size=eval_batch_size,
             *args,
             **kwargs,
         )

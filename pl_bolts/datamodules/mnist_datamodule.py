@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from pl_bolts.datamodules import BaseDataModule
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -44,11 +44,12 @@ class MNISTDataModule(BaseDataModule):
     def __init__(
         self,
         data_dir: Optional[str] = None,
-        val_split: int = 5000,
+        val_split: Union[int, float] = 0.2,
         num_workers: int = 16,
         normalize: bool = False,
         seed: int = 42,
-        batch_size: int = 32,
+        train_batch_size: int = 32,
+        eval_batch_size: int = 32,
         *args,
         **kwargs,
     ):
@@ -77,7 +78,8 @@ class MNISTDataModule(BaseDataModule):
             num_workers=num_workers,
             normalize=normalize,
             seed=seed,
-            batch_size=batch_size,
+            train_batch_size=train_batch_size,
+            eval_batch_size=eval_batch_size,
             *args,
             **kwargs,
         )
