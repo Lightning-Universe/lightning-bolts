@@ -55,13 +55,14 @@ class FRCNN(pl.LightningModule):
         pretrained: bool = False,
         pretrained_backbone: bool = True,
         trainable_backbone_layers: int = 3,
-        replace_head: bool = True,
         **kwargs,
     ):
         """
         Args:
             learning_rate: the learning rate
             num_classes: number of detection classes (including background)
+            backbone: Pretained backbone CNN architecture.
+            fpn: If True, creates a FPN on top of Resnet based CNNs.
             pretrained: if true, returns a model pre-trained on COCO train2017
             pretrained_backbone: if true, returns a model with backbone pre-trained on Imagenet
             trainable_backbone_layers: number of trainable resnet layers starting from final block
@@ -72,8 +73,9 @@ class FRCNN(pl.LightningModule):
         self.num_classes = num_classes
         self.backbone = backbone
         if backbone is None:
-            self.model = fasterrcnn_resnet50_fpn(pretrained=True,
-                                                 trainable_backbone_layers=trainable_backbone_layers,)
+            self.model = fasterrcnn_resnet50_fpn(pretrained=pretrained,
+                                                 pretrained_backbone=pretrained_backbone,
+                                                 trainable_backbone_layers=trainable_backbone_layers)
 
             in_features = self.model.roi_heads.box_predictor.cls_score.in_features
             self.model.roi_heads.box_predictor = FastRCNNPredictor(in_features, self.num_classes)
@@ -122,10 +124,11 @@ class FRCNN(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--learning_rate", type=float, default=0.0001)
         parser.add_argument("--num_classes", type=int, default=91)
+        parser.add_argument("--backbone", type=str, default=None)
+        parser.add_argument("--fpn", type=bool, default=True)
         parser.add_argument("--pretrained", type=bool, default=False)
         parser.add_argument("--pretrained_backbone", type=bool, default=True)
         parser.add_argument("--trainable_backbone_layers", type=int, default=3)
-        parser.add_argument("--replace_head", type=bool, default=True)
 
         parser.add_argument("--data_dir", type=str, default=".")
         parser.add_argument("--batch_size", type=int, default=1)
