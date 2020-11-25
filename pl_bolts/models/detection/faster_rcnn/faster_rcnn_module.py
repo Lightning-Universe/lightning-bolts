@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from typing import Optional
 
 import pytorch_lightning as pl
 import torch
@@ -49,8 +50,8 @@ class FRCNN(pl.LightningModule):
         self,
         learning_rate: float = 0.0001,
         num_classes: int = 91,
-        backbone: str = None,
-        fpn: bool = True,
+        backbone: Optional[str] = None,
+        fpn: Optional[bool] = True,
         pretrained: bool = False,
         pretrained_backbone: bool = True,
         trainable_backbone_layers: int = 3,
