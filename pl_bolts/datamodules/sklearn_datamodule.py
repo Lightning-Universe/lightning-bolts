@@ -1,16 +1,18 @@
-from importlib.util import find_spec
 import math
 from typing import Any
 
 import numpy as np
 import torch
 from pytorch_lightning import LightningDataModule
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 
+from pl_bolts import _SKLEARN_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
 
-_SKLEARN_AVAILABLE = find_spec("sklearn") is not None
 if _SKLEARN_AVAILABLE:
     from sklearn.utils import shuffle as sk_shuffle
+else:
+    warn_missing_pkg("sklearn")  # pragma: no-cover
 
 
 class SklearnDataset(Dataset):

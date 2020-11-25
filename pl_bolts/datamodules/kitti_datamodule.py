@@ -1,4 +1,3 @@
-import importlib
 import os
 
 import torch
@@ -6,11 +5,14 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import random_split
 
+from pl_bolts import _TORCHVISION_AVAILABLE
 from pl_bolts.datasets.kitti_dataset import KittiDataset
+from pl_bolts.utils.warnings import warn_missing_pkg
 
-_TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
 if _TORCHVISION_AVAILABLE:
     import torchvision.transforms as transforms
+else:
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
 class KittiDataModule(LightningDataModule):
@@ -62,7 +64,7 @@ class KittiDataModule(LightningDataModule):
         """
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
-                'You want to use `transforms` from `torchvision` which is not installed yet.'
+                'You want to use `torchvision` which is not installed yet.'
             )
 
         super().__init__(*args, **kwargs)

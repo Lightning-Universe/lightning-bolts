@@ -19,7 +19,7 @@ This is the simplest autoencoder. You can use it like so
 
 You can override any part of this AE to build your own variation.
 
-.. code-block:: python
+.. testcode::
 
     from pl_bolts.models.autoencoders import AE
 
@@ -31,7 +31,9 @@ You can override any part of this AE to build your own variation.
 
 You can use the pretrained models present in bolts.
 
-CIFAR-10 pretrained model::
+CIFAR-10 pretrained model:
+
+.. code-block:: python
 
     from pl_bolts.models.autoencoders import AE
 
@@ -103,7 +105,9 @@ You can override any part of this VAE to build your own variation.
 
 You can use the pretrained models present in bolts.
 
-CIFAR-10 pretrained model::
+CIFAR-10 pretrained model:
+
+.. code-block::
 
     from pl_bolts.models.autoencoders import VAE
 

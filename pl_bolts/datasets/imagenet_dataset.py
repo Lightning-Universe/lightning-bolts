@@ -12,12 +12,15 @@ import numpy as np
 import torch
 from torch._six import PY3
 
-_TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
+from pl_bolts import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
 if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import ImageNet
     from torchvision.datasets.imagenet import load_meta_file
-else:
-    ImageNet = object  # pragma: no-cover
+else:  # pragma: no-cover
+    warn_missing_pkg('torchvision')
+    ImageNet = object
 
 
 class UnlabeledImagenet(ImageNet):

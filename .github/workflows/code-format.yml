@@ -15,14 +15,26 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.7
-
       - name: Install dependencies
         run: |
-          # python -m pip install --upgrade --user pip
           pip install flake8
           pip --version
         shell: bash
-
       - name: PEP8
         run: |
           flake8 .
+
+  imports-check-isort:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install isort
+        run: |
+          pip install isort==5.6.4
+          pip --version
+      - name: isort
+        run: |
+          isort . --check --diff

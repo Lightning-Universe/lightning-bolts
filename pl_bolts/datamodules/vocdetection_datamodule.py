@@ -1,12 +1,10 @@
-import importlib
-
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
+from pl_bolts import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-_TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
 if _TORCHVISION_AVAILABLE:
     import torchvision.transforms as T
     from torchvision.datasets import VOCDetection

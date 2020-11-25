@@ -2,19 +2,22 @@
 Datamodules for RL models that rely on experiences generated during training
 Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/experience.py
 """
+import importlib
 from abc import ABC
 from collections import deque, namedtuple
-import importlib
-from typing import Iterable, Callable, Tuple, List
+from typing import Callable, Iterable, List, Tuple
 
 import torch
 from torch.utils.data import IterableDataset
 
-_GYM_AVAILABLE = importlib.util.find_spec("gym") is not None
+from pl_bolts import _GYM_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
 if _GYM_AVAILABLE:
     from gym import Env
+else:
+    warn_missing_pkg("gym")  # pragma: no-cover
 
-# Datasets
 
 Experience = namedtuple(
     "Experience", field_names=["state", "action", "reward", "done", "new_state"]

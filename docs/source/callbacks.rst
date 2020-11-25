@@ -8,7 +8,6 @@ This module houses a collection of callbacks that can be passed into the trainer
 .. code-block:: python
 
     from pl_bolts.callbacks import PrintTableMetricsCallback
-    import pytorch_lightning as pl
 
     trainer = pl.Trainer(callbacks=[PrintTableMetricsCallback()])
 

@@ -1,7 +1,10 @@
 import random
 
 from pl_bolts.transforms.dataset_normalizations import (
-    imagenet_normalization, cifar10_normalization, stl10_normalization)
+    cifar10_normalization,
+    imagenet_normalization,
+    stl10_normalization,
+)
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:

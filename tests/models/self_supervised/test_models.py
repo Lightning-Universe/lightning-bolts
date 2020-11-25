@@ -4,12 +4,12 @@ import torch
 from pytorch_lightning import seed_everything
 
 from pl_bolts.datamodules import CIFAR10DataModule
-from pl_bolts.models.self_supervised import CPCV2, AMDIM, MocoV2, SimCLR, BYOL, SwAV
-from pl_bolts.models.self_supervised.cpc import CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10
+from pl_bolts.models.self_supervised import AMDIM, BYOL, CPCV2, MocoV2, SimCLR, SwAV
+from pl_bolts.models.self_supervised.cpc import CPCEvalTransformsCIFAR10, CPCTrainTransformsCIFAR10
 from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
-from pl_bolts.models.self_supervised.moco.transforms import (Moco2TrainCIFAR10Transforms, Moco2EvalCIFAR10Transforms)
+from pl_bolts.models.self_supervised.moco.transforms import Moco2EvalCIFAR10Transforms, Moco2TrainCIFAR10Transforms
 from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
-from pl_bolts.models.self_supervised.swav.transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
+from pl_bolts.models.self_supervised.swav.transforms import SwAVEvalDataTransform, SwAVTrainDataTransform
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 
 
@@ -80,7 +80,7 @@ def test_simclr(tmpdir, datadir):
     datamodule.train_transforms = SimCLRTrainDataTransform(32)
     datamodule.val_transforms = SimCLREvalDataTransform(32)
 
-    model = SimCLR(batch_size=2, num_samples=datamodule.num_samples)
+    model = SimCLR(batch_size=2, num_samples=datamodule.num_samples, gpus=0, nodes=1, dataset='cifar10')
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model, datamodule)
     loss = trainer.progress_bar_dict['loss']
@@ -117,6 +117,7 @@ def test_swav(tmpdir, datadir):
         arch='resnet18',
         hidden_mlp=512,
         gpus=0,
+        nodes=1,
         num_samples=datamodule.num_samples,
         batch_size=batch_size,
         nmb_crops=[2, 1],

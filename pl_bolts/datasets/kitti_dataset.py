@@ -1,12 +1,15 @@
-import importlib
 import os
 
 import numpy as np
 from torch.utils.data import Dataset
 
-_PIL_AVAILABLE = importlib.util.find_spec("PIL") is not None
+from pl_bolts import _PIL_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
 if _PIL_AVAILABLE:
     from PIL import Image
+else:  # pragma: no-cover
+    warn_missing_pkg('PIL')
 
 
 DEFAULT_VOID_LABELS = (0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1)
@@ -46,9 +49,9 @@ class KittiDataset(Dataset):
             void_labels: useless classes to be excluded from training
             valid_labels: useful classes to include
         """
-        if not _PIL_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
-                'You want to use `Pillow` which is not installed yet.'
+        if not _PIL_AVAILABLE:  # pragma: no-cover
+            raise ModuleNotFoundError(
+                'You want to use `PIL` which is not installed yet.'
             )
 
         self.img_size = img_size

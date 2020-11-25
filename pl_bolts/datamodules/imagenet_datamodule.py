@@ -1,17 +1,16 @@
-import importlib
 import os
 from typing import Optional
 
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
+from pl_bolts import _TORCHVISION_AVAILABLE
+from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-_TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
-    from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
@@ -82,6 +81,7 @@ class ImagenetDataModule(LightningDataModule):
         self.meta_dir = meta_dir
         self.num_imgs_per_val_class = num_imgs_per_val_class
         self.batch_size = batch_size
+        self.num_samples = 1281167 - self.num_imgs_per_val_class * self.num_classes
 
     @property
     def num_classes(self):
@@ -136,6 +136,7 @@ class ImagenetDataModule(LightningDataModule):
 
         dataset = UnlabeledImagenet(self.data_dir,
                                     num_imgs_per_class=-1,
+                                    num_imgs_per_class_val_split=self.num_imgs_per_val_class,
                                     meta_dir=self.meta_dir,
                                     split='train',
                                     transform=transforms)

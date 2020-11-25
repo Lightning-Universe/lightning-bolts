@@ -2,7 +2,7 @@ import pytest
 import pytorch_lightning as pl
 from pytorch_lightning import seed_everything
 
-from pl_bolts.datamodules import MNISTDataModule, CIFAR10DataModule
+from pl_bolts.datamodules import CIFAR10DataModule, MNISTDataModule
 from pl_bolts.models.gans import GAN
 
 
