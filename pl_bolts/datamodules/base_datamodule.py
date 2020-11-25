@@ -61,41 +61,46 @@ class BaseDataModule(LightningDataModule):
 
     def setup(self, stage=None):
         if stage == "fit" or stage is None:
-            dataset_dev = self.dataset_cls(self.data_dir, train=True, download=False, **self.extra_args)
-
-            # Split
-            self.dataset_train, self.dataset_val = self._split_dataset(dataset_dev)
-
-            # Update transforms
-            self.dataset_train.transform = (
+            train_transforms = (
                 self.default_transforms() if self.train_transforms is None else self.train_transforms
             )
-            self.dataset_val.transform = (
+            val_transforms = (
                 self.default_transforms() if self.val_transforms is None else self.val_transforms
             )
+
+            dataset_train = self.dataset_cls(self.data_dir, train=True, transform=train_transforms, **self.extra_args)
+            dataset_val = self.dataset_cls(self.data_dir, train=True, transform=val_transforms, **self.extra_args)
+
+            # Split
+            self.dataset_train = self._split_dataset(dataset_train)
+            self.dataset_val = self._split_dataset(dataset_val, train=False)
 
         if stage == "test" or stage is None:
             test_transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
             self.dataset_test = self.dataset_cls(
-                self.data_dir, train=False, download=False, transform=test_transforms, **self.extra_args
+                self.data_dir, train=False, transform=test_transforms, **self.extra_args
             )
 
-    def _split_dataset(self, dataset_dev):
-        dev_len = len(dataset_dev)
-        splits = self._get_splits(dev_len)
+    def _split_dataset(self, dataset, train=True):
+        len_dataset = len(dataset)
+        splits = self._get_splits(len_dataset)
         dataset_train, dataset_val = random_split(
-            dataset_dev, splits, generator=torch.Generator().manual_seed(self.seed)
+            dataset, splits, generator=torch.Generator().manual_seed(self.seed)
         )
-        return dataset_train, dataset_val
 
-    def _get_splits(self, dev_len):
+        if train:
+            return dataset_train
+        else:
+            return dataset_val
+
+    def _get_splits(self, len_dataset):
         if isinstance(self.val_split, int):
-            train_len = dev_len - self.val_split
+            train_len = len_dataset - self.val_split
             return [train_len, self.val_split]
 
         elif isinstance(self.val_split, float):
-            val_len = int(self.val_split * dev_len)
-            train_len = dev_len - val_len
+            val_len = int(self.val_split * len_dataset)
+            train_len = len_dataset - val_len
             return [train_len, val_len]
 
     def default_transforms(self):
