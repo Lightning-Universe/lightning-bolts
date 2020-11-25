@@ -122,7 +122,6 @@ class BaseDataModule(LightningDataModule):
         """
         Default transform for the dataset
         """
-        pass
 
     def train_dataloader(self):
         """
