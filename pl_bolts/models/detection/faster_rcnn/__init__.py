@@ -1,2 +1,2 @@
 from pl_bolts.models.detection.faster_rcnn.backbones import create_fasterrcnn_backbone
-from pl_bolts.models.detection.faster_rcnn.faster_rcnn_module import FRCNN
+from pl_bolts.models.detection.faster_rcnn.faster_rcnn_module import FasterRCNN

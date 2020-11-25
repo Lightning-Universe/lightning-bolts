@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from pl_bolts.datasets import DummyDetectionDataset
-from pl_bolts.models.detection.faster_rcnn import FRCNN
+from pl_bolts.models.detection.faster_rcnn import FasterRCNN
 
 
 def _collate_fn(batch):
@@ -11,14 +11,14 @@ def _collate_fn(batch):
 
 
 def test_fasterrcnn():
-    model = FRCNN()
+    model = FasterRCNN()
 
     image = torch.rand(1, 3, 400, 400)
     model(image)
 
 
 def test_fasterrcnn_train(tmpdir):
-    model = FRCNN()
+    model = FasterRCNN()
 
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
@@ -28,7 +28,7 @@ def test_fasterrcnn_train(tmpdir):
 
 
 def test_fasterrcnn_bbone_train(tmpdir):
-    model = FRCNN(backbone="resnet18", fpn=True, pretrained_backbone=True)
+    model = FasterRCNN(backbone="resnet18", fpn=True, pretrained_backbone=True)
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
 

@@ -7,7 +7,8 @@ import torch
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
-    from torchvision.models.detection.faster_rcnn import FasterRCNN, FastRCNNPredictor, fasterrcnn_resnet50_fpn
+    from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
+    from torchvision.models.detection.faster_rcnn import FastRCNNPredictor, fasterrcnn_resnet50_fpn
     from torchvision.ops import box_iou
 
     from pl_bolts.models.detection.components import create_torchvision_backbone
@@ -27,7 +28,7 @@ def _evaluate_iou(target, pred):
     return box_iou(target["boxes"], pred["boxes"]).diag().mean()
 
 
-class FRCNN(pl.LightningModule):
+class FasterRCNN(pl.LightningModule):
     """
     PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with
     Region Proposal Networks <https://arxiv.org/abs/1506.01497>`_.
@@ -83,7 +84,7 @@ class FRCNN(pl.LightningModule):
         else:
             backbone_model = create_fasterrcnn_backbone(self.backbone, fpn, pretrained_backbone,
                                                         trainable_backbone_layers, **kwargs)
-            self.model = FasterRCNN(backbone_model, num_classes=num_classes, **kwargs)
+            self.model = torchvision_FasterRCNN(backbone_model, num_classes=num_classes, **kwargs)
 
     def forward(self, x):
         self.model.eval()
