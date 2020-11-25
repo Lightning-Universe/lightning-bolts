@@ -51,7 +51,7 @@ class FRCNN(pl.LightningModule):
         learning_rate: float = 0.0001,
         num_classes: int = 91,
         backbone: Optional[str] = None,
-        fpn: Optional[bool] = True,
+        fpn: bool = True,
         pretrained: bool = False,
         pretrained_backbone: bool = True,
         trainable_backbone_layers: int = 3,
