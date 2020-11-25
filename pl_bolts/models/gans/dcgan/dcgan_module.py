@@ -3,8 +3,16 @@ from argparse import ArgumentParser
 import pytorch_lightning as pl
 import torch
 from torch import nn
-from torchvision import transforms as transform_lib
 
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+try:
+    from torchvision import transforms as transform_lib
+except ModuleNotFoundError:
+    warn_missing_pkg('torchvision')  # pragma: no-cover
+    _TORCHVISION_AVAILABLE = False
+else:
+    _TORCHVISION_AVAILABLE = True
 from pl_bolts.models.gans.dcgan.components import DCGANDiscriminator, DCGANGenerator
 
 

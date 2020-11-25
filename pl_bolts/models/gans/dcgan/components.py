@@ -16,16 +16,18 @@ class DCGANGenerator(nn.Module):
     @staticmethod
     def _make_gen_block(in_channels, out_channels, kernel_size=4, stride=2, padding=1, bias=False, last_block=False):
         if not last_block:
-            return nn.Sequential(
+            gen_block = nn.Sequential(
                 nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias),
                 nn.BatchNorm2d(out_channels),
                 nn.ReLU(True),
             )
         else:
-            return nn.Sequential(
+            gen_block = nn.Sequential(
                 nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias),
                 nn.Tanh(),
             )
+
+        return gen_block
 
     def forward(self, noise):
         return self.gen(noise)
@@ -47,16 +49,18 @@ class DCGANDiscriminator(nn.Module):
         in_channels, out_channels, kernel_size=4, stride=2, padding=1, bias=False, batch_norm=True, last_block=False
     ):
         if not last_block:
-            return nn.Sequential(
+            disc_block = nn.Sequential(
                 nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias),
                 nn.BatchNorm2d(out_channels) if batch_norm else nn.Identity(),
                 nn.LeakyReLU(0.2, inplace=True),
             )
         else:
-            return nn.Sequential(
+            disc_block = nn.Sequential(
                 nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias),
                 nn.Sigmoid(),
             )
+
+        return disc_block
 
     def forward(self, noise):
         return self.disc(noise)

@@ -29,6 +29,7 @@ def test_cli_run_dcgan_gan(cli_args):
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args.strip().split()):
         cli_main()
 
+
 # TODO: this test is hanging (runs for more then 10min) so we need to use GPU or optimize it...
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
 @pytest.mark.parametrize('cli_args', [
