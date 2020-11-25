@@ -10,7 +10,7 @@ from pl_bolts.datasets.concat_dataset import ConcatDataset
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-if _TORCHVISION_AVAILABLE
+if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import STL10
 else:  # pragma: no-cover
