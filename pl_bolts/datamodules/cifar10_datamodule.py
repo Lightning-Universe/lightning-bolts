@@ -96,7 +96,17 @@ class CIFAR10DataModule(BaseDataModule):
             *args,
             **kwargs,
         )
-        self.num_samples = 60000 - val_split
+
+    @property
+    def num_samples(self):
+        len_dataset = 60000
+        if isinstance(self.val_split, int):
+            train_len = len_dataset - self.val_split
+        elif isinstance(self.val_split, float):
+            val_len = int(self.val_split * len_dataset)
+            train_len = len_dataset - val_len
+
+        return train_len
 
     @property
     def num_classes(self):

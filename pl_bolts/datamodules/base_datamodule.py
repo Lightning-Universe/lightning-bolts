@@ -90,18 +90,18 @@ class BaseDataModule(LightningDataModule):
 
         if train:
             return dataset_train
-        else:
-            return dataset_val
+        return dataset_val
 
     def _get_splits(self, len_dataset):
         if isinstance(self.val_split, int):
             train_len = len_dataset - self.val_split
-            return [train_len, self.val_split]
-
+            splits = [train_len, self.val_split]
         elif isinstance(self.val_split, float):
             val_len = int(self.val_split * len_dataset)
             train_len = len_dataset - val_len
-            return [train_len, val_len]
+            splits = [train_len, val_len]
+
+        return splits
 
     def default_transforms(self):
         return transform_lib.ToTensor()
