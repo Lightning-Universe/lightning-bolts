@@ -380,8 +380,15 @@ To reproduce::
 
     # finetune
     python simclr_finetuner.py
-        --ckpt_path path/to/epoch=xyz.ckpt
-        --gpus 1
+    --gpus 8
+    --ckpt_path path/to/simclr/ckpt
+    --dataset imagenet
+    --data_dir path/to/imagenet/dataset
+    --batch_size 256
+    --num_workers 16
+    --learning_rate 0.8
+    --nesterov True
+    --num_epochs 90
 
 SimCLR API
 **********
@@ -541,7 +548,15 @@ To reproduce::
 
     # finetune
     python swav_finetuner.py
-        --ckpt_path path/to/epoch=xyz.ckpt
+    --gpus 8
+    --ckpt_path path/to/simclr/ckpt
+    --dataset imagenet
+    --data_dir path/to/imagenet/dataset
+    --batch_size 256
+    --num_workers 16
+    --learning_rate 0.8
+    --nesterov True
+    --num_epochs 90
 
 SwAV API
 ********
