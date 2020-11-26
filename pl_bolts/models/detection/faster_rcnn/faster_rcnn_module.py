@@ -63,7 +63,7 @@ class FasterRCNN(pl.LightningModule):
             learning_rate: the learning rate
             num_classes: number of detection classes (including background)
             backbone: Pretained backbone CNN architecture.
-            fpn: If True, creates a FPN on top of Resnet based CNNs.
+            fpn: If True, creates a Feature Pyramind Network on top of Resnet based CNNs.
             pretrained: if true, returns a model pre-trained on COCO train2017
             pretrained_backbone: if true, returns a model with backbone pre-trained on Imagenet
             trainable_backbone_layers: number of trainable resnet layers starting from final block

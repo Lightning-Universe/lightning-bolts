@@ -26,11 +26,9 @@ def create_fasterrcnn_backbone(backbone: str, fpn: bool = True, pretrained: str 
 
     if fpn:
         # Creates a torchvision resnet model with fpn added.
-        print("Resnet FPN Backbones works only for imagenet weights")
         backbone = resnet_fpn_backbone(backbone, pretrained=True,
                                        trainable_layers=trainable_backbone_layers, **kwargs)
     else:
         # This does not create fpn backbone, it is supported for all models
-        print("FPN is not supported for Non Resnet Backbones")
         backbone, _ = create_torchvision_backbone(backbone, pretrained)
     return backbone
