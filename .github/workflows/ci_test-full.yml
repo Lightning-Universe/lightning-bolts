@@ -80,11 +80,23 @@ jobs:
         path: ./datasets
         key: pl-datasets-${{ hashFiles('tests/conftest.py') }}
 
+    - name: Check cached datasets
+      run: |
+        ls -lh
+        echo =======
+        ls -lh datasets
+
     - name: Tests
       run: |
         # tox --sitepackages
         coverage run --source pl_bolts -m pytest pl_bolts tests -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
         coverage xml
+
+    - name: Check cached datasets
+      run: |
+        ls -lh
+        echo =======
+        ls -lh datasets
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@v2
