@@ -81,6 +81,7 @@ jobs:
         key: pl-datasets-${{ hashFiles('tests/conftest.py') }}
 
     - name: Check cached datasets
+      shell: bash
       run: |
         ls -lh
         echo =======
@@ -95,6 +96,7 @@ jobs:
         coverage xml
 
     - name: Check cached datasets
+      shell: bash
       run: |
         ls -lh
         echo =======
