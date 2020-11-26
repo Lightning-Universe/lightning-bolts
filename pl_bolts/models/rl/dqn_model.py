@@ -288,28 +288,18 @@ class DQN(pl.LightningModule):
         if self.global_step % self.sync_rate == 0:
             self.target_net.load_state_dict(self.net.state_dict())
 
-        log = {
+        self.log_dict({
             "total_reward": self.total_rewards[-1],
             "avg_reward": self.avg_rewards,
             "train_loss": loss,
             "episodes": self.done_episodes,
             "episode_steps": self.total_episode_steps[-1]
-        }
-        status = {
-            "steps": self.global_step,
-            "avg_reward": self.avg_rewards,
-            "total_reward": self.total_rewards[-1],
-            "episodes": self.done_episodes,
-            "episode_steps": self.total_episode_steps[-1],
-            "epsilon": self.agent.epsilon,
-        }
+        })
 
         return OrderedDict(
             {
                 "loss": loss,
                 "avg_reward": self.avg_rewards,
-                "log": log,
-                "progress_bar": status,
             }
         )
 
@@ -323,8 +313,8 @@ class DQN(pl.LightningModule):
         """Log the avg of the test results"""
         rewards = [x["test_reward"] for x in outputs]
         avg_reward = sum(rewards) / len(rewards)
-        tensorboard_logs = {"avg_test_reward": avg_reward}
-        return {"avg_test_reward": avg_reward, "log": tensorboard_logs}
+        self.log("avg_test_reward", avg_reward)
+        return {"avg_test_reward": avg_reward}
 
     def configure_optimizers(self) -> List[Optimizer]:
         """ Initialize Adam optimizer"""
