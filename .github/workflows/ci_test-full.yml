@@ -85,6 +85,8 @@ jobs:
         ls -lh
         echo =======
         ls -lh datasets
+        echo =======
+        ls -lh datasets/*
 
     - name: Tests
       run: |
@@ -97,6 +99,8 @@ jobs:
         ls -lh
         echo =======
         ls -lh datasets
+        echo =======
+        ls -lh datasets/*
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@v2
