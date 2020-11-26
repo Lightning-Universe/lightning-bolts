@@ -22,6 +22,7 @@ def create_fasterrcnn_backbone(backbone: str, fpn: bool = True, pretrained: str 
             "resnet152", "resnext101_32x8d", "mobilenet_v2", "vgg11", "vgg13", "vgg16", "vgg19",
         fpn: If True then constructs fpn as well.
         pretrained: If None creates imagenet weights backbone.
+        trainable_backbone_layers: number of trainable resnet layers starting from final block.
     """
 
     if fpn:
