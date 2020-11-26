@@ -11,10 +11,9 @@ except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
-__all__ = ["create_torchvision_backbone"]
 
 
-def _create_backbone_generic(model, out_channels: int):
+def _create_backbone_generic(model: nn.Module, out_channels: int):
     """
     Generic Backbone creater. It removes the last linear layer.
 
@@ -36,8 +35,8 @@ def _create_backbone_adaptive(model, out_channels: Optional[int] = None):
     Creates backbone by removing linear after Adaptive Pooling layer.
 
     Args:
-        model: torch.nn model with adaptive pooling layer.
-        out_channels: Number of out_channels in last layer.
+        model: torch.nn model with adaptive pooling layer
+        out_channels: Number of out_channels in last layer
     """
     if out_channels is None:
         modules_total = list(model.children())

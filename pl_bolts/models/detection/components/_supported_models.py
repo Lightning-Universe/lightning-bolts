@@ -24,3 +24,4 @@ try:
 
 except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
+    TORCHVISION_MODEL_ZOO = {}

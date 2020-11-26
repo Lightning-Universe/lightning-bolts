@@ -74,9 +74,11 @@ class FasterRCNN(pl.LightningModule):
         self.num_classes = num_classes
         self.backbone = backbone
         if backbone is None:
-            self.model = fasterrcnn_resnet50_fpn(pretrained=pretrained,
-                                                 pretrained_backbone=pretrained_backbone,
-                                                 trainable_backbone_layers=trainable_backbone_layers)
+            self.model = fasterrcnn_resnet50_fpn(
+                pretrained=pretrained,
+                pretrained_backbone=pretrained_backbone,
+                trainable_backbone_layers=trainable_backbone_layers,
+            )
 
             in_features = self.model.roi_heads.box_predictor.cls_score.in_features
             self.model.roi_heads.box_predictor = FastRCNNPredictor(in_features, self.num_classes)
