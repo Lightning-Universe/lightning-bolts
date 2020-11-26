@@ -14,7 +14,7 @@ from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
 class SimSiam(pl.LightningModule):
-"""
+    """
     PyTorch Lightning implementation of `Exploring Simple Siamese Representation Learning (SimSiam)
     <https://arxiv.org/pdf/2011.10566v1.pdf>`_
 
