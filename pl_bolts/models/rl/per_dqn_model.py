@@ -130,27 +130,17 @@ class PERDQN(DQN):
         if self.global_step % self.sync_rate == 0:
             self.target_net.load_state_dict(self.net.state_dict())
 
-        log = {
+        self.log_dict({
             "total_reward": self.total_rewards[-1],
             "avg_reward": self.avg_rewards,
             "train_loss": loss,
             # "episodes": self.total_episode_steps,
-        }
-        status = {
-            "steps": self.global_step,
-            "avg_reward": self.avg_rewards,
-            "total_reward": self.total_rewards[-1],
-            "episodes": self.done_episodes,
-            # "episode_steps": self.episode_steps,
-            "epsilon": self.agent.epsilon,
-        }
+        })
 
         return OrderedDict(
             {
                 "loss": loss,
                 "avg_reward": self.avg_rewards,
-                "log": log,
-                "progress_bar": status,
             }
         )
 
