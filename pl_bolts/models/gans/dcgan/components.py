@@ -5,6 +5,12 @@ from torch import nn
 
 class DCGANGenerator(nn.Module):
     def __init__(self, latent_dim: int, feature_maps: int, image_channels: int):
+        """
+        Args:
+            latent_dim: Dimension of the latent space
+            feature_maps: Number of feature maps to use
+            image_channels: Number of channels of the images from the dataset
+        """
         super().__init__()
         self.gen = nn.Sequential(
             self._make_gen_block(latent_dim, feature_maps * 8, kernel_size=4, stride=1, padding=0),
@@ -44,6 +50,11 @@ class DCGANGenerator(nn.Module):
 
 class DCGANDiscriminator(nn.Module):
     def __init__(self, feature_maps: int, image_channels: int):
+        """
+        Args:
+            feature_maps: Number of feature maps to use
+            image_channels: Number of channels of the images from the dataset
+        """
         super().__init__()
         self.disc = nn.Sequential(
             self._make_disc_block(image_channels, feature_maps, batch_norm=False),

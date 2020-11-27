@@ -29,6 +29,16 @@ class DCGAN(pl.LightningModule):
         learning_rate: float = 0.0002,
         **kwargs
     ):
+        """
+        Args:
+            beta1: Beta1 value for Adam optimizer
+            beta2: Beta2 value for Adam optimizer
+            feature_maps_gen: Number of feature maps to use for the generator
+            feature_maps_disc: Number of feature maps to use for the discriminator
+            image_channels: Number of channels of the images from the dataset
+            latent_dim: Dimension of the latent space
+            learning_rate: Learning rate
+        """
         super().__init__()
         self.save_hyperparameters()
 

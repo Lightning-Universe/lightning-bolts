@@ -4,8 +4,7 @@ from pytorch_lightning import seed_everything
 from torchvision import transforms as transform_lib
 
 from pl_bolts.datamodules import CIFAR10DataModule, MNISTDataModule
-from pl_bolts.models.gans import GAN
-from pl_bolts.models.gans.dcgan.dcgan_module import DCGAN
+from pl_bolts.models.gans import DCGAN, GAN
 
 
 @pytest.mark.parametrize(
