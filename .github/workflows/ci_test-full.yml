@@ -85,7 +85,12 @@ jobs:
       run: |
         ls -lh
         echo =======
-        ls -lh datasets
+        #ls -lh datasets
+        echo =======
+        find . -name "MNIST"
+        find . -name "mnist"
+        find . -name "CIFAR"
+        find . -name "cifar"
 
     - name: Tests
       run: |
@@ -98,7 +103,7 @@ jobs:
       run: |
         ls -lh
         echo =======
-        ls -lh datasets
+        #ls -lh datasets
         echo =======
         find . -name "MNIST"
         find . -name "mnist"
