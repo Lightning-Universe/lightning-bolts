@@ -103,6 +103,11 @@ jobs:
         ls -lh datasets
         echo =======
         ls -lh datasets/*
+        echo =======
+        find . -name "MNIST"
+        find . -name "mnist"
+        find . -name "CIFAR"
+        find . -name "cifar"
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@v2
