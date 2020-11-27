@@ -79,27 +79,24 @@ class DCGAN(pl.LightningModule):
 
         return result
 
-    def _disc_step(self, real):
+    def _disc_step(self, real: torch.Tensor) -> torch.Tensor:
         disc_loss = self._get_disc_loss(real)
         self.log("loss/disc", disc_loss, on_epoch=True, prog_bar=True)
         return disc_loss
 
-    def _gen_step(self, real):
-        gen_loss = self._generator_loss(real)
+    def _gen_step(self, real: torch.Tensor) -> torch.Tensor:
+        gen_loss = self._get_gen_loss(real)
         self.log("loss/gen", gen_loss, on_epoch=True, prog_bar=True)
         return gen_loss
 
-    def _get_disc_loss(self, real):
+    def _get_disc_loss(self, real: torch.Tensor) -> torch.Tensor:
         # Train with real
         real_pred = self.discriminator(real)
         real_gt = torch.ones_like(real_pred)
         real_loss = self.criterion(real_pred, real_gt)
 
         # Train with fake
-        batch_size = self._get_batch_size(real)
-        noise = self._get_noise(batch_size, self.hparams.latent_dim)
-        fake = self(noise)
-        fake_pred = self.discriminator(fake)
+        fake_pred = self._get_fake_pred(real)
         fake_gt = torch.zeros_like(fake_pred)
         fake_loss = self.criterion(fake_pred, fake_gt)
 
@@ -107,19 +104,24 @@ class DCGAN(pl.LightningModule):
 
         return disc_loss
 
-    def _generator_loss(self, real):
+    def _get_gen_loss(self, real: torch.Tensor) -> torch.Tensor:
         # Train with fake
-        batch_size = self._get_batch_size(real)
-        noise = self._get_noise(batch_size, self.hparams.latent_dim)
-        fake = self(noise)
-        fake_pred = self.discriminator(fake)
+        fake_pred = self._get_fake_pred(real)
         fake_gt = torch.ones_like(fake_pred)
         gen_loss = self.criterion(fake_pred, fake_gt)
 
         return gen_loss
 
+    def _get_fake_pred(self, real: torch.Tensor) -> torch.Tensor:
+        batch_size = self._get_batch_size(real)
+        noise = self._get_noise(batch_size, self.hparams.latent_dim)
+        fake = self(noise)
+        fake_pred = self.discriminator(fake)
+
+        return fake_pred
+
     @staticmethod
-    def _get_batch_size(real):
+    def _get_batch_size(real: torch.Tensor) -> int:
         batch_size = len(real)
         return batch_size
 
@@ -128,7 +130,7 @@ class DCGAN(pl.LightningModule):
         return noise
 
     @staticmethod
-    def add_model_specific_args(parent_parser):
+    def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--beta1", default=0.5, type=float)
         parser.add_argument("--beta2", default=0.999, type=float)
