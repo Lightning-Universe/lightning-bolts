@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from pl_bolts.datasets import DummyDetectionDataset
-from pl_bolts.models.detection.faster_rcnn import FasterRCNN
+from pl_bolts.models.detection import FasterRCNN
 
 
 def _collate_fn(batch):

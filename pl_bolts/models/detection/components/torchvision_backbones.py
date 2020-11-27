@@ -30,7 +30,7 @@ def _create_backbone_generic(model: nn.Module, out_channels: int):
 
 # Use this when you have Adaptive Pooling layer in End.
 # When Model.features is not applicable.
-def _create_backbone_adaptive(model, out_channels: Optional[int] = None):
+def _create_backbone_adaptive(model: nn.Module, out_channels: Optional[int] = None):
     """
     Creates backbone by removing linear after Adaptive Pooling layer.
 
@@ -44,7 +44,7 @@ def _create_backbone_adaptive(model, out_channels: Optional[int] = None):
     return _create_backbone_generic(model, out_channels=out_channels)
 
 
-def _create_backbone_features(model, out_channels: int):
+def _create_backbone_features(model: nn.Module, out_channels: int):
     """
     Creates backbone from feature sequential block.
 
