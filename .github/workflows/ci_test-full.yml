@@ -88,7 +88,7 @@ jobs:
         #ls -lh datasets
         echo =======
         find / -iname "MNIST" 2> /dev/null
-        find / -iname "CIFAR" 2> /dev/null
+        find / -iname "CIFAR10" 2> /dev/null
 
     - name: Tests
       run: |
@@ -104,7 +104,7 @@ jobs:
         #ls -lh datasets
         echo =======
         find / -iname "MNIST" 2> /dev/null
-        find / -iname "CIFAR" 2> /dev/null
+        find / -iname "CIFAR10" 2> /dev/null
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@v2
