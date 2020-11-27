@@ -87,8 +87,8 @@ jobs:
         echo =======
         #ls -lh datasets
         echo =======
-        find / -iname "MNIST" 2> /dev/null || echo mnist not found
-        find / -iname "CIFAR" 2> /dev/null || echo cifar not found
+        find / -iname "MNIST" 2> /dev/null
+        find / -iname "CIFAR" 2> /dev/null
 
     - name: Tests
       run: |
@@ -103,8 +103,8 @@ jobs:
         echo =======
         #ls -lh datasets
         echo =======
-        find / -iname "MNIST" 2> /dev/null || echo mnist not found
-        find / -iname "CIFAR" 2> /dev/null || echo cifar not found
+        find / -iname "MNIST" 2> /dev/null
+        find / -iname "CIFAR" 2> /dev/null
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@v2
