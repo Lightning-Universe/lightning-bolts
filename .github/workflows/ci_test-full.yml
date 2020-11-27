@@ -102,8 +102,6 @@ jobs:
         echo =======
         ls -lh datasets
         echo =======
-        ls -lh datasets/*
-        echo =======
         find . -name "MNIST"
         find . -name "mnist"
         find . -name "CIFAR"
