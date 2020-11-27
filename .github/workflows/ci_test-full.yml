@@ -86,8 +86,6 @@ jobs:
         ls -lh
         echo =======
         ls -lh datasets
-        echo =======
-        ls -lh datasets/*
 
     - name: Tests
       run: |
