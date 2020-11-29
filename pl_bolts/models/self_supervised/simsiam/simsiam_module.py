@@ -102,6 +102,7 @@ class SimSiam(pl.LightningModule):
         return y
 
     def cosine_similarity(self, a, b):
+        b = b.detach()  # stop gradient of backbone + projection mlp
         a = F.normalize(a, dim=-1)
         b = F.normalize(b, dim=-1)
         sim = (a * b).sum(-1).mean()
@@ -111,20 +112,17 @@ class SimSiam(pl.LightningModule):
         (img_1, img_2, _), y = batch
 
         # Image 1 to image 2 loss
-        y1, z1, h1 = self.online_network(img_1)
-        with torch.no_grad():
-            y2, z2, h2 = self.target_network(img_2)
-        loss_a = -1 * self.cosine_similarity(h1, z2)
+        _, z1, h1 = self.online_network(img_1)
+        _, z2, h2 = self.target_network(img_2)
+        loss_a = -1.0 * self.cosine_similarity(h1, z2)
 
         # Image 2 to image 1 loss
-        y1, z1, h1 = self.online_network(img_2)
-        with torch.no_grad():
-            y2, z2, h2 = self.target_network(img_1)
-        # L2 normalize
-        loss_b = -1 * self.cosine_similarity(h1, z2)
+        _, z1, h1 = self.online_network(img_2)
+        _, z2, h2 = self.target_network(img_1)
+        loss_b = -1.0 * self.cosine_similarity(h1, z2)
 
         # Final loss
-        total_loss = loss_a + loss_b
+        total_loss = loss_a / 2.0 + loss_b / 2.0
 
         return loss_a, loss_b, total_loss
 
