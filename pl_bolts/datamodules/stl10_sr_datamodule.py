@@ -20,7 +20,7 @@ class STL10_SR_DataModule(LightningDataModule):
             *args,
             **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__()
 
         self.dataset_cls = STL10_SR
         self.dims = (3, 96, 96)
@@ -33,15 +33,12 @@ class STL10_SR_DataModule(LightningDataModule):
         return 10
 
     def prepare_data(self):
-        self.dataset_cls(self.data_dir, split='unlabeled', download=True)
         self.dataset_cls(self.data_dir, split='train', download=True)
         self.dataset_cls(self.data_dir, split='test', download=True)
 
     def setup(self, stage=None):
         if stage == "fit" or stage is None:
-            dataset_labeled = self.dataset_cls(self.data_dir, split='train')
-            dataset_unlabeled = self.dataset_cls(self.data_dir, split='unlabeled')
-            self.dataset_train = ConcatDataset(dataset_labeled, dataset_unlabeled)
+            self.dataset_train = self.dataset_cls(self.data_dir, split='train')
 
         if stage == "test" or stage is None:
             self.dataset_test = self.dataset_cls(self.data_dir, split='test')
