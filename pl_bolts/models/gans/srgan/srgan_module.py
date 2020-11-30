@@ -4,54 +4,41 @@ from typing import Tuple
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-from pytorch_lightning import Callback
-from torchvision.utils import make_grid
 
-from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, SRGANGenerator, VGG19FeatureExtractor
-from pl_bolts.utils.warnings import warn_missing_pkg
-
-try:
-    from torchvision import transforms as transform_lib
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
+from pl_bolts.callbacks import SRImageLoggerCallback
+from pl_bolts.datamodules.stl10_sr_datamodule import STL10_SR_DataModule
+from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, VGG19FeatureExtractor
 
 
 class SRGAN(pl.LightningModule):
     def __init__(
         self,
-        beta1: float = 0.5,
-        beta2: float = 0.999,
-        image_channels: int = 1,
+        image_channels: int = 3,
         feature_maps_gen: int = 64,
         feature_maps_disc: int = 64,
-        latent_dim: int = 100,
+        generator_checkpoint: str = "srresnet.pt",
         learning_rate: float = 0.0002,
         **kwargs
     ):
         """
         Args:
-            beta1: Beta1 value for Adam optimizer
-            beta2: Beta2 value for Adam optimizer
             image_channels: Number of channels of the images from the dataset
             feature_maps_gen: Number of feature maps to use for the generator
             feature_maps_disc: Number of feature maps to use for the discriminator
+            generator_checkpoint: Generator checkpoint created with SRResNet module
             learning_rate: Learning rate
         """
         super().__init__()
         self.save_hyperparameters()
 
-        self.generator = SRGANGenerator(self.hparams.image_channels, self.hparams.feature_maps_gen)
+        self.generator = torch.load(self.hparams.generator_checkpoint)
         self.discriminator = SRGANDiscriminator(self.hparams.image_channels, self.hparams.feature_maps_gen)
         self.vgg_feature_extractor = VGG19FeatureExtractor()
 
     def configure_optimizers(self):
         lr = self.hparams.learning_rate
-        betas = (self.hparams.beta1, self.hparams.beta2)
-        opt_disc = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=betas)
-        opt_gen = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=betas)
+        opt_disc = torch.optim.Adam(self.discriminator.parameters(), lr=lr)
+        opt_gen = torch.optim.Adam(self.generator.parameters(), lr=lr)
         return [opt_disc, opt_gen], []
 
     def forward(self, x):
@@ -73,12 +60,12 @@ class SRGAN(pl.LightningModule):
 
     def _disc_step(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
         disc_loss = self._get_disc_loss(hr_image, lr_image)
-        self.log("loss/disc", disc_loss, on_epoch=True, prog_bar=True)
+        self.log("loss/disc", disc_loss, on_step=True, on_epoch=True, prog_bar=True)
         return disc_loss
 
     def _gen_step(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
         gen_loss = self._get_gen_loss(hr_image, lr_image)
-        self.log("loss/gen", gen_loss, on_epoch=True, prog_bar=True)
+        self.log("loss/gen", gen_loss, on_step=True, on_epoch=True, prog_bar=True)
         return gen_loss
 
     def _get_disc_loss(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
@@ -122,41 +109,15 @@ class SRGAN(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument("--beta1", default=0.5, type=float)
-        parser.add_argument("--beta2", default=0.999, type=float)
         parser.add_argument("--image_channels", default=3, type=int)
         parser.add_argument("--feature_maps_gen", default=64, type=int)
         parser.add_argument("--feature_maps_disc", default=64, type=int)
+        parser.add_argument("--generator_checkpoint", default="srresnet.pt", type=str)
         parser.add_argument("--learning_rate", default=1e-4, type=float)
         return parser
 
 
-class TensorboardImageLoggerCallback(Callback):
-    def __init__(self, log_interval: int = 100, num_samples: int = 3):
-        super().__init__()
-        self.log_interval = log_interval
-        self.num_samples = num_samples
-
-    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
-        global_step = pl_module.global_step
-        if global_step % self.log_interval == 0:
-            hr_image, lr_image = batch
-            hr_image, lr_image = hr_image.to(pl_module.device), lr_image.to(pl_module.device)
-            lr_image_scaled = F.interpolate(lr_image, scale_factor=4)
-            hr_fake = pl_module(lr_image)
-
-            hr_image_grid = make_grid(hr_image[:self.num_samples], nrow=1, normalize=True)
-            lr_image_grid = make_grid(lr_image_scaled[:self.num_samples], nrow=1, normalize=True)
-            hr_fake_grid = make_grid(hr_fake[:self.num_samples], nrow=1, normalize=True)
-
-            grid = torch.cat((lr_image_grid, hr_image_grid, hr_fake_grid), -1)
-            title = f"images_step_{global_step}"
-            trainer.logger.experiment.add_image(title, grid, global_step=global_step)
-
-
 def cli_main(args=None):
-    from pl_bolts.datamodules.stl10_sr_datamodule import STL10_SR_DataModule
-
     pl.seed_everything(1234)
 
     parser = ArgumentParser()
@@ -167,7 +128,7 @@ def cli_main(args=None):
 
     model = SRGAN(**vars(args))
     dm = STL10_SR_DataModule(**vars(args))
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=[TensorboardImageLoggerCallback()])
+    trainer = pl.Trainer.from_argparse_args(args, callbacks=[SRImageLoggerCallback()])
     trainer.fit(model, dm)
 
     return dm, model, trainer

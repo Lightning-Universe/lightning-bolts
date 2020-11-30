@@ -33,12 +33,12 @@ class STL10_SR_DataModule(LightningDataModule):
         return 10
 
     def prepare_data(self):
-        self.dataset_cls(self.data_dir, split='train', download=True)
+        self.dataset_cls(self.data_dir, split='train+unlabeled', download=True)
         self.dataset_cls(self.data_dir, split='test', download=True)
 
     def setup(self, stage=None):
         if stage == "fit" or stage is None:
-            self.dataset_train = self.dataset_cls(self.data_dir, split='train')
+            self.dataset_train = self.dataset_cls(self.data_dir, split='train+unlabeled')
 
         if stage == "test" or stage is None:
             self.dataset_test = self.dataset_cls(self.data_dir, split='test')

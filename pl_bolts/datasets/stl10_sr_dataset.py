@@ -14,25 +14,22 @@ else:
 
 
 class STL10_SR(STL10):
-    def __init__(self, root, hr_size=96, *args, **kwargs):
+    def __init__(self, root, *args, **kwargs):
         super().__init__(root, *args, **kwargs)
 
-        mean = np.array([0.485, 0.456, 0.406])
-        std = np.array([0.229, 0.224, 0.225])
-
+        # Scale range of HR images to [-1, 1]
         self.hr_transforms = transform_lib.Compose(
             [
-                transform_lib.Resize(hr_size, Image.BICUBIC),
                 transform_lib.ToTensor(),
-                transform_lib.Normalize(mean, std),
+                transform_lib.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             ]
         )
 
+        # Scale range of LR images to [0, 1]
         self.lr_transforms = transform_lib.Compose(
             [
-                transform_lib.Resize(hr_size // 4, Image.BICUBIC),
+                transform_lib.Resize(24, Image.BICUBIC),
                 transform_lib.ToTensor(),
-                transform_lib.Normalize(mean, std),
             ]
         )
 
