@@ -114,15 +114,15 @@ class SimSiam(pl.LightningModule):
         # Image 1 to image 2 loss
         _, z1, h1 = self.online_network(img_1)
         _, z2, h2 = self.target_network(img_2)
-        loss_a = -1.0 * self.cosine_similarity(h1, z2)
+        loss_a = -2.0 * self.cosine_similarity(h1, z2)
 
         # Image 2 to image 1 loss
         _, z1, h1 = self.online_network(img_2)
         _, z2, h2 = self.target_network(img_1)
-        loss_b = -1.0 * self.cosine_similarity(h1, z2)
+        loss_b = -2.0 * self.cosine_similarity(h1, z2)
 
         # Final loss
-        total_loss = loss_a / 2.0 + loss_b / 2.0
+        total_loss = loss_a + loss_b
 
         return loss_a, loss_b, total_loss
 
