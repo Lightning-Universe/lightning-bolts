@@ -50,7 +50,9 @@ def test_dataloader():
     # -----------------------------
     # train + test
     # -----------------------------
-    loaders = SklearnDataModule(X=X, y=y, x_test=x_test, y_test=y_test, val_split=0.2, random_state=1234, drop_last=True)
+    loaders = SklearnDataModule(
+        X=X, y=y, x_test=x_test, y_test=y_test, val_split=0.2, random_state=1234, drop_last=True
+    )
     train_loader = loaders.train_dataloader()
     val_loader = loaders.val_dataloader()
     test_loader = loaders.test_dataloader()
