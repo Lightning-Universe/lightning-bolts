@@ -191,9 +191,10 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             dataset_val,
             batch_size=self.batch_size,
-            shuffle=False,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            pin_memory=True
+            drpo_last=self.drop_last
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -233,10 +234,10 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
-            shuffle=False,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -254,10 +255,10 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
-            shuffle=False,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -272,9 +273,10 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             dataset_train,
             batch_size=self.batch_size,
-            shuffle=False,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            pin_memory=True
+            drop_last=self.drop_last
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -292,10 +294,10 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             labeled_val,
             batch_size=self.batch_size,
-            shuffle=False,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
