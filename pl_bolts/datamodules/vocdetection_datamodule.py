@@ -171,7 +171,7 @@ class VOCDetectionDataModule(LightningDataModule):
             batch_size=batch_size,
             shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=self.drop_last
+            drop_last=self.drop_last,
             pin_memory=self.pin_memory,
             collate_fn=_collate_fn,
         )
@@ -198,7 +198,7 @@ class VOCDetectionDataModule(LightningDataModule):
             batch_size=batch_size,
             shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=self.drop_last
+            drop_last=self.drop_last,
             pin_memory=self.pin_memory,
             collate_fn=_collate_fn,
         )
