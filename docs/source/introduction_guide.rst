@@ -425,7 +425,7 @@ Here's an example for logistic regression
 
     # use any numpy or sklearn dataset
     X, y = load_iris(return_X_y=True)
-    dm = SklearnDataModule(X, y)
+    dm = SklearnDataModule(X, y, batch_size=12)
 
     # build model
     model = LogisticRegression(input_dim=4, num_classes=3)
@@ -434,7 +434,7 @@ Here's an example for logistic regression
     trainer = pl.Trainer(tpu_cores=8, precision=16)
     trainer.fit(model, dm.train_dataloader(), dm.val_dataloader())
 
-    trainer.test(test_dataloaders=dm.test_dataloader(batch_size=12))
+    trainer.test(test_dataloaders=dm.test_dataloader())
 
 Any input will be flattened across all dimensions except the first one (batch).
 This means images, sound, etc... work out of the box.
