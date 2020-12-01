@@ -37,9 +37,9 @@ class TestReinforce(TestCase):
     def test_loss(self):
         """Test the reinforce loss function"""
 
-        batch_states = torch.rand(32, 4)
-        batch_actions = torch.rand(32).long()
-        batch_qvals = torch.rand(32)
+        batch_states = torch.rand(16, 4)
+        batch_actions = torch.rand(16).long()
+        batch_qvals = torch.rand(16)
 
         loss = self.model.loss(batch_states, batch_actions, batch_qvals)
 

@@ -109,8 +109,8 @@ class CityscapesDataModule(LightningDataModule):
         """
         Cityscapes train set
         """
-        transforms = self.train_transforms or self.default_transforms()
-        target_transforms = self.target_transforms or self.default_target_transforms()
+        transforms = self.train_transforms or self._default_transforms()
+        target_transforms = self.target_transforms or self._default_target_transforms()
 
         dataset = Cityscapes(self.data_dir,
                              split='train',
@@ -134,8 +134,8 @@ class CityscapesDataModule(LightningDataModule):
         """
         Cityscapes val set
         """
-        transforms = self.val_transforms or self.default_transforms()
-        target_transforms = self.target_transforms or self.default_target_transforms()
+        transforms = self.val_transforms or self._default_transforms()
+        target_transforms = self.target_transforms or self._default_target_transforms()
 
         dataset = Cityscapes(self.data_dir,
                              split='val',
@@ -159,8 +159,8 @@ class CityscapesDataModule(LightningDataModule):
         """
         Cityscapes test set
         """
-        transforms = self.test_transforms or self.default_transforms()
-        target_transforms = self.target_transforms or self.default_target_transforms()
+        transforms = self.test_transforms or self._default_transforms()
+        target_transforms = self.target_transforms or self._default_target_transforms()
 
         dataset = Cityscapes(self.data_dir,
                              split='test',
@@ -179,7 +179,7 @@ class CityscapesDataModule(LightningDataModule):
         )
         return loader
 
-    def default_transforms(self):
+    def _default_transforms(self):
         cityscapes_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transform_lib.Normalize(
@@ -189,7 +189,7 @@ class CityscapesDataModule(LightningDataModule):
         ])
         return cityscapes_transforms
 
-    def default_target_transforms(self):
+    def _default_target_transforms(self):
         cityscapes_target_trasnforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transform_lib.Lambda(lambda t: t.squeeze())
