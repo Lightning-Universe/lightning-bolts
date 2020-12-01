@@ -27,7 +27,7 @@ def test_dataloader():
     # -----------------------------
     # train
     # -----------------------------
-    loaders = SklearnDataModule(X=X, y=y, val_split=0.2, test_split=0.2, random_state=1234)
+    loaders = SklearnDataModule(X=X, y=y, val_split=0.2, test_split=0.2, random_state=1234, drop_last=True)
     train_loader = loaders.train_dataloader()
     val_loader = loaders.val_dataloader()
     test_loader = loaders.test_dataloader()
