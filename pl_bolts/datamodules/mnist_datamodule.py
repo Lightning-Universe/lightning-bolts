@@ -144,10 +144,10 @@ class MNISTDataModule(LightningDataModule):
         loader = DataLoader(
             dataset_val,
             batch_size=self.batch_size,
-            shuffle=False,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True,
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory,
         )
         return loader
 
@@ -162,8 +162,12 @@ class MNISTDataModule(LightningDataModule):
 
         dataset = MNIST(self.data_dir, train=False, download=False, transform=transforms)
         loader = DataLoader(
-            dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers, drop_last=True,
-            pin_memory=True
+            dataset,
+            batch_size=self.batch_size,
+            shuffle=self.shuffle,
+            num_workers=self.num_workers,
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory,
         )
         return loader
 

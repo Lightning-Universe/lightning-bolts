@@ -26,6 +26,9 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
             data_dir,
             meta_dir=None,
             num_workers=16,
+            shuffle=False,
+            pin_memory=False,
+            drop_last=False,
             *args,
             **kwargs,
     ):
@@ -39,6 +42,9 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         self.data_dir = data_dir
         self.num_workers = num_workers
         self.meta_dir = meta_dir
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
 
     @property
     def num_classes(self):
@@ -85,10 +91,10 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
-            shuffle=True,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -103,9 +109,10 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
-            shuffle=False,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            pin_memory=True
+            drop_last=self.drop_last
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -120,10 +127,10 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
-            shuffle=False,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
