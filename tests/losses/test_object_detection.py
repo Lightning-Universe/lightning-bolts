@@ -7,7 +7,7 @@ from unittest import TestCase
 import pytest
 import torch
 
-from pl_bolts.losses.giou import giou_loss
+from pl_bolts.losses.object_detection import giou_loss
 
 
 @pytest.mark.parametrize(
