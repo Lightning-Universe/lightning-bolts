@@ -22,7 +22,7 @@ These are common losses used in object detection.
 GIoU Loss
 ---------
 
-.. autofunction:: pl_bolts.losses.giou.giou_loss
+.. autofunction:: pl_bolts.losses.object_detection.giou_loss
     :noindex:
 
 ---------------
