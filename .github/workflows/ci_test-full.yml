@@ -85,10 +85,11 @@ jobs:
       run: |
         ls -lh
         echo =======
-        #ls -lh datasets
-        echo =======
-        find / -iname "MNIST" 2> /dev/null || echo mnist not found
-        find / -iname "CIFAR10" 2> /dev/null || echo cifar10 not found
+        ls -lh datasets
+        # Commented out because the below lines takes too long on macOS and Windows for unknown reason.
+        #echo =======
+        #find / -iname "MNIST" 2> /dev/null || echo mnist not found
+        #find / -iname "CIFAR10" 2> /dev/null || echo cifar10 not found
 
     - name: Tests
       run: |
@@ -101,10 +102,11 @@ jobs:
       run: |
         ls -lh
         echo =======
-        #ls -lh datasets
-        echo =======
-        find / -iname "MNIST" 2> /dev/null || echo mnist not found
-        find / -iname "CIFAR10" 2> /dev/null || echo cifar10 not found
+        ls -lh datasets
+        # Commented out because the below lines takes ages on macOS and Windows for unknown reason.
+        #echo =======
+        #find / -iname "MNIST" 2> /dev/null || echo mnist not found
+        #find / -iname "CIFAR10" 2> /dev/null || echo cifar10 not found
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@v2
