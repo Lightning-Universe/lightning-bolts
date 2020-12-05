@@ -86,6 +86,8 @@ jobs:
         ls -lh
         echo =======
         ls -lh datasets
+        echo ======
+        if command -v asdf >/dev/null; then du datasets; fi
         # Commented out because the below lines takes too long on macOS and Windows for unknown reason.
         #echo =======
         #find / -iname "MNIST" 2> /dev/null || echo mnist not found
@@ -103,6 +105,8 @@ jobs:
         ls -lh
         echo =======
         ls -lh datasets
+        echo =======
+        if command -v asdf >/dev/null; then du datasets; fi
         # Commented out because the below lines takes ages on macOS and Windows for unknown reason.
         #echo =======
         #find / -iname "MNIST" 2> /dev/null || echo mnist not found
