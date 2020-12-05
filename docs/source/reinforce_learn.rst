@@ -306,7 +306,7 @@ steadily increases till convergence.
   :width: 800
   :alt: Noisy DQN Result
 
-**DQN vs Dueling DQN: Pong**
+**DQN vs Noisy DQN: Pong**
 
 In comparison to the base DQN, the Noisy DQN is more stable and is able to converge on an optimal policy much faster
 than the original. It seems that the replacement of the epsilon-greedy strategy with network noise provides a better
