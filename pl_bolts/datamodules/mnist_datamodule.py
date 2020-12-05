@@ -52,6 +52,7 @@ class MNISTDataModule(LightningDataModule):
         normalize: bool = False,
         seed: int = 42,
         batch_size: int = 32,
+        download: bool = False,
         *args,
         **kwargs,
     ):
@@ -62,6 +63,7 @@ class MNISTDataModule(LightningDataModule):
             num_workers: how many workers to use for loading data
             normalize: If true applies image normalize
             batch_size: size of batch
+            download: If true it downloads MNIST dataset into data_dir. Default is false.
         """
         super().__init__(*args, **kwargs)
 
@@ -77,6 +79,9 @@ class MNISTDataModule(LightningDataModule):
         self.normalize = normalize
         self.seed = seed
         self.batch_size = batch_size
+        
+        if download:
+            self.prepare_data()
 
     @property
     def num_classes(self):
