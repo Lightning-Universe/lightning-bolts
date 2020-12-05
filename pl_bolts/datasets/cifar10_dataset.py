@@ -37,10 +37,11 @@ class CIFAR10(LightDataset):
             downloaded again.
 
     Examples:
+
         >>> from torchvision import transforms
         >>> from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
         >>> cf10_transforms = transforms.Compose([transforms.ToTensor(), cifar10_normalization()])
-        >>> dataset = CIFAR10(download=True, transform=cf10_transforms, data_dir="datasets")
+        >>> dataset = CIFAR10(download=True, transform=cf10_transforms)
         >>> len(dataset)
         50000
         >>> torch.bincount(dataset.targets)
@@ -166,7 +167,7 @@ class TrialCIFAR10(CIFAR10):
     without the torchvision dependency.
     Examples:
 
-        >>> dataset = TrialCIFAR10(download=True, num_samples=150, labels=(1, 5, 8), data_dir="datasets")
+        >>> dataset = TrialCIFAR10(download=True, num_samples=150, labels=(1, 5, 8))
         >>> len(dataset)
         450
         >>> sorted(set([d.item() for d in dataset.targets]))
