@@ -16,11 +16,11 @@ from pl_bolts.models import LitMNIST
 )
 @mock.patch("pl_bolts.callbacks.data_monitor.DataMonitorBase.log_histogram")
 def test_base_log_interval_override(
-    log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir
+    log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls
 ):
     """ Test logging interval set by log_every_n_steps argument. """
     monitor = TrainingDataMonitor(log_every_n_steps=log_every_n_steps)
-    model = LitMNIST(data_dir=datadir, num_workers=0)
+    model = LitMNIST(num_workers=0)
     trainer = Trainer(
         default_root_dir=tmpdir,
         log_every_n_steps=1,
@@ -43,11 +43,11 @@ def test_base_log_interval_override(
 )
 @mock.patch("pl_bolts.callbacks.data_monitor.DataMonitorBase.log_histogram")
 def test_base_log_interval_fallback(
-    log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir
+    log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls
 ):
     """ Test that if log_every_n_steps not set in the callback, fallback to what is defined in the Trainer. """
     monitor = TrainingDataMonitor()
-    model = LitMNIST(data_dir=datadir, num_workers=0)
+    model = LitMNIST(num_workers=0)
     trainer = Trainer(
         default_root_dir=tmpdir,
         log_every_n_steps=log_every_n_steps,
@@ -81,10 +81,10 @@ def test_base_unsupported_logger_warning(tmpdir):
 
 
 @mock.patch("pl_bolts.callbacks.data_monitor.TrainingDataMonitor.log_histogram")
-def test_training_data_monitor(log_histogram, tmpdir, datadir):
+def test_training_data_monitor(log_histogram, tmpdir):
     """ Test that the TrainingDataMonitor logs histograms of data points going into training_step. """
     monitor = TrainingDataMonitor()
-    model = LitMNIST(data_dir=datadir, num_workers=0)
+    model = LitMNIST()
     trainer = Trainer(
         default_root_dir=tmpdir, log_every_n_steps=1, callbacks=[monitor],
     )
