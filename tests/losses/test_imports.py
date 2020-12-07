@@ -29,7 +29,7 @@ def test_import_rl(name):
     "FeatureMapContrastiveTask",
     "tanh_clip",
 ])
-def test_import(name):
+def test_import_self_supervised_learning(name):
     """Tests importing when dependencies are not met.
 
     Set the following in @pytest.mark.parametrize:
