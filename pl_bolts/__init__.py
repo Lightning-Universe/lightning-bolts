@@ -47,6 +47,7 @@ else:
         callbacks,
         datamodules,
         datasets,
+        losses,
         metrics,
         models,
         optimizers,
