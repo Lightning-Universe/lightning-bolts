@@ -36,14 +36,33 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
         self.num_classes = num_classes
         self.dataset = dataset
 
-    def on_pretrain_routine_start(self, trainer, pl_module):
-        pl_module.knn_evaluator = KNeighborsClassifier(n_neighbors=self.num_classes)
-
 
     def get_representations(self, pl_module, x):
         representations = pl_module(x)
         representations = representations.reshape(representations.size(0), -1)
         return representations
+
+    def get_all_representations(self, pl_module, dataloader):
+        all_representations = None
+        ys = None
+
+        for batch in dataloader:
+            x, y = self.to_device(batch, pl_module.device)
+
+            with torch.no_grad():
+                representations = self.get_representations(pl_module, x)
+            
+            if all_representations is None:
+                all_representations = representations.detach()
+            else:
+                all_representations = torch.cat([all_representations,representations])
+
+            if ys is None:
+                ys = y
+            else:
+                ys = torch.cat([ys,y])
+
+        return all_representations.numpy(), ys.numpy()
 
     def to_device(self, batch, device):
         # get the labeled batch
@@ -60,31 +79,24 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
 
         return x, y
 
-    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
-        x, y = self.to_device(batch, pl_module.device)
+    def on_validation_epoch_end(self, trainer, pl_module):
+        pl_module.knn_evaluator = KNeighborsClassifier(n_neighbors=self.num_classes)
 
-        with torch.no_grad():
-            representations = self.get_representations(pl_module, x)
-
-        representations = representations.detach()
+        train_dataloader = pl_module.train_dataloader()
+        representations, y = self.get_all_representations(pl_module, train_dataloader)
 
         # knn fit
         pl_module.knn_evaluator.fit(representations, y)
         train_acc = pl_module.knn_evaluator.score(representations, y)
 
         # log metrics
-        pl_module.log('online_knn_train_acc', train_acc, on_step=True, on_epoch=False)
 
-    def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
-        x, y = self.to_device(batch, pl_module.device)
+        val_dataloader = pl_module.val_dataloader()
+        representations, y = self.get_all_representations(pl_module, val_dataloader)
 
-        with torch.no_grad():
-            representations = self.get_representations(pl_module, x)
-
-        representations = representations.detach()
-
-        # train knn
+        # knn val acc
         val_acc = pl_module.knn_evaluator.score(representations, y)
         
         # log metrics
+        pl_module.log('online_knn_train_acc', train_acc, on_step=False, on_epoch=True, sync_dist=True)
         pl_module.log('online_knn_val_acc', val_acc, on_step=False, on_epoch=True, sync_dist=True)
