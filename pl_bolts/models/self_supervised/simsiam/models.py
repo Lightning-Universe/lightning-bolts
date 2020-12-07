@@ -20,7 +20,7 @@ class MLP(nn.Module):
 
 
 class SiameseArm(nn.Module):
-    def __init__(self, encoder=None):
+    def __init__(self, encoder=None, input_dim=2048, hidden_size=4096, output_dim=256):
         super().__init__()
 
         if encoder is None:
@@ -28,9 +28,9 @@ class SiameseArm(nn.Module):
         # Encoder
         self.encoder = encoder
         # Projector
-        self.projector = MLP()
+        self.projector = MLP(input_dim, hidden_size, output_dim)
         # Predictor
-        self.predictor = MLP(input_dim=256)
+        self.predictor = MLP(output_dim, hidden_size, output_dim)
 
     def forward(self, x):
         y = self.encoder(x)[0]
