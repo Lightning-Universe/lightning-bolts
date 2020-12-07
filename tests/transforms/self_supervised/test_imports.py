@@ -7,7 +7,7 @@ from tests import optional_pkg_names
 
 
 @pytest.mark.parametrize("name", [
-    "Patchfy",
+    "Patchify",
     "RandomTranslateWithReflect",
 ])
 def test_import(name):

@@ -11,13 +11,13 @@ from tests import optional_pkg_names
     "cifar10_normalization",
     "stl10_normalization",
 ])
-def test_import(name):
+def test_import_dataset_normalizations(name):
     """Tests importing when dependencies are not met.
 
     Set the following in @pytest.mark.parametrize:
         name: class, function or variable name to test importing
     """
     with mock.patch.dict("sys.modules", {pkg: None for pkg in optional_pkg_names}):
-        module_name = "pl_bolts.transforms.dataset_nomalization"
+        module_name = "pl_bolts.transforms.dataset_normalizations"
         module = importlib.import_module(module_name)
         assert hasattr(module, name), f"`from {module_name} import {name}` failed."
