@@ -206,6 +206,10 @@ class Reinforce(pl.LightningModule):
 
                 self.batch_episodes = 0
 
+                self.batch_states.clear()
+                self.batch_actions.clear()
+                self.batch_qvals.clear()
+
             # Simulates epochs
             if self.total_steps % self.batches_per_epoch == 0:
                 break
