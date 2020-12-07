@@ -1,12 +1,16 @@
+import math
 from argparse import ArgumentParser
 from copy import deepcopy
 from typing import Any
+from typing import Callable, Optional
 
 import pytorch_lightning as pl
 import torch
+import numpy as np
 import torch.nn.functional as F
+from pytorch_lightning.utilities import AMPType
 from pytorch_lightning import seed_everything
-from torch.optim import Adam
+from torch.optim.optimizer import Optimizer
 
 from pl_bolts.models.self_supervised.simsiam.models import SiameseArm
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
@@ -68,13 +72,26 @@ class SimSiam(pl.LightningModule):
 
     def __init__(
         self,
-        learning_rate: float = 0.2,
-        weight_decay: float = 1.5e-6,
-        input_height: int = 32,
-        batch_size: int = 32,
-        num_workers: int = 0,
+        gpus: int,
+        num_samples: int,
+        batch_size: int,
+        dataset: str,
+        nodes: int = 1,
+        arch: str = 'resnet50',
+        hidden_mlp: int = 2048,
+        feat_dim: int = 128,
         warmup_epochs: int = 10,
-        max_epochs: int = 1000,
+        max_epochs: int = 100,
+        temperature: float = 0.1,
+        first_conv: bool = True,
+        maxpool1: bool = True,
+        optimizer: str = 'adam',
+        lars_wrapper: bool = True,
+        exclude_bn_bias: bool = False,
+        start_lr: float = 0.,
+        learning_rate: float = 1e-3,
+        final_lr: float = 0.,
+        weight_decay: float = 1e-6,
         **kwargs
     ):
         """
@@ -91,8 +108,47 @@ class SimSiam(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
+        self.gpus = gpus
+        self.nodes = nodes
+        self.arch = arch
+        self.dataset = dataset
+        self.num_samples = num_samples
+        self.batch_size = batch_size
+
+        self.hidden_mlp = hidden_mlp
+        self.feat_dim = feat_dim
+        self.first_conv = first_conv
+        self.maxpool1 = maxpool1
+
+        self.optim = optimizer
+        self.lars_wrapper = lars_wrapper
+        self.exclude_bn_bias = exclude_bn_bias
+        self.weight_decay = weight_decay
+        self.temperature = temperature
+
+        self.start_lr = start_lr
+        self.final_lr = final_lr
+        self.learning_rate = learning_rate
+        self.warmup_epochs = warmup_epochs
+        self.max_epochs = max_epochs
+
         self.online_network = SiameseArm()
         self._init_target_network()
+
+        # compute iters per epoch
+        global_batch_size = self.nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
+        self.train_iters_per_epoch = self.num_samples // global_batch_size
+
+        # define LR schedule
+        warmup_lr_schedule = np.linspace(
+            self.start_lr, self.learning_rate, self.train_iters_per_epoch * self.warmup_epochs
+        )
+        iters = np.arange(self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs))
+        cosine_lr_schedule = np.array([self.final_lr + 0.5 * (self.learning_rate - self.final_lr) * (
+            1 + math.cos(math.pi * t / (self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs)))
+        ) for t in iters])
+
+        self.lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
 
     def _init_target_network(self):
         self.target_network = deepcopy(self.online_network)
@@ -145,17 +201,87 @@ class SimSiam(pl.LightningModule):
 
         return total_loss
 
+    def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=['bias', 'bn']):
+        params = []
+        excluded_params = []
+
+        for name, param in named_params:
+            if not param.requires_grad:
+                continue
+            elif any(layer_name in name for layer_name in skip_list):
+                excluded_params.append(param)
+            else:
+                params.append(param)
+
+        return [
+            {'params': params, 'weight_decay': weight_decay},
+            {'params': excluded_params, 'weight_decay': 0.}
+        ]
+
     def configure_optimizers(self):
-        optimizer = Adam(
-            self.online_network.parameters(),
-            lr=self.hparams.learning_rate,
-            weight_decay=self.hparams.weight_decay,
-        )
-        optimizer = LARSWrapper(optimizer)
-        scheduler = LinearWarmupCosineAnnealingLR(
-            optimizer, warmup_epochs=self.hparams.warmup_epochs, max_epochs=self.hparams.max_epochs,
-        )
-        return [optimizer], [scheduler]
+        if self.exclude_bn_bias:
+            params = self.exclude_from_wt_decay(
+                self.named_parameters(),
+                weight_decay=self.weight_decay
+            )
+        else:
+            params = self.parameters()
+
+        if self.optim == 'sgd':
+            optimizer = torch.optim.SGD(
+                params,
+                lr=self.learning_rate,
+                momentum=0.9,
+                weight_decay=self.weight_decay
+            )
+        elif self.optim == 'adam':
+            optimizer = torch.optim.Adam(
+                params,
+                lr=self.learning_rate,
+                weight_decay=self.weight_decay
+            )
+
+        if self.lars_wrapper:
+            optimizer = LARSWrapper(
+                optimizer,
+                eta=0.001,  # trust coefficient
+                clip=False
+            )
+
+        return optimizer
+
+    def optimizer_step(
+        self,
+        epoch: int,
+        batch_idx: int,
+        optimizer: Optimizer,
+        optimizer_idx: int,
+        optimizer_closure: Optional[Callable] = None,
+        on_tpu: bool = False,
+        using_native_amp: bool = False,
+        using_lbfgs: bool = False,
+    ) -> None:
+        # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
+        # adjust LR of optim contained within LARSWrapper
+        if self.lars_wrapper:
+            for param_group in optimizer.optim.param_groups:
+                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
+        else:
+            for param_group in optimizer.param_groups:
+                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
+
+        # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
+        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
+
+        # from lightning
+        if self.trainer.amp_backend == AMPType.NATIVE:
+            optimizer_closure()
+            self.trainer.scaler.step(optimizer)
+        elif self.trainer.amp_backend == AMPType.APEX:
+            optimizer_closure()
+            optimizer.step()
+        else:
+            optimizer.step(closure=optimizer_closure)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
