@@ -101,5 +101,3 @@ def test_import_warnings(name):
         module_name = "pl_bolts.utils.warnings"
         module = importlib.import_module(module_name)
         assert hasattr(module, name), f"`from {module_name} import {name}` failed."
-
-
