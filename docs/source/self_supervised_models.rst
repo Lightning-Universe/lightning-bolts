@@ -431,7 +431,7 @@ To Train::
     model = SwAV(
         gpus=1,
         num_samples=dm.num_unlabeled_samples,
-        dataset='stl10,
+        dataset='stl10',
         batch_size=batch_size
     )
 

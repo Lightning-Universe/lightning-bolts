@@ -33,9 +33,9 @@ PACKAGE_ROOT = os.path.dirname(__file__)
 try:
     # This variable is injected in the __builtins__ by the build process.
     # It used to enable importing subpackages when the binaries are not built.
-    __LIGHTNING_BOLT_SETUP__
+    _ = None if __LIGHTNING_BOLT_SETUP__ else None
 except NameError:
-    __LIGHTNING_BOLT_SETUP__ = False
+    __LIGHTNING_BOLT_SETUP__: bool = False
 
 if __LIGHTNING_BOLT_SETUP__:
     import sys  # pragma: no-cover
