@@ -49,7 +49,7 @@ jobs:
       - name: Install mypy
         run: |
           pip install mypy
-          pip --version
+          pip list
       - name: mypy
         run: |
           mypy
