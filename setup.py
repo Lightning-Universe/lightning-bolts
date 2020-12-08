@@ -14,7 +14,7 @@ except ImportError:
 # http://blog.ionelmc.ro/2014/05/25/python-packaging/
 
 PATH_ROOT = os.path.dirname(__file__)
-builtins.__LIGHTNING_BOLT_SETUP__ = True
+builtins.__LIGHTNING_BOLT_SETUP__: bool = True
 
 import pl_bolts  # noqa: E402
 
