@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 import torch
 from pytorch_lightning.callbacks import Callback
@@ -30,6 +31,7 @@ class LatentDimInterpolator(Callback):
         interpolate_epoch_interval: int = 20,
         range_start: int = -5,
         range_end: int = 5,
+        steps: int = 11,
         num_samples: int = 2,
         normalize=False,
     ):
@@ -47,6 +49,7 @@ class LatentDimInterpolator(Callback):
         self.range_end = range_end
         self.num_samples = num_samples
         self.normalize = normalize
+        self.steps = steps
 
     def on_epoch_end(self, trainer, pl_module):
         if (trainer.current_epoch + 1) % self.interpolate_epoch_interval == 0:
@@ -63,8 +66,8 @@ class LatentDimInterpolator(Callback):
         images = []
         with torch.no_grad():
             pl_module.eval()
-            for z1 in range(self.range_start, self.range_end, 1):
-                for z2 in range(self.range_start, self.range_end, 1):
+            for z1 in np.linspace(self.range_start, self.range_end, self.steps):
+                for z2 in np.linspace(self.range_start, self.range_end, self.steps):
                     # set all dims to zero
                     z = torch.zeros(self.num_samples, latent_dim, device=pl_module.device)
 
