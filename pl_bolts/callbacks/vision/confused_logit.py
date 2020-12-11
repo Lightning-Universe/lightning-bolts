@@ -1,6 +1,10 @@
+from typing import Sequence, Tuple
+
 import torch
-from pytorch_lightning import Callback
-from torch import nn
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
+from pytorch_lightning import Callback, LightningModule, Trainer
+from torch import Tensor, nn
 
 
 class ConfusedLogitCallback(Callback):  # pragma: no-cover
@@ -56,7 +60,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
         self.logging_batch_interval = logging_batch_interval
         self.min_logit_value = min_logit_value
 
-    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
+    def on_train_batch_end(self, trainer: Trainer, pl_module: LightningModule, outputs: Sequence, batch: Sequence, batch_idx: int, dataloader_idx: int) -> None:
         # show images only every 20 batches
         if (trainer.batch_idx + 1) % self.logging_batch_interval != 0:
             return
@@ -92,7 +96,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
                 self._plot(confusing_x, confusing_y, trainer, pl_module, mask_idxs)
                 pl_module.train()
 
-    def _plot(self, confusing_x, confusing_y, trainer, model, mask_idxs):
+    def _plot(self, confusing_x: Tensor, confusing_y: Tensor, trainer: Trainer, model: LightningModule, mask_idxs: Tensor) -> None:
         from matplotlib import pyplot as plt
 
         confusing_x = confusing_x[:self.top_k]
@@ -103,7 +107,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
 
         batch_size, c, w, h = confusing_x.size()
         for logit_i, x_param in enumerate((x_param_a, x_param_b)):
-            x_param = x_param.to(model.device)
+            x_param = x_param.to(model.device)  # type: ignore
             logits = model(x_param.view(batch_size, -1))
             logits[:, mask_idxs[:, logit_i]].sum().backward()
 
@@ -129,7 +133,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
             trainer.logger.experiment.add_figure('confusing_imgs', fig, global_step=trainer.global_step)
 
     @staticmethod
-    def __draw_sample(fig, axarr, row_idx, col_idx, img, title):
+    def __draw_sample(fig: Figure, axarr: Axes, row_idx: int, col_idx: int, img: Tensor, title: str) -> None:
         im = axarr[row_idx, col_idx].imshow(img)
         fig.colorbar(im, ax=axarr[row_idx, col_idx])
         axarr[row_idx, col_idx].set_title(title, fontsize=20)

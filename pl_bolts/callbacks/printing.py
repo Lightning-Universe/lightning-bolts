@@ -1,7 +1,8 @@
 import copy
 from itertools import zip_longest
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Sized
 
+from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.utilities import rank_zero_info
 
@@ -33,10 +34,10 @@ class PrintTableMetricsCallback(Callback):
 
     """
 
-    def __init__(self):
-        self.metrics = []
+    def __init__(self) -> None:
+        self.metrics: List = []
 
-    def on_epoch_end(self, trainer, pl_module):
+    def on_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         metrics_dict = copy.copy(trainer.callback_metrics)
         self.metrics.append(metrics_dict)
         rank_zero_info(dicts_to_table(self.metrics))
@@ -49,7 +50,7 @@ def dicts_to_table(dicts: List[Dict],
                    convert_headers: Optional[Dict[str, Callable]] = None,
                    header_names: Optional[List[str]] = None,
                    skip_none_lines: bool = False,
-                   replace_values: Optional[Dict[str, Any]] = None):
+                   replace_values: Optional[Dict[str, Any]] = None) -> str:
     """
     Generate ascii table from dictionary
     Taken from (https://stackoverflow.com/questions/40056747/print-a-list-of-dictionaries-in-table-form)
