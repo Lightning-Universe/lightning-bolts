@@ -8,6 +8,8 @@ import torch
 import torch.distributed as dist
 import torch.nn.functional as F
 from pytorch_lightning.utilities import AMPType
+from pytorch_lightning.callbacks import ModelCheckpoint
+
 from torch import nn
 from torch.optim.optimizer import Optimizer
 
@@ -189,7 +191,7 @@ class SimCLR(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
 
-        self.log('val_loss', loss, on_step=False, on_epoch=True)
+        self.log('val_loss', loss, on_step=False, on_epoch=True, sync_dist=True)
         return loss
 
     def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=['bias', 'bn']):
@@ -466,6 +468,9 @@ def cli_main():
             dataset=args.dataset
         )
 
+    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor='val_loss')
+    callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
+
     trainer = pl.Trainer(
         max_epochs=args.max_epochs,
         max_steps=None if args.max_steps == -1 else args.max_steps,
@@ -474,7 +479,7 @@ def cli_main():
         distributed_backend='ddp' if args.gpus > 1 else None,
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=32 if args.fp32 else 16,
-        callbacks=[online_evaluator] if args.online_ft else None,
+        callbacks=callbacks,
         fast_dev_run=args.fast_dev_run
     )
 
