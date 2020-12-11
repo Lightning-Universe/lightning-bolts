@@ -7,8 +7,8 @@ import pytorch_lightning as pl
 import torch
 import torch.distributed as dist
 import torch.nn.functional as F
-from pytorch_lightning.utilities import AMPType
 from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.core.optimizer import LightningOptimizer
 
 from torch import nn
 from torch.optim.optimizer import Optimizer
@@ -267,14 +267,10 @@ class SimCLR(pl.LightningModule):
         self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
 
         # from lightning
-        if self.trainer.amp_backend == AMPType.NATIVE:
-            optimizer_closure()
-            self.trainer.scaler.step(optimizer)
-        elif self.trainer.amp_backend == AMPType.APEX:
-            optimizer_closure()
-            optimizer.step()
-        else:
-            optimizer.step(closure=optimizer_closure)
+        if not isinstance(optimizer, LightningOptimizer):
+            # wraps into LightingOptimizer only for running step
+            optimizer = LightningOptimizer.to_lightning_optimizer(optimizer, self.trainer)
+        optimizer.step(closure=optimizer_closure, *args, **kwargs)
 
     def nt_xent_loss(self, out_1, out_2, temperature, eps=1e-6):
         """
