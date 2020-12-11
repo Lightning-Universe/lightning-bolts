@@ -36,6 +36,14 @@ class LARSWrapper(object):
         self.__repr__ = self.optim.__repr__
 
     @property
+    def defaults(self):
+        return self.optim.defaults
+
+    @defaults.setter
+    def defaults(self, defaults):
+        self.optim.defaults = defaults
+
+    @property
     def __class__(self):
         return Optimizer
 

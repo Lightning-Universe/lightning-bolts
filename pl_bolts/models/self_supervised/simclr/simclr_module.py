@@ -185,6 +185,9 @@ class SimCLR(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
 
+        # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
+        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
+
         self.log('train_loss', loss, on_step=True, on_epoch=False)
         return loss
 
@@ -245,7 +248,6 @@ class SimCLR(pl.LightningModule):
 
     def optimizer_step(
         self,
-        *args,
         epoch: int = None,
         batch_idx: int = None,
         optimizer: Optimizer = None,
@@ -254,25 +256,14 @@ class SimCLR(pl.LightningModule):
         on_tpu: bool = None,
         using_native_amp: bool = None,
         using_lbfgs: bool = None,
-        **kwargs,
     ) -> None:
         # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
         # adjust LR of optim contained within LARSWrapper
-        if self.lars_wrapper:
-            for param_group in optimizer.optim.param_groups:
-                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
-        else:
-            for param_group in optimizer.param_groups:
-                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
-
-        # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
-        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
+        for param_group in optimizer.param_groups:
+            param_group["lr"] = self.lr_schedule[self.trainer.global_step]
 
         # from lightning
-        if not isinstance(optimizer, LightningOptimizer):
-            # wraps into LightingOptimizer only for running step
-            optimizer = LightningOptimizer.to_lightning_optimizer(optimizer, self.trainer)
-        optimizer.step(closure=optimizer_closure, *args, **kwargs)
+        optimizer.step(closure=optimizer_closure)
 
     def nt_xent_loss(self, out_1, out_2, temperature, eps=1e-6):
         """
