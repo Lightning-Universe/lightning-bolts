@@ -254,9 +254,14 @@ class SimCLR(pl.LightningModule):
         using_native_amp: bool = False,
         using_lbfgs: bool = False,
     ) -> None:
+        # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
         # adjust LR of optim contained within LARSWrapper
-        for param_group in optimizer.param_groups:
-            param_group["lr"] = self.lr_schedule[self.trainer.global_step]
+        if self.lars_wrapper:
+            for param_group in optimizer.optim.param_groups:
+                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
+        else:
+            for param_group in optimizer.param_groups:
+                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
 
         # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
         self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
