@@ -263,6 +263,9 @@ class SimCLR(pl.LightningModule):
             param_group["lr"] = self.lr_schedule[self.trainer.global_step]
 
         # from lightning
+        if not isinstance(optimizer, LightningOptimizer):
+            # wraps into LightingOptimizer only for running step
+            optimizer = LightningOptimizer.to_lightning_optimizer(optimizer, self.trainer)
         optimizer.step(closure=optimizer_closure)
 
     def nt_xent_loss(self, out_1, out_2, temperature, eps=1e-6):
