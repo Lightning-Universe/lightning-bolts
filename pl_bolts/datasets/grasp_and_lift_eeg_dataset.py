@@ -28,6 +28,9 @@ class GraspAndLiftEEGDataset(data.Dataset):
         num_samples: The number of samples in the returned examples.
             If None, the the dataset yields the full length trials.
 
+        last_label_only: If true, return only the last sample's labels.
+            Must be used with num_samples.
+
     Examples:
         >>> dataset = GraspAndLiftEEGDataset('/data',
                                              train=True,
@@ -77,9 +80,13 @@ class GraspAndLiftEEGDataset(data.Dataset):
                  root: str,
                  train: bool = True,
                  download: bool = True,
-                 num_samples: int = None):
+                 num_samples: int = None,
+                 last_label_only: bool = False):
         super(GraspAndLiftEEGDataset, self).__init__()
+        if num_samples == None and last_label_only:
+            raise ValueError('last_label_only cannot be used without setting num_samples')
         self.num_samples = num_samples
+        self.last_label_only = last_label_only
         dir = os.path.join(root, 'train' if train else 'test')
         if not os.path.exists(dir):
             if not download:
@@ -210,7 +217,15 @@ class GraspAndLiftEEGDataset(data.Dataset):
                 continue
             j = index - ofs
             x = x[:, j:j + self.num_samples]
-            y = self.Y[i][:, j:j + self.num_samples] if self.Y != None else []
+            if self.Y != None:
+                if self.last_label_only:
+                    # Only return the label for the last sample
+                    y = self.Y[i][:, j + self.num_samples - 1]
+                else:
+                    # Return labels for all samples
+                    y = self.Y[i][:, j:j + self.num_samples]
+            else:
+                y = []
             return x, y
         raise ValueError(f'unable to seek {index}')
 
