@@ -50,8 +50,8 @@ class FashionMNISTDataModule(LightningDataModule):
             data_dir: str,
             val_split: int = 5000,
             num_workers: int = 16,
-            seed: int = 42,
             batch_size: int = 32,
+            seed: int = 42,
             shuffle: bool = False,
             pin_memory: bool = False,
             drop_last: bool = False,
@@ -81,8 +81,11 @@ class FashionMNISTDataModule(LightningDataModule):
         self.data_dir = data_dir
         self.val_split = val_split
         self.num_workers = num_workers
-        self.seed = seed
         self.batch_size = batch_size
+        self.seed = seed
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
 
     @property
     def num_classes(self):

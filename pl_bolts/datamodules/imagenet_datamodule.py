@@ -77,11 +77,11 @@ class ImagenetDataModule(LightningDataModule):
             num_imgs_per_val_class: how many images per class for the validation set
             image_size: final image size
             num_workers: how many data workers
+            batch_size: batch_size
             shuffle: If true shuffles the data every epoch
             pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
                         returning them
             drop_last: If true drops the last incomplete batch
-            batch_size: batch_size
         """
         super().__init__(*args, **kwargs)
 
