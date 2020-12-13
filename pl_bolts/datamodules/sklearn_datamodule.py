@@ -131,13 +131,13 @@ class SklearnDataModule(LightningDataModule):
         >>> len(val_loader.dataset)
         100
         >>> len(val_loader)
-        3
+        4
         >>> # test set
         >>> test_loader = loaders.test_dataloader()
         >>> len(test_loader.dataset)
         51
         >>> len(test_loader)
-        1
+        2
     """
 
     name = 'sklearn'
