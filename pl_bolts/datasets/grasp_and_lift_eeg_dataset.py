@@ -1,9 +1,10 @@
 import os
-import requests
 import time
+import zipfile
+
+import requests
 import torch
 import torch.utils.data as data
-import zipfile
 
 
 def recursive_listdir(path: str, suffix: str) -> list:
