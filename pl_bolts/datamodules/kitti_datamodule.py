@@ -77,6 +77,12 @@ class KittiDataModule(LightningDataModule):
         self.seed = seed
         self.shuffle = shuffle
 
+        self.default_transforms = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.35675976, 0.37380189, 0.3764753],
+                                 std=[0.32064945, 0.32098866, 0.32325324])
+        ])
+
         # split into train, val, test
         kitti_dataset = KittiDataset(self.data_dir, transform=self._default_transforms())
 

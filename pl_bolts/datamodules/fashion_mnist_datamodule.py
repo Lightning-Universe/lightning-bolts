@@ -83,9 +83,6 @@ class FashionMNISTDataModule(LightningDataModule):
         self.num_workers = num_workers
         self.seed = seed
         self.batch_size = batch_size
-        self.shuffle = shuffle
-        self.pin_memory = pin_memory
-        self.drop_last = drop_last
 
     @property
     def num_classes(self):
