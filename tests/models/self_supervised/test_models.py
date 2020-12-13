@@ -139,3 +139,4 @@ def test_simsiam(tmpdir, datadir):
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) < 0
+
