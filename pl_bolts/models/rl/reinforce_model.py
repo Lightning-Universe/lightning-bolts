@@ -16,15 +16,13 @@ from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.datamodules.experience_source import Experience
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.networks import MLP
+from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _GYM_AVAILABLE:
     import gym
-except ModuleNotFoundError:
-    warn_missing_pkg('gym')  # pragma: no-cover
-    _GYM_AVAILABLE = False
 else:
-    _GYM_AVAILABLE = True
+    warn_missing_pkg('gym')  # pragma: no-cover
 
 
 class Reinforce(pl.LightningModule):

@@ -441,10 +441,13 @@ import torch
 
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer, LightningModule
-from pytorch_lightning.utilities import NATIVE_AMP_AVALAIBLE
-APEX_AVAILABLE = importlib.util.find_spec("apex") is not None
-XLA_AVAILABLE = importlib.util.find_spec("torch_xla") is not None
-TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
+from pl_bolts.utils import (
+    _TORCHVISION_AVAILABLE,
+    _GYM_AVAILABLE,
+    _SKLEARN_AVAILABLE,
+    _PIL_AVAILABLE,
+    _OPENCV_AVAILABLE,
+)
 
 """
 coverage_skip_undoc_in_source = True

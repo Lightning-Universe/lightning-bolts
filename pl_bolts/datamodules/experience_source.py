@@ -2,7 +2,6 @@
 Datamodules for RL models that rely on experiences generated during training
 Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/experience.py
 """
-import importlib
 from abc import ABC
 from collections import deque, namedtuple
 from typing import Callable, Iterable, List, Tuple

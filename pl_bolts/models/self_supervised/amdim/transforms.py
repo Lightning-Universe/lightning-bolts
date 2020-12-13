@@ -1,13 +1,11 @@
 from pl_bolts.transforms.self_supervised import RandomTranslateWithReflect
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision import transforms
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
 else:
-    _TORCHVISION_AVAILABLE = True
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
 class AMDIMTrainTransformsCIFAR10:
