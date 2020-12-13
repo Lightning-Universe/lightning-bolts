@@ -1,6 +1,9 @@
 import os
+import requests
+import time
 import torch
 import torch.utils.data as data
+import zipfile
 
 
 def recursive_listdir(path: str, suffix: str) -> list:
@@ -143,9 +146,6 @@ class GraspAndLiftEEGDataset(data.Dataset):
         self.Y = Y if len(Y) > 0 else None
 
     def download(self, root: str):
-        import requests
-        import time
-        import zipfile
         zip_path = os.path.join(root, 'grasp-and-lift-eeg-detection.zip')
         if not os.path.exists(zip_path) or os.path.getsize(zip_path) != self.ZIP_SIZE_BYTES:
             print(f'Downloading from {self.ZIP_URL}')
