@@ -11,6 +11,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
+
     from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover

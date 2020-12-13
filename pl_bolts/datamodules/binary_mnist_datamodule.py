@@ -63,8 +63,8 @@ class BinaryMNISTDataModule(LightningDataModule):
         """
         super().__init__(*args, **kwargs)
 
-        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError(
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use MNIST dataset loaded from `torchvision` which is not installed yet.'
             )
 
