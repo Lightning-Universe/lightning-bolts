@@ -32,10 +32,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
             Must be used with num_samples.
 
     Examples:
-        >>> dataset = GraspAndLiftEEGDataset('/data',
-                                             train=True,
-                                             download=True,
-                                             num_samples=1024)
+        >>> dataset = GraspAndLiftEEGDataset('/data', train=True, download=True, num_samples=1024)
         Downloading from https://grasplifteeg.nyc3.digitaloceanspaces.com/grasp-and-lift-eeg-detection.zip
         Downloaded in 283 seconds
         Extracting /data/grasp-and-lift-eeg-detection.zip to /data
@@ -68,7 +65,8 @@ class GraspAndLiftEEGDataset(data.Dataset):
         International Creative Commons License (http://creativecommons.org/licenses/by/4.0/).
     """
 
-    GRASPLIFT_DATA_HEADER = 'id,Fp1,Fp2,F7,F3,Fz,F4,F8,FC5,FC1,FC2,FC6,T7,C3,Cz,C4,T8,TP9,CP5,CP1,CP2,CP6,TP10,P7,P3,Pz,P4,P8,PO9,O1,Oz,O2,PO10\n'
+    GRASPLIFT_DATA_HEADER = 'id,Fp1,Fp2,F7,F3,Fz,F4,F8,FC5,FC1,FC2,FC6,T7,C3,Cz,C4,T8,TP9,CP5,CP1,CP2,CP6,' + \
+        'TP10,P7,P3,Pz,P4,P8,PO9,O1,Oz,O2,PO10\n'
 
     GRASPLIFT_EVENTS_HEADER = 'id,HandStart,FirstDigitTouch,BothStartLoadPhase,LiftOff,Replace,BothReleased\n'
 
@@ -83,7 +81,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
                  num_samples: int = None,
                  last_label_only: bool = False):
         super(GraspAndLiftEEGDataset, self).__init__()
-        if num_samples == None and last_label_only:
+        if num_samples is None and last_label_only:
             raise ValueError('last_label_only cannot be used without setting num_samples')
         self.num_samples = num_samples
         self.last_label_only = last_label_only
@@ -115,7 +113,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
 
         if should_compile:
             self.X, self.Y = self.compile_bin(csv_files)
-            if num_samples != None:
+            if num_samples is not None:
                 # Divide each example up into windows
                 self.total_examples = 0
                 for x in self.X:
@@ -131,14 +129,14 @@ class GraspAndLiftEEGDataset(data.Dataset):
                 item = examples.get(series, [None, None])
                 item[0 if is_data else 1] = samples
                 examples[series] = item
-                if is_data and num_samples != None:
+                if is_data and num_samples is not None:
                     self.total_examples += samples.shape[1] - num_samples + 1
             self.X = []
             Y = []
             for series in sorted(examples):
                 x, y = examples[series]
                 self.X.append(x)
-                if y != None:
+                if y is not None:
                     Y.append(y)
             self.Y = Y if len(Y) > 0 else None
 
@@ -199,15 +197,15 @@ class GraspAndLiftEEGDataset(data.Dataset):
             x, y = examples[series]
             torch.save(samples, series + '_data.csv.bin')
             X.append(x)
-            if y != None:
+            if y is not None:
                 torch.save(samples, series + '_events.csv.bin')
                 Y.append(y)
         return X, Y if len(Y) > 0 else None
 
     def __getitem__(self, index):
-        if self.num_samples == None:
+        if self.num_samples is None:
             # Return the entire example (e.g. reinforcement learning)
-            return (self.X[index], self.Y[index] if self.Y != None else [])
+            return (self.X[index], self.Y[index] if self.Y is not None else [])
         # Find the example and offset for the index
         ofs = 0
         for i, x in enumerate(self.X):
@@ -217,7 +215,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
                 continue
             j = index - ofs
             x = x[:, j:j + self.num_samples]
-            if self.Y != None:
+            if self.Y is not None:
                 if self.last_label_only:
                     # Only return the label for the last sample
                     y = self.Y[i][:, j + self.num_samples - 1]
@@ -230,7 +228,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
         raise ValueError(f'unable to seek {index}')
 
     def __len__(self):
-        if self.num_samples == None:
+        if self.num_samples is None:
             # No windowing - each example is full length
             return len(self.X)
         # Use precalculated dataset length
