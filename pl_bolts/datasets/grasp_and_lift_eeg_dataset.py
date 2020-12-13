@@ -3,6 +3,13 @@ import torch
 import torch.utils.data as data
 
 
+def recursive_listdir(path: str, suffix: str) -> list:
+    return [os.path.join(dp, f)
+            for dp, dn, fn in os.walk(os.path.expanduser(path))
+            for f in fn
+            if f.endswith(suffix)]
+
+
 class GraspAndLiftEEGDataset(data.Dataset):
     """ 32-channel, 500Hz EEG dataset of subjects performing a various
     grasp-and-lift motor tasks, with per-sample class labels.
@@ -85,60 +92,55 @@ class GraspAndLiftEEGDataset(data.Dataset):
             raise ValueError('last_label_only cannot be used without setting num_samples')
         self.num_samples = num_samples
         self.last_label_only = last_label_only
-        dir = os.path.join(root, 'train' if train else 'test')
-        if not os.path.exists(dir):
+        data_dir = os.path.join(root, 'train' if train else 'test')
+        if not os.path.exists(data_dir):
             if not download:
-                raise ValueError(f'{dir} does not exist')
+                raise ValueError(f'{data_dir} does not exist')
             if not os.path.exists(root):
                 os.makedirs(root)
             self.download(root)
         csv_suffix = '.csv'
         bin_suffix = '.csv.bin'
-        csv_files = [os.path.join(dp, f)
-                     for dp, dn, fn in os.walk(os.path.expanduser(dir))
-                     for f in fn
-                     if f.endswith(csv_suffix)]
-        bin_files = [os.path.join(dp, f)
-                     for dp, dn, fn in os.walk(os.path.expanduser(dir))
-                     for f in fn
-                     if f.endswith(bin_suffix)]
-
-        should_compile = False
-
-        if len(bin_files) < len(csv_files):
+        csv_files = recursive_listdir(data_dir, csv_suffix)
+        bin_files = recursive_listdir(data_dir, bin_suffix)
+        should_compile = len(bin_files) < len(csv_files)
+        if should_compile:
             print(f'Number of .csv.bin files ({len(bin_files)}) '
                   f'is less than the number of .csv ({len(csv_files)}).'
                   ' Compiling binary representation...')
-            should_compile = True
-
-        if should_compile:
-            self.X, self.Y = self.compile_bin(csv_files)
-            if num_samples is not None:
-                # Divide each example up into windows
-                self.total_examples = 0
-                for x in self.X:
-                    self.total_examples += x.shape[1] - num_samples + 1
+            self.load_from_csv(csv_files)
         else:
-            examples = {}
+            self.load_from_bin(bin_files)
+
+    def load_from_csv(self, csv_files):
+        self.X, self.Y = self.compile_bin(csv_files)
+        if self.num_samples is not None:
+            # Divide each example up into windows
             self.total_examples = 0
-            for file in bin_files:
-                is_data = file.endswith('_data.csv.bin')
-                series = file[:-len('_data.csv.bin')
-                              if is_data else -len('_events.csv.bin')]
-                samples = torch.load(file)
-                item = examples.get(series, [None, None])
-                item[0 if is_data else 1] = samples
-                examples[series] = item
-                if is_data and num_samples is not None:
-                    self.total_examples += samples.shape[1] - num_samples + 1
-            self.X = []
-            Y = []
-            for series in sorted(examples):
-                x, y = examples[series]
-                self.X.append(x)
-                if y is not None:
-                    Y.append(y)
-            self.Y = Y if len(Y) > 0 else None
+            for x in self.X:
+                self.total_examples += x.shape[1] - self.num_samples + 1
+
+    def load_from_bin(self, bin_files: list):
+        examples = {}
+        self.total_examples = 0
+        for file in bin_files:
+            is_data = file.endswith('_data.csv.bin')
+            series = file[:-len('_data.csv.bin')
+                          if is_data else -len('_events.csv.bin')]
+            samples = torch.load(file)
+            item = examples.get(series, [None, None])
+            item[0 if is_data else 1] = samples
+            examples[series] = item
+            if is_data and self.num_samples is not None:
+                self.total_examples += samples.shape[1] - self.num_samples + 1
+        self.X = []
+        Y = []
+        for series in sorted(examples):
+            x, y = examples[series]
+            self.X.append(x)
+            if y is not None:
+                Y.append(y)
+        self.Y = Y if len(Y) > 0 else None
 
     def download(self, root: str):
         import requests
