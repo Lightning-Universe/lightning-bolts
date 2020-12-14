@@ -4,7 +4,7 @@ import torch
 from pytorch_lightning import seed_everything
 
 from pl_bolts.datamodules import CIFAR10DataModule
-from pl_bolts.models.self_supervised import AMDIM, BYOL, CPCV2, MocoV2, SimCLR, SwAV, SimSiam
+from pl_bolts.models.self_supervised import AMDIM, BYOL, CPCV2, MocoV2, SimCLR, SimSiam, SwAV
 from pl_bolts.models.self_supervised.cpc import CPCEvalTransformsCIFAR10, CPCTrainTransformsCIFAR10
 from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
 from pl_bolts.models.self_supervised.moco.transforms import Moco2EvalCIFAR10Transforms, Moco2TrainCIFAR10Transforms
