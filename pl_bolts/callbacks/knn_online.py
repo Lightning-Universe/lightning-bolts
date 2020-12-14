@@ -2,7 +2,6 @@ from typing import Optional
 
 import torch
 from pytorch_lightning import Callback
-
 from sklearn.neighbors import KNeighborsClassifier
 
 

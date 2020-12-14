@@ -1,27 +1,22 @@
 import math
 from argparse import ArgumentParser
 from copy import deepcopy
-from typing import Any
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
+import numpy as np
 import pytorch_lightning as pl
 import torch
-import numpy as np
 import torch.nn.functional as F
-from pytorch_lightning.utilities import AMPType
 from pytorch_lightning import seed_everything
+from pytorch_lightning.utilities import AMPType
 from torch.optim.optimizer import Optimizer
 
-from pl_bolts.models.self_supervised.simsiam.models import SiameseArm
 from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
+from pl_bolts.models.self_supervised.simsiam.models import SiameseArm
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-
-from pl_bolts.transforms.dataset_normalizations import (
-    cifar10_normalization,
-    imagenet_normalization,
-    stl10_normalization,
-)
+from pl_bolts.transforms.dataset_normalizations import (cifar10_normalization, imagenet_normalization,
+                                                        stl10_normalization)
 
 
 class SimSiam(pl.LightningModule):
