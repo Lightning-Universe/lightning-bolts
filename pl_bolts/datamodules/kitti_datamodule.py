@@ -5,7 +5,7 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import random_split
 
-from pl_bolts import _TORCHVISION_AVAILABLE
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.datasets.kitti_dataset import KittiDataset
 from pl_bolts.utils.warnings import warn_missing_pkg
 

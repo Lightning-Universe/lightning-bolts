@@ -12,7 +12,7 @@ import numpy as np
 import torch
 from torch._six import PY3
 
-from pl_bolts import _TORCHVISION_AVAILABLE
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:

@@ -3,7 +3,7 @@ from typing import Callable, Optional
 
 import numpy as np
 
-from pl_bolts import _TORCHVISION_AVAILABLE
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:

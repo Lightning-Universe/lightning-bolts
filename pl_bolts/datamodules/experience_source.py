@@ -10,7 +10,7 @@ from typing import Callable, Iterable, List, Tuple
 import torch
 from torch.utils.data import IterableDataset
 
-from pl_bolts import _GYM_AVAILABLE
+from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:

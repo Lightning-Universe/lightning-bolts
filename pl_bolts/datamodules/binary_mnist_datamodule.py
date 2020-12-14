@@ -2,7 +2,7 @@ import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
 
-from pl_bolts import _TORCHVISION_AVAILABLE
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.datasets.mnist_dataset import BinaryMNIST
 from pl_bolts.utils.warnings import warn_missing_pkg
 

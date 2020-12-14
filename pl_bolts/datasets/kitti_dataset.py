@@ -3,7 +3,7 @@ import os
 import numpy as np
 from torch.utils.data import Dataset
 
-from pl_bolts import _PIL_AVAILABLE
+from pl_bolts.utils import _PIL_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _PIL_AVAILABLE:
