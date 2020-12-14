@@ -33,7 +33,7 @@ def cli_main():  # pragma: no-cover
     parser.add_argument('--dropout', type=float, default=0.)
     parser.add_argument('--learning_rate', type=float, default=0.3)
     parser.add_argument('--weight_decay', type=float, default=1e-6)
-    parser.add_argument('--nesterov', type=bool, default=False)
+    parser.add_argument('--nesterov', type=bool, default=False)  # fix nesterov flag here
     parser.add_argument('--scheduler_type', type=str, default='cosine')
     parser.add_argument('--gamma', type=float, default=0.1)
     parser.add_argument('--final_lr', type=float, default=0.)

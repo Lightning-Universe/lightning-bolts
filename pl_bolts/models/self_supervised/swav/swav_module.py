@@ -523,6 +523,7 @@ def cli_main():
         normalization = imagenet_normalization()
 
         args.size_crops = [224, 96]
+        args.nmb_crops = [2, 6]
         args.min_scale_crops = [0.14, 0.05]
         args.max_scale_crops = [1., 0.14]
         args.gaussian_blur = True
