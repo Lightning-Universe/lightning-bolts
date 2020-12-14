@@ -7,16 +7,14 @@ from torch.utils.data import DataLoader, random_split
 
 from pl_bolts.datasets.concat_dataset import ConcatDataset
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import STL10
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 
 class STL10DataModule(LightningDataModule):  # pragma: no cover
@@ -75,8 +73,8 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         """
         super().__init__(*args, **kwargs)
 
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use STL10 dataset loaded from `torchvision` which is not installed yet.'
             )
 

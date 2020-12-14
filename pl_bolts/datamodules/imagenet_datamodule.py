@@ -4,24 +4,15 @@ from typing import Optional
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
+from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
-
-try:
-    from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 
 class ImagenetDataModule(LightningDataModule):
@@ -78,8 +69,8 @@ class ImagenetDataModule(LightningDataModule):
         """
         super().__init__(*args, **kwargs)
 
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use ImageNet dataset loaded from `torchvision` which is not installed yet.'
             )
 
