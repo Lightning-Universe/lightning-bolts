@@ -134,7 +134,7 @@ class SimSiam(pl.LightningModule):
         self.max_epochs = max_epochs
 
         self.init_model()
-        
+
         # compute iters per epoch
         global_batch_size = self.nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
@@ -155,11 +155,12 @@ class SimSiam(pl.LightningModule):
             backbone = resnet18
         elif self.arch == 'resnet50':
             backbone = resnet50
-            
-        encoder =backbone(
+
+        encoder = backbone(
             first_conv=self.first_conv, maxpool1=self.maxpool1, return_all_feature_maps=False
         )
-        self.online_network = SiameseArm(encoder,input_dim=self.hidden_mlp, hidden_size=self.hidden_mlp, output_dim=self.feat_dim)
+        self.online_network = SiameseArm(encoder, input_dim=self.hidden_mlp,
+                                         hidden_size=self.hidden_mlp, output_dim=self.feat_dim)
         self.init_target_network()
 
     def init_target_network(self):

@@ -5,6 +5,7 @@ from pytorch_lightning import Callback
 
 from sklearn.neighbors import KNeighborsClassifier
 
+
 class KNNOnlineEvaluator(Callback):  # pragma: no-cover
     """
     Evaluates self-supervised K nearest neighbors.
@@ -21,6 +22,7 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
         )
 
     """
+
     def __init__(
         self,
         dataset: str,
@@ -36,7 +38,6 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
         self.num_classes = num_classes
         self.dataset = dataset
 
-
     def get_representations(self, pl_module, x):
         representations = pl_module(x)
         representations = representations.reshape(representations.size(0), -1)
@@ -51,16 +52,16 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
 
             with torch.no_grad():
                 representations = self.get_representations(pl_module, x)
-            
+
             if all_representations is None:
                 all_representations = representations.detach()
             else:
-                all_representations = torch.cat([all_representations,representations])
+                all_representations = torch.cat([all_representations, representations])
 
             if ys is None:
                 ys = y
             else:
-                ys = torch.cat([ys,y])
+                ys = torch.cat([ys, y])
 
         return all_representations.numpy(), ys.numpy()
 
@@ -96,7 +97,7 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
 
         # knn val acc
         val_acc = pl_module.knn_evaluator.score(representations, y)
-        
+
         # log metrics
         pl_module.log('online_knn_train_acc', train_acc, on_step=False, on_epoch=True, sync_dist=True)
         pl_module.log('online_knn_val_acc', val_acc, on_step=False, on_epoch=True, sync_dist=True)
