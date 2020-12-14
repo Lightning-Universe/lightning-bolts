@@ -6,8 +6,8 @@ from typing import Callable, Optional, Sequence, Tuple
 import torch
 from torch import Tensor
 
-from pl_bolts.utils import _PIL_AVAILABLE
 from pl_bolts.datasets.base_dataset import LightDataset
+from pl_bolts.utils import _PIL_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _PIL_AVAILABLE:
