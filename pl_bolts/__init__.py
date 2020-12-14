@@ -1,7 +1,6 @@
 """Root package info."""
 
 import os
-from importlib.util import find_spec
 
 __version__ = '0.2.5rc1'
 __author__ = 'PyTorchLightning et al.'
@@ -30,12 +29,6 @@ Please organize the functions of your lightning module.
 """
 
 PACKAGE_ROOT = os.path.dirname(__file__)
-
-_TORCHVISION_AVAILABLE = find_spec("torchvision") is not None
-_SKLEARN_AVAILABLE = find_spec("sklearn") is not None
-_PIL_AVAILABLE = find_spec("PIL") is not None
-_GYM_AVAILABLE = find_spec("gym") is not None
-_OPENCV_AVAILABLE = find_spec("cv2") is not None
 
 try:
     # This variable is injected in the __builtins__ by the build process.
