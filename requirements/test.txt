@@ -13,3 +13,5 @@ mypy
 yapf
 
 atari-py==0.2.6  # needed for RL
+
+scikit-learn>=0.20.0
