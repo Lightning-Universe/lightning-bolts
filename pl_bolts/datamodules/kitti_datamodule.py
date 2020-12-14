@@ -1,4 +1,3 @@
-import importlib
 import os
 
 import torch
@@ -7,13 +6,13 @@ from torch.utils.data import DataLoader
 from torch.utils.data.dataset import random_split
 
 from pl_bolts.datasets.kitti_dataset import KittiDataset
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-_TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
 if _TORCHVISION_AVAILABLE:
     import torchvision.transforms as transforms
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 
 class KittiDataModule(LightningDataModule):
@@ -63,8 +62,8 @@ class KittiDataModule(LightningDataModule):
             batch_size: the batch size
             seed: random seed to be used for train/val/test splits
         """
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `torchvision` which is not installed yet.'
             )
 

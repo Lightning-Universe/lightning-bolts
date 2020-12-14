@@ -6,17 +6,14 @@ from typing import Callable, Optional, Sequence, Tuple
 import torch
 from torch import Tensor
 
+from pl_bolts.datasets.base_dataset import LightDataset
+from pl_bolts.utils import _PIL_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _PIL_AVAILABLE:
     from PIL import Image
-except ModuleNotFoundError:
-    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
-    _PIL_AVAILABLE = False
-else:
-    _PIL_AVAILABLE = True
-
-from pl_bolts.datasets.base_dataset import LightDataset
+else:  # pragma: no cover
+    warn_missing_pkg('PIL', pypi_name='Pillow')
 
 
 class CIFAR10(LightDataset):
