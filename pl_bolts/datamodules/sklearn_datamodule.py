@@ -52,7 +52,7 @@ class SklearnDataset(Dataset):
         y = self.Y[idx]
 
         # Do not convert integer to float for classification data
-        if not y.dtype == np.integer:
+        if not ((y.dtype == np.int32) or (y.dtype == np.int64)):
             y = y.astype(np.float32)
 
         if self.X_transform:
