@@ -134,7 +134,7 @@ def test_simsiam(tmpdir, datadir):
     datamodule.val_transforms = SimCLREvalDataTransform(32)
 
     model = SimSiam(batch_size=2, num_samples=datamodule.num_samples, gpus=0, nodes=1, dataset='cifar10')
-    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
+    trainer = pl.Trainer(gpus=0, fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model, datamodule)
     loss = trainer.progress_bar_dict['loss']
 
