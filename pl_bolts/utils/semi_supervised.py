@@ -3,7 +3,7 @@ import math
 import numpy as np
 import torch
 
-from pl_bolts import _SKLEARN_AVAILABLE
+from pl_bolts.utils import _SKLEARN_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _SKLEARN_AVAILABLE:
