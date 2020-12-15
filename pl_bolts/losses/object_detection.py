@@ -17,6 +17,15 @@ def giou_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         pred: batch of prediction bounding boxes with representation ``[x_min, y_min, x_max, y_max]``
         target: batch of target bounding boxes with representation ``[x_min, y_min, x_max, y_max]``
 
+    Example:
+
+        >>> import torch
+        >>> from pl_bolts.losses.object_detection import giou_loss
+        >>> pred = torch.tensor([[100, 100, 200, 200]])
+        >>> target = torch.tensor([[150, 150, 250, 250]])
+        >>> giou_loss(pred, target)
+        tensor([[1.0794]])
+
     Returns:
         GIoU loss
     """
