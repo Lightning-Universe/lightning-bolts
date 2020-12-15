@@ -5,6 +5,7 @@ Generalized Intersection over Union (GIoU) loss (Rezatofighi et. al)
 import torch
 
 
+
 def giou_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     """
     Calculates the generalized intersection over union loss.

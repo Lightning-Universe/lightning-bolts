@@ -29,4 +29,4 @@ def giou(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     C_y_max = torch.max(pred[:, None, 3], target[:, 3])
     C_area = (C_x_max - C_x_min).clamp(min=0) * (C_y_max - C_y_min).clamp(min=0)
     iou = torch.true_divide(intersection, union)
-    return iou  - torch.true_divide((C_area - union), C_area)
+    return iou - torch.true_divide((C_area - union), C_area)
