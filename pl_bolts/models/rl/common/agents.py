@@ -145,7 +145,7 @@ class PolicyAgentContinous(Agent):
     """ Policy based agent that returns a Normal distribution and an action given an observation"""
 
     def __init__(self, net, act_dim):
-        self.net=net
+        self.net = net
         log_std = -0.5 * torch.ones(act_dim, dtype=torch.float)
         self.log_std = torch.nn.Parameter(log_std)
 
