@@ -1,8 +1,6 @@
 """
-Test Generalized Intersection over Union
+Test Object Detection Loss Functions
 """
-
-from unittest import TestCase
 
 import pytest
 import torch
@@ -40,5 +38,4 @@ def test_complete_overlap(pred, target, expected_loss):
     ],
 )
 def test_no_overlap(pred, target, expected_loss):
-    torch.testing.assert_allclose(giou_loss(pred, target), expected_loss)
     torch.testing.assert_allclose(giou_loss(pred, target), expected_loss)
