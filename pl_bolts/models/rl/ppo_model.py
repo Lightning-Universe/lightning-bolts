@@ -100,8 +100,8 @@ class PPO(pl.LightningModule):
             self.net = MLP(self.env.observation_space.shape, self.env.action_space.n)
             self.agent = PolicyAgentCategorical(self.net)
         else:
-            raise NotImplementedError('Env action space should be of type Box (continous) or Discrete (categorical). Got type: ', 
-                                      type(self.env.action_space))
+            raise NotImplementedError('Env action space should be of type Box (continous) or Discrete (categorical)'
+                                      'Got type: ', type(self.env.action_space))
 
         self.batch_states = []
         self.batch_actions = []
@@ -162,7 +162,7 @@ class PPO(pl.LightningModule):
         rews = rewards + [last_value]
         vals = values + [last_value]
         # GAE
-        delta = [rews[i] + self.gamma * vals[i+1] - vals[i] for i in range(len(rews)-1)]
+        delta = [rews[i] + self.gamma * vals[i + 1] - vals[i] for i in range(len(rews) - 1)]
         adv = self.discount_rewards(delta, self.gamma * self.lam)
 
         return adv
@@ -193,7 +193,7 @@ class PPO(pl.LightningModule):
 
             self.state = torch.FloatTensor(next_state)
 
-            epoch_end = step == (self.steps_per_epoch-1)
+            epoch_end = step == (self.steps_per_epoch - 1)
             terminal = len(self.ep_rewards) == self.max_episode_len
 
             if epoch_end or done or terminal:
@@ -205,19 +205,21 @@ class PPO(pl.LightningModule):
                     last_value = 0
 
                 # discounted cumulative reward
-                self.batch_qvals += self.discount_rewards(self.ep_rewards+[last_value], self.gamma)[:-1]
+                self.batch_qvals += self.discount_rewards(self.ep_rewards + [last_value], self.gamma)[:-1]
                 # advantage
                 self.batch_adv += self.calc_advantage(self.ep_rewards, self.ep_values, last_value)
                 # logs
                 self.done_episodes += 1
-                self.epoch_rewards+=np.sum(self.ep_rewards)
+                self.epoch_rewards += np.sum(self.ep_rewards)
                 # reset params
                 self.ep_rewards = []
                 self.ep_values = []
                 self.state = torch.FloatTensor(self.env.reset())
 
             if epoch_end:
-                train_data = zip(self.batch_states, self.batch_actions, self.batch_logp, self.batch_qvals, self.batch_adv)
+                train_data = zip(
+                    self.batch_states, self.batch_actions, self.batch_logp,
+                    self.batch_qvals, self.batch_adv)
 
                 for state, action, logp_old, qval, adv in train_data:
                     yield state, action, logp_old, qval, adv
@@ -228,9 +230,9 @@ class PPO(pl.LightningModule):
                 self.batch_logp.clear()
                 self.batch_qvals.clear()
 
-                self.avg_ep_reward = self.epoch_rewards/self.done_episodes
-                self.avg_reward = self.epoch_rewards/self.steps_per_epoch
-                self.avg_ep_len = self.steps_per_epoch/self.done_episodes
+                self.avg_ep_reward = self.epoch_rewards / self.done_episodes
+                self.avg_reward = self.epoch_rewards / self.steps_per_epoch
+                self.avg_ep_len = self.steps_per_epoch / self.done_episodes
 
                 self.epoch_rewards = 0
                 self.done_episodes = 0
@@ -239,7 +241,7 @@ class PPO(pl.LightningModule):
         pi, _ = self.agent(state)
         logp = self.agent.get_log_prob(pi, action)
         ratio = torch.exp(logp - logp_old)
-        clip_adv = torch.clamp(ratio, 1-self.clip_ratio, 1+self.clip_ratio) * adv
+        clip_adv = torch.clamp(ratio, 1 - self.clip_ratio, 1 + self.clip_ratio) * adv
         loss_actor = -(torch.min(ratio * adv, clip_adv)).mean()
         return loss_actor
 
