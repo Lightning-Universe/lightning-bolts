@@ -1,6 +1,6 @@
 from typing import Optional, Sequence, Union
 
-from pl_bolts.datamodules.base_datamodule import BaseDataModule
+from pl_bolts.datamodules.base_datamodule import VisionDataModule
 from pl_bolts.datasets.cifar10_dataset import TrialCIFAR10
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -13,7 +13,7 @@ else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
-class CIFAR10DataModule(BaseDataModule):
+class CIFAR10DataModule(VisionDataModule):
     """
     .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/wp-content/uploads/2019/01/
         Plot-of-a-Subset-of-Images-from-the-CIFAR-10-Dataset.png

@@ -7,7 +7,7 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, random_split
 
 
-class BaseDataModule(LightningDataModule):
+class VisionDataModule(LightningDataModule):
 
     extra_args = {}
 

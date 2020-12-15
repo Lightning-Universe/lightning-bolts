@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from pl_bolts.datamodules import BaseDataModule
+from pl_bolts.datamodules.base_datamodule import VisionDataModule
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -11,7 +11,7 @@ else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
-class MNISTDataModule(BaseDataModule):
+class MNISTDataModule(VisionDataModule):
     """
     .. figure:: https://miro.medium.com/max/744/1*AO2rIhzRYzFVQlFLx9DM9A.png
         :width: 400

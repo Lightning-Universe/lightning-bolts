@@ -1,7 +1,7 @@
 from typing import Optional, Union
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.datamodules.base_datamodule import BaseDataModule
+from pl_bolts.datamodules.base_datamodule import VisionDataModule
 from pl_bolts.datasets.mnist_dataset import BinaryMNIST
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -11,7 +11,7 @@ else:  # pragma: no-cover
     warn_missing_pkg('torchvision')
 
 
-class BinaryMNISTDataModule(BaseDataModule):
+class BinaryMNISTDataModule(VisionDataModule):
     """
     .. figure:: https://miro.medium.com/max/744/1*AO2rIhzRYzFVQlFLx9DM9A.png
         :width: 400
