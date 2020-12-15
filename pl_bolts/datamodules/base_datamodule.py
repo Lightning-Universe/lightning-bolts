@@ -1,20 +1,10 @@
 import os
 from abc import abstractmethod
-from typing import Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import torch
 from pytorch_lightning import LightningDataModule
-from torch.utils.data import DataLoader, random_split
-
-from pl_bolts.utils.warnings import warn_missing_pkg
-
-try:
-    from torchvision import transforms as transform_lib
-except ModuleNotFoundError:
-    warn_missing_pkg("torchvision")  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
+from torch.utils.data import DataLoader, Dataset, random_split
 
 
 class BaseDataModule(LightningDataModule):
@@ -23,7 +13,7 @@ class BaseDataModule(LightningDataModule):
 
     def __init__(
         self,
-        dataset_cls,
+        dataset_cls: Dataset,
         dims: Tuple[int, int, int],
         data_dir: Optional[str] = None,
         val_split: Union[int, float] = 0.2,
@@ -64,7 +54,7 @@ class BaseDataModule(LightningDataModule):
         self.dataset_cls(self.data_dir, train=True, download=True)
         self.dataset_cls(self.data_dir, train=False, download=True)
 
-    def setup(self, stage=None):
+    def setup(self, stage: Optional[str] = None):
         """
         Creates train, val, and test dataset
         """
@@ -89,7 +79,7 @@ class BaseDataModule(LightningDataModule):
                 self.data_dir, train=False, transform=test_transforms, **self.extra_args
             )
 
-    def _split_dataset(self, dataset, train=True):
+    def _split_dataset(self, dataset: Dataset, train: bool = True) -> Dataset:
         """
         Splits the dataset into train and validation set
         """
@@ -103,7 +93,7 @@ class BaseDataModule(LightningDataModule):
             return dataset_train
         return dataset_val
 
-    def _get_splits(self, len_dataset):
+    def _get_splits(self, len_dataset: int) -> List[int]:
         """
         Computes split lengths for train and validation set
         """
@@ -123,25 +113,25 @@ class BaseDataModule(LightningDataModule):
         Default transform for the dataset
         """
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         """
         The train dataloader
         """
         return self._data_loader(self.dataset_train, shuffle=True)
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         """
         The val dataloader
         """
         return self._data_loader(self.dataset_val)
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         """
         The test dataloader
         """
         return self._data_loader(self.dataset_test)
 
-    def _data_loader(self, dataset, shuffle=False):
+    def _data_loader(self, dataset: Dataset, shuffle: bool = False) -> DataLoader:
         return DataLoader(
             dataset,
             batch_size=self.batch_size,

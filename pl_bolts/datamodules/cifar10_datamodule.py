@@ -100,8 +100,8 @@ class CIFAR10DataModule(BaseDataModule):
         )
 
     @property
-    def num_samples(self):
-        len_dataset = 60000
+    def num_samples(self) -> int:
+        len_dataset = 50_000
         if isinstance(self.val_split, int):
             train_len = len_dataset - self.val_split
         elif isinstance(self.val_split, float):
@@ -111,18 +111,18 @@ class CIFAR10DataModule(BaseDataModule):
         return train_len
 
     @property
-    def num_classes(self):
+    def num_classes(self) -> int:
         """
         Return:
             10
         """
         return 10
 
-    def default_transforms(self):
+    def default_transforms(self) -> transform_lib.Compose:
         if self.normalize:
             cf10_transforms = transform_lib.Compose([transform_lib.ToTensor(), cifar10_normalization()])
         else:
-            cf10_transforms = transform_lib.ToTensor()
+            cf10_transforms = transform_lib.Compose([transform_lib.ToTensor()])
 
         return cf10_transforms
 

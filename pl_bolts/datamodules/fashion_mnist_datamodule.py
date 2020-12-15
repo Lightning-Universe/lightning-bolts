@@ -85,19 +85,19 @@ class FashionMNISTDataModule(BaseDataModule):
         )
 
     @property
-    def num_classes(self):
+    def num_classes(self) -> int:
         """
         Return:
             10
         """
         return 10
 
-    def default_transforms(self):
+    def default_transforms(self) -> transform_lib.Compose:
         if self.normalize:
             mnist_transforms = transform_lib.Compose(
                 [transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5,), std=(0.5,))]
             )
         else:
-            mnist_transforms = transform_lib.ToTensor()
+            mnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
 
         return mnist_transforms
