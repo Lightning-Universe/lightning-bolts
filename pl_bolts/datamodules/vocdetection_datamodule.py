@@ -196,7 +196,7 @@ class VOCDetectionDataModule(LightningDataModule):
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
-            shuffle=self.shuffle,
+            shuffle=False,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
             pin_memory=self.pin_memory,

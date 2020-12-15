@@ -215,7 +215,7 @@ class SklearnDataModule(LightningDataModule):
         loader = DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,
-            shuffle=self.shuffle,
+            shuffle=False,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
             pin_memory=self.pin_memory
@@ -226,7 +226,7 @@ class SklearnDataModule(LightningDataModule):
         loader = DataLoader(
             self.test_dataset,
             batch_size=self.batch_size,
-            shuffle=self.shuffle,
+            shuffle=False,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
             pin_memory=self.pin_memory

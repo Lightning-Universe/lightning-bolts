@@ -144,7 +144,7 @@ class BinaryMNISTDataModule(LightningDataModule):
         loader = DataLoader(
             dataset_val,
             batch_size=self.batch_size,
-            shuffle=self.shuffle,
+            shuffle=False,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
             pin_memory=self.pin_memory
@@ -161,7 +161,7 @@ class BinaryMNISTDataModule(LightningDataModule):
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
-            shuffle=self.shuffle,
+            shuffle=False,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
             pin_memory=self.pin_memory

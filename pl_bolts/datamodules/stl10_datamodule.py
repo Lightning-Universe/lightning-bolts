@@ -191,7 +191,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             dataset_val,
             batch_size=self.batch_size,
-            shuffle=self.shuffle,
+            shuffle=False,
             num_workers=self.num_workers,
             drpo_last=self.drop_last,
             pin_memory=self.pin_memory
@@ -234,7 +234,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
-            shuffle=self.shuffle,
+            shuffle=False,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
             pin_memory=self.pin_memory
@@ -255,7 +255,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
-            shuffle=self.shuffle,
+            shuffle=False,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
             pin_memory=self.pin_memory
@@ -294,7 +294,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             labeled_val,
             batch_size=self.batch_size,
-            shuffle=self.shuffle,
+            shuffle=False,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
             pin_memory=self.pin_memory
