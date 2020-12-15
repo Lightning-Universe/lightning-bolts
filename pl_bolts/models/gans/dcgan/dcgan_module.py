@@ -10,7 +10,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 try:
     from torchvision import transforms as transform_lib
 except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+    warn_missing_pkg("torchvision")  # pragma: no-cover
     _TORCHVISION_AVAILABLE = False
 else:
     _TORCHVISION_AVAILABLE = True
@@ -166,15 +166,28 @@ def cli_main(args=None):
 
     if script_args.dataset == "mnist":
         dm_cls = MNISTDataModule
+        transforms = transform_lib.Compose(
+            [
+                transform_lib.Resize(script_args.image_size),
+                transform_lib.ToTensor(),
+                transform_lib.Normalize((0.5,), (0.5,)),
+            ]
+        )
     elif script_args.dataset == "cifar10":
         dm_cls = CIFAR10DataModule
+        transforms = transform_lib.Compose(
+            [
+                transform_lib.Resize(script_args.image_size),
+                transform_lib.ToTensor(),
+                transform_lib.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
 
     parser = dm_cls.add_argparse_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)
     parser = DCGAN.add_model_specific_args(parser)
     args = parser.parse_args(args)
 
-    transforms = transform_lib.Compose([transform_lib.Resize(args.image_size), transform_lib.ToTensor()])
     dm = dm_cls.from_argparse_args(args)
     dm.train_transforms = transforms
     dm.val_transforms = transforms
