@@ -1,21 +1,19 @@
+from typing import List
+
 import numpy as np
 
+from pl_bolts.utils import _OPENCV_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     import torchvision.transforms as transforms
-except ImportError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
 else:
-    _TORCHVISION_AVAILABLE = True
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
-try:
+if _OPENCV_AVAILABLE:
     import cv2
-except ImportError:
+else:
     warn_missing_pkg('cv2', pypi_name='opencv-python')  # pragma: no-cover
-
-from typing import List
 
 
 class SwAVTrainDataTransform(object):

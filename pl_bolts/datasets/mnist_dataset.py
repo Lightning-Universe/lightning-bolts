@@ -2,16 +2,15 @@ from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
-    from torchvision import transforms as transform_lib
     from torchvision.datasets import MNIST
-else:  # pragma: no cover
-    warn_missing_pkg('torchvision')
+else:
+    warn_missing_pkg('torchvision')  # pragma: no-cover
     MNIST = object
 
 if _PIL_AVAILABLE:
     from PIL import Image
-else:  # pragma: no cover
-    warn_missing_pkg('PIL', pypi_name='Pillow')
+else:
+    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
 
 
 class BinaryMNIST(MNIST):

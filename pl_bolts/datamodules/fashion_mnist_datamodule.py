@@ -8,8 +8,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import FashionMNIST
-else:  # pragma: no cover
-    warn_missing_pkg('torchvision')
+else:
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
 class FashionMNISTDataModule(LightningDataModule):
@@ -62,8 +62,8 @@ class FashionMNISTDataModule(LightningDataModule):
         """
         super().__init__(*args, **kwargs)
 
-        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError(
+        if not _TORCHVISION_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use fashion MNIST dataset loaded from `torchvision` which is not installed yet.'
             )
 

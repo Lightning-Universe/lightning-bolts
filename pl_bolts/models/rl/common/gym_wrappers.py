@@ -9,15 +9,13 @@ import gym.spaces
 import numpy as np
 import torch
 
+from pl_bolts.utils import _OPENCV_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _OPENCV_AVAILABLE:
     import cv2
-except ModuleNotFoundError:
-    warn_missing_pkg('cv2', pypi_name='opencv-python')  # pragma: no-cover
-    _OPENCV_AVAILABLE = False
 else:
-    _OPENCV_AVAILABLE = True
+    warn_missing_pkg('cv2', pypi_name='opencv-python')  # pragma: no-cover
 
 
 class ToTensor(gym.Wrapper):
