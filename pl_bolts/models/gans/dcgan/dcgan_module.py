@@ -8,16 +8,14 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
 from pl_bolts.models.gans.dcgan.components import DCGANDiscriminator, DCGANGenerator
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
-    from torchvision.datasets import CIFAR10, LSUN, MNIST
-except ModuleNotFoundError:
-    warn_missing_pkg("torchvision")  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
+    from torchvision.datasets import CIFAR10, MNIST
+else:  # pragma: no-cover
+    warn_missing_pkg('torchvision')
 
 
 class DCGAN(pl.LightningModule):
