@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from pl_bolts.datamodules.base_datamodule import VisionDataModule
+from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -41,6 +41,8 @@ class FashionMNISTDataModule(VisionDataModule):
     """
 
     name = "fashion_mnist"
+    DATASET_CLS = FashionMNIST
+    DIMS = (1, 28, 28)
 
     def __init__(
         self,
@@ -68,12 +70,7 @@ class FashionMNISTDataModule(VisionDataModule):
                 "You want to use FashionMNIST dataset loaded from `torchvision` which is not installed yet."
             )
 
-        dataset_cls = FashionMNIST
-        dims = (1, 28, 28)
-
         super().__init__(
-            dataset_cls=dataset_cls,
-            dims=dims,
             data_dir=data_dir,
             val_split=val_split,
             num_workers=num_workers,

@@ -1,6 +1,6 @@
 from typing import Optional, Sequence, Union
 
-from pl_bolts.datamodules.base_datamodule import VisionDataModule
+from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.datasets.cifar10_dataset import TrialCIFAR10
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -55,7 +55,8 @@ class CIFAR10DataModule(VisionDataModule):
     """
 
     name = "cifar10"
-    extra_args = {}
+    DATASET_CLS = CIFAR10
+    DIMS = (3, 32, 32)
 
     def __init__(
         self,
@@ -83,12 +84,7 @@ class CIFAR10DataModule(VisionDataModule):
                 "You want to use CIFAR10 dataset loaded from `torchvision` which is not installed yet."
             )
 
-        dataset_cls = CIFAR10
-        dims = (3, 32, 32)
-
         super().__init__(
-            dataset_cls=dataset_cls,
-            dims=dims,
             data_dir=data_dir,
             val_split=val_split,
             num_workers=num_workers,
@@ -102,11 +98,14 @@ class CIFAR10DataModule(VisionDataModule):
     @property
     def num_samples(self) -> int:
         len_dataset = 50_000
+        # todo: clean up with parent methods
         if isinstance(self.val_split, int):
             train_len = len_dataset - self.val_split
         elif isinstance(self.val_split, float):
             val_len = int(self.val_split * len_dataset)
             train_len = len_dataset - val_len
+        else:
+            raise ValueError(f'Unsupported type {type(self.val_split)}')
 
         return train_len
 
@@ -147,6 +146,9 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
         model = LitModel(datamodule=dm)
     """
 
+    DATASET_CLS = TrialCIFAR10
+    DIMS = (3, 32, 32)
+
     def __init__(
         self,
         data_dir: str,
@@ -166,8 +168,7 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
             labels: list selected CIFAR10 classes/labels
         """
         super().__init__(data_dir, val_split, num_workers, *args, **kwargs)
-        self.dims = (3, 32, 32)
-        self.DATASET = TrialCIFAR10
+
         self.num_samples = num_samples
         self.labels = sorted(labels) if labels is not None else set(range(10))
         self.extra_args = dict(num_samples=self.num_samples, labels=self.labels)

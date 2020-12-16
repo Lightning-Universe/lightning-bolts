@@ -1,8 +1,8 @@
 from typing import Optional, Union
 
-from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.datamodules.base_datamodule import VisionDataModule
+from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.datasets.mnist_dataset import BinaryMNIST
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -40,6 +40,8 @@ class BinaryMNISTDataModule(VisionDataModule):
     """
 
     name = "binary_mnist"
+    DATASET_CLS = BinaryMNIST
+    DIMS = (1, 28, 28)
 
     def __init__(
         self,
@@ -67,12 +69,7 @@ class BinaryMNISTDataModule(VisionDataModule):
                 "You want to use transforms loaded from `torchvision` which is not installed yet."
             )
 
-        dataset_cls = BinaryMNIST
-        dims = (1, 28, 28)
-
         super().__init__(
-            dataset_cls=dataset_cls,
-            dims=dims,
             data_dir=data_dir,
             val_split=val_split,
             num_workers=num_workers,
