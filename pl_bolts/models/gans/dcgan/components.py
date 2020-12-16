@@ -1,38 +1,60 @@
 # Based on https://github.com/pytorch/examples/blob/master/dcgan/main.py
+import torch
 from torch import nn
 
 
 class DCGANGenerator(nn.Module):
-    def __init__(self, latent_dim, feature_maps, image_channels):
+    def __init__(self, latent_dim: int, feature_maps: int, image_channels: int):
+        """
+        Args:
+            latent_dim: Dimension of the latent space
+            feature_maps: Number of feature maps to use
+            image_channels: Number of channels of the images from the dataset
+        """
         super().__init__()
         self.gen = nn.Sequential(
             self._make_gen_block(latent_dim, feature_maps * 8, kernel_size=4, stride=1, padding=0),
             self._make_gen_block(feature_maps * 8, feature_maps * 4),
             self._make_gen_block(feature_maps * 4, feature_maps * 2),
-            self._make_gen_block(feature_maps * 2, feature_maps, 4),
+            self._make_gen_block(feature_maps * 2, feature_maps),
             self._make_gen_block(feature_maps, image_channels, last_block=True),
         )
 
     @staticmethod
-    def _make_gen_block(in_channels, out_channels, kernel_size=4, stride=2, padding=1, bias=False, last_block=False):
+    def _make_gen_block(
+        in_channels: int,
+        out_channels: int,
+        kernel_size: int = 4,
+        stride: int = 2,
+        padding: int = 1,
+        bias: bool = False,
+        last_block: bool = False,
+    ) -> nn.Sequential:
         if not last_block:
-            return nn.Sequential(
+            gen_block = nn.Sequential(
                 nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias),
                 nn.BatchNorm2d(out_channels),
                 nn.ReLU(True),
             )
         else:
-            return nn.Sequential(
+            gen_block = nn.Sequential(
                 nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias),
                 nn.Tanh(),
             )
 
-    def forward(self, noise):
+        return gen_block
+
+    def forward(self, noise: torch.Tensor) -> torch.Tensor:
         return self.gen(noise)
 
 
 class DCGANDiscriminator(nn.Module):
-    def __init__(self, feature_maps, image_channels):
+    def __init__(self, feature_maps: int, image_channels: int):
+        """
+        Args:
+            feature_maps: Number of feature maps to use
+            image_channels: Number of channels of the images from the dataset
+        """
         super().__init__()
         self.disc = nn.Sequential(
             self._make_disc_block(image_channels, feature_maps, batch_norm=False),
@@ -44,19 +66,28 @@ class DCGANDiscriminator(nn.Module):
 
     @staticmethod
     def _make_disc_block(
-        in_channels, out_channels, kernel_size=4, stride=2, padding=1, bias=False, batch_norm=True, last_block=False
-    ):
+        in_channels: int,
+        out_channels: int,
+        kernel_size: int = 4,
+        stride: int = 2,
+        padding: int = 1,
+        bias: bool = False,
+        batch_norm: bool = True,
+        last_block: bool = False,
+    ) -> nn.Sequential:
         if not last_block:
-            return nn.Sequential(
+            disc_block = nn.Sequential(
                 nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias),
                 nn.BatchNorm2d(out_channels) if batch_norm else nn.Identity(),
                 nn.LeakyReLU(0.2, inplace=True),
             )
         else:
-            return nn.Sequential(
+            disc_block = nn.Sequential(
                 nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias),
                 nn.Sigmoid(),
             )
 
-    def forward(self, noise):
-        return self.disc(noise)
+        return disc_block
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.disc(x).view(-1, 1).squeeze(1)
