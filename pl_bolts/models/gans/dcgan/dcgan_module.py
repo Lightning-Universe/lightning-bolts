@@ -48,12 +48,12 @@ class DCGAN(pl.LightningModule):
 
         self.criterion = nn.BCELoss()
 
-    def _get_generator(self):
+    def _get_generator(self) -> nn.Module:
         generator = DCGANGenerator(self.hparams.latent_dim, self.hparams.feature_maps_gen, self.hparams.image_channels)
         generator.apply(self._weights_init)
         return generator
 
-    def _get_discriminator(self):
+    def _get_discriminator(self) -> nn.Module:
         discriminator = DCGANDiscriminator(self.hparams.feature_maps_disc, self.hparams.image_channels)
         discriminator.apply(self._weights_init)
         return discriminator
