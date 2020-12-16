@@ -5,23 +5,18 @@ from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization,
     stl10_normalization,
 )
+from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision import transforms
-except ModuleNotFoundError:
+else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
 
-try:
+if _PIL_AVAILABLE:
     from PIL import ImageFilter
-except ModuleNotFoundError:
-    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
-    _PIL_AVAILABLE = False
 else:
-    _PIL_AVAILABLE = True
+    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
 
 
 class Moco2TrainCIFAR10Transforms:
