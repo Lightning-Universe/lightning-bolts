@@ -1,7 +1,7 @@
 import inspect
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 
 import pytorch_lightning as pl
 
@@ -32,7 +32,7 @@ class LightningArgumentParser(ArgumentParser):
         # args.data -> data args
         # args.model -> model args
     """
-    def __init__(self, *args, ignore_required_init_args=True, **kwargs):
+    def __init__(self, *args: Any, ignore_required_init_args: bool = True, **kwargs: Any):
         """
         Args:
             ignore_required_init_args (bool, optional): Whether to include positional args when adding
@@ -41,10 +41,10 @@ class LightningArgumentParser(ArgumentParser):
         super().__init__(*args, **kwargs)
         self.ignore_required_init_args = ignore_required_init_args
 
-        self._default_obj_args = dict()
-        self._added_arg_names = []
+        self._default_obj_args: Dict[str, List[LitArg]] = dict()
+        self._added_arg_names: List[str] = []
 
-    def add_object_args(self, name, obj):
+    def add_object_args(self, name: str, obj: Any) -> None:
         default_args = gather_lit_args(obj)
         self._default_obj_args[name] = default_args
         for arg in default_args:
@@ -58,7 +58,7 @@ class LightningArgumentParser(ArgumentParser):
                 kwargs["default"] = arg.default
             self.add_argument(f"--{arg.name}", **kwargs)
 
-    def parse_lit_args(self, *args, **kwargs):
+    def parse_lit_args(self, *args: Any, **kwargs: Any) -> Namespace:
         parsed_args_dict = vars(self.parse_args(*args, **kwargs))
         lit_args = Namespace()
         for name, default_args in self._default_obj_args.items():
@@ -72,7 +72,7 @@ class LightningArgumentParser(ArgumentParser):
         return lit_args
 
 
-def gather_lit_args(cls, root_cls=None):
+def gather_lit_args(cls: Any, root_cls: Optional[Any] = None) -> List[LitArg]:
 
     if root_cls is None:
         if issubclass(cls, pl.LightningModule):
@@ -83,7 +83,7 @@ def gather_lit_args(cls, root_cls=None):
             root_cls = cls
 
     blacklisted_args = ["self", "args", "kwargs"]
-    arguments = []
+    arguments: List[LitArg] = []
     argument_names = []
     for obj in inspect.getmro(cls):
 

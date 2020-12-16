@@ -1,4 +1,6 @@
+from typing import Optional
 
+from pytorch_lightning import LightningModule
 
 vae_imagenet2012 = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/' \
                    'vae/imagenet_06_22_2019/checkpoints/epoch%3D63.ckpt'
@@ -11,7 +13,7 @@ urls = {
 }
 
 
-def load_pretrained(model, class_name=None):  # pragma: no-cover
+def load_pretrained(model: LightningModule, class_name: Optional[str] = None) -> None:  # pragma: no-cover
     if class_name is None:
         class_name = model.__class__.__name__
     ckpt_url = urls[class_name]
