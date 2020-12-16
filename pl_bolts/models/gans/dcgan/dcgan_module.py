@@ -2,7 +2,9 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import torch
+from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import nn
+from torch.utils.data import DataLoader
 
 from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
 from pl_bolts.models.gans.dcgan.components import DCGANDiscriminator, DCGANGenerator
@@ -10,6 +12,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     from torchvision import transforms as transform_lib
+    from torchvision.datasets import CIFAR10, LSUN, MNIST
 except ModuleNotFoundError:
     warn_missing_pkg("torchvision")  # pragma: no-cover
     _TORCHVISION_AVAILABLE = False
@@ -21,7 +24,6 @@ class DCGAN(pl.LightningModule):
     def __init__(
         self,
         beta1: float = 0.5,
-        beta2: float = 0.999,
         feature_maps_gen: int = 64,
         feature_maps_disc: int = 64,
         image_channels: int = 1,
@@ -32,7 +34,6 @@ class DCGAN(pl.LightningModule):
         """
         Args:
             beta1: Beta1 value for Adam optimizer
-            beta2: Beta2 value for Adam optimizer
             feature_maps_gen: Number of feature maps to use for the generator
             feature_maps_disc: Number of feature maps to use for the discriminator
             image_channels: Number of channels of the images from the dataset
@@ -93,12 +94,12 @@ class DCGAN(pl.LightningModule):
 
     def _disc_step(self, real: torch.Tensor) -> torch.Tensor:
         disc_loss = self._get_disc_loss(real)
-        self.log("loss/disc", disc_loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log("loss/disc", disc_loss, on_epoch=True)
         return disc_loss
 
     def _gen_step(self, real: torch.Tensor) -> torch.Tensor:
         gen_loss = self._get_gen_loss(real)
-        self.log("loss/gen", gen_loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log("loss/gen", gen_loss, on_epoch=True)
         return gen_loss
 
     def _get_disc_loss(self, real: torch.Tensor) -> torch.Tensor:
@@ -133,8 +134,7 @@ class DCGAN(pl.LightningModule):
         return fake_pred
 
     def _get_noise(self, n_samples: int, latent_dim: int) -> torch.Tensor:
-        noise = torch.randn(n_samples, latent_dim, device=self.device)
-        return noise
+        return torch.randn(n_samples, latent_dim, device=self.device)
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
@@ -149,26 +149,18 @@ class DCGAN(pl.LightningModule):
 
 
 def cli_main(args=None):
-    from pl_bolts.datamodules import CIFAR10DataModule, MNISTDataModule
-
     pl.seed_everything(1234)
 
     parser = ArgumentParser()
-    parser.add_argument("--dataset", default="mnist", type=str, help="mnist, cifar10")
+    parser.add_argument("--dataset", default="mnist", type=str, choices=["cifar10", "mnist"])
     parser.add_argument("--image_size", default=64, type=int)
+    parser.add_argument("--data_dir", default="./", type=str)
+    parser.add_argument("--batch_size", default=64, type=int)
+    parser.add_argument("--num_workers", default=6, type=int)
+
     script_args, _ = parser.parse_known_args(args)
 
-    if script_args.dataset == "mnist":
-        dm_cls = MNISTDataModule
-        transforms = transform_lib.Compose(
-            [
-                transform_lib.Resize(script_args.image_size),
-                transform_lib.ToTensor(),
-                transform_lib.Normalize((0.5,), (0.5,)),
-            ]
-        )
-    elif script_args.dataset == "cifar10":
-        dm_cls = CIFAR10DataModule
+    if script_args.dataset == "cifar10":
         transforms = transform_lib.Compose(
             [
                 transform_lib.Resize(script_args.image_size),
@@ -176,23 +168,34 @@ def cli_main(args=None):
                 transform_lib.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             ]
         )
+        dataset = CIFAR10(root=script_args.data_dir, download=True, transform=transforms)
+    elif script_args.dataset == "mnist":
+        transforms = transform_lib.Compose(
+            [
+                transform_lib.Resize(script_args.image_size),
+                transform_lib.ToTensor(),
+                transform_lib.Normalize((0.5,), (0.5,)),
+            ]
+        )
+        dataset = MNIST(root=script_args.data_dir, download=True, transform=transforms)
 
-    parser = dm_cls.add_argparse_args(parser)
+    dataloader = DataLoader(
+        dataset, batch_size=script_args.batch_size, shuffle=True, num_workers=script_args.num_workers
+    )
+
     parser = pl.Trainer.add_argparse_args(parser)
     parser = DCGAN.add_model_specific_args(parser)
     args = parser.parse_args(args)
 
-    dm = dm_cls.from_argparse_args(args)
-    dm.train_transforms = transforms
-    dm.val_transforms = transforms
-    dm.test_transforms = transforms
-
     model = DCGAN(**vars(args))
-    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]
+    callbacks = [
+        ModelCheckpoint(save_top_k=3, monitor="loss/gen_epoch"),
+        TensorboardGenerativeModelImageSampler(num_samples=100),
+        LatentDimInterpolator(interpolate_epoch_interval=1),
+    ]
     trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks)
-    trainer.fit(model, dm)
-    return dm, model, trainer
+    trainer.fit(model, dataloader)
 
 
 if __name__ == "__main__":
-    dm, model, trainer = cli_main()
+    cli_main()
