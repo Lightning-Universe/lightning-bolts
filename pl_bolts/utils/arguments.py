@@ -32,11 +32,11 @@ class LightningArgumentParser(ArgumentParser):
         # args.data -> data args
         # args.model -> model args
     """
-    def __init__(self, *args: Any, ignore_required_init_args: bool = True, **kwargs: Any):
+    def __init__(self, *args: Any, ignore_required_init_args: bool = True, **kwargs: Any) -> None:
         """
         Args:
-            ignore_required_init_args (bool, optional): Whether to include positional args when adding
-            object args. Defaults to True.
+            ignore_required_init_args: Whether to include positional args when adding
+            object args. Defaults to ``True``.
         """
         super().__init__(*args, **kwargs)
         self.ignore_required_init_args = ignore_required_init_args
