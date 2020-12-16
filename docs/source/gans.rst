@@ -41,3 +41,29 @@ Loss curves:
 
 .. autoclass:: pl_bolts.models.gans.GAN
    :noindex:
+
+DCGAN
+---------
+DCGAN implementation from the paper `Unsupervised Representation Learning with Deep Convolutional Generative
+Adversarial Networks <https://arxiv.org/pdf/1511.06434.pdf>`_. The implementation is based on the version from
+PyTorch's `examples <https://github.com/pytorch/examples/blob/master/dcgan/main.py>`_.
+
+Implemented by:
+
+    - `Christoph Clement <https://github.com/chris-clem>`_
+
+Example outputs:
+
+    .. image:: _images/gans/dcgan_outputs.png
+        :width: 400
+        :alt: DCGAN generated samples
+
+Loss curves:
+
+    .. image:: _images/gans/dcgan_dloss.png
+        :width: 200
+        :alt: DCGAN disc loss
+
+    .. image:: _images/gans/dcgan_gloss.png
+        :width: 200
+        :alt: DCGAN gen loss
