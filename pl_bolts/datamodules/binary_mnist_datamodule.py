@@ -70,6 +70,8 @@ class BinaryMNISTDataModule(VisionDataModule):
             )
 
         super().__init__(
+            dataset_cls=BinaryMNIST,
+            dims=(1, 28, 28),
             data_dir=data_dir,
             val_split=val_split,
             num_workers=num_workers,
