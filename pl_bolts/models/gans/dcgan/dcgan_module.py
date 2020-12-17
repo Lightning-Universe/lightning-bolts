@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from typing import Any
 
 import pytorch_lightning as pl
 import torch
