@@ -68,7 +68,7 @@ class VisionDataModule(LightningDataModule):
             self.dataset_train = self._split_dataset(dataset_train)
             self.dataset_val = self._split_dataset(dataset_val, train=False)
 
-        elif stage == "test" or stage is None:
+        if stage == "test" or stage is None:
             test_transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
             self.dataset_test = self.DATASET_CLASS(
                 self.data_dir, train=False, transform=test_transforms, **self.EXTRA_ARGS

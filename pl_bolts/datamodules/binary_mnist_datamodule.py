@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.datasets.mnist_dataset import BinaryMNIST
@@ -51,9 +51,9 @@ class BinaryMNISTDataModule(VisionDataModule):
         normalize: bool = False,
         seed: int = 42,
         batch_size: int = 32,
-        *args,
-        **kwargs,
-    ):
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """
         Args:
             data_dir: Where to save/load the data
