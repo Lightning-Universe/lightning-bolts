@@ -12,8 +12,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
     from gym import Wrapper, ObservationWrapper
+    from gym import make as gym_make
     import gym.spaces
-    import gym.make
 else:  # pragma: no-cover
     warn_missing_pkg('gym')
     Wrapper = object
@@ -204,7 +204,7 @@ class DataAugmentation(ObservationWrapper):
 
 def make_environment(env_name):
     """Convert environment with wrappers"""
-    env = gym.make(env_name)
+    env = gym_make(env_name)
     env = MaxAndSkipEnv(env)
     env = FireResetEnv(env)
     env = ProcessFrame84(env)
