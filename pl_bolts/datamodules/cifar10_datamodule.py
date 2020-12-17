@@ -151,9 +151,9 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
         num_workers: int = 16,
         num_samples: int = 100,
         labels: Optional[Sequence] = (1, 5, 8),
-        *args,
-        **kwargs,
-    ):
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """
         Args:
             data_dir: where to save/load the data
