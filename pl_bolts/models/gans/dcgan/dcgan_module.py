@@ -27,8 +27,8 @@ class DCGAN(pl.LightningModule):
         image_channels: int = 1,
         latent_dim: int = 100,
         learning_rate: float = 0.0002,
-        **kwargs
-    ):
+        **kwargs: Any,
+    ) -> None:
         """
         Args:
             beta1: Beta1 value for Adam optimizer

@@ -67,3 +67,6 @@ Loss curves:
     .. image:: _images/gans/dcgan_gloss.png
         :width: 200
         :alt: DCGAN gen loss
+
+.. autoclass:: pl_bolts.models.gans.DCGAN
+   :noindex:
