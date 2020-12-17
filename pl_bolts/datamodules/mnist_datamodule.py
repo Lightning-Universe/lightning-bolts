@@ -9,6 +9,7 @@ if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import MNIST
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
+    MNIST = None
 
 
 class MNISTDataModule(VisionDataModule):
@@ -38,12 +39,6 @@ class MNISTDataModule(VisionDataModule):
 
         Trainer().fit(model, dm)
     """
-
-    if not _TORCHVISION_AVAILABLE:
-        raise ModuleNotFoundError(  # pragma: no-cover
-            "You want to use MNIST dataset loaded from `torchvision` which is not installed yet."
-        )
-
     name = "mnist"
     dataset_cls = MNIST
     dims = (1, 28, 28)

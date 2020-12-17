@@ -11,6 +11,7 @@ if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import CIFAR10
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
+    CIFAR10 = None
 
 
 class CIFAR10DataModule(VisionDataModule):
@@ -53,12 +54,6 @@ class CIFAR10DataModule(VisionDataModule):
         dm.test_transforms = ...
         dm.val_transforms  = ...
     """
-
-    if not _TORCHVISION_AVAILABLE:
-        raise ModuleNotFoundError(  # pragma: no-cover
-            "You want to use CIFAR10 dataset loaded from `torchvision` which is not installed yet."
-        )
-
     name = "cifar10"
     dataset_cls = CIFAR10
     dims = (3, 32, 32)

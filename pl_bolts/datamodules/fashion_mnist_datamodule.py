@@ -9,6 +9,7 @@ if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import FashionMNIST
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
+    FashionMNIST = None
 
 
 class FashionMNISTDataModule(VisionDataModule):
@@ -39,12 +40,6 @@ class FashionMNISTDataModule(VisionDataModule):
 
         Trainer().fit(model, dm)
     """
-
-    if not _TORCHVISION_AVAILABLE:
-        raise ModuleNotFoundError(  # pragma: no-cover
-            "You want to use FashionMNIST dataset loaded from `torchvision` which is not installed yet."
-        )
-
     name = "fashion_mnist"
     dataset_cls = FashionMNIST
     dims = (1, 28, 28)
