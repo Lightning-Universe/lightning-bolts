@@ -7,13 +7,13 @@ import collections
 import numpy as np
 import torch
 
-from pl_bolts.utils import _OPENCV_AVAILABLE, _GYM_AVAILABLE
+from pl_bolts.utils import _GYM_AVAILABLE, _OPENCV_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
-    from gym import Wrapper, ObservationWrapper
-    from gym import make as gym_make
     import gym.spaces
+    from gym import ObservationWrapper, Wrapper
+    from gym import make as gym_make
 else:  # pragma: no-cover
     warn_missing_pkg('gym')
     Wrapper = object
