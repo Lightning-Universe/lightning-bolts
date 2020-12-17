@@ -1,6 +1,6 @@
 import os
 from abc import abstractmethod
-from typing import List, Optional, Tuple, Union
+from typing import Any, List, Optional, Union
 
 import torch
 from pytorch_lightning import LightningDataModule
@@ -10,9 +10,9 @@ from torch.utils.data import DataLoader, Dataset, random_split
 class VisionDataModule(LightningDataModule):
 
     EXTRA_ARGS = {}
+    name: str = ""
     #: Dataset class to use
     DATASET_CLASS = ...
-    name: str = ""
     #: A tuple describing the shape of the data
     DIMS: tuple = ...
 
@@ -22,19 +22,26 @@ class VisionDataModule(LightningDataModule):
         val_split: Union[int, float] = 0.2,
         num_workers: int = 16,
         normalize: bool = False,
-        seed: int = 42,
         batch_size: int = 32,
-        *args,
-        **kwargs,
-    ):
+        seed: int = 42,
+        shuffle: bool = False,
+        pin_memory: bool = False,
+        drop_last: bool = False,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """
         Args:
             data_dir: Where to save/load the data
             val_split: Percent (float) or number (int) of samples to use for the validation split
             num_workers: How many workers to use for loading data
             normalize: If true applies image normalize
-            seed: Seed to fix the validation split
             batch_size: How many samples per batch to load
+            seed: Random seed to be used for train/val/test splits
+            shuffle: If true shuffles the train data every epoch
+            pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
+                        returning them
+            drop_last: If true drops the last incomplete batch
         """
 
         super().__init__(*args, **kwargs)
@@ -43,8 +50,11 @@ class VisionDataModule(LightningDataModule):
         self.val_split = val_split
         self.num_workers = num_workers
         self.normalize = normalize
-        self.seed = seed
         self.batch_size = batch_size
+        self.seed = seed
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
 
     def prepare_data(self):
         """
@@ -110,7 +120,7 @@ class VisionDataModule(LightningDataModule):
 
     def train_dataloader(self) -> DataLoader:
         """ The train dataloader """
-        return self._data_loader(self.dataset_train, shuffle=True)
+        return self._data_loader(self.dataset_train, shuffle=self.shuffle)
 
     def val_dataloader(self) -> DataLoader:
         """ The val dataloader """
@@ -126,6 +136,6 @@ class VisionDataModule(LightningDataModule):
             batch_size=self.batch_size,
             shuffle=shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True,
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )

@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Union
+from typing import Any, Optional, Sequence, Union
 
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.datasets.cifar10_dataset import TrialCIFAR10
@@ -64,19 +64,26 @@ class CIFAR10DataModule(VisionDataModule):
         val_split: Union[int, float] = 0.2,
         num_workers: int = 16,
         normalize: bool = False,
-        seed: int = 42,
         batch_size: int = 32,
-        *args,
-        **kwargs,
-    ):
+        seed: int = 42,
+        shuffle: bool = False,
+        pin_memory: bool = False,
+        drop_last: bool = False,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """
         Args:
             data_dir: Where to save/load the data
             val_split: Percent (float) or number (int) of samples to use for the validation split
             num_workers: How many workers to use for loading data
             normalize: If true applies image normalize
-            seed: Seed to fix the validation split
             batch_size: How many samples per batch to load
+            seed: Random seed to be used for train/val/test splits
+            shuffle: If true shuffles the train data every epoch
+            pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
+                        returning them
+            drop_last: If true drops the last incomplete batch
         """
 
         if not _TORCHVISION_AVAILABLE:
@@ -89,24 +96,18 @@ class CIFAR10DataModule(VisionDataModule):
             val_split=val_split,
             num_workers=num_workers,
             normalize=normalize,
-            seed=seed,
             batch_size=batch_size,
+            seed=seed,
+            shuffle=shuffle,
+            pin_memory=pin_memory,
+            drop_last=drop_last,
             *args,
             **kwargs,
         )
 
     @property
     def num_samples(self) -> int:
-        len_dataset = 50_000
-        # todo: clean up with parent methods
-        if isinstance(self.val_split, int):
-            train_len = len_dataset - self.val_split
-        elif isinstance(self.val_split, float):
-            val_len = int(self.val_split * len_dataset)
-            train_len = len_dataset - val_len
-        else:
-            raise ValueError(f'Unsupported type {type(self.val_split)}')
-
+        train_len, _ = self._get_splits(len_dataset=50_000)
         return train_len
 
     @property

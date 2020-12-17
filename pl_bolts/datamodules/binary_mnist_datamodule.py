@@ -49,8 +49,11 @@ class BinaryMNISTDataModule(VisionDataModule):
         val_split: Union[int, float] = 0.2,
         num_workers: int = 16,
         normalize: bool = False,
-        seed: int = 42,
         batch_size: int = 32,
+        seed: int = 42,
+        shuffle: bool = False,
+        pin_memory: bool = False,
+        drop_last: bool = False,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -60,8 +63,12 @@ class BinaryMNISTDataModule(VisionDataModule):
             val_split: Percent (float) or number (int) of samples to use for the validation split
             num_workers: How many workers to use for loading data
             normalize: If true applies image normalize
-            seed: Seed to fix the validation split
             batch_size: How many samples per batch to load
+            seed: Random seed to be used for train/val/test splits
+            shuffle: If true shuffles the train data every epoch
+            pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
+                        returning them
+            drop_last: If true drops the last incomplete batch
         """
 
         if not _TORCHVISION_AVAILABLE:
@@ -70,14 +77,15 @@ class BinaryMNISTDataModule(VisionDataModule):
             )
 
         super().__init__(
-            dataset_cls=BinaryMNIST,
-            dims=(1, 28, 28),
             data_dir=data_dir,
             val_split=val_split,
             num_workers=num_workers,
             normalize=normalize,
-            seed=seed,
             batch_size=batch_size,
+            seed=seed,
+            shuffle=shuffle,
+            pin_memory=pin_memory,
+            drop_last=drop_last,
             *args,
             **kwargs,
         )

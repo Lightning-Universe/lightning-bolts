@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -50,19 +50,26 @@ class FashionMNISTDataModule(VisionDataModule):
         val_split: Union[int, float] = 0.2,
         num_workers: int = 16,
         normalize: bool = False,
-        seed: int = 42,
         batch_size: int = 32,
-        *args,
-        **kwargs,
-    ):
+        seed: int = 42,
+        shuffle: bool = False,
+        pin_memory: bool = False,
+        drop_last: bool = False,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """
         Args:
             data_dir: Where to save/load the data
             val_split: Percent (float) or number (int) of samples to use for the validation split
             num_workers: How many workers to use for loading data
             normalize: If true applies image normalize
-            seed: Seed to fix the validation split
             batch_size: How many samples per batch to load
+            seed: Random seed to be used for train/val/test splits
+            shuffle: If true shuffles the train data every epoch
+            pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
+                        returning them
+            drop_last: If true drops the last incomplete batch
         """
 
         if not _TORCHVISION_AVAILABLE:
@@ -75,8 +82,11 @@ class FashionMNISTDataModule(VisionDataModule):
             val_split=val_split,
             num_workers=num_workers,
             normalize=normalize,
-            seed=seed,
             batch_size=batch_size,
+            seed=seed,
+            shuffle=shuffle,
+            pin_memory=pin_memory,
+            drop_last=drop_last,
             *args,
             **kwargs,
         )
