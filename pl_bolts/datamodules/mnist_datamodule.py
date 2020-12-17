@@ -9,6 +9,7 @@ if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import MNIST
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
+    MNIST = None
 
 
 class MNISTDataModule(VisionDataModule):

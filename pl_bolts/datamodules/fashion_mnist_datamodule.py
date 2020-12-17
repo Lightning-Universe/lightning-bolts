@@ -9,6 +9,7 @@ if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import FashionMNIST
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
+    FashionMNIST = None
 
 
 class FashionMNISTDataModule(VisionDataModule):

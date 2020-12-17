@@ -11,6 +11,7 @@ if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import CIFAR10
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
+    CIFAR10 = None
 
 
 class CIFAR10DataModule(VisionDataModule):
