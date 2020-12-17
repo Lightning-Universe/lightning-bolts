@@ -55,8 +55,8 @@ class CIFAR10DataModule(VisionDataModule):
     """
 
     name = "cifar10"
-    DATASET_CLS = CIFAR10
-    DIMS = (3, 32, 32)
+    dataset_cls = CIFAR10
+    dims = (3, 32, 32)
 
     def __init__(
         self,
@@ -147,8 +147,8 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
         model = LitModel(datamodule=dm)
     """
 
-    DATASET_CLS = TrialCIFAR10
-    DIMS = (3, 32, 32)
+    dataset_cls = TrialCIFAR10
+    dims = (3, 32, 32)
 
     def __init__(
         self,

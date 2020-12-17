@@ -12,9 +12,9 @@ class VisionDataModule(LightningDataModule):
     EXTRA_ARGS = {}
     name: str = ""
     #: Dataset class to use
-    DATASET_CLASS = ...
+    dataset_cls = ...
     #: A tuple describing the shape of the data
-    DIMS: tuple = ...
+    dims: tuple = ...
 
     def __init__(
         self,
@@ -60,8 +60,8 @@ class VisionDataModule(LightningDataModule):
         """
         Saves files to data_dir
         """
-        self.DATASET_CLASS(self.data_dir, train=True, download=True)
-        self.DATASET_CLASS(self.data_dir, train=False, download=True)
+        self.dataset_cls(self.data_dir, train=True, download=True)
+        self.dataset_cls(self.data_dir, train=False, download=True)
 
     def setup(self, stage: Optional[str] = None):
         """
@@ -71,8 +71,8 @@ class VisionDataModule(LightningDataModule):
             train_transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
             val_transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
 
-            dataset_train = self.DATASET_CLASS(self.data_dir, train=True, transform=train_transforms, **self.EXTRA_ARGS)
-            dataset_val = self.DATASET_CLASS(self.data_dir, train=True, transform=val_transforms, **self.EXTRA_ARGS)
+            dataset_train = self.dataset_cls(self.data_dir, train=True, transform=train_transforms, **self.EXTRA_ARGS)
+            dataset_val = self.dataset_cls(self.data_dir, train=True, transform=val_transforms, **self.EXTRA_ARGS)
 
             # Split
             self.dataset_train = self._split_dataset(dataset_train)
@@ -80,7 +80,7 @@ class VisionDataModule(LightningDataModule):
 
         if stage == "test" or stage is None:
             test_transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
-            self.dataset_test = self.DATASET_CLASS(
+            self.dataset_test = self.dataset_cls(
                 self.data_dir, train=False, transform=test_transforms, **self.EXTRA_ARGS
             )
 

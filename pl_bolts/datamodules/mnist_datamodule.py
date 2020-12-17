@@ -40,8 +40,8 @@ class MNISTDataModule(VisionDataModule):
     """
 
     name = "mnist"
-    DATASET_CLS = MNIST
-    DIMS = (1, 28, 28)
+    dataset_cls = MNIST
+    dims = (1, 28, 28)
 
     def __init__(
         self,

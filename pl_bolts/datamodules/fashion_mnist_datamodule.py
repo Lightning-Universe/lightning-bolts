@@ -41,8 +41,8 @@ class FashionMNISTDataModule(VisionDataModule):
     """
 
     name = "fashion_mnist"
-    DATASET_CLS = FashionMNIST
-    DIMS = (1, 28, 28)
+    dataset_cls = FashionMNIST
+    dims = (1, 28, 28)
 
     def __init__(
         self,
