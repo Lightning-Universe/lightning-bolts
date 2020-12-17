@@ -40,6 +40,11 @@ class FashionMNISTDataModule(VisionDataModule):
         Trainer().fit(model, dm)
     """
 
+    if not _TORCHVISION_AVAILABLE:
+        raise ModuleNotFoundError(  # pragma: no-cover
+            "You want to use FashionMNIST dataset loaded from `torchvision` which is not installed yet."
+        )
+
     name = "fashion_mnist"
     dataset_cls = FashionMNIST
     dims = (1, 28, 28)
@@ -71,12 +76,6 @@ class FashionMNISTDataModule(VisionDataModule):
                         returning them
             drop_last: If true drops the last incomplete batch
         """
-
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
-                "You want to use FashionMNIST dataset loaded from `torchvision` which is not installed yet."
-            )
-
         super().__init__(
             data_dir=data_dir,
             val_split=val_split,

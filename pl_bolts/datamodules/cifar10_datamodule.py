@@ -54,6 +54,11 @@ class CIFAR10DataModule(VisionDataModule):
         dm.val_transforms  = ...
     """
 
+    if not _TORCHVISION_AVAILABLE:
+        raise ModuleNotFoundError(  # pragma: no-cover
+            "You want to use CIFAR10 dataset loaded from `torchvision` which is not installed yet."
+        )
+
     name = "cifar10"
     dataset_cls = CIFAR10
     dims = (3, 32, 32)
@@ -85,12 +90,6 @@ class CIFAR10DataModule(VisionDataModule):
                         returning them
             drop_last: If true drops the last incomplete batch
         """
-
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
-                "You want to use CIFAR10 dataset loaded from `torchvision` which is not installed yet."
-            )
-
         super().__init__(
             data_dir=data_dir,
             val_split=val_split,
