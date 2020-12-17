@@ -505,7 +505,7 @@ To Train::
     trainer.fit(model)
 
 Pre-trained ImageNet
-*****************
+********************
 
 We have included an option to directly load
 `ImageNet weights <https://github.com/facebookresearch/swav>`_ provided by FAIR into bolts.
