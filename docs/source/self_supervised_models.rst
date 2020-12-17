@@ -385,8 +385,8 @@ To reproduce::
         --learning_rate 0.3
         --num_epochs 100
 
-Imagenet baseline
-*****************
+Imagenet baseline for SimCLR
+****************************
 .. list-table:: Cifar-10 implementation results
    :widths: 18 15 25 15 10 20 20 10
    :header-rows: 1
@@ -616,8 +616,8 @@ To reproduce::
     --nesterov True
     --num_epochs 90
 
-Imagenet baseline
-*****************
+Imagenet baseline for SwAV
+**************************
 .. list-table:: Cifar-10 implementation results
    :widths: 18 15 25 15 10 20 20 10
    :header-rows: 1
