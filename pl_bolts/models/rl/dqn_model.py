@@ -22,11 +22,13 @@ from pl_bolts.models.rl.common.memory import MultiStepBuffer
 from pl_bolts.models.rl.common.networks import CNN
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
+from pl_bolts.models.rl.common.gym_wrappers import make_environment
 
 if _GYM_AVAILABLE:
-    from pl_bolts.models.rl.common.gym_wrappers import gym, make_environment
+    from gym import Env
 else:
     warn_missing_pkg('gym')  # pragma: no-cover
+    Env = object
 
 
 class DQN(pl.LightningModule):
@@ -336,7 +338,7 @@ class DQN(pl.LightningModule):
         return self._dataloader()
 
     @staticmethod
-    def make_environment(env_name: str, seed: Optional[int] = None) -> gym.Env:
+    def make_environment(env_name: str, seed: Optional[int] = None) -> Env:
         """
         Initialise gym  environment
 
