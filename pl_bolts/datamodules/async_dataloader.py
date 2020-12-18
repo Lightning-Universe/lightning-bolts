@@ -1,10 +1,11 @@
 import re
 from queue import Queue
 from threading import Thread
+from typing import Any, Optional, Union
 
 import torch
 from torch._six import container_abcs, string_classes
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 
 class AsynchronousLoader(object):
@@ -26,7 +27,14 @@ class AsynchronousLoader(object):
             constructing one here
     """
 
-    def __init__(self, data, device=torch.device('cuda', 0), q_size=10, num_batches=None, **kwargs):
+    def __init__(
+            self,
+            data: Union[DataLoader, Dataset],
+            device: torch.device = torch.device('cuda', 0),
+            q_size: int = 10,
+            num_batches: Optional[int] = None,
+            **kwargs: Any
+    ):
         if isinstance(data, torch.utils.data.DataLoader):
             self.dataloader = data
         else:
@@ -105,5 +113,5 @@ class AsynchronousLoader(object):
         self.idx += 1
         return out
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.num_batches
