@@ -20,6 +20,25 @@ else:  # pragma: no-cover
 
 
 class DCGAN(pl.LightningModule):
+    """
+    DCGAN implementation.
+
+    Example::
+
+        from pl_bolts.models.gan import DCGAN
+
+        m = DCGAN()
+        Trainer(gpus=2).fit(m)
+
+    Example CLI::
+
+        # mnist
+        python dcgan_module.py --gpus 1
+
+        # cifar10
+        python dcgan_module.py --gpus 1 --dataset cifar10 --image_channels 3
+    """
+
     def __init__(
         self,
         beta1: float = 0.5,
@@ -74,6 +93,15 @@ class DCGAN(pl.LightningModule):
         return [opt_disc, opt_gen], []
 
     def forward(self, noise: torch.Tensor) -> torch.Tensor:
+        """
+        Generates an image given input noise
+
+        Example::
+
+            noise = torch.rand(batch_size, latent_dim)
+            gan = GAN.load_from_checkpoint(PATH)
+            img = gan(noise)
+        """
         noise = noise.view(*noise.shape, 1, 1)
         return self.generator(noise)
 
@@ -189,8 +217,8 @@ def cli_main(args=None):
     model = DCGAN(**vars(args))
     callbacks = [
         ModelCheckpoint(save_top_k=3, monitor="loss/gen_epoch"),
-        TensorboardGenerativeModelImageSampler(num_samples=100),
-        LatentDimInterpolator(interpolate_epoch_interval=1),
+        TensorboardGenerativeModelImageSampler(),
+        LatentDimInterpolator(interpolate_epoch_interval=5),
     ]
     trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks)
     trainer.fit(model, dataloader)
