@@ -1,4 +1,5 @@
 import os
+from typing import Any, Optional
 
 import torch
 from pytorch_lightning import LightningDataModule
@@ -130,7 +131,7 @@ class KittiDataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self) -> transform_lib.Compose:
+    def _default_transforms(self) -> transforms.Compose:
         kitti_transforms = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.35675976, 0.37380189, 0.3764753], std=[0.32064945, 0.32098866, 0.32325324])

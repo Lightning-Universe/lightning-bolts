@@ -9,11 +9,6 @@ from torch.utils.data import DataLoader, Dataset, random_split
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-if _TORCHVISION_AVAILABLE:
-    from torchvision import transforms as transform_lib
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-
 
 class VisionDataModule(LightningDataModule):
 
@@ -121,7 +116,7 @@ class VisionDataModule(LightningDataModule):
         return splits
 
     @abstractmethod
-    def default_transforms(self) -> transform_lib.Compose:
+    def default_transforms(self):
         """ Default transform for the dataset """
 
     def train_dataloader(self) -> DataLoader:

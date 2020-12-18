@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
@@ -17,7 +19,7 @@ class Compose(object):
     Like `torchvision.transforms.compose` but works for (image, target)
     """
 
-    def __init__(self, transforms):
+    def __init__(self, transforms: T.Compose):
         self.transforms = transforms
 
     def __call__(self, image, target):
@@ -55,7 +57,7 @@ CLASSES = (
 )
 
 
-def _prepare_voc_instance(image, target):
+def _prepare_voc_instance(image, target: Dict[str, Any]):
     """
     Prepares VOC dataset into appropriate target for fasterrcnn
 
@@ -113,8 +115,8 @@ class VOCDetectionDataModule(LightningDataModule):
         shuffle: bool = False,
         pin_memory: bool = False,
         drop_last: bool = False,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ):
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
@@ -132,7 +134,7 @@ class VOCDetectionDataModule(LightningDataModule):
         self.drop_last = drop_last
 
     @property
-    def num_classes(self):
+    def num_classes(self) -> int:
         """
         Return:
             21
@@ -146,7 +148,7 @@ class VOCDetectionDataModule(LightningDataModule):
         VOCDetection(self.data_dir, year=self.year, image_set="train", download=True)
         VOCDetection(self.data_dir, year=self.year, image_set="val", download=True)
 
-    def train_dataloader(self, batch_size=1, transforms=None):
+    def train_dataloader(self, batch_size: int = 1, transforms=None) -> DataLoader:
         """
         VOCDetection train set uses the `train` subset
 
@@ -172,7 +174,7 @@ class VOCDetectionDataModule(LightningDataModule):
         )
         return loader
 
-    def val_dataloader(self, batch_size=1, transforms=None):
+    def val_dataloader(self, batch_size: int = 1, transforms=None) -> DataLoader:
         """
         VOCDetection val set uses the `val` subset
 
@@ -197,7 +199,7 @@ class VOCDetectionDataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self):
+    def _default_transforms(self) -> T.Compose:
         if self.normalize:
             return (
                 lambda image, target: (
