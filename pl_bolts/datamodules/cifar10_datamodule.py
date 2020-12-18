@@ -112,7 +112,7 @@ class CIFAR10DataModule(VisionDataModule):
         """
         return 10
 
-    def default_transforms(self):
+    def default_transforms(self) -> transform_lib.Compose:
         if self.normalize:
             cf10_transforms = transform_lib.Compose([transform_lib.ToTensor(), cifar10_normalization()])
         else:
@@ -146,14 +146,14 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
 
     def __init__(
         self,
-        data_dir: str,
+        data_dir: Optional[str],
         val_split: int = 50,
         num_workers: int = 16,
         num_samples: int = 100,
         labels: Optional[Sequence] = (1, 5, 8),
         *args: Any,
         **kwargs: Any,
-    ) -> None:
+    ):
         """
         Args:
             data_dir: where to save/load the data

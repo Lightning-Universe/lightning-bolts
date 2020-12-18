@@ -42,10 +42,10 @@ class SklearnDataset(Dataset):
         self.X_transform = X_transform
         self.y_transform = y_transform
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.X)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx) -> Tuple[np.ndarray, np.ndarray]:
         x = self.X[idx].astype(np.float32)
         y = self.Y[idx]
 
@@ -89,10 +89,10 @@ class TensorDataset(Dataset):
         self.X_transform = X_transform
         self.y_transform = y_transform
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.X)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx) -> Tuple[torch.Tensor, torch.Tensor]:
         x = self.X[idx].float()
         y = self.Y[idx]
 
@@ -145,14 +145,14 @@ class SklearnDataModule(LightningDataModule):
             x_val=None, y_val=None,
             x_test=None, y_test=None,
             val_split=0.2, test_split=0.1,
-            num_workers=2,
-            random_state=1234,
-            shuffle=True,
+            num_workers:int = 2,
+            random_state: int = 1234,
+            shuffle: bool = True,
             batch_size: int = 16,
-            pin_memory=False,
-            drop_last=False,
-            *args,
-            **kwargs,
+            pin_memory: bool = False,
+            drop_last: bool = False,
+            *args: Any,
+            **kwargs: Any,
     ):
 
         super().__init__(*args, **kwargs)
@@ -193,12 +193,20 @@ class SklearnDataModule(LightningDataModule):
 
         self._init_datasets(X, y, x_val, y_val, x_test, y_test)
 
-    def _init_datasets(self, X, y, x_val, y_val, x_test, y_test):
+    def _init_datasets(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        x_val: np.ndarray,
+        y_val: np.ndarray,
+        x_test: np.ndarray,
+        y_test: np.ndarray
+    ):
         self.train_dataset = SklearnDataset(X, y)
         self.val_dataset = SklearnDataset(x_val, y_val)
         self.test_dataset = SklearnDataset(x_test, y_test)
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         loader = DataLoader(
             self.train_dataset,
             batch_size=self.batch_size,
@@ -209,7 +217,7 @@ class SklearnDataModule(LightningDataModule):
         )
         return loader
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         loader = DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,
@@ -220,7 +228,7 @@ class SklearnDataModule(LightningDataModule):
         )
         return loader
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         loader = DataLoader(
             self.test_dataset,
             batch_size=self.batch_size,
