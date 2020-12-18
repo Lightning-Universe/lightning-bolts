@@ -155,7 +155,7 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
         labels: Optional[Sequence] = (1, 5, 8),
         *args: Any,
         **kwargs: Any,
-    ) -> None:
+    ):
         """
         Args:
             data_dir: where to save/load the data
