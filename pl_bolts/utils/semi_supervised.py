@@ -1,5 +1,5 @@
 import math
-from typing import Any, List, Sequence, Tuple
+from typing import Any, List, Sequence, Tuple, Union
 
 import numpy as np
 import torch
@@ -33,14 +33,18 @@ class Identity(torch.nn.Module):
         return x
 
 
-def balance_classes(X: np.ndarray, labels: Sequence[int], batch_size: int) -> Tuple[np.ndarray, np.ndarray]:
+def balance_classes(
+    X: Union[Tensor, np.ndarray],
+    Y: Union[Tensor, np.ndarray, Sequence[int]],
+    batch_size: int
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Makes sure each batch has an equal amount of data from each class.
     Perfect balance
 
     Args:
         X: input features
-        labels: mixed labels (ints)
+        Y: mixed labels (ints)
         batch_size: the ultimate batch size
     """
     if not _SKLEARN_AVAILABLE:
@@ -48,16 +52,16 @@ def balance_classes(X: np.ndarray, labels: Sequence[int], batch_size: int) -> Tu
             'You want to use `shuffle` function from `scikit-learn` which is not installed yet.'
         )
 
-    nb_classes = len(set(labels))
+    nb_classes = len(set(Y))
 
-    nb_batches = math.ceil(len(labels) / batch_size)
+    nb_batches = math.ceil(len(Y) / batch_size)
 
     # sort by classes
     final_batches_x: List[Any] = [[] for i in range(nb_batches)]
     final_batches_y: List[Any] = [[] for i in range(nb_batches)]
 
     # Y needs to be np arr
-    Y = np.asarray(labels)
+    Y = np.asarray(Y)
 
     # pick chunk size for each class using the largest split
     chunk_sizes = []

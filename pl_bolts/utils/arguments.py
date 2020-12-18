@@ -92,7 +92,7 @@ def gather_lit_args(cls: Any, root_cls: Optional[Any] = None) -> List[LitArg]:
 
         if issubclass(obj, root_cls):
 
-            default_params = inspect.signature(obj.__init__).parameters
+            default_params = inspect.signature(obj.__init__).parameters  # type: ignore
 
             for arg in default_params:
                 arg_type = default_params[arg].annotation
@@ -104,7 +104,7 @@ def gather_lit_args(cls: Any, root_cls: Optional[Any] = None) -> List[LitArg]:
                     arg_types = (arg_type,)
 
                 # If type is empty, that means it hasn't been given type hint. We skip these.
-                arg_is_missing_type_hint = arg_types == (inspect._empty,)
+                arg_is_missing_type_hint = arg_types == (inspect.Parameter.empty,)
                 # Some args should be ignored by default (self, kwargs, args)
                 arg_is_in_blacklist = arg in blacklisted_args and arg_is_missing_type_hint
                 # We only keep the first arg we see of a given name, as it overrides the parents
@@ -113,9 +113,9 @@ def gather_lit_args(cls: Any, root_cls: Optional[Any] = None) -> List[LitArg]:
                 do_skip_this_arg = arg_is_in_blacklist or arg_is_missing_type_hint or arg_is_duplicate
 
                 # Positional args have no default, but do have a known type or types.
-                arg_is_positional = arg_default == inspect._empty and not arg_is_missing_type_hint
+                arg_is_positional = arg_default == inspect.Parameter.empty and not arg_is_missing_type_hint
                 # Kwargs have both a default + known type or types
-                arg_is_kwarg = arg_default != inspect._empty and not arg_is_missing_type_hint
+                arg_is_kwarg = arg_default != inspect.Parameter.empty and not arg_is_missing_type_hint
 
                 if do_skip_this_arg:
                     continue
@@ -124,7 +124,7 @@ def gather_lit_args(cls: Any, root_cls: Optional[Any] = None) -> List[LitArg]:
                     lit_arg = LitArg(
                         name=arg,
                         types=arg_types,
-                        default=arg_default if arg_default != inspect._empty else None,
+                        default=arg_default if arg_default != inspect.Parameter.empty else None,
                         required=arg_is_positional,
                         context=obj.__name__,
                     )
