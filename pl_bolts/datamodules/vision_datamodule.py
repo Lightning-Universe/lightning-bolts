@@ -36,7 +36,7 @@ class VisionDataModule(LightningDataModule):
         drop_last: bool = False,
         *args: Any,
         **kwargs: Any,
-    ) -> None:
+    ):
         """
         Args:
             data_dir: Where to save/load the data
@@ -63,14 +63,14 @@ class VisionDataModule(LightningDataModule):
         self.pin_memory = pin_memory
         self.drop_last = drop_last
 
-    def prepare_data(self) -> None:
+    def prepare_data(self):
         """
         Saves files to data_dir
         """
         self.dataset_cls(self.data_dir, train=True, download=True)
         self.dataset_cls(self.data_dir, train=False, download=True)
 
-    def setup(self, stage: Optional[str] = None) -> None:
+    def setup(self, stage: Optional[str] = None):
         """
         Creates train, val, and test dataset
         """
