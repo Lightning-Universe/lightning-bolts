@@ -94,7 +94,7 @@ class ImagenetDataModule(LightningDataModule):
         self.num_samples = 1281167 - self.num_imgs_per_val_class * self.num_classes
 
     @property
-    def num_classes(self):
+    def num_classes(self) -> int:
         """
         Return:
 
@@ -103,7 +103,7 @@ class ImagenetDataModule(LightningDataModule):
         """
         return 1000
 
-    def _verify_splits(self, data_dir, split):
+    def _verify_splits(self, data_dir: str, split: str):
         dirs = os.listdir(data_dir)
 
         if split not in dirs:
@@ -142,7 +142,7 @@ class ImagenetDataModule(LightningDataModule):
                 """
                 )
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         """
         Uses the train split of imagenet2012 and puts away a portion of it for the validation split
         """
@@ -166,7 +166,7 @@ class ImagenetDataModule(LightningDataModule):
         )
         return loader
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         """
         Uses the part of the train split of imagenet2012  that was not used for training via `num_imgs_per_val_class`
 
@@ -193,7 +193,7 @@ class ImagenetDataModule(LightningDataModule):
         )
         return loader
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         """
         Uses the validation split of imagenet2012 for testing
         """
@@ -212,7 +212,7 @@ class ImagenetDataModule(LightningDataModule):
         )
         return loader
 
-    def train_transform(self):
+    def train_transform(self) -> transform_lib.Compose:
         """
         The standard imagenet transforms
 
@@ -238,7 +238,7 @@ class ImagenetDataModule(LightningDataModule):
 
         return preprocessing
 
-    def val_transform(self):
+    def val_transform(self) -> transform_lib.Compose:
         """
         The standard imagenet transforms for validation
 

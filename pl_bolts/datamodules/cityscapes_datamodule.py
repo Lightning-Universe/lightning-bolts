@@ -109,14 +109,14 @@ class CityscapesDataModule(LightningDataModule):
         self.target_transforms = None
 
     @property
-    def num_classes(self):
+    def num_classes(self) -> int:
         """
         Return:
             30
         """
         return 30
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         """
         Cityscapes train set
         """
@@ -143,7 +143,7 @@ class CityscapesDataModule(LightningDataModule):
         )
         return loader
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         """
         Cityscapes val set
         """
@@ -170,7 +170,7 @@ class CityscapesDataModule(LightningDataModule):
         )
         return loader
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         """
         Cityscapes test set
         """
@@ -196,7 +196,7 @@ class CityscapesDataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self):
+    def _default_transforms(self) -> transform_lib.Compose:
         cityscapes_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transform_lib.Normalize(
@@ -205,7 +205,7 @@ class CityscapesDataModule(LightningDataModule):
         ])
         return cityscapes_transforms
 
-    def _default_target_transforms(self):
+    def _default_target_transforms(self) -> transform_lib.Compose:
         cityscapes_target_trasnforms = transform_lib.Compose([
             transform_lib.ToTensor(), transform_lib.Lambda(lambda t: t.squeeze())
         ])

@@ -46,10 +46,10 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         self.drop_last = drop_last
 
     @property
-    def num_classes(self):
+    def num_classes(self) -> int:
         return 1000
 
-    def _verify_splits(self, data_dir, split):
+    def _verify_splits(self, data_dir: str, split: str):
         dirs = os.listdir(data_dir)
 
         if split not in dirs:
@@ -83,7 +83,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
                 """
                 )
 
-    def train_dataloader(self, num_images_per_class=-1, add_normalize=False):
+    def train_dataloader(self, num_images_per_class: int = -1, add_normalize: bool = False) -> DataLoader:
         transforms = self._default_transforms() if self.train_transforms is None else self.train_transforms
 
         dataset = UnlabeledImagenet(
@@ -103,7 +103,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def val_dataloader(self, num_images_per_class=50, add_normalize=False):
+    def val_dataloader(self, num_images_per_class: int = 50, add_normalize: bool = False) -> DataLoader:
         transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
 
         dataset = UnlabeledImagenet(
@@ -123,7 +123,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def test_dataloader(self, num_images_per_class, add_normalize=False):
+    def test_dataloader(self, num_images_per_class: int, add_normalize: bool = False) -> DataLoader:
         transforms = self._default_transforms() if self.test_transforms is None else self.test_transforms
 
         dataset = UnlabeledImagenet(

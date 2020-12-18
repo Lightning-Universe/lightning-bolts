@@ -97,7 +97,7 @@ class KittiDataModule(LightningDataModule):
             kitti_dataset, lengths=[train_len, val_len, test_len], generator=torch.Generator().manual_seed(self.seed)
         )
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         loader = DataLoader(
             self.trainset,
             batch_size=self.batch_size,
@@ -108,7 +108,7 @@ class KittiDataModule(LightningDataModule):
         )
         return loader
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         loader = DataLoader(
             self.valset,
             batch_size=self.batch_size,
@@ -119,7 +119,7 @@ class KittiDataModule(LightningDataModule):
         )
         return loader
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         loader = DataLoader(
             self.testset,
             batch_size=self.batch_size,
@@ -130,7 +130,7 @@ class KittiDataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self):
+    def _default_transforms(self) -> transform_lib.Compose:
         kitti_transforms = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.35675976, 0.37380189, 0.3764753], std=[0.32064945, 0.32098866, 0.32325324])
