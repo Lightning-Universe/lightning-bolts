@@ -63,8 +63,8 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             shuffle: bool = False,
             pin_memory: bool = False,
             drop_last: bool = False,
-            *args,
-            **kwargs,
+            *args: Any,
+            **kwargs: Any,
     ):
         """
         Args:
@@ -99,7 +99,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         self.num_unlabeled_samples = 100000 - unlabeled_val_split
 
     @property
-    def num_classes(self):
+    def num_classes(self) -> int:
         return 10
 
     def prepare_data(self):
@@ -110,7 +110,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         STL10(self.data_dir, split='train', download=True, transform=transform_lib.ToTensor())
         STL10(self.data_dir, split='test', download=True, transform=transform_lib.ToTensor())
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         """
         Loads the 'unlabeled' split minus a portion set aside for validation via `unlabeled_val_split`.
         """
@@ -131,7 +131,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def train_dataloader_mixed(self):
+    def train_dataloader_mixed(self) -> DataLoader:
         """
         Loads a portion of the 'unlabeled' training data and 'train' (labeled) data.
         both portions have a subset removed for validation via `unlabeled_val_split` and `train_val_split`
@@ -169,7 +169,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         """
         Loads a portion of the 'unlabeled' training data set aside for validation
         The val dataset = (unlabeled - train_val_split)
@@ -196,7 +196,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def val_dataloader_mixed(self):
+    def val_dataloader_mixed(self) -> DataLoader:
         """
         Loads a portion of the 'unlabeled' training data set aside for validation along with
         the portion of the 'train' dataset to be used for validation
@@ -239,7 +239,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         """
         Loads the test split of STL10
 
@@ -260,7 +260,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def train_dataloader_labeled(self):
+    def train_dataloader_labeled(self) -> DataLoader:
         transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
 
         dataset = STL10(self.data_dir, split='train', download=False, transform=transforms)
@@ -278,7 +278,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def val_dataloader_labeled(self):
+    def val_dataloader_labeled(self) -> DataLoader:
         transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
         dataset = STL10(self.data_dir,
                         split='train',
@@ -299,7 +299,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def _default_transforms(self):
+    def _default_transforms(self) -> transform_lib.Compose:
         data_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             stl10_normalization()
