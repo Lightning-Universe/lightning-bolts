@@ -1,5 +1,5 @@
 import math
-from typing import Any
+from typing import Any, Tuple
 
 import numpy as np
 import torch
@@ -145,7 +145,7 @@ class SklearnDataModule(LightningDataModule):
             x_val=None, y_val=None,
             x_test=None, y_test=None,
             val_split=0.2, test_split=0.1,
-            num_workers:int = 2,
+            num_workers: int = 2,
             random_state: int = 1234,
             shuffle: bool = True,
             batch_size: int = 16,

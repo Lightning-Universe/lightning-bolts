@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Any, Optional
 
 import torch
 from pytorch_lightning import LightningDataModule
