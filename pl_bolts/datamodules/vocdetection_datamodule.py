@@ -199,7 +199,7 @@ class VOCDetectionDataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self) -> T.Compose:
+    def _default_transforms(self):
         if self.normalize:
             return (
                 lambda image, target: (

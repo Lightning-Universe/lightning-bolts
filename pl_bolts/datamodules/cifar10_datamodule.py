@@ -112,7 +112,7 @@ class CIFAR10DataModule(VisionDataModule):
         """
         return 10
 
-    def default_transforms(self) -> transform_lib.Compose:
+    def default_transforms(self):
         if self.normalize:
             cf10_transforms = transform_lib.Compose([transform_lib.ToTensor(), cifar10_normalization()])
         else:

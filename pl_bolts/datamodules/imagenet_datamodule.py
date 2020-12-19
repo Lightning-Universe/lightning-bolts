@@ -212,7 +212,7 @@ class ImagenetDataModule(LightningDataModule):
         )
         return loader
 
-    def train_transform(self) -> transform_lib.Compose:
+    def train_transform(self):
         """
         The standard imagenet transforms
 
@@ -238,7 +238,7 @@ class ImagenetDataModule(LightningDataModule):
 
         return preprocessing
 
-    def val_transform(self) -> transform_lib.Compose:
+    def val_transform(self):
         """
         The standard imagenet transforms for validation
 
