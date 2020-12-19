@@ -1,16 +1,15 @@
-import importlib
 import math
 
 import numpy as np
 import torch
 
+from pl_bolts.utils import _SKLEARN_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-_SKLEARN_AVAILABLE = importlib.util.find_spec("sklearn") is not None
 if _SKLEARN_AVAILABLE:
     from sklearn.utils import shuffle as sk_shuffle
-else:
-    warn_missing_pkg('sklearn', pypi_name='scikit-learn')  # pragma: no-cover
+else:  # pragma: no-cover
+    warn_missing_pkg('sklearn', pypi_name='scikit-learn')
 
 
 class Identity(torch.nn.Module):

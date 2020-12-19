@@ -6,15 +6,13 @@ import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
 
+from pl_bolts.utils import _SKLEARN_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _SKLEARN_AVAILABLE:
     from sklearn.utils import shuffle as sk_shuffle
-except ModuleNotFoundError:
-    warn_missing_pkg("sklearn")  # pragma: no-cover
-    _SKLEARN_AVAILABLE = False
 else:
-    _SKLEARN_AVAILABLE = True
+    warn_missing_pkg("sklearn")  # pragma: no-cover
 
 
 class SklearnDataset(Dataset):
@@ -52,7 +50,7 @@ class SklearnDataset(Dataset):
         y = self.Y[idx]
 
         # Do not convert integer to float for classification data
-        if not y.dtype == np.integer:
+        if not ((y.dtype == np.int32) or (y.dtype == np.int64)):
             y = y.astype(np.float32)
 
         if self.X_transform:
@@ -125,19 +123,19 @@ class SklearnDataModule(LightningDataModule):
         >>> len(train_loader.dataset)
         355
         >>> len(train_loader)
-        11
+        12
         >>> # validation set
         >>> val_loader = loaders.val_dataloader()
         >>> len(val_loader.dataset)
         100
         >>> len(val_loader)
-        3
+        4
         >>> # test set
         >>> test_loader = loaders.test_dataloader()
         >>> len(test_loader.dataset)
         51
         >>> len(test_loader)
-        1
+        2
     """
 
     name = 'sklearn'
@@ -151,6 +149,8 @@ class SklearnDataModule(LightningDataModule):
             random_state=1234,
             shuffle=True,
             batch_size: int = 16,
+            pin_memory=False,
+            drop_last=False,
             *args,
             **kwargs,
     ):
@@ -158,6 +158,9 @@ class SklearnDataModule(LightningDataModule):
         super().__init__(*args, **kwargs)
         self.num_workers = num_workers
         self.batch_size = batch_size
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
 
         # shuffle x and y
         if shuffle and _SKLEARN_AVAILABLE:
@@ -199,10 +202,10 @@ class SklearnDataModule(LightningDataModule):
         loader = DataLoader(
             self.train_dataset,
             batch_size=self.batch_size,
-            shuffle=True,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -212,8 +215,8 @@ class SklearnDataModule(LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -223,8 +226,8 @@ class SklearnDataModule(LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 

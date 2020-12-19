@@ -1,10 +1,19 @@
 from typing import Sequence, Tuple
+import importlib
 
 import torch
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from pytorch_lightning import Callback, LightningModule, Trainer
 from torch import Tensor, nn
+
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+_MATPLOTLIB_AVAILABLE = importlib.util.find_spec("matplotlib") is not None
+if _MATPLOTLIB_AVAILABLE:
+    from matplotlib import pyplot as plt
+else:
+    warn_missing_pkg("matplotlib")  # pragma: no-cover
 
 
 class ConfusedLogitCallback(Callback):  # pragma: no-cover
@@ -97,9 +106,17 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
                 self._plot(confusing_x, confusing_y, trainer, pl_module, mask_idxs)
                 pl_module.train()
 
+<<<<<<< HEAD
     def _plot(self, confusing_x: Tensor, confusing_y: Tensor, trainer: Trainer,
               model: LightningModule, mask_idxs: Tensor) -> None:
         from matplotlib import pyplot as plt
+=======
+    def _plot(self, confusing_x, confusing_y, trainer, model, mask_idxs):
+        if not _MATPLOTLIB_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `matplotlib` which is not installed yet, install it with `pip install matplotlib`.'
+            )
+>>>>>>> upstream/master
 
         confusing_x = confusing_x[:self.top_k]
         confusing_y = confusing_y[:self.top_k]

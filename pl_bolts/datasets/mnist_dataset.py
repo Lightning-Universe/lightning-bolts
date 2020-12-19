@@ -1,20 +1,16 @@
+from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
-    from torchvision import transforms as transform_lib
+if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import MNIST
-except ModuleNotFoundError as err:
-    raise ModuleNotFoundError(  # pragma: no-cover
-        'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
-    ) from err
-
-try:
-    from PIL import Image
-except ModuleNotFoundError:
-    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
-    _PIL_AVAILABLE = False
 else:
-    _PIL_AVAILABLE = True
+    warn_missing_pkg('torchvision')  # pragma: no-cover
+    MNIST = object
+
+if _PIL_AVAILABLE:
+    from PIL import Image
+else:
+    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
 
 
 class BinaryMNIST(MNIST):

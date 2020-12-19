@@ -1,98 +1,36 @@
 from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
+from pl_bolts.datamodules.binary_mnist_datamodule import BinaryMNISTDataModule
+from pl_bolts.datamodules.cifar10_datamodule import CIFAR10DataModule, TinyCIFAR10DataModule
+from pl_bolts.datamodules.cityscapes_datamodule import CityscapesDataModule
+from pl_bolts.datamodules.experience_source import DiscountedExperienceSource, ExperienceSource, ExperienceSourceDataset
+from pl_bolts.datamodules.fashion_mnist_datamodule import FashionMNISTDataModule
+from pl_bolts.datamodules.imagenet_datamodule import ImagenetDataModule
+from pl_bolts.datamodules.kitti_datamodule import KittiDataModule
+from pl_bolts.datamodules.mnist_datamodule import MNISTDataModule
+from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule, SklearnDataset, TensorDataset
+from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
+from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
+from pl_bolts.datamodules.vocdetection_datamodule import VOCDetectionDataModule
+from pl_bolts.datasets.kitti_dataset import KittiDataset
 
-__all__ = []
-
-try:
-    from pl_bolts.datamodules.binary_mnist_datamodule import BinaryMNISTDataModule
-except ModuleNotFoundError:
-    pass
-else:
-    __all__ += ['BinaryMNISTDataModule']
-
-try:
-    from pl_bolts.datamodules.cifar10_datamodule import CIFAR10DataModule, TinyCIFAR10DataModule
-except ModuleNotFoundError:
-    pass
-else:
-    __all__ += ['CIFAR10DataModule', 'TinyCIFAR10DataModule']
-
-try:
-    from pl_bolts.datamodules.experience_source import (
-        DiscountedExperienceSource,
-        ExperienceSource,
-        ExperienceSourceDataset,
-    )
-except ModuleNotFoundError:
-    pass
-else:
-    __all__ += ['ExperienceSourceDataset', 'ExperienceSource', 'DiscountedExperienceSource']
-
-try:
-    from pl_bolts.datamodules.fashion_mnist_datamodule import FashionMNISTDataModule
-except ModuleNotFoundError:
-    pass
-else:
-    __all__ += ['FashionMNISTDataModule']
-
-try:
-    from pl_bolts.datamodules.imagenet_datamodule import ImagenetDataModule
-except ModuleNotFoundError:
-    pass
-else:
-    __all__ += ['ImagenetDataModule']
-
-try:
-    from pl_bolts.datamodules.mnist_datamodule import MNISTDataModule
-except ModuleNotFoundError:
-    pass
-else:
-    __all__ += ['MNISTDataModule']
-
-try:
-    from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule, SklearnDataset, TensorDataset
-except ModuleNotFoundError:
-    pass
-else:
-    __all__ += ['SklearnDataset', 'SklearnDataModule', 'TensorDataset']
-
-try:
-    from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
-except ModuleNotFoundError:
-    pass
-else:
-    __all__ += ['SSLImagenetDataModule']
-
-try:
-    from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
-except ModuleNotFoundError:
-    pass
-else:
-    __all__ += ['STL10DataModule']
-
-try:
-    from pl_bolts.datamodules.vocdetection_datamodule import VOCDetectionDataModule
-except ModuleNotFoundError:
-    pass
-else:
-    __all__ += ['VOCDetectionDataModule']
-
-try:
-    from pl_bolts.datamodules.cityscapes_datamodule import CityscapesDataModule
-except ModuleNotFoundError:  # pragma: no-cover
-    pass
-else:
-    __all__ += ['CityscapesDataModule']
-
-try:
-    from pl_bolts.datasets.kitti_dataset import KittiDataset
-except ModuleNotFoundError:
-    pass
-else:
-    __all__ += ['KittiDataset']
-
-try:
-    from pl_bolts.datamodules.kitti_datamodule import KittiDataModule
-except ModuleNotFoundError:
-    pass
-else:
-    __all__ += ['KittiDataModule']
+__all__ = [
+    'AsynchronousLoader',
+    'BinaryMNISTDataModule',
+    'CIFAR10DataModule',
+    'TinyCIFAR10DataModule',
+    'CityscapesDataModule',
+    'DiscountedExperienceSource',
+    'ExperienceSource',
+    'ExperienceSourceDataset',
+    'FashionMNISTDataModule',
+    'ImagenetDataModule',
+    'KittiDataModule',
+    'MNISTDataModule',
+    'SklearnDataModule',
+    'SklearnDataset',
+    'TensorDataset',
+    'SSLImagenetDataModule',
+    'STL10DataModule',
+    'VOCDetectionDataModule',
+    'KittiDataset',
+]

@@ -1,15 +1,13 @@
 import numpy as np
 import torch.nn.functional as F
 
+from pl_bolts.utils import _PIL_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _PIL_AVAILABLE:
     from PIL import Image
-except ModuleNotFoundError:
-    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
-    _PIL_AVAILABLE = False
 else:
-    _PIL_AVAILABLE = True
+    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
 
 
 class RandomTranslateWithReflect:
