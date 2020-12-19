@@ -19,7 +19,7 @@ class Compose(object):
     Like `torchvision.transforms.compose` but works for (image, target)
     """
 
-    def __init__(self, transforms: T.Compose):
+    def __init__(self, transforms):
         self.transforms = transforms
 
     def __call__(self, image, target):
