@@ -39,8 +39,14 @@ class BYOLMAWeightUpdate(Callback):
         self.initial_tau = initial_tau
         self.current_tau = initial_tau
 
-    def on_train_batch_end(self, trainer: Trainer, pl_module: LightningModule, outputs: Sequence,
-                           batch: Sequence, batch_idx: int, dataloader_idx: int) -> None:
+    def on_train_batch_end(self,
+                           trainer: Trainer,
+                           pl_module: LightningModule,
+                           outputs: Sequence,
+                           batch: Sequence,
+                           batch_idx: int,
+                           dataloader_idx: int
+                           ) -> None:
         # get networks
         online_net = pl_module.online_network
         target_net = pl_module.target_network

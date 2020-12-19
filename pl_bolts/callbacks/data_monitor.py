@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 import numpy as np
 import torch
 import torch.nn as nn
+from torch.nn import Module
 from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.loggers import LightningLoggerBase, TensorBoardLogger, WandbLogger
 from pytorch_lightning.utilities import rank_zero_warn
@@ -189,7 +190,7 @@ class ModuleDataMonitor(DataMonitorBase):
             else self.GROUP_NAME_OUTPUT
         )
 
-        def hook(_: nn.Module, inp: Sequence, out: Sequence) -> None:
+        def hook(_: Module, inp: Sequence, out: Sequence) -> None:
             inp = inp[0] if len(inp) == 1 else inp
             self.log_histograms(inp, group=input_group_name)
             self.log_histograms(out, group=output_group_name)
@@ -219,8 +220,13 @@ class TrainingDataMonitor(DataMonitorBase):
         """
         super().__init__(log_every_n_steps=log_every_n_steps)
 
-    def on_train_batch_start(self, trainer: Trainer, pl_module: LightningModule,
-                             batch: Sequence, *args: int, **kwargs: int) -> None:
+    def on_train_batch_start(self,
+                             trainer: Trainer,
+                             pl_module: LightningModule,
+                             batch: Sequence,
+                             *args: int,
+                             **kwargs: int
+                             ) -> None:
         super().on_train_batch_start(trainer, pl_module, batch, *args, **kwargs)
         self.log_histograms(batch, group=self.GROUP_NAME)
 
