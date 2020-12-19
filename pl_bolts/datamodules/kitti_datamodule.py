@@ -134,7 +134,7 @@ class KittiDataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self) -> transforms.Compose:
+    def _default_transforms(self):
         kitti_transforms = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.35675976, 0.37380189, 0.3764753],
