@@ -1,5 +1,5 @@
-from typing import Sequence, Tuple
 import importlib
+from typing import Sequence, Tuple
 
 import torch
 from matplotlib.axes import Axes
