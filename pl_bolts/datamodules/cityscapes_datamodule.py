@@ -192,7 +192,7 @@ class CityscapesDataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self) -> transform_lib.Compose:
+    def _default_transforms(self):
         cityscapes_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transform_lib.Normalize(
@@ -202,7 +202,7 @@ class CityscapesDataModule(LightningDataModule):
         ])
         return cityscapes_transforms
 
-    def _default_target_transforms(self) -> transform_lib.Compose:
+    def _default_target_transforms(self):
         cityscapes_target_trasnforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transform_lib.Lambda(lambda t: t.squeeze())
