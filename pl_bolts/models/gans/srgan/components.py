@@ -1,8 +1,10 @@
 # based on https://colab.research.google.com/github/https-deeplearning-ai/GANs-Public/blob/master/C3W2_SRGAN_(Optional).ipynb#scrollTo=cpyEsLi-OQj4 noqa: E501
+import torch
 import torch.nn as nn
 
 from pl_bolts.utils.warnings import warn_missing_pkg
 
+# TODO: change import
 try:
     from torchvision.models import vgg19
 except ModuleNotFoundError:
@@ -13,7 +15,7 @@ else:
 
 
 class ResidualBlock(nn.Module):
-    def __init__(self, feature_maps: int = 64):
+    def __init__(self, feature_maps: int = 64) -> None:
         super().__init__()
 
         # Residual block: k3n64s1 x2
@@ -30,14 +32,14 @@ class ResidualBlock(nn.Module):
             nn.PReLU() if prelu else nn.Identity(),
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return x + self.block(x)
 
 
 class SRGANGenerator(nn.Module):
     def __init__(
         self, image_channels: int = 3, feature_maps: int = 64, num_res_blocks: int = 16, num_ps_blocks: int = 2
-    ):
+    ) -> None:
         super().__init__()
         # Input block: k9n64s1
         self.input_block = nn.Sequential(
@@ -73,7 +75,7 @@ class SRGANGenerator(nn.Module):
             nn.Tanh(),
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x_res = self.input_block(x)
         x = x_res + self.res_blocks(x_res)
         x = self.ps_blocks(x)
@@ -82,7 +84,7 @@ class SRGANGenerator(nn.Module):
 
 
 class SRGANDiscriminator(nn.Module):
-    def __init__(self, image_channels: int = 3, feature_maps: int = 64):
+    def __init__(self, image_channels: int = 3, feature_maps: int = 64) -> None:
         super().__init__()
         # k3n64s1 --> k3n64s2 --> k3n128s1 --> k3n128s2 --> k3n256s1 --> k3n256s2 --> k3n512s1 --> k3n512s2 --> MLP
 
@@ -105,32 +107,36 @@ class SRGANDiscriminator(nn.Module):
             nn.Flatten(),
         )
 
-    def _make_double_conv_block(self, in_channels: int, out_channels: int, first_batch_norm: bool = True):
+    def _make_double_conv_block(
+        self, in_channels: int, out_channels: int, first_batch_norm: bool = True
+    ) -> nn.Sequential:
         return nn.Sequential(
             self._make_conv_block(in_channels, out_channels, batch_norm=first_batch_norm),
             self._make_conv_block(out_channels, out_channels, stride=2),
         )
 
     @staticmethod
-    def _make_conv_block(in_channels: int, out_channels: int, stride: int = 1, batch_norm: bool = True):
+    def _make_conv_block(
+        in_channels: int, out_channels: int, stride: int = 1, batch_norm: bool = True
+    ) -> nn.Sequential:
         return nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1),
             nn.BatchNorm2d(out_channels) if batch_norm else nn.Identity(),
             nn.LeakyReLU(0.2, inplace=True),
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.conv_blocks(x)
         x = self.mlp(x)
         return x
 
 
 class VGG19FeatureExtractor(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         vgg = vgg19(pretrained=True)
         self.vgg = nn.Sequential(*list(vgg.features)[:-1]).eval()
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.vgg(x)

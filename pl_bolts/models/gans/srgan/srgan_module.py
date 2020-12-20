@@ -19,7 +19,7 @@ class SRGAN(pl.LightningModule):
         generator_checkpoint: str = "srresnet.pt",
         learning_rate: float = 0.0002,
         **kwargs
-    ):
+    ) -> None:
         """
         Args:
             image_channels: Number of channels of the images from the dataset
@@ -41,7 +41,7 @@ class SRGAN(pl.LightningModule):
         opt_gen = torch.optim.Adam(self.generator.parameters(), lr=lr)
         return [opt_disc, opt_gen], []
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.generator(x)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
@@ -70,10 +70,12 @@ class SRGAN(pl.LightningModule):
 
     def _get_disc_loss(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
         real_pred = self.discriminator(hr_image)
-        real_loss = self._get_adv_loss(real_pred, ones=True)
+        # TODO: check if ones=False or ones=True
+        real_loss = self._get_adv_loss(real_pred, ones=False)
 
         _, fake_pred = self._get_fake_pred(lr_image)
-        fake_loss = self._get_adv_loss(fake_pred, ones=False)
+        # TODO: check if ones=False or ones=True
+        fake_loss = self._get_adv_loss(fake_pred, ones=True)
 
         disc_loss = 0.5 * (real_loss + fake_loss)
 
@@ -127,12 +129,10 @@ def cli_main(args=None):
     args = parser.parse_args(args)
 
     model = SRGAN(**vars(args))
-    dm = STL10_SR_DataModule(**vars(args))
+    dm = STL10_SR_DataModule.from_argparse_args(args)
     trainer = pl.Trainer.from_argparse_args(args, callbacks=[SRImageLoggerCallback()])
     trainer.fit(model, dm)
 
-    return dm, model, trainer
-
 
 if __name__ == "__main__":
-    dm, model, trainer = cli_main()
+    cli_main()

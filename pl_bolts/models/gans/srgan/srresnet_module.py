@@ -16,7 +16,7 @@ class SRResNet(pl.LightningModule):
         feature_maps: int = 64,
         learning_rate: float = 1e-4,
         **kwargs
-    ):
+    ) -> None:
         """
         Args:
             image_channels: Number of channels of the images from the dataset
@@ -61,7 +61,7 @@ def cli_main(args=None):
     args = parser.parse_args(args)
 
     model = SRResNet(**vars(args))
-    dm = STL10_SR_DataModule(**vars(args))
+    dm = STL10_SR_DataModule.from_argparse_args(args)
     trainer = pl.Trainer.from_argparse_args(args, callbacks=[SRImageLoggerCallback()])
     trainer.fit(model, dm)
 

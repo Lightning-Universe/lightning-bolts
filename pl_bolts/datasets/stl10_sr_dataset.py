@@ -3,6 +3,7 @@ from PIL import Image
 
 from pl_bolts.utils.warnings import warn_missing_pkg
 
+# TODO: change imports
 try:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import STL10
@@ -14,7 +15,7 @@ else:
 
 
 class STL10_SR(STL10):
-    def __init__(self, root, *args, **kwargs):
+    def __init__(self, root: str, *args, **kwargs) -> None:
         super().__init__(root, *args, **kwargs)
 
         # Scale range of HR images to [-1, 1]
@@ -35,6 +36,7 @@ class STL10_SR(STL10):
 
     def __getitem__(self, index):
         data = self.data[index]
+        # TODO compare with coursera implementation
         image = Image.fromarray(np.transpose(data, (1, 2, 0)))
 
         hr_image = self.hr_transforms(image)

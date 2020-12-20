@@ -1,11 +1,13 @@
 import torch
 import torch.nn.functional as F
 from pytorch_lightning import Callback
+
+# TODO add import
 from torchvision.utils import make_grid
 
 
 class SRImageLoggerCallback(Callback):
-    def __init__(self, log_interval: int = 100, num_samples: int = 3):
+    def __init__(self, log_interval: int = 100, num_samples: int = 3) -> None:
         super().__init__()
         self.log_interval = log_interval
         self.num_samples = num_samples
