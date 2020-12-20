@@ -220,13 +220,14 @@ class TrainingDataMonitor(DataMonitorBase):
         """
         super().__init__(log_every_n_steps=log_every_n_steps)
 
-    def on_train_batch_start(self,
-                             trainer: Trainer,
-                             pl_module: LightningModule,
-                             batch: Sequence,
-                             *args: int,
-                             **kwargs: int
-                             ) -> None:
+    def on_train_batch_start(
+            self,
+            trainer: Trainer,
+            pl_module: LightningModule,
+            batch: Sequence,
+            *args: int,
+            **kwargs: int,
+    ) -> None:
         super().on_train_batch_start(trainer, pl_module, batch, *args, **kwargs)
         self.log_histograms(batch, group=self.GROUP_NAME)
 

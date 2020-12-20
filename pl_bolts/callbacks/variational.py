@@ -22,14 +22,6 @@ class LatentDimInterpolator(Callback):
 
     Default interpolates between [-5, 5] (-5, -4, -3, ..., 3, 4, 5)
 
-    Args:
-        interpolate_epoch_interval: default 20
-        range_start: default -5
-        range_end: default 5
-        steps: number of step between start and end
-        num_samples: default 2
-        normalize: default True (change image to (0, 1) range)
-
     Example::
 
         from pl_bolts.callbacks import LatentDimInterpolator
@@ -46,6 +38,15 @@ class LatentDimInterpolator(Callback):
         num_samples: int = 2,
         normalize: bool = True,
     ):
+        """	
+        Args:	
+            interpolate_epoch_interval: default 20	
+            range_start: default -5	
+            range_end: default 5	
+            steps: number of step between start and end	
+            num_samples: default 2	
+            normalize: default True (change image to (0, 1) range)	
+        """
         super().__init__()
         self.interpolate_epoch_interval = interpolate_epoch_interval
         self.range_start = range_start

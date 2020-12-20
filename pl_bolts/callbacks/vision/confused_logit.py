@@ -106,13 +106,14 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
                 self._plot(confusing_x, confusing_y, trainer, pl_module, mask_idxs)
                 pl_module.train()
 
-    def _plot(self,
-              confusing_x: Tensor,
-              confusing_y: Tensor,
-              trainer: Trainer,
-              model: LightningModule,
-              mask_idxs: Tensor
-              ) -> None:
+    def _plot(
+            self,
+            confusing_x: Tensor,
+            confusing_y: Tensor,
+            trainer: Trainer,
+            model: LightningModule,
+            mask_idxs: Tensor,
+    ) -> None:
         if not _MATPLOTLIB_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `matplotlib` which is not installed yet, install it with `pip install matplotlib`.'
