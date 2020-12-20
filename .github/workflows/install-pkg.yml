@@ -47,7 +47,6 @@ jobs:
       - name: Create package
         run: |
           # python setup.py check --metadata --strict
-          pip install matplotlib
           python setup.py sdist
 
       - name: Install package
@@ -55,7 +54,7 @@ jobs:
           pip install virtualenv
           virtualenv vEnv ; source vEnv/bin/activate
           # pip install -r requirements.txt
-          pip install torchvision
+          pip install torchvision matplotlib
           pip install dist/*
           cd .. & python -c "import pytorch_lightning as pl ; print(pl.__version__)"
           cd .. & python -c "import pl_bolts ; print(pl_bolts.__version__)"
