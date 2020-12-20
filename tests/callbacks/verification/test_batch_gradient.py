@@ -4,8 +4,9 @@ from torch import nn as nn
 
 from pytorch_lightning import Trainer, LightningModule
 
-from pl_bolts.callbacks.verification.batch_gradient import BatchGradientVerification, BatchGradientVerificationCallback, \
-    default_input_mapping, default_output_mapping
+from pl_bolts.callbacks import BatchGradientVerificationCallback
+from pl_bolts.callbacks.verification import BatchGradientVerification
+from pl_bolts.callbacks.verification.batch_gradient import default_input_mapping, default_output_mapping
 
 
 class TemplateModel(nn.Module):
