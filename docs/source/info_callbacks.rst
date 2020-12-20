@@ -104,7 +104,7 @@ does all of that for you before training begins.
 
 This Callback will warn the user with the following message in case data mixing inside the batch is detected:
 
-.. code-block:: bash
+.. code-block::
 
     Your model is mixing data across the batch dimension.
     This can lead to wrong gradient updates in the optimizer.
