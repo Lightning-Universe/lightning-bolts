@@ -30,5 +30,5 @@ class SRImageLoggerCallback(Callback):
             hr_fake_grid = make_grid(hr_fake[: self.num_samples], nrow=1, normalize=True)
 
             grid = torch.cat((lr_image_grid, hr_image_grid, hr_fake_grid), -1)
-            title = f"sr_images"
+            title = "sr_images"
             trainer.logger.experiment.add_image(title, grid, global_step=global_step)

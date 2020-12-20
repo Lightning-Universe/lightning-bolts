@@ -1,4 +1,7 @@
-# based on https://colab.research.google.com/github/https-deeplearning-ai/GANs-Public/blob/master/C3W2_SRGAN_(Optional).ipynb  noqa: E501
+"""
+based on
+https://colab.research.google.com/github/https-deeplearning-ai/GANs-Public/blob/master/C3W2_SRGAN_(Optional).ipynb
+"""
 import torch
 import torch.nn as nn
 
