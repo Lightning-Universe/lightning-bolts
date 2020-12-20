@@ -1,7 +1,6 @@
-from typing import Callable, Any, List, Optional
+from typing import Any, Callable, List, Optional
 
 import torch
-
 from pytorch_lightning.utilities.apply_func import apply_to_collection
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 

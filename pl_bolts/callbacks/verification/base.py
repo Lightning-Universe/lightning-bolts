@@ -1,12 +1,11 @@
 from abc import abstractmethod
 from copy import deepcopy
-
-import torch.nn as nn
 from typing import Any, Optional
 
+import torch.nn as nn
 from pytorch_lightning import Callback
 from pytorch_lightning.core.lightning import LightningModule
-from pytorch_lightning.utilities import rank_zero_warn, move_data_to_device
+from pytorch_lightning.utilities import move_data_to_device, rank_zero_warn
 
 
 class VerificationBase:
