@@ -11,6 +11,7 @@ from pl_bolts.datamodules import (
     CityscapesDataModule,
     FashionMNISTDataModule,
     MNISTDataModule,
+    STL10_SR_DataModule,
 )
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
 
@@ -91,3 +92,19 @@ def _create_dm(dm_cls, datadir, val_split=0.2):
     dm.prepare_data()
     dm.setup()
     return dm
+
+
+def test_stl10_sr_datamodule(datadir):
+    dm = STL10_SR_DataModule(datadir, num_workers=1, batch_size=2)
+    dm.prepare_data()
+    dm.setup()
+
+    loader = dm.train_dataloader()
+    hr_image, lr_image = next(iter(loader))
+
+    assert hr_image.size() == torch.Size([2, 3, 96, 96])
+    assert lr_image.size() == torch.Size([2, 3, 24, 24])
+    assert hr_image.min() == -1.0
+    assert hr_image.max() == 1.0
+    assert lr_image.min() == 0.0
+    assert lr_image.max() == 1.0

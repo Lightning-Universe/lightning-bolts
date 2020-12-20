@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 
 from pl_bolts.callbacks import SRImageLoggerCallback
-from pl_bolts.datamodules.stl10_sr_datamodule import STL10_SR_DataModule
+from pl_bolts.datamodules import STL10_SR_DataModule
 from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, VGG19FeatureExtractor
 
 
