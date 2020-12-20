@@ -18,8 +18,8 @@ from pl_bolts.metrics.object_detection import giou
         )
     ],
 )
-def test_complete_overlap(pred, target, expected_giou):
-    torch.testing.assert_allclose(giou(pred, target), expected_giou)
+def test_complete_overlap(preds, target, expected_giou):
+    torch.testing.assert_allclose(giou(preds, target), expected_giou)
 
 
 @pytest.mark.parametrize(
@@ -37,5 +37,5 @@ def test_complete_overlap(pred, target, expected_giou):
         ),
     ],
 )
-def test_no_overlap(pred, target, expected_giou):
-    torch.testing.assert_allclose(giou(pred, target), expected_giou)
+def test_no_overlap(preds, target, expected_giou):
+    torch.testing.assert_allclose(giou(preds, target), expected_giou)

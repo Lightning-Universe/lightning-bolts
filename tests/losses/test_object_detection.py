@@ -18,8 +18,8 @@ from pl_bolts.losses.object_detection import giou_loss
         )
     ],
 )
-def test_complete_overlap(pred, target, expected_loss):
-    torch.testing.assert_allclose(giou_loss(pred, target), expected_loss)
+def test_complete_overlap(preds, target, expected_loss):
+    torch.testing.assert_allclose(giou_loss(preds, target), expected_loss)
 
 
 @pytest.mark.parametrize(
@@ -37,5 +37,5 @@ def test_complete_overlap(pred, target, expected_loss):
         ),
     ],
 )
-def test_no_overlap(pred, target, expected_loss):
-    torch.testing.assert_allclose(giou_loss(pred, target), expected_loss)
+def test_no_overlap(preds, target, expected_loss):
+    torch.testing.assert_allclose(giou_loss(preds, target), expected_loss)
