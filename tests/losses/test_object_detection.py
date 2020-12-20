@@ -9,7 +9,7 @@ from pl_bolts.losses.object_detection import giou_loss
 
 
 @pytest.mark.parametrize(
-    "pred, target, expected_loss",
+    "preds, target, expected_loss",
     [
         (
             torch.tensor([[100, 100, 200, 200]]),
@@ -23,7 +23,7 @@ def test_complete_overlap(pred, target, expected_loss):
 
 
 @pytest.mark.parametrize(
-    "pred, target, expected_loss",
+    "preds, target, expected_loss",
     [
         (
             torch.tensor([[100, 100, 200, 200]]),
