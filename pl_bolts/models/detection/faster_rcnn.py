@@ -122,9 +122,6 @@ class FasterRCNN(pl.LightningModule):
         parser.add_argument("--pretrained_backbone", type=bool, default=True)
         parser.add_argument("--trainable_backbone_layers", type=int, default=3)
         parser.add_argument("--replace_head", type=bool, default=True)
-
-        parser.add_argument("--data_dir", type=str, default=".")
-        parser.add_argument("--batch_size", type=int, default=1)
         return parser
 
 

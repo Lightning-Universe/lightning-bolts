@@ -5,16 +5,13 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
-
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
 else:
-    _TORCHVISION_AVAILABLE = True
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
 class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
@@ -26,6 +23,10 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
             data_dir,
             meta_dir=None,
             num_workers=16,
+            batch_size: int = 32,
+            shuffle: bool = False,
+            pin_memory: bool = False,
+            drop_last: bool = False,
             *args,
             **kwargs,
     ):
@@ -39,6 +40,10 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         self.data_dir = data_dir
         self.num_workers = num_workers
         self.meta_dir = meta_dir
+        self.batch_size = batch_size
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
 
     @property
     def num_classes(self):
@@ -74,7 +79,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
                 UnlabeledImagenet.generate_meta_bins(path)
                 """)
 
-    def train_dataloader(self, batch_size, num_images_per_class=-1, add_normalize=False):
+    def train_dataloader(self, num_images_per_class=-1, add_normalize=False):
         transforms = self._default_transforms() if self.train_transforms is None else self.train_transforms
 
         dataset = UnlabeledImagenet(self.data_dir,
@@ -84,15 +89,15 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
                                     transform=transforms)
         loader = DataLoader(
             dataset,
-            batch_size=batch_size,
-            shuffle=True,
+            batch_size=self.batch_size,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
-    def val_dataloader(self, batch_size, num_images_per_class=50, add_normalize=False):
+    def val_dataloader(self, num_images_per_class=50, add_normalize=False):
         transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
 
         dataset = UnlabeledImagenet(self.data_dir,
@@ -102,14 +107,15 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
                                     transform=transforms)
         loader = DataLoader(
             dataset,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
-    def test_dataloader(self, batch_size, num_images_per_class, add_normalize=False):
+    def test_dataloader(self, num_images_per_class, add_normalize=False):
         transforms = self._default_transforms() if self.test_transforms is None else self.test_transforms
 
         dataset = UnlabeledImagenet(self.data_dir,
@@ -119,11 +125,11 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
                                     transform=transforms)
         loader = DataLoader(
             dataset,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 

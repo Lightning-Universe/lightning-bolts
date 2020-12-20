@@ -1,4 +1,9 @@
 [tool.isort]
 profile = "black"
-src_paths = ["pl_bolts", "tests"]
+known_first_party = [
+    "pl_bolts",
+    "tests",
+    "docs",
+    "notebooks",
+]
 line_length = 120

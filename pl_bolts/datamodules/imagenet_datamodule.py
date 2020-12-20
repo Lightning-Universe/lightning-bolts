@@ -4,24 +4,15 @@ from typing import Optional
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
+from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
 else:
-    _TORCHVISION_AVAILABLE = True
-
-try:
-    from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
-except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
 
 
 class ImagenetDataModule(LightningDataModule):
@@ -64,6 +55,9 @@ class ImagenetDataModule(LightningDataModule):
             image_size: int = 224,
             num_workers: int = 16,
             batch_size: int = 32,
+            shuffle: bool = False,
+            pin_memory: bool = False,
+            drop_last: bool = False,
             *args,
             **kwargs,
     ):
@@ -75,6 +69,10 @@ class ImagenetDataModule(LightningDataModule):
             image_size: final image size
             num_workers: how many data workers
             batch_size: batch_size
+            shuffle: If true shuffles the data every epoch
+            pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
+                        returning them
+            drop_last: If true drops the last incomplete batch
         """
         super().__init__(*args, **kwargs)
 
@@ -90,6 +88,9 @@ class ImagenetDataModule(LightningDataModule):
         self.meta_dir = meta_dir
         self.num_imgs_per_val_class = num_imgs_per_val_class
         self.batch_size = batch_size
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
         self.num_samples = 1281167 - self.num_imgs_per_val_class * self.num_classes
 
     @property
@@ -152,10 +153,10 @@ class ImagenetDataModule(LightningDataModule):
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
-            shuffle=True,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -179,7 +180,8 @@ class ImagenetDataModule(LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -199,8 +201,8 @@ class ImagenetDataModule(LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 

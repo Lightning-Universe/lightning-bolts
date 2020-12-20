@@ -2,7 +2,7 @@
 
 import os
 
-__version__ = '0.2.5rc1'
+__version__ = '0.2.6rc1'
 __author__ = 'PyTorchLightning et al.'
 __author_email__ = 'name@pytorchlightning.ai'
 __license__ = 'Apache-2.0'
@@ -33,9 +33,9 @@ PACKAGE_ROOT = os.path.dirname(__file__)
 try:
     # This variable is injected in the __builtins__ by the build process.
     # It used to enable importing subpackages when the binaries are not built.
-    __LIGHTNING_BOLT_SETUP__
+    _ = None if __LIGHTNING_BOLT_SETUP__ else None
 except NameError:
-    __LIGHTNING_BOLT_SETUP__ = False
+    __LIGHTNING_BOLT_SETUP__: bool = False
 
 if __LIGHTNING_BOLT_SETUP__:
     import sys  # pragma: no-cover
@@ -43,15 +43,16 @@ if __LIGHTNING_BOLT_SETUP__:
     sys.stdout.write(f'Partial import of `{__name__}` during the build process.\n')  # pragma: no-cover
     # We are not importing the rest of the lightning during the build process, as it may not be compiled yet
 else:
-
-    # from pl_bolts.models.mnist_module import LitMNIST
-    from pl_bolts import callbacks, datamodules, datasets, metrics, models, transforms
+    from pl_bolts import callbacks, datamodules, datasets, losses, metrics, models, optimizers, transforms, utils
 
     __all__ = [
-        # 'LitMNIST',
-        'models',
-        'metrics',
         'callbacks',
         'datamodules',
         'datasets',
+        'losses',
+        'metrics',
+        'models',
+        'optimizers',
+        'transforms',
+        'utils'
     ]

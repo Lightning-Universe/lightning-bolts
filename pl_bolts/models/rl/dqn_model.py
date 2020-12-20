@@ -18,17 +18,17 @@ from torch.utils.data import DataLoader
 from pl_bolts.datamodules.experience_source import Experience, ExperienceSourceDataset
 from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common.agents import ValueAgent
+from pl_bolts.models.rl.common.gym_wrappers import make_environment
 from pl_bolts.models.rl.common.memory import MultiStepBuffer
 from pl_bolts.models.rl.common.networks import CNN
+from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
-    from pl_bolts.models.rl.common.gym_wrappers import gym, make_environment
-except ModuleNotFoundError:
-    warn_missing_pkg('gym')  # pragma: no-cover
-    _GYM_AVAILABLE = False
+if _GYM_AVAILABLE:
+    from gym import Env
 else:
-    _GYM_AVAILABLE = True
+    warn_missing_pkg('gym')  # pragma: no-cover
+    Env = object
 
 
 class DQN(pl.LightningModule):
@@ -338,7 +338,7 @@ class DQN(pl.LightningModule):
         return self._dataloader()
 
     @staticmethod
-    def make_environment(env_name: str, seed: Optional[int] = None) -> gym.Env:
+    def make_environment(env_name: str, seed: Optional[int] = None) -> Env:
         """
         Initialise gym  environment
 

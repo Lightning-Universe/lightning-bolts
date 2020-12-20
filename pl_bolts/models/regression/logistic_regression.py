@@ -137,9 +137,6 @@ def cli_main():
             'You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`.'
         ) from err
 
-    X, y = load_iris(return_X_y=True)
-    loaders = SklearnDataModule(X, y)
-
     # args
     parser = ArgumentParser()
     parser = LogisticRegression.add_model_specific_args(parser)
@@ -150,9 +147,13 @@ def cli_main():
     # model = LogisticRegression(**vars(args))
     model = LogisticRegression(input_dim=4, num_classes=3, l1_strength=0.01, learning_rate=0.01)
 
+    # data
+    X, y = load_iris(return_X_y=True)
+    loaders = SklearnDataModule(X, y, batch_size=args.batch_size)
+
     # train
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model, loaders.train_dataloader(args.batch_size), loaders.val_dataloader(args.batch_size))
+    trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
 
 
 if __name__ == '__main__':

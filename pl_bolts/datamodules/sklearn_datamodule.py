@@ -6,15 +6,13 @@ import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
 
+from pl_bolts.utils import _SKLEARN_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _SKLEARN_AVAILABLE:
     from sklearn.utils import shuffle as sk_shuffle
-except ModuleNotFoundError:
-    warn_missing_pkg("sklearn")  # pragma: no-cover
-    _SKLEARN_AVAILABLE = False
 else:
-    _SKLEARN_AVAILABLE = True
+    warn_missing_pkg("sklearn")  # pragma: no-cover
 
 
 class SklearnDataset(Dataset):
@@ -52,7 +50,7 @@ class SklearnDataset(Dataset):
         y = self.Y[idx]
 
         # Do not convert integer to float for classification data
-        if not y.dtype == np.integer:
+        if not ((y.dtype == np.int32) or (y.dtype == np.int64)):
             y = y.astype(np.float32)
 
         if self.X_transform:
@@ -118,26 +116,26 @@ class SklearnDataModule(LightningDataModule):
         >>> from pl_bolts.datamodules import SklearnDataModule
         ...
         >>> X, y = load_boston(return_X_y=True)
-        >>> loaders = SklearnDataModule(X, y)
+        >>> loaders = SklearnDataModule(X, y, batch_size=32)
         ...
         >>> # train set
-        >>> train_loader = loaders.train_dataloader(batch_size=32)
+        >>> train_loader = loaders.train_dataloader()
         >>> len(train_loader.dataset)
         355
         >>> len(train_loader)
-        11
+        12
         >>> # validation set
-        >>> val_loader = loaders.val_dataloader(batch_size=32)
+        >>> val_loader = loaders.val_dataloader()
         >>> len(val_loader.dataset)
         100
         >>> len(val_loader)
-        3
+        4
         >>> # test set
-        >>> test_loader = loaders.test_dataloader(batch_size=32)
+        >>> test_loader = loaders.test_dataloader()
         >>> len(test_loader.dataset)
         51
         >>> len(test_loader)
-        1
+        2
     """
 
     name = 'sklearn'
@@ -150,12 +148,19 @@ class SklearnDataModule(LightningDataModule):
             num_workers=2,
             random_state=1234,
             shuffle=True,
+            batch_size: int = 16,
+            pin_memory=False,
+            drop_last=False,
             *args,
             **kwargs,
     ):
 
         super().__init__(*args, **kwargs)
         self.num_workers = num_workers
+        self.batch_size = batch_size
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
 
         # shuffle x and y
         if shuffle and _SKLEARN_AVAILABLE:
@@ -193,36 +198,36 @@ class SklearnDataModule(LightningDataModule):
         self.val_dataset = SklearnDataset(x_val, y_val)
         self.test_dataset = SklearnDataset(x_test, y_test)
 
-    def train_dataloader(self, batch_size: int = 16):
+    def train_dataloader(self):
         loader = DataLoader(
             self.train_dataset,
-            batch_size=batch_size,
-            shuffle=True,
+            batch_size=self.batch_size,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
-    def val_dataloader(self, batch_size: int = 16):
+    def val_dataloader(self):
         loader = DataLoader(
             self.val_dataset,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
-    def test_dataloader(self, batch_size: int = 16):
+    def test_dataloader(self):
         loader = DataLoader(
             self.test_dataset,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 

@@ -28,7 +28,7 @@ PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 PATH_ROOT = os.path.join(PATH_HERE, '..', '..')
 sys.path.insert(0, os.path.abspath(PATH_ROOT))
 
-builtins.__LIGHTNING_BOLT_SETUP__ = True
+builtins.__LIGHTNING_BOLT_SETUP__: bool = True
 
 SPHINX_MOCK_REQUIREMENTS = int(os.environ.get('SPHINX_MOCK_REQUIREMENTS', True))
 
@@ -339,8 +339,8 @@ def package_list_from_file(file):
         for ln in fp.readlines():
             found = [ln.index(ch) for ch in list(',=<>#') if ch in ln]
             pkg = ln[:min(found)] if found else ln
-            if pkg.rstrip():
-                mocked_packages.append(pkg.rstrip())
+            if pkg.strip():
+                mocked_packages.append(pkg.strip())
     return mocked_packages
 
 
@@ -360,8 +360,7 @@ if SPHINX_MOCK_REQUIREMENTS:
 # replace PyPI packages by importing ones
 MOCK_PACKAGES = [PACKAGE_MAPPING.get(pkg, pkg) for pkg in MOCK_PACKAGES]
 
-MOCK_MANUAL_PACKAGES = []
-autodoc_mock_imports = MOCK_PACKAGES + MOCK_MANUAL_PACKAGES
+autodoc_mock_imports = MOCK_PACKAGES
 # for mod_name in MOCK_REQUIRE_PACKAGES:
 #     sys.modules[mod_name] = mock.Mock()
 
@@ -441,10 +440,6 @@ import torch
 
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer, LightningModule
-from pytorch_lightning.utilities import NATIVE_AMP_AVALAIBLE
-APEX_AVAILABLE = importlib.util.find_spec("apex") is not None
-XLA_AVAILABLE = importlib.util.find_spec("torch_xla") is not None
-TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
 
 """
 coverage_skip_undoc_in_source = True

@@ -41,6 +41,7 @@ def test_logistic_regression_model(tmpdir, datadir):
 
     model = LogisticRegression(input_dim=28 * 28, num_classes=10, learning_rate=0.001)
     model.prepare_data = dm.prepare_data
+    model.setup = dm.setup
     model.train_dataloader = dm.train_dataloader
     model.val_dataloader = dm.val_dataloader
     model.test_dataloader = dm.test_dataloader
