@@ -1,7 +1,9 @@
 import math
+from typing import Any, List, Sequence, Tuple, Union
 
 import numpy as np
 import torch
+from torch import Tensor
 
 from pl_bolts.utils import _SKLEARN_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -24,14 +26,18 @@ class Identity(torch.nn.Module):
         model.fc = Identity()
 
     """
-    def __init__(self):
+    def __init__(self) -> None:
         super(Identity, self).__init__()
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         return x
 
 
-def balance_classes(X: np.ndarray, Y: list, batch_size: int):
+def balance_classes(
+    X: Union[Tensor, np.ndarray],
+    Y: Union[Tensor, np.ndarray, Sequence[int]],
+    batch_size: int
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Makes sure each batch has an equal amount of data from each class.
     Perfect balance
@@ -51,19 +57,19 @@ def balance_classes(X: np.ndarray, Y: list, batch_size: int):
     nb_batches = math.ceil(len(Y) / batch_size)
 
     # sort by classes
-    final_batches_x = [[] for i in range(nb_batches)]
-    final_batches_y = [[] for i in range(nb_batches)]
+    final_batches_x: List[list] = [[] for i in range(nb_batches)]
+    final_batches_y: List[list] = [[] for i in range(nb_batches)]
 
     # Y needs to be np arr
     Y = np.asarray(Y)
 
     # pick chunk size for each class using the largest split
-    chunk_size = []
+    chunk_sizes = []
     for class_i in range(nb_classes):
         mask = Y == class_i
         y = Y[mask]
-        chunk_size.append(math.ceil(len(y) / nb_batches))
-    chunk_size = max(chunk_size)
+        chunk_sizes.append(math.ceil(len(y) / nb_batches))
+    chunk_size = max(chunk_sizes)
     # force chunk size to be even
     if chunk_size % 2 != 0:
         chunk_size -= 1
@@ -102,7 +108,7 @@ def generate_half_labeled_batches(
         larger_set_X: np.ndarray,
         larger_set_Y: np.ndarray,
         batch_size: int,
-):
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Given a labeled dataset and an unlabeled dataset, this function generates
     a joint pair where half the batches are labeled and the other half is not

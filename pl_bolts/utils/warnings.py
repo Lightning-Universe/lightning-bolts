@@ -1,10 +1,16 @@
 import os
 import warnings
+from typing import Any, Callable, Optional
 
 MISSING_PACKAGE_WARNINGS = {}
 
 
-def warn_missing_pkg(pkg_name: str, pypi_name: str = None, extra_text: str = None, stdout_func=warnings.warn):
+def warn_missing_pkg(
+    pkg_name: str,
+    pypi_name: Optional[str] = None,
+    extra_text: Optional[str] = None,
+    stdout_func: Callable = warnings.warn,
+) -> int:
     """
     Template for warning on missing packages, show them just once.
 
