@@ -4,7 +4,10 @@ import torch
 from pytorch_lightning.utilities.apply_func import apply_to_collection
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
-from pl_bolts.callbacks.verification.base import VerificationBase, VerificationCallbackBase
+from pl_bolts.callbacks.verification.base import (
+    VerificationBase,
+    VerificationCallbackBase,
+)
 
 
 class BatchGradientVerification(VerificationBase):
