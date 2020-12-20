@@ -1,6 +1,6 @@
 import os
 import warnings
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 
 MISSING_PACKAGE_WARNINGS = {}
 
