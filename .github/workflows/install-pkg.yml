@@ -47,6 +47,7 @@ jobs:
       - name: Create package
         run: |
           # python setup.py check --metadata --strict
+          pip install matplotlib
           python setup.py sdist
 
       - name: Install package
