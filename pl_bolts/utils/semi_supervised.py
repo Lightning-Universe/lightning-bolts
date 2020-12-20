@@ -57,8 +57,8 @@ def balance_classes(
     nb_batches = math.ceil(len(Y) / batch_size)
 
     # sort by classes
-    final_batches_x: List[Any] = [[] for i in range(nb_batches)]
-    final_batches_y: List[Any] = [[] for i in range(nb_batches)]
+    final_batches_x: List[list] = [[] for i in range(nb_batches)]
+    final_batches_y: List[list] = [[] for i in range(nb_batches)]
 
     # Y needs to be np arr
     Y = np.asarray(Y)
