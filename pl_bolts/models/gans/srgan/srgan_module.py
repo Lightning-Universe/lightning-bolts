@@ -11,6 +11,23 @@ from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, VGG19Featu
 
 
 class SRGAN(pl.LightningModule):
+    """
+    SRGAN implementation from the paper `Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial
+    Network <https://arxiv.org/pdf/1609.04802.pdf>`_. It uses a pretrained SRResNet model as the generator.
+
+    Example::
+
+        from pl_bolts.models.gan import SRGAN
+
+        m = SRGAN()
+        Trainer(gpus=2).fit(m)
+
+    Example CLI::
+
+        # STL10 dataset
+        python  srgan_module.py --gpus 1
+    """
+
     def __init__(
         self,
         image_channels: int = 3,
@@ -44,6 +61,14 @@ class SRGAN(pl.LightningModule):
         return [opt_disc, opt_gen], []
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Generates a high resolution image given a low resolution image
+
+        Example::
+
+            gan = SRGAN.load_from_checkpoint(PATH)
+            hr_image = gan(lr_image)
+        """
         return self.generator(x)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
@@ -72,12 +97,10 @@ class SRGAN(pl.LightningModule):
 
     def _get_disc_loss(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
         real_pred = self.discriminator(hr_image)
-        # TODO check if ones=False or ones=True
-        real_loss = self._get_adv_loss(real_pred, ones=False)
+        real_loss = self._get_adv_loss(real_pred, ones=True)
 
         _, fake_pred = self._get_fake_pred(lr_image)
-        # TODO check if ones=False or ones=True
-        fake_loss = self._get_adv_loss(fake_pred, ones=True)
+        fake_loss = self._get_adv_loss(fake_pred, ones=False)
 
         disc_loss = 0.5 * (real_loss + fake_loss)
 
@@ -135,8 +158,8 @@ def cli_main(args=None):
     trainer = pl.Trainer.from_argparse_args(args, callbacks=[SRImageLoggerCallback()])
     trainer.fit(model, dm)
 
-    torch.save(SRGAN.generator, "srgenerator.pt")
-    torch.save(SRGAN.discriminator, "srdiscriminator.pt")
+    torch.save(model.generator, "srgenerator.pt")
+    torch.save(model.discriminator, "srdiscriminator.pt")
 
 
 if __name__ == "__main__":

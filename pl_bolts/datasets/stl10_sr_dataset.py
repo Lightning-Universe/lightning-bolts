@@ -15,6 +15,7 @@ else:
     warn_missing_pkg("torchvision")  # pragma: no-cover
     STL10 = None
 
+
 class STL10_SR(STL10):
     def __init__(self, root: str, *args, **kwargs) -> None:
         super().__init__(root, *args, **kwargs)
