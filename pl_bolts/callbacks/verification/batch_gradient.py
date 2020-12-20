@@ -1,4 +1,4 @@
-from typing import Callable, Any, List
+from typing import Callable, Any, List, Optional
 
 import torch
 
@@ -17,9 +17,9 @@ class BatchGradientVerification(VerificationBase):
 
     def check(
         self,
-        input_array=None,
-        input_mapping: Callable = None,
-        output_mapping: Callable = None,
+        input_array: Any,
+        input_mapping: Optional[Callable] = None,
+        output_mapping: Optional[Callable] = None,
         sample_idx=0,
     ) -> bool:
         """

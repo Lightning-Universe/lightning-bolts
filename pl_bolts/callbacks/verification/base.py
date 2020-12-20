@@ -2,9 +2,10 @@ from abc import abstractmethod
 from copy import deepcopy
 
 import torch.nn as nn
-from typing import Any
+from typing import Any, Optional
 
-from pytorch_lightning import Callback, LightningModule
+from pytorch_lightning import Callback
+from pytorch_lightning.core.lightning import LightningModule
 from pytorch_lightning.utilities import rank_zero_warn, move_data_to_device
 
 
@@ -37,7 +38,7 @@ class VerificationBase:
         """
         pass
 
-    def _get_input_array_copy(self, input_array=None) -> Any:
+    def _get_input_array_copy(self, input_array: Optional[Any] = None) -> Any:
         """
         Returns a deep copy of the example input array in cases where it is expected that the
         input changes during the verification process.
@@ -101,7 +102,7 @@ class VerificationCallbackBase(Callback):
         """
         The message to be printed when the model does not pass the verification.
         If the message for warning and error differ, override the
-        :meth:`VerificationCallbackBase.warning_message` and :meth:`VerificationCallbackBase.error_message`
+        :meth:`warning_message` and :meth:`error_message`
         methods directly.
 
         Arguments:
