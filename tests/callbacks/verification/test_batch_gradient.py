@@ -1,8 +1,7 @@
 import pytest
 import torch
+from pytorch_lightning import LightningModule, Trainer
 from torch import nn as nn
-
-from pytorch_lightning import Trainer, LightningModule
 
 from pl_bolts.callbacks import BatchGradientVerificationCallback
 from pl_bolts.callbacks.verification import BatchGradientVerification
