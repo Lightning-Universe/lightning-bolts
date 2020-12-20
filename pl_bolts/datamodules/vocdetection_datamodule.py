@@ -62,7 +62,6 @@ def _prepare_voc_instance(image, target):
     https://github.com/pytorch/vision/issues/1097#issuecomment-508917489
     """
     anno = target["annotation"]
-    h, w = anno["size"]["height"], anno["size"]["width"]
     boxes = []
     classes = []
     area = []
