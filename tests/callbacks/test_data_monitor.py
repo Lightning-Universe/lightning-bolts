@@ -1,5 +1,5 @@
 from unittest import mock
-from unittest.mock import ANY, call
+from unittest.mock import call
 
 import pytest
 import torch

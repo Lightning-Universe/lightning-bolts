@@ -1,4 +1,4 @@
-from pl_bolts.models.self_supervised.moco.transforms import (
+from pl_bolts.models.self_supervised.moco.transforms import (  # noqa: F401
     Moco2EvalCIFAR10Transforms,
     Moco2EvalImagenetTransforms,
     Moco2EvalSTL10Transforms,

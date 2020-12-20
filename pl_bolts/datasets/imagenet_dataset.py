@@ -1,6 +1,5 @@
 import gzip
 import hashlib
-import importlib
 import os
 import shutil
 import tarfile
