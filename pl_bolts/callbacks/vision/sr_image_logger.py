@@ -2,8 +2,13 @@ import torch
 import torch.nn.functional as F
 from pytorch_lightning import Callback
 
-# TODO add import
-from torchvision.utils import make_grid
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _TORCHVISION_AVAILABLE:
+    from torchvision.utils import make_grid
+else:
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
 class SRImageLoggerCallback(Callback):

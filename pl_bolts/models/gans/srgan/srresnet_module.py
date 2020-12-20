@@ -10,13 +10,7 @@ from pl_bolts.models.gans.srgan.components import SRGANGenerator
 
 
 class SRResNet(pl.LightningModule):
-    def __init__(
-        self,
-        image_channels: int = 3,
-        feature_maps: int = 64,
-        learning_rate: float = 1e-4,
-        **kwargs
-    ) -> None:
+    def __init__(self, image_channels: int = 3, feature_maps: int = 64, learning_rate: float = 1e-4, **kwargs) -> None:
         """
         Args:
             image_channels: Number of channels of the images from the dataset

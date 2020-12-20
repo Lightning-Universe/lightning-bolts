@@ -1,17 +1,14 @@
-# based on https://colab.research.google.com/github/https-deeplearning-ai/GANs-Public/blob/master/C3W2_SRGAN_(Optional).ipynb#scrollTo=cpyEsLi-OQj4 noqa: E501
+# based on https://colab.research.google.com/github/https-deeplearning-ai/GANs-Public/blob/master/C3W2_SRGAN_(Optional).ipynb  noqa: E501
 import torch
 import torch.nn as nn
 
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-# TODO: change import
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision.models import vgg19
-except ModuleNotFoundError:
-    warn_missing_pkg("torchvision")  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
 else:
-    _TORCHVISION_AVAILABLE = True
+    warn_missing_pkg("torchvision")  # pragma: no-cover
 
 
 class ResidualBlock(nn.Module):

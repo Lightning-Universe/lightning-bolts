@@ -1,17 +1,14 @@
 import numpy as np
 from PIL import Image
 
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-# TODO: change imports
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import STL10
-except ModuleNotFoundError:
-    warn_missing_pkg("torchvision")  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
 else:
-    _TORCHVISION_AVAILABLE = True
+    warn_missing_pkg("torchvision")  # pragma: no-cover
 
 
 class STL10_SR(STL10):
@@ -36,7 +33,6 @@ class STL10_SR(STL10):
 
     def __getitem__(self, index):
         data = self.data[index]
-        # TODO compare with coursera implementation
         image = Image.fromarray(np.transpose(data, (1, 2, 0)))
 
         hr_image = self.hr_transforms(image)

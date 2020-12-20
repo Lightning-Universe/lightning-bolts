@@ -39,6 +39,8 @@ class SRGAN(pl.LightningModule):
         lr = self.hparams.learning_rate
         opt_disc = torch.optim.Adam(self.discriminator.parameters(), lr=lr)
         opt_gen = torch.optim.Adam(self.generator.parameters(), lr=lr)
+
+        # TODO add lr scheduler
         return [opt_disc, opt_gen], []
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -70,11 +72,11 @@ class SRGAN(pl.LightningModule):
 
     def _get_disc_loss(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
         real_pred = self.discriminator(hr_image)
-        # TODO: check if ones=False or ones=True
+        # TODO check if ones=False or ones=True
         real_loss = self._get_adv_loss(real_pred, ones=False)
 
         _, fake_pred = self._get_fake_pred(lr_image)
-        # TODO: check if ones=False or ones=True
+        # TODO check if ones=False or ones=True
         fake_loss = self._get_adv_loss(fake_pred, ones=True)
 
         disc_loss = 0.5 * (real_loss + fake_loss)
@@ -132,6 +134,9 @@ def cli_main(args=None):
     dm = STL10_SR_DataModule.from_argparse_args(args)
     trainer = pl.Trainer.from_argparse_args(args, callbacks=[SRImageLoggerCallback()])
     trainer.fit(model, dm)
+
+    torch.save(SRGAN.generator, "srgenerator.pt")
+    torch.save(SRGAN.discriminator, "srdiscriminator.pt")
 
 
 if __name__ == "__main__":
