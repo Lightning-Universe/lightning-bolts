@@ -58,12 +58,13 @@ class BYOLMAWeightUpdate(Callback):
         self.current_tau = self.update_tau(pl_module, trainer)
 
     def update_tau(self, pl_module: LightningModule, trainer: Trainer) -> float:
-        max_steps = len(trainer.train_dataloader) * trainer.max_epochs
+        max_steps = len(trainer.train_dataloader) * trainer.max_epochs  # type: ignore[attr-defined]
         tau = 1 - (1 - self.initial_tau) * (math.cos(math.pi * pl_module.global_step / max_steps) + 1) / 2
         return tau
 
     def update_weights(self, online_net: Union[Module, Tensor], target_net: Union[Module, Tensor]) -> None:
         # apply MA weight update
-        for (name, online_p), (_, target_p) in zip(online_net.named_parameters(), target_net.named_parameters()):
+        for (name, online_p), (_, target_p) in zip(
+                online_net.named_parameters(), target_net.named_parameters()):  # type: ignore[union-attr]
             if 'weight' in name:
                 target_p.data = self.current_tau * target_p.data + (1 - self.current_tau) * online_p.data

@@ -72,7 +72,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
     def on_train_batch_end(self, trainer: Trainer, pl_module: LightningModule, outputs: Sequence,
                            batch: Sequence, batch_idx: int, dataloader_idx: int) -> None:
         # show images only every 20 batches
-        if (trainer.batch_idx + 1) % self.logging_batch_interval != 0:
+        if (trainer.batch_idx + 1) % self.logging_batch_interval != 0:  # type: ignore[attr-defined]
             return
 
         # pick the last batch and logits
@@ -87,9 +87,9 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
             raise AttributeError(m) from err
 
         # only check when it has opinions (ie: the logit > 5)
-        if logits.max() > self.min_logit_value:
+        if logits.max() > self.min_logit_value:  # type: ignore[operator]
             # pick the top two confused probs
-            (values, idxs) = torch.topk(logits, k=2, dim=1)
+            (values, idxs) = torch.topk(logits, k=2, dim=1)  # type: ignore[arg-type]
 
             # care about only the ones that are at most eps close to each other
             eps = self.max_logit_difference
@@ -112,7 +112,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
               trainer: Trainer,
               model: LightningModule,
               mask_idxs: Tensor
-              ):
+              ) -> None:
         if not _MATPLOTLIB_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `matplotlib` which is not installed yet, install it with `pip install matplotlib`.'
@@ -126,7 +126,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
 
         batch_size, c, w, h = confusing_x.size()
         for logit_i, x_param in enumerate((x_param_a, x_param_b)):
-            x_param = x_param.to(model.device)  # type: ignore
+            x_param = x_param.to(model.device)  # type: ignore[assignment]
             logits = model(x_param.view(batch_size, -1))
             logits[:, mask_idxs[:, logit_i]].sum().backward()
 

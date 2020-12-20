@@ -1,6 +1,6 @@
 import copy
 from itertools import zip_longest
-from typing import Any, Callable, Dict, List, Optional, Sized
+from typing import Any, Callable, Dict, List, Optional
 
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import Callback
@@ -80,19 +80,19 @@ def dicts_to_table(dicts: List[Dict],
     # optional arg prelude
     if keys is None:
         if len(dicts) > 0:
-            keys = dicts[0].keys()
+            keys = dicts[0].keys()  # type: ignore[assignment]
         elif header_names is not None:
             keys = header_names
         else:
             raise ValueError('keys or header_names mandatory on empty input list')
     if pads is None:
-        pads = [''] * len(keys)
-    elif len(pads) != len(keys):
-        raise ValueError(f'bad pad length {len(pads)}, expected: {len(keys)}')
+        pads = [''] * len(keys)  # type: ignore[arg-type]
+    elif len(pads) != len(keys):  # type: ignore[arg-type]
+        raise ValueError(f'bad pad length {len(pads)}, expected: {len(keys)}')  # type: ignore[arg-type]
     if fcodes is None:
-        fcodes = [''] * len(keys)
+        fcodes = [''] * len(keys)  # type: ignore[arg-type]
     elif len(fcodes) != len(fcodes):
-        raise ValueError(f'bad fcodes length {len(fcodes)}, expected: {len(keys)}')
+        raise ValueError(f'bad fcodes length {len(fcodes)}, expected: {len(keys)}')  # type: ignore[arg-type]
     if convert_headers is None:
         convert_headers = {}
     if header_names is None:
@@ -100,10 +100,10 @@ def dicts_to_table(dicts: List[Dict],
     if replace_values is None:
         replace_values = {}
     # build header
-    headline = '│'.join(f"{v:{pad}}" for v, pad in zip_longest(header_names, pads))
+    headline = '│'.join(f"{v:{pad}}" for v, pad in zip_longest(header_names, pads))  # type: ignore[arg-type]
     underline = '─' * len(headline)
     # suffix special keys to apply converters to later on
-    marked_keys = [h + '____' if h in convert_headers else h for h in keys]
+    marked_keys = [h + '____' if h in convert_headers else h for h in keys]  # type: ignore[union-attr]
     marked_values = {}
     s = '│'.join(f"{{{h}:{pad}{fcode}}}" for h, pad, fcode in zip_longest(marked_keys, pads, fcodes))
     lines = [headline, underline, ]
@@ -120,7 +120,7 @@ def dicts_to_table(dicts: List[Dict],
         elif none_keys:
             raise ValueError(f'keys {none_keys} are None in {d}. Do skip or use replace mapping.')
         for h in convert_headers:
-            if h in keys:
+            if h in keys:  # type: ignore[operator]
                 converter = convert_headers[h]
                 marked_values[h + '____'] = converter(d)
         line = s.format(**d, **marked_values)

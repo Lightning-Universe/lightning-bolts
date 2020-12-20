@@ -3,12 +3,12 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.nn import Module
 from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.loggers import LightningLoggerBase, TensorBoardLogger, WandbLogger
 from pytorch_lightning.utilities import rank_zero_warn
 from pytorch_lightning.utilities.apply_func import apply_to_collection
 from torch import Tensor
+from torch.nn import Module
 from torch.utils.hooks import RemovableHandle
 
 try:
@@ -42,7 +42,7 @@ class DataMonitorBase(Callback):
 
     def on_train_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
         self._log = self._is_logger_available(trainer.logger)
-        self._log_every_n_steps = self._log_every_n_steps or trainer.log_every_n_steps
+        self._log_every_n_steps = self._log_every_n_steps or trainer.log_every_n_steps  # type: ignore[attr-defined]
         self._trainer = trainer
 
     def on_train_batch_start(
@@ -61,7 +61,7 @@ class DataMonitorBase(Callback):
                 Each label also has the tensors's shape as suffix.
             group: Name under which the histograms will be grouped.
         """
-        if not self._log or (self._train_batch_idx + 1) % self._log_every_n_steps != 0:  # type: ignore
+        if not self._log or (self._train_batch_idx + 1) % self._log_every_n_steps != 0:  # type: ignore[operator]
             return
 
         batch = apply_to_collection(batch, dtype=np.ndarray, function=torch.from_numpy)
