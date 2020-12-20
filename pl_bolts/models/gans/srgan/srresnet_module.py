@@ -67,8 +67,6 @@ def cli_main(args=None):
 
     torch.save(model.srresnet, "srresnet.pt")
 
-    return dm, model, trainer
-
 
 if __name__ == "__main__":
-    dm, model, trainer = cli_main()
+    cli_main()

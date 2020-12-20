@@ -7,7 +7,7 @@ from torchvision.utils import make_grid
 
 
 class SRImageLoggerCallback(Callback):
-    def __init__(self, log_interval: int = 100, num_samples: int = 3) -> None:
+    def __init__(self, log_interval: int = 1000, num_samples: int = 5) -> None:
         super().__init__()
         self.log_interval = log_interval
         self.num_samples = num_samples
