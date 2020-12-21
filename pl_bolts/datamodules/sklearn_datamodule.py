@@ -209,7 +209,7 @@ class SklearnDataModule(LightningDataModule):
         x_val: np.ndarray,
         y_val: np.ndarray,
         x_test: np.ndarray,
-<<<<<<< HEAD
+        y_test: np.ndarray
     ) -> None:
         self.train_dataset = SklearnDataset(X, y)
         self.val_dataset = SklearnDataset(x_val, y_val)
