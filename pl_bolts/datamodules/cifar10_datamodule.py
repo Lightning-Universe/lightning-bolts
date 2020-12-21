@@ -71,7 +71,7 @@ class CIFAR10DataModule(VisionDataModule):
         drop_last: bool = False,
         *args: Any,
         **kwargs: Any,
-    ) -> None:
+    ):
         """
         Args:
             data_dir: Where to save/load the data
