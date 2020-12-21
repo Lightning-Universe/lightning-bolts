@@ -146,7 +146,7 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
 
     def __init__(
         self,
-        data_dir: Optional[str],
+        data_dir: Optional[str] = None,
         val_split: int = 50,
         num_workers: int = 16,
         num_samples: int = 100,

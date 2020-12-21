@@ -22,7 +22,7 @@ class KittiDataModule(LightningDataModule):
 
     def __init__(
             self,
-            data_dir: Optional[str],
+            data_dir: Optional[str] = None,
             val_split: float = 0.2,
             test_split: float = 0.1,
             num_workers: int = 16,
