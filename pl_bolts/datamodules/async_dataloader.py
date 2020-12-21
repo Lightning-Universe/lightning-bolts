@@ -34,7 +34,7 @@ class AsynchronousLoader(object):
             q_size: int = 10,
             num_batches: Optional[int] = None,
             **kwargs: Any
-    ):
+    ) -> None:
         if isinstance(data, torch.utils.data.DataLoader):
             self.dataloader = data
         else:
@@ -57,7 +57,7 @@ class AsynchronousLoader(object):
 
         self.np_str_obj_array_pattern = re.compile(r'[SaUO]')
 
-    def load_loop(self):  # The loop that will load into the queue in the background
+    def load_loop(self) -> None:  # The loop that will load into the queue in the background
         for i, sample in enumerate(self.dataloader):
             self.queue.put(self.load_instance(sample))
             if i == len(self):
