@@ -73,7 +73,7 @@ class CIFAR10DataModule(VisionDataModule):
         drop_last: bool = False,
         *args: Any,
         **kwargs: Any,
-    ):
+    ) -> None:
         """
         Args:
             data_dir: Where to save/load the data
@@ -155,7 +155,7 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
         labels: Optional[Sequence] = (1, 5, 8),
         *args: Any,
         **kwargs: Any,
-    ):
+    ) -> None:
         """
         Args:
             data_dir: where to save/load the data
