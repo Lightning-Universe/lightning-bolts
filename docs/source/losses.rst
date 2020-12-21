@@ -27,6 +27,14 @@ GIoU Loss
 
 ---------------
 
+IoU Loss
+--------
+
+.. autofunction:: pl_bolts.losses.object_detection.iou_loss
+    :noindex:
+
+---------------
+
 Reinforcement Learning
 ======================
 These are common losses used in RL.
