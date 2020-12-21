@@ -60,7 +60,7 @@ class ImagenetDataModule(LightningDataModule):
         drop_last: bool = False,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             data_dir: path to the imagenet dataset file
@@ -103,7 +103,7 @@ class ImagenetDataModule(LightningDataModule):
         """
         return 1000
 
-    def _verify_splits(self, data_dir: str, split: str):
+    def _verify_splits(self, data_dir: str, split: str) -> None:
         dirs = os.listdir(data_dir)
 
         if split not in dirs:
@@ -112,7 +112,7 @@ class ImagenetDataModule(LightningDataModule):
                 f' make sure the folder contains a subfolder named {split}'
             )
 
-    def prepare_data(self):
+    def prepare_data(self) -> None:
         """
         This method already assumes you have imagenet2012 downloaded.
         It validates the data using the meta.bin.

@@ -65,7 +65,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         drop_last: bool = False,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             data_dir: where to save/load the data
@@ -102,7 +102,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
     def num_classes(self) -> int:
         return 10
 
-    def prepare_data(self):
+    def prepare_data(self) -> None:
         """
         Downloads the unlabeled, train and test split
         """

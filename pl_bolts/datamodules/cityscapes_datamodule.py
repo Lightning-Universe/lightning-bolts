@@ -73,7 +73,7 @@ class CityscapesDataModule(LightningDataModule):
         drop_last: bool = False,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             data_dir: where to load the data from path, i.e. where directory leftImg8bit and gtFine or gtCoarse

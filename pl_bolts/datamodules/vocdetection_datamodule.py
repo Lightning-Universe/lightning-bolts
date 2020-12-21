@@ -19,7 +19,7 @@ class Compose(object):
     Like `torchvision.transforms.compose` but works for (image, target)
     """
 
-    def __init__(self, transforms):
+    def __init__(self, transforms) -> None:
         self.transforms = transforms
 
     def __call__(self, image, target):
@@ -117,7 +117,7 @@ class VOCDetectionDataModule(LightningDataModule):
         drop_last: bool = False,
         *args: Any,
         **kwargs: Any,
-    ):
+    ) -> None:
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use VOC dataset loaded from `torchvision` which is not installed yet.'
@@ -141,7 +141,7 @@ class VOCDetectionDataModule(LightningDataModule):
         """
         return 21
 
-    def prepare_data(self):
+    def prepare_data(self) -> None:
         """
         Saves VOCDetection files to data_dir
         """

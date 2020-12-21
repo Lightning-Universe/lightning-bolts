@@ -28,8 +28,9 @@ class SklearnDataset(Dataset):
         >>> len(dataset)
         506
     """
-
-    def __init__(self, X: np.ndarray, y: np.ndarray, X_transform: Any = None, y_transform: Any = None):
+    def __init__(
+        self, X: np.ndarray, y: np.ndarray, X_transform: Any = None, y_transform: Any = None
+    ) -> None:
         """
         Args:
             X: Numpy ndarray
@@ -76,8 +77,9 @@ class TensorDataset(Dataset):
         >>> len(dataset)
         10
     """
-
-    def __init__(self, X: torch.Tensor, y: torch.Tensor, X_transform: Any = None, y_transform: Any = None):
+    def __init__(
+        self, X: torch.Tensor, y: torch.Tensor, X_transform: Any = None, y_transform: Any = None
+    ) -> None:
         """
         Args:
             X: PyTorch tensor
@@ -160,7 +162,7 @@ class SklearnDataModule(LightningDataModule):
         drop_last=False,
         *args,
         **kwargs,
-    ):
+    ) -> None:
 
         super().__init__(*args, **kwargs)
         self.num_workers = num_workers
@@ -208,7 +210,7 @@ class SklearnDataModule(LightningDataModule):
         y_val: np.ndarray,
         x_test: np.ndarray,
         y_test: np.ndarray
-    ):
+    ) -> None:
         self.train_dataset = SklearnDataset(X, y)
         self.val_dataset = SklearnDataset(x_val, y_val)
         self.test_dataset = SklearnDataset(x_test, y_test)
