@@ -1,5 +1,5 @@
 import importlib
-from typing import Sequence, Tuple
+from typing import Sequence
 
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
