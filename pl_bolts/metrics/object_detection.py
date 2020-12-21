@@ -1,6 +1,38 @@
 import torch
 
 
+def iou(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    """
+    Calculates the intersection over union.
+
+    Args:
+        preds: batch of prediction bounding boxes with representation ``[x_min, y_min, x_max, y_max]``
+        target: batch of target bounding boxes with representation ``[x_min, y_min, x_max, y_max]``
+
+    Example:
+
+        >>> import torch
+        >>> from pl_bolts.metrics.object_detection import iou
+        >>> preds = torch.tensor([[100, 100, 200, 200]])
+        >>> target = torch.tensor([[150, 150, 250, 250]])
+        >>> iou(preds, target)
+        tensor([[0.1429]])
+
+    Returns:
+        IoU value
+    """
+    x_min = torch.max(preds[:, None, 0], target[:, 0])
+    y_min = torch.max(preds[:, None, 1], target[:, 1])
+    x_max = torch.min(preds[:, None, 2], target[:, 2])
+    y_max = torch.min(preds[:, None, 3], target[:, 3])
+    intersection = (x_max - x_min).clamp(min=0) * (y_max - y_min).clamp(min=0)
+    pred_area = (preds[:, 2] - preds[:, 0]) * (preds[:, 3] - preds[:, 1])
+    target_area = (target[:, 2] - target[:, 0]) * (target[:, 3] - target[:, 1])
+    union = pred_area[:, None] + target_area - intersection
+    iou = torch.true_divide(intersection, union)
+    return iou
+
+
 def giou(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     """
     Calculates the generalized intersection over union.
