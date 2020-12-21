@@ -69,8 +69,15 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
         self.logging_batch_interval = logging_batch_interval
         self.min_logit_value = min_logit_value
 
-    def on_train_batch_end(self, trainer: Trainer, pl_module: LightningModule, outputs: Sequence,
-                           batch: Sequence, batch_idx: int, dataloader_idx: int) -> None:
+    def on_train_batch_end(
+            self,
+            trainer: Trainer,
+            pl_module: LightningModule,
+            outputs: Sequence,
+            batch: Sequence,
+            batch_idx: int,
+            dataloader_idx: int
+    ) -> None:
         # show images only every 20 batches
         if (trainer.batch_idx + 1) % self.logging_batch_interval != 0:  # type: ignore[attr-defined]
             return
