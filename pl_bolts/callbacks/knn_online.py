@@ -38,7 +38,8 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
         self.dataset = dataset
 
     def get_representations(self, pl_module, x):
-        representations = pl_module(x)
+        with torch.no_grad():
+            representations = pl_module(x)
         representations = representations.reshape(representations.size(0), -1)
         return representations
 
@@ -55,14 +56,14 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
             if all_representations is None:
                 all_representations = representations.detach()
             else:
-                all_representations = torch.cat([all_representations, representations])
+                all_representations = torch.cat([all_representations, representations.detach()])
 
             if ys is None:
                 ys = y
             else:
                 ys = torch.cat([ys, y])
 
-        return all_representations.numpy(), ys.numpy()
+        return all_representations.cpu().numpy(), ys.cpu().numpy()
 
     def to_device(self, batch, device):
         # get the labeled batch
