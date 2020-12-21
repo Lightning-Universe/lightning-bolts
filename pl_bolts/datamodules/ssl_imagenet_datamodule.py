@@ -30,7 +30,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
             drop_last: bool = False,
             *args: Any,
             **kwargs: Any,
-    ):
+    ) -> None:
         super().__init__(*args, **kwargs)
 
         if not _TORCHVISION_AVAILABLE:
@@ -50,14 +50,14 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
     def num_classes(self) -> int:
         return 1000
 
-    def _verify_splits(self, data_dir: str, split: str):
+    def _verify_splits(self, data_dir: str, split: str) -> None:
         dirs = os.listdir(data_dir)
 
         if split not in dirs:
             raise FileNotFoundError(f'a {split} Imagenet split was not found in {data_dir}, make sure the'
                                     f' folder contains a subfolder named {split}')
 
-    def prepare_data(self):
+    def prepare_data(self) -> None:
         # imagenet cannot be downloaded... must provide path to folder with the train/val splits
         self._verify_splits(self.data_dir, 'train')
         self._verify_splits(self.data_dir, 'val')

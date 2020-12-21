@@ -33,7 +33,7 @@ class KittiDataModule(LightningDataModule):
             drop_last: bool = False,
             *args: Any,
             **kwargs: Any,
-    ):
+    ) -> None:
         """
         Kitti train, validation and test dataloaders.
 

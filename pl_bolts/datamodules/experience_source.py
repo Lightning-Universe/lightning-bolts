@@ -30,7 +30,7 @@ class ExperienceSourceDataset(IterableDataset):
     The logic for the experience source and how the batch is generated is defined the Lightning model itself
     """
 
-    def __init__(self, generate_batch: Callable):
+    def __init__(self, generate_batch: Callable) -> None:
         self.generate_batch = generate_batch
 
     def __iter__(self) -> Iterable:
@@ -243,7 +243,7 @@ class ExperienceSource(BaseExperienceSource):
 class DiscountedExperienceSource(ExperienceSource):
     """Outputs experiences with a discounted reward over N steps"""
 
-    def __init__(self, env: Env, agent, n_steps: int = 1, gamma: float = 0.99):
+    def __init__(self, env: Env, agent, n_steps: int = 1, gamma: float = 0.99) -> None:
         super().__init__(env, agent, (n_steps + 1))
         self.gamma = gamma
         self.steps = n_steps
