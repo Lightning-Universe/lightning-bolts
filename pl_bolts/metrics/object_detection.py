@@ -19,7 +19,8 @@ def iou(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         tensor([[0.1429]])
 
     Returns:
-        IoU value
+        IoU tensor: an NxM tensor containing the pairwise IoU values for every element in preds and target,
+                    where N is the number of prediction bounding boxes and M is the number of target bounding boxes
     """
     x_min = torch.max(preds[:, None, 0], target[:, 0])
     y_min = torch.max(preds[:, None, 1], target[:, 1])
