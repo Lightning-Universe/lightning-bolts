@@ -6,8 +6,8 @@ def iou(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     Calculates the intersection over union.
 
     Args:
-        preds: batch of prediction bounding boxes with representation ``[x_min, y_min, x_max, y_max]``
-        target: batch of target bounding boxes with representation ``[x_min, y_min, x_max, y_max]``
+        preds: an Nx4 batch of prediction bounding boxes with representation ``[x_min, y_min, x_max, y_max]``
+        target: an Mx4 batch of target bounding boxes with representation ``[x_min, y_min, x_max, y_max]``
 
     Example:
 
