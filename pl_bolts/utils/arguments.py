@@ -41,7 +41,7 @@ class LightningArgumentParser(ArgumentParser):
         super().__init__(*args, **kwargs)
         self.ignore_required_init_args = ignore_required_init_args
 
-        self._default_obj_args: Dict[str, List[LitArg]] = dict()
+        self._default_obj_args: Dict[str, List[LitArg]] = {}
         self._added_arg_names: List[str] = []
 
     def add_object_args(self, name: str, obj: Any) -> None:
@@ -62,7 +62,7 @@ class LightningArgumentParser(ArgumentParser):
         parsed_args_dict = vars(self.parse_args(*args, **kwargs))
         lit_args = Namespace()
         for name, default_args in self._default_obj_args.items():
-            lit_obj_args = dict()
+            lit_obj_args = {}
             for arg in default_args:
                 arg_is_member_of_obj = arg.name in parsed_args_dict
                 arg_should_be_added = not arg.required or (arg.required and not self.ignore_required_init_args)

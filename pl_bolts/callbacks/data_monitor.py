@@ -64,7 +64,7 @@ class DataMonitorBase(Callback):
             return
 
         batch = apply_to_collection(batch, dtype=np.ndarray, function=torch.from_numpy)
-        named_tensors = dict()
+        named_tensors = {}
         collect_and_name_tensors(batch, output=named_tensors, parent_name=group)
 
         for name, tensor in named_tensors.items():
