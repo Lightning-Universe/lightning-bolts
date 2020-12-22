@@ -23,7 +23,6 @@ def warn_missing_pkg(
     Returns:
         number of warning calls
     """
-    global MISSING_PACKAGE_WARNINGS
     if pkg_name not in MISSING_PACKAGE_WARNINGS:
         extra_text = os.linesep + extra_text if extra_text else ''
         if not pypi_name:
