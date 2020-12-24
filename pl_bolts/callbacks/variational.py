@@ -5,11 +5,12 @@ import torch
 from pytorch_lightning.callbacks import Callback
 
 from pl_bolts.utils.warnings import warn_missing_pkg
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 
-try:
+if _TORCHVISION_AVAILABLE:
     import torchvision
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg("torchvision")
 
 
 class LatentDimInterpolator(Callback):
@@ -44,6 +45,11 @@ class LatentDimInterpolator(Callback):
             num_samples: default 2
             normalize: default True (change image to (0, 1) range)
         """
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
+                "You want to use transforms loaded from `torchvision` which is not installed yet."
+            )
+
         super().__init__()
         self.interpolate_epoch_interval = interpolate_epoch_interval
         self.range_start = range_start
