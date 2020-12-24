@@ -4,8 +4,8 @@ import numpy as np
 import torch
 from pytorch_lightning.callbacks import Callback
 
-from pl_bolts.utils.warnings import warn_missing_pkg
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     import torchvision
