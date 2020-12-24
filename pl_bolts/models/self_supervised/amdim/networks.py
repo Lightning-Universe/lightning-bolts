@@ -101,7 +101,7 @@ class AMDIMEncoder(nn.Module):
                     self.dim2layer[w] = layer_i
 
         # get projected activation sizes at different layers
-        ndf_1 = enc_acts[self.dim2layer[1]].size(1)
+        # ndf_1 = enc_acts[self.dim2layer[1]].size(1)
         ndf_5 = enc_acts[self.dim2layer[5]].size(1)
         ndf_7 = enc_acts[self.dim2layer[7]].size(1)
 

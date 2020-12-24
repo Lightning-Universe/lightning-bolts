@@ -1,8 +1,9 @@
 import numpy as np
 import torch
+from torch import Tensor
 
 
-def tile(a, dim, n_tile):
+def tile(a: Tensor, dim: int, n_tile: int) -> Tensor:
     init_dim = a.size(dim)
     repeat_idx = [1] * a.dim()
     repeat_idx[dim] = n_tile

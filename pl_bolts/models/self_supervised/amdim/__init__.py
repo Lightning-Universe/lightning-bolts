@@ -1,8 +1,8 @@
-from pl_bolts.models.self_supervised.amdim.amdim_module import AMDIM
-from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
+from pl_bolts.models.self_supervised.amdim.amdim_module import AMDIM  # noqa: F401
+from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder  # noqa: F401
 
 try:
-    from pl_bolts.models.self_supervised.amdim.transforms import (
+    from pl_bolts.models.self_supervised.amdim.transforms import (  # noqa: F401
         AMDIMEvalTransformsCIFAR10,
         AMDIMEvalTransformsImageNet128,
         AMDIMEvalTransformsSTL10,
