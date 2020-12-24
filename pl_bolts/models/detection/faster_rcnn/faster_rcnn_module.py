@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from typing import Optional
 
 import pytorch_lightning as pl
 import torch
@@ -6,8 +7,12 @@ import torch
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
-    from torchvision.models.detection import faster_rcnn, fasterrcnn_resnet50_fpn
+    from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
+    from torchvision.models.detection.faster_rcnn import FastRCNNPredictor, fasterrcnn_resnet50_fpn
     from torchvision.ops import box_iou
+
+    from pl_bolts.models.detection.components import create_torchvision_backbone
+    from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
@@ -47,38 +52,42 @@ class FasterRCNN(pl.LightningModule):
         self,
         learning_rate: float = 0.0001,
         num_classes: int = 91,
+        backbone: Optional[str] = None,
+        fpn: bool = True,
         pretrained: bool = False,
         pretrained_backbone: bool = True,
         trainable_backbone_layers: int = 3,
-        replace_head: bool = True,
         **kwargs,
     ):
         """
         Args:
             learning_rate: the learning rate
             num_classes: number of detection classes (including background)
+            backbone: Pretained backbone CNN architecture.
+            fpn: If True, creates a Feature Pyramind Network on top of Resnet based CNNs.
             pretrained: if true, returns a model pre-trained on COCO train2017
             pretrained_backbone: if true, returns a model with backbone pre-trained on Imagenet
             trainable_backbone_layers: number of trainable resnet layers starting from final block
         """
         super().__init__()
 
-        model = fasterrcnn_resnet50_fpn(
-            # num_classes=num_classes,
-            pretrained=pretrained,
-            pretrained_backbone=pretrained_backbone,
-            trainable_backbone_layers=trainable_backbone_layers,
-        )
-
-        if replace_head:
-            in_features = model.roi_heads.box_predictor.cls_score.in_features
-            head = faster_rcnn.FastRCNNPredictor(in_features, num_classes)
-            model.roi_heads.box_predictor = head
-        else:
-            assert num_classes == 91, "replace_head must be true to change num_classes"
-
-        self.model = model
         self.learning_rate = learning_rate
+        self.num_classes = num_classes
+        self.backbone = backbone
+        if backbone is None:
+            self.model = fasterrcnn_resnet50_fpn(
+                pretrained=pretrained,
+                pretrained_backbone=pretrained_backbone,
+                trainable_backbone_layers=trainable_backbone_layers,
+            )
+
+            in_features = self.model.roi_heads.box_predictor.cls_score.in_features
+            self.model.roi_heads.box_predictor = FastRCNNPredictor(in_features, self.num_classes)
+
+        else:
+            backbone_model = create_fasterrcnn_backbone(self.backbone, fpn, pretrained_backbone,
+                                                        trainable_backbone_layers, **kwargs)
+            self.model = torchvision_FasterRCNN(backbone_model, num_classes=num_classes, **kwargs)
 
     def forward(self, x):
         self.model.eval()
@@ -119,10 +128,14 @@ class FasterRCNN(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--learning_rate", type=float, default=0.0001)
         parser.add_argument("--num_classes", type=int, default=91)
+        parser.add_argument("--backbone", type=str, default=None)
+        parser.add_argument("--fpn", type=bool, default=True)
         parser.add_argument("--pretrained", type=bool, default=False)
         parser.add_argument("--pretrained_backbone", type=bool, default=True)
         parser.add_argument("--trainable_backbone_layers", type=int, default=3)
-        parser.add_argument("--replace_head", type=bool, default=True)
+
+        parser.add_argument("--data_dir", type=str, default=".")
+        parser.add_argument("--batch_size", type=int, default=1)
         return parser
 
 
