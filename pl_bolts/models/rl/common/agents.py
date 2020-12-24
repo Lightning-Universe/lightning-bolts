@@ -3,7 +3,7 @@ Agent module containing classes for Agent logic
 Based on the implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/agent.py
 """
 from abc import ABC
-from typing import List
+from typing import List, Union
 
 import numpy as np
 import torch
@@ -169,7 +169,7 @@ class ActorCriticAgent(Agent):
 
         return pi, actions.cpu(), log_p.cpu(), value.cpu()
 
-    def get_log_prob(self, pi: Categorical, actions: torch.Tensor):
+    def get_log_prob(self, pi: Union[Categorical, Normal], actions: torch.Tensor):
         """
         Takes in the current state and returns the agents policy, a sampled action, log probability
         of the action, and the value of the state
