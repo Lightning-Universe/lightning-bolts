@@ -47,7 +47,7 @@ class LatentDimInterpolator(Callback):
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
-                "You want to use transforms loaded from `torchvision` which is not installed yet."
+                "You want to use `torchvision` which is not installed yet."
             )
 
         super().__init__()
