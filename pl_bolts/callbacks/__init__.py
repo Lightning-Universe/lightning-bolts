@@ -12,7 +12,6 @@ from pl_bolts.callbacks.vision.image_generation import TensorboardGenerativeMode
 
 __all__ = [
     "BYOLMAWeightUpdate",
-    "DataMonitorBase",
     "ModuleDataMonitor",
     "TrainingDataMonitor",
     "PrintTableMetricsCallback",
