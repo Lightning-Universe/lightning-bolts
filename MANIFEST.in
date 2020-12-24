@@ -1,3 +1,20 @@
+<<<<<<< HEAD
+=======
+# Copyright The PyTorch Lightning team.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 # Manifest syntax https://docs.python.org/2/distutils/sourcedist.html
 graft wheelhouse
 
@@ -5,16 +22,31 @@ recursive-exclude __pycache__  *.py[cod] *.orig
 
 # Include the README and CHANGELOG
 include *.md
+<<<<<<< HEAD
 recursive-include pl_bolts *.md
+=======
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 # Include the license file
 include LICENSE
 
 exclude *.sh
+<<<<<<< HEAD
 exclude *.toml
 exclude *.svg    
 recursive-include pytorch_lightning *.py
 
+=======
+exclude *.svg
+recursive-include pytorch_lightning *.py
+
+# Include marker file for PEP 561
+include pytorch_lightning/py.typed
+
+# include examples
+recursive-include pl_examples *.py *.md *.sh *.txt *.toml
+
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 # exclude tests from package
 recursive-exclude tests *
 recursive-exclude site *
@@ -23,6 +55,7 @@ exclude tests
 # Exclude the documentation files
 recursive-exclude docs *
 exclude docs
+<<<<<<< HEAD
 
 # Include the Requirements
 include requirements.txt
@@ -30,6 +63,24 @@ recursive-include requirements *.txt
 
 # Exclude build configs
 exclude *.yml
+=======
+recursive-include docs/source/_images/logos/ *
+recursive-include docs/source/_images/general/ pl_overview* tf_* tutorial_* PTL101_*
+
+# Include the Requirements
+recursive-include requirements *.txt
+recursive-exclude requirements *.sh
+include requirements.txt
+include pyproject.toml
+
+# Exclude build configs
+exclude *.yml
+exclude *.yaml
+exclude *.jsonnet
+
+# Exclude pyright config
+exclude .pyrightconfig.json
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 # Exclude Makefile
 exclude Makefile
@@ -41,3 +92,8 @@ prune notebook*
 prune temp*
 prune test*
 prune benchmark*
+<<<<<<< HEAD
+=======
+prune dockers
+
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439

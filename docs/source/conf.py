@@ -17,17 +17,24 @@ import builtins
 import glob
 import inspect
 import os
+<<<<<<< HEAD
 import re
+=======
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 import shutil
 import sys
 
 import pt_lightning_sphinx_theme
+<<<<<<< HEAD
 from sphinx.ext import apidoc
+=======
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 PATH_ROOT = os.path.join(PATH_HERE, '..', '..')
 sys.path.insert(0, os.path.abspath(PATH_ROOT))
 
+<<<<<<< HEAD
 builtins.__LIGHTNING_BOLT_SETUP__ = True
 
 SPHINX_MOCK_REQUIREMENTS = int(os.environ.get('SPHINX_MOCK_REQUIREMENTS', True))
@@ -63,12 +70,41 @@ for dir_name in (os.path.basename(p) for p in glob.glob(os.path.join(PATH_ROOT, 
     readme = readme.replace('](%s/' % dir_name, '](%s/%s/' % (PATH_ROOT, dir_name))
 with open('readme.md', 'w') as fp:
     fp.write(readme)
+=======
+builtins.__LIGHTNING_SETUP__ = True
+
+SPHINX_MOCK_REQUIREMENTS = int(os.environ.get('SPHINX_MOCK_REQUIREMENTS', True))
+
+import pytorch_lightning  # noqa: E402
+
+# -- Project documents -------------------------------------------------------
+
+# # export the documentation
+# with open('intro.rst', 'w') as fp:
+#     intro = pytorch_lightning.__doc__.replace(os.linesep + ' ', '')
+#     fp.write(m2r.convert(intro))
+#     # fp.write(pytorch_lightning.__doc__)
+
+# # export the READme
+# with open(os.path.join(PATH_ROOT, 'README.md'), 'r') as fp:
+#     readme = fp.read()
+# # replace all paths to relative
+# for ndir in (os.path.basename(p) for p in glob.glob(os.path.join(PATH_ROOT, '*'))
+#              if os.path.isdir(p)):
+#     readme = readme.replace('](%s/' % ndir, '](%s/%s/' % (PATH_ROOT, ndir))
+# with open('readme.md', 'w') as fp:
+#     fp.write(readme)
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 # copy all documents from GH templates like contribution guide
 for md in glob.glob(os.path.join(PATH_ROOT, '.github', '*.md')):
     shutil.copy(md, os.path.join(PATH_HERE, os.path.basename(md)))
+<<<<<<< HEAD
 
 # export the changelog
+=======
+# copy also the changelog
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 with open(os.path.join(PATH_ROOT, 'CHANGELOG.md'), 'r') as fp:
     chlog_lines = fp.readlines()
 # enrich short subsub-titles to be unique
@@ -82,12 +118,30 @@ for i, ln in enumerate(chlog_lines):
 with open(os.path.join(PATH_HERE, 'CHANGELOG.md'), 'w') as fp:
     fp.writelines(chlog_lines)
 
+<<<<<<< HEAD
+=======
+# -- Project information -----------------------------------------------------
+
+project = 'PyTorch Lightning'
+copyright = pytorch_lightning.__copyright__
+author = pytorch_lightning.__author__
+
+# The short X.Y version
+version = pytorch_lightning.__version__
+# The full version, including alpha/beta/rc tags
+release = pytorch_lightning.__version__
+
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
 
+<<<<<<< HEAD
 needs_sphinx = '2.4'
+=======
+needs_sphinx = '2.0'
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -100,7 +154,11 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
+<<<<<<< HEAD
     'sphinx.ext.linkcode',
+=======
+    'sphinx.ext.viewcode',
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
     'sphinx.ext.autosummary',
     'sphinx.ext.napoleon',
     'sphinx.ext.imgmath',
@@ -127,6 +185,12 @@ nbsphinx_requirejs_path = ''
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
+<<<<<<< HEAD
+=======
+#
+# source_suffix = ['.rst', '.md']
+# source_suffix = ['.rst', '.md', '.ipynb']
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 source_suffix = {
     '.rst': 'restructuredtext',
     '.txt': 'markdown',
@@ -148,22 +212,34 @@ language = None
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = [
+<<<<<<< HEAD
     'api/pl_bolts.rst',
     'api/modules.rst',
     'api/pl_bolts.submit.rst',
     'api/pl_bolts.utils.*',
+=======
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
     'PULL_REQUEST_TEMPLATE.md',
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
+<<<<<<< HEAD
 #
+=======
+# http://www.sphinx-doc.org/en/master/usage/theming.html#builtin-themes
+# html_theme = 'bizstyle'
+# https://sphinx-themes.org
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 html_theme = 'pt_lightning_sphinx_theme'
 html_theme_path = [pt_lightning_sphinx_theme.get_html_theme_path()]
 
@@ -172,8 +248,13 @@ html_theme_path = [pt_lightning_sphinx_theme.get_html_theme_path()]
 # documentation.
 
 html_theme_options = {
+<<<<<<< HEAD
     'pytorch_project': pl_bolts.__homepage__,
     'canonical_url': pl_bolts.__homepage__,
+=======
+    'pytorch_project': pytorch_lightning.__homepage__,
+    'canonical_url': pytorch_lightning.__homepage__,
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
     'collapse_navigation': False,
     'display_version': True,
     'logo_only': False,
@@ -242,8 +323,12 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, project, project + ' Documentation', author, project,
+<<<<<<< HEAD
      'The lightweight PyTorch wrapper for ML researchers. Scale your models. Write less boilerplate.',
      'Miscellaneous'),
+=======
+     'One line description of project.', 'Miscellaneous'),
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 ]
 
 # -- Options for Epub output -------------------------------------------------
@@ -267,12 +352,19 @@ epub_exclude_files = ['search.html']
 
 # -- Options for intersphinx extension ---------------------------------------
 
+<<<<<<< HEAD
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'pytorch_lightning': ('https://pytorch-lightning.readthedocs.io/en/stable/', None),
     'python': ('https://docs.python.org/3', None),
     'torch': ('https://pytorch.org/docs/stable/', None),
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+=======
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'torch': ('https://pytorch.org/docs/stable/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
     'PIL': ('https://pillow.readthedocs.io/en/stable/', None),
 }
 
@@ -281,6 +373,7 @@ intersphinx_mapping = {
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
+<<<<<<< HEAD
 # https://github.com/rtfd/readthedocs.org/issues/1139
 # I use sphinx-apidoc to auto-generate API documentation for my project.
 # Right now I have to commit these auto-generated files to my repository
@@ -314,11 +407,14 @@ def run_apidoc(_):
 
         apidoc.main(argv)
 
+=======
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 def setup(app):
     # this is for hiding doctest decoration,
     # see: http://z4r.github.io/python/2011/12/02/hides-the-prompts-and-output/
     app.add_javascript('copybutton.js')
+<<<<<<< HEAD
     app.connect('builder-inited', run_apidoc)
 
 
@@ -329,6 +425,18 @@ if not os.path.isdir(path_nbs):
 for path_ipynb in glob.glob(os.path.join(PATH_ROOT, 'notebooks', '*.ipynb')):
     path_ipynb2 = os.path.join(path_nbs, os.path.basename(path_ipynb))
     shutil.copy(path_ipynb, path_ipynb2)
+=======
+    app.add_css_file('main.css')
+
+
+# copy all notebooks to local folder
+# path_nbs = os.path.join(PATH_HERE, 'notebooks')
+# if not os.path.isdir(path_nbs):
+#     os.mkdir(path_nbs)
+# for path_ipynb in glob.glob(os.path.join(PATH_ROOT, 'notebooks', '*.ipynb')):
+#     path_ipynb2 = os.path.join(path_nbs, os.path.basename(path_ipynb))
+#     shutil.copy(path_ipynb, path_ipynb2)
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 
 # Ignoring Third-party packages
@@ -346,15 +454,25 @@ def package_list_from_file(file):
 
 # define mapping from PyPI names to python imports
 PACKAGE_MAPPING = {
+<<<<<<< HEAD
     'pytorch-lightning': 'pytorch_lightning',
     'scikit-learn': 'sklearn',
     'Pillow': 'PIL',
     'opencv-python': 'cv2',
+=======
+    'Pillow': 'PIL',
+    'opencv-python': 'cv2',
+    'PyYAML': 'yaml',
+    'comet-ml': 'comet_ml',
+    'neptune-client': 'neptune',
+    'hydra-core': 'hydra',
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 }
 MOCK_PACKAGES = []
 if SPHINX_MOCK_REQUIREMENTS:
     # mock also base packages when we are on RTD since we don't install them there
     MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements.txt'))
+<<<<<<< HEAD
     MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements', 'models.txt'))
     MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements', 'loggers.txt'))
 # replace PyPI packages by importing ones
@@ -418,6 +536,26 @@ autodoc_default_options = {
     'show-inheritance': True,
     'private-members': True,
     'noindex': True,
+=======
+    MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements', 'extra.txt'))
+    MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements', 'loggers.txt'))
+MOCK_PACKAGES = [PACKAGE_MAPPING.get(pkg, pkg) for pkg in MOCK_PACKAGES]
+
+autodoc_mock_imports = MOCK_PACKAGES
+
+autosummary_generate = True
+
+autodoc_member_order = 'groupwise'
+
+autoclass_content = 'both'
+
+autodoc_default_options = {
+    'members': True,
+    'methods': True,
+    'special-members': '__call__',
+    'exclude-members': '_abc_impl',
+    'show-inheritance': True,
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 }
 
 # Sphinx will add “permalinks” for each heading and description environment as paragraph signs that
@@ -441,6 +579,7 @@ import importlib
 import os
 import torch
 
+<<<<<<< HEAD
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer, LightningModule
 from pytorch_lightning.utilities import NATIVE_AMP_AVALAIBLE
@@ -448,5 +587,16 @@ APEX_AVAILABLE = importlib.util.find_spec("apex") is not None
 XLA_AVAILABLE = importlib.util.find_spec("torch_xla") is not None
 TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
 
+=======
+from pytorch_lightning.utilities import (
+    NATIVE_AMP_AVAILABLE,
+    APEX_AVAILABLE,
+    XLA_AVAILABLE,
+    TPU_AVAILABLE,
+)
+TORCHVISION_AVAILABLE = importlib.util.find_spec("torchvision") is not None
+
+
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 """
 coverage_skip_undoc_in_source = True

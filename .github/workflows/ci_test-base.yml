@@ -1,8 +1,16 @@
 name: CI base testing
 
 # see: https://help.github.com/en/actions/reference/events-that-trigger-workflows
+<<<<<<< HEAD
 # Trigger the workflow on push or pull request
 on: [push, pull_request]
+=======
+on:  # Trigger the workflow on push or pull request, but only for the master branch
+  push:
+    branches: [master, "release/*"]  # include release branches like release/1.0.x
+  pull_request:
+    branches: [master, "release/*"]
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 jobs:
   doctest:
@@ -41,9 +49,15 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ steps.pip-cache.outputs.dir }}
+<<<<<<< HEAD
         key: ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}-pip-${{ hashFiles('requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}-pip-
+=======
+        key: ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
     - name: Install dependencies
       run: |
@@ -66,6 +80,7 @@ jobs:
     - name: Test Package [only]
       run: |
         # NOTE: run coverage on tests does not propagare faler status for Win, https://github.com/nedbat/coveragepy/issues/1003
+<<<<<<< HEAD
         coverage run --source pl_bolts -m pytest pl_bolts -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml --ignore=pl_bolts/datamodules --ignore=pl_bolts/datasets --ignore=pl_bolts/models/self_supervised/amdim/transforms.py --ignore=pl_bolts/models/rl
 
     - name: Upload pytest test results
@@ -75,6 +90,16 @@ jobs:
         path: junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
       # Use always() to always run this step to publish test results when there are test failures
       if: always()
+=======
+        coverage run --source pytorch_lightning -m pytest pytorch_lightning -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
+
+    - name: Upload pytest test results
+      uses: actions/upload-artifact@v2
+      with:
+        name: pytest-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}
+        path: junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
+      if: failure()
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
     - name: Statistics
       if: success()

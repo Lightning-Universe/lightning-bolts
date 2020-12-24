@@ -5,7 +5,11 @@ on: [issues]  # pull_request
 
 jobs:
   greeting:
+<<<<<<< HEAD
     runs-on: ubuntu-latest
+=======
+    runs-on: ubuntu-20.04
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
     steps:
     - uses: actions/first-interaction@v1
       with:

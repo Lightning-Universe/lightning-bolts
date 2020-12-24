@@ -1,18 +1,54 @@
+<<<<<<< HEAD
 # Editor files
 *.vs
 *.vscode
+=======
+# project
+.DS_Store
+run_configs/
+model_weights/
+app/models/
+pip-wheel-metadata/
+lightning_logs/
+.vscode/
+
+# Test-tube
+test_tube_logs/
+test_tube_data/
+test_tube_exp/
+
+# Documentations
+docs/source/api
+docs/source/*.md
+docs/source/generated
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+<<<<<<< HEAD
+=======
+timit_data/
+
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 # C extensions
 *.so
 
+<<<<<<< HEAD
 # Distribution / packaging
 .Python
 build/
+=======
+.idea/
+
+# Distribution / packaging
+.Python
+ide_layouts/
+build/
+_build/
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 develop-eggs/
 dist/
 downloads/
@@ -22,6 +58,7 @@ lib/
 lib64/
 parts/
 sdist/
+<<<<<<< HEAD
 var/
 wheels/
 pip-wheel-metadata/
@@ -30,6 +67,12 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+=======
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -44,16 +87,26 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
+<<<<<<< HEAD
 .nox/
+=======
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 .coverage
 .coverage.*
 .cache
 nosetests.xml
 coverage.xml
 *.cover
+<<<<<<< HEAD
 *.py,cover
 .hypothesis/
 .pytest_cache/
+=======
+.hypothesis/
+tests/tests_tt_dir/
+tests/save_dir
+tests/tests/
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 # Translations
 *.mo
@@ -62,8 +115,11 @@ coverage.xml
 # Django stuff:
 *.log
 local_settings.py
+<<<<<<< HEAD
 db.sqlite3
 db.sqlite3-journal
+=======
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 # Flask stuff:
 instance/
@@ -73,9 +129,13 @@ instance/
 .scrapy
 
 # Sphinx documentation
+<<<<<<< HEAD
 docs/_build/
 docs/source/api/
 docs/source/*.md
+=======
+docs/build/
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 # PyBuilder
 target/
@@ -83,6 +143,7 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+<<<<<<< HEAD
 # IPython
 profile_default/
 ipython_config.py
@@ -103,18 +164,35 @@ __pypackages__/
 # Celery stuff
 celerybeat-schedule
 celerybeat.pid
+=======
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 # SageMath parsed files
 *.sage.py
 
+<<<<<<< HEAD
 # Environments
 .env
+=======
+# dotenv
+.env
+
+# virtualenv
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 .venv
 env/
 venv/
 ENV/
+<<<<<<< HEAD
 env.bak/
 venv.bak/
+=======
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 # Spyder project settings
 .spyderproject
@@ -128,6 +206,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+<<<<<<< HEAD
 .dmypy.json
 dmypy.json
 
@@ -157,3 +236,20 @@ tests/test-reports/
 **/dac
 **_binary
 **MNIST
+=======
+
+# data
+.data/
+Datasets/
+mnist/
+
+# pl tests
+ml-runs/
+mlruns/
+*.zip
+*.ckpt
+pytorch\ lightning
+test-reports/
+wandb
+.forked/
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439

@@ -14,6 +14,12 @@ pycodestyle:  # Same as scanner.linter value. Other option is flake8
         - E741  # ambiguous variable name
         - F401
         - F841
+<<<<<<< HEAD
+=======
+        - E203 # whitespace before ':'. Opposite convention enforced by black
+        - E501 # line too long. Handled by black
+        - W503 # line break before binary operator, need for black
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 no_blank_comment: True  # If True, no comment is made on PR without any errors.
 descending_issues_order: False  # If True, PEP 8 issues in message will be displayed in descending order of line numbers in the file

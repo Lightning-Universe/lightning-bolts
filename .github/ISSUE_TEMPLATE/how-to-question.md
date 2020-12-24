@@ -9,9 +9,16 @@ assignees: ''
 
 ## ❓ Questions and Help
 
+<<<<<<< HEAD
 ### Before asking:   
 1. search the issues.   
 2. search the docs.    
+=======
+### Before asking: 
+1. Try to find answers to your questions in [the Lightning Forum!](https://forums.pytorchlightning.ai/)
+2. Search for similar [issues](https://github.com/PyTorchLightning/pytorch-lightning/issues).   
+3. Search the [docs](https://pytorch-lightning.readthedocs.io/en/latest/).    
+>>>>>>> 90c1c0f68b4983c685e9d009482890e578800439
 
 <!-- If you still can't find what you need: -->
 
