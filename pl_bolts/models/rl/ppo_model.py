@@ -7,8 +7,8 @@ from pytorch_lightning import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.datamodules.experience_source import Experience
-from pl_bolts.models.rl.common.agents import PolicyAgentContinous, PolicyAgentCategorical
-from pl_bolts.models.rl.common.networks import MLP
+from pl_bolts.models.rl.common.agents import ActorCriticAgent
+from pl_bolts.models.rl.common.networks import MLP, ActorCategorical, ActorContinous
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 import torch
@@ -94,14 +94,15 @@ class PPO(pl.LightningModule):
         # policy network (agent)
         if type(self.env.action_space) == gym.spaces.box.Box:
             act_dim = self.env.action_space.shape[0]
-            self.net = MLP(self.env.observation_space.shape, act_dim)
-            self.agent = PolicyAgentContinous(self.net, act_dim)
+            actor_mlp = MLP(self.env.observation_space.shape, act_dim)
+            self.actor = ActorContinous(actor_mlp, act_dim)
         elif type(self.env.action_space) == gym.spaces.discrete.Discrete:
-            self.net = MLP(self.env.observation_space.shape, self.env.action_space.n)
-            self.agent = PolicyAgentCategorical(self.net)
+            actor_mlp = MLP(self.env.observation_space.shape, self.env.action_space.n)
+            self.actor = ActorCategorical(actor_mlp)
         else:
             raise NotImplementedError('Env action space should be of type Box (continous) or Discrete (categorical)'
                                       'Got type: ', type(self.env.action_space))
+        self.agent = ActorCriticAgent(self.actor, self.critic)
 
         self.batch_states = []
         self.batch_actions = []
@@ -128,8 +129,9 @@ class PPO(pl.LightningModule):
         Returns:
             Tuple of policy and action
         """
-        pi, action = self.agent(x)
+        pi, action = self.actor(x)
         value = self.critic(x)
+
         return pi, action, value
 
     def discount_rewards(self, rewards: List[float], discount: float) -> List[float]:
@@ -177,11 +179,7 @@ class PPO(pl.LightningModule):
         """
 
         for step in range(self.steps_per_epoch):
-            with torch.no_grad():
-                pi, action = self.agent(self.state)
-                log_prob = self.agent.get_log_prob(pi, action)
-                value = self.critic(self.state)
-
+            pi, action, log_prob, value = self.agent(self.state, self.device)
             next_state, reward, done, _ = self.env.step(action.numpy())
 
             self.batch_states.append(self.state)
@@ -200,7 +198,8 @@ class PPO(pl.LightningModule):
                 # if trajectory ends abtruptly, boostrap value of next state
                 if (terminal or epoch_end) and not done:
                     with torch.no_grad():
-                        last_value = self.critic(self.state).item()
+                        _, _, _, value = self.agent(self.state, self.device)
+                        last_value = value.item()
                 else:
                     last_value = 0
 
@@ -238,8 +237,8 @@ class PPO(pl.LightningModule):
                 self.done_episodes = 0
 
     def actor_loss(self, state, action, logp_old, qval, adv) -> torch.Tensor:
-        pi, _ = self.agent(state)
-        logp = self.agent.get_log_prob(pi, action)
+        pi, _ = self.actor(state)
+        logp = self.actor.get_log_prob(pi, action)
         ratio = torch.exp(logp - logp_old)
         clip_adv = torch.clamp(ratio, 1 - self.clip_ratio, 1 + self.clip_ratio) * adv
         loss_actor = -(torch.min(ratio * adv, clip_adv)).mean()
@@ -280,7 +279,7 @@ class PPO(pl.LightningModule):
 
     def configure_optimizers(self) -> List[Optimizer]:
         """ Initialize Adam optimizer"""
-        optimizer_actor = optim.Adam(self.agent.net.parameters(), lr=self.lr_actor)
+        optimizer_actor = optim.Adam(self.actor.parameters(), lr=self.lr_actor)
         optimizer_critic = optim.Adam(self.critic.parameters(), lr=self.lr_critic)
 
         return [optimizer_actor, optimizer_critic]
