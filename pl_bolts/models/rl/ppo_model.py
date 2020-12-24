@@ -34,6 +34,7 @@ class PPO(pl.LightningModule):
 
     Example:
         >>> from pl_bolts.models.rl.ppo_model import PPO
+        ...
         >>> model = PPO("CartPole-v0")
     Train:
         trainer = Trainer()
