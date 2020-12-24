@@ -23,7 +23,7 @@ def giou(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
 
     Returns:
         GIoU tensor: an NxM tensor containing the pairwise GIoU values for every element in preds and target,
-                     where N is the number of prediction bounding boxes and M is the number of target bounding boxes
+            where N is the number of prediction bounding boxes and M is the number of target bounding boxes
     """
     x_min = torch.max(preds[:, None, 0], target[:, 0])
     y_min = torch.max(preds[:, None, 1], target[:, 1])
