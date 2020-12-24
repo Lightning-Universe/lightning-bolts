@@ -141,68 +141,41 @@ class PolicyAgent(Agent):
         return actions
 
 
-class PolicyAgentContinous(Agent):
-    """ Policy based agent that returns a Normal distribution and an action given an observation"""
-
-    def __init__(self, net, act_dim):
-        self.net = net
-        log_std = -0.5 * torch.ones(act_dim, dtype=torch.float)
-        self.log_std = torch.nn.Parameter(log_std)
-
-    def __call__(self, states: torch.Tensor) -> List[int]:
-        """
-        Takes in the state and returns the agent's policy pi and an action
-        Args:
-            states: current state of the environment
-            device: the device used for the current batch
-        Returns:
-            torch dsitribution and randomly sampled action
-        """
-
-        mu = self.net(states)
-        std = torch.exp(self.log_std)
-        pi = Normal(loc=mu, scale=std)
-        actions = pi.sample()
-        return pi, actions
-
-    def get_log_prob(self, pi: Normal, actions: torch.Tensor):
-        """
-        Takes in a distribution and actions and returns log prob of actions under the distribution
-        Args:
-            pi: torch distribution
-            actions: actions taken by distribution
-        Returns:
-            log probability of the acition under pi
-        """
-        return pi.log_prob(actions).sum(axis=-1)
-
-
-class PolicyAgentCategorical(Agent):
+class ActorCriticAgent(Agent):
     """Policy based agent that returns a distribution and an action given an observation"""
 
-    def __call__(self, states: torch.Tensor) -> List[int]:
+    def __init__(self, actor_net: nn.Module, critic_net: nn.Module):
+        self.actor_net = actor_net
+        self.critic_net = critic_net
+
+    @torch.no_grad()
+    def __call__(self, state: torch.Tensor, device: str) -> List[int]:
         """
-        Takes in the current state and returns the action based on the agents policy
+        Takes in the current state and returns the agents policy, a sampled action, log probability
+        of the action, and value of the given state
         Args:
             states: current state of the environment
             device: the device used for the current batch
         Returns:
             torch dsitribution and randomly sampled action
         """
+        state = torch.tensor(state, device=device)
 
-        logits = self.net(states)
-        pi = Categorical(logits=logits)
-        actions = pi.sample()
+        pi, actions = self.actor_net(state)
+        log_p = self.get_log_prob(pi, actions)
 
-        return pi, actions
+        value = self.critic_net(state)
+
+        return pi, actions.cpu(), log_p.cpu(), value.cpu()
 
     def get_log_prob(self, pi: Categorical, actions: torch.Tensor):
         """
-        Takes in a distribution and actions and returns log prob of actions under the distribution
+        Takes in the current state and returns the agents policy, a sampled action, log probability
+        of the action, and the value of the state
         Args:
             pi: torch distribution
             actions: actions taken by distribution
         Returns:
             log probability of the acition under pi
         """
-        return pi.log_prob(actions)
+        return self.actor_net.get_log_prob(pi, actions)
