@@ -1,12 +1,10 @@
 import argparse
-from collections import OrderedDict
 from typing import List, Tuple
 
 import pytorch_lightning as pl
 from pytorch_lightning import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pl_bolts.datamodules import ExperienceSourceDataset
-from pl_bolts.datamodules.experience_source import Experience
 from pl_bolts.models.rl.common.agents import ActorCriticAgent
 from pl_bolts.models.rl.common.networks import MLP, ActorCategorical, ActorContinous
 from pl_bolts.utils.warnings import warn_missing_pkg
