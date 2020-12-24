@@ -59,15 +59,16 @@ def _create_backbone_features(model: nn.Module, out_channels: int):
 
 def create_torchvision_backbone(model_name: str, pretrained: bool = True):
     """
-    Creates CNN backbone from torchvision.
+    Creates CNN backbone from Torchvision.
 
     Args:
         model_name: Name of the model. E.g. resnet18
-        pretrained (bool)
+        pretrained: Pretrained weights dataset "imagenet", etc
     """
 
     if model_name == "mobilenet_v2":
         model_selected = TORCHVISION_MODEL_ZOO[model_name]
+        net = model_selected(pretrained=pretrained)
         out_channels = 1280
         ft_backbone = _create_backbone_features(net, 1280)
         return ft_backbone, out_channels
@@ -75,27 +76,30 @@ def create_torchvision_backbone(model_name: str, pretrained: bool = True):
     elif model_name in ["vgg11", "vgg13", "vgg16", "vgg19"]:
         out_channels = 512
         model_selected = TORCHVISION_MODEL_ZOO[model_name]
+        net = model_selected(pretrained=pretrained)
         ft_backbone = _create_backbone_features(net, out_channels)
         return ft_backbone, out_channels
 
     elif model_name in ["resnet18", "resnet34"]:
         out_channels = 512
         model_selected = TORCHVISION_MODEL_ZOO[model_name]
+        net = model_selected(pretrained=pretrained)
         ft_backbone = _create_backbone_adaptive(net, out_channels)
         return ft_backbone, out_channels
 
     elif model_name in ["resnet50", "resnet101", "resnet152", "resnext50_32x4d", "resnext101_32x8d"]:
         out_channels = 2048
         model_selected = TORCHVISION_MODEL_ZOO[model_name]
+        net = model_selected(pretrained=pretrained)
         ft_backbone = _create_backbone_adaptive(net, out_channels)
         return ft_backbone, out_channels
 
     elif model_name in ["mnasnet0_5", "mnasnet0_75", "mnasnet1_0", "mnasnet1_3"]:
         out_channels = 1280
         model_selected = TORCHVISION_MODEL_ZOO[model_name]
+        net = model_selected(pretrained=pretrained)
         ft_backbone = _create_backbone_adaptive(net, out_channels)
         return ft_backbone, out_channels
 
-    net = model_selected(pretrained=pretrained)
     else:
         raise ValueError(f"Unsupported model: '{model_name}'")
