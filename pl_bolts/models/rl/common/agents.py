@@ -159,7 +159,8 @@ class ActorCriticAgent(Agent):
         Returns:
             torch dsitribution and randomly sampled action
         """
-        state = torch.tensor(state, device=device)
+
+        state = state.to(device=device)
 
         pi, actions = self.actor_net(state)
         log_p = self.get_log_prob(pi, actions)
