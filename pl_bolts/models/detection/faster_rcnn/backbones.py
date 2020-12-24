@@ -10,7 +10,7 @@ except ModuleNotFoundError:
 
 
 def create_fasterrcnn_backbone(backbone: str, fpn: bool = True, pretrained: str = None,
-                               trainable_backbone_layers: int = 3, **kwargs: Any) -> nn.Module:
+                               trainable_backbone_layers: int = 3, **kwargs) -> nn.Module:
 
     """
     Args:
