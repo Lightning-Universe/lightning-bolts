@@ -28,8 +28,8 @@ def giou_loss(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         tensor([[1.0794]])
 
     Returns:
-        GIoU loss: an NxM tensor containing the pairwise GIoU loss for every element in preds and target,
-            where N is the number of prediction bounding boxes and M is the number of target bounding boxes
+        GIoU loss in an NxM tensor containing the pairwise GIoU loss for every element in preds and target,
+        where N is the number of prediction bounding boxes and M is the number of target bounding boxes
     """
     loss = 1 - giou(preds, target)
     return loss
