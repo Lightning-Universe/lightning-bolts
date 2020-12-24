@@ -9,7 +9,6 @@ from pl_bolts.models.self_supervised.amdim.transforms import (  # noqa: F401
     AMDIMTrainTransformsSTL10,
 )
 
-
 __all__ = [
     "AMDIM",
     "AMDIMEncoder",
