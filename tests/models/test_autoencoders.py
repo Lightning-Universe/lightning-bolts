@@ -1,10 +1,10 @@
 import pytest
 import pytorch_lightning as pl
-import torch
 from pytorch_lightning import seed_everything
+import torch
 
 from pl_bolts.datamodules import CIFAR10DataModule
-from pl_bolts.models.autoencoders import AE, VAE, resnet18_decoder, resnet18_encoder, resnet50_encoder
+from pl_bolts.models.autoencoders import AE, resnet18_decoder, resnet18_encoder, resnet50_encoder, VAE
 
 
 @pytest.mark.parametrize("dm_cls", [pytest.param(CIFAR10DataModule, id="cifar10")])

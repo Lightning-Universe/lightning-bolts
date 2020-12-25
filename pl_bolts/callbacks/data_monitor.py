@@ -1,13 +1,13 @@
 from typing import Any, Dict, List, Optional, Sequence, Union
 
 import numpy as np
-import torch
-import torch.nn as nn
 from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.loggers import TensorBoardLogger, WandbLogger
 from pytorch_lightning.utilities import rank_zero_warn
 from pytorch_lightning.utilities.apply_func import apply_to_collection
+import torch
 from torch import Tensor
+import torch.nn as nn
 from torch.utils.hooks import RemovableHandle
 
 try:

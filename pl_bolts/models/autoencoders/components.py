@@ -1,6 +1,6 @@
 import torch
-import torch.nn.functional as F
 from torch import nn
+import torch.nn.functional as F
 
 
 class Interpolate(nn.Module):

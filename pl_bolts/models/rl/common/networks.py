@@ -6,7 +6,7 @@ from typing import Tuple
 
 import numpy as np
 import torch
-from torch import Tensor, nn
+from torch import nn, Tensor
 from torch.nn import functional as F
 
 

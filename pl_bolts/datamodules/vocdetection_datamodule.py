@@ -1,13 +1,13 @@
-import torch
 from pytorch_lightning import LightningDataModule
+import torch
 from torch.utils.data import DataLoader
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
-    import torchvision.transforms as T
     from torchvision.datasets import VOCDetection
+    import torchvision.transforms as T
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 

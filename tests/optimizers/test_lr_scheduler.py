@@ -1,9 +1,9 @@
 import math
 
 import numpy as np
+from pytorch_lightning import seed_everything
 import torch
 import torch.nn.functional as F
-from pytorch_lightning import seed_everything
 from torch.optim import SGD
 from torch.optim.lr_scheduler import _LRScheduler
 

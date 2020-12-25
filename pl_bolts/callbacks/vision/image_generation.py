@@ -1,5 +1,5 @@
-import torch
 from pytorch_lightning import Callback
+import torch
 
 from pl_bolts.utils.warnings import warn_missing_pkg
 

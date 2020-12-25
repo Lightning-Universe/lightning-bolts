@@ -3,7 +3,7 @@ from dataclasses import FrozenInstanceError
 import pytest
 import pytorch_lightning as pl
 
-from pl_bolts.utils.arguments import LightningArgumentParser, LitArg, gather_lit_args
+from pl_bolts.utils.arguments import gather_lit_args, LightningArgumentParser, LitArg
 
 
 class DummyParentModel(pl.LightningModule):

@@ -1,8 +1,8 @@
 import math
 
 import numpy as np
-import torch
 from pytorch_lightning.callbacks import Callback
+import torch
 
 from pl_bolts.utils.warnings import warn_missing_pkg
 

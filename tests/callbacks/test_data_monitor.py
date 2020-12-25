@@ -2,10 +2,10 @@ from unittest import mock
 from unittest.mock import call
 
 import pytest
-import torch
-import torch.nn as nn
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import LoggerCollection, TensorBoardLogger
+import torch
+import torch.nn as nn
 
 from pl_bolts.callbacks import ModuleDataMonitor, TrainingDataMonitor
 from pl_bolts.models import LitMNIST

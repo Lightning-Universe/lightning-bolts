@@ -1,5 +1,5 @@
-import os
 from argparse import ArgumentParser
+import os
 
 import pytorch_lightning as pl
 

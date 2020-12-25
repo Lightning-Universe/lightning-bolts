@@ -1,6 +1,6 @@
-import inspect
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
+import inspect
 from typing import Any, Dict, List, Optional
 
 import pytorch_lightning as pl

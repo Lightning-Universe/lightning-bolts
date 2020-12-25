@@ -3,9 +3,9 @@ from copy import deepcopy
 from typing import Any
 
 import pytorch_lightning as pl
+from pytorch_lightning import seed_everything
 import torch
 import torch.nn.functional as F
-from pytorch_lightning import seed_everything
 from torch.optim import Adam
 
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate

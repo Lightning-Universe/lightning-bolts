@@ -1,9 +1,9 @@
-import uuid
 from pathlib import Path
+import uuid
 
+from PIL import Image
 import pytest
 import torch
-from PIL import Image
 
 from pl_bolts.datamodules import (
     BinaryMNISTDataModule,

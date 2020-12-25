@@ -2,8 +2,8 @@ import math
 
 import numpy as np
 import torch
-import torch.nn.functional as F
 from torch import nn
+import torch.nn.functional as F
 
 
 class AMDIMEncoder(nn.Module):

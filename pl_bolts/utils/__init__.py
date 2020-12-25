@@ -1,5 +1,5 @@
-import torch
 from pytorch_lightning.utilities import _module_available
+import torch
 
 _NATIVE_AMP_AVAILABLE: bool = _module_available("torch.cuda.amp") and hasattr(torch.cuda.amp, "autocast")
 

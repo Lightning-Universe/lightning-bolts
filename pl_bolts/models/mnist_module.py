@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 
-import torch
 from pytorch_lightning import LightningModule, Trainer
+import torch
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
 
