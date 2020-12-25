@@ -7,13 +7,13 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     import torchvision.transforms as transforms
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 if _OPENCV_AVAILABLE:
     import cv2
-else:
-    warn_missing_pkg('cv2', pypi_name='opencv-python')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('cv2', pypi_name='opencv-python')
 
 
 class SwAVTrainDataTransform(object):
