@@ -18,6 +18,7 @@ class SRGAN(pl.LightningModule):
         feature_maps_disc: int = 64,
         generator_checkpoint: str = "srresnet.pt",
         learning_rate: float = 0.0002,
+        scheduler_step: int = 100,
         **kwargs
     ) -> None:
         """
@@ -27,6 +28,7 @@ class SRGAN(pl.LightningModule):
             feature_maps_disc: Number of feature maps to use for the discriminator
             generator_checkpoint: Generator checkpoint created with SRResNet module
             learning_rate: Learning rate
+            scheduler_step: Number of epochs after which the learning rate gets decayed
         """
         super().__init__()
         self.save_hyperparameters()
@@ -40,8 +42,9 @@ class SRGAN(pl.LightningModule):
         opt_disc = torch.optim.Adam(self.discriminator.parameters(), lr=lr)
         opt_gen = torch.optim.Adam(self.generator.parameters(), lr=lr)
 
-        # TODO add lr scheduler
-        return [opt_disc, opt_gen], []
+        sched_disc = torch.optim.lr_scheduler.MultiStepLR(opt_disc, milestones=[self.hparams.scheduler_step], gamma=0.1)
+        sched_gen = torch.optim.lr_scheduler.MultiStepLR(opt_gen, milestones=[self.hparams.scheduler_step], gamma=0.1)
+        return [opt_disc, opt_gen], [sched_disc, sched_gen]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.generator(x)
@@ -118,6 +121,7 @@ class SRGAN(pl.LightningModule):
         parser.add_argument("--feature_maps_disc", default=64, type=int)
         parser.add_argument("--generator_checkpoint", default="srresnet.pt", type=str)
         parser.add_argument("--learning_rate", default=1e-4, type=float)
+        parser.add_argument("--scheduler_step", default=100, type=int)
         return parser
 
 
@@ -130,7 +134,7 @@ def cli_main(args=None):
     parser = SRGAN.add_model_specific_args(parser)
     args = parser.parse_args(args)
 
-    model = SRGAN(**vars(args))
+    model = SRGAN(**vars(args), scheduler_step=args.max_epochs // 2)
     dm = STL10_SR_DataModule.from_argparse_args(args)
     trainer = pl.Trainer.from_argparse_args(args, callbacks=[SRImageLoggerCallback()])
     trainer.fit(model, dm)
