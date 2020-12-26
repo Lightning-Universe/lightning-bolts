@@ -32,7 +32,7 @@ class SRResNet(pl.LightningModule):
         hr_image, lr_image = batch
         fake = self(lr_image)
         loss = F.mse_loss(hr_image, fake)
-        self.log("loss", loss, on_epoch=True, prog_bar=True)
+        self.log("loss", loss, on_step=True, on_epoch=True)
 
         return loss
 
@@ -49,6 +49,8 @@ def cli_main(args=None):
     pl.seed_everything(1234)
 
     parser = ArgumentParser()
+    parser.add_argument("--log_interval", default=1000, type=int)
+
     parser = STL10_SR_DataModule.add_argparse_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)
     parser = SRResNet.add_model_specific_args(parser)
@@ -56,7 +58,7 @@ def cli_main(args=None):
 
     model = SRResNet(**vars(args))
     dm = STL10_SR_DataModule.from_argparse_args(args)
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=[SRImageLoggerCallback()])
+    trainer = pl.Trainer.from_argparse_args(args, callbacks=[SRImageLoggerCallback(log_interval=args.log_interval)])
     trainer.fit(model, dm)
 
     torch.save(model.srresnet, "srresnet.pt")
