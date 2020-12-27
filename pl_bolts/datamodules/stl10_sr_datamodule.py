@@ -35,6 +35,7 @@ class STL10_SR_DataModule(LightningDataModule):
     def __init__(
         self,
         data_dir: Optional[str] = None,
+        train_split: str = "train+unlabeled",
         num_workers: int = 16,
         batch_size: int = 32,
         shuffle: bool = True,
@@ -48,6 +49,7 @@ class STL10_SR_DataModule(LightningDataModule):
         self.dataset_cls = STL10_SR
         self.dims = (3, 96, 96)
         self.data_dir = data_dir if data_dir is not None else os.getcwd()
+        self.train_split = train_split
         self.num_workers = num_workers
         self.batch_size = batch_size
         self.shuffle = shuffle
@@ -59,12 +61,12 @@ class STL10_SR_DataModule(LightningDataModule):
         return 10
 
     def prepare_data(self) -> None:
-        self.dataset_cls(self.data_dir, split="train", download=True)
+        self.dataset_cls(self.data_dir, split=self.train_split, download=True)
         self.dataset_cls(self.data_dir, split="test", download=True)
 
     def setup(self, stage=None) -> None:
         if stage == "fit" or stage is None:
-            self.dataset_train = self.dataset_cls(self.data_dir, split="train")
+            self.dataset_train = self.dataset_cls(self.data_dir, split=self.train_split)
 
         if stage == "test" or stage is None:
             self.dataset_test = self.dataset_cls(self.data_dir, split="test")
