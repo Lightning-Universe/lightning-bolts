@@ -57,7 +57,6 @@ class SRGAN(pl.LightningModule):
         opt_disc = torch.optim.Adam(self.discriminator.parameters(), lr=lr)
         opt_gen = torch.optim.Adam(self.generator.parameters(), lr=lr)
 
-        # TODO add lr scheduler
         return [opt_disc, opt_gen], []
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
