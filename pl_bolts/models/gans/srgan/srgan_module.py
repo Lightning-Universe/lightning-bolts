@@ -1,22 +1,39 @@
 from argparse import ArgumentParser
-from typing import Tuple
+from typing import Optional, Tuple
 
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 
 from pl_bolts.callbacks import SRImageLoggerCallback
-from pl_bolts.datamodules.stl10_sr_datamodule import STL10_SR_DataModule
-from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, VGG19FeatureExtractor
+from pl_bolts.datamodules import STL10_SR_DataModule
+from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, SRGANGenerator, VGG19FeatureExtractor
 
 
 class SRGAN(pl.LightningModule):
+    """
+    SRGAN implementation from the paper `Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial
+    Network <https://arxiv.org/pdf/1609.04802.pdf>`_. It uses a pretrained SRResNet model as the generator.
+
+    Example::
+
+        from pl_bolts.models.gan import SRGAN
+
+        m = SRGAN()
+        Trainer(gpus=2).fit(m)
+
+    Example CLI::
+
+        # STL10 dataset
+        python  srgan_module.py --gpus 1
+    """
+
     def __init__(
         self,
         image_channels: int = 3,
         feature_maps_gen: int = 64,
         feature_maps_disc: int = 64,
-        generator_checkpoint: str = "srresnet.pt",
+        generator_checkpoint: Optional[str] = None,
         learning_rate: float = 0.0002,
         scheduler_step: int = 100,
         **kwargs
@@ -33,8 +50,11 @@ class SRGAN(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.generator = torch.load(self.hparams.generator_checkpoint)
-        self.discriminator = SRGANDiscriminator(self.hparams.image_channels, self.hparams.feature_maps_gen)
+        if self.hparams.generator_checkpoint:
+            self.generator = torch.load(self.hparams.generator_checkpoint)
+        else:
+            self.generator = SRGANGenerator(self.hparams.image_channels, self.hparams.feature_maps_gen)
+        self.discriminator = SRGANDiscriminator(self.hparams.image_channels, self.hparams.feature_maps_disc)
         self.vgg_feature_extractor = VGG19FeatureExtractor()
 
     def configure_optimizers(self):
@@ -47,6 +67,14 @@ class SRGAN(pl.LightningModule):
         return [opt_disc, opt_gen], [sched_disc, sched_gen]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Generates a high resolution image given a low resolution image
+
+        Example::
+
+            gan = SRGAN.load_from_checkpoint(PATH)
+            hr_image = gan(lr_image)
+        """
         return self.generator(x)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
@@ -75,12 +103,10 @@ class SRGAN(pl.LightningModule):
 
     def _get_disc_loss(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
         real_pred = self.discriminator(hr_image)
-        # TODO check if ones=False or ones=True
-        real_loss = self._get_adv_loss(real_pred, ones=False)
+        real_loss = self._get_adv_loss(real_pred, ones=True)
 
         _, fake_pred = self._get_fake_pred(lr_image)
-        # TODO check if ones=False or ones=True
-        fake_loss = self._get_adv_loss(fake_pred, ones=True)
+        fake_loss = self._get_adv_loss(fake_pred, ones=False)
 
         disc_loss = 0.5 * (real_loss + fake_loss)
 
@@ -119,7 +145,7 @@ class SRGAN(pl.LightningModule):
         parser.add_argument("--image_channels", default=3, type=int)
         parser.add_argument("--feature_maps_gen", default=64, type=int)
         parser.add_argument("--feature_maps_disc", default=64, type=int)
-        parser.add_argument("--generator_checkpoint", default="srresnet.pt", type=str)
+        parser.add_argument("--generator_checkpoint", default=None, type=str)
         parser.add_argument("--learning_rate", default=1e-4, type=float)
         parser.add_argument("--scheduler_step", default=100, type=int)
         return parser
@@ -139,8 +165,8 @@ def cli_main(args=None):
     trainer = pl.Trainer.from_argparse_args(args, callbacks=[SRImageLoggerCallback()])
     trainer.fit(model, dm)
 
-    torch.save(SRGAN.generator, "srgenerator.pt")
-    torch.save(SRGAN.discriminator, "srdiscriminator.pt")
+    torch.save(model.generator, "srgenerator.pt")
+    torch.save(model.discriminator, "srdiscriminator.pt")
 
 
 if __name__ == "__main__":

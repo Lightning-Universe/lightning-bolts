@@ -10,6 +10,23 @@ from pl_bolts.models.gans.srgan.components import SRGANGenerator
 
 
 class SRResNet(pl.LightningModule):
+    """
+    SRResNet implementation from the paper `Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial
+    Network <https://arxiv.org/pdf/1609.04802.pdf>`_. A pretrained model is used as the generator for SRGAN.
+
+    Example::
+
+        from pl_bolts.models.gan import SRResNet
+
+        m = SRResNet()
+        Trainer(gpus=2).fit(m)
+
+    Example CLI::
+
+        # STL10 dataset
+        python  ssresnetmodule.py --gpus 1
+    """
+
     def __init__(self, image_channels: int = 3, feature_maps: int = 64, learning_rate: float = 1e-4, **kwargs) -> None:
         """
         Args:
@@ -25,7 +42,15 @@ class SRResNet(pl.LightningModule):
     def configure_optimizers(self):
         return torch.optim.Adam(self.srresnet.parameters(), lr=self.hparams.learning_rate)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Creates a high resolution image given a low resolution image
+
+        Example::
+
+            sr_resnet = SRResNet.load_from_checkpoint(PATH)
+            hr_image = sr_resnet(lr_image)
+        """
         return self.srresnet(x)
 
     def training_step(self, batch, batch_idx):

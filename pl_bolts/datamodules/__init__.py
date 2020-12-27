@@ -10,6 +10,7 @@ from pl_bolts.datamodules.mnist_datamodule import MNISTDataModule
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule, SklearnDataset, TensorDataset
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
+from pl_bolts.datamodules.stl10_sr_datamodule import STL10_SR_DataModule
 from pl_bolts.datamodules.vocdetection_datamodule import VOCDetectionDataModule
 from pl_bolts.datasets.kitti_dataset import KittiDataset
 
@@ -31,6 +32,7 @@ __all__ = [
     'TensorDataset',
     'SSLImagenetDataModule',
     'STL10DataModule',
+    'STL10_SR_DataModule',
     'VOCDetectionDataModule',
     'KittiDataset',
 ]

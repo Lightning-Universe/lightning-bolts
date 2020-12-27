@@ -8,6 +8,27 @@ from pl_bolts.datasets.stl10_sr_dataset import STL10_SR
 
 
 class STL10_SR_DataModule(LightningDataModule):
+    """
+    .. figure:: https://samyzaf.com/ML/cifar10/cifar1.jpg
+        :width: 400
+        :alt: STL-10
+
+    STL-10 data module that can be used to train super resolution models.
+
+    Specs:
+        - Returns tuple of high- and low-resolution image
+        - Each high-resolution image is (3 x 96 x 96) and scaled to [-1, 1]
+        - Each low-resolution image is (3 x 24 x 24) and scaled to [0, 1]
+
+    Example::
+
+        from pl_bolts.datamodules import STL10_SR_DataModule
+
+        dm = STL10_SR_DataModule(PATH)
+        model = LitModel()
+
+        Trainer().fit(model, dm)
+    """
 
     name = "stl10_sr"
 
