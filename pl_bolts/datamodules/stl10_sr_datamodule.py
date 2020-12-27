@@ -13,7 +13,7 @@ class STL10_SR_DataModule(LightningDataModule):
         :width: 400
         :alt: STL-10
 
-    STL-10 super resolution data module.
+    STL-10 data module that can be used to train super resolution models.
 
     Specs:
         - Returns tuple of high- and low-resolution image

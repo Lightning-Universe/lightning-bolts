@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from typing import Tuple
+from typing import Optional, Tuple
 
 import pytorch_lightning as pl
 import torch
@@ -7,7 +7,7 @@ import torch.nn.functional as F
 
 from pl_bolts.callbacks import SRImageLoggerCallback
 from pl_bolts.datamodules import STL10_SR_DataModule
-from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, VGG19FeatureExtractor
+from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, SRGANGenerator, VGG19FeatureExtractor
 
 
 class SRGAN(pl.LightningModule):
@@ -33,7 +33,7 @@ class SRGAN(pl.LightningModule):
         image_channels: int = 3,
         feature_maps_gen: int = 64,
         feature_maps_disc: int = 64,
-        generator_checkpoint: str = "srresnet.pt",
+        generator_checkpoint: Optional[str] = None,
         learning_rate: float = 0.0002,
         scheduler_step: int = 100,
         **kwargs
@@ -50,8 +50,11 @@ class SRGAN(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.generator = torch.load(self.hparams.generator_checkpoint)
-        self.discriminator = SRGANDiscriminator(self.hparams.image_channels, self.hparams.feature_maps_gen)
+        if self.hparams.generator_checkpoint:
+            self.generator = torch.load(self.hparams.generator_checkpoint)
+        else:
+            self.generator = SRGANGenerator(self.hparams.image_channels, self.hparams.feature_maps_gen)
+        self.discriminator = SRGANDiscriminator(self.hparams.image_channels, self.hparams.feature_maps_disc)
         self.vgg_feature_extractor = VGG19FeatureExtractor()
 
     def configure_optimizers(self):
@@ -142,7 +145,7 @@ class SRGAN(pl.LightningModule):
         parser.add_argument("--image_channels", default=3, type=int)
         parser.add_argument("--feature_maps_gen", default=64, type=int)
         parser.add_argument("--feature_maps_disc", default=64, type=int)
-        parser.add_argument("--generator_checkpoint", default="srresnet.pt", type=str)
+        parser.add_argument("--generator_checkpoint", default=None, type=str)
         parser.add_argument("--learning_rate", default=1e-4, type=float)
         parser.add_argument("--scheduler_step", default=100, type=int)
         return parser
