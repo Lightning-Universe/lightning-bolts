@@ -26,7 +26,7 @@ def test_cli_run_basic_gan(cli_args):
     "cli_args",
     [f"--data_dir {DATASETS_PATH} --max_epochs 1" " --batch_size 2 --limit_train_batches 2 --limit_val_batches 2"],
 )
-def test_cli_run_basic_gan(cli_args):
+def test_cli_run_srgan(cli_args):
     from pl_bolts.models.gans.srgan.srgan_module import cli_main
 
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args.strip().split()):
@@ -37,7 +37,7 @@ def test_cli_run_basic_gan(cli_args):
     "cli_args",
     [f"--data_dir {DATASETS_PATH} --max_epochs 1" " --batch_size 2 --limit_train_batches 2 --limit_val_batches 2"],
 )
-def test_cli_run_basic_gan(cli_args):
+def test_cli_run_basic_srresnet(cli_args):
     from pl_bolts.models.gans.srgan.srresnet_module import cli_main
 
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args.strip().split()):
