@@ -1,7 +1,6 @@
 import math
 from argparse import ArgumentParser
-from copy import deepcopy
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 
 import numpy as np
 import pytorch_lightning as pl
@@ -15,8 +14,11 @@ from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
 from pl_bolts.models.self_supervised.simsiam.models import SiameseArm
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-from pl_bolts.transforms.dataset_normalizations import (cifar10_normalization, imagenet_normalization,
-                                                        stl10_normalization)
+from pl_bolts.transforms.dataset_normalizations import (
+    cifar10_normalization,
+    imagenet_normalization,
+    stl10_normalization,
+)
 
 
 class SimSiam(pl.LightningModule):
@@ -129,7 +131,7 @@ class SimSiam(pl.LightningModule):
         self.max_epochs = max_epochs
 
         self.init_model()
-
+        
         # compute iters per epoch
         global_batch_size = self.nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
@@ -150,19 +152,12 @@ class SimSiam(pl.LightningModule):
             backbone = resnet18
         elif self.arch == 'resnet50':
             backbone = resnet50
-
+            
         encoder = backbone(
             first_conv=self.first_conv, maxpool1=self.maxpool1, return_all_feature_maps=False
         )
-        self.online_network = SiameseArm(encoder, input_dim=self.hidden_mlp,
-                                         hidden_size=self.hidden_mlp, output_dim=self.feat_dim)
-        self.init_target_network()
-
-    def init_target_network(self):
-        self.target_network = deepcopy(self.online_network)
-
-    def on_train_batch_end(self, outputs, batch: Any, batch_idx: int, dataloader_idx: int) -> None:
-        self.init_target_network()
+        self.online_network = SiameseArm(encoder, input_dim=self.hidden_mlp, 
+                                        hidden_size=self.hidden_mlp, output_dim=self.feat_dim)
 
     def forward(self, x):
         y, _, _ = self.online_network(x)
@@ -172,42 +167,34 @@ class SimSiam(pl.LightningModule):
         b = b.detach()  # stop gradient of backbone + projection mlp
         a = F.normalize(a, dim=-1)
         b = F.normalize(b, dim=-1)
-        sim = (a * b).sum(-1).mean()
+        sim = -1 * (a * b).sum(-1).mean()
         return sim
 
-    def shared_step(self, batch, batch_idx):
+    def training_step(self, batch, batch_idx):
         (img_1, img_2, _), y = batch
 
         # Image 1 to image 2 loss
         _, z1, h1 = self.online_network(img_1)
-        _, z2, h2 = self.target_network(img_2)
-        loss_a = -1.0 * self.cosine_similarity(h1, z2)
-
-        # Image 2 to image 1 loss
-        _, z1, h1 = self.online_network(img_2)
-        _, z2, h2 = self.target_network(img_1)
-        loss_b = -1.0 * self.cosine_similarity(h1, z2)
-
-        # Final loss
-        total_loss = loss_a / 2.0 + loss_b / 2.0
-
-        return loss_a, loss_b, total_loss
-
-    def training_step(self, batch, batch_idx):
-        loss_a, loss_b, total_loss = self.shared_step(batch, batch_idx)
+        _, z2, h2 = self.online_network(img_2)
+        loss = self.cosine_similarity(h1, z2) / 2 + self.cosine_similarity(h2, z1) / 2
 
         # log results
-        self.log_dict({"1_2_loss": loss_a, "2_1_loss": loss_b, "train_loss": total_loss})
+        self.log_dict({"loss": loss})
 
-        return total_loss
+        return loss
 
     def validation_step(self, batch, batch_idx):
-        loss_a, loss_b, total_loss = self.shared_step(batch, batch_idx)
+        (img_1, img_2, _), y = batch
+
+        # Image 1 to image 2 loss
+        _, z1, h1 = self.online_network(img_1)
+        _, z2, h2 = self.online_network(img_2)
+        loss = self.cosine_similarity(h1, z2) / 2 + self.cosine_similarity(h2, z1) / 2
 
         # log results
-        self.log_dict({"1_2_loss": loss_a, "2_1_loss": loss_b, "train_loss": total_loss})
+        self.log_dict({"loss": loss})
 
-        return total_loss
+        return loss
 
     def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=['bias', 'bn']):
         params = []
@@ -346,15 +333,8 @@ class SimSiam(pl.LightningModule):
 
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
-    from pl_bolts.datamodules import (
-        CIFAR10DataModule,
-        ImagenetDataModule,
-        STL10DataModule,
-    )
-    from pl_bolts.models.self_supervised.simclr import (
-        SimCLREvalDataTransform,
-        SimCLRTrainDataTransform,
-    )
+    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
+    from pl_bolts.models.self_supervised.simclr import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
     seed_everything(1234)
 
