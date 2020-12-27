@@ -25,25 +25,22 @@ def test_dev_datasets(datadir):
 
 def _create_synth_Cityscapes_dataset(path_dir):
     """Create synthetic dataset with random images, just to simulate that the dataset have been already downloaded."""
-    non_existing_citites = ['dummy_city_1', 'dummy_city_2']
-    fine_labels_dir = Path(path_dir) / 'gtFine'
-    images_dir = Path(path_dir) / 'leftImg8bit'
-    dataset_splits = ['train', 'val', 'test']
+    non_existing_citites = ["dummy_city_1", "dummy_city_2"]
+    fine_labels_dir = Path(path_dir) / "gtFine"
+    images_dir = Path(path_dir) / "leftImg8bit"
+    dataset_splits = ["train", "val", "test"]
 
     for split in dataset_splits:
         for city in non_existing_citites:
             (images_dir / split / city).mkdir(parents=True, exist_ok=True)
             (fine_labels_dir / split / city).mkdir(parents=True, exist_ok=True)
             base_name = str(uuid.uuid4())
-            image_name = f'{base_name}_leftImg8bit.png'
-            instance_target_name = f'{base_name}_gtFine_instanceIds.png'
-            semantic_target_name = f'{base_name}_gtFine_labelIds.png'
-            Image.new('RGB', (2048, 1024)).save(
-                images_dir / split / city / image_name)
-            Image.new('L', (2048, 1024)).save(
-                fine_labels_dir / split / city / instance_target_name)
-            Image.new('L', (2048, 1024)).save(
-                fine_labels_dir / split / city / semantic_target_name)
+            image_name = f"{base_name}_leftImg8bit.png"
+            instance_target_name = f"{base_name}_gtFine_instanceIds.png"
+            semantic_target_name = f"{base_name}_gtFine_labelIds.png"
+            Image.new("RGB", (2048, 1024)).save(images_dir / split / city / image_name)
+            Image.new("L", (2048, 1024)).save(fine_labels_dir / split / city / instance_target_name)
+            Image.new("L", (2048, 1024)).save(fine_labels_dir / split / city / semantic_target_name)
 
 
 def test_cityscapes_datamodule(datadir):
@@ -51,12 +48,9 @@ def test_cityscapes_datamodule(datadir):
     _create_synth_Cityscapes_dataset(datadir)
 
     batch_size = 1
-    target_types = ['semantic', 'instance']
+    target_types = ["semantic", "instance"]
     for target_type in target_types:
-        dm = CityscapesDataModule(datadir,
-                                  num_workers=0,
-                                  batch_size=batch_size,
-                                  target_type=target_type)
+        dm = CityscapesDataModule(datadir, num_workers=0, batch_size=batch_size, target_type=target_type)
     loader = dm.train_dataloader()
     img, mask = next(iter(loader))
     assert img.size() == torch.Size([batch_size, 3, 1024, 2048])
@@ -94,6 +88,7 @@ def _create_dm(dm_cls, datadir, val_split=0.2):
     return dm
 
 
+# TODO: Cache dataset
 def test_stl10_sr_datamodule(datadir):
     dm = STL10_SR_DataModule(datadir, num_workers=1, batch_size=2)
     dm.prepare_data()
@@ -104,7 +99,9 @@ def test_stl10_sr_datamodule(datadir):
 
     assert hr_image.size() == torch.Size([2, 3, 96, 96])
     assert lr_image.size() == torch.Size([2, 3, 24, 24])
-    assert hr_image.min() == -1.0
-    assert hr_image.max() == 1.0
-    assert lr_image.min() == 0.0
-    assert lr_image.max() == 1.0
+
+    atol = 1e-02
+    assert torch.allclose(hr_image.min(), torch.tensor(-1.0), atol=atol)
+    assert torch.allclose(hr_image.max(), torch.tensor(1.0), atol=atol)
+    assert torch.allclose(lr_image.min(), torch.tensor(0.0), atol=atol)
+    assert torch.allclose(lr_image.max(), torch.tensor(1.0), atol=atol)

@@ -35,7 +35,7 @@ class STL10_SR_DataModule(LightningDataModule):
     def __init__(
         self,
         data_dir: Optional[str] = None,
-        train_split: str = "train+unlabeled",
+        train_split: str = "train",
         num_workers: int = 16,
         batch_size: int = 32,
         shuffle: bool = True,
