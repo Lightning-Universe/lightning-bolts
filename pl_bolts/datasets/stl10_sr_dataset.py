@@ -1,4 +1,4 @@
-import numpy as np
+import torch
 
 from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -6,7 +6,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _PIL_AVAILABLE:
     from PIL import Image
 else:
-    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
+    warn_missing_pkg("PIL", pypi_name="Pillow")  # pragma: no-cover
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
@@ -37,8 +37,8 @@ class STL10_SR(STL10):
         )
 
     def __getitem__(self, index):
-        data = self.data[index]
-        image = Image.fromarray(np.transpose(data, (1, 2, 0)))
+        image = torch.from_numpy(self.data[index])
+        image = transform_lib.ToPILImage()(image)
 
         hr_image = self.hr_transforms(image)
         lr_image = self.lr_transforms(image)

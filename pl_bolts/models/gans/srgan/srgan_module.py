@@ -34,7 +34,7 @@ class SRGAN(pl.LightningModule):
         feature_maps_gen: int = 64,
         feature_maps_disc: int = 64,
         generator_checkpoint: Optional[str] = None,
-        learning_rate: float = 0.0002,
+        learning_rate: float = 1e-4,
         scheduler_step: int = 100,
         **kwargs
     ) -> None:
@@ -93,12 +93,12 @@ class SRGAN(pl.LightningModule):
 
     def _disc_step(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
         disc_loss = self._get_disc_loss(hr_image, lr_image)
-        self.log("loss/disc", disc_loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log("loss/disc", disc_loss, on_step=True, on_epoch=True)
         return disc_loss
 
     def _gen_step(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
         gen_loss = self._get_gen_loss(hr_image, lr_image)
-        self.log("loss/gen", gen_loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log("loss/gen", gen_loss, on_step=True, on_epoch=True)
         return gen_loss
 
     def _get_disc_loss(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
@@ -147,7 +147,6 @@ class SRGAN(pl.LightningModule):
         parser.add_argument("--feature_maps_disc", default=64, type=int)
         parser.add_argument("--generator_checkpoint", default=None, type=str)
         parser.add_argument("--learning_rate", default=1e-4, type=float)
-        parser.add_argument("--scheduler_step", default=100, type=int)
         return parser
 
 
@@ -155,6 +154,8 @@ def cli_main(args=None):
     pl.seed_everything(1234)
 
     parser = ArgumentParser()
+    parser.add_argument("--log_interval", default=1000, type=int)
+
     parser = STL10_SR_DataModule.add_argparse_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)
     parser = SRGAN.add_model_specific_args(parser)
@@ -162,7 +163,7 @@ def cli_main(args=None):
 
     model = SRGAN(**vars(args), scheduler_step=args.max_epochs // 2)
     dm = STL10_SR_DataModule.from_argparse_args(args)
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=[SRImageLoggerCallback()])
+    trainer = pl.Trainer.from_argparse_args(args, callbacks=[SRImageLoggerCallback(log_interval=args.log_interval)])
     trainer.fit(model, dm)
 
     torch.save(model.generator, "srgenerator.pt")
