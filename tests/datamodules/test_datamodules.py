@@ -88,7 +88,6 @@ def _create_dm(dm_cls, datadir, val_split=0.2):
     return dm
 
 
-# TODO: Cache dataset
 def test_stl10_sr_datamodule(datadir):
     dm = STL10_SR_DataModule(datadir, num_workers=1, batch_size=2)
     dm.prepare_data()
@@ -100,7 +99,7 @@ def test_stl10_sr_datamodule(datadir):
     assert hr_image.size() == torch.Size([2, 3, 96, 96])
     assert lr_image.size() == torch.Size([2, 3, 24, 24])
 
-    atol = 1e-02
+    atol = 1e-01
     assert torch.allclose(hr_image.min(), torch.tensor(-1.0), atol=atol)
     assert torch.allclose(hr_image.max(), torch.tensor(1.0), atol=atol)
     assert torch.allclose(lr_image.min(), torch.tensor(0.0), atol=atol)
