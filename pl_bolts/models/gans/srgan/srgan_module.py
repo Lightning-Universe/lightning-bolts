@@ -92,52 +92,57 @@ class SRGAN(pl.LightningModule):
         return result
 
     def _disc_step(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
-        disc_loss = self._get_disc_loss(hr_image, lr_image)
+        disc_loss = self._disc_loss(hr_image, lr_image)
         self.log("loss/disc", disc_loss, on_step=True, on_epoch=True)
         return disc_loss
 
     def _gen_step(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
-        gen_loss = self._get_gen_loss(hr_image, lr_image)
+        gen_loss = self._gen_loss(hr_image, lr_image)
         self.log("loss/gen", gen_loss, on_step=True, on_epoch=True)
         return gen_loss
 
-    def _get_disc_loss(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
+    def _disc_loss(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
         real_pred = self.discriminator(hr_image)
-        real_loss = self._get_adv_loss(real_pred, ones=True)
+        real_loss = self._adv_loss(real_pred, ones=True)
 
-        _, fake_pred = self._get_fake_pred(lr_image)
-        fake_loss = self._get_adv_loss(fake_pred, ones=False)
+        _, fake_pred = self._fake_pred(lr_image)
+        fake_loss = self._adv_loss(fake_pred, ones=False)
 
         disc_loss = 0.5 * (real_loss + fake_loss)
 
         return disc_loss
 
-    def _get_gen_loss(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
-        fake, fake_pred = self._get_fake_pred(lr_image)
-        adv_loss = self._get_adv_loss(fake_pred, ones=True)
+    def _gen_loss(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
+        fake, fake_pred = self._fake_pred(lr_image)
 
-        content_loss = self._get_content_loss(hr_image, fake)
+        perceptual_loss = self._perceptual_loss(hr_image, fake)
+        adv_loss = self._adv_loss(fake_pred, ones=True)
+        content_loss = self._content_loss(hr_image, fake)
 
-        gen_loss = content_loss + 1e-3 * adv_loss
+        gen_loss = 0.006 * perceptual_loss + 0.001 * adv_loss + content_loss
 
         return gen_loss
 
-    def _get_fake_pred(self, lr_image: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def _fake_pred(self, lr_image: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         fake = self(lr_image)
         fake_pred = self.discriminator(fake)
         return fake, fake_pred
 
     @staticmethod
-    def _get_adv_loss(pred: torch.Tensor, ones: bool) -> torch.Tensor:
+    def _adv_loss(pred: torch.Tensor, ones: bool) -> torch.Tensor:
         target = torch.ones_like(pred) if ones else torch.zeros_like(pred)
         adv_loss = F.binary_cross_entropy_with_logits(pred, target)
         return adv_loss
 
-    def _get_content_loss(self, hr_image: torch.Tensor, fake: torch.Tensor) -> torch.Tensor:
+    def _perceptual_loss(self, hr_image: torch.Tensor, fake: torch.Tensor) -> torch.Tensor:
         real_features = self.vgg_feature_extractor(hr_image)
         fake_features = self.vgg_feature_extractor(fake)
-        content_loss = F.mse_loss(real_features, fake_features)
-        return content_loss
+        perceptual_loss = self._content_loss(real_features, fake_features)
+        return perceptual_loss
+
+    @staticmethod
+    def _content_loss(hr_image: torch.Tensor, fake: torch.Tensor) -> torch.Tensor:
+        return F.mse_loss(hr_image, fake)
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
