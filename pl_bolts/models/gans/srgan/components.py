@@ -137,6 +137,8 @@ class VGG19FeatureExtractor(nn.Module):
 
         vgg = vgg19(pretrained=True)
         self.vgg = nn.Sequential(*list(vgg.features)[:-1]).eval()
+        for p in self.vgg.parameters():
+            p.requires_grad = False
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.vgg(x)
