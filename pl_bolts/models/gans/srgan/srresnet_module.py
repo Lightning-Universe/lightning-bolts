@@ -19,12 +19,12 @@ class SRResNet(pl.LightningModule):
         from pl_bolts.models.gan import SRResNet
 
         m = SRResNet()
-        Trainer(gpus=2).fit(m)
+        Trainer(gpus=1).fit(m)
 
     Example CLI::
 
-        # STL10 dataset
-        python  ssresnetmodule.py --gpus 1
+        # STL10_SR_DataModule
+        python ssresnetmodule.py --gpus 1
     """
 
     def __init__(self, image_channels: int = 3, feature_maps: int = 64, learning_rate: float = 1e-4, **kwargs) -> None:
@@ -58,7 +58,6 @@ class SRResNet(pl.LightningModule):
         fake = self(lr_image)
         loss = F.mse_loss(hr_image, fake)
         self.log("loss", loss, on_step=True, on_epoch=True)
-
         return loss
 
     @staticmethod
@@ -86,7 +85,7 @@ def cli_main(args=None):
     trainer = pl.Trainer.from_argparse_args(args, callbacks=[SRImageLoggerCallback(log_interval=args.log_interval)])
     trainer.fit(model, dm)
 
-    torch.save(model.srresnet, "srresnet.pt")
+    torch.save(model.srresnet, f"srresnet-epoch={args.max_epochs}-step={trainer.global_step}.pt")
 
 
 if __name__ == "__main__":
