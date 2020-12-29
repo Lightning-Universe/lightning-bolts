@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from pl_bolts.datasets.stl10_sr_dataset import STL10_SR
 
+
 # TODO: Cache dataset for tests
 class STL10_SR_DataModule(LightningDataModule):
     """
