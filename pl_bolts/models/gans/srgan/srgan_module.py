@@ -4,13 +4,9 @@ from typing import Optional, Tuple
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-from torch.utils.data.dataset import random_split
 
 from pl_bolts.callbacks import SRImageLoggerCallback
 from pl_bolts.datamodules.sr_datamodule import SRDataModule
-from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
-from pl_bolts.datasets.sr_celeba_dataset import SRCelebADataset
-from pl_bolts.datasets.stl10_sr_dataset import SRSTL10Dataset
 from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, SRGANGenerator, VGG19FeatureExtractor
 from pl_bolts.models.gans.srgan.utils import parse_args
 

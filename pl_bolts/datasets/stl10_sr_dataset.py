@@ -10,7 +10,6 @@ else:
     warn_missing_pkg("PIL", pypi_name="Pillow")  # pragma: no-cover
 
 if _TORCHVISION_AVAILABLE:
-    from torchvision import transforms as transform_lib
     from torchvision.datasets import STL10
 else:
     warn_missing_pkg("torchvision")  # pragma: no-cover

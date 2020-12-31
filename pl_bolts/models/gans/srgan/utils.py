@@ -17,6 +17,7 @@ def parse_args(args, pl_module_cls):
     parser.add_argument("--scale_factor", default=4, type=int)
     parser.add_argument("--save_model_checkpoint", dest="save_model_checkpoint", action="store_true")
     script_args, _ = parser.parse_known_args(args)
+
     if script_args.dataset == "celeba":
         hr_image_size = 128
         lr_image_size = hr_image_size // script_args.scale_factor
@@ -51,6 +52,7 @@ def parse_args(args, pl_module_cls):
         dataset_test = dataset_cls(
             hr_image_size, lr_image_size, image_channels, root=script_args.data_dir, split="test"
         )
+
     parser = SRDataModule.add_argparse_args(parser)
     parser = pl_module_cls.add_model_specific_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)

@@ -4,7 +4,6 @@ from typing import Tuple
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-from torch.utils.data.dataset import random_split
 
 from pl_bolts.callbacks import SRImageLoggerCallback
 from pl_bolts.datamodules.sr_datamodule import SRDataModule

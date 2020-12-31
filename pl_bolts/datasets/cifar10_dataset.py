@@ -7,18 +7,13 @@ import torch
 from torch import Tensor
 
 from pl_bolts.datasets.base_dataset import LightDataset
-from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE
+from pl_bolts.utils import _PIL_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _PIL_AVAILABLE:
     from PIL import Image
 else:
     warn_missing_pkg("PIL", pypi_name="Pillow")  # pragma: no-cover
-
-if _TORCHVISION_AVAILABLE:
-    from torchvision import transforms as transform_lib
-else:
-    warn_missing_pkg("torchvision")  # pragma: no-cover
 
 
 class CIFAR10(LightDataset):
