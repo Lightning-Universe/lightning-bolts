@@ -90,22 +90,16 @@ class CIFAR10(LightDataset):
         self.transform = transform
 
         if not _PIL_AVAILABLE:
-            raise ImportError(
-                "You want to use PIL.Image for loading but it is not installed yet."
-            )
+            raise ImportError("You want to use PIL.Image for loading but it is not installed yet.")
 
         os.makedirs(self.cached_folder_path, exist_ok=True)
         self.prepare_data(download)
 
-        if not self._check_exists(
-            self.cached_folder_path, (self.TRAIN_FILE_NAME, self.TEST_FILE_NAME)
-        ):
+        if not self._check_exists(self.cached_folder_path, (self.TRAIN_FILE_NAME, self.TEST_FILE_NAME)):
             raise RuntimeError("Dataset not found.")
 
         data_file = self.TRAIN_FILE_NAME if self.train else self.TEST_FILE_NAME
-        self.data, self.targets = torch.load(
-            os.path.join(self.cached_folder_path, data_file)
-        )
+        self.data, self.targets = torch.load(os.path.join(self.cached_folder_path, data_file))
 
     def __getitem__(self, idx: int) -> Tuple[Tensor, int]:
         img = self.data[idx].reshape(3, 32, 32)
@@ -122,9 +116,7 @@ class CIFAR10(LightDataset):
     def _check_exists(cls, data_folder: str, file_names: Sequence[str]) -> bool:
         if isinstance(file_names, str):
             file_names = [file_names]
-        return all(
-            os.path.isfile(os.path.join(data_folder, fname)) for fname in file_names
-        )
+        return all(os.path.isfile(os.path.join(data_folder, fname)) for fname in file_names)
 
     def _unpickle(self, path_folder: str, file_name: str) -> Tuple[Tensor, Tensor]:
         with open(os.path.join(path_folder, file_name), "rb") as fo:
@@ -154,14 +146,10 @@ class CIFAR10(LightDataset):
         data = torch.cat(data, dim=0)
         labels = torch.cat(labels, dim=0)
         # and save as PT
-        torch.save(
-            (data, labels), os.path.join(self.cached_folder_path, self.TRAIN_FILE_NAME)
-        )
+        torch.save((data, labels), os.path.join(self.cached_folder_path, self.TRAIN_FILE_NAME))
 
     def prepare_data(self, download: bool):
-        if self._check_exists(
-            self.cached_folder_path, (self.TRAIN_FILE_NAME, self.TEST_FILE_NAME)
-        ):
+        if self._check_exists(self.cached_folder_path, (self.TRAIN_FILE_NAME, self.TEST_FILE_NAME)):
             return
 
         base_path = os.path.join(self.dir_path, self.DATASET_NAME)
@@ -234,33 +222,5 @@ class TrialCIFAR10(CIFAR10):
             assert os.path.isfile(path_fname), "Missing cached file: %s" % path_fname
             data, targets = torch.load(path_fname)
             if self.num_samples or len(self.labels) < 10:
-                data, targets = self._prepare_subset(
-                    data, targets, self.num_samples, self.labels
-                )
+                data, targets = self._prepare_subset(data, targets, self.num_samples, self.labels)
             torch.save((data, targets), os.path.join(self.cached_folder_path, fname))
-
-
-class CIFAR10_SR(CIFAR10):
-    """
-    Customized `CIFAR10 <http://www.cs.toronto.edu/~kriz/cifar.html>`_ dataset for testing super resolution models.
-    """
-
-    def __init__(self, data_dir) -> None:
-        super().__init__(data_dir)
-
-        self.hr_transforms = transform_lib.Compose([transform_lib.ToTensor()])
-
-        self.lr_transforms = transform_lib.Compose(
-            [transform_lib.Resize(8, Image.BICUBIC), transform_lib.ToTensor()]
-        )
-
-    def __getitem__(self, idx: int) -> Tuple[Tensor, Tensor]:
-        img = self.data[idx].reshape(3, 32, 32)
-
-        img = img.numpy().transpose((1, 2, 0))  # convert to HWC
-        img = Image.fromarray(img)
-
-        hr_image = self.hr_transforms(img)
-        lr_image = self.lr_transforms(img)
-
-        return hr_image, lr_image
