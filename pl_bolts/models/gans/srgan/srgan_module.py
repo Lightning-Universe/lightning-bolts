@@ -155,11 +155,11 @@ class SRGAN(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument("--image_channels", default=3, type=int)
         parser.add_argument("--feature_maps_gen", default=64, type=int)
         parser.add_argument("--feature_maps_disc", default=64, type=int)
         parser.add_argument("--generator_checkpoint", default=None, type=str)
         parser.add_argument("--learning_rate", default=1e-4, type=float)
+        parser.add_argument("--scheduler_step", default=100, type=float)
         return parser
 
 
@@ -167,11 +167,10 @@ def cli_main(args=None):
     pl.seed_everything(1234)
 
     pl_module_cls = SRGAN
-    args, _, datasets = parse_args(args, pl_module_cls)
+    args, image_channels, datasets = parse_args(args, pl_module_cls)
 
     dm = SRDataModule(*datasets, **vars(args))
-    # TODO: calculate scheduler_step
-    model = pl_module_cls(**vars(args), scheduler_step=args.max_epochs // 2)
+    model = pl_module_cls(**vars(args), image_channels=image_channels)
     trainer = pl.Trainer.from_argparse_args(
         args,
         callbacks=[SRImageLoggerCallback(log_interval=args.log_interval, scale_factor=args.scale_factor)],
