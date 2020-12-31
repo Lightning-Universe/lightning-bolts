@@ -38,7 +38,7 @@ class ResidualBlock(nn.Module):
 
 class SRGANGenerator(nn.Module):
     def __init__(
-        self, image_channels: int = 3, feature_maps: int = 64, num_res_blocks: int = 16, num_ps_blocks: int = 2
+        self, image_channels: int, feature_maps: int = 64, num_res_blocks: int = 16, num_ps_blocks: int = 2
     ) -> None:
         super().__init__()
         # Input block: k9n64s1
@@ -84,7 +84,7 @@ class SRGANGenerator(nn.Module):
 
 
 class SRGANDiscriminator(nn.Module):
-    def __init__(self, image_channels: int = 3, feature_maps: int = 64) -> None:
+    def __init__(self, image_channels: int, feature_maps: int = 64) -> None:
         super().__init__()
         # k3n64s1 --> k3n64s2 --> k3n128s1 --> k3n128s2 --> k3n256s1 --> k3n256s2 --> k3n512s1 --> k3n512s2 --> MLP
 
@@ -132,8 +132,11 @@ class SRGANDiscriminator(nn.Module):
 
 
 class VGG19FeatureExtractor(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, image_channels: int = 3) -> None:
         super().__init__()
+
+        assert image_channels in [1, 3]
+        self.image_channels = image_channels
 
         vgg = vgg19(pretrained=True)
         self.vgg = nn.Sequential(*list(vgg.features)[:-1]).eval()
@@ -141,4 +144,7 @@ class VGG19FeatureExtractor(nn.Module):
             p.requires_grad = False
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if self.image_channels == 1:
+            x = x.repeat(1, 3, 1, 1)
+
         return self.vgg(x)

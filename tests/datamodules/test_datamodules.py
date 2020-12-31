@@ -11,9 +11,10 @@ from pl_bolts.datamodules import (
     CityscapesDataModule,
     FashionMNISTDataModule,
     MNISTDataModule,
-    STL10_SR_DataModule,
 )
+from pl_bolts.datamodules.sr_datamodule import SRDataModule
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
+from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
 
 
 def test_dev_datasets(datadir):
@@ -88,19 +89,10 @@ def _create_dm(dm_cls, datadir, val_split=0.2):
     return dm
 
 
-def test_stl10_sr_datamodule(datadir):
-    dm = STL10_SR_DataModule(datadir, num_workers=1, batch_size=2)
-    dm.prepare_data()
-    dm.setup()
+def test_sr_datamodule(datadir):
+    dataset = SRMNISTDataset(hr_image_size=28, lr_image_size=7, image_channels=1, root=datadir)
+    dm = SRDataModule(dataset_train=dataset, dataset_val=dataset, dataset_test=dataset, batch_size=2)
 
-    loader = dm.train_dataloader()
-    hr_image, lr_image = next(iter(loader))
-
-    assert hr_image.size() == torch.Size([2, 3, 96, 96])
-    assert lr_image.size() == torch.Size([2, 3, 24, 24])
-
-    atol = 1e-01
-    assert torch.allclose(hr_image.min(), torch.tensor(-1.0), atol=atol)
-    assert torch.allclose(hr_image.max(), torch.tensor(1.0), atol=atol)
-    assert torch.allclose(lr_image.min(), torch.tensor(0.0), atol=atol)
-    assert torch.allclose(lr_image.max(), torch.tensor(1.0), atol=atol)
+    b = next(iter(dm.train_dataloader()))
+    b = next(iter(dm.val_dataloader()))
+    b = next(iter(dm.test_dataloader()))

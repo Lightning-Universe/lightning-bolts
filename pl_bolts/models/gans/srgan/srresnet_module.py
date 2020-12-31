@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from pl_bolts.models.gans.srgan.utils import parse_args
 from typing import Tuple
 
 import pytorch_lightning as pl
@@ -10,6 +9,7 @@ from torch.utils.data.dataset import random_split
 from pl_bolts.callbacks import SRImageLoggerCallback
 from pl_bolts.datamodules.sr_datamodule import SRDataModule
 from pl_bolts.models.gans.srgan.components import SRGANGenerator
+from pl_bolts.models.gans.srgan.utils import parse_args
 
 
 class SRResNet(pl.LightningModule):
@@ -43,6 +43,8 @@ class SRResNet(pl.LightningModule):
         Args:
             image_channels: Number of channels of the images from the dataset
             feature_maps: Number of feature maps to use
+            num_res_blocks: Number of res blocks to use in the generator
+            scale_factor: Scale factor for the images (either 2 or 4)
             learning_rate: Learning rate
         """
         super().__init__()
@@ -50,7 +52,6 @@ class SRResNet(pl.LightningModule):
 
         assert scale_factor in [2, 4]
         num_ps_blocks = scale_factor // 2
-
         self.srresnet = SRGANGenerator(image_channels, feature_maps, num_res_blocks, num_ps_blocks)
 
     def configure_optimizers(self):

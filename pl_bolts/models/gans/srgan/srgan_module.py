@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from pl_bolts.models.gans.srgan.utils import parse_args
 from typing import Optional, Tuple
 
 import pytorch_lightning as pl
@@ -13,6 +12,7 @@ from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
 from pl_bolts.datasets.sr_celeba_dataset import SRCelebADataset
 from pl_bolts.datasets.stl10_sr_dataset import SRSTL10Dataset
 from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, SRGANGenerator, VGG19FeatureExtractor
+from pl_bolts.models.gans.srgan.utils import parse_args
 
 
 class SRGAN(pl.LightningModule):
@@ -38,6 +38,8 @@ class SRGAN(pl.LightningModule):
         image_channels: int = 3,
         feature_maps_gen: int = 64,
         feature_maps_disc: int = 64,
+        num_res_blocks: int = 16,
+        scale_factor: int = 4,
         generator_checkpoint: Optional[str] = None,
         learning_rate: float = 1e-4,
         scheduler_step: int = 100,
@@ -48,6 +50,8 @@ class SRGAN(pl.LightningModule):
             image_channels: Number of channels of the images from the dataset
             feature_maps_gen: Number of feature maps to use for the generator
             feature_maps_disc: Number of feature maps to use for the discriminator
+            num_res_blocks: Number of res blocks to use in the generator
+            scale_factor: Scale factor for the images (either 2 or 4)
             generator_checkpoint: Generator checkpoint created with SRResNet module
             learning_rate: Learning rate
             scheduler_step: Number of epochs after which the learning rate gets decayed
@@ -56,11 +60,14 @@ class SRGAN(pl.LightningModule):
         self.save_hyperparameters()
 
         if self.hparams.generator_checkpoint:
-            self.generator = torch.load(self.hparams.generator_checkpoint)
+            self.generator = torch.load(generator_checkpoint)
         else:
-            self.generator = SRGANGenerator(self.hparams.image_channels, self.hparams.feature_maps_gen)
-        self.discriminator = SRGANDiscriminator(self.hparams.image_channels, self.hparams.feature_maps_disc)
-        self.vgg_feature_extractor = VGG19FeatureExtractor()
+            assert scale_factor in [2, 4]
+            num_ps_blocks = scale_factor // 2
+            self.generator = SRGANGenerator(image_channels, feature_maps_gen, num_res_blocks, num_ps_blocks)
+
+        self.discriminator = SRGANDiscriminator(image_channels, feature_maps_disc)
+        self.vgg_feature_extractor = VGG19FeatureExtractor(image_channels)
 
     def configure_optimizers(self):
         lr = self.hparams.learning_rate

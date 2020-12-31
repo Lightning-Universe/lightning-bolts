@@ -1,3 +1,5 @@
+import os
+
 from pl_bolts.datasets.sr_dataset_mixin import SRDatasetMixin
 from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -26,7 +28,7 @@ class BinaryMNIST(MNIST):
 
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
-        img = Image.fromarray(img.numpy(), mode="L")
+        img = PIL.Image.fromarray(img.numpy(), mode="L")
 
         if self.transform is not None:
             img = self.transform(img)
@@ -51,3 +53,11 @@ class SRMNISTDataset(SRDatasetMixin, MNIST):
 
     def _get_image(self, index: int):
         return PIL.Image.fromarray(self.data[index].numpy(), mode="L")
+
+    @property
+    def raw_folder(self) -> str:
+        return os.path.join(self.root, "MNIST", "raw")
+
+    @property
+    def processed_folder(self) -> str:
+        return os.path.join(self.root, "MNIST", "processed")
