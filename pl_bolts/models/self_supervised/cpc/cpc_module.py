@@ -111,10 +111,10 @@ class CPCV2(pl.LightningModule):
     def __recover_z_shape(self, Z, b):
         # recover shape
         Z = Z.squeeze(-1)
-        nb_patch = int(math.sqrt(Z.size(0) // b))
+        nb_patches = int(math.sqrt(Z.size(0) // b))
         Z = Z.view(b, -1, Z.size(1))
         Z = Z.permute(0, 2, 1).contiguous()
-        Z = Z.view(b, -1, nb_patch, nb_patch)
+        Z = Z.view(b, -1, nb_patches, nb_patches)
 
         return Z
 
