@@ -12,9 +12,10 @@ else:
 
 
 class SRImageLoggerCallback(Callback):
-    def __init__(self, log_interval: int = 1000, num_samples: int = 5) -> None:
+    def __init__(self, log_interval: int = 1000, scale_factor: int = 4, num_samples: int = 5) -> None:
         super().__init__()
         self.log_interval = log_interval
+        self.scale_factor = scale_factor
         self.num_samples = num_samples
 
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
@@ -23,7 +24,7 @@ class SRImageLoggerCallback(Callback):
             hr_image, lr_image = batch
             hr_image, lr_image = hr_image.to(pl_module.device), lr_image.to(pl_module.device)
             hr_fake = pl_module(lr_image)
-            lr_image = F.interpolate(lr_image, scale_factor=4)
+            lr_image = F.interpolate(lr_image, scale_factor=self.scale_factor)
 
             lr_image_grid = make_grid(lr_image[: self.num_samples], nrow=1, normalize=True)
             hr_fake_grid = make_grid(hr_fake[: self.num_samples], nrow=1, normalize=True)
