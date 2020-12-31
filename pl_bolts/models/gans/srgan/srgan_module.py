@@ -1,12 +1,17 @@
 from argparse import ArgumentParser
+from pl_bolts.models.gans.srgan.utils import parse_args
 from typing import Optional, Tuple
 
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
+from torch.utils.data.dataset import random_split
 
 from pl_bolts.callbacks import SRImageLoggerCallback
-from pl_bolts.datamodules import STL10_SR_DataModule
+from pl_bolts.datamodules.sr_datamodule import SRDataModule
+from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
+from pl_bolts.datasets.sr_celeba_dataset import SRCelebADataset
+from pl_bolts.datasets.stl10_sr_dataset import SRSTL10Dataset
 from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, SRGANGenerator, VGG19FeatureExtractor
 
 
@@ -36,7 +41,7 @@ class SRGAN(pl.LightningModule):
         generator_checkpoint: Optional[str] = None,
         learning_rate: float = 1e-4,
         scheduler_step: int = 100,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Args:
@@ -158,21 +163,23 @@ class SRGAN(pl.LightningModule):
 def cli_main(args=None):
     pl.seed_everything(1234)
 
-    parser = ArgumentParser()
-    parser.add_argument("--log_interval", default=1000, type=int)
+    pl_module_cls = SRGAN
+    args, _, datasets = parse_args(args, pl_module_cls)
 
-    parser = STL10_SR_DataModule.add_argparse_args(parser)
-    parser = pl.Trainer.add_argparse_args(parser)
-    parser = SRGAN.add_model_specific_args(parser)
-    args = parser.parse_args(args)
-
-    model = SRGAN(**vars(args), scheduler_step=args.max_epochs // 2)
-    dm = STL10_SR_DataModule.from_argparse_args(args)
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=[SRImageLoggerCallback(log_interval=args.log_interval)])
+    dm = SRDataModule(*datasets, **vars(args))
+    # TODO: calculate scheduler_step
+    model = pl_module_cls(**vars(args), scheduler_step=args.max_epochs // 2)
+    trainer = pl.Trainer.from_argparse_args(
+        args,
+        callbacks=[SRImageLoggerCallback(log_interval=args.log_interval, scale_factor=args.scale_factor)],
+        logger=pl.loggers.TensorBoardLogger(
+            save_dir="lightning_logs",
+            name="srgan",
+            version=f"{args.dataset}-scale_factor={args.scale_factor}",
+            default_hp_metric=False,
+        ),
+    )
     trainer.fit(model, dm)
-
-    torch.save(model.generator, "srgenerator.pt")
-    torch.save(model.discriminator, "srdiscriminator.pt")
 
 
 if __name__ == "__main__":
