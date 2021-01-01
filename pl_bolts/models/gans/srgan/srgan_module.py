@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from pathlib import Path
 from typing import List, Optional, Tuple
 
 import pytorch_lightning as pl
@@ -14,19 +15,27 @@ from pl_bolts.models.gans.srgan.utils import parse_args
 class SRGAN(pl.LightningModule):
     """
     SRGAN implementation from the paper `Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial
-    Network <https://arxiv.org/pdf/1609.04802.pdf>`_. It uses a pretrained SRResNet model as the generator.
+    Network <https://arxiv.org/pdf/1609.04802.pdf>`_. It uses a pretrained SRResNet model as the generator if available.
+
+    You can pretrain a SRResNet model with :code:`srresnet_module.py`.
 
     Example::
 
         from pl_bolts.models.gan import SRGAN
 
         m = SRGAN()
-        Trainer(gpus=2).fit(m)
+        Trainer(gpus=1).fit(m)
 
     Example CLI::
 
-        # STL10 dataset
-        python  srgan_module.py --gpus 1
+        # CelebA dataset, scale_factor 4
+        python srgan_module.py --dataset=celeba --scale_factor=4 --gpus=1
+
+        # MNIST dataset, scale_factor 4
+        python srgan_module.py --dataset=mnist --scale_factor=4 --gpus=1
+
+        # STL10 dataset, scale_factor 4
+        python srgan_module.py --dataset=stl10 --scale_factor=4 --gpus=1
     """
 
     def __init__(
@@ -74,16 +83,16 @@ class SRGAN(pl.LightningModule):
         sched_gen = torch.optim.lr_scheduler.MultiStepLR(opt_gen, milestones=[self.hparams.scheduler_step], gamma=0.1)
         return [opt_disc, opt_gen], [sched_disc, sched_gen]
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, lr_image: torch.Tensor) -> torch.Tensor:
         """
         Generates a high resolution image given a low resolution image
 
         Example::
 
-            gan = SRGAN.load_from_checkpoint(PATH)
-            hr_image = gan(lr_image)
+            srgan = SRGAN.load_from_checkpoint(PATH)
+            hr_image = srgan(lr_image)
         """
-        return self.generator(x)
+        return self.generator(lr_image)
 
     def training_step(
         self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int, optimizer_idx: int
@@ -159,7 +168,6 @@ class SRGAN(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--feature_maps_gen", default=64, type=int)
         parser.add_argument("--feature_maps_disc", default=64, type=int)
-        parser.add_argument("--generator_checkpoint", default=None, type=str)
         parser.add_argument("--learning_rate", default=1e-4, type=float)
         parser.add_argument("--scheduler_step", default=100, type=float)
         return parser
@@ -169,10 +177,17 @@ def cli_main(args=None):
     pl.seed_everything(1234)
 
     pl_module_cls = SRGAN
-    args, image_channels, datasets = parse_args(args, pl_module_cls)
+    args, datasets = parse_args(args, pl_module_cls)
 
     dm = SRDataModule(*datasets, **vars(args))
-    model = pl_module_cls(**vars(args), image_channels=image_channels)
+
+    generator_checkpoint = Path(f"model_checkpoints/srresnet-{args.dataset}-scale_factor={args.scale_factor}.pt")
+    if not generator_checkpoint.exists():
+        generator_checkpoint = None
+
+    model = pl_module_cls(
+        **vars(args), image_channels=dm.dataset_train.image_channels, generator_checkpoint=generator_checkpoint
+    )
     trainer = pl.Trainer.from_argparse_args(
         args,
         callbacks=[SRImageLoggerCallback(log_interval=args.log_interval, scale_factor=args.scale_factor)],

@@ -44,12 +44,18 @@ class BinaryMNIST(MNIST):
 
 
 class SRMNISTDataset(SRDatasetMixin, MNIST):
-    # TODO: add docs
-    def __init__(self, hr_image_size: int, lr_image_size: int, image_channels: int, *args, **kwargs) -> None:
+    """
+    MNIST dataset that can be used to train Super Resolution models.
+
+    Function __getitem__ (implemented in SRDatasetMixin) returns tuple of high and low resolution image.
+
+    """
+
+    def __init__(self, scale_factor: int, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.hr_image_size = hr_image_size
-        self.lr_image_size = lr_image_size
-        self.image_channels = image_channels
+        self.hr_image_size = 28
+        self.lr_image_size = self.hr_image_size // scale_factor
+        self.image_channels = 1
 
     def _get_image(self, index: int):
         return PIL.Image.fromarray(self.data[index].numpy(), mode="L")

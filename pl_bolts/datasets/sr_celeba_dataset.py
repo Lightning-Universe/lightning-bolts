@@ -17,12 +17,18 @@ else:
 
 
 class SRCelebADataset(SRDatasetMixin, CelebA):
-    # TODO: add docs
-    def __init__(self, hr_image_size: int, lr_image_size: int, image_channels: int, *args, **kwargs) -> None:
+    """
+    CelebA dataset that can be used to train Super Resolution models.
+
+    Function __getitem__ (implemented in SRDatasetMixin) returns tuple of high and low resolution image.
+
+    """
+
+    def __init__(self, scale_factor: int, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.hr_image_size = hr_image_size
-        self.lr_image_size = lr_image_size
-        self.image_channels = image_channels
+        self.hr_image_size = 128
+        self.lr_image_size = self.hr_image_size // scale_factor
+        self.image_channels = 3
 
     def _get_image(self, index: int):
         return PIL.Image.open(os.path.join(self.root, self.base_folder, "img_align_celeba", self.filename[index]))

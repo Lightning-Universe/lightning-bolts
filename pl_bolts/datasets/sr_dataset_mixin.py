@@ -17,10 +17,22 @@ else:
 
 
 class SRDatasetMixin:
-    # TODO: add docs
+    """
+    Mixin for Super Resolution datasets.
+
+    Scales range of high resolution images to [-1, 1] and range or low resolution images to [0, 1].
+    """
+
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        image = self._get_image(index)
+
+        hr_image = self.hr_transforms(image)
+        lr_image = self.lr_transforms(hr_image)
+
+        return hr_image, lr_image
+
     @property
     def hr_transforms(self):
-        # Scale range of HR images to [-1, 1]
         return transform_lib.Compose(
             [
                 transform_lib.RandomCrop(self.hr_image_size),
@@ -43,11 +55,3 @@ class SRDatasetMixin:
 
     def _normalize_tuple(self, value: float) -> Union[Tuple[int], Tuple[int, int, int]]:
         return (value,) * self.image_channels
-
-    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        image = self._get_image(index)
-
-        hr_image = self.hr_transforms(image)
-        lr_image = self.lr_transforms(hr_image)
-
-        return hr_image, lr_image

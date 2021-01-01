@@ -14,7 +14,7 @@ from pl_bolts.models.gans.srgan.utils import parse_args
 class SRResNet(pl.LightningModule):
     """
     SRResNet implementation from the paper `Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial
-    Network <https://arxiv.org/pdf/1609.04802.pdf>`_. A pretrained model is used as the generator for SRGAN.
+    Network <https://arxiv.org/pdf/1609.04802.pdf>`_. A pretrained SRResNet model is used as the generator for SRGAN.
 
     Example::
 
@@ -25,8 +25,14 @@ class SRResNet(pl.LightningModule):
 
     Example CLI::
 
-        # STL10_SR_DataModule
-        python ssresnetmodule.py --gpus 1
+        # CelebA dataset, scale_factor 4
+        python srresnet_module.py --dataset=celeba --scale_factor=4 --gpus=1
+
+        # MNIST dataset, scale_factor 4
+        python srresnet_module.py --dataset=mnist --scale_factor=4 --gpus=1
+
+        # STL10 dataset, scale_factor 4
+        python srresnet_module.py --dataset=stl10 --scale_factor=4 --gpus=1
     """
 
     def __init__(
@@ -101,9 +107,9 @@ def cli_main(args=None):
     pl.seed_everything(1234)
 
     pl_module_cls = SRResNet
-    args, image_channels, datasets = parse_args(args, pl_module_cls)
+    args, datasets = parse_args(args, pl_module_cls)
     dm = SRDataModule(*datasets, **vars(args))
-    model = pl_module_cls(**vars(args), image_channels=image_channels)
+    model = pl_module_cls(**vars(args), image_channels=dm.dataset_train.image_channels)
     trainer = pl.Trainer.from_argparse_args(
         args,
         callbacks=[SRImageLoggerCallback(log_interval=args.log_interval, scale_factor=args.scale_factor)],

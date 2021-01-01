@@ -3,7 +3,19 @@ from torch.utils.data import DataLoader, Dataset
 
 
 class SRDataModule(LightningDataModule):
-    # TODO: add docs
+    """
+    DataModule for Super Resolution datasets.
+
+    Example::
+        from pl_bolts.datamodules import SRDataModule
+        from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
+
+        dataset_dev = SRMNISTDataset(scale_factor=4, root=".", train=True)
+        dataset_train, dataset_val = random_split(dataset_dev, lengths=[55_000, 5_000])
+        dataset_test = SRMNISTDataset(scale_factor=4, root=".", train=True)
+        dm = SRDataModule(dataset_train, dataset_val, dataset_test)
+    """
+
     def __init__(
         self,
         dataset_train: Dataset,
@@ -17,6 +29,18 @@ class SRDataModule(LightningDataModule):
         *args,
         **kwargs,
     ) -> None:
+        """
+        Args:
+            dataset_train: Train dataset
+            dataset_val: Val dataset
+            dataset_test: Test dataset
+            batch_size: How many samples per batch to load
+            num_workers: How many workers to use for loading data
+            shuffle: If true shuffles the train data every epoch
+            pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
+                        returning them
+            drop_last: If true drops the last incomplete batch
+        """
         super().__init__()
 
         self.dataset_train = dataset_train
