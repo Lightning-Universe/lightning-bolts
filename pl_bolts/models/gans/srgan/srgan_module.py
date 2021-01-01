@@ -186,7 +186,7 @@ def cli_main(args=None):
         generator_checkpoint = None
 
     model = pl_module_cls(
-        **vars(args), image_channels=dm.dataset_train.image_channels, generator_checkpoint=generator_checkpoint
+        **vars(args), image_channels=dm.dataset_train.dataset.image_channels, generator_checkpoint=generator_checkpoint
     )
     trainer = pl.Trainer.from_argparse_args(
         args,

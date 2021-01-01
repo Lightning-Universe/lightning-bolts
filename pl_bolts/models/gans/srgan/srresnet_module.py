@@ -109,7 +109,7 @@ def cli_main(args=None):
     pl_module_cls = SRResNet
     args, datasets = parse_args(args, pl_module_cls)
     dm = SRDataModule(*datasets, **vars(args))
-    model = pl_module_cls(**vars(args), image_channels=dm.dataset_train.image_channels)
+    model = pl_module_cls(**vars(args), image_channels=dm.dataset_train.dataset.image_channels)
     trainer = pl.Trainer.from_argparse_args(
         args,
         callbacks=[SRImageLoggerCallback(log_interval=args.log_interval, scale_factor=args.scale_factor)],
