@@ -40,15 +40,12 @@ def test_rand_str_dict_ds():
 
 @pytest.mark.parametrize("scale_factor", [2, 4])
 def test_sr_datasets(datadir, scale_factor):
+    dl = DataLoader(SRMNISTDataset(scale_factor, root=datadir))
+    hr_image, lr_image = next(iter(dl))
+
     hr_image_size = 28
-    lr_image_size = hr_image_size // scale_factor
-    image_channels = 1
-    dataset = SRMNISTDataset(hr_image_size, lr_image_size, image_channels, root=datadir)
-
-    hr_image, lr_image = next(iter(DataLoader(dataset)))
-
-    assert hr_image.size() == torch.Size([1, image_channels, hr_image_size, hr_image_size])
-    assert lr_image.size() == torch.Size([1, image_channels, lr_image_size, lr_image_size])
+    assert hr_image.size() == torch.Size([1, 1, hr_image_size, hr_image_size])
+    assert lr_image.size() == torch.Size([1, 1, hr_image_size // scale_factor, hr_image_size // scale_factor])
 
     atol = 0.3
     assert torch.allclose(hr_image.min(), torch.tensor(-1.0), atol=atol)

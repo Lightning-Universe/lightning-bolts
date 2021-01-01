@@ -30,16 +30,8 @@ def test_gan(tmpdir, datadir, dm_cls):
 def test_sr_modules(tmpdir, datadir, sr_module_cls, scale_factor):
     seed_everything(42)
 
-    dl = _sr_mnist_dataloader(datadir, scale_factor)
+    dl = DataLoader(SRMNISTDataset(scale_factor, root=datadir))
     model = sr_module_cls(image_channels=1, scale_factor=scale_factor)
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, dl)
     trainer.test()
-
-
-def _sr_mnist_dataloader(datadir, scale_factor):
-    hr_image_size = 28
-    lr_image_size = hr_image_size // scale_factor
-    image_channels = 1
-    dl = DataLoader(SRMNISTDataset(hr_image_size, lr_image_size, image_channels, root=datadir), batch_size=2)
-    return dl
