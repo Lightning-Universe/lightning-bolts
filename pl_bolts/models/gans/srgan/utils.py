@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 import pytorch_lightning as pl
 from torch.utils.data.dataset import random_split
 
-from pl_bolts.datamodules.sr_datamodule import SRDataModule
+from pl_bolts.datamodules import SRDataModule
 from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
 from pl_bolts.datasets.sr_celeba_dataset import SRCelebADataset
 from pl_bolts.datasets.stl10_sr_dataset import SRSTL10Dataset

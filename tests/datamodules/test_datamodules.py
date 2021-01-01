@@ -12,7 +12,7 @@ from pl_bolts.datamodules import (
     FashionMNISTDataModule,
     MNISTDataModule,
 )
-from pl_bolts.datamodules.sr_datamodule import SRDataModule
+from pl_bolts.datamodules import SRDataModule
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
 from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
 
