@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import List, Optional, Tuple
+from warnings import warn
 
 import pytorch_lightning as pl
 import torch
@@ -183,10 +184,13 @@ def cli_main(args=None):
 
     generator_checkpoint = Path(f"model_checkpoints/srresnet-{args.dataset}-scale_factor={args.scale_factor}.pt")
     if not generator_checkpoint.exists():
+        warn(
+            "No generator checkpoint found. Training generator from scratch. Use srresnet_module.py to pretrain the generator."
+        )
         generator_checkpoint = None
 
     model = pl_module_cls(
-        **vars(args), image_channels=dm.dataset_train.dataset.image_channels, generator_checkpoint=generator_checkpoint
+        **vars(args), image_channels=dm.dataset_test.image_channels, generator_checkpoint=generator_checkpoint
     )
     trainer = pl.Trainer.from_argparse_args(
         args,
