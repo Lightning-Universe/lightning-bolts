@@ -74,7 +74,7 @@ class SRGAN(pl.LightningModule):
         self.discriminator = SRGANDiscriminator(image_channels, feature_maps_disc)
         self.vgg_feature_extractor = VGG19FeatureExtractor(image_channels)
 
-    def configure_optimizers(self) -> Tuple[List, List]:
+    def configure_optimizers(self) -> Tuple[List[torch.optim.Adam], List[torch.optim.lr_scheduler.MultiStepLR]]:
         lr = self.hparams.learning_rate
         opt_disc = torch.optim.Adam(self.discriminator.parameters(), lr=lr)
         opt_gen = torch.optim.Adam(self.generator.parameters(), lr=lr)

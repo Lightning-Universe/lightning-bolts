@@ -13,7 +13,7 @@ from pl_bolts.datasets.sr_stl10_dataset import SRSTL10Dataset
 
 def parse_args(
     args: Optional[Sequence[Text]], pl_module_cls: pl.LightningModule
-) -> Tuple[Namespace, int, List[VisionDataset, VisionDataset, VisionDataset]]:
+) -> Tuple[Namespace, int, List[VisionDataset]]:
 
     parser = ArgumentParser()
     parser.add_argument("--dataset", default="mnist", type=str, choices=["celeba", "mnist", "stl10"])
