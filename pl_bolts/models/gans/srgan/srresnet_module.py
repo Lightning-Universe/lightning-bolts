@@ -53,7 +53,7 @@ class SRResNet(pl.LightningModule):
         num_ps_blocks = scale_factor // 2
         self.srresnet = SRGANGenerator(image_channels, feature_maps, num_res_blocks, num_ps_blocks)
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> torch.optim.Adam:
         return torch.optim.Adam(self.srresnet.parameters(), lr=self.hparams.learning_rate)
 
     def forward(self, lr_image: torch.Tensor) -> torch.Tensor:

@@ -11,8 +11,8 @@ from pl_bolts.datamodules import (
     CityscapesDataModule,
     FashionMNISTDataModule,
     MNISTDataModule,
+    SRDataModule,
 )
-from pl_bolts.datamodules import SRDataModule
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
 from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
 

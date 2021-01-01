@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import pytorch_lightning as pl
 import torch
@@ -65,7 +65,7 @@ class SRGAN(pl.LightningModule):
         self.discriminator = SRGANDiscriminator(image_channels, feature_maps_disc)
         self.vgg_feature_extractor = VGG19FeatureExtractor(image_channels)
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> Tuple[List, List]:
         lr = self.hparams.learning_rate
         opt_disc = torch.optim.Adam(self.discriminator.parameters(), lr=lr)
         opt_gen = torch.optim.Adam(self.generator.parameters(), lr=lr)
@@ -85,7 +85,9 @@ class SRGAN(pl.LightningModule):
         """
         return self.generator(x)
 
-    def training_step(self, batch, batch_idx, optimizer_idx):
+    def training_step(
+        self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int, optimizer_idx: int
+    ) -> torch.Tensor:
         hr_image, lr_image = batch
 
         # Train discriminator

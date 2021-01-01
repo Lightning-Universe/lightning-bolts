@@ -1,15 +1,19 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
+from typing import List, Optional, Sequence, Text, Tuple
 
 import pytorch_lightning as pl
 from torch.utils.data.dataset import random_split
+from torchvision.datasets.vision import VisionDataset
 
 from pl_bolts.datamodules import SRDataModule
 from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
 from pl_bolts.datasets.sr_celeba_dataset import SRCelebADataset
-from pl_bolts.datasets.stl10_sr_dataset import SRSTL10Dataset
+from pl_bolts.datasets.sr_stl10_dataset import SRSTL10Dataset
 
 
-def parse_args(args, pl_module_cls):
+def parse_args(
+    args: Optional[Sequence[Text]], pl_module_cls: pl.LightningModule
+) -> Tuple[Namespace, int, List[VisionDataset, VisionDataset, VisionDataset]]:
     parser = ArgumentParser()
     parser.add_argument("--dataset", default="mnist", type=str, choices=["celeba", "mnist", "stl10"])
     parser.add_argument("--data_dir", default="./", type=str)

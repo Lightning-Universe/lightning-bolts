@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 import torch
 
@@ -41,7 +41,7 @@ class SRDatasetMixin:
             ]
         )
 
-    def _normalize_tuple(self, value: float) -> Tuple:
+    def _normalize_tuple(self, value: float) -> Union[Tuple[int], Tuple[int, int, int]]:
         return (value,) * self.image_channels
 
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
