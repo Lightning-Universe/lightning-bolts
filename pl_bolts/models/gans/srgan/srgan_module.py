@@ -10,7 +10,7 @@ import torch.nn.functional as F
 from pl_bolts.callbacks import SRImageLoggerCallback
 from pl_bolts.datamodules import SRDataModule
 from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, SRGANGenerator, VGG19FeatureExtractor
-from pl_bolts.models.gans.srgan.utils import parse_args
+from pl_bolts.models.gans.srgan.utils import parse_args, prepare_datasets
 
 
 class SRGAN(pl.LightningModule):
@@ -178,14 +178,16 @@ def cli_main(args=None):
     pl.seed_everything(1234)
 
     pl_module_cls = SRGAN
-    args, datasets = parse_args(args, pl_module_cls)
+    args = parse_args(args, pl_module_cls)
 
+    datasets = prepare_datasets(args.dataset, args.scale_factor, args.data_dir)
     dm = SRDataModule(*datasets, **vars(args))
 
     generator_checkpoint = Path(f"model_checkpoints/srresnet-{args.dataset}-scale_factor={args.scale_factor}.pt")
     if not generator_checkpoint.exists():
         warn(
-            "No generator checkpoint found. Training generator from scratch. Use srresnet_module.py to pretrain the generator."
+            "No generator checkpoint found. Training generator from scratch. \
+            Use srresnet_module.py to pretrain the generator."
         )
         generator_checkpoint = None
 
