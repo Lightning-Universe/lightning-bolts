@@ -131,9 +131,6 @@ def cli_main():
             'You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`.'
         ) from err
 
-    X, y = load_boston(return_X_y=True)  # these are numpy arrays
-    loaders = SklearnDataModule(X, y)
-
     # args
     parser = ArgumentParser()
     parser = LinearRegression.add_model_specific_args(parser)
@@ -144,9 +141,13 @@ def cli_main():
     model = LinearRegression(input_dim=13, l1_strength=1, l2_strength=1)
     # model = LinearRegression(**vars(args))
 
+    # data
+    X, y = load_boston(return_X_y=True)  # these are numpy arrays
+    loaders = SklearnDataModule(X, y, batch_size=args.batch_size)
+
     # train
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model, loaders.train_dataloader(args.batch_size), loaders.val_dataloader(args.batch_size))
+    trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
 
 
 if __name__ == '__main__':

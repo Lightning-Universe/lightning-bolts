@@ -1,6 +1,5 @@
 import os
 from typing import Optional
-from warnings import warn
 
 import torch
 from pytorch_lightning import LightningDataModule
@@ -8,16 +7,14 @@ from torch.utils.data import DataLoader, random_split
 
 from pl_bolts.datasets.concat_dataset import ConcatDataset
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import STL10
-except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
-    _TORCHVISION_AVAILABLE = False
 else:
-    _TORCHVISION_AVAILABLE = True
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
 class STL10DataModule(LightningDataModule):  # pragma: no cover
@@ -63,6 +60,9 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             num_workers: int = 16,
             batch_size: int = 32,
             seed: int = 42,
+            shuffle: bool = False,
+            pin_memory: bool = False,
+            drop_last: bool = False,
             *args,
             **kwargs,
     ):
@@ -73,6 +73,11 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             train_val_split: how many images from the labeled training split to use for validation
             num_workers: how many workers to use for loading data
             batch_size: the batch size
+            seed: random seed to be used for train/val/test splits
+            shuffle: If true shuffles the data every epoch
+            pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
+                        returning them
+            drop_last: If true drops the last incomplete batch
         """
         super().__init__(*args, **kwargs)
 
@@ -88,8 +93,10 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         self.num_workers = num_workers
         self.batch_size = batch_size
         self.seed = seed
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
         self.num_unlabeled_samples = 100000 - unlabeled_val_split
-        self.labeled_val_split = 200
 
     @property
     def num_classes(self):
@@ -107,7 +114,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         """
         Loads the 'unlabeled' split minus a portion set aside for validation via `unlabeled_val_split`.
         """
-        transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
+        transforms = self._default_transforms() if self.train_transforms is None else self.train_transforms
 
         dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
@@ -117,10 +124,10 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             dataset_train,
             batch_size=self.batch_size,
-            shuffle=True,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -134,7 +141,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size: the batch size
             transforms: a sequence of transforms
         """
-        transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
+        transforms = self._default_transforms() if self.train_transforms is None else self.train_transforms
 
         unlabeled_dataset = STL10(self.data_dir,
                                   split='unlabeled',
@@ -155,10 +162,10 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
-            shuffle=True,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -172,7 +179,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size: the batch size
             transforms: a sequence of transforms
         """
-        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+        transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
 
         dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
@@ -184,7 +191,8 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            pin_memory=True
+            drpo_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -204,7 +212,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size: the batch size
             transforms: a sequence of transforms
         """
-        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+        transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
         unlabeled_dataset = STL10(self.data_dir,
                                   split='unlabeled',
                                   download=False,
@@ -226,8 +234,8 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
@@ -239,7 +247,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size: the batch size
             transforms: the transforms
         """
-        transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
+        transforms = self._default_transforms() if self.test_transforms is None else self.test_transforms
 
         dataset = STL10(self.data_dir, split='test', download=False, transform=transforms)
         loader = DataLoader(
@@ -247,37 +255,38 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
     def train_dataloader_labeled(self):
-        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+        transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
 
         dataset = STL10(self.data_dir, split='train', download=False, transform=transforms)
         train_length = len(dataset)
         dataset_train, _ = random_split(dataset,
-                                        [train_length - self.labeled_val_split, self.labeled_val_split],
+                                        [train_length - self.train_val_split, self.train_val_split],
                                         generator=torch.Generator().manual_seed(self.seed))
         loader = DataLoader(
             dataset_train,
             batch_size=self.batch_size,
-            shuffle=False,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
     def val_dataloader_labeled(self):
-        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+        transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
         dataset = STL10(self.data_dir,
                         split='train',
                         download=False,
                         transform=transforms)
         labeled_length = len(dataset)
         _, labeled_val = random_split(dataset,
-                                      [labeled_length - self.labeled_val_split, self.labeled_val_split],
+                                      [labeled_length - self.train_val_split, self.train_val_split],
                                       generator=torch.Generator().manual_seed(self.seed))
 
         loader = DataLoader(
@@ -285,12 +294,12 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
-    def default_transforms(self):
+    def _default_transforms(self):
         data_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             stl10_normalization()

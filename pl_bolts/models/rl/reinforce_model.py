@@ -1,7 +1,6 @@
 import argparse
 from collections import OrderedDict
-from typing import Tuple, List
-from warnings import warn
+from typing import List, Tuple
 
 import numpy as np
 import pytorch_lightning as pl
@@ -17,14 +16,13 @@ from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.datamodules.experience_source import Experience
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.networks import MLP
+from pl_bolts.utils import _GYM_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _GYM_AVAILABLE:
     import gym
-except ModuleNotFoundError:
-    warn('You want to use `gym` which is not installed yet, install it with `pip install gym`.')  # pragma: no-cover
-    _GYM_AVAILABLE = False
 else:
-    _GYM_AVAILABLE = True
+    warn_missing_pkg('gym')  # pragma: no-cover
 
 
 class Reinforce(pl.LightningModule):
@@ -206,6 +204,10 @@ class Reinforce(pl.LightningModule):
 
                 self.batch_episodes = 0
 
+                self.batch_states.clear()
+                self.batch_actions.clear()
+                self.batch_qvals.clear()
+
             # Simulates epochs
             if self.total_steps % self.batches_per_epoch == 0:
                 break
@@ -215,7 +217,7 @@ class Reinforce(pl.LightningModule):
 
         # policy loss
         log_prob = log_softmax(logits, dim=1)
-        log_prob_actions = scaled_rewards * log_prob[range(self.batch_size), actions]
+        log_prob_actions = scaled_rewards * log_prob[range(len(log_prob)), actions]
         loss = -log_prob_actions.mean()
 
         return loss

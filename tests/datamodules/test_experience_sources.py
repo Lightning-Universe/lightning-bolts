@@ -8,10 +8,10 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules.experience_source import (
     BaseExperienceSource,
+    DiscountedExperienceSource,
+    Experience,
     ExperienceSource,
     ExperienceSourceDataset,
-    Experience,
-    DiscountedExperienceSource,
 )
 from pl_bolts.models.rl.common.agents import Agent
 

@@ -3,7 +3,7 @@
 import os
 
 # Always prefer setuptools over distutils
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 try:
     import builtins
@@ -14,7 +14,7 @@ except ImportError:
 # http://blog.ionelmc.ro/2014/05/25/python-packaging/
 
 PATH_ROOT = os.path.dirname(__file__)
-builtins.__LIGHTNING_BOLT_SETUP__ = True
+builtins.__LIGHTNING_BOLT_SETUP__: bool = True
 
 import pl_bolts  # noqa: E402
 

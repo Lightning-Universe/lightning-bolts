@@ -1,7 +1,7 @@
 from pl_bolts.callbacks import PrintTableMetricsCallback
 
 
-def test_printtable_metrics_callback(tmpdir):
+def test_printtable_metrics_callback():
     callback = PrintTableMetricsCallback()
 
     metrics_a = {'loss': 1.0, 'epoch': 0}

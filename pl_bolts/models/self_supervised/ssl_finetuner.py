@@ -1,11 +1,11 @@
+from typing import List, Optional
+
 import pytorch_lightning as pl
-import pytorch_lightning.metrics.functional as plm
 import torch
 import torch.nn.functional as F
+from pytorch_lightning.metrics import Accuracy
 
 from pl_bolts.models.self_supervised import SSLEvaluator
-from typing import Optional, List
-from pytorch_lightning.metrics import Accuracy
 
 
 class SSLFineTuner(pl.LightningModule):
@@ -103,18 +103,18 @@ class SSLFineTuner(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         loss, logits, y = self.shared_step(batch)
-        acc = self.val_acc(logits, y)
+        self.val_acc(logits, y)
 
-        self.log('val_loss', loss, prog_bar=True)
+        self.log('val_loss', loss, prog_bar=True, sync_dist=True)
         self.log('val_acc', self.val_acc)
 
         return loss
 
     def test_step(self, batch, batch_idx):
         loss, logits, y = self.shared_step(batch)
-        acc = self.test_acc(logits, y)
+        self.test_acc(logits, y)
 
-        self.log('test_loss', loss)
+        self.log('test_loss', loss, sync_dist=True)
         self.log('test_acc', self.test_acc)
 
         return loss

@@ -4,13 +4,20 @@ Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/
 """
 from abc import ABC
 from collections import deque, namedtuple
-from typing import Iterable, Callable, Tuple, List
+from typing import Callable, Iterable, List, Tuple
 
 import torch
-from gym import Env
 from torch.utils.data import IterableDataset
 
-# Datasets
+from pl_bolts.utils import _GYM_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _GYM_AVAILABLE:
+    from gym import Env
+else:  # pragma: no cover
+    warn_missing_pkg("gym")
+    Env = object
+
 
 Experience = namedtuple(
     "Experience", field_names=["state", "action", "reward", "done", "new_state"]

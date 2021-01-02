@@ -1,16 +1,13 @@
-from warnings import warn
-
 import numpy as np
 import torch.nn.functional as F
 
-try:
+from pl_bolts.utils import _PIL_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _PIL_AVAILABLE:
     from PIL import Image
-except ModuleNotFoundError:
-    warn('You want to use `Pillow` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install Pillow`.')
-    _PIL_AVAILABLE = False
 else:
-    _PIL_AVAILABLE = True
+    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
 
 
 class RandomTranslateWithReflect:

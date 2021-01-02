@@ -1,9 +1,9 @@
 from pl_bolts.datasets.dummy_dataset import (
-    RandomDictStringDataset,
-    RandomDictDataset,
-    RandomDataset,
     DummyDataset,
-    DummyDetectionDataset
+    DummyDetectionDataset,
+    RandomDataset,
+    RandomDictDataset,
+    RandomDictStringDataset,
 )
 
 __all__ = [

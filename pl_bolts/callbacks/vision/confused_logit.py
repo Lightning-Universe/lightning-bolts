@@ -1,6 +1,16 @@
+import importlib
+
 import torch
 from pytorch_lightning import Callback
 from torch import nn
+
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+_MATPLOTLIB_AVAILABLE = importlib.util.find_spec("matplotlib") is not None
+if _MATPLOTLIB_AVAILABLE:
+    from matplotlib import pyplot as plt
+else:
+    warn_missing_pkg("matplotlib")  # pragma: no-cover
 
 
 class ConfusedLogitCallback(Callback):  # pragma: no-cover
@@ -93,7 +103,10 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
                 pl_module.train()
 
     def _plot(self, confusing_x, confusing_y, trainer, model, mask_idxs):
-        from matplotlib import pyplot as plt
+        if not _MATPLOTLIB_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'You want to use `matplotlib` which is not installed yet, install it with `pip install matplotlib`.'
+            )
 
         confusing_x = confusing_x[:self.top_k]
         confusing_y = confusing_y[:self.top_k]

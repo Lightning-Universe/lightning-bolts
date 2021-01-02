@@ -1,23 +1,19 @@
-from warnings import warn
+from typing import List
 
 import numpy as np
 
-try:
+from pl_bolts.utils import _OPENCV_AVAILABLE, _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _TORCHVISION_AVAILABLE:
     import torchvision.transforms as transforms
-except ImportError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
-try:
+if _OPENCV_AVAILABLE:
     import cv2
-except ImportError:
-    warn('You want to use `opencv-python` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install opencv-python`.')
-
-from typing import List
+else:  # pragma: no cover
+    warn_missing_pkg('cv2', pypi_name='opencv-python')
 
 
 class SwAVTrainDataTransform(object):
@@ -57,8 +53,12 @@ class SwAVTrainDataTransform(object):
         ]
 
         if self.gaussian_blur:
+            kernel_size = int(0.1 * self.size_crops[0])
+            if kernel_size % 2 == 0:
+                kernel_size += 1
+
             color_transform.append(
-                GaussianBlur(kernel_size=int(0.1 * self.size_crops[0]), p=0.5)
+                GaussianBlur(kernel_size=kernel_size, p=0.5)
             )
 
         self.color_transform = transforms.Compose(color_transform)

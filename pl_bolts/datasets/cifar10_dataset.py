@@ -1,22 +1,19 @@
 import os
 import pickle
 import tarfile
-from typing import Tuple, Optional, Sequence, Callable
-from warnings import warn
+from typing import Callable, Optional, Sequence, Tuple
 
 import torch
 from torch import Tensor
 
-try:
-    from PIL import Image
-except ModuleNotFoundError:
-    warn('You want to use `Pillow` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install Pillow`.')
-    _PIL_AVAILABLE = False
-else:
-    _PIL_AVAILABLE = True
-
 from pl_bolts.datasets.base_dataset import LightDataset
+from pl_bolts.utils import _PIL_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _PIL_AVAILABLE:
+    from PIL import Image
+else:
+    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
 
 
 class CIFAR10(LightDataset):
@@ -41,7 +38,7 @@ class CIFAR10(LightDataset):
         >>> from torchvision import transforms
         >>> from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
         >>> cf10_transforms = transforms.Compose([transforms.ToTensor(), cifar10_normalization()])
-        >>> dataset = CIFAR10(download=True, transform=cf10_transforms)
+        >>> dataset = CIFAR10(download=True, transform=cf10_transforms, data_dir="datasets")
         >>> len(dataset)
         50000
         >>> torch.bincount(dataset.targets)
@@ -167,7 +164,7 @@ class TrialCIFAR10(CIFAR10):
     without the torchvision dependency.
     Examples:
 
-        >>> dataset = TrialCIFAR10(download=True, num_samples=150, labels=(1, 5, 8))
+        >>> dataset = TrialCIFAR10(download=True, num_samples=150, labels=(1, 5, 8), data_dir="datasets")
         >>> len(dataset)
         450
         >>> sorted(set([d.item() for d in dataset.targets]))

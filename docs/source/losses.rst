@@ -13,6 +13,20 @@ We're cleaning up many of our losses, but in the meantime, submit a PR to add yo
 
 -------------
 
+Object Detection
+======================
+These are common losses used in object detection.
+
+---------------
+
+GIoU Loss
+---------
+
+.. autofunction:: pl_bolts.losses.object_detection.giou_loss
+    :noindex:
+
+---------------
+
 Reinforcement Learning
 ======================
 These are common losses used in RL.

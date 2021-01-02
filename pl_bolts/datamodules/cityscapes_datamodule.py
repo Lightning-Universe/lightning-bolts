@@ -1,18 +1,14 @@
-from warnings import warn
-
-import torch
 from pytorch_lightning import LightningDataModule
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 
-try:
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import Cityscapes
-except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
-    _TORCHVISION_AVAILABLE = False
 else:
-    _TORCHVISION_AVAILABLE = True
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
 class CityscapesDataModule(LightningDataModule):
@@ -23,9 +19,12 @@ class CityscapesDataModule(LightningDataModule):
 
     Standard Cityscapes, train, val, test splits and transforms
 
+    Note: You need to have downloaded the Cityscapes dataset first and provide the path to where it is saved.
+        You can download the dataset here: https://www.cityscapes-dataset.com/
+
     Specs:
         - 30 classes (road, person, sidewalk, etc...)
-        - (image, target) - image dims: (3 x 32 x 32), target dims: (3 x 32 x 32)
+        - (image, target) - image dims: (3 x 1024 x 2048), target dims: (1024 x 2048)
 
     Transforms::
 
@@ -53,6 +52,7 @@ class CityscapesDataModule(LightningDataModule):
         dm.train_transforms = ...
         dm.test_transforms = ...
         dm.val_transforms  = ...
+        dm.target_transforms = ...
     """
 
     name = 'Cityscapes'
@@ -60,20 +60,31 @@ class CityscapesDataModule(LightningDataModule):
 
     def __init__(
             self,
-            data_dir,
-            val_split=5000,
-            num_workers=16,
-            batch_size=32,
-            seed=42,
+            data_dir: str,
+            quality_mode: str = 'fine',
+            target_type: str = 'instance',
+            num_workers: int = 16,
+            batch_size: int = 32,
+            seed: int = 42,
+            shuffle: bool = False,
+            pin_memory: bool = False,
+            drop_last: bool = False,
             *args,
             **kwargs,
     ):
         """
         Args:
-            data_dir: where to save/load the data
-            val_split: how many of the training images to use for the validation split
+            data_dir: where to load the data from path, i.e. where directory leftImg8bit and gtFine or gtCoarse
+                are located
+            quality_mode: the quality mode to use, either 'fine' or 'coarse'
+            target_type: targets to use, either 'instance' or 'semantic'
             num_workers: how many workers to use for loading data
             batch_size: number of examples per training/eval step
+            seed: random seed to be used for train/val/test splits
+            shuffle: If true shuffles the data every epoch
+            pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
+                        returning them
+            drop_last: If true drops the last incomplete batch
         """
         super().__init__(*args, **kwargs)
 
@@ -82,13 +93,20 @@ class CityscapesDataModule(LightningDataModule):
                 'You want to use CityScapes dataset loaded from `torchvision` which is not installed yet.'
             )
 
-        self.dims = (3, 32, 32)
-        self.DATASET = Cityscapes
+        if target_type not in ['instance', 'semantic']:
+            raise ValueError(f'Only "semantic" and "instance" target types are supported. Got {target_type}.')
+
+        self.dims = (3, 1024, 2048)
         self.data_dir = data_dir
-        self.val_split = val_split
+        self.quality_mode = quality_mode
+        self.target_type = target_type
         self.num_workers = num_workers
         self.batch_size = batch_size
         self.seed = seed
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
+        self.target_transforms = None
 
     @property
     def num_classes(self):
@@ -98,77 +116,81 @@ class CityscapesDataModule(LightningDataModule):
         """
         return 30
 
-    def prepare_data(self):
-        """
-        Saves Cityscapes files to data_dir
-        """
-        self.DATASET(self.data_dir, train=True, download=True, transform=transform_lib.ToTensor(), **self.extra_args)
-        self.DATASET(self.data_dir, train=False, download=True, transform=transform_lib.ToTensor(), **self.extra_args)
-
     def train_dataloader(self):
         """
-        Cityscapes train set with removed subset to use for validation
+        Cityscapes train set
         """
-        transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
+        transforms = self.train_transforms or self._default_transforms()
+        target_transforms = self.target_transforms or self._default_target_transforms()
 
-        dataset = self.DATASET(self.data_dir, train=True, download=False, transform=transforms, **self.extra_args)
-        train_length = len(dataset)
-        dataset_train, _ = random_split(
-            dataset,
-            [train_length - self.val_split, self.val_split],
-            generator=torch.Generator().manual_seed(self.seed)
-        )
+        dataset = Cityscapes(self.data_dir,
+                             split='train',
+                             target_type=self.target_type,
+                             mode=self.quality_mode,
+                             transform=transforms,
+                             target_transform=target_transforms,
+                             **self.extra_args)
+
         loader = DataLoader(
-            dataset_train,
+            dataset,
             batch_size=self.batch_size,
-            shuffle=True,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
     def val_dataloader(self):
         """
-        Cityscapes val set uses a subset of the training set for validation
+        Cityscapes val set
         """
-        transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+        transforms = self.val_transforms or self._default_transforms()
+        target_transforms = self.target_transforms or self._default_target_transforms()
 
-        dataset = self.DATASET(self.data_dir, train=True, download=False, transform=transforms, **self.extra_args)
-        train_length = len(dataset)
-        _, dataset_val = random_split(
-            dataset,
-            [train_length - self.val_split, self.val_split],
-            generator=torch.Generator().manual_seed(self.seed)
-        )
+        dataset = Cityscapes(self.data_dir,
+                             split='val',
+                             target_type=self.target_type,
+                             mode=self.quality_mode,
+                             transform=transforms,
+                             target_transform=target_transforms,
+                             **self.extra_args)
+
         loader = DataLoader(
-            dataset_val,
+            dataset,
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            pin_memory=True,
-            drop_last=True
+            pin_memory=self.pin_memory,
+            drop_last=self.drop_last
         )
         return loader
 
     def test_dataloader(self):
         """
-        Cityscapes test set uses the test split
+        Cityscapes test set
         """
-        transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
+        transforms = self.test_transforms or self._default_transforms()
+        target_transforms = self.target_transforms or self._default_target_transforms()
 
-        dataset = self.DATASET(self.data_dir, train=False, download=False, transform=transforms, **self.extra_args)
+        dataset = Cityscapes(self.data_dir,
+                             split='test',
+                             target_type=self.target_type,
+                             mode=self.quality_mode,
+                             transform=transforms,
+                             target_transform=target_transforms,
+                             **self.extra_args)
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
-    def default_transforms(self):
+    def _default_transforms(self):
         cityscapes_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transform_lib.Normalize(
@@ -177,3 +199,10 @@ class CityscapesDataModule(LightningDataModule):
             )
         ])
         return cityscapes_transforms
+
+    def _default_target_transforms(self):
+        cityscapes_target_trasnforms = transform_lib.Compose([
+            transform_lib.ToTensor(),
+            transform_lib.Lambda(lambda t: t.squeeze())
+        ])
+        return cityscapes_target_trasnforms

@@ -98,27 +98,21 @@ class BYOL(pl.LightningModule):
         y, _, _ = self.online_network(x)
         return y
 
-    def cosine_similarity(self, a, b):
-        a = F.normalize(a, dim=-1)
-        b = F.normalize(b, dim=-1)
-        sim = (a * b).sum(-1).mean()
-        return sim
-
     def shared_step(self, batch, batch_idx):
-        (img_1, img_2), y = batch
+        (img_1, img_2, _), y = batch
 
         # Image 1 to image 2 loss
         y1, z1, h1 = self.online_network(img_1)
         with torch.no_grad():
             y2, z2, h2 = self.target_network(img_2)
-        loss_a = - 2 * self.cosine_similarity(h1, z2)
+        loss_a = - 2 * F.cosine_similarity(h1, z2).mean()
 
         # Image 2 to image 1 loss
         y1, z1, h1 = self.online_network(img_2)
         with torch.no_grad():
             y2, z2, h2 = self.target_network(img_1)
         # L2 normalize
-        loss_b = - 2 * self.cosine_similarity(h1, z2)
+        loss_b = - 2 * F.cosine_similarity(h1, z2).mean()
 
         # Final loss
         total_loss = loss_a + loss_b
@@ -177,8 +171,8 @@ class BYOL(pl.LightningModule):
 
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
-    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, ImagenetDataModule
-    from pl_bolts.models.self_supervised.simclr import SimCLRTrainDataTransform, SimCLREvalDataTransform
+    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
+    from pl_bolts.models.self_supervised.simclr import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
     seed_everything(1234)
 
@@ -220,15 +214,8 @@ def cli_main():
 
     model = BYOL(**args.__dict__)
 
-    def to_device(batch, device):
-        (x1, x2), y = batch
-        x1 = x1.to(device)
-        y = y.to(device)
-        return x1, y
-
     # finetune in real-time
-    online_eval = SSLOnlineEvaluator(z_dim=2048, num_classes=dm.num_classes)
-    online_eval.to_device = to_device
+    online_eval = SSLOnlineEvaluator(dataset=args.dataset, z_dim=2048, num_classes=dm.num_classes)
 
     trainer = pl.Trainer.from_argparse_args(args, max_steps=300000, callbacks=[online_eval])
 

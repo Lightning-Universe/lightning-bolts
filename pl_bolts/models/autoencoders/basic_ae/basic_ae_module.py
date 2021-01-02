@@ -5,8 +5,12 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
-from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_decoder
-from pl_bolts.models.autoencoders.components import resnet50_encoder, resnet50_decoder
+from pl_bolts.models.autoencoders.components import (
+    resnet18_decoder,
+    resnet18_encoder,
+    resnet50_decoder,
+    resnet50_encoder,
+)
 
 
 class AE(pl.LightningModule):
@@ -36,7 +40,6 @@ class AE(pl.LightningModule):
         first_conv: bool = False,
         maxpool1: bool = False,
         enc_out_dim: int = 512,
-        kl_coeff: float = 0.1,
         latent_dim: int = 256,
         lr: float = 1e-4,
         **kwargs

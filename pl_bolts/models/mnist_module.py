@@ -1,18 +1,17 @@
-import os
 from argparse import ArgumentParser
-from warnings import warn
 
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
 
+from pl_bolts.utils.warnings import warn_missing_pkg
+
 try:
     from torchvision import transforms
     from torchvision.datasets import MNIST
 except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
 class LitMNIST(LightningModule):
@@ -70,7 +69,7 @@ class LitMNIST(LightningModule):
         return loader
 
     def test_dataloader(self):
-        test_dataset = MNIST(os.getcwd(), train=False, download=True, transform=transforms.ToTensor())
+        test_dataset = MNIST(self.hparams.data_dir, train=False, download=True, transform=transforms.ToTensor())
         loader = DataLoader(test_dataset, batch_size=self.hparams.batch_size, num_workers=self.hparams.num_workers)
         return loader
 

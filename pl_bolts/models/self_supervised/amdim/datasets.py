@@ -1,16 +1,17 @@
 from typing import Optional
-from warnings import warn
 
 from torch.utils.data import random_split
 
-try:
+from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
+from pl_bolts.datasets.ssl_amdim_datasets import CIFAR10Mixed
+from pl_bolts.models.self_supervised.amdim import transforms as amdim_transforms
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import STL10
-    from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
-    from pl_bolts.datasets.ssl_amdim_datasets import CIFAR10Mixed
-    from pl_bolts.models.self_supervised.amdim import transforms as amdim_transforms
-except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 
 class AMDIMPretraining():
@@ -54,6 +55,10 @@ class AMDIMPretraining():
 
     @staticmethod
     def stl(dataset_root, split: Optional[str] = None):
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
+                'You want to use STL10 dataset loaded from `torchvision` which is not installed yet.'
+            )
         dataset = STL10(
             root=dataset_root,
             split='unlabeled',
@@ -95,6 +100,10 @@ class AMDIMPatchesPretraining():
 
     @staticmethod
     def stl(dataset_root, patch_size, patch_overlap, split: Optional[str] = None):
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
+                'You want to use STL10 dataset loaded from `torchvision` which is not installed yet.'
+            )
         train_transform = amdim_transforms.TransformsSTL10Patches(
             patch_size=patch_size,
             overlap=patch_overlap

@@ -1,15 +1,15 @@
 from argparse import ArgumentParser
-from warnings import warn
 
 import pytorch_lightning as pl
 import torch
+
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     from torchvision.models.detection import faster_rcnn, fasterrcnn_resnet50_fpn
     from torchvision.ops import box_iou
 except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
 def _evaluate_iou(target, pred):
@@ -122,9 +122,6 @@ class FasterRCNN(pl.LightningModule):
         parser.add_argument("--pretrained_backbone", type=bool, default=True)
         parser.add_argument("--trainable_backbone_layers", type=int, default=3)
         parser.add_argument("--replace_head", type=bool, default=True)
-
-        parser.add_argument("--data_dir", type=str, default=".")
-        parser.add_argument("--batch_size", type=int, default=1)
         return parser
 
 

@@ -1,19 +1,15 @@
-from warnings import warn
-
 import torch
-import torchvision.transforms as T
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
-try:
-    from torchvision.datasets import VOCDetection
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
 
-except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
-    _TORCHVISION_AVAILABLE = False
+if _TORCHVISION_AVAILABLE:
+    import torchvision.transforms as T
+    from torchvision.datasets import VOCDetection
 else:
-    _TORCHVISION_AVAILABLE = True
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
 class Compose(object):
@@ -66,7 +62,6 @@ def _prepare_voc_instance(image, target):
     https://github.com/pytorch/vision/issues/1097#issuecomment-508917489
     """
     anno = target["annotation"]
-    h, w = anno["size"]["height"], anno["size"]["width"]
     boxes = []
     classes = []
     area = []
@@ -115,20 +110,26 @@ class VOCDetectionDataModule(LightningDataModule):
         year: str = "2012",
         num_workers: int = 16,
         normalize: bool = False,
+        shuffle: bool = False,
+        pin_memory: bool = False,
+        drop_last: bool = False,
         *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
-
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use VOC dataset loaded from `torchvision` which is not installed yet.'
             )
 
+        super().__init__(*args, **kwargs)
+
         self.year = year
         self.data_dir = data_dir
         self.num_workers = num_workers
         self.normalize = normalize
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
 
     @property
     def num_classes(self):
@@ -165,9 +166,10 @@ class VOCDetectionDataModule(LightningDataModule):
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
-            shuffle=True,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            pin_memory=True,
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory,
             collate_fn=_collate_fn,
         )
         return loader
@@ -193,7 +195,8 @@ class VOCDetectionDataModule(LightningDataModule):
             batch_size=batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            pin_memory=True,
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory,
             collate_fn=_collate_fn,
         )
         return loader

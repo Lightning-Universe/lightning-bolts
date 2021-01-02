@@ -4,8 +4,7 @@ Deep Q Network
 
 import argparse
 from collections import OrderedDict
-from typing import Tuple, List, Dict, Optional
-from warnings import warn
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pytorch_lightning as pl
@@ -16,20 +15,20 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from pl_bolts.datamodules.experience_source import ExperienceSourceDataset, Experience
+from pl_bolts.datamodules.experience_source import Experience, ExperienceSourceDataset
 from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common.agents import ValueAgent
+from pl_bolts.models.rl.common.gym_wrappers import make_environment
 from pl_bolts.models.rl.common.memory import MultiStepBuffer
 from pl_bolts.models.rl.common.networks import CNN
+from pl_bolts.utils import _GYM_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
-    from pl_bolts.models.rl.common.gym_wrappers import gym, make_environment
-except ModuleNotFoundError:
-    warn('You want to use `gym` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install gym`.')
-    _GYM_AVAILABLE = False
+if _GYM_AVAILABLE:
+    from gym import Env
 else:
-    _GYM_AVAILABLE = True
+    warn_missing_pkg('gym')  # pragma: no-cover
+    Env = object
 
 
 class DQN(pl.LightningModule):
@@ -289,28 +288,18 @@ class DQN(pl.LightningModule):
         if self.global_step % self.sync_rate == 0:
             self.target_net.load_state_dict(self.net.state_dict())
 
-        log = {
+        self.log_dict({
             "total_reward": self.total_rewards[-1],
             "avg_reward": self.avg_rewards,
             "train_loss": loss,
             "episodes": self.done_episodes,
             "episode_steps": self.total_episode_steps[-1]
-        }
-        status = {
-            "steps": self.global_step,
-            "avg_reward": self.avg_rewards,
-            "total_reward": self.total_rewards[-1],
-            "episodes": self.done_episodes,
-            "episode_steps": self.total_episode_steps[-1],
-            "epsilon": self.agent.epsilon,
-        }
+        })
 
         return OrderedDict(
             {
                 "loss": loss,
                 "avg_reward": self.avg_rewards,
-                "log": log,
-                "progress_bar": status,
             }
         )
 
@@ -324,8 +313,8 @@ class DQN(pl.LightningModule):
         """Log the avg of the test results"""
         rewards = [x["test_reward"] for x in outputs]
         avg_reward = sum(rewards) / len(rewards)
-        tensorboard_logs = {"avg_test_reward": avg_reward}
-        return {"avg_test_reward": avg_reward, "log": tensorboard_logs}
+        self.log("avg_test_reward", avg_reward)
+        return {"avg_test_reward": avg_reward}
 
     def configure_optimizers(self) -> List[Optimizer]:
         """ Initialize Adam optimizer"""
@@ -349,7 +338,7 @@ class DQN(pl.LightningModule):
         return self._dataloader()
 
     @staticmethod
-    def make_environment(env_name: str, seed: Optional[int] = None) -> gym.Env:
+    def make_environment(env_name: str, seed: Optional[int] = None) -> Env:
         """
         Initialise gym  environment
 

@@ -12,27 +12,27 @@ You may obtain a copy of the License from the LICENSE file present in this folde
 
 from argparse import ArgumentParser
 from typing import Union
-from warnings import warn
 
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 from torch import nn
 
+from pl_bolts.utils.warnings import warn_missing_pkg
+
 try:
     import torchvision
 except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+    warn_missing_pkg('torchvision')  # pragma: no-cover
 
-from pl_bolts.metrics import precision_at_k, mean
+from pl_bolts.metrics import mean, precision_at_k
 from pl_bolts.models.self_supervised.moco.transforms import (
-    Moco2TrainCIFAR10Transforms,
     Moco2EvalCIFAR10Transforms,
-    Moco2TrainSTL10Transforms,
+    Moco2EvalImagenetTransforms,
     Moco2EvalSTL10Transforms,
+    Moco2TrainCIFAR10Transforms,
     Moco2TrainImagenetTransforms,
-    Moco2EvalImagenetTransforms
+    Moco2TrainSTL10Transforms,
 )
 
 
@@ -256,7 +256,7 @@ class MocoV2(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         # in STL10 we pass in both lab+unl for online ft
         if self.trainer.datamodule.name == 'stl10':
-            labeled_batch = batch[1]
+            # labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
 
@@ -278,7 +278,7 @@ class MocoV2(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         # in STL10 we pass in both lab+unl for online ft
         if self.trainer.datamodule.name == 'stl10':
-            labeled_batch = batch[1]
+            # labeled_batch = batch[1]
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
 
@@ -351,7 +351,7 @@ def concat_all_gather(tensor):
 
 
 def cli_main():
-    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule, SSLImagenetDataModule
+    from pl_bolts.datamodules import CIFAR10DataModule, SSLImagenetDataModule, STL10DataModule
 
     parser = ArgumentParser()
 

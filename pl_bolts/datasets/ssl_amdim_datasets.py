@@ -1,14 +1,16 @@
 from abc import ABC
 from typing import Callable, Optional
-from warnings import warn
 
 import numpy as np
 
-try:
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import CIFAR10
-except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
+    CIFAR10 = object
 
 
 class SSLDatasetMixin(ABC):

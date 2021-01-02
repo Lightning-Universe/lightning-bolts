@@ -12,32 +12,29 @@ except ImportError:
 
 from pl_bolts.models.self_supervised.amdim.transforms import (
     AMDIMEvalTransformsCIFAR10,
-    AMDIMTrainTransformsCIFAR10,
-    AMDIMTrainTransformsSTL10,
+    AMDIMEvalTransformsImageNet128,
     AMDIMEvalTransformsSTL10,
+    AMDIMTrainTransformsCIFAR10,
     AMDIMTrainTransformsImageNet128,
-    AMDIMEvalTransformsImageNet128
+    AMDIMTrainTransformsSTL10,
 )
 from pl_bolts.models.self_supervised.cpc.transforms import (
-    CPCTrainTransformsCIFAR10,
     CPCEvalTransformsCIFAR10,
-    CPCTrainTransformsSTL10,
+    CPCEvalTransformsImageNet128,
     CPCEvalTransformsSTL10,
+    CPCTrainTransformsCIFAR10,
     CPCTrainTransformsImageNet128,
-    CPCEvalTransformsImageNet128
+    CPCTrainTransformsSTL10,
 )
 from pl_bolts.models.self_supervised.moco.transforms import (
-    Moco2TrainCIFAR10Transforms,
     Moco2EvalCIFAR10Transforms,
-    Moco2TrainSTL10Transforms,
+    Moco2EvalImagenetTransforms,
     Moco2EvalSTL10Transforms,
+    Moco2TrainCIFAR10Transforms,
     Moco2TrainImagenetTransforms,
-    Moco2EvalImagenetTransforms
+    Moco2TrainSTL10Transforms,
 )
-from pl_bolts.models.self_supervised.simclr.transforms import (
-    SimCLREvalDataTransform,
-    SimCLRTrainDataTransform
-)
+from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
 
 @pytest.mark.parametrize("img_size", [
@@ -45,7 +42,7 @@ from pl_bolts.models.self_supervised.simclr.transforms import (
     (3, 96, 96),
     (3, 160, 160),
 ])
-def test_simclr_transforms(tmpdir, img_size):
+def test_simclr_transforms(img_size):
     pl.seed_everything(0)
 
     (c, h, w) = img_size
@@ -67,7 +64,7 @@ def test_simclr_transforms(tmpdir, img_size):
     Moco2TrainCIFAR10Transforms,
     Moco2EvalCIFAR10Transforms,
 ])
-def test_cifar10_transforms(tmpdir, transform):
+def test_cifar10_transforms(transform):
     x = torch.rand(3, 32, 32)
     x = transforms.ToPILImage(mode='RGB')(x)
 
@@ -83,7 +80,7 @@ def test_cifar10_transforms(tmpdir, transform):
     Moco2TrainSTL10Transforms,
     Moco2EvalSTL10Transforms,
 ])
-def test_stl10_transforms(tmpdir, transform):
+def test_stl10_transforms(transform):
     x = torch.rand(3, 64, 64)
     x = transforms.ToPILImage(mode='RGB')(x)
 
@@ -99,7 +96,7 @@ def test_stl10_transforms(tmpdir, transform):
     Moco2TrainImagenetTransforms,
     Moco2EvalImagenetTransforms
 ])
-def test_imagenet_transforms(tmpdir, transform):
+def test_imagenet_transforms(transform):
     x = torch.rand(3, 128, 128)
     x = transforms.ToPILImage(mode='RGB')(x)
 

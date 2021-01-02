@@ -4,18 +4,23 @@ Adapted from official swav implementation: https://github.com/facebookresearch/s
 import math
 import os
 from argparse import ArgumentParser
-from warnings import warn
+from typing import Callable, Optional
 
 import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.distributed as dist
+from pytorch_lightning.utilities import AMPType
 from torch import nn
+from torch.optim.optimizer import Optimizer
 
-from pl_bolts.models.self_supervised.swav.swav_resnet import resnet50, resnet18
-
-from pl_bolts.transforms.dataset_normalizations import stl10_normalization, cifar10_normalization
+from pl_bolts.models.self_supervised.swav.swav_resnet import resnet18, resnet50
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
+from pl_bolts.transforms.dataset_normalizations import (
+    cifar10_normalization,
+    imagenet_normalization,
+    stl10_normalization,
+)
 
 
 class SwAV(pl.LightningModule):
@@ -25,6 +30,7 @@ class SwAV(pl.LightningModule):
         num_samples: int,
         batch_size: int,
         dataset: str,
+        nodes: int = 1,
         arch: str = 'resnet50',
         hidden_mlp: int = 2048,
         feat_dim: int = 128,
@@ -53,8 +59,9 @@ class SwAV(pl.LightningModule):
     ):
         """
         Args:
-            gpus: number of gpus used in training, passed to SwAV module
+            gpus: number of gpus per node used in training, passed to SwAV module
                 to manage the queue and select distributed sinkhorn
+            nodes: number of nodes to train on
             num_samples: number of image samples used for training
             batch_size: batch size per GPU in ddp
             dataset: dataset being used for train/val
@@ -93,6 +100,7 @@ class SwAV(pl.LightningModule):
         self.save_hyperparameters()
 
         self.gpus = gpus
+        self.nodes = nodes
         self.arch = arch
         self.dataset = dataset
         self.num_samples = num_samples
@@ -126,7 +134,7 @@ class SwAV(pl.LightningModule):
         self.warmup_epochs = warmup_epochs
         self.max_epochs = max_epochs
 
-        if self.gpus > 1:
+        if self.gpus * self.nodes > 1:
             self.get_assignments = self.distributed_sinkhorn
         else:
             self.get_assignments = self.sinkhorn
@@ -134,7 +142,7 @@ class SwAV(pl.LightningModule):
         self.model = self.init_model()
 
         # compute iters per epoch
-        global_batch_size = self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
+        global_batch_size = self.nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
         # define LR schedule
@@ -321,15 +329,15 @@ class SwAV(pl.LightningModule):
 
     def optimizer_step(
         self,
-        epoch,
-        batch_idx,
-        optimizer,
-        optimizer_idx,
-        second_order_closure=None,
-        on_tpu=False,
-        using_native_amp=False,
-        using_lbfgs=False
-    ):
+        epoch: int,
+        batch_idx: int,
+        optimizer: Optimizer,
+        optimizer_idx: int,
+        optimizer_closure: Optional[Callable] = None,
+        on_tpu: bool = False,
+        using_native_amp: bool = False,
+        using_lbfgs: bool = False,
+    ) -> None:
         # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
         # adjust LR of optim contained within LARSWrapper
         if self.lars_wrapper:
@@ -340,14 +348,17 @@ class SwAV(pl.LightningModule):
                 param_group["lr"] = self.lr_schedule[self.trainer.global_step]
 
         # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
-        learning_rate = {'learning_rate': self.lr_schedule[self.trainer.global_step]}
-        self.logger.log_metrics(learning_rate, step=self.trainer.global_step)
+        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
 
-        # from lightning implementation
-        if using_native_amp:
+        # from lightning
+        if self.trainer.amp_backend == AMPType.NATIVE:
+            optimizer_closure()
             self.trainer.scaler.step(optimizer)
-        else:
+        elif self.trainer.amp_backend == AMPType.APEX:
+            optimizer_closure()
             optimizer.step()
+        else:
+            optimizer.step(closure=optimizer_closure)
 
     def sinkhorn(self, Q, nmb_iters):
         with torch.no_grad():
@@ -417,7 +428,7 @@ class SwAV(pl.LightningModule):
         parser.add_argument("--gaussian_blur", action="store_true", help="add gaussian blur")
         parser.add_argument("--jitter_strength", type=float, default=1.0, help="jitter strength")
         parser.add_argument("--dataset", type=str, default="stl10", help="stl10, cifar10")
-        parser.add_argument("--data_path", type=str, default=".", help="path to download data")
+        parser.add_argument("--data_dir", type=str, default=".", help="path to download data")
         parser.add_argument("--queue_path", type=str, default="queue", help="path for queue")
 
         parser.add_argument("--nmb_crops", type=int, default=[2, 4], nargs="+",
@@ -431,8 +442,9 @@ class SwAV(pl.LightningModule):
 
         # training params
         parser.add_argument("--fast_dev_run", action='store_true')
+        parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
         parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
-        parser.add_argument("--num_workers", default=16, type=int, help="num of workers per GPU")
+        parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
         parser.add_argument("--lars_wrapper", action='store_true', help="apple lars wrapper over optimizer used")
         parser.add_argument('--exclude_bn_bias', action='store_true', help="exclude bn/bias from weight decay")
@@ -467,8 +479,8 @@ class SwAV(pl.LightningModule):
 
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
-    from pl_bolts.models.self_supervised.swav.transforms import SwAVTrainDataTransform, SwAVEvalDataTransform
-    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule, CIFAR10DataModule
+    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
+    from pl_bolts.models.self_supervised.swav.transforms import SwAVEvalDataTransform, SwAVTrainDataTransform
 
     parser = ArgumentParser()
 
@@ -478,7 +490,7 @@ def cli_main():
 
     if args.dataset == 'stl10':
         dm = STL10DataModule(
-            data_dir=args.data_path,
+            data_dir=args.data_dir,
             batch_size=args.batch_size,
             num_workers=args.num_workers
         )
@@ -495,7 +507,7 @@ def cli_main():
         args.num_workers = 0
 
         dm = CIFAR10DataModule(
-            data_dir=args.data_path,
+            data_dir=args.data_dir,
             batch_size=args.batch_size,
             num_workers=args.num_workers
         )
@@ -511,11 +523,44 @@ def cli_main():
         args.size_crops = [32, 16]
         args.nmb_crops = [2, 1]
         args.gaussian_blur = False
+    elif args.dataset == 'imagenet':
+        args.maxpool1 = True
+        args.first_conv = True
+        normalization = imagenet_normalization()
+
+        args.size_crops = [224, 96]
+        args.min_scale_crops = [0.14, 0.05]
+        args.max_scale_crops = [1., 0.14]
+        args.gaussian_blur = True
+        args.jitter_strength = 1.
+
+        args.batch_size = 64
+        args.nodes = 8
+        args.gpus = 8  # per-node
+        args.max_epochs = 800
+
+        args.optimizer = 'sgd'
+        args.lars_wrapper = True
+        args.learning_rate = 4.8
+        args.final_lr = 0.0048
+        args.start_lr = 0.3
+
+        args.nmb_prototypes = 3000
+        args.online_ft = True
+
+        dm = ImagenetDataModule(
+            data_dir=args.data_dir,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers
+        )
+
+        args.num_samples = dm.num_samples
+        args.input_height = dm.size()[-1]
     else:
         raise NotImplementedError("other datasets have not been implemented till now")
 
     dm.train_transforms = SwAVTrainDataTransform(
-        normalize=stl10_normalization(),
+        normalize=normalization,
         size_crops=args.size_crops,
         nmb_crops=args.nmb_crops,
         min_scale_crops=args.min_scale_crops,
@@ -525,7 +570,7 @@ def cli_main():
     )
 
     dm.val_transforms = SwAVEvalDataTransform(
-        normalize=stl10_normalization(),
+        normalize=normalization,
         size_crops=args.size_crops,
         nmb_crops=args.nmb_crops,
         min_scale_crops=args.min_scale_crops,
@@ -552,6 +597,7 @@ def cli_main():
         max_epochs=args.max_epochs,
         max_steps=None if args.max_steps == -1 else args.max_steps,
         gpus=args.gpus,
+        num_nodes=args.nodes,
         distributed_backend='ddp' if args.gpus > 1 else None,
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=32 if args.fp32 else 16,

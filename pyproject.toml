@@ -1,0 +1,9 @@
+[tool.isort]
+profile = "black"
+known_first_party = [
+    "pl_bolts",
+    "tests",
+    "docs",
+    "notebooks",
+]
+line_length = 120

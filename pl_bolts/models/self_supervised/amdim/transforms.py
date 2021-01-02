@@ -1,15 +1,11 @@
-from warnings import warn
-
 from pl_bolts.transforms.self_supervised import RandomTranslateWithReflect
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision import transforms
-except ModuleNotFoundError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
-    _TORCHVISION_AVAILABLE = False
-else:
-    _TORCHVISION_AVAILABLE = True
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 
 class AMDIMTrainTransformsCIFAR10:
@@ -82,8 +78,8 @@ class AMDIMEvalTransformsCIFAR10:
     """
 
     def __init__(self):
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -125,8 +121,8 @@ class AMDIMTrainTransformsSTL10:
     """
 
     def __init__(self, height=64):
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -174,8 +170,8 @@ class AMDIMEvalTransformsSTL10(object):
     """
 
     def __init__(self, height=64):
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -219,8 +215,8 @@ class AMDIMTrainTransformsImageNet128(object):
     """
 
     def __init__(self, height=128):
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -268,8 +264,8 @@ class AMDIMEvalTransformsImageNet128(object):
     """
 
     def __init__(self, height=128):
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 

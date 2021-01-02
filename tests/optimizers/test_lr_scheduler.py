@@ -85,7 +85,7 @@ class TestLRScheduler(object):
             scheduler.step()
 
 
-def test_lwca_lr(tmpdir):
+def test_lwca_lr():
     seed_everything()
 
     warmup_start_lr = 0.0
@@ -136,7 +136,7 @@ def test_lwca_lr(tmpdir):
     test_lr_scheduler._test_lr(scheduler, targets, epochs=max_epochs)
 
 
-def test_lwca_lr_with_nz_start_lr(tmpdir):
+def test_lwca_lr_with_nz_start_lr():
     seed_everything()
 
     warmup_start_lr = 0.2
@@ -187,7 +187,7 @@ def test_lwca_lr_with_nz_start_lr(tmpdir):
     test_lr_scheduler._test_lr(scheduler, targets, epochs=max_epochs)
 
 
-def test_lwca_lr_with_nz_eta_min(tmpdir):
+def test_lwca_lr_with_nz_eta_min():
     seed_everything()
 
     warmup_start_lr = 0.0
@@ -238,7 +238,7 @@ def test_lwca_lr_with_nz_eta_min(tmpdir):
     test_lr_scheduler._test_lr(scheduler, targets, epochs=max_epochs)
 
 
-def test_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
+def test_lwca_lr_with_nz_start_lr_nz_eta_min():
     seed_everything()
 
     warmup_start_lr = 0.009
@@ -289,7 +289,7 @@ def test_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
     test_lr_scheduler._test_lr(scheduler, targets, epochs=max_epochs)
 
 
-def test_closed_form_lwca_lr(tmpdir):
+def test_closed_form_lwca_lr():
     seed_everything()
 
     warmup_start_lr = 0.0
@@ -321,7 +321,7 @@ def test_closed_form_lwca_lr(tmpdir):
     )
 
 
-def test_closed_form_lwca_lr_with_nz_start_lr(tmpdir):
+def test_closed_form_lwca_lr_with_nz_start_lr():
     seed_everything()
 
     warmup_start_lr = 0.2
@@ -353,7 +353,7 @@ def test_closed_form_lwca_lr_with_nz_start_lr(tmpdir):
     )
 
 
-def test_closed_form_lwca_lr_with_nz_eta_min(tmpdir):
+def test_closed_form_lwca_lr_with_nz_eta_min():
     seed_everything()
 
     warmup_start_lr = 0.0
@@ -385,7 +385,7 @@ def test_closed_form_lwca_lr_with_nz_eta_min(tmpdir):
     )
 
 
-def test_closed_form_lwca_lr_with_nz_start_lr_nz_eta_min(tmpdir):
+def test_closed_form_lwca_lr_with_nz_start_lr_nz_eta_min():
     seed_everything()
 
     warmup_start_lr = 0.009

@@ -1,2 +1,5 @@
 # test_tube>=0.7.5
 # trains>=0.14.1
+matplotlib
+wandb
+scipy

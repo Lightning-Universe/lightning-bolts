@@ -5,8 +5,12 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
-from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_decoder
-from pl_bolts.models.autoencoders.components import resnet50_encoder, resnet50_decoder
+from pl_bolts.models.autoencoders.components import (
+    resnet18_decoder,
+    resnet18_encoder,
+    resnet50_decoder,
+    resnet50_encoder,
+)
 
 
 class VAE(pl.LightningModule):
@@ -127,6 +131,7 @@ class VAE(pl.LightningModule):
 
         kl = log_qz - log_pz
         kl = kl.mean()
+        kl *= self.kl_coeff
 
         loss = kl + recon_loss
 

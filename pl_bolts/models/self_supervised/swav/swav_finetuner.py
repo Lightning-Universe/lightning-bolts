@@ -6,18 +6,18 @@ import pytorch_lightning as pl
 from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner
 from pl_bolts.models.self_supervised.swav.swav_module import SwAV
 from pl_bolts.models.self_supervised.swav.transforms import SwAVFinetuneTransform
-from pl_bolts.transforms.dataset_normalizations import stl10_normalization, imagenet_normalization
+from pl_bolts.transforms.dataset_normalizations import imagenet_normalization, stl10_normalization
 
 
-def cli_main():  # pragma: no-cover
-    from pl_bolts.datamodules import STL10DataModule, ImagenetDataModule
+def cli_main():  # pragma: no cover
+    from pl_bolts.datamodules import ImagenetDataModule, STL10DataModule
 
     pl.seed_everything(1234)
 
     parser = ArgumentParser()
     parser.add_argument('--dataset', type=str, help='stl10, imagenet', default='stl10')
     parser.add_argument('--ckpt_path', type=str, help='path to ckpt')
-    parser.add_argument('--data_path', type=str, help='path to ckpt', default=os.getcwd())
+    parser.add_argument('--data_dir', type=str, help='path to dataset', default=os.getcwd())
 
     parser.add_argument("--batch_size", default=64, type=int, help="batch size per gpu")
     parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
@@ -38,7 +38,7 @@ def cli_main():  # pragma: no-cover
 
     if args.dataset == 'stl10':
         dm = STL10DataModule(
-            data_dir=args.data_path,
+            data_dir=args.data_dir,
             batch_size=args.batch_size,
             num_workers=args.num_workers
         )
@@ -57,12 +57,17 @@ def cli_main():  # pragma: no-cover
             input_height=dm.size()[-1],
             eval_transform=True
         )
+        dm.test_transforms = SwAVFinetuneTransform(
+            normalize=stl10_normalization(),
+            input_height=dm.size()[-1],
+            eval_transform=True
+        )
 
         args.maxpool1 = False
         args.first_conv = True
     elif args.dataset == 'imagenet':
         dm = ImagenetDataModule(
-            data_dir=args.data_path,
+            data_dir=args.data_dir,
             batch_size=args.batch_size,
             num_workers=args.num_workers
         )
@@ -92,12 +97,12 @@ def cli_main():  # pragma: no-cover
 
     backbone = SwAV(
         gpus=args.gpus,
+        nodes=1,
         num_samples=args.num_samples,
         batch_size=args.batch_size,
-        datamodule=dm,
         maxpool1=args.maxpool1,
         first_conv=args.first_conv,
-        dataset='imagenet',
+        dataset=args.dataset,
     ).load_from_checkpoint(args.ckpt_path, strict=False)
 
     tuner = SSLFineTuner(
@@ -117,6 +122,7 @@ def cli_main():  # pragma: no-cover
 
     trainer = pl.Trainer(
         gpus=args.gpus,
+        num_nodes=1,
         precision=16,
         max_epochs=args.num_epochs,
         distributed_backend='ddp',
