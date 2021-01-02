@@ -5,3 +5,13 @@ from pl_bolts.models.self_supervised.swav.transforms import (  # noqa: F401
     SwAVFinetuneTransform,
     SwAVTrainDataTransform,
 )
+
+
+__all__ = [
+    "SwAV",
+    "resnet18",
+    "resnet50",
+    "SwAVEvalDataTransform",
+    "SwAVFinetuneTransform",
+    "SwAVTrainDataTransform",
+]
