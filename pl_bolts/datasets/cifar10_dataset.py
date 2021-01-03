@@ -13,7 +13,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _PIL_AVAILABLE:
     from PIL import Image
 else:
-    warn_missing_pkg("PIL", pypi_name="Pillow")  # pragma: no-cover
+    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
 
 
 class CIFAR10(LightDataset):
@@ -64,20 +64,20 @@ class CIFAR10(LightDataset):
     """
 
     BASE_URL = "https://www.cs.toronto.edu/~kriz/"
-    FILE_NAME = "cifar-10-python.tar.gz"
-    cache_folder_name = "complete"
-    TRAIN_FILE_NAME = "training.pt"
-    TEST_FILE_NAME = "test.pt"
-    DATASET_NAME = "CIFAR10"
+    FILE_NAME = 'cifar-10-python.tar.gz'
+    cache_folder_name = 'complete'
+    TRAIN_FILE_NAME = 'training.pt'
+    TEST_FILE_NAME = 'test.pt'
+    DATASET_NAME = 'CIFAR10'
     labels = set(range(10))
     relabel = False
 
     def __init__(
-        self,
-        data_dir: str = ".",
-        train: bool = True,
-        transform: Optional[Callable] = None,
-        download: bool = True,
+            self,
+            data_dir: str = '.',
+            train: bool = True,
+            transform: Optional[Callable] = None,
+            download: bool = True
     ):
         super().__init__()
         self.dir_path = data_dir
@@ -85,13 +85,13 @@ class CIFAR10(LightDataset):
         self.transform = transform
 
         if not _PIL_AVAILABLE:
-            raise ImportError("You want to use PIL.Image for loading but it is not installed yet.")
+            raise ImportError('You want to use PIL.Image for loading but it is not installed yet.')
 
         os.makedirs(self.cached_folder_path, exist_ok=True)
         self.prepare_data(download)
 
         if not self._check_exists(self.cached_folder_path, (self.TRAIN_FILE_NAME, self.TEST_FILE_NAME)):
-            raise RuntimeError("Dataset not found.")
+            raise RuntimeError('Dataset not found.')
 
         data_file = self.TRAIN_FILE_NAME if self.train else self.TEST_FILE_NAME
         self.data, self.targets = torch.load(os.path.join(self.cached_folder_path, data_file))
@@ -111,29 +111,28 @@ class CIFAR10(LightDataset):
     def _check_exists(cls, data_folder: str, file_names: Sequence[str]) -> bool:
         if isinstance(file_names, str):
             file_names = [file_names]
-        return all(os.path.isfile(os.path.join(data_folder, fname)) for fname in file_names)
+        return all(os.path.isfile(os.path.join(data_folder, fname))
+                   for fname in file_names)
 
     def _unpickle(self, path_folder: str, file_name: str) -> Tuple[Tensor, Tensor]:
-        with open(os.path.join(path_folder, file_name), "rb") as fo:
-            pkl = pickle.load(fo, encoding="bytes")
-        return torch.tensor(pkl[b"data"]), torch.tensor(pkl[b"labels"])
+        with open(os.path.join(path_folder, file_name), 'rb') as fo:
+            pkl = pickle.load(fo, encoding='bytes')
+        return torch.tensor(pkl[b'data']), torch.tensor(pkl[b'labels'])
 
     def _extract_archive_save_torch(self, download_path):
         # extract achieve
-        with tarfile.open(os.path.join(download_path, self.FILE_NAME), "r:gz") as tar:
+        with tarfile.open(os.path.join(download_path, self.FILE_NAME), 'r:gz') as tar:
             tar.extractall(path=download_path)
         # this is internal path in the archive
-        path_content = os.path.join(download_path, "cifar-10-batches-py")
+        path_content = os.path.join(download_path, 'cifar-10-batches-py')
 
         # load Test and save as PT
-        torch.save(
-            self._unpickle(path_content, "test_batch"),
-            os.path.join(self.cached_folder_path, self.TEST_FILE_NAME),
-        )
+        torch.save(self._unpickle(path_content, 'test_batch'),
+                   os.path.join(self.cached_folder_path, self.TEST_FILE_NAME))
         # load Train and save as PT
         data, labels = [], []
         for i in range(5):
-            fname = f"data_batch_{i + 1}"
+            fname = f'data_batch_{i + 1}'
             _data, _labels = self._unpickle(path_content, fname)
             data.append(_data)
             labels.append(_labels)
@@ -176,16 +175,15 @@ class TrialCIFAR10(CIFAR10):
         >>> data.shape
         torch.Size([3, 32, 32])
     """
-
     def __init__(
-        self,
-        data_dir: str = ".",
-        train: bool = True,
-        transform: Optional[Callable] = None,
-        download: bool = False,
-        num_samples: int = 100,
-        labels: Optional[Sequence] = (1, 5, 8),
-        relabel: bool = True,
+            self,
+            data_dir: str = '.',
+            train: bool = True,
+            transform: Optional[Callable] = None,
+            download: bool = False,
+            num_samples: int = 100,
+            labels: Optional[Sequence] = (1, 5, 8),
+            relabel: bool = True,
     ):
         """
         Args:
@@ -207,14 +205,19 @@ class TrialCIFAR10(CIFAR10):
 
         self.cache_folder_name = f'labels-{"-".join(str(d) for d in sorted(self.labels))}_nb-{self.num_samples}'
 
-        super().__init__(data_dir, train=train, transform=transform, download=download)
+        super().__init__(
+            data_dir,
+            train=train,
+            transform=transform,
+            download=download
+        )
 
     def prepare_data(self, download: bool) -> None:
         super().prepare_data(download)
 
         for fname in (self.TRAIN_FILE_NAME, self.TEST_FILE_NAME):
             path_fname = os.path.join(super().cached_folder_path, fname)
-            assert os.path.isfile(path_fname), "Missing cached file: %s" % path_fname
+            assert os.path.isfile(path_fname), 'Missing cached file: %s' % path_fname
             data, targets = torch.load(path_fname)
             if self.num_samples or len(self.labels) < 10:
                 data, targets = self._prepare_subset(data, targets, self.num_samples, self.labels)

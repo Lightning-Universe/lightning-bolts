@@ -1,7 +1,7 @@
 import pytest
 import pytorch_lightning as pl
 from pytorch_lightning import seed_everything
-from torch.utils.data import DataLoader
+from torch.utils.data.dataloader import DataLoader
 
 from pl_bolts.datamodules import CIFAR10DataModule, MNISTDataModule
 from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
@@ -9,14 +9,10 @@ from pl_bolts.models.gans import GAN, SRGAN, SRResNet
 
 
 @pytest.mark.parametrize(
-    "dm_cls",
-    [
-        pytest.param(MNISTDataModule, id="mnist"),
-        pytest.param(CIFAR10DataModule, id="cifar10"),
-    ],
+    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"), pytest.param(CIFAR10DataModule, id="cifar10")]
 )
 def test_gan(tmpdir, datadir, dm_cls):
-    seed_everything(42)
+    seed_everything()
 
     dm = dm_cls(data_dir=datadir)
     model = GAN(*dm.size())
