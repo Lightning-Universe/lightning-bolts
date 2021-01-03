@@ -1,9 +1,10 @@
 [tool.isort]
-profile = "black"
 known_first_party = [
     "pl_bolts",
     "tests",
     "docs",
     "notebooks",
 ]
+profile = "black"
 line_length = 120
+order_by_type = "False"
