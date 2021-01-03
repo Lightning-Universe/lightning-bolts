@@ -5,9 +5,9 @@ import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
 from torch import Tensor, nn
 
+from pl_bolts.utils import _MATPLOTLIB_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-_MATPLOTLIB_AVAILABLE = importlib.util.find_spec("matplotlib") is not None  # type: ignore[attr-defined]
 if _MATPLOTLIB_AVAILABLE:
     from matplotlib import pyplot as plt
     from matplotlib.axes import Axes
