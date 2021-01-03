@@ -9,7 +9,6 @@ from pl_bolts.models.self_supervised.cpc.transforms import (  # noqa: F401
     CPCTrainTransformsSTL10,
 )
 
-
 __all__ = [
     "CPCV2",
     "cpc_resnet50",
