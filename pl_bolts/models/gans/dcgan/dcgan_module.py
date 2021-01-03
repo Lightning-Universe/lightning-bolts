@@ -219,7 +219,7 @@ def cli_main(args=None):
     model = DCGAN(**vars(args), image_channels=image_channels)
     callbacks = [
         ModelCheckpoint(save_top_k=3, monitor="loss/gen_epoch"),
-        TensorboardGenerativeModelImageSampler(),
+        TensorboardGenerativeModelImageSampler(num_samples=25, nrow=5),
         LatentDimInterpolator(interpolate_epoch_interval=5),
     ]
     trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks)
