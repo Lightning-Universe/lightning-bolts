@@ -30,11 +30,9 @@ class TensorboardGenerativeModelImageSampler(Callback):
         trainer = Trainer(callbacks=[TensorboardGenerativeModelImageSampler()])
     """
 
-    def __init__(self, num_samples: int = 3, nrow: int = 1, normalize: bool = True):
+    def __init__(self, num_samples: int = 3):
         super().__init__()
         self.num_samples = num_samples
-        self.nrow = nrow
-        self.normalize = normalize
 
     def on_epoch_end(self, trainer, pl_module):
         dim = (self.num_samples, pl_module.hparams.latent_dim)
@@ -50,6 +48,6 @@ class TensorboardGenerativeModelImageSampler(Callback):
             img_dim = pl_module.img_dim
             images = images.view(self.num_samples, *img_dim)
 
-        grid = torchvision.utils.make_grid(images, nrow=self.nrow, normalize=self.normalize)
-        str_title = f"{pl_module.__class__.__name__}_images"
+        grid = torchvision.utils.make_grid(images)
+        str_title = f'{pl_module.__class__.__name__}_images'
         trainer.logger.experiment.add_image(str_title, grid, global_step=trainer.global_step)
