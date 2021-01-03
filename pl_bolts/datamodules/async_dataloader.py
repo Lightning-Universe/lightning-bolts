@@ -1,5 +1,5 @@
-from queue import Queue
 import re
+from queue import Queue
 from threading import Thread
 
 import torch

@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 import gzip
 import hashlib
 import os
@@ -6,6 +5,7 @@ import shutil
 import tarfile
 import tempfile
 import zipfile
+from contextlib import contextmanager
 
 import numpy as np
 import torch

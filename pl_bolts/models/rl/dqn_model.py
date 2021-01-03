@@ -8,10 +8,10 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pytorch_lightning as pl
-from pytorch_lightning import seed_everything
-from pytorch_lightning.callbacks import ModelCheckpoint
 import torch
 import torch.optim as optim
+from pytorch_lightning import seed_everything
+from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 

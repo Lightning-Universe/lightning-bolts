@@ -1,7 +1,7 @@
 import importlib
 
-from pytorch_lightning import Callback
 import torch
+from pytorch_lightning import Callback
 from torch import nn
 
 from pl_bolts.utils.warnings import warn_missing_pkg

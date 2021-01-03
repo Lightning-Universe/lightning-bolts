@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 
 import pytorch_lightning as pl
-from pytorch_lightning.metrics.functional import accuracy
 import torch
+from pytorch_lightning.metrics.functional import accuracy
 from torch import nn
 from torch.nn import functional as F
 from torch.optim import Adam

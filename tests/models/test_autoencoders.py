@@ -1,7 +1,7 @@
 import pytest
 import pytorch_lightning as pl
-from pytorch_lightning import seed_everything
 import torch
+from pytorch_lightning import seed_everything
 
 from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.models.autoencoders import AE, resnet18_decoder, resnet18_encoder, resnet50_encoder, VAE

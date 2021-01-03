@@ -1,7 +1,7 @@
 import pytest
 import pytorch_lightning as pl
-from pytorch_lightning import seed_everything
 import torch
+from pytorch_lightning import seed_everything
 
 from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.models.self_supervised import AMDIM, BYOL, CPCV2, MocoV2, SimCLR, SwAV

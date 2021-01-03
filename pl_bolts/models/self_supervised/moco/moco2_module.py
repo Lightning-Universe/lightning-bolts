@@ -15,8 +15,8 @@ from typing import Union
 
 import pytorch_lightning as pl
 import torch
-from torch import nn
 import torch.nn.functional as F
+from torch import nn
 
 from pl_bolts.utils.warnings import warn_missing_pkg
 

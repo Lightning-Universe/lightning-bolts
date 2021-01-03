@@ -2,14 +2,14 @@
 CPC V2
 ======
 """
-from argparse import ArgumentParser
 import math
+from argparse import ArgumentParser
 from typing import Optional
 
 import pytorch_lightning as pl
-from pytorch_lightning.utilities import rank_zero_warn
 import torch
 import torch.optim as optim
+from pytorch_lightning.utilities import rank_zero_warn
 
 from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc.networks import cpc_resnet101

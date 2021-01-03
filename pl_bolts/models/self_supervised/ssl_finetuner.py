@@ -1,9 +1,9 @@
 from typing import List, Optional
 
 import pytorch_lightning as pl
-from pytorch_lightning.metrics import Accuracy
 import torch
 import torch.nn.functional as F
+from pytorch_lightning.metrics import Accuracy
 
 from pl_bolts.models.self_supervised import SSLEvaluator
 

@@ -1,13 +1,13 @@
-from argparse import ArgumentParser
 import math
+from argparse import ArgumentParser
 from typing import Callable, Optional
 
 import numpy as np
 import pytorch_lightning as pl
-from pytorch_lightning.utilities import AMPType
 import torch
-from torch import nn
 import torch.nn.functional as F
+from pytorch_lightning.utilities import AMPType
+from torch import nn
 from torch.optim.optimizer import Optimizer
 
 from pl_bolts.models.self_supervised.resnets import resnet18, resnet50

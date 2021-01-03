@@ -1,9 +1,9 @@
-from abc import ABC
 import logging
 import os
+import urllib.request
+from abc import ABC
 from typing import Sequence, Tuple
 from urllib.error import HTTPError
-import urllib.request
 
 import torch
 from torch import Tensor

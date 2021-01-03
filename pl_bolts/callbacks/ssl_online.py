@@ -1,8 +1,8 @@
 from typing import Optional
 
+import torch
 from pytorch_lightning import Callback
 from pytorch_lightning.metrics.functional import accuracy
-import torch
 from torch.nn import functional as F
 
 

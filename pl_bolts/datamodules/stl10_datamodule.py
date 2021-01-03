@@ -1,8 +1,8 @@
 import os
 from typing import Optional
 
-from pytorch_lightning import LightningDataModule
 import torch
+from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
 
 from pl_bolts.datasets.concat_dataset import ConcatDataset

@@ -1,7 +1,7 @@
 import os
 
-from pytorch_lightning import LightningDataModule
 import torch
+from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import random_split
 

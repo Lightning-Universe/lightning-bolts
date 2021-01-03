@@ -1,6 +1,6 @@
 import math
-from typing import List
 import warnings
+from typing import List
 
 import torch.nn as nn
 from torch.optim import Adam, Optimizer
