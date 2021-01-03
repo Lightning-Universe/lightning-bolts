@@ -39,8 +39,8 @@ def giou_loss(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     Loss for Bounding Box Regression <https://arxiv.org/abs/1902.09630>`_.
 
     Args:
-        preds: batch of prediction bounding boxes with representation ``[x_min, y_min, x_max, y_max]``
-        target: batch of target bounding boxes with representation ``[x_min, y_min, x_max, y_max]``
+        preds: an Nx4 batch of prediction bounding boxes with representation ``[x_min, y_min, x_max, y_max]``
+        target: an Mx4 batch of target bounding boxes with representation ``[x_min, y_min, x_max, y_max]``
 
     Example:
 
@@ -52,7 +52,8 @@ def giou_loss(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         tensor([[1.0794]])
 
     Returns:
-        GIoU loss
+        GIoU loss in an NxM tensor containing the pairwise GIoU loss for every element in preds and target,
+        where N is the number of prediction bounding boxes and M is the number of target bounding boxes
     """
     loss = 1 - giou(preds, target)
     return loss
