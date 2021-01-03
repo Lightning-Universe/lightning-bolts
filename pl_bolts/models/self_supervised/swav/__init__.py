@@ -6,7 +6,6 @@ from pl_bolts.models.self_supervised.swav.transforms import (  # noqa: F401
     SwAVTrainDataTransform,
 )
 
-
 __all__ = [
     "SwAV",
     "resnet18",
