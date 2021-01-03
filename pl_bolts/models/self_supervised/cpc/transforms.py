@@ -4,8 +4,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 
 class CPCTrainTransformsCIFAR10:
@@ -39,8 +39,8 @@ class CPCTrainTransformsCIFAR10:
             patch_size: size of patches when cutting up the image into overlapping patches
             overlap: how much to overlap patches
         """
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -97,8 +97,8 @@ class CPCEvalTransformsCIFAR10:
             patch_size: size of patches when cutting up the image into overlapping patches
             overlap: how much to overlap patches
         """
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -151,8 +151,8 @@ class CPCTrainTransformsSTL10:
             patch_size: size of patches when cutting up the image into overlapping patches
             overlap: how much to overlap patches
         """
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -210,8 +210,8 @@ class CPCEvalTransformsSTL10:
             patch_size: size of patches when cutting up the image into overlapping patches
             overlap: how much to overlap patches
         """
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -260,8 +260,8 @@ class CPCTrainTransformsImageNet128:
             patch_size: size of patches when cutting up the image into overlapping patches
             overlap: how much to overlap patches
         """
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -320,8 +320,8 @@ class CPCEvalTransformsImageNet128:
             patch_size: size of patches when cutting up the image into overlapping patches
             overlap: how much to overlap patches
         """
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 

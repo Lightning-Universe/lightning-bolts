@@ -5,7 +5,6 @@ from typing import Callable, Optional
 import numpy as np
 import pytorch_lightning as pl
 import torch
-import torch.distributed as dist
 import torch.nn.functional as F
 from pytorch_lightning.utilities import AMPType
 from torch import nn

@@ -96,7 +96,7 @@ def test_from_pretrained(datadir):
 
         # test forward method on pre-trained weights
         for x, y in data_loader:
-            x_hat = vae(x)
+            vae(x)
             break
 
         vae = vae.from_pretrained('stl10-resnet18')  # try loading weights not compatible with exact architecture
@@ -105,7 +105,7 @@ def test_from_pretrained(datadir):
 
         # test forward method on pre-trained weights
         for x, y in data_loader:
-            x_hat = ae(x)
+            ae(x)
             break
 
     except Exception:
@@ -116,8 +116,8 @@ def test_from_pretrained(datadir):
     keyerror = False
 
     try:
-        vae = vae.from_pretrained('abc')
-        ae = ae.from_pretrained('xyz')
+        vae.from_pretrained('abc')
+        ae.from_pretrained('xyz')
     except KeyError:
         keyerror = True
 

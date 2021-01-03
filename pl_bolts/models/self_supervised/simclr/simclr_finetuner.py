@@ -13,7 +13,7 @@ from pl_bolts.transforms.dataset_normalizations import (
 )
 
 
-def cli_main():  # pragma: no-cover
+def cli_main():  # pragma: no cover
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
 
     pl.seed_everything(1234)

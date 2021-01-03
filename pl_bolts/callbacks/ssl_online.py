@@ -8,7 +8,7 @@ from torch.nn import functional as F
 from torch.optim import Optimizer
 
 
-class SSLOnlineEvaluator(Callback):  # pragma: no-cover
+class SSLOnlineEvaluator(Callback):  # pragma: no cover
     """
     Attaches a MLP for fine-tuning using the standard self-supervised protocol.
 

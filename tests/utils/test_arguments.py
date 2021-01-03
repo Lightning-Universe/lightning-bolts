@@ -40,7 +40,7 @@ def test_parser_bad_argument():
     parser = LightningArgumentParser()
     parser.add_object_args('dm', DummyParentDataModule)
     parser.add_object_args('model', DummyParentModel)
-    args = parser.parse_lit_args(['--some-bad-arg', 'asdf'])
+    parser.parse_lit_args(['--some-bad-arg', 'asdf'])
 
 
 def test_lit_arg_immutable():

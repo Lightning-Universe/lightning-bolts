@@ -7,11 +7,8 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-try:
-    from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
-except ModuleNotFoundError:
-    pass
 from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
+from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
@@ -321,29 +318,6 @@ class AMDIM(pl.LightningModule):
             ]
         }
 
-        imagenet2012_large = {
-            'dataset': 'imagenet2012',
-            'ndf': 320,
-            'n_rkhs': 2560,
-            'depth': 10,
-            'image_height': 128,
-            'batch_size': 200,
-            'nb_classes': 1000,
-            'lr_options': [
-                imagenet_root_lr * 32,
-                imagenet_root_lr * 16,
-                imagenet_root_lr * 8,
-                imagenet_root_lr * 4,
-                imagenet_root_lr * 2,
-                imagenet_root_lr,
-                imagenet_root_lr * 1 / 2,
-                imagenet_root_lr * 1 / 4,
-                imagenet_root_lr * 1 / 8,
-                imagenet_root_lr * 1 / 16,
-                imagenet_root_lr * 1 / 32,
-            ]
-        }
-
         DATASETS = {
             'cifar10': cifar_10,
             'stl10': stl10,
@@ -366,8 +340,9 @@ class AMDIM(pl.LightningModule):
         parser.add_argument('--image_height', type=int, default=dataset['image_height'])
 
         # trainin params
-        resnets = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
-                   'wide_resnet50_2', 'wide_resnet101_2']
+        # resnets = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152',
+        #            'resnext50_32x4d', 'resnext101_32x8d',
+        #            'wide_resnet50_2', 'wide_resnet101_2']
         parser.add_argument('--batch_size', type=int, default=dataset['batch_size'],
                             help='input batch size (default: 200)')
         parser.add_argument('--learning_rate', type=float, default=0.0002)

@@ -1,1 +1,1 @@
-from pl_bolts.metrics.aggregation import accuracy, mean, precision_at_k
+from pl_bolts.metrics.aggregation import accuracy, mean, precision_at_k  # noqa: F401
