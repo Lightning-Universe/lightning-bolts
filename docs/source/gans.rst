@@ -52,21 +52,37 @@ Implemented by:
 
     - `Christoph Clement <https://github.com/chris-clem>`_
 
-Example outputs:
+Example MNIST outputs:
 
-    .. image:: _images/gans/dcgan_outputs.png
+    .. image:: _images/gans/dcgan_mnist_outputs.png
         :width: 400
-        :alt: DCGAN generated samples
+        :alt: DCGAN generated MNIST samples
 
-Loss curves:
+Example LSUN bedroom outputs:
 
-    .. image:: _images/gans/dcgan_dloss.png
+    .. image:: _images/gans/dcgan_lsun_outputs.png
+        :width: 400
+        :alt: DCGAN generated LSUN bedroom samples
+
+MNIST Loss curves:
+
+    .. image:: _images/gans/dcgan_mnist_dloss.png
         :width: 200
-        :alt: DCGAN disc loss
+        :alt: DCGAN MNIST disc loss
 
-    .. image:: _images/gans/dcgan_gloss.png
+    .. image:: _images/gans/dcgan_mnist_gloss.png
         :width: 200
-        :alt: DCGAN gen loss
+        :alt: DCGAN MNIST gen loss
+
+LSUN Loss curves:
+
+    .. image:: _images/gans/dcgan_lsun_dloss.png
+        :width: 200
+        :alt: DCGAN LSUN disc loss
+
+    .. image:: _images/gans/dcgan_lsun_gloss.png
+        :width: 200
+        :alt: DCGAN LSUN gen loss
 
 .. autoclass:: pl_bolts.models.gans.DCGAN
    :noindex:
