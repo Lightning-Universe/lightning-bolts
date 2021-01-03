@@ -39,15 +39,11 @@ DQN Loss
 .. autofunction:: pl_bolts.losses.rl.dqn_loss
     :noindex:
 
----------------
-
 Double DQN Loss
 ---------------
 
 .. autofunction:: pl_bolts.losses.rl.double_dqn_loss
     :noindex:
-
----------------
 
 Per DQN Loss
 ------------
