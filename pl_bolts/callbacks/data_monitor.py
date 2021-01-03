@@ -234,8 +234,8 @@ class TrainingDataMonitor(DataMonitorBase):
             trainer: Trainer,
             pl_module: LightningModule,
             batch: Sequence,
-            *args: int,
-            **kwargs: int,
+            *args: Any,
+            **kwargs: Any,
     ) -> None:
         super().on_train_batch_start(trainer, pl_module, batch, *args, **kwargs)
         self.log_histograms(batch, group=self.GROUP_NAME)
