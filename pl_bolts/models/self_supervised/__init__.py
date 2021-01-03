@@ -32,7 +32,7 @@ __all__ = [
     "AMDIM",
     "BYOL",
     "CPCV2",
-    "SSLEvaluator"
+    "SSLEvaluator",
     "MocoV2",
     "SimCLR",
     "SSLFineTuner",
