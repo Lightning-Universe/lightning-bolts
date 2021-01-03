@@ -6,7 +6,7 @@ from pytorch_lightning.metrics.functional import accuracy
 from torch.nn import functional as F
 
 
-class SSLOnlineEvaluator(Callback):  # pragma: no-cover
+class SSLOnlineEvaluator(Callback):  # pragma: no cover
     """
     Attaches a MLP for fine-tuning using the standard self-supervised protocol.
 

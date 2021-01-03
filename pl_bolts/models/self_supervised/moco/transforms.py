@@ -10,13 +10,13 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 if _PIL_AVAILABLE:
     from PIL import ImageFilter
-else:
-    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('PIL', pypi_name='Pillow')
 
 
 class Moco2TrainCIFAR10Transforms:
@@ -25,8 +25,8 @@ class Moco2TrainCIFAR10Transforms:
     https://arxiv.org/pdf/2003.04297.pdf
     """
     def __init__(self, height: int = 32):
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -55,8 +55,8 @@ class Moco2EvalCIFAR10Transforms:
     https://arxiv.org/pdf/2003.04297.pdf
     """
     def __init__(self, height: int = 32):
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -79,8 +79,8 @@ class Moco2TrainSTL10Transforms:
     https://arxiv.org/pdf/2003.04297.pdf
     """
     def __init__(self, height: int = 64):
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -109,8 +109,8 @@ class Moco2EvalSTL10Transforms:
     https://arxiv.org/pdf/2003.04297.pdf
     """
     def __init__(self, height: int = 64):
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -135,8 +135,8 @@ class Moco2TrainImagenetTransforms:
     """
 
     def __init__(self, height: int = 128):
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -165,8 +165,8 @@ class Moco2EvalImagenetTransforms:
     https://arxiv.org/pdf/2003.04297.pdf
     """
     def __init__(self, height: int = 128):
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -187,8 +187,8 @@ class GaussianBlur(object):
     """Gaussian blur augmentation in SimCLR https://arxiv.org/abs/2002.05709"""
 
     def __init__(self, sigma=(0.1, 2.0)):
-        if not _PIL_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _PIL_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `Pillow` which is not installed yet, install it with `pip install Pillow`.'
             )
         self.sigma = sigma

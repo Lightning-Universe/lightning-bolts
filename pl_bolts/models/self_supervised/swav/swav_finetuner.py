@@ -9,7 +9,7 @@ from pl_bolts.models.self_supervised.swav.transforms import SwAVFinetuneTransfor
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization, stl10_normalization
 
 
-def cli_main():  # pragma: no-cover
+def cli_main():  # pragma: no cover
     from pl_bolts.datamodules import ImagenetDataModule, STL10DataModule
 
     pl.seed_everything(1234)

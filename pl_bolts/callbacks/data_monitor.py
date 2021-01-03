@@ -10,9 +10,13 @@ from pytorch_lightning.utilities.apply_func import apply_to_collection
 from torch import Tensor
 from torch.utils.hooks import RemovableHandle
 
-try:
+from pl_bolts.utils import _WANDB_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _WANDB_AVAILABLE:
     import wandb
-except ModuleNotFoundError:
+else:  # pragma: no cover
+    warn_missing_pkg("wandb")
     wandb = None
 
 
@@ -64,7 +68,7 @@ class DataMonitorBase(Callback):
             return
 
         batch = apply_to_collection(batch, dtype=np.ndarray, function=torch.from_numpy)
-        named_tensors = dict()
+        named_tensors = {}
         collect_and_name_tensors(batch, output=named_tensors, parent_name=group)
 
         for name, tensor in named_tensors.items():
@@ -87,6 +91,11 @@ class DataMonitorBase(Callback):
             )
 
         if isinstance(logger, WandbLogger):
+            if not _WANDB_AVAILABLE:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    "You want to use `wandb` which is not installed yet."
+                )
+
             logger.experiment.log(
                 data={name: wandb.Histogram(tensor)}, commit=False,
             )
