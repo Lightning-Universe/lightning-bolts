@@ -2,7 +2,7 @@ from typing import Sequence
 
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
-from torch import Tensor, nn
+from torch import nn, Tensor
 
 from pl_bolts.utils import _MATPLOTLIB_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg

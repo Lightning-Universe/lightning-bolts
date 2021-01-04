@@ -3,7 +3,7 @@ from typing import Optional, Sequence, Tuple, Union
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.metrics.functional import accuracy
-from torch import Tensor, device
+from torch import device, Tensor
 from torch.nn import functional as F
 from torch.optim import Optimizer
 
