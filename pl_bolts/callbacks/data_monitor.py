@@ -50,11 +50,11 @@ class DataMonitorBase(Callback):
         self._trainer = trainer
 
     def on_train_batch_start(
-        self, trainer: Trainer, pl_module: LightningModule, batch: Sequence, batch_idx: int, dataloader_idx: int
+        self, trainer: Trainer, pl_module: LightningModule, batch: Any, batch_idx: int, dataloader_idx: int
     ) -> None:
         self._train_batch_idx = batch_idx
 
-    def log_histograms(self, batch: Sequence, group: str = "") -> None:
+    def log_histograms(self, batch: Any, group: str = "") -> None:
         """
         Logs the histograms at the interval defined by `row_log_interval`, given a logger is available.
 
@@ -233,7 +233,7 @@ class TrainingDataMonitor(DataMonitorBase):
             self,
             trainer: Trainer,
             pl_module: LightningModule,
-            batch: Sequence,
+            batch: Any,
             *args: Any,
             **kwargs: Any,
     ) -> None:
