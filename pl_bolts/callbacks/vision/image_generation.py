@@ -38,7 +38,7 @@ class TensorboardGenerativeModelImageSampler(Callback):
         nrow: int = 8,
         padding: int = 2,
         normalize: bool = False,
-        range: Optional[Tuple[int, int]] = None,
+        norm_range: Optional[Tuple[int, int]] = None,
         scale_each: bool = False,
         pad_value: int = 0,
     ) -> None:
@@ -49,7 +49,7 @@ class TensorboardGenerativeModelImageSampler(Callback):
             padding: amount of padding. Default: ``2``.
             normalize: If True, shift the image to the range (0, 1),
                 by the min and max values specified by :attr:`range`. Default: ``False``.
-            range: tuple (min, max) where min and max are numbers,
+            norm_range: tuple (min, max) where min and max are numbers,
                 then these numbers are used to normalize the image. By default, min and max
                 are computed from the tensor.
             scale_each: If ``True``, scale each image in the batch of
@@ -61,7 +61,7 @@ class TensorboardGenerativeModelImageSampler(Callback):
         self.nrow = nrow
         self.padding = padding
         self.normalize = normalize
-        self.range = range
+        self.norm_range = norm_range
         self.scale_each = scale_each
         self.pad_value = pad_value
 
@@ -84,7 +84,7 @@ class TensorboardGenerativeModelImageSampler(Callback):
             nrow=self.nrow,
             padding=self.padding,
             normalize=self.normalize,
-            range=self.range,
+            range=self.norm_range,
             scale_each=self.scale_each,
             pad_value=self.pad_value,
         )
