@@ -1,5 +1,5 @@
 import torch
-from pytorch_lightning import Callback
+from pytorch_lightning import Callback, LightningModule, Trainer
 
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -30,12 +30,12 @@ class TensorboardGenerativeModelImageSampler(Callback):
         trainer = Trainer(callbacks=[TensorboardGenerativeModelImageSampler()])
     """
 
-    def __init__(self, num_samples: int = 3):
+    def __init__(self, num_samples: int = 3) -> None:
         super().__init__()
-        self.num_samples = num_samples
+        self.num_samples: int = num_samples
 
-    def on_epoch_end(self, trainer, pl_module):
-        dim = (self.num_samples, pl_module.hparams.latent_dim)
+    def on_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        dim = (self.num_samples, pl_module.hparams.latent_dim)  # type: ignore[union-attr]
         z = torch.normal(mean=0.0, std=1.0, size=dim, device=pl_module.device)
 
         # generate images
