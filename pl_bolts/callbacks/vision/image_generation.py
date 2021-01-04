@@ -42,6 +42,20 @@ class TensorboardGenerativeModelImageSampler(Callback):
         scale_each: bool = False,
         pad_value: int = 0,
     ) -> None:
+        """
+        Args:
+            nrow: Number of images displayed in each row of the grid.
+                The final grid size is ``(B / nrow, nrow)``. Default: ``8``.
+            padding: amount of padding. Default: ``2``.
+            normalize: If True, shift the image to the range (0, 1),
+                by the min and max values specified by :attr:`range`. Default: ``False``.
+            range: tuple (min, max) where min and max are numbers,
+                then these numbers are used to normalize the image. By default, min and max
+                are computed from the tensor.
+            scale_each: If ``True``, scale each image in the batch of
+                images separately rather than the (min, max) over all images. Default: ``False``.
+            pad_value: Value for the padded pixels. Default: ``0``.
+        """
         super().__init__()
         self.num_samples = num_samples
         self.nrow = nrow
