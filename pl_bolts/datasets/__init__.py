@@ -13,7 +13,6 @@ from pl_bolts.datasets.kitti_dataset import KittiDataset
 from pl_bolts.datasets.mnist_dataset import BinaryMNIST
 from pl_bolts.datasets.ssl_amdim_datasets import CIFAR10Mixed, SSLDatasetMixin
 
-
 __all__ = [
     "LightDataset",
     "CIFAR10",
