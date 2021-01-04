@@ -272,7 +272,7 @@ intersphinx_mapping = {
     'pytorch_lightning': ('https://pytorch-lightning.readthedocs.io/en/stable/', None),
     'python': ('https://docs.python.org/3', None),
     'torch': ('https://pytorch.org/docs/stable/', None),
-    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
     'PIL': ('https://pillow.readthedocs.io/en/stable/', None),
 }
 

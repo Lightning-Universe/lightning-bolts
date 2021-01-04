@@ -9,5 +9,4 @@ def tile(a: Tensor, dim: int, n_tile: int) -> Tensor:
     repeat_idx[dim] = n_tile
     a = a.repeat(*repeat_idx)
     order_index = torch.LongTensor(np.concatenate([init_dim * np.arange(n_tile) + i for i in range(init_dim)]))
-    order_index = order_index.type_as(a).long()
     return torch.index_select(a, dim, order_index)
