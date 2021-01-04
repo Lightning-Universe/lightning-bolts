@@ -16,6 +16,7 @@ else:  # pragma: no cover
     Axes = object
     Figure = object
 
+
 class ConfusedLogitCallback(Callback):  # pragma: no-cover
     """
     Takes the logit predictions of a model and when the probabilities of two classes are very close, the model
