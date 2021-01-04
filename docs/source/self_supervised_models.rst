@@ -92,15 +92,11 @@ AMDIM
 .. autoclass:: pl_bolts.models.self_supervised.AMDIM
    :noindex:
 
----------
-
 BYOL
 ^^^^
 
 .. autoclass:: pl_bolts.models.self_supervised.BYOL
    :noindex:
-
----------
 
 CPC (V2)
 ^^^^^^^^
@@ -253,15 +249,11 @@ CPCV2 API
 .. autoclass:: pl_bolts.models.self_supervised.CPCV2
    :noindex:
 
----------
-
 Moco (V2)
 ^^^^^^^^^
 
 .. autoclass:: pl_bolts.models.self_supervised.MocoV2
    :noindex:
-
----------
 
 SimCLR
 ^^^^^^
@@ -388,8 +380,6 @@ SimCLR API
 
 .. autoclass:: pl_bolts.models.self_supervised.SimCLR
    :noindex:
-
----------
 
 SwAV
 ^^^^

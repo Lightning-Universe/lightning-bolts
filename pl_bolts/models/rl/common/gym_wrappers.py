@@ -12,8 +12,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
     import gym.spaces
-    from gym import ObservationWrapper, Wrapper
     from gym import make as gym_make
+    from gym import ObservationWrapper, Wrapper
 else:  # pragma: no-cover
     warn_missing_pkg('gym')
     Wrapper = object
