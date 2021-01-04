@@ -11,9 +11,10 @@ if _MATPLOTLIB_AVAILABLE:
     from matplotlib import pyplot as plt
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
-else:
-    warn_missing_pkg("matplotlib")  # pragma: no-cover
-
+else:  # pragma: no cover
+    warn_missing_pkg("matplotlib")
+    Axes = object
+    Figure = object
 
 class ConfusedLogitCallback(Callback):  # pragma: no-cover
     """
