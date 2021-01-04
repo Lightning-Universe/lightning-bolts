@@ -1,7 +1,7 @@
 from typing import Any, Optional, Sequence, Union
 
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
-from pl_bolts.datasets.cifar10_dataset import TrialCIFAR10
+from pl_bolts.datasets import TrialCIFAR10
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg

@@ -4,7 +4,7 @@ from typing import Optional
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
-from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
+from pl_bolts.datasets import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -133,7 +133,7 @@ class ImagenetDataModule(LightningDataModule):
 
                 To generate the meta.bin do the following:
 
-                from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
+                from pl_bolts.datasets import UnlabeledImagenet
                 path = '/path/to/folder/with/ILSVRC2012_devkit_t12.tar.gz/'
                 UnlabeledImagenet.generate_meta_bins(path)
                 """)
