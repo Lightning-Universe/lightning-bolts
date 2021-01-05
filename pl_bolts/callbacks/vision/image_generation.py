@@ -44,12 +44,13 @@ class TensorboardGenerativeModelImageSampler(Callback):
     ) -> None:
         """
         Args:
+            num_samples: Number of images displayed in the grid. Default: ``3``.
             nrow: Number of images displayed in each row of the grid.
                 The final grid size is ``(B / nrow, nrow)``. Default: ``8``.
-            padding: amount of padding. Default: ``2``.
-            normalize: If True, shift the image to the range (0, 1),
+            padding: Amount of padding. Default: ``2``.
+            normalize: If ``True``, shift the image to the range (0, 1),
                 by the min and max values specified by :attr:`range`. Default: ``False``.
-            norm_range: tuple (min, max) where min and max are numbers,
+            norm_range: Tuple (min, max) where min and max are numbers,
                 then these numbers are used to normalize the image. By default, min and max
                 are computed from the tensor.
             scale_each: If ``True``, scale each image in the batch of
