@@ -22,6 +22,6 @@ try:
         "mobilenet_v2": torchvision.models.mobilenet_v2,
     }
 
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+except ModuleNotFoundError:  # pragma: no-cover
+    warn_missing_pkg('torchvision')
     TORCHVISION_MODEL_ZOO = {}

@@ -1,3 +1,5 @@
+from typing import Optional
+
 import torch.nn as nn
 
 from pl_bolts.models.detection.components import create_torchvision_backbone
@@ -9,8 +11,8 @@ except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
 
-def create_fasterrcnn_backbone(backbone: str, fpn: bool = True, pretrained: str = None,
-                               trainable_backbone_layers: int = 3, **kwargs) -> nn.Module:
+def create_fasterrcnn_backbone(backbone: str, fpn: bool = True, pretrained: Optional[str] = None,
+                               trainable_backbone_layers: int = 3, **kwargs: Any) -> nn.Module:
 
     """
     Args:

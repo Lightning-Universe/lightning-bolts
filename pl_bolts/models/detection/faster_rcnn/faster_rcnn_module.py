@@ -57,7 +57,7 @@ class FasterRCNN(pl.LightningModule):
         pretrained: bool = False,
         pretrained_backbone: bool = True,
         trainable_backbone_layers: int = 3,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Args:
