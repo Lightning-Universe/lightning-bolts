@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from typing import Optional
+from typing import Optional, Any
 
 import pytorch_lightning as pl
 import torch
@@ -10,8 +10,6 @@ try:
     from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
     from torchvision.models.detection.faster_rcnn import FastRCNNPredictor, fasterrcnn_resnet50_fpn
     from torchvision.ops import box_iou
-
-    from pl_bolts.models.detection.components import create_torchvision_backbone
     from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
