@@ -13,8 +13,10 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import STL10
+    from torchvision.transforms import Compose
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
+    Compose = object
 
 
 class STL10DataModule(LightningDataModule):  # pragma: no cover
@@ -298,6 +300,9 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def _default_transforms(self):
-        data_transforms = transform_lib.Compose([transform_lib.ToTensor(), stl10_normalization()])
+    def _default_transforms(self) -> Compose:
+        data_transforms = transform_lib.Compose([
+            transform_lib.ToTensor(),
+            stl10_normalization()
+        ])
         return data_transforms

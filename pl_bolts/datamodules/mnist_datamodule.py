@@ -7,9 +7,11 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import MNIST
+    from torchvision.transforms import Compose
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
     MNIST = None
+    Compose = object
 
 
 class MNISTDataModule(VisionDataModule):
@@ -92,7 +94,7 @@ class MNISTDataModule(VisionDataModule):
         """
         return 10
 
-    def default_transforms(self):
+    def default_transforms(self) -> Compose:
         if self.normalize:
             mnist_transforms = transform_lib.Compose([
                 transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5, ), std=(0.5, ))
