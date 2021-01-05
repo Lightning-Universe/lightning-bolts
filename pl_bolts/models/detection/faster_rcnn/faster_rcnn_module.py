@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from typing import Optional, Any
+from typing import Any, Optional
 
 import pytorch_lightning as pl
 import torch
@@ -10,9 +10,10 @@ try:
     from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
     from torchvision.models.detection.faster_rcnn import FastRCNNPredictor, fasterrcnn_resnet50_fpn
     from torchvision.ops import box_iou
+
     from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+    warn_missing_pkg("torchvision")  # pragma: no-cover
 
 
 def _evaluate_iou(target, pred):
@@ -80,12 +81,21 @@ class FasterRCNN(pl.LightningModule):
             )
 
             in_features = self.model.roi_heads.box_predictor.cls_score.in_features
-            self.model.roi_heads.box_predictor = FastRCNNPredictor(in_features, self.num_classes)
+            self.model.roi_heads.box_predictor = FastRCNNPredictor(
+                in_features, self.num_classes
+            )
 
         else:
-            backbone_model = create_fasterrcnn_backbone(self.backbone, fpn, pretrained_backbone,
-                                                        trainable_backbone_layers, **kwargs)
-            self.model = torchvision_FasterRCNN(backbone_model, num_classes=num_classes, **kwargs)
+            backbone_model = create_fasterrcnn_backbone(
+                self.backbone,
+                fpn,
+                pretrained_backbone,
+                trainable_backbone_layers,
+                **kwargs,
+            )
+            self.model = torchvision_FasterRCNN(
+                backbone_model, num_classes=num_classes, **kwargs
+            )
 
     def forward(self, x):
         self.model.eval()

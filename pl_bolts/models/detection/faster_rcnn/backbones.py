@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Any, Optional
 
 import torch.nn as nn
 
@@ -8,11 +8,16 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 try:
     from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
 except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+    warn_missing_pkg("torchvision")  # pragma: no-cover
 
 
-def create_fasterrcnn_backbone(backbone: str, fpn: bool = True, pretrained: Optional[str] = None,
-                               trainable_backbone_layers: int = 3, **kwargs: Any) -> nn.Module:
+def create_fasterrcnn_backbone(
+    backbone: str,
+    fpn: bool = True,
+    pretrained: Optional[str] = None,
+    trainable_backbone_layers: int = 3,
+    **kwargs: Any
+) -> nn.Module:
 
     """
     Args:
@@ -29,8 +34,12 @@ def create_fasterrcnn_backbone(backbone: str, fpn: bool = True, pretrained: Opti
 
     if fpn:
         # Creates a torchvision resnet model with fpn added.
-        backbone = resnet_fpn_backbone(backbone, pretrained=True,
-                                       trainable_layers=trainable_backbone_layers, **kwargs)
+        backbone = resnet_fpn_backbone(
+            backbone,
+            pretrained=True,
+            trainable_layers=trainable_backbone_layers,
+            **kwargs
+        )
     else:
         # This does not create fpn backbone, it is supported for all models
         backbone, _ = create_torchvision_backbone(backbone, pretrained)

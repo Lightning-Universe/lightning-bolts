@@ -7,7 +7,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 try:
     from pl_bolts.models.detection.components._supported_models import TORCHVISION_MODEL_ZOO
 except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+    warn_missing_pkg("torchvision")  # pragma: no-cover
 
 
 def _create_backbone_generic(model: nn.Module, out_channels: int) -> nn.Module:
@@ -27,7 +27,9 @@ def _create_backbone_generic(model: nn.Module, out_channels: int) -> nn.Module:
 
 # Use this when you have Adaptive Pooling layer in End.
 # When Model.features is not applicable.
-def _create_backbone_adaptive(model: nn.Module, out_channels: Optional[int] = None) -> nn.Module:
+def _create_backbone_adaptive(
+    model: nn.Module, out_channels: Optional[int] = None
+) -> nn.Module:
     """
     Creates backbone by removing linear after Adaptive Pooling layer.
 
@@ -54,7 +56,9 @@ def _create_backbone_features(model: nn.Module, out_channels: int) -> nn.Module:
     return ft_backbone
 
 
-def create_torchvision_backbone(model_name: str, pretrained: bool = True) -> Tuple[nn.Module, int]:
+def create_torchvision_backbone(
+    model_name: str, pretrained: bool = True
+) -> Tuple[nn.Module, int]:
     """
     Creates CNN backbone from Torchvision.
 
@@ -84,7 +88,13 @@ def create_torchvision_backbone(model_name: str, pretrained: bool = True) -> Tup
         ft_backbone = _create_backbone_adaptive(net, out_channels)
         return ft_backbone, out_channels
 
-    elif model_name in ["resnet50", "resnet101", "resnet152", "resnext50_32x4d", "resnext101_32x8d"]:
+    elif model_name in [
+        "resnet50",
+        "resnet101",
+        "resnet152",
+        "resnext50_32x4d",
+        "resnext101_32x8d",
+    ]:
         out_channels = 2048
         model_selected = TORCHVISION_MODEL_ZOO[model_name]
         net = model_selected(pretrained=pretrained)
