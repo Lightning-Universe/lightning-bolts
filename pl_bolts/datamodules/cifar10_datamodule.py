@@ -9,9 +9,11 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import CIFAR10
+    from torchvision.transforms import Compose
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
     CIFAR10 = None
+    Compose = object
 
 
 class CIFAR10DataModule(VisionDataModule):
@@ -112,7 +114,7 @@ class CIFAR10DataModule(VisionDataModule):
         """
         return 10
 
-    def default_transforms(self):
+    def default_transforms(self) -> Compose:
         if self.normalize:
             cf10_transforms = transform_lib.Compose([transform_lib.ToTensor(), cifar10_normalization()])
         else:

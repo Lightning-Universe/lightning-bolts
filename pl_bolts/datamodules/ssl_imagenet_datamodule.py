@@ -11,8 +11,10 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
+    from torchvision.transforms import Compose
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
+    Compose = object
 
 
 class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
@@ -134,7 +136,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def _default_transforms(self):
+    def _default_transforms(self) -> Compose:
         mnist_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             imagenet_normalization()

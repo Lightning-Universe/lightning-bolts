@@ -9,8 +9,10 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import Cityscapes
+    from torchvision.transforms import Compose
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
+    Compose = object
 
 
 class CityscapesDataModule(LightningDataModule):
@@ -192,7 +194,7 @@ class CityscapesDataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self):
+    def _default_transforms(self) -> Compose:
         cityscapes_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transform_lib.Normalize(
@@ -202,7 +204,7 @@ class CityscapesDataModule(LightningDataModule):
         ])
         return cityscapes_transforms
 
-    def _default_target_transforms(self):
+    def _default_target_transforms(self) -> Compose:
         cityscapes_target_trasnforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transform_lib.Lambda(lambda t: t.squeeze())
