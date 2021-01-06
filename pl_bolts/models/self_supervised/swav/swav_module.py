@@ -12,7 +12,6 @@ import torch
 import torch.distributed as dist
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.core.optimizer import LightningOptimizer
-
 from torch import nn
 from torch.optim.optimizer import Optimizer
 
