@@ -162,17 +162,18 @@ class SwAV(pl.LightningModule):
         self.softmax = nn.Softmax(dim=1)
 
     def setup(self, stage):
-        queue_folder = os.path.join(self.logger.log_dir, self.queue_path)
-        if not os.path.exists(queue_folder):
-            os.makedirs(queue_folder)
+        if self.queue_length > 0:
+            queue_folder = os.path.join(self.logger.log_dir, self.queue_path)
+            if not os.path.exists(queue_folder):
+                os.makedirs(queue_folder)
 
-        self.queue_path = os.path.join(
-            queue_folder,
-            "queue" + str(self.trainer.global_rank) + ".pth"
-        )
+            self.queue_path = os.path.join(
+                queue_folder,
+                "queue" + str(self.trainer.global_rank) + ".pth"
+            )
 
-        if os.path.isfile(self.queue_path):
-            self.queue = torch.load(self.queue_path)["queue"]
+            if os.path.isfile(self.queue_path):
+                self.queue = torch.load(self.queue_path)["queue"]
 
     def init_model(self):
         if self.arch == 'resnet18':
