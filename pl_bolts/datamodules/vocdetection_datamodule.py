@@ -6,7 +6,7 @@ from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
-    import torchvision.transforms as T
+    import torchvision.transforms as transform_lib
     from torchvision.datasets import VOCDetection
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
@@ -203,17 +203,14 @@ class VOCDetectionDataModule(LightningDataModule):
 
     def _default_transforms(self):
         if self.normalize:
-            return (
-                lambda image, target: (
-                    T.Compose(
-                        [
-                            T.ToTensor(),
-                            T.Normalize(
-                                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                            ),
-                        ]
-                    )(image),
-                    target,
-                ),
+            voc_transforms = transform_lib.Compose(
+                [
+                    transform_lib.ToTensor(),
+                    transform_lib.Normalize(
+                        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                    )
+                ]
             )
-        return lambda image, target: (T.ToTensor()(image), target)
+        else:
+            voc_transforms = transform_lib.Compose([transform_lib.ToTensor()])
+        return voc_transforms
