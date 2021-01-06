@@ -5,7 +5,9 @@ import torch.nn as nn
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
-    from pl_bolts.models.detection.components._supported_models import TORCHVISION_MODEL_ZOO
+    from pl_bolts.models.detection.components._supported_models import (
+        TORCHVISION_MODEL_ZOO,
+    )
 except ModuleNotFoundError:
     warn_missing_pkg("torchvision")  # pragma: no-cover
 
@@ -67,24 +69,21 @@ def create_torchvision_backbone(
         pretrained: Pretrained weights dataset "imagenet", etc
     """
 
+    model_selected = TORCHVISION_MODEL_ZOO[model_name]
+    net = model_selected(pretrained=pretrained)
+
     if model_name == "mobilenet_v2":
-        model_selected = TORCHVISION_MODEL_ZOO[model_name]
-        net = model_selected(pretrained=pretrained)
         out_channels = 1280
         ft_backbone = _create_backbone_features(net, 1280)
         return ft_backbone, out_channels
 
     elif model_name in ["vgg11", "vgg13", "vgg16", "vgg19"]:
         out_channels = 512
-        model_selected = TORCHVISION_MODEL_ZOO[model_name]
-        net = model_selected(pretrained=pretrained)
         ft_backbone = _create_backbone_features(net, out_channels)
         return ft_backbone, out_channels
 
     elif model_name in ["resnet18", "resnet34"]:
         out_channels = 512
-        model_selected = TORCHVISION_MODEL_ZOO[model_name]
-        net = model_selected(pretrained=pretrained)
         ft_backbone = _create_backbone_adaptive(net, out_channels)
         return ft_backbone, out_channels
 
@@ -96,15 +95,11 @@ def create_torchvision_backbone(
         "resnext101_32x8d",
     ]:
         out_channels = 2048
-        model_selected = TORCHVISION_MODEL_ZOO[model_name]
-        net = model_selected(pretrained=pretrained)
         ft_backbone = _create_backbone_adaptive(net, out_channels)
         return ft_backbone, out_channels
 
     elif model_name in ["mnasnet0_5", "mnasnet0_75", "mnasnet1_0", "mnasnet1_3"]:
         out_channels = 1280
-        model_selected = TORCHVISION_MODEL_ZOO[model_name]
-        net = model_selected(pretrained=pretrained)
         ft_backbone = _create_backbone_adaptive(net, out_channels)
         return ft_backbone, out_channels
 
