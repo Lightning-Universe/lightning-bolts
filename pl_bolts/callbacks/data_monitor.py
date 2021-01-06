@@ -4,15 +4,20 @@ import numpy as np
 import torch
 import torch.nn as nn
 from pytorch_lightning import Callback, LightningModule, Trainer
-from pytorch_lightning.loggers import TensorBoardLogger, WandbLogger
+from pytorch_lightning.loggers import LightningLoggerBase, TensorBoardLogger, WandbLogger
 from pytorch_lightning.utilities import rank_zero_warn
 from pytorch_lightning.utilities.apply_func import apply_to_collection
 from torch import Tensor
+from torch.nn import Module
 from torch.utils.hooks import RemovableHandle
 
-try:
+from pl_bolts.utils import _WANDB_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _WANDB_AVAILABLE:
     import wandb
-except ModuleNotFoundError:
+else:  # pragma: no cover
+    warn_missing_pkg("wandb")
     wandb = None
 
 
@@ -34,22 +39,22 @@ class DataMonitorBase(Callback):
                 interval defined in the Trainer. Use this to override the Trainer default.
         """
         super().__init__()
-        self._log_every_n_steps = log_every_n_steps
+        self._log_every_n_steps: Optional[int] = log_every_n_steps
         self._log = False
-        self._trainer = None
-        self._train_batch_idx = None
+        self._trainer: Trainer
+        self._train_batch_idx: int
 
-    def on_train_start(self, trainer, pl_module):
+    def on_train_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
         self._log = self._is_logger_available(trainer.logger)
-        self._log_every_n_steps = self._log_every_n_steps or trainer.log_every_n_steps
+        self._log_every_n_steps = self._log_every_n_steps or trainer.log_every_n_steps  # type: ignore[attr-defined]
         self._trainer = trainer
 
     def on_train_batch_start(
-        self, trainer, pl_module, batch, batch_idx, dataloader_idx
-    ):
+        self, trainer: Trainer, pl_module: LightningModule, batch: Any, batch_idx: int, dataloader_idx: int
+    ) -> None:
         self._train_batch_idx = batch_idx
 
-    def log_histograms(self, batch, group="") -> None:
+    def log_histograms(self, batch: Any, group: str = "") -> None:
         """
         Logs the histograms at the interval defined by `row_log_interval`, given a logger is available.
 
@@ -60,11 +65,11 @@ class DataMonitorBase(Callback):
                 Each label also has the tensors's shape as suffix.
             group: Name under which the histograms will be grouped.
         """
-        if not self._log or (self._train_batch_idx + 1) % self._log_every_n_steps != 0:
+        if not self._log or (self._train_batch_idx + 1) % self._log_every_n_steps != 0:  # type: ignore[operator]
             return
 
         batch = apply_to_collection(batch, dtype=np.ndarray, function=torch.from_numpy)
-        named_tensors = dict()
+        named_tensors: Dict[str, Tensor] = {}
         collect_and_name_tensors(batch, output=named_tensors, parent_name=group)
 
         for name, tensor in named_tensors.items():
@@ -87,11 +92,16 @@ class DataMonitorBase(Callback):
             )
 
         if isinstance(logger, WandbLogger):
+            if not _WANDB_AVAILABLE:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    "You want to use `wandb` which is not installed yet."
+                )
+
             logger.experiment.log(
                 data={name: wandb.Histogram(tensor)}, commit=False,
             )
 
-    def _is_logger_available(self, logger) -> bool:
+    def _is_logger_available(self, logger: LightningLoggerBase) -> bool:
         available = True
         if not logger:
             rank_zero_warn("Cannot log histograms because Trainer has no logger.")
@@ -145,9 +155,9 @@ class ModuleDataMonitor(DataMonitorBase):
         """
         super().__init__(log_every_n_steps=log_every_n_steps)
         self._submodule_names = submodules
-        self._hook_handles = []
+        self._hook_handles: List = []
 
-    def on_train_start(self, trainer: Trainer, pl_module: LightningModule):
+    def on_train_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
         super().on_train_start(trainer, pl_module)
         submodule_dict = dict(pl_module.named_modules())
         self._hook_handles = []
@@ -161,7 +171,7 @@ class ModuleDataMonitor(DataMonitorBase):
             handle = self._register_hook(name, submodule_dict[name])
             self._hook_handles.append(handle)
 
-    def on_train_end(self, trainer, pl_module):
+    def on_train_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         for handle in self._hook_handles:
             handle.remove()
 
@@ -189,7 +199,7 @@ class ModuleDataMonitor(DataMonitorBase):
             else self.GROUP_NAME_OUTPUT
         )
 
-        def hook(_, inp, out):
+        def hook(_: Module, inp: Sequence, out: Sequence) -> None:
             inp = inp[0] if len(inp) == 1 else inp
             self.log_histograms(inp, group=input_group_name)
             self.log_histograms(out, group=output_group_name)
@@ -219,7 +229,14 @@ class TrainingDataMonitor(DataMonitorBase):
         """
         super().__init__(log_every_n_steps=log_every_n_steps)
 
-    def on_train_batch_start(self, trainer, pl_module, batch, *args, **kwargs):
+    def on_train_batch_start(
+            self,
+            trainer: Trainer,
+            pl_module: LightningModule,
+            batch: Any,
+            *args: Any,
+            **kwargs: Any,
+    ) -> None:
         super().on_train_batch_start(trainer, pl_module, batch, *args, **kwargs)
         self.log_histograms(batch, group=self.GROUP_NAME)
 

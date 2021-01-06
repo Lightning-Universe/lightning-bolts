@@ -1,7 +1,7 @@
 import inspect
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 
 import pytorch_lightning as pl
 
@@ -32,19 +32,19 @@ class LightningArgumentParser(ArgumentParser):
         # args.data -> data args
         # args.model -> model args
     """
-    def __init__(self, *args, ignore_required_init_args=True, **kwargs):
+    def __init__(self, *args: Any, ignore_required_init_args: bool = True, **kwargs: Any) -> None:
         """
         Args:
-            ignore_required_init_args (bool, optional): Whether to include positional args when adding
-            object args. Defaults to True.
+            ignore_required_init_args: Whether to include positional args when adding
+            object args. Defaults to ``True``.
         """
         super().__init__(*args, **kwargs)
         self.ignore_required_init_args = ignore_required_init_args
 
-        self._default_obj_args = dict()
-        self._added_arg_names = []
+        self._default_obj_args: Dict[str, List[LitArg]] = {}
+        self._added_arg_names: List[str] = []
 
-    def add_object_args(self, name, obj):
+    def add_object_args(self, name: str, obj: Any) -> None:
         default_args = gather_lit_args(obj)
         self._default_obj_args[name] = default_args
         for arg in default_args:
@@ -58,11 +58,11 @@ class LightningArgumentParser(ArgumentParser):
                 kwargs["default"] = arg.default
             self.add_argument(f"--{arg.name}", **kwargs)
 
-    def parse_lit_args(self, *args, **kwargs):
+    def parse_lit_args(self, *args: Any, **kwargs: Any) -> Namespace:
         parsed_args_dict = vars(self.parse_args(*args, **kwargs))
         lit_args = Namespace()
         for name, default_args in self._default_obj_args.items():
-            lit_obj_args = dict()
+            lit_obj_args = {}
             for arg in default_args:
                 arg_is_member_of_obj = arg.name in parsed_args_dict
                 arg_should_be_added = not arg.required or (arg.required and not self.ignore_required_init_args)
@@ -72,7 +72,7 @@ class LightningArgumentParser(ArgumentParser):
         return lit_args
 
 
-def gather_lit_args(cls, root_cls=None):
+def gather_lit_args(cls: Any, root_cls: Optional[Any] = None) -> List[LitArg]:
 
     if root_cls is None:
         if issubclass(cls, pl.LightningModule):
@@ -83,7 +83,7 @@ def gather_lit_args(cls, root_cls=None):
             root_cls = cls
 
     blacklisted_args = ["self", "args", "kwargs"]
-    arguments = []
+    arguments: List[LitArg] = []
     argument_names = []
     for obj in inspect.getmro(cls):
 
@@ -92,7 +92,7 @@ def gather_lit_args(cls, root_cls=None):
 
         if issubclass(obj, root_cls):
 
-            default_params = inspect.signature(obj.__init__).parameters
+            default_params = inspect.signature(obj.__init__).parameters  # type: ignore
 
             for arg in default_params:
                 arg_type = default_params[arg].annotation
@@ -104,7 +104,7 @@ def gather_lit_args(cls, root_cls=None):
                     arg_types = (arg_type,)
 
                 # If type is empty, that means it hasn't been given type hint. We skip these.
-                arg_is_missing_type_hint = arg_types == (inspect._empty,)
+                arg_is_missing_type_hint = arg_types == (inspect.Parameter.empty,)
                 # Some args should be ignored by default (self, kwargs, args)
                 arg_is_in_blacklist = arg in blacklisted_args and arg_is_missing_type_hint
                 # We only keep the first arg we see of a given name, as it overrides the parents
@@ -113,9 +113,9 @@ def gather_lit_args(cls, root_cls=None):
                 do_skip_this_arg = arg_is_in_blacklist or arg_is_missing_type_hint or arg_is_duplicate
 
                 # Positional args have no default, but do have a known type or types.
-                arg_is_positional = arg_default == inspect._empty and not arg_is_missing_type_hint
+                arg_is_positional = arg_default == inspect.Parameter.empty and not arg_is_missing_type_hint
                 # Kwargs have both a default + known type or types
-                arg_is_kwarg = arg_default != inspect._empty and not arg_is_missing_type_hint
+                arg_is_kwarg = arg_default != inspect.Parameter.empty and not arg_is_missing_type_hint
 
                 if do_skip_this_arg:
                     continue
@@ -124,7 +124,7 @@ def gather_lit_args(cls, root_cls=None):
                     lit_arg = LitArg(
                         name=arg,
                         types=arg_types,
-                        default=arg_default if arg_default != inspect._empty else None,
+                        default=arg_default if arg_default != inspect.Parameter.empty else None,
                         required=arg_is_positional,
                         context=obj.__name__,
                     )
