@@ -35,6 +35,7 @@ __all__ = [
     "SSLEvaluator",
     "MocoV2",
     "SimCLR",
+    "SimSiam",
     "SSLFineTuner",
     "SwAV",
 ]
