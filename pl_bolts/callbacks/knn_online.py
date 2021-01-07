@@ -1,7 +1,9 @@
-from typing import Optional
+from typing import Optional, Tuple
 
+import numpy as np
 import torch
-from pytorch_lightning import Callback
+from torch.utils.data import DataLoader
+from pytorch_lightning import Callback, LightningModule, Trainer
 from sklearn.neighbors import KNeighborsClassifier
 
 
@@ -25,8 +27,8 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
     def __init__(
         self,
         dataset: str,
-        num_classes: int = None,
-    ):
+        num_classes: Optional[int] = None,
+    ) -> None:
         """
         Args:
             dataset: if stl10, need to get the labeled batch
@@ -37,13 +39,13 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
         self.num_classes = num_classes
         self.dataset = dataset
 
-    def get_representations(self, pl_module, x):
+    def get_representations(self, pl_module: LightningModule, x: torch.Tensor) -> torch.Tensor:
         with torch.no_grad():
             representations = pl_module(x)
         representations = representations.reshape(representations.size(0), -1)
         return representations
 
-    def get_all_representations(self, pl_module, dataloader):
+    def get_all_representations(self, pl_module: LightningModule, dataloader: DataLoader) -> Tuple[np.ndarray, np.ndarray]:
         all_representations = None
         ys = None
 
@@ -65,7 +67,7 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
 
         return all_representations.cpu().numpy(), ys.cpu().numpy()
 
-    def to_device(self, batch, device):
+    def to_device(self, batch: torch.Tensor, device: torch.device) -> Tuple[torch.Tensor, torch.Tensor]:
         # get the labeled batch
         if self.dataset == 'stl10':
             labeled_batch = batch[1]
@@ -80,7 +82,7 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
 
         return x, y
 
-    def on_validation_epoch_end(self, trainer, pl_module):
+    def on_validation_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         pl_module.knn_evaluator = KNeighborsClassifier(n_neighbors=self.num_classes)
 
         train_dataloader = pl_module.train_dataloader()
