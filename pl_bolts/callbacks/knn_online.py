@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -65,9 +65,9 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
             else:
                 ys = torch.cat([ys, y])
 
-        return all_representations.cpu().numpy(), ys.cpu().numpy()
+        return all_representations.cpu().numpy(), ys.cpu().numpy()  # type: ignore[union-attr]
 
-    def to_device(self, batch: torch.Tensor, device: torch.device) -> Tuple[torch.Tensor, torch.Tensor]:
+    def to_device(self, batch: torch.Tensor, device: Union[str, torch.device]) -> Tuple[torch.Tensor, torch.Tensor]:
         # get the labeled batch
         if self.dataset == 'stl10':
             labeled_batch = batch[1]
@@ -89,16 +89,16 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
         representations, y = self.get_all_representations(pl_module, train_dataloader)
 
         # knn fit
-        pl_module.knn_evaluator.fit(representations, y)
-        train_acc = pl_module.knn_evaluator.score(representations, y)
+        pl_module.knn_evaluator.fit(representations, y)  # type: ignore[union-attr,operator]
+        train_acc = pl_module.knn_evaluator.score(representations, y)  # type: ignore[union-attr,operator]
 
         # log metrics
 
         val_dataloader = pl_module.val_dataloader()
-        representations, y = self.get_all_representations(pl_module, val_dataloader)
+        representations, y = self.get_all_representations(pl_module, val_dataloader)  # type: ignore[arg-type]
 
         # knn val acc
-        val_acc = pl_module.knn_evaluator.score(representations, y)
+        val_acc = pl_module.knn_evaluator.score(representations, y)  # type: ignore[union-attr,operator]
 
         # log metrics
         pl_module.log('online_knn_train_acc', train_acc, on_step=False, on_epoch=True, sync_dist=True)
