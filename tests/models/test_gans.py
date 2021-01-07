@@ -17,7 +17,7 @@ def test_gan(tmpdir, datadir, dm_cls):
     model = GAN(*dm.size())
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, dm)
-    trainer.test(datamodule=dm)
+    trainer.test(datamodule=dm, ckpt_path=None)
 
 
 @pytest.mark.parametrize(
@@ -33,3 +33,4 @@ def test_dcgan(tmpdir, datadir, dm_cls):
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, dm)
     trainer.test(datamodule=dm)
+    trainer.test(datamodule=dm, ckpt_path=None)

@@ -123,6 +123,7 @@ def test_swav(tmpdir, datadir):
         nmb_crops=[2, 1],
         sinkhorn_iterations=1,
         nmb_prototypes=2,
+        queue_length=0,
         maxpool1=False,
         first_conv=False,
         dataset='cifar10'
