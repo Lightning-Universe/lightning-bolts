@@ -89,7 +89,7 @@ def test_cli_run_self_supervised_swav(cli_args):
 
 
 @pytest.mark.parametrize('cli_args', [
-    f'--data_dir {DATASETS_PATH} --gpus 0 --max_epochs 1 --max_steps 3 --fast_dev_run --batch_size 2 --online_ft'
+    f'--data_dir {DATASETS_PATH} --gpus 0 --max_epochs 1 --max_steps 3 --fast_dev_run 1 --batch_size 2 --online_ft'
 ])
 def test_cli_run_self_supervised_simsiam(cli_args):
     """Test running CLI for an example with default params."""
