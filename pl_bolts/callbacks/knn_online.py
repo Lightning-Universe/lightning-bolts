@@ -3,8 +3,15 @@ from typing import Optional, Tuple, Union
 import numpy as np
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
-from sklearn.neighbors import KNeighborsClassifier
 from torch.utils.data import DataLoader
+
+from pl_bolts.utils import _SKLEARN_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _SKLEARN_AVAILABLE:
+    from sklearn.neighbors import KNeighborsClassifier
+else:  # pragma: no cover
+    warn_missing_pkg("sklearn", pypi_name="scikit-learn")
 
 
 class KNNOnlineEvaluator(Callback):  # pragma: no-cover
@@ -34,6 +41,11 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
             dataset: if stl10, need to get the labeled batch
             num_classes: Number of classes
         """
+        if not _SKLEARN_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
+                "You want to use `KNeighborsClassifier` function from `scikit-learn` which is not installed yet."
+            )
+
         super().__init__()
 
         self.num_classes = num_classes
