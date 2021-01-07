@@ -2,9 +2,9 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
 from pytorch_lightning import Callback, LightningModule, Trainer
 from sklearn.neighbors import KNeighborsClassifier
+from torch.utils.data import DataLoader
 
 
 class KNNOnlineEvaluator(Callback):  # pragma: no-cover
