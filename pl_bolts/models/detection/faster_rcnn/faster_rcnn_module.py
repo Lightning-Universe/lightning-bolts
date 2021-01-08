@@ -141,9 +141,6 @@ class FasterRCNN(pl.LightningModule):
         parser.add_argument("--pretrained", type=bool, default=False)
         parser.add_argument("--pretrained_backbone", type=bool, default=True)
         parser.add_argument("--trainable_backbone_layers", type=int, default=3)
-
-        parser.add_argument("--data_dir", type=str, default=".")
-        parser.add_argument("--batch_size", type=int, default=1)
         return parser
 
 
@@ -153,6 +150,8 @@ def run_cli():
     pl.seed_everything(42)
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
+    parser.add_argument("--data_dir", type=str, default=".")
+    parser.add_argument("--batch_size", type=int, default=1)
     parser = FasterRCNN.add_model_specific_args(parser)
 
     args = parser.parse_args()
