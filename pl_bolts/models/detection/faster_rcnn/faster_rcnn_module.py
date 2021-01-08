@@ -8,7 +8,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
-    from torchvision.models.detection.faster_rcnn import FastRCNNPredictor, fasterrcnn_resnet50_fpn
+    from torchvision.models.detection.faster_rcnn import fasterrcnn_resnet50_fpn, FastRCNNPredictor
     from torchvision.ops import box_iou
 
     from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
