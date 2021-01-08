@@ -30,4 +30,4 @@ def test_sr_modules(tmpdir, datadir, sr_module_cls, scale_factor):
     model = sr_module_cls(image_channels=1, scale_factor=scale_factor)
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, dl)
-    trainer.test()
+    trainer.test(ckpt_path=None)
