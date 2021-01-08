@@ -32,5 +32,4 @@ def test_dcgan(tmpdir, datadir, dm_cls):
     model = DCGAN(image_channels=dm.dims[0])
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, dm)
-    trainer.test(datamodule=dm)
     trainer.test(datamodule=dm, ckpt_path=None)
