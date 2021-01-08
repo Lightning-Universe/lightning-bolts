@@ -23,7 +23,7 @@ def test_cli_run_basic_gan(cli_args):
     "cli_args",
     [
         f"--dataset mnist --scale_factor 4 --data_dir {DATASETS_PATH} --max_epochs 1"
-        " --batch_size 2 --limit_train_batches 2 --limit_val_batches 2"
+        " --batch_size 2 --limit_train_batches 2 --limit_val_batches 2 --fast_dev_run 1"
     ],
 )
 def test_cli_run_srgan(cli_args):
