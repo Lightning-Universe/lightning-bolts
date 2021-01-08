@@ -37,7 +37,7 @@ def test_cli_run_srgan(cli_args):
     "cli_args",
     [
         f"--dataset mnist --data_dir {DATASETS_PATH} --max_epochs 1"
-        " --batch_size 2 --limit_train_batches 2 --limit_val_batches 2"
+        " --batch_size 2 --limit_train_batches 2 --limit_val_batches 2 --fast_dev_run 1"
     ],
 )
 def test_cli_run_srresnet(cli_args):
