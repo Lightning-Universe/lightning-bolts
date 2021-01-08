@@ -38,7 +38,7 @@ class SRDataModule(LightningDataModule):
             num_workers: How many workers to use for loading data
             shuffle: If true shuffles the train data every epoch
             pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
-                        returning them
+                returning them
             drop_last: If true drops the last incomplete batch
         """
         super().__init__()
