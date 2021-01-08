@@ -31,4 +31,3 @@ def test_sr_modules(tmpdir, datadir, sr_module_cls, scale_factor):
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, dl)
     trainer.test()
-    trainer.test(datamodule=dl, ckpt_path=None)
