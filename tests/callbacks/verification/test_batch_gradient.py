@@ -79,8 +79,13 @@ class LitModel(LightningModule):
     [TemplateModel, MultipleInputModel, MultipleOutputModel, DictInputDictOutputModel,],
 )
 @pytest.mark.parametrize("mix_data", [True, False])
-@pytest.mark.parametrize("device", [torch.device("cpu"), torch.device("cuda", 0)])
-@pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU")
+@pytest.mark.parametrize("device", [
+    pytest.param(torch.device("cpu")),
+    pytest.param(
+        torch.device("cuda", 0),
+        marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU"),
+    )
+])
 def test_batch_gradient_verification(model_class, mix_data, device):
     model = model_class(mix_data).to(device)
     is_valid = not mix_data
@@ -90,8 +95,10 @@ def test_batch_gradient_verification(model_class, mix_data, device):
     assert result == is_valid
 
 
-@pytest.mark.parametrize("gpus", [0, 1])
-@pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU")
+@pytest.mark.parametrize("gpus", [
+    pytest.param(0),
+    pytest.param(1, marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU")),
+])
 def test_batch_gradient_verification_callback(gpus):
     trainer = Trainer(gpus=gpus)
     model = LitModel(mix_data=True)
