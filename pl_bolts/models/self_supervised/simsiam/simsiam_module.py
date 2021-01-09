@@ -299,9 +299,7 @@ class SimSiam(pl.LightningModule):
         parser.add_argument("--data_dir", type=str, default=".", help="path to download data")
 
         # training params
-        parser.add_argument("--fast_dev_run", action="store_true")
         parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
-        parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
         parser.add_argument(
@@ -310,10 +308,6 @@ class SimSiam(pl.LightningModule):
         parser.add_argument(
             "--exclude_bn_bias", action="store_true", help="exclude bn/bias from weight decay"
         )
-        parser.add_argument(
-            "--max_epochs", default=100, type=int, help="number of total epochs to run"
-        )
-        parser.add_argument("--max_steps", default=-1, type=int, help="max steps")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
         parser.add_argument("--batch_size", default=128, type=int, help="batch size per gpu")
 
@@ -338,6 +332,9 @@ def cli_main():
     seed_everything(1234)
 
     parser = ArgumentParser()
+
+    # trainer args
+    parser = pl.Trainer.add_argparse_args(parser)
 
     # model args
     parser = SimSiam.add_model_specific_args(parser)
