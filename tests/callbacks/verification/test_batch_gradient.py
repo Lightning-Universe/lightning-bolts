@@ -127,15 +127,6 @@ def test_batch_gradient_verification_callback(gpus):
         callback.on_train_start(trainer, model)
 
 
-# @patch("pl_bolts.callbacks.verification.batch_gradient.default_output_mapping")
-# @patch("pl_bolts.callbacks.verification.batch_gradient.default_input_mapping")
-# def test_default_input_output_mapping_arguments(input_mapping_mock, output_mapping_mock):
-#     model = LitModel()
-#     verification = BatchGradientVerification(model)
-#     verification.check(model.example_input_array, input_mapping=None, output_mapping=None)
-#     assert input_mapping_mock.assert_called_with(model.example_input_array)
-
-
 def test_batch_verification_raises_on_batch_size_1():
     model = TemplateModel()
     verification = BatchGradientVerification(model)
