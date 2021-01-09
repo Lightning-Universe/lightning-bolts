@@ -95,7 +95,7 @@ does all of that for you before training begins.
 .. code-block:: python
 
     from pytorch_lightning import Trainer
-    from verification.batch_gradient import BatchGradientVerificationCallback
+    from pl_bolts.callbacks import BatchGradientVerificationCallback
 
     model = YourLightningModule()
     verification = BatchGradientVerificationCallback()
