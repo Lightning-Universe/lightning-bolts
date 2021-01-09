@@ -1,7 +1,7 @@
 Learning Rate Schedulers
 ========================
-This package lists common losses across research domains
-(This is a work in progress. If you have any losses you want to contribute, please submit a PR!)
+This package lists common learning rate schedulers across research domains
+(This is a work in progress. If you have any learning rate schedulers you want to contribute, please submit a PR!)
 
 .. note:: this module is a work in progress
 
