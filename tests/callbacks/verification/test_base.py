@@ -2,21 +2,19 @@ from unittest.mock import Mock, patch
 
 import pytest
 import torch
+import torch.nn as nn
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities import move_data_to_device
 
 from pl_bolts.callbacks.verification.base import VerificationBase
-import torch.nn as nn
 
 
 class TrivialVerification(VerificationBase):
-
     def check(self, *args, **kwargs):
         return True
 
 
 class PyTorchModel(nn.Module):
-
     def __init__(self):
         super().__init__()
         self.layer = nn.Linear(5, 2)
@@ -26,7 +24,6 @@ class PyTorchModel(nn.Module):
 
 
 class LitModel(LightningModule):
-
     def __init__(self):
         super().__init__()
         self.example_input_array = None
@@ -56,7 +53,10 @@ def test_verification_base_get_input_array(device):
     assert verification.model == model
 
     # for a PyTorch model, user must provide the input array
-    with patch("pl_bolts.callbacks.verification.base.move_data_to_device", wraps=move_data_to_device) as mocked:
+    with patch(
+        "pl_bolts.callbacks.verification.base.move_data_to_device",
+        wraps=move_data_to_device,
+    ) as mocked:
         copied_tensor = verification._get_input_array_copy(input_array=input_tensor)
         mocked.assert_called_once()
         assert copied_tensor.device == device
@@ -67,7 +67,9 @@ def test_verification_base_get_input_array(device):
     verification = TrivialVerification(model)
 
     # for a LightningModule, user can rely on the example_input_array
-    with patch.object(model, 'transfer_batch_to_device', wraps=model.transfer_batch_to_device) as mocked:
+    with patch.object(
+        model, "transfer_batch_to_device", wraps=model.transfer_batch_to_device
+    ) as mocked:
         copied_tensor = verification._get_input_array_copy(input_array=None)
         mocked.assert_called_once()
         assert copied_tensor.device == model.device == device

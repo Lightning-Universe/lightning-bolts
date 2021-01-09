@@ -33,6 +33,7 @@ class TemplateModel(nn.Module):
 
 class MultipleInputModel(TemplateModel):
     """ Base model for testing verification when forward accepts multiple arguments. """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.input_array = (torch.rand(10, 5, 2), torch.rand(10, 5, 2))
@@ -44,6 +45,7 @@ class MultipleInputModel(TemplateModel):
 
 class MultipleOutputModel(TemplateModel):
     """ Base model for testing verification when forward has multiple outputs. """
+
     def forward(self, x):
         out = super().forward(x)
         return None, out, out, False
@@ -51,6 +53,7 @@ class MultipleOutputModel(TemplateModel):
 
 class DictInputDictOutputModel(TemplateModel):
     """ Base model for testing verification when forward has a collection of outputs. """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.input_array = {
@@ -70,6 +73,7 @@ class DictInputDictOutputModel(TemplateModel):
 
 class LitModel(LightningModule):
     """ Base model for testing verification with LightningModules. """
+
     def __init__(self, *args, **kwargs):
         super().__init__()
         self.model = DictInputDictOutputModel(*args, **kwargs)
