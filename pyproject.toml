@@ -8,3 +8,20 @@ known_first_party = [
 profile = "black"
 line_length = 120
 order_by_type = "False"
+
+[tool.black]
+line-length = 120
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
