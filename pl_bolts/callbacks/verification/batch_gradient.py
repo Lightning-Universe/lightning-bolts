@@ -192,7 +192,7 @@ def collect_tensors(data: Any) -> List[torch.Tensor]:
     """ Filters all tensors in a collection and returns them in a list. """
     tensors = []
 
-    def collect_batches(tensor):
+    def collect_batches(tensor: torch.Tensor) -> torch.Tensor:
         tensors.append(tensor)
         return tensor
 
