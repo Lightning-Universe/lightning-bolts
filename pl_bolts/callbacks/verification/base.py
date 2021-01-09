@@ -23,7 +23,7 @@ class VerificationBase:
         self.model = model
 
     @abstractmethod
-    def check(self, *args, **kwargs) -> bool:
+    def check(self, *args: Any, **kwargs: Any) -> bool:
         """ Runs the actual test on the model. All verification classes must implement this.
 
         Arguments:
@@ -35,7 +35,6 @@ class VerificationBase:
             with a heuristic accuracy, thus the return value may not always reflect the true state of
             the system in these cases.
         """
-        pass
 
     def _get_input_array_copy(self, input_array: Optional[Any] = None) -> Any:
         """
@@ -111,7 +110,6 @@ class VerificationCallbackBase(Callback):
         Returns:
             The message as a string.
         """
-        pass
 
     def warning_message(self, *args: Any, **kwargs: Any) -> str:
         """ The warning message printed when the model does not pass the verification. """

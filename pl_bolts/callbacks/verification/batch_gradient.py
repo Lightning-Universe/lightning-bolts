@@ -107,7 +107,7 @@ class BatchGradientVerificationCallback(VerificationCallbackBase):
         self._output_mapping = output_mapping
         self._sample_idx = sample_idx
 
-    def message(self) -> str:
+    def message(self, *args: Any, **kwargs: Any) -> str:
         message = (
             "Your model is mixing data across the batch dimension."
             " This can lead to wrong gradient updates in the optimizer."
@@ -148,7 +148,7 @@ def default_input_mapping(data: Any) -> List[torch.Tensor]:
     torch.Size([3, 2])
     """
     tensors = collect_tensors(data)
-    batches = []
+    batches: List[torch.Tensor] = []
     for tensor in tensors:
         if tensor.ndim > 0 and (not batches or tensor.size(0) == batches[0].size(0)):
             batches.append(tensor)
