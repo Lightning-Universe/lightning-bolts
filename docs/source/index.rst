@@ -75,6 +75,13 @@ PyTorch-Lightning-Bolts documentation
 
 .. toctree::
    :maxdepth: 2
+   :name: lr_schedulers
+   :caption: LR Schedulers
+
+   lr_schedulers
+
+.. toctree::
+   :maxdepth: 2
    :name: transforms
    :caption: Data Processing
 
