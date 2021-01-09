@@ -10,6 +10,7 @@ PyTorch-Lightning-Bolts documentation
    :name: start
    :caption: Start here
 
+   installation
    introduction_guide
    models
 
