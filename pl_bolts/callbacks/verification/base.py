@@ -88,16 +88,16 @@ class VerificationCallbackBase(Callback):
     from :attr:`~pytorch_lightning.core.lightning.LightningModule.example_input_array` if needed.
     """
 
-    def __init__(self, warn: bool = True, error: bool = False):
+    def __init__(self, warn: bool = True, error: bool = False) -> None:
         """
         Arguments:
-            warn: If `True`, prints a warning message when verification fails. Default: `True`.
-            error: If `True`, prints a error message when verification fails. Default: `False`.
+            warn: If ``True``, prints a warning message when verification fails. Default: ``True``.
+            error: If ``True``, prints an error message when verification fails. Default: ``False``.
         """
         self._raise_warning = warn
         self._raise_error = error
 
-    def message(self, *args, **kwargs) -> str:
+    def message(self, *args: Any, **kwargs: Any) -> str:
         """
         The message to be printed when the model does not pass the verification.
         If the message for warning and error differ, override the
@@ -113,15 +113,15 @@ class VerificationCallbackBase(Callback):
         """
         pass
 
-    def warning_message(self, *args, **kwargs) -> str:
+    def warning_message(self, *args: Any, **kwargs: Any) -> str:
         """ The warning message printed when the model does not pass the verification. """
         return self.message(*args, **kwargs)
 
-    def error_message(self, *args, **kwargs) -> str:
+    def error_message(self, *args: Any, **kwargs: Any) -> str:
         """ The error message printed when the model does not pass the verification. """
         return self.message(*args, **kwargs)
 
-    def _raise(self, *args, **kwargs):
+    def _raise(self, *args: Any, **kwargs: Any) -> None:
         if self._raise_error:
             raise RuntimeError(self.error_message(*args, **kwargs))
         if self._raise_warning:

@@ -1,6 +1,7 @@
 from typing import Any, Callable, List, Optional
 
 import torch
+from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.utilities.apply_func import apply_to_collection
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
@@ -19,7 +20,7 @@ class BatchGradientVerification(VerificationBase):
         input_array: Any,
         input_mapping: Optional[Callable] = None,
         output_mapping: Optional[Callable] = None,
-        sample_idx=0,
+        sample_idx: int = 0,
     ) -> bool:
         """
         Runs the test for data mixing across the batch.
@@ -43,7 +44,7 @@ class BatchGradientVerification(VerificationBase):
                 Default: `i = 0`.
 
         Returns:
-             `True` if the data in the batch does not mix during the forward pass, and `False` otherwise.
+             ``True`` if the data in the batch does not mix during the forward pass, and ``False`` otherwise.
         """
         input_mapping = input_mapping or default_input_mapping
         output_mapping = output_mapping or default_output_mapping
@@ -86,10 +87,10 @@ class BatchGradientVerificationCallback(VerificationCallbackBase):
 
     def __init__(
         self,
-        input_mapping: Callable = None,
-        output_mapping: Callable = None,
-        sample_idx=0,
-        **kwargs
+        input_mapping: Optional[Callable] = None,
+        output_mapping: Optional[Callable] = None,
+        sample_idx: int = 0,
+        **kwargs: Any,
     ):
         """
         Arguments:
@@ -106,7 +107,7 @@ class BatchGradientVerificationCallback(VerificationCallbackBase):
         self._output_mapping = output_mapping
         self._sample_idx = sample_idx
 
-    def message(self):
+    def message(self) -> str:
         message = (
             "Your model is mixing data across the batch dimension."
             " This can lead to wrong gradient updates in the optimizer."
@@ -114,7 +115,7 @@ class BatchGradientVerificationCallback(VerificationCallbackBase):
         )
         return message
 
-    def on_train_start(self, trainer, pl_module):
+    def on_train_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
         verification = BatchGradientVerification(pl_module)
         result = verification.check(
             input_array=pl_module.example_input_array,
