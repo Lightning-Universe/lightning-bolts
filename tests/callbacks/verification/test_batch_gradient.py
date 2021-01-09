@@ -1,4 +1,4 @@
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import pytest
 import torch
@@ -79,13 +79,18 @@ class LitModel(LightningModule):
     [TemplateModel, MultipleInputModel, MultipleOutputModel, DictInputDictOutputModel,],
 )
 @pytest.mark.parametrize("mix_data", [True, False])
-@pytest.mark.parametrize("device", [
-    pytest.param(torch.device("cpu")),
-    pytest.param(
-        torch.device("cuda", 0),
-        marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU"),
-    )
-])
+@pytest.mark.parametrize(
+    "device",
+    [
+        pytest.param(torch.device("cpu")),
+        pytest.param(
+            torch.device("cuda", 0),
+            marks=pytest.mark.skipif(
+                not torch.cuda.is_available(), reason="Test requires GPU"
+            ),
+        ),
+    ],
+)
 def test_batch_gradient_verification(model_class, mix_data, device):
     model = model_class(mix_data).to(device)
     is_valid = not mix_data
@@ -95,10 +100,18 @@ def test_batch_gradient_verification(model_class, mix_data, device):
     assert result == is_valid
 
 
-@pytest.mark.parametrize("gpus", [
-    pytest.param(0),
-    pytest.param(1, marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU")),
-])
+@pytest.mark.parametrize(
+    "gpus",
+    [
+        pytest.param(0),
+        pytest.param(
+            1,
+            marks=pytest.mark.skipif(
+                not torch.cuda.is_available(), reason="Test requires GPU"
+            ),
+        ),
+    ],
+)
 def test_batch_gradient_verification_callback(gpus):
     trainer = Trainer(gpus=gpus)
     model = LitModel(mix_data=True)
@@ -114,12 +127,22 @@ def test_batch_gradient_verification_callback(gpus):
         callback.on_train_start(trainer, model)
 
 
+# @patch("pl_bolts.callbacks.verification.batch_gradient.default_output_mapping")
+# @patch("pl_bolts.callbacks.verification.batch_gradient.default_input_mapping")
+# def test_default_input_output_mapping_arguments(input_mapping_mock, output_mapping_mock):
+#     model = LitModel()
+#     verification = BatchGradientVerification(model)
+#     verification.check(model.example_input_array, input_mapping=None, output_mapping=None)
+#     assert input_mapping_mock.assert_called_with(model.example_input_array)
+
 
 def test_batch_verification_raises_on_batch_size_1():
     model = TemplateModel()
     verification = BatchGradientVerification(model)
     small_batch = model.input_array[0:1]
-    with pytest.raises(MisconfigurationException, match="Batch size must be greater than 1"):
+    with pytest.raises(
+        MisconfigurationException, match="Batch size must be greater than 1"
+    ):
         verification.check(input_array=small_batch)
 
 
@@ -140,7 +163,7 @@ def test_batch_verification_calls_custom_input_output_mappings():
     verification.check(
         model.input_array,
         input_mapping=mocked_input_mapping,
-        output_mapping=mocked_output_mapping
+        output_mapping=mocked_output_mapping,
     )
     mocked_input_mapping.assert_called_once()
     mocked_output_mapping.assert_called_once()
