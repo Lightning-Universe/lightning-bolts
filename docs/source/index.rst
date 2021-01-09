@@ -78,7 +78,7 @@ PyTorch-Lightning-Bolts documentation
    :name: learning_rate_schedulers
    :caption: Learning Rate Schedulers
 
-   lr_schedulers
+   learning_rate_schedulers
 
 .. toctree::
    :maxdepth: 2
