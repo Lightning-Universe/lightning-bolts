@@ -23,7 +23,13 @@ class MLP(nn.Module):
 
 
 class SiameseArm(nn.Module):
-    def __init__(self, encoder: Optional[nn.Module] = None, input_dim: int = 2048, hidden_size: int = 4096, output_dim: int = 256) -> None:
+    def __init__(
+        self,
+        encoder: Optional[nn.Module] = None,
+        input_dim: int = 2048,
+        hidden_size: int = 4096,
+        output_dim: int = 256,
+    ) -> None:
         super().__init__()
 
         if encoder is None:

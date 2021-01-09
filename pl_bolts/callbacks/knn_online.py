@@ -57,7 +57,11 @@ class KNNOnlineEvaluator(Callback):  # pragma: no-cover
         representations = representations.reshape(representations.size(0), -1)
         return representations
 
-    def get_all_representations(self, pl_module: LightningModule, dataloader: DataLoader) -> Tuple[np.ndarray, np.ndarray]:
+    def get_all_representations(
+        self,
+        pl_module: LightningModule,
+        dataloader: DataLoader
+    ) -> Tuple[np.ndarray, np.ndarray]:
         all_representations = None
         ys = None
 

@@ -13,7 +13,6 @@ from torch.optim.optimizer import Optimizer
 from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
 from pl_bolts.models.self_supervised.simsiam.models import SiameseArm
 from pl_bolts.optimizers.lars_scheduling import LARSWrapper
-from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.transforms.dataset_normalizations import (
     cifar10_normalization,
     imagenet_normalization,
@@ -131,7 +130,7 @@ class SimSiam(pl.LightningModule):
         self.max_epochs = max_epochs
 
         self.init_model()
-        
+
         # compute iters per epoch
         global_batch_size = self.nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
@@ -152,12 +151,12 @@ class SimSiam(pl.LightningModule):
             backbone = resnet18
         elif self.arch == 'resnet50':
             backbone = resnet50
-            
+
         encoder = backbone(
             first_conv=self.first_conv, maxpool1=self.maxpool1, return_all_feature_maps=False
         )
-        self.online_network = SiameseArm(encoder, input_dim=self.hidden_mlp, 
-                                        hidden_size=self.hidden_mlp, output_dim=self.feat_dim)
+        self.online_network = SiameseArm(encoder, input_dim=self.hidden_mlp,
+                                         hidden_size=self.hidden_mlp, output_dim=self.feat_dim)
 
     def forward(self, x):
         y, _, _ = self.online_network(x)
