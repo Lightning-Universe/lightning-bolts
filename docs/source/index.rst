@@ -10,6 +10,7 @@ PyTorch-Lightning-Bolts documentation
    :name: start
    :caption: Start here
 
+   installation
    introduction_guide
    models
 
@@ -30,8 +31,8 @@ PyTorch-Lightning-Bolts documentation
    :caption: DataModules
 
    datamodules
-   sklearn_datamodule
-   vision_datamodules
+   datamodules_sklearn
+   datamodules_vision
 
 .. toctree::
    :maxdepth: 2

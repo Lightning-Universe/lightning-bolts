@@ -26,3 +26,14 @@ from pl_bolts.models.self_supervised.moco.moco2_module import MocoV2  # noqa: F4
 from pl_bolts.models.self_supervised.simclr.simclr_module import SimCLR  # noqa: F401
 from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner  # noqa: F401
 from pl_bolts.models.self_supervised.swav.swav_module import SwAV  # noqa: F401
+
+__all__ = [
+    "AMDIM",
+    "BYOL",
+    "CPCV2",
+    "SSLEvaluator",
+    "MocoV2",
+    "SimCLR",
+    "SSLFineTuner",
+    "SwAV",
+]

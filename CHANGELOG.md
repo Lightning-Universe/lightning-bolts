@@ -17,7 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `VisionDataModule` as parent class for `BinaryMNISTDataModule`, `CIFAR10DataModule`, `FashionMNISTDataModule`, 
   and `MNISTDataModule` ([#400](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/400))
 
-- Added `BatchGradientVerificationCallback` for verification of correct batched model forward pass ([#465](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/465))
+- Added GIoU loss ([#347](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/347))
+
+- Added IoU loss ([#469](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/469))
 
 ### Changed
 

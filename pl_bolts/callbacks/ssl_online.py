@@ -1,12 +1,14 @@
-from typing import Optional
+from typing import Optional, Sequence, Tuple, Union
 
 import torch
-from pytorch_lightning import Callback
+from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.metrics.functional import accuracy
+from torch import device, Tensor
 from torch.nn import functional as F
+from torch.optim import Optimizer
 
 
-class SSLOnlineEvaluator(Callback):  # pragma: no-cover
+class SSLOnlineEvaluator(Callback):  # pragma: no cover
     """
     Attaches a MLP for fine-tuning using the standard self-supervised protocol.
 
@@ -24,6 +26,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
         )
 
     """
+
     def __init__(
         self,
         dataset: str,
@@ -44,13 +47,13 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
 
         self.hidden_dim = hidden_dim
         self.drop_p = drop_p
-        self.optimizer = None
+        self.optimizer: Optimizer
 
         self.z_dim = z_dim
         self.num_classes = num_classes
         self.dataset = dataset
 
-    def on_pretrain_routine_start(self, trainer, pl_module):
+    def on_pretrain_routine_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
         from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 
         pl_module.non_linear_evaluator = SSLEvaluator(
@@ -64,12 +67,12 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
             pl_module.non_linear_evaluator.parameters(), lr=1e-4
         )
 
-    def get_representations(self, pl_module, x):
+    def get_representations(self, pl_module: LightningModule, x: Tensor) -> Tensor:
         representations = pl_module(x)
         representations = representations.reshape(representations.size(0), -1)
         return representations
 
-    def to_device(self, batch, device):
+    def to_device(self, batch: Sequence, device: Union[str, device]) -> Tuple[Tensor, Tensor]:
         # get the labeled batch
         if self.dataset == 'stl10':
             labeled_batch = batch[1]
@@ -84,7 +87,8 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
 
         return x, y
 
-    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
+    def on_train_batch_end(self, trainer: Trainer, pl_module: LightningModule, outputs: Sequence,
+                           batch: Sequence, batch_idx: int, dataloader_idx: int) -> None:
         x, y = self.to_device(batch, pl_module.device)
 
         with torch.no_grad():
@@ -93,7 +97,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
         representations = representations.detach()
 
         # forward pass
-        mlp_preds = pl_module.non_linear_evaluator(representations)
+        mlp_preds = pl_module.non_linear_evaluator(representations)  # type: ignore[operator]
         mlp_loss = F.cross_entropy(mlp_preds, y)
 
         # update finetune weights
@@ -106,7 +110,8 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
         pl_module.log('online_train_acc', train_acc, on_step=True, on_epoch=False)
         pl_module.log('online_train_loss', mlp_loss, on_step=True, on_epoch=False)
 
-    def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
+    def on_validation_batch_end(self, trainer: Trainer, pl_module: LightningModule,
+                                outputs: Sequence, batch: Sequence, batch_idx: int, dataloader_idx: int) -> None:
         x, y = self.to_device(batch, pl_module.device)
 
         with torch.no_grad():
@@ -115,7 +120,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no-cover
         representations = representations.detach()
 
         # forward pass
-        mlp_preds = pl_module.non_linear_evaluator(representations)
+        mlp_preds = pl_module.non_linear_evaluator(representations)  # type: ignore[operator]
         mlp_loss = F.cross_entropy(mlp_preds, y)
 
         # log metrics

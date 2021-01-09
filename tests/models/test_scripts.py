@@ -44,7 +44,7 @@ def test_cli_run_mnist(cli_args):
 
 
 @pytest.mark.parametrize('cli_args', [
-    f'--dataset cifar10 --data_dir {DATASETS_PATH} --max_epochs 1 --batch_size 2 --fast_dev_run',
+    f'--dataset cifar10 --data_dir {DATASETS_PATH} --max_epochs 1 --batch_size 2 --fast_dev_run 1',
 ])
 def test_cli_run_basic_ae(cli_args):
     """Test running CLI for an example with default params."""
@@ -56,7 +56,7 @@ def test_cli_run_basic_ae(cli_args):
 
 
 @pytest.mark.parametrize('cli_args', [
-    f'--dataset cifar10 --data_dir {DATASETS_PATH} --max_epochs 1 --batch_size 2 --fast_dev_run',
+    f'--dataset cifar10 --data_dir {DATASETS_PATH} --max_epochs 1 --batch_size 2 --fast_dev_run 1',
 ])
 def test_cli_run_basic_vae(cli_args):
     """Test running CLI for an example with default params."""

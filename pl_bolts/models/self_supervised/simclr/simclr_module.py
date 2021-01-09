@@ -6,7 +6,8 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-from pytorch_lightning.utilities import AMPType
+from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.core.optimizer import LightningOptimizer
 from torch import nn
 from torch.optim.optimizer import Optimizer
 
@@ -182,13 +183,16 @@ class SimCLR(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
 
+        # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
+        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
+
         self.log('train_loss', loss, on_step=True, on_epoch=False)
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
 
-        self.log('val_loss', loss, on_step=False, on_epoch=True)
+        self.log('val_loss', loss, on_step=False, on_epoch=True, sync_dist=True)
         return loss
 
     def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=['bias', 'bn']):
@@ -242,36 +246,25 @@ class SimCLR(pl.LightningModule):
 
     def optimizer_step(
         self,
-        epoch: int,
-        batch_idx: int,
-        optimizer: Optimizer,
-        optimizer_idx: int,
+        epoch: int = None,
+        batch_idx: int = None,
+        optimizer: Optimizer = None,
+        optimizer_idx: int = None,
         optimizer_closure: Optional[Callable] = None,
-        on_tpu: bool = False,
-        using_native_amp: bool = False,
-        using_lbfgs: bool = False,
+        on_tpu: bool = None,
+        using_native_amp: bool = None,
+        using_lbfgs: bool = None,
     ) -> None:
         # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
         # adjust LR of optim contained within LARSWrapper
-        if self.lars_wrapper:
-            for param_group in optimizer.optim.param_groups:
-                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
-        else:
-            for param_group in optimizer.param_groups:
-                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
-
-        # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
-        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
+        for param_group in optimizer.param_groups:
+            param_group["lr"] = self.lr_schedule[self.trainer.global_step]
 
         # from lightning
-        if self.trainer.amp_backend == AMPType.NATIVE:
-            optimizer_closure()
-            self.trainer.scaler.step(optimizer)
-        elif self.trainer.amp_backend == AMPType.APEX:
-            optimizer_closure()
-            optimizer.step()
-        else:
-            optimizer.step(closure=optimizer_closure)
+        if not isinstance(optimizer, LightningOptimizer):
+            # wraps into LightingOptimizer only for running step
+            optimizer = LightningOptimizer.to_lightning_optimizer(optimizer, self.trainer)
+        optimizer.step(closure=optimizer_closure)
 
     def nt_xent_loss(self, out_1, out_2, temperature, eps=1e-6):
         """
@@ -333,7 +326,7 @@ class SimCLR(pl.LightningModule):
         parser.add_argument("--data_dir", type=str, default=".", help="path to download data")
 
         # training params
-        parser.add_argument("--fast_dev_run", action='store_true')
+        parser.add_argument("--fast_dev_run", default=1, type=int)
         parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
         parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
@@ -465,6 +458,9 @@ def cli_main():
             dataset=args.dataset
         )
 
+    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor='val_loss')
+    callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
+
     trainer = pl.Trainer(
         max_epochs=args.max_epochs,
         max_steps=None if args.max_steps == -1 else args.max_steps,
@@ -473,7 +469,7 @@ def cli_main():
         distributed_backend='ddp' if args.gpus > 1 else None,
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=32 if args.fp32 else 16,
-        callbacks=[online_evaluator] if args.online_ft else None,
+        callbacks=callbacks,
         fast_dev_run=args.fast_dev_run
     )
 

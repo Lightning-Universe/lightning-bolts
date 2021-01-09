@@ -1,6 +1,6 @@
 import numpy as np
 
-from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils import _OPENCV_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -8,10 +8,10 @@ if _TORCHVISION_AVAILABLE:
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
 
-try:
+if _OPENCV_AVAILABLE:
     import cv2
-except ModuleNotFoundError:
-    warn_missing_pkg('cv2', pypi_name='opencv-python')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('cv2', pypi_name='opencv-python')
 
 
 class SimCLRTrainDataTransform(object):
@@ -43,8 +43,8 @@ class SimCLRTrainDataTransform(object):
         normalize=None
     ) -> None:
 
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `transforms` from `torchvision` which is not installed yet.'
             )
 
@@ -187,6 +187,11 @@ class SimCLRFinetuneTransform(object):
 class GaussianBlur(object):
     # Implements Gaussian blur as described in the SimCLR paper
     def __init__(self, kernel_size, p=0.5, min=0.1, max=2.0):
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
+                'You want to use `GaussianBlur` from `cv2` which is not installed yet.'
+            )
+
         self.min = min
         self.max = max
 
