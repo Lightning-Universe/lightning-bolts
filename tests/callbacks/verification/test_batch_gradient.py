@@ -1,6 +1,9 @@
+from unittest.mock import patch, Mock
+
 import pytest
 import torch
 from pytorch_lightning import LightningModule, Trainer
+from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import nn as nn
 
 from pl_bolts.callbacks import BatchGradientVerificationCallback
@@ -82,6 +85,7 @@ def test_batch_gradient_verification(model_class, mix_data, device):
     model = model_class(mix_data).to(device)
     is_valid = not mix_data
     verification = BatchGradientVerification(model)
+    assert verification.model == model
     result = verification.check(input_array=model.input_array)
     assert result == is_valid
 
@@ -101,6 +105,38 @@ def test_batch_gradient_verification_callback(gpus):
     callback = BatchGradientVerificationCallback(error=True)
     with pytest.raises(RuntimeError, match=expected):
         callback.on_train_start(trainer, model)
+
+
+
+def test_batch_verification_raises_on_batch_size_1():
+    model = TemplateModel()
+    verification = BatchGradientVerification(model)
+    small_batch = model.input_array[0:1]
+    with pytest.raises(MisconfigurationException, match="Batch size must be greater than 1"):
+        verification.check(input_array=small_batch)
+
+
+def test_batch_verification_calls_custom_input_output_mappings():
+    model = MultipleInputModel()
+
+    def input_mapping(inputs):
+        assert isinstance(inputs, tuple) and len(inputs) == 2
+        return [inputs[0]]
+
+    def output_mapping(outputs):
+        assert isinstance(outputs, torch.Tensor)
+        return torch.cat((outputs, outputs), 1)
+
+    mocked_input_mapping = Mock(wraps=input_mapping)
+    mocked_output_mapping = Mock(wraps=output_mapping)
+    verification = BatchGradientVerification(model)
+    verification.check(
+        model.input_array,
+        input_mapping=mocked_input_mapping,
+        output_mapping=mocked_output_mapping
+    )
+    mocked_input_mapping.assert_called_once()
+    mocked_output_mapping.assert_called_once()
 
 
 def test_default_input_mapping():
