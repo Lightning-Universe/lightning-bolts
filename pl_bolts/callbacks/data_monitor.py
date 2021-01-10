@@ -93,10 +93,7 @@ class DataMonitorBase(Callback):
             if not _WANDB_AVAILABLE:  # pragma: no cover
                 raise ModuleNotFoundError("You want to use `wandb` which is not installed yet.")
 
-            logger.experiment.log(
-                data={name: wandb.Histogram(tensor)},
-                commit=False
-            )
+            logger.experiment.log(data={name: wandb.Histogram(tensor)}, commit=False)
 
     def _is_logger_available(self, logger: LightningLoggerBase) -> bool:
         available = True

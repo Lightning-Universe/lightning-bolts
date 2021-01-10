@@ -202,7 +202,13 @@ class SimCLR(pl.LightningModule):
             else:
                 params.append(param)
 
-        return [{'params': params, 'weight_decay': weight_decay}, {'params': excluded_params, 'weight_decay': 0.,}]
+        return [{
+            'params': params,
+            'weight_decay': weight_decay
+        }, {
+            'params': excluded_params,
+            'weight_decay': 0.,
+        }]
 
     def configure_optimizers(self):
         if self.exclude_bn_bias:

@@ -71,7 +71,12 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
         self.min_logit_value = min_logit_value
 
     def on_train_batch_end(
-        self, trainer: Trainer, pl_module: LightningModule, outputs: Sequence, batch: Sequence, batch_idx: int,
+        self,
+        trainer: Trainer,
+        pl_module: LightningModule,
+        outputs: Sequence,
+        batch: Sequence,
+        batch_idx: int,
         dataloader_idx: int,
     ) -> None:
         # show images only every 20 batches

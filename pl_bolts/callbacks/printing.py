@@ -108,10 +108,7 @@ def dicts_to_table(
     marked_keys = [h + '____' if h in convert_headers else h for h in keys]  # type: ignore[union-attr]
     marked_values = {}
     s = '│'.join(f"{{{h}:{pad}{fcode}}}" for h, pad, fcode in zip_longest(marked_keys, pads, fcodes))
-    lines = [
-        headline,
-        underline
-    ]
+    lines = [headline, underline]
     for d in dicts:
         none_keys = [k for k, v in d.items() if v is None]
         if skip_none_lines and none_keys:
