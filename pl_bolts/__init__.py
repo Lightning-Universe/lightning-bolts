@@ -28,7 +28,8 @@ To add a model, you can start with the MNIST template (or any other model in the
 Please organize the functions of your lightning module.
 """
 
-PACKAGE_ROOT = os.path.dirname(__file__)
+_PACKAGE_ROOT = os.path.dirname(__file__)
+_HTTPS_AWS_HUB = "https://pl-bolts-weights.s3.us-east-2.amazonaws.com"
 
 try:
     # This variable is injected in the __builtins__ by the build process.
@@ -56,5 +57,3 @@ else:
         'transforms',
         'utils',
     ]
-
-    _HTTPS_AWS_HUB = "https://pl-bolts-weights.s3.us-east-2.amazonaws.com"
