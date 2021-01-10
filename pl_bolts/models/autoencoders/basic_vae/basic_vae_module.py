@@ -32,8 +32,8 @@ class VAE(pl.LightningModule):
     """
 
     pretrained_urls = {
-        'cifar10-resnet18': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-cifar10/checkpoints/epoch%3D89.ckpt',
-        'stl10-resnet18': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-stl10/checkpoints/epoch%3D89.ckpt'
+        'cifar10-resnet18': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-cifar10/checkpoints/epoch%3D89.ckpt',  # noqa: E501
+        'stl10-resnet18': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-stl10/checkpoints/epoch%3D89.ckpt'  # noqa: E501
     }
 
     def __init__(
