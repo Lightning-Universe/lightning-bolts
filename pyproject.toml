@@ -11,6 +11,9 @@ order_by_type = "False"
 
 [tool.black]
 line-length = 120
+skip-string-normalization = "True"
+color = "True"
+target-version = ["py38", "py36"]
 exclude = '''
 /(
     \.eggs
