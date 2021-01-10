@@ -53,6 +53,7 @@ class VanillaPolicyGradient(pl.LightningModule):
     Note:
         Currently only supports CPU and single GPU training with `distributed_backend=dp`
     """
+
     def __init__(
         self,
         env: str,
@@ -121,9 +122,7 @@ class VanillaPolicyGradient(pl.LightningModule):
         output = self.net(x)
         return output
 
-    def train_batch(
-        self,
-    ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
+    def train_batch(self, ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -230,14 +229,12 @@ class VanillaPolicyGradient(pl.LightningModule):
             "reward": self.total_rewards[-1],
             "avg_reward": self.avg_rewards,
         }
-        return OrderedDict(
-            {
-                "loss": loss,
-                "avg_reward": self.avg_rewards,
-                "log": log,
-                "progress_bar": log,
-            }
-        )
+        return OrderedDict({
+            "loss": loss,
+            "avg_reward": self.avg_rewards,
+            "log": log,
+            "progress_bar": log,
+        })
 
     def configure_optimizers(self) -> List[Optimizer]:
         """ Initialize Adam optimizer"""
@@ -304,14 +301,10 @@ def cli_main():
     model = VanillaPolicyGradient(**args.__dict__)
 
     # save checkpoints based on avg_reward
-    checkpoint_callback = ModelCheckpoint(
-        save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True
-    )
+    checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True)
 
     seed_everything(123)
-    trainer = pl.Trainer.from_argparse_args(
-        args, deterministic=True, checkpoint_callback=checkpoint_callback
-    )
+    trainer = pl.Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
     trainer.fit(model)
 
 

@@ -52,6 +52,7 @@ class Reinforce(pl.LightningModule):
     Note:
         Currently only supports CPU and single GPU training with `distributed_backend=dp`
     """
+
     def __init__(
         self,
         env: str,
@@ -162,9 +163,7 @@ class Reinforce(pl.LightningModule):
             total_reward = (self.gamma * total_reward) + exp.reward
         return total_reward
 
-    def train_batch(
-            self,
-    ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
+    def train_batch(self, ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -190,16 +189,12 @@ class Reinforce(pl.LightningModule):
                 self.batch_episodes += 1
                 self.done_episodes += 1
                 self.total_rewards.append(sum(self.cur_rewards))
-                self.avg_rewards = float(
-                    np.mean(self.total_rewards[-self.avg_reward_len:])
-                )
+                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
                 self.cur_rewards = []
                 self.state = self.env.reset()
 
             if self.batch_episodes >= self.num_batch_episodes:
-                for state, action, qval in zip(
-                        self.batch_states, self.batch_actions, self.batch_qvals
-                ):
+                for state, action, qval in zip(self.batch_states, self.batch_actions, self.batch_qvals):
                     yield state, action, qval
 
                 self.batch_episodes = 0
@@ -244,14 +239,12 @@ class Reinforce(pl.LightningModule):
             "avg_reward": self.avg_rewards,
         }
 
-        return OrderedDict(
-            {
-                "loss": loss,
-                "avg_reward": self.avg_rewards,
-                "log": log,
-                "progress_bar": log,
-            }
-        )
+        return OrderedDict({
+            "loss": loss,
+            "avg_reward": self.avg_rewards,
+            "log": log,
+            "progress_bar": log,
+        })
 
     def configure_optimizers(self) -> List[Optimizer]:
         """ Initialize Adam optimizer"""
@@ -301,7 +294,10 @@ class Reinforce(pl.LightningModule):
         )
 
         arg_parser.add_argument(
-            "--entropy_beta", type=float, default=0.01, help="entropy value",
+            "--entropy_beta",
+            type=float,
+            default=0.01,
+            help="entropy value",
         )
 
         return arg_parser
@@ -320,14 +316,10 @@ def cli_main():
     model = Reinforce(**args.__dict__)
 
     # save checkpoints based on avg_reward
-    checkpoint_callback = ModelCheckpoint(
-        save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True
-    )
+    checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True)
 
     seed_everything(123)
-    trainer = pl.Trainer.from_argparse_args(
-        args, deterministic=True, checkpoint_callback=checkpoint_callback
-    )
+    trainer = pl.Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
     trainer.fit(model)
 
 

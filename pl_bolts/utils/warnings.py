@@ -27,8 +27,10 @@ def warn_missing_pkg(
         extra_text = os.linesep + extra_text if extra_text else ''
         if not pypi_name:
             pypi_name = pkg_name
-        stdout_func(f'You want to use `{pkg_name}` which is not installed yet,'
-                    f' install it with `pip install {pypi_name}`.' + extra_text)
+        stdout_func(
+            f'You want to use `{pkg_name}` which is not installed yet,'
+            f' install it with `pip install {pypi_name}`.' + extra_text
+        )
         MISSING_PACKAGE_WARNINGS[pkg_name] = 1
     else:
         MISSING_PACKAGE_WARNINGS[pkg_name] += 1

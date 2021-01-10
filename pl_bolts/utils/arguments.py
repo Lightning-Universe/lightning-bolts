@@ -32,6 +32,7 @@ class LightningArgumentParser(ArgumentParser):
         # args.data -> data args
         # args.model -> model args
     """
+
     def __init__(self, *args: Any, ignore_required_init_args: bool = True, **kwargs: Any) -> None:
         """
         Args:
@@ -101,10 +102,10 @@ def gather_lit_args(cls: Any, root_cls: Optional[Any] = None) -> List[LitArg]:
                 try:
                     arg_types = tuple(arg_type.__args__)
                 except AttributeError:
-                    arg_types = (arg_type,)
+                    arg_types = (arg_type, )
 
                 # If type is empty, that means it hasn't been given type hint. We skip these.
-                arg_is_missing_type_hint = arg_types == (inspect.Parameter.empty,)
+                arg_is_missing_type_hint = arg_types == (inspect.Parameter.empty, )
                 # Some args should be ignored by default (self, kwargs, args)
                 arg_is_in_blacklist = arg in blacklisted_args and arg_is_missing_type_hint
                 # We only keep the first arg we see of a given name, as it overrides the parents
