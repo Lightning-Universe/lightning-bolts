@@ -94,23 +94,13 @@ def test_swav(tmpdir, datadir):
     batch_size = 2
 
     # inputs, y = batch  (doesn't receive y for some reason)
-    datamodule = CIFAR10DataModule(
-        data_dir=datadir,
-        batch_size=batch_size,
-        num_workers=0
-    )
+    datamodule = CIFAR10DataModule(data_dir=datadir, batch_size=batch_size, num_workers=0)
 
     datamodule.train_transforms = SwAVTrainDataTransform(
-        normalize=cifar10_normalization(),
-        size_crops=[32, 16],
-        nmb_crops=[2, 1],
-        gaussian_blur=False
+        normalize=cifar10_normalization(), size_crops=[32, 16], nmb_crops=[2, 1], gaussian_blur=False
     )
     datamodule.val_transforms = SwAVEvalDataTransform(
-        normalize=cifar10_normalization(),
-        size_crops=[32, 16],
-        nmb_crops=[2, 1],
-        gaussian_blur=False
+        normalize=cifar10_normalization(), size_crops=[32, 16], nmb_crops=[2, 1], gaussian_blur=False
     )
 
     model = SwAV(
@@ -129,9 +119,7 @@ def test_swav(tmpdir, datadir):
         dataset='cifar10'
     )
 
-    trainer = pl.Trainer(
-        gpus=0, fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=3
-    )
+    trainer = pl.Trainer(gpus=0, fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=3)
 
     trainer.fit(model, datamodule)
     loss = trainer.progress_bar_dict['loss']
