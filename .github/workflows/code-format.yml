@@ -8,7 +8,7 @@ on:  # Trigger the workflow on push or pull request, but only for the master bra
     branches: [master]
 
 jobs:
-  flake8:
+  pep8-check-flake8:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@master
@@ -20,9 +20,25 @@ jobs:
           pip install flake8
           pip --version
         shell: bash
-      - name: PEP8
+      - name: flake8
+        run: flake8 .
+
+  format-check-black:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
         run: |
-          flake8 .
+          pip install --upgrade pip
+          pip install black
+          pip --version
+        shell: bash
+      - name: black
+        run: |
+          black --config ./pyproject.toml --diff --check  .
 
   imports-check-isort:
     runs-on: ubuntu-20.04
