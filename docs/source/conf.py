@@ -238,8 +238,8 @@ texinfo_documents = [
     (
         master_doc, project, project + ' Documentation', author, project,
         'The lightweight PyTorch wrapper for ML researchers. Scale your models. Write less boilerplate.',
-        'Miscellaneous'
-    ),
+        'Miscellaneous',
+    )
 ]
 
 # -- Options for Epub output -------------------------------------------------
@@ -302,7 +302,7 @@ def run_apidoc(_):
     for pkg in PACKAGES:
         argv = [
             '-e', '-o', apidoc_output_folder,
-            os.path.join(PATH_ROOT, pkg), '**/test_*', '--force', '--private', '--module-first'
+            os.path.join(PATH_ROOT, pkg), '**/test_*', '--force', '--private', '--module-first',
         ]
 
         apidoc.main(argv)
