@@ -17,7 +17,7 @@ def test_vae(tmpdir, datadir, dm_cls):
         fast_dev_run=True,
         default_root_dir=tmpdir,
         max_epochs=1,
-        gpus=None
+        gpus=None,
     )
 
     result = trainer.fit(model, dm)
@@ -34,7 +34,7 @@ def test_ae(tmpdir, datadir, dm_cls):
         fast_dev_run=True,
         default_root_dir=tmpdir,
         max_epochs=1,
-        gpus=None
+        gpus=None,
     )
 
     result = trainer.fit(model, dm)
