@@ -11,14 +11,11 @@ except ModuleNotFoundError:
     warn_missing_pkg("torchvision")  # pragma: no-cover
 
 
-def create_fasterrcnn_backbone(
-    backbone: str,
-    fpn: bool = True,
-    pretrained: Optional[str] = None,
-    trainable_backbone_layers: int = 3,
-    **kwargs: Any
-) -> nn.Module:
-
+def create_fasterrcnn_backbone(backbone: str,
+                               fpn: bool = True,
+                               pretrained: Optional[str] = None,
+                               trainable_backbone_layers: int = 3,
+                               **kwargs: Any) -> nn.Module:
     """
     Args:
         backbone:
@@ -38,8 +35,7 @@ def create_fasterrcnn_backbone(
             backbone,
             pretrained=True,
             trainable_layers=trainable_backbone_layers,
-            **kwargs
-        )
+            **kwargs)
     else:
         # This does not create fpn backbone, it is supported for all models
         backbone, _ = create_torchvision_backbone(backbone, pretrained)
