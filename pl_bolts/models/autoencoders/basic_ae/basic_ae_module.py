@@ -29,7 +29,7 @@ class AE(pl.LightningModule):
     """
 
     pretrained_urls = {
-        'cifar10-resnet18': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/ae/ae-cifar10/checkpoints/epoch%3D96.ckpt'  # noqa: E501
+        'cifar10-resnet18': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/ae/ae-cifar10/checkpoints/epoch%3D96.ckpt'
     }
 
     def __init__(
