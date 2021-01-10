@@ -1,3 +1,4 @@
+import os
 from argparse import ArgumentParser
 
 import pytorch_lightning as pl
@@ -5,6 +6,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
+from pl_bolts import _HTTPS_AWS_HUB
 from pl_bolts.models.autoencoders.components import (
     resnet18_decoder,
     resnet18_encoder,
@@ -29,7 +31,7 @@ class AE(pl.LightningModule):
     """
 
     pretrained_urls = {
-        'cifar10-resnet18': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/ae/ae-cifar10/checkpoints/epoch%3D96.ckpt'
+        'cifar10-resnet18': os.payh.join(_HTTPS_AWS_HUB, 'ae/ae-cifar10/checkpoints/epoch%3D96.ckpt')
     }
 
     def __init__(
@@ -41,7 +43,7 @@ class AE(pl.LightningModule):
         enc_out_dim: int = 512,
         latent_dim: int = 256,
         lr: float = 1e-4,
-        **kwargs
+        **kwargs,
     ):
         """
         Args:

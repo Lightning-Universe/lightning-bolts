@@ -1,3 +1,4 @@
+import os
 from argparse import ArgumentParser
 
 import pytorch_lightning as pl
@@ -5,6 +6,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
+from pl_bolts import _HTTPS_AWS_HUB
 from pl_bolts.models.autoencoders.components import (
     resnet18_decoder,
     resnet18_encoder,
@@ -32,8 +34,8 @@ class VAE(pl.LightningModule):
     """
 
     pretrained_urls = {
-        'cifar10-resnet18': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-cifar10/checkpoints/epoch%3D89.ckpt',
-        'stl10-resnet18': 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/vae-stl10/checkpoints/epoch%3D89.ckpt'
+        'cifar10-resnet18': os.path.join(_HTTPS_AWS_HUB, 'vae/vae-cifar10/checkpoints/epoch%3D89.ckpt'),
+        'stl10-resnet18': os.path.join(_HTTPS_AWS_HUB, 'vae/vae-stl10/checkpoints/epoch%3D89.ckpt'),
     }
 
     def __init__(

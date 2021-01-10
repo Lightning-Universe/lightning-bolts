@@ -56,3 +56,5 @@ else:
         'transforms',
         'utils',
     ]
+
+    _HTTPS_AWS_HUB = "https://pl-bolts-weights.s3.us-east-2.amazonaws.com"
