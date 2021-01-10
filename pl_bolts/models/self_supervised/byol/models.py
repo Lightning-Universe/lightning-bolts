@@ -11,7 +11,7 @@ class MLP(nn.Module):
         self.input_dim = input_dim
         self.model = nn.Sequential(
             nn.Linear(input_dim, hidden_size, bias=False), nn.BatchNorm1d(hidden_size), nn.ReLU(inplace=True),
-            nn.Linear(hidden_size, output_dim, bias=True)
+            nn.Linear(hidden_size, output_dim, bias=True),
         )
 
     def forward(self, x):

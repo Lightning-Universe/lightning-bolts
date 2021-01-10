@@ -110,7 +110,7 @@ def dicts_to_table(
     s = '│'.join(f"{{{h}:{pad}{fcode}}}" for h, pad, fcode in zip_longest(marked_keys, pads, fcodes))
     lines = [
         headline,
-        underline,
+        underline
     ]
     for d in dicts:
         none_keys = [k for k, v in d.items() if v is None]

@@ -47,7 +47,7 @@ def double_dqn_loss(
     batch: Tuple[torch.Tensor, torch.Tensor],
     net: nn.Module,
     target_net: nn.Module,
-    gamma: float = 0.99
+    gamma: float = 0.99,
 ) -> torch.Tensor:
     """
     Calculates the mse loss using a mini batch from the replay buffer. This uses an improvement to the original
@@ -94,7 +94,7 @@ def per_dqn_loss(
     batch_weights: List,
     net: nn.Module,
     target_net: nn.Module,
-    gamma: float = 0.99
+    gamma: float = 0.99,
 ) -> Tuple[torch.Tensor, np.ndarray]:
     """
     Calculates the mse loss with the priority weights of the batch from the PER buffer

@@ -87,7 +87,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
 
     def on_train_batch_end(
         self, trainer: Trainer, pl_module: LightningModule, outputs: Sequence, batch: Sequence, batch_idx: int,
-        dataloader_idx: int
+        dataloader_idx: int,
     ) -> None:
         x, y = self.to_device(batch, pl_module.device)
 
@@ -112,7 +112,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
 
     def on_validation_batch_end(
         self, trainer: Trainer, pl_module: LightningModule, outputs: Sequence, batch: Sequence, batch_idx: int,
-        dataloader_idx: int
+        dataloader_idx: int,
     ) -> None:
         x, y = self.to_device(batch, pl_module.device)
 

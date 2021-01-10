@@ -144,7 +144,7 @@ class SimCLRFinetuneTransform(object):
 
         self.color_jitter = transforms.ColorJitter(
             0.8 * self.jitter_strength, 0.8 * self.jitter_strength, 0.8 * self.jitter_strength,
-            0.2 * self.jitter_strength
+            0.2 * self.jitter_strength,
         )
 
         if not eval_transform:

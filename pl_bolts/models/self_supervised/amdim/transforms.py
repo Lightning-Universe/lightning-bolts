@@ -40,7 +40,7 @@ class AMDIMTrainTransformsCIFAR10:
 
         # image augmentation functions
         normalize = transforms.Normalize(
-            mean=[x / 255.0 for x in [125.3, 123.0, 113.9]], std=[x / 255.0 for x in [63.0, 62.1, 66.7]]
+            mean=[x / 255.0 for x in [125.3, 123.0, 113.9]], std=[x / 255.0 for x in [63.0, 62.1, 66.7]],
         )
         col_jitter = transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.2)], p=0.8)
         img_jitter = transforms.RandomApply([RandomTranslateWithReflect(4)], p=0.8)
@@ -79,7 +79,7 @@ class AMDIMEvalTransformsCIFAR10:
         # flipping image along vertical axis
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
         normalize = transforms.Normalize(
-            mean=[x / 255.0 for x in [125.3, 123.0, 113.9]], std=[x / 255.0 for x in [63.0, 62.1, 66.7]]
+            mean=[x / 255.0 for x in [125.3, 123.0, 113.9]], std=[x / 255.0 for x in [63.0, 62.1, 66.7]],
         )
 
         # transform for testing

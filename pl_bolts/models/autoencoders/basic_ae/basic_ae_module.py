@@ -68,11 +68,11 @@ class AE(pl.LightningModule):
         valid_encoders = {
             'resnet18': {
                 'enc': resnet18_encoder,
-                'dec': resnet18_decoder
+                'dec': resnet18_decoder,
             },
             'resnet50': {
                 'enc': resnet50_encoder,
-                'dec': resnet50_decoder
+                'dec': resnet50_decoder,
             },
         }
 

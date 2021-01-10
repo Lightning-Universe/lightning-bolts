@@ -72,7 +72,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
 
     def on_train_batch_end(
         self, trainer: Trainer, pl_module: LightningModule, outputs: Sequence, batch: Sequence, batch_idx: int,
-        dataloader_idx: int
+        dataloader_idx: int,
     ) -> None:
         # show images only every 20 batches
         if (trainer.batch_idx + 1) % self.logging_batch_interval != 0:  # type: ignore[attr-defined]

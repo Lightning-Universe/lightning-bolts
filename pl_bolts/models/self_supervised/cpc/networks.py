@@ -31,7 +31,7 @@ class CPCResNet(nn.Module):
             replace_stride_with_dilation = [False, False, False]
         if len(replace_stride_with_dilation) != 3:
             raise ValueError(
-                "replace_stride_with_dilation should be None"
+                "`replace_stride_with_dilation` should be None"
                 f" or a 3-element tuple, got {replace_stride_with_dilation}"
             )
         self.groups = groups

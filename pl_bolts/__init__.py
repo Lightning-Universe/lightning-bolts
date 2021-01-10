@@ -46,5 +46,5 @@ else:
     from pl_bolts import callbacks, datamodules, datasets, losses, metrics, models, optimizers, transforms, utils
 
     __all__ = [
-        'callbacks', 'datamodules', 'datasets', 'losses', 'metrics', 'models', 'optimizers', 'transforms', 'utils'
+        'callbacks', 'datamodules', 'datasets', 'losses', 'metrics', 'models', 'optimizers', 'transforms', 'utils',
     ]

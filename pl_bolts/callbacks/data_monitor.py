@@ -95,7 +95,7 @@ class DataMonitorBase(Callback):
 
             logger.experiment.log(
                 data={name: wandb.Histogram(tensor)},
-                commit=False,
+                commit=False
             )
 
     def _is_logger_available(self, logger: LightningLoggerBase) -> bool:
