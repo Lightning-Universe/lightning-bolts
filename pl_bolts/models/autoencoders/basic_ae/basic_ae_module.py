@@ -31,7 +31,7 @@ class AE(pl.LightningModule):
     """
 
     pretrained_urls = {
-        'cifar10-resnet18': os.path.join(_HTTPS_AWS_HUB, 'ae/ae-cifar10/checkpoints/epoch%3D96.ckpt')
+        'cifar10-resnet18': os.path.join(_HTTPS_AWS_HUB, 'ae/ae-cifar10/checkpoints/epoch%3D96.ckpt'),
     }
 
     def __init__(
