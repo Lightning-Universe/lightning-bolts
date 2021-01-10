@@ -17,7 +17,6 @@ import builtins
 import glob
 import inspect
 import os
-import re
 import shutil
 import sys
 
