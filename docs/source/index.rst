@@ -110,7 +110,6 @@ Indices and tables
 .. toctree::
    :hidden:
 
-   readme
    api/pl_bolts.callbacks
    api/pl_bolts.datamodules
    api/pl_bolts.datasets
