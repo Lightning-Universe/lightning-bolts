@@ -234,13 +234,15 @@ man_pages = [(master_doc, project, project + ' Documentation', [author], 1)]
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
-texinfo_documents = [
-    (
-        master_doc, project, project + ' Documentation', author, project,
-        'The lightweight PyTorch wrapper for ML researchers. Scale your models. Write less boilerplate.',
-        'Miscellaneous',
-    )
-]
+texinfo_documents = [(
+    master_doc,
+    project,
+    project + ' Documentation',
+    author,
+    project,
+    'The lightweight PyTorch wrapper for ML researchers. Scale your models. Write less boilerplate.',
+    'Miscellaneous',
+)]
 
 # -- Options for Epub output -------------------------------------------------
 
@@ -301,8 +303,14 @@ def run_apidoc(_):
 
     for pkg in PACKAGES:
         argv = [
-            '-e', '-o', apidoc_output_folder,
-            os.path.join(PATH_ROOT, pkg), '**/test_*', '--force', '--private', '--module-first',
+            '-e',
+            '-o',
+            apidoc_output_folder,
+            os.path.join(PATH_ROOT, pkg),
+            '**/test_*',
+            '--force',
+            '--private',
+            '--module-first',
         ]
 
         apidoc.main(argv)
