@@ -80,8 +80,7 @@ class FasterRCNN(pl.LightningModule):
             )
 
             in_features = self.model.roi_heads.box_predictor.cls_score.in_features
-            self.model.roi_heads.box_predictor = FastRCNNPredictor(
-                in_features, self.num_classes)
+            self.model.roi_heads.box_predictor = FastRCNNPredictor(in_features, self.num_classes)
 
         else:
             backbone_model = create_fasterrcnn_backbone(
@@ -91,9 +90,7 @@ class FasterRCNN(pl.LightningModule):
                 trainable_backbone_layers,
                 **kwargs,
             )
-            self.model = torchvision_FasterRCNN(backbone_model,
-                                                num_classes=num_classes,
-                                                **kwargs)
+            self.model = torchvision_FasterRCNN(backbone_model, num_classes=num_classes, **kwargs)
 
     def forward(self, x):
         self.model.eval()
@@ -113,8 +110,7 @@ class FasterRCNN(pl.LightningModule):
         images, targets = batch
         # fasterrcnn takes only images for eval() mode
         outs = self.model(images)
-        iou = torch.stack([_evaluate_iou(t, o)
-                           for t, o in zip(targets, outs)]).mean()
+        iou = torch.stack([_evaluate_iou(t, o) for t, o in zip(targets, outs)]).mean()
         return {"val_iou": iou}
 
     def validation_epoch_end(self, outs):
