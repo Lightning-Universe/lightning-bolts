@@ -14,6 +14,7 @@ else:
 
 
 class BinaryMNIST(MNIST):
+
     def __getitem__(self, idx):
         """
         Args:

@@ -62,16 +62,19 @@ class BYOL(pl.LightningModule):
             --meta_dir /path/to/folder/with/meta.bin/
             --batch_size 32
     """
-    def __init__(self,
-                 num_classes,
-                 learning_rate: float = 0.2,
-                 weight_decay: float = 1.5e-6,
-                 input_height: int = 32,
-                 batch_size: int = 32,
-                 num_workers: int = 0,
-                 warmup_epochs: int = 10,
-                 max_epochs: int = 1000,
-                 **kwargs):
+
+    def __init__(
+        self,
+        num_classes,
+        learning_rate: float = 0.2,
+        weight_decay: float = 1.5e-6,
+        input_height: int = 32,
+        batch_size: int = 32,
+        num_workers: int = 0,
+        warmup_epochs: int = 10,
+        max_epochs: int = 1000,
+        **kwargs
+    ):
         """
         Args:
             datamodule: The datamodule
@@ -105,14 +108,14 @@ class BYOL(pl.LightningModule):
         y1, z1, h1 = self.online_network(img_1)
         with torch.no_grad():
             y2, z2, h2 = self.target_network(img_2)
-        loss_a = - 2 * F.cosine_similarity(h1, z2).mean()
+        loss_a = -2 * F.cosine_similarity(h1, z2).mean()
 
         # Image 2 to image 1 loss
         y1, z1, h1 = self.online_network(img_2)
         with torch.no_grad():
             y2, z2, h2 = self.target_network(img_1)
         # L2 normalize
-        loss_b = - 2 * F.cosine_similarity(h1, z2).mean()
+        loss_b = -2 * F.cosine_similarity(h1, z2).mean()
 
         # Final loss
         total_loss = loss_a + loss_b
@@ -139,9 +142,7 @@ class BYOL(pl.LightningModule):
         optimizer = Adam(self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
         optimizer = LARSWrapper(optimizer)
         scheduler = LinearWarmupCosineAnnealingLR(
-            optimizer,
-            warmup_epochs=self.hparams.warmup_epochs,
-            max_epochs=self.hparams.max_epochs
+            optimizer, warmup_epochs=self.hparams.warmup_epochs, max_epochs=self.hparams.max_epochs
         )
         return [optimizer], [scheduler]
 

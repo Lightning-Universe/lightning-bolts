@@ -129,23 +129,24 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
+
     def __init__(
-            self,
-            block,
-            layers,
-            zero_init_residual=False,
-            groups=1,
-            widen=1,
-            width_per_group=64,
-            replace_stride_with_dilation=None,
-            norm_layer=None,
-            normalize=False,
-            output_dim=0,
-            hidden_mlp=0,
-            nmb_prototypes=0,
-            eval_mode=False,
-            first_conv=True,
-            maxpool1=True
+        self,
+        block,
+        layers,
+        zero_init_residual=False,
+        groups=1,
+        widen=1,
+        width_per_group=64,
+        replace_stride_with_dilation=None,
+        norm_layer=None,
+        normalize=False,
+        output_dim=0,
+        hidden_mlp=0,
+        nmb_prototypes=0,
+        eval_mode=False,
+        first_conv=True,
+        maxpool1=True
     ):
         super(ResNet, self).__init__()
         if norm_layer is None:
@@ -173,13 +174,9 @@ class ResNet(nn.Module):
         num_out_filters = width_per_group * widen
 
         if first_conv:
-            self.conv1 = nn.Conv2d(
-                3, num_out_filters, kernel_size=7, stride=2, padding=2, bias=False
-            )
+            self.conv1 = nn.Conv2d(3, num_out_filters, kernel_size=7, stride=2, padding=2, bias=False)
         else:
-            self.conv1 = nn.Conv2d(
-                3, num_out_filters, kernel_size=3, stride=1, padding=1, bias=False
-            )
+            self.conv1 = nn.Conv2d(3, num_out_filters, kernel_size=3, stride=1, padding=1, bias=False)
 
         self.bn1 = norm_layer(num_out_filters)
         self.relu = nn.ReLU(inplace=True)
@@ -319,13 +316,15 @@ class ResNet(nn.Module):
     def forward(self, inputs):
         if not isinstance(inputs, list):
             inputs = [inputs]
-        idx_crops = torch.cumsum(torch.unique_consecutive(
-            torch.tensor([inp.shape[-1] for inp in inputs]),
-            return_counts=True,
-        )[1], 0)
+        idx_crops = torch.cumsum(
+            torch.unique_consecutive(
+                torch.tensor([inp.shape[-1] for inp in inputs]),
+                return_counts=True,
+            )[1], 0
+        )
         start_idx = 0
         for end_idx in idx_crops:
-            _out = torch.cat(inputs[start_idx: end_idx])
+            _out = torch.cat(inputs[start_idx:end_idx])
 
             if 'cuda' in str(self.conv1.weight.device):
                 _out = self.forward_backbone(_out.cuda(non_blocking=True))
@@ -341,6 +340,7 @@ class ResNet(nn.Module):
 
 
 class MultiPrototypes(nn.Module):
+
     def __init__(self, output_dim, nmb_prototypes):
         super(MultiPrototypes, self).__init__()
         self.nmb_heads = len(nmb_prototypes)

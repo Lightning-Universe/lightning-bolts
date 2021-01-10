@@ -35,18 +35,13 @@ class SimCLRTrainDataTransform(object):
         x = sample()
         (xi, xj) = transform(x)
     """
+
     def __init__(
-        self,
-        input_height: int = 224,
-        gaussian_blur: bool = True,
-        jitter_strength: float = 1.,
-        normalize=None
+        self, input_height: int = 224, gaussian_blur: bool = True, jitter_strength: float = 1., normalize=None
     ) -> None:
 
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError(
-                'You want to use `transforms` from `torchvision` which is not installed yet.'
-            )
+            raise ModuleNotFoundError('You want to use `transforms` from `torchvision` which is not installed yet.')
 
         self.jitter_strength = jitter_strength
         self.input_height = input_height
@@ -54,9 +49,7 @@ class SimCLRTrainDataTransform(object):
         self.normalize = normalize
 
         self.color_jitter = transforms.ColorJitter(
-            0.8 * self.jitter_strength,
-            0.8 * self.jitter_strength,
-            0.8 * self.jitter_strength,
+            0.8 * self.jitter_strength, 0.8 * self.jitter_strength, 0.8 * self.jitter_strength,
             0.2 * self.jitter_strength
         )
 
@@ -86,8 +79,7 @@ class SimCLRTrainDataTransform(object):
         # add online train transform of the size of global view
         self.online_transform = transforms.Compose([
             transforms.RandomResizedCrop(self.input_height),
-            transforms.RandomHorizontalFlip(),
-            self.final_transform
+            transforms.RandomHorizontalFlip(), self.final_transform
         ])
 
     def __call__(self, sample):
@@ -117,12 +109,9 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
         x = sample()
         (xi, xj) = transform(x)
     """
+
     def __init__(
-        self,
-        input_height: int = 224,
-        gaussian_blur: bool = True,
-        jitter_strength: float = 1.,
-        normalize=None
+        self, input_height: int = 224, gaussian_blur: bool = True, jitter_strength: float = 1., normalize=None
     ):
         super().__init__(
             normalize=normalize,
@@ -140,6 +129,7 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
 
 
 class SimCLRFinetuneTransform(object):
+
     def __init__(
         self,
         input_height: int = 224,
@@ -153,9 +143,7 @@ class SimCLRFinetuneTransform(object):
         self.normalize = normalize
 
         self.color_jitter = transforms.ColorJitter(
-            0.8 * self.jitter_strength,
-            0.8 * self.jitter_strength,
-            0.8 * self.jitter_strength,
+            0.8 * self.jitter_strength, 0.8 * self.jitter_strength, 0.8 * self.jitter_strength,
             0.2 * self.jitter_strength
         )
 
@@ -188,9 +176,7 @@ class GaussianBlur(object):
     # Implements Gaussian blur as described in the SimCLR paper
     def __init__(self, kernel_size, p=0.5, min=0.1, max=2.0):
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError(
-                'You want to use `GaussianBlur` from `cv2` which is not installed yet.'
-            )
+            raise ModuleNotFoundError('You want to use `GaussianBlur` from `cv2` which is not installed yet.')
 
         self.min = min
         self.max = max

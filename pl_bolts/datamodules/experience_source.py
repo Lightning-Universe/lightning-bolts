@@ -18,10 +18,7 @@ else:  # pragma: no cover
     warn_missing_pkg("gym")
     Env = object
 
-
-Experience = namedtuple(
-    "Experience", field_names=["state", "action", "reward", "done", "new_state"]
-)
+Experience = namedtuple("Experience", field_names=["state", "action", "reward", "done", "new_state"])
 
 
 class ExperienceSourceDataset(IterableDataset):
@@ -263,8 +260,13 @@ class DiscountedExperienceSource(ExperienceSource):
 
             total_reward = self.discount_rewards(tail_experiences)
 
-            yield Experience(state=experiences[0].state, action=experiences[0].action,
-                             reward=total_reward, done=experiences[0].done, new_state=last_exp_state)
+            yield Experience(
+                state=experiences[0].state,
+                action=experiences[0].action,
+                reward=total_reward,
+                done=experiences[0].done,
+                new_state=last_exp_state
+            )
 
     def split_head_tail_exp(self, experiences: Tuple[Experience]) -> Tuple[List, Tuple[Experience]]:
         """

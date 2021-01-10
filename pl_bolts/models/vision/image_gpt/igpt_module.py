@@ -96,6 +96,7 @@ class ImageGPT(pl.LightningModule):
         cd pl_bolts/models/vision/image_gpt
         python igpt_module.py --learning_rate 1e-2 --batch_size 32 --gpus 4
     """
+
     def __init__(
         self,
         embed_dim: int = 16,

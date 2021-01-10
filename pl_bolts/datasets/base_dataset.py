@@ -27,12 +27,8 @@ class LightDataset(ABC, Dataset):
         return os.path.join(self.dir_path, self.DATASET_NAME, self.cache_folder_name)
 
     @staticmethod
-    def _prepare_subset(
-            full_data: torch.Tensor,
-            full_targets: torch.Tensor,
-            num_samples: int,
-            labels: Sequence
-    ) -> Tuple[Tensor, Tensor]:
+    def _prepare_subset(full_data: torch.Tensor, full_targets: torch.Tensor, num_samples: int,
+                        labels: Sequence) -> Tuple[Tensor, Tensor]:
         """Prepare a subset of a common dataset."""
         classes = {d: 0 for d in labels}
         indexes = []

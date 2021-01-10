@@ -48,12 +48,12 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
     """
 
     def __init__(
-            self,
-            top_k: int,
-            projection_factor: int = 3,
-            min_logit_value: float = 5.0,
-            logging_batch_interval: int = 20,
-            max_logit_difference: float = 0.1
+        self,
+        top_k: int,
+        projection_factor: int = 3,
+        min_logit_value: float = 5.0,
+        logging_batch_interval: int = 20,
+        max_logit_difference: float = 0.1
     ):
         """
         Args:
@@ -71,13 +71,8 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
         self.min_logit_value = min_logit_value
 
     def on_train_batch_end(
-            self,
-            trainer: Trainer,
-            pl_module: LightningModule,
-            outputs: Sequence,
-            batch: Sequence,
-            batch_idx: int,
-            dataloader_idx: int
+        self, trainer: Trainer, pl_module: LightningModule, outputs: Sequence, batch: Sequence, batch_idx: int,
+        dataloader_idx: int
     ) -> None:
         # show images only every 20 batches
         if (trainer.batch_idx + 1) % self.logging_batch_interval != 0:  # type: ignore[attr-defined]
@@ -115,12 +110,12 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
                 pl_module.train()
 
     def _plot(
-            self,
-            confusing_x: Tensor,
-            confusing_y: Tensor,
-            trainer: Trainer,
-            model: LightningModule,
-            mask_idxs: Tensor,
+        self,
+        confusing_x: Tensor,
+        confusing_y: Tensor,
+        trainer: Trainer,
+        model: LightningModule,
+        mask_idxs: Tensor,
     ) -> None:
         if not _MATPLOTLIB_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover

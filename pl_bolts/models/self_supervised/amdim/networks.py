@@ -7,8 +7,17 @@ from torch import nn
 
 
 class AMDIMEncoder(nn.Module):
-    def __init__(self, dummy_batch, num_channels=3, encoder_feature_dim=64, embedding_fx_dim=512,
-                 conv_block_depth=3, encoder_size=32, use_bn=False):
+
+    def __init__(
+        self,
+        dummy_batch,
+        num_channels=3,
+        encoder_feature_dim=64,
+        embedding_fx_dim=512,
+        conv_block_depth=3,
+        encoder_size=32,
+        use_bn=False
+    ):
         super().__init__()
         # NDF = encoder hidden feat size
         # RKHS = output dim
@@ -62,12 +71,7 @@ class AMDIMEncoder(nn.Module):
             ])
         else:
             raise RuntimeError(f"Could not build encoder. Encoder size {encoder_size} is not supported")
-        self._config_modules(
-            dummy_batch,
-            output_widths=[1, 5, 7],
-            n_rkhs=n_rkhs,
-            use_bn=use_bn
-        )
+        self._config_modules(dummy_batch, output_widths=[1, 5, 7], n_rkhs=n_rkhs, use_bn=use_bn)
 
     def init_weights(self, init_scale=1.):
         """
@@ -144,14 +148,13 @@ class AMDIMEncoder(nn.Module):
 
 
 class Conv3x3(nn.Module):
-    def __init__(self, n_in, n_out, n_kern, n_stride, n_pad,
-                 use_bn=True, pad_mode='constant'):
+
+    def __init__(self, n_in, n_out, n_kern, n_stride, n_pad, use_bn=True, pad_mode='constant'):
         super(Conv3x3, self).__init__()
         assert (pad_mode in ['constant', 'reflect'])
         self.n_pad = (n_pad, n_pad, n_pad, n_pad)
         self.pad_mode = pad_mode
-        self.conv = nn.Conv2d(n_in, n_out, n_kern, n_stride, 0,
-                              bias=(not use_bn))
+        self.conv = nn.Conv2d(n_in, n_out, n_kern, n_stride, 0, bias=(not use_bn))
         self.relu = nn.ReLU(inplace=True)
         self.bn = MaybeBatchNorm2d(n_out, True, use_bn)
 
@@ -169,6 +172,7 @@ class Conv3x3(nn.Module):
 
 
 class ConvResBlock(nn.Module):
+
     def __init__(self, n_in, n_out, width, stride, pad, depth, use_bn):
         super(ConvResBlock, self).__init__()
         layer_list = [ConvResNxN(n_in, n_out, width, stride, pad, use_bn)]
@@ -190,6 +194,7 @@ class ConvResBlock(nn.Module):
 
 
 class ConvResNxN(nn.Module):
+
     def __init__(self, n_in, n_out, width, stride, pad, use_bn=False):
         super(ConvResNxN, self).__init__()
         self.n_in = n_in
@@ -234,6 +239,7 @@ class ConvResNxN(nn.Module):
 
 
 class MaybeBatchNorm2d(nn.Module):
+
     def __init__(self, n_ftr, affine, use_bn):
         super(MaybeBatchNorm2d, self).__init__()
         self.bn = nn.BatchNorm2d(n_ftr, affine=affine)
@@ -246,30 +252,29 @@ class MaybeBatchNorm2d(nn.Module):
 
 
 class NopNet(nn.Module):
+
     def __init__(self, norm_dim=None):
         super(NopNet, self).__init__()
         self.norm_dim = norm_dim
 
     def forward(self, x):
         if self.norm_dim is not None:
-            x_norms = torch.sum(x ** 2., dim=self.norm_dim, keepdim=True)
+            x_norms = torch.sum(x**2., dim=self.norm_dim, keepdim=True)
             x_norms = torch.sqrt(x_norms + 1e-6)
             x = x / x_norms
         return x
 
 
 class FakeRKHSConvNet(nn.Module):
+
     def __init__(self, n_input, n_output, use_bn=False):
         super(FakeRKHSConvNet, self).__init__()
-        self.conv1 = nn.Conv2d(n_input, n_output, kernel_size=1, stride=1,
-                               padding=0, bias=False)
+        self.conv1 = nn.Conv2d(n_input, n_output, kernel_size=1, stride=1, padding=0, bias=False)
         self.bn1 = MaybeBatchNorm2d(n_output, True, use_bn)
         self.relu1 = nn.ReLU(inplace=True)
-        self.conv2 = nn.Conv2d(n_output, n_output, kernel_size=1, stride=1,
-                               padding=0, bias=False)
+        self.conv2 = nn.Conv2d(n_output, n_output, kernel_size=1, stride=1, padding=0, bias=False)
         self.bn_out = MaybeBatchNorm2d(n_output, True, True)
-        self.shortcut = nn.Conv2d(n_input, n_output, kernel_size=1,
-                                  stride=1, padding=0, bias=True)
+        self.shortcut = nn.Conv2d(n_input, n_output, kernel_size=1, stride=1, padding=0, bias=True)
         # when possible, initialize shortcut to be like identity
         if n_output >= n_input:
             eye_mask = np.zeros((n_output, n_input, 1, 1), dtype=np.bool)

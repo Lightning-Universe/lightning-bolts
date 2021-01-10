@@ -45,9 +45,7 @@ class PERDQN(DQN):
 
         """
 
-    def train_batch(
-        self,
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def train_batch(self, ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -82,9 +80,7 @@ class PERDQN(DQN):
                 self.done_episodes += 1
                 self.total_rewards.append(episode_reward)
                 self.total_episode_steps.append(episode_steps)
-                self.avg_rewards = float(
-                    np.mean(self.total_rewards[-self.avg_reward_len:])
-                )
+                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
                 self.state = self.env.reset()
                 episode_steps = 0
                 episode_reward = 0
@@ -137,12 +133,10 @@ class PERDQN(DQN):
             # "episodes": self.total_episode_steps,
         })
 
-        return OrderedDict(
-            {
-                "loss": loss,
-                "avg_reward": self.avg_rewards,
-            }
-        )
+        return OrderedDict({
+            "loss": loss,
+            "avg_reward": self.avg_rewards,
+        })
 
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""

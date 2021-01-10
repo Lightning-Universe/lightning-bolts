@@ -147,13 +147,9 @@ class DQN(pl.LightningModule):
         self.avg_reward_len = avg_reward_len
 
         for _ in range(avg_reward_len):
-            self.total_rewards.append(
-                torch.tensor(min_episode_reward, device=self.device)
-            )
+            self.total_rewards.append(torch.tensor(min_episode_reward, device=self.device))
 
-        self.avg_rewards = float(
-            np.mean(self.total_rewards[-self.avg_reward_len:])
-        )
+        self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
 
         self.state = self.env.reset()
 
@@ -218,9 +214,7 @@ class DQN(pl.LightningModule):
         output = self.net(x)
         return output
 
-    def train_batch(
-        self,
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def train_batch(self, ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -249,9 +243,7 @@ class DQN(pl.LightningModule):
                 self.done_episodes += 1
                 self.total_rewards.append(episode_reward)
                 self.total_episode_steps.append(episode_steps)
-                self.avg_rewards = float(
-                    np.mean(self.total_rewards[-self.avg_reward_len:])
-                )
+                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
                 self.state = self.env.reset()
                 episode_steps = 0
                 episode_reward = 0
@@ -296,12 +288,10 @@ class DQN(pl.LightningModule):
             "episode_steps": self.total_episode_steps[-1]
         })
 
-        return OrderedDict(
-            {
-                "loss": loss,
-                "avg_reward": self.avg_rewards,
-            }
-        )
+        return OrderedDict({
+            "loss": loss,
+            "avg_reward": self.avg_rewards,
+        })
 
     def test_step(self, *args, **kwargs) -> Dict[str, torch.Tensor]:
         """Evaluate the agent for 10 episodes"""
@@ -357,9 +347,7 @@ class DQN(pl.LightningModule):
         return env
 
     @staticmethod
-    def add_model_specific_args(
-        arg_parser: argparse.ArgumentParser,
-    ) -> argparse.ArgumentParser:
+    def add_model_specific_args(arg_parser: argparse.ArgumentParser, ) -> argparse.ArgumentParser:
         """
         Adds arguments for DQN model
 
@@ -431,13 +419,10 @@ def cli_main():
     model = DQN(**args.__dict__)
 
     # save checkpoints based on avg_reward
-    checkpoint_callback = ModelCheckpoint(
-        save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True
-    )
+    checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True)
 
     seed_everything(123)
-    trainer = pl.Trainer.from_argparse_args(
-        args, deterministic=True, checkpoint_callback=checkpoint_callback)
+    trainer = pl.Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
 
     trainer.fit(model)
 
