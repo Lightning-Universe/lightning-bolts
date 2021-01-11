@@ -1,6 +1,6 @@
-from pl_bolts.utils.warnings import warn_missing_pkg
+from pl_bolts.utils.warnings import warn_missing_pkg, _TORCHVISION_AVAILABLE
 
-try:
+if _TORCHVISION_AVAILABLE:
     import torchvision
 
     TORCHVISION_MODEL_ZOO = {
@@ -22,6 +22,6 @@ try:
         "mobilenet_v2": torchvision.models.mobilenet_v2,
     }
 
-except ModuleNotFoundError:  # pragma: no-cover
+else:  # pragma: no-cover
     warn_missing_pkg("torchvision")
     TORCHVISION_MODEL_ZOO = {}

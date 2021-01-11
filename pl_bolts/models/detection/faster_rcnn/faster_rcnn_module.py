@@ -4,15 +4,15 @@ from typing import Any, Optional
 import pytorch_lightning as pl
 import torch
 
-from pl_bolts.utils.warnings import warn_missing_pkg
+from pl_bolts.utils.warnings import warn_missing_pkg, _TORCHVISION_AVAILABLE
 
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
     from torchvision.models.detection.faster_rcnn import fasterrcnn_resnet50_fpn, FastRCNNPredictor
     from torchvision.ops import box_iou
 
     from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
-except ModuleNotFoundError:
+else:
     warn_missing_pkg("torchvision")  # pragma: no-cover
 
 

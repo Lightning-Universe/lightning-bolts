@@ -3,11 +3,11 @@ from typing import Any, Optional
 import torch.nn as nn
 
 from pl_bolts.models.detection.components import create_torchvision_backbone
-from pl_bolts.utils.warnings import warn_missing_pkg
+from pl_bolts.utils.warnings import warn_missing_pkg, _TORCHVISION_AVAILABLE
 
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
-except ModuleNotFoundError:
+else:
     warn_missing_pkg("torchvision")  # pragma: no-cover
 
 
