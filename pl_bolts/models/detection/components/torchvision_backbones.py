@@ -2,7 +2,7 @@ from typing import Optional, Tuple
 
 import torch.nn as nn
 
-from pl_bolts.utils.warnings import warn_missing_pkg, _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import _TORCHVISION_AVAILABLE, warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from pl_bolts.models.detection.components._supported_models import TORCHVISION_MODEL_ZOO

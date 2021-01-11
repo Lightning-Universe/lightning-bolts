@@ -1,4 +1,4 @@
-from pl_bolts.utils.warnings import warn_missing_pkg, _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import _TORCHVISION_AVAILABLE, warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     import torchvision
