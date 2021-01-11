@@ -4,7 +4,8 @@ from typing import Any, Optional
 import pytorch_lightning as pl
 import torch
 
-from pl_bolts.utils.warnings import _TORCHVISION_AVAILABLE, warn_missing_pkg
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
