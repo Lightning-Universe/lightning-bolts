@@ -301,8 +301,5 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         return loader
 
     def _default_transforms(self) -> Compose:
-        data_transforms = transform_lib.Compose([
-            transform_lib.ToTensor(),
-            stl10_normalization()
-        ])
+        data_transforms = transform_lib.Compose([transform_lib.ToTensor(), stl10_normalization()])
         return data_transforms
