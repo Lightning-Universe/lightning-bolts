@@ -23,15 +23,15 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
 
     def __init__(
         self,
-        data_dir,
-        meta_dir=None,
+        data_dir: str,
+        meta_dir: Optional[str] = None,
         num_workers=16,
         batch_size: int = 32,
         shuffle: bool = False,
         pin_memory: bool = False,
         drop_last: bool = False,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
 

@@ -60,8 +60,8 @@ class ImagenetDataModule(LightningDataModule):
         shuffle: bool = False,
         pin_memory: bool = False,
         drop_last: bool = False,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """
         Args:
