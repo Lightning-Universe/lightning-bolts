@@ -8,8 +8,9 @@ from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 try:
     from sklearn.utils import shuffle as sk_shuffle
 except ImportError:
-    warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install sklearn`.')
+    warn(  # pragma: no-cover
+        'You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`.'
+    )
 
 
 def test_dataloader():

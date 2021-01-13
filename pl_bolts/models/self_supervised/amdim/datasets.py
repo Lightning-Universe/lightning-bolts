@@ -60,10 +60,8 @@ class AMDIMPretraining():
                 'You want to use STL10 dataset loaded from `torchvision` which is not installed yet.'
             )
         dataset = STL10(
-            root=dataset_root,
-            split='unlabeled',
-            transform=amdim_transforms.AMDIMTrainTransformsSTL10(),
-            download=True)
+            root=dataset_root, split='unlabeled', transform=amdim_transforms.AMDIMTrainTransformsSTL10(), download=True
+        )
         tng_split, val_split = random_split(dataset, [95000, 5000])
         return tng_split, val_split
 
@@ -87,9 +85,7 @@ class AMDIMPatchesPretraining():
     @staticmethod
     def cifar10(dataset_root, patch_size, patch_overlap, split: str = 'train'):
         assert split in ('train', 'val')
-        train_transform = amdim_transforms.TransformsC10Patches(
-            patch_size=patch_size,
-            patch_overlap=patch_overlap)
+        train_transform = amdim_transforms.TransformsC10Patches(patch_size=patch_size, patch_overlap=patch_overlap)
         dataset = CIFAR10Mixed(
             root=dataset_root,
             split=split,
@@ -104,10 +100,7 @@ class AMDIMPatchesPretraining():
             raise ModuleNotFoundError(
                 'You want to use STL10 dataset loaded from `torchvision` which is not installed yet.'
             )
-        train_transform = amdim_transforms.TransformsSTL10Patches(
-            patch_size=patch_size,
-            overlap=patch_overlap
-        )
+        train_transform = amdim_transforms.TransformsSTL10Patches(patch_size=patch_size, overlap=patch_overlap)
         dataset = STL10(
             root=dataset_root,
             split='unlabeled',
@@ -121,10 +114,7 @@ class AMDIMPatchesPretraining():
     @staticmethod
     def imagenet(dataset_root, nb_classes, patch_size, patch_overlap, split: str = 'train'):
         assert split in ('train', 'val')
-        train_transform = amdim_transforms.TransformsImageNet128Patches(
-            patch_size=patch_size,
-            overlap=patch_overlap
-        )
+        train_transform = amdim_transforms.TransformsImageNet128Patches(patch_size=patch_size, overlap=patch_overlap)
         dataset = UnlabeledImagenet(
             dataset_root,
             nb_classes=nb_classes,

@@ -6,12 +6,14 @@ import torch
 from tests import DATASETS_PATH
 
 
-@pytest.mark.parametrize('cli_args', [
-    f'--dataset mnist --data_dir {DATASETS_PATH} --max_epochs 1'
-    ' --batch_size 2 --limit_train_batches 2 --limit_val_batches 2',
-    f'--dataset cifar10 --data_dir {DATASETS_PATH} --max_epochs 1'
-    ' --batch_size 2 --limit_train_batches 2 --limit_val_batches 2',
-])
+@pytest.mark.parametrize(
+    'cli_args', [
+        f'--dataset mnist --data_dir {DATASETS_PATH} --max_epochs 1'
+        ' --batch_size 2 --limit_train_batches 2 --limit_val_batches 2',
+        f'--dataset cifar10 --data_dir {DATASETS_PATH} --max_epochs 1'
+        ' --batch_size 2 --limit_train_batches 2 --limit_val_batches 2',
+    ]
+)
 def test_cli_run_basic_gan(cli_args):
     from pl_bolts.models.gans.basic.basic_gan_module import cli_main
 
@@ -29,10 +31,12 @@ def test_cli_run_dcgan(cli_args):
 
 # TODO: this test is hanging (runs for more then 10min) so we need to use GPU or optimize it...
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
-@pytest.mark.parametrize('cli_args', [
-    f'--data_dir {DATASETS_PATH} --max_epochs 1  --limit_train_batches 2'
-    ' --limit_val_batches 2 --batch_size 2 --encoder resnet18',
-])
+@pytest.mark.parametrize(
+    'cli_args', [
+        f'--data_dir {DATASETS_PATH} --max_epochs 1  --limit_train_batches 2'
+        ' --limit_val_batches 2 --batch_size 2 --encoder resnet18',
+    ]
+)
 def test_cli_run_cpc(cli_args):
     from pl_bolts.models.self_supervised.cpc.cpc_module import cli_main
 
@@ -51,9 +55,11 @@ def test_cli_run_mnist(cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize('cli_args', [
-    f'--dataset cifar10 --data_dir {DATASETS_PATH} --max_epochs 1 --batch_size 2 --fast_dev_run 1',
-])
+@pytest.mark.parametrize(
+    'cli_args', [
+        f'--dataset cifar10 --data_dir {DATASETS_PATH} --max_epochs 1 --batch_size 2 --fast_dev_run 1',
+    ]
+)
 def test_cli_run_basic_ae(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.autoencoders.basic_ae.basic_ae_module import cli_main
@@ -63,9 +69,11 @@ def test_cli_run_basic_ae(cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize('cli_args', [
-    f'--dataset cifar10 --data_dir {DATASETS_PATH} --max_epochs 1 --batch_size 2 --fast_dev_run 1',
-])
+@pytest.mark.parametrize(
+    'cli_args', [
+        f'--dataset cifar10 --data_dir {DATASETS_PATH} --max_epochs 1 --batch_size 2 --fast_dev_run 1',
+    ]
+)
 def test_cli_run_basic_vae(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.autoencoders.basic_vae.basic_vae_module import cli_main

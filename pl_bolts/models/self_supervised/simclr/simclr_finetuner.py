@@ -41,81 +41,51 @@ def cli_main():  # pragma: no cover
     args = parser.parse_args()
 
     if args.dataset == 'cifar10':
-        dm = CIFAR10DataModule(
-            data_dir=args.data_dir,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers
-        )
+        dm = CIFAR10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         dm.train_transforms = SimCLRFinetuneTransform(
-            normalize=cifar10_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=False
+            normalize=cifar10_normalization(), input_height=dm.size()[-1], eval_transform=False
         )
         dm.val_transforms = SimCLRFinetuneTransform(
-            normalize=cifar10_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=True
+            normalize=cifar10_normalization(), input_height=dm.size()[-1], eval_transform=True
         )
         dm.test_transforms = SimCLRFinetuneTransform(
-            normalize=cifar10_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=True
+            normalize=cifar10_normalization(), input_height=dm.size()[-1], eval_transform=True
         )
 
         args.maxpool1 = False
         args.first_conv = False
         args.num_samples = 1
     elif args.dataset == 'stl10':
-        dm = STL10DataModule(
-            data_dir=args.data_dir,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers
-        )
+        dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         dm.train_dataloader = dm.train_dataloader_labeled
         dm.val_dataloader = dm.val_dataloader_labeled
         args.num_samples = 1
 
         dm.train_transforms = SimCLRFinetuneTransform(
-            normalize=stl10_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=False
+            normalize=stl10_normalization(), input_height=dm.size()[-1], eval_transform=False
         )
         dm.val_transforms = SimCLRFinetuneTransform(
-            normalize=stl10_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=True
+            normalize=stl10_normalization(), input_height=dm.size()[-1], eval_transform=True
         )
         dm.test_transforms = SimCLRFinetuneTransform(
-            normalize=stl10_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=True
+            normalize=stl10_normalization(), input_height=dm.size()[-1], eval_transform=True
         )
 
         args.maxpool1 = False
         args.first_conv = True
     elif args.dataset == 'imagenet':
-        dm = ImagenetDataModule(
-            data_dir=args.data_dir,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers
-        )
+        dm = ImagenetDataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         dm.train_transforms = SimCLRFinetuneTransform(
-            normalize=imagenet_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=False
+            normalize=imagenet_normalization(), input_height=dm.size()[-1], eval_transform=False
         )
         dm.val_transforms = SimCLRFinetuneTransform(
-            normalize=imagenet_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=True
+            normalize=imagenet_normalization(), input_height=dm.size()[-1], eval_transform=True
         )
         dm.test_transforms = SimCLRFinetuneTransform(
-            normalize=imagenet_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=True
+            normalize=imagenet_normalization(), input_height=dm.size()[-1], eval_transform=True
         )
 
         args.num_samples = 1

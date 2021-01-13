@@ -20,18 +20,18 @@ class KittiDataModule(LightningDataModule):
     name = 'kitti'
 
     def __init__(
-            self,
-            data_dir: str,
-            val_split: float = 0.2,
-            test_split: float = 0.1,
-            num_workers: int = 16,
-            batch_size: int = 32,
-            seed: int = 42,
-            shuffle: bool = False,
-            pin_memory: bool = False,
-            drop_last: bool = False,
-            *args,
-            **kwargs,
+        self,
+        data_dir: str,
+        val_split: float = 0.2,
+        test_split: float = 0.1,
+        num_workers: int = 16,
+        batch_size: int = 32,
+        seed: int = 42,
+        shuffle: bool = False,
+        pin_memory: bool = False,
+        drop_last: bool = False,
+        *args,
+        **kwargs,
     ):
         """
         Kitti train, validation and test dataloaders.
@@ -70,9 +70,7 @@ class KittiDataModule(LightningDataModule):
             drop_last: If true drops the last incomplete batch
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError(
-                'You want to use `torchvision` which is not installed yet.'
-            )
+            raise ModuleNotFoundError('You want to use `torchvision` which is not installed yet.')
 
         super().__init__(*args, **kwargs)
         self.data_dir = data_dir if data_dir is not None else os.getcwd()
@@ -90,9 +88,9 @@ class KittiDataModule(LightningDataModule):
         test_len = round(test_split * len(kitti_dataset))
         train_len = len(kitti_dataset) - val_len - test_len
 
-        self.trainset, self.valset, self.testset = random_split(kitti_dataset,
-                                                                lengths=[train_len, val_len, test_len],
-                                                                generator=torch.Generator().manual_seed(self.seed))
+        self.trainset, self.valset, self.testset = random_split(
+            kitti_dataset, lengths=[train_len, val_len, test_len], generator=torch.Generator().manual_seed(self.seed)
+        )
 
     def train_dataloader(self):
         loader = DataLoader(
@@ -130,7 +128,6 @@ class KittiDataModule(LightningDataModule):
     def _default_transforms(self):
         kitti_transforms = transforms.Compose([
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.35675976, 0.37380189, 0.3764753],
-                                 std=[0.32064945, 0.32098866, 0.32325324])
+            transforms.Normalize(mean=[0.35675976, 0.37380189, 0.3764753], std=[0.32064945, 0.32098866, 0.32325324])
         ])
         return kitti_transforms

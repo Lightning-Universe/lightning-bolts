@@ -27,9 +27,7 @@ class RandomTranslateWithReflect:
             raise ModuleNotFoundError(  # pragma: no-cover
                 'You want to use `Pillow` which is not installed yet, install it with `pip install Pillow`.'
             )
-        xtranslation, ytranslation = np.random.randint(-self.max_translation,
-                                                       self.max_translation + 1,
-                                                       size=2)
+        xtranslation, ytranslation = np.random.randint(-self.max_translation, self.max_translation + 1, size=2)
         xpad, ypad = abs(xtranslation), abs(ytranslation)
         xsize, ysize = old_image.size
 
@@ -52,10 +50,9 @@ class RandomTranslateWithReflect:
         new_image.paste(flipped_both, (xpad - xsize + 1, ypad + ysize - 1))
         new_image.paste(flipped_both, (xpad + xsize - 1, ypad + ysize - 1))
 
-        new_image = new_image.crop((xpad - xtranslation,
-                                    ypad - ytranslation,
-                                    xpad + xsize - xtranslation,
-                                    ypad + ysize - ytranslation))
+        new_image = new_image.crop(
+            (xpad - xtranslation, ypad - ytranslation, xpad + xsize - xtranslation, ypad + ysize - ytranslation)
+        )
         return new_image
 
 

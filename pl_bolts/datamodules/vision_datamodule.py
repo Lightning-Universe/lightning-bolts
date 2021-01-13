@@ -90,9 +90,7 @@ class VisionDataModule(LightningDataModule):
         """
         len_dataset = len(dataset)
         splits = self._get_splits(len_dataset)
-        dataset_train, dataset_val = random_split(
-            dataset, splits, generator=torch.Generator().manual_seed(self.seed)
-        )
+        dataset_train, dataset_val = random_split(dataset, splits, generator=torch.Generator().manual_seed(self.seed))
 
         if train:
             return dataset_train

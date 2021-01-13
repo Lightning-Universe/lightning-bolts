@@ -63,9 +63,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
             n_hidden=self.hidden_dim,
         ).to(pl_module.device)
 
-        self.optimizer = torch.optim.Adam(
-            pl_module.non_linear_evaluator.parameters(), lr=1e-4
-        )
+        self.optimizer = torch.optim.Adam(pl_module.non_linear_evaluator.parameters(), lr=1e-4)
 
     def get_representations(self, pl_module: LightningModule, x: Tensor) -> Tensor:
         representations = pl_module(x)
@@ -87,8 +85,15 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
 
         return x, y
 
-    def on_train_batch_end(self, trainer: Trainer, pl_module: LightningModule, outputs: Sequence,
-                           batch: Sequence, batch_idx: int, dataloader_idx: int) -> None:
+    def on_train_batch_end(
+        self,
+        trainer: Trainer,
+        pl_module: LightningModule,
+        outputs: Sequence,
+        batch: Sequence,
+        batch_idx: int,
+        dataloader_idx: int,
+    ) -> None:
         x, y = self.to_device(batch, pl_module.device)
 
         with torch.no_grad():
@@ -110,8 +115,15 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         pl_module.log('online_train_acc', train_acc, on_step=True, on_epoch=False)
         pl_module.log('online_train_loss', mlp_loss, on_step=True, on_epoch=False)
 
-    def on_validation_batch_end(self, trainer: Trainer, pl_module: LightningModule,
-                                outputs: Sequence, batch: Sequence, batch_idx: int, dataloader_idx: int) -> None:
+    def on_validation_batch_end(
+        self,
+        trainer: Trainer,
+        pl_module: LightningModule,
+        outputs: Sequence,
+        batch: Sequence,
+        batch_idx: int,
+        dataloader_idx: int,
+    ) -> None:
         x, y = self.to_device(batch, pl_module.device)
 
         with torch.no_grad():
