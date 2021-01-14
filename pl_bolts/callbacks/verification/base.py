@@ -23,7 +23,7 @@ class VerificationBase:
         self.model = model
 
     @abstractmethod
-    def check(self, *args: Any, **kwargs: Any) -> bool:
+    def check(self, *args: Any, **kwargs: Any) -> bool:  # type: ignore
         """ Runs the actual test on the model. All verification classes must implement this.
 
         Arguments:
