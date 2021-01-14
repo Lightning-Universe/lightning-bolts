@@ -1,3 +1,4 @@
+# type: ignore[override]
 from typing import Any, Callable, List, Optional
 
 import torch
@@ -15,7 +16,6 @@ class BatchGradientVerification(VerificationBase):
     on the wrong tensor dimensions.
     """
 
-    # type: ignore
     def check(
         self,
         input_array: Any,
