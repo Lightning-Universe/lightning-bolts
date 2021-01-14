@@ -21,7 +21,7 @@ class BatchGradientVerification(VerificationBase):
         input_mapping: Optional[Callable] = None,
         output_mapping: Optional[Callable] = None,
         sample_idx: int = 0,
-    ) -> bool:
+    ) -> bool:  # type: ignore
         """
         Runs the test for data mixing across the batch.
 
