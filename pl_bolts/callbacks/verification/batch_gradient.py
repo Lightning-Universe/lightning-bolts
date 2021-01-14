@@ -15,13 +15,14 @@ class BatchGradientVerification(VerificationBase):
     on the wrong tensor dimensions.
     """
 
+    # type: ignore
     def check(
         self,
         input_array: Any,
         input_mapping: Optional[Callable] = None,
         output_mapping: Optional[Callable] = None,
         sample_idx: int = 0,
-    ) -> bool:  # type: ignore
+    ) -> bool:
         """
         Runs the test for data mixing across the batch.
 
