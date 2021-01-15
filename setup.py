@@ -29,13 +29,15 @@ def _load_long_description():
     return _lld()
 
 
-extras = {
-    'loggers': _load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='loggers.txt'),
-    'models': _load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='models.txt'),
-    'test': _load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='test.txt'),
-}
-extras['extra'] = extras['models'] + extras['loggers']
-extras['dev'] = extras['extra'] + extras['test']
+def _prepare_extras():
+    extras = {
+        'loggers': _load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='loggers.txt'),
+        'models': _load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='models.txt'),
+        'test': _load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='test.txt'),
+    }
+    extras['extra'] = extras['models'] + extras['loggers']
+    extras['dev'] = extras['extra'] + extras['test']
+    return extras
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
 # keep the meta-data here for simplicity in reading this file... it's not obvious
@@ -60,7 +62,7 @@ setup(
     python_requires='>=3.6',
     setup_requires=['pytorch-lightning>=1.1.0'],
     install_requires=_load_requirements(),
-    extras_require=extras,
+    extras_require=_prepare_extras(),
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",
         "Documentation": "https://pytorch-lightning-bolts.rtfd.io/en/latest/",
