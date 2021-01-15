@@ -10,6 +10,15 @@ try:
 except ImportError:
     import __builtin__ as builtins
 
+try:
+    import pytorch_lightning  # noqa: F401
+except ImportError:
+    try:
+        import pip
+    except ImportError:
+        raise ImportError('Missing `pip` to install custom dependencies.')
+    pip.main(['install', 'pytorch-lightning>=1.1.0'])
+
 # https://packaging.python.org/guides/single-sourcing-package-version/
 # http://blog.ionelmc.ro/2014/05/25/python-packaging/
 
@@ -17,12 +26,6 @@ _PATH_ROOT = os.path.dirname(__file__)
 builtins.__LIGHTNING_BOLT_SETUP__: bool = True
 
 import pl_bolts  # noqa: E402
-
-try:
-    import pytorch_lightning
-except ImportError:
-    import pip
-    pip.main(['install', 'pytorch-lightning>=1.1.0'])
 
 
 def _load_requirements(path_dir=_PATH_ROOT, file_name='requirements.txt', comment_char='#'):
@@ -44,6 +47,7 @@ def _prepare_extras():
     extras['extra'] = extras['models'] + extras['loggers']
     extras['dev'] = extras['extra'] + extras['test']
     return extras
+
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
 # keep the meta-data here for simplicity in reading this file... it's not obvious
