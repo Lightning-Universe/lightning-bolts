@@ -13,27 +13,33 @@ except ImportError:
 # https://packaging.python.org/guides/single-sourcing-package-version/
 # http://blog.ionelmc.ro/2014/05/25/python-packaging/
 
-PATH_ROOT = os.path.dirname(__file__)
+_PATH_ROOT = os.path.dirname(__file__)
 builtins.__LIGHTNING_BOLT_SETUP__: bool = True
 
 import pl_bolts  # noqa: E402
 
+try:
+    import pytorch_lightning
+except ImportError:
+    import pip
+    pip.main(['install', 'pytorch-lightning>=1.1.0'])
 
-def _load_requirements(path_dir=PATH_ROOT, file_name='requirements.txt', comment_char='#'):
+
+def _load_requirements(path_dir=_PATH_ROOT, file_name='requirements.txt', comment_char='#'):
     from pytorch_lightning.setup_tools import _load_requirements as _lreq
     return _lreq(path_dir=path_dir, file_name=file_name, comment_char=comment_char)
 
 
 def _load_long_description():
     from pytorch_lightning.setup_tools import _load_long_description as _lld
-    return _lld()
+    return _lld(_PATH_ROOT)
 
 
 def _prepare_extras():
     extras = {
-        'loggers': _load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='loggers.txt'),
-        'models': _load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='models.txt'),
-        'test': _load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='test.txt'),
+        'loggers': _load_requirements(path_dir=os.path.join(_PATH_ROOT, 'requirements'), file_name='loggers.txt'),
+        'models': _load_requirements(path_dir=os.path.join(_PATH_ROOT, 'requirements'), file_name='models.txt'),
+        'test': _load_requirements(path_dir=os.path.join(_PATH_ROOT, 'requirements'), file_name='test.txt'),
     }
     extras['extra'] = extras['models'] + extras['loggers']
     extras['dev'] = extras['extra'] + extras['test']

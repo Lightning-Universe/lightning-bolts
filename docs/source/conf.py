@@ -52,13 +52,13 @@ github_repo = project
 
 # -- Project documents -------------------------------------------------------
 # export the READme
-# with open(os.path.join(PATH_ROOT, 'README.md'), 'r') as fp:
+# with open(os.path.join(_PATH_ROOT, 'README.md'), 'r') as fp:
 #     readme = fp.read()
 # # TODO: temp fix removing SVG badges and GIF, because PDF cannot show them
 # readme = re.sub(r'(\[!\[.*\))', '', readme)
 # readme = re.sub(r'(!\[.*.gif\))', '', readme)
-# for dir_name in (os.path.basename(p) for p in glob.glob(os.path.join(PATH_ROOT, '*')) if os.path.isdir(p)):
-#     readme = readme.replace('](%s/' % dir_name, '](%s/%s/' % (PATH_ROOT, dir_name))
+# for dir_name in (os.path.basename(p) for p in glob.glob(os.path.join(_PATH_ROOT, '*')) if os.path.isdir(p)):
+#     readme = readme.replace('](%s/' % dir_name, '](%s/%s/' % (_PATH_ROOT, dir_name))
 # with open('readme.md', 'w') as fp:
 #     fp.write(readme)
 
