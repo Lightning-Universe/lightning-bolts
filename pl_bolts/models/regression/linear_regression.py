@@ -14,15 +14,17 @@ class LinearRegression(pl.LightningModule):
     $$min_{W} ||(Wx + b) - y ||_2^2 $$
     """
 
-    def __init__(self,
-                 input_dim: int,
-                 output_dim: int = 1,
-                 bias: bool = True,
-                 learning_rate: float = 1e-4,
-                 optimizer: Optimizer = Adam,
-                 l1_strength: float = 0.0,
-                 l2_strength: float = 0.0,
-                 **kwargs):
+    def __init__(
+        self,
+        input_dim: int,
+        output_dim: int = 1,
+        bias: bool = True,
+        learning_rate: float = 1e-4,
+        optimizer: Optimizer = Adam,
+        l1_strength: float = 0.0,
+        l2_strength: float = 0.0,
+        **kwargs
+    ):
         """
         Args:
             input_dim: number of dimensions of the input (1+)
@@ -67,11 +69,7 @@ class LinearRegression(pl.LightningModule):
 
         tensorboard_logs = {'train_mse_loss': loss}
         progress_bar_metrics = tensorboard_logs
-        return {
-            'loss': loss,
-            'log': tensorboard_logs,
-            'progress_bar': progress_bar_metrics
-        }
+        return {'loss': loss, 'log': tensorboard_logs, 'progress_bar': progress_bar_metrics}
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
@@ -83,11 +81,7 @@ class LinearRegression(pl.LightningModule):
         val_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
         tensorboard_logs = {'val_mse_loss': val_loss}
         progress_bar_metrics = tensorboard_logs
-        return {
-            'val_loss': val_loss,
-            'log': tensorboard_logs,
-            'progress_bar': progress_bar_metrics
-        }
+        return {'val_loss': val_loss, 'log': tensorboard_logs, 'progress_bar': progress_bar_metrics}
 
     def test_step(self, batch, batch_idx):
         x, y = batch
@@ -98,11 +92,7 @@ class LinearRegression(pl.LightningModule):
         test_loss = torch.stack([x['test_loss'] for x in outputs]).mean()
         tensorboard_logs = {'test_mse_loss': test_loss}
         progress_bar_metrics = tensorboard_logs
-        return {
-            'test_loss': test_loss,
-            'log': tensorboard_logs,
-            'progress_bar': progress_bar_metrics
-        }
+        return {'test_loss': test_loss, 'log': tensorboard_logs, 'progress_bar': progress_bar_metrics}
 
     def configure_optimizers(self):
         return self.optimizer(self.parameters(), lr=self.hparams.learning_rate)

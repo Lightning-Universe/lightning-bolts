@@ -22,28 +22,26 @@ def test_cpc_resnet():
     model(x)
 
 
-@pytest.mark.parametrize("model_class", [
-    resnet18,
-    resnet34,
-    resnet50,
-    resnet101,
-    resnet152,
-    resnext50_32x4d,
-    resnext101_32x8d,
-    wide_resnet50_2,
-    wide_resnet101_2
-])
+@pytest.mark.parametrize(
+    "model_class", [
+        resnet18,
+        resnet34,
+        resnet50,
+        resnet101,
+        resnet152,
+        resnext50_32x4d,
+        resnext101_32x8d,
+        wide_resnet50_2,
+        wide_resnet101_2,
+    ]
+)
 def test_torchvision_resnets(model_class):
     x = torch.rand(3, 3, 64, 64)
     model = model_class()
     model(x)
 
 
-@pytest.mark.parametrize("size", [
-    32,
-    64,
-    128
-])
+@pytest.mark.parametrize("size", [32, 64, 128])
 def test_amdim_encoder(size):
     dummy_batch = torch.zeros((2, 3, size, size))
     model = AMDIMEncoder(dummy_batch, encoder_size=size)

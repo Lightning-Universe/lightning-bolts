@@ -6,7 +6,8 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-from pytorch_lightning.utilities import AMPType
+from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.core.optimizer import LightningOptimizer
 from torch import nn
 from torch.optim.optimizer import Optimizer
 
@@ -20,13 +21,12 @@ from pl_bolts.transforms.dataset_normalizations import (
 
 
 class SyncFunction(torch.autograd.Function):
+
     @staticmethod
     def forward(ctx, tensor):
         ctx.batch_size = tensor.shape[0]
 
-        gathered_tensor = [
-            torch.zeros_like(tensor) for _ in range(torch.distributed.get_world_size())
-        ]
+        gathered_tensor = [torch.zeros_like(tensor) for _ in range(torch.distributed.get_world_size())]
 
         torch.distributed.all_gather(gathered_tensor, tensor)
         gathered_tensor = torch.cat(gathered_tensor, 0)
@@ -38,12 +38,12 @@ class SyncFunction(torch.autograd.Function):
         grad_input = grad_output.clone()
         torch.distributed.all_reduce(grad_input, op=torch.distributed.ReduceOp.SUM, async_op=False)
 
-        return grad_input[
-            torch.distributed.get_rank() * ctx.batch_size:(torch.distributed.get_rank() + 1) * ctx.batch_size
-        ]
+        return grad_input[torch.distributed.get_rank() * ctx.batch_size:(torch.distributed.get_rank() + 1) *
+                          ctx.batch_size]
 
 
 class Projection(nn.Module):
+
     def __init__(self, input_dim=2048, hidden_dim=2048, output_dim=128):
         super().__init__()
         self.output_dim = output_dim
@@ -51,10 +51,9 @@ class Projection(nn.Module):
         self.hidden_dim = hidden_dim
 
         self.model = nn.Sequential(
-            nn.Linear(self.input_dim, self.hidden_dim),
-            nn.BatchNorm1d(self.hidden_dim),
-            nn.ReLU(),
-            nn.Linear(self.hidden_dim, self.output_dim, bias=False))
+            nn.Linear(self.input_dim, self.hidden_dim), nn.BatchNorm1d(self.hidden_dim), nn.ReLU(),
+            nn.Linear(self.hidden_dim, self.output_dim, bias=False)
+        )
 
     def forward(self, x):
         x = self.model(x)
@@ -62,6 +61,7 @@ class Projection(nn.Module):
 
 
 class SimCLR(pl.LightningModule):
+
     def __init__(
         self,
         gpus: int,
@@ -124,11 +124,7 @@ class SimCLR(pl.LightningModule):
 
         self.encoder = self.init_model()
 
-        self.projection = Projection(
-            input_dim=self.hidden_mlp,
-            hidden_dim=self.hidden_mlp,
-            output_dim=self.feat_dim
-        )
+        self.projection = Projection(input_dim=self.hidden_mlp, hidden_dim=self.hidden_mlp, output_dim=self.feat_dim)
 
         # compute iters per epoch
         global_batch_size = self.nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
@@ -139,9 +135,11 @@ class SimCLR(pl.LightningModule):
             self.start_lr, self.learning_rate, self.train_iters_per_epoch * self.warmup_epochs
         )
         iters = np.arange(self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs))
-        cosine_lr_schedule = np.array([self.final_lr + 0.5 * (self.learning_rate - self.final_lr) * (
-            1 + math.cos(math.pi * t / (self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs)))
-        ) for t in iters])
+        cosine_lr_schedule = np.array([
+            self.final_lr + 0.5 * (self.learning_rate - self.final_lr) *
+            (1 + math.cos(math.pi * t / (self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs))))
+            for t in iters
+        ])
 
         self.lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
 
@@ -151,9 +149,7 @@ class SimCLR(pl.LightningModule):
         elif self.arch == 'resnet50':
             backbone = resnet50
 
-        return backbone(
-            first_conv=self.first_conv, maxpool1=self.maxpool1, return_all_feature_maps=False
-        )
+        return backbone(first_conv=self.first_conv, maxpool1=self.maxpool1, return_all_feature_maps=False)
 
     def forward(self, x):
         # bolts resnet returns a list
@@ -182,13 +178,16 @@ class SimCLR(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
 
+        # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
+        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
+
         self.log('train_loss', loss, on_step=True, on_epoch=False)
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
 
-        self.log('val_loss', loss, on_step=False, on_epoch=True)
+        self.log('val_loss', loss, on_step=False, on_epoch=True, sync_dist=True)
         return loss
 
     def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=['bias', 'bn']):
@@ -203,33 +202,24 @@ class SimCLR(pl.LightningModule):
             else:
                 params.append(param)
 
-        return [
-            {'params': params, 'weight_decay': weight_decay},
-            {'params': excluded_params, 'weight_decay': 0.}
-        ]
+        return [{
+            'params': params,
+            'weight_decay': weight_decay
+        }, {
+            'params': excluded_params,
+            'weight_decay': 0.,
+        }]
 
     def configure_optimizers(self):
         if self.exclude_bn_bias:
-            params = self.exclude_from_wt_decay(
-                self.named_parameters(),
-                weight_decay=self.weight_decay
-            )
+            params = self.exclude_from_wt_decay(self.named_parameters(), weight_decay=self.weight_decay)
         else:
             params = self.parameters()
 
         if self.optim == 'sgd':
-            optimizer = torch.optim.SGD(
-                params,
-                lr=self.learning_rate,
-                momentum=0.9,
-                weight_decay=self.weight_decay
-            )
+            optimizer = torch.optim.SGD(params, lr=self.learning_rate, momentum=0.9, weight_decay=self.weight_decay)
         elif self.optim == 'adam':
-            optimizer = torch.optim.Adam(
-                params,
-                lr=self.learning_rate,
-                weight_decay=self.weight_decay
-            )
+            optimizer = torch.optim.Adam(params, lr=self.learning_rate, weight_decay=self.weight_decay)
 
         if self.lars_wrapper:
             optimizer = LARSWrapper(
@@ -242,36 +232,25 @@ class SimCLR(pl.LightningModule):
 
     def optimizer_step(
         self,
-        epoch: int,
-        batch_idx: int,
-        optimizer: Optimizer,
-        optimizer_idx: int,
+        epoch: int = None,
+        batch_idx: int = None,
+        optimizer: Optimizer = None,
+        optimizer_idx: int = None,
         optimizer_closure: Optional[Callable] = None,
-        on_tpu: bool = False,
-        using_native_amp: bool = False,
-        using_lbfgs: bool = False,
+        on_tpu: bool = None,
+        using_native_amp: bool = None,
+        using_lbfgs: bool = None,
     ) -> None:
         # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
         # adjust LR of optim contained within LARSWrapper
-        if self.lars_wrapper:
-            for param_group in optimizer.optim.param_groups:
-                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
-        else:
-            for param_group in optimizer.param_groups:
-                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
-
-        # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
-        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
+        for param_group in optimizer.param_groups:
+            param_group["lr"] = self.lr_schedule[self.trainer.global_step]
 
         # from lightning
-        if self.trainer.amp_backend == AMPType.NATIVE:
-            optimizer_closure()
-            self.trainer.scaler.step(optimizer)
-        elif self.trainer.amp_backend == AMPType.APEX:
-            optimizer_closure()
-            optimizer.step()
-        else:
-            optimizer.step(closure=optimizer_closure)
+        if not isinstance(optimizer, LightningOptimizer):
+            # wraps into LightingOptimizer only for running step
+            optimizer = LightningOptimizer.to_lightning_optimizer(optimizer, self.trainer)
+        optimizer.step(closure=optimizer_closure)
 
     def nt_xent_loss(self, out_1, out_2, temperature, eps=1e-6):
         """
@@ -333,7 +312,7 @@ class SimCLR(pl.LightningModule):
         parser.add_argument("--data_dir", type=str, default=".", help="path to download data")
 
         # training params
-        parser.add_argument("--fast_dev_run", action='store_true')
+        parser.add_argument("--fast_dev_run", default=1, type=int)
         parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
         parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
@@ -366,11 +345,7 @@ def cli_main():
     args = parser.parse_args()
 
     if args.dataset == 'stl10':
-        dm = STL10DataModule(
-            data_dir=args.data_dir,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers
-        )
+        dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         dm.train_dataloader = dm.train_dataloader_mixed
         dm.val_dataloader = dm.val_dataloader_mixed
@@ -390,10 +365,7 @@ def cli_main():
             val_split = args.nodes * args.gpus * args.batch_size
 
         dm = CIFAR10DataModule(
-            data_dir=args.data_dir,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers,
-            val_split=val_split
+            data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers, val_split=val_split
         )
 
         args.num_samples = dm.num_samples
@@ -427,11 +399,7 @@ def cli_main():
         args.start_lr = 0.3
         args.online_ft = True
 
-        dm = ImagenetDataModule(
-            data_dir=args.data_dir,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers
-        )
+        dm = ImagenetDataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         args.num_samples = dm.num_samples
         args.input_height = dm.size()[-1]
@@ -458,12 +426,11 @@ def cli_main():
     if args.online_ft:
         # online eval
         online_evaluator = SSLOnlineEvaluator(
-            drop_p=0.,
-            hidden_dim=None,
-            z_dim=args.hidden_mlp,
-            num_classes=dm.num_classes,
-            dataset=args.dataset
+            drop_p=0., hidden_dim=None, z_dim=args.hidden_mlp, num_classes=dm.num_classes, dataset=args.dataset
         )
+
+    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor='val_loss')
+    callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
 
     trainer = pl.Trainer(
         max_epochs=args.max_epochs,
@@ -473,7 +440,7 @@ def cli_main():
         distributed_backend='ddp' if args.gpus > 1 else None,
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=32 if args.fp32 else 16,
-        callbacks=[online_evaluator] if args.online_ft else None,
+        callbacks=callbacks,
         fast_dev_run=args.fast_dev_run
     )
 

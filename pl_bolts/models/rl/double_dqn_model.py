@@ -72,12 +72,10 @@ class DoubleDQN(DQN):
             # "episodes": self.total_episode_steps,
         })
 
-        return OrderedDict(
-            {
-                "loss": loss,
-                "avg_reward": self.avg_rewards,
-            }
-        )
+        return OrderedDict({
+            "loss": loss,
+            "avg_reward": self.avg_rewards,
+        })
 
 
 def cli_main():

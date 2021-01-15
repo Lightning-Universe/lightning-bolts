@@ -95,14 +95,14 @@ class SSLDatasetMixin(ABC):
 class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
     def __init__(
-            self,
-            root: str,
-            split: str = 'val',
-            transform: Optional[Callable] = None,
-            target_transform: Optional[Callable] = None,
-            download: bool = False,
-            nb_labeled_per_class: Optional[int] = None,
-            val_pct: float = 0.10
+        self,
+        root: str,
+        split: str = 'val',
+        transform: Optional[Callable] = None,
+        target_transform: Optional[Callable] = None,
+        download: bool = False,
+        nb_labeled_per_class: Optional[int] = None,
+        val_pct: float = 0.10
     ):
 
         if nb_labeled_per_class == -1:

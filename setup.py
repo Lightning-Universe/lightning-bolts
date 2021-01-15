@@ -52,7 +52,6 @@ extras = {
 extras['extra'] = extras['models'] + extras['loggers']
 extras['dev'] = extras['extra'] + extras['test']
 
-
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
 # keep the meta-data here for simplicity in reading this file... it's not obvious
 # what happens and to non-engineers they won't know to look in init ...
@@ -68,24 +67,20 @@ setup(
     download_url='https://github.com/PyTorchLightning/pytorch-lightning-bolts',
     license=pl_bolts.__license__,
     packages=find_packages(exclude=['tests', 'docs']),
-
     long_description=load_long_describtion(),
     long_description_content_type='text/markdown',
     include_package_data=True,
     zip_safe=False,
-
     keywords=['deep learning', 'pytorch', 'AI'],
     python_requires='>=3.6',
     setup_requires=[],
     install_requires=load_requirements(),
     extras_require=extras,
-
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",
         "Documentation": "https://pytorch-lightning-bolts.rtfd.io/en/latest/",
         "Source Code": "https://github.com/PyTorchLightning/pytorch-lightning-bolts",
     },
-
     classifiers=[
         'Environment :: Console',
         'Natural Language :: English',

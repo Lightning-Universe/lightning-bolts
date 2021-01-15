@@ -1,3 +1,4 @@
+import os
 from argparse import ArgumentParser
 
 import pytorch_lightning as pl
@@ -5,6 +6,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
+from pl_bolts import _HTTPS_AWS_HUB
 from pl_bolts.models.autoencoders.components import (
     resnet18_decoder,
     resnet18_encoder,
@@ -29,8 +31,7 @@ class AE(pl.LightningModule):
     """
 
     pretrained_urls = {
-        'cifar10-resnet18':
-            'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/ae/ae-cifar10/checkpoints/epoch%3D96.ckpt'
+        'cifar10-resnet18': os.path.join(_HTTPS_AWS_HUB, 'ae/ae-cifar10/checkpoints/epoch%3D96.ckpt'),
     }
 
     def __init__(
@@ -42,7 +43,7 @@ class AE(pl.LightningModule):
         enc_out_dim: int = 512,
         latent_dim: int = 256,
         lr: float = 1e-4,
-        **kwargs
+        **kwargs,
     ):
         """
         Args:
@@ -67,8 +68,14 @@ class AE(pl.LightningModule):
         self.input_height = input_height
 
         valid_encoders = {
-            'resnet18': {'enc': resnet18_encoder, 'dec': resnet18_decoder},
-            'resnet50': {'enc': resnet50_encoder, 'dec': resnet50_decoder},
+            'resnet18': {
+                'enc': resnet18_encoder,
+                'dec': resnet18_decoder,
+            },
+            'resnet50': {
+                'enc': resnet50_encoder,
+                'dec': resnet50_decoder,
+            },
         }
 
         if enc_type not in valid_encoders:
@@ -109,9 +116,7 @@ class AE(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
-        self.log_dict(
-            {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
-        )
+        self.log_dict({f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -132,7 +137,9 @@ class AE(pl.LightningModule):
         parser.add_argument("--lr", type=float, default=1e-4)
 
         parser.add_argument(
-            "--enc_out_dim", type=int, default=512,
+            "--enc_out_dim",
+            type=int,
+            default=512,
             help="512 for resnet18, 2048 for bigger resnets, adjust for wider resnets"
         )
         parser.add_argument("--latent_dim", type=int, default=256)

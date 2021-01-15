@@ -40,13 +40,13 @@ class BYOLMAWeightUpdate(Callback):
         self.current_tau = initial_tau
 
     def on_train_batch_end(
-            self,
-            trainer: Trainer,
-            pl_module: LightningModule,
-            outputs: Sequence,
-            batch: Sequence,
-            batch_idx: int,
-            dataloader_idx: int,
+        self,
+        trainer: Trainer,
+        pl_module: LightningModule,
+        outputs: Sequence,
+        batch: Sequence,
+        batch_idx: int,
+        dataloader_idx: int,
     ) -> None:
         # get networks
         online_net = pl_module.online_network
@@ -66,6 +66,7 @@ class BYOLMAWeightUpdate(Callback):
     def update_weights(self, online_net: Union[Module, Tensor], target_net: Union[Module, Tensor]) -> None:
         # apply MA weight update
         for (name, online_p), (_, target_p) in zip(
-                online_net.named_parameters(), target_net.named_parameters()):  # type: ignore[union-attr]
+            online_net.named_parameters(), target_net.named_parameters()
+        ):  # type: ignore[union-attr]
             if 'weight' in name:
                 target_p.data = self.current_tau * target_p.data + (1 - self.current_tau) * online_p.data

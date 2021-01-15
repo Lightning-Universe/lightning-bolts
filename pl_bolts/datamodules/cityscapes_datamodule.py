@@ -59,18 +59,18 @@ class CityscapesDataModule(LightningDataModule):
     extra_args = {}
 
     def __init__(
-            self,
-            data_dir: str,
-            quality_mode: str = 'fine',
-            target_type: str = 'instance',
-            num_workers: int = 16,
-            batch_size: int = 32,
-            seed: int = 42,
-            shuffle: bool = False,
-            pin_memory: bool = False,
-            drop_last: bool = False,
-            *args,
-            **kwargs,
+        self,
+        data_dir: str,
+        quality_mode: str = 'fine',
+        target_type: str = 'instance',
+        num_workers: int = 16,
+        batch_size: int = 32,
+        seed: int = 42,
+        shuffle: bool = False,
+        pin_memory: bool = False,
+        drop_last: bool = False,
+        *args,
+        **kwargs,
     ):
         """
         Args:
@@ -123,13 +123,15 @@ class CityscapesDataModule(LightningDataModule):
         transforms = self.train_transforms or self._default_transforms()
         target_transforms = self.target_transforms or self._default_target_transforms()
 
-        dataset = Cityscapes(self.data_dir,
-                             split='train',
-                             target_type=self.target_type,
-                             mode=self.quality_mode,
-                             transform=transforms,
-                             target_transform=target_transforms,
-                             **self.extra_args)
+        dataset = Cityscapes(
+            self.data_dir,
+            split='train',
+            target_type=self.target_type,
+            mode=self.quality_mode,
+            transform=transforms,
+            target_transform=target_transforms,
+            **self.extra_args
+        )
 
         loader = DataLoader(
             dataset,
@@ -148,13 +150,15 @@ class CityscapesDataModule(LightningDataModule):
         transforms = self.val_transforms or self._default_transforms()
         target_transforms = self.target_transforms or self._default_target_transforms()
 
-        dataset = Cityscapes(self.data_dir,
-                             split='val',
-                             target_type=self.target_type,
-                             mode=self.quality_mode,
-                             transform=transforms,
-                             target_transform=target_transforms,
-                             **self.extra_args)
+        dataset = Cityscapes(
+            self.data_dir,
+            split='val',
+            target_type=self.target_type,
+            mode=self.quality_mode,
+            transform=transforms,
+            target_transform=target_transforms,
+            **self.extra_args
+        )
 
         loader = DataLoader(
             dataset,
@@ -173,13 +177,15 @@ class CityscapesDataModule(LightningDataModule):
         transforms = self.test_transforms or self._default_transforms()
         target_transforms = self.target_transforms or self._default_target_transforms()
 
-        dataset = Cityscapes(self.data_dir,
-                             split='test',
-                             target_type=self.target_type,
-                             mode=self.quality_mode,
-                             transform=transforms,
-                             target_transform=target_transforms,
-                             **self.extra_args)
+        dataset = Cityscapes(
+            self.data_dir,
+            split='test',
+            target_type=self.target_type,
+            mode=self.quality_mode,
+            transform=transforms,
+            target_transform=target_transforms,
+            **self.extra_args
+        )
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -194,15 +200,13 @@ class CityscapesDataModule(LightningDataModule):
         cityscapes_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transform_lib.Normalize(
-                mean=[0.28689554, 0.32513303, 0.28389177],
-                std=[0.18696375, 0.19017339, 0.18720214]
+                mean=[0.28689554, 0.32513303, 0.28389177], std=[0.18696375, 0.19017339, 0.18720214]
             )
         ])
         return cityscapes_transforms
 
     def _default_target_transforms(self):
         cityscapes_target_trasnforms = transform_lib.Compose([
-            transform_lib.ToTensor(),
-            transform_lib.Lambda(lambda t: t.squeeze())
+            transform_lib.ToTensor(), transform_lib.Lambda(lambda t: t.squeeze())
         ])
         return cityscapes_target_trasnforms

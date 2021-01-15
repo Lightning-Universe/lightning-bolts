@@ -38,8 +38,13 @@ class TestLRScheduler(object):
         self.net = SchedulerTestNet()
         self.optimizer = SGD(
             [
-                {"params": self.net.conv1.parameters()},
-                {"params": self.net.conv2.parameters(), "lr": base_lr * multiplier},
+                {
+                    "params": self.net.conv1.parameters(),
+                },
+                {
+                    "params": self.net.conv2.parameters(),
+                    "lr": base_lr * multiplier,
+                },
             ],
             lr=base_lr,
         )
@@ -47,7 +52,9 @@ class TestLRScheduler(object):
         self.closed_form_net = SchedulerTestNet()
         self.closed_form_opt = SGD(
             [
-                {"params": self.closed_form_net.conv1.parameters()},
+                {
+                    "params": self.closed_form_net.conv1.parameters(),
+                },
                 {
                     "params": self.closed_form_net.conv2.parameters(),
                     "lr": base_lr * multiplier,
@@ -63,9 +70,7 @@ class TestLRScheduler(object):
             for param_group, target in zip(self.optimizer.param_groups, targets):
                 assert (
                     abs(target[epoch] - param_group["lr"]) < EPSILON
-                ), "LR is wrong in epoch {}: expected {}, got {}".format(
-                    epoch, target[epoch], param_group["lr"]
-                )
+                ), "LR is wrong in epoch {}: expected {}, got {}".format(epoch, target[epoch], param_group["lr"])
             for scheduler in schedulers:
                 scheduler.step()
 
@@ -79,9 +84,7 @@ class TestLRScheduler(object):
             for i, param_group in enumerate(self.optimizer.param_groups):
                 assert (
                     abs(targets[epoch][i] - param_group["lr"]) < EPSILON
-                ), "LR is wrong in epoch {}: expected {}, got {}".format(
-                    epoch, targets[epoch][i], param_group["lr"]
-                )
+                ), "LR is wrong in epoch {}: expected {}, got {}".format(epoch, targets[epoch][i], param_group["lr"])
             scheduler.step()
 
 
@@ -101,26 +104,18 @@ def test_lwca_lr():
     # param-group1
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr, warmup_epochs)
     iters = np.arange(max_epochs - warmup_epochs)
-    cosine_lr_schedule = np.array(
-        [
-            eta_min + 0.5 * (base_lr - eta_min) * (
-                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
-            ) for t in iters
-        ]
-    )
+    cosine_lr_schedule = np.array([
+        eta_min + 0.5 * (base_lr - eta_min) * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+    ])
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
     targets.append(list(lr_schedule))
 
     # param-group2
     base_lr2 = base_lr * multiplier
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr2, warmup_epochs)
-    cosine_lr_schedule = np.array(
-        [
-            eta_min + 0.5 * (base_lr2 - eta_min) * (
-                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
-            ) for t in iters
-        ]
-    )
+    cosine_lr_schedule = np.array([
+        eta_min + 0.5 * (base_lr2 - eta_min) * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+    ])
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
     targets.append(list(lr_schedule))
 
@@ -152,26 +147,18 @@ def test_lwca_lr_with_nz_start_lr():
     # param-group1
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr, warmup_epochs)
     iters = np.arange(max_epochs - warmup_epochs)
-    cosine_lr_schedule = np.array(
-        [
-            eta_min + 0.5 * (base_lr - eta_min) * (
-                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
-            ) for t in iters
-        ]
-    )
+    cosine_lr_schedule = np.array([
+        eta_min + 0.5 * (base_lr - eta_min) * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+    ])
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
     targets.append(list(lr_schedule))
 
     # param-group2
     base_lr2 = base_lr * multiplier
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr2, warmup_epochs)
-    cosine_lr_schedule = np.array(
-        [
-            eta_min + 0.5 * (base_lr2 - eta_min) * (
-                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
-            ) for t in iters
-        ]
-    )
+    cosine_lr_schedule = np.array([
+        eta_min + 0.5 * (base_lr2 - eta_min) * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+    ])
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
     targets.append(list(lr_schedule))
 
@@ -203,26 +190,18 @@ def test_lwca_lr_with_nz_eta_min():
     # param-group1
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr, warmup_epochs)
     iters = np.arange(max_epochs - warmup_epochs)
-    cosine_lr_schedule = np.array(
-        [
-            eta_min + 0.5 * (base_lr - eta_min) * (
-                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
-            ) for t in iters
-        ]
-    )
+    cosine_lr_schedule = np.array([
+        eta_min + 0.5 * (base_lr - eta_min) * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+    ])
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
     targets.append(list(lr_schedule))
 
     # param-group2
     base_lr2 = base_lr * multiplier
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr2, warmup_epochs)
-    cosine_lr_schedule = np.array(
-        [
-            eta_min + 0.5 * (base_lr2 - eta_min) * (
-                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
-            ) for t in iters
-        ]
-    )
+    cosine_lr_schedule = np.array([
+        eta_min + 0.5 * (base_lr2 - eta_min) * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+    ])
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
     targets.append(list(lr_schedule))
 
@@ -254,26 +233,18 @@ def test_lwca_lr_with_nz_start_lr_nz_eta_min():
     # param-group1
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr, warmup_epochs)
     iters = np.arange(max_epochs - warmup_epochs)
-    cosine_lr_schedule = np.array(
-        [
-            eta_min + 0.5 * (base_lr - eta_min) * (
-                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
-            ) for t in iters
-        ]
-    )
+    cosine_lr_schedule = np.array([
+        eta_min + 0.5 * (base_lr - eta_min) * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+    ])
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
     targets.append(list(lr_schedule))
 
     # param-group2
     base_lr2 = base_lr * multiplier
     warmup_lr_schedule = np.linspace(warmup_start_lr, base_lr2, warmup_epochs)
-    cosine_lr_schedule = np.array(
-        [
-            eta_min + 0.5 * (base_lr2 - eta_min) * (
-                1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))
-            ) for t in iters
-        ]
-    )
+    cosine_lr_schedule = np.array([
+        eta_min + 0.5 * (base_lr2 - eta_min) * (1 + math.cos(math.pi * t / (max_epochs - warmup_epochs))) for t in iters
+    ])
     lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
     targets.append(list(lr_schedule))
 
@@ -316,9 +287,7 @@ def test_closed_form_lwca_lr():
         eta_min=eta_min,
     )
 
-    test_lr_scheduler._test_against_closed_form(
-        scheduler, closed_form_scheduler, epochs=max_epochs
-    )
+    test_lr_scheduler._test_against_closed_form(scheduler, closed_form_scheduler, epochs=max_epochs)
 
 
 def test_closed_form_lwca_lr_with_nz_start_lr():
@@ -348,9 +317,7 @@ def test_closed_form_lwca_lr_with_nz_start_lr():
         eta_min=eta_min,
     )
 
-    test_lr_scheduler._test_against_closed_form(
-        scheduler, closed_form_scheduler, epochs=max_epochs
-    )
+    test_lr_scheduler._test_against_closed_form(scheduler, closed_form_scheduler, epochs=max_epochs)
 
 
 def test_closed_form_lwca_lr_with_nz_eta_min():
@@ -380,9 +347,7 @@ def test_closed_form_lwca_lr_with_nz_eta_min():
         eta_min=eta_min,
     )
 
-    test_lr_scheduler._test_against_closed_form(
-        scheduler, closed_form_scheduler, epochs=max_epochs
-    )
+    test_lr_scheduler._test_against_closed_form(scheduler, closed_form_scheduler, epochs=max_epochs)
 
 
 def test_closed_form_lwca_lr_with_nz_start_lr_nz_eta_min():
@@ -412,6 +377,4 @@ def test_closed_form_lwca_lr_with_nz_start_lr_nz_eta_min():
         eta_min=eta_min,
     )
 
-    test_lr_scheduler._test_against_closed_form(
-        scheduler, closed_form_scheduler, epochs=max_epochs
-    )
+    test_lr_scheduler._test_against_closed_form(scheduler, closed_form_scheduler, epochs=max_epochs)

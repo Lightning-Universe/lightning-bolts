@@ -10,7 +10,8 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.distributed as dist
-from pytorch_lightning.utilities import AMPType
+from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.core.optimizer import LightningOptimizer
 from torch import nn
 from torch.optim.optimizer import Optimizer
 
@@ -24,6 +25,7 @@ from pl_bolts.transforms.dataset_normalizations import (
 
 
 class SwAV(pl.LightningModule):
+
     def __init__(
         self,
         gpus: int,
@@ -150,9 +152,11 @@ class SwAV(pl.LightningModule):
             self.start_lr, self.learning_rate, self.train_iters_per_epoch * self.warmup_epochs
         )
         iters = np.arange(self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs))
-        cosine_lr_schedule = np.array([self.final_lr + 0.5 * (self.learning_rate - self.final_lr) * (
-            1 + math.cos(math.pi * t / (self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs)))
-        ) for t in iters])
+        cosine_lr_schedule = np.array([
+            self.final_lr + 0.5 * (self.learning_rate - self.final_lr) *
+            (1 + math.cos(math.pi * t / (self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs))))
+            for t in iters
+        ])
 
         self.lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
 
@@ -160,17 +164,15 @@ class SwAV(pl.LightningModule):
         self.softmax = nn.Softmax(dim=1)
 
     def setup(self, stage):
-        queue_folder = os.path.join(self.logger.log_dir, self.queue_path)
-        if not os.path.exists(queue_folder):
-            os.makedirs(queue_folder)
+        if self.queue_length > 0:
+            queue_folder = os.path.join(self.logger.log_dir, self.queue_path)
+            if not os.path.exists(queue_folder):
+                os.makedirs(queue_folder)
 
-        self.queue_path = os.path.join(
-            queue_folder,
-            "queue" + str(self.trainer.global_rank) + ".pth"
-        )
+            self.queue_path = os.path.join(queue_folder, "queue" + str(self.trainer.global_rank) + ".pth")
 
-        if os.path.isfile(self.queue_path):
-            self.queue = torch.load(self.queue_path)["queue"]
+            if os.path.isfile(self.queue_path):
+                self.queue = torch.load(self.queue_path)["queue"]
 
     def init_model(self):
         if self.arch == 'resnet18':
@@ -238,19 +240,16 @@ class SwAV(pl.LightningModule):
         loss = 0
         for i, crop_id in enumerate(self.crops_for_assign):
             with torch.no_grad():
-                out = output[bs * crop_id: bs * (crop_id + 1)]
+                out = output[bs * crop_id:bs * (crop_id + 1)]
 
                 # 4. time to use the queue
                 if self.queue is not None:
                     if self.use_the_queue or not torch.all(self.queue[i, -1, :] == 0):
                         self.use_the_queue = True
-                        out = torch.cat((torch.mm(
-                            self.queue[i],
-                            self.model.prototypes.weight.t()
-                        ), out))
+                        out = torch.cat((torch.mm(self.queue[i], self.model.prototypes.weight.t()), out))
                     # fill the queue
                     self.queue[i, bs:] = self.queue[i, :-bs].clone()
-                    self.queue[i, :bs] = embedding[crop_id * bs: (crop_id + 1) * bs]
+                    self.queue[i, :bs] = embedding[crop_id * bs:(crop_id + 1) * bs]
 
                 # 5. get assignments
                 q = torch.exp(out / self.epsilon).t()
@@ -259,7 +258,7 @@ class SwAV(pl.LightningModule):
             # cluster assignment prediction
             subloss = 0
             for v in np.delete(np.arange(np.sum(self.nmb_crops)), crop_id):
-                p = self.softmax(output[bs * v: bs * (v + 1)] / self.temperature)
+                p = self.softmax(output[bs * v:bs * (v + 1)] / self.temperature)
                 subloss -= torch.mean(torch.sum(q * torch.log(p), dim=1))
             loss += subloss / (np.sum(self.nmb_crops) - 1)
         loss /= len(self.crops_for_assign)
@@ -268,6 +267,9 @@ class SwAV(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
+
+        # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
+        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
 
         self.log('train_loss', loss, on_step=True, on_epoch=False)
         return loss
@@ -290,33 +292,18 @@ class SwAV(pl.LightningModule):
             else:
                 params.append(param)
 
-        return [
-            {'params': params, 'weight_decay': weight_decay},
-            {'params': excluded_params, 'weight_decay': 0.}
-        ]
+        return [{'params': params, 'weight_decay': weight_decay}, {'params': excluded_params, 'weight_decay': 0.}]
 
     def configure_optimizers(self):
         if self.exclude_bn_bias:
-            params = self.exclude_from_wt_decay(
-                self.named_parameters(),
-                weight_decay=self.weight_decay
-            )
+            params = self.exclude_from_wt_decay(self.named_parameters(), weight_decay=self.weight_decay)
         else:
             params = self.parameters()
 
         if self.optim == 'sgd':
-            optimizer = torch.optim.SGD(
-                params,
-                lr=self.learning_rate,
-                momentum=0.9,
-                weight_decay=self.weight_decay
-            )
+            optimizer = torch.optim.SGD(params, lr=self.learning_rate, momentum=0.9, weight_decay=self.weight_decay)
         elif self.optim == 'adam':
-            optimizer = torch.optim.Adam(
-                params,
-                lr=self.learning_rate,
-                weight_decay=self.weight_decay
-            )
+            optimizer = torch.optim.Adam(params, lr=self.learning_rate, weight_decay=self.weight_decay)
 
         if self.lars_wrapper:
             optimizer = LARSWrapper(
@@ -329,36 +316,25 @@ class SwAV(pl.LightningModule):
 
     def optimizer_step(
         self,
-        epoch: int,
-        batch_idx: int,
-        optimizer: Optimizer,
-        optimizer_idx: int,
+        epoch: int = None,
+        batch_idx: int = None,
+        optimizer: Optimizer = None,
+        optimizer_idx: int = None,
         optimizer_closure: Optional[Callable] = None,
-        on_tpu: bool = False,
-        using_native_amp: bool = False,
-        using_lbfgs: bool = False,
+        on_tpu: bool = None,
+        using_native_amp: bool = None,
+        using_lbfgs: bool = None,
     ) -> None:
         # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
         # adjust LR of optim contained within LARSWrapper
-        if self.lars_wrapper:
-            for param_group in optimizer.optim.param_groups:
-                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
-        else:
-            for param_group in optimizer.param_groups:
-                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
-
-        # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
-        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
+        for param_group in optimizer.param_groups:
+            param_group["lr"] = self.lr_schedule[self.trainer.global_step]
 
         # from lightning
-        if self.trainer.amp_backend == AMPType.NATIVE:
-            optimizer_closure()
-            self.trainer.scaler.step(optimizer)
-        elif self.trainer.amp_backend == AMPType.APEX:
-            optimizer_closure()
-            optimizer.step()
-        else:
-            optimizer.step(closure=optimizer_closure)
+        if not isinstance(optimizer, LightningOptimizer):
+            # wraps into LightingOptimizer only for running step
+            optimizer = LightningOptimizer.to_lightning_optimizer(optimizer, self.trainer)
+        optimizer.step(closure=optimizer_closure)
 
     def sinkhorn(self, Q, nmb_iters):
         with torch.no_grad():
@@ -431,17 +407,29 @@ class SwAV(pl.LightningModule):
         parser.add_argument("--data_dir", type=str, default=".", help="path to download data")
         parser.add_argument("--queue_path", type=str, default="queue", help="path for queue")
 
-        parser.add_argument("--nmb_crops", type=int, default=[2, 4], nargs="+",
-                            help="list of number of crops (example: [2, 6])")
-        parser.add_argument("--size_crops", type=int, default=[96, 36], nargs="+",
-                            help="crops resolutions (example: [224, 96])")
-        parser.add_argument("--min_scale_crops", type=float, default=[0.33, 0.10], nargs="+",
-                            help="argument in RandomResizedCrop (example: [0.14, 0.05])")
-        parser.add_argument("--max_scale_crops", type=float, default=[1, 0.33], nargs="+",
-                            help="argument in RandomResizedCrop (example: [1., 0.14])")
+        parser.add_argument(
+            "--nmb_crops", type=int, default=[2, 4], nargs="+", help="list of number of crops (example: [2, 6])"
+        )
+        parser.add_argument(
+            "--size_crops", type=int, default=[96, 36], nargs="+", help="crops resolutions (example: [224, 96])"
+        )
+        parser.add_argument(
+            "--min_scale_crops",
+            type=float,
+            default=[0.33, 0.10],
+            nargs="+",
+            help="argument in RandomResizedCrop (example: [0.14, 0.05])"
+        )
+        parser.add_argument(
+            "--max_scale_crops",
+            type=float,
+            default=[1, 0.33],
+            nargs="+",
+            help="argument in RandomResizedCrop (example: [1., 0.14])"
+        )
 
         # training params
-        parser.add_argument("--fast_dev_run", action='store_true')
+        parser.add_argument("--fast_dev_run", default=1, type=int)
         parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
         parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
@@ -459,20 +447,36 @@ class SwAV(pl.LightningModule):
         parser.add_argument("--final_lr", type=float, default=1e-6, help="final learning rate")
 
         # swav params
-        parser.add_argument("--crops_for_assign", type=int, nargs="+", default=[0, 1],
-                            help="list of crops id used for computing assignments")
+        parser.add_argument(
+            "--crops_for_assign",
+            type=int,
+            nargs="+",
+            default=[0, 1],
+            help="list of crops id used for computing assignments"
+        )
         parser.add_argument("--temperature", default=0.1, type=float, help="temperature parameter in training loss")
-        parser.add_argument("--epsilon", default=0.05, type=float,
-                            help="regularization parameter for Sinkhorn-Knopp algorithm")
-        parser.add_argument("--sinkhorn_iterations", default=3, type=int,
-                            help="number of iterations in Sinkhorn-Knopp algorithm")
+        parser.add_argument(
+            "--epsilon", default=0.05, type=float, help="regularization parameter for Sinkhorn-Knopp algorithm"
+        )
+        parser.add_argument(
+            "--sinkhorn_iterations", default=3, type=int, help="number of iterations in Sinkhorn-Knopp algorithm"
+        )
         parser.add_argument("--nmb_prototypes", default=512, type=int, help="number of prototypes")
-        parser.add_argument("--queue_length", type=int, default=0,
-                            help="length of the queue (0 for no queue); must be divisible by total batch size")
-        parser.add_argument("--epoch_queue_starts", type=int, default=15,
-                            help="from this epoch, we start using a queue")
-        parser.add_argument("--freeze_prototypes_epochs", default=1, type=int,
-                            help="freeze the prototypes during this many epochs from the start")
+        parser.add_argument(
+            "--queue_length",
+            type=int,
+            default=0,
+            help="length of the queue (0 for no queue); must be divisible by total batch size"
+        )
+        parser.add_argument(
+            "--epoch_queue_starts", type=int, default=15, help="from this epoch, we start using a queue"
+        )
+        parser.add_argument(
+            "--freeze_prototypes_epochs",
+            default=1,
+            type=int,
+            help="freeze the prototypes during this many epochs from the start"
+        )
 
         return parser
 
@@ -489,11 +493,7 @@ def cli_main():
     args = parser.parse_args()
 
     if args.dataset == 'stl10':
-        dm = STL10DataModule(
-            data_dir=args.data_dir,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers
-        )
+        dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         dm.train_dataloader = dm.train_dataloader_mixed
         dm.val_dataloader = dm.val_dataloader_mixed
@@ -506,11 +506,7 @@ def cli_main():
         args.batch_size = 2
         args.num_workers = 0
 
-        dm = CIFAR10DataModule(
-            data_dir=args.data_dir,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers
-        )
+        dm = CIFAR10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         args.num_samples = dm.num_samples
 
@@ -529,6 +525,7 @@ def cli_main():
         normalization = imagenet_normalization()
 
         args.size_crops = [224, 96]
+        args.nmb_crops = [2, 6]
         args.min_scale_crops = [0.14, 0.05]
         args.max_scale_crops = [1., 0.14]
         args.gaussian_blur = True
@@ -548,11 +545,7 @@ def cli_main():
         args.nmb_prototypes = 3000
         args.online_ft = True
 
-        dm = ImagenetDataModule(
-            data_dir=args.data_dir,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers
-        )
+        dm = ImagenetDataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         args.num_samples = dm.num_samples
         args.input_height = dm.size()[-1]
@@ -586,12 +579,11 @@ def cli_main():
     if args.online_ft:
         # online eval
         online_evaluator = SSLOnlineEvaluator(
-            drop_p=0.,
-            hidden_dim=None,
-            z_dim=args.hidden_mlp,
-            num_classes=dm.num_classes,
-            dataset=args.dataset
+            drop_p=0., hidden_dim=None, z_dim=args.hidden_mlp, num_classes=dm.num_classes, dataset=args.dataset
         )
+
+    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor='val_loss')
+    callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
 
     trainer = pl.Trainer(
         max_epochs=args.max_epochs,
@@ -601,7 +593,7 @@ def cli_main():
         distributed_backend='ddp' if args.gpus > 1 else None,
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=32 if args.fp32 else 16,
-        callbacks=[online_evaluator] if args.online_ft else None,
+        callbacks=callbacks,
         fast_dev_run=args.fast_dev_run
     )
 

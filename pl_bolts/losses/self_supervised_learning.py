@@ -95,6 +95,7 @@ class AmdimNCELoss(nn.Module):
     """
     Compute the NCE scores for predicting r_src->r_trg.
     """
+
     def __init__(self, tclip):
         super().__init__()
         self.tclip = tclip
@@ -136,12 +137,11 @@ class AmdimNCELoss(nn.Module):
         # -----------------------
         # STABILITY TRICKS
         # trick 1: weighted regularization term
-        raw_scores = raw_scores / emb_dim ** 0.5
-        lgt_reg = 5e-2 * (raw_scores ** 2.).mean()
+        raw_scores = raw_scores / emb_dim**0.5
+        lgt_reg = 5e-2 * (raw_scores**2.).mean()
 
         # trick 2: tanh clip
         raw_scores = tanh_clip(raw_scores, clip_val=self.tclip)
-
         """
         pos_scores includes scores for all the positive samples
         neg_scores includes scores for all the negative samples, with
@@ -273,7 +273,7 @@ class FeatureMapContrastiveTask(nn.Module):
 
         if masks is not None:
             # subsample from conv-ish r_cnv to get a single vector
-            mask_idx = torch.randint(0, masks.size(0), (n_batch,), device=r_cnv.device)
+            mask_idx = torch.randint(0, masks.size(0), (n_batch, ), device=r_cnv.device)
             mask = masks[mask_idx]
             r_cnv = torch.masked_select(r_cnv, mask)
 

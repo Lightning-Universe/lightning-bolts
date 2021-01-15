@@ -156,12 +156,13 @@ class GAN(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--learning_rate', type=float, default=0.0002, help="adam: learning rate")
-        parser.add_argument('--adam_b1', type=float, default=0.5,
-                            help="adam: decay of first order momentum of gradient")
-        parser.add_argument('--adam_b2', type=float, default=0.999,
-                            help="adam: decay of first order momentum of gradient")
-        parser.add_argument('--latent_dim', type=int, default=100,
-                            help="generator embedding dim")
+        parser.add_argument(
+            '--adam_b1', type=float, default=0.5, help="adam: decay of first order momentum of gradient"
+        )
+        parser.add_argument(
+            '--adam_b2', type=float, default=0.999, help="adam: decay of first order momentum of gradient"
+        )
+        parser.add_argument('--latent_dim', type=int, default=100, help="generator embedding dim")
         return parser
 
 
