@@ -160,9 +160,7 @@ class VOCDetectionDataModule(LightningDataModule):
         transforms = [_prepare_voc_instance]
         image_transforms = image_transforms or self.train_transforms or self._default_transforms()
         transforms = Compose(transforms, image_transforms)
-        dataset = VOCDetection(
-            self.data_dir, year=self.year, image_set="train", transforms=transforms
-        )
+        dataset = VOCDetection(self.data_dir, year=self.year, image_set="train", transforms=transforms)
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
@@ -185,9 +183,7 @@ class VOCDetectionDataModule(LightningDataModule):
         transforms = [_prepare_voc_instance]
         image_transforms = image_transforms or self.train_transforms or self._default_transforms()
         transforms = Compose(transforms, image_transforms)
-        dataset = VOCDetection(
-            self.data_dir, year=self.year, image_set="val", transforms=transforms
-        )
+        dataset = VOCDetection(self.data_dir, year=self.year, image_set="val", transforms=transforms)
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
@@ -204,9 +200,7 @@ class VOCDetectionDataModule(LightningDataModule):
             voc_transforms = transform_lib.Compose(
                 [
                     transform_lib.ToTensor(),
-                    transform_lib.Normalize(
-                        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                    )
+                    transform_lib.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                 ]
             )
         else:
