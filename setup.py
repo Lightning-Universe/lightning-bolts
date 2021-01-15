@@ -58,7 +58,7 @@ setup(
     zip_safe=False,
     keywords=['deep learning', 'pytorch', 'AI'],
     python_requires='>=3.6',
-    setup_requires=[],
+    setup_requires=['pytorch-lightning>=1.1.0'],
     install_requires=_load_requirements(),
     extras_require=extras,
     project_urls={
