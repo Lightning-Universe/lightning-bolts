@@ -38,22 +38,22 @@ class AMDIM(pl.LightningModule):
     """
 
     def __init__(
-            self,
-            datamodule: Union[str, pl.LightningDataModule] = 'cifar10',
-            encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'amdim_encoder',
-            contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask('01, 02, 11'),
-            image_channels: int = 3,
-            image_height: int = 32,
-            encoder_feature_dim: int = 320,
-            embedding_fx_dim: int = 1280,
-            conv_block_depth: int = 10,
-            use_bn: bool = False,
-            tclip: int = 20.0,
-            learning_rate: int = 2e-4,
-            data_dir: str = '',
-            num_classes: int = 10,
-            batch_size: int = 200,
-            **kwargs,
+        self,
+        datamodule: Union[str, pl.LightningDataModule] = 'cifar10',
+        encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'amdim_encoder',
+        contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask('01, 02, 11'),
+        image_channels: int = 3,
+        image_height: int = 32,
+        encoder_feature_dim: int = 320,
+        embedding_fx_dim: int = 1280,
+        conv_block_depth: int = 10,
+        use_bn: bool = False,
+        tclip: int = 20.0,
+        learning_rate: int = 2e-4,
+        data_dir: str = '',
+        num_classes: int = 10,
+        batch_size: int = 200,
+        **kwargs,
     ):
         """
         Args:
@@ -88,8 +88,9 @@ class AMDIM(pl.LightningModule):
         self.val_split = None
 
     def init_encoder(self):
-        dummy_batch = torch.zeros((2, self.hparams.image_channels, self.hparams.image_height,
-                                   self.hparams.image_height))
+        dummy_batch = torch.zeros(
+            (2, self.hparams.image_channels, self.hparams.image_height, self.hparams.image_height)
+        )
         encoder_name = self.hparams.encoder
 
         if encoder_name == 'amdim_encoder':
@@ -164,10 +165,7 @@ class AMDIM(pl.LightningModule):
         total_loss = unsupervised_loss
 
         tensorboard_logs = {'train_nce_loss': total_loss}
-        result = {
-            'loss': total_loss,
-            'log': tensorboard_logs
-        }
+        result = {'loss': total_loss, 'log': tensorboard_logs}
 
         return result
 
@@ -181,9 +179,7 @@ class AMDIM(pl.LightningModule):
         loss, lgt_reg = self.contrastive_task((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
         unsupervised_loss = loss.sum() + lgt_reg
 
-        result = {
-            'val_nce': unsupervised_loss
-        }
+        result = {'val_nce': unsupervised_loss}
         return result
 
     def validation_epoch_end(self, outputs):
@@ -197,11 +193,7 @@ class AMDIM(pl.LightningModule):
 
     def configure_optimizers(self):
         opt = optim.Adam(
-            params=self.parameters(),
-            lr=self.hparams.learning_rate,
-            betas=(0.8, 0.999),
-            weight_decay=1e-5,
-            eps=1e-7
+            params=self.parameters(), lr=self.hparams.learning_rate, betas=(0.8, 0.999), weight_decay=1e-5, eps=1e-7
         )
 
         # if self.hparams.datamodule in ['cifar10', 'stl10', 'cifar100']:
@@ -318,11 +310,7 @@ class AMDIM(pl.LightningModule):
             ]
         }
 
-        DATASETS = {
-            'cifar10': cifar_10,
-            'stl10': stl10,
-            'imagenet2012': imagenet2012
-        }
+        DATASETS = {'cifar10': cifar_10, 'stl10': stl10, 'imagenet2012': imagenet2012}
 
         (args, _) = parser.parse_known_args()
         dataset = DATASETS[args.datamodule]
@@ -334,8 +322,12 @@ class AMDIM(pl.LightningModule):
         parser.add_argument('--tclip', type=float, default=20.0, help='soft clipping range for NCE scores')
         parser.add_argument('--use_bn', type=int, default=0)
         parser.add_argument('--encoder_feature_dim', type=int, default=dataset['ndf'], help='feature size for encoder')
-        parser.add_argument('--embedding_fx_dim', type=int, default=dataset['n_rkhs'],
-                            help='number of dimensions in fake RKHS embeddings')
+        parser.add_argument(
+            '--embedding_fx_dim',
+            type=int,
+            default=dataset['n_rkhs'],
+            help='number of dimensions in fake RKHS embeddings'
+        )
         parser.add_argument('--conv_block_depth', type=int, default=dataset['depth'])
         parser.add_argument('--image_height', type=int, default=dataset['image_height'])
 
@@ -343,8 +335,9 @@ class AMDIM(pl.LightningModule):
         # resnets = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152',
         #            'resnext50_32x4d', 'resnext101_32x8d',
         #            'wide_resnet50_2', 'wide_resnet101_2']
-        parser.add_argument('--batch_size', type=int, default=dataset['batch_size'],
-                            help='input batch size (default: 200)')
+        parser.add_argument(
+            '--batch_size', type=int, default=dataset['batch_size'], help='input batch size (default: 200)'
+        )
         parser.add_argument('--learning_rate', type=float, default=0.0002)
 
         # data

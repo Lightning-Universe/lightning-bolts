@@ -28,10 +28,10 @@ class LightDataset(ABC, Dataset):
 
     @staticmethod
     def _prepare_subset(
-            full_data: torch.Tensor,
-            full_targets: torch.Tensor,
-            num_samples: int,
-            labels: Sequence
+        full_data: torch.Tensor,
+        full_targets: torch.Tensor,
+        num_samples: int,
+        labels: Sequence,
     ) -> Tuple[Tensor, Tensor]:
         """Prepare a subset of a common dataset."""
         classes = {d: 0 for d in labels}

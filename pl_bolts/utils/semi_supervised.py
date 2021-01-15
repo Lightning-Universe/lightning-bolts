@@ -26,6 +26,7 @@ class Identity(torch.nn.Module):
         model.fc = Identity()
 
     """
+
     def __init__(self) -> None:
         super(Identity, self).__init__()
 
@@ -33,11 +34,8 @@ class Identity(torch.nn.Module):
         return x
 
 
-def balance_classes(
-    X: Union[Tensor, np.ndarray],
-    Y: Union[Tensor, np.ndarray, Sequence[int]],
-    batch_size: int
-) -> Tuple[np.ndarray, np.ndarray]:
+def balance_classes(X: Union[Tensor, np.ndarray], Y: Union[Tensor, np.ndarray, Sequence[int]],
+                    batch_size: int) -> Tuple[np.ndarray, np.ndarray]:
     """
     Makes sure each batch has an equal amount of data from each class.
     Perfect balance
@@ -89,8 +87,8 @@ def balance_classes(
             i_end = i_start + chunk_size
 
             if len(final_batches_x) > batch_i:
-                final_batches_x[batch_i].append(x[i_start: i_end])
-                final_batches_y[batch_i].append(y[i_start: i_end])
+                final_batches_x[batch_i].append(x[i_start:i_end])
+                final_batches_y[batch_i].append(y[i_start:i_end])
 
     # merge into full dataset
     final_batches_x = [np.concatenate(x, axis=0) for x in final_batches_x if len(x) > 0]
@@ -103,11 +101,11 @@ def balance_classes(
 
 
 def generate_half_labeled_batches(
-        smaller_set_X: np.ndarray,
-        smaller_set_Y: np.ndarray,
-        larger_set_X: np.ndarray,
-        larger_set_Y: np.ndarray,
-        batch_size: int,
+    smaller_set_X: np.ndarray,
+    smaller_set_Y: np.ndarray,
+    larger_set_X: np.ndarray,
+    larger_set_Y: np.ndarray,
+    batch_size: int,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Given a labeled dataset and an unlabeled dataset, this function generates
@@ -123,14 +121,14 @@ def generate_half_labeled_batches(
     for i_start in range(0, n_larger, half_batch):
         i_end = i_start + half_batch
 
-        X_larger = larger_set_X[i_start: i_end]
-        Y_larger = larger_set_Y[i_start: i_end]
+        X_larger = larger_set_X[i_start:i_end]
+        Y_larger = larger_set_Y[i_start:i_end]
 
         # pull out labeled part
         smaller_start = i_start % (n_smaller - half_batch)
         smaller_end = smaller_start + half_batch
 
-        X_small = smaller_set_X[smaller_start: smaller_end]
+        X_small = smaller_set_X[smaller_start:smaller_end]
         Y_small = smaller_set_Y[smaller_start:smaller_end]
 
         X.extend([X_larger, X_small])

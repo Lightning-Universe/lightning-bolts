@@ -202,6 +202,7 @@ class VOCDetectionDataModule(LightningDataModule):
                     transform_lib.ToTensor(),
                     transform_lib.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                 ]
+
             )
         else:
             voc_transforms = transform_lib.Compose([transform_lib.ToTensor()])

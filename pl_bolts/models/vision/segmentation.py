@@ -8,6 +8,7 @@ from pl_bolts.models.vision.unet import UNet
 
 
 class SemSegment(pl.LightningModule):
+
     def __init__(
         self,
         lr: float = 0.01,
@@ -41,10 +42,12 @@ class SemSegment(pl.LightningModule):
         self.bilinear = bilinear
         self.lr = lr
 
-        self.net = UNet(num_classes=num_classes,
-                        num_layers=self.num_layers,
-                        features_start=self.features_start,
-                        bilinear=self.bilinear)
+        self.net = UNet(
+            num_classes=num_classes,
+            num_layers=self.num_layers,
+            features_start=self.features_start,
+            bilinear=self.bilinear
+        )
 
     def forward(self, x):
         return self.net(x)
@@ -82,8 +85,12 @@ class SemSegment(pl.LightningModule):
         parser.add_argument("--lr", type=float, default=0.01, help="adam: learning rate")
         parser.add_argument("--num_layers", type=int, default=5, help="number of layers on u-net")
         parser.add_argument("--features_start", type=float, default=64, help="number of features in first layer")
-        parser.add_argument("--bilinear", action='store_true', default=False,
-                            help="whether to use bilinear interpolation or transposed")
+        parser.add_argument(
+            "--bilinear",
+            action='store_true',
+            default=False,
+            help="whether to use bilinear interpolation or transposed"
+        )
 
         return parser
 
