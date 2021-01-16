@@ -1,4 +1,4 @@
-# type: ignore[override]
+# type: ignore
 from typing import Any, Callable, List, Optional
 
 import torch

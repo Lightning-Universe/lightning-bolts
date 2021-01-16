@@ -117,7 +117,7 @@ that works with any PyTorch :class:`~torch.nn.Module` is also available:
 
 .. code-block:: python
 
-    from verification.batch_gradient import BatchGradientVerification
+    from pl_bolts.utils import BatchGradientVerification
 
     model = YourPyTorchModel()
     verification = BatchGradientVerification(model)

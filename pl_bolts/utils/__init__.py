@@ -1,6 +1,8 @@
 import torch
 from pytorch_lightning.utilities import _module_available
 
+from pl_bolts.callbacks.verification.batch_gradient import BatchGradientVerification
+
 _NATIVE_AMP_AVAILABLE: bool = _module_available("torch.cuda.amp") and hasattr(torch.cuda.amp, "autocast")
 
 _TORCHVISION_AVAILABLE: bool = _module_available("torchvision")

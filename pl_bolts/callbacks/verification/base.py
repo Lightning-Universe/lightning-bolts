@@ -1,3 +1,4 @@
+# type: ignore
 from abc import abstractmethod
 from copy import deepcopy
 from typing import Any, Optional
