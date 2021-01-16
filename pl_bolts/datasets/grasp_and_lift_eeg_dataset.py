@@ -86,7 +86,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
                  train: bool = True,
                  download: bool = True,
                  num_samples: int = None,
-                 last_label_only: bool = False):
+                 last_label_only: bool = False) -> None:
         super(GraspAndLiftEEGDataset, self).__init__()
         if num_samples is None and last_label_only:
             raise ValueError('last_label_only cannot be used without setting num_samples')
