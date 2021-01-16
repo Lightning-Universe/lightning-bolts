@@ -85,7 +85,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
                  root: str,
                  train: bool = True,
                  download: bool = True,
-                 num_samples: int = None,
+                 num_samples: Optional[int] = None,
                  last_label_only: bool = False) -> None:
         super(GraspAndLiftEEGDataset, self).__init__()
         if num_samples is None and last_label_only:
