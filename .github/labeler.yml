@@ -1,0 +1,14 @@
+callback:
+  - pl_bolts/callbacks/**/*
+
+datamodule:
+  - pl_bolts/datamodules/**/*
+
+documentation:
+  - docs
+
+logger:
+  - pl_bolts/loggers/**/*
+
+model:
+  - pl_bolts/models/**/*
