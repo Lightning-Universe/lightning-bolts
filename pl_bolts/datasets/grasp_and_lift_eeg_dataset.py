@@ -1,9 +1,11 @@
 import os
 import time
+from typing import List, Optional, Tuple
 import zipfile
 
 import requests
 import torch
+from torch import Tensor
 import torch.utils.data as data
 
 
@@ -112,7 +114,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
         else:
             self.load_from_bin(bin_files)
 
-    def load_from_csv(self, csv_files):
+    def load_from_csv(self, csv_files: List[str]) -> None:
         self.X, self.Y = self.compile_bin(csv_files)
         if self.num_samples is not None:
             # Divide each example up into windows
@@ -120,7 +122,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
             for x in self.X:
                 self.total_examples += x.shape[1] - self.num_samples + 1
 
-    def load_from_bin(self, bin_files: list):
+    def load_from_bin(self, bin_files: List[str]) -> None:
         examples = {}
         self.total_examples = 0
         for file in bin_files:
@@ -142,7 +144,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
                 Y.append(y)
         self.Y = Y if len(Y) > 0 else None
 
-    def download(self, root: str):
+    def download(self, root: str) -> None:
         zip_path = os.path.join(root, 'grasp-and-lift-eeg-detection.zip')
         if not os.path.exists(zip_path) or os.path.getsize(zip_path) != self.ZIP_SIZE_BYTES:
             print(f'Downloading from {self.ZIP_URL}')
@@ -163,7 +165,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
         print(f'Unzipped in {int(delta)} seconds')
         os.remove(zip_path)
 
-    def compile_bin(self, csv_files: list):
+    def compile_bin(self, csv_files: List[str]) -> Tuple[Tensor, Optional[Tensor]]:
         examples = {}
         for i, file in enumerate(csv_files):
             is_data = file.endswith('_data.csv')
@@ -201,7 +203,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
                 Y.append(y)
         return X, Y if len(Y) > 0 else None
 
-    def __getitem__(self, index):
+    def __getitem__(self, index) -> Tuple[Tensor, Optional[Tensor]]:
         if self.num_samples is None:
             # Return the entire example (e.g. reinforcement learning)
             return (self.X[index], self.Y[index] if self.Y is not None else [])
@@ -226,7 +228,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
             return x, y
         raise ValueError(f'unable to seek {index}')
 
-    def __len__(self):
+    def __len__(self) -> int:
         if self.num_samples is None:
             # No windowing - each example is full length
             return len(self.X)
