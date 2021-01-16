@@ -30,15 +30,11 @@ class GraspAndLiftEEGDataset(data.Dataset):
 
     Args:
         root: Path to directory containing train/ and test/ folders
-
         train: If true, use the train/ directory and load class labels.
             If false, load the test/ directory (which lacks labels)
-
         download: If true, download the data if it is not present locally
-
         num_samples: The number of samples in the returned examples.
             If None, the the dataset yields the full length trials.
-
         last_label_only: If true, return only the last sample's labels.
             Must be used with num_samples.
 
