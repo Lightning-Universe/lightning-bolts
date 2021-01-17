@@ -90,6 +90,4 @@ class TensorboardGenerativeModelImageSampler(Callback):
             pad_value=self.pad_value,
         )
         str_title = f"{pl_module.__class__.__name__}_images"
-        trainer.logger.experiment.add_image(
-            str_title, grid, global_step=trainer.global_step
-        )
+        trainer.logger.experiment.add_image(str_title, grid, global_step=trainer.global_step)
