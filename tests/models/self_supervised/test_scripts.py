@@ -7,7 +7,12 @@ from tests import DATASETS_PATH
 
 
 @pytest.mark.parametrize(
-    'cli_args', [f"--data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 3 --fast_dev_run 1 --batch_size 2"]
+    'cli_args', [f"--data_dir {DATASETS_PATH}"
+                 " --max_epochs 1"
+                 " --max_steps 3"
+                 " --fast_dev_run 1"
+                 " --batch_size 2"
+                 " --num_workers 1",]
 )
 def test_cli_run_self_supervised_amdim(cli_args):
     """Test running CLI for an example with default params."""
@@ -22,7 +27,11 @@ def test_cli_run_self_supervised_amdim(cli_args):
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
 @pytest.mark.parametrize(
     'cli_args',
-    [f'--data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 3 --fast_dev_run 1 --batch_size 2 --encoder resnet18']
+    [f'--data_dir {DATASETS_PATH} --max_epochs 1'
+     ' --max_steps 3'
+     ' --fast_dev_run 1'
+     ' --batch_size 2'
+     ' --encoder resnet18',]
 )
 def test_cli_run_self_supervised_cpc(cli_args):
     """Test running CLI for an example with default params."""
@@ -34,7 +43,11 @@ def test_cli_run_self_supervised_cpc(cli_args):
 
 
 @pytest.mark.parametrize(
-    'cli_args', [f'--data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 3 --fast_dev_run 1 --batch_size 2']
+    'cli_args', [f'--data_dir {DATASETS_PATH}'
+                 ' --max_epochs 1'
+                 ' --max_steps 3'
+                 ' --fast_dev_run 1'
+                 ' --batch_size 2',]
 )
 def test_cli_run_self_supervised_moco(cli_args):
     """Test running CLI for an example with default params."""
@@ -47,8 +60,12 @@ def test_cli_run_self_supervised_moco(cli_args):
 
 @pytest.mark.parametrize(
     'cli_args', [
-        f'--data_dir {DATASETS_PATH} --gpus 0 --fp32 --max_epochs 1 --max_steps 3 --fast_dev_run 1'
-        ' --batch_size 2 --online_ft'
+        f'--data_dir {DATASETS_PATH}'
+        '--max_epochs 1'
+        ' --max_steps 3'
+        ' --fast_dev_run 1'
+        ' --batch_size 2'
+        ' --online_ft',
     ]
 )
 def test_cli_run_self_supervised_simclr(cli_args):
@@ -62,7 +79,12 @@ def test_cli_run_self_supervised_simclr(cli_args):
 
 @pytest.mark.parametrize(
     'cli_args',
-    [f'--data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 3 --fast_dev_run 1 --batch_size 2 --online_ft']
+    [f'--data_dir {DATASETS_PATH}'
+     ' --max_epochs 1'
+     ' --max_steps 3'
+     ' --fast_dev_run 1'
+     ' --batch_size 2'
+     ' --online_ft',]
 )
 def test_cli_run_self_supervised_byol(cli_args):
     """Test running CLI for an example with default params."""
@@ -75,8 +97,17 @@ def test_cli_run_self_supervised_byol(cli_args):
 
 @pytest.mark.parametrize(
     'cli_args', [
-        f'--dataset cifar10 --data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 3 --fast_dev_run 1 --batch_size 2'
-        ' --gpus 0 --arch resnet18 --hidden_mlp 512 --fp32 --sinkhorn_iterations 1 --nmb_prototypes 2 --queue_length 0'
+        '--dataset cifar10'
+        f' --data_dir {DATASETS_PATH}'
+        ' --max_epochs 1'
+        ' --max_steps 3'
+        ' --fast_dev_run 1'
+        ' --batch_size 2'
+        ' --arch resnet18'
+        ' --hidden_mlp 512'
+        ' --sinkhorn_iterations 1'
+        ' --nmb_prototypes 2'
+        ' --queue_length 0',
     ]
 )
 def test_cli_run_self_supervised_swav(cli_args):
@@ -90,8 +121,13 @@ def test_cli_run_self_supervised_swav(cli_args):
 
 @pytest.mark.parametrize(
     'cli_args', [
-        f'--dataset cifar10 --data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 3 --fast_dev_run 1 --batch_size 2'
-        ' --gpus 0 --fp32 --online_ft'
+        '--dataset cifar10 '
+        f'--data_dir {DATASETS_PATH}'
+        ' --max_epochs 1'
+        ' --max_steps 3'
+        ' --fast_dev_run 1'
+        ' --batch_size 2'
+        ' --online_ft',
     ]
 )
 def test_cli_run_self_supervised_simsiam(cli_args):
