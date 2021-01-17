@@ -33,25 +33,21 @@ class SRDatasetMixin:
 
     @property
     def hr_transforms(self):
-        return transform_lib.Compose(
-            [
-                transform_lib.RandomCrop(self.hr_image_size),
-                transform_lib.ToTensor(),
-                transform_lib.Normalize(mean=self._normalize_tuple(0.5), std=self._normalize_tuple(0.5)),
-            ]
-        )
+        return transform_lib.Compose([
+            transform_lib.RandomCrop(self.hr_image_size),
+            transform_lib.ToTensor(),
+            transform_lib.Normalize(mean=self._normalize_tuple(0.5), std=self._normalize_tuple(0.5)),
+        ])
 
     @property
     def lr_transforms(self):
         # Scale range of LR images to [0, 1]
-        return transform_lib.Compose(
-            [
-                transform_lib.Normalize(mean=self._normalize_tuple(-1.0), std=self._normalize_tuple(2.0)),
-                transform_lib.ToPILImage(),
-                transform_lib.Resize(self.lr_image_size, Image.BICUBIC),
-                transform_lib.ToTensor(),
-            ]
-        )
+        return transform_lib.Compose([
+            transform_lib.Normalize(mean=self._normalize_tuple(-1.0), std=self._normalize_tuple(2.0)),
+            transform_lib.ToPILImage(),
+            transform_lib.Resize(self.lr_image_size, Image.BICUBIC),
+            transform_lib.ToTensor(),
+        ])
 
     def _normalize_tuple(self, value: float) -> Union[Tuple[int], Tuple[int, int, int]]:
-        return (value,) * self.image_channels
+        return (value, ) * self.image_channels
