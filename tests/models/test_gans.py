@@ -9,7 +9,8 @@ from pl_bolts.models.gans import GAN, SRGAN, SRResNet
 
 
 @pytest.mark.parametrize(
-    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"), pytest.param(CIFAR10DataModule, id="cifar10")]
+    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"),
+               pytest.param(CIFAR10DataModule, id="cifar10")]
 )
 def test_gan(tmpdir, datadir, dm_cls):
     seed_everything()

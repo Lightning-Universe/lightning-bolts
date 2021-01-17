@@ -24,25 +24,23 @@ from pl_bolts.models.self_supervised.cpc.transforms import (
 from pl_bolts.utils.pretrained_weights import load_pretrained
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
-__all__ = [
-    'CPCV2'
-]
+__all__ = ['CPCV2']
 
 
 class CPCV2(pl.LightningModule):
 
     def __init__(
-            self,
-            encoder_name: str = 'cpc_encoder',
-            patch_size: int = 8,
-            patch_overlap: int = 4,
-            online_ft: bool = True,
-            task: str = 'cpc',
-            num_workers: int = 4,
-            num_classes: int = 10,
-            learning_rate: float = 1e-4,
-            pretrained: Optional[str] = None,
-            **kwargs,
+        self,
+        encoder_name: str = 'cpc_encoder',
+        patch_size: int = 8,
+        patch_overlap: int = 4,
+        online_ft: bool = True,
+        task: str = 'cpc',
+        num_workers: int = 4,
+        num_classes: int = 10,
+        learning_rate: float = 1e-4,
+        pretrained: Optional[str] = None,
+        **kwargs,
     ):
         """
         Args:
@@ -175,11 +173,7 @@ class CPCV2(pl.LightningModule):
 
     def configure_optimizers(self):
         opt = optim.Adam(
-            params=self.parameters(),
-            lr=self.hparams.learning_rate,
-            betas=(0.8, 0.999),
-            weight_decay=1e-5,
-            eps=1e-7
+            params=self.parameters(), lr=self.hparams.learning_rate, betas=(0.8, 0.999), weight_decay=1e-5, eps=1e-7
         )
 
         # if self.hparams.dataset in ['cifar10', 'stl10']:
@@ -195,8 +189,8 @@ class CPCV2(pl.LightningModule):
         parser.add_argument('--online_ft', action='store_true')
         parser.add_argument('--task', type=str, default='cpc')
         possible_resnets = [
-            'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152',
-            'resnext50_32x4d', 'resnext101_32x8d', 'wide_resnet50_2', 'wide_resnet101_2'
+            'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
+            'wide_resnet50_2', 'wide_resnet101_2'
         ]
         parser.add_argument('--encoder', default='cpc_encoder', type=str, choices=possible_resnets)
         # cifar10: 1e-5, stl10: 3e-5, imagenet: 4e-4

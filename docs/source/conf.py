@@ -17,7 +17,6 @@ import builtins
 import glob
 import inspect
 import os
-import re
 import shutil
 import sys
 
@@ -51,18 +50,17 @@ release = pl_bolts.__version__
 github_user = 'PyTorchLightning'
 github_repo = project
 
-
 # -- Project documents -------------------------------------------------------
 # export the READme
-with open(os.path.join(PATH_ROOT, 'README.md'), 'r') as fp:
-    readme = fp.read()
-# TODO: temp fix removing SVG badges and GIF, because PDF cannot show them
-readme = re.sub(r'(\[!\[.*\))', '', readme)
-readme = re.sub(r'(!\[.*.gif\))', '', readme)
-for dir_name in (os.path.basename(p) for p in glob.glob(os.path.join(PATH_ROOT, '*')) if os.path.isdir(p)):
-    readme = readme.replace('](%s/' % dir_name, '](%s/%s/' % (PATH_ROOT, dir_name))
-with open('readme.md', 'w') as fp:
-    fp.write(readme)
+# with open(os.path.join(_PATH_ROOT, 'README.md'), 'r') as fp:
+#     readme = fp.read()
+# # TODO: temp fix removing SVG badges and GIF, because PDF cannot show them
+# readme = re.sub(r'(\[!\[.*\))', '', readme)
+# readme = re.sub(r'(!\[.*.gif\))', '', readme)
+# for dir_name in (os.path.basename(p) for p in glob.glob(os.path.join(_PATH_ROOT, '*')) if os.path.isdir(p)):
+#     readme = readme.replace('](%s/' % dir_name, '](%s/%s/' % (_PATH_ROOT, dir_name))
+# with open('readme.md', 'w') as fp:
+#     fp.write(readme)
 
 # copy all documents from GH templates like contribution guide
 for md in glob.glob(os.path.join(PATH_ROOT, '.github', '*.md')):
@@ -81,7 +79,6 @@ for i, ln in enumerate(chlog_lines):
         chlog_lines[i] = ln
 with open(os.path.join(PATH_HERE, 'CHANGELOG.md'), 'w') as fp:
     fp.writelines(chlog_lines)
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -158,7 +155,6 @@ exclude_patterns = [
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -198,7 +194,6 @@ html_static_path = ['_images', '_templates', '_static']
 #
 # html_sidebars = {}
 
-
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
@@ -231,20 +226,22 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, project, project + ' Documentation', [author], 1)
-]
+man_pages = [(master_doc, project, project + ' Documentation', [author], 1)]
 
 # -- Options for Texinfo output ----------------------------------------------
 
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
-texinfo_documents = [
-    (master_doc, project, project + ' Documentation', author, project,
-     'The lightweight PyTorch wrapper for ML researchers. Scale your models. Write less boilerplate.',
-     'Miscellaneous'),
-]
+texinfo_documents = [(
+    master_doc,
+    project,
+    project + ' Documentation',
+    author,
+    project,
+    'The lightweight PyTorch wrapper for ML researchers. Scale your models. Write less boilerplate.',
+    'Miscellaneous',
+)]
 
 # -- Options for Epub output -------------------------------------------------
 
@@ -304,13 +301,16 @@ def run_apidoc(_):
         shutil.rmtree(apidoc_output_folder)
 
     for pkg in PACKAGES:
-        argv = ['-e',
-                '-o', apidoc_output_folder,
-                os.path.join(PATH_ROOT, pkg),
-                '**/test_*',
-                '--force',
-                '--private',
-                '--module-first']
+        argv = [
+            '-e',
+            '-o',
+            apidoc_output_folder,
+            os.path.join(PATH_ROOT, pkg),
+            '**/test_*',
+            '--force',
+            '--private',
+            '--module-first',
+        ]
 
         apidoc.main(argv)
 
@@ -361,6 +361,7 @@ if SPHINX_MOCK_REQUIREMENTS:
 MOCK_PACKAGES = [PACKAGE_MAPPING.get(pkg, pkg) for pkg in MOCK_PACKAGES]
 
 autodoc_mock_imports = MOCK_PACKAGES
+
 # for mod_name in MOCK_REQUIRE_PACKAGES:
 #     sys.modules[mod_name] = mock.Mock()
 
@@ -368,6 +369,7 @@ autodoc_mock_imports = MOCK_PACKAGES
 # Resolve function
 # This function is used to populate the (source) links in the API
 def linkcode_resolve(domain, info):
+
     def find_source():
         # try to find the file and line number, based on code from numpy:
         # https://github.com/numpy/numpy/blob/master/doc/source/conf.py#L286

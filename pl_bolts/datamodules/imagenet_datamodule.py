@@ -48,18 +48,18 @@ class ImagenetDataModule(LightningDataModule):
     name = 'imagenet'
 
     def __init__(
-            self,
-            data_dir: str,
-            meta_dir: Optional[str] = None,
-            num_imgs_per_val_class: int = 50,
-            image_size: int = 224,
-            num_workers: int = 16,
-            batch_size: int = 32,
-            shuffle: bool = False,
-            pin_memory: bool = False,
-            drop_last: bool = False,
-            *args,
-            **kwargs,
+        self,
+        data_dir: str,
+        meta_dir: Optional[str] = None,
+        num_imgs_per_val_class: int = 50,
+        image_size: int = 224,
+        num_workers: int = 16,
+        batch_size: int = 32,
+        shuffle: bool = False,
+        pin_memory: bool = False,
+        drop_last: bool = False,
+        *args,
+        **kwargs,
     ):
         """
         Args:
@@ -107,8 +107,10 @@ class ImagenetDataModule(LightningDataModule):
         dirs = os.listdir(data_dir)
 
         if split not in dirs:
-            raise FileNotFoundError(f'a {split} Imagenet split was not found in {data_dir},'
-                                    f' make sure the folder contains a subfolder named {split}')
+            raise FileNotFoundError(
+                f'a {split} Imagenet split was not found in {data_dir},'
+                f' make sure the folder contains a subfolder named {split}'
+            )
 
     def prepare_data(self):
         """
@@ -123,7 +125,8 @@ class ImagenetDataModule(LightningDataModule):
         for split in ['train', 'val']:
             files = os.listdir(os.path.join(self.data_dir, split))
             if 'meta.bin' not in files:
-                raise FileNotFoundError("""
+                raise FileNotFoundError(
+                    """
                 no meta.bin present. Imagenet is no longer automatically downloaded by PyTorch.
                 To get imagenet:
                 1. download yourself from http://www.image-net.org/challenges/LSVRC/2012/downloads
@@ -136,7 +139,8 @@ class ImagenetDataModule(LightningDataModule):
                 from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
                 path = '/path/to/folder/with/ILSVRC2012_devkit_t12.tar.gz/'
                 UnlabeledImagenet.generate_meta_bins(path)
-                """)
+                """
+                )
 
     def train_dataloader(self):
         """
@@ -144,12 +148,14 @@ class ImagenetDataModule(LightningDataModule):
         """
         transforms = self.train_transform() if self.train_transforms is None else self.train_transforms
 
-        dataset = UnlabeledImagenet(self.data_dir,
-                                    num_imgs_per_class=-1,
-                                    num_imgs_per_class_val_split=self.num_imgs_per_val_class,
-                                    meta_dir=self.meta_dir,
-                                    split='train',
-                                    transform=transforms)
+        dataset = UnlabeledImagenet(
+            self.data_dir,
+            num_imgs_per_class=-1,
+            num_imgs_per_class_val_split=self.num_imgs_per_val_class,
+            meta_dir=self.meta_dir,
+            split='train',
+            transform=transforms
+        )
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -170,11 +176,13 @@ class ImagenetDataModule(LightningDataModule):
         """
         transforms = self.train_transform() if self.val_transforms is None else self.val_transforms
 
-        dataset = UnlabeledImagenet(self.data_dir,
-                                    num_imgs_per_class_val_split=self.num_imgs_per_val_class,
-                                    meta_dir=self.meta_dir,
-                                    split='val',
-                                    transform=transforms)
+        dataset = UnlabeledImagenet(
+            self.data_dir,
+            num_imgs_per_class_val_split=self.num_imgs_per_val_class,
+            meta_dir=self.meta_dir,
+            split='val',
+            transform=transforms
+        )
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -191,11 +199,9 @@ class ImagenetDataModule(LightningDataModule):
         """
         transforms = self.val_transform() if self.test_transforms is None else self.test_transforms
 
-        dataset = UnlabeledImagenet(self.data_dir,
-                                    num_imgs_per_class=-1,
-                                    meta_dir=self.meta_dir,
-                                    split='test',
-                                    transform=transforms)
+        dataset = UnlabeledImagenet(
+            self.data_dir, num_imgs_per_class=-1, meta_dir=self.meta_dir, split='test', transform=transforms
+        )
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
