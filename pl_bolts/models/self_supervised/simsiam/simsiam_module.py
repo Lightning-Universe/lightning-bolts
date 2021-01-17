@@ -140,9 +140,11 @@ class SimSiam(pl.LightningModule):
             self.start_lr, self.learning_rate, self.train_iters_per_epoch * self.warmup_epochs
         )
         iters = np.arange(self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs))
-        cosine_lr_schedule = np.array([self.final_lr + 0.5 * (self.learning_rate - self.final_lr) * (
-            1 + math.cos(math.pi * t / (self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs)))
-        ) for t in iters])
+        cosine_lr_schedule = np.array([
+            self.final_lr + 0.5 * (self.learning_rate - self.final_lr) *
+            (1 + math.cos(math.pi * t / (self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs))))
+            for t in iters
+        ])
 
         self.lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
 
@@ -152,11 +154,10 @@ class SimSiam(pl.LightningModule):
         elif self.arch == 'resnet50':
             backbone = resnet50
 
-        encoder = backbone(
-            first_conv=self.first_conv, maxpool1=self.maxpool1, return_all_feature_maps=False
+        encoder = backbone(first_conv=self.first_conv, maxpool1=self.maxpool1, return_all_feature_maps=False)
+        self.online_network = SiameseArm(
+            encoder, input_dim=self.hidden_mlp, hidden_size=self.hidden_mlp, output_dim=self.feat_dim
         )
-        self.online_network = SiameseArm(encoder, input_dim=self.hidden_mlp,
-                                         hidden_size=self.hidden_mlp, output_dim=self.feat_dim)
 
     def forward(self, x):
         y, _, _ = self.online_network(x)
@@ -208,32 +209,26 @@ class SimSiam(pl.LightningModule):
                 params.append(param)
 
         return [
-            {'params': params, 'weight_decay': weight_decay},
-            {'params': excluded_params, 'weight_decay': 0.}
+            {
+                'params': params,
+                'weight_decay': weight_decay
+            },
+            {
+                'params': excluded_params,
+                'weight_decay': 0.
+            },
         ]
 
     def configure_optimizers(self):
         if self.exclude_bn_bias:
-            params = self.exclude_from_wt_decay(
-                self.named_parameters(),
-                weight_decay=self.weight_decay
-            )
+            params = self.exclude_from_wt_decay(self.named_parameters(), weight_decay=self.weight_decay)
         else:
             params = self.parameters()
 
         if self.optim == 'sgd':
-            optimizer = torch.optim.SGD(
-                params,
-                lr=self.learning_rate,
-                momentum=0.9,
-                weight_decay=self.weight_decay
-            )
+            optimizer = torch.optim.SGD(params, lr=self.learning_rate, momentum=0.9, weight_decay=self.weight_decay)
         elif self.optim == 'adam':
-            optimizer = torch.optim.Adam(
-                params,
-                lr=self.learning_rate,
-                weight_decay=self.weight_decay
-            )
+            optimizer = torch.optim.Adam(params, lr=self.learning_rate, weight_decay=self.weight_decay)
 
         if self.lars_wrapper:
             optimizer = LARSWrapper(
@@ -285,9 +280,7 @@ class SimSiam(pl.LightningModule):
         # specify flags to store false
         parser.add_argument("--first_conv", action="store_false")
         parser.add_argument("--maxpool1", action="store_false")
-        parser.add_argument(
-            "--hidden_mlp", default=2048, type=int, help="hidden layer dimension in projection head"
-        )
+        parser.add_argument("--hidden_mlp", default=2048, type=int, help="hidden layer dimension in projection head")
         parser.add_argument("--feat_dim", default=128, type=int, help="feature dimension")
         parser.add_argument("--online_ft", action="store_true")
         parser.add_argument("--fp32", action="store_true")
@@ -302,23 +295,15 @@ class SimSiam(pl.LightningModule):
         parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
-        parser.add_argument(
-            "--lars_wrapper", action="store_true", help="apple lars wrapper over optimizer used"
-        )
-        parser.add_argument(
-            "--exclude_bn_bias", action="store_true", help="exclude bn/bias from weight decay"
-        )
+        parser.add_argument("--lars_wrapper", action="store_true", help="apple lars wrapper over optimizer used")
+        parser.add_argument("--exclude_bn_bias", action="store_true", help="exclude bn/bias from weight decay")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
         parser.add_argument("--batch_size", default=128, type=int, help="batch size per gpu")
 
-        parser.add_argument(
-            "--temperature", default=0.1, type=float, help="temperature parameter in training loss"
-        )
+        parser.add_argument("--temperature", default=0.1, type=float, help="temperature parameter in training loss")
         parser.add_argument("--weight_decay", default=1e-6, type=float, help="weight decay")
         parser.add_argument("--learning_rate", default=1e-3, type=float, help="base learning rate")
-        parser.add_argument(
-            "--start_lr", default=0, type=float, help="initial warmup learning rate"
-        )
+        parser.add_argument("--start_lr", default=0, type=float, help="initial warmup learning rate")
         parser.add_argument("--final_lr", type=float, default=1e-6, help="final learning rate")
 
         return parser
@@ -345,9 +330,7 @@ def cli_main():
 
     # init datamodule
     if args.dataset == "stl10":
-        dm = STL10DataModule(
-            data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers
-        )
+        dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         dm.train_dataloader = dm.train_dataloader_mixed
         dm.val_dataloader = dm.val_dataloader_mixed
@@ -404,9 +387,7 @@ def cli_main():
         args.start_lr = 0.3
         args.online_ft = True
 
-        dm = ImagenetDataModule(
-            data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers
-        )
+        dm = ImagenetDataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         args.num_samples = dm.num_samples
         args.input_height = dm.size()[-1]

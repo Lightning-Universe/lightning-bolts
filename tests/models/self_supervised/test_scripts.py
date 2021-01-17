@@ -88,10 +88,12 @@ def test_cli_run_self_supervised_swav(cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize('cli_args', [
-    f'--dataset cifar10 --data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 3 --fast_dev_run 1 --batch_size 2'
-    ' --gpus 0 --fp32 --online_ft'
-])
+@pytest.mark.parametrize(
+    'cli_args', [
+        f'--dataset cifar10 --data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 3 --fast_dev_run 1 --batch_size 2'
+        ' --gpus 0 --fp32 --online_ft'
+    ]
+)
 def test_cli_run_self_supervised_simsiam(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.self_supervised.simsiam.simsiam_module import cli_main
