@@ -186,24 +186,20 @@ def cli_main(args=None):
     script_args, _ = parser.parse_known_args(args)
 
     if script_args.dataset == "lsun":
-        transforms = transform_lib.Compose(
-            [
-                transform_lib.Resize(script_args.image_size),
-                transform_lib.CenterCrop(script_args.image_size),
-                transform_lib.ToTensor(),
-                transform_lib.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-            ]
-        )
+        transforms = transform_lib.Compose([
+            transform_lib.Resize(script_args.image_size),
+            transform_lib.CenterCrop(script_args.image_size),
+            transform_lib.ToTensor(),
+            transform_lib.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        ])
         dataset = LSUN(root=script_args.data_dir, classes=["bedroom_train"], transform=transforms)
         image_channels = 3
     elif script_args.dataset == "mnist":
-        transforms = transform_lib.Compose(
-            [
-                transform_lib.Resize(script_args.image_size),
-                transform_lib.ToTensor(),
-                transform_lib.Normalize((0.5,), (0.5,)),
-            ]
-        )
+        transforms = transform_lib.Compose([
+            transform_lib.Resize(script_args.image_size),
+            transform_lib.ToTensor(),
+            transform_lib.Normalize((0.5, ), (0.5, )),
+        ])
         dataset = MNIST(root=script_args.data_dir, download=True, transform=transforms)
         image_channels = 1
 

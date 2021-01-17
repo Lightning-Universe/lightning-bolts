@@ -22,7 +22,8 @@ def test_gan(tmpdir, datadir, dm_cls):
 
 
 @pytest.mark.parametrize(
-    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"), pytest.param(CIFAR10DataModule, id="cifar10")]
+    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"),
+               pytest.param(CIFAR10DataModule, id="cifar10")]
 )
 def test_dcgan(tmpdir, datadir, dm_cls):
     seed_everything()

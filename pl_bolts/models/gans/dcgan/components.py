@@ -4,6 +4,7 @@ from torch import nn
 
 
 class DCGANGenerator(nn.Module):
+
     def __init__(self, latent_dim: int, feature_maps: int, image_channels: int) -> None:
         """
         Args:
@@ -49,6 +50,7 @@ class DCGANGenerator(nn.Module):
 
 
 class DCGANDiscriminator(nn.Module):
+
     def __init__(self, feature_maps: int, image_channels: int) -> None:
         """
         Args:
