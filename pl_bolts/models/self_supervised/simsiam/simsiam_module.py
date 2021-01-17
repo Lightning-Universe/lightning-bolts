@@ -292,7 +292,6 @@ class SimSiam(pl.LightningModule):
         parser.add_argument("--data_dir", type=str, default=".", help="path to download data")
 
         # training params
-        parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
         parser.add_argument("--lars_wrapper", action="store_true", help="apple lars wrapper over optimizer used")
@@ -422,17 +421,10 @@ def cli_main():
             dataset=args.dataset,
         )
 
-    trainer = pl.Trainer(
-        max_epochs=args.max_epochs,
-        max_steps=None if args.max_steps == -1 else args.max_steps,
-        gpus=args.gpus,
-        num_nodes=args.nodes,
-        distributed_backend="ddp" if args.gpus > 1 else None,
+    trainer = pl.Trainer.from_argparse_args(args, kwargs=dict(
         sync_batchnorm=True if args.gpus > 1 else False,
-        precision=32 if args.fp32 else 16,
         callbacks=[online_evaluator] if args.online_ft else None,
-        fast_dev_run=args.fast_dev_run,
-    )
+    ))
 
     trainer.fit(model, datamodule=dm)
 
