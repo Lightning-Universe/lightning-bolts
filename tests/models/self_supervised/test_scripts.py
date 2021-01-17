@@ -7,12 +7,14 @@ from tests import DATASETS_PATH
 
 
 @pytest.mark.parametrize(
-    'cli_args', [f"--data_dir {DATASETS_PATH}"
-                 " --max_epochs 1"
-                 " --max_steps 3"
-                 " --fast_dev_run 1"
-                 " --batch_size 2"
-                 " --num_workers 1",]
+    'cli_args', [
+        f"--data_dir {DATASETS_PATH}"
+        " --max_epochs 1"
+        " --max_steps 3"
+        " --fast_dev_run 1"
+        " --batch_size 2"
+        " --num_workers 0",
+    ]
 )
 def test_cli_run_self_supervised_amdim(cli_args):
     """Test running CLI for an example with default params."""
@@ -26,12 +28,13 @@ def test_cli_run_self_supervised_amdim(cli_args):
 # TODO: this test is hanging (runs for more then 10min) so we need to use GPU or optimize it...
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
 @pytest.mark.parametrize(
-    'cli_args',
-    [f'--data_dir {DATASETS_PATH} --max_epochs 1'
-     ' --max_steps 3'
-     ' --fast_dev_run 1'
-     ' --batch_size 2'
-     ' --encoder resnet18',]
+    'cli_args', [
+        f'--data_dir {DATASETS_PATH} --max_epochs 1'
+        ' --max_steps 3'
+        ' --fast_dev_run 1'
+        ' --batch_size 2'
+        ' --encoder resnet18',
+    ]
 )
 def test_cli_run_self_supervised_cpc(cli_args):
     """Test running CLI for an example with default params."""
@@ -43,11 +46,13 @@ def test_cli_run_self_supervised_cpc(cli_args):
 
 
 @pytest.mark.parametrize(
-    'cli_args', [f'--data_dir {DATASETS_PATH}'
-                 ' --max_epochs 1'
-                 ' --max_steps 3'
-                 ' --fast_dev_run 1'
-                 ' --batch_size 2',]
+    'cli_args', [
+        f'--data_dir {DATASETS_PATH}'
+        ' --max_epochs 1'
+        ' --max_steps 3'
+        ' --fast_dev_run 1'
+        ' --batch_size 2',
+    ]
 )
 def test_cli_run_self_supervised_moco(cli_args):
     """Test running CLI for an example with default params."""
@@ -78,13 +83,14 @@ def test_cli_run_self_supervised_simclr(cli_args):
 
 
 @pytest.mark.parametrize(
-    'cli_args',
-    [f'--data_dir {DATASETS_PATH}'
-     ' --max_epochs 1'
-     ' --max_steps 3'
-     ' --fast_dev_run 1'
-     ' --batch_size 2'
-     ' --online_ft',]
+    'cli_args', [
+        f'--data_dir {DATASETS_PATH}'
+        ' --max_epochs 1'
+        ' --max_steps 3'
+        ' --fast_dev_run 1'
+        ' --batch_size 2'
+        ' --online_ft',
+    ]
 )
 def test_cli_run_self_supervised_byol(cli_args):
     """Test running CLI for an example with default params."""
