@@ -597,7 +597,7 @@ def cli_main():
         fast_dev_run=args.fast_dev_run
     )
 
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
 
 
 if __name__ == '__main__':

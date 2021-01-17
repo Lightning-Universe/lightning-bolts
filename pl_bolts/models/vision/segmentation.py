@@ -118,7 +118,7 @@ def cli_main():
 
     # train
     trainer = pl.Trainer().from_argparse_args(args)
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
 
 
 if __name__ == '__main__':

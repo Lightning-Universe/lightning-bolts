@@ -36,7 +36,7 @@ class BinaryMNISTDataModule(VisionDataModule):
         dm = BinaryMNISTDataModule('.')
         model = LitModel()
 
-        Trainer().fit(model, dm)
+        Trainer().fit(model, datamodule=dm)
     """
 
     name = "binary_mnist"

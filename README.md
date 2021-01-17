@@ -165,7 +165,7 @@ model = LinearRegression(input_dim=13)
 # try with gpus=4!
 # trainer = pl.Trainer(gpus=4)
 trainer = pl.Trainer()
-trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
+trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
 trainer.test(test_dataloaders=loaders.test_dataloader())
 ```
 

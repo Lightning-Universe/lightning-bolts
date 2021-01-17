@@ -20,7 +20,7 @@ def test_vae(tmpdir, datadir, dm_cls):
         gpus=None,
     )
 
-    result = trainer.fit(model, dm)
+    result = trainer.fit(model, datamodule=dm)
     assert result == 1
 
 
@@ -37,7 +37,7 @@ def test_ae(tmpdir, datadir, dm_cls):
         gpus=None,
     )
 
-    result = trainer.fit(model, dm)
+    result = trainer.fit(model, datamodule=dm)
     assert result == 1
 
 

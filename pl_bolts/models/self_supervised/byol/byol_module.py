@@ -42,7 +42,7 @@ class BYOL(pl.LightningModule):
         dm.val_transforms = SimCLREvalDataTransform(32)
 
         trainer = pl.Trainer()
-        trainer.fit(model, dm)
+        trainer.fit(model, datamodule=dm)
 
     Train::
 
@@ -220,7 +220,7 @@ def cli_main():
 
     trainer = pl.Trainer.from_argparse_args(args, max_steps=300000, callbacks=[online_eval])
 
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
 
 
 if __name__ == '__main__':

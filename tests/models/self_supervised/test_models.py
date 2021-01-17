@@ -24,7 +24,7 @@ def test_cpcv2(tmpdir, datadir):
 
     model = CPCV2(encoder='resnet18', online_ft=True, num_classes=datamodule.num_classes)
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['val_nce']
 
     assert float(loss) > 0
@@ -41,7 +41,7 @@ def test_byol(tmpdir, datadir):
 
     model = BYOL(data_dir=datadir, num_classes=datamodule)
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=2)
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) < 1.0
@@ -82,7 +82,7 @@ def test_simclr(tmpdir, datadir):
 
     model = SimCLR(batch_size=2, num_samples=datamodule.num_samples, gpus=0, nodes=1, dataset='cifar10')
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) > 0
@@ -121,7 +121,7 @@ def test_swav(tmpdir, datadir):
 
     trainer = pl.Trainer(gpus=0, fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=3)
 
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) > 0
@@ -136,7 +136,7 @@ def test_simsiam(tmpdir, datadir):
 
     model = SimSiam(batch_size=2, num_samples=datamodule.num_samples, gpus=0, nodes=1, dataset='cifar10')
     trainer = pl.Trainer(gpus=0, fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) < 0

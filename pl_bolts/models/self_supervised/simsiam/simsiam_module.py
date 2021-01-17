@@ -46,7 +46,7 @@ class SimSiam(pl.LightningModule):
         dm.val_transforms = SimCLREvalDataTransform(32)
 
         trainer = pl.Trainer()
-        trainer.fit(model, dm)
+        trainer.fit(model, datamodule=dm)
 
     Train::
 
@@ -434,7 +434,7 @@ def cli_main():
         fast_dev_run=args.fast_dev_run,
     )
 
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
 
 
 if __name__ == "__main__":

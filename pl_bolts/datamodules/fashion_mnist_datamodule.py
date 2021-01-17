@@ -38,7 +38,7 @@ class FashionMNISTDataModule(VisionDataModule):
         dm = FashionMNISTDataModule('.')
         model = LitModel()
 
-        Trainer().fit(model, dm)
+        Trainer().fit(model, datamodule=dm)
     """
     name = "fashion_mnist"
     dataset_cls = FashionMNIST

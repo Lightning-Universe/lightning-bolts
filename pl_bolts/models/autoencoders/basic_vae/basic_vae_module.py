@@ -217,7 +217,7 @@ def cli_main(args=None):
     model = VAE(**vars(args))
 
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
     return dm, model, trainer
 
 

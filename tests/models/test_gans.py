@@ -16,5 +16,5 @@ def test_gan(tmpdir, datadir, dm_cls):
     dm = dm_cls(data_dir=datadir)
     model = GAN(*dm.size())
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
     trainer.test(datamodule=dm, ckpt_path=None)
