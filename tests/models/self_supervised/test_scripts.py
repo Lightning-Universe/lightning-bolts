@@ -13,7 +13,7 @@ from tests import DATASETS_PATH
         " --max_steps 3"
         " --fast_dev_run 1"
         " --batch_size 2"
-        " --num_workers 0",
+        " --num_workers 0"
     ]
 )
 def test_cli_run_self_supervised_amdim(cli_args):
@@ -33,7 +33,8 @@ def test_cli_run_self_supervised_amdim(cli_args):
         ' --max_steps 3'
         ' --fast_dev_run 1'
         ' --batch_size 2'
-        ' --encoder resnet18',
+        ' --encoder resnet18'
+        ' --num_workers 0'
     ]
 )
 def test_cli_run_self_supervised_cpc(cli_args):
@@ -51,7 +52,8 @@ def test_cli_run_self_supervised_cpc(cli_args):
         ' --max_epochs 1'
         ' --max_steps 3'
         ' --fast_dev_run 1'
-        ' --batch_size 2',
+        ' --batch_size 2'
+        ' --num_workers 0'
     ]
 )
 def test_cli_run_self_supervised_moco(cli_args):
@@ -70,7 +72,8 @@ def test_cli_run_self_supervised_moco(cli_args):
         ' --max_steps 3'
         ' --fast_dev_run 1'
         ' --batch_size 2'
-        ' --online_ft',
+        ' --num_workers 0'
+        ' --online_ft'
     ]
 )
 def test_cli_run_self_supervised_simclr(cli_args):
@@ -89,7 +92,8 @@ def test_cli_run_self_supervised_simclr(cli_args):
         ' --max_steps 3'
         ' --fast_dev_run 1'
         ' --batch_size 2'
-        ' --online_ft',
+        " --num_workers 0"
+        ' --online_ft'
     ]
 )
 def test_cli_run_self_supervised_byol(cli_args):
@@ -113,7 +117,8 @@ def test_cli_run_self_supervised_byol(cli_args):
         ' --hidden_mlp 512'
         ' --sinkhorn_iterations 1'
         ' --nmb_prototypes 2'
-        ' --queue_length 0',
+        ' --num_workers 0'
+        ' --queue_length 0'
     ]
 )
 def test_cli_run_self_supervised_swav(cli_args):
@@ -133,7 +138,8 @@ def test_cli_run_self_supervised_swav(cli_args):
         ' --max_steps 3'
         ' --fast_dev_run 1'
         ' --batch_size 2'
-        ' --online_ft',
+        ' --num_workers 0'
+        ' --online_ft'
     ]
 )
 def test_cli_run_self_supervised_simsiam(cli_args):

@@ -156,7 +156,7 @@ class BYOL(pl.LightningModule):
 
         # Data
         parser.add_argument('--data_dir', type=str, default='.')
-        parser.add_argument('--num_workers', default=0, type=int)
+        parser.add_argument('--num_workers', default=8, type=int)
 
         # optim
         parser.add_argument('--batch_size', type=int, default=256)
