@@ -74,6 +74,7 @@ def test_cli_run_self_supervised_moco(cli_args):
         ' --batch_size 2'
         ' --num_workers 0'
         ' --online_ft'
+        ' --gpus 0'
     ]
 )
 def test_cli_run_self_supervised_simclr(cli_args):
@@ -119,6 +120,7 @@ def test_cli_run_self_supervised_byol(cli_args):
         ' --nmb_prototypes 2'
         ' --num_workers 0'
         ' --queue_length 0'
+        ' --gpus 0'
     ]
 )
 def test_cli_run_self_supervised_swav(cli_args):
@@ -140,6 +142,7 @@ def test_cli_run_self_supervised_swav(cli_args):
         ' --batch_size 2'
         ' --num_workers 0'
         ' --online_ft'
+        ' --gpus 0'
     ]
 )
 def test_cli_run_self_supervised_simsiam(cli_args):
