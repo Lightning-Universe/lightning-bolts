@@ -429,14 +429,10 @@ class SwAV(pl.LightningModule):
         )
 
         # training params
-        parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
-        parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
         parser.add_argument("--lars_wrapper", action='store_true', help="apple lars wrapper over optimizer used")
         parser.add_argument('--exclude_bn_bias', action='store_true', help="exclude bn/bias from weight decay")
-        parser.add_argument("--max_epochs", default=100, type=int, help="number of total epochs to run")
-        parser.add_argument("--max_steps", default=-1, type=int, help="max steps")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
         parser.add_argument("--batch_size", default=128, type=int, help="batch size per gpu")
 
@@ -489,6 +485,7 @@ def cli_main():
 
     # model args
     parser = SwAV.add_model_specific_args(parser)
+    parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
     if args.dataset == 'stl10':
@@ -584,17 +581,10 @@ def cli_main():
     model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor='val_loss')
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
 
-    trainer = pl.Trainer(
-        max_epochs=args.max_epochs,
-        max_steps=None if args.max_steps == -1 else args.max_steps,
-        gpus=args.gpus,
-        num_nodes=args.nodes,
-        distributed_backend='ddp' if args.gpus > 1 else None,
+    trainer = pl.Trainer.from_argparse_args(args, kwargs=dict(
         sync_batchnorm=True if args.gpus > 1 else False,
-        precision=32 if args.fp32 else 16,
         callbacks=callbacks,
-        fast_dev_run=args.fast_dev_run
-    )
+    ))
 
     trainer.fit(model, datamodule=dm)
 
