@@ -21,8 +21,7 @@ jobs:
           pip --version
         shell: bash
       - name: PEP8
-        run: |
-          flake8 .
+        run: flake8 .
 
   format-check-yapf:
     runs-on: ubuntu-20.04
@@ -38,8 +37,7 @@ jobs:
           pip --version
         shell: bash
       - name: yapf
-        run: |
-          yapf --diff --parallel --recursive .
+        run: yapf --diff --parallel --recursive .
 
   imports-check-isort:
     runs-on: ubuntu-20.04
@@ -67,5 +65,4 @@ jobs:
           pip install mypy
           pip list
       - name: mypy
-        run: |
-          mypy
+        run: mypy
