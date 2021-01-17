@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
+from torch.nn import functional as F
 
 from pl_bolts.models.vision.unet import UNet
 

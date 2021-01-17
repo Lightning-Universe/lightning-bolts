@@ -5,9 +5,9 @@ from typing import Callable, Optional
 import numpy as np
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
 from pytorch_lightning import seed_everything
 from pytorch_lightning.utilities import AMPType
+from torch.nn import functional as F
 from torch.optim.optimizer import Optimizer
 
 from pl_bolts.models.self_supervised.resnets import resnet18, resnet50

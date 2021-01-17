@@ -8,8 +8,8 @@ from typing import Optional
 
 import pytorch_lightning as pl
 import torch
-import torch.optim as optim
 from pytorch_lightning.utilities import rank_zero_warn
+from torch import optim as optim
 
 from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc.networks import cpc_resnet101

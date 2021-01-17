@@ -1,9 +1,8 @@
 """
 Adapted from: https://github.com/facebookresearch/swav/blob/master/src/resnet50.py
 """
-
 import torch
-import torch.nn as nn
+from torch import nn as nn
 
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):

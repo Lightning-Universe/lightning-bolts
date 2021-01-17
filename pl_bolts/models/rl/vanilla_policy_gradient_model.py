@@ -5,9 +5,9 @@ from typing import List, Tuple
 import numpy as np
 import pytorch_lightning as pl
 import torch
-import torch.optim as optim
 from pytorch_lightning import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
+from torch import optim as optim
 from torch.nn.functional import log_softmax, softmax
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader

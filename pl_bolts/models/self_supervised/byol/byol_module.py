@@ -4,8 +4,8 @@ from typing import Any
 
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
 from pytorch_lightning import seed_everything
+from torch.nn import functional as F
 from torch.optim import Adam
 
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate

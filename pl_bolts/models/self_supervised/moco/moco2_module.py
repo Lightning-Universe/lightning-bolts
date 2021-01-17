@@ -9,14 +9,13 @@ You may not use this file except in compliance with the License.
 
 You may obtain a copy of the License from the LICENSE file present in this folder.
 """
-
 from argparse import ArgumentParser
 from typing import Union
 
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
 from torch import nn
+from torch.nn import functional as F
 
 from pl_bolts.utils.warnings import warn_missing_pkg
 
