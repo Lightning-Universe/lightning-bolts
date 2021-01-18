@@ -49,6 +49,7 @@ class FasterRCNN(pl.LightningModule):
         # PascalVOC
         python faster_rcnn.py --gpus 1 --pretrained True
     """
+
     def __init__(
         self,
         learning_rate: float = 0.0001,
