@@ -46,9 +46,7 @@ def balance_classes(X: Union[Tensor, np.ndarray], Y: Union[Tensor, np.ndarray, S
         batch_size: the ultimate batch size
     """
     if not _SKLEARN_AVAILABLE:  # pragma: no cover
-        raise ModuleNotFoundError(
-            'You want to use `shuffle` function from `scikit-learn` which is not installed yet.'
-        )
+        raise ModuleNotFoundError('You want to use `shuffle` function from `scikit-learn` which is not installed yet.')
 
     nb_classes = len(set(Y))
 
