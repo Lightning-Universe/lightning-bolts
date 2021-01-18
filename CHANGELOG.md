@@ -56,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed the end of batch size mismatch ([#389](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/389))
 - Fixed `batch_size` parameter for DataModules remaining ([#344](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/344))
 - Fixed CIFAR `num_samples` ([#432](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/432))
+- Fixed DQN `run_n_episodes` using the wrong environment variable ([#525](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/525))
 
 ## [0.2.5] - 2020-10-12
 
