@@ -4,7 +4,7 @@ from typing import Union
 
 import pytorch_lightning as pl
 import torch
-import torch.optim as optim
+from torch import optim as optim
 from torch.utils.data import DataLoader
 
 from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
@@ -53,6 +53,7 @@ class AMDIM(pl.LightningModule):
         data_dir: str = '',
         num_classes: int = 10,
         batch_size: int = 200,
+        num_workers: int = 16,
         **kwargs,
     ):
         """
@@ -213,7 +214,7 @@ class AMDIM(pl.LightningModule):
             batch_size=self.hparams.batch_size,
             pin_memory=True,
             drop_last=True,
-            num_workers=16,
+            num_workers=self.hparams.num_workers,
         )
         return loader
 
@@ -227,7 +228,7 @@ class AMDIM(pl.LightningModule):
             batch_size=self.hparams.batch_size,
             pin_memory=True,
             drop_last=True,
-            num_workers=16,
+            num_workers=self.hparams.num_workers,
         )
         return loader
 
@@ -342,6 +343,7 @@ class AMDIM(pl.LightningModule):
 
         # data
         parser.add_argument('--data_dir', default=os.getcwd(), type=str)
+        parser.add_argument('--num_workers', type=int, default=16)
         return parser
 
 

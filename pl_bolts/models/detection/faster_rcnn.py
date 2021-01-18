@@ -141,7 +141,7 @@ def run_cli():
 
     model = FasterRCNN(**vars(args))
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule=datamodule)
 
 
 if __name__ == "__main__":

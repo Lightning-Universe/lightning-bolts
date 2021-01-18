@@ -39,7 +39,7 @@ class MNISTDataModule(VisionDataModule):
         dm = MNISTDataModule('.')
         model = LitModel()
 
-        Trainer().fit(model, dm)
+        Trainer().fit(model, datamodule=dm)
     """
     name = "mnist"
     dataset_cls = MNIST

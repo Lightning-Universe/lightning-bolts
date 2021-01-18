@@ -26,7 +26,10 @@
 [![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://join.slack.com/t/pytorch-lightning/shared_invite/zt-f6bl2l0l-JYMK3tbAgAmGRrlNr00f1A)
 [![Discourse status](https://img.shields.io/discourse/status?server=https%3A%2F%2Fforums.pytorchlightning.ai)](https://forums.pytorchlightning.ai/)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/PytorchLightning/pytorch-lightning/blob/master/LICENSE)
+
+<!--
 [![Next Release](https://img.shields.io/badge/Next%20Release-Oct%2005-purple.svg)](https://shields.io/)
+-->
 
 </div>
 
@@ -50,11 +53,13 @@
 
 | System / PyTorch ver. | 1.6 (min. req.) | 1.7 (latest) |
 | :---: | :---: | :---: |
-| Linux py3.6 / py3.7 / py3.8 | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
-| OSX py3.6 / py3.7 | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
-| Windows py3.6 / py3.7 | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
+| Linux py3.{6,8} | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
+| OSX py3.{6,8} | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
+| Windows py3.7* | ![CI base testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) | ![CI base testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) |
 
 </center>
+
+- _\* testing just the package itself, we skip full test suite - excluding `tests` folder_
 
 ## Install
 
@@ -162,7 +167,7 @@ model = LinearRegression(input_dim=13)
 # try with gpus=4!
 # trainer = pl.Trainer(gpus=4)
 trainer = pl.Trainer()
-trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
+trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
 trainer.test(test_dataloaders=loaders.test_dataloader())
 ```
 

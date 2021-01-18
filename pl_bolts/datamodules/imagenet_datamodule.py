@@ -44,7 +44,7 @@ class ImagenetDataModule(LightningDataModule):
         dm = ImagenetDataModule(IMAGENET_PATH)
         model = LitModel()
 
-        Trainer().fit(model, dm)
+        Trainer().fit(model, datamodule=dm)
     """
 
     name = 'imagenet'

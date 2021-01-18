@@ -47,7 +47,7 @@ class CityscapesDataModule(LightningDataModule):
         dm = CityscapesDataModule(PATH)
         model = LitModel()
 
-        Trainer().fit(model, dm)
+        Trainer().fit(model, datamodule=dm)
 
     Or you can set your own transforms
 

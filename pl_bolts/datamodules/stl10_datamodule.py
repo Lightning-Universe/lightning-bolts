@@ -49,7 +49,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         dm = STL10DataModule(PATH)
         model = LitModel()
 
-        Trainer().fit(model, dm)
+        Trainer().fit(model, datamodule=dm)
     """
 
     name = 'stl10'

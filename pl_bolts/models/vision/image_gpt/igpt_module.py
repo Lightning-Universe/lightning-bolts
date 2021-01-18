@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import torch
-import torch.nn as nn
+from torch import nn as nn
 
 from pl_bolts.models.vision.image_gpt.gpt2 import GPT2
 

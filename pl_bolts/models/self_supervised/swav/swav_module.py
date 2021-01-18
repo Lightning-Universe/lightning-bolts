@@ -9,9 +9,9 @@ from typing import Callable, Optional
 import numpy as np
 import pytorch_lightning as pl
 import torch
-import torch.distributed as dist
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.core.optimizer import LightningOptimizer
+from torch import distributed as dist
 from torch import nn
 from torch.optim.optimizer import Optimizer
 
@@ -597,7 +597,7 @@ def cli_main():
         fast_dev_run=args.fast_dev_run
     )
 
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
 
 
 if __name__ == '__main__':
