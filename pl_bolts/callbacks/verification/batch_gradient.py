@@ -42,7 +42,6 @@ class BatchGradientVerification(VerificationBase):
                 The index `i` of the batch sample to run the test for. When computing the gradient of
                 a loss value on the `i-th` output w.r.t. the whole input, we expect the gradient to be
                 non-zero only on the `i-th` input sample and zero gradient on the rest of the batch.
-                Default: `i = 0`.
 
         Returns:
              ``True`` if the data in the batch does not mix during the forward pass, and ``False`` otherwise.

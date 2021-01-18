@@ -136,7 +136,7 @@ def test_batch_gradient_verification_pl_module(mix_data, device):
         pytest.param(0),
         pytest.param(
             1,
-            marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU"),
+            marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU")
         ),
     ],
 )
