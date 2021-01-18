@@ -25,6 +25,14 @@ def test_cli_run_basic_gan(cli_args, dataset_name):
         cli_main()
 
 
+@pytest.mark.parametrize('cli_args', [f'--dataset mnist --data_dir {DATASETS_PATH} --fast_dev_run 1'])
+def test_cli_run_dcgan(cli_args):
+    from pl_bolts.models.gans.dcgan.dcgan_module import cli_main
+
+    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args.strip().split()):
+        cli_main()
+
+
 # TODO: this test is hanging (runs for more then 10min) so we need to use GPU or optimize it...
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
 @pytest.mark.parametrize(
