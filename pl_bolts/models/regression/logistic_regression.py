@@ -139,7 +139,7 @@ def cli_main():
 
     # data
     X, y = load_iris(return_X_y=True)
-    loaders = SklearnDataModule(X, y, batch_size=args.batch_size)
+    loaders = SklearnDataModule(X, y, batch_size=args.batch_size, num_workers=0)
 
     # train
     trainer = pl.Trainer.from_argparse_args(args)
