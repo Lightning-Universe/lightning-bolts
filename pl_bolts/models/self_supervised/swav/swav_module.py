@@ -429,6 +429,7 @@ class SwAV(pl.LightningModule):
         )
 
         # training params
+        parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
         parser.add_argument("--lars_wrapper", action='store_true', help="apple lars wrapper over optimizer used")
