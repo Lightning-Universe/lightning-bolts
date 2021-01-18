@@ -127,7 +127,8 @@ class SimCLR(pl.LightningModule):
         self.projection = Projection(input_dim=self.hidden_mlp, hidden_dim=self.hidden_mlp, output_dim=self.feat_dim)
 
         # compute iters per epoch
-        global_batch_size = self.nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
+        nb_gpus = len(self.gpus) if isinstance(gpus, (list, tuple)) else self.gpus
+        global_batch_size = self.nodes * nb_gpus * self.batch_size if nb_gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
         # define LR schedule
