@@ -3,21 +3,17 @@ from unittest.mock import call
 
 import pytest
 import torch
-import torch.nn as nn
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import LoggerCollection, TensorBoardLogger
+from torch import nn as nn
 
 from pl_bolts.callbacks import ModuleDataMonitor, TrainingDataMonitor
 from pl_bolts.models import LitMNIST
 
 
-@pytest.mark.parametrize(
-    ["log_every_n_steps", "max_steps", "expected_calls"], [pytest.param(3, 10, 3)]
-)
+@pytest.mark.parametrize(["log_every_n_steps", "max_steps", "expected_calls"], [pytest.param(3, 10, 3)])
 @mock.patch("pl_bolts.callbacks.data_monitor.DataMonitorBase.log_histogram")
-def test_base_log_interval_override(
-    log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir
-):
+def test_base_log_interval_override(log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir):
     """ Test logging interval set by log_every_n_steps argument. """
     monitor = TrainingDataMonitor(log_every_n_steps=log_every_n_steps)
     model = LitMNIST(data_dir=datadir, num_workers=0)
@@ -42,9 +38,7 @@ def test_base_log_interval_override(
     ],
 )
 @mock.patch("pl_bolts.callbacks.data_monitor.DataMonitorBase.log_histogram")
-def test_base_log_interval_fallback(
-    log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir
-):
+def test_base_log_interval_fallback(log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir):
     """ Test that if log_every_n_steps not set in the callback, fallback to what is defined in the Trainer. """
     monitor = TrainingDataMonitor()
     model = LitMNIST(data_dir=datadir, num_workers=0)
@@ -62,21 +56,15 @@ def test_base_no_logger_warning():
     """ Test a warning is displayed when Trainer has no logger. """
     monitor = TrainingDataMonitor()
     trainer = Trainer(logger=False, callbacks=[monitor])
-    with pytest.warns(
-        UserWarning, match="Cannot log histograms because Trainer has no logger"
-    ):
+    with pytest.warns(UserWarning, match="Cannot log histograms because Trainer has no logger"):
         monitor.on_train_start(trainer, pl_module=None)
 
 
 def test_base_unsupported_logger_warning(tmpdir):
     """ Test a warning is displayed when an unsupported logger is used. """
     monitor = TrainingDataMonitor()
-    trainer = Trainer(
-        logger=LoggerCollection([TensorBoardLogger(tmpdir)]), callbacks=[monitor]
-    )
-    with pytest.warns(
-        UserWarning, match="does not support logging with LoggerCollection"
-    ):
+    trainer = Trainer(logger=LoggerCollection([TensorBoardLogger(tmpdir)]), callbacks=[monitor])
+    with pytest.warns(UserWarning, match="does not support logging with LoggerCollection"):
         monitor.on_train_start(trainer, pl_module=None)
 
 
@@ -86,15 +74,15 @@ def test_training_data_monitor(log_histogram, tmpdir, datadir):
     monitor = TrainingDataMonitor()
     model = LitMNIST(data_dir=datadir)
     trainer = Trainer(
-        default_root_dir=tmpdir, log_every_n_steps=1, callbacks=[monitor],
+        default_root_dir=tmpdir,
+        log_every_n_steps=1,
+        callbacks=[monitor],
     )
     monitor.on_train_start(trainer, model)
 
     # single tensor
     example_data = torch.rand(2, 3, 4)
-    monitor.on_train_batch_start(
-        trainer, model, batch=example_data, batch_idx=0, dataloader_idx=0
-    )
+    monitor.on_train_batch_start(trainer, model, batch=example_data, batch_idx=0, dataloader_idx=0)
     assert log_histogram.call_args_list == [
         call(example_data, "training_step/[2, 3, 4]"),
     ]
@@ -103,9 +91,7 @@ def test_training_data_monitor(log_histogram, tmpdir, datadir):
 
     # tuple
     example_data = (torch.rand(2, 3, 4), torch.rand(5), "non-tensor")
-    monitor.on_train_batch_start(
-        trainer, model, batch=example_data, batch_idx=0, dataloader_idx=0
-    )
+    monitor.on_train_batch_start(trainer, model, batch=example_data, batch_idx=0, dataloader_idx=0)
     assert log_histogram.call_args_list == [
         call(example_data[0], "training_step/0/[2, 3, 4]"),
         call(example_data[1], "training_step/1/[5]"),
@@ -119,9 +105,7 @@ def test_training_data_monitor(log_histogram, tmpdir, datadir):
         "x1": torch.rand(5),
         "non-tensor": "non-tensor",
     }
-    monitor.on_train_batch_start(
-        trainer, model, batch=example_data, batch_idx=0, dataloader_idx=0
-    )
+    monitor.on_train_batch_start(trainer, model, batch=example_data, batch_idx=0, dataloader_idx=0)
     assert log_histogram.call_args_list == [
         call(example_data["x0"], "training_step/x0/[2, 3, 4]"),
         call(example_data["x1"], "training_step/x1/[5]"),
@@ -129,6 +113,7 @@ def test_training_data_monitor(log_histogram, tmpdir, datadir):
 
 
 class SubModule(nn.Module):
+
     def __init__(self, inp, out):
         super().__init__()
         self.sub_layer = nn.Linear(inp, out)
@@ -138,6 +123,7 @@ class SubModule(nn.Module):
 
 
 class ModuleDataMonitorModel(nn.Module):
+
     def __init__(self):
         super().__init__()
         self.layer1 = nn.Linear(12, 5)
@@ -162,12 +148,12 @@ def test_module_data_monitor_forward(log_histogram, tmpdir):
     monitor = ModuleDataMonitor(submodules=None)
     model = ModuleDataMonitorModel()
     trainer = Trainer(
-        default_root_dir=tmpdir, log_every_n_steps=1, callbacks=[monitor],
+        default_root_dir=tmpdir,
+        log_every_n_steps=1,
+        callbacks=[monitor],
     )
     monitor.on_train_start(trainer, model)
-    monitor.on_train_batch_start(
-        trainer, model, batch=None, batch_idx=0, dataloader_idx=0
-    )
+    monitor.on_train_batch_start(trainer, model, batch=None, batch_idx=0, dataloader_idx=0)
 
     example_input = torch.rand(2, 6, 2)
     output = model(example_input)
@@ -183,12 +169,12 @@ def test_module_data_monitor_submodules_all(log_histogram, tmpdir):
     monitor = ModuleDataMonitor(submodules=True)
     model = ModuleDataMonitorModel()
     trainer = Trainer(
-        default_root_dir=tmpdir, log_every_n_steps=1, callbacks=[monitor],
+        default_root_dir=tmpdir,
+        log_every_n_steps=1,
+        callbacks=[monitor],
     )
     monitor.on_train_start(trainer, model)
-    monitor.on_train_batch_start(
-        trainer, model, batch=None, batch_idx=0, dataloader_idx=0
-    )
+    monitor.on_train_batch_start(trainer, model, batch=None, batch_idx=0, dataloader_idx=0)
 
     example_input = torch.rand(2, 6, 2)
     output = model(example_input)
@@ -210,12 +196,12 @@ def test_module_data_monitor_submodules_specific(log_histogram, tmpdir):
     monitor = ModuleDataMonitor(submodules=["layer1", "layer2.sub_layer"])
     model = ModuleDataMonitorModel()
     trainer = Trainer(
-        default_root_dir=tmpdir, log_every_n_steps=1, callbacks=[monitor],
+        default_root_dir=tmpdir,
+        log_every_n_steps=1,
+        callbacks=[monitor],
     )
     monitor.on_train_start(trainer, model)
-    monitor.on_train_batch_start(
-        trainer, model, batch=None, batch_idx=0, dataloader_idx=0
-    )
+    monitor.on_train_batch_start(trainer, model, batch=None, batch_idx=0, dataloader_idx=0)
 
     example_input = torch.rand(2, 6, 2)
     _ = model(example_input)

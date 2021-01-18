@@ -2,11 +2,11 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 
 import numpy as np
 import torch
-import torch.nn as nn
 from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.loggers import LightningLoggerBase, TensorBoardLogger, WandbLogger
 from pytorch_lightning.utilities import rank_zero_warn
 from pytorch_lightning.utilities.apply_func import apply_to_collection
+from torch import nn as nn
 from torch import Tensor
 from torch.nn import Module
 from torch.utils.hooks import RemovableHandle
@@ -87,19 +87,13 @@ class DataMonitorBase(Callback):
         logger = self._trainer.logger
         tensor = tensor.detach().cpu()
         if isinstance(logger, TensorBoardLogger):
-            logger.experiment.add_histogram(
-                tag=name, values=tensor, global_step=self._trainer.global_step
-            )
+            logger.experiment.add_histogram(tag=name, values=tensor, global_step=self._trainer.global_step)
 
         if isinstance(logger, WandbLogger):
             if not _WANDB_AVAILABLE:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "You want to use `wandb` which is not installed yet."
-                )
+                raise ModuleNotFoundError("You want to use `wandb` which is not installed yet.")
 
-            logger.experiment.log(
-                data={name: wandb.Histogram(tensor)}, commit=False,
-            )
+            logger.experiment.log(data={name: wandb.Histogram(tensor)}, commit=False)
 
     def _is_logger_available(self, logger: LightningLoggerBase) -> bool:
         available = True
@@ -188,16 +182,8 @@ class ModuleDataMonitor(DataMonitorBase):
         return names
 
     def _register_hook(self, module_name: str, module: nn.Module) -> RemovableHandle:
-        input_group_name = (
-            f"{self.GROUP_NAME_INPUT}/{module_name}"
-            if module_name
-            else self.GROUP_NAME_INPUT
-        )
-        output_group_name = (
-            f"{self.GROUP_NAME_OUTPUT}/{module_name}"
-            if module_name
-            else self.GROUP_NAME_OUTPUT
-        )
+        input_group_name = (f"{self.GROUP_NAME_INPUT}/{module_name}" if module_name else self.GROUP_NAME_INPUT)
+        output_group_name = (f"{self.GROUP_NAME_OUTPUT}/{module_name}" if module_name else self.GROUP_NAME_OUTPUT)
 
         def hook(_: Module, inp: Sequence, out: Sequence) -> None:
             inp = inp[0] if len(inp) == 1 else inp
@@ -230,20 +216,18 @@ class TrainingDataMonitor(DataMonitorBase):
         super().__init__(log_every_n_steps=log_every_n_steps)
 
     def on_train_batch_start(
-            self,
-            trainer: Trainer,
-            pl_module: LightningModule,
-            batch: Any,
-            *args: Any,
-            **kwargs: Any,
+        self,
+        trainer: Trainer,
+        pl_module: LightningModule,
+        batch: Any,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         super().on_train_batch_start(trainer, pl_module, batch, *args, **kwargs)
         self.log_histograms(batch, group=self.GROUP_NAME)
 
 
-def collect_and_name_tensors(
-    data: Any, output: Dict[str, Tensor], parent_name: str = "input"
-) -> None:
+def collect_and_name_tensors(data: Any, output: Dict[str, Tensor], parent_name: str = "input") -> None:
     """
     Recursively fetches all tensors in a (nested) collection of data (depth-first search) and names them.
     Data in dictionaries get named by their corresponding keys and otherwise they get indexed by an

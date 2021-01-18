@@ -1,10 +1,11 @@
 import numpy as np
 import torch
-import torch.nn.functional as F
 from torch import nn
+from torch.nn import functional as F
 
 
 class Generator(nn.Module):
+
     def __init__(self, latent_dim, img_shape, hidden_dim=256):
         super().__init__()
         feats = int(np.prod(img_shape))
@@ -25,6 +26,7 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
+
     def __init__(self, img_shape, hidden_dim=1024):
         super().__init__()
         in_dim = int(np.prod(img_shape))

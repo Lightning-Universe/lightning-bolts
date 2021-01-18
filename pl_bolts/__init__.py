@@ -2,7 +2,7 @@
 
 import os
 
-__version__ = '0.2.6rc1'
+__version__ = '0.3.0rc1'
 __author__ = 'PyTorchLightning et al.'
 __author_email__ = 'name@pytorchlightning.ai'
 __license__ = 'Apache-2.0'
@@ -28,7 +28,8 @@ To add a model, you can start with the MNIST template (or any other model in the
 Please organize the functions of your lightning module.
 """
 
-PACKAGE_ROOT = os.path.dirname(__file__)
+_PACKAGE_ROOT = os.path.dirname(__file__)
+_HTTPS_AWS_HUB = "https://pl-bolts-weights.s3.us-east-2.amazonaws.com"
 
 try:
     # This variable is injected in the __builtins__ by the build process.
@@ -54,5 +55,5 @@ else:
         'models',
         'optimizers',
         'transforms',
-        'utils'
+        'utils',
     ]

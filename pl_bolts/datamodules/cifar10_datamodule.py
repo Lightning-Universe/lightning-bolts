@@ -44,7 +44,7 @@ class CIFAR10DataModule(VisionDataModule):
         dm = CIFAR10DataModule(PATH)
         model = LitModel()
 
-        Trainer().fit(model, dm)
+        Trainer().fit(model, datamodule=dm)
 
     Or you can set your own transforms
 

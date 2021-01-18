@@ -9,8 +9,12 @@ import torch
 from torch import nn
 
 
-def dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], net: nn.Module,
-             target_net: nn.Module, gamma: float = 0.99) -> torch.Tensor:
+def dqn_loss(
+    batch: Tuple[torch.Tensor, torch.Tensor],
+    net: nn.Module,
+    target_net: nn.Module,
+    gamma: float = 0.99
+) -> torch.Tensor:
     """
     Calculates the mse loss using a mini batch from the replay buffer
 
@@ -27,9 +31,7 @@ def dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], net: nn.Module,
 
     actions = actions.long().squeeze(-1)
 
-    state_action_values = (
-        net(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
-    )
+    state_action_values = (net(states).gather(1, actions.unsqueeze(-1)).squeeze(-1))
 
     with torch.no_grad():
         next_state_values = target_net(next_states).max(1)[0]
@@ -41,8 +43,12 @@ def dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], net: nn.Module,
     return nn.MSELoss()(state_action_values, expected_state_action_values)
 
 
-def double_dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], net: nn.Module,
-                    target_net: nn.Module, gamma: float = 0.99) -> torch.Tensor:
+def double_dqn_loss(
+    batch: Tuple[torch.Tensor, torch.Tensor],
+    net: nn.Module,
+    target_net: nn.Module,
+    gamma: float = 0.99,
+) -> torch.Tensor:
     """
     Calculates the mse loss using a mini batch from the replay buffer. This uses an improvement to the original
     DQN loss by using the double dqn. This is shown by using the actions of the train network to pick the
@@ -61,25 +67,19 @@ def double_dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], net: nn.Module,
 
     actions = actions.long().squeeze(-1)
 
-    state_action_values = (
-        net(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
-    )
+    state_action_values = (net(states).gather(1, actions.unsqueeze(-1)).squeeze(-1))
 
     # dont want to mess with gradients when using the target network
     with torch.no_grad():
         next_outputs = net(next_states)  # [16, 2], [batch, action_space]
 
-        next_state_acts = next_outputs.max(1)[1].unsqueeze(
-            -1
-        )  # take action at the index with the highest value
+        next_state_acts = next_outputs.max(1)[1].unsqueeze(-1)  # take action at the index with the highest value
         next_tgt_out = target_net(next_states)
 
         # Take the value of the action chosen by the train network
         next_state_values = next_tgt_out.gather(1, next_state_acts).squeeze(-1)
         next_state_values[dones] = 0.0  # any steps flagged as done get a 0 value
-        next_state_values = (
-            next_state_values.detach()
-        )  # remove values from the graph, no grads needed
+        next_state_values = (next_state_values.detach())  # remove values from the graph, no grads needed
 
     # calc expected discounted return of next_state_values
     expected_state_action_values = next_state_values * gamma + rewards
@@ -89,8 +89,13 @@ def double_dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], net: nn.Module,
     return nn.MSELoss()(state_action_values, expected_state_action_values)
 
 
-def per_dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], batch_weights: List, net: nn.Module,
-                 target_net: nn.Module, gamma: float = 0.99) -> Tuple[torch.Tensor, np.ndarray]:
+def per_dqn_loss(
+    batch: Tuple[torch.Tensor, torch.Tensor],
+    batch_weights: List,
+    net: nn.Module,
+    target_net: nn.Module,
+    gamma: float = 0.99,
+) -> Tuple[torch.Tensor, np.ndarray]:
     """
     Calculates the mse loss with the priority weights of the batch from the PER buffer
 
@@ -119,6 +124,6 @@ def per_dqn_loss(batch: Tuple[torch.Tensor, torch.Tensor], batch_weights: List, 
         next_s_vals = target_net(next_states).max(1)[0]
         next_s_vals[dones] = 0.0
         exp_sa_vals = next_s_vals.detach() * gamma + rewards
-    loss = (state_action_vals - exp_sa_vals) ** 2
+    loss = (state_action_vals - exp_sa_vals)**2
     losses_v = batch_weights * loss
     return losses_v.mean(), (losses_v + 1e-5).data.cpu().numpy()

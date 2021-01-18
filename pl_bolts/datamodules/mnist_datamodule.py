@@ -37,7 +37,7 @@ class MNISTDataModule(VisionDataModule):
         dm = MNISTDataModule('.')
         model = LitModel()
 
-        Trainer().fit(model, dm)
+        Trainer().fit(model, datamodule=dm)
     """
     name = "mnist"
     dataset_cls = MNIST
@@ -94,9 +94,9 @@ class MNISTDataModule(VisionDataModule):
 
     def default_transforms(self):
         if self.normalize:
-            mnist_transforms = transform_lib.Compose(
-                [transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5,), std=(0.5,))]
-            )
+            mnist_transforms = transform_lib.Compose([
+                transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5, ), std=(0.5, ))
+            ])
         else:
             mnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
 

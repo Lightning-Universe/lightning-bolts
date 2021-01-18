@@ -44,7 +44,7 @@ def test_parser_bad_argument():
 
 
 def test_lit_arg_immutable():
-    arg = LitArg("some_arg", (int,), 1, False)
+    arg = LitArg("some_arg", (int, ), 1, False)
     with pytest.raises(FrozenInstanceError):
         arg.default = 0
     assert arg.default == 1
@@ -55,11 +55,20 @@ def test_lit_arg_immutable():
     [
         pytest.param(
             DummyParentModel,
-            {"a": (int, None, True), "b": (str, None, True), "c": (str, "parent_model_c", False),},
+            {
+                "a": (int, None, True),
+                "b": (str, None, True),
+                "c": (str, "parent_model_c", False),
+            },
             id="dummy-parent-model",
         ),
         pytest.param(
-            DummyParentDataModule, {"d": (str, None, True), "c": (str, "parent_dm_c", False)}, id="dummy-parent-dm",
+            DummyParentDataModule,
+            {
+                "d": (str, None, True),
+                "c": (str, "parent_dm_c", False),
+            },
+            id="dummy-parent-dm",
         ),
     ],
 )
@@ -75,7 +84,9 @@ def test_gather_lit_args(obj, expected):
 
 @pytest.mark.parametrize(
     "ignore_required_init_args,dm_cls,model_cls,a,b,c,d",
-    [pytest.param(True, DummyParentDataModule, DummyParentModel, 999, "bbb", "ccc", "ddd", id="base",),],
+    [
+        pytest.param(True, DummyParentDataModule, DummyParentModel, 999, "bbb", "ccc", "ddd", id="base"),
+    ],
 )
 def test_lightning_arguments(ignore_required_init_args, dm_cls, model_cls, a, b, c, d):
     parser = LightningArgumentParser(ignore_required_init_args=ignore_required_init_args)

@@ -19,7 +19,7 @@ Example::
     model = LitModel()
 
     trainer = Trainer()
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
 
 Or use it manually with plain PyTorch
 

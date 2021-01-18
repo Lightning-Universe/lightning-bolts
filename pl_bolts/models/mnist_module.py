@@ -15,6 +15,7 @@ except ModuleNotFoundError:
 
 
 class LitMNIST(LightningModule):
+
     def __init__(self, hidden_dim=128, learning_rate=1e-3, batch_size=32, num_workers=4, data_dir='', **kwargs):
         super().__init__()
         self.save_hyperparameters()

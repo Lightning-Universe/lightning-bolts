@@ -60,6 +60,7 @@ def test_unet():
 def test_semantic_segmentation():
 
     class DummyDataModule(pl.LightningDataModule):
+
         def train_dataloader(self):
             train_ds = DummyDataset((3, 35, 120), (35, 120), num_samples=100)
             return DataLoader(train_ds, batch_size=1)
@@ -69,7 +70,7 @@ def test_semantic_segmentation():
     model = SemSegment(num_classes=19)
 
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1)
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) > 0

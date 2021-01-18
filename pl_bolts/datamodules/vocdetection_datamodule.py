@@ -6,7 +6,7 @@ from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
-    import torchvision.transforms as T
+    from torchvision import transforms as T
     from torchvision.datasets import VOCDetection
 else:
     warn_missing_pkg('torchvision')  # pragma: no-cover
@@ -160,9 +160,7 @@ class VOCDetectionDataModule(LightningDataModule):
             t.append(transforms)
         transforms = Compose(t)
 
-        dataset = VOCDetection(
-            self.data_dir, year=self.year, image_set="train", transforms=transforms
-        )
+        dataset = VOCDetection(self.data_dir, year=self.year, image_set="train", transforms=transforms)
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
@@ -187,9 +185,7 @@ class VOCDetectionDataModule(LightningDataModule):
         if transforms is not None:
             t.append(transforms)
         transforms = Compose(t)
-        dataset = VOCDetection(
-            self.data_dir, year=self.year, image_set="val", transforms=transforms
-        )
+        dataset = VOCDetection(self.data_dir, year=self.year, image_set="val", transforms=transforms)
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
@@ -205,14 +201,10 @@ class VOCDetectionDataModule(LightningDataModule):
         if self.normalize:
             return (
                 lambda image, target: (
-                    T.Compose(
-                        [
-                            T.ToTensor(),
-                            T.Normalize(
-                                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                            ),
-                        ]
-                    )(image),
+                    T.Compose([
+                        T.ToTensor(),
+                        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                    ])(image),
                     target,
                 ),
             )

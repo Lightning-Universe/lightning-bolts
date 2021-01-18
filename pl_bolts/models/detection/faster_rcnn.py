@@ -42,6 +42,7 @@ class FasterRCNN(pl.LightningModule):
         # PascalVOC
         python faster_rcnn.py --gpus 1 --pretrained True
     """
+
     def __init__(
         self,
         learning_rate: float = 0.0001,
@@ -140,7 +141,7 @@ def run_cli():
 
     model = FasterRCNN(**vars(args))
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule=datamodule)
 
 
 if __name__ == "__main__":
