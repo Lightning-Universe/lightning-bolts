@@ -68,7 +68,7 @@ class SimCLR(pl.LightningModule):
         num_samples: int,
         batch_size: int,
         dataset: str,
-        nodes: int = 1,
+        num_nodes: int = 1,
         arch: str = 'resnet50',
         hidden_mlp: int = 2048,
         feat_dim: int = 128,
@@ -99,7 +99,7 @@ class SimCLR(pl.LightningModule):
         self.save_hyperparameters()
 
         self.gpus = gpus
-        self.nodes = nodes
+        self.num_nodes = num_nodes
         self.arch = arch
         self.dataset = dataset
         self.num_samples = num_samples
@@ -128,7 +128,8 @@ class SimCLR(pl.LightningModule):
 
         # compute iters per epoch
         nb_gpus = len(self.gpus) if isinstance(gpus, (list, tuple)) else self.gpus
-        global_batch_size = self.nodes * nb_gpus * self.batch_size if nb_gpus > 0 else self.batch_size
+        assert isinstance(nb_gpus, int)
+        global_batch_size = self.num_nodes * nb_gpus * self.batch_size if nb_gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
         # define LR schedule
@@ -313,7 +314,6 @@ class SimCLR(pl.LightningModule):
         parser.add_argument("--data_dir", type=str, default=".", help="path to download data")
 
         # training params
-        parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
         parser.add_argument("--lars_wrapper", action='store_true', help="apple lars wrapper over optimizer used")
@@ -359,8 +359,8 @@ def cli_main():
         args.jitter_strength = 1.
     elif args.dataset == 'cifar10':
         val_split = 5000
-        if args.nodes * args.gpus * args.batch_size > val_split:
-            val_split = args.nodes * args.gpus * args.batch_size
+        if args.num_nodes * args.gpus * args.batch_size > val_split:
+            val_split = args.num_nodes * args.gpus * args.batch_size
 
         dm = CIFAR10DataModule(
             data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers, val_split=val_split
@@ -386,7 +386,7 @@ def cli_main():
         args.jitter_strength = 1.
 
         args.batch_size = 64
-        args.nodes = 8
+        args.num_nodes = 8
         args.gpus = 8  # per-node
         args.max_epochs = 800
 

@@ -32,7 +32,7 @@ class SwAV(pl.LightningModule):
         num_samples: int,
         batch_size: int,
         dataset: str,
-        nodes: int = 1,
+        num_nodes: int = 1,
         arch: str = 'resnet50',
         hidden_mlp: int = 2048,
         feat_dim: int = 128,
@@ -63,7 +63,7 @@ class SwAV(pl.LightningModule):
         Args:
             gpus: number of gpus per node used in training, passed to SwAV module
                 to manage the queue and select distributed sinkhorn
-            nodes: number of nodes to train on
+            num_nodes: number of nodes to train on
             num_samples: number of image samples used for training
             batch_size: batch size per GPU in ddp
             dataset: dataset being used for train/val
@@ -102,7 +102,7 @@ class SwAV(pl.LightningModule):
         self.save_hyperparameters()
 
         self.gpus = gpus
-        self.nodes = nodes
+        self.num_nodes = num_nodes
         self.arch = arch
         self.dataset = dataset
         self.num_samples = num_samples
@@ -136,7 +136,7 @@ class SwAV(pl.LightningModule):
         self.warmup_epochs = warmup_epochs
         self.max_epochs = max_epochs
 
-        if self.gpus or self.nodes > 1:
+        if self.gpus or self.num_nodes > 1:
             self.get_assignments = self.distributed_sinkhorn
         else:
             self.get_assignments = self.sinkhorn
@@ -145,7 +145,8 @@ class SwAV(pl.LightningModule):
 
         # compute iters per epoch
         nb_gpus = len(self.gpus) if isinstance(gpus, (list, tuple)) else self.gpus
-        global_batch_size = self.nodes * nb_gpus * self.batch_size if nb_gpus > 0 else self.batch_size
+        assert isinstance(nb_gpus, int)
+        global_batch_size = self.num_nodes * nb_gpus * self.batch_size if nb_gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
         # define LR schedule
@@ -430,7 +431,6 @@ class SwAV(pl.LightningModule):
         )
 
         # training params
-        parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
         parser.add_argument("--lars_wrapper", action='store_true', help="apple lars wrapper over optimizer used")
@@ -530,7 +530,7 @@ def cli_main():
         args.jitter_strength = 1.
 
         args.batch_size = 64
-        args.nodes = 8
+        args.num_nodes = 8
         args.gpus = 8  # per-node
         args.max_epochs = 800
 
@@ -577,7 +577,11 @@ def cli_main():
     if args.online_ft:
         # online eval
         online_evaluator = SSLOnlineEvaluator(
-            drop_p=0., hidden_dim=None, z_dim=args.hidden_mlp, num_classes=dm.num_classes, dataset=args.dataset
+            drop_p=0.,
+            hidden_dim=None,
+            z_dim=args.hidden_mlp,
+            num_classes=dm.num_classes,
+            dataset=args.dataset,
         )
 
     model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor='val_loss')
