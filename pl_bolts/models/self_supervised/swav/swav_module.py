@@ -136,7 +136,7 @@ class SwAV(pl.LightningModule):
         self.warmup_epochs = warmup_epochs
         self.max_epochs = max_epochs
 
-        if self.gpus * self.nodes > 1:
+        if self.gpus or self.nodes:
             self.get_assignments = self.distributed_sinkhorn
         else:
             self.get_assignments = self.sinkhorn
