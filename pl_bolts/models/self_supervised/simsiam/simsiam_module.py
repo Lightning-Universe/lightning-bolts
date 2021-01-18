@@ -422,10 +422,11 @@ def cli_main():
             dataset=args.dataset,
         )
 
-    trainer = pl.Trainer.from_argparse_args(args, kwargs=dict(
+    trainer = pl.Trainer.from_argparse_args(
+        args,
         sync_batchnorm=True if args.gpus > 1 else False,
         callbacks=[online_evaluator] if args.online_ft else None,
-    ))
+    )
 
     trainer.fit(model, datamodule=dm)
 

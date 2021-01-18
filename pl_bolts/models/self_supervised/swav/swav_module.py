@@ -582,10 +582,11 @@ def cli_main():
     model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor='val_loss')
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
 
-    trainer = pl.Trainer.from_argparse_args(args, kwargs=dict(
+    trainer = pl.Trainer.from_argparse_args(
+        args,
         sync_batchnorm=True if args.gpus > 1 else False,
         callbacks=callbacks,
-    ))
+    )
 
     trainer.fit(model, datamodule=dm)
 
