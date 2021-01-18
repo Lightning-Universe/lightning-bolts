@@ -31,7 +31,7 @@ class UNet(nn.Module):
             bilinear: bool = False
     ):
 
-        if (num_layers < 1):
+        if num_layers < 1:
             raise ValueError(f'num_layers = {num_layers}, expected: num_layers > 0')
 
         super().__init__()
