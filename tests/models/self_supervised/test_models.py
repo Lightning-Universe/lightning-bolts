@@ -50,7 +50,7 @@ def test_byol(tmpdir, datadir):
 def test_amdim(tmpdir, datadir):
     seed_everything()
 
-    model = AMDIM(data_dir=datadir, batch_size=2, online_ft=True, encoder='resnet18')
+    model = AMDIM(data_dir=datadir, batch_size=2, online_ft=True, encoder='resnet18', num_workers=0)
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.progress_bar_dict['loss']
