@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     [#348](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/348),
     [#323](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/323))
 - Added data monitor callbacks `ModuleDataMonitor` and `TrainingDataMonitor` ([#285](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/285))
-- Added DCGAN ([#403](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/403)) 
+- Added DCGAN module ([#403](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/403)) 
 - Added `VisionDataModule` as parent class for `BinaryMNISTDataModule`, `CIFAR10DataModule`, `FashionMNISTDataModule`, 
   and `MNISTDataModule` ([#400](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/400))
 - Added GIoU loss ([#347](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/347))
