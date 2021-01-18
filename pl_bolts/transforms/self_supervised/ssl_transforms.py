@@ -1,5 +1,5 @@
 import numpy as np
-import torch.nn.functional as F
+from torch.nn import functional as F
 
 from pl_bolts.utils import _PIL_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg

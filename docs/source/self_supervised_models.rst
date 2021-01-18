@@ -130,7 +130,7 @@ To Train::
 
     # fit
     trainer = pl.Trainer()
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
 
 To finetune::
 
@@ -286,7 +286,7 @@ To Train::
 
     # fit
     trainer = pl.Trainer()
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
 
 CIFAR-10 baseline
 *****************

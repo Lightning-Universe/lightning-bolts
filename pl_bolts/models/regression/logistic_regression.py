@@ -139,11 +139,11 @@ def cli_main():
 
     # data
     X, y = load_iris(return_X_y=True)
-    loaders = SklearnDataModule(X, y, batch_size=args.batch_size)
+    loaders = SklearnDataModule(X, y, batch_size=args.batch_size, num_workers=0)
 
     # train
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
+    trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
 
 
 if __name__ == '__main__':

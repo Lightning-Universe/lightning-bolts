@@ -24,4 +24,4 @@ def test_fasterrcnn_train(tmpdir):
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
 
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
-    trainer.fit(model, train_dl, valid_dl)
+    trainer.fit(model, train_dataloader=train_dl, val_dataloaders=valid_dl)

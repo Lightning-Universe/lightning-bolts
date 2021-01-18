@@ -4,8 +4,8 @@ from typing import Any
 
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
 from pytorch_lightning import seed_everything
+from torch.nn import functional as F
 from torch.optim import Adam
 
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
@@ -42,7 +42,7 @@ class BYOL(pl.LightningModule):
         dm.val_transforms = SimCLREvalDataTransform(32)
 
         trainer = pl.Trainer()
-        trainer.fit(model, dm)
+        trainer.fit(model, datamodule=dm)
 
     Train::
 
@@ -156,7 +156,7 @@ class BYOL(pl.LightningModule):
 
         # Data
         parser.add_argument('--data_dir', type=str, default='.')
-        parser.add_argument('--num_workers', default=0, type=int)
+        parser.add_argument('--num_workers', default=8, type=int)
 
         # optim
         parser.add_argument('--batch_size', type=int, default=256)
@@ -220,7 +220,7 @@ def cli_main():
 
     trainer = pl.Trainer.from_argparse_args(args, max_steps=300000, callbacks=[online_eval])
 
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
 
 
 if __name__ == '__main__':

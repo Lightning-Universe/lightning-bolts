@@ -4,7 +4,7 @@ import torch
 from pytorch_lightning import seed_everything
 
 from pl_bolts.datamodules import CIFAR10DataModule
-from pl_bolts.models.self_supervised import AMDIM, BYOL, CPCV2, MocoV2, SimCLR, SwAV
+from pl_bolts.models.self_supervised import AMDIM, BYOL, CPCV2, MocoV2, SimCLR, SimSiam, SwAV
 from pl_bolts.models.self_supervised.cpc import CPCEvalTransformsCIFAR10, CPCTrainTransformsCIFAR10
 from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
 from pl_bolts.models.self_supervised.moco.transforms import Moco2EvalCIFAR10Transforms, Moco2TrainCIFAR10Transforms
@@ -24,7 +24,7 @@ def test_cpcv2(tmpdir, datadir):
 
     model = CPCV2(encoder='resnet18', online_ft=True, num_classes=datamodule.num_classes)
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['val_nce']
 
     assert float(loss) > 0
@@ -41,7 +41,7 @@ def test_byol(tmpdir, datadir):
 
     model = BYOL(data_dir=datadir, num_classes=datamodule)
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=2)
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) < 1.0
@@ -82,7 +82,7 @@ def test_simclr(tmpdir, datadir):
 
     model = SimCLR(batch_size=2, num_samples=datamodule.num_samples, gpus=0, nodes=1, dataset='cifar10')
     trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) > 0
@@ -121,7 +121,22 @@ def test_swav(tmpdir, datadir):
 
     trainer = pl.Trainer(gpus=0, fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=3)
 
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']
 
     assert float(loss) > 0
+
+
+def test_simsiam(tmpdir, datadir):
+    seed_everything()
+
+    datamodule = CIFAR10DataModule(data_dir=datadir, num_workers=0, batch_size=2)
+    datamodule.train_transforms = SimCLRTrainDataTransform(32)
+    datamodule.val_transforms = SimCLREvalDataTransform(32)
+
+    model = SimSiam(batch_size=2, num_samples=datamodule.num_samples, gpus=0, nodes=1, dataset='cifar10')
+    trainer = pl.Trainer(gpus=0, fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
+    trainer.fit(model, datamodule=datamodule)
+    loss = trainer.progress_bar_dict['loss']
+
+    assert float(loss) < 0

@@ -194,7 +194,7 @@ def cli_main(args=None):
     model = GAN(*dm.size(), **vars(args))
     callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]
     trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks, progress_bar_refresh_rate=20)
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
     return dm, model, trainer
 
 
