@@ -78,8 +78,8 @@ class DummyDetectionDataset(Dataset):
 
     def __getitem__(self, idx: int):
         img = torch.rand(self.img_shape)
-        boxes = torch.tensor([self._random_bbox() for _ in range(self.num_boxes)])
-        labels = torch.randint(self.num_classes, (self.num_boxes, ))
+        boxes = torch.tensor([self._random_bbox() for _ in range(self.num_boxes)], dtype=torch.float32)
+        labels = torch.randint(self.num_classes, (self.num_boxes, ), dtype=torch.long)
         return img, {"boxes": boxes, "labels": labels}
 
 
