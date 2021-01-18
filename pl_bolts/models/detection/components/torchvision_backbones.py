@@ -3,8 +3,8 @@ from typing import Optional, Tuple
 import torch.nn as nn
 
 from pl_bolts.models.detection.components._supported_models import TORCHVISION_MODEL_ZOO
-from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.warnings import warn_missing_pkg
+from pl_bolts.utils import _TORCHVISION_AVAILABLE  # noqa: F401
+from pl_bolts.utils.warnings import warn_missing_pkg  # noqa: F401
 
 
 def _create_backbone_generic(model: nn.Module, out_channels: int) -> nn.Module:
