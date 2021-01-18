@@ -171,7 +171,7 @@ class DQN(pl.LightningModule):
             while not done:
                 self.agent.epsilon = epsilon
                 action = self.agent(episode_state, self.device)
-                next_state, reward, done, _ = self.env.step(action[0])
+                next_state, reward, done, _ = env.step(action[0])
                 episode_state = next_state
                 episode_reward += reward
 
