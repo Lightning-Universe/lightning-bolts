@@ -90,7 +90,7 @@ class FashionMNISTDataModule(VisionDataModule):
             **kwargs,
         )
 
-   @property
+    @property
     def num_classes(self) -> int:
         """
         Return:
