@@ -8,8 +8,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
-else:
-    warn_missing_pkg("torchvision")  # pragma: no-cover
+else:  # pragma: no-cover
+    warn_missing_pkg("torchvision")
 
 
 def create_fasterrcnn_backbone(

@@ -23,6 +23,6 @@ if _TORCHVISION_AVAILABLE:
         "mobilenet_v2": torchvision.models.mobilenet_v2,
     }
 
-else:  # pragma: no-cover
+else:  # pragma: no cover
     warn_missing_pkg("torchvision")
     TORCHVISION_MODEL_ZOO = {}

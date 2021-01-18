@@ -13,8 +13,8 @@ if _TORCHVISION_AVAILABLE:
     from torchvision.ops import box_iou
 
     from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
-else:
-    warn_missing_pkg("torchvision")  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg("torchvision")
 
 
 def _evaluate_iou(target, pred):
