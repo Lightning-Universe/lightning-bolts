@@ -10,7 +10,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _SKLEARN_AVAILABLE:
     from sklearn.utils import shuffle as sk_shuffle
-else:  # pragma: no-cover
+else:  # pragma: no cover
     warn_missing_pkg('sklearn', pypi_name='scikit-learn')
 
 
@@ -45,8 +45,8 @@ def balance_classes(X: Union[Tensor, np.ndarray], Y: Union[Tensor, np.ndarray, S
         Y: mixed labels (ints)
         batch_size: the ultimate batch size
     """
-    if not _SKLEARN_AVAILABLE:
-        raise ModuleNotFoundError(  # pragma: no-cover
+    if not _SKLEARN_AVAILABLE:  # pragma: no cover
+        raise ModuleNotFoundError(
             'You want to use `shuffle` function from `scikit-learn` which is not installed yet.'
         )
 
