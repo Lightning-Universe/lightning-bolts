@@ -19,9 +19,7 @@ def _evaluate_iou(target, pred):
     from model
     """
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-        raise ModuleNotFoundError(
-            'You want to use `torchvision` which is not installed yet.'
-        )
+        raise ModuleNotFoundError('You want to use `torchvision` which is not installed yet.')
 
     if pred["boxes"].shape[0] == 0:
         # no box detected, 0 IOU
@@ -68,9 +66,7 @@ class FasterRCNN(pl.LightningModule):
             trainable_backbone_layers: number of trainable resnet layers starting from final block
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError(
-                'You want to use `torchvision` which is not installed yet.'
-            )
+            raise ModuleNotFoundError('You want to use `torchvision` which is not installed yet.')
 
         super().__init__()
 

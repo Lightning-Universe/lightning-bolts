@@ -30,9 +30,7 @@ class ToTensor(Wrapper):
 
     def __init__(self, env=None):
         if not _GYM_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError(
-                'You want to use `gym` which is not installed yet.'
-            )
+            raise ModuleNotFoundError('You want to use `gym` which is not installed yet.')
 
         super(ToTensor, self).__init__(env)
 
@@ -51,9 +49,7 @@ class FireResetEnv(Wrapper):
 
     def __init__(self, env=None):
         if not _GYM_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError(
-                'You want to use `gym` which is not installed yet.'
-            )
+            raise ModuleNotFoundError('You want to use `gym` which is not installed yet.')
 
         super(FireResetEnv, self).__init__(env)
         assert env.unwrapped.get_action_meanings()[1] == "FIRE"
@@ -80,9 +76,7 @@ class MaxAndSkipEnv(Wrapper):
 
     def __init__(self, env=None, skip=4):
         if not _GYM_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError(
-                'You want to use `gym` which is not installed yet.'
-            )
+            raise ModuleNotFoundError('You want to use `gym` which is not installed yet.')
 
         super(MaxAndSkipEnv, self).__init__(env)
         # most recent raw observations (for max pooling across time steps)
@@ -202,9 +196,7 @@ class DataAugmentation(ObservationWrapper):
 
     def __init__(self, env=None):
         if not _GYM_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError(
-                'You want to use `gym` which is not installed yet.'
-            )
+            raise ModuleNotFoundError('You want to use `gym` which is not installed yet.')
 
         super().__init__(env)
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
