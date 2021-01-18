@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored `pl_bolts.callbacks` ([#477](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/477))
 - Refactored the rest of `pl_bolts.models.self_supervised` ([#481](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/481),
     [#479](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/479)
+- Update [`torchvision.utils.make_grid`(https://pytorch.org/docs/stable/torchvision/utils.html#torchvision.utils.make_grid)] kwargs to `TensorboardGenerativeModelImageSampler` ([#494](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/494))
 
 ### Fixed
 
