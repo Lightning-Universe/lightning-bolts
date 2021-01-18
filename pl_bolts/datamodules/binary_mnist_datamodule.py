@@ -7,7 +7,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
-else:  # pragma: no-cover
+else:  # pragma: no cover
     warn_missing_pkg('torchvision')
 
 
@@ -71,8 +71,8 @@ class BinaryMNISTDataModule(VisionDataModule):
             drop_last: If true drops the last incomplete batch
         """
 
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 "You want to use transforms loaded from `torchvision` which is not installed yet."
             )
 

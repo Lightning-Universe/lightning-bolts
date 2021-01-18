@@ -8,8 +8,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import VOCDetection
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 
 class Compose(object):
@@ -119,8 +119,8 @@ class VOCDetectionDataModule(LightningDataModule):
         *args,
         **kwargs,
     ):
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use VOC dataset loaded from `torchvision` which is not installed yet.'
             )
 
