@@ -14,7 +14,6 @@ class VerificationBase:
     Base class for model verification.
     All verifications should run with any :class:`torch.nn.Module` unless otherwise stated.
     """
-
     def __init__(self, model: nn.Module):
         """
         Arguments:
@@ -51,12 +50,10 @@ class VerificationBase:
 
         if isinstance(self.model, LightningModule):
             input_array = self.model.transfer_batch_to_device(
-                input_array, self.model.device
-            )
+                input_array, self.model.device)
         else:
             input_array = move_data_to_device(
-                input_array, device=next(self.model.parameters()).device
-            )
+                input_array, device=next(self.model.parameters()).device)
 
         return input_array
 
@@ -87,7 +84,6 @@ class VerificationCallbackBase(Callback):
     :class:`~pytorch_lightning.core.lightning.LightningModule` and will take the input array
     from :attr:`~pytorch_lightning.core.lightning.LightningModule.example_input_array` if needed.
     """
-
     def __init__(self, warn: bool = True, error: bool = False) -> None:
         """
         Arguments:

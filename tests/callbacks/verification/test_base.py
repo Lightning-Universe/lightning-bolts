@@ -39,9 +39,8 @@ class LitModel(LightningModule):
         pytest.param(torch.device("cpu")),
         pytest.param(
             torch.device("cuda", 0),
-            marks=pytest.mark.skipif(
-                not torch.cuda.is_available(), reason="Test requires GPU"
-            ),
+            marks=pytest.mark.skipif(not torch.cuda.is_available(),
+                                     reason="Test requires GPU"),
         ),
     ],
 )
@@ -54,10 +53,11 @@ def test_verification_base_get_input_array(device):
 
     # for a PyTorch model, user must provide the input array
     with patch(
-        "pl_bolts.callbacks.verification.base.move_data_to_device",
-        wraps=move_data_to_device,
+            "pl_bolts.callbacks.verification.base.move_data_to_device",
+            wraps=move_data_to_device,
     ) as mocked:
-        copied_tensor = verification._get_input_array_copy(input_array=input_tensor)
+        copied_tensor = verification._get_input_array_copy(
+            input_array=input_tensor)
         mocked.assert_called_once()
         assert copied_tensor.device == device
         assert torch.allclose(input_tensor, copied_tensor.cpu())
@@ -67,9 +67,9 @@ def test_verification_base_get_input_array(device):
     verification = TrivialVerification(model)
 
     # for a LightningModule, user can rely on the example_input_array
-    with patch.object(
-        model, "transfer_batch_to_device", wraps=model.transfer_batch_to_device
-    ) as mocked:
+    with patch.object(model,
+                      "transfer_batch_to_device",
+                      wraps=model.transfer_batch_to_device) as mocked:
         copied_tensor = verification._get_input_array_copy(input_array=None)
         mocked.assert_called_once()
         assert copied_tensor.device == model.device == device

@@ -15,7 +15,6 @@ class BatchGradientVerification(VerificationBase):
     This can happen if reshape- and/or permutation operations are carried out in the wrong order or
     on the wrong tensor dimensions.
     """
-
     def check(
         self,
         input_array: Any,
@@ -54,8 +53,7 @@ class BatchGradientVerification(VerificationBase):
 
         if input_batches[0].size(0) < 2:
             raise MisconfigurationException(
-                "Batch size must be greater than 1 to run verification."
-            )
+                "Batch size must be greater than 1 to run verification.")
 
         for input_batch in input_batches:
             input_batch.requires_grad = True
@@ -85,7 +83,6 @@ class BatchGradientVerificationCallback(VerificationCallbackBase):
     The callback version of the :class:`BatchGradientVerification` test.
     Verification is performed right before training begins.
     """
-
     def __init__(
         self,
         input_mapping: Optional[Callable] = None,
@@ -116,7 +113,8 @@ class BatchGradientVerificationCallback(VerificationCallbackBase):
         )
         return message
 
-    def on_train_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def on_train_start(self, trainer: Trainer,
+                       pl_module: LightningModule) -> None:
         verification = BatchGradientVerification(pl_module)
         result = verification.check(
             input_array=pl_module.example_input_array,
@@ -151,7 +149,8 @@ def default_input_mapping(data: Any) -> List[torch.Tensor]:
     tensors = collect_tensors(data)
     batches: List[torch.Tensor] = []
     for tensor in tensors:
-        if tensor.ndim > 0 and (not batches or tensor.size(0) == batches[0].size(0)):
+        if tensor.ndim > 0 and (not batches
+                                or tensor.size(0) == batches[0].size(0)):
             batches.append(tensor)
     return batches
 
