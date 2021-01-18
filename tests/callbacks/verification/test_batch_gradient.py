@@ -12,6 +12,7 @@ from pl_bolts.utils import BatchGradientVerification
 
 
 class TemplateModel(nn.Module):
+
     def __init__(self, mix_data=False):
         """ Base model for testing. The setting ``mix_data=True`` simulates a wrong implementation. """
         super().__init__()
@@ -33,6 +34,7 @@ class TemplateModel(nn.Module):
 
 class MultipleInputModel(TemplateModel):
     """ Base model for testing verification when forward accepts multiple arguments. """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.input_array = (torch.rand(10, 5, 2), torch.rand(10, 5, 2))
@@ -44,6 +46,7 @@ class MultipleInputModel(TemplateModel):
 
 class MultipleOutputModel(TemplateModel):
     """ Base model for testing verification when forward has multiple outputs. """
+
     def forward(self, x):
         out = super().forward(x)
         return None, out, out, False
@@ -51,6 +54,7 @@ class MultipleOutputModel(TemplateModel):
 
 class DictInputDictOutputModel(TemplateModel):
     """ Base model for testing verification when forward has a collection of outputs. """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.input_array = {
@@ -72,6 +76,7 @@ class DictInputDictOutputModel(TemplateModel):
 
 class LitModel(LightningModule):
     """ Base model for testing verification with LightningModules. """
+
     def __init__(self, *args, **kwargs):
         super().__init__()
         self.model = DictInputDictOutputModel(*args, **kwargs)
@@ -83,10 +88,7 @@ class LitModel(LightningModule):
 
 @pytest.mark.parametrize(
     "model_class",
-    [
-        TemplateModel, MultipleInputModel, MultipleOutputModel,
-        DictInputDictOutputModel
-    ],
+    [TemplateModel, MultipleInputModel, MultipleOutputModel, DictInputDictOutputModel],
 )
 @pytest.mark.parametrize("mix_data", [True, False])
 @pytest.mark.parametrize(
@@ -95,8 +97,7 @@ class LitModel(LightningModule):
         pytest.param(torch.device("cpu")),
         pytest.param(
             torch.device("cuda", 0),
-            marks=pytest.mark.skipif(not torch.cuda.is_available(),
-                                     reason="Test requires GPU"),
+            marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU"),
         ),
     ],
 )
@@ -116,8 +117,7 @@ def test_batch_gradient_verification(model_class, mix_data, device):
         pytest.param(torch.device("cpu")),
         pytest.param(
             torch.device("cuda", 0),
-            marks=pytest.mark.skipif(not torch.cuda.is_available(),
-                                     reason="Test requires GPU"),
+            marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU"),
         ),
     ],
 )
@@ -136,8 +136,7 @@ def test_batch_gradient_verification_pl_module(mix_data, device):
         pytest.param(0),
         pytest.param(
             1,
-            marks=pytest.mark.skipif(not torch.cuda.is_available(),
-                                     reason="Test requires GPU"),
+            marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU"),
         ),
     ],
 )
@@ -162,8 +161,7 @@ def test_batch_verification_raises_on_batch_size_1():
     model = TemplateModel()
     verification = BatchGradientVerification(model)
     small_batch = model.input_array[0:1]
-    with pytest.raises(MisconfigurationException,
-                       match="Batch size must be greater than 1"):
+    with pytest.raises(MisconfigurationException, match="Batch size must be greater than 1"):
         verification.check(input_array=small_batch)
 
 
@@ -236,8 +234,7 @@ def test_default_output_mapping():
 
     # tuple + nesting
     data = (tensor0, None, tensor1, "foo", [tensor2])
-    expected = torch.cat(
-        (tensor0.view(b, -1), tensor1.view(b, -1), tensor2.view(b, -1)), dim=1)
+    expected = torch.cat((tensor0.view(b, -1), tensor1.view(b, -1), tensor2.view(b, -1)), dim=1)
     output = default_output_mapping(data)
     assert torch.all(output == expected)
 
