@@ -13,6 +13,4 @@ _OPENCV_AVAILABLE: bool = _module_available("cv2")
 _WANDB_AVAILABLE: bool = _module_available("wandb")
 _MATPLOTLIB_AVAILABLE: bool = _module_available("matplotlib")
 
-__all__ = [
-    "BatchGradientVerification"
-]
+__all__ = ["BatchGradientVerification"]
