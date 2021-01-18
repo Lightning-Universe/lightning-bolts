@@ -5,7 +5,7 @@ import pytest
 
 @pytest.mark.parametrize(
     'cli_args', [
-        '--env PongNoFrameskip-v4'
+        ' --env PongNoFrameskip-v4'
         ' --max_steps 10'
         ' --fast_dev_run 1'
         ' --warm_start_size 10'
@@ -24,7 +24,7 @@ def test_cli_run_rl_dqn(cli_args):
 
 @pytest.mark.parametrize(
     'cli_args', [
-        '--env PongNoFrameskip-v4'
+        ' --env PongNoFrameskip-v4'
         ' --max_steps 10'
         ' --fast_dev_run 1'
         ' --warm_start_size 10'
@@ -43,7 +43,7 @@ def test_cli_run_rl_double_dqn(cli_args):
 
 @pytest.mark.parametrize(
     'cli_args', [
-        '--env PongNoFrameskip-v4'
+        ' --env PongNoFrameskip-v4'
         ' --max_steps 10'
         ' --fast_dev_run 1'
         ' --warm_start_size 10'
@@ -62,7 +62,7 @@ def test_cli_run_rl_dueling_dqn(cli_args):
 
 @pytest.mark.parametrize(
     'cli_args', [
-        '--env PongNoFrameskip-v4'
+        ' --env PongNoFrameskip-v4'
         ' --max_steps 10'
         ' --fast_dev_run 1'
         ' --warm_start_size 10'
@@ -81,7 +81,7 @@ def test_cli_run_rl_noisy_dqn(cli_args):
 
 @pytest.mark.parametrize(
     'cli_args', [
-        '--env PongNoFrameskip-v4'
+        ' --env PongNoFrameskip-v4'
         ' --max_steps 10'
         ' --fast_dev_run 1'
         ' --warm_start_size 10'
@@ -99,7 +99,7 @@ def test_cli_run_rl_per_dqn(cli_args):
 
 
 @pytest.mark.parametrize('cli_args', [
-    '--env CartPole-v0'
+    ' --env CartPole-v0'
     ' --max_steps 10'
     ' --fast_dev_run 1'
     ' --batch_size 10',
@@ -114,7 +114,7 @@ def test_cli_run_rl_reinforce(cli_args):
 
 
 @pytest.mark.parametrize('cli_args', [
-    '--env CartPole-v0'
+    ' --env CartPole-v0'
     ' --max_steps 10'
     ' --fast_dev_run 1'
     ' --batch_size 10',
