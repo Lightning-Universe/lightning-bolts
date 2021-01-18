@@ -1,5 +1,3 @@
-import platform
-
 import pytest
 import pytorch_lightning as pl
 from pytorch_lightning import seed_everything
