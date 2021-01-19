@@ -110,16 +110,17 @@ class LinearRegression(pl.LightningModule):
 
 def cli_main():
     from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
+    from pl_bolts.utils import _SKLEARN_AVAILABLE
 
     pl.seed_everything(1234)
 
     # create dataset
-    try:
+    if _SKLEARN_AVAILABLE:
         from sklearn.datasets import load_boston
-    except ModuleNotFoundError as err:
-        raise ModuleNotFoundError(  # pragma: no-cover
+    else:  # pragma: no cover
+        raise ModuleNotFoundError(
             'You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`.'
-        ) from err
+        )
 
     # args
     parser = ArgumentParser()

@@ -4,6 +4,7 @@ from typing import Any, Optional
 import pytorch_lightning as pl
 import torch
 
+from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -11,8 +12,6 @@ if _TORCHVISION_AVAILABLE:
     from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
     from torchvision.models.detection.faster_rcnn import fasterrcnn_resnet50_fpn, FastRCNNPredictor
     from torchvision.ops import box_iou
-
-    from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
@@ -22,6 +21,9 @@ def _evaluate_iou(target, pred):
     Evaluate intersection over union (IOU) for target from dataset and output prediction
     from model
     """
+    if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+        raise ModuleNotFoundError('You want to use `torchvision` which is not installed yet.')
+
     if pred["boxes"].shape[0] == 0:
         # no box detected, 0 IOU
         return torch.tensor(0.0, device=pred["boxes"].device)
@@ -69,6 +71,9 @@ class FasterRCNN(pl.LightningModule):
             pretrained_backbone: if true, returns a model with backbone pre-trained on Imagenet
             trainable_backbone_layers: number of trainable resnet layers starting from final block
         """
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError('You want to use `torchvision` which is not installed yet.')
+
         super().__init__()
 
         self.learning_rate = learning_rate

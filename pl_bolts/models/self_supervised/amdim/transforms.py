@@ -30,10 +30,8 @@ class AMDIMTrainTransformsCIFAR10:
     """
 
     def __init__(self):
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
-                'You want to use `transforms` from `torchvision` which is not installed yet.'
-            )
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError('You want to use `transforms` from `torchvision` which is not installed yet.')
 
         # flipping image along vertical axis
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
