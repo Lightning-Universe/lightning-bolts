@@ -7,27 +7,13 @@ import torch
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
+from pl_bolts.metrics.object_detection import _evaluate_iou
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
     from torchvision.models.detection.faster_rcnn import fasterrcnn_resnet50_fpn, FastRCNNPredictor
-    from torchvision.ops import box_iou
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
-
-
-def _evaluate_iou(target, pred):
-    """
-    Evaluate intersection over union (IOU) for target from dataset and output prediction
-    from model
-    """
-    if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-        raise ModuleNotFoundError('You want to use `torchvision` which is not installed yet.')
-
-    if pred["boxes"].shape[0] == 0:
-        # no box detected, 0 IOU
-        return torch.tensor(0.0, device=pred["boxes"].device)
-    return box_iou(target["boxes"], pred["boxes"]).diag().mean()
 
 
 class FasterRCNN(pl.LightningModule):
@@ -117,7 +103,7 @@ class FasterRCNN(pl.LightningModule):
         images, targets = batch
         # fasterrcnn takes only images for eval() mode
         outs = self.model(images)
-        iou = torch.stack([_evaluate_iou(t, o) for t, o in zip(targets, outs)]).mean()
+        iou = torch.stack([_evaluate_iou(o, t) for t, o in zip(targets, outs)]).mean()
         return {"val_iou": iou}
 
     def validation_epoch_end(self, outs):
