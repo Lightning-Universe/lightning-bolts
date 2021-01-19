@@ -32,7 +32,7 @@ class BinaryMNIST(MNIST):
 
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
-        img = PIL.Image.fromarray(img.numpy(), mode="L")
+        img = Image.fromarray(img.numpy(), mode="L")
 
         if self.transform is not None:
             img = self.transform(img)
@@ -62,7 +62,7 @@ class SRMNISTDataset(SRDatasetMixin, MNIST):
         self.image_channels = 1
 
     def _get_image(self, index: int):
-        return PIL.Image.fromarray(self.data[index].numpy(), mode="L")
+        return Image.fromarray(self.data[index].numpy(), mode="L")
 
     @property
     def raw_folder(self) -> str:

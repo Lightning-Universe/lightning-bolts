@@ -26,8 +26,8 @@ class SRDataModule(LightningDataModule):
         num_workers: int = 8,
         pin_memory: bool = True,
         drop_last: bool = True,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """
         Args:

@@ -5,7 +5,7 @@ from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _PIL_AVAILABLE:
-    import PIL
+    from PIL import Image
 else:
     warn_missing_pkg("PIL", pypi_name="Pillow")  # pragma: no-cover
 

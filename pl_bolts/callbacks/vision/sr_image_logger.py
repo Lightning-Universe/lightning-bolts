@@ -10,8 +10,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.utils import make_grid
-else:
-    warn_missing_pkg("torchvision")  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg("torchvision")
 
 
 class SRImageLoggerCallback(Callback):
