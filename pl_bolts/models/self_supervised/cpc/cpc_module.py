@@ -195,7 +195,7 @@ class CPCV2(pl.LightningModule):
 
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
-    from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
+    from pl_bolts.datamodules import CIFAR10DataModule
     from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 
     pl.seed_everything(1234)
