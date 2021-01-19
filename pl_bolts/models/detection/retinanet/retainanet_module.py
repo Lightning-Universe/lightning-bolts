@@ -55,7 +55,7 @@ class RetinaNet(pl.LightningModule):
         self.num_classes = num_classes
         self.backbone = backbone
         if backbone is None:
-            self.model = retinanet_resnet50_fpn(pretrained=True, **kwargs)
+            self.model = retinanet_resnet50_fpn(pretrained=pretrained, **kwargs)
 
             self.model.head = RetinaNetHead(in_channels=self.model.backbone.out_channels,
                                             num_anchors=self.model.head.classification_head.num_anchors,
