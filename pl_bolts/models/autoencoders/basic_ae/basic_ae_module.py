@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import torch
-import torch.nn as nn
+from torch import nn as nn
 from torch.nn import functional as F
 
 from pl_bolts import _HTTPS_AWS_HUB
@@ -180,7 +180,7 @@ def cli_main(args=None):
     model = AE(**vars(args))
 
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
     return dm, model, trainer
 
 

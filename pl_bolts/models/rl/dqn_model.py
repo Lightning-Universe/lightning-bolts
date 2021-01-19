@@ -1,7 +1,6 @@
 """
 Deep Q Network
 """
-
 import argparse
 from collections import OrderedDict
 from typing import Dict, List, Optional, Tuple
@@ -9,9 +8,9 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pytorch_lightning as pl
 import torch
-import torch.optim as optim
 from pytorch_lightning import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
+from torch import optim as optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
@@ -172,7 +171,7 @@ class DQN(pl.LightningModule):
             while not done:
                 self.agent.epsilon = epsilon
                 action = self.agent(episode_state, self.device)
-                next_state, reward, done, _ = self.env.step(action[0])
+                next_state, reward, done, _ = env.step(action[0])
                 episode_state = next_state
                 episode_reward += reward
 

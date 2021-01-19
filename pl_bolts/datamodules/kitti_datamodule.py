@@ -10,7 +10,7 @@ from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
-    import torchvision.transforms as transforms
+    from torchvision import transforms as transforms
 else:  # pragma: no cover
     warn_missing_pkg('torchvision')
 
@@ -55,7 +55,7 @@ class KittiDataModule(LightningDataModule):
             dm = KittiDataModule(PATH)
             model = LitModel()
 
-            Trainer().fit(model, dm)
+            Trainer().fit(model, datamodule=dm)
 
         Args:
             data_dir: where to load the data from path, i.e. '/path/to/folder/with/data_semantics/'
@@ -80,11 +80,6 @@ class KittiDataModule(LightningDataModule):
         self.shuffle = shuffle
         self.pin_memory = pin_memory
         self.drop_last = drop_last
-
-        self.default_transforms = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.35675976, 0.37380189, 0.3764753], std=[0.32064945, 0.32098866, 0.32325324])
-        ])
 
         # split into train, val, test
         kitti_dataset = KittiDataset(self.data_dir, transform=self._default_transforms())

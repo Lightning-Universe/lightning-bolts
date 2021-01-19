@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
+from torch.nn import functional as F
 
 from pl_bolts.models.vision.unet import UNet
 
@@ -118,7 +118,7 @@ def cli_main():
 
     # train
     trainer = pl.Trainer().from_argparse_args(args)
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
 
 
 if __name__ == '__main__':

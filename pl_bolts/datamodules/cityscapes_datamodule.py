@@ -7,8 +7,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import Cityscapes
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 
 class CityscapesDataModule(LightningDataModule):
@@ -43,7 +43,7 @@ class CityscapesDataModule(LightningDataModule):
         dm = CityscapesDataModule(PATH)
         model = LitModel()
 
-        Trainer().fit(model, dm)
+        Trainer().fit(model, datamodule=dm)
 
     Or you can set your own transforms
 
@@ -88,8 +88,8 @@ class CityscapesDataModule(LightningDataModule):
         """
         super().__init__(*args, **kwargs)
 
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use CityScapes dataset loaded from `torchvision` which is not installed yet.'
             )
 

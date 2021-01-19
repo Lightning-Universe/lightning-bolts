@@ -1,6 +1,6 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
+from torch import nn as nn
+from torch.nn import functional as F
 
 
 class UNet(nn.Module):
@@ -31,6 +31,10 @@ class UNet(nn.Module):
         features_start: int = 64,
         bilinear: bool = False
     ):
+
+        if num_layers < 1:
+            raise ValueError(f'num_layers = {num_layers}, expected: num_layers > 0')
+
         super().__init__()
         self.num_layers = num_layers
 

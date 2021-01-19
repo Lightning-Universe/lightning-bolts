@@ -53,11 +53,13 @@
 
 | System / PyTorch ver. | 1.6 (min. req.) | 1.7 (latest) |
 | :---: | :---: | :---: |
-| Linux py3.{6,7,8} | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
-| OSX py3.{6,7} | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
-| Windows py3.{6,7} | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
+| Linux py3.{6,8} | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
+| OSX py3.{6,8} | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
+| Windows py3.7* | ![CI base testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) | ![CI base testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) |
 
 </center>
+
+- _\* testing just the package itself, we skip full test suite - excluding `tests` folder_
 
 ## Install
 
@@ -165,7 +167,7 @@ model = LinearRegression(input_dim=13)
 # try with gpus=4!
 # trainer = pl.Trainer(gpus=4)
 trainer = pl.Trainer()
-trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
+trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
 trainer.test(test_dataloaders=loaders.test_dataloader())
 ```
 

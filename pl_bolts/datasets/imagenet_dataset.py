@@ -195,7 +195,7 @@ def parse_devkit_archive(root, file=None):
         file (str, optional): Name of devkit archive. Defaults to
             'ILSVRC2012_devkit_t12.tar.gz'
     """
-    import scipy.io as sio
+    from scipy import io as sio
 
     def parse_meta_mat(devkit_root):
         metafile = os.path.join(devkit_root, "data", "meta.mat")

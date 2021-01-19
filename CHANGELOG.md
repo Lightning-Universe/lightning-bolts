@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     [#348](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/348),
     [#323](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/323))
 - Added data monitor callbacks `ModuleDataMonitor` and `TrainingDataMonitor` ([#285](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/285))
+- Added DCGAN module ([#403](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/403)) 
 - Added `VisionDataModule` as parent class for `BinaryMNISTDataModule`, `CIFAR10DataModule`, `FashionMNISTDataModule`, 
   and `MNISTDataModule` ([#400](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/400))
 - Added `SRGAN` module ([#466](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/466))
@@ -23,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added flags to datamodules ([#388](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/388))
 - Added metric GIoU ([#347](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/347))
 - Added Intersection over Union Metric/Loss ([#469](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/469))
+- Added SimSiam model ([#407](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/407))
+- Added gradient verification callback ([#465](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/465))
+- Added Backbones to FRCNN ([#475](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/475))
 
 ### Changed
 
@@ -41,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored `pl_bolts.callbacks` ([#477](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/477))
 - Refactored the rest of `pl_bolts.models.self_supervised` ([#481](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/481),
     [#479](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/479)
+- Update [`torchvision.utils.make_grid`(https://pytorch.org/docs/stable/torchvision/utils.html#torchvision.utils.make_grid)] kwargs to `TensorboardGenerativeModelImageSampler` ([#494](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/494))
 
 ### Fixed
 
@@ -56,6 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed the end of batch size mismatch ([#389](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/389))
 - Fixed `batch_size` parameter for DataModules remaining ([#344](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/344))
 - Fixed CIFAR `num_samples` ([#432](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/432))
+- Fixed DQN `run_n_episodes` using the wrong environment variable ([#525](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/525))
 
 ## [0.2.5] - 2020-10-12
 
