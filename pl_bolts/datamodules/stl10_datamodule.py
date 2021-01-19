@@ -14,8 +14,8 @@ if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import STL10
     from torchvision.transforms import Compose
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
     Compose = object
 
 
@@ -83,8 +83,8 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         """
         super().__init__(*args, **kwargs)
 
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use STL10 dataset loaded from `torchvision` which is not installed yet.'
             )
 

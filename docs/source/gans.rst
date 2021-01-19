@@ -41,3 +41,48 @@ Loss curves:
 
 .. autoclass:: pl_bolts.models.gans.GAN
    :noindex:
+
+DCGAN
+---------
+DCGAN implementation from the paper `Unsupervised Representation Learning with Deep Convolutional Generative
+Adversarial Networks <https://arxiv.org/pdf/1511.06434.pdf>`_. The implementation is based on the version from
+PyTorch's `examples <https://github.com/pytorch/examples/blob/master/dcgan/main.py>`_.
+
+Implemented by:
+
+    - `Christoph Clement <https://github.com/chris-clem>`_
+
+Example MNIST outputs:
+
+    .. image:: _images/gans/dcgan_mnist_outputs.png
+        :width: 400
+        :alt: DCGAN generated MNIST samples
+
+Example LSUN bedroom outputs:
+
+    .. image:: _images/gans/dcgan_lsun_outputs.png
+        :width: 400
+        :alt: DCGAN generated LSUN bedroom samples
+
+MNIST Loss curves:
+
+    .. image:: _images/gans/dcgan_mnist_dloss.png
+        :width: 200
+        :alt: DCGAN MNIST disc loss
+
+    .. image:: _images/gans/dcgan_mnist_gloss.png
+        :width: 200
+        :alt: DCGAN MNIST gen loss
+
+LSUN Loss curves:
+
+    .. image:: _images/gans/dcgan_lsun_dloss.png
+        :width: 200
+        :alt: DCGAN LSUN disc loss
+
+    .. image:: _images/gans/dcgan_lsun_gloss.png
+        :width: 200
+        :alt: DCGAN LSUN gen loss
+
+.. autoclass:: pl_bolts.models.gans.DCGAN
+   :noindex:

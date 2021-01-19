@@ -14,21 +14,24 @@ if _GYM_AVAILABLE:
     import gym.spaces
     from gym import make as gym_make
     from gym import ObservationWrapper, Wrapper
-else:  # pragma: no-cover
+else:  # pragma: no cover
     warn_missing_pkg('gym')
     Wrapper = object
     ObservationWrapper = object
 
 if _OPENCV_AVAILABLE:
     import cv2
-else:
-    warn_missing_pkg('cv2', pypi_name='opencv-python')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('cv2', pypi_name='opencv-python')
 
 
 class ToTensor(Wrapper):
     """For environments where the user need to press FIRE for the game to start."""
 
     def __init__(self, env=None):
+        if not _GYM_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError('You want to use `gym` which is not installed yet.')
+
         super(ToTensor, self).__init__(env)
 
     def step(self, action):
@@ -45,6 +48,9 @@ class FireResetEnv(Wrapper):
     """For environments where the user need to press FIRE for the game to start."""
 
     def __init__(self, env=None):
+        if not _GYM_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError('You want to use `gym` which is not installed yet.')
+
         super(FireResetEnv, self).__init__(env)
         assert env.unwrapped.get_action_meanings()[1] == "FIRE"
         assert len(env.unwrapped.get_action_meanings()) >= 3
@@ -69,6 +75,9 @@ class MaxAndSkipEnv(Wrapper):
     """Return only every `skip`-th frame"""
 
     def __init__(self, env=None, skip=4):
+        if not _GYM_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError('You want to use `gym` which is not installed yet.')
+
         super(MaxAndSkipEnv, self).__init__(env)
         # most recent raw observations (for max pooling across time steps)
         self._obs_buffer = collections.deque(maxlen=2)
@@ -99,8 +108,7 @@ class ProcessFrame84(ObservationWrapper):
     """preprocessing images from env"""
 
     def __init__(self, env=None):
-
-        if not _OPENCV_AVAILABLE:
+        if not _OPENCV_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError('This class uses OpenCV which it is not installed yet.')
 
         super(ProcessFrame84, self).__init__(env)
@@ -130,8 +138,7 @@ class ImageToPyTorch(ObservationWrapper):
     """converts image to pytorch format"""
 
     def __init__(self, env):
-
-        if not _OPENCV_AVAILABLE:
+        if not _OPENCV_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError('This class uses OpenCV which it is not installed yet.')
 
         super(ImageToPyTorch, self).__init__(env)
@@ -188,6 +195,9 @@ class DataAugmentation(ObservationWrapper):
     """
 
     def __init__(self, env=None):
+        if not _GYM_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError('You want to use `gym` which is not installed yet.')
+
         super().__init__(env)
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
 

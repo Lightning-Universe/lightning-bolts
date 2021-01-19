@@ -17,7 +17,7 @@ else:  # pragma: no cover
     Figure = object
 
 
-class ConfusedLogitCallback(Callback):  # pragma: no-cover
+class ConfusedLogitCallback(Callback):  # pragma: no cover
     """
     Takes the logit predictions of a model and when the probabilities of two classes are very close, the model
     doesn't have high certainty that it should pick one vs the other class.
@@ -122,8 +122,8 @@ class ConfusedLogitCallback(Callback):  # pragma: no-cover
         model: LightningModule,
         mask_idxs: Tensor,
     ) -> None:
-        if not _MATPLOTLIB_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _MATPLOTLIB_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use `matplotlib` which is not installed yet, install it with `pip install matplotlib`.'
             )
 

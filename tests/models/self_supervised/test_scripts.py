@@ -122,7 +122,6 @@ def test_cli_run_self_supervised_byol(cli_args):
         ' --num_workers 0'
         ' --queue_length 0'
         ' --gpus 0'
-        ' --fp32'
     ]
 )
 def test_cli_run_self_supervised_swav(cli_args):

@@ -21,7 +21,8 @@ jobs:
         requires: ['minimal', 'latest']
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
-    timeout-minutes: 25
+    # the reason for high number is MUCH slower tests on macOS and py3.8
+    timeout-minutes: 35
 
     steps:
     - uses: actions/checkout@v2

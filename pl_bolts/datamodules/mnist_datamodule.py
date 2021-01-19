@@ -8,8 +8,8 @@ if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import MNIST
     from torchvision.transforms import Compose
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
     MNIST = None
     Compose = object
 
@@ -72,6 +72,11 @@ class MNISTDataModule(VisionDataModule):
                         returning them
             drop_last: If true drops the last incomplete batch
         """
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
+                'You want to use MNIST dataset loaded from `torchvision` which is not installed yet.'
+            )
+
         super().__init__(
             data_dir=data_dir,
             val_split=val_split,
