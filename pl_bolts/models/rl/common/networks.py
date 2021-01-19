@@ -7,8 +7,8 @@ from typing import Tuple
 import numpy as np
 import torch
 from torch import nn, Tensor
-from torch.nn import functional as F
 from torch.distributions import Categorical, Normal
+from torch.nn import functional as F
 
 
 class CNN(nn.Module):
