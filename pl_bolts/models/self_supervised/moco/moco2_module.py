@@ -17,13 +17,6 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from pl_bolts.utils.warnings import warn_missing_pkg
-
-try:
-    import torchvision
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-
 from pl_bolts.metrics import mean, precision_at_k
 from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2EvalCIFAR10Transforms,
@@ -33,6 +26,13 @@ from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainImagenetTransforms,
     Moco2TrainSTL10Transforms,
 )
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _TORCHVISION_AVAILABLE:
+    import torchvision
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 
 class MocoV2(pl.LightningModule):
@@ -159,7 +159,7 @@ class MocoV2(pl.LightningModule):
         self.queue_ptr[0] = ptr
 
     @torch.no_grad()
-    def _batch_shuffle_ddp(self, x):  # pragma: no-cover
+    def _batch_shuffle_ddp(self, x):  # pragma: no cover
         """
         Batch shuffle, for making use of BatchNorm.
         *** Only support DistributedDataParallel (DDP) model. ***
@@ -187,7 +187,7 @@ class MocoV2(pl.LightningModule):
         return x_gather[idx_this], idx_unshuffle
 
     @torch.no_grad()
-    def _batch_unshuffle_ddp(self, x, idx_unshuffle):  # pragma: no-cover
+    def _batch_unshuffle_ddp(self, x, idx_unshuffle):  # pragma: no cover
         """
         Undo batch shuffle.
         *** Only support DistributedDataParallel (DDP) model. ***

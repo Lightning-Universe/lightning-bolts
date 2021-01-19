@@ -14,7 +14,7 @@ else:  # pragma: no cover
     warn_missing_pkg("sklearn", pypi_name="scikit-learn")
 
 
-class KNNOnlineEvaluator(Callback):  # pragma: no-cover
+class KNNOnlineEvaluator(Callback):  # pragma: no cover
     """
     Evaluates self-supervised K nearest neighbors.
 

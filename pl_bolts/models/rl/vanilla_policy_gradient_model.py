@@ -20,8 +20,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
     import gym
-else:
-    warn_missing_pkg('gym')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('gym')
 
 
 class VanillaPolicyGradient(pl.LightningModule):
@@ -79,7 +79,7 @@ class VanillaPolicyGradient(pl.LightningModule):
         """
         super().__init__()
 
-        if not _GYM_AVAILABLE:
+        if not _GYM_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError('This Module requires gym environment which is not installed yet.')
 
         # Hyperparameters
