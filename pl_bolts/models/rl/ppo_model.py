@@ -31,12 +31,31 @@ from pl_bolts.models.rl.common.networks import MLP, ActorCategorical, ActorConti
 
 class PPO(pl.LightningModule):
     """
-    PyTorch Lightning implementation of PPO.
+    PyTorch Lightning implementation of Proximal Policy Optimization
+    <https://arxiv.org/abs/1707.06347>`_
+    Paper authors: John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov
+
+    Model implemented by:
+
+        -
+
     Example:
-        model = PPOLightning("CartPole-v0")
-    Train:
+        >>> from pl_bolts.models.rl.ppo_model import PPO
+        ...
+        >>> model = PPO("CartPole-v0")
+
+    Train::
+
         trainer = Trainer()
         trainer.fit(model)
+
+    Note:
+        This example is based on:
+        https://github.com/openai/baselines/blob/master/baselines/ppo2/ppo2.py
+        https://github.com/openai/spinningup/blob/master/spinup/algos/pytorch/ppo/ppo.py
+
+    Note:
+        Currently only supports CPU and single GPU training with `distributed_backend=dp`
     """
     def __init__(
         self,
