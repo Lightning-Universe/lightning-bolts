@@ -11,6 +11,7 @@ import torch
 from pytorch_lightning.utilities import rank_zero_warn
 from torch import optim as optim
 
+from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
 from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc.networks import cpc_resnet101
 from pl_bolts.models.self_supervised.cpc.transforms import (
@@ -150,13 +151,6 @@ class CPCV2(pl.LightningModule):
         return nce_loss
 
     def shared_step(self, batch):
-        try:
-            from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
-        except ModuleNotFoundError as err:
-            raise ModuleNotFoundError(  # pragma: no-cover
-                'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
-            ) from err
-
         if isinstance(self.datamodule, STL10DataModule):
             unlabeled_batch = batch[0]
             batch = unlabeled_batch

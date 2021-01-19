@@ -3,12 +3,13 @@ from typing import Optional, Tuple
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
 
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     import torchvision
-except ModuleNotFoundError:
-    warn_missing_pkg("torchvision")  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg("torchvision")
 
 
 class TensorboardGenerativeModelImageSampler(Callback):
@@ -57,6 +58,9 @@ class TensorboardGenerativeModelImageSampler(Callback):
                 images separately rather than the (min, max) over all images. Default: ``False``.
             pad_value: Value for the padded pixels. Default: ``0``.
         """
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError("You want to use `torchvision` which is not installed yet.")
+
         super().__init__()
         self.num_samples = num_samples
         self.nrow = nrow
