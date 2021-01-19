@@ -104,9 +104,7 @@ class ProcessFrame84(ObservationWrapper):
             raise ModuleNotFoundError('This class uses OpenCV which it is not installed yet.')
 
         super(ProcessFrame84, self).__init__(env)
-        self.observation_space = gym.spaces.Box(
-            low=0, high=255, shape=(84, 84, 1), dtype=np.uint8
-        )
+        self.observation_space = gym.spaces.Box(low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
 
     def observation(self, obs):
         """preprocess the obs"""
@@ -139,9 +137,7 @@ class ImageToPyTorch(ObservationWrapper):
         super(ImageToPyTorch, self).__init__(env)
         old_shape = self.observation_space.shape
         new_shape = (old_shape[-1], old_shape[0], old_shape[1])
-        self.observation_space = gym.spaces.Box(
-            low=0.0, high=1.0, shape=new_shape, dtype=np.float32
-        )
+        self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=new_shape, dtype=np.float32)
 
     @staticmethod
     def observation(observation):
@@ -193,9 +189,7 @@ class DataAugmentation(ObservationWrapper):
 
     def __init__(self, env=None):
         super().__init__(env)
-        self.observation_space = gym.spaces.Box(
-            low=0, high=255, shape=(84, 84, 1), dtype=np.uint8
-        )
+        self.observation_space = gym.spaces.Box(low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
 
     def observation(self, obs):
         """preprocess the obs"""

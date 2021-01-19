@@ -2,7 +2,6 @@
 known_first_party = [
     "pl_bolts",
     "tests",
-    "docs",
     "notebooks",
 ]
 profile = "black"

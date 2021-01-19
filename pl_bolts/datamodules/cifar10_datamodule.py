@@ -9,8 +9,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import CIFAR10
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
     CIFAR10 = None
 
 
@@ -44,7 +44,7 @@ class CIFAR10DataModule(VisionDataModule):
         dm = CIFAR10DataModule(PATH)
         model = LitModel()
 
-        Trainer().fit(model, dm)
+        Trainer().fit(model, datamodule=dm)
 
     Or you can set your own transforms
 

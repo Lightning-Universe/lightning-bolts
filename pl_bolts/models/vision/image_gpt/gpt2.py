@@ -1,9 +1,10 @@
 import pytorch_lightning as pl
 import torch
-import torch.nn as nn
+from torch import nn as nn
 
 
 class Block(nn.Module):
+
     def __init__(self, embed_dim, heads):
         super(Block, self).__init__()
         self.ln_1 = nn.LayerNorm(embed_dim)
@@ -16,9 +17,7 @@ class Block(nn.Module):
         )
 
     def forward(self, x):
-        attn_mask = torch.full(
-            (len(x), len(x)), -float("Inf"), device=x.device, dtype=x.dtype
-        )
+        attn_mask = torch.full((len(x), len(x)), -float("Inf"), device=x.device, dtype=x.dtype)
         attn_mask = torch.triu(attn_mask, diagonal=1)
 
         x = self.ln_1(x)
@@ -73,12 +72,8 @@ class GPT2(pl.LightningModule):
         nn.init.normal_(self.sos)
 
     def _init_embeddings(self):
-        self.token_embeddings = nn.Embedding(
-            self.hparams.vocab_size, self.hparams.embed_dim
-        )
-        self.position_embeddings = nn.Embedding(
-            self.hparams.num_positions, self.hparams.embed_dim
-        )
+        self.token_embeddings = nn.Embedding(self.hparams.vocab_size, self.hparams.embed_dim)
+        self.position_embeddings = nn.Embedding(self.hparams.num_positions, self.hparams.embed_dim)
 
     def _init_layers(self):
         self.layers = nn.ModuleList()
@@ -86,9 +81,7 @@ class GPT2(pl.LightningModule):
             self.layers.append(Block(self.hparams.embed_dim, self.hparams.heads))
 
         self.ln_f = nn.LayerNorm(self.hparams.embed_dim)
-        self.head = nn.Linear(
-            self.hparams.embed_dim, self.hparams.vocab_size, bias=False
-        )
+        self.head = nn.Linear(self.hparams.embed_dim, self.hparams.vocab_size, bias=False)
         self.clf_head = nn.Linear(self.hparams.embed_dim, self.hparams.num_classes)
 
     def forward(self, x, classify=False):

@@ -4,27 +4,29 @@ from unittest import mock
 import pytest
 
 
-@pytest.mark.parametrize("dm_cls,deps", [
-    ("AsynchronousLoader", []),
-    ("BinaryMNISTDataModule", ["torchvision"]),
-    ("CIFAR10DataModule", ["torchvision"]),
-    ("TinyCIFAR10DataModule", ["torchvision"]),
-    ("DiscountedExperienceSource", ["gym"]),
-    ("ExperienceSource", ["gym"]),
-    ("ExperienceSourceDataset", ["gym"]),
-    ("FashionMNISTDataModule", ["torchvision"]),
-    ("ImagenetDataModule", ["torchvision"]),
-    ("MNISTDataModule", ["torchvision"]),
-    ("SklearnDataModule", ["sklearn"]),
-    ("SklearnDataset", []),
-    ("TensorDataset", []),
-    ("SSLImagenetDataModule", ["torchvision"]),
-    ("STL10DataModule", ["torchvision"]),
-    ("VOCDetectionDataModule", ["torchvision"]),
-    ("CityscapesDataModule", ["torchvision"]),
-    ("KittiDataset", ["PIL"]),
-    ("KittiDataModule", ["torchvision"]),
-])
+@pytest.mark.parametrize(
+    "dm_cls,deps", [
+        ("AsynchronousLoader", []),
+        ("BinaryMNISTDataModule", ["torchvision"]),
+        ("CIFAR10DataModule", ["torchvision"]),
+        ("TinyCIFAR10DataModule", ["torchvision"]),
+        ("DiscountedExperienceSource", ["gym"]),
+        ("ExperienceSource", ["gym"]),
+        ("ExperienceSourceDataset", ["gym"]),
+        ("FashionMNISTDataModule", ["torchvision"]),
+        ("ImagenetDataModule", ["torchvision"]),
+        ("MNISTDataModule", ["torchvision"]),
+        ("SklearnDataModule", ["sklearn"]),
+        ("SklearnDataset", []),
+        ("TensorDataset", []),
+        ("SSLImagenetDataModule", ["torchvision"]),
+        ("STL10DataModule", ["torchvision"]),
+        ("VOCDetectionDataModule", ["torchvision"]),
+        ("CityscapesDataModule", ["torchvision"]),
+        ("KittiDataset", ["PIL"]),
+        ("KittiDataModule", ["torchvision"]),
+    ]
+)
 def test_import(dm_cls, deps):
     """Tests importing when dependencies are not met.
 

@@ -10,6 +10,7 @@ PyTorch-Lightning-Bolts documentation
    :name: start
    :caption: Start here
 
+   installation
    introduction_guide
    models
 
@@ -30,8 +31,8 @@ PyTorch-Lightning-Bolts documentation
    :caption: DataModules
 
    datamodules
-   sklearn_datamodule
-   vision_datamodules
+   datamodules_sklearn
+   datamodules_vision
 
 .. toctree::
    :maxdepth: 2
@@ -75,6 +76,13 @@ PyTorch-Lightning-Bolts documentation
 
 .. toctree::
    :maxdepth: 2
+   :name: learning_rate_schedulers
+   :caption: Learning Rate Schedulers
+
+   learning_rate_schedulers
+
+.. toctree::
+   :maxdepth: 2
    :name: transforms
    :caption: Data Processing
 
@@ -110,7 +118,6 @@ Indices and tables
 .. toctree::
    :hidden:
 
-   readme
    api/pl_bolts.callbacks
    api/pl_bolts.datamodules
    api/pl_bolts.datasets

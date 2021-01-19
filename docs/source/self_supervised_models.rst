@@ -130,7 +130,7 @@ To Train::
 
     # fit
     trainer = pl.Trainer()
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
 
 To finetune::
 
@@ -286,7 +286,7 @@ To Train::
 
     # fit
     trainer = pl.Trainer()
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
 
 CIFAR-10 baseline
 *****************
@@ -311,21 +311,13 @@ CIFAR-10 baseline
      - TPUs
      - 1.0/1.5
    * - Ours
-     - `85.68 <https://tensorboard.dev/experiment/GlS1eLXMQsqh3T5DAec6UQ/#scalars>`_
+     - 88.50
      - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
      - `LARS-SGD <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
      - 2048
-     - 800 (~4 hours)
+     - 800 (4 hours)
      - 8 V100 (16GB)
      - 1.5
-   * - Ours
-     - `85.68 <https://tensorboard.dev/experiment/GlS1eLXMQsqh3T5DAec6UQ/#scalars>`_
-     - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
-     - `LARS-Adam <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
-     - 2048
-     - 800 (~4 hours)
-     - 8 V100 (16GB)
-     - 1e-3
 
 |
 
@@ -364,16 +356,89 @@ To reproduce::
 
     # pretrain
     python simclr_module.py
-        --gpus 1
+        --gpus 8
         --dataset cifar10
-        --batch_size 512
-        --learning_rate 1e-06
-        --num_workers 8
+        --batch_size 256
+        -- num_workers 16
+        --optimizer sgd
+        --learning_rate 1.5
+        --lars_wrapper
+        --exclude_bn_bias
+        --max_epochs 800
+        --online_ft
 
     # finetune
     python simclr_finetuner.py
-        --ckpt_path path/to/epoch=xyz.ckpt
-        --gpus 1
+        --gpus 4
+        --ckpt_path path/to/simclr/ckpt
+        --dataset cifar10
+        --batch_size 64
+        --num_workers 8
+        --learning_rate 0.3
+        --num_epochs 100
+
+Imagenet baseline for SimCLR
+****************************
+.. list-table:: Cifar-10 implementation results
+   :widths: 18 15 25 15 10 20 20 10
+   :header-rows: 1
+
+   * - Implementation
+     - test acc
+     - Encoder
+     - Optimizer
+     - Batch
+     - Epochs
+     - Hardware
+     - LR
+   * - `Original <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
+     - `~69.3 <https://github.com/google-research/simclr#finetuning-the-linear-head-linear-eval>`_
+     - resnet50
+     - LARS
+     - 4096
+     - 800
+     - TPUs
+     - 4.8
+   * - Ours
+     - 68.4
+     - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
+     - `LARS-SGD <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - 4096
+     - 800
+     - 64 V100 (16GB)
+     - 4.8
+
+|
+
+Imagenet pretrained model::
+
+    from pl_bolts.models.self_supervised import SimCLR
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+    simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+
+    simclr.freeze()
+
+|
+
+To reproduce::
+
+    # pretrain
+    python simclr_module.py
+        --dataset imagenet
+        --data_path path/to/imagenet
+
+    # finetune
+    python simclr_finetuner.py
+        --gpus 8
+        --ckpt_path path/to/simclr/ckpt
+        --dataset imagenet
+        --data_dir path/to/imagenet/dataset
+        --batch_size 256
+        --num_workers 16
+        --learning_rate 0.8
+        --nesterov True
+        --num_epochs 90
 
 SimCLR API
 **********
@@ -429,8 +494,8 @@ To Train::
     trainer = pl.Trainer(precision=16)
     trainer.fit(model)
 
-ImageNet baseline
-*****************
+Pre-trained ImageNet
+********************
 
 We have included an option to directly load
 `ImageNet weights <https://github.com/facebookresearch/swav>`_ provided by FAIR into bolts.
@@ -531,7 +596,59 @@ To reproduce::
 
     # finetune
     python swav_finetuner.py
-        --ckpt_path path/to/epoch=xyz.ckpt
+    --gpus 8
+    --ckpt_path path/to/simclr/ckpt
+    --dataset imagenet
+    --data_dir path/to/imagenet/dataset
+    --batch_size 256
+    --num_workers 16
+    --learning_rate 0.8
+    --nesterov True
+    --num_epochs 90
+
+Imagenet baseline for SwAV
+**************************
+.. list-table:: Cifar-10 implementation results
+   :widths: 18 15 25 15 10 20 20 10
+   :header-rows: 1
+
+   * - Implementation
+     - test acc
+     - Encoder
+     - Optimizer
+     - Batch
+     - Epochs
+     - Hardware
+     - LR
+   * - Original
+     - 75.3
+     - resnet50
+     - LARS
+     - 4096
+     - 800
+     - 64 V100s
+     - 4.8
+   * - Ours
+     - 74
+     - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
+     - `LARS-SGD <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - 4096
+     - 800
+     - 64 V100 (16GB)
+     - 4.8
+
+|
+
+Imagenet pretrained model::
+
+    from pl_bolts.models.self_supervised import SwAV
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/bolts_swav_imagenet/swav_imagenet.ckpt'
+    swav = SwAV.load_from_checkpoint(weight_path, strict=False)
+
+    swav.freeze()
+
+|
 
 SwAV API
 ********

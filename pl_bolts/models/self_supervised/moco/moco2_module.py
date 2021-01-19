@@ -9,14 +9,13 @@ You may not use this file except in compliance with the License.
 
 You may obtain a copy of the License from the LICENSE file present in this folder.
 """
-
 from argparse import ArgumentParser
 from typing import Union
 
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
 from torch import nn
+from torch.nn import functional as F
 
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -66,20 +65,23 @@ class MocoV2(pl.LightningModule):
             --batch_size 32
     """
 
-    def __init__(self,
-                 base_encoder: Union[str, torch.nn.Module] = 'resnet18',
-                 emb_dim: int = 128,
-                 num_negatives: int = 65536,
-                 encoder_momentum: float = 0.999,
-                 softmax_temperature: float = 0.07,
-                 learning_rate: float = 0.03,
-                 momentum: float = 0.9,
-                 weight_decay: float = 1e-4,
-                 data_dir: str = './',
-                 batch_size: int = 256,
-                 use_mlp: bool = False,
-                 num_workers: int = 8,
-                 *args, **kwargs):
+    def __init__(
+        self,
+        base_encoder: Union[str, torch.nn.Module] = 'resnet18',
+        emb_dim: int = 128,
+        num_negatives: int = 65536,
+        encoder_momentum: float = 0.999,
+        softmax_temperature: float = 0.07,
+        learning_rate: float = 0.03,
+        momentum: float = 0.9,
+        weight_decay: float = 1e-4,
+        data_dir: str = './',
+        batch_size: int = 256,
+        use_mlp: bool = False,
+        num_workers: int = 8,
+        *args,
+        **kwargs
+    ):
         """
         Args:
             base_encoder: torchvision model name or torch.nn.Module
@@ -267,11 +269,7 @@ class MocoV2(pl.LightningModule):
 
         acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))
 
-        log = {
-            'train_loss': loss,
-            'train_acc1': acc1,
-            'train_acc5': acc5
-        }
+        log = {'train_loss': loss, 'train_acc1': acc1, 'train_acc5': acc5}
         self.log_dict(log)
         return loss
 
@@ -289,11 +287,7 @@ class MocoV2(pl.LightningModule):
 
         acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))
 
-        results = {
-            'val_loss': loss,
-            'val_acc1': acc1,
-            'val_acc5': acc5
-        }
+        results = {'val_loss': loss, 'val_acc1': acc1, 'val_acc5': acc5}
         return results
 
     def validation_epoch_end(self, outputs):
@@ -301,17 +295,16 @@ class MocoV2(pl.LightningModule):
         val_acc1 = mean(outputs, 'val_acc1')
         val_acc5 = mean(outputs, 'val_acc5')
 
-        log = {
-            'val_loss': val_loss,
-            'val_acc1': val_acc1,
-            'val_acc5': val_acc5
-        }
+        log = {'val_loss': val_loss, 'val_acc1': val_acc1, 'val_acc5': val_acc5}
         self.log_dict(log)
 
     def configure_optimizers(self):
-        optimizer = torch.optim.SGD(self.parameters(), self.hparams.learning_rate,
-                                    momentum=self.hparams.momentum,
-                                    weight_decay=self.hparams.weight_decay)
+        optimizer = torch.optim.SGD(
+            self.parameters(),
+            self.hparams.learning_rate,
+            momentum=self.hparams.momentum,
+            weight_decay=self.hparams.weight_decay
+        )
         return optimizer
 
     @staticmethod
@@ -342,8 +335,7 @@ def concat_all_gather(tensor):
     Performs all_gather operation on the provided tensors.
     *** Warning ***: torch.distributed.all_gather has no gradient.
     """
-    tensors_gather = [torch.ones_like(tensor)
-                      for _ in range(torch.distributed.get_world_size())]
+    tensors_gather = [torch.ones_like(tensor) for _ in range(torch.distributed.get_world_size())]
     torch.distributed.all_gather(tensors_gather, tensor, async_op=False)
 
     output = torch.cat(tensors_gather, dim=0)

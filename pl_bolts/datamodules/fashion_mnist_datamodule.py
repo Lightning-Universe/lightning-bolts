@@ -7,8 +7,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import FashionMNIST
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
     FashionMNIST = None
 
 
@@ -38,7 +38,7 @@ class FashionMNISTDataModule(VisionDataModule):
         dm = FashionMNISTDataModule('.')
         model = LitModel()
 
-        Trainer().fit(model, dm)
+        Trainer().fit(model, datamodule=dm)
     """
     name = "fashion_mnist"
     dataset_cls = FashionMNIST
@@ -71,6 +71,11 @@ class FashionMNISTDataModule(VisionDataModule):
                         returning them
             drop_last: If true drops the last incomplete batch
         """
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
+                'You want to use FashionMNIST dataset loaded from `torchvision` which is not installed yet.'
+            )
+
         super().__init__(
             data_dir=data_dir,
             val_split=val_split,
@@ -95,9 +100,9 @@ class FashionMNISTDataModule(VisionDataModule):
 
     def default_transforms(self):
         if self.normalize:
-            mnist_transforms = transform_lib.Compose(
-                [transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5,), std=(0.5,))]
-            )
+            mnist_transforms = transform_lib.Compose([
+                transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5, ), std=(0.5, ))
+            ])
         else:
             mnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
 

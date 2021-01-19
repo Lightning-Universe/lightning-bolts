@@ -10,47 +10,43 @@ try:
 except ImportError:
     import __builtin__ as builtins
 
+try:
+    import pytorch_lightning  # noqa: F401
+except ImportError:
+    try:
+        import pip
+    except ImportError:
+        raise ImportError('Missing `pip` to install custom dependencies.')
+    pip.main(['install', 'pytorch-lightning>=1.1.0'])
+
 # https://packaging.python.org/guides/single-sourcing-package-version/
 # http://blog.ionelmc.ro/2014/05/25/python-packaging/
 
-PATH_ROOT = os.path.dirname(__file__)
+_PATH_ROOT = os.path.dirname(__file__)
 builtins.__LIGHTNING_BOLT_SETUP__: bool = True
 
 import pl_bolts  # noqa: E402
 
 
-def load_requirements(path_dir=PATH_ROOT, file_name='requirements.txt', comment_char='#'):
-    with open(os.path.join(path_dir, file_name), 'r') as file:
-        lines = [ln.strip() for ln in file.readlines()]
-    reqs = []
-    for ln in lines:
-        if comment_char in ln:  # filer all comments
-            ln = ln[:ln.index(comment_char)].strip()
-        if ln.startswith('http'):  # skip directly installed dependencies
-            continue
-        if ln:  # if requirement is not empty
-            reqs.append(ln)
-    return reqs
+def _load_requirements(path_dir=_PATH_ROOT, file_name='requirements.txt', comment_char='#'):
+    from pytorch_lightning.setup_tools import _load_requirements as _lreq
+    return _lreq(path_dir=path_dir, file_name=file_name, comment_char=comment_char)
 
 
-def load_long_describtion():
-    # https://github.com/PyTorchLightning/pytorch-lightning/raw/master/docs/source/_images/lightning_module/pt_to_pl.png
-    url = os.path.join(pl_bolts.__homepage__, 'raw', pl_bolts.__version__, 'docs')
-    text = open('README.md', encoding='utf-8').read()
-    # replace relative repository path to absolute link to the release
-    text = text.replace('](docs', f']({url}')
-    # SVG images are not readable on PyPI, so replace them  with PNG
-    text = text.replace('.svg', '.png')
-    return text
+def _load_long_description():
+    from pytorch_lightning.setup_tools import _load_long_description as _lld
+    return _lld(_PATH_ROOT)
 
 
-extras = {
-    'loggers': load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='loggers.txt'),
-    'models': load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='models.txt'),
-    'test': load_requirements(path_dir=os.path.join(PATH_ROOT, 'requirements'), file_name='test.txt'),
-}
-extras['extra'] = extras['models'] + extras['loggers']
-extras['dev'] = extras['extra'] + extras['test']
+def _prepare_extras():
+    extras = {
+        'loggers': _load_requirements(path_dir=os.path.join(_PATH_ROOT, 'requirements'), file_name='loggers.txt'),
+        'models': _load_requirements(path_dir=os.path.join(_PATH_ROOT, 'requirements'), file_name='models.txt'),
+        'test': _load_requirements(path_dir=os.path.join(_PATH_ROOT, 'requirements'), file_name='test.txt'),
+    }
+    extras['extra'] = extras['models'] + extras['loggers']
+    extras['dev'] = extras['extra'] + extras['test']
+    return extras
 
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
@@ -68,24 +64,20 @@ setup(
     download_url='https://github.com/PyTorchLightning/pytorch-lightning-bolts',
     license=pl_bolts.__license__,
     packages=find_packages(exclude=['tests', 'docs']),
-
-    long_description=load_long_describtion(),
+    long_description=_load_long_description(),
     long_description_content_type='text/markdown',
     include_package_data=True,
     zip_safe=False,
-
     keywords=['deep learning', 'pytorch', 'AI'],
     python_requires='>=3.6',
-    setup_requires=[],
-    install_requires=load_requirements(),
-    extras_require=extras,
-
+    setup_requires=['pytorch-lightning>=1.1.0'],
+    install_requires=_load_requirements(),
+    extras_require=_prepare_extras(),
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",
         "Documentation": "https://pytorch-lightning-bolts.rtfd.io/en/latest/",
         "Source Code": "https://github.com/PyTorchLightning/pytorch-lightning-bolts",
     },
-
     classifiers=[
         'Environment :: Console',
         'Natural Language :: English',

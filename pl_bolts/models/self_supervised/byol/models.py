@@ -4,6 +4,7 @@ from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
 
 class MLP(nn.Module):
+
     def __init__(self, input_dim=2048, hidden_size=4096, output_dim=256):
         super().__init__()
         self.output_dim = output_dim
@@ -12,7 +13,8 @@ class MLP(nn.Module):
             nn.Linear(input_dim, hidden_size, bias=False),
             nn.BatchNorm1d(hidden_size),
             nn.ReLU(inplace=True),
-            nn.Linear(hidden_size, output_dim, bias=True))
+            nn.Linear(hidden_size, output_dim, bias=True),
+        )
 
     def forward(self, x):
         x = self.model(x)
@@ -20,6 +22,7 @@ class MLP(nn.Module):
 
 
 class SiameseArm(nn.Module):
+
     def __init__(self, encoder=None):
         super().__init__()
 

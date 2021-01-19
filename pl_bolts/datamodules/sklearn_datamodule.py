@@ -11,8 +11,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _SKLEARN_AVAILABLE:
     from sklearn.utils import shuffle as sk_shuffle
-else:
-    warn_missing_pkg("sklearn")  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg("sklearn")
 
 
 class SklearnDataset(Dataset):
@@ -28,6 +28,7 @@ class SklearnDataset(Dataset):
         >>> len(dataset)
         506
     """
+
     def __init__(self, X: np.ndarray, y: np.ndarray, X_transform: Any = None, y_transform: Any = None):
         """
         Args:
@@ -75,6 +76,7 @@ class TensorDataset(Dataset):
         >>> len(dataset)
         10
     """
+
     def __init__(self, X: torch.Tensor, y: torch.Tensor, X_transform: Any = None, y_transform: Any = None):
         """
         Args:
@@ -141,18 +143,23 @@ class SklearnDataModule(LightningDataModule):
     name = 'sklearn'
 
     def __init__(
-            self, X, y,
-            x_val=None, y_val=None,
-            x_test=None, y_test=None,
-            val_split=0.2, test_split=0.1,
-            num_workers=2,
-            random_state=1234,
-            shuffle=True,
-            batch_size: int = 16,
-            pin_memory=False,
-            drop_last=False,
-            *args,
-            **kwargs,
+        self,
+        X,
+        y,
+        x_val=None,
+        y_val=None,
+        x_test=None,
+        y_test=None,
+        val_split=0.2,
+        test_split=0.1,
+        num_workers=2,
+        random_state=1234,
+        shuffle=True,
+        batch_size: int = 16,
+        pin_memory=False,
+        drop_last=False,
+        *args,
+        **kwargs,
     ):
 
         super().__init__(*args, **kwargs)
@@ -165,8 +172,8 @@ class SklearnDataModule(LightningDataModule):
         # shuffle x and y
         if shuffle and _SKLEARN_AVAILABLE:
             X, y = sk_shuffle(X, y, random_state=random_state)
-        elif shuffle and not _SKLEARN_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        elif shuffle and not _SKLEARN_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use shuffle function from `scikit-learn` which is not installed yet.'
             )
 
@@ -177,7 +184,7 @@ class SklearnDataModule(LightningDataModule):
         if hold_out_split > 0:
             val_split = val_split / hold_out_split
             hold_out_size = math.floor(len(X) * hold_out_split)
-            x_holdout, y_holdout = X[: hold_out_size], y[: hold_out_size]
+            x_holdout, y_holdout = X[:hold_out_size], y[:hold_out_size]
             test_i_start = int(val_split * hold_out_size)
             x_val_hold_out, y_val_holdout = x_holdout[:test_i_start], y_holdout[:test_i_start]
             x_test_hold_out, y_test_holdout = x_holdout[test_i_start:], y_holdout[test_i_start:]

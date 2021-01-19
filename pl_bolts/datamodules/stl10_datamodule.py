@@ -13,8 +13,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import STL10
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 
 class STL10DataModule(LightningDataModule):  # pragma: no cover
@@ -47,24 +47,24 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         dm = STL10DataModule(PATH)
         model = LitModel()
 
-        Trainer().fit(model, dm)
+        Trainer().fit(model, datamodule=dm)
     """
 
     name = 'stl10'
 
     def __init__(
-            self,
-            data_dir: Optional[str] = None,
-            unlabeled_val_split: int = 5000,
-            train_val_split: int = 500,
-            num_workers: int = 16,
-            batch_size: int = 32,
-            seed: int = 42,
-            shuffle: bool = False,
-            pin_memory: bool = False,
-            drop_last: bool = False,
-            *args,
-            **kwargs,
+        self,
+        data_dir: Optional[str] = None,
+        unlabeled_val_split: int = 5000,
+        train_val_split: int = 500,
+        num_workers: int = 16,
+        batch_size: int = 32,
+        seed: int = 42,
+        shuffle: bool = False,
+        pin_memory: bool = False,
+        drop_last: bool = False,
+        *args,
+        **kwargs,
     ):
         """
         Args:
@@ -81,8 +81,8 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         """
         super().__init__(*args, **kwargs)
 
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
                 'You want to use STL10 dataset loaded from `torchvision` which is not installed yet.'
             )
 
@@ -118,9 +118,10 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
 
         dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
-        dataset_train, _ = random_split(dataset,
-                                        [train_length - self.unlabeled_val_split, self.unlabeled_val_split],
-                                        generator=torch.Generator().manual_seed(self.seed))
+        dataset_train, _ = random_split(
+            dataset, [train_length - self.unlabeled_val_split, self.unlabeled_val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
         loader = DataLoader(
             dataset_train,
             batch_size=self.batch_size,
@@ -143,20 +144,19 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         """
         transforms = self._default_transforms() if self.train_transforms is None else self.train_transforms
 
-        unlabeled_dataset = STL10(self.data_dir,
-                                  split='unlabeled',
-                                  download=False,
-                                  transform=transforms)
+        unlabeled_dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         unlabeled_length = len(unlabeled_dataset)
-        unlabeled_dataset, _ = random_split(unlabeled_dataset,
-                                            [unlabeled_length - self.unlabeled_val_split, self.unlabeled_val_split],
-                                            generator=torch.Generator().manual_seed(self.seed))
+        unlabeled_dataset, _ = random_split(
+            unlabeled_dataset, [unlabeled_length - self.unlabeled_val_split, self.unlabeled_val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
 
         labeled_dataset = STL10(self.data_dir, split='train', download=False, transform=transforms)
         labeled_length = len(labeled_dataset)
-        labeled_dataset, _ = random_split(labeled_dataset,
-                                          [labeled_length - self.train_val_split, self.train_val_split],
-                                          generator=torch.Generator().manual_seed(self.seed))
+        labeled_dataset, _ = random_split(
+            labeled_dataset, [labeled_length - self.train_val_split, self.train_val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
 
         dataset = ConcatDataset(unlabeled_dataset, labeled_dataset)
         loader = DataLoader(
@@ -183,9 +183,10 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
 
         dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         train_length = len(dataset)
-        _, dataset_val = random_split(dataset,
-                                      [train_length - self.unlabeled_val_split, self.unlabeled_val_split],
-                                      generator=torch.Generator().manual_seed(self.seed))
+        _, dataset_val = random_split(
+            dataset, [train_length - self.unlabeled_val_split, self.unlabeled_val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
         loader = DataLoader(
             dataset_val,
             batch_size=self.batch_size,
@@ -213,20 +214,19 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             transforms: a sequence of transforms
         """
         transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
-        unlabeled_dataset = STL10(self.data_dir,
-                                  split='unlabeled',
-                                  download=False,
-                                  transform=transforms)
+        unlabeled_dataset = STL10(self.data_dir, split='unlabeled', download=False, transform=transforms)
         unlabeled_length = len(unlabeled_dataset)
-        _, unlabeled_dataset = random_split(unlabeled_dataset,
-                                            [unlabeled_length - self.unlabeled_val_split, self.unlabeled_val_split],
-                                            generator=torch.Generator().manual_seed(self.seed))
+        _, unlabeled_dataset = random_split(
+            unlabeled_dataset, [unlabeled_length - self.unlabeled_val_split, self.unlabeled_val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
 
         labeled_dataset = STL10(self.data_dir, split='train', download=False, transform=transforms)
         labeled_length = len(labeled_dataset)
-        _, labeled_dataset = random_split(labeled_dataset,
-                                          [labeled_length - self.train_val_split, self.train_val_split],
-                                          generator=torch.Generator().manual_seed(self.seed))
+        _, labeled_dataset = random_split(
+            labeled_dataset, [labeled_length - self.train_val_split, self.train_val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
 
         dataset = ConcatDataset(unlabeled_dataset, labeled_dataset)
         loader = DataLoader(
@@ -265,9 +265,10 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
 
         dataset = STL10(self.data_dir, split='train', download=False, transform=transforms)
         train_length = len(dataset)
-        dataset_train, _ = random_split(dataset,
-                                        [train_length - self.train_val_split, self.train_val_split],
-                                        generator=torch.Generator().manual_seed(self.seed))
+        dataset_train, _ = random_split(
+            dataset, [train_length - self.train_val_split, self.train_val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
         loader = DataLoader(
             dataset_train,
             batch_size=self.batch_size,
@@ -280,14 +281,12 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
 
     def val_dataloader_labeled(self):
         transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
-        dataset = STL10(self.data_dir,
-                        split='train',
-                        download=False,
-                        transform=transforms)
+        dataset = STL10(self.data_dir, split='train', download=False, transform=transforms)
         labeled_length = len(dataset)
-        _, labeled_val = random_split(dataset,
-                                      [labeled_length - self.train_val_split, self.train_val_split],
-                                      generator=torch.Generator().manual_seed(self.seed))
+        _, labeled_val = random_split(
+            dataset, [labeled_length - self.train_val_split, self.train_val_split],
+            generator=torch.Generator().manual_seed(self.seed)
+        )
 
         loader = DataLoader(
             labeled_val,
@@ -300,8 +299,5 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         return loader
 
     def _default_transforms(self):
-        data_transforms = transform_lib.Compose([
-            transform_lib.ToTensor(),
-            stl10_normalization()
-        ])
+        data_transforms = transform_lib.Compose([transform_lib.ToTensor(), stl10_normalization()])
         return data_transforms
