@@ -22,7 +22,9 @@ For example, you could use a pretrained VAE to generate features for an image da
     encoder = simclr.encoder
     encoder.freeze()
 
-    for (x, y) in own_data
+.. code-block:: python
+
+    for (x, y) in own_data:
         features = encoder(x)
 
 The advantage of bolts is that each system can be decomposed and used in interesting ways.
@@ -41,6 +43,8 @@ might perform better than the same resnet50 trained with labels
     # trained with labels
     from torchvision.models import resnet50
     resnet50_supervised = resnet50(pretrained=True)
+
+.. code-block:: python
 
     # perhaps the features when trained without labels are much better for classification or other tasks
     x = image_sample()
@@ -83,6 +87,8 @@ In this approach, we load the pretrained model and unfreeze from the beginning
     # don't call .freeze()
 
     classifier = LogisticRegression()
+
+.. code-block:: python
 
     for (x, y) in own_data:
         feats = resnet50(x)
@@ -127,6 +133,8 @@ The approach that works best most often is to freeze first then unfreeze later
     resnet50.freeze()
 
     classifier = LogisticRegression()
+
+.. code-block:: python
 
     for epoch in epochs:
         for (x, y) in own_data:
@@ -187,7 +195,7 @@ Hyperparameter search
 For finetuning to work well, you should try many versions of the model hyperparameters. Otherwise you're unlikely
 to get the most value out of your data.
 
-.. code-block:: python
+.. testcode::
 
     learning_rates = [0.01, 0.001, 0.0001]
     hidden_dim = [128, 256, 512]
@@ -271,7 +279,7 @@ figure out if your VAE implementation was correct, or if your training loop was 
 
 **Example 2: Changing the generator step of a GAN**
 
-.. code-block:: python
+.. testcode::
 
     from pl_bolts.models.gans import GAN
 
@@ -300,7 +308,7 @@ figure out if your VAE implementation was correct, or if your training loop was 
 
 **Example 3: Changing the way the loss is calculated in a contrastive self-supervised learning approach**
 
-.. code-block:: python
+.. testcode::
 
     from pl_bolts.models.self_supervised import AMDIM
 
@@ -346,7 +354,7 @@ approaches.
 
 **Example 2: Use the contrastive task of AMDIM in CPC**
 
-.. code-block:: python
+.. testcode::
 
     from pl_bolts.models.self_supervised import AMDIM, CPCV2
 
@@ -361,7 +369,7 @@ Compose new ideas
 You may also be interested in creating completely new approaches that mix and match all sorts of different
 pieces together
 
-.. code-block:: python
+.. testcode::
 
     # this model is for illustration purposes, it makes no research sense but it's intended to show
     # that you can be as creative and expressive as you want.

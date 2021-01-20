@@ -145,7 +145,7 @@ don't have enough data, time or money to do your own training.
 
 For example, you could use a pretrained VAE to generate features for an image dataset.
 
-.. code-block:: python
+.. testcode::
 
     from pl_bolts.models.autoencoders import VAE
     from pl_bolts.models.self_supervised import CPCV2
@@ -158,7 +158,7 @@ For example, you could use a pretrained VAE to generate features for an image da
     model2 = CPCV2(encoder='resnet18', pretrained='imagenet128').freeze()
     model3 = CPCV2(encoder='resnet18', pretrained='stl10').freeze()
 
-    for (x, y) in own_data
+    for (x, y) in own_data:
         features = encoder(x)
         feat2 = model2(x)
         feat3 = model3(x)
@@ -172,7 +172,7 @@ you can use any finetuning protocol you prefer.
 
 **Example 1: Unfrozen finetune**
 
-.. code-block:: python
+.. testcode::
 
     # unfrozen finetune
     model = CPCV2(encoder='resnet18', pretrained='imagenet128')
@@ -187,7 +187,7 @@ you can use any finetuning protocol you prefer.
 
 **Example 2: Freeze then unfreeze**
 
-.. code-block:: python
+.. testcode::
 
     # FREEZE!
     model = CPCV2(encoder='resnet18', pretrained='imagenet128')
