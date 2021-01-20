@@ -194,7 +194,7 @@ you can use any finetuning protocol you prefer.
     # FREEZE!
     model = CPCV2(encoder='resnet18', pretrained='imagenet128')
     resnet18 = model.encoder
-    resnet18.freeze()
+    resnet18.eval()
 
     classifier = LogisticRegression(...)
 

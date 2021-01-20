@@ -130,7 +130,7 @@ The approach that works best most often is to freeze first then unfreeze later
     weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
     simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
     resnet50 = simclr.encoder
-    resnet50.freeze()
+    resnet50.eval()
 
 .. code-block:: python
 
