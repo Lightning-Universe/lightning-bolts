@@ -3,6 +3,7 @@ from queue import Queue
 from threading import Thread
 from typing import Any, Optional, Union
 
+import numpy as np
 import torch
 from torch._six import container_abcs, string_classes
 from torch.utils.data import DataLoader, Dataset
@@ -33,7 +34,7 @@ class AsynchronousLoader(object):
         device: torch.device = torch.device('cuda', 0),
         q_size: int = 10,
         num_batches: Optional[int] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         if isinstance(data, torch.utils.data.DataLoader):
             self.dataloader = data
@@ -51,7 +52,7 @@ class AsynchronousLoader(object):
         self.q_size = q_size
 
         self.load_stream = torch.cuda.Stream(device=device)
-        self.queue = Queue(maxsize=self.q_size)
+        self.queue: Queue = Queue(maxsize=self.q_size)
 
         self.idx = 0
 
@@ -64,7 +65,7 @@ class AsynchronousLoader(object):
                 break
 
     # Recursive loading for each instance based on torch.utils.data.default_collate
-    def load_instance(self, sample):
+    def load_instance(self, sample: Any) -> Any:
         elem_type = type(sample)
 
         if torch.is_tensor(sample):
@@ -88,16 +89,16 @@ class AsynchronousLoader(object):
         else:
             return sample
 
-    def __iter__(self):
+    def __iter__(self) -> "AsynchronousLoader":
         # We don't want to run the thread more than once
         # Start a new thread if we are at the beginning of a new epoch, and our current worker is dead
-        if (not hasattr(self, 'worker') or not self.worker.is_alive()) and self.queue.empty() and self.idx == 0:
+        if (not hasattr(self, 'worker') or not self.worker.is_alive()) and self.queue.empty() and self.idx == 0:  # type: ignore[has-type]
             self.worker = Thread(target=self.load_loop)
             self.worker.daemon = True
             self.worker.start()
         return self
 
-    def __next__(self):
+    def __next__(self) -> torch.Tensor:
         # If we've reached the number of batches to return
         # or the queue is empty and the worker is dead then exit
         done = not self.worker.is_alive() and self.queue.empty()

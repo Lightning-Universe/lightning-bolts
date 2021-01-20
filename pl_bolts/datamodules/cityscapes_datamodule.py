@@ -1,3 +1,4 @@
+# type: ignore[override]
 from typing import Any
 
 from pytorch_lightning import LightningDataModule
@@ -60,7 +61,7 @@ class CityscapesDataModule(LightningDataModule):
     """
 
     name = 'Cityscapes'
-    extra_args = {}
+    extra_args: dict = {}
 
     def __init__(
         self,

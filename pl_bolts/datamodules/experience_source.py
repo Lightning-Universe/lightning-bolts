@@ -299,5 +299,5 @@ class DiscountedExperienceSource(ExperienceSource):
         """
         total_reward = 0.0
         for exp in reversed(experiences):
-            total_reward = (self.gamma * total_reward) + exp.reward
+            total_reward = (self.gamma * total_reward) + exp.reward  # type: ignore[attr-defined]
         return total_reward

@@ -87,7 +87,7 @@ class CIFAR10DataModule(VisionDataModule):
                         returning them
             drop_last: If true drops the last incomplete batch
         """
-        super().__init__(
+        super().__init__(  # type: ignore[misc]
             data_dir=data_dir,
             val_split=val_split,
             num_workers=num_workers,
@@ -166,7 +166,7 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
         """
         super().__init__(data_dir, val_split, num_workers, *args, **kwargs)
 
-        self.num_samples = num_samples
+        self.num_samples = num_samples  # type: ignore[misc]
         self.labels = sorted(labels) if labels is not None else set(range(10))
         self.extra_args = dict(num_samples=self.num_samples, labels=self.labels)
 

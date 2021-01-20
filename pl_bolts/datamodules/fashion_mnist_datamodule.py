@@ -78,7 +78,7 @@ class FashionMNISTDataModule(VisionDataModule):
                 'You want to use FashionMNIST dataset loaded from `torchvision` which is not installed yet.'
             )
 
-        super().__init__(
+        super().__init__(  # type: ignore[misc]
             data_dir=data_dir,
             val_split=val_split,
             num_workers=num_workers,

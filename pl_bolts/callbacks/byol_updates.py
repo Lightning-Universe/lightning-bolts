@@ -66,7 +66,7 @@ class BYOLMAWeightUpdate(Callback):
     def update_weights(self, online_net: Union[Module, Tensor], target_net: Union[Module, Tensor]) -> None:
         # apply MA weight update
         for (name, online_p), (_, target_p) in zip(
-            online_net.named_parameters(), target_net.named_parameters()
-        ):  # type: ignore[union-attr]
+            online_net.named_parameters(), target_net.named_parameters()  # type: ignore[union-attr]
+        ):
             if 'weight' in name:
                 target_p.data = self.current_tau * target_p.data + (1 - self.current_tau) * online_p.data

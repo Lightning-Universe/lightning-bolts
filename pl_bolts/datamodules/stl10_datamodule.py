@@ -1,3 +1,4 @@
+# type: ignore[override]
 import os
 from typing import Any, Optional
 
@@ -194,7 +195,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drpo_last=self.drop_last,
+            drop_last=self.drop_last,
             pin_memory=self.pin_memory
         )
         return loader

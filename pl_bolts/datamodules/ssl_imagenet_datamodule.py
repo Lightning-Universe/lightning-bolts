@@ -1,3 +1,4 @@
+# type: ignore[override]
 import os
 from typing import Any, Optional
 
@@ -25,7 +26,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         self,
         data_dir: str,
         meta_dir: Optional[str] = None,
-        num_workers=16,
+        num_workers: int = 16,
         batch_size: int = 32,
         shuffle: bool = False,
         pin_memory: bool = False,
@@ -96,7 +97,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
             split='train',
             transform=transforms
         )
-        loader = DataLoader(
+        loader: DataLoader = DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=self.shuffle,
@@ -116,7 +117,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
             split='val',
             transform=transforms
         )
-        loader = DataLoader(
+        loader: DataLoader = DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=False,
@@ -136,7 +137,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
             split='test',
             transform=transforms
         )
-        loader = DataLoader(
+        loader: DataLoader = DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=False,

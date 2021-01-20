@@ -1,3 +1,4 @@
+# type: ignore[override]
 import os
 from typing import Any, Optional
 
@@ -158,7 +159,7 @@ class ImagenetDataModule(LightningDataModule):
             split='train',
             transform=transforms
         )
-        loader = DataLoader(
+        loader: DataLoader = DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=self.shuffle,
@@ -185,7 +186,7 @@ class ImagenetDataModule(LightningDataModule):
             split='val',
             transform=transforms
         )
-        loader = DataLoader(
+        loader: DataLoader = DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=False,
@@ -204,7 +205,7 @@ class ImagenetDataModule(LightningDataModule):
         dataset = UnlabeledImagenet(
             self.data_dir, num_imgs_per_class=-1, meta_dir=self.meta_dir, split='test', transform=transforms
         )
-        loader = DataLoader(
+        loader: DataLoader = DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=False,
