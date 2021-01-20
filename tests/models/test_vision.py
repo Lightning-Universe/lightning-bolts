@@ -6,6 +6,8 @@ from pl_bolts.datamodules import FashionMNISTDataModule, MNISTDataModule
 from pl_bolts.datasets import DummyDataset
 from pl_bolts.models import GPT2, ImageGPT, SemSegment, UNet
 
+pl.seed_everything(42)
+
 
 class DummyDataModule(pl.LightningDataModule):
 
@@ -15,20 +17,17 @@ class DummyDataModule(pl.LightningDataModule):
 
 
 def test_igpt(tmpdir, datadir):
-    pl.seed_everything(0)
     dm = MNISTDataModule(data_dir=datadir, normalize=False)
     model = ImageGPT()
 
-    trainer = pl.Trainer(fast_dev_run=True, logger=False, max_epochs=1, default_root_dir=tmpdir)
-
+    trainer = pl.Trainer(limit_train_batches=2, limit_val_batches=2, limit_test_batches=2, max_epochs=1, )
     trainer.fit(model, datamodule=dm)
     trainer.test(datamodule=dm)
     assert trainer.callback_metrics["test_loss"] < 1.7
 
     dm = FashionMNISTDataModule(data_dir=datadir, num_workers=1)
     model = ImageGPT(classify=True)
-    trainer = pl.Trainer(fast_dev_run=True, logger=False, max_epochs=1, default_root_dir=tmpdir)
-
+    trainer = pl.Trainer(limit_train_batches=2, limit_val_batches=2, limit_test_batches=2, max_epochs=1,)
     trainer.fit(model, datamodule=dm)
 
 
