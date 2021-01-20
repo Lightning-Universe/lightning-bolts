@@ -174,7 +174,7 @@ you can use any finetuning protocol you prefer.
 
 **Example 1: Unfrozen finetune**
 
-.. testcode::
+.. code-block:: python
 
     # unfrozen finetune
     model = CPCV2(encoder='resnet18', pretrained='imagenet128')
@@ -183,15 +183,13 @@ you can use any finetuning protocol you prefer.
 
     classifier = LogisticRegression()
 
-.. code-block:: python
-
     for (x, y) in own_data:
         feats = resnet18(x)
         y_hat = classifier(feats)
 
 **Example 2: Freeze then unfreeze**
 
-.. testcode::
+.. code-block:: python
 
     # FREEZE!
     model = CPCV2(encoder='resnet18', pretrained='imagenet128')
@@ -199,8 +197,6 @@ you can use any finetuning protocol you prefer.
     resnet18.freeze()
 
     classifier = LogisticRegression()
-
-.. code-block:: python
 
     for epoch in epochs:
         for (x, y) in own_data:
