@@ -195,7 +195,7 @@ Hyperparameter search
 For finetuning to work well, you should try many versions of the model hyperparameters. Otherwise you're unlikely
 to get the most value out of your data.
 
-.. testcode::
+.. code-block:: python
 
     from pl_bolts.models.autoencoders import VAE
 
