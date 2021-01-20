@@ -199,7 +199,7 @@ class VOCDetectionDataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self) -> transform_lib.Compose:
+    def _default_transforms(self) -> Callable:
         if self.normalize:
             voc_transforms = transform_lib.Compose([
                 transform_lib.ToTensor(),
