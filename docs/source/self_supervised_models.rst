@@ -21,14 +21,14 @@ In this example, we'll load a resnet 18 which was pretrained on imagenet using C
 
 .. testcode::
 
-            from pl_bolts.models.self_supervised import SimCLR
+    from pl_bolts.models.self_supervised import SimCLR
 
-            # load resnet50 pretrained using SimCLR on imagenet
-            weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
-            simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+    # load resnet50 pretrained using SimCLR on imagenet
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+    simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
 
-            simclr_resnet50 = simclr.encoder
-            simclr_resnet50.freeze()
+    simclr_resnet50 = simclr.encoder
+    simclr_resnet50.eval()
 
 This means you can now extract image representations that were pretrained via unsupervised learning.
 
