@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Callable, Tuple, Optional
+from typing import Any, Dict, List, Callable, Tuple, Optional, Union
 
 import torch
 from pytorch_lightning import LightningDataModule
