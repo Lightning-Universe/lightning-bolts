@@ -19,9 +19,7 @@ def test_igpt(tmpdir, datadir):
     dm = MNISTDataModule(data_dir=datadir, normalize=False)
     model = ImageGPT()
 
-    trainer = pl.Trainer(
-        fast_dev_run=True, logger=False, checkpoint_callback=False, max_epochs=1, default_root_dir=tmpdir
-    )
+    trainer = pl.Trainer(fast_dev_run=True, logger=False, max_epochs=1, default_root_dir=tmpdir)
 
     trainer.fit(model, datamodule=dm)
     trainer.test(datamodule=dm)
@@ -29,9 +27,7 @@ def test_igpt(tmpdir, datadir):
 
     dm = FashionMNISTDataModule(data_dir=datadir, num_workers=1)
     model = ImageGPT(classify=True)
-    trainer = pl.Trainer(
-        fast_dev_run=True, logger=False, checkpoint_callback=False, max_epochs=1, default_root_dir=tmpdir
-    )
+    trainer = pl.Trainer(fast_dev_run=True, logger=False, max_epochs=1, default_root_dir=tmpdir)
 
     trainer.fit(model, datamodule=dm)
 

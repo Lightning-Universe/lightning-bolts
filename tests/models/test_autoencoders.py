@@ -41,6 +41,7 @@ def test_ae(tmpdir, datadir, dm_cls):
     assert result == 1
 
 
+@torch.no_grad()
 def test_encoder():
     img = torch.rand(16, 3, 224, 224)
 
@@ -54,6 +55,7 @@ def test_encoder():
     assert out2.shape == (16, 2048)
 
 
+@torch.no_grad()
 def test_decoder():
     latent_dim = 128
     input_height = 288  # random but has to be a multiple of 32 for first_conv=True, maxpool1=True
