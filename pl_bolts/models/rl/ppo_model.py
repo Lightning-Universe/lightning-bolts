@@ -15,18 +15,23 @@ References
 import argparse
 from typing import List, Tuple
 
-import gym
 import torch
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 import pytorch_lightning as pl
 from pl_bolts.datamodules import ExperienceSourceDataset
-
-# from pl_bolts.utils import _GYM_AVAILABLE
-# from pl_bolts.utils.warnings import warn_missing_pkg
-
 from pl_bolts.models.rl.common.networks import MLP, ActorCategorical, ActorContinous
+from pl_bolts.utils import _GYM_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+try:
+    import gym
+except ModuleNotFoundError:
+    _GYM_AVAILABLE = False
+    warn_missing_pkg('gym')
+else:
+    _GYM_AVAILABLE = True
 
 
 class PPO(pl.LightningModule):
@@ -36,8 +41,6 @@ class PPO(pl.LightningModule):
     Paper authors: John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov
 
     Model implemented by:
-
-        -
 
     Example:
         >>> from pl_bolts.models.rl.ppo_model import PPO
@@ -86,6 +89,9 @@ class PPO(pl.LightningModule):
             clip_ratio: hyperparameter for clipping in the policy objective
         """
         super().__init__()
+
+        if not _GYM_AVAILABLE:
+            raise ModuleNotFoundError('This Module requires gym environment which is not installed yet.')
 
         # Hyperparameters
         self.lr_actor = lr_actor
