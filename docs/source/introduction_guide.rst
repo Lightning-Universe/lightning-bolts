@@ -181,7 +181,7 @@ you can use any finetuning protocol you prefer.
     resnet18 = model.encoder
     # don't call .freeze()
 
-    classifier = LogisticRegression()
+    classifier = LogisticRegression(...)
 
     for (x, y) in own_data:
         feats = resnet18(x)
@@ -196,7 +196,7 @@ you can use any finetuning protocol you prefer.
     resnet18 = model.encoder
     resnet18.freeze()
 
-    classifier = LogisticRegression()
+    classifier = LogisticRegression(...)
 
     for epoch in epochs:
         for (x, y) in own_data:

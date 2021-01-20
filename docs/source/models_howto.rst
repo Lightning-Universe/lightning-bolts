@@ -80,16 +80,15 @@ In this approach, we load the pretrained model and unfreeze from the beginning
 .. testcode::
 
     from pl_bolts.models.self_supervised import SimCLR
-    from pl_bolts.models.regression import LogisticRegression
 
     weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
     simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
     resnet50 = simclr.encoder
     # don't call .freeze()
 
-    classifier = LogisticRegression()
-
 .. code-block:: python
+
+    classifier = LogisticRegression(...)
 
     for (x, y) in own_data:
         feats = resnet50(x)
@@ -104,7 +103,7 @@ Or as a LightningModule
 
         def __init__(self, encoder):
             self.encoder = encoder
-            self.classifier = LogisticRegression()
+            self.classifier = LogisticRegression(...)
 
         def training_step(self, batch, batch_idx):
             (x, y) = batch
@@ -127,16 +126,15 @@ The approach that works best most often is to freeze first then unfreeze later
 
     # freeze!
     from pl_bolts.models.self_supervised import SimCLR
-    from pl_bolts.models.regression import LogisticRegression
 
     weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
     simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
     resnet50 = simclr.encoder
     resnet50.freeze()
 
-    classifier = LogisticRegression()
-
 .. code-block:: python
+
+    classifier = LogisticRegression(...)
 
     for epoch in epochs:
         for (x, y) in own_data:
@@ -172,7 +170,7 @@ Unless you still need to mix it into your research code.
 
         def __init__(self, encoder):
             self.encoder = encoder
-            self.classifier = LogisticRegression()
+            self.classifier = LogisticRegression(...)
 
         def training_step(self, batch, batch_idx):
 
