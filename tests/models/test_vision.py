@@ -7,17 +7,22 @@ from pl_bolts.datasets import DummyDataset
 from pl_bolts.models import GPT2, ImageGPT, SemSegment, UNet
 
 
-def test_igpt(datadir):
+class DummyDataModule(pl.LightningDataModule):
+
+    def train_dataloader(self):
+        train_ds = DummyDataset((3, 35, 120), (35, 120), num_samples=100)
+        return DataLoader(train_ds, batch_size=1)
+
+
+def test_igpt(tmpdir, datadir):
     pl.seed_everything(0)
     dm = MNISTDataModule(data_dir=datadir, normalize=False)
     model = ImageGPT()
 
     trainer = pl.Trainer(
-        limit_train_batches=2,
-        limit_val_batches=2,
-        limit_test_batches=2,
-        max_epochs=1,
+        fast_dev_run=True, logger=False, checkpoint_callback=False, max_epochs=1, default_root_dir=tmpdir
     )
+
     trainer.fit(model, datamodule=dm)
     trainer.test(datamodule=dm)
     assert trainer.callback_metrics["test_loss"] < 1.7
@@ -25,14 +30,13 @@ def test_igpt(datadir):
     dm = FashionMNISTDataModule(data_dir=datadir, num_workers=1)
     model = ImageGPT(classify=True)
     trainer = pl.Trainer(
-        limit_train_batches=2,
-        limit_val_batches=2,
-        limit_test_batches=2,
-        max_epochs=1,
+        fast_dev_run=True, logger=False, checkpoint_callback=False, max_epochs=1, default_root_dir=tmpdir
     )
+
     trainer.fit(model, datamodule=dm)
 
 
+@torch.no_grad()
 def test_gpt2():
     seq_len = 17
     batch_size = 32
@@ -50,6 +54,7 @@ def test_gpt2():
     model(x)
 
 
+@torch.no_grad()
 def test_unet():
     x = torch.rand(10, 3, 28, 28)
     model = UNet(num_classes=2)
@@ -57,19 +62,14 @@ def test_unet():
     assert y.shape == torch.Size([10, 2, 28, 28])
 
 
-def test_semantic_segmentation():
-
-    class DummyDataModule(pl.LightningDataModule):
-
-        def train_dataloader(self):
-            train_ds = DummyDataset((3, 35, 120), (35, 120), num_samples=100)
-            return DataLoader(train_ds, batch_size=1)
-
+def test_semantic_segmentation(tmpdir, ):
     dm = DummyDataModule()
 
     model = SemSegment(num_classes=19)
 
-    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1)
+    trainer = trainer = pl.Trainer(
+        fast_dev_run=True, logger=False, checkpoint_callback=False, max_epochs=1, default_root_dir=tmpdir
+    )
     trainer.fit(model, datamodule=dm)
     loss = trainer.progress_bar_dict['loss']
 
