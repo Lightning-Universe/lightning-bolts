@@ -1,17 +1,10 @@
 import os
 from abc import abstractmethod
-from typing import Any, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, random_split
-
-from pl_bolts.utils import _TORCHVISION_AVAILABLE
-
-if _TORCHVISION_AVAILABLE:
-    from torchvision.transforms import Compose
-else:
-    Compose = object
 
 
 class VisionDataModule(LightningDataModule):
@@ -120,7 +113,7 @@ class VisionDataModule(LightningDataModule):
         return splits
 
     @abstractmethod
-    def default_transforms(self) -> Compose:
+    def default_transforms(self) -> Callable:
         """ Default transform for the dataset """
 
     def train_dataloader(self, *args: Any, **kwargs: Any) -> DataLoader:

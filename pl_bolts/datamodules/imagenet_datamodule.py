@@ -12,10 +12,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
-    from torchvision.transforms import Compose
 else:  # pragma: no cover
     warn_missing_pkg('torchvision')
-    Compose = object
 
 
 class ImagenetDataModule(LightningDataModule):
@@ -215,7 +213,7 @@ class ImagenetDataModule(LightningDataModule):
         )
         return loader
 
-    def train_transform(self) -> Compose:
+    def train_transform(self) -> Callable:
         """
         The standard imagenet transforms
 
@@ -241,7 +239,7 @@ class ImagenetDataModule(LightningDataModule):
 
         return preprocessing
 
-    def val_transform(self) -> Compose:
+    def val_transform(self) -> Callable:
         """
         The standard imagenet transforms for validation
 

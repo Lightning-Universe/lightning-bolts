@@ -1,6 +1,6 @@
 # type: ignore[override]
 import os
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
@@ -12,10 +12,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
-    from torchvision.transforms import Compose
 else:  # pragma: no cover
     warn_missing_pkg('torchvision')
-    Compose = object
 
 
 class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
@@ -147,6 +145,6 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         )
         return loader
 
-    def _default_transforms(self) -> Compose:
+    def _default_transforms(self) -> Callable:
         mnist_transforms = transform_lib.Compose([transform_lib.ToTensor(), imagenet_normalization()])
         return mnist_transforms

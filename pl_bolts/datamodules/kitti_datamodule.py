@@ -1,6 +1,6 @@
 # type: ignore[override]
 import os
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import torch
 from pytorch_lightning import LightningDataModule
@@ -13,10 +13,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transforms
-    from torchvision.transforms import Compose
 else:  # pragma: no cover
     warn_missing_pkg('torchvision')
-    Compose = object
 
 
 class KittiDataModule(LightningDataModule):
@@ -129,7 +127,7 @@ class KittiDataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self) -> Compose:
+    def _default_transforms(self) -> Callable:
         kitti_transforms = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.35675976, 0.37380189, 0.3764753], std=[0.32064945, 0.32098866, 0.32325324])
