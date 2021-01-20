@@ -20,7 +20,7 @@ For example, you could use a pretrained VAE to generate features for an image da
     weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
     simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
     encoder = simclr.encoder
-    encoder.freeze()
+    encoder.eval()
 
 .. code-block:: python
 
@@ -38,7 +38,7 @@ might perform better than the same resnet50 trained with labels
 
     weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
     simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
-    resnet50_unsupervised = simclr.encoder.freeze()
+    resnet50_unsupervised = simclr.encoder.eval()
 
     # trained with labels
     from torchvision.models import resnet50
