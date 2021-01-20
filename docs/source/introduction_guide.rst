@@ -152,7 +152,7 @@ For example, you could use a pretrained VAE to generate features for an image da
 
     model1 = VAE(input_height=32, pretrained='imagenet2012')
     encoder = model1.encoder
-    encoder.freeze()
+    encoder.eval()
 
     # bolts are pretrained on different datasets
     model2 = CPCV2(encoder='resnet18', pretrained='imagenet128').freeze()
