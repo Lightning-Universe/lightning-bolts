@@ -204,7 +204,7 @@ to get the most value out of your data.
 
     for lr in learning_rates:
         for hd in hidden_dim:
-            vae = VAE(hidden_dim=hd, learning_rate=lr)
+            vae = VAE(input_height=32, hidden_dim=hd, learning_rate=lr)
             trainer = Trainer()
             trainer.fit(vae)
 
