@@ -59,8 +59,8 @@ Bolts are often trained on more than just one dataset.
 
     from pl_bolts.models.self_supervised import SimCLR
 
-    # cifar-10 weights
-    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp12_87_52/epoch%3D960.ckpt'
+    # imagenet weights
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
     simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
 
     simclr.freeze()
@@ -82,7 +82,7 @@ In this approach, we load the pretrained model and unfreeze from the beginning
     from pl_bolts.models.self_supervised import SimCLR
     from pl_bolts.models.regression import LogisticRegression
 
-    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp12_87_52/epoch%3D960.ckpt'
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
     simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
     resnet50 = simclr.encoder
     # don't call .freeze()
