@@ -364,6 +364,12 @@ approaches.
     model = CPCV2(contrastive_task=default_amdim_task, encoder='cpc_default')
     # you might need to modify the cpc encoder depending on what you use
 
+.. testoutput::
+   :hide:
+   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
+
+   ...
+
 ---------------
 
 Compose new ideas
