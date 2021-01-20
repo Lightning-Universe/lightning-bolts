@@ -2,7 +2,6 @@ import torch
 
 
 def _evaluate_iou(preds: torch.Tensor, target: torch.Tensor):
-
     """
     Evaluate intersection over union (IOU) for target from dataset and output prediction
     from model
