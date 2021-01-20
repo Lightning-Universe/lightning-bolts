@@ -4,10 +4,10 @@ from typing import Any, Optional
 import pytorch_lightning as pl
 import torch
 
+from pl_bolts.metrics.object_detection import _evaluate_iou
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
-from pl_bolts.metrics.object_detection import _evaluate_iou
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN

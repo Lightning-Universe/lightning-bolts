@@ -4,13 +4,13 @@ from typing import Any, Optional
 import pytorch_lightning as pl
 import torch
 
-from pl_bolts.models.detection.faster_rcnn import create_retinanet_backbone
+from pl_bolts.metrics.object_detection import _evaluate_iou
+from pl_bolts.models.detection.retinanet import create_retinanet_backbone
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
-from pl_bolts.metrics.object_detection import _evaluate_iou
 
 if _TORCHVISION_AVAILABLE:
-    from torchvision.models.detection.faster_rcnn import RetinaNet as torchvision_RetinaNet
+    from torchvision.models.detection.retinanet import RetinaNet as torchvision_RetinaNet
     from torchvision.models.detection.retinanet import retinanet_resnet50_fpn, RetinaNetHead
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
@@ -36,10 +36,17 @@ class RetinaNet(pl.LightningModule):
         python retinanet.py --gpus 1 --pretrained True
     """
 
-    def __init__(self, learning_rate: float = 0.0001, num_classes: int = 91,
-                 backbone: Optional[str] = None, fpn: bool = True,
-                 pretrained: bool = False, pretrained_backbone: bool = True, trainable_backbone_layers: int = 3,
-                 **kwargs: Any, ):
+    def __init__(
+        self,
+        learning_rate: float = 0.0001,
+        num_classes: int = 91,
+        backbone: Optional[str] = None,
+        fpn: bool = True,
+        pretrained: bool = False,
+        pretrained_backbone: bool = True,
+        trainable_backbone_layers: int = 3,
+        **kwargs: Any,
+    ):
         """
         Args:
             learning_rate: the learning rate
@@ -57,13 +64,17 @@ class RetinaNet(pl.LightningModule):
         if backbone is None:
             self.model = retinanet_resnet50_fpn(pretrained=pretrained, **kwargs)
 
-            self.model.head = RetinaNetHead(in_channels=self.model.backbone.out_channels,
-                                            num_anchors=self.model.head.classification_head.num_anchors,
-                                            num_classes=num_classes, **kwargs)
+            self.model.head = RetinaNetHead(
+                in_channels=self.model.backbone.out_channels,
+                num_anchors=self.model.head.classification_head.num_anchors,
+                num_classes=num_classes,
+                **kwargs
+            )
 
         else:
-            backbone_model = create_retinanet_backbone(self.backbone, fpn, pretrained_backbone,
-                                                       trainable_backbone_layers, **kwargs)
+            backbone_model = create_retinanet_backbone(
+                self.backbone, fpn, pretrained_backbone, trainable_backbone_layers, **kwargs
+            )
             self.model = torchvision_RetinaNet(backbone_model, num_classes=num_classes, **kwargs)
 
     def forward(self, x):
