@@ -13,7 +13,7 @@ don't have enough data, time or money to do your own training.
 
 For example, you could use a pretrained VAE to generate features for an image dataset.
 
-.. code-block:: python
+.. testcode::
 
     from pl_bolts.models.self_supervised import SimCLR
 
@@ -29,7 +29,7 @@ The advantage of bolts is that each system can be decomposed and used in interes
 For instance, this resnet50 was trained using self-supervised learning (no labels) on Imagenet, and thus
 might perform better than the same resnet50 trained with labels
 
-.. code-block:: python
+.. testcode::
 
     # trained without labels
     from pl_bolts.models.self_supervised import SimCLR
@@ -51,7 +51,7 @@ might perform better than the same resnet50 trained with labels
 
 Bolts are often trained on more than just one dataset.
 
-.. code-block:: python
+.. testcode::
 
     from pl_bolts.models.self_supervised import SimCLR
 
@@ -73,7 +73,7 @@ Unfrozen Finetuning
 ^^^^^^^^^^^^^^^^^^^
 In this approach, we load the pretrained model and unfreeze from the beginning
 
-.. code-block:: python
+.. testcode::
 
     from pl_bolts.models.self_supervised import SimCLR
 
@@ -116,7 +116,7 @@ Freeze then unfreeze
 ^^^^^^^^^^^^^^^^^^^^
 The approach that works best most often is to freeze first then unfreeze later
 
-.. code-block:: python
+.. testcode::
 
     # freeze!
     from pl_bolts.models.self_supervised import SimCLR

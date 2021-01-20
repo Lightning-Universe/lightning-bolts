@@ -19,7 +19,7 @@ The models in this module are trained unsupervised and thus can capture better i
 
 In this example, we'll load a resnet 18 which was pretrained on imagenet using CPC as the pretext task.
 
-Example::
+.. testcode::
 
             from pl_bolts.models.self_supervised import SimCLR
 
