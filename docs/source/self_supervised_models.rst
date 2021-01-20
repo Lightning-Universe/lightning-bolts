@@ -21,15 +21,14 @@ In this example, we'll load a resnet 18 which was pretrained on imagenet using C
 
 Example::
 
-            from pl_bolts.models.self_supervised import CPCV2
+            from pl_bolts.models.self_supervised import SimCLR
 
-            # load resnet18 pretrained using CPC on imagenet
-            model = CPCV2(pretrained='resnet18')
-            cpc_resnet18 = model.encoder
-            cpc_resnet18.freeze()
+            # load resnet50 pretrained using SimCLR on imagenet
+            weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+            simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
 
-            # it supports any torchvision resnet
-            model = CPCV2(pretrained='resnet50')
+            simclr_resnet50 = simclr.encoder
+            simclr_resnet50.freeze()
 
 This means you can now extract image representations that were pretrained via unsupervised learning.
 
@@ -38,7 +37,7 @@ Example::
     my_dataset = SomeDataset()
     for batch in my_dataset:
         x, y = batch
-        out = cpc_resnet18(x)
+        out = simclr_resnet50(x)
 
 ----------------
 

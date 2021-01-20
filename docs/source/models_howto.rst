@@ -15,35 +15,37 @@ For example, you could use a pretrained VAE to generate features for an image da
 
 .. code-block:: python
 
-    from pl_bolts.models.autoencoders import VAE
+    from pl_bolts.models.self_supervised import SimCLR
 
-    model = VAE(pretrained='imagenet2012')
-    encoder = model.encoder
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+    simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+    encoder = simclr.encoder
     encoder.freeze()
 
     for (x, y) in own_data
         features = encoder(x)
 
 The advantage of bolts is that each system can be decomposed and used in interesting ways.
-For instance, this resnet18 was trained using self-supervised learning (no labels) on Imagenet, and thus
-might perform better than the same resnet18 trained with labels
+For instance, this resnet50 was trained using self-supervised learning (no labels) on Imagenet, and thus
+might perform better than the same resnet50 trained with labels
 
 .. code-block:: python
 
     # trained without labels
-    from pl_bolts.models.self_supervised import CPCV2
+    from pl_bolts.models.self_supervised import SimCLR
 
-    model = CPCV2(encoder='resnet18', pretrained='imagenet128')
-    resnet18_unsupervised = model.encoder.freeze()
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+    simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+    resnet50_unsupervised = simclr.encoder.freeze()
 
     # trained with labels
-    from torchvision.models import resnet18
-    resnet18_supervised = resnet18(pretrained=True)
+    from torchvision.models import resnet50
+    resnet50_supervised = resnet50(pretrained=True)
 
     # perhaps the features when trained without labels are much better for classification or other tasks
     x = image_sample()
-    unsup_feats = resnet18_unsupervised(x)
-    sup_feats = resnet18_supervised(x)
+    unsup_feats = resnet50_unsupervised(x)
+    sup_feats = resnet50_supervised(x)
 
     # which one will be better?
 
@@ -51,8 +53,13 @@ Bolts are often trained on more than just one dataset.
 
 .. code-block:: python
 
-    model = CPCV2(encoder='resnet18', pretrained='stl10')
+    from pl_bolts.models.self_supervised import SimCLR
 
+    # cifar-10 weights
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp12_87_52/epoch%3D960.ckpt'
+    simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+
+    simclr.freeze()
 
 ---------------
 
@@ -68,14 +75,17 @@ In this approach, we load the pretrained model and unfreeze from the beginning
 
 .. code-block:: python
 
-    model = CPCV2(encoder='resnet18', pretrained='imagenet128')
-    resnet18 = model.encoder
+    from pl_bolts.models.self_supervised import SimCLR
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-v1-exp12_87_52/epoch%3D960.ckpt'
+    simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+    resnet50 = simclr.encoder
     # don't call .freeze()
 
     classifier = LogisticRegression()
 
     for (x, y) in own_data:
-        feats = resnet18(x)
+        feats = resnet50(x)
         y_hat = classifier(feats)
         ...
 
@@ -97,7 +107,7 @@ Or as a LightningModule
             return loss
 
     trainer = Trainer(gpus=2)
-    model = FineTuner(resnet18)
+    model = FineTuner(resnet50)
     trainer.fit(model)
 
 Sometimes this works well, but more often it's better to keep the encoder frozen for a while
@@ -109,21 +119,24 @@ The approach that works best most often is to freeze first then unfreeze later
 .. code-block:: python
 
     # freeze!
-    model = CPCV2(encoder='resnet18', pretrained='imagenet128')
-    resnet18 = model.encoder
-    resnet18.freeze()
+    from pl_bolts.models.self_supervised import SimCLR
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+    simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+    resnet50 = simclr.encoder
+    resnet50.freeze()
 
     classifier = LogisticRegression()
 
     for epoch in epochs:
         for (x, y) in own_data:
-            feats = resnet18(x)
+            feats = resnet50(x)
             y_hat = classifier(feats)
             loss = cross_entropy_with_logits(y_hat, y)
 
         # unfreeze after 10 epochs
         if epoch == 10:
-            resnet18.unfreeze()
+            resnet50.unfreeze()
 
 .. note:: In practice, unfreezing later works MUCH better.
 
@@ -138,7 +151,7 @@ Or in Lightning as a Callback so you don't pollute your research code.
                 encoder.unfreeze()
 
     trainer = Trainer(gpus=2, callbacks=[UnFreezeCallback()])
-    model = FineTuner(resnet18)
+    model = FineTuner(resnet50)
     trainer.fit(model)
 
 Unless you still need to mix it into your research code.
