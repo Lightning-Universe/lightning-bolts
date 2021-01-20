@@ -158,6 +158,8 @@ For example, you could use a pretrained VAE to generate features for an image da
     model2 = CPCV2(encoder='resnet18', pretrained='imagenet128').freeze()
     model3 = CPCV2(encoder='resnet18', pretrained='stl10').freeze()
 
+.. code-block:: python
+
     for (x, y) in own_data:
         features = encoder(x)
         feat2 = model2(x)
@@ -181,6 +183,8 @@ you can use any finetuning protocol you prefer.
 
     classifier = LogisticRegression()
 
+.. code-block:: python
+
     for (x, y) in own_data:
         feats = resnet18(x)
         y_hat = classifier(feats)
@@ -195,6 +199,8 @@ you can use any finetuning protocol you prefer.
     resnet18.freeze()
 
     classifier = LogisticRegression()
+
+.. code-block:: python
 
     for epoch in epochs:
         for (x, y) in own_data:
