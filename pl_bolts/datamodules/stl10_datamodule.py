@@ -1,6 +1,6 @@
 # type: ignore[override]
 import os
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import torch
 from pytorch_lightning import LightningDataModule
