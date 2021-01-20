@@ -151,7 +151,9 @@ class VOCDetectionDataModule(LightningDataModule):
         VOCDetection(self.data_dir, year=self.year, image_set="train", download=True)
         VOCDetection(self.data_dir, year=self.year, image_set="val", download=True)
 
-    def train_dataloader(self, batch_size: int = 1, image_transforms: Union[List[Callable], Callable]=None) -> DataLoader:
+    def train_dataloader(
+        self, batch_size: int = 1, image_transforms: Union[List[Callable], Callable] = None
+    ) -> DataLoader:
         """
         VOCDetection train set uses the `train` subset
 
