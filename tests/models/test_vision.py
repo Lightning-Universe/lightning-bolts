@@ -15,6 +15,7 @@ class DummyDataModule(pl.LightningDataModule):
 
 
 def test_igpt(tmpdir, datadir):
+    pl.seed_everything(0)
     dm = MNISTDataModule(data_dir=datadir, normalize=False)
     model = ImageGPT()
 

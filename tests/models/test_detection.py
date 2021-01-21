@@ -12,7 +12,7 @@ def _collate_fn(batch):
 
 @torch.no_grad()
 def test_fasterrcnn():
-    model = FasterRCNN()
+    model = FasterRCNN(pretrained=False, pretrained_backbone=False)
 
     image = torch.rand(1, 3, 400, 400)
     model(image)
