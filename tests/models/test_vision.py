@@ -36,6 +36,7 @@ def test_igpt(tmpdir, datadir):
         limit_val_batches=2,
         limit_test_batches=2,
         max_epochs=1,
+        logger=False, checkpoint_callback=False,
     )
     trainer.fit(model, datamodule=dm)
 

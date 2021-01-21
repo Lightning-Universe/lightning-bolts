@@ -14,7 +14,7 @@ def _collate_fn(batch):
 def test_fasterrcnn():
     model = FasterRCNN(pretrained=False, pretrained_backbone=False)
 
-    image = torch.rand(1, 3, 400, 400)
+    image = torch.rand(1, 3, 224, 224)
     model(image)
 
 
@@ -24,7 +24,7 @@ def test_fasterrcnn_train(tmpdir):
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
 
-    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer = pl.Trainer(fast_dev_run=True, logger=False, checkpoint_callback=False, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model, train_dataloader=train_dl, val_dataloaders=valid_dl)
 
 
@@ -33,5 +33,5 @@ def test_fasterrcnn_bbone_train(tmpdir):
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
 
-    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer = pl.Trainer(fast_dev_run=True, logger=False, checkpoint_callback=False, max_epochs=1, default_root_dir=tmpdir)
     trainer.fit(model, train_dl, valid_dl)
