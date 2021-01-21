@@ -19,7 +19,7 @@ def test_fasterrcnn():
 
 
 def test_fasterrcnn_train(tmpdir):
-    model = FasterRCNN()
+    model = FasterRCNN(pretrained=False, pretrained_backbone=False)
 
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
@@ -29,7 +29,7 @@ def test_fasterrcnn_train(tmpdir):
 
 
 def test_fasterrcnn_bbone_train(tmpdir):
-    model = FasterRCNN(backbone="resnet18", fpn=True, pretrained_backbone=True)
+    model = FasterRCNN(backbone="resnet18", fpn=True, pretrained_backbone=False, pretrained=False)
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
 
