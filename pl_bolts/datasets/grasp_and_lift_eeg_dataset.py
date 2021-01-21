@@ -39,15 +39,24 @@ class GraspAndLiftEEGDataset(data.Dataset):
             If None, the the dataset yields the full length trials.
         last_label_only: If true, return only the last sample's labels.
             Must be used with num_samples.
+        subjects: Optional list of numbers between 1 and 12 limiting
+            which subjects' trials to load. Default is None, which loads
+            all subjects. Use this feature to create training and
+            validation splits.
 
     Examples:
-        >>> dataset = GraspAndLiftEEGDataset('/data', train=True, download=True, num_samples=1024)
+        # Load the first nine subjects
+        # Withhold the last three (10, 11, and 12) for validation/testing
+        >>> dataset = GraspAndLiftEEGDataset('/data', train=True, \
+                                             download=True, \
+                                             num_samples=1024, \
+                                             subjects=[1, 2, 3, 4, 5, 6, 7, 8, 9])
         Downloading from https://grasplifteeg.nyc3.digitaloceanspaces.com/grasp-and-lift-eeg-detection.zip
         Downloaded in 283 seconds
         Extracting /data/grasp-and-lift-eeg-detection.zip to /data
         Unzipped in 36 seconds
         >>> len(dataset)
-        17887546
+        13296223
         >>> data, label = dataset[0]
         >>> data.shape
         torch.Size([32, 1024])
@@ -88,7 +97,8 @@ class GraspAndLiftEEGDataset(data.Dataset):
                  train: bool = True,
                  download: bool = True,
                  num_samples: Optional[int] = None,
-                 last_label_only: bool = False) -> None:
+                 last_label_only: bool = False,
+                 subjects: Optional[List[int]] = None) -> None:
         super(GraspAndLiftEEGDataset, self).__init__()
         if num_samples is None and last_label_only:
             raise ValueError('last_label_only cannot be used without setting num_samples')
@@ -110,22 +120,31 @@ class GraspAndLiftEEGDataset(data.Dataset):
             print(f'Number of .csv.bin files ({len(bin_files)}) '
                   f'is less than the number of .csv ({len(csv_files)}).'
                   ' Compiling binary representation...')
-            self.load_from_csv(csv_files)
+            self.load_from_csv(csv_files, subjects)
         else:
-            self.load_from_bin(bin_files)
+            self.load_from_bin(bin_files, subjects)
 
-    def load_from_csv(self, csv_files: List[str]) -> None:
-        self.X, self.Y = self.compile_bin(csv_files)
+    def load_from_csv(self, csv_files: List[str], subjects: Optional[List[int]]) -> None:
+        """ Convert and load the data from the original .csv files
+        """
+        self.X, self.Y = self.compile_bin(csv_files, subjects)
         if self.num_samples is not None:
             # Divide each example up into windows
             self.total_examples = 0
             for x in self.X:
                 self.total_examples += x.shape[1] - self.num_samples + 1
 
-    def load_from_bin(self, bin_files: List[str]) -> None:
+    def load_from_bin(self, bin_files: List[str], subjects: Optional[List[int]]) -> None:
+        """ Load the data from existing .csv.bin files
+        """
         examples = {}
         self.total_examples = 0
         for file in bin_files:
+            if subjects is not None:
+                basename = os.path.basename(file)
+                subject = int(basename[4:basename.index('_')])
+                if subject not in subjects:
+                    continue
             is_data = file.endswith('_data.csv.bin')
             series = file[:-len('_data.csv.bin')
                           if is_data else -len('_events.csv.bin')]
@@ -165,9 +184,16 @@ class GraspAndLiftEEGDataset(data.Dataset):
         print(f'Unzipped in {int(delta)} seconds')
         os.remove(zip_path)
 
-    def compile_bin(self, csv_files: List[str]) -> Tuple[Tensor, Optional[Tensor]]:
+    def compile_bin(self, csv_files: List[str], subjects: Optional[List[int]]) -> Tuple[Tensor, Optional[Tensor]]:
+        """ Compile the .csv.bin files from the original .csv files
+        """
         examples = {}
         for i, file in enumerate(csv_files):
+            if subjects is not None:
+                basename = os.path.basename(file)
+                subject = int(basename[4:basename.index('_')])
+                if subject not in subjects:
+                    continue
             is_data = file.endswith('_data.csv')
             samples = []
             with open(file, 'r') as f:
