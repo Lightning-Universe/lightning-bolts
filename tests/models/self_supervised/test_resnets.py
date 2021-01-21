@@ -25,15 +25,15 @@ def test_cpc_resnet():
 
 @pytest.mark.parametrize(
     "model_class", [
-        resnet18(pretrained=False),
-        resnet34(pretrained=False),
-        resnet50(pretrained=False),
-        resnet101(pretrained=False),
-        resnet152(pretrained=False),
-        resnext50_32x4d(pretrained=False),
-        resnext101_32x8d(pretrained=False),
-        wide_resnet50_2(pretrained=False),
-        wide_resnet101_2(pretrained=False),
+        resnet18(),
+        resnet34(),
+        resnet50(),
+        resnet101(),
+        resnet152(),
+        resnext50_32x4d(),
+        resnext101_32x8d(),
+        wide_resnet50_2(),
+        wide_resnet101_2(),
     ]
 )
 @torch.no_grad()
