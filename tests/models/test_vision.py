@@ -6,8 +6,6 @@ from pl_bolts.datamodules import FashionMNISTDataModule, MNISTDataModule
 from pl_bolts.datasets import DummyDataset
 from pl_bolts.models import GPT2, ImageGPT, SemSegment, UNet
 
-pl.seed_everything(42)
-
 
 class DummyDataModule(pl.LightningDataModule):
 
@@ -33,6 +31,7 @@ def test_igpt(tmpdir, datadir):
 
 @torch.no_grad()
 def test_gpt2():
+    pl.seed_everything(0)
     seq_len = 17
     batch_size = 32
     vocab_size = 16
@@ -57,7 +56,7 @@ def test_unet():
     assert y.shape == torch.Size([10, 2, 28, 28])
 
 
-def test_semantic_segmentation(tmpdir, ):
+def test_semantic_segmentation(tmpdir):
     dm = DummyDataModule()
 
     model = SemSegment(num_classes=19)
