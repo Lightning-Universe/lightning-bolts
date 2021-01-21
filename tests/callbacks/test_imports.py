@@ -8,10 +8,14 @@ from tests import optional_pkg_names
 
 @pytest.mark.parametrize(
     "name", [
+        "BatchGradientVerificationCallback",
+        "BYOLMAWeightUpdate",
         "ModuleDataMonitor",
         "TrainingDataMonitor",
         "PrintTableMetricsCallback",
+        "SSLOnlineEvaluator",
         "LatentDimInterpolator",
+        "ConfusedLogitCallback",
         "TensorboardGenerativeModelImageSampler",
     ]
 )

@@ -8,6 +8,8 @@ from tests import optional_pkg_names
 
 @pytest.mark.parametrize("name", [
     "accuracy",
+    "giou",
+    "iou",
     "mean",
     "precision_at_k",
 ])

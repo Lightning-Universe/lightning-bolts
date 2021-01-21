@@ -12,11 +12,13 @@ from tests import optional_pkg_names
         "BinaryMNISTDataModule",
         "CIFAR10DataModule",
         "TinyCIFAR10DataModule",
+        "CityscapesDataModule",
         "DiscountedExperienceSource",
         "ExperienceSource",
         "ExperienceSourceDataset",
         "FashionMNISTDataModule",
         "ImagenetDataModule",
+        "KittiDataModule",
         "MNISTDataModule",
         "SklearnDataModule",
         "SklearnDataset",
@@ -24,9 +26,7 @@ from tests import optional_pkg_names
         "SSLImagenetDataModule",
         "STL10DataModule",
         "VOCDetectionDataModule",
-        "CityscapesDataModule",
         "KittiDataset",
-        "KittiDataModule",
     ]
 )
 def test_import(name):
@@ -36,5 +36,6 @@ def test_import(name):
         name: class, function or variable name to test importing
     """
     with mock.patch.dict("sys.modules", {pkg: None for pkg in optional_pkg_names}):
-        module = importlib.import_module("pl_bolts.datamodules")
-        assert hasattr(module, name), f"`from pl_bolts.datamodules import {name}` failed."
+        module_name = "pl_bolts.datamodules"
+        module = importlib.import_module(module_name)
+        assert hasattr(module, name), f"`from {module_name} import {name}` failed."
