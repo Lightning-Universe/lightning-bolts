@@ -10,6 +10,7 @@ def _collate_fn(batch):
     return tuple(zip(*batch))
 
 
+@torch.no_grad()
 def test_fasterrcnn():
     model = FasterRCNN()
 
