@@ -18,14 +18,24 @@ def test_igpt(tmpdir, datadir):
     dm = MNISTDataModule(data_dir=datadir, normalize=False)
     model = ImageGPT()
 
-    trainer = pl.Trainer(limit_train_batches=2, limit_val_batches=2, limit_test_batches=2, max_epochs=1, )
+    trainer = pl.Trainer(
+        limit_train_batches=2,
+        limit_val_batches=2,
+        limit_test_batches=2,
+        max_epochs=1,
+    )
     trainer.fit(model, datamodule=dm)
     trainer.test(datamodule=dm)
     assert trainer.callback_metrics["test_loss"] < 1.7
 
     dm = FashionMNISTDataModule(data_dir=datadir, num_workers=1)
     model = ImageGPT(classify=True)
-    trainer = pl.Trainer(limit_train_batches=2, limit_val_batches=2, limit_test_batches=2, max_epochs=1,)
+    trainer = pl.Trainer(
+        limit_train_batches=2,
+        limit_val_batches=2,
+        limit_test_batches=2,
+        max_epochs=1,
+    )
     trainer.fit(model, datamodule=dm)
 
 
