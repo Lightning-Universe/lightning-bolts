@@ -5,27 +5,30 @@ import pytest
 
 from tests import optional_pkg_names
 
-@pytest.mark.parametrize("name", [
-    "AsynchronousLoader",
-    "BinaryMNISTDataModule",
-    "CIFAR10DataModule",
-    "TinyCIFAR10DataModule",
-    "DiscountedExperienceSource",
-    "ExperienceSource",
-    "ExperienceSourceDataset",
-    "FashionMNISTDataModule",
-    "ImagenetDataModule",
-    "MNISTDataModule",
-    "SklearnDataModule",
-    "SklearnDataset",
-    "TensorDataset",
-    "SSLImagenetDataModule",
-    "STL10DataModule",
-    "VOCDetectionDataModule",
-    "CityscapesDataModule",
-    "KittiDataset",
-    "KittiDataModule",
-])
+
+@pytest.mark.parametrize(
+    "name", [
+        "AsynchronousLoader",
+        "BinaryMNISTDataModule",
+        "CIFAR10DataModule",
+        "TinyCIFAR10DataModule",
+        "DiscountedExperienceSource",
+        "ExperienceSource",
+        "ExperienceSourceDataset",
+        "FashionMNISTDataModule",
+        "ImagenetDataModule",
+        "MNISTDataModule",
+        "SklearnDataModule",
+        "SklearnDataset",
+        "TensorDataset",
+        "SSLImagenetDataModule",
+        "STL10DataModule",
+        "VOCDetectionDataModule",
+        "CityscapesDataModule",
+        "KittiDataset",
+        "KittiDataModule",
+    ]
+)
 def test_import(name):
     """Tests importing when dependencies are not met.
 

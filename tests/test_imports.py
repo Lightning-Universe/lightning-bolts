@@ -6,17 +6,19 @@ import pytest
 from tests import optional_pkg_names
 
 
-@pytest.mark.parametrize("name", [
-    "callbacks",
-    "datamodules",
-    "datasets",
-    "losses",
-    "metrics",
-    "models",
-    "optimizers",
-    "transforms",
-    "utils",
-])
+@pytest.mark.parametrize(
+    "name", [
+        "callbacks",
+        "datamodules",
+        "datasets",
+        "losses",
+        "metrics",
+        "models",
+        "optimizers",
+        "transforms",
+        "utils",
+    ]
+)
 def test_import(name):
     """Tests importing when dependencies are not met.
 

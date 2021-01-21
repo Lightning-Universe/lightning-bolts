@@ -22,13 +22,15 @@ def test_import_rl(name):
         assert hasattr(module, name), f"`from {module_name} import {name}` failed."
 
 
-@pytest.mark.parametrize("name", [
-    "nt_xent_loss",
-    "CPCTask",
-    "AmdimNCELoss",
-    "FeatureMapContrastiveTask",
-    "tanh_clip",
-])
+@pytest.mark.parametrize(
+    "name", [
+        "nt_xent_loss",
+        "CPCTask",
+        "AmdimNCELoss",
+        "FeatureMapContrastiveTask",
+        "tanh_clip",
+    ]
+)
 def test_import_self_supervised_learning(name):
     """Tests importing when dependencies are not met.
 

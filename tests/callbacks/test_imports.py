@@ -6,13 +6,15 @@ import pytest
 from tests import optional_pkg_names
 
 
-@pytest.mark.parametrize("name", [
-    "ModuleDataMonitor",
-    "TrainingDataMonitor",
-    "PrintTableMetricsCallback",
-    "LatentDimInterpolator",
-    "TensorboardGenerativeModelImageSampler",
-])
+@pytest.mark.parametrize(
+    "name", [
+        "ModuleDataMonitor",
+        "TrainingDataMonitor",
+        "PrintTableMetricsCallback",
+        "LatentDimInterpolator",
+        "TensorboardGenerativeModelImageSampler",
+    ]
+)
 def test_import(name):
     """Tests importing when dependencies are not met.
 
