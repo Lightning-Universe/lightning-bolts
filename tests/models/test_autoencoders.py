@@ -106,9 +106,10 @@ def test_from_pretrained(datadir):
         ae = ae.from_pretrained('cifar10-resnet18')
 
         # test forward method on pre-trained weights
-        for x, y in data_loader:
-            ae(x)
-            break
+        with torch.no_grad():
+            for x, y in data_loader:
+                ae(x)
+                break
 
     except Exception:
         exception_raised = True
