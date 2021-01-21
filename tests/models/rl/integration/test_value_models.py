@@ -17,9 +17,12 @@ class TestValueModels(TestCase):
         parent_parser = pl.Trainer.add_argparse_args(parent_parser)
         parent_parser = DQN.add_model_specific_args(parent_parser)
         args_list = [
-            "--warm_start_size", "100",
-            "--gpus", "0",
-            "--env", "PongNoFrameskip-v4",
+            "--warm_start_size",
+            "100",
+            "--gpus",
+            "0",
+            "--env",
+            "PongNoFrameskip-v4",
         ]
         self.hparams = parent_parser.parse_args(args_list)
 

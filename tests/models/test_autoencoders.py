@@ -4,7 +4,7 @@ import torch
 from pytorch_lightning import seed_everything
 
 from pl_bolts.datamodules import CIFAR10DataModule
-from pl_bolts.models.autoencoders import AE, VAE, resnet18_decoder, resnet18_encoder, resnet50_encoder
+from pl_bolts.models.autoencoders import AE, resnet18_decoder, resnet18_encoder, resnet50_encoder, VAE
 
 
 @pytest.mark.parametrize("dm_cls", [pytest.param(CIFAR10DataModule, id="cifar10")])
@@ -17,10 +17,10 @@ def test_vae(tmpdir, datadir, dm_cls):
         fast_dev_run=True,
         default_root_dir=tmpdir,
         max_epochs=1,
-        gpus=None
+        gpus=None,
     )
 
-    result = trainer.fit(model, dm)
+    result = trainer.fit(model, datamodule=dm)
     assert result == 1
 
 
@@ -34,10 +34,10 @@ def test_ae(tmpdir, datadir, dm_cls):
         fast_dev_run=True,
         default_root_dir=tmpdir,
         max_epochs=1,
-        gpus=None
+        gpus=None,
     )
 
-    result = trainer.fit(model, dm)
+    result = trainer.fit(model, datamodule=dm)
     assert result == 1
 
 
@@ -96,7 +96,7 @@ def test_from_pretrained(datadir):
 
         # test forward method on pre-trained weights
         for x, y in data_loader:
-            x_hat = vae(x)
+            vae(x)
             break
 
         vae = vae.from_pretrained('stl10-resnet18')  # try loading weights not compatible with exact architecture
@@ -105,7 +105,7 @@ def test_from_pretrained(datadir):
 
         # test forward method on pre-trained weights
         for x, y in data_loader:
-            x_hat = ae(x)
+            ae(x)
             break
 
     except Exception:
@@ -116,8 +116,8 @@ def test_from_pretrained(datadir):
     keyerror = False
 
     try:
-        vae = vae.from_pretrained('abc')
-        ae = ae.from_pretrained('xyz')
+        vae.from_pretrained('abc')
+        ae.from_pretrained('xyz')
     except KeyError:
         keyerror = True
 

@@ -1,7 +1,8 @@
-import torch
+from torch.utils.data import Dataset
 
 
-class ConcatDataset(torch.utils.data.Dataset):
+class ConcatDataset(Dataset):
+
     def __init__(self, *datasets):
         self.datasets = datasets
 

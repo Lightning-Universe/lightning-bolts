@@ -11,13 +11,14 @@ import numpy as np
 import torch
 from torch._six import PY3
 
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import ImageNet
     from torchvision.datasets.imagenet import load_meta_file
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
     ImageNet = object
 
 
@@ -30,14 +31,14 @@ class UnlabeledImagenet(ImageNet):
     """
 
     def __init__(
-            self,
-            root,
-            split: str = 'train',
-            num_classes: int = -1,
-            num_imgs_per_class: int = -1,
-            num_imgs_per_class_val_split: int = 50,
-            meta_dir=None,
-            **kwargs,
+        self,
+        root,
+        split: str = 'train',
+        num_classes: int = -1,
+        num_imgs_per_class: int = -1,
+        num_imgs_per_class_val_split: int = 50,
+        meta_dir=None,
+        **kwargs,
     ):
         """
         Args:
@@ -49,6 +50,11 @@ class UnlabeledImagenet(ImageNet):
             download:
             kwargs:
         """
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
+                'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
+            )
+
         root = self.root = os.path.expanduser(root)
 
         # [train], [val] --> [train, val], [test]
@@ -117,9 +123,7 @@ class UnlabeledImagenet(ImageNet):
         self.wnids = self.classes
         self.wnid_to_idx = {wnid: idx for idx, wnid in zip(idcs, self.wnids)}
         self.classes = [wnid_to_classes[wnid] for wnid in self.wnids]
-        self.class_to_idx = {cls: idx
-                             for clss, idx in zip(self.classes, idcs)
-                             for cls in clss}
+        self.class_to_idx = {cls: idx for clss, idx in zip(self.classes, idcs) for cls in clss}
 
         # update the root data
         self.samples = self.imgs
@@ -143,9 +147,11 @@ class UnlabeledImagenet(ImageNet):
     def generate_meta_bins(cls, devkit_dir):
         files = os.listdir(devkit_dir)
         if 'ILSVRC2012_devkit_t12.tar.gz' not in files:
-            raise FileNotFoundError('devkit_path must point to the devkit file'
-                                    'ILSVRC2012_devkit_t12.tar.gz. Download from here:'
-                                    'http://www.image-net.org/challenges/LSVRC/2012/downloads')
+            raise FileNotFoundError(
+                'devkit_path must point to the devkit file'
+                'ILSVRC2012_devkit_t12.tar.gz. Download from here:'
+                'http://www.image-net.org/challenges/LSVRC/2012/downloads'
+            )
 
         parse_devkit_archive(devkit_dir)
         print(f'meta.bin generated at {devkit_dir}/meta.bin')
@@ -155,7 +161,8 @@ def _verify_archive(root, file, md5):
     if not _check_integrity(os.path.join(root, file), md5):
         raise RuntimeError(
             f"The archive {file} is not present in the root directory or is corrupted."
-            f" You need to download it externally and place it in {root}.")
+            f" You need to download it externally and place it in {root}."
+        )
 
 
 def _check_integrity(fpath, md5=None):
@@ -188,14 +195,13 @@ def parse_devkit_archive(root, file=None):
         file (str, optional): Name of devkit archive. Defaults to
             'ILSVRC2012_devkit_t12.tar.gz'
     """
-    import scipy.io as sio
+    from scipy import io as sio
 
     def parse_meta_mat(devkit_root):
         metafile = os.path.join(devkit_root, "data", "meta.mat")
         meta = sio.loadmat(metafile, squeeze_me=True)['synsets']
         nums_children = list(zip(*meta))[4]
-        meta = [meta[idx] for idx, num_children in enumerate(nums_children)
-                if num_children == 0]
+        meta = [meta[idx] for idx, num_children in enumerate(nums_children) if num_children == 0]
         idcs, wnids, classes = list(zip(*meta))[:3]
         classes = [tuple(clss.split(', ')) for clss in classes]
         idx_to_wnid = {idx: wnid for idx, wnid in zip(idcs, wnids)}
@@ -203,8 +209,7 @@ def parse_devkit_archive(root, file=None):
         return idx_to_wnid, wnid_to_classes
 
     def parse_val_groundtruth_txt(devkit_root):
-        file = os.path.join(devkit_root, "data",
-                            "ILSVRC2012_validation_ground_truth.txt")
+        file = os.path.join(devkit_root, "data", "ILSVRC2012_validation_ground_truth.txt")
         with open(file, 'r') as txtfh:
             val_idcs = txtfh.readlines()
         return [int(val_idx) for val_idx in val_idcs]

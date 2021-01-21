@@ -1,23 +1,20 @@
+from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
-    from torchvision import transforms as transform_lib
+if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import MNIST
-except ModuleNotFoundError as err:
-    raise ModuleNotFoundError(  # pragma: no-cover
-        'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
-    ) from err
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
+    MNIST = object
 
-try:
+if _PIL_AVAILABLE:
     from PIL import Image
-except ModuleNotFoundError:
-    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
-    _PIL_AVAILABLE = False
-else:
-    _PIL_AVAILABLE = True
+else:  # pragma: no cover
+    warn_missing_pkg('PIL', pypi_name='Pillow')
 
 
 class BinaryMNIST(MNIST):
+
     def __getitem__(self, idx):
         """
         Args:
@@ -25,6 +22,9 @@ class BinaryMNIST(MNIST):
         Returns:
             tuple: (image, target) where target is index of the target class.
         """
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError('You want to use `torchvision` which is not installed yet.')
+
         img, target = self.data[idx], int(self.targets[idx])
 
         # doing this so that it is consistent with all other datasets

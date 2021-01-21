@@ -1,6 +1,6 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
+from torch import nn as nn
+from torch.nn import functional as F
 
 
 class UNet(nn.Module):
@@ -22,14 +22,19 @@ class UNet(nn.Module):
         features_start: Number of features in first layer (default 64)
         bilinear: Whether to use bilinear interpolation or transposed convolutions (default) for upsampling.
     """
+
     def __init__(
-            self,
-            num_classes: int,
-            input_channels: int = 3,
-            num_layers: int = 5,
-            features_start: int = 64,
-            bilinear: bool = False
+        self,
+        num_classes: int,
+        input_channels: int = 3,
+        num_layers: int = 5,
+        features_start: int = 64,
+        bilinear: bool = False
     ):
+
+        if num_layers < 1:
+            raise ValueError(f'num_layers = {num_layers}, expected: num_layers > 0')
+
         super().__init__()
         self.num_layers = num_layers
 
@@ -67,12 +72,8 @@ class DoubleConv(nn.Module):
     def __init__(self, in_ch: int, out_ch: int):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Conv2d(in_ch, out_ch, kernel_size=3, padding=1),
-            nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_ch, out_ch, kernel_size=3, padding=1),
-            nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True)
+            nn.Conv2d(in_ch, out_ch, kernel_size=3, padding=1), nn.BatchNorm2d(out_ch), nn.ReLU(inplace=True),
+            nn.Conv2d(out_ch, out_ch, kernel_size=3, padding=1), nn.BatchNorm2d(out_ch), nn.ReLU(inplace=True)
         )
 
     def forward(self, x):
@@ -86,10 +87,7 @@ class Down(nn.Module):
 
     def __init__(self, in_ch: int, out_ch: int):
         super().__init__()
-        self.net = nn.Sequential(
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            DoubleConv(in_ch, out_ch)
-        )
+        self.net = nn.Sequential(nn.MaxPool2d(kernel_size=2, stride=2), DoubleConv(in_ch, out_ch))
 
     def forward(self, x):
         return self.net(x)

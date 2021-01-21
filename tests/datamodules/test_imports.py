@@ -5,7 +5,6 @@ import pytest
 
 from tests import optional_pkg_names
 
-
 @pytest.mark.parametrize("name", [
     "AsynchronousLoader",
     "BinaryMNISTDataModule",

@@ -22,16 +22,10 @@ def test_generate_half_labeled_batches():
     larger_set_X = np.random.rand(100, 3, 32, 32)
     larger_set_Y = np.zeros_like(smaller_set_Y) + -1
 
-    (mixed_x, mixed_y) = generate_half_labeled_batches(
-        smaller_set_X,
-        smaller_set_Y,
-        larger_set_X,
-        larger_set_Y,
-        10
-    )
+    (mixed_x, mixed_y) = generate_half_labeled_batches(smaller_set_X, smaller_set_Y, larger_set_X, larger_set_Y, 10)
 
     # only half the batch should be unlabeled
     for i in range(0, len(mixed_y), 10):
-        batch = mixed_y[i: i + 10]
+        batch = mixed_y[i:i + 10]
         counts = Counter(batch.flatten().tolist())
         assert counts[-1] == 5

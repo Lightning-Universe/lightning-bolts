@@ -1,15 +1,14 @@
 import torch
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import Dataset
 
 
 class DummyDataset(Dataset):
     """
     Generate a dummy dataset
 
-    Example::
-
-        from pl_bolts.datasets import DummyDataset
-
+    Example:
+        >>> from pl_bolts.datasets import DummyDataset
+        >>> from torch.utils.data import DataLoader
         >>> # mnist dims
         >>> ds = DummyDataset((1, 28, 28), (1, ))
         >>> dl = DataLoader(ds, batch_size=7)
@@ -21,6 +20,7 @@ class DummyDataset(Dataset):
         >>> y.size()
         torch.Size([7, 1])
     """
+
     def __init__(self, *shapes, num_samples: int = 10000):
         """
         Args:
@@ -46,13 +46,13 @@ class DummyDetectionDataset(Dataset):
     """
     Generate a dummy dataset for detection
 
-    Example::
-
-        from pl_bolts.datasets import DummyDetectionDataset
-
+    Example:
+        >>> from pl_bolts.datasets import DummyDetectionDataset
+        >>> from torch.utils.data import DataLoader
         >>> ds = DummyDetectionDataset()
         >>> dl = DataLoader(ds, batch_size=7)
     """
+
     def __init__(
         self, img_shape: tuple = (3, 256, 256), num_boxes: int = 1, num_classes: int = 2, num_samples: int = 10000
     ):
@@ -72,14 +72,14 @@ class DummyDetectionDataset(Dataset):
 
     def _random_bbox(self):
         c, h, w = self.img_shape
-        xs = torch.randint(w, (2,))
-        ys = torch.randint(h, (2,))
+        xs = torch.randint(w, (2, ))
+        ys = torch.randint(h, (2, ))
         return [min(xs), min(ys), max(xs), max(ys)]
 
     def __getitem__(self, idx: int):
         img = torch.rand(self.img_shape)
-        boxes = torch.tensor([self._random_bbox() for _ in range(self.num_boxes)])
-        labels = torch.randint(self.num_classes, (self.num_boxes,))
+        boxes = torch.tensor([self._random_bbox() for _ in range(self.num_boxes)], dtype=torch.float32)
+        labels = torch.randint(self.num_classes, (self.num_boxes, ), dtype=torch.long)
         return img, {"boxes": boxes, "labels": labels}
 
 
@@ -87,13 +87,13 @@ class RandomDictDataset(Dataset):
     """
     Generate a dummy dataset with a dict structure
 
-    Example::
-
-        from pl_bolts.datasets import RandomDictDataset
-
+    Example:
+        >>> from pl_bolts.datasets import RandomDictDataset
+        >>> from torch.utils.data import DataLoader
         >>> ds = RandomDictDataset(10)
         >>> dl = DataLoader(ds, batch_size=7)
     """
+
     def __init__(self, size: int, num_samples: int = 250):
         """
         Args:
@@ -116,13 +116,13 @@ class RandomDictStringDataset(Dataset):
     """
     Generate a dummy dataset with strings
 
-    Example::
-
-        from pl_bolts.datasets import RandomDictStringDataset
-
+    Example:
+        >>> from pl_bolts.datasets import RandomDictStringDataset
+        >>> from torch.utils.data import DataLoader
         >>> ds = RandomDictStringDataset(10)
         >>> dl = DataLoader(ds, batch_size=7)
     """
+
     def __init__(self, size: int, num_samples: int = 250):
         """
         Args:
@@ -143,13 +143,13 @@ class RandomDataset(Dataset):
     """
     Generate a dummy dataset
 
-    Example::
-
-        from pl_bolts.datasets import RandomDataset
-
+    Example:
+        >>> from pl_bolts.datasets import RandomDataset
+        >>> from torch.utils.data import DataLoader
         >>> ds = RandomDataset(10)
         >>> dl = DataLoader(ds, batch_size=7)
     """
+
     def __init__(self, size: int, num_samples: int = 250):
         """
         Args:

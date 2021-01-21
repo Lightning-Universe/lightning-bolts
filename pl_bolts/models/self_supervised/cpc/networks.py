@@ -1,12 +1,20 @@
-import torch.nn.functional as F
 from torch import nn
+from torch.nn import functional as F
 
 
 class CPCResNet(nn.Module):
 
-    def __init__(self, sample_batch, block, layers, zero_init_residual=False,
-                 groups=1, width_per_group=64, replace_stride_with_dilation=None,
-                 norm_layer=None):
+    def __init__(
+        self,
+        sample_batch,
+        block,
+        layers,
+        zero_init_residual=False,
+        groups=1,
+        width_per_group=64,
+        replace_stride_with_dilation=None,
+        norm_layer=None
+    ):
         super(CPCResNet, self).__init__()
         if norm_layer is None:
             norm_layer = nn.LayerNorm
@@ -22,12 +30,13 @@ class CPCResNet(nn.Module):
             # the 2x2 stride with a dilated convolution instead
             replace_stride_with_dilation = [False, False, False]
         if len(replace_stride_with_dilation) != 3:
-            raise ValueError("replace_stride_with_dilation should be None"
-                             f" or a 3-element tuple, got {replace_stride_with_dilation}")
+            raise ValueError(
+                "`replace_stride_with_dilation` should be None"
+                f" or a 3-element tuple, got {replace_stride_with_dilation}"
+            )
         self.groups = groups
         self.base_width = width_per_group
-        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
-                               bias=False)
+        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
 
         # transform batch for LN
         sample_batch = self.conv1(sample_batch)
@@ -39,12 +48,15 @@ class CPCResNet(nn.Module):
         sample_batch = self.maxpool(sample_batch)
 
         self.layer1, sample_batch = self._make_layer(sample_batch, block, 64, blocks=layers[0])
-        self.layer2, sample_batch = self._make_layer(sample_batch, block, 128, blocks=layers[1],
-                                                     stride=2, dilate=replace_stride_with_dilation[0])
-        self.layer3, sample_batch = self._make_layer(sample_batch, block, 512, blocks=layers[2],
-                                                     stride=2, dilate=replace_stride_with_dilation[1], expansion=8)
-        self.layer4, sample_batch = self._make_layer(sample_batch, block, 512, blocks=layers[3],
-                                                     stride=2, dilate=replace_stride_with_dilation[2])
+        self.layer2, sample_batch = self._make_layer(
+            sample_batch, block, 128, blocks=layers[1], stride=2, dilate=replace_stride_with_dilation[0]
+        )
+        self.layer3, sample_batch = self._make_layer(
+            sample_batch, block, 512, blocks=layers[2], stride=2, dilate=replace_stride_with_dilation[1], expansion=8
+        )
+        self.layer4, sample_batch = self._make_layer(
+            sample_batch, block, 512, blocks=layers[3], stride=2, dilate=replace_stride_with_dilation[2]
+        )
         # self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
         for m in self.modules():
@@ -66,16 +78,25 @@ class CPCResNet(nn.Module):
             downsample = conv
 
         layers = []
-        layer = block(sample_batch, self.inplanes, planes, stride, downsample, self.groups,
-                      self.base_width, previous_dilation, norm_layer, expansion)
+        layer = block(
+            sample_batch, self.inplanes, planes, stride, downsample, self.groups, self.base_width, previous_dilation,
+            norm_layer, expansion
+        )
 
         sample_batch = layer(sample_batch)
         layers.append(layer)
         self.inplanes = planes * expansion
         for _ in range(1, blocks):
-            layer = block(sample_batch, self.inplanes, planes, groups=self.groups,
-                          base_width=self.base_width, dilation=self.dilation,
-                          norm_layer=norm_layer, expansion=expansion)
+            layer = block(
+                sample_batch,
+                self.inplanes,
+                planes,
+                groups=self.groups,
+                base_width=self.base_width,
+                dilation=self.dilation,
+                norm_layer=norm_layer,
+                expansion=expansion
+            )
             sample_batch = layer(sample_batch)
             layers.append(layer)
 
@@ -110,8 +131,19 @@ def cpc_resnet50(sample_batch, **kwargs):
 
 class LNBottleneck(nn.Module):
 
-    def __init__(self, sample_batch, inplanes, planes, stride=1, downsample_conv=None, groups=1,
-                 base_width=64, dilation=1, norm_layer=None, expansion=4):
+    def __init__(
+        self,
+        sample_batch,
+        inplanes,
+        planes,
+        stride=1,
+        downsample_conv=None,
+        groups=1,
+        base_width=64,
+        dilation=1,
+        norm_layer=None,
+        expansion=4
+    ):
         super(LNBottleneck, self).__init__()
         width = int(planes * (base_width / 64.)) * groups
         # Both self.conv2 and self.downsample layers downsample the input when stride != 1
@@ -165,8 +197,16 @@ class LNBottleneck(nn.Module):
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=dilation, groups=groups, bias=False, dilation=dilation)
+    return nn.Conv2d(
+        in_planes,
+        out_planes,
+        kernel_size=3,
+        stride=stride,
+        padding=dilation,
+        groups=groups,
+        bias=False,
+        dilation=dilation
+    )
 
 
 def conv1x1(in_planes, out_planes, stride=1):
