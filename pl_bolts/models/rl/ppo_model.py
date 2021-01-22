@@ -1,17 +1,3 @@
-
-"""
-PyTorch Lightning implementation of Proximal Policy Optimization (PPO)
-<https://arxiv.org/abs/1707.06347>
-Paper authors: John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov
-The example implements PPO compatible to work with any continous or discrete action-space environments via OpenAI Gym.
-To run the template, just run:
-`python reinforce_learn_ppo.py`
-References
-----------
-[1] https://github.com/openai/baselines/blob/master/baselines/ppo2/ppo2.py
-[2] https://github.com/openai/spinningup
-[3] https://github.com/sid-sundrani/ppo_lightning
-"""
 import argparse
 from typing import List, Tuple
 
