@@ -148,7 +148,7 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
 
     def __init__(self, input_channels, hidden_channels=8):
-        super(Discriminator, self).__init__()
+        `super().__init__()`
         self.conv1 = nn.Conv2d(input_channels, hidden_channels, kernel_size=1)
         self.contract1 = DownSampleConv(hidden_channels, use_bn=False)
         self.contract2 = DownSampleConv(hidden_channels * 2)
