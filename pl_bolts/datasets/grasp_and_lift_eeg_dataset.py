@@ -1,12 +1,12 @@
 import os
 import time
-from typing import List, Optional, Tuple
 import zipfile
+from typing import List, Optional, Tuple
 
 import requests
 import torch
-from torch import Tensor
 import torch.utils.data as data
+from torch import Tensor
 
 
 def recursive_listdir(path: str, suffix: str) -> list:
