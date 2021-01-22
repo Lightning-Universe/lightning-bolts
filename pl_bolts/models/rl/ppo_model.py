@@ -1,32 +1,25 @@
 import argparse
 from typing import List, Tuple
 
+import torch
 import pytorch_lightning as pl
-from pytorch_lightning import seed_everything
-from pytorch_lightning.callbacks import ModelCheckpoint
+from torch.optim.optimizer import Optimizer
+from torch.utils.data import DataLoader
+
 from pl_bolts.datamodules import ExperienceSourceDataset
-from pl_bolts.models.rl.common.agents import ActorCriticAgent
-from pl_bolts.models.rl.common.networks import MLP, ActorCategorical, ActorContinous
+from pl_bolts.models.rl.common.networks import ActorCategorical, ActorContinous, MLP
+from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-import torch
-from torch.utils.data import DataLoader
-import torch.optim as optim
-from torch.optim.optimizer import Optimizer
-import numpy as np
-
-try:
+if _GYM_AVAILABLE:
     import gym
-except ModuleNotFoundError:
-    warn_missing_pkg('gym')  # pragma: no-cover
-    _GYM_AVAILABLE = False
 else:
-    _GYM_AVAILABLE = True
+    warn_missing_pkg('gym')
 
 
 class PPO(pl.LightningModule):
     """
-    PyTorch Lightning implementation of `PPO
+    PyTorch Lightning implementation of Proximal Policy Optimization
     <https://arxiv.org/abs/1707.06347>`_
     Paper authors: John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov
 
@@ -36,14 +29,19 @@ class PPO(pl.LightningModule):
         >>> from pl_bolts.models.rl.ppo_model import PPO
         ...
         >>> model = PPO("CartPole-v0")
-    Train:
+
+    Train::
+
         trainer = Trainer()
         trainer.fit(model)
+
     Note:
         This example is based on:
         https://github.com/openai/baselines/blob/master/baselines/ppo2/ppo2.py
         https://github.com/openai/spinningup/blob/master/spinup/algos/pytorch/ppo/ppo.py
 
+    Note:
+        Currently only supports CPU and single GPU training with `distributed_backend=dp`
     """
     def __init__(
         self,
@@ -55,8 +53,9 @@ class PPO(pl.LightningModule):
         max_episode_len: float = 200,
         batch_size: int = 512,
         steps_per_epoch: int = 2048,
+        nb_optim_iters: int = 4,
         clip_ratio: float = 0.2,
-        **kwargs
+        **kwargs,
     ) -> None:
 
         """
@@ -69,6 +68,7 @@ class PPO(pl.LightningModule):
             max_episode_len: maximum number interactions (actions) in an episode
             batch_size:  batch_size when training network- can simulate number of policy updates performed per epoch
             steps_per_epoch: how many action-state pairs to rollout for trajectory collection per epoch
+            nb_optim_iters: how many steps of gradient descent to perform on each batch
             clip_ratio: hyperparameter for clipping in the policy objective
         """
         super().__init__()
@@ -80,6 +80,7 @@ class PPO(pl.LightningModule):
         self.lr_actor = lr_actor
         self.lr_critic = lr_critic
         self.steps_per_epoch = steps_per_epoch
+        self.nb_optim_iters = nb_optim_iters
         self.batch_size = batch_size
         self.gamma = gamma
         self.lam = lam
@@ -91,17 +92,16 @@ class PPO(pl.LightningModule):
         # value network
         self.critic = MLP(self.env.observation_space.shape, 1)
         # policy network (agent)
-        if type(self.env.action_space) == gym.spaces.box.Box:
+        if isinstance(self.env.action_space, gym.spaces.box.Box):
             act_dim = self.env.action_space.shape[0]
             actor_mlp = MLP(self.env.observation_space.shape, act_dim)
             self.actor = ActorContinous(actor_mlp, act_dim)
-        elif type(self.env.action_space) == gym.spaces.discrete.Discrete:
+        elif isinstance(self.env.action_space, gym.spaces.discrete.Discrete):
             actor_mlp = MLP(self.env.observation_space.shape, self.env.action_space.n)
             self.actor = ActorCategorical(actor_mlp)
         else:
-            raise NotImplementedError('Env action space should be of type Box (continous) or Discrete (categorical)'
-                                      'Got type: ', type(self.env.action_space))
-        self.agent = ActorCriticAgent(self.actor, self.critic)
+            raise NotImplementedError('Env action space should be of type Box (continous) or Discrete (categorical). '
+                                      f'Got type: {type(self.env.action_space)}')
 
         self.batch_states = []
         self.batch_actions = []
@@ -111,9 +111,9 @@ class PPO(pl.LightningModule):
 
         self.ep_rewards = []
         self.ep_values = []
+        self.epoch_rewards = []
 
-        self.done_episodes = 0
-        self.epoch_rewards = 0
+        self.episode_step = 0
         self.avg_ep_reward = 0
         self.avg_ep_len = 0
         self.avg_reward = 0
@@ -168,7 +168,7 @@ class PPO(pl.LightningModule):
 
         return adv
 
-    def train_batch(
+    def generate_trajectory_samples(
             self,
     ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
         """
@@ -178,8 +178,15 @@ class PPO(pl.LightningModule):
         """
 
         for step in range(self.steps_per_epoch):
-            pi, action, log_prob, value = self.agent(self.state, self.device)
-            next_state, reward, done, _ = self.env.step(action.numpy())
+            self.state = self.state.to(device=self.device)
+
+            with torch.no_grad():
+                pi, action, value = self(self.state)
+                log_prob = self.actor.get_log_prob(pi, action)
+
+            next_state, reward, done, _ = self.env.step(action.cpu().numpy())
+
+            self.episode_step += 1
 
             self.batch_states.append(self.state)
             self.batch_actions.append(action)
@@ -196,22 +203,25 @@ class PPO(pl.LightningModule):
             if epoch_end or done or terminal:
                 # if trajectory ends abtruptly, boostrap value of next state
                 if (terminal or epoch_end) and not done:
+                    self.state = self.state.to(device=self.device)
                     with torch.no_grad():
-                        _, _, _, value = self.agent(self.state, self.device)
+                        _, _, value = self(self.state)
                         last_value = value.item()
+                        steps_before_cutoff = self.episode_step
                 else:
                     last_value = 0
+                    steps_before_cutoff = 0
 
                 # discounted cumulative reward
                 self.batch_qvals += self.discount_rewards(self.ep_rewards + [last_value], self.gamma)[:-1]
                 # advantage
                 self.batch_adv += self.calc_advantage(self.ep_rewards, self.ep_values, last_value)
                 # logs
-                self.done_episodes += 1
-                self.epoch_rewards += np.sum(self.ep_rewards)
+                self.epoch_rewards.append(sum(self.ep_rewards))
                 # reset params
                 self.ep_rewards = []
                 self.ep_values = []
+                self.episode_step = 0
                 self.state = torch.FloatTensor(self.env.reset())
 
             if epoch_end:
@@ -228,12 +238,21 @@ class PPO(pl.LightningModule):
                 self.batch_logp.clear()
                 self.batch_qvals.clear()
 
-                self.avg_ep_reward = self.epoch_rewards / self.done_episodes
-                self.avg_reward = self.epoch_rewards / self.steps_per_epoch
-                self.avg_ep_len = self.steps_per_epoch / self.done_episodes
+                # logging
+                self.avg_reward = sum(self.epoch_rewards) / self.steps_per_epoch
 
-                self.epoch_rewards = 0
-                self.done_episodes = 0
+                # if epoch ended abruptly, exlude last cut-short episode to prevent stats skewness
+                epoch_rewards = self.epoch_rewards
+                if not done:
+                    epoch_rewards = epoch_rewards[:-1]
+
+                total_epoch_reward = sum(epoch_rewards)
+                nb_episodes = len(epoch_rewards)
+
+                self.avg_ep_reward = total_epoch_reward / nb_episodes
+                self.avg_ep_len = (self.steps_per_epoch - steps_before_cutoff) / nb_episodes
+
+                self.epoch_rewards.clear()
 
     def actor_loss(self, state, action, logp_old, qval, adv) -> torch.Tensor:
         pi, _ = self.actor(state)
@@ -251,7 +270,6 @@ class PPO(pl.LightningModule):
     def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx, optimizer_idx):
         """
         Carries out a single update to actor and critic network from a batch of replay buffer.
-
         Args:
             batch: batch of replay buffer/trajectory data
             batch_idx: not used
@@ -260,6 +278,10 @@ class PPO(pl.LightningModule):
             loss
         """
         state, action, old_logp, qval, adv = batch
+
+        # normalize advantages
+        adv = (adv - adv.mean()) / adv.std()
+
         self.log("avg_ep_len", self.avg_ep_len, prog_bar=True, on_step=False, on_epoch=True)
         self.log("avg_ep_reward", self.avg_ep_reward, prog_bar=True, on_step=False, on_epoch=True)
         self.log("avg_reward", self.avg_reward, prog_bar=True, on_step=False, on_epoch=True)
@@ -278,14 +300,22 @@ class PPO(pl.LightningModule):
 
     def configure_optimizers(self) -> List[Optimizer]:
         """ Initialize Adam optimizer"""
-        optimizer_actor = optim.Adam(self.actor.parameters(), lr=self.lr_actor)
-        optimizer_critic = optim.Adam(self.critic.parameters(), lr=self.lr_critic)
+        optimizer_actor = torch.optim.Adam(self.actor.parameters(), lr=self.lr_actor)
+        optimizer_critic = torch.optim.Adam(self.critic.parameters(), lr=self.lr_critic)
 
-        return [optimizer_actor, optimizer_critic]
+        return optimizer_actor, optimizer_critic
+
+    def optimizer_step(self, *args, **kwargs):
+        """
+        Run 'nb_optim_iters' number of iterations of gradient descent on actor and critic
+        for each data sample.
+        """
+        for _ in range(self.nb_optim_iters):
+            super().optimizer_step(*args, **kwargs)
 
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""
-        dataset = ExperienceSourceDataset(self.train_batch)
+        dataset = ExperienceSourceDataset(self.generate_trajectory_samples)
         dataloader = DataLoader(dataset=dataset, batch_size=self.batch_size)
         return dataloader
 
@@ -293,50 +323,37 @@ class PPO(pl.LightningModule):
         """Get train loader"""
         return self._dataloader()
 
-    def get_device(self, batch) -> str:
-        """Retrieve device currently being used by minibatch"""
-        return batch[0][0][0].device.index if self.on_gpu else "cpu"
-
     @staticmethod
-    def add_model_specific_args(arg_parser) -> argparse.ArgumentParser:
-        """
-        Adds arguments for PPO model
-        Args:
-            arg_parser: the current argument parser to add to
-        Returns:
-            arg_parser with model specific cargs added
-        """
-        arg_parser.add_argument("--steps_per_epoch", type=int, default=2048, help="number of samples in an epoch")
-        arg_parser.add_argument("--batch_size", type=int, default=512, help="size of the batches")
+    def add_model_specific_args(parent_parser):  # pragma: no-cover
+        parser = argparse.ArgumentParser(parents=[parent_parser])
+        parser.add_argument("--env", type=str, default="CartPole-v0")
+        parser.add_argument("--gamma", type=float, default=0.99, help="discount factor")
+        parser.add_argument("--lam", type=float, default=0.95, help="advantage discount factor")
+        parser.add_argument("--lr_actor", type=float, default=3e-4, help="learning rate of actor network")
+        parser.add_argument("--lr_critic", type=float, default=1e-3, help="learning rate of critic network")
+        parser.add_argument("--max_episode_len", type=int, default=1000, help="capacity of the replay buffer")
+        parser.add_argument("--batch_size", type=int, default=512, help="batch_size when training network")
+        parser.add_argument("--steps_per_epoch", type=int, default=2048,
+                            help="how many action-state pairs to rollout for trajectory collection per epoch")
+        parser.add_argument("--nb_optim_iters", type=int, default=4,
+                            help="how many steps of gradient descent to perform on each batch")
+        parser.add_argument("--clip_ratio", type=float, default=0.2,
+                            help="hyperparameter for clipping in the policy objective")
 
-        arg_parser.add_argument("--env", type=str, required=True, help="gym environment tag")
-        arg_parser.add_argument("--gamma", type=float, default=0.99, help="discount factor")
-
-        return arg_parser
+        return parser
 
 
-def cli_main():
-    parser = argparse.ArgumentParser(add_help=False)
+def cli_main() -> None:
+    parent_parser = argparse.ArgumentParser(add_help=False)
+    parent_parser = pl.Trainer.add_argparse_args(parent_parser)
 
-    # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
-
-    # model args
-    parser = PPO.add_model_specific_args(parser)
+    parser = PPO.add_model_specific_args(parent_parser)
     args = parser.parse_args()
 
-    model = PPO(**args.__dict__)
+    model = PPO(**vars(args))
 
-    # save checkpoints based on avg_reward
-    checkpoint_callback = ModelCheckpoint(
-        save_top_k=1, monitor="avg_ep_reward", mode="max",
-        period=1, verbose=True
-    )
-
-    seed_everything(123)
-    trainer = pl.Trainer.from_argparse_args(
-        args, deterministic=True, checkpoint_callback=checkpoint_callback
-    )
+    pl.seed_everything(0)
+    trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model)
 
 

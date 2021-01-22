@@ -7,8 +7,8 @@ from typing import Tuple
 import numpy as np
 import torch
 from torch import nn, Tensor
-from torch.nn import functional as F
 from torch.distributions import Categorical, Normal
+from torch.nn import functional as F
 
 
 class CNN(nn.Module):
@@ -339,7 +339,10 @@ class NoisyLinear(nn.Linear):
 
 
 class ActorCategorical(nn.Module):
-    "Policy network, for discrete action spaces, which returns a distribution and an action given an observation"
+    """
+    Policy network, for discrete action spaces, which returns a distribution
+    and an action given an observation
+    """
 
     def __init__(self, actor_net):
         """
@@ -360,7 +363,8 @@ class ActorCategorical(nn.Module):
 
     def get_log_prob(self, pi: Categorical, actions: torch.Tensor):
         """
-        Takes in a distribution and actions and returns log prob of actions under the distribution
+        Takes in a distribution and actions and returns log prob of actions
+        under the distribution
         Args:
             pi: torch distribution
             actions: actions taken by distribution
@@ -371,7 +375,10 @@ class ActorCategorical(nn.Module):
 
 
 class ActorContinous(nn.Module):
-    "Policy network, for continous action spaces, which returns a distribution and an action given an observation"
+    """
+    Policy network, for continous action spaces, which returns a distribution
+    and an action given an observation
+    """
 
     def __init__(self, actor_net, act_dim):
         """
@@ -382,7 +389,7 @@ class ActorContinous(nn.Module):
         super().__init__()
         self.actor_net = actor_net
         log_std = -0.5 * torch.ones(act_dim, dtype=torch.float)
-        self.log_std = torch.nn.Parameter(log_std)
+        self.log_std = nn.Parameter(log_std)
 
     def forward(self, states):
         mu = self.actor_net(states)
@@ -394,7 +401,8 @@ class ActorContinous(nn.Module):
 
     def get_log_prob(self, pi: Normal, actions: torch.Tensor):
         """
-        Takes in a distribution and actions and returns log prob of actions under the distribution
+        Takes in a distribution and actions and returns log prob of actions
+        under the distribution
         Args:
             pi: torch distribution
             actions: actions taken by distribution
