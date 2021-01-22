@@ -25,13 +25,10 @@ from pl_bolts.models.rl.common.networks import MLP, ActorCategorical, ActorConti
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _GYM_AVAILABLE:
     import gym
-except ModuleNotFoundError:
-    _GYM_AVAILABLE = False
-    warn_missing_pkg('gym')
 else:
-    _GYM_AVAILABLE = True
+    warn_missing_pkg('gym')
 
 
 class PPO(pl.LightningModule):
