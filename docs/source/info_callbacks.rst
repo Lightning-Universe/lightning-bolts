@@ -64,3 +64,63 @@ You can track all or just a selection of submodules:
 
 This is especially useful for debugging the data flow in complex models and to identify
 numerical instabilities.
+
+
+---------------
+
+Model Verification
+------------------
+
+
+Gradient-Check for Batch-Optimization
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Gradient descent over a batch of samples can not only benefit the optimization but also leverages data parallelism.
+However, one has to be careful not to mix data across the batch dimension.
+Only a small error in a reshape or permutation operation results in the optimization getting stuck and you won't
+even get a runtime error. How can one tell if the model mixes data in the batch?
+A simple trick is to do the following:
+
+1. run the model on an example batch (can be random data)
+2. get the output batch and select the n-th sample (choose n)
+3. compute a dummy loss value of only that sample and compute the gradient w.r.t the entire input batch
+4. observe that only the i-th sample in the input batch has non-zero gradient
+
+|
+
+If the gradient is non-zero for the other samples in the batch, it means the forward pass of the model is mixing data!
+The :class:`~pl_bolts.callbacks.verification.batch_gradient.BatchGradientVerificationCallback`
+does all of that for you before training begins.
+
+.. code-block:: python
+
+    from pytorch_lightning import Trainer
+    from pl_bolts.callbacks import BatchGradientVerificationCallback
+
+    model = YourLightningModule()
+    verification = BatchGradientVerificationCallback()
+    trainer = Trainer(callbacks=[verification])
+    trainer.fit(model)
+
+This Callback will warn the user with the following message in case data mixing inside the batch is detected:
+
+.. code-block::
+
+    Your model is mixing data across the batch dimension.
+    This can lead to wrong gradient updates in the optimizer.
+    Check the operations that reshape and permute tensor dimensions in your model.
+
+
+A non-Callback version
+:class:`~pl_bolts.callbacks.verification.batch_gradient.BatchGradientVerification`
+that works with any PyTorch :class:`~torch.nn.Module` is also available:
+
+.. code-block:: python
+
+    from pl_bolts.utils import BatchGradientVerification
+
+    model = YourPyTorchModel()
+    verification = BatchGradientVerification(model)
+    valid = verification.check(input_array=torch.rand(2, 3, 4), sample_idx=1)
+
+In this example we run the test on a batch size 2 by inspecting gradients on the second sample.

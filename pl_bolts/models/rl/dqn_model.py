@@ -1,7 +1,6 @@
 """
 Deep Q Network
 """
-
 import argparse
 from collections import OrderedDict
 from typing import Dict, List, Optional, Tuple
@@ -9,26 +8,26 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pytorch_lightning as pl
 import torch
-import torch.optim as optim
 from pytorch_lightning import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
+from torch import optim as optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules.experience_source import Experience, ExperienceSourceDataset
 from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common.agents import ValueAgent
+from pl_bolts.models.rl.common.gym_wrappers import make_environment
 from pl_bolts.models.rl.common.memory import MultiStepBuffer
 from pl_bolts.models.rl.common.networks import CNN
+from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
-    from pl_bolts.models.rl.common.gym_wrappers import gym, make_environment
-except ModuleNotFoundError:
-    warn_missing_pkg('gym')  # pragma: no-cover
-    _GYM_AVAILABLE = False
-else:
-    _GYM_AVAILABLE = True
+if _GYM_AVAILABLE:
+    from gym import Env
+else:  # pragma: no cover
+    warn_missing_pkg('gym')
+    Env = object
 
 
 class DQN(pl.LightningModule):
@@ -147,13 +146,9 @@ class DQN(pl.LightningModule):
         self.avg_reward_len = avg_reward_len
 
         for _ in range(avg_reward_len):
-            self.total_rewards.append(
-                torch.tensor(min_episode_reward, device=self.device)
-            )
+            self.total_rewards.append(torch.tensor(min_episode_reward, device=self.device))
 
-        self.avg_rewards = float(
-            np.mean(self.total_rewards[-self.avg_reward_len:])
-        )
+        self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
 
         self.state = self.env.reset()
 
@@ -176,7 +171,7 @@ class DQN(pl.LightningModule):
             while not done:
                 self.agent.epsilon = epsilon
                 action = self.agent(episode_state, self.device)
-                next_state, reward, done, _ = self.env.step(action[0])
+                next_state, reward, done, _ = env.step(action[0])
                 episode_state = next_state
                 episode_reward += reward
 
@@ -218,9 +213,7 @@ class DQN(pl.LightningModule):
         output = self.net(x)
         return output
 
-    def train_batch(
-        self,
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def train_batch(self, ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -249,9 +242,7 @@ class DQN(pl.LightningModule):
                 self.done_episodes += 1
                 self.total_rewards.append(episode_reward)
                 self.total_episode_steps.append(episode_steps)
-                self.avg_rewards = float(
-                    np.mean(self.total_rewards[-self.avg_reward_len:])
-                )
+                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
                 self.state = self.env.reset()
                 episode_steps = 0
                 episode_reward = 0
@@ -296,12 +287,10 @@ class DQN(pl.LightningModule):
             "episode_steps": self.total_episode_steps[-1]
         })
 
-        return OrderedDict(
-            {
-                "loss": loss,
-                "avg_reward": self.avg_rewards,
-            }
-        )
+        return OrderedDict({
+            "loss": loss,
+            "avg_reward": self.avg_rewards,
+        })
 
     def test_step(self, *args, **kwargs) -> Dict[str, torch.Tensor]:
         """Evaluate the agent for 10 episodes"""
@@ -338,7 +327,7 @@ class DQN(pl.LightningModule):
         return self._dataloader()
 
     @staticmethod
-    def make_environment(env_name: str, seed: Optional[int] = None) -> gym.Env:
+    def make_environment(env_name: str, seed: Optional[int] = None) -> Env:
         """
         Initialise gym  environment
 
@@ -357,9 +346,7 @@ class DQN(pl.LightningModule):
         return env
 
     @staticmethod
-    def add_model_specific_args(
-        arg_parser: argparse.ArgumentParser,
-    ) -> argparse.ArgumentParser:
+    def add_model_specific_args(arg_parser: argparse.ArgumentParser, ) -> argparse.ArgumentParser:
         """
         Adds arguments for DQN model
 
@@ -431,13 +418,10 @@ def cli_main():
     model = DQN(**args.__dict__)
 
     # save checkpoints based on avg_reward
-    checkpoint_callback = ModelCheckpoint(
-        save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True
-    )
+    checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True)
 
     seed_everything(123)
-    trainer = pl.Trainer.from_argparse_args(
-        args, deterministic=True, checkpoint_callback=checkpoint_callback)
+    trainer = pl.Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
 
     trainer.fit(model)
 

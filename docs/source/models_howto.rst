@@ -13,46 +13,57 @@ don't have enough data, time or money to do your own training.
 
 For example, you could use a pretrained VAE to generate features for an image dataset.
 
+.. testcode::
+
+    from pl_bolts.models.self_supervised import SimCLR
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+    simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+    encoder = simclr.encoder
+    encoder.eval()
+
 .. code-block:: python
 
-    from pl_bolts.models.autoencoders import VAE
-
-    model = VAE(pretrained='imagenet2012')
-    encoder = model.encoder
-    encoder.freeze()
-
-    for (x, y) in own_data
+    for (x, y) in own_data:
         features = encoder(x)
 
 The advantage of bolts is that each system can be decomposed and used in interesting ways.
-For instance, this resnet18 was trained using self-supervised learning (no labels) on Imagenet, and thus
-might perform better than the same resnet18 trained with labels
+For instance, this resnet50 was trained using self-supervised learning (no labels) on Imagenet, and thus
+might perform better than the same resnet50 trained with labels
+
+.. testcode::
+
+    # trained without labels
+    from pl_bolts.models.self_supervised import SimCLR
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+    simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+    resnet50_unsupervised = simclr.encoder.eval()
+
+    # trained with labels
+    from torchvision.models import resnet50
+    resnet50_supervised = resnet50(pretrained=True)
 
 .. code-block:: python
 
-    # trained without labels
-    from pl_bolts.models.self_supervised import CPCV2
-
-    model = CPCV2(encoder='resnet18', pretrained='imagenet128')
-    resnet18_unsupervised = model.encoder.freeze()
-
-    # trained with labels
-    from torchvision.models import resnet18
-    resnet18_supervised = resnet18(pretrained=True)
-
     # perhaps the features when trained without labels are much better for classification or other tasks
     x = image_sample()
-    unsup_feats = resnet18_unsupervised(x)
-    sup_feats = resnet18_supervised(x)
+    unsup_feats = resnet50_unsupervised(x)
+    sup_feats = resnet50_supervised(x)
 
     # which one will be better?
 
 Bolts are often trained on more than just one dataset.
 
-.. code-block:: python
+.. testcode::
 
-    model = CPCV2(encoder='resnet18', pretrained='stl10')
+    from pl_bolts.models.self_supervised import SimCLR
 
+    # imagenet weights
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+    simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+
+    simclr.freeze()
 
 ---------------
 
@@ -66,16 +77,21 @@ Unfrozen Finetuning
 ^^^^^^^^^^^^^^^^^^^
 In this approach, we load the pretrained model and unfreeze from the beginning
 
-.. code-block:: python
+.. testcode::
 
-    model = CPCV2(encoder='resnet18', pretrained='imagenet128')
-    resnet18 = model.encoder
+    from pl_bolts.models.self_supervised import SimCLR
+
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+    simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+    resnet50 = simclr.encoder
     # don't call .freeze()
 
-    classifier = LogisticRegression()
+.. code-block:: python
+
+    classifier = LogisticRegression(...)
 
     for (x, y) in own_data:
-        feats = resnet18(x)
+        feats = resnet50(x)
         y_hat = classifier(feats)
         ...
 
@@ -87,7 +103,7 @@ Or as a LightningModule
 
         def __init__(self, encoder):
             self.encoder = encoder
-            self.classifier = LogisticRegression()
+            self.classifier = LogisticRegression(...)
 
         def training_step(self, batch, batch_idx):
             (x, y) = batch
@@ -97,7 +113,7 @@ Or as a LightningModule
             return loss
 
     trainer = Trainer(gpus=2)
-    model = FineTuner(resnet18)
+    model = FineTuner(resnet50)
     trainer.fit(model)
 
 Sometimes this works well, but more often it's better to keep the encoder frozen for a while
@@ -106,24 +122,29 @@ Freeze then unfreeze
 ^^^^^^^^^^^^^^^^^^^^
 The approach that works best most often is to freeze first then unfreeze later
 
-.. code-block:: python
+.. testcode::
 
     # freeze!
-    model = CPCV2(encoder='resnet18', pretrained='imagenet128')
-    resnet18 = model.encoder
-    resnet18.freeze()
+    from pl_bolts.models.self_supervised import SimCLR
 
-    classifier = LogisticRegression()
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+    simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+    resnet50 = simclr.encoder
+    resnet50.eval()
+
+.. code-block:: python
+
+    classifier = LogisticRegression(...)
 
     for epoch in epochs:
         for (x, y) in own_data:
-            feats = resnet18(x)
+            feats = resnet50(x)
             y_hat = classifier(feats)
             loss = cross_entropy_with_logits(y_hat, y)
 
         # unfreeze after 10 epochs
         if epoch == 10:
-            resnet18.unfreeze()
+            resnet50.unfreeze()
 
 .. note:: In practice, unfreezing later works MUCH better.
 
@@ -138,7 +159,7 @@ Or in Lightning as a Callback so you don't pollute your research code.
                 encoder.unfreeze()
 
     trainer = Trainer(gpus=2, callbacks=[UnFreezeCallback()])
-    model = FineTuner(resnet18)
+    model = FineTuner(resnet50)
     trainer.fit(model)
 
 Unless you still need to mix it into your research code.
@@ -149,7 +170,7 @@ Unless you still need to mix it into your research code.
 
         def __init__(self, encoder):
             self.encoder = encoder
-            self.classifier = LogisticRegression()
+            self.classifier = LogisticRegression(...)
 
         def training_step(self, batch, batch_idx):
 
@@ -176,12 +197,14 @@ to get the most value out of your data.
 
 .. code-block:: python
 
+    from pl_bolts.models.autoencoders import VAE
+
     learning_rates = [0.01, 0.001, 0.0001]
     hidden_dim = [128, 256, 512]
 
     for lr in learning_rates:
         for hd in hidden_dim:
-            vae = VAE(hidden_dim=hd, learning_rate=lr)
+            vae = VAE(input_height=32, hidden_dim=hd, learning_rate=lr)
             trainer = Trainer()
             trainer.fit(vae)
 
@@ -202,7 +225,7 @@ If you do have enough data and compute resources, then you could try training fr
 
     # fit!
     trainer = Trainer(gpus=2)
-    trainer.fit(model, train_data, val_data)
+    trainer.fit(model, train_dataloader=train_data, val_dataloaders=val_data)
 
 .. note:: For this to work well, make sure you have enough data and time to train these models!
 
@@ -258,7 +281,7 @@ figure out if your VAE implementation was correct, or if your training loop was 
 
 **Example 2: Changing the generator step of a GAN**
 
-.. code-block:: python
+.. testcode::
 
     from pl_bolts.models.gans import GAN
 
@@ -287,7 +310,7 @@ figure out if your VAE implementation was correct, or if your training loop was 
 
 **Example 3: Changing the way the loss is calculated in a contrastive self-supervised learning approach**
 
-.. code-block:: python
+.. testcode::
 
     from pl_bolts.models.self_supervised import AMDIM
 
@@ -333,13 +356,19 @@ approaches.
 
 **Example 2: Use the contrastive task of AMDIM in CPC**
 
-.. code-block:: python
+.. testcode::
 
     from pl_bolts.models.self_supervised import AMDIM, CPCV2
 
     default_amdim_task = AMDIM().contrastive_task
     model = CPCV2(contrastive_task=default_amdim_task, encoder='cpc_default')
     # you might need to modify the cpc encoder depending on what you use
+
+.. testoutput::
+   :hide:
+   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
+
+   ...
 
 ---------------
 
@@ -348,7 +377,7 @@ Compose new ideas
 You may also be interested in creating completely new approaches that mix and match all sorts of different
 pieces together
 
-.. code-block:: python
+.. testcode::
 
     # this model is for illustration purposes, it makes no research sense but it's intended to show
     # that you can be as creative and expressive as you want.

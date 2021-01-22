@@ -7,9 +7,9 @@ from typing import List, Union
 
 import numpy as np
 import torch
-import torch.nn.functional as F
 from torch import nn
 from torch.distributions import Categorical, Normal
+from torch.nn import functional as F
 
 
 class Agent(ABC):

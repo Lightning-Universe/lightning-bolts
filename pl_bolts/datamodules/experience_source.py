@@ -2,7 +2,6 @@
 Datamodules for RL models that rely on experiences generated during training
 Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/experience.py
 """
-import importlib
 from abc import ABC
 from collections import deque, namedtuple
 from typing import Callable, Iterable, List, Tuple
@@ -19,10 +18,7 @@ else:  # pragma: no cover
     warn_missing_pkg("gym")
     Env = object
 
-
-Experience = namedtuple(
-    "Experience", field_names=["state", "action", "reward", "done", "new_state"]
-)
+Experience = namedtuple("Experience", field_names=["state", "action", "reward", "done", "new_state"])
 
 
 class ExperienceSourceDataset(IterableDataset):
@@ -31,7 +27,7 @@ class ExperienceSourceDataset(IterableDataset):
     The logic for the experience source and how the batch is generated is defined the Lightning model itself
     """
 
-    def __init__(self, generate_batch: Callable):
+    def __init__(self, generate_batch: Callable) -> None:
         self.generate_batch = generate_batch
 
     def __iter__(self) -> Iterable:
@@ -244,7 +240,7 @@ class ExperienceSource(BaseExperienceSource):
 class DiscountedExperienceSource(ExperienceSource):
     """Outputs experiences with a discounted reward over N steps"""
 
-    def __init__(self, env: Env, agent, n_steps: int = 1, gamma: float = 0.99):
+    def __init__(self, env: Env, agent, n_steps: int = 1, gamma: float = 0.99) -> None:
         super().__init__(env, agent, (n_steps + 1))
         self.gamma = gamma
         self.steps = n_steps
@@ -264,8 +260,13 @@ class DiscountedExperienceSource(ExperienceSource):
 
             total_reward = self.discount_rewards(tail_experiences)
 
-            yield Experience(state=experiences[0].state, action=experiences[0].action,
-                             reward=total_reward, done=experiences[0].done, new_state=last_exp_state)
+            yield Experience(
+                state=experiences[0].state,
+                action=experiences[0].action,
+                reward=total_reward,
+                done=experiences[0].done,
+                new_state=last_exp_state
+            )
 
     def split_head_tail_exp(self, experiences: Tuple[Experience]) -> Tuple[List, Tuple[Experience]]:
         """
@@ -298,5 +299,5 @@ class DiscountedExperienceSource(ExperienceSource):
         """
         total_reward = 0.0
         for exp in reversed(experiences):
-            total_reward = (self.gamma * total_reward) + exp.reward
+            total_reward = (self.gamma * total_reward) + exp.reward  # type: ignore[attr-defined]
         return total_reward

@@ -1,14 +1,16 @@
 import math
+from typing import List, Sequence, Tuple, Union
 
 import numpy as np
 import torch
+from torch import Tensor
 
 from pl_bolts.utils import _SKLEARN_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _SKLEARN_AVAILABLE:
     from sklearn.utils import shuffle as sk_shuffle
-else:  # pragma: no-cover
+else:  # pragma: no cover
     warn_missing_pkg('sklearn', pypi_name='scikit-learn')
 
 
@@ -24,14 +26,16 @@ class Identity(torch.nn.Module):
         model.fc = Identity()
 
     """
-    def __init__(self):
+
+    def __init__(self) -> None:
         super(Identity, self).__init__()
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         return x
 
 
-def balance_classes(X: np.ndarray, Y: list, batch_size: int):
+def balance_classes(X: Union[Tensor, np.ndarray], Y: Union[Tensor, np.ndarray, Sequence[int]],
+                    batch_size: int) -> Tuple[np.ndarray, np.ndarray]:
     """
     Makes sure each batch has an equal amount of data from each class.
     Perfect balance
@@ -41,29 +45,27 @@ def balance_classes(X: np.ndarray, Y: list, batch_size: int):
         Y: mixed labels (ints)
         batch_size: the ultimate batch size
     """
-    if not _SKLEARN_AVAILABLE:
-        raise ModuleNotFoundError(  # pragma: no-cover
-            'You want to use `shuffle` function from `scikit-learn` which is not installed yet.'
-        )
+    if not _SKLEARN_AVAILABLE:  # pragma: no cover
+        raise ModuleNotFoundError('You want to use `shuffle` function from `scikit-learn` which is not installed yet.')
 
     nb_classes = len(set(Y))
 
     nb_batches = math.ceil(len(Y) / batch_size)
 
     # sort by classes
-    final_batches_x = [[] for i in range(nb_batches)]
-    final_batches_y = [[] for i in range(nb_batches)]
+    final_batches_x: List[list] = [[] for i in range(nb_batches)]
+    final_batches_y: List[list] = [[] for i in range(nb_batches)]
 
     # Y needs to be np arr
     Y = np.asarray(Y)
 
     # pick chunk size for each class using the largest split
-    chunk_size = []
+    chunk_sizes = []
     for class_i in range(nb_classes):
         mask = Y == class_i
         y = Y[mask]
-        chunk_size.append(math.ceil(len(y) / nb_batches))
-    chunk_size = max(chunk_size)
+        chunk_sizes.append(math.ceil(len(y) / nb_batches))
+    chunk_size = max(chunk_sizes)
     # force chunk size to be even
     if chunk_size % 2 != 0:
         chunk_size -= 1
@@ -83,8 +85,8 @@ def balance_classes(X: np.ndarray, Y: list, batch_size: int):
             i_end = i_start + chunk_size
 
             if len(final_batches_x) > batch_i:
-                final_batches_x[batch_i].append(x[i_start: i_end])
-                final_batches_y[batch_i].append(y[i_start: i_end])
+                final_batches_x[batch_i].append(x[i_start:i_end])
+                final_batches_y[batch_i].append(y[i_start:i_end])
 
     # merge into full dataset
     final_batches_x = [np.concatenate(x, axis=0) for x in final_batches_x if len(x) > 0]
@@ -97,12 +99,12 @@ def balance_classes(X: np.ndarray, Y: list, batch_size: int):
 
 
 def generate_half_labeled_batches(
-        smaller_set_X: np.ndarray,
-        smaller_set_Y: np.ndarray,
-        larger_set_X: np.ndarray,
-        larger_set_Y: np.ndarray,
-        batch_size: int,
-):
+    smaller_set_X: np.ndarray,
+    smaller_set_Y: np.ndarray,
+    larger_set_X: np.ndarray,
+    larger_set_Y: np.ndarray,
+    batch_size: int,
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Given a labeled dataset and an unlabeled dataset, this function generates
     a joint pair where half the batches are labeled and the other half is not
@@ -117,14 +119,14 @@ def generate_half_labeled_batches(
     for i_start in range(0, n_larger, half_batch):
         i_end = i_start + half_batch
 
-        X_larger = larger_set_X[i_start: i_end]
-        Y_larger = larger_set_Y[i_start: i_end]
+        X_larger = larger_set_X[i_start:i_end]
+        Y_larger = larger_set_Y[i_start:i_end]
 
         # pull out labeled part
         smaller_start = i_start % (n_smaller - half_batch)
         smaller_end = smaller_start + half_batch
 
-        X_small = smaller_set_X[smaller_start: smaller_end]
+        X_small = smaller_set_X[smaller_start:smaller_end]
         Y_small = smaller_set_Y[smaller_start:smaller_end]
 
         X.extend([X_larger, X_small])

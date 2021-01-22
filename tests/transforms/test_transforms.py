@@ -7,8 +7,9 @@ import torch
 try:
     from torchvision import transforms
 except ImportError:
-    warn('You want to use `torchvision` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install torchvision`.')
+    warn(  # pragma: no-cover
+        'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
+    )
 
 from pl_bolts.models.self_supervised.amdim.transforms import (
     AMDIMEvalTransformsCIFAR10,
@@ -56,14 +57,16 @@ def test_simclr_transforms(img_size):
     transform(x)
 
 
-@pytest.mark.parametrize("transform", [
-    CPCTrainTransformsCIFAR10,
-    CPCEvalTransformsCIFAR10,
-    AMDIMEvalTransformsCIFAR10,
-    AMDIMTrainTransformsCIFAR10,
-    Moco2TrainCIFAR10Transforms,
-    Moco2EvalCIFAR10Transforms,
-])
+@pytest.mark.parametrize(
+    "transform", [
+        CPCTrainTransformsCIFAR10,
+        CPCEvalTransformsCIFAR10,
+        AMDIMEvalTransformsCIFAR10,
+        AMDIMTrainTransformsCIFAR10,
+        Moco2TrainCIFAR10Transforms,
+        Moco2EvalCIFAR10Transforms,
+    ]
+)
 def test_cifar10_transforms(transform):
     x = torch.rand(3, 32, 32)
     x = transforms.ToPILImage(mode='RGB')(x)
@@ -72,14 +75,16 @@ def test_cifar10_transforms(transform):
     transform(x)
 
 
-@pytest.mark.parametrize("transform", [
-    CPCTrainTransformsSTL10,
-    CPCEvalTransformsSTL10,
-    AMDIMTrainTransformsSTL10,
-    AMDIMEvalTransformsSTL10,
-    Moco2TrainSTL10Transforms,
-    Moco2EvalSTL10Transforms,
-])
+@pytest.mark.parametrize(
+    "transform", [
+        CPCTrainTransformsSTL10,
+        CPCEvalTransformsSTL10,
+        AMDIMTrainTransformsSTL10,
+        AMDIMEvalTransformsSTL10,
+        Moco2TrainSTL10Transforms,
+        Moco2EvalSTL10Transforms,
+    ]
+)
 def test_stl10_transforms(transform):
     x = torch.rand(3, 64, 64)
     x = transforms.ToPILImage(mode='RGB')(x)
@@ -88,14 +93,16 @@ def test_stl10_transforms(transform):
     transform(x)
 
 
-@pytest.mark.parametrize("transform", [
-    CPCTrainTransformsImageNet128,
-    CPCEvalTransformsImageNet128,
-    AMDIMTrainTransformsImageNet128,
-    AMDIMEvalTransformsImageNet128,
-    Moco2TrainImagenetTransforms,
-    Moco2EvalImagenetTransforms
-])
+@pytest.mark.parametrize(
+    "transform", [
+        CPCTrainTransformsImageNet128,
+        CPCEvalTransformsImageNet128,
+        AMDIMTrainTransformsImageNet128,
+        AMDIMEvalTransformsImageNet128,
+        Moco2TrainImagenetTransforms,
+        Moco2EvalImagenetTransforms,
+    ]
+)
 def test_imagenet_transforms(transform):
     x = torch.rand(3, 128, 128)
     x = transforms.ToPILImage(mode='RGB')(x)

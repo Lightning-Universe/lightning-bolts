@@ -2,16 +2,15 @@ from typing import Optional
 
 from torch.utils.data import random_split
 
+from pl_bolts.datasets import CIFAR10Mixed, UnlabeledImagenet
+from pl_bolts.models.self_supervised.amdim import transforms as amdim_transforms
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import STL10
-
-    from pl_bolts.datasets.imagenet_dataset import UnlabeledImagenet
-    from pl_bolts.datasets.ssl_amdim_datasets import CIFAR10Mixed
-    from pl_bolts.models.self_supervised.amdim import transforms as amdim_transforms
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
 
 
 class AMDIMPretraining():
@@ -55,11 +54,13 @@ class AMDIMPretraining():
 
     @staticmethod
     def stl(dataset_root, split: Optional[str] = None):
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
+                'You want to use STL10 dataset loaded from `torchvision` which is not installed yet.'
+            )
         dataset = STL10(
-            root=dataset_root,
-            split='unlabeled',
-            transform=amdim_transforms.AMDIMTrainTransformsSTL10(),
-            download=True)
+            root=dataset_root, split='unlabeled', transform=amdim_transforms.AMDIMTrainTransformsSTL10(), download=True
+        )
         tng_split, val_split = random_split(dataset, [95000, 5000])
         return tng_split, val_split
 
@@ -83,9 +84,7 @@ class AMDIMPatchesPretraining():
     @staticmethod
     def cifar10(dataset_root, patch_size, patch_overlap, split: str = 'train'):
         assert split in ('train', 'val')
-        train_transform = amdim_transforms.TransformsC10Patches(
-            patch_size=patch_size,
-            patch_overlap=patch_overlap)
+        train_transform = amdim_transforms.TransformsC10Patches(patch_size=patch_size, patch_overlap=patch_overlap)
         dataset = CIFAR10Mixed(
             root=dataset_root,
             split=split,
@@ -96,10 +95,11 @@ class AMDIMPatchesPretraining():
 
     @staticmethod
     def stl(dataset_root, patch_size, patch_overlap, split: Optional[str] = None):
-        train_transform = amdim_transforms.TransformsSTL10Patches(
-            patch_size=patch_size,
-            overlap=patch_overlap
-        )
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
+                'You want to use STL10 dataset loaded from `torchvision` which is not installed yet.'
+            )
+        train_transform = amdim_transforms.TransformsSTL10Patches(patch_size=patch_size, overlap=patch_overlap)
         dataset = STL10(
             root=dataset_root,
             split='unlabeled',
@@ -113,10 +113,7 @@ class AMDIMPatchesPretraining():
     @staticmethod
     def imagenet(dataset_root, nb_classes, patch_size, patch_overlap, split: str = 'train'):
         assert split in ('train', 'val')
-        train_transform = amdim_transforms.TransformsImageNet128Patches(
-            patch_size=patch_size,
-            overlap=patch_overlap
-        )
+        train_transform = amdim_transforms.TransformsImageNet128Patches(patch_size=patch_size, overlap=patch_overlap)
         dataset = UnlabeledImagenet(
             dataset_root,
             nb_classes=nb_classes,

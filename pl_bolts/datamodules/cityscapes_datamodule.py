@@ -1,3 +1,6 @@
+# type: ignore[override]
+from typing import Any, Callable
+
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
@@ -43,7 +46,7 @@ class CityscapesDataModule(LightningDataModule):
         dm = CityscapesDataModule(PATH)
         model = LitModel()
 
-        Trainer().fit(model, dm)
+        Trainer().fit(model, datamodule=dm)
 
     Or you can set your own transforms
 
@@ -56,19 +59,22 @@ class CityscapesDataModule(LightningDataModule):
     """
 
     name = 'Cityscapes'
-    extra_args = {}
+    extra_args: dict = {}
 
     def __init__(
-            self,
-            data_dir: str,
-            quality_mode: str = 'fine',
-            target_type: str = 'instance',
-            num_workers: int = 16,
-            batch_size: int = 32,
-            seed: int = 42,
-            *args,
-            **kwargs,
-    ):
+        self,
+        data_dir: str,
+        quality_mode: str = 'fine',
+        target_type: str = 'instance',
+        num_workers: int = 16,
+        batch_size: int = 32,
+        seed: int = 42,
+        shuffle: bool = False,
+        pin_memory: bool = False,
+        drop_last: bool = False,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """
         Args:
             data_dir: where to load the data from path, i.e. where directory leftImg8bit and gtFine or gtCoarse
@@ -77,6 +83,11 @@ class CityscapesDataModule(LightningDataModule):
             target_type: targets to use, either 'instance' or 'semantic'
             num_workers: how many workers to use for loading data
             batch_size: number of examples per training/eval step
+            seed: random seed to be used for train/val/test splits
+            shuffle: If true shuffles the data every epoch
+            pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
+                        returning them
+            drop_last: If true drops the last incomplete batch
         """
         super().__init__(*args, **kwargs)
 
@@ -95,103 +106,110 @@ class CityscapesDataModule(LightningDataModule):
         self.num_workers = num_workers
         self.batch_size = batch_size
         self.seed = seed
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
         self.target_transforms = None
 
     @property
-    def num_classes(self):
+    def num_classes(self) -> int:
         """
         Return:
             30
         """
         return 30
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         """
         Cityscapes train set
         """
         transforms = self.train_transforms or self._default_transforms()
         target_transforms = self.target_transforms or self._default_target_transforms()
 
-        dataset = Cityscapes(self.data_dir,
-                             split='train',
-                             target_type=self.target_type,
-                             mode=self.quality_mode,
-                             transform=transforms,
-                             target_transform=target_transforms,
-                             **self.extra_args)
+        dataset = Cityscapes(
+            self.data_dir,
+            split='train',
+            target_type=self.target_type,
+            mode=self.quality_mode,
+            transform=transforms,
+            target_transform=target_transforms,
+            **self.extra_args
+        )
 
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
-            shuffle=True,
+            shuffle=self.shuffle,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         """
         Cityscapes val set
         """
         transforms = self.val_transforms or self._default_transforms()
         target_transforms = self.target_transforms or self._default_target_transforms()
 
-        dataset = Cityscapes(self.data_dir,
-                             split='val',
-                             target_type=self.target_type,
-                             mode=self.quality_mode,
-                             transform=transforms,
-                             target_transform=target_transforms,
-                             **self.extra_args)
+        dataset = Cityscapes(
+            self.data_dir,
+            split='val',
+            target_type=self.target_type,
+            mode=self.quality_mode,
+            transform=transforms,
+            target_transform=target_transforms,
+            **self.extra_args
+        )
 
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            pin_memory=True,
-            drop_last=True
+            pin_memory=self.pin_memory,
+            drop_last=self.drop_last
         )
         return loader
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         """
         Cityscapes test set
         """
         transforms = self.test_transforms or self._default_transforms()
         target_transforms = self.target_transforms or self._default_target_transforms()
 
-        dataset = Cityscapes(self.data_dir,
-                             split='test',
-                             target_type=self.target_type,
-                             mode=self.quality_mode,
-                             transform=transforms,
-                             target_transform=target_transforms,
-                             **self.extra_args)
+        dataset = Cityscapes(
+            self.data_dir,
+            split='test',
+            target_type=self.target_type,
+            mode=self.quality_mode,
+            transform=transforms,
+            target_transform=target_transforms,
+            **self.extra_args
+        )
         loader = DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=True
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory
         )
         return loader
 
-    def _default_transforms(self):
+    def _default_transforms(self) -> Callable:
         cityscapes_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transform_lib.Normalize(
-                mean=[0.28689554, 0.32513303, 0.28389177],
-                std=[0.18696375, 0.19017339, 0.18720214]
+                mean=[0.28689554, 0.32513303, 0.28389177], std=[0.18696375, 0.19017339, 0.18720214]
             )
         ])
         return cityscapes_transforms
 
-    def _default_target_transforms(self):
+    def _default_target_transforms(self) -> Callable:
         cityscapes_target_trasnforms = transform_lib.Compose([
-            transform_lib.ToTensor(),
-            transform_lib.Lambda(lambda t: t.squeeze())
+            transform_lib.ToTensor(), transform_lib.Lambda(lambda t: t.squeeze())
         ])
         return cityscapes_target_trasnforms

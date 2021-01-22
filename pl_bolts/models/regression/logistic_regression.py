@@ -14,15 +14,17 @@ class LogisticRegression(pl.LightningModule):
     Logistic regression model
     """
 
-    def __init__(self,
-                 input_dim: int,
-                 num_classes: int,
-                 bias: bool = True,
-                 learning_rate: float = 1e-4,
-                 optimizer: Optimizer = Adam,
-                 l1_strength: float = 0.0,
-                 l2_strength: float = 0.0,
-                 **kwargs):
+    def __init__(
+        self,
+        input_dim: int,
+        num_classes: int,
+        bias: bool = True,
+        learning_rate: float = 1e-4,
+        optimizer: Optimizer = Adam,
+        l1_strength: float = 0.0,
+        l2_strength: float = 0.0,
+        **kwargs
+    ):
         """
         Args:
             input_dim: number of dimensions of the input (at least 1)
@@ -68,11 +70,7 @@ class LogisticRegression(pl.LightningModule):
 
         tensorboard_logs = {'train_ce_loss': loss}
         progress_bar_metrics = tensorboard_logs
-        return {
-            'loss': loss,
-            'log': tensorboard_logs,
-            'progress_bar': progress_bar_metrics
-        }
+        return {'loss': loss, 'log': tensorboard_logs, 'progress_bar': progress_bar_metrics}
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
@@ -86,11 +84,7 @@ class LogisticRegression(pl.LightningModule):
         val_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
         tensorboard_logs = {'val_ce_loss': val_loss, 'val_acc': acc}
         progress_bar_metrics = tensorboard_logs
-        return {
-            'val_loss': val_loss,
-            'log': tensorboard_logs,
-            'progress_bar': progress_bar_metrics
-        }
+        return {'val_loss': val_loss, 'log': tensorboard_logs, 'progress_bar': progress_bar_metrics}
 
     def test_step(self, batch, batch_idx):
         x, y = batch
@@ -104,11 +98,7 @@ class LogisticRegression(pl.LightningModule):
         test_loss = torch.stack([x['test_loss'] for x in outputs]).mean()
         tensorboard_logs = {'test_ce_loss': test_loss, 'test_acc': acc}
         progress_bar_metrics = tensorboard_logs
-        return {
-            'test_loss': test_loss,
-            'log': tensorboard_logs,
-            'progress_bar': progress_bar_metrics
-        }
+        return {'test_loss': test_loss, 'log': tensorboard_logs, 'progress_bar': progress_bar_metrics}
 
     def configure_optimizers(self):
         return self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
@@ -126,16 +116,17 @@ class LogisticRegression(pl.LightningModule):
 
 def cli_main():
     from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
+    from pl_bolts.utils import _SKLEARN_AVAILABLE
 
     pl.seed_everything(1234)
 
     # Example: Iris dataset in Sklearn (4 features, 3 class labels)
-    try:
+    if _SKLEARN_AVAILABLE:
         from sklearn.datasets import load_iris
-    except ModuleNotFoundError as err:
-        raise ModuleNotFoundError(  # pragma: no-cover
+    else:  # pragma: no cover
+        raise ModuleNotFoundError(
             'You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`.'
-        ) from err
+        )
 
     # args
     parser = ArgumentParser()
@@ -149,11 +140,11 @@ def cli_main():
 
     # data
     X, y = load_iris(return_X_y=True)
-    loaders = SklearnDataModule(X, y, batch_size=args.batch_size)
+    loaders = SklearnDataModule(X, y, batch_size=args.batch_size, num_workers=0)
 
     # train
     trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model, loaders.train_dataloader(), loaders.val_dataloader())
+    trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
 
 
 if __name__ == '__main__':

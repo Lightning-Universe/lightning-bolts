@@ -9,7 +9,7 @@ from pl_bolts.models.self_supervised.swav.transforms import SwAVFinetuneTransfor
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization, stl10_normalization
 
 
-def cli_main():  # pragma: no-cover
+def cli_main():  # pragma: no cover
     from pl_bolts.datamodules import ImagenetDataModule, STL10DataModule
 
     pl.seed_everything(1234)
@@ -37,56 +37,36 @@ def cli_main():  # pragma: no-cover
     args = parser.parse_args()
 
     if args.dataset == 'stl10':
-        dm = STL10DataModule(
-            data_dir=args.data_dir,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers
-        )
+        dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         dm.train_dataloader = dm.train_dataloader_labeled
         dm.val_dataloader = dm.val_dataloader_labeled
         args.num_samples = 0
 
         dm.train_transforms = SwAVFinetuneTransform(
-            normalize=stl10_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=False
+            normalize=stl10_normalization(), input_height=dm.size()[-1], eval_transform=False
         )
         dm.val_transforms = SwAVFinetuneTransform(
-            normalize=stl10_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=True
+            normalize=stl10_normalization(), input_height=dm.size()[-1], eval_transform=True
         )
         dm.test_transforms = SwAVFinetuneTransform(
-            normalize=stl10_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=True
+            normalize=stl10_normalization(), input_height=dm.size()[-1], eval_transform=True
         )
 
         args.maxpool1 = False
         args.first_conv = True
     elif args.dataset == 'imagenet':
-        dm = ImagenetDataModule(
-            data_dir=args.data_dir,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers
-        )
+        dm = ImagenetDataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         dm.train_transforms = SwAVFinetuneTransform(
-            normalize=imagenet_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=False
+            normalize=imagenet_normalization(), input_height=dm.size()[-1], eval_transform=False
         )
         dm.val_transforms = SwAVFinetuneTransform(
-            normalize=imagenet_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=True
+            normalize=imagenet_normalization(), input_height=dm.size()[-1], eval_transform=True
         )
 
         dm.test_transforms = SwAVFinetuneTransform(
-            normalize=imagenet_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=True
+            normalize=imagenet_normalization(), input_height=dm.size()[-1], eval_transform=True
         )
 
         args.num_samples = 1

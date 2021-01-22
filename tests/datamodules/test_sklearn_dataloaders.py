@@ -8,8 +8,9 @@ from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 try:
     from sklearn.utils import shuffle as sk_shuffle
 except ImportError:
-    warn('You want to use `sklearn` which is not installed yet,'  # pragma: no-cover
-         ' install it with `pip install sklearn`.')
+    warn(  # pragma: no-cover
+        'You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`.'
+    )
 
 
 def test_dataloader():
@@ -27,7 +28,7 @@ def test_dataloader():
     # -----------------------------
     # train
     # -----------------------------
-    loaders = SklearnDataModule(X=X, y=y, val_split=0.2, test_split=0.2, random_state=1234)
+    loaders = SklearnDataModule(X=X, y=y, val_split=0.2, test_split=0.2, random_state=1234, drop_last=True)
     train_loader = loaders.train_dataloader()
     val_loader = loaders.val_dataloader()
     test_loader = loaders.test_dataloader()
@@ -39,7 +40,7 @@ def test_dataloader():
     # -----------------------------
     # train + val
     # -----------------------------
-    loaders = SklearnDataModule(X=X, y=y, x_val=x_val, y_val=y_val, test_split=0.2, random_state=1234)
+    loaders = SklearnDataModule(X=X, y=y, x_val=x_val, y_val=y_val, test_split=0.2, random_state=1234, drop_last=True)
     train_loader = loaders.train_dataloader()
     val_loader = loaders.val_dataloader()
     test_loader = loaders.test_dataloader()
@@ -50,7 +51,9 @@ def test_dataloader():
     # -----------------------------
     # train + test
     # -----------------------------
-    loaders = SklearnDataModule(X=X, y=y, x_test=x_test, y_test=y_test, val_split=0.2, random_state=1234)
+    loaders = SklearnDataModule(
+        X=X, y=y, x_test=x_test, y_test=y_test, val_split=0.2, random_state=1234, drop_last=True
+    )
     train_loader = loaders.train_dataloader()
     val_loader = loaders.val_dataloader()
     test_loader = loaders.test_dataloader()
@@ -61,7 +64,7 @@ def test_dataloader():
     # -----------------------------
     # train + val + test
     # -----------------------------
-    loaders = SklearnDataModule(X, y, x_val, y_val, x_test, y_test, random_state=1234)
+    loaders = SklearnDataModule(X, y, x_val, y_val, x_test, y_test, random_state=1234, drop_last=True)
     train_loader = loaders.train_dataloader()
     val_loader = loaders.val_dataloader()
     test_loader = loaders.test_dataloader()
