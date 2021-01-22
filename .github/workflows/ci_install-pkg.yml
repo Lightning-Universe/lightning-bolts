@@ -34,8 +34,8 @@ jobs:
       # max-parallel: 6
       matrix:
         # PyTorch 1.5 is failing on Win and bolts requires torchvision>=0.5
-        os: [ubuntu-20.04, macOS-10.15]  # , windows-2019
-        python-version: [3.7, 3.8]
+        os: [ubuntu-20.04, macOS-10.15, windows-2019]  #
+        python-version: [3.7]
 
     steps:
       - uses: actions/checkout@master
@@ -49,6 +49,7 @@ jobs:
           python setup.py sdist
 
       - name: Install package
+        if: runner.os != 'windows'
         run: |
           pip install virtualenv
           virtualenv vEnv ; source vEnv/bin/activate

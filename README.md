@@ -1,6 +1,6 @@
 <div align="center">
 
-![Logo](https://raw.githubusercontent.com/PyTorchLightning/pytorch-lightning-bolts/master/docs/source/_images/logos/bolts_logo.png)
+![Logo](docs/source/_images/logos/bolts_logo.png)
 
 # PyTorch Lightning Bolts    
 
