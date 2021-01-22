@@ -3,12 +3,11 @@ Agent module containing classes for Agent logic
 Based on the implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/agent.py
 """
 from abc import ABC
-from typing import List, Union
+from typing import List
 
 import numpy as np
 import torch
 from torch import nn
-from torch.distributions import Categorical, Normal
 from torch.nn import functional as F
 
 
@@ -139,44 +138,3 @@ class PolicyAgent(Agent):
         actions = [np.random.choice(len(prob), p=prob) for prob in prob_np]
 
         return actions
-
-
-class ActorCriticAgent(Agent):
-    """Policy based agent that returns a distribution and an action given an observation"""
-
-    def __init__(self, actor_net: nn.Module, critic_net: nn.Module):
-        self.actor_net = actor_net
-        self.critic_net = critic_net
-
-    @torch.no_grad()
-    def __call__(self, state: torch.Tensor, device: str) -> List[int]:
-        """
-        Takes in the current state and returns the agents policy, a sampled action, log probability
-        of the action, and value of the given state
-        Args:
-            states: current state of the environment
-            device: the device used for the current batch
-        Returns:
-            torch dsitribution and randomly sampled action
-        """
-
-        state = state.to(device=device)
-
-        pi, actions = self.actor_net(state)
-        log_p = self.get_log_prob(pi, actions)
-
-        value = self.critic_net(state)
-
-        return pi, actions.cpu(), log_p.cpu(), value.cpu()
-
-    def get_log_prob(self, pi: Union[Categorical, Normal], actions: torch.Tensor):
-        """
-        Takes in the current state and returns the agents policy, a sampled action, log probability
-        of the action, and the value of the state
-        Args:
-            pi: torch distribution
-            actions: actions taken by distribution
-        Returns:
-            log probability of the acition under pi
-        """
-        return self.actor_net.get_log_prob(pi, actions)
