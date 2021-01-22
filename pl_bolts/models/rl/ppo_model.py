@@ -16,12 +16,12 @@ import argparse
 from typing import List, Tuple
 
 import torch
+import pytorch_lightning as pl
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-import pytorch_lightning as pl
 from pl_bolts.datamodules import ExperienceSourceDataset
-from pl_bolts.models.rl.common.networks import MLP, ActorCategorical, ActorContinous
+from pl_bolts.models.rl.common.networks import ActorCategorical, ActorContinous, MLP
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
