@@ -18,12 +18,13 @@ jobs:
 
       - name: Create package
         run: |
+          pip install --upgrade setuptools wheel
           # python setup.py check --metadata --strict
-          python setup.py sdist
+          python setup.py sdist bdist_wheel
 
       - name: Check package
         run: |
-          pip install twine==1.13.0
+          pip install twine>=3.2
           twine check dist/*
           python setup.py clean
 
