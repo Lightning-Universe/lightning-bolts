@@ -360,20 +360,19 @@ class PPO(pl.LightningModule):
         return parser
 
 
-def main(args) -> None:
-    model = PPO(**vars(args))
-
-    trainer = pl.Trainer.from_argparse_args(args)
-    trainer.fit(model)
-
-
-if __name__ == '__main__':
-    pl.seed_everything(0)
-
+def cli_main() -> None:
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = pl.Trainer.add_argparse_args(parent_parser)
 
     parser = PPO.add_model_specific_args(parent_parser)
     args = parser.parse_args()
 
-    main(args)
+    model = PPO(**vars(args))
+
+    pl.seed_everything(0)
+    trainer = pl.Trainer.from_argparse_args(args)
+    trainer.fit(model)
+
+
+if __name__ == '__main__':
+    cli_main()
