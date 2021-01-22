@@ -10,10 +10,7 @@ from torch import Tensor
 
 
 def recursive_listdir(path: str, suffix: str) -> list:
-    return [
-        os.path.join(dp, f) for dp, dn, fn in os.walk(os.path.expanduser(path))
-        for f in fn if f.endswith(suffix)
-    ]
+    return [os.path.join(dp, f) for dp, dn, fn in os.walk(os.path.expanduser(path)) for f in fn if f.endswith(suffix)]
 
 
 class GraspAndLiftEEGDataset(data.Dataset):
@@ -92,17 +89,18 @@ class GraspAndLiftEEGDataset(data.Dataset):
 
     ZIP_SIZE_BYTES = 980887394
 
-    def __init__(self,
-                 root: str,
-                 train: bool = True,
-                 download: bool = True,
-                 num_samples: Optional[int] = None,
-                 last_label_only: bool = False,
-                 subjects: Optional[List[int]] = None) -> None:
+    def __init__(
+        self,
+        root: str,
+        train: bool = True,
+        download: bool = True,
+        num_samples: Optional[int] = None,
+        last_label_only: bool = False,
+        subjects: Optional[List[int]] = None
+    ) -> None:
         super(GraspAndLiftEEGDataset, self).__init__()
         if num_samples is None and last_label_only:
-            raise ValueError(
-                'last_label_only cannot be used without setting num_samples')
+            raise ValueError('last_label_only cannot be used without setting num_samples')
         self.num_samples = num_samples
         self.last_label_only = last_label_only
         data_dir = os.path.join(root, 'train' if train else 'test')
@@ -118,15 +116,16 @@ class GraspAndLiftEEGDataset(data.Dataset):
         bin_files = recursive_listdir(data_dir, bin_suffix)
         should_compile = len(bin_files) < len(csv_files)
         if should_compile:
-            print(f'Number of .csv.bin files ({len(bin_files)}) '
-                  f'is less than the number of .csv ({len(csv_files)}).'
-                  ' Compiling binary representation...')
+            print(
+                f'Number of .csv.bin files ({len(bin_files)}) '
+                f'is less than the number of .csv ({len(csv_files)}).'
+                ' Compiling binary representation...'
+            )
             self.load_from_csv(csv_files, subjects)
         else:
             self.load_from_bin(bin_files, subjects)
 
-    def load_from_csv(self, csv_files: List[str],
-                      subjects: Optional[List[int]]) -> None:
+    def load_from_csv(self, csv_files: List[str], subjects: Optional[List[int]]) -> None:
         """ Convert and load the data from the original .csv files
         """
         self.X, self.Y = self.compile_bin(csv_files, subjects)
@@ -136,8 +135,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
             for x in self.X:
                 self.total_examples += x.shape[1] - self.num_samples + 1
 
-    def load_from_bin(self, bin_files: List[str],
-                      subjects: Optional[List[int]]) -> None:
+    def load_from_bin(self, bin_files: List[str], subjects: Optional[List[int]]) -> None:
         """ Load the data from existing .csv.bin files
         """
         examples = {}
@@ -149,8 +147,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
                 if subject not in subjects:
                     continue
             is_data = file.endswith('_data.csv.bin')
-            series = file[:-len('_data.csv.bin'
-                                ) if is_data else -len('_events.csv.bin')]
+            series = file[:-len('_data.csv.bin') if is_data else -len('_events.csv.bin')]
             samples = torch.load(file)
             item = examples.get(series, [None, None])
             item[0 if is_data else 1] = samples
@@ -168,14 +165,12 @@ class GraspAndLiftEEGDataset(data.Dataset):
 
     def download(self, root: str) -> None:
         zip_path = os.path.join(root, 'grasp-and-lift-eeg-detection.zip')
-        if not os.path.exists(
-                zip_path) or os.path.getsize(zip_path) != self.ZIP_SIZE_BYTES:
+        if not os.path.exists(zip_path) or os.path.getsize(zip_path) != self.ZIP_SIZE_BYTES:
             print(f'Downloading from {self.ZIP_URL}')
             start = time.time()
             r = requests.get(self.ZIP_URL)
             if r.status_code != 200:
-                raise ValueError(
-                    f'Expected status code 200, got {r.status_code}')
+                raise ValueError(f'Expected status code 200, got {r.status_code}')
             with open(zip_path, 'wb') as f:
                 f.write(r.content)
             delta = time.time() - start
@@ -188,9 +183,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
         print(f'Unzipped in {int(delta)} seconds')
         os.remove(zip_path)
 
-    def compile_bin(
-            self, csv_files: List[str],
-            subjects: Optional[List[int]]) -> Tuple[Tensor, Optional[Tensor]]:
+    def compile_bin(self, csv_files: List[str], subjects: Optional[List[int]]) -> Tuple[Tensor, Optional[Tensor]]:
         """ Compile the .csv.bin files from the original .csv files
         """
         examples = {}
@@ -218,8 +211,7 @@ class GraspAndLiftEEGDataset(data.Dataset):
                     channels = torch.Tensor(channels).unsqueeze(1)
                     samples.append(channels)
             samples = torch.cat(samples, dim=1)
-            series = file[:-len('_data.csv') if is_data else -len('_events.csv'
-                                                                  )]
+            series = file[:-len('_data.csv') if is_data else -len('_events.csv')]
             item = examples.get(series, [None, None])
             item[0 if is_data else 1] = samples
             examples[series] = item
