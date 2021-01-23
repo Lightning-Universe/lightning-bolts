@@ -19,4 +19,3 @@ def test_neural_ode(tmpdir):
     trainer = pl.Trainer(max_epochs=300, default_root_dir=tmpdir, progress_bar_refresh_rate=0)
     trainer.fit(model, loader, loader)
     assert trainer.logged_metrics['loss'] < 1e-1
-

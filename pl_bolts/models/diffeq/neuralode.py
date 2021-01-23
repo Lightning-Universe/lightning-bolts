@@ -102,7 +102,6 @@ class DepthInvariantNeuralODE(pl.LightningModule):
 
 def cli_main(args=None):
     from torchdyn.datasets import ToyDataset, generate_concentric_spheres, generate_moons
-
     pl.seed_everything(1234)
 
     parser = ArgumentParser()
