@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from torchdyn.models import NeuralODE, DataControl
+from torchdyn.models import NeuralDE, DataControl
 
 
 class DepthInvariantNeuralODE(pl.LightningModule):
@@ -28,7 +28,7 @@ class DepthInvariantNeuralODE(pl.LightningModule):
             relative_tol: float = 1e-4,
             integration_span: Tensor = torch.linspace(0, 1),
             data_control: str = 'True',
-            learning_rate: float = 0.01,
+            lr: float = 0.01,
             **kwargs
     ):
         """
@@ -43,6 +43,7 @@ class DepthInvariantNeuralODE(pl.LightningModule):
 
         """
         super().__init__()
+        self.lr = lr
 
         if data_control:
             vector_field = nn.Sequential(DataControl(),
@@ -57,7 +58,7 @@ class DepthInvariantNeuralODE(pl.LightningModule):
                                          nn.Linear(hidden_dim, input_dim)
                                          )
 
-        self.nde = NeuralODE(vector_field,
+        self.nde = NeuralDE(vector_field,
                              order=1,
                              sensitivity='adjoint',
                              solver='dopri5',
@@ -78,25 +79,24 @@ class DepthInvariantNeuralODE(pl.LightningModule):
         """
         return self.nde(z)
 
-    def training_step(self, batch, batch_idx, optimizer_idx):
+    def training_step(self, batch, batch_idx):
         x, y = batch
-        y_hat = self.model(x)
+        y_hat = self.nde(x)
         loss = nn.CrossEntropyLoss()(y_hat, y)
 
         nfe = self.nde.nfe
         self.nde.nfe = 0
+        self.log('loss', loss)
         return {'loss': loss, 'nfe': nfe}
 
     def configure_optimizers(self):
-        lr = self.hparams.learning_rate
-
-        opt_g = torch.optim.Adam(self.generator.parameters(), lr=lr)
+        opt_g = torch.optim.Adam(self.parameters(), lr=self.lr)
         return [opt_g], []
 
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--learning_rate', type=float, default=0.0002, help="adam: learning rate")
+        parser.add_argument('--lr', type=float, default=0.0002, help="adam: learning rate")
         return parser
 
 
