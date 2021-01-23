@@ -74,9 +74,7 @@ def test_semantic_segmentation(tmpdir):
 
     model = SemSegment(num_classes=19)
 
-    trainer = trainer = pl.Trainer(
-        fast_dev_run=True, logger=False, checkpoint_callback=False, default_root_dir=tmpdir
-    )
+    trainer = trainer = pl.Trainer(fast_dev_run=True, logger=False, checkpoint_callback=False, default_root_dir=tmpdir)
     trainer.fit(model, datamodule=dm)
     loss = trainer.progress_bar_dict['loss']
 
