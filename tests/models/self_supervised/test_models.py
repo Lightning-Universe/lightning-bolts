@@ -23,7 +23,7 @@ def test_cpcv2(tmpdir, datadir):
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 
     model = CPCV2(encoder='resnet18', online_ft=True, num_classes=datamodule.num_classes)
-    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
+    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['val_nce']
 
@@ -40,7 +40,7 @@ def test_byol(tmpdir, datadir):
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 
     model = BYOL(data_dir=datadir, num_classes=datamodule)
-    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=2)
+    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir, max_steps=2)
     trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']
 
@@ -51,7 +51,7 @@ def test_amdim(tmpdir, datadir):
     seed_everything()
 
     model = AMDIM(data_dir=datadir, batch_size=2, online_ft=True, encoder='resnet18', num_workers=0)
-    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
+    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model)
     loss = trainer.progress_bar_dict['loss']
 
@@ -66,7 +66,7 @@ def test_moco(tmpdir, datadir):
     datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
 
     model = MocoV2(data_dir=datadir, batch_size=2, online_ft=True)
-    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, callbacks=[MocoLRScheduler()])
+    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir, callbacks=[MocoLRScheduler()])
     trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']
 
@@ -81,7 +81,7 @@ def test_simclr(tmpdir, datadir):
     datamodule.val_transforms = SimCLREvalDataTransform(32)
 
     model = SimCLR(batch_size=2, num_samples=datamodule.num_samples, gpus=0, nodes=1, dataset='cifar10')
-    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
+    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']
 
@@ -119,7 +119,7 @@ def test_swav(tmpdir, datadir):
         dataset='cifar10'
     )
 
-    trainer = pl.Trainer(gpus=0, fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir, max_steps=3)
+    trainer = pl.Trainer(gpus=0, fast_dev_run=True, default_root_dir=tmpdir, max_steps=3)
 
     trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']
@@ -135,7 +135,7 @@ def test_simsiam(tmpdir, datadir):
     datamodule.val_transforms = SimCLREvalDataTransform(32)
 
     model = SimSiam(batch_size=2, num_samples=datamodule.num_samples, gpus=0, nodes=1, dataset='cifar10')
-    trainer = pl.Trainer(gpus=0, fast_dev_run=True, max_epochs=1, default_root_dir=tmpdir)
+    trainer = pl.Trainer(gpus=0, fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']
 

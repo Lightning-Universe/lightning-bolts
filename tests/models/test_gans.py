@@ -19,7 +19,7 @@ def test_gan(tmpdir, datadir, dm_cls):
     dm = dm_cls(data_dir=datadir, num_workers=0)
     model = GAN(*dm.size())
     trainer = pl.Trainer(
-        fast_dev_run=True, logger=False, checkpoint_callback=False, max_epochs=1, default_root_dir=tmpdir
+        fast_dev_run=True, logger=False, checkpoint_callback=False, default_root_dir=tmpdir
     )
     trainer.fit(model, datamodule=dm)
     trainer.test(datamodule=dm, ckpt_path=None)
@@ -37,7 +37,7 @@ def test_dcgan(tmpdir, datadir, dm_cls):
 
     model = DCGAN(image_channels=dm.dims[0])
     trainer = pl.Trainer(
-        fast_dev_run=True, logger=False, checkpoint_callback=False, max_epochs=1, default_root_dir=tmpdir
+        fast_dev_run=True, logger=False, checkpoint_callback=False, default_root_dir=tmpdir
     )
     trainer.fit(model, dm)
     trainer.test(datamodule=dm, ckpt_path=None)
