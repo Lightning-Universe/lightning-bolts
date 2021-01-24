@@ -8,6 +8,7 @@ pycodestyle:  # Same as scanner.linter value. Other option is flake8
     max-line-length: 120  # Default is 79 in PEP 8
     ignore:  # Errors and warnings to ignore
         - W503  # line break before binary operator
+        - W504  # line break after binary operator
         - E402  # module level import not at top of file
         - E731  # do not assign a lambda expression, use a def
         - C406  # Unnecessary list literal - rewrite as a dict literal.
