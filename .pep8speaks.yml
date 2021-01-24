@@ -15,6 +15,7 @@ pycodestyle:  # Same as scanner.linter value. Other option is flake8
         - E741  # ambiguous variable name
         - F401
         - F841
+        - E129  # Ignore "Visually indented line with same indent as next logical line"
 
 no_blank_comment: True  # If True, no comment is made on PR without any errors.
 descending_issues_order: False  # If True, PEP 8 issues in message will be displayed in descending order of line numbers in the file
