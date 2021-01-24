@@ -31,4 +31,4 @@ class SRCelebADataset(SRDatasetMixin, CelebA):
         self.image_channels = 3
 
     def _get_image(self, index: int):
-        return PIL.Image.open(os.path.join(self.root, self.base_folder, "img_align_celeba", self.filename[index]))
+        return Image.open(os.path.join(self.root, self.base_folder, "img_align_celeba", self.filename[index]))
