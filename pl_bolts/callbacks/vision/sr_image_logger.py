@@ -15,8 +15,29 @@ else:  # pragma: no cover
 
 
 class SRImageLoggerCallback(Callback):
+    """
+    Logs low-res, generated high-res, and ground truth high-res images to TensorBoard
+    Your model must implement the ``forward`` function for generation.
+
+    Requirements::
+
+        # model forward must work generating high-res from low-res image
+        hr_fake = pl_module(lr_image)
+
+    Example::
+
+        from pl_bolts.callbacks import SRImageLoggerCallback
+
+        trainer = Trainer(callbacks=[SRImageLoggerCallback()])
+    """
 
     def __init__(self, log_interval: int = 1000, scale_factor: int = 4, num_samples: int = 5) -> None:
+        """
+        Args:
+            log_interval: Number of steps between logging. Default: ``1000``.
+            scale_factor: Scale factor used for downsampling the high-res images. Default: ``4``.
+            num_samples: Number of images of displayed in the grid. Default: ``5``.
+        """
         super().__init__()
         self.log_interval = log_interval
         self.scale_factor = scale_factor
