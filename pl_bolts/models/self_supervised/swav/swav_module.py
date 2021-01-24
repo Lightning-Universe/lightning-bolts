@@ -136,7 +136,7 @@ class SwAV(pl.LightningModule):
         self.warmup_epochs = warmup_epochs
         self.max_epochs = max_epochs
 
-        if self.gpus or self.num_nodes > 1:
+        if self.gpus * self.num_nodes > 1:
             self.get_assignments = self.distributed_sinkhorn
         else:
             self.get_assignments = self.sinkhorn
@@ -144,9 +144,7 @@ class SwAV(pl.LightningModule):
         self.model = self.init_model()
 
         # compute iters per epoch
-        nb_gpus = len(self.gpus) if isinstance(gpus, (list, tuple)) else self.gpus
-        assert isinstance(nb_gpus, int)
-        global_batch_size = self.num_nodes * nb_gpus * self.batch_size if nb_gpus > 0 else self.batch_size
+        global_batch_size = self.nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
         # define LR schedule
@@ -409,32 +407,24 @@ class SwAV(pl.LightningModule):
         parser.add_argument("--data_dir", type=str, default=".", help="path to download data")
         parser.add_argument("--queue_path", type=str, default="queue", help="path for queue")
 
-        parser.add_argument(
-            "--nmb_crops", type=int, default=[2, 4], nargs="+", help="list of number of crops (example: [2, 6])"
-        )
-        parser.add_argument(
-            "--size_crops", type=int, default=[96, 36], nargs="+", help="crops resolutions (example: [224, 96])"
-        )
-        parser.add_argument(
-            "--min_scale_crops",
-            type=float,
-            default=[0.33, 0.10],
-            nargs="+",
-            help="argument in RandomResizedCrop (example: [0.14, 0.05])"
-        )
-        parser.add_argument(
-            "--max_scale_crops",
-            type=float,
-            default=[1, 0.33],
-            nargs="+",
-            help="argument in RandomResizedCrop (example: [1., 0.14])"
-        )
+        parser.add_argument("--nmb_crops", type=int, default=[2, 4], nargs="+",
+                            help="list of number of crops (example: [2, 6])")
+        parser.add_argument("--size_crops", type=int, default=[96, 36], nargs="+",
+                            help="crops resolutions (example: [224, 96])")
+        parser.add_argument("--min_scale_crops", type=float, default=[0.33, 0.10], nargs="+",
+                            help="argument in RandomResizedCrop (example: [0.14, 0.05])")
+        parser.add_argument("--max_scale_crops", type=float, default=[1, 0.33], nargs="+",
+                            help="argument in RandomResizedCrop (example: [1., 0.14])")
 
         # training params
+        parser.add_argument("--num_nodes", default=1, type=int, help="number of nodes for training")
+        parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
         parser.add_argument("--lars_wrapper", action='store_true', help="apple lars wrapper over optimizer used")
         parser.add_argument('--exclude_bn_bias', action='store_true', help="exclude bn/bias from weight decay")
+        parser.add_argument("--max_epochs", default=100, type=int, help="number of total epochs to run")
+        parser.add_argument("--max_steps", default=-1, type=int, help="max steps")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
         parser.add_argument("--batch_size", default=128, type=int, help="batch size per gpu")
 
@@ -444,36 +434,20 @@ class SwAV(pl.LightningModule):
         parser.add_argument("--final_lr", type=float, default=1e-6, help="final learning rate")
 
         # swav params
-        parser.add_argument(
-            "--crops_for_assign",
-            type=int,
-            nargs="+",
-            default=[0, 1],
-            help="list of crops id used for computing assignments"
-        )
+        parser.add_argument("--crops_for_assign", type=int, nargs="+", default=[0, 1],
+                            help="list of crops id used for computing assignments")
         parser.add_argument("--temperature", default=0.1, type=float, help="temperature parameter in training loss")
-        parser.add_argument(
-            "--epsilon", default=0.05, type=float, help="regularization parameter for Sinkhorn-Knopp algorithm"
-        )
-        parser.add_argument(
-            "--sinkhorn_iterations", default=3, type=int, help="number of iterations in Sinkhorn-Knopp algorithm"
-        )
+        parser.add_argument("--epsilon", default=0.05, type=float,
+                            help="regularization parameter for Sinkhorn-Knopp algorithm")
+        parser.add_argument("--sinkhorn_iterations", default=3, type=int,
+                            help="number of iterations in Sinkhorn-Knopp algorithm")
         parser.add_argument("--nmb_prototypes", default=512, type=int, help="number of prototypes")
-        parser.add_argument(
-            "--queue_length",
-            type=int,
-            default=0,
-            help="length of the queue (0 for no queue); must be divisible by total batch size"
-        )
-        parser.add_argument(
-            "--epoch_queue_starts", type=int, default=15, help="from this epoch, we start using a queue"
-        )
-        parser.add_argument(
-            "--freeze_prototypes_epochs",
-            default=1,
-            type=int,
-            help="freeze the prototypes during this many epochs from the start"
-        )
+        parser.add_argument("--queue_length", type=int, default=0,
+                            help="length of the queue (0 for no queue); must be divisible by total batch size")
+        parser.add_argument("--epoch_queue_starts", type=int, default=15,
+                            help="from this epoch, we start using a queue")
+        parser.add_argument("--freeze_prototypes_epochs", default=1, type=int,
+                            help="freeze the prototypes during this many epochs from the start")
 
         return parser
 
@@ -487,7 +461,6 @@ def cli_main():
 
     # model args
     parser = SwAV.add_model_specific_args(parser)
-    parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
     if args.dataset == 'stl10':
@@ -587,9 +560,14 @@ def cli_main():
     model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor='val_loss')
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
 
-    trainer = pl.Trainer.from_argparse_args(
-        args,
+    trainer = pl.Trainer(
+        max_epochs=args.max_epochs,
+        max_steps=None if args.max_steps == -1 else args.max_steps,
+        gpus=args.gpus,
+        num_nodes=args.nodes,
+        distributed_backend='ddp' if args.gpus > 1 else None,
         sync_batchnorm=True if args.gpus > 1 else False,
+        precision=32 if args.fp32 else 16,
         callbacks=callbacks,
     )
 

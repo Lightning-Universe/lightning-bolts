@@ -52,7 +52,9 @@ class Projection(nn.Module):
         self.hidden_dim = hidden_dim
 
         self.model = nn.Sequential(
-            nn.Linear(self.input_dim, self.hidden_dim), nn.BatchNorm1d(self.hidden_dim), nn.ReLU(),
+            nn.Linear(self.input_dim, self.hidden_dim),
+            nn.BatchNorm1d(self.hidden_dim),
+            nn.ReLU(),
             nn.Linear(self.hidden_dim, self.output_dim, bias=False)
         )
 
@@ -125,12 +127,14 @@ class SimCLR(pl.LightningModule):
 
         self.encoder = self.init_model()
 
-        self.projection = Projection(input_dim=self.hidden_mlp, hidden_dim=self.hidden_mlp, output_dim=self.feat_dim)
+        self.projection = Projection(
+            input_dim=self.hidden_mlp,
+            hidden_dim=self.hidden_mlp,
+            output_dim=self.feat_dim
+        )
 
         # compute iters per epoch
-        nb_gpus = len(self.gpus) if isinstance(gpus, (list, tuple)) else self.gpus
-        assert isinstance(nb_gpus, int)
-        global_batch_size = self.num_nodes * nb_gpus * self.batch_size if nb_gpus > 0 else self.batch_size
+        global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
         # define LR schedule
@@ -315,10 +319,14 @@ class SimCLR(pl.LightningModule):
         parser.add_argument("--data_dir", type=str, default=".", help="path to download data")
 
         # training params
+        parser.add_argument("--num_nodes", default=1, type=int, help="number of nodes for training")
+        parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
         parser.add_argument("--lars_wrapper", action='store_true', help="apple lars wrapper over optimizer used")
         parser.add_argument('--exclude_bn_bias', action='store_true', help="exclude bn/bias from weight decay")
+        parser.add_argument("--max_epochs", default=100, type=int, help="number of total epochs to run")
+        parser.add_argument("--max_steps", default=-1, type=int, help="max steps")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
         parser.add_argument("--batch_size", default=128, type=int, help="batch size per gpu")
 
@@ -340,7 +348,6 @@ def cli_main():
 
     # model args
     parser = SimCLR.add_model_specific_args(parser)
-    parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
     if args.dataset == 'stl10':
@@ -431,9 +438,14 @@ def cli_main():
     model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor='val_loss')
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
 
-    trainer = pl.Trainer.from_argparse_args(
-        args,
+    trainer = pl.Trainer(
+        max_epochs=args.max_epochs,
+        max_steps=None if args.max_steps == -1 else args.max_steps,
+        gpus=args.gpus,
+        num_nodes=args.num_nodes,
+        distributed_backend='ddp' if args.gpus > 1 else None,
         sync_batchnorm=True if args.gpus > 1 else False,
+        precision=32 if args.fp32 else 16,
         callbacks=callbacks,
     )
 
