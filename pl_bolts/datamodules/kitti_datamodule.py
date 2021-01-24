@@ -1,11 +1,13 @@
+# type: ignore[override]
 import os
+from typing import Any, Callable, Optional
 
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import random_split
 
-from pl_bolts.datasets.kitti_dataset import KittiDataset
+from pl_bolts.datasets import KittiDataset
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -21,7 +23,7 @@ class KittiDataModule(LightningDataModule):
 
     def __init__(
         self,
-        data_dir: str,
+        data_dir: Optional[str] = None,
         val_split: float = 0.2,
         test_split: float = 0.1,
         num_workers: int = 16,
@@ -30,9 +32,9 @@ class KittiDataModule(LightningDataModule):
         shuffle: bool = False,
         pin_memory: bool = False,
         drop_last: bool = False,
-        *args,
-        **kwargs,
-    ):
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """
         Kitti train, validation and test dataloaders.
 
@@ -92,7 +94,7 @@ class KittiDataModule(LightningDataModule):
             kitti_dataset, lengths=[train_len, val_len, test_len], generator=torch.Generator().manual_seed(self.seed)
         )
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         loader = DataLoader(
             self.trainset,
             batch_size=self.batch_size,
@@ -103,7 +105,7 @@ class KittiDataModule(LightningDataModule):
         )
         return loader
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         loader = DataLoader(
             self.valset,
             batch_size=self.batch_size,
@@ -114,7 +116,7 @@ class KittiDataModule(LightningDataModule):
         )
         return loader
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         loader = DataLoader(
             self.testset,
             batch_size=self.batch_size,
@@ -125,7 +127,7 @@ class KittiDataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self):
+    def _default_transforms(self) -> Callable:
         kitti_transforms = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.35675976, 0.37380189, 0.3764753], std=[0.32064945, 0.32098866, 0.32325324])

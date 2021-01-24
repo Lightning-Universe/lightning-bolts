@@ -2,11 +2,11 @@
 
 import os
 
-__version__ = '0.3.0rc1'
+__version__ = '0.3.0'
 __author__ = 'PyTorchLightning et al.'
 __author_email__ = 'name@pytorchlightning.ai'
 __license__ = 'Apache-2.0'
-__copyright__ = 'Copyright (c) 2020-2020, %s.' % __author__
+__copyright__ = f'Copyright (c) 2020-2021, {__author__}'
 __homepage__ = 'https://github.com/PyTorchLightning/pytorch-lightning-bolts'
 __docs__ = "PyTorch Lightning Bolts is a community contribution for ML researchers."
 __long_doc__ = """
@@ -29,6 +29,7 @@ Please organize the functions of your lightning module.
 """
 
 _PACKAGE_ROOT = os.path.dirname(__file__)
+_PROJECT_ROOT = os.path.dirname(_PACKAGE_ROOT)
 _HTTPS_AWS_HUB = "https://pl-bolts-weights.s3.us-east-2.amazonaws.com"
 
 try:

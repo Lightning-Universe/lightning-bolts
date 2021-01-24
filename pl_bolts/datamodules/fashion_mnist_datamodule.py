@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, Callable, Optional, Union
 
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -76,7 +76,7 @@ class FashionMNISTDataModule(VisionDataModule):
                 'You want to use FashionMNIST dataset loaded from `torchvision` which is not installed yet.'
             )
 
-        super().__init__(
+        super().__init__(  # type: ignore[misc]
             data_dir=data_dir,
             val_split=val_split,
             num_workers=num_workers,
@@ -98,7 +98,7 @@ class FashionMNISTDataModule(VisionDataModule):
         """
         return 10
 
-    def default_transforms(self):
+    def default_transforms(self) -> Callable:
         if self.normalize:
             mnist_transforms = transform_lib.Compose([
                 transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5, ), std=(0.5, ))
