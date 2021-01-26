@@ -124,7 +124,7 @@ class RetinaNet(pl.LightningModule):
         return parser
 
 
-def run_cli():
+def cli_main():
     from pl_bolts.datamodules import VOCDetectionDataModule
 
     pl.seed_everything(42)
