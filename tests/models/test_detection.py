@@ -55,7 +55,7 @@ def test_retinanet_train(tmpdir):
     trainer.fit(model, train_dataloader=train_dl, val_dataloaders=valid_dl)
 
 
-def test_retinanet_bbone_train(tmpdir):
+def test_retinanet_backbone_train(tmpdir):
     model = RetinaNet(backbone="resnet18", fpn=True, pretrained_backbone=False)
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
