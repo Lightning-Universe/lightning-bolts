@@ -55,7 +55,7 @@ class Projection(nn.Module):
             nn.Linear(self.input_dim, self.hidden_dim),
             nn.BatchNorm1d(self.hidden_dim),
             nn.ReLU(),
-            nn.Linear(self.hidden_dim, self.output_dim, bias=False)
+            nn.Linear(self.hidden_dim, self.output_dim, bias=False),
         )
 
     def forward(self, x):
@@ -130,7 +130,7 @@ class SimCLR(pl.LightningModule):
         self.projection = Projection(
             input_dim=self.hidden_mlp,
             hidden_dim=self.hidden_mlp,
-            output_dim=self.feat_dim
+            output_dim=self.feat_dim,
         )
 
         # compute iters per epoch

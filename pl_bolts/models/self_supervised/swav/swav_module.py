@@ -407,14 +407,26 @@ class SwAV(pl.LightningModule):
         parser.add_argument("--data_dir", type=str, default=".", help="path to download data")
         parser.add_argument("--queue_path", type=str, default="queue", help="path for queue")
 
-        parser.add_argument("--nmb_crops", type=int, default=[2, 4], nargs="+",
-                            help="list of number of crops (example: [2, 6])")
-        parser.add_argument("--size_crops", type=int, default=[96, 36], nargs="+",
-                            help="crops resolutions (example: [224, 96])")
-        parser.add_argument("--min_scale_crops", type=float, default=[0.33, 0.10], nargs="+",
-                            help="argument in RandomResizedCrop (example: [0.14, 0.05])")
-        parser.add_argument("--max_scale_crops", type=float, default=[1, 0.33], nargs="+",
-                            help="argument in RandomResizedCrop (example: [1., 0.14])")
+        parser.add_argument(
+            "--nmb_crops", type=int, default=[2, 4], nargs="+", help="list of number of crops (example: [2, 6])"
+        )
+        parser.add_argument(
+            "--size_crops", type=int, default=[96, 36], nargs="+", help="crops resolutions (example: [224, 96])"
+        )
+        parser.add_argument(
+            "--min_scale_crops",
+            type=float,
+            default=[0.33, 0.10],
+            nargs="+",
+            help="argument in RandomResizedCrop (example: [0.14, 0.05])"
+        )
+        parser.add_argument(
+            "--max_scale_crops",
+            type=float,
+            default=[1, 0.33],
+            nargs="+",
+            help="argument in RandomResizedCrop (example: [1., 0.14])"
+        )
 
         # training params
         parser.add_argument("--num_nodes", default=1, type=int, help="number of nodes for training")
@@ -434,20 +446,36 @@ class SwAV(pl.LightningModule):
         parser.add_argument("--final_lr", type=float, default=1e-6, help="final learning rate")
 
         # swav params
-        parser.add_argument("--crops_for_assign", type=int, nargs="+", default=[0, 1],
-                            help="list of crops id used for computing assignments")
+        parser.add_argument(
+            "--crops_for_assign",
+            type=int,
+            nargs="+",
+            default=[0, 1],
+            help="list of crops id used for computing assignments"
+        )
         parser.add_argument("--temperature", default=0.1, type=float, help="temperature parameter in training loss")
-        parser.add_argument("--epsilon", default=0.05, type=float,
-                            help="regularization parameter for Sinkhorn-Knopp algorithm")
-        parser.add_argument("--sinkhorn_iterations", default=3, type=int,
-                            help="number of iterations in Sinkhorn-Knopp algorithm")
+        parser.add_argument(
+            "--epsilon", default=0.05, type=float, help="regularization parameter for Sinkhorn-Knopp algorithm"
+        )
+        parser.add_argument(
+            "--sinkhorn_iterations", default=3, type=int, help="number of iterations in Sinkhorn-Knopp algorithm"
+        )
         parser.add_argument("--nmb_prototypes", default=512, type=int, help="number of prototypes")
-        parser.add_argument("--queue_length", type=int, default=0,
-                            help="length of the queue (0 for no queue); must be divisible by total batch size")
-        parser.add_argument("--epoch_queue_starts", type=int, default=15,
-                            help="from this epoch, we start using a queue")
-        parser.add_argument("--freeze_prototypes_epochs", default=1, type=int,
-                            help="freeze the prototypes during this many epochs from the start")
+        parser.add_argument(
+            "--queue_length",
+            type=int,
+            default=0,
+            help="length of the queue (0 for no queue); must be divisible by total batch size",
+        )
+        parser.add_argument(
+            "--epoch_queue_starts", type=int, default=15, help="from this epoch, we start using a queue",
+        )
+        parser.add_argument(
+            "--freeze_prototypes_epochs",
+            default=1,
+            type=int,
+            help="freeze the prototypes during this many epochs from the start",
+        )
 
         return parser
 
