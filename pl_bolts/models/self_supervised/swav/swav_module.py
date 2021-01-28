@@ -468,7 +468,10 @@ class SwAV(pl.LightningModule):
             help="length of the queue (0 for no queue); must be divisible by total batch size",
         )
         parser.add_argument(
-            "--epoch_queue_starts", type=int, default=15, help="from this epoch, we start using a queue",
+            "--epoch_queue_starts",
+            type=int,
+            default=15,
+            help="from this epoch, we start using a queue",
         )
         parser.add_argument(
             "--freeze_prototypes_epochs",
