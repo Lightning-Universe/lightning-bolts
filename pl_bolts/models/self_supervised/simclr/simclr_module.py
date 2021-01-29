@@ -5,10 +5,10 @@ from typing import Callable, Optional
 import numpy as np
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.core.optimizer import LightningOptimizer
 from torch import nn
+from torch.nn import functional as F
 from torch.optim.optimizer import Optimizer
 
 from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
@@ -68,7 +68,7 @@ class SimCLR(pl.LightningModule):
         num_samples: int,
         batch_size: int,
         dataset: str,
-        nodes: int = 1,
+        num_nodes: int = 1,
         arch: str = 'resnet50',
         hidden_mlp: int = 2048,
         feat_dim: int = 128,
@@ -99,7 +99,7 @@ class SimCLR(pl.LightningModule):
         self.save_hyperparameters()
 
         self.gpus = gpus
-        self.nodes = nodes
+        self.num_nodes = num_nodes
         self.arch = arch
         self.dataset = dataset
         self.num_samples = num_samples
@@ -127,7 +127,7 @@ class SimCLR(pl.LightningModule):
         self.projection = Projection(input_dim=self.hidden_mlp, hidden_dim=self.hidden_mlp, output_dim=self.feat_dim)
 
         # compute iters per epoch
-        global_batch_size = self.nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
+        global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
         # define LR schedule
@@ -313,7 +313,7 @@ class SimCLR(pl.LightningModule):
 
         # training params
         parser.add_argument("--fast_dev_run", default=1, type=int)
-        parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
+        parser.add_argument("--num_nodes", default=1, type=int, help="number of nodes for training")
         parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
@@ -361,8 +361,8 @@ def cli_main():
         args.jitter_strength = 1.
     elif args.dataset == 'cifar10':
         val_split = 5000
-        if args.nodes * args.gpus * args.batch_size > val_split:
-            val_split = args.nodes * args.gpus * args.batch_size
+        if args.num_nodes * args.gpus * args.batch_size > val_split:
+            val_split = args.num_nodes * args.gpus * args.batch_size
 
         dm = CIFAR10DataModule(
             data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers, val_split=val_split
@@ -388,7 +388,7 @@ def cli_main():
         args.jitter_strength = 1.
 
         args.batch_size = 64
-        args.nodes = 8
+        args.num_nodes = 8
         args.gpus = 8  # per-node
         args.max_epochs = 800
 
@@ -436,7 +436,7 @@ def cli_main():
         max_epochs=args.max_epochs,
         max_steps=None if args.max_steps == -1 else args.max_steps,
         gpus=args.gpus,
-        num_nodes=args.nodes,
+        num_nodes=args.num_nodes,
         distributed_backend='ddp' if args.gpus > 1 else None,
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=32 if args.fp32 else 16,
