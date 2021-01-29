@@ -32,7 +32,7 @@ class SwAV(pl.LightningModule):
         num_samples: int,
         batch_size: int,
         dataset: str,
-        nodes: int = 1,
+        num_nodes: int = 1,
         arch: str = 'resnet50',
         hidden_mlp: int = 2048,
         feat_dim: int = 128,
@@ -63,7 +63,7 @@ class SwAV(pl.LightningModule):
         Args:
             gpus: number of gpus per node used in training, passed to SwAV module
                 to manage the queue and select distributed sinkhorn
-            nodes: number of nodes to train on
+            num_nodes: number of nodes to train on
             num_samples: number of image samples used for training
             batch_size: batch size per GPU in ddp
             dataset: dataset being used for train/val
@@ -102,7 +102,7 @@ class SwAV(pl.LightningModule):
         self.save_hyperparameters()
 
         self.gpus = gpus
-        self.nodes = nodes
+        self.num_nodes = num_nodes
         self.arch = arch
         self.dataset = dataset
         self.num_samples = num_samples
@@ -136,7 +136,7 @@ class SwAV(pl.LightningModule):
         self.warmup_epochs = warmup_epochs
         self.max_epochs = max_epochs
 
-        if self.gpus * self.nodes > 1:
+        if self.gpus * self.num_nodes > 1:
             self.get_assignments = self.distributed_sinkhorn
         else:
             self.get_assignments = self.sinkhorn
@@ -144,7 +144,7 @@ class SwAV(pl.LightningModule):
         self.model = self.init_model()
 
         # compute iters per epoch
-        global_batch_size = self.nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
+        global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
         # define LR schedule
@@ -198,7 +198,7 @@ class SwAV(pl.LightningModule):
             if self.trainer.current_epoch >= self.epoch_queue_starts and self.queue is None:
                 self.queue = torch.zeros(
                     len(self.crops_for_assign),
-                    self.queue_length // self.gpus,  # change to nodes * gpus once multi-node
+                    self.queue_length // self.gpus,  # change to num_nodes * gpus once multi-node
                     self.feat_dim,
                 )
 
@@ -430,7 +430,7 @@ class SwAV(pl.LightningModule):
 
         # training params
         parser.add_argument("--fast_dev_run", default=1, type=int)
-        parser.add_argument("--nodes", default=1, type=int, help="number of nodes for training")
+        parser.add_argument("--num_nodes", default=1, type=int, help="number of nodes for training")
         parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
@@ -532,7 +532,7 @@ def cli_main():
         args.jitter_strength = 1.
 
         args.batch_size = 64
-        args.nodes = 8
+        args.num_nodes = 8
         args.gpus = 8  # per-node
         args.max_epochs = 800
 
@@ -589,7 +589,7 @@ def cli_main():
         max_epochs=args.max_epochs,
         max_steps=None if args.max_steps == -1 else args.max_steps,
         gpus=args.gpus,
-        num_nodes=args.nodes,
+        num_nodes=args.num_nodes,
         distributed_backend='ddp' if args.gpus > 1 else None,
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=32 if args.fp32 else 16,
