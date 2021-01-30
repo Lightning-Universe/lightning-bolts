@@ -579,7 +579,11 @@ def cli_main():
     if args.online_ft:
         # online eval
         online_evaluator = SSLOnlineEvaluator(
-            drop_p=0., hidden_dim=None, z_dim=args.hidden_mlp, num_classes=dm.num_classes, dataset=args.dataset
+            drop_p=0.,
+            hidden_dim=None,
+            z_dim=args.hidden_mlp,
+            num_classes=dm.num_classes,
+            dataset=args.dataset,
         )
 
     model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor='val_loss')
