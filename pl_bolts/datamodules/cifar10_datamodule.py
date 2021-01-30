@@ -1,4 +1,4 @@
-from typing import Any, Optional, Sequence, Union
+from typing import Any, Callable, Optional, Sequence, Union
 
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.datasets import TrialCIFAR10
@@ -85,7 +85,7 @@ class CIFAR10DataModule(VisionDataModule):
                         returning them
             drop_last: If true drops the last incomplete batch
         """
-        super().__init__(
+        super().__init__(  # type: ignore[misc]
             data_dir=data_dir,
             val_split=val_split,
             num_workers=num_workers,
@@ -112,7 +112,7 @@ class CIFAR10DataModule(VisionDataModule):
         """
         return 10
 
-    def default_transforms(self):
+    def default_transforms(self) -> Callable:
         if self.normalize:
             cf10_transforms = transform_lib.Compose([transform_lib.ToTensor(), cifar10_normalization()])
         else:
@@ -146,7 +146,7 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
 
     def __init__(
         self,
-        data_dir: str,
+        data_dir: Optional[str] = None,
         val_split: int = 50,
         num_workers: int = 16,
         num_samples: int = 100,
@@ -164,7 +164,7 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
         """
         super().__init__(data_dir, val_split, num_workers, *args, **kwargs)
 
-        self.num_samples = num_samples
+        self.num_samples = num_samples  # type: ignore[misc]
         self.labels = sorted(labels) if labels is not None else set(range(10))
         self.extra_args = dict(num_samples=self.num_samples, labels=self.labels)
 

@@ -1,5 +1,6 @@
+# type: ignore[override]
 import os
-from typing import Optional
+from typing import Any, Callable, Optional
 
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
@@ -58,9 +59,9 @@ class ImagenetDataModule(LightningDataModule):
         shuffle: bool = False,
         pin_memory: bool = False,
         drop_last: bool = False,
-        *args,
-        **kwargs,
-    ):
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """
         Args:
             data_dir: path to the imagenet dataset file
@@ -94,7 +95,7 @@ class ImagenetDataModule(LightningDataModule):
         self.num_samples = 1281167 - self.num_imgs_per_val_class * self.num_classes
 
     @property
-    def num_classes(self):
+    def num_classes(self) -> int:
         """
         Return:
 
@@ -103,7 +104,7 @@ class ImagenetDataModule(LightningDataModule):
         """
         return 1000
 
-    def _verify_splits(self, data_dir, split):
+    def _verify_splits(self, data_dir: str, split: str) -> None:
         dirs = os.listdir(data_dir)
 
         if split not in dirs:
@@ -112,7 +113,7 @@ class ImagenetDataModule(LightningDataModule):
                 f' make sure the folder contains a subfolder named {split}'
             )
 
-    def prepare_data(self):
+    def prepare_data(self) -> None:
         """
         This method already assumes you have imagenet2012 downloaded.
         It validates the data using the meta.bin.
@@ -142,7 +143,7 @@ class ImagenetDataModule(LightningDataModule):
                 """
                 )
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         """
         Uses the train split of imagenet2012 and puts away a portion of it for the validation split
         """
@@ -156,7 +157,7 @@ class ImagenetDataModule(LightningDataModule):
             split='train',
             transform=transforms
         )
-        loader = DataLoader(
+        loader: DataLoader = DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=self.shuffle,
@@ -166,7 +167,7 @@ class ImagenetDataModule(LightningDataModule):
         )
         return loader
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         """
         Uses the part of the train split of imagenet2012  that was not used for training via `num_imgs_per_val_class`
 
@@ -183,7 +184,7 @@ class ImagenetDataModule(LightningDataModule):
             split='val',
             transform=transforms
         )
-        loader = DataLoader(
+        loader: DataLoader = DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=False,
@@ -193,7 +194,7 @@ class ImagenetDataModule(LightningDataModule):
         )
         return loader
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         """
         Uses the validation split of imagenet2012 for testing
         """
@@ -202,7 +203,7 @@ class ImagenetDataModule(LightningDataModule):
         dataset = UnlabeledImagenet(
             self.data_dir, num_imgs_per_class=-1, meta_dir=self.meta_dir, split='test', transform=transforms
         )
-        loader = DataLoader(
+        loader: DataLoader = DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=False,
@@ -212,7 +213,7 @@ class ImagenetDataModule(LightningDataModule):
         )
         return loader
 
-    def train_transform(self):
+    def train_transform(self) -> Callable:
         """
         The standard imagenet transforms
 
@@ -238,7 +239,7 @@ class ImagenetDataModule(LightningDataModule):
 
         return preprocessing
 
-    def val_transform(self):
+    def val_transform(self) -> Callable:
         """
         The standard imagenet transforms for validation
 

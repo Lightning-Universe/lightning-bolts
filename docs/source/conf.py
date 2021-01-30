@@ -149,6 +149,7 @@ exclude_patterns = [
     'api/modules.rst',
     'api/pl_bolts.submit.rst',
     'api/pl_bolts.utils.*',
+    'api/pl_bolts.setup_tools.*',
     'PULL_REQUEST_TEMPLATE.md',
 ]
 

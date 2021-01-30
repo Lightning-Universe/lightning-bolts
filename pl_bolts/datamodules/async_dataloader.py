@@ -1,10 +1,11 @@
 import re
 from queue import Queue
 from threading import Thread
+from typing import Any, Optional, Union
 
 import torch
 from torch._six import container_abcs, string_classes
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 
 class AsynchronousLoader(object):
@@ -26,7 +27,14 @@ class AsynchronousLoader(object):
             constructing one here
     """
 
-    def __init__(self, data, device=torch.device('cuda', 0), q_size=10, num_batches=None, **kwargs):
+    def __init__(
+        self,
+        data: Union[DataLoader, Dataset],
+        device: torch.device = torch.device('cuda', 0),
+        q_size: int = 10,
+        num_batches: Optional[int] = None,
+        **kwargs: Any,
+    ) -> None:
         if isinstance(data, torch.utils.data.DataLoader):
             self.dataloader = data
         else:
@@ -43,20 +51,20 @@ class AsynchronousLoader(object):
         self.q_size = q_size
 
         self.load_stream = torch.cuda.Stream(device=device)
-        self.queue = Queue(maxsize=self.q_size)
+        self.queue: Queue = Queue(maxsize=self.q_size)
 
         self.idx = 0
 
         self.np_str_obj_array_pattern = re.compile(r'[SaUO]')
 
-    def load_loop(self):  # The loop that will load into the queue in the background
+    def load_loop(self) -> None:  # The loop that will load into the queue in the background
         for i, sample in enumerate(self.dataloader):
             self.queue.put(self.load_instance(sample))
             if i == len(self):
                 break
 
     # Recursive loading for each instance based on torch.utils.data.default_collate
-    def load_instance(self, sample):
+    def load_instance(self, sample: Any) -> Any:
         elem_type = type(sample)
 
         if torch.is_tensor(sample):
@@ -80,16 +88,18 @@ class AsynchronousLoader(object):
         else:
             return sample
 
-    def __iter__(self):
+    def __iter__(self) -> "AsynchronousLoader":
         # We don't want to run the thread more than once
         # Start a new thread if we are at the beginning of a new epoch, and our current worker is dead
-        if (not hasattr(self, 'worker') or not self.worker.is_alive()) and self.queue.empty() and self.idx == 0:
+
+        if_worker = (not hasattr(self, 'worker') or not self.worker.is_alive())
+        if if_worker and self.queue.empty() and self.idx == 0:  # type: ignore[has-type]
             self.worker = Thread(target=self.load_loop)
             self.worker.daemon = True
             self.worker.start()
         return self
 
-    def __next__(self):
+    def __next__(self) -> torch.Tensor:
         # If we've reached the number of batches to return
         # or the queue is empty and the worker is dead then exit
         done = not self.worker.is_alive() and self.queue.empty()
@@ -105,5 +115,5 @@ class AsynchronousLoader(object):
         self.idx += 1
         return out
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.num_batches

@@ -13,7 +13,7 @@ class GAN(pl.LightningModule):
 
     Example::
 
-        from pl_bolts.models.gan import GAN
+        from pl_bolts.models.gans import GAN
 
         m = GAN()
         Trainer(gpus=2).fit(m)

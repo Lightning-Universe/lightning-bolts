@@ -18,12 +18,13 @@ jobs:
 
       - name: Create package
         run: |
+          pip install --upgrade setuptools wheel
           # python setup.py check --metadata --strict
-          python setup.py sdist
+          python setup.py sdist bdist_wheel
 
       - name: Check package
         run: |
-          pip install twine==1.13.0
+          pip install "twine>=3.2"
           twine check dist/*
           python setup.py clean
 
@@ -34,8 +35,8 @@ jobs:
       # max-parallel: 6
       matrix:
         # PyTorch 1.5 is failing on Win and bolts requires torchvision>=0.5
-        os: [ubuntu-20.04, macOS-10.15]  # , windows-2019
-        python-version: [3.7, 3.8]
+        os: [ubuntu-20.04, macOS-10.15, windows-2019]  #
+        python-version: [3.7]
 
     steps:
       - uses: actions/checkout@master
@@ -49,6 +50,7 @@ jobs:
           python setup.py sdist
 
       - name: Install package
+        if: runner.os != 'windows'
         run: |
           pip install virtualenv
           virtualenv vEnv ; source vEnv/bin/activate
