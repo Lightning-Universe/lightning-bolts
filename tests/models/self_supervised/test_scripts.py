@@ -108,19 +108,19 @@ def test_cli_run_self_supervised_byol(cli_args):
 
 @pytest.mark.parametrize(
     'cli_args', [
-        f' --dataset cifar10'
-        ' --data_dir {DATASETS_PATH}'
+        ' --dataset cifar10'
+        f' --data_dir {DATASETS_PATH}'
         ' --max_epochs 1'
         ' --max_steps 3'
         ' --fast_dev_run 1'
         ' --batch_size 2'
-        ' --gpus 0'
         ' --arch resnet18'
         ' --hidden_mlp 512'
         ' --fp32'
         ' --sinkhorn_iterations 1'
         ' --nmb_prototypes 2'
         ' --queue_length 0'
+        ' --gpus 0'
     ]
 )
 def test_cli_run_self_supervised_swav(cli_args):
