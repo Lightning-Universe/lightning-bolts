@@ -145,20 +145,22 @@ don't have enough data, time or money to do your own training.
 
 For example, you could use a pretrained VAE to generate features for an image dataset.
 
-.. code-block:: python
+.. testcode::
 
     from pl_bolts.models.autoencoders import VAE
     from pl_bolts.models.self_supervised import CPCV2
 
-    model1 = VAE(pretrained='imagenet2012')
+    model1 = VAE(input_height=32, pretrained='imagenet2012')
     encoder = model1.encoder
-    encoder.freeze()
+    encoder.eval()
 
     # bolts are pretrained on different datasets
     model2 = CPCV2(encoder='resnet18', pretrained='imagenet128').freeze()
     model3 = CPCV2(encoder='resnet18', pretrained='stl10').freeze()
 
-    for (x, y) in own_data
+.. code-block:: python
+
+    for (x, y) in own_data:
         features = encoder(x)
         feat2 = model2(x)
         feat3 = model3(x)
@@ -179,7 +181,7 @@ you can use any finetuning protocol you prefer.
     resnet18 = model.encoder
     # don't call .freeze()
 
-    classifier = LogisticRegression()
+    classifier = LogisticRegression(...)
 
     for (x, y) in own_data:
         feats = resnet18(x)
@@ -192,9 +194,9 @@ you can use any finetuning protocol you prefer.
     # FREEZE!
     model = CPCV2(encoder='resnet18', pretrained='imagenet128')
     resnet18 = model.encoder
-    resnet18.freeze()
+    resnet18.eval()
 
-    classifier = LogisticRegression()
+    classifier = LogisticRegression(...)
 
     for epoch in epochs:
         for (x, y) in own_data:

@@ -1,3 +1,6 @@
+# type: ignore[override]
+from typing import Any, Callable
+
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
@@ -56,7 +59,7 @@ class CityscapesDataModule(LightningDataModule):
     """
 
     name = 'Cityscapes'
-    extra_args = {}
+    extra_args: dict = {}
 
     def __init__(
         self,
@@ -69,9 +72,9 @@ class CityscapesDataModule(LightningDataModule):
         shuffle: bool = False,
         pin_memory: bool = False,
         drop_last: bool = False,
-        *args,
-        **kwargs,
-    ):
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """
         Args:
             data_dir: where to load the data from path, i.e. where directory leftImg8bit and gtFine or gtCoarse
@@ -109,14 +112,14 @@ class CityscapesDataModule(LightningDataModule):
         self.target_transforms = None
 
     @property
-    def num_classes(self):
+    def num_classes(self) -> int:
         """
         Return:
             30
         """
         return 30
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         """
         Cityscapes train set
         """
@@ -143,7 +146,7 @@ class CityscapesDataModule(LightningDataModule):
         )
         return loader
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         """
         Cityscapes val set
         """
@@ -170,7 +173,7 @@ class CityscapesDataModule(LightningDataModule):
         )
         return loader
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         """
         Cityscapes test set
         """
@@ -196,7 +199,7 @@ class CityscapesDataModule(LightningDataModule):
         )
         return loader
 
-    def _default_transforms(self):
+    def _default_transforms(self) -> Callable:
         cityscapes_transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transform_lib.Normalize(
@@ -205,7 +208,7 @@ class CityscapesDataModule(LightningDataModule):
         ])
         return cityscapes_transforms
 
-    def _default_target_transforms(self):
+    def _default_target_transforms(self) -> Callable:
         cityscapes_target_trasnforms = transform_lib.Compose([
             transform_lib.ToTensor(), transform_lib.Lambda(lambda t: t.squeeze())
         ])
