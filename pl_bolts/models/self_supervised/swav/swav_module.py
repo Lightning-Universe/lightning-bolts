@@ -198,7 +198,7 @@ class SwAV(pl.LightningModule):
             if self.trainer.current_epoch >= self.epoch_queue_starts and self.queue is None:
                 self.queue = torch.zeros(
                     len(self.crops_for_assign),
-                    self.queue_length // self.gpus,  # change to num_nodes * gpus once multi-node
+                    self.queue_length // self.gpus,  # change to nodes * gpus once multi-node
                     self.feat_dim,
                 )
 
