@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 
-def center_crop(image, new_shape):
+def _center_crop(image, new_shape):
     h, w = image.shape[-2:]
     n_h, n_w = new_shape[-2:]
     cy, cx = int(h / 2), int(w / 2)
@@ -14,7 +14,7 @@ def center_crop(image, new_shape):
 
 class ConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, use_dropout=False, use_bn=True):
-        super(ConvBlock, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
         self.activation = nn.LeakyReLU(0.2)
 
@@ -39,7 +39,7 @@ class ConvBlock(nn.Module):
 class UpSampleConv(nn.Module):
 
     def __init__(self, input_channels, use_dropout=False, use_bn=True):
-        super(self).__init__()
+        super().__init__()
         self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
         self.conv1 = nn.Conv2d(input_channels, input_channels // 2, kernel_size=2)
         self.conv2 = nn.Conv2d(input_channels, input_channels // 2, kernel_size=3, padding=1)
@@ -56,7 +56,7 @@ class UpSampleConv(nn.Module):
 
         x = self.upsample(x)
         x = self.conv1(x)
-        skip_con_x = center_crop(skip_con_x, x.shape)
+        skip_con_x = _center_crop(skip_con_x, x.shape)
         x = torch.cat([x, skip_con_x], axis=1)
         x = self.conv2(x)
         if self.use_bn:
@@ -75,8 +75,8 @@ class UpSampleConv(nn.Module):
 
 class DownSampleConv(nn.Module):
 
-    def __init__(self, in_channels, use_dropout=False, use_bn=True):
-        super(self).__init__()
+    def __init__(self, in_channels, use_dropout=False, use_bn=False):
+        super().__init__()
         self.maxpool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         if use_bn:
@@ -99,7 +99,7 @@ class DownSampleConv(nn.Module):
 
 class Generator(nn.Module):
     def __init__(self, in_channels, out_channels, hidden_channels=32, depth=6):
-        super(self).__init__()
+        super().__init__()
 
         self.conv1 = nn.Conv2d(in_channels, hidden_channels, kernel_size=1)
 
@@ -114,13 +114,14 @@ class Generator(nn.Module):
 
         # encoding/contracting path of the Generator
         for i in range(depth):
-            self.contracting_layers += [
-                DownSampleConv(hidden_channels * 2 ** i, use_dropout=True if i < 3 else False)
-            ]
+            down_sample_conv = DownSampleConv(hidden_channels * 2 ** i,
+                                              use_dropout=(True if i < 3 else False))
+            self.contracting_layers.append(down_sample_conv)
 
         # Upsampling/Expanding path of the Generator
         for i in range(depth):
-            self.expanding_layers += [UpSampleConv(hidden_channels * 2 ** (i + 1))]
+            upsample_conv = UpSampleConv(hidden_channels * 2 ** (i + 1))
+            self.expanding_layers.append(upsample_conv)
 
         self.contracting_layers = nn.ModuleList(self.contracting_layers)
         self.expanding_layers = nn.ModuleList(self.expanding_layers)
@@ -145,7 +146,7 @@ class Generator(nn.Module):
         return self.sigmoid(x)
 
 
-class Discriminator(nn.Module):
+class PatchGAN(nn.Module):
 
     def __init__(self, input_channels, hidden_channels=8):
         super().__init__()
