@@ -37,6 +37,7 @@ class SyncFunction(torch.autograd.Function):
     def backward(ctx, grad_output):
         grad_input = grad_output.clone()
         torch.distributed.all_reduce(grad_input, op=torch.distributed.ReduceOp.SUM, async_op=False)
+
         idx_from = torch.distributed.get_rank() * ctx.batch_size
         idx_to = (torch.distributed.get_rank() + 1) * ctx.batch_size
         return grad_input[idx_from:idx_to]
