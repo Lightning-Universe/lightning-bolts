@@ -70,6 +70,7 @@ PyTorch-Lightning-Bolts documentation
 
    autoencoders
    convolutional
+   object_detection
    gans
    reinforce_learn
    self_supervised_models
