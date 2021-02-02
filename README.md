@@ -1,10 +1,10 @@
 <div align="center">
 
-![Logo](docs/source/_images/logos/bolts_logo.png)
-
-# PyTorch Lightning Bolts    
+<img src="docs/source/_images/logos/bolts_logo.png" width="400px">
 
 **Pretrained SOTA Deep Learning models, callbacks and more for research and production with PyTorch Lightning and PyTorch**
+
+--- 
 
 <p align="center">
   <a href="https://www.pytorchlightning.ai/">Website</a> •
