@@ -168,6 +168,7 @@ class PPO(pl.LightningModule):
     ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
         """
         Contains the logic for generating trajectory data to train policy and value network
+
         Yield:
            Tuple of Lists containing tensors for states, actions, log probs, qvals and advantage
         """
