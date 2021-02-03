@@ -38,6 +38,7 @@ class PPO(pl.LightningModule):
     Note:
         Currently only supports CPU and single GPU training with `distributed_backend=dp`
     """
+
     def __init__(
         self,
         env: str,
@@ -52,7 +53,6 @@ class PPO(pl.LightningModule):
         clip_ratio: float = 0.2,
         **kwargs,
     ) -> None:
-
         """
         Args:
             env: gym environment tag
@@ -95,8 +95,10 @@ class PPO(pl.LightningModule):
             actor_mlp = MLP(self.env.observation_space.shape, self.env.action_space.n)
             self.actor = ActorCategorical(actor_mlp)
         else:
-            raise NotImplementedError('Env action space should be of type Box (continous) or Discrete (categorical). '
-                                      f'Got type: {type(self.env.action_space)}')
+            raise NotImplementedError(
+                'Env action space should be of type Box (continous) or Discrete (categorical). '
+                f'Got type: {type(self.env.action_space)}'
+            )
 
         self.batch_states = []
         self.batch_actions = []
@@ -165,9 +167,7 @@ class PPO(pl.LightningModule):
 
         return adv
 
-    def generate_trajectory_samples(
-            self,
-    ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
+    def generate_trajectory_samples(self, ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
         """
         Contains the logic for generating trajectory data to train policy and value network
 
@@ -224,8 +224,8 @@ class PPO(pl.LightningModule):
 
             if epoch_end:
                 train_data = zip(
-                    self.batch_states, self.batch_actions, self.batch_logp,
-                    self.batch_qvals, self.batch_adv)
+                    self.batch_states, self.batch_actions, self.batch_logp, self.batch_qvals, self.batch_adv
+                )
 
                 for state, action, logp_old, qval, adv in train_data:
                     yield state, action, logp_old, qval, adv
@@ -333,12 +333,18 @@ class PPO(pl.LightningModule):
         parser.add_argument("--lr_critic", type=float, default=1e-3, help="learning rate of critic network")
         parser.add_argument("--max_episode_len", type=int, default=1000, help="capacity of the replay buffer")
         parser.add_argument("--batch_size", type=int, default=512, help="batch_size when training network")
-        parser.add_argument("--steps_per_epoch", type=int, default=2048,
-                            help="how many action-state pairs to rollout for trajectory collection per epoch")
-        parser.add_argument("--nb_optim_iters", type=int, default=4,
-                            help="how many steps of gradient descent to perform on each batch")
-        parser.add_argument("--clip_ratio", type=float, default=0.2,
-                            help="hyperparameter for clipping in the policy objective")
+        parser.add_argument(
+            "--steps_per_epoch",
+            type=int,
+            default=2048,
+            help="how many action-state pairs to rollout for trajectory collection per epoch"
+        )
+        parser.add_argument(
+            "--nb_optim_iters", type=int, default=4, help="how many steps of gradient descent to perform on each batch"
+        )
+        parser.add_argument(
+            "--clip_ratio", type=float, default=0.2, help="hyperparameter for clipping in the policy objective"
+        )
 
         return parser
 
