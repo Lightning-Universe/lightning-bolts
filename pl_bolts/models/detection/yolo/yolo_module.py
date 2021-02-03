@@ -103,9 +103,10 @@ class Yolo(pl.LightningModule):
 
         self._create_modules()
 
-    def forward(self,
-                images: Tensor,
-                targets: List[Dict[str, Tensor]] = None
+    def forward(
+        self,
+        images: Tensor,
+        targets: List[Dict[str, Tensor]] = None
     ) -> Tuple[Tensor, Tensor, Tensor, Dict[str, Tensor]]:
         """
         Runs a forward pass through the network (all layers listed in `self._module_list`), and if
@@ -125,7 +126,7 @@ class Yolo(pl.LightningModule):
                 dictionaries, one for each image.
 
         Returns:
-            boxes (:class:`~torch.Tensor`), confidences (:class:`~torch.Tensor`), classprobs (:class:`~torch.Tensor`), losses (Dict[str, :class:`~torch.Tensor`]):
+            boxes (Tensor), confidences (Tensor), classprobs (Tensor), losses (Dict[str, Tensor]):
                 Detections, and if targets were provided, a dictionary of losses. The first
                 dimension of the detections is the index of the image in the batch and the second
                 dimension is the detection within the image. `boxes` contains the predicted
@@ -187,9 +188,10 @@ class Yolo(pl.LightningModule):
             warmup_start_lr=self.warmup_start_lr)
         return [optimizer], [lr_scheduler]
 
-    def training_step(self,
-                      batch: Tuple[List[Tensor], List[Dict[str, Tensor]]],
-                      batch_idx: int
+    def training_step(
+        self,
+        batch: Tuple[List[Tensor], List[Dict[str, Tensor]]],
+        batch_idx: int
     ) -> Dict[str, Tensor]:
         """
         Computes the training loss.
@@ -212,9 +214,10 @@ class Yolo(pl.LightningModule):
 
         return {'loss': total_loss}
 
-    def validation_step(self,
-                        batch: Tuple[List[Tensor], List[Dict[str, Tensor]]],
-                        batch_idx: int
+    def validation_step(
+        self,
+        batch: Tuple[List[Tensor], List[Dict[str, Tensor]]],
+        batch_idx: int
     ) -> Dict[str, Tensor]:
         """
         Evaluates a batch of data from the validation set.
@@ -235,9 +238,10 @@ class Yolo(pl.LightningModule):
             self.log('val/{}_loss'.format(name), value)
         self.log('val/total_loss', total_loss)
 
-    def test_step(self,
-                  batch: Tuple[List[Tensor], List[Dict[str, Tensor]]],
-                  batch_idx: int
+    def test_step(
+        self,
+        batch: Tuple[List[Tensor], List[Dict[str, Tensor]]],
+        batch_idx: int
     ) -> Dict[str, Tensor]:
         """
         Evaluates a batch of data from the test set.
@@ -422,8 +426,9 @@ class Yolo(pl.LightningModule):
             self._module_list.append(module)
             layer_outputs.append(num_outputs)
 
-    def _validate_batch(self,
-                        batch: Tuple[List[Tensor], List[Dict[str, Tensor]]]
+    def _validate_batch(
+        self,
+        batch: Tuple[List[Tensor], List[Dict[str, Tensor]]]
     ) -> Tuple[Tensor, List[Dict[str, Tensor]]]:
         """
         Reads a batch of data, validates the format, and stacks the images into a single tensor.
@@ -472,11 +477,12 @@ class Yolo(pl.LightningModule):
         images = torch.stack(images)
         return images, targets
 
-    def _filter_detections(self,
-                           boxes: Tensor,
-                           confidences: Tensor,
-                           classprobs: Tensor,
-                           labels: Tensor
+    def _filter_detections(
+        self,
+        boxes: Tensor,
+        confidences: Tensor,
+        classprobs: Tensor,
+        labels: Tensor
     ) -> Tuple[List[Tensor], List[Tensor], List[Tensor], List[Tensor]]:
         """
         Filters detections based on confidence threshold. Then for every class performs non-maximum
@@ -492,7 +498,7 @@ class Yolo(pl.LightningModule):
             labels: Indices of the best classes in a tensor sized `[batch_size, N]`.
 
         Returns:
-            boxes (List[:class:`~torch.Tensor`]), confidences (List[:class:`~torch.Tensor`]), classprobs (List[:class:`~torch.Tensor`]), labels (List[:class:`~torch.Tensor`]):
+            boxes (List[Tensor]), confidences (List[Tensor]), classprobs (List[Tensor]), labels (List[Tensor]):
                 Four lists, each containing one tensor per image - bounding box (x1, y1, x2, y2)
                 coordinates, detection confidences, probabilities of the best class of each
                 prediction, and the predicted class labels.

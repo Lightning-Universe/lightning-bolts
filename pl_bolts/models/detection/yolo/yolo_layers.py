@@ -96,9 +96,10 @@ class DetectionLayer(nn.Module):
         self.confidence_loss_multiplier = confidence_loss_multiplier
         self.se_loss = nn.MSELoss(reduction='none')
 
-    def forward(self,
-                x: Tensor,
-                targets: Optional[List[Dict[str, Tensor]]] = None
+    def forward(
+        self,
+        x: Tensor,
+        targets: Optional[List[Dict[str, Tensor]]] = None
     ) -> Tuple[Tensor, Dict[str, Tensor]]:
         """
         Runs a forward pass through this YOLO detection layer.
