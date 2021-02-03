@@ -1,8 +1,8 @@
 import argparse
 from typing import List, Tuple
 
-import torch
 import pytorch_lightning as pl
+import torch
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
