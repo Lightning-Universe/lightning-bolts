@@ -260,7 +260,7 @@ class PPO(pl.LightningModule):
         loss_actor = -(torch.min(ratio * adv, clip_adv)).mean()
         return loss_actor
 
-    def critic_loss(self, state, action, logp_old, qval, adv) -> torch.Tensor:
+    def critic_loss(self, state, qval) -> torch.Tensor:
         value = self.critic(state)
         loss_critic = (qval - value).pow(2).mean()
         return loss_critic
@@ -293,7 +293,7 @@ class PPO(pl.LightningModule):
             return loss_actor
 
         elif optimizer_idx == 1:
-            loss_critic = self.critic_loss(state, action, old_logp, qval, adv)
+            loss_critic = self.critic_loss(state, qval)
             self.log('loss_critic', loss_critic, on_step=False, on_epoch=True, prog_bar=False, logger=True)
 
             return loss_critic
