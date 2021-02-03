@@ -423,19 +423,23 @@ class Mish(nn.Module):
 class RouteLayer(nn.Module):
     """Route layer concatenates the output (or part of it) from given layers."""
 
-    def __init__(self, layers, groups, group_id):
+    def __init__(self, source_layers: List[int], num_chunks: int, chunk_idx: int):
+        """
+        Creates a YOLO route layer.
+
+        Args:
+            source_layers (List[int]): Indices of the layers whose output will be concatenated.
+            num_chunks (int): Layer outputs will be split into this number of chunks.
+            chunk_idx (int): Only the chunks with this index will be concatenated.
+        """
         super().__init__()
-        self.layers = layers
-        if groups > 0:
-            self.groups = groups
-            self.group_id = group_id
-        else:
-            self.groups = 1
-            self.group_id = 0
+        self.source_layers = source_layers
+        self.num_chunks = num_chunks
+        self.chunk_idx = chunk_idx
 
     def forward(self, x, outputs):
-        chunks = [torch.chunk(outputs[l], self.groups, dim=1)[self.group_id]
-                  for l in self.layers]
+        chunks = [torch.chunk(outputs[layer], self.num_chunks, dim=1)[self.chunk_idx]
+                  for layer in self.source_layers]
         return torch.cat(chunks, dim=1)
 
 
@@ -443,6 +447,12 @@ class ShortcutLayer(nn.Module):
     """Shortcut layer adds a residual connection from the source layer."""
 
     def __init__(self, source_layer):
+        """
+        Constructs a YOLO shortcut layer.
+
+        Args:
+            num_classes (int): Number of different classes that this layer predicts.
+        """
         super().__init__()
         self.source_layer = source_layer
 

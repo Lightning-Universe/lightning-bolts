@@ -28,18 +28,17 @@ from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, Mish, Rou
 
 
 class Yolo(pl.LightningModule):
-    def __init__(
-        self,
-        configuration: YoloConfiguration,
-        optimizer: str = 'sgd',
-        momentum: float = 0.9,
-        weight_decay: float = 0.0005,
-        learning_rate: float = 0.0013,
-        warmup_epochs: int = 1,
-        warmup_start_lr: float = 0.0001,
-        annealing_epochs: int = 271,
-        confidence_threshold: float = 0.2,
-        nms_threshold: float = 0.45):
+    def __init__(self,
+                 configuration: YoloConfiguration,
+                 optimizer: str = 'sgd',
+                 momentum: float = 0.9,
+                 weight_decay: float = 0.0005,
+                 learning_rate: float = 0.0013,
+                 warmup_epochs: int = 1,
+                 warmup_start_lr: float = 0.0001,
+                 annealing_epochs: int = 271,
+                 confidence_threshold: float = 0.2,
+                 nms_threshold: float = 0.45):
         """
         Constructs a YOLO model.
 
@@ -347,17 +346,13 @@ class Yolo(pl.LightningModule):
                 module = nn.Upsample(scale_factor=config["stride"], mode='nearest')
 
             elif config['type'] == 'route':
-                groups = config.get('groups', 0)
-                group_id = config.get('group_id', 0)
-                layers = [layer if layer >= 0 else index + layer for layer in config['layers']]
-                module = RouteLayer(layers, groups, group_id)
-
-                num_outputs = 0
-                for layer in layers:
-                    if groups > 0:
-                        num_outputs += layer_outputs[layer] // groups
-                    else:
-                        num_outputs += layer_outputs[layer]
+                num_chunks = config.get('groups', 1)
+                chunk_idx = config.get('group_id', 0)
+                source_layers = [layer if layer >= 0 else index + layer
+                                 for layer in config['layers']]
+                module = RouteLayer(source_layers, num_chunks, chunk_idx)
+                num_outputs = sum(layer_outputs[layer] // num_chunks
+                                  for layer in source_layers)
 
             elif config['type'] == 'shortcut':
                 module = ShortcutLayer(config['from'])

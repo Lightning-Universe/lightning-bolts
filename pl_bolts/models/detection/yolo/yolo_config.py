@@ -91,7 +91,7 @@ class YoloConfiguration:
 
         def convert(key, value):
             """Converts a value to the correct type based on key."""
-            if not key in variable_types:
+            if key not in variable_types:
                 warn('Unknown YOLO configuration variable: ' + key)
                 return key, value
             if key in list_variables:
