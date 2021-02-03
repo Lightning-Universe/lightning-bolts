@@ -167,7 +167,7 @@ class PPO(pl.LightningModule):
 
         return adv
 
-    def generate_trajectory_samples(self, ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
+    def generate_trajectory_samples(self) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
         """
         Contains the logic for generating trajectory data to train policy and value network
 
