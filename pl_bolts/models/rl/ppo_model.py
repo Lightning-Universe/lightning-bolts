@@ -24,6 +24,7 @@ class PPO(pl.LightningModule):
     Paper authors: John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov
 
     Model implemented by:
+    `Sidhant Sundrani <https://github.com/sid-sundrani>`
 
     Example:
         >>> from pl_bolts.models.rl.ppo_model import PPO
