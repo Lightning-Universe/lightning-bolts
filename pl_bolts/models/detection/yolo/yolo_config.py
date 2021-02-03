@@ -5,15 +5,15 @@ from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
 
 class YoloConfiguration:
+    """Parser for YOLOv4 network configuration files."""
+
     def __init__(self, path: str):
         """
-        Parser for YOLOv4 network configuration files.
-
         Saves the variables from the first configuration section to attributes of this object, and
         the rest of the sections to the `modules` list.
 
         Args:
-            path (str): configuration file to read
+            path: configuration file to read
         """
         with open(path, 'r') as config_file:
             sections = self._read_file(config_file)

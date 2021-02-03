@@ -1,17 +1,19 @@
 import inspect
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
-from typing import List, Type, Union
+from typing import Dict, List, Tuple, Type, Union
 
 import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 from pytorch_lightning.utilities import argparse_utils
-from torch import optim
+from torch import optim, Tensor
 
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.utils.warnings import warn_missing_pkg
+from pl_bolts.models.detection.yolo.yolo_config import YoloConfiguration
+from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, Mish, RouteLayer, ShortcutLayer
 
 try:
     import torchvision.transforms as T
@@ -23,11 +25,35 @@ except ModuleNotFoundError:
 else:
     _TORCHVISION_AVAILABLE = True
 
-from pl_bolts.models.detection.yolo.yolo_config import YoloConfiguration
-from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, Mish, RouteLayer, ShortcutLayer
-
 
 class Yolo(pl.LightningModule):
+    """
+    PyTorch Lightning implementation of `YOLOv3 <https://arxiv.org/abs/1804.02767>`_ with some
+    improvements from `YOLOv4 <https://arxiv.org/abs/2004.10934>`_.
+
+    YOLOv3 paper authors: Joseph Redmon and Ali Farhadi
+
+    YOLOv4 paper authors: Alexey Bochkovskiy, Chien-Yao Wang, Hong-Yuan Mark Liao
+
+    Model implemented by:
+        - `Seppo Enarvi <https://github.com/senarvi>`_
+
+    The network architecture is read from a configuration file in the same format as in the Darknet
+    implementation. Supports loading weights from a Darknet model file too, if you don't want to
+    start training from a randomly initialized model. During training, the model expects both the
+    images (list of tensors), as well as targets (list of dictionaries).
+
+    The target dictionaries should contain:
+        - boxes (`FloatTensor[N, 4]`): the ground truth boxes in `[x1, y1, x2, y2]` format.
+        - labels (`LongTensor[N]`): the class label for each ground truh box
+
+    CLI command::
+
+        # PascalVOC
+        wget https://raw.githubusercontent.com/AlexeyAB/darknet/master/cfg/yolov4-tiny.cfg
+        python yolo_module.py --config yolov4-tiny.cfg --data_dir . --gpus 8 --batch-size 8
+    """
+
     def __init__(self,
                  configuration: YoloConfiguration,
                  optimizer: str = 'sgd',
@@ -40,22 +66,21 @@ class Yolo(pl.LightningModule):
                  confidence_threshold: float = 0.2,
                  nms_threshold: float = 0.45):
         """
-        Constructs a YOLO model.
-
         Args:
-            config (YoloConfiguration): The model configuration file.
-            momentum (float): Momentum factor for SGD with momentum.
-            weight_decay (float): Weight decay (L2 penalty).
-            learning_rate (float): Learning rate after the warmup period.
-            warmup_epochs (int): Length of the learning rate warmup period in the beginning of
+            configuration: The model configuration.
+            optimizer: Which optimizer to use for training; either 'sgd' or 'adam'.
+            momentum: Momentum factor for SGD with momentum.
+            weight_decay: Weight decay (L2 penalty).
+            learning_rate: Learning rate after the warmup period.
+            warmup_epochs: Length of the learning rate warmup period in the beginning of
                 training. During this number of epochs, the learning rate will be raised from
                 `warmup_start_lr` to `learning_rate`.
-            warmup_start_lr (int): Learning rate in the beginning of the warmup period.
-            annealing_epochs (int): Length of the learning rate annealing period, during which the
+            warmup_start_lr: Learning rate in the beginning of the warmup period.
+            annealing_epochs: Length of the learning rate annealing period, during which the
                 learning rate will go to zero.
-            confidence_threshold (float): Postprocessing will remove bounding boxes whose
+            confidence_threshold: Postprocessing will remove bounding boxes whose
                 confidence score is not higher than this threshold.
-            nms_threshold (float): Non-maximum suppression will remove bounding boxes whose IoU
+            nms_threshold: Non-maximum suppression will remove bounding boxes whose IoU
                 with the next best bounding box in that class is higher than this threshold.
         """
         super().__init__()
@@ -78,8 +103,10 @@ class Yolo(pl.LightningModule):
 
         self._create_modules()
 
-    def forward(self, images, targets=None):
-        # type: (List[Tensor]) -> Tuple[Dict[str, Tensor], List[Dict[str, Tensor]]]
+    def forward(self,
+                images: Tensor,
+                targets: List[Dict[str, Tensor]] = None
+    ) -> Tuple[Tensor, Tensor, Tensor, Dict[str, Tensor]]:
         """
         Runs a forward pass through the network (all layers listed in `self._module_list`), and if
         training targets are provided, computes the losses from the detection layers.
@@ -92,13 +119,13 @@ class Yolo(pl.LightningModule):
         features.
 
         Args:
-            images (Tensor): Images to be processed. Tensor of size
+            images: Images to be processed. Tensor of size
                 `[batch_size, num_channels, height, width]`.
-            targets (List[Dict[str, Tensor]]): If set, computes losses from detection layers
-                against these targets. A list of dictionaries, one for each image.
+            targets: If set, computes losses from detection layers against these targets. A list of
+                dictionaries, one for each image.
 
         Returns:
-            boxes (Tensor), confidences (Tensor), classprobs (Tensor), losses (Dict[str, Tensor]):
+            boxes (:class:`~torch.Tensor`), confidences (:class:`~torch.Tensor`), classprobs (:class:`~torch.Tensor`), losses (Dict[str, :class:`~torch.Tensor`]):
                 Detections, and if targets were provided, a dictionary of losses. The first
                 dimension of the detections is the index of the image in the batch and the second
                 dimension is the detection within the image. `boxes` contains the predicted
@@ -140,7 +167,7 @@ class Yolo(pl.LightningModule):
         else:
             return boxes, confidences, classprobs
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> Tuple[List, List]:
         """Constructs the optimizer and learning rate scheduler."""
         if self.optimizer == 'sgd':
             optimizer = optim.SGD(
@@ -160,16 +187,17 @@ class Yolo(pl.LightningModule):
             warmup_start_lr=self.warmup_start_lr)
         return [optimizer], [lr_scheduler]
 
-    def training_step(self, batch, batch_idx):
-        # type: (Tuple[List[Tensor], List[Dict[str, Tensor]]]) -> Dict[str, Tensor]
+    def training_step(self,
+                      batch: Tuple[List[Tensor], List[Dict[str, Tensor]]],
+                      batch_idx: int
+    ) -> Dict[str, Tensor]:
         """
         Computes the training loss.
 
         Args:
-            batch (Tuple[List[Tensor], List[Dict[str, Tensor]]]):
-                A tuple of images and targets. Images is a list of 3-dimensional tensors. Targets
-                is a list of dictionaries that contain ground-truth boxes, labels, etc.
-            batch_idx (int): The index of this batch.
+            batch: A tuple of images and targets. Images is a list of 3-dimensional tensors.
+                Targets is a list of dictionaries that contain ground-truth boxes, labels, etc.
+            batch_idx: The index of this batch.
 
         Returns:
             A dictionary that includes the training loss in 'loss'.
@@ -184,15 +212,17 @@ class Yolo(pl.LightningModule):
 
         return {'loss': total_loss}
 
-    def validation_step(self, batch, batch_idx):
-        # type: (Tuple[List[Tensor], List[Dict[str, Tensor]]], int) -> Dict[str, Tensor]
+    def validation_step(self,
+                        batch: Tuple[List[Tensor], List[Dict[str, Tensor]]],
+                        batch_idx: int
+    ) -> Dict[str, Tensor]:
         """
         Evaluates a batch of data from the validation set.
 
         Args:
-            batch (Tuple[List[Tensor], List[Dict[str, Tensor]]]):
-                The batch of data read by the :class:`~torch.utils.data.DataLoader`
-            batch_idx (int): The index of this batch
+            batch: A tuple of images and targets. Images is a list of 3-dimensional tensors.
+                Targets is a list of dictionaries that contain ground-truth boxes, labels, etc.
+            batch_idx: The index of this batch
         """
         images, targets = self._validate_batch(batch)
         boxes, confidences, classprobs, losses = self(images, targets)
@@ -205,15 +235,17 @@ class Yolo(pl.LightningModule):
             self.log('val/{}_loss'.format(name), value)
         self.log('val/total_loss', total_loss)
 
-    def test_step(self, batch, batch_idx):
-        # type: (Tuple[List[Tensor], List[Dict[str, Tensor]]], int) -> Dict[str, Tensor]
+    def test_step(self,
+                  batch: Tuple[List[Tensor], List[Dict[str, Tensor]]],
+                  batch_idx: int
+    ) -> Dict[str, Tensor]:
         """
         Evaluates a batch of data from the test set.
 
         Args:
-            batch (Tuple[List[Tensor], List[Dict[str, Tensor]]]):
-                The batch of data read by the :class:`~torch.utils.data.DataLoader`
-            batch_idx (int): The index of this batch.
+            batch: A tuple of images and targets. Images is a list of 3-dimensional tensors.
+                Targets is a list of dictionaries that contain ground-truth boxes, labels, etc.
+            batch_idx: The index of this batch.
         """
         images, targets = self._validate_batch(batch)
         boxes, confidences, classprobs, losses = self(images, targets)
@@ -226,20 +258,19 @@ class Yolo(pl.LightningModule):
             self.log('test/{}_loss'.format(name), value)
         self.log('test/total_loss', total_loss)
 
-    def infer(self, image):
-        # type: (ndarray) -> Dict[str, Tensor]
+    def infer(self, image: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
         """
         Resizes given image to the network input size and feeds it to the network. Returns the
         detected bounding boxes, confidences, and class labels.
 
         Args:
-            image (Tensor):
-                An input image, a tensor of uint8 values sized `[channels, height, width]`.
+            image: An input image, a tensor of uint8 values sized `[channels, height, width]`.
 
         Returns:
-            boxes (Tensor): A matrix of detected bounding box (x1, y1, x2, y2) coordinates.
-            confidences (Tensor): A vector of confidences for the bounding box detections.
-            labels (Tensor): A vector of predicted class labels.
+            boxes (:class:`~torch.Tensor`), confidences (:class:`~torch.Tensor`), labels (:class:`~torch.Tensor`):
+                A matrix of detected bounding box (x1, y1, x2, y2) coordinates, a vector of
+                confidences for the bounding box detections, and a vector of predicted class
+                labels.
         """
         network_input = image.float().div(255.0)
         network_input = network_input.unsqueeze(0)
@@ -263,6 +294,9 @@ class Yolo(pl.LightningModule):
     def load_darknet_weights(self, weight_file):
         """
         Loads weights to layer modules from a pretrained Darknet model.
+
+        Args:
+            weight_file: A file object containing model weights in the Darknet binary format.
         """
         version = np.fromfile(weight_file, count=3, dtype=np.int32)
         images_seen = np.fromfile(weight_file, count=1, dtype=np.int64)
@@ -388,13 +422,19 @@ class Yolo(pl.LightningModule):
             self._module_list.append(module)
             layer_outputs.append(num_outputs)
 
-    def _validate_batch(self, batch):
+    def _validate_batch(self,
+                        batch: Tuple[List[Tensor], List[Dict[str, Tensor]]]
+    ) -> Tuple[Tensor, List[Dict[str, Tensor]]]:
         """
-        Reads a batch of data and validates the format.
+        Reads a batch of data, validates the format, and stacks the images into a single tensor.
 
         Args:
-            batch (Tuple[List[Tensor], List[Dict[str, Tensor]]]):
-                The batch of data read by the :class:`~torch.utils.data.DataLoader`
+            batch (Tuple[List[:class:`~torch.Tensor`], List[Dict[str, :class:`~torch.Tensor`]]]):
+                The batch of data read by the :class:`~torch.utils.data.DataLoader`.
+
+        Returns:
+            batch (Tuple[:class:`~torch.Tensor`, List[Dict[str, :class:`~torch.Tensor`]]]):
+                The input batch with images stacked into a single tensor.
         """
         images, targets = batch
 
@@ -403,7 +443,7 @@ class Yolo(pl.LightningModule):
                              .format(len(images), len(targets)))
 
         for image in images:
-            if not isinstance(image, torch.Tensor):
+            if not isinstance(image, Tensor):
                 raise ValueError("Expected image to be of type Tensor, got {}."
                                  .format(type(image)))
             expected_shape = torch.Size((self.config.channels,
@@ -415,14 +455,14 @@ class Yolo(pl.LightningModule):
 
         for target in targets:
             boxes = target['boxes']
-            if not isinstance(boxes, torch.Tensor):
+            if not isinstance(boxes, Tensor):
                 raise ValueError("Expected target boxes to be of type Tensor, got {}."
                                  .format(type(boxes)))
             if (len(boxes.shape) != 2) or (boxes.shape[-1] != 4):
                 raise ValueError("Expected target boxes to be tensors of shape [N, 4], got {}."
                                  .format(list(boxes.shape)))
             labels = target['labels']
-            if not isinstance(labels, torch.Tensor):
+            if not isinstance(labels, Tensor):
                 raise ValueError("Expected target labels to be of type Tensor, got {}."
                                  .format(type(labels)))
             if len(labels.shape) != 1:
@@ -432,7 +472,12 @@ class Yolo(pl.LightningModule):
         images = torch.stack(images)
         return images, targets
 
-    def _filter_detections(self, boxes, confidences, classprobs, labels):
+    def _filter_detections(self,
+                           boxes: Tensor,
+                           confidences: Tensor,
+                           classprobs: Tensor,
+                           labels: Tensor
+    ) -> Tuple[List[Tensor], List[Tensor], List[Tensor], List[Tensor]]:
         """
         Filters detections based on confidence threshold. Then for every class performs non-maximum
         suppression (NMS). NMS iterates the bounding boxes that predict this class in descending
@@ -440,26 +485,17 @@ class Yolo(pl.LightningModule):
         higher than the NMS threshold.
 
         Args:
-            boxes (Tensor):
-                Detected bounding box (x1, y1, x2, y2) coordinates in a tensor sized
+            boxes: Detected bounding box (x1, y1, x2, y2) coordinates in a tensor sized
                 `[batch_size, N, 4]`.
-            confidences (Tensor):
-                Detection confidences in a tensor sized `[batch_size, N]`.
-            classprobs (Tensor):
-                Probabilities of the best classes in a tensor sized `[batch_size, N]`.
-            labels (Tensor):
-                Indices of the best classes in a tensor sized `[batch_size, N]`.
+            confidences: Detection confidences in a tensor sized `[batch_size, N]`.
+            classprobs: Probabilities of the best classes in a tensor sized `[batch_size, N]`.
+            labels: Indices of the best classes in a tensor sized `[batch_size, N]`.
 
         Returns:
-            boxes (List[Tensor]):
-                List of bounding box (x1, y1, x2, y2) coordinates, one tensor for each image.
-            confidences (List[Tensor]):
-                List of detection confidences, one tensor for each image.
-            classprobs (List[Tensor]):
-                List of tensors, one for each image, that contain the probabilities of the best
-                class of each prediction.
-            labels (List[Tensor]):
-                List of predicted class labels, one for each image.
+            boxes (List[:class:`~torch.Tensor`]), confidences (List[:class:`~torch.Tensor`]), classprobs (List[:class:`~torch.Tensor`]), labels (List[:class:`~torch.Tensor`]):
+                Four lists, each containing one tensor per image - bounding box (x1, y1, x2, y2)
+                coordinates, detection confidences, probabilities of the best class of each
+                prediction, and the predicted class labels.
         """
         out_boxes = []
         out_confidences = []
@@ -500,19 +536,6 @@ class Yolo(pl.LightningModule):
             out_labels.append(img_out_labels)
 
         return out_boxes, out_confidences, out_classprobs, out_labels
-
-    def _scale_boxes(self, images, boxes):
-        """Scales the box coordinates to image dimensions."""
-        result = []
-
-        for image, img_boxes in zip(images, boxes):
-            height = image.shape[1]
-            width = image.shape[2]
-            scale = torch.tensor([width, height, width, height], device=img_boxes.device)
-            img_boxes = img_boxes * scale
-            result.append(img_boxes)
-
-        return result
 
 
 class Resize:

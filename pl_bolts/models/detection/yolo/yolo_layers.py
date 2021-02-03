@@ -1,8 +1,8 @@
-from typing import List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import torch
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
-from torch import nn
+from torch import nn, Tensor
 
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -56,27 +56,25 @@ class DetectionLayer(nn.Module):
                  class_loss_multiplier: float = 1.0,
                  confidence_loss_multiplier: float = 1.0):
         """
-        Constructs a YOLO detection layer.
-
         Args:
-            num_classes (int): Number of different classes that this layer predicts.
-            image_width (int): Image width (defines the scale of the anchor box and target bounding
+            num_classes: Number of different classes that this layer predicts.
+            image_width: Image width (defines the scale of the anchor box and target bounding
                 box dimensions).
-            image_height (int): Image height (defines the scale of the anchor box and target
+            image_height: Image height (defines the scale of the anchor box and target
                 bounding box dimensions).
-            anchor_dims (List[Tuple[int, int]]): A list of all the predefined anchor box
-                dimensions. The list should contain (width, height) tuples in the network input
-                resolution (relative to the width and height defined in the configuration file).
-            anchor_ids (List[int]): List of indices to `anchor_dims` that is used to select the
-                (usually 3) anchors that this layer uses.
-            xy_scale (float): Eliminate "grid sensitivity" by scaling the box coordinates by this
-                factor. Using a value > 1.0 helps to produce coordinate values close to one.
-            ignore_threshold (float): If a predictor is not responsible for predicting any target,
-                but the corresponding anchor has IoU with some target greater than this threshold,
-                the predictor will not be taken into account when calculating the confidence loss.
-            coord_loss_multiplier (float): Multiply the coordinate/size loss by this factor.
-            class_loss_multiplier (float): Multiply the classification loss by this factor.
-            confidence_loss_multiplier (float): Multiply the confidence loss by this factor.
+            anchor_dims: A list of all the predefined anchor box dimensions. The list should
+                contain (width, height) tuples in the network input resolution (relative to the
+                width and height defined in the configuration file).
+            anchor_ids: List of indices to `anchor_dims` that is used to select the (usually 3)
+                anchors that this layer uses.
+            xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor.
+                Using a value > 1.0 helps to produce coordinate values close to one.
+            ignore_threshold: If a predictor is not responsible for predicting any target, but the
+                corresponding anchor has IoU with some target greater than this threshold, the
+                predictor will not be taken into account when calculating the confidence loss.
+            coord_loss_multiplier: Multiply the coordinate/size loss by this factor.
+            class_loss_multiplier: Multiply the classification loss by this factor.
+            confidence_loss_multiplier: Multiply the confidence loss by this factor.
         """
         super().__init__()
 
@@ -98,7 +96,10 @@ class DetectionLayer(nn.Module):
         self.confidence_loss_multiplier = confidence_loss_multiplier
         self.se_loss = nn.MSELoss(reduction='none')
 
-    def forward(self, x, targets=None):
+    def forward(self,
+                x: Tensor,
+                targets: Optional[List[Dict[str, Tensor]]] = None
+    ) -> Tuple[Tensor, Dict[str, Tensor]]:
         """
         Runs a forward pass through this YOLO detection layer.
 
@@ -107,15 +108,14 @@ class DetectionLayer(nn.Module):
         probabilities to ]0, 1[ range using sigmoid.
 
         Args:
-            x (Tensor): The output from the previous layer. Tensor of size
+            x : The output from the previous layer. Tensor of size
                 `[batch_size, boxes_per_cell * (num_classes + 5), height, width]`.
-            targets (List[Dict[str, Tensor]]): If set, computes losses from detection layers
-                against these targets. A list of dictionaries, one for each image.
+            targets: If set, computes losses from detection layers against these targets. A list of
+                dictionaries, one for each image.
 
         Returns:
-            result (Tuple[Tensor, Dict[str, Tensor]]): Layer output, and if training targets were
-                provided, a dictionary of losses. Layer output is sized
-                `[batch_size, num_anchors * height * width, num_classes + 5]`.
+            result: Layer output, and if training targets were provided, a dictionary of losses.
+                Layer output is sized `[batch_size, num_anchors * height * width, num_classes + 5]`.
         """
         batch_size, num_features, height, width = x.shape
         num_attrs = self.num_classes + 5
@@ -413,8 +413,6 @@ class DetectionLayer(nn.Module):
 
 class Mish(nn.Module):
     """Mish activation."""
-    def __init__(self):
-        super().__init__()
 
     def forward(self, x):
         return x * torch.tanh(nn.functional.softplus(x))
@@ -425,12 +423,10 @@ class RouteLayer(nn.Module):
 
     def __init__(self, source_layers: List[int], num_chunks: int, chunk_idx: int):
         """
-        Creates a YOLO route layer.
-
         Args:
-            source_layers (List[int]): Indices of the layers whose output will be concatenated.
-            num_chunks (int): Layer outputs will be split into this number of chunks.
-            chunk_idx (int): Only the chunks with this index will be concatenated.
+            source_layers: Indices of the layers whose output will be concatenated.
+            num_chunks: Layer outputs will be split into this number of chunks.
+            chunk_idx: Only the chunks with this index will be concatenated.
         """
         super().__init__()
         self.source_layers = source_layers
@@ -446,12 +442,11 @@ class RouteLayer(nn.Module):
 class ShortcutLayer(nn.Module):
     """Shortcut layer adds a residual connection from the source layer."""
 
-    def __init__(self, source_layer):
+    def __init__(self, source_layer: int):
         """
-        Constructs a YOLO shortcut layer.
-
         Args:
-            num_classes (int): Number of different classes that this layer predicts.
+            source_layer: Index of the layer whose output will be added to the output of the
+                previous layer.
         """
         super().__init__()
         self.source_layer = source_layer
