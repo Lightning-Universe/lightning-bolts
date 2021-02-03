@@ -344,7 +344,7 @@ class ActorCategorical(nn.Module):
     and an action given an observation
     """
 
-    def __init__(self, actor_net):
+    def __init__(self, actor_net: nn.Module):
         """
         Args:
             input_shape: observation shape of the environment
@@ -382,7 +382,7 @@ class ActorContinous(nn.Module):
     and an action given an observation
     """
 
-    def __init__(self, actor_net, act_dim):
+    def __init__(self, actor_net: nn.Module, act_dim: int):
         """
         Args:
             input_shape: observation shape of the environment
