@@ -365,9 +365,11 @@ class ActorCategorical(nn.Module):
         """
         Takes in a distribution and actions and returns log prob of actions
         under the distribution
+
         Args:
             pi: torch distribution
             actions: actions taken by distribution
+
         Returns:
             log probability of the acition under pi
         """
@@ -403,9 +405,11 @@ class ActorContinous(nn.Module):
         """
         Takes in a distribution and actions and returns log prob of actions
         under the distribution
+
         Args:
             pi: torch distribution
             actions: actions taken by distribution
+
         Returns:
             log probability of the acition under pi
         """
