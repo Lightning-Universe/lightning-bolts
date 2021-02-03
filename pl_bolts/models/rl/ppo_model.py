@@ -13,7 +13,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
     import gym
-else:
+else:  # pragma: no cover
     warn_missing_pkg('gym')
 
 
