@@ -252,7 +252,7 @@ class PPO(pl.LightningModule):
 
                 self.epoch_rewards.clear()
 
-    def actor_loss(self, state, action, logp_old, qval, adv) -> torch.Tensor:
+    def actor_loss(self, state, action, logp_old, adv) -> torch.Tensor:
         pi, _ = self.actor(state)
         logp = self.actor.get_log_prob(pi, action)
         ratio = torch.exp(logp - logp_old)
@@ -287,7 +287,7 @@ class PPO(pl.LightningModule):
         self.log("avg_reward", self.avg_reward, prog_bar=True, on_step=False, on_epoch=True)
 
         if optimizer_idx == 0:
-            loss_actor = self.actor_loss(state, action, old_logp, qval, adv)
+            loss_actor = self.actor_loss(state, action, old_logp, adv)
             self.log('loss_actor', loss_actor, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
             return loss_actor
