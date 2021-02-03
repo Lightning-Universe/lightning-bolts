@@ -30,11 +30,6 @@ class PPO(pl.LightningModule):
         ...
         >>> model = PPO("CartPole-v0")
 
-    Train::
-
-        trainer = Trainer()
-        trainer.fit(model)
-
     Note:
         This example is based on:
         https://github.com/openai/baselines/blob/master/baselines/ppo2/ppo2.py
