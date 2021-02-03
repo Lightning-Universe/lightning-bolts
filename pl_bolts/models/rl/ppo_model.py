@@ -265,10 +265,12 @@ class PPO(pl.LightningModule):
     def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx, optimizer_idx):
         """
         Carries out a single update to actor and critic network from a batch of replay buffer.
+
         Args:
             batch: batch of replay buffer/trajectory data
             batch_idx: not used
             optimizer_idx: idx that controls optimizing actor or critic network
+
         Returns:
             loss
         """
