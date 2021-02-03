@@ -148,10 +148,12 @@ class PPO(pl.LightningModule):
 
     def calc_advantage(self, rewards: List[float], values: List[float], last_value: float) -> List[float]:
         """Calculate the advantage given rewards, state values, and the last value of episode
+
         Args:
             rewards: list of episode rewards
             values: list of state values from critic
             last_value: value of last state of episode
+
         Returns:
             list of advantages
         """
