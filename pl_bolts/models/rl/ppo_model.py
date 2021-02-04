@@ -299,11 +299,10 @@ class PPO(pl.LightningModule):
 
             return loss_critic
 
-        else:
-            raise NotImplementedError(
-                f'Got optimizer_idx: {optimizer_idx}. Expected only 2 optimizers from configure_optimizers. '
-                'Modify optimizer logic in training_step to account for this. '
-            )
+        raise NotImplementedError(
+            f'Got optimizer_idx: {optimizer_idx}. Expected only 2 optimizers from configure_optimizers. '
+            'Modify optimizer logic in training_step to account for this. '
+        )
 
     def configure_optimizers(self) -> List[Optimizer]:
         """ Initialize Adam optimizer"""
