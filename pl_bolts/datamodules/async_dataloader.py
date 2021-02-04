@@ -92,8 +92,8 @@ class AsynchronousLoader(object):
         # We don't want to run the thread more than once
         # Start a new thread if we are at the beginning of a new epoch, and our current worker is dead
 
-        if_worker = (not hasattr(self, 'worker') or not self.worker.is_alive())
-        if if_worker and self.queue.empty() and self.idx == 0:  # type: ignore[has-type]
+        if_worker = (not hasattr(self, 'worker') or not self.worker.is_alive())  # type: ignore[has-type]
+        if if_worker and self.queue.empty() and self.idx == 0:
             self.worker = Thread(target=self.load_loop)
             self.worker.daemon = True
             self.worker.start()

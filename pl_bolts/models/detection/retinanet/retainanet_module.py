@@ -16,7 +16,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-class RetinaNet(pl.LightningModule):
+class RetinaNet(LightningModule):
     """
     PyTorch Lightning implementation of Retina Net `Focal Loss for
     Dense Object Detection <https://arxiv.org/abs/1708.02002>`_.
