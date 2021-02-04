@@ -89,14 +89,14 @@ class RetinaNet(pl.LightningModule):
         # fasterrcnn takes both images and targets for training, returns
         loss_dict = self.model(images, targets)
         loss = sum(loss for loss in loss_dict.values())
-        return {"loss": loss, "log": loss_dict}
+        self.log('loss', loss, prog_bar=True)
 
     def validation_step(self, batch, batch_idx):
         images, targets = batch
         # fasterrcnn takes only images for eval() mode
         outs = self.model(images)
         iou = torch.stack([_evaluate_iou(o, t) for t, o in zip(targets, outs)]).mean()
-        return {"val_iou": iou}
+        self.log("val_iou", iou, prog_bar=True)
 
     def validation_epoch_end(self, outs):
         avg_iou = torch.stack([o["val_iou"] for o in outs]).mean()
