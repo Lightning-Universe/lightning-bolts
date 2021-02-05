@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import torch
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
@@ -52,16 +52,19 @@ class DetectionLayer(nn.Module):
                  anchor_ids: List[int],
                  xy_scale: float = 1.0,
                  ignore_threshold: float = 0.5,
-                 coord_loss_multiplier: float = 1.0,
+                 overlap_loss_func: Callable = None,
+                 class_loss_func: Callable = None,
+                 confidence_loss_func: Callable = None,
+                 overlap_loss_multiplier: float = 1.0,
                  class_loss_multiplier: float = 1.0,
                  confidence_loss_multiplier: float = 1.0):
         """
         Args:
             num_classes: Number of different classes that this layer predicts.
-            image_width: Image width (defines the scale of the anchor box and target bounding
-                box dimensions).
-            image_height: Image height (defines the scale of the anchor box and target
-                bounding box dimensions).
+            image_width: Image width (defines the scale of the anchor box and target bounding box
+                dimensions).
+            image_height: Image height (defines the scale of the anchor box and target bounding box
+                dimensions).
             anchor_dims: A list of all the predefined anchor box dimensions. The list should
                 contain (width, height) tuples in the network input resolution (relative to the
                 width and height defined in the configuration file).
@@ -72,6 +75,12 @@ class DetectionLayer(nn.Module):
             ignore_threshold: If a predictor is not responsible for predicting any target, but the
                 corresponding anchor has IoU with some target greater than this threshold, the
                 predictor will not be taken into account when calculating the confidence loss.
+            overlap_loss_func: Loss function for (x, y, w, h) coordinates. Default is the sum of
+                squared errors.
+            class_loss_func: Loss function for class probability distribution. Default is the sum
+                of squared errors.
+            confidence_loss_func: Loss function for confidence score. Default is the sum of squared
+                errors.
             coord_loss_multiplier: Multiply the coordinate/size loss by this factor.
             class_loss_multiplier: Multiply the classification loss by this factor.
             confidence_loss_multiplier: Multiply the confidence loss by this factor.
@@ -91,10 +100,15 @@ class DetectionLayer(nn.Module):
         self.anchor_map = [anchor_ids.index(i) if i in anchor_ids else -1 for i in range(9)]
         self.xy_scale = xy_scale
         self.ignore_threshold = ignore_threshold
-        self.coord_loss_multiplier = coord_loss_multiplier
+
+        self.overlap_loss_multiplier = overlap_loss_multiplier
         self.class_loss_multiplier = class_loss_multiplier
         self.confidence_loss_multiplier = confidence_loss_multiplier
-        self.se_loss = nn.MSELoss(reduction='none')
+
+        se_loss = nn.MSELoss(reduction='none')
+        self.overlap_loss_func = overlap_loss_func or se_loss
+        self.class_loss_func = class_loss_func or se_loss
+        self.confidence_loss_func = confidence_loss_func or se_loss
 
     def forward(
         self,
@@ -109,7 +123,7 @@ class DetectionLayer(nn.Module):
         probabilities to ]0, 1[ range using sigmoid.
 
         Args:
-            x : The output from the previous layer. Tensor of size
+            x: The output from the previous layer. Tensor of size
                 `[batch_size, boxes_per_cell * (num_classes + 5), height, width]`.
             targets: If set, computes losses from detection layers against these targets. A list of
                 dictionaries, one for each image.
@@ -154,8 +168,8 @@ class DetectionLayer(nn.Module):
         if targets is None:
             return output
         else:
-            np_mask = self._no_prediction_mask(corners, targets)
-            losses = self._calculate_losses(xy, wh, confidence, classprob, targets, np_mask)
+            lc_mask = self._low_confidence_mask(corners, targets)
+            losses = self._calculate_losses(xy, wh, confidence, classprob, targets, lc_mask)
             return output, losses
 
     def _global_xy(self, xy):
@@ -220,14 +234,14 @@ class DetectionLayer(nn.Module):
         bottom_right = xy + half_wh
         return torch.cat((top_left, bottom_right), -1)
 
-    def _no_prediction_mask(self, preds, targets):
+    def _low_confidence_mask(self, boxes, targets):
         """
-        Initializes the mask that will be used to select predictors that are not responsible for
-        predicting any target. The value will be `True`, unless the predicted box overlaps any
-        target significantly (IoU greater than `self.ignore_threshold`).
+        Initializes the mask that will be used to select predictors that are not predicting any
+        ground-truth target. The value will be `True`, unless the predicted box overlaps any target
+        significantly (IoU greater than `self.ignore_threshold`).
 
         Args:
-            preds (Tensor): The predicted corner coordinates, normalized to the [0, 1] range.
+            boxes (Tensor): The predicted corner coordinates, normalized to the [0, 1] range.
                 Tensor of size `[batch_size, height, width, boxes_per_cell, 4]`.
             targets (List[Dict[str, Tensor]]): List of dictionaries of target values, one
                 dictionary for each image.
@@ -237,27 +251,28 @@ class DetectionLayer(nn.Module):
                 with `False` where the predicted box overlaps a target significantly and `True`
                 elsewhere.
         """
-        shape = preds.shape
-        preds = preds.view(shape[0], -1, shape[-1])
+        batch_size, height, width, boxes_per_cell, num_coords = boxes.shape
+        num_preds = height * width * boxes_per_cell
+        boxes = boxes.view(batch_size, num_preds, num_coords)
 
         scale = torch.tensor([self.image_width,
                               self.image_height,
                               self.image_width,
                               self.image_height],
-                             device=preds.device)
-        preds = preds * scale
+                             device=boxes.device)
+        boxes = boxes * scale
 
-        results = torch.ones(preds.shape[:-1], dtype=torch.bool, device=preds.device)
-        for image_idx, (image_preds, image_targets) in enumerate(zip(preds, targets)):
+        results = torch.ones((batch_size, num_preds), dtype=torch.bool, device=boxes.device)
+        for image_idx, (image_boxes, image_targets) in enumerate(zip(boxes, targets)):
             target_boxes = image_targets['boxes']
             if target_boxes.shape[0] > 0:
-                ious = box_iou(image_preds, target_boxes)
-                best_ious = ious.max(-1).values
-                results[image_idx] = best_ious <= self.ignore_threshold
-        results = results.view(shape[:-1])
-        return results
+                ious = box_iou(image_boxes, target_boxes)  # [num_preds, num_targets]
+                best_iou = ious.max(-1).values  # [num_preds]
+                results[image_idx] = best_iou <= self.ignore_threshold
 
-    def _calculate_losses(self, xy, wh, confidence, classprob, targets, np_mask):
+        return results.view((batch_size, height, width, boxes_per_cell))
+
+    def _calculate_losses(self, xy, wh, confidence, classprob, targets, lc_mask):
         """
         From the targets that are in the image space calculates the actual targets for the network
         predictions, and returns a dictionary of training losses.
@@ -273,8 +288,8 @@ class DetectionLayer(nn.Module):
                 sized `[batch_size, height, width, boxes_per_cell, num_classes]`.
             targets (List[Dict[str, Tensor]]): List of dictionaries of target values, one
                 dictionary for each image.
-            np_mask: A boolean mask containing `True` where the predicted box does not overlap any
-                target significantly.
+            lc_mask (Tensor): A boolean mask containing `True` where the predicted box does not
+                overlap any target significantly.
 
         Returns:
             predicted (Dict[str, Tensor]): A dictionary of training losses.
@@ -341,9 +356,10 @@ class DetectionLayer(nn.Module):
             predictors = predictors[selected]
             best_anchors = best_anchors[selected]
 
-            # The "no-prediction" mask is used to select predictors that are not responsible for
-            # predicting any object for calculating the confidence loss.
-            np_mask[image_idx, cell_j, cell_i, predictors] = False
+            # The "low-confidence" mask is used to select predictors that are not responsible for
+            # predicting any object, for calculating the part of the confidence loss with zero as
+            # the target confidence.
+            lc_mask[image_idx, cell_j, cell_i, predictors] = False
 
             # Bounding box targets
             relative_xy = box_xy - box_xy.floor()
@@ -372,42 +388,35 @@ class DetectionLayer(nn.Module):
 
         if pred_xy and pred_wh and target_xy and target_wh:
             size_compensation = torch.cat(size_compensation).unsqueeze(1)
-            pred_xy = torch.cat(pred_xy)
-            target_xy = torch.cat(target_xy)
-            location_loss = self.se_loss(pred_xy, target_xy)
-            location_loss = location_loss * size_compensation
-            location_loss = location_loss.sum() / batch_size
-            losses['location'] = location_loss * self.coord_loss_multiplier
+            pred_xywh = torch.cat((torch.cat(pred_xy), torch.cat(pred_wh)), -1)
+            target_xywh = torch.cat((torch.cat(target_xy), torch.cat(target_wh)), -1)
+            overlap_loss = self.overlap_loss_func(pred_xywh, target_xywh)
+            overlap_loss = overlap_loss * size_compensation
+            overlap_loss = overlap_loss.sum() / batch_size
+            losses['overlap'] = overlap_loss * self.overlap_loss_multiplier
 
-            pred_wh = torch.cat(pred_wh)
-            target_wh = torch.cat(target_wh)
-            size_loss = self.se_loss(pred_wh, target_wh)
-            size_loss = size_loss * size_compensation
-            size_loss = size_loss.sum() / batch_size
-            losses['size'] = size_loss * self.coord_loss_multiplier
-
-        class_loss = None
         if pred_classprob and target_label:
             pred_classprob = torch.cat(pred_classprob)
             target_label = torch.cat(target_label)
             target_classprob = torch.nn.functional.one_hot(target_label, self.num_classes)
             target_classprob = target_classprob.to(dtype=pred_classprob.dtype)
-            class_loss = self.se_loss(pred_classprob, target_classprob)
+            class_loss = self.class_loss_func(pred_classprob, target_classprob)
             class_loss = class_loss.sum() / batch_size
             losses['class'] = class_loss * self.class_loss_multiplier
 
-        np_confidence = confidence[np_mask]
-        np_target_confidence = torch.zeros_like(np_confidence)
-        np_confidence_loss = self.se_loss(np_confidence, np_target_confidence)
-        np_confidence_loss = np_confidence_loss.sum() / batch_size
-        losses['np_confidence'] = np_confidence_loss * self.confidence_loss_multiplier
-
+        pred_low_confidence = confidence[lc_mask]
+        target_low_confidence = torch.zeros_like(pred_low_confidence)
         if pred_confidence:
-            p_confidence = torch.cat(pred_confidence)
-            p_target_confidence = torch.ones_like(p_confidence)
-            p_confidence_loss = self.se_loss(p_confidence, p_target_confidence)
-            p_confidence_loss = p_confidence_loss.sum() / batch_size
-            losses['p_confidence'] = p_confidence_loss * self.confidence_loss_multiplier
+            pred_high_confidence = torch.cat(pred_confidence)
+            target_high_confidence = torch.ones_like(pred_high_confidence)
+            pred_confidence = torch.cat((pred_low_confidence, pred_high_confidence))
+            target_confidence = torch.cat((target_low_confidence, target_high_confidence))
+        else:
+            pred_confidence = pred_low_confidence
+            target_confidence = target_low_confidence
+        confidence_loss = self.confidence_loss_func(pred_confidence, target_confidence)
+        confidence_loss = confidence_loss.sum() / batch_size
+        losses['confidence'] = confidence_loss * self.confidence_loss_multiplier
 
         return losses
 

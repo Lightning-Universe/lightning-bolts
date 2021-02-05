@@ -403,7 +403,7 @@ class Yolo(pl.LightningModule):
 
                 xy_scale = config.get('scale_x_y', 1.0)
                 ignore_threshold = config.get('ignore_thresh', 1.0)
-                coord_loss_multiplier = config.get('iou_normalizer', 1.0)
+                overlap_loss_multiplier = config.get('iou_normalizer', 1.0)
                 class_loss_multiplier = config.get('cls_normalizer', 1.0)
                 confidence_loss_multiplier = config.get('obj_normalizer', 1.0)
 
@@ -415,7 +415,7 @@ class Yolo(pl.LightningModule):
                     anchor_ids=config['mask'],
                     xy_scale=xy_scale,
                     ignore_threshold=ignore_threshold,
-                    coord_loss_multiplier=coord_loss_multiplier,
+                    overlap_loss_multiplier=overlap_loss_multiplier,
                     class_loss_multiplier=class_loss_multiplier,
                     confidence_loss_multiplier=confidence_loss_multiplier)
 
@@ -434,12 +434,10 @@ class Yolo(pl.LightningModule):
         Reads a batch of data, validates the format, and stacks the images into a single tensor.
 
         Args:
-            batch (Tuple[List[:class:`~torch.Tensor`], List[Dict[str, :class:`~torch.Tensor`]]]):
-                The batch of data read by the :class:`~torch.utils.data.DataLoader`.
+            batch: The batch of data read by the :class:`~torch.utils.data.DataLoader`.
 
         Returns:
-            batch (Tuple[:class:`~torch.Tensor`, List[Dict[str, :class:`~torch.Tensor`]]]):
-                The input batch with images stacked into a single tensor.
+            batch: The input batch with images stacked into a single tensor.
         """
         images, targets = batch
 
