@@ -7,13 +7,12 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from pytorch_lightning.utilities import argparse_utils
 from torch import optim, Tensor
 
-from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-from pl_bolts.utils.warnings import warn_missing_pkg
 from pl_bolts.models.detection.yolo.yolo_config import YoloConfiguration
 from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, RouteLayer, ShortcutLayer
+from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     import torchvision.transforms as T
@@ -139,7 +138,7 @@ class Yolo(pl.LightningModule):
 
         x = images
         for module in self.network:
-            if isinstance(module, RouteLayer) or isinstance(module, ShortcutLayer):
+            if isinstance(module, (RouteLayer, ShortcutLayer)):
                 x = module(x, outputs)
             elif isinstance(module, DetectionLayer):
                 if targets is None:
@@ -163,11 +162,11 @@ class Yolo(pl.LightningModule):
         confidences = detections[..., 4]
         classprobs = detections[..., 5:]
 
-        if targets is not None:
-            losses = {loss_name: mean_loss(loss_name) for loss_name in losses[0].keys()}
-            return boxes, confidences, classprobs, losses
-        else:
+        if targets is None:
             return boxes, confidences, classprobs
+
+        losses = {loss_name: mean_loss(loss_name) for loss_name in losses[0].keys()}
+        return boxes, confidences, classprobs, losses
 
     def configure_optimizers(self) -> Tuple[List, List]:
         """Constructs the optimizer and learning rate scheduler."""

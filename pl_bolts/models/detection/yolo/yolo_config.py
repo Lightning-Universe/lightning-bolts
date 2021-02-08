@@ -1,8 +1,8 @@
 import re
 from warnings import warn
 
-from pytorch_lightning.utilities.exceptions import MisconfigurationException
 import torch.nn as nn
+from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
 from pl_bolts.models.detection.yolo.yolo_layers import *
 
