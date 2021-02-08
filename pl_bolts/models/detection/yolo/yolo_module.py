@@ -13,7 +13,7 @@ from torch import optim, Tensor
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.utils.warnings import warn_missing_pkg
 from pl_bolts.models.detection.yolo.yolo_config import YoloConfiguration
-from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, Mish, RouteLayer, ShortcutLayer
+from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, RouteLayer, ShortcutLayer
 
 try:
     import torchvision.transforms as T
@@ -38,10 +38,12 @@ class Yolo(pl.LightningModule):
     Model implemented by:
         - `Seppo Enarvi <https://github.com/senarvi>`_
 
-    The network architecture is read from a configuration file in the same format as in the Darknet
-    implementation. Supports loading weights from a Darknet model file too, if you don't want to
-    start training from a randomly initialized model. During training, the model expects both the
-    images (list of tensors), as well as targets (list of dictionaries).
+    The network architecture can be read from a Darknet configuration file using the
+    :class:`~pl_bolts.models.detection.yolo.yolo_config.YoloConfiguration` class, or created by
+    some other means, and provided as a list of PyTorch modules. Supports loading weights from a
+    Darknet model file too, if you don't want to start training from a randomly initialized model.
+    During training, the model expects both the images (list of tensors), as well as targets (list
+    of dictionaries).
 
     The target dictionaries should contain:
         - boxes (`FloatTensor[N, 4]`): the ground truth boxes in `[x1, y1, x2, y2]` format.
@@ -55,7 +57,7 @@ class Yolo(pl.LightningModule):
     """
 
     def __init__(self,
-                 configuration: YoloConfiguration,
+                 network: nn.ModuleList,
                  optimizer: str = 'sgd',
                  momentum: float = 0.9,
                  weight_decay: float = 0.0005,
@@ -67,7 +69,8 @@ class Yolo(pl.LightningModule):
                  nms_threshold: float = 0.45):
         """
         Args:
-            configuration: The model configuration.
+            network: A list of network modules. This can be obtained from a Darknet configuration
+                using the `YoloConfiguration.get_network()` method.
             optimizer: Which optimizer to use for training; either 'sgd' or 'adam'.
             momentum: Momentum factor for SGD with momentum.
             weight_decay: Weight decay (L2 penalty).
@@ -90,7 +93,7 @@ class Yolo(pl.LightningModule):
                 'YOLO model uses `torchvision`, which is not installed yet.'
             )
 
-        self.config = configuration
+        self.network = network
         self.optimizer = optimizer
         self.momentum = momentum
         self.weight_decay = weight_decay
@@ -101,15 +104,13 @@ class Yolo(pl.LightningModule):
         self.confidence_threshold = confidence_threshold
         self.nms_threshold = nms_threshold
 
-        self._create_modules()
-
     def forward(
         self,
         images: Tensor,
         targets: List[Dict[str, Tensor]] = None
     ) -> Tuple[Tensor, Tensor, Tensor, Dict[str, Tensor]]:
         """
-        Runs a forward pass through the network (all layers listed in `self._module_list`), and if
+        Runs a forward pass through the network (all layers listed in `self.network`), and if
         training targets are provided, computes the losses from the detection layers.
 
         Detections are concatenated from the detection layers. Each image will produce
@@ -137,7 +138,7 @@ class Yolo(pl.LightningModule):
         losses = []      # Losses from detection layers
 
         x = images
-        for module in self._module_list:
+        for module in self.network:
             if isinstance(module, RouteLayer) or isinstance(module, ShortcutLayer):
                 x = module(x, outputs)
             elif isinstance(module, DetectionLayer):
@@ -313,7 +314,7 @@ class Yolo(pl.LightningModule):
             with torch.no_grad():
                 tensor.copy_(x)
 
-        for module in self._module_list:
+        for module in self.network:
             # Weights are loaded only to convolutional layers
             if not isinstance(module, nn.Sequential):
                 continue
@@ -343,89 +344,6 @@ class Yolo(pl.LightningModule):
                 depr_arg_names.extend(val)
         return depr_arg_names
 
-    def _create_modules(self):
-        """
-        Creates a list of network modules based on parsed configuration file.
-        """
-        self._module_list = nn.ModuleList()
-        num_outputs = 3     # Number of channels in the previous layer output
-        layer_outputs = []  # Number of channels in the output of every layer
-
-        # Iterate through the modules from the configuration and generate required components.
-        for index, config in enumerate(self.config.modules):
-            if config['type'] == 'convolutional':
-                module = nn.Sequential()
-
-                batch_normalize = config.get('batch_normalize', False)
-                padding = (config['size'] - 1) // 2 if config['pad'] else 0
-
-                conv = nn.Conv2d(
-                    num_outputs,
-                    config['filters'],
-                    config['size'],
-                    config['stride'],
-                    padding,
-                    bias=not batch_normalize)
-                module.add_module("conv_{0}".format(index), conv)
-                num_outputs = config['filters']
-
-                if batch_normalize:
-                    bn = nn.BatchNorm2d(config['filters'])
-                    module.add_module("batch_norm_{0}".format(index), bn)
-
-                if config['activation'] == 'leaky':
-                    leakyrelu = nn.LeakyReLU(0.1, inplace=True)
-                    module.add_module('leakyrelu_{0}'.format(index), leakyrelu)
-                elif config['activation'] == 'mish':
-                    mish = Mish()
-                    module.add_module("mish_{0}".format(index), mish)
-
-            elif config['type'] == 'upsample':
-                module = nn.Upsample(scale_factor=config["stride"], mode='nearest')
-
-            elif config['type'] == 'route':
-                num_chunks = config.get('groups', 1)
-                chunk_idx = config.get('group_id', 0)
-                source_layers = [layer if layer >= 0 else index + layer
-                                 for layer in config['layers']]
-                module = RouteLayer(source_layers, num_chunks, chunk_idx)
-                num_outputs = sum(layer_outputs[layer] // num_chunks
-                                  for layer in source_layers)
-
-            elif config['type'] == 'shortcut':
-                module = ShortcutLayer(config['from'])
-
-            elif config['type'] == 'yolo':
-                # The "anchors" list alternates width and height.
-                anchor_dims = config['anchors']
-                anchor_dims = [(anchor_dims[i], anchor_dims[i + 1])
-                               for i in range(0, len(anchor_dims), 2)]
-
-                xy_scale = config.get('scale_x_y', 1.0)
-                ignore_threshold = config.get('ignore_thresh', 1.0)
-                overlap_loss_multiplier = config.get('iou_normalizer', 1.0)
-                class_loss_multiplier = config.get('cls_normalizer', 1.0)
-                confidence_loss_multiplier = config.get('obj_normalizer', 1.0)
-
-                module = DetectionLayer(
-                    num_classes=config['classes'],
-                    image_width=self.config.width,
-                    image_height=self.config.height,
-                    anchor_dims=anchor_dims,
-                    anchor_ids=config['mask'],
-                    xy_scale=xy_scale,
-                    ignore_threshold=ignore_threshold,
-                    overlap_loss_multiplier=overlap_loss_multiplier,
-                    class_loss_multiplier=class_loss_multiplier,
-                    confidence_loss_multiplier=confidence_loss_multiplier)
-
-            elif config['type'] == 'maxpool':
-                padding = (config['size'] - 1) // 2
-                module = nn.MaxPool2d(config['size'], config['stride'], padding)
-
-            self._module_list.append(module)
-            layer_outputs.append(num_outputs)
-
     def _validate_batch(
         self,
         batch: Tuple[List[Tensor], List[Dict[str, Tensor]]]
@@ -449,12 +367,6 @@ class Yolo(pl.LightningModule):
             if not isinstance(image, Tensor):
                 raise ValueError("Expected image to be of type Tensor, got {}."
                                  .format(type(image)))
-            expected_shape = torch.Size((self.config.channels,
-                                         self.config.height,
-                                         self.config.width))
-            if image.shape != expected_shape:
-                raise ValueError("Expected images to be tensors of shape {}, got {}."
-                                 .format(list(expected_shape), list(image.shape)))
 
         for target in targets:
             boxes = target['boxes']
@@ -595,7 +507,7 @@ def run_cli():
     params = vars(args)
     valid_kwargs = inspect.signature(Yolo.__init__).parameters
     kwargs = dict((name, params[name]) for name in valid_kwargs if name in params)
-    model = Yolo(configuration=config, **kwargs)
+    model = Yolo(network=config.get_network(), **kwargs)
     if args.darknet_weights is not None:
         with open(args.darknet_weights, 'r') as weight_file:
             model.load_darknet_weights(weight_file)

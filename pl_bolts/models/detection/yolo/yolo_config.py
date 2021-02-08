@@ -2,18 +2,25 @@ import re
 from warnings import warn
 
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
+import torch.nn as nn
+
+from pl_bolts.models.detection.yolo.yolo_layers import *
 
 
 class YoloConfiguration:
-    """Parser for YOLOv4 network configuration files."""
+    """
+    This class can be used to parse the configuration files of the Darknet YOLOv4 implementation.
+    The `get_network()` method returns a PyTorch module list that can be used to construct a YOLO
+    model.
+    """
 
     def __init__(self, path: str):
         """
         Saves the variables from the first configuration section to attributes of this object, and
-        the rest of the sections to the `modules` list.
+        the rest of the sections to the `layer_configs` list.
 
         Args:
-            path: configuration file to read
+            path: Path to a configuration file
         """
         with open(path, 'r') as config_file:
             sections = self._read_file(config_file)
@@ -23,7 +30,25 @@ class YoloConfiguration:
                 "The model configuration file should include at least two sections.")
 
         self.__dict__.update(sections[0])
-        self.modules = sections[1:]
+        self.global_config = sections[0]
+        self.layer_configs = sections[1:]
+
+    def get_network(self) -> nn.ModuleList:
+        """
+        Iterates through the layers from the configuration and creates corresponding PyTorch
+        modules. Returns the network structure that can be used to create a YOLO model.
+
+        Returns:
+            modules: A `nn.ModuleList` that defines the YOLO network.
+        """
+        result = nn.ModuleList()
+        num_inputs = [3]  # Number of channels in the input of every layer up to the current layer
+        for layer_config in self.layer_configs:
+            config = {**self.global_config, **layer_config}
+            module, num_outputs = _create_layer(config, num_inputs)
+            result.append(module)
+            num_inputs.append(num_outputs)
+        return result
 
     def _read_file(self, config_file):
         """
@@ -33,7 +58,7 @@ class YoloConfiguration:
             config_file (iterable over lines): The configuration file to read.
 
         Returns:
-            sections (list): A list of configuration sections.
+            sections (List[dict]): A list of configuration sections.
         """
         section_re = re.compile(r'\[([^]]+)\]')
         list_variables = ('layers', 'anchors', 'mask', 'scales')
@@ -120,3 +145,111 @@ class YoloConfiguration:
             sections.append(section)
 
         return sections
+
+
+def _create_layer(config: dict, num_inputs: List[int]) -> Tuple[nn.Module, int]:
+    """
+    Calls one of the `_create_<layertype>(config, num_inputs)` functions to create a PyTorch
+    module from the layer config.
+
+    Args:
+        config: Dictionary of configuration options for this layer.
+        num_inputs: Number of channels in the input of every layer up to this layer.
+
+    Returns:
+        module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the
+            number of channels in its output.
+    """
+    create_func = {
+        'convolutional': _create_convolutional,
+        'maxpool': _create_maxpool,
+        'route': _create_route,
+        'shortcut': _create_shortcut,
+        'upsample': _create_upsample,
+        'yolo': _create_yolo
+    }
+    return create_func[config['type']](config, num_inputs)
+
+def _create_convolutional(config, num_inputs):
+    module = nn.Sequential()
+
+    batch_normalize = config.get('batch_normalize', False)
+    padding = (config['size'] - 1) // 2 if config['pad'] else 0
+
+    conv = nn.Conv2d(
+        num_inputs[-1],
+        config['filters'],
+        config['size'],
+        config['stride'],
+        padding,
+        bias=not batch_normalize)
+    module.add_module('conv', conv)
+
+    if batch_normalize:
+        bn = nn.BatchNorm2d(config['filters'])
+        module.add_module('bn', bn)
+
+    if config['activation'] == 'leaky':
+        leakyrelu = nn.LeakyReLU(0.1, inplace=True)
+        module.add_module('leakyrelu', leakyrelu)
+    elif config['activation'] == 'mish':
+        mish = Mish()
+        module.add_module('mish', mish)
+
+    return module, config['filters']
+
+def _create_maxpool(config, num_inputs):
+    padding = (config['size'] - 1) // 2
+    module = nn.MaxPool2d(config['size'], config['stride'], padding)
+    return module, num_inputs[-1]
+
+def _create_route(config, num_inputs):
+    num_chunks = config.get('groups', 1)
+    chunk_idx = config.get('group_id', 0)
+
+    # 0 is the first layer, -1 is the previous layer
+    last = len(num_inputs) - 1
+    source_layers = [layer if layer >= 0 else last + layer
+                     for layer in config['layers']]
+
+    module = RouteLayer(source_layers, num_chunks, chunk_idx)
+
+    # The number of outputs of a source layer is the number of inputs of the next layer.
+    num_outputs = sum(num_inputs[layer + 1] // num_chunks
+                        for layer in source_layers)
+
+    return module, num_outputs
+
+def _create_shortcut(config, num_inputs):
+    module = ShortcutLayer(config['from'])
+    return module, num_inputs[-1]
+
+def _create_upsample(config, num_inputs):
+    module = nn.Upsample(scale_factor=config["stride"], mode='nearest')
+    return module, num_inputs[-1]
+
+def _create_yolo(config, num_inputs):
+    # The "anchors" list alternates width and height.
+    anchor_dims = config['anchors']
+    anchor_dims = [(anchor_dims[i], anchor_dims[i + 1])
+                    for i in range(0, len(anchor_dims), 2)]
+
+    xy_scale = config.get('scale_x_y', 1.0)
+    ignore_threshold = config.get('ignore_thresh', 1.0)
+    overlap_loss_multiplier = config.get('iou_normalizer', 1.0)
+    class_loss_multiplier = config.get('cls_normalizer', 1.0)
+    confidence_loss_multiplier = config.get('obj_normalizer', 1.0)
+
+    module = DetectionLayer(
+        num_classes=config['classes'],
+        image_width=config['width'],
+        image_height=config['height'],
+        anchor_dims=anchor_dims,
+        anchor_ids=config['mask'],
+        xy_scale=xy_scale,
+        ignore_threshold=ignore_threshold,
+        overlap_loss_multiplier=overlap_loss_multiplier,
+        class_loss_multiplier=class_loss_multiplier,
+        confidence_loss_multiplier=confidence_loss_multiplier)
+
+    return module, num_inputs[-1]

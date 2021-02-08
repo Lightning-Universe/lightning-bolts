@@ -20,7 +20,7 @@ def _aligned_iou(dims1, dims2):
     Calculates a matrix of intersections over union from box dimensions, assuming that the boxes
     are located at the same coordinates.
 
-    Arguments:
+    Args:
         dims1 (Tensor[N, 2]): width and height of N boxes
         dims2 (Tensor[M, 2]): width and height of M boxes
 
@@ -167,10 +167,10 @@ class DetectionLayer(nn.Module):
 
         if targets is None:
             return output
-        else:
-            lc_mask = self._low_confidence_mask(corners, targets)
-            losses = self._calculate_losses(xy, wh, confidence, classprob, targets, lc_mask)
-            return output, losses
+
+        lc_mask = self._low_confidence_mask(corners, targets)
+        losses = self._calculate_losses(xy, wh, confidence, classprob, targets, lc_mask)
+        return output, losses
 
     def _global_xy(self, xy):
         """
