@@ -297,6 +297,13 @@ class Yolo(pl.LightningModule):
         """
         Loads weights to layer modules from a pretrained Darknet model.
 
+        One may want to continue training from the pretrained weights, on a dataset with a
+        different number of object categories. The number of kernels in the convolutional layers
+        just before each detection layer depends on the number of output classes. The Darknet
+        solution is to truncate the weight file and stop reading weights at the first incompatible
+        layer. For this reason the function silently leaves the rest of the layers unchanged, when
+        the weight file ends.
+
         Args:
             weight_file: A file object containing model weights in the Darknet binary format.
         """
@@ -306,7 +313,13 @@ class Yolo(pl.LightningModule):
               'images.'.format(version[0], version[1], version[2], images_seen[0]))
 
         def read(tensor):
+            """
+            Reads the contents of `tensor` from the current position of `weight_file`.
+            If there's no more data in `weight_file`, returns without error.
+            """
             x = np.fromfile(weight_file, count=tensor.numel(), dtype=np.float32)
+            if x.shape[0] == 0:
+                return
             x = torch.from_numpy(x).view_as(tensor)
             with torch.no_grad():
                 tensor.copy_(x)
