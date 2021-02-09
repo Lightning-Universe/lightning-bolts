@@ -33,7 +33,7 @@ class Pix2Pix(pl.LightningModule):
         self.patch_gan = self.patch_gan.apply(_weights_init)
 
         self.adversarial_criterion = nn.BCEWithLogitsLoss()
-        self.recon_criterion = nn.L1Loss()
+        self.reconstruct_criterion = nn.L1Loss()
 
     def _gen_step(self, real_images, conditioned_images):
         # Pix2Pix has adversarial and a reconstruction loss
@@ -43,7 +43,7 @@ class Pix2Pix(pl.LightningModule):
         adversarial_loss = self.adversarial_criterion(disc_logits, torch.ones_like(disc_logits))
 
         # calculate reconstruction loss
-        recon_loss = self.recon_criterion(fake_images, real_images)
+        recon_loss = self.reconstruct_criterion(fake_images, real_images)
         lambda_recon = self.hparams.lambda_recon
 
         return adversarial_loss + lambda_recon * recon_loss
