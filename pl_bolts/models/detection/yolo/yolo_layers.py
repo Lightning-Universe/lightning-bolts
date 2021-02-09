@@ -44,20 +44,22 @@ class DetectionLayer(nn.Module):
     resolutions. The loss should be summed from all of them.
     """
 
-    def __init__(self,
-                 num_classes: int,
-                 image_width: int,
-                 image_height: int,
-                 anchor_dims: List[Tuple[int, int]],
-                 anchor_ids: List[int],
-                 xy_scale: float = 1.0,
-                 ignore_threshold: float = 0.5,
-                 overlap_loss_func: Callable = None,
-                 class_loss_func: Callable = None,
-                 confidence_loss_func: Callable = None,
-                 overlap_loss_multiplier: float = 1.0,
-                 class_loss_multiplier: float = 1.0,
-                 confidence_loss_multiplier: float = 1.0):
+    def __init__(
+        self,
+        num_classes: int,
+        image_width: int,
+        image_height: int,
+        anchor_dims: List[Tuple[int, int]],
+        anchor_ids: List[int],
+        xy_scale: float = 1.0,
+        ignore_threshold: float = 0.5,
+        overlap_loss_func: Callable = None,
+        class_loss_func: Callable = None,
+        confidence_loss_func: Callable = None,
+        overlap_loss_multiplier: float = 1.0,
+        class_loss_multiplier: float = 1.0,
+        confidence_loss_multiplier: float = 1.0
+    ):
         """
         Args:
             num_classes: Number of different classes that this layer predicts.
@@ -110,11 +112,7 @@ class DetectionLayer(nn.Module):
         self.class_loss_func = class_loss_func or se_loss
         self.confidence_loss_func = confidence_loss_func or se_loss
 
-    def forward(
-        self,
-        x: Tensor,
-        targets: Optional[List[Dict[str, Tensor]]] = None
-    ) -> Tuple[Tensor, Dict[str, Tensor]]:
+    def forward(self, x: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None) -> Tuple[Tensor, Dict[str, Tensor]]:
         """
         Runs a forward pass through this YOLO detection layer.
 
@@ -138,7 +136,8 @@ class DetectionLayer(nn.Module):
         if boxes_per_cell != len(self.anchor_ids):
             raise MisconfigurationException(
                 "The model predicts {} bounding boxes per cell, but {} anchor boxes are defined "
-                "for this layer.".format(boxes_per_cell, len(self.anchor_ids)))
+                "for this layer.".format(boxes_per_cell, len(self.anchor_ids))
+            )
 
         # Reshape the output to have the bounding box attributes of each grid cell on its own row.
         x = x.permute(0, 2, 3, 1)  # [batch_size, height, width, boxes_per_cell * num_attrs]
@@ -255,10 +254,7 @@ class DetectionLayer(nn.Module):
         num_preds = height * width * boxes_per_cell
         boxes = boxes.view(batch_size, num_preds, num_coords)
 
-        scale = torch.tensor([self.image_width,
-                              self.image_height,
-                              self.image_width,
-                              self.image_height],
+        scale = torch.tensor([self.image_width, self.image_height, self.image_width, self.image_height],
                              device=boxes.device)
         boxes = boxes * scale
 
@@ -299,12 +295,9 @@ class DetectionLayer(nn.Module):
         assert batch_size == len(targets)
 
         # Divisor for converting targets from image coordinates to feature map coordinates
-        image_to_feature_map = torch.tensor([self.image_width / width,
-                                             self.image_height / height],
-                                            device=device)
+        image_to_feature_map = torch.tensor([self.image_width / width, self.image_height / height], device=device)
         # Divisor for converting targets from image coordinates to [0, 1] range
-        image_to_unit = torch.tensor([self.image_width, self.image_height],
-                                     device=device)
+        image_to_unit = torch.tensor([self.image_width, self.image_height], device=device)
 
         anchor_wh = torch.tensor(self.anchor_dims, dtype=wh.dtype, device=device)
         anchor_map = torch.tensor(self.anchor_map, dtype=torch.int64, device=device)
@@ -444,8 +437,7 @@ class RouteLayer(nn.Module):
         self.chunk_idx = chunk_idx
 
     def forward(self, x, outputs):
-        chunks = [torch.chunk(outputs[layer], self.num_chunks, dim=1)[self.chunk_idx]
-                  for layer in self.source_layers]
+        chunks = [torch.chunk(outputs[layer], self.num_chunks, dim=1)[self.chunk_idx] for layer in self.source_layers]
         return torch.cat(chunks, dim=1)
 
 

@@ -42,7 +42,8 @@ def test_fasterrcnn_bbone_train(tmpdir):
 
 def _create_yolo_config_file(config_path):
     config_file = open(config_path, 'w')
-    config_file.write('''[net]
+    config_file.write(
+        '''[net]
 width=256
 height=256
 channels=3
@@ -120,7 +121,8 @@ classes=2
 scale_x_y=1.05
 cls_normalizer=1.0
 iou_normalizer=0.07
-ignore_thresh=0.7''')
+ignore_thresh=0.7'''
+    )
     config_file.close()
 
 
@@ -148,15 +150,10 @@ def test_yolo_train(tmpdir):
 
 
 @pytest.mark.parametrize(
-    "dims1, dims2, expected_ious",
-    [(torch.tensor([[1.0, 1.0],
-                    [10.0, 1.0],
-                    [100.0, 10.0]]),
-      torch.tensor([[1.0, 10.0],
-                    [2.0, 20.0]]),
-      torch.tensor([[1.0 / 10.0, 1.0 / 40.0],
-                    [1.0 / 19.0, 2.0 / 48.0],
-                    [10.0 / 1000.0, 20.0 / 1020.0]]))]
+    "dims1, dims2, expected_ious", [(
+        torch.tensor([[1.0, 1.0], [10.0, 1.0], [100.0, 10.0]]), torch.tensor([[1.0, 10.0], [2.0, 20.0]]),
+        torch.tensor([[1.0 / 10.0, 1.0 / 40.0], [1.0 / 19.0, 2.0 / 48.0], [10.0 / 1000.0, 20.0 / 1020.0]])
+    )]
 )
 def test_aligned_iou(dims1, dims2, expected_ious):
     torch.testing.assert_allclose(_aligned_iou(dims1, dims2), expected_ious)

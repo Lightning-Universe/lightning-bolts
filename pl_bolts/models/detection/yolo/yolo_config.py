@@ -27,8 +27,7 @@ class YoloConfiguration:
             sections = self._read_file(config_file)
 
         if len(sections) < 2:
-            raise MisconfigurationException(
-                "The model configuration file should include at least two sections.")
+            raise MisconfigurationException("The model configuration file should include at least two sections.")
 
         self.__dict__.update(sections[0])
         self.global_config = sections[0]
@@ -179,12 +178,8 @@ def _create_convolutional(config, num_inputs):
     padding = (config['size'] - 1) // 2 if config['pad'] else 0
 
     conv = nn.Conv2d(
-        num_inputs[-1],
-        config['filters'],
-        config['size'],
-        config['stride'],
-        padding,
-        bias=not batch_normalize)
+        num_inputs[-1], config['filters'], config['size'], config['stride'], padding, bias=not batch_normalize
+    )
     module.add_module('conv', conv)
 
     if batch_normalize:
@@ -213,14 +208,12 @@ def _create_route(config, num_inputs):
 
     # 0 is the first layer, -1 is the previous layer
     last = len(num_inputs) - 1
-    source_layers = [layer if layer >= 0 else last + layer
-                     for layer in config['layers']]
+    source_layers = [layer if layer >= 0 else last + layer for layer in config['layers']]
 
     module = yolo.RouteLayer(source_layers, num_chunks, chunk_idx)
 
     # The number of outputs of a source layer is the number of inputs of the next layer.
-    num_outputs = sum(num_inputs[layer + 1] // num_chunks
-                      for layer in source_layers)
+    num_outputs = sum(num_inputs[layer + 1] // num_chunks for layer in source_layers)
 
     return module, num_outputs
 
@@ -238,8 +231,7 @@ def _create_upsample(config, num_inputs):
 def _create_yolo(config, num_inputs):
     # The "anchors" list alternates width and height.
     anchor_dims = config['anchors']
-    anchor_dims = [(anchor_dims[i], anchor_dims[i + 1])
-                   for i in range(0, len(anchor_dims), 2)]
+    anchor_dims = [(anchor_dims[i], anchor_dims[i + 1]) for i in range(0, len(anchor_dims), 2)]
 
     xy_scale = config.get('scale_x_y', 1.0)
     ignore_threshold = config.get('ignore_thresh', 1.0)
@@ -257,6 +249,7 @@ def _create_yolo(config, num_inputs):
         ignore_threshold=ignore_threshold,
         overlap_loss_multiplier=overlap_loss_multiplier,
         class_loss_multiplier=class_loss_multiplier,
-        confidence_loss_multiplier=confidence_loss_multiplier)
+        confidence_loss_multiplier=confidence_loss_multiplier
+    )
 
     return module, num_inputs[-1]
