@@ -369,7 +369,7 @@ class DetectionLayer(nn.Module):
             # mapped to the last class.
             labels = image_targets['labels']
             labels = labels[selected]
-            labels = torch.minimum(labels, torch.tensor(self.num_classes - 1, device=device))
+            labels = torch.min(labels, torch.tensor(self.num_classes - 1, device=device))
             target_label.append(labels)
 
             pred_xy.append(xy[image_idx, cell_j, cell_i, predictors])
