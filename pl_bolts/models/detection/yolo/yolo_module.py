@@ -479,7 +479,9 @@ class Resize:
 
 def run_cli():
     from argparse import ArgumentParser
+
     from pytorch_lightning.utilities import argparse_utils
+
     from pl_bolts.datamodules import VOCDetectionDataModule
 
     pl.seed_everything(42)
