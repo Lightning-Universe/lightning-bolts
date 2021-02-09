@@ -5,7 +5,7 @@ from warnings import warn
 import torch.nn as nn
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
-import pl_bolts.models.detection.yolo.yolo_layers as yolo
+from pl_bolts.models.detection.yolo import yolo_layers
 
 
 class YoloConfiguration:
@@ -190,7 +190,7 @@ def _create_convolutional(config, num_inputs):
         leakyrelu = nn.LeakyReLU(0.1, inplace=True)
         module.add_module('leakyrelu', leakyrelu)
     elif config['activation'] == 'mish':
-        mish = yolo.Mish()
+        mish = yolo_layers.Mish()
         module.add_module('mish', mish)
 
     return module, config['filters']
@@ -210,7 +210,7 @@ def _create_route(config, num_inputs):
     last = len(num_inputs) - 1
     source_layers = [layer if layer >= 0 else last + layer for layer in config['layers']]
 
-    module = yolo.RouteLayer(source_layers, num_chunks, chunk_idx)
+    module = yolo_layers.RouteLayer(source_layers, num_chunks, chunk_idx)
 
     # The number of outputs of a source layer is the number of inputs of the next layer.
     num_outputs = sum(num_inputs[layer + 1] // num_chunks for layer in source_layers)
@@ -219,7 +219,7 @@ def _create_route(config, num_inputs):
 
 
 def _create_shortcut(config, num_inputs):
-    module = yolo.ShortcutLayer(config['from'])
+    module = yolo_layers.ShortcutLayer(config['from'])
     return module, num_inputs[-1]
 
 
@@ -239,7 +239,7 @@ def _create_yolo(config, num_inputs):
     class_loss_multiplier = config.get('cls_normalizer', 1.0)
     confidence_loss_multiplier = config.get('obj_normalizer', 1.0)
 
-    module = yolo.DetectionLayer(
+    module = yolo_layers.DetectionLayer(
         num_classes=config['classes'],
         image_width=config['width'],
         image_height=config['height'],
