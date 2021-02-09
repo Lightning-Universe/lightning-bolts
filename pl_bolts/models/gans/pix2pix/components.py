@@ -1,15 +1,6 @@
 import torch
 from torch import nn
-
-
-def _center_crop(image, new_shape):
-    h, w = image.shape[-2:]
-    n_h, n_w = new_shape[-2:]
-    cy, cx = int(h / 2), int(w / 2)
-    xmin, ymin = cx - n_w // 2, cy - n_h // 2
-    xmax, ymax = xmin + n_w, ymin + n_h
-    cropped_image = image[..., xmin:xmax, ymin:ymax]
-    return cropped_image
+from torchvision.transforms.functional import center_crop
 
 
 class ConvBlock(nn.Module):
@@ -23,7 +14,7 @@ class ConvBlock(nn.Module):
         self.use_bn = use_bn
 
         if use_dropout:
-            self.dropout = nn.Dropout()
+            self.dropout = nn.Dropout(0.5)
         self.use_dropout = use_dropout
 
     def forward(self, x):
@@ -49,14 +40,15 @@ class UpSampleConv(nn.Module):
         self.use_bn = use_bn
         self.activation = nn.ReLU()
         if use_dropout:
-            self.dropout = nn.Dropout()
+            self.dropout = nn.Dropout(0.5)
         self.use_dropout = use_dropout
 
     def forward(self, x, skip_con_x):
 
         x = self.upsample(x)
         x = self.conv1(x)
-        skip_con_x = _center_crop(skip_con_x, x.shape)
+        # skip_con_x = _center_crop(skip_con_x, x.shape)
+        skip_con_x = center_crop(skip_con_x, x.shape[-2:])
         x = torch.cat([x, skip_con_x], axis=1)
         x = self.conv2(x)
         if self.use_bn:
@@ -135,12 +127,10 @@ class Generator(nn.Module):
 
         for i in range(depth):
             x = self.contracting_layers[i](x)
-            print(x.shape)
             contractive_x.append(x)
 
         for i in range(depth - 1, -1, -1):
             x = self.expanding_layers[i](x, contractive_x[i])
-            print(x.shape)
         x = self.conv_final(x)
 
         return self.sigmoid(x)
