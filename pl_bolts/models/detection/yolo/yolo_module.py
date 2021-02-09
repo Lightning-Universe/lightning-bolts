@@ -1,7 +1,5 @@
 import inspect
-from argparse import ArgumentParser, Namespace
-from pathlib import Path
-from typing import Dict, List, Tuple, Type, Union
+from typing import Dict, List, Tuple
 
 import numpy as np
 import pytorch_lightning as pl
@@ -480,10 +478,9 @@ class Resize:
 
 
 def run_cli():
+    from argparse import ArgumentParser
     from pytorch_lightning.utilities import argparse_utils
-
     from pl_bolts.datamodules import VOCDetectionDataModule
-    from pl_bolts.datamodules.vocdetection_datamodule import Compose
 
     pl.seed_everything(42)
 

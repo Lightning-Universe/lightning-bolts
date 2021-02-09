@@ -1,10 +1,11 @@
 import re
+from typing import List, Tuple
 from warnings import warn
 
 import torch.nn as nn
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
-from pl_bolts.models.detection.yolo.yolo_layers import *
+import pl_bolts.models.detection.yolo.yolo_layers as yolo
 
 
 class YoloConfiguration:
@@ -170,6 +171,7 @@ def _create_layer(config: dict, num_inputs: List[int]) -> Tuple[nn.Module, int]:
     }
     return create_func[config['type']](config, num_inputs)
 
+
 def _create_convolutional(config, num_inputs):
     module = nn.Sequential()
 
@@ -193,15 +195,17 @@ def _create_convolutional(config, num_inputs):
         leakyrelu = nn.LeakyReLU(0.1, inplace=True)
         module.add_module('leakyrelu', leakyrelu)
     elif config['activation'] == 'mish':
-        mish = Mish()
+        mish = yolo.Mish()
         module.add_module('mish', mish)
 
     return module, config['filters']
+
 
 def _create_maxpool(config, num_inputs):
     padding = (config['size'] - 1) // 2
     module = nn.MaxPool2d(config['size'], config['stride'], padding)
     return module, num_inputs[-1]
+
 
 def _create_route(config, num_inputs):
     num_chunks = config.get('groups', 1)
@@ -212,27 +216,30 @@ def _create_route(config, num_inputs):
     source_layers = [layer if layer >= 0 else last + layer
                      for layer in config['layers']]
 
-    module = RouteLayer(source_layers, num_chunks, chunk_idx)
+    module = yolo.RouteLayer(source_layers, num_chunks, chunk_idx)
 
     # The number of outputs of a source layer is the number of inputs of the next layer.
     num_outputs = sum(num_inputs[layer + 1] // num_chunks
-                        for layer in source_layers)
+                      for layer in source_layers)
 
     return module, num_outputs
 
+
 def _create_shortcut(config, num_inputs):
-    module = ShortcutLayer(config['from'])
+    module = yolo.ShortcutLayer(config['from'])
     return module, num_inputs[-1]
+
 
 def _create_upsample(config, num_inputs):
     module = nn.Upsample(scale_factor=config["stride"], mode='nearest')
     return module, num_inputs[-1]
 
+
 def _create_yolo(config, num_inputs):
     # The "anchors" list alternates width and height.
     anchor_dims = config['anchors']
     anchor_dims = [(anchor_dims[i], anchor_dims[i + 1])
-                    for i in range(0, len(anchor_dims), 2)]
+                   for i in range(0, len(anchor_dims), 2)]
 
     xy_scale = config.get('scale_x_y', 1.0)
     ignore_threshold = config.get('ignore_thresh', 1.0)
@@ -240,7 +247,7 @@ def _create_yolo(config, num_inputs):
     class_loss_multiplier = config.get('cls_normalizer', 1.0)
     confidence_loss_multiplier = config.get('obj_normalizer', 1.0)
 
-    module = DetectionLayer(
+    module = yolo.DetectionLayer(
         num_classes=config['classes'],
         image_width=config['width'],
         image_height=config['height'],
