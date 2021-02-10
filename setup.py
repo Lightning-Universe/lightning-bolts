@@ -10,15 +10,6 @@ try:
 except ImportError:
     import __builtin__ as builtins
 
-try:
-    import pytorch_lightning  # noqa: F401
-except ImportError:
-    try:
-        import pip
-    except ImportError:
-        raise ImportError('Missing `pip` to install custom dependencies.')
-    pip.main(['install', 'pytorch-lightning>=1.1.0'])
-
 # https://packaging.python.org/guides/single-sourcing-package-version/
 # http://blog.ionelmc.ro/2014/05/25/python-packaging/
 
@@ -26,16 +17,7 @@ _PATH_ROOT = os.path.dirname(__file__)
 builtins.__LIGHTNING_BOLT_SETUP__: bool = True
 
 import pl_bolts  # noqa: E402
-
-
-def _load_requirements(path_dir=_PATH_ROOT, file_name='requirements.txt', comment_char='#'):
-    from pytorch_lightning.setup_tools import _load_requirements as _lreq
-    return _lreq(path_dir=path_dir, file_name=file_name, comment_char=comment_char)
-
-
-def _load_long_description():
-    from pytorch_lightning.setup_tools import _load_long_description as _lld
-    return _lld(_PATH_ROOT)
+from pl_bolts.setup_tools import _load_readme_description, _load_requirements  # noqa: E402
 
 
 def _prepare_extras():
@@ -64,14 +46,14 @@ setup(
     download_url='https://github.com/PyTorchLightning/pytorch-lightning-bolts',
     license=pl_bolts.__license__,
     packages=find_packages(exclude=['tests', 'docs']),
-    long_description=_load_long_description(),
+    long_description=_load_readme_description(_PATH_ROOT),
     long_description_content_type='text/markdown',
     include_package_data=True,
     zip_safe=False,
     keywords=['deep learning', 'pytorch', 'AI'],
     python_requires='>=3.6',
-    setup_requires=['pytorch-lightning>=1.1.0'],
-    install_requires=_load_requirements(),
+    setup_requires=['wheel'],
+    install_requires=_load_requirements(_PATH_ROOT),
     extras_require=_prepare_extras(),
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",
@@ -94,9 +76,9 @@ setup(
         'Operating System :: OS Independent',
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3'
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.8'
     ],
 )

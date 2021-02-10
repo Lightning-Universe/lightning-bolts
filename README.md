@@ -1,10 +1,10 @@
 <div align="center">
 
-![Logo](https://raw.githubusercontent.com/PyTorchLightning/pytorch-lightning-bolts/master/docs/source/_images/logos/bolts_logo.png)
-
-# PyTorch Lightning Bolts    
+<img src="docs/source/_images/logos/bolts_logo.png" width="400px">
 
 **Pretrained SOTA Deep Learning models, callbacks and more for research and production with PyTorch Lightning and PyTorch**
+
+--- 
 
 <p align="center">
   <a href="https://www.pytorchlightning.ai/">Website</a> •
@@ -34,18 +34,6 @@
 </div>
 
 ---
-
-## Trending contributors
-
-[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/0)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/0)
-[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/1)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/1)
-[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/2)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/2)
-[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/3)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/3)
-[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/4)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/4)
-[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/5)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/5)
-[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/6)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/6)
-[![](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/images/7)](https://sourcerer.io/fame/williamFalcon/pytorchlightning/pytorch-lightning-bolts/links/7)
-
 
 ## Continuous Integration
 
