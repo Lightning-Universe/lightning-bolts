@@ -1,9 +1,10 @@
-from pl_bolts.metrics.aggregation import accuracy, giou, iou, mean, precision_at_k
+from pl_bolts.metrics.aggregation import accuracy, mean, precision_at_k
+from pl_bolts.metrics.object_detection import giou, iou
 
 __all__ = [
     "accuracy",
-    "giou",
-    "iou",
     "mean",
     "precision_at_k",
+    "giou",
+    "iou",
 ]
