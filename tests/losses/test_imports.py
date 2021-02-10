@@ -43,12 +43,10 @@ def test_import_self_supervised_learning(name):
         assert hasattr(module, name), f"`from {module_name} import {name}` failed."
 
 
-@pytest.mark.parametrize(
-    "name", [
-        "giou_loss",
-        "iou_loss",
-    ]
-)
+@pytest.mark.parametrize("name", [
+    "giou_loss",
+    "iou_loss",
+])
 def test_import_object_detection(name):
     """Tests importing when dependencies are not met.
 
