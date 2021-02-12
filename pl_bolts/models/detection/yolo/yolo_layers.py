@@ -7,7 +7,7 @@ from torch import nn, Tensor
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
-    from torchvision.ops import box_area, box_iou
+    from torchvision.ops import box_iou
 except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
     _TORCHVISION_AVAILABLE = False
@@ -30,6 +30,21 @@ def _corner_coordinates(xy, wh):
     top_left = xy - half_wh
     bottom_right = xy + half_wh
     return torch.cat((top_left, bottom_right), -1)
+
+
+def _area(boxes: Tensor) -> Tensor:
+    """
+    Computes the area of a set of bounding boxes, which are specified by its
+    (x1, y1, x2, y2) coordinates.
+
+    Arguments:
+        boxes (Tensor[N, 4]): boxes for which the area will be computed. They
+            are expected to be in (x1, y1, x2, y2) format
+
+    Returns:
+        area (Tensor[N]): area for each box
+    """
+    return (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
 
 
 def _aligned_iou(dims1, dims2):
@@ -69,8 +84,8 @@ def _elementwise_iou(boxes1: Tensor, boxes2: Tensor) -> Tensor:
         iou (Tensor[N]): the vector containing the elementwise IoU values for every element in
         boxes1 and boxes2
     """
-    area1 = box_area(boxes1)
-    area2 = box_area(boxes2)
+    area1 = _area(boxes1)
+    area2 = _area(boxes2)
 
     lt = torch.max(boxes1[:, :2], boxes2[:, :2])  # [N,2]
     rb = torch.min(boxes1[:, 2:], boxes2[:, 2:])  # [N,2]
@@ -101,8 +116,8 @@ def _elementwise_generalized_iou(boxes1: Tensor, boxes2: Tensor) -> Tensor:
     assert (boxes1[:, 2:] >= boxes1[:, :2]).all()
     assert (boxes2[:, 2:] >= boxes2[:, :2]).all()
 
-    area1 = box_area(boxes1)
-    area2 = box_area(boxes2)
+    area1 = _area(boxes1)
+    area2 = _area(boxes2)
 
     lt = torch.max(boxes1[:, :2], boxes2[:, :2])  # [N,2]
     rb = torch.min(boxes1[:, 2:], boxes2[:, 2:])  # [N,2]
