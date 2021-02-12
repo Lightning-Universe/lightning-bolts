@@ -4,6 +4,7 @@ from torchvision.transforms.functional import center_crop
 
 
 class ConvBlock(nn.Module):
+
     def __init__(self, in_channels, out_channels, use_dropout=False, use_bn=True):
         super().__init__()
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
@@ -31,7 +32,7 @@ class UpSampleConv(nn.Module):
 
     def __init__(self, input_channels, use_dropout=False, use_bn=True):
         super().__init__()
-        self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.upsample = nn.ConvTranspose2d(input_channels, input_channels, kernel_size=2, stride=2)
         self.conv1 = nn.Conv2d(input_channels, input_channels // 2, kernel_size=2)
         self.conv2 = nn.Conv2d(input_channels, input_channels // 2, kernel_size=3, padding=1)
         self.conv3 = nn.Conv2d(input_channels // 2, input_channels // 2, kernel_size=2, padding=1)
@@ -90,14 +91,13 @@ class DownSampleConv(nn.Module):
 
 
 class Generator(nn.Module):
+
     def __init__(self, in_channels, out_channels, hidden_channels=32, depth=6):
         super().__init__()
 
         self.conv1 = nn.Conv2d(in_channels, hidden_channels, kernel_size=1)
 
-        self.conv_final = nn.Conv2d(hidden_channels,
-                                    out_channels,
-                                    kernel_size=1)
+        self.conv_final = nn.Conv2d(hidden_channels, out_channels, kernel_size=1)
         self.depth = depth
 
         self.contracting_layers = []
@@ -106,13 +106,12 @@ class Generator(nn.Module):
 
         # encoding/contracting path of the Generator
         for i in range(depth):
-            down_sample_conv = DownSampleConv(hidden_channels * 2 ** i,
-                                              use_dropout=(True if i < 3 else False))
+            down_sample_conv = DownSampleConv(hidden_channels * 2**i, use_dropout=(True if i < 3 else False))
             self.contracting_layers.append(down_sample_conv)
 
         # Upsampling/Expanding path of the Generator
         for i in range(depth):
-            upsample_conv = UpSampleConv(hidden_channels * 2 ** (i + 1))
+            upsample_conv = UpSampleConv(hidden_channels * 2**(i + 1))
             self.expanding_layers.append(upsample_conv)
 
         self.contracting_layers = nn.ModuleList(self.contracting_layers)
