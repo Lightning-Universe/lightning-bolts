@@ -72,7 +72,6 @@ def test_cli_run_self_supervised_moco(cli_args):
         ' --max_steps 3'
         ' --fast_dev_run 1'
         ' --batch_size 2'
-        ' --num_workers 0'
         ' --online_ft'
         ' --gpus 0'
         ' --fp32'
@@ -117,9 +116,9 @@ def test_cli_run_self_supervised_byol(cli_args):
         ' --batch_size 2'
         ' --arch resnet18'
         ' --hidden_mlp 512'
+        ' --fp32'
         ' --sinkhorn_iterations 1'
         ' --nmb_prototypes 2'
-        ' --num_workers 0'
         ' --queue_length 0'
         ' --gpus 0'
     ]
