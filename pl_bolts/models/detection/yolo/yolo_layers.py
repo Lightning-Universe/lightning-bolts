@@ -139,11 +139,13 @@ def _elementwise_generalized_iou(boxes1: Tensor, boxes2: Tensor) -> Tensor:
 
 
 class IoULoss(nn.Module):
+
     def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
         return 1.0 - _elementwise_iou(inputs, target)
 
 
 class GIoULoss(nn.Module):
+
     def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
         return 1.0 - _elementwise_generalized_iou(inputs, target)
 
