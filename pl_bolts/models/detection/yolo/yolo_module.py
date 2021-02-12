@@ -174,6 +174,8 @@ class Yolo(pl.LightningModule):
             )
         elif self.optimizer == 'adam':
             optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
+        else:
+            raise ValueError("Unknown optimizer: {}".format(self.optimizer))
 
         lr_scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,

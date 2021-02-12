@@ -7,12 +7,29 @@ from torch import nn, Tensor
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
-    from torchvision.ops import box_iou
+    from torchvision.ops import box_area, box_iou
 except ModuleNotFoundError:
     warn_missing_pkg('torchvision')  # pragma: no-cover
     _TORCHVISION_AVAILABLE = False
 else:
     _TORCHVISION_AVAILABLE = True
+
+
+def _corner_coordinates(xy, wh):
+    """
+    Converts box center points and sizes to corner coordinates.
+
+    Args:
+        xy (Tensor): Center coordinates. Tensor of size `[..., 2]`.
+        wh (Tensor): Width and height. Tensor of size `[..., 2]`.
+
+    Returns:
+        boxes (Tensor): A matrix of (x1, y1, x2, y2) coordinates.
+    """
+    half_wh = wh / 2
+    top_left = xy - half_wh
+    bottom_right = xy + half_wh
+    return torch.cat((top_left, bottom_right), -1)
 
 
 def _aligned_iou(dims1, dims2):
@@ -38,6 +55,84 @@ def _aligned_iou(dims1, dims2):
     return inter / union
 
 
+def _elementwise_iou(boxes1: Tensor, boxes2: Tensor) -> Tensor:
+    """
+    Returns the elementwise intersection-over-union between two sets of boxes.
+
+    Both sets of boxes are expected to be in (x1, y1, x2, y2) format.
+
+    Args:
+        boxes1 (Tensor[N, 4])
+        boxes2 (Tensor[N, 4])
+
+    Returns:
+        iou (Tensor[N]): the vector containing the elementwise IoU values for every element in
+        boxes1 and boxes2
+    """
+    area1 = box_area(boxes1)
+    area2 = box_area(boxes2)
+
+    lt = torch.max(boxes1[:, :2], boxes2[:, :2])  # [N,2]
+    rb = torch.min(boxes1[:, 2:], boxes2[:, 2:])  # [N,2]
+
+    wh = (rb - lt).clamp(min=0)  # [N,2]
+    inter = wh[:, 0] * wh[:, 1]  # [N]
+
+    iou = inter / (area1 + area2 - inter)
+    return iou
+
+
+def _elementwise_generalized_iou(boxes1: Tensor, boxes2: Tensor) -> Tensor:
+    """
+    Returns the elementwise generalized intersection-over-union between two sets of boxes.
+
+    Both sets of boxes are expected to be in (x1, y1, x2, y2) format.
+
+    Args:
+        boxes1 (Tensor[N, 4])
+        boxes2 (Tensor[N, 4])
+
+    Returns:
+        generalized_iou (Tensor[N]): the vector containing the elementwise generalized IoU values
+        for every element in boxes1 and boxes2
+    """
+
+    # Degenerate boxes give inf / nan results, so do an early check.
+    assert (boxes1[:, 2:] >= boxes1[:, :2]).all()
+    assert (boxes2[:, 2:] >= boxes2[:, :2]).all()
+
+    area1 = box_area(boxes1)
+    area2 = box_area(boxes2)
+
+    lt = torch.max(boxes1[:, :2], boxes2[:, :2])  # [N,2]
+    rb = torch.min(boxes1[:, 2:], boxes2[:, 2:])  # [N,2]
+
+    wh = (rb - lt).clamp(min=0)  # [N,2]
+    inter = wh[:, 0] * wh[:, 1]  # [N]
+
+    union = area1 + area2 - inter
+
+    iou = inter / union
+
+    lti = torch.min(boxes1[:, :2], boxes2[:, :2])
+    rbi = torch.max(boxes1[:, 2:], boxes2[:, 2:])
+
+    whi = (rbi - lti).clamp(min=0)  # [N,2]
+    areai = whi[:, 0] * whi[:, 1]
+
+    return iou - (areai - union) / areai
+
+
+class IoULoss(nn.Module):
+    def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
+        return 1.0 - _elementwise_iou(inputs, target)
+
+
+class GIoULoss(nn.Module):
+    def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
+        return 1.0 - _elementwise_generalized_iou(inputs, target)
+
+
 class DetectionLayer(nn.Module):
     """
     A YOLO detection layer. A YOLO model has usually 1 - 3 detection layers at different
@@ -56,6 +151,7 @@ class DetectionLayer(nn.Module):
         overlap_loss_func: Callable = None,
         class_loss_func: Callable = None,
         confidence_loss_func: Callable = None,
+        image_space_loss: bool = False,
         overlap_loss_multiplier: float = 1.0,
         class_loss_multiplier: float = 1.0,
         confidence_loss_multiplier: float = 1.0
@@ -77,12 +173,17 @@ class DetectionLayer(nn.Module):
             ignore_threshold: If a predictor is not responsible for predicting any target, but the
                 corresponding anchor has IoU with some target greater than this threshold, the
                 predictor will not be taken into account when calculating the confidence loss.
-            overlap_loss_func: Loss function for (x, y, w, h) coordinates. Default is the sum of
+            overlap_loss_func: Loss function for bounding box coordinates. Default is the sum of
                 squared errors.
             class_loss_func: Loss function for class probability distribution. Default is the sum
                 of squared errors.
             confidence_loss_func: Loss function for confidence score. Default is the sum of squared
                 errors.
+            image_space_loss: If set to `True`, the overlap loss function will receive the bounding
+                box (x1, y1, x2, y2) coordinate normalized to the [0, 1] range. This is needed for
+                the IoU losses introduced in YOLOv4. Otherwise the loss will be computed from the x,
+                y, width, and height values, as predicted by the network (i.e. relative to the
+                anchor box, and width and height are logarithmic).
             coord_loss_multiplier: Multiply the coordinate/size loss by this factor.
             class_loss_multiplier: Multiply the classification loss by this factor.
             confidence_loss_multiplier: Multiply the confidence loss by this factor.
@@ -103,14 +204,14 @@ class DetectionLayer(nn.Module):
         self.xy_scale = xy_scale
         self.ignore_threshold = ignore_threshold
 
-        self.overlap_loss_multiplier = overlap_loss_multiplier
-        self.class_loss_multiplier = class_loss_multiplier
-        self.confidence_loss_multiplier = confidence_loss_multiplier
-
         se_loss = nn.MSELoss(reduction='none')
         self.overlap_loss_func = overlap_loss_func or se_loss
         self.class_loss_func = class_loss_func or se_loss
         self.confidence_loss_func = confidence_loss_func or se_loss
+        self.image_space_loss = image_space_loss
+        self.overlap_loss_multiplier = overlap_loss_multiplier
+        self.class_loss_multiplier = class_loss_multiplier
+        self.confidence_loss_multiplier = confidence_loss_multiplier
 
     def forward(self, x: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None) -> Tuple[Tensor, Dict[str, Tensor]]:
         """
@@ -127,8 +228,9 @@ class DetectionLayer(nn.Module):
                 dictionaries, one for each image.
 
         Returns:
-            result: Layer output, and if training targets were provided, a dictionary of losses.
-                Layer output is sized `[batch_size, num_anchors * height * width, num_classes + 5]`.
+            output (Tensor), losses (Dict[str, Tensor]): Layer output, and if training targets were
+                provided, a dictionary of losses. Layer output is sized
+                `[batch_size, num_anchors * height * width, num_classes + 5]`.
         """
         batch_size, num_features, height, width = x.shape
         num_attrs = self.num_classes + 5
@@ -160,15 +262,17 @@ class DetectionLayer(nn.Module):
 
         image_xy = self._global_xy(xy)
         image_wh = self._scale_wh(wh)
-        corners = self._corner_coordinates(image_xy, image_wh)
-        output = torch.cat((corners, confidence.unsqueeze(-1), classprob), -1)
+        boxes = _corner_coordinates(image_xy, image_wh)
+        output = torch.cat((boxes, confidence.unsqueeze(-1), classprob), -1)
         output = output.reshape(batch_size, height * width * boxes_per_cell, num_attrs)
 
         if targets is None:
             return output
 
-        lc_mask = self._low_confidence_mask(corners, targets)
-        losses = self._calculate_losses(xy, wh, confidence, classprob, targets, lc_mask)
+        lc_mask = self._low_confidence_mask(boxes, targets)
+        if not self.image_space_loss:
+            boxes = torch.cat((xy, wh), -1)
+        losses = self._calculate_losses(boxes, confidence, classprob, targets, lc_mask)
         return output, losses
 
     def _global_xy(self, xy):
@@ -217,22 +321,6 @@ class DetectionLayer(nn.Module):
         anchor_wh = torch.tensor(anchor_wh, dtype=wh.dtype, device=wh.device)
         return torch.exp(wh) * anchor_wh / image_size
 
-    def _corner_coordinates(self, xy, wh):
-        """
-        Converts box center points and sizes to corner coordinates.
-
-        Args:
-            xy (Tensor): Center coordinates. Tensor of size `[..., 2]`.
-            wh (Tensor): Width and height. Tensor of size `[..., 2]`.
-
-        Returns:
-            corners (Tensor): A matrix of (x1, y1, x2, y2) coordinates.
-        """
-        half_wh = wh / 2
-        top_left = xy - half_wh
-        bottom_right = xy + half_wh
-        return torch.cat((top_left, bottom_right), -1)
-
     def _low_confidence_mask(self, boxes, targets):
         """
         Initializes the mask that will be used to select predictors that are not predicting any
@@ -268,16 +356,14 @@ class DetectionLayer(nn.Module):
 
         return results.view((batch_size, height, width, boxes_per_cell))
 
-    def _calculate_losses(self, xy, wh, confidence, classprob, targets, lc_mask):
+    def _calculate_losses(self, boxes, confidence, classprob, targets, lc_mask):
         """
         From the targets that are in the image space calculates the actual targets for the network
         predictions, and returns a dictionary of training losses.
 
         Args:
-            xy (Tensor): The predicted center coordinates before scaling. Values from zero to one
-                in a tensor sized `[batch_size, height, width, boxes_per_cell, 2]`.
-            wh (Tensor): The unnormalized width and height predictions. Tensor of size
-                `[batch_size, height, width, boxes_per_cell, 2]`.
+            boxes (Tensor): The predicted bounding boxes. A tensor sized
+                `[batch_size, height, width, boxes_per_cell, 4]`.
             confidence (Tensor): The confidence predictions, normalized to [0, 1]. A tensor sized
                 `[batch_size, height, width, boxes_per_cell]`.
             classprob (Tensor): The class probability predictions, normalized to [0, 1]. A tensor
@@ -290,8 +376,8 @@ class DetectionLayer(nn.Module):
         Returns:
             predicted (Dict[str, Tensor]): A dictionary of training losses.
         """
-        batch_size, height, width, boxes_per_cell, _ = xy.shape
-        device = xy.device
+        batch_size, height, width, boxes_per_cell, _ = boxes.shape
+        device = boxes.device
         assert batch_size == len(targets)
 
         # Divisor for converting targets from image coordinates to feature map coordinates
@@ -299,7 +385,7 @@ class DetectionLayer(nn.Module):
         # Divisor for converting targets from image coordinates to [0, 1] range
         image_to_unit = torch.tensor([self.image_width, self.image_height], device=device)
 
-        anchor_wh = torch.tensor(self.anchor_dims, dtype=wh.dtype, device=device)
+        anchor_wh = torch.tensor(self.anchor_dims, dtype=boxes.dtype, device=device)
         anchor_map = torch.tensor(self.anchor_map, dtype=torch.int64, device=device)
 
         # List of predicted and target values for the predictors that are responsible for
@@ -308,33 +394,34 @@ class DetectionLayer(nn.Module):
         target_wh = []
         target_label = []
         size_compensation = []
-        pred_xy = []
-        pred_wh = []
+        pred_boxes = []
         pred_classprob = []
         pred_confidence = []
 
         for image_idx, image_targets in enumerate(targets):
-            boxes = image_targets['boxes']
-            if boxes.shape[0] < 1:
+            target_boxes = image_targets['boxes']
+            if target_boxes.shape[0] < 1:
                 continue
 
             # Bounding box corner coordinates are converted to center coordinates, width, and
-            # height.
-            box_wh = boxes[:, 2:4] - boxes[:, 0:2]
-            box_xy = boxes[:, 0:2] + (box_wh / 2)
+            # height, and normalized to [0, 1] range.
+            wh = target_boxes[:, 2:4] - target_boxes[:, 0:2]
+            xy = target_boxes[:, 0:2] + (wh / 2)
+            unit_xy = xy / image_to_unit
+            unit_wh = wh / image_to_unit
 
             # The center coordinates are converted to the feature map dimensions so that the whole
             # number tells the cell index and the fractional part tells the location inside the cell.
-            box_xy = box_xy / image_to_feature_map
-            cell_i = box_xy[:, 0].to(torch.int64).clamp(0, width - 1)
-            cell_j = box_xy[:, 1].to(torch.int64).clamp(0, height - 1)
+            xy = xy / image_to_feature_map
+            cell_i = xy[:, 0].to(torch.int64).clamp(0, width - 1)
+            cell_j = xy[:, 1].to(torch.int64).clamp(0, height - 1)
 
             # We want to know which anchor box overlaps a ground truth box more than any other
             # anchor box. We know that the anchor box is located in the same grid cell as the
             # ground truth box. For each prior shape (width, height), we calculate the IoU with
             # all ground truth boxes, assuming the boxes are at the same location. Then for each
             # target, we select the prior shape that gives the highest IoU.
-            ious = _aligned_iou(box_wh, anchor_wh)
+            ious = _aligned_iou(wh, anchor_wh)
             best_anchors = ious.max(1).indices
 
             # `anchor_map` maps the anchor indices to the predictors in this layer, or to -1 if
@@ -342,8 +429,8 @@ class DetectionLayer(nn.Module):
             # another layer.
             predictors = anchor_map[best_anchors]
             selected = predictors >= 0
-            box_xy = box_xy[selected]
-            box_wh = box_wh[selected]
+            unit_xy = unit_xy[selected]
+            unit_wh = unit_wh[selected]
             cell_i = cell_i[selected]
             cell_j = cell_j[selected]
             predictors = predictors[selected]
@@ -354,14 +441,21 @@ class DetectionLayer(nn.Module):
             # the target confidence.
             lc_mask[image_idx, cell_j, cell_i, predictors] = False
 
-            # Bounding box targets
-            relative_xy = box_xy - box_xy.floor()
-            relative_wh = torch.log(box_wh / anchor_wh[best_anchors] + 1e-16)
-            target_xy.append(relative_xy)
-            target_wh.append(relative_wh)
+            # IoU losses are calculated from the image space coordinates normalized to [0, 1]
+            # range. The squared-error loss is calculated from the raw predicted values.
+            if self.image_space_loss:
+                target_xy.append(unit_xy)
+                target_wh.append(unit_wh)
+            else:
+                xy = xy[selected]
+                wh = wh[selected]
+                relative_xy = xy - xy.floor()
+                relative_wh = torch.log(wh / anchor_wh[best_anchors] + 1e-16)
+                target_xy.append(relative_xy)
+                target_wh.append(relative_wh)
 
-            # Size compensation factor for bounding box loss
-            unit_wh = box_wh / image_to_unit
+            # Size compensation factor for bounding box overlap loss is calculated from image space
+            # width and height.
             size_compensation.append(2 - (unit_wh[:, 0] * unit_wh[:, 1]))
 
             # The data may contain a different number of classes than this detection layer. In case
@@ -372,18 +466,20 @@ class DetectionLayer(nn.Module):
             labels = torch.min(labels, torch.tensor(self.num_classes - 1, device=device))
             target_label.append(labels)
 
-            pred_xy.append(xy[image_idx, cell_j, cell_i, predictors])
-            pred_wh.append(wh[image_idx, cell_j, cell_i, predictors])
+            pred_boxes.append(boxes[image_idx, cell_j, cell_i, predictors])
             pred_classprob.append(classprob[image_idx, cell_j, cell_i, predictors])
             pred_confidence.append(confidence[image_idx, cell_j, cell_i, predictors])
 
         losses = dict()
 
-        if pred_xy and pred_wh and target_xy and target_wh:
+        if pred_boxes and target_xy and target_wh:
             size_compensation = torch.cat(size_compensation).unsqueeze(1)
-            pred_xywh = torch.cat((torch.cat(pred_xy), torch.cat(pred_wh)), -1)
-            target_xywh = torch.cat((torch.cat(target_xy), torch.cat(target_wh)), -1)
-            overlap_loss = self.overlap_loss_func(pred_xywh, target_xywh)
+            pred_boxes = torch.cat(pred_boxes)
+            if self.image_space_loss:
+                target_boxes = _corner_coordinates(torch.cat(target_xy), torch.cat(target_wh))
+            else:
+                target_boxes = torch.cat((torch.cat(target_xy), torch.cat(target_wh)), -1)
+            overlap_loss = self.overlap_loss_func(pred_boxes, target_boxes)
             overlap_loss = overlap_loss * size_compensation
             overlap_loss = overlap_loss.sum() / batch_size
             losses['overlap'] = overlap_loss * self.overlap_loss_multiplier

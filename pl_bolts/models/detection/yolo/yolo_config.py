@@ -239,6 +239,14 @@ def _create_yolo(config, num_inputs):
     class_loss_multiplier = config.get('cls_normalizer', 1.0)
     confidence_loss_multiplier = config.get('obj_normalizer', 1.0)
 
+    overlap_loss_name = config.get('iou_loss', 'mse')
+    if overlap_loss_name == 'mse':
+        overlap_loss_func = nn.MSELoss(reduction='none')
+    elif overlap_loss_name == 'giou':
+        overlap_loss_func = yolo_layers.GIoULoss()
+    else:
+        overlap_loss_func = yolo_layers.IoULoss()
+
     module = yolo_layers.DetectionLayer(
         num_classes=config['classes'],
         image_width=config['width'],
@@ -247,6 +255,8 @@ def _create_yolo(config, num_inputs):
         anchor_ids=config['mask'],
         xy_scale=xy_scale,
         ignore_threshold=ignore_threshold,
+        overlap_loss_func=overlap_loss_func,
+        image_space_loss=overlap_loss_name != 'mse',
         overlap_loss_multiplier=overlap_loss_multiplier,
         class_loss_multiplier=class_loss_multiplier,
         confidence_loss_multiplier=confidence_loss_multiplier
