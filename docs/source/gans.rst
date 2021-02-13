@@ -42,7 +42,6 @@ Loss curves:
 .. autoclass:: pl_bolts.models.gans.GAN
    :noindex:
 
-
 DCGAN
 ---------
 DCGAN implementation from the paper `Unsupervised Representation Learning with Deep Convolutional Generative
@@ -51,7 +50,7 @@ PyTorch's `examples <https://github.com/pytorch/examples/blob/master/dcgan/main.
 
 Implemented by:
 
-    - `Christoph Clement <https://github.com/chris-clem>`_   
+    - `Christoph Clement <https://github.com/chris-clem>`_
 
 Example MNIST outputs:
 
