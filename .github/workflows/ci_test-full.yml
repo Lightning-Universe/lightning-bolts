@@ -62,8 +62,13 @@ jobs:
 
     - name: Install dependencies
       run: |
-        # python -m pip install --upgrade --user pip
-        pip install --requirement requirements/devel.txt --pre --upgrade --quiet --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
+        python -m pip install --upgrade --user pip
+
+        # Install only mandatory dependencies and check if `import pl_bolts` is successful without any optional packages.
+        pip install --pre --upgrade --quiet --find-links https://download.pytorch.org/whl/cpu/torch_stable.html .
+        python -c 'import pl_bolts'
+
+        pip install --pre --upgrade --quiet --find-links https://download.pytorch.org/whl/cpu/torch_stable.html .[dev]
         python --version
         pip --version
         pip list
@@ -78,7 +83,7 @@ jobs:
     - name: Tests
       run: |
         # tox --sitepackages
-        coverage run --source pl_bolts -m py.test pl_bolts tests -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
+        coverage run --source pl_bolts -m pytest tests -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@v2
