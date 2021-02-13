@@ -8,14 +8,6 @@ DATASETS_PATH = os.path.join(PACKAGE_ROOT, 'datasets')
 # generate a list of random seeds for each test
 ROOT_SEED = 1234
 
-optional_pkg_names = [
-    "torchvision",
-    "gym",
-    "sklearn",
-    "PIL",
-    "cv2",
-]
-
 
 def reset_seed():
     seed_everything()
