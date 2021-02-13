@@ -41,7 +41,7 @@ class UpSample(nn.Module):
         """
         super().__init__()
         self.input_channels = input_channels
-        self.upsample = nn.ConvTranspose2d(input_channels, input_channels//2, padding=1, kernel_size=4, stride=2)
+        self.upsample = nn.ConvTranspose2d(input_channels, input_channels // 2, padding=1, kernel_size=4, stride=2)
         # self.conv1 = nn.Conv2d(input_channels, input_channels // 2, kernel_size=2)
         self.conv2 = nn.Conv2d(input_channels, input_channels // 2, kernel_size=3, padding=1)
         self.conv3 = nn.Conv2d(input_channels // 2, input_channels // 2, kernel_size=2, padding=1)
