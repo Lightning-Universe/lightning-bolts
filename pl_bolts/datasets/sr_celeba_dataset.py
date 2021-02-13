@@ -6,13 +6,13 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _PIL_AVAILABLE:
     from PIL import Image
-else:
-    warn_missing_pkg("PIL", pypi_name="Pillow")  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg("PIL", pypi_name="Pillow")
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import CelebA
-else:
-    warn_missing_pkg("torchvision")  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg("torchvision")
     CelebA = object
 
 
