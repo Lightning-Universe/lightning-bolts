@@ -33,9 +33,7 @@ class CNN(nn.Module):
         )
 
         conv_out_size = self._get_conv_out(input_shape)
-        self.head = nn.Sequential(
-            nn.Linear(conv_out_size, 512), nn.ReLU(), nn.Linear(512, n_actions)
-        )
+        self.head = nn.Sequential(nn.Linear(conv_out_size, 512), nn.ReLU(), nn.Linear(512, n_actions))
 
     def _get_conv_out(self, shape) -> int:
         """
@@ -119,9 +117,7 @@ class DuelingMLP(nn.Module):
             nn.ReLU(),
             nn.Linear(hidden_size, n_actions),
         )
-        self.head_val = nn.Sequential(
-            nn.Linear(hidden_size, 256), nn.ReLU(), nn.Linear(256, 1)
-        )
+        self.head_val = nn.Sequential(nn.Linear(hidden_size, 256), nn.ReLU(), nn.Linear(256, 1))
 
     def forward(self, input_x):
         """
@@ -179,14 +175,10 @@ class DuelingCNN(nn.Module):
         conv_out_size = self._get_conv_out(input_shape)
 
         # advantage head
-        self.head_adv = nn.Sequential(
-            nn.Linear(conv_out_size, 256), nn.ReLU(), nn.Linear(256, n_actions)
-        )
+        self.head_adv = nn.Sequential(nn.Linear(conv_out_size, 256), nn.ReLU(), nn.Linear(256, n_actions))
 
         # value head
-        self.head_val = nn.Sequential(
-            nn.Linear(conv_out_size, 256), nn.ReLU(), nn.Linear(256, 1)
-        )
+        self.head_val = nn.Sequential(nn.Linear(conv_out_size, 256), nn.ReLU(), nn.Linear(256, 1))
 
     def _get_conv_out(self, shape) -> int:
         """
@@ -254,9 +246,7 @@ class NoisyCNN(nn.Module):
         )
 
         conv_out_size = self._get_conv_out(input_shape)
-        self.head = nn.Sequential(
-            NoisyLinear(conv_out_size, 512), nn.ReLU(), NoisyLinear(512, n_actions)
-        )
+        self.head = nn.Sequential(NoisyLinear(conv_out_size, 512), nn.ReLU(), NoisyLinear(512, n_actions))
 
     def _get_conv_out(self, shape) -> int:
         """
@@ -313,7 +303,7 @@ class NoisyLinear(nn.Linear):
         self.register_buffer("epsilon_weight", epsilon_weight)
 
         if bias:
-            bias = torch.full((out_features,), sigma_init)
+            bias = torch.full((out_features, ), sigma_init)
             self.sigma_bias = nn.Parameter(bias)
             epsilon_bias = torch.zeros(out_features)
             self.register_buffer("epsilon_bias", epsilon_bias)

@@ -1,13 +1,13 @@
 import numpy as np
-import torch.nn.functional as F
+from torch.nn import functional as F
 
 from pl_bolts.utils import _PIL_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _PIL_AVAILABLE:
     from PIL import Image
-else:
-    warn_missing_pkg('PIL', pypi_name='Pillow')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('PIL', pypi_name='Pillow')
 
 
 class RandomTranslateWithReflect:
@@ -20,16 +20,13 @@ class RandomTranslateWithReflect:
     """
 
     def __init__(self, max_translation):
+        if not _PIL_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError("You want to use `Pillow` which is not installed yet.")
+
         self.max_translation = max_translation
 
     def __call__(self, old_image):
-        if not _PIL_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
-                'You want to use `Pillow` which is not installed yet, install it with `pip install Pillow`.'
-            )
-        xtranslation, ytranslation = np.random.randint(-self.max_translation,
-                                                       self.max_translation + 1,
-                                                       size=2)
+        xtranslation, ytranslation = np.random.randint(-self.max_translation, self.max_translation + 1, size=2)
         xpad, ypad = abs(xtranslation), abs(ytranslation)
         xsize, ysize = old_image.size
 
@@ -52,10 +49,9 @@ class RandomTranslateWithReflect:
         new_image.paste(flipped_both, (xpad - xsize + 1, ypad + ysize - 1))
         new_image.paste(flipped_both, (xpad + xsize - 1, ypad + ysize - 1))
 
-        new_image = new_image.crop((xpad - xtranslation,
-                                    ypad - ytranslation,
-                                    xpad + xsize - xtranslation,
-                                    ypad + ysize - ytranslation))
+        new_image = new_image.crop(
+            (xpad - xtranslation, ypad - ytranslation, xpad + xsize - xtranslation, ypad + ysize - ytranslation)
+        )
         return new_image
 
 

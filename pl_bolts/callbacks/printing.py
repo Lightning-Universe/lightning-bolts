@@ -43,14 +43,16 @@ class PrintTableMetricsCallback(Callback):
         rank_zero_info(dicts_to_table(self.metrics))
 
 
-def dicts_to_table(dicts: List[Dict],
-                   keys: Optional[List[str]] = None,
-                   pads: Optional[List[str]] = None,
-                   fcodes: Optional[List[str]] = None,
-                   convert_headers: Optional[Dict[str, Callable]] = None,
-                   header_names: Optional[List[str]] = None,
-                   skip_none_lines: bool = False,
-                   replace_values: Optional[Dict[str, Any]] = None) -> str:
+def dicts_to_table(
+    dicts: List[Dict],
+    keys: Optional[List[str]] = None,
+    pads: Optional[List[str]] = None,
+    fcodes: Optional[List[str]] = None,
+    convert_headers: Optional[Dict[str, Callable]] = None,
+    header_names: Optional[List[str]] = None,
+    skip_none_lines: bool = False,
+    replace_values: Optional[Dict[str, Any]] = None
+) -> str:
     """
     Generate ascii table from dictionary
     Taken from (https://stackoverflow.com/questions/40056747/print-a-list-of-dictionaries-in-table-form)
@@ -106,7 +108,7 @@ def dicts_to_table(dicts: List[Dict],
     marked_keys = [h + '____' if h in convert_headers else h for h in keys]  # type: ignore[union-attr]
     marked_values = {}
     s = '│'.join(f"{{{h}:{pad}{fcode}}}" for h, pad, fcode in zip_longest(marked_keys, pads, fcodes))
-    lines = [headline, underline, ]
+    lines = [headline, underline]
     for d in dicts:
         none_keys = [k for k, v in d.items() if v is None]
         if skip_none_lines and none_keys:

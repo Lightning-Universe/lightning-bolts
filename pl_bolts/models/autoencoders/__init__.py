@@ -11,3 +11,12 @@ from pl_bolts.models.autoencoders.components import (  # noqa: F401
     resnet50_decoder,
     resnet50_encoder,
 )
+
+__all__ = [
+    "AE",
+    "VAE",
+    "resnet18_decoder",
+    "resnet18_encoder",
+    "resnet50_decoder",
+    "resnet50_encoder",
+]

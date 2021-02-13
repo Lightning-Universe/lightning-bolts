@@ -13,7 +13,7 @@ class GAN(pl.LightningModule):
 
     Example::
 
-        from pl_bolts.models.gan import GAN
+        from pl_bolts.models.gans import GAN
 
         m = GAN()
         Trainer(gpus=2).fit(m)
@@ -156,12 +156,13 @@ class GAN(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--learning_rate', type=float, default=0.0002, help="adam: learning rate")
-        parser.add_argument('--adam_b1', type=float, default=0.5,
-                            help="adam: decay of first order momentum of gradient")
-        parser.add_argument('--adam_b2', type=float, default=0.999,
-                            help="adam: decay of first order momentum of gradient")
-        parser.add_argument('--latent_dim', type=int, default=100,
-                            help="generator embedding dim")
+        parser.add_argument(
+            '--adam_b1', type=float, default=0.5, help="adam: decay of first order momentum of gradient"
+        )
+        parser.add_argument(
+            '--adam_b2', type=float, default=0.999, help="adam: decay of first order momentum of gradient"
+        )
+        parser.add_argument('--latent_dim', type=int, default=100, help="generator embedding dim")
         return parser
 
 
@@ -193,7 +194,7 @@ def cli_main(args=None):
     model = GAN(*dm.size(), **vars(args))
     callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]
     trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks, progress_bar_refresh_rate=20)
-    trainer.fit(model, dm)
+    trainer.fit(model, datamodule=dm)
     return dm, model, trainer
 
 

@@ -2,8 +2,8 @@ from typing import List, Optional
 
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
 from pytorch_lightning.metrics import Accuracy
+from torch.nn import functional as F
 
 from pl_bolts.models.self_supervised import SSLEvaluator
 
@@ -76,12 +76,7 @@ class SSLFineTuner(pl.LightningModule):
         self.final_lr = final_lr
 
         self.backbone = backbone
-        self.linear_layer = SSLEvaluator(
-            n_input=in_features,
-            n_classes=num_classes,
-            p=dropout,
-            n_hidden=hidden_dim
-        )
+        self.linear_layer = SSLEvaluator(n_input=in_features, n_classes=num_classes, p=dropout, n_hidden=hidden_dim)
 
         # metrics
         self.train_acc = Accuracy()
@@ -142,12 +137,12 @@ class SSLFineTuner(pl.LightningModule):
 
         # set scheduler
         if self.scheduler_type == "step":
-            scheduler = torch.optim.lr_scheduler.MultiStepLR(
-                optimizer, self.decay_epochs, gamma=self.gamma
-            )
+            scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, self.decay_epochs, gamma=self.gamma)
         elif self.scheduler_type == "cosine":
             scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-                optimizer, self.epochs, eta_min=self.final_lr  # total epochs to run
+                optimizer,
+                self.epochs,
+                eta_min=self.final_lr  # total epochs to run
             )
 
         return [optimizer], [scheduler]

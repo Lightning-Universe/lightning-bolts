@@ -1,6 +1,6 @@
 import os
 from abc import abstractmethod
-from typing import Any, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 
 import torch
 from pytorch_lightning import LightningDataModule
@@ -9,12 +9,12 @@ from torch.utils.data import DataLoader, Dataset, random_split
 
 class VisionDataModule(LightningDataModule):
 
-    EXTRA_ARGS = {}
+    EXTRA_ARGS: dict = {}
     name: str = ""
     #: Dataset class to use
-    dataset_cls = ...
+    dataset_cls: type
     #: A tuple describing the shape of the data
-    dims: tuple = ...
+    dims: tuple
 
     def __init__(
         self,
@@ -56,7 +56,7 @@ class VisionDataModule(LightningDataModule):
         self.pin_memory = pin_memory
         self.drop_last = drop_last
 
-    def prepare_data(self) -> None:
+    def prepare_data(self, *args: Any, **kwargs: Any) -> None:
         """
         Saves files to data_dir
         """
@@ -88,11 +88,9 @@ class VisionDataModule(LightningDataModule):
         """
         Splits the dataset into train and validation set
         """
-        len_dataset = len(dataset)
+        len_dataset = len(dataset)  # type: ignore[arg-type]
         splits = self._get_splits(len_dataset)
-        dataset_train, dataset_val = random_split(
-            dataset, splits, generator=torch.Generator().manual_seed(self.seed)
-        )
+        dataset_train, dataset_val = random_split(dataset, splits, generator=torch.Generator().manual_seed(self.seed))
 
         if train:
             return dataset_train
@@ -115,18 +113,18 @@ class VisionDataModule(LightningDataModule):
         return splits
 
     @abstractmethod
-    def default_transforms(self):
+    def default_transforms(self) -> Callable:
         """ Default transform for the dataset """
 
-    def train_dataloader(self) -> DataLoader:
+    def train_dataloader(self, *args: Any, **kwargs: Any) -> DataLoader:
         """ The train dataloader """
         return self._data_loader(self.dataset_train, shuffle=self.shuffle)
 
-    def val_dataloader(self) -> DataLoader:
+    def val_dataloader(self, *args: Any, **kwargs: Any) -> Union[DataLoader, List[DataLoader]]:
         """ The val dataloader """
         return self._data_loader(self.dataset_val)
 
-    def test_dataloader(self) -> DataLoader:
+    def test_dataloader(self, *args: Any, **kwargs: Any) -> Union[DataLoader, List[DataLoader]]:
         """ The test dataloader """
         return self._data_loader(self.dataset_test)
 

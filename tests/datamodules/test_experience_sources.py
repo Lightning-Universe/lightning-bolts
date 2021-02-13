@@ -17,16 +17,19 @@ from pl_bolts.models.rl.common.agents import Agent
 
 
 class DummyAgent(Agent):
+
     def __call__(self, states, device):
         return [0] * len(states)
 
 
 class DummyExperienceSource(BaseExperienceSource):
+
     def __iter__(self):
         yield torch.ones(3)
 
 
 class TestExperienceSourceDataset(TestCase):
+
     def train_batch(self):
         """Returns an iterator used for testing"""
         return iter([i for i in range(100)])
@@ -45,6 +48,7 @@ class TestExperienceSourceDataset(TestCase):
 
 
 class TestBaseExperienceSource(TestCase):
+
     def setUp(self) -> None:
         self.net = Mock()
         self.agent = DummyAgent(net=self.net)
@@ -63,6 +67,7 @@ class TestBaseExperienceSource(TestCase):
 
 
 class TestExperienceSource(TestCase):
+
     def setUp(self) -> None:
         self.net = Mock()
         self.agent = DummyAgent(net=self.net)
@@ -233,6 +238,7 @@ class TestExperienceSource(TestCase):
 
 
 class TestDiscountedExperienceSource(TestCase):
+
     def setUp(self) -> None:
         self.net = Mock()
         self.agent = DummyAgent(net=self.net)
@@ -240,9 +246,7 @@ class TestDiscountedExperienceSource(TestCase):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.n_steps = 3
         self.gamma = 0.9
-        self.source = DiscountedExperienceSource(
-            self.env, self.agent, n_steps=self.n_steps, gamma=self.gamma
-        )
+        self.source = DiscountedExperienceSource(self.env, self.agent, n_steps=self.n_steps, gamma=self.gamma)
 
         self.state = torch.ones(3)
         self.next_state = torch.zeros(3)
@@ -264,9 +268,7 @@ class TestDiscountedExperienceSource(TestCase):
         )
 
         self.env1 = Mock()
-        self.env1.step = Mock(
-            return_value=(self.next_state, self.reward, True, self.state)
-        )
+        self.env1.step = Mock(return_value=(self.next_state, self.reward, True, self.state))
 
     def test_init(self):
         """Test that experience source is setup correctly"""
@@ -284,9 +286,7 @@ class TestDiscountedExperienceSource(TestCase):
     def test_source_step_done(self):
         """Tests that the source returns a single experience"""
 
-        self.source = DiscountedExperienceSource(
-            self.env1, self.agent, n_steps=self.n_steps
-        )
+        self.source = DiscountedExperienceSource(self.env1, self.agent, n_steps=self.n_steps)
 
         self.source.histories[0].append(self.exp1)
         self.source.histories[0].append(self.exp2)
@@ -303,16 +303,12 @@ class TestDiscountedExperienceSource(TestCase):
         discounted returns: G(t) = R(t+1) + γ*R(t+2) + γ^2*R(t+3) ... + γ^N-1*R(t+N)
         """
 
-        self.source = DiscountedExperienceSource(
-            self.env1, self.agent, n_steps=self.n_steps
-        )
+        self.source = DiscountedExperienceSource(self.env1, self.agent, n_steps=self.n_steps)
 
         self.source.histories[0] += [self.exp1, self.exp2]
 
         discounted_reward = (
-            self.exp1.reward +
-            (self.source.gamma * self.exp2.reward) +
-            (self.source.gamma * self.reward) ** 2
+            self.exp1.reward + (self.source.gamma * self.exp2.reward) + (self.source.gamma * self.reward)**2
         )
 
         for idx, exp in enumerate(self.source.runner(self.device)):

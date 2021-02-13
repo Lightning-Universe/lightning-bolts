@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, Callable, Optional, Union
 
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -7,8 +7,8 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import MNIST
-else:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
+else:  # pragma: no cover
+    warn_missing_pkg('torchvision')
     MNIST = None
 
 
@@ -37,7 +37,7 @@ class MNISTDataModule(VisionDataModule):
         dm = MNISTDataModule('.')
         model = LitModel()
 
-        Trainer().fit(model, dm)
+        Trainer().fit(model, datamodule=dm)
     """
     name = "mnist"
     dataset_cls = MNIST
@@ -70,7 +70,12 @@ class MNISTDataModule(VisionDataModule):
                         returning them
             drop_last: If true drops the last incomplete batch
         """
-        super().__init__(
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
+                'You want to use MNIST dataset loaded from `torchvision` which is not installed yet.'
+            )
+
+        super().__init__(  # type: ignore[misc]
             data_dir=data_dir,
             val_split=val_split,
             num_workers=num_workers,
@@ -92,11 +97,11 @@ class MNISTDataModule(VisionDataModule):
         """
         return 10
 
-    def default_transforms(self):
+    def default_transforms(self) -> Callable:
         if self.normalize:
-            mnist_transforms = transform_lib.Compose(
-                [transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5,), std=(0.5,))]
-            )
+            mnist_transforms = transform_lib.Compose([
+                transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5, ), std=(0.5, ))
+            ])
         else:
             mnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
 

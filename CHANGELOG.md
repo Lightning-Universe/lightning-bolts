@@ -4,52 +4,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - YYYY-MM-DD
+## [0.3.0] - 2021-01-20
 
 ### Added
 
 - Added `input_channels` argument to UNet ([#297](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/297))
-
-- Added SwAV ([#239](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/239), [#348](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/348), [#323](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/323))
-
+- Added SwAV ([#239](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/239),
+    [#348](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/348),
+    [#323](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/323))
 - Added data monitor callbacks `ModuleDataMonitor` and `TrainingDataMonitor` ([#285](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/285))
-
+- Added DCGAN module ([#403](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/403)) 
 - Added `VisionDataModule` as parent class for `BinaryMNISTDataModule`, `CIFAR10DataModule`, `FashionMNISTDataModule`, 
   and `MNISTDataModule` ([#400](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/400))
-
 - Added GIoU loss ([#347](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/347))
-
 - Added IoU loss ([#469](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/469))
+- Added semantic segmentation model `SemSegment` with `UNet` backend ([#259](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/259))
+- Added pption to normalize latent interpolation images ([#438](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/438))
+- Added flags to datamodules ([#388](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/388))
+- Added metric GIoU ([#347](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/347))
+- Added Intersection over Union Metric/Loss ([#469](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/469))
+- Added SimSiam model ([#407](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/407))
+- Added gradient verification callback ([#465](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/465))
+- Added Backbones to FRCNN ([#475](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/475))
 
 ### Changed
 
-- Decoupled datamodules from models ([#332](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/332), [#270](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/270))
-
+- Decoupled datamodules from models ([#332](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/332),
+    [#270](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/270))
 - Set PyTorch Lightning 1.0 as the minimum requirement ([#274](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/274))
-
-- Move `pl_bolts.callbacks.self_supervised.BYOLMAWeightUpdate` to  `pl_bolts.callbacks.byol_updates.BYOLMAWeightUpdate` ([#288](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/288))
-
-- Move `pl_bolts.callbacks.self_supervised.SSLOnlineEvaluator` to `pl_bolts.callbacks.ssl_online.SSLOnlineEvaluator` ([#288](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/288))
-
-- Move `pl_bolts.datamodules.*_dataset` to `pl_bolts.datasets.*_dataset` ([#275](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/275))
+- Moved `pl_bolts.callbacks.self_supervised.BYOLMAWeightUpdate` to  `pl_bolts.callbacks.byol_updates.BYOLMAWeightUpdate` ([#288](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/288))
+- Moved `pl_bolts.callbacks.self_supervised.SSLOnlineEvaluator` to `pl_bolts.callbacks.ssl_online.SSLOnlineEvaluator` ([#288](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/288))
+- Moved `pl_bolts.datamodules.*_dataset` to `pl_bolts.datasets.*_dataset` ([#275](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/275))
+- Ensured sync across val/test step when using DDP ([#371](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/371))
+- Refactored CLI arguments of models ([#394](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/394))
+- Upgraded DQN to use `.log` ([#404](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/404))
+- Decoupled DataModules from models - CPCV2 ([#386](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/386))
+- Refactored datamodules/datasets ([#338](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/338))
+- Refactored Vision DataModules ([#400](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/400))
+- Refactored `pl_bolts.callbacks` ([#477](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/477))
+- Refactored the rest of `pl_bolts.models.self_supervised` ([#481](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/481),
+    [#479](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/479)
+- Update [`torchvision.utils.make_grid`(https://pytorch.org/docs/stable/torchvision/utils.html#torchvision.utils.make_grid)] kwargs to `TensorboardGenerativeModelImageSampler` ([#494](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/494))
 
 ### Fixed
 
 - Fixed duplicate warnings when optional packages are unavailable ([#341](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/341))
-
-- Fixed ModuleNotFoundError when importing datamoules ([#303](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/303))
-
+- Fixed `ModuleNotFoundError` when importing datamoules ([#303](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/303))
 - Fixed cyclic imports in `pl_bolts.utils.self_suprvised` ([#350](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/350))
-
 - Fixed VAE loss to use KL term of ELBO ([#330](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/330))
-
 - Fixed dataloders of `MNISTDataModule` to use `self.batch_size` ([#331](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/331))
-
 - Fixed missing `outputs` in SSL hooks for PyTorch Lightning 1.0 ([#277](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/277))
-
-### Removed
-
-### Deprecated
+- Fixed stl10 datamodule ([#369](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/369))
+- Fixes SimCLR transforms ([#329](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/329))
+- Fixed binary MNIST datamodule ([#377](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/377))
+- Fixed the end of batch size mismatch ([#389](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/389))
+- Fixed `batch_size` parameter for DataModules remaining ([#344](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/344))
+- Fixed CIFAR `num_samples` ([#432](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/432))
+- Fixed DQN `run_n_episodes` using the wrong environment variable ([#525](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/525))
 
 ## [0.2.5] - 2020-10-12
 
@@ -65,7 +76,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Enabled PyTorch Lightning 0.10 compatibility ([#264](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/264))
 - Added dummy datasets ([#266](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/266))
-- Added semantic segmentation model `SemSegment` with `UNet` backend ([#259](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/259))
 - Added `KittiDataModule` ([#248](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/248))
 - Added `UNet` ([#247](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/247))
 - Added reinforcement learning models, losses and datamodules ([#257](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/257))

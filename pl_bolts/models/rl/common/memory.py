@@ -7,9 +7,7 @@ from typing import List, Tuple, Union
 
 import numpy as np
 
-Experience = namedtuple(
-    "Experience", field_names=["state", "action", "reward", "done", "new_state"]
-)
+Experience = namedtuple("Experience", field_names=["state", "action", "reward", "done", "new_state"])
 
 
 class Buffer:
@@ -43,9 +41,7 @@ class Buffer:
         Returns:
             a batch of tuple np arrays of state, action, reward, done, next_state
         """
-        states, actions, rewards, dones, next_states = zip(
-            *[self.buffer[idx] for idx in range(self.__len__())]
-        )
+        states, actions, rewards, dones, next_states = zip(*[self.buffer[idx] for idx in range(self.__len__())])
 
         self.buffer.clear()
 
@@ -75,9 +71,7 @@ class ReplayBuffer(Buffer):
         """
 
         indices = np.random.choice(len(self.buffer), batch_size, replace=False)
-        states, actions, rewards, dones, next_states = zip(
-            *[self.buffer[idx] for idx in indices]
-        )
+        states, actions, rewards, dones, next_states = zip(*[self.buffer[idx] for idx in indices])
 
         return (
             np.array(states),
@@ -122,8 +116,13 @@ class MultiStepBuffer(ReplayBuffer):
 
             total_reward = self.discount_rewards(tail_experiences)
 
-            n_step_exp = Experience(state=experiences[0].state, action=experiences[0].action, reward=total_reward,
-                                    done=experiences[0].done, new_state=last_exp_state)
+            n_step_exp = Experience(
+                state=experiences[0].state,
+                action=experiences[0].action,
+                reward=total_reward,
+                done=experiences[0].done,
+                new_state=last_exp_state
+            )
 
             self.buffer.append(n_step_exp)  # add n_step experience to buffer
 
@@ -237,7 +236,7 @@ class PERBuffer(ReplayBuffer):
         self.capacity = buffer_size
         self.pos = 0
         self.buffer = []
-        self.priorities = np.zeros((buffer_size,), dtype=np.float32)
+        self.priorities = np.zeros((buffer_size, ), dtype=np.float32)
 
     def update_beta(self, step) -> float:
         """
@@ -289,18 +288,16 @@ class PERBuffer(ReplayBuffer):
         if len(self.buffer) == self.capacity:
             prios = self.priorities
         else:
-            prios = self.priorities[: self.pos]
+            prios = self.priorities[:self.pos]
 
         # probability to the power of alpha to weight how important that probability it, 0 = normal distirbution
-        probs = prios ** self.prob_alpha
+        probs = prios**self.prob_alpha
         probs /= probs.sum()
 
         # choise sample of indices based on the priority prob distribution
         indices = np.random.choice(len(self.buffer), batch_size, p=probs)
         # samples = [self.buffer[idx] for idx in indices]
-        states, actions, rewards, dones, next_states = zip(
-            *[self.buffer[idx] for idx in indices]
-        )
+        states, actions, rewards, dones, next_states = zip(*[self.buffer[idx] for idx in indices])
 
         samples = (
             np.array(states),
@@ -312,7 +309,7 @@ class PERBuffer(ReplayBuffer):
         total = len(self.buffer)
 
         # weight of each sample datum to compensate for the bias added in with prioritising samples
-        weights = (total * probs[indices]) ** (-self.beta)
+        weights = (total * probs[indices])**(-self.beta)
         weights /= weights.max()
 
         # return the samples, the indices chosen and the weight of each datum in the sample

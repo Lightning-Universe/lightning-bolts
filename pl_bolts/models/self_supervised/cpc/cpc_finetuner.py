@@ -12,7 +12,7 @@ from pl_bolts.models.self_supervised.cpc.transforms import (
 )
 
 
-def cli_main():  # pragma: no-cover
+def cli_main():  # pragma: no cover
     from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 
     pl.seed_everything(1234)
