@@ -135,7 +135,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
 
         batch_size, c, w, h = confusing_x.size()
         for logit_i, x_param in enumerate((x_param_a, x_param_b)):
-            x_param = x_param.to(model.device)  # type: ignore[assignment]
+            x_param = x_param.to(model.device)
             logits = model(x_param.view(batch_size, -1))
             logits[:, mask_idxs[:, logit_i]].sum().backward()
 
