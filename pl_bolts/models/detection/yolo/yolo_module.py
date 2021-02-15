@@ -304,18 +304,9 @@ class YOLO(pl.LightningModule):
 
             read(conv.weight)
 
-    @classmethod
-    def get_deprecated_arg_names(cls) -> List:
-        """Returns a list with deprecated constructor arguments."""
-        depr_arg_names = []
-        for name, val in cls.__dict__.items():
-            if name.startswith('DEPRECATED') and isinstance(val, (tuple, list)):
-                depr_arg_names.extend(val)
-        return depr_arg_names
-
     def _validate_batch(
         self,
-        batch: Tuple[List[Tensor], List[Dict[str, Tensor]]],
+        batch: Tuple[List[Tensor], List[Dict[str, Tensor]]]
     ) -> Tuple[Tensor, List[Dict[str, Tensor]]]:
         """
         Reads a batch of data, validates the format, and stacks the images into a single tensor.
