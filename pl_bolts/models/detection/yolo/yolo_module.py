@@ -344,8 +344,13 @@ class YOLO(pl.LightningModule):
         images = torch.stack(images)
         return images, targets
 
-    def _filter_detections(self, boxes: Tensor, confidences: Tensor, classprobs: Tensor,
-                           labels: Tensor) -> Tuple[List[Tensor], List[Tensor], List[Tensor], List[Tensor]]:
+    def _filter_detections(
+        self,
+        boxes: Tensor,
+        confidences: Tensor,
+        classprobs: Tensor,
+        labels: Tensor,
+    ) -> Tuple[List[Tensor], List[Tensor], List[Tensor], List[Tensor]]:
         """
         Filters detections based on confidence threshold. Then for every class performs non-maximum
         suppression (NMS). NMS iterates the bounding boxes that predict this class in descending
