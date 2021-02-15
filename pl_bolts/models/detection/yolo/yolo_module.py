@@ -339,8 +339,10 @@ class Yolo(pl.LightningModule):
                 depr_arg_names.extend(val)
         return depr_arg_names
 
-    def _validate_batch(self, batch: Tuple[List[Tensor], List[Dict[str,
-                                                                   Tensor]]]) -> Tuple[Tensor, List[Dict[str, Tensor]]]:
+    def _validate_batch(
+        self,
+        batch: Tuple[List[Tensor], List[Dict[str, Tensor]]],
+    ) -> Tuple[Tensor, List[Dict[str, Tensor]]]:
         """
         Reads a batch of data, validates the format, and stacks the images into a single tensor.
 
