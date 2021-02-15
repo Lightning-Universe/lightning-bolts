@@ -10,17 +10,15 @@ from torch import optim, Tensor
 from pl_bolts.models.detection.yolo.yolo_config import YoloConfiguration
 from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, RouteLayer, ShortcutLayer
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
+if _TORCHVISION_AVAILABLE:
     import torchvision.transforms as T
     from torchvision.ops import nms
     from torchvision.transforms import functional as F
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
 else:
-    _TORCHVISION_AVAILABLE = True
+    warn_missing_pkg('torchvision')
 
 
 class Yolo(pl.LightningModule):
@@ -43,8 +41,8 @@ class Yolo(pl.LightningModule):
     of dictionaries).
 
     The target dictionaries should contain:
-        - boxes (`FloatTensor[N, 4]`): the ground truth boxes in `[x1, y1, x2, y2]` format.
-        - labels (`LongTensor[N]`): the class label for each ground truh box
+        - boxes (``FloatTensor[N, 4]``): the ground truth boxes in ``[x1, y1, x2, y2]`` format.
+        - labels (``LongTensor[N]``): the class label for each ground truh box
 
     CLI command::
 
@@ -69,14 +67,14 @@ class Yolo(pl.LightningModule):
         """
         Args:
             network: A list of network modules. This can be obtained from a Darknet configuration
-                using the `YoloConfiguration.get_network()` method.
+                using the ``YoloConfiguration.get_network()`` method.
             optimizer: Which optimizer to use for training; either 'sgd' or 'adam'.
             momentum: Momentum factor for SGD with momentum.
             weight_decay: Weight decay (L2 penalty).
             learning_rate: Learning rate after the warmup period.
             warmup_epochs: Length of the learning rate warmup period in the beginning of
                 training. During this number of epochs, the learning rate will be raised from
-                `warmup_start_lr` to `learning_rate`.
+                ``warmup_start_lr`` to ``learning_rate``.
             warmup_start_lr: Learning rate in the beginning of the warmup period.
             annealing_epochs: Length of the learning rate annealing period, during which the
                 learning rate will go to zero.
@@ -107,7 +105,7 @@ class Yolo(pl.LightningModule):
                 images: Tensor,
                 targets: List[Dict[str, Tensor]] = None) -> Tuple[Tensor, Tensor, Tensor, Dict[str, Tensor]]:
         """
-        Runs a forward pass through the network (all layers listed in `self.network`), and if
+        Runs a forward pass through the network (all layers listed in ``self.network``), and if
         training targets are provided, computes the losses from the detection layers.
 
         Detections are concatenated from the detection layers. Each image will produce
@@ -119,7 +117,7 @@ class Yolo(pl.LightningModule):
 
         Args:
             images: Images to be processed. Tensor of size
-                `[batch_size, num_channels, height, width]`.
+                ``[batch_size, num_channels, height, width]``.
             targets: If set, computes losses from detection layers against these targets. A list of
                 dictionaries, one for each image.
 
@@ -127,7 +125,7 @@ class Yolo(pl.LightningModule):
             boxes (Tensor), confidences (Tensor), classprobs (Tensor), losses (Dict[str, Tensor]):
                 Detections, and if targets were provided, a dictionary of losses. The first
                 dimension of the detections is the index of the image in the batch and the second
-                dimension is the detection within the image. `boxes` contains the predicted
+                dimension is the detection within the image. ``boxes`` contains the predicted
                 (x1, y1, x2, y2) coordinates, normalized to [0, 1].
         """
         outputs = []  # Outputs from all layers
@@ -252,7 +250,7 @@ class Yolo(pl.LightningModule):
         detected bounding boxes, confidences, and class labels.
 
         Args:
-            image: An input image, a tensor of uint8 values sized `[channels, height, width]`.
+            image: An input image, a tensor of uint8 values sized ``[channels, height, width]``.
 
         Returns:
             boxes (:class:`~torch.Tensor`), confidences (:class:`~torch.Tensor`), labels (:class:`~torch.Tensor`):
@@ -301,8 +299,8 @@ class Yolo(pl.LightningModule):
 
         def read(tensor):
             """
-            Reads the contents of `tensor` from the current position of `weight_file`.
-            If there's no more data in `weight_file`, returns without error.
+            Reads the contents of ``tensor`` from the current position of ``weight_file``.
+            If there's no more data in ``weight_file``, returns without error.
             """
             x = np.fromfile(weight_file, count=tensor.numel(), dtype=np.float32)
             if x.shape[0] == 0:
@@ -390,10 +388,10 @@ class Yolo(pl.LightningModule):
 
         Args:
             boxes: Detected bounding box (x1, y1, x2, y2) coordinates in a tensor sized
-                `[batch_size, N, 4]`.
-            confidences: Detection confidences in a tensor sized `[batch_size, N]`.
-            classprobs: Probabilities of the best classes in a tensor sized `[batch_size, N]`.
-            labels: Indices of the best classes in a tensor sized `[batch_size, N]`.
+                ``[batch_size, N, 4]``.
+            confidences: Detection confidences in a tensor sized ``[batch_size, N]``.
+            classprobs: Probabilities of the best classes in a tensor sized ``[batch_size, N]``.
+            labels: Indices of the best classes in a tensor sized ``[batch_size, N]``.
 
         Returns:
             boxes (List[Tensor]), confidences (List[Tensor]), classprobs (List[Tensor]), labels (List[Tensor]):
@@ -447,8 +445,8 @@ class Resize:
 
     Args:
         output_size (tuple or int): Desired output size. If tuple (height, width), the output is
-            matched to `output_size`. If int, the smaller of the image edges is matched to
-            `output_size`, keeping the aspect ratio the same.
+            matched to ``output_size``. If int, the smaller of the image edges is matched to
+            ``output_size``, keeping the aspect ratio the same.
     """
 
     def __init__(self, output_size: tuple):

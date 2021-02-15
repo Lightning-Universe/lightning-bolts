@@ -4,15 +4,13 @@ import torch
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import nn, Tensor
 
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
-    from torchvision.ops import box_iou
-except ModuleNotFoundError:
-    warn_missing_pkg('torchvision')  # pragma: no-cover
-    _TORCHVISION_AVAILABLE = False
+if _TORCHVISION_AVAILABLE:
+    from torchvision.ops import box_iou, generalized_box_iou
 else:
-    _TORCHVISION_AVAILABLE = True
+    warn_missing_pkg('torchvision')
 
 
 def _corner_coordinates(xy, wh):
@@ -20,8 +18,8 @@ def _corner_coordinates(xy, wh):
     Converts box center points and sizes to corner coordinates.
 
     Args:
-        xy (Tensor): Center coordinates. Tensor of size `[..., 2]`.
-        wh (Tensor): Width and height. Tensor of size `[..., 2]`.
+        xy (Tensor): Center coordinates. Tensor of size ``[..., 2]``.
+        wh (Tensor): Width and height. Tensor of size ``[..., 2]``.
 
     Returns:
         boxes (Tensor): A matrix of (x1, y1, x2, y2) coordinates.
@@ -30,21 +28,6 @@ def _corner_coordinates(xy, wh):
     top_left = xy - half_wh
     bottom_right = xy + half_wh
     return torch.cat((top_left, bottom_right), -1)
-
-
-def _area(boxes: Tensor) -> Tensor:
-    """
-    Computes the area of a set of bounding boxes, which are specified by its
-    (x1, y1, x2, y2) coordinates.
-
-    Arguments:
-        boxes (Tensor[N, 4]): boxes for which the area will be computed. They
-            are expected to be in (x1, y1, x2, y2) format
-
-    Returns:
-        area (Tensor[N]): area for each box
-    """
-    return (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
 
 
 def _aligned_iou(dims1, dims2):
@@ -58,7 +41,7 @@ def _aligned_iou(dims1, dims2):
 
     Returns:
         iou (Tensor[N, M]): the NxM matrix containing the pairwise IoU values for every element in
-            `dims1` and `dims2`
+            ``dims1`` and ``dims2``
     """
     area1 = dims1[:, 0] * dims1[:, 1]  # [N]
     area2 = dims2[:, 0] * dims2[:, 1]  # [M]
@@ -70,84 +53,16 @@ def _aligned_iou(dims1, dims2):
     return inter / union
 
 
-def _elementwise_iou(boxes1: Tensor, boxes2: Tensor) -> Tensor:
-    """
-    Returns the elementwise intersection-over-union between two sets of boxes.
-
-    Both sets of boxes are expected to be in (x1, y1, x2, y2) format.
-
-    Args:
-        boxes1 (Tensor[N, 4])
-        boxes2 (Tensor[N, 4])
-
-    Returns:
-        iou (Tensor[N]): the vector containing the elementwise IoU values for every element in
-        boxes1 and boxes2
-    """
-    area1 = _area(boxes1)
-    area2 = _area(boxes2)
-
-    lt = torch.max(boxes1[:, :2], boxes2[:, :2])  # [N,2]
-    rb = torch.min(boxes1[:, 2:], boxes2[:, 2:])  # [N,2]
-
-    wh = (rb - lt).clamp(min=0)  # [N,2]
-    inter = wh[:, 0] * wh[:, 1]  # [N]
-
-    iou = inter / (area1 + area2 - inter)
-    return iou
-
-
-def _elementwise_generalized_iou(boxes1: Tensor, boxes2: Tensor) -> Tensor:
-    """
-    Returns the elementwise generalized intersection-over-union between two sets of boxes.
-
-    Both sets of boxes are expected to be in (x1, y1, x2, y2) format.
-
-    Args:
-        boxes1 (Tensor[N, 4])
-        boxes2 (Tensor[N, 4])
-
-    Returns:
-        generalized_iou (Tensor[N]): the vector containing the elementwise generalized IoU values
-        for every element in boxes1 and boxes2
-    """
-
-    # Degenerate boxes give inf / nan results, so do an early check.
-    assert (boxes1[:, 2:] >= boxes1[:, :2]).all()
-    assert (boxes2[:, 2:] >= boxes2[:, :2]).all()
-
-    area1 = _area(boxes1)
-    area2 = _area(boxes2)
-
-    lt = torch.max(boxes1[:, :2], boxes2[:, :2])  # [N,2]
-    rb = torch.min(boxes1[:, 2:], boxes2[:, 2:])  # [N,2]
-
-    wh = (rb - lt).clamp(min=0)  # [N,2]
-    inter = wh[:, 0] * wh[:, 1]  # [N]
-
-    union = area1 + area2 - inter
-
-    iou = inter / union
-
-    lti = torch.min(boxes1[:, :2], boxes2[:, :2])
-    rbi = torch.max(boxes1[:, 2:], boxes2[:, 2:])
-
-    whi = (rbi - lti).clamp(min=0)  # [N,2]
-    areai = whi[:, 0] * whi[:, 1]
-
-    return iou - (areai - union) / areai
-
-
 class IoULoss(nn.Module):
 
     def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
-        return 1.0 - _elementwise_iou(inputs, target)
+        return 1.0 - box_iou(inputs, target).diagonal()
 
 
 class GIoULoss(nn.Module):
 
     def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
-        return 1.0 - _elementwise_generalized_iou(inputs, target)
+        return 1.0 - generalized_box_iou(inputs, target).diagonal()
 
 
 class DetectionLayer(nn.Module):
@@ -183,7 +98,7 @@ class DetectionLayer(nn.Module):
             anchor_dims: A list of all the predefined anchor box dimensions. The list should
                 contain (width, height) tuples in the network input resolution (relative to the
                 width and height defined in the configuration file).
-            anchor_ids: List of indices to `anchor_dims` that is used to select the (usually 3)
+            anchor_ids: List of indices to ``anchor_dims`` that is used to select the (usually 3)
                 anchors that this layer uses.
             xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor.
                 Using a value > 1.0 helps to produce coordinate values close to one.
@@ -196,7 +111,7 @@ class DetectionLayer(nn.Module):
                 of squared errors.
             confidence_loss_func: Loss function for confidence score. Default is the sum of squared
                 errors.
-            image_space_loss: If set to `True`, the overlap loss function will receive the bounding
+            image_space_loss: If set to ``True``, the overlap loss function will receive the bounding
                 box (x1, y1, x2, y2) coordinate normalized to the [0, 1] range. This is needed for
                 the IoU losses introduced in YOLOv4. Otherwise the loss will be computed from the x,
                 y, width, and height values, as predicted by the network (i.e. relative to the
@@ -240,14 +155,14 @@ class DetectionLayer(nn.Module):
 
         Args:
             x: The output from the previous layer. Tensor of size
-                `[batch_size, boxes_per_cell * (num_classes + 5), height, width]`.
+                ``[batch_size, boxes_per_cell * (num_classes + 5), height, width]``.
             targets: If set, computes losses from detection layers against these targets. A list of
                 dictionaries, one for each image.
 
         Returns:
             output (Tensor), losses (Dict[str, Tensor]): Layer output, and if training targets were
                 provided, a dictionary of losses. Layer output is sized
-                `[batch_size, num_anchors * height * width, num_classes + 5]`.
+                ``[batch_size, num_anchors * height * width, num_classes + 5]``.
         """
         batch_size, num_features, height, width = x.shape
         num_attrs = self.num_classes + 5
@@ -303,7 +218,7 @@ class DetectionLayer(nn.Module):
 
         Args:
             xy (Tensor): The predicted center coordinates before scaling. Values from zero to one
-                in a tensor sized `[batch_size, height, width, boxes_per_cell, 2]`.
+                in a tensor sized ``[batch_size, height, width, boxes_per_cell, 2]``.
 
         Returns:
             result (Tensor): Global coordinates from zero to one, in a tensor with the same shape
@@ -327,7 +242,7 @@ class DetectionLayer(nn.Module):
 
         Args:
             wh (Tensor): The unnormalized width and height predictions. Tensor of size
-                `[..., boxes_per_cell, 2]`.
+                ``[..., boxes_per_cell, 2]``.
 
         Returns:
             result (Tensor): A tensor with the same shape as the input tensor, but scaled sizes
@@ -341,18 +256,18 @@ class DetectionLayer(nn.Module):
     def _low_confidence_mask(self, boxes, targets):
         """
         Initializes the mask that will be used to select predictors that are not predicting any
-        ground-truth target. The value will be `True`, unless the predicted box overlaps any target
-        significantly (IoU greater than `self.ignore_threshold`).
+        ground-truth target. The value will be ``True``, unless the predicted box overlaps any target
+        significantly (IoU greater than ``self.ignore_threshold``).
 
         Args:
             boxes (Tensor): The predicted corner coordinates, normalized to the [0, 1] range.
-                Tensor of size `[batch_size, height, width, boxes_per_cell, 4]`.
+                Tensor of size ``[batch_size, height, width, boxes_per_cell, 4]``.
             targets (List[Dict[str, Tensor]]): List of dictionaries of target values, one
                 dictionary for each image.
 
         Returns:
-            results (Tensor): A boolean tensor shaped `[batch_size, height, width, boxes_per_cell]`
-                with `False` where the predicted box overlaps a target significantly and `True`
+            results (Tensor): A boolean tensor shaped ``[batch_size, height, width, boxes_per_cell]``
+                with ``False`` where the predicted box overlaps a target significantly and ``True``
                 elsewhere.
         """
         batch_size, height, width, boxes_per_cell, num_coords = boxes.shape
@@ -380,14 +295,14 @@ class DetectionLayer(nn.Module):
 
         Args:
             boxes (Tensor): The predicted bounding boxes. A tensor sized
-                `[batch_size, height, width, boxes_per_cell, 4]`.
+                ``[batch_size, height, width, boxes_per_cell, 4]``.
             confidence (Tensor): The confidence predictions, normalized to [0, 1]. A tensor sized
-                `[batch_size, height, width, boxes_per_cell]`.
+                ``[batch_size, height, width, boxes_per_cell]``.
             classprob (Tensor): The class probability predictions, normalized to [0, 1]. A tensor
-                sized `[batch_size, height, width, boxes_per_cell, num_classes]`.
+                sized ``[batch_size, height, width, boxes_per_cell, num_classes]``.
             targets (List[Dict[str, Tensor]]): List of dictionaries of target values, one
                 dictionary for each image.
-            lc_mask (Tensor): A boolean mask containing `True` where the predicted box does not
+            lc_mask (Tensor): A boolean mask containing ``True`` where the predicted box does not
                 overlap any target significantly.
 
         Returns:
@@ -441,7 +356,7 @@ class DetectionLayer(nn.Module):
             ious = _aligned_iou(wh, anchor_wh)
             best_anchors = ious.max(1).indices
 
-            # `anchor_map` maps the anchor indices to the predictors in this layer, or to -1 if
+            # ``anchor_map`` maps the anchor indices to the predictors in this layer, or to -1 if
             # it's not an anchor of this layer. We ignore the predictions if the best anchor is in
             # another layer.
             predictors = anchor_map[best_anchors]

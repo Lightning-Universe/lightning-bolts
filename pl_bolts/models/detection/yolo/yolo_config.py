@@ -11,14 +11,14 @@ from pl_bolts.models.detection.yolo import yolo_layers
 class YoloConfiguration:
     """
     This class can be used to parse the configuration files of the Darknet YOLOv4 implementation.
-    The `get_network()` method returns a PyTorch module list that can be used to construct a YOLO
+    The ``get_network()`` method returns a PyTorch module list that can be used to construct a YOLO
     model.
     """
 
     def __init__(self, path: str):
         """
         Saves the variables from the first configuration section to attributes of this object, and
-        the rest of the sections to the `layer_configs` list.
+        the rest of the sections to the ``layer_configs`` list.
 
         Args:
             path: Path to a configuration file
@@ -39,7 +39,7 @@ class YoloConfiguration:
         modules. Returns the network structure that can be used to create a YOLO model.
 
         Returns:
-            modules: A `nn.ModuleList` that defines the YOLO network.
+            modules: A ``nn.ModuleList`` that defines the YOLO network.
         """
         result = nn.ModuleList()
         num_inputs = [3]  # Number of channels in the input of every layer up to the current layer
@@ -149,7 +149,7 @@ class YoloConfiguration:
 
 def _create_layer(config: dict, num_inputs: List[int]) -> Tuple[nn.Module, int]:
     """
-    Calls one of the `_create_<layertype>(config, num_inputs)` functions to create a PyTorch
+    Calls one of the ``_create_<layertype>(config, num_inputs)`` functions to create a PyTorch
     module from the layer config.
 
     Args:
