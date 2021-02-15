@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from pl_bolts.datasets import DummyDetectionDataset
-from pl_bolts.models.detection import FasterRCNN, Yolo, YoloConfiguration
+from pl_bolts.models.detection import FasterRCNN, YOLO, YOLOConfiguration
 from pl_bolts.models.detection.yolo.yolo_layers import _aligned_iou
 
 
@@ -129,8 +129,8 @@ ignore_thresh=0.7'''
 def test_yolo(tmpdir):
     config_path = Path(tmpdir) / 'yolo.cfg'
     _create_yolo_config_file(config_path)
-    config = YoloConfiguration(config_path)
-    model = Yolo(config.get_network())
+    config = YOLOConfiguration(config_path)
+    model = YOLO(config.get_network())
 
     image = torch.rand(1, 3, 256, 256)
     model(image)
@@ -139,8 +139,8 @@ def test_yolo(tmpdir):
 def test_yolo_train(tmpdir):
     config_path = Path(tmpdir) / 'yolo.cfg'
     _create_yolo_config_file(config_path)
-    config = YoloConfiguration(config_path)
-    model = Yolo(config.get_network())
+    config = YOLOConfiguration(config_path)
+    model = YOLO(config.get_network())
 
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)

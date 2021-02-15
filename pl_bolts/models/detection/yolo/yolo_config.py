@@ -8,7 +8,7 @@ from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from pl_bolts.models.detection.yolo import yolo_layers
 
 
-class YoloConfiguration:
+class YOLOConfiguration:
     """
     This class can be used to parse the configuration files of the Darknet YOLOv4 implementation.
     The ``get_network()`` method returns a PyTorch module list that can be used to construct a YOLO

@@ -1,5 +1,5 @@
 import inspect
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Type
 
 import numpy as np
 import pytorch_lightning as pl
@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 from torch import optim, Tensor
 
-from pl_bolts.models.detection.yolo.yolo_config import YoloConfiguration
+from pl_bolts.models.detection.yolo.yolo_config import YOLOConfiguration
 from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, RouteLayer, ShortcutLayer
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -21,7 +21,7 @@ else:
     warn_missing_pkg('torchvision')
 
 
-class Yolo(pl.LightningModule):
+class YOLO(pl.LightningModule):
     """
     PyTorch Lightning implementation of `YOLOv3 <https://arxiv.org/abs/1804.02767>`_ with some
     improvements from `YOLOv4 <https://arxiv.org/abs/2004.10934>`_.
@@ -54,13 +54,10 @@ class Yolo(pl.LightningModule):
     def __init__(
         self,
         network: nn.ModuleList,
-        optimizer: str = 'sgd',
-        momentum: float = 0.9,
-        weight_decay: float = 0.0005,
-        learning_rate: float = 0.0013,
-        warmup_epochs: int = 1,
-        warmup_start_lr: float = 0.0001,
-        annealing_epochs: int = 271,
+        optimizer: Type[optim.Optimizer] = optim.SGD,
+        optimizer_params: Dict[str, Any] = {'lr': 0.0013, 'momentum': 0.9, 'weight_decay': 0.0005},
+        lr_scheduler: Type[optim.lr_scheduler._LRScheduler] = LinearWarmupCosineAnnealingLR,
+        lr_scheduler_params: Dict[str, Any] = {'warmup_epochs': 1, 'max_epochs': 271, 'warmup_start_lr': 0.0},
         confidence_threshold: float = 0.2,
         nms_threshold: float = 0.45
     ):
@@ -68,16 +65,10 @@ class Yolo(pl.LightningModule):
         Args:
             network: A list of network modules. This can be obtained from a Darknet configuration
                 using the ``YoloConfiguration.get_network()`` method.
-            optimizer: Which optimizer to use for training; either 'sgd' or 'adam'.
-            momentum: Momentum factor for SGD with momentum.
-            weight_decay: Weight decay (L2 penalty).
-            learning_rate: Learning rate after the warmup period.
-            warmup_epochs: Length of the learning rate warmup period in the beginning of
-                training. During this number of epochs, the learning rate will be raised from
-                ``warmup_start_lr`` to ``learning_rate``.
-            warmup_start_lr: Learning rate in the beginning of the warmup period.
-            annealing_epochs: Length of the learning rate annealing period, during which the
-                learning rate will go to zero.
+            optimizer: Which optimizer class to use for training.
+            optimizer_params: Parameters to pass to the optimizer constructor.
+            lr_scheduler: Which learning rate scheduler class to use for training.
+            lr_scheduler_params: Parameters to pass to the learning rate scheduler constructor.
             confidence_threshold: Postprocessing will remove bounding boxes whose
                 confidence score is not higher than this threshold.
             nms_threshold: Non-maximum suppression will remove bounding boxes whose IoU
@@ -91,13 +82,10 @@ class Yolo(pl.LightningModule):
             )
 
         self.network = network
-        self.optimizer = optimizer
-        self.momentum = momentum
-        self.weight_decay = weight_decay
-        self.learning_rate = learning_rate
-        self.warmup_epochs = warmup_epochs
-        self.warmup_start_lr = warmup_start_lr
-        self.annealing_epochs = annealing_epochs
+        self.optimizer_class = optimizer
+        self.optimizer_params = optimizer_params
+        self.lr_scheduler_class = lr_scheduler
+        self.lr_scheduler_params = lr_scheduler_params
         self.confidence_threshold = confidence_threshold
         self.nms_threshold = nms_threshold
 
@@ -166,22 +154,8 @@ class Yolo(pl.LightningModule):
 
     def configure_optimizers(self) -> Tuple[List, List]:
         """Constructs the optimizer and learning rate scheduler."""
-        if self.optimizer == 'sgd':
-            optimizer = optim.SGD(
-                self.parameters(), lr=self.learning_rate, momentum=self.momentum, weight_decay=self.weight_decay
-            )
-        elif self.optimizer == 'adam':
-            optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
-        else:
-            raise ValueError("Unknown optimizer: {}".format(self.optimizer))
-
-        lr_scheduler = LinearWarmupCosineAnnealingLR(
-            optimizer,
-            warmup_epochs=self.warmup_epochs,
-            max_epochs=self.annealing_epochs,
-            warmup_start_lr=self.warmup_start_lr
-        )
-
+        optimizer = self.optimizer_class(self.parameters(), **self.optimizer_params)
+        lr_scheduler = self.lr_scheduler_class(optimizer, **self.lr_scheduler_params)
         return [optimizer], [lr_scheduler]
 
     def training_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int) -> Dict[str, Tensor]:
@@ -483,22 +457,42 @@ def run_cli():
     parser.add_argument('--config', type=str, help='model configuration file', required=True)
     parser.add_argument('--darknet-weights', type=str, help='initialize the model weights from this Darknet model file')
     parser.add_argument('--batch-size', type=int, help='number of images in one batch', default=16)
+    parser.add_argument('--lr', type=float, help='learning ratea after warmup', default=0.0013)
+    parser.add_argument('--momentum', type=float, help='optimizer momentum factor', default=0.9)
+    parser.add_argument('--weight-decay', type=float, help='weight decay (L2 penalty)', default=0.0005)
+    parser.add_argument('--warmup-epochs', type=int, help='length of the learning rate warmup', default=1)
+    parser.add_argument('--max-epochs', type=int, help='maximum number of epochs to train', default=271)
+    parser.add_argument('--initial-lr', type=float, help='learning rate before warmup', default=0.0)
+    parser.add_argument('--confidence-threshold', type=float, help='threshold for prediction confidence', default=0.01)
+    parser.add_argument('--nms-threshold', type=float, help='non-maximum suppression threshold', default=0.45)
     parser = VOCDetectionDataModule.add_argparse_args(parser)
-    parser = argparse_utils.add_argparse_args(Yolo, parser)
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
-    config = YoloConfiguration(args.config)
+    config = YOLOConfiguration(args.config)
 
     transforms = [Resize((config.height, config.width))]
     image_transforms = T.ToTensor()
     datamodule = VOCDetectionDataModule.from_argparse_args(args)
     datamodule.prepare_data()
 
-    params = vars(args)
-    valid_kwargs = inspect.signature(Yolo.__init__).parameters
-    kwargs = dict((name, params[name]) for name in valid_kwargs if name in params)
-    model = Yolo(network=config.get_network(), **kwargs)
+    optimizer_params = {
+        'lr': args.lr,
+        'momentum': args.momentum,
+        'weight_decay': args.weight_decay
+    }
+    lr_scheduler_params = {
+        'warmup_epochs': args.warmup_epochs,
+        'max_epochs': args.max_epochs,
+        'warmup_start_lr': args.initial_lr
+    }
+    model = YOLO(
+        network=config.get_network(),
+        optimizer_params=optimizer_params,
+        lr_scheduler_params=lr_scheduler_params,
+        confidence_threshold=args.confidence_threshold,
+        nms_threshold=args.nms_threshold
+    )
     if args.darknet_weights is not None:
         with open(args.darknet_weights, 'r') as weight_file:
             model.load_darknet_weights(weight_file)

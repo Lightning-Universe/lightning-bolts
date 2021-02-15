@@ -8,7 +8,13 @@ from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
-    from torchvision.ops import box_iou, generalized_box_iou
+    from torchvision.ops import box_iou
+    try:
+        from torchvision.ops import generalized_box_iou
+    except ImportError:
+        _GIOU_AVAILABLE = False
+    else:
+        _GIOU_AVAILABLE = True
 else:
     warn_missing_pkg('torchvision')
 
@@ -60,6 +66,13 @@ class IoULoss(nn.Module):
 
 
 class GIoULoss(nn.Module):
+
+    def __init__(self):
+        super().__init__()
+        if not _GIOU_AVAILABLE:
+            raise ModuleNotFoundError(  # pragma: no-cover
+                'A more recent version of `torchvision` is needed for generalized IoU loss.'
+            )
 
     def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
         return 1.0 - generalized_box_iou(inputs, target).diagonal()

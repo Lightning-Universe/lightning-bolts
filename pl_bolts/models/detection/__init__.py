@@ -1,5 +1,6 @@
 from pl_bolts.models.detection import components
 from pl_bolts.models.detection.faster_rcnn import FasterRCNN
-from pl_bolts.models.detection.yolo import Yolo, YoloConfiguration
+from pl_bolts.models.detection.yolo.yolo_module import YOLO
+from pl_bolts.models.detection.yolo.yolo_config import YOLOConfiguration
 
-__all__ = ["components", "FasterRCNN", "YoloConfiguration", "Yolo"]
+__all__ = ["components", "FasterRCNN", "YOLOConfiguration", "YOLO"]
