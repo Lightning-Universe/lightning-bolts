@@ -135,10 +135,8 @@ class DetectionLayer(nn.Module):
         """
         super().__init__()
 
-        if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
-                'YOLO model uses `torchvision`, which is not installed yet.'
-            )
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError('YOLO model uses `torchvision`, which is not installed yet.')
 
         self.num_classes = num_classes
         self.image_width = image_width
