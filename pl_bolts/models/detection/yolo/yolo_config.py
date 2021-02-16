@@ -15,7 +15,7 @@ class YOLOConfiguration:
     model.
     """
 
-    def __init__(self, path: str):
+    def __init__(self, path: str) -> None:
         """
         Saves the variables from the first configuration section to attributes of this object, and
         the rest of the sections to the ``layer_configs`` list.

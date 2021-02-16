@@ -67,7 +67,7 @@ class IoULoss(nn.Module):
 
 class GIoULoss(nn.Module):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         if not _GIOU_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
@@ -93,14 +93,14 @@ class DetectionLayer(nn.Module):
         anchor_ids: List[int],
         xy_scale: float = 1.0,
         ignore_threshold: float = 0.5,
-        overlap_loss_func: Callable = None,
-        class_loss_func: Callable = None,
-        confidence_loss_func: Callable = None,
+        overlap_loss_func: Optional[Callable] = None,
+        class_loss_func: Optional[Callable] = None,
+        confidence_loss_func: Optional[Callable] = None,
         image_space_loss: bool = False,
         overlap_loss_multiplier: float = 1.0,
         class_loss_multiplier: float = 1.0,
         confidence_loss_multiplier: float = 1.0
-    ):
+    ) -> None:
         """
         Args:
             num_classes: Number of different classes that this layer predicts.
@@ -463,7 +463,7 @@ class Mish(nn.Module):
 class RouteLayer(nn.Module):
     """Route layer concatenates the output (or part of it) from given layers."""
 
-    def __init__(self, source_layers: List[int], num_chunks: int, chunk_idx: int):
+    def __init__(self, source_layers: List[int], num_chunks: int, chunk_idx: int) -> None:
         """
         Args:
             source_layers: Indices of the layers whose output will be concatenated.
@@ -483,7 +483,7 @@ class RouteLayer(nn.Module):
 class ShortcutLayer(nn.Module):
     """Shortcut layer adds a residual connection from the source layer."""
 
-    def __init__(self, source_layer: int):
+    def __init__(self, source_layer: int) -> None:
         """
         Args:
             source_layer: Index of the layer whose output will be added to the output of the

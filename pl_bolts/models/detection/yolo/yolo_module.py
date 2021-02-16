@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 import numpy as np
 import pytorch_lightning as pl
@@ -13,7 +13,6 @@ from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
-    import torchvision.transforms as T
     from torchvision.ops import nms
     from torchvision.transforms import functional as F
 else:
@@ -59,7 +58,7 @@ class YOLO(pl.LightningModule):
         lr_scheduler_params: Dict[str, Any] = {'warmup_epochs': 1, 'max_epochs': 271, 'warmup_start_lr': 0.0},
         confidence_threshold: float = 0.2,
         nms_threshold: float = 0.45
-    ):
+    ) -> None:
         """
         Args:
             network: A list of network modules. This can be obtained from a Darknet configuration
@@ -88,9 +87,11 @@ class YOLO(pl.LightningModule):
         self.confidence_threshold = confidence_threshold
         self.nms_threshold = nms_threshold
 
-    def forward(self,
-                images: Tensor,
-                targets: List[Dict[str, Tensor]] = None) -> Tuple[Tensor, Tensor, Tensor, Dict[str, Tensor]]:
+    def forward(
+        self,
+        images: Tensor,
+        targets: Optional[List[Dict[str, Tensor]]] = None
+    ) -> Tuple[Tensor, Tensor, Tensor, Dict[str, Tensor]]:
         """
         Runs a forward pass through the network (all layers listed in ``self.network``), and if
         training targets are provided, computes the losses from the detection layers.
@@ -349,7 +350,7 @@ class YOLO(pl.LightningModule):
         boxes: Tensor,
         confidences: Tensor,
         classprobs: Tensor,
-        labels: Tensor,
+        labels: Tensor
     ) -> Tuple[List[Tensor], List[Tensor], List[Tensor], List[Tensor]]:
         """
         Filters detections based on confidence threshold. Then for every class performs non-maximum
@@ -420,7 +421,7 @@ class Resize:
             ``output_size``, keeping the aspect ratio the same.
     """
 
-    def __init__(self, output_size: tuple):
+    def __init__(self, output_size: tuple) -> None:
         self.output_size = output_size
 
     def __call__(self, image, target):
@@ -467,7 +468,6 @@ def run_cli():
     config = YOLOConfiguration(args.config)
 
     transforms = [Resize((config.height, config.width))]
-    image_transforms = T.ToTensor()
     datamodule = VOCDetectionDataModule.from_argparse_args(args)
     datamodule.prepare_data()
 
@@ -494,8 +494,8 @@ def run_cli():
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(
-        model, datamodule.train_dataloader(args.batch_size, transforms, image_transforms),
-        datamodule.val_dataloader(args.batch_size, transforms, image_transforms)
+        model, datamodule.train_dataloader(args.batch_size, transforms),
+        datamodule.val_dataloader(args.batch_size, transforms)
     )
 
 
