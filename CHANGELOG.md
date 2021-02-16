@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - YYYY-MM-DD
+
+### Added
+
+### Changed
+
+- Moved vision models (`GPT2`, `ImageGPT`, `SemSegment`, `UNet`) to `pl_bolts.models.vision` ([#561](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/561))
+
+### Fixed
+
+### Removed
+
+### Deprecated
+
 ## [0.3.0] - 2021-01-20
 
 ### Added
