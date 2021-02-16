@@ -65,10 +65,10 @@ jobs:
         python -m pip install --upgrade --user pip
 
         # Install only mandatory dependencies and check if `import pl_bolts` is successful without any optional packages.
-        pip install --pre --upgrade --quiet .
+        pip install --pre --upgrade --quiet --find-links https://download.pytorch.org/whl/cpu/torch_stable.html .
         python -c 'import pl_bolts'
 
-        pip install --pre --upgrade --quiet .[dev]
+        pip install --pre --upgrade --quiet --find-links https://download.pytorch.org/whl/cpu/torch_stable.html .[dev]
         python --version
         pip --version
         pip list
