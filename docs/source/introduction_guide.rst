@@ -18,7 +18,8 @@ All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, G
 
 .. code-block:: python
 
-    from pl_bolts.models import VAE, GPT2, ImageGPT, PixelCNN
+    from pl_bolts.models import VAE
+    from pl_bolts.models.vision import GPT2, ImageGPT, PixelCNN
     from pl_bolts.models.self_supervised import AMDIM, CPCV2, SimCLR, MocoV2
     from pl_bolts.models import LinearRegression, LogisticRegression
     from pl_bolts.models.gans import GAN
@@ -29,8 +30,8 @@ All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, G
 
 .. code-block:: python
 
-    from pl_bolts.models import ImageGPT
-    from pl_bolts.self_supervised import SimCLR
+    from pl_bolts.models.vision import ImageGPT
+    from pl_bolts.models.self_supervised import SimCLR
 
     class VideoGPT(ImageGPT):
 
@@ -215,8 +216,8 @@ for production, but each module is written to be easily extended for research.
 
 .. code-block:: python
 
-    from pl_bolts.models import ImageGPT
-    from pl_bolts.self_supervised import SimCLR
+    from pl_bolts.models.vision import ImageGPT
+    from pl_bolts.models.self_supervised import SimCLR
 
     class VideoGPT(ImageGPT):
 
