@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import FashionMNISTDataModule, MNISTDataModule
 from pl_bolts.datasets import DummyDataset
-from pl_bolts.models import GPT2, ImageGPT, SemSegment, UNet
+from pl_bolts.models.vision import GPT2, ImageGPT, SemSegment, UNet
 
 
 def test_igpt(datadir):
