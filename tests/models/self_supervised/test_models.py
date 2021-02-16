@@ -40,7 +40,7 @@ def test_byol(tmpdir, datadir):
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 
     model = BYOL(data_dir=datadir, num_classes=datamodule)
-    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir, max_steps=2)
+    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']
 
@@ -119,7 +119,7 @@ def test_swav(tmpdir, datadir):
         dataset='cifar10'
     )
 
-    trainer = pl.Trainer(gpus=0, fast_dev_run=True, default_root_dir=tmpdir, max_steps=3)
+    trainer = pl.Trainer(gpus=0, fast_dev_run=True, default_root_dir=tmpdir)
 
     trainer.fit(model, datamodule=datamodule)
     loss = trainer.progress_bar_dict['loss']

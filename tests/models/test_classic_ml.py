@@ -20,7 +20,7 @@ def test_linear_regression_model(tmpdir):
     loader = DataLoader(SklearnDataset(X, y), batch_size=2)
 
     model = LinearRegression(input_dim=2, learning_rate=0.5)
-    trainer = pl.Trainer(max_epochs=300, default_root_dir=tmpdir, progress_bar_refresh_rate=0, logger=False)
+    trainer = pl.Trainer(max_epochs=300, default_root_dir=tmpdir, progress_bar_refresh_rate=0, logger=False, checkpoint_callback=False)
     trainer.fit(
         model,
         loader,
@@ -51,6 +51,7 @@ def test_logistic_regression_model(tmpdir, datadir):
         default_root_dir=tmpdir,
         progress_bar_refresh_rate=0,
         logger=False,
+        checkpoint_callback=False,
     )
     trainer.fit(model)
     trainer.test(model)
