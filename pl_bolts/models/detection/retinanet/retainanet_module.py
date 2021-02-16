@@ -16,7 +16,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-class RetinaNet(LightningModule):
+class RetinaNet(pl.LightningModule):
     """
     PyTorch Lightning implementation of Retina Net `Focal Loss for
     Dense Object Detection <https://arxiv.org/abs/1708.02002>`_.
@@ -77,6 +77,8 @@ class RetinaNet(LightningModule):
             )
             self.model = torchvision_RetinaNet(backbone_model, num_classes=num_classes, **kwargs)
 
+        self.save_hyperparameters()
+
     def forward(self, x):
         self.model.eval()
         return self.model(x)
@@ -95,7 +97,7 @@ class RetinaNet(LightningModule):
         images, targets = batch
         # fasterrcnn takes only images for eval() mode
         outs = self.model(images)
-        iou = torch.stack([_evaluate_iou(o, t) for t, o in zip(targets, outs)]).mean()
+        iou = torch.stack([_evaluate_iou(t, o) for t, o in zip(targets, outs)]).mean()
         self.log("val_iou", iou, prog_bar=True)
 
     def validation_epoch_end(self, outs):
