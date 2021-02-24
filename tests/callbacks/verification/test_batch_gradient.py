@@ -18,6 +18,7 @@ class TemplateModel(nn.Module):
         super().__init__()
         self.mix_data = mix_data
         self.linear = nn.Linear(10, 5)
+        self.bn = nn.BatchNorm1d(10)
         self.input_array = torch.rand(10, 5, 2)
 
     def forward(self, *args, **kwargs):
@@ -29,7 +30,7 @@ class TemplateModel(nn.Module):
             x = x.view(10, -1).permute(1, 0).view(-1, 10)  # oops!
         else:
             x = x.view(-1, 10)  # good!
-        return self.linear(x)
+        return self.linear(self.bn(x))
 
 
 class MultipleInputModel(TemplateModel):

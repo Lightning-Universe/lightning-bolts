@@ -1,4 +1,5 @@
 # type: ignore
+from contextlib import contextmanager
 from typing import Any, Callable, List, Optional
 
 import torch
@@ -58,7 +59,8 @@ class BatchGradientVerification(VerificationBase):
             input_batch.requires_grad = True
 
         self.model.zero_grad()
-        output = self._model_forward(input_array)
+        with eval_batchnorm(self.model):
+            output = self._model_forward(input_array)
 
         # backward on the i-th sample should lead to gradient only in i-th input slice
         output_mapping(output)[sample_idx].sum().backward()
@@ -190,3 +192,18 @@ def collect_tensors(data: Any) -> List[torch.Tensor]:
 
     apply_to_collection(data, dtype=torch.Tensor, function=collect_batches)
     return tensors
+
+
+@contextmanager
+def eval_batchnorm(model):
+    to_revert = []
+    try:
+        for m in model.modules():
+            if isinstance(m, (torch.nn.BatchNorm1d, torch.nn.BatchNorm2d)):
+                if m.training:
+                    m.eval()
+                    to_revert.append(m)
+        yield
+    finally:
+        for m in to_revert:
+            m.train(True)
