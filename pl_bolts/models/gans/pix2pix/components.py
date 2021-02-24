@@ -1,158 +1,144 @@
 import torch
 from torch import nn
-from torchvision.transforms.functional import center_crop
 
 
-class ConvBlock(nn.Module):
-
-    def __init__(self, in_channels, out_channels, use_dropout=False, use_bn=True, **kwargs):
-        """
-        kwargs:
-            drop_out (float): value for drop out in [0, 1]
-        """
+class UpSampleConv(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel=4, strides=2, padding=1, activation=True, batchnorm=True,
+                 dropout=False):
         super().__init__()
-        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
-        self.activation = nn.LeakyReLU(0.2)
+        self.activation = activation
+        self.batchnorm = batchnorm
+        self.dropout = dropout
 
-        if use_bn:
-            self.batchnorm = nn.BatchNorm2d(out_channels)
-        self.use_bn = use_bn
+        self.deconv = nn.ConvTranspose2d(in_channels, out_channels, kernel, strides, padding)
 
-        if use_dropout:
-            self.dropout = nn.Dropout(kwargs.get('drop_out', 0.5))
-        self.use_dropout = use_dropout
+        if batchnorm:
+            self.bn = nn.BatchNorm2d(out_channels)
+
+        if activation:
+            self.act = nn.ReLU(True)
+
+        if dropout:
+            self.drop = nn.Dropout2d(0.5)
 
     def forward(self, x):
-        x = self.conv1(x)
-        if self.use_bn:
-            x = self.batchnorm(x)
-        if self.use_dropout:
-            x = self.dropout(x)
-        x = self.activation(x)
+        x = self.deconv(x)
+        if self.batchnorm:
+            x = self.bn(x)
+
+        if self.dropout:
+            x = self.drop(x)
         return x
 
 
-class UpSample(nn.Module):
-
-    def __init__(self, input_channels, use_dropout=False, use_bn=True, **kwargs):
+class DownSampleConv(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel=4, strides=2, padding=1, activation=True, batchnorm=True):
         """
-        kwargs:
-            drop_out (float): value for drop out in [0, 1]
+        Paper details:
+        - C64-C128-C256-C512-C512-C512-C512-C512
+        - All convolutions are 4×4 spatial filters applied with stride 2
+        - Convolutions in the encoder downsample by a factor of 2
         """
         super().__init__()
-        self.input_channels = input_channels
-        self.upsample = nn.ConvTranspose2d(input_channels, input_channels // 2, padding=1, kernel_size=4, stride=2)
-        # self.conv1 = nn.Conv2d(input_channels, input_channels // 2, kernel_size=2)
-        self.conv2 = nn.Conv2d(input_channels, input_channels // 2, kernel_size=3, padding=1)
-        self.conv3 = nn.Conv2d(input_channels // 2, input_channels // 2, kernel_size=2, padding=1)
-        if use_bn:
-            self.batchnorm = nn.BatchNorm2d(input_channels // 2)
-        self.use_bn = use_bn
-        self.activation = nn.ReLU()
-        if use_dropout:
-            self.dropout = nn.Dropout(kwargs.get('drop_out', 0.5))
-        self.use_dropout = use_dropout
+        self.activation = activation
+        self.batchnorm = batchnorm
 
-    def forward(self, x, skip_con_x):
-        print('before upsample', x.shape)
-        x = self.upsample(x)
-        # x = self.conv1(x)
-        print('after upsamle', x.shape)
-        skip_con_x = center_crop(skip_con_x, x.shape[-2:])
-        x = torch.cat([x, skip_con_x], axis=1)
-        print(x.shape, self.input_channels)
-        x = self.conv2(x)
-        if self.use_bn:
-            x = self.batchnorm(x)
-        if self.use_dropout:
-            x = self.dropout(x)
-        x = self.activation(x)
-        x = self.conv3(x)
-        if self.use_bn:
-            x = self.batchnorm(x)
-        if self.use_dropout:
-            x = self.dropout(x)
-        x = self.activation(x)
-        return x
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel, strides, padding)
 
+        if batchnorm:
+            self.bn = nn.BatchNorm2d(out_channels)
 
-class DownSample(nn.Module):
-
-    def __init__(self, in_channels, use_dropout=False, use_bn=False):
-        super().__init__()
-        self.conv_block1 = ConvBlock(in_channels, in_channels * 2, use_dropout, use_bn)
-        self.conv_block2 = ConvBlock(in_channels * 2, in_channels * 2, use_dropout, use_bn)
-        self.maxpool = nn.MaxPool2d(kernel_size=2, stride=2)
+        if activation:
+            self.act = nn.LeakyReLU(0.2)
 
     def forward(self, x):
-        x = self.conv_block1(x)
-        x = self.conv_block2(x)
-        x = self.maxpool(x)
+        x = self.conv(x)
+        if self.batchnorm:
+            x = self.bn(x)
+        if self.activation:
+            x = self.act(x)
         return x
 
 
 class Generator(nn.Module):
-
-    def __init__(self, in_channels, out_channels, hidden_channels=32, depth=6):
+    def __init__(self, in_channels, out_channels, hidden_channels=64):
+        """
+        Paper details:
+        - Encoder: C64-C128-C256-C512-C512-C512-C512-C512
+        - All convolutions are 4×4 spatial filters applied with stride 2
+        - Convolutions in the encoder downsample by a factor of 2
+        - Decoder: CD512-CD1024-CD1024-C1024-C1024-C512 -C256-C128
+        """
         super().__init__()
 
-        self.conv1 = nn.Conv2d(in_channels, hidden_channels, kernel_size=1)
+        # encoder/donwsample convs
+        self.encoders = [
+            DownSampleConv(in_channels, 64, batchnorm=False),  # bs x 64 x 128 x 128
+            DownSampleConv(64, 128),  # bs x 128 x 64 x 64
+            DownSampleConv(128, 256),  # bs x 256 x 32 x 32
+            DownSampleConv(256, 512),  # bs x 512 x 16 x 16
+            DownSampleConv(512, 512),  # bs x 512 x 8 x 8
+            DownSampleConv(512, 512),  # bs x 512 x 4 x 4
+            DownSampleConv(512, 512),  # bs x 512 x 2 x 2
+            DownSampleConv(512, 512, batchnorm=False),  # bs x 512 x 1 x 1
+        ]
 
-        self.conv_final = nn.Conv2d(hidden_channels, out_channels, kernel_size=1)
-        self.depth = depth
+        # decoder/upsample convs
+        self.decoders = [
+            UpSampleConv(512, 512, dropout=True),  # bs x 512 x 2 x 2
+            UpSampleConv(1024, 512, dropout=True),  # bs x 512 x 4 x 4
+            UpSampleConv(1024, 512, dropout=True),  # bs x 512 x 8 x 8
+            UpSampleConv(1024, 512),  # bs x 512 x 16 x 16
+            UpSampleConv(1024, 256),  # bs x 256 x 32 x 32
+            UpSampleConv(512, 128),  # bs x 128 x 64 x 64
+            UpSampleConv(256, 64),  # bs x 64 x 128 x 128
+        ]
+        self.decoder_channels = [512, 512, 512, 512, 256, 128, 64]
+        self.final_conv = nn.ConvTranspose2d(64, out_channels, kernel_size=4, stride=2, padding=1)
+        self.tanh = nn.Tanh()
 
-        self.contracting_layers = []
-        self.expanding_layers = []
-        self.sigmoid = nn.Sigmoid()
+        self.encoders = nn.ModuleList(self.encoders)
+        self.decoders = nn.ModuleList(self.decoders)
 
-        # encoding/contracting path of the Generator
-        for i in range(depth):
-            down_sample_conv = DownSample(hidden_channels * 2**i, use_dropout=(True if i < 3 else False))
-            self.contracting_layers.append(down_sample_conv)
+    def forward(self, x):
+        skips_cons = []
+        for encoder in self.encoders:
+            x = encoder(x)
 
-        # Upsampling/Expanding path of the Generator
-        for i in range(depth):
-            upsample_conv = UpSample(hidden_channels * 2**(i + 1))
-            self.expanding_layers.append(upsample_conv)
+            skips_cons.append(x)
 
-        self.contracting_layers = nn.ModuleList(self.contracting_layers)
-        self.expanding_layers = nn.ModuleList(self.expanding_layers)
+        skips_cons = list(reversed(skips_cons[:-1]))
+        decoders = self.decoders[:-1]
 
-    def forward(self, conditional_image):
-        depth = self.depth
-        contractive_x = []
+        i = 0
+        for decoder, skip in zip(decoders, skips_cons):
+            x = decoder(x)
+            assert self.decoder_channels[i] == x.shape[1], f'{x.shape, self.decoder_channels[i]}'
+            # print(x.shape, skip.shape)
+            x = torch.cat((x, skip), axis=1)
+            i += 1
 
-        x = self.conv1(conditional_image)
-        contractive_x.append(x)
-
-        for i in range(depth):
-            x = self.contracting_layers[i](x)
-            contractive_x.append(x)
-
-        for i in range(depth - 1, -1, -1):
-            x = self.expanding_layers[i](x, contractive_x[i])
-        x = self.conv_final(x)
-
-        return self.sigmoid(x)
+        x = self.decoders[-1](x)
+        # print(x.shape)
+        x = self.final_conv(x)
+        return self.tanh(x)
 
 
 class PatchGAN(nn.Module):
 
-    def __init__(self, input_channels, hidden_channels=8):
+    def __init__(self, input_channels):
         super().__init__()
-        self.conv1 = nn.Conv2d(input_channels, hidden_channels, kernel_size=1)
-        self.contract1 = DownSample(hidden_channels, use_bn=False)
-        self.contract2 = DownSample(hidden_channels * 2)
-        self.contract3 = DownSample(hidden_channels * 4)
-        self.contract4 = DownSample(hidden_channels * 8)
-        self.final = nn.Conv2d(hidden_channels * 16, 1, kernel_size=1)
+        self.d1 = DownSampleConv(input_channels, 64, batchnorm=False)
+        self.d2 = DownSampleConv(64, 128)
+        self.d3 = DownSampleConv(128, 256)
+        self.d4 = DownSampleConv(256, 512)
+        self.final = nn.Conv2d(512, 1, kernel_size=1)
 
-    def forward(self, fake_image, conditional_image):
-        x = torch.cat([fake_image, conditional_image], axis=1)
-        x0 = self.conv1(x)
-        x1 = self.contract1(x0)
-        x2 = self.contract2(x1)
-        x3 = self.contract3(x2)
-        x4 = self.contract4(x3)
-        xn = self.final(x4)
+    def forward(self, x, y):
+        x = torch.cat([x, y], axis=1)
+        x0 = self.d1(x)
+        x1 = self.d2(x0)
+        x2 = self.d3(x1)
+        x3 = self.d4(x2)
+        xn = self.final(x3)
         return xn
