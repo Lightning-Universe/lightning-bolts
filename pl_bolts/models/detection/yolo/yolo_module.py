@@ -57,7 +57,8 @@ class YOLO(pl.LightningModule):
         lr_scheduler: Type[optim.lr_scheduler._LRScheduler] = LinearWarmupCosineAnnealingLR,
         lr_scheduler_params: Dict[str, Any] = {'warmup_epochs': 1, 'max_epochs': 271, 'warmup_start_lr': 0.0},
         confidence_threshold: float = 0.2,
-        nms_threshold: float = 0.45
+        nms_threshold: float = 0.45,
+        max_predictions_per_image: int = -1
     ) -> None:
         """
         Args:
@@ -69,8 +70,10 @@ class YOLO(pl.LightningModule):
             lr_scheduler_params: Parameters to pass to the learning rate scheduler constructor.
             confidence_threshold: Postprocessing will remove bounding boxes whose
                 confidence score is not higher than this threshold.
-            nms_threshold: Non-maximum suppression will remove bounding boxes whose IoU
-                with the next best bounding box in that class is higher than this threshold.
+            nms_threshold: Non-maximum suppression will remove bounding boxes whose IoU with a higher
+                confidence box is higher than this threshold, if the predicted categories are equal.
+            max_predictions_per_image: If non-negative, keep at most this number of
+                highest-confidence predictions per image.
         """
         super().__init__()
 
@@ -86,6 +89,7 @@ class YOLO(pl.LightningModule):
         self.lr_scheduler_params = lr_scheduler_params
         self.confidence_threshold = confidence_threshold
         self.nms_threshold = nms_threshold
+        self.max_predictions_per_image = max_predictions_per_image
 
     def forward(
         self,
@@ -404,10 +408,14 @@ class YOLO(pl.LightningModule):
                 img_out_classprobs = torch.cat((img_out_classprobs, cls_classprobs[selected]))
                 img_out_labels = torch.cat((img_out_labels, cls_labels[selected]))
 
-            out_boxes.append(img_out_boxes)
-            out_confidences.append(img_out_confidences)
-            out_classprobs.append(img_out_classprobs)
-            out_labels.append(img_out_labels)
+            # Sort by descending confidence and limit the maximum number of predictions.
+            indices = torch.argsort(img_out_confidences, descending=True)
+            if self.max_predictions_per_image >= 0:
+                indices = indices[:self.max_predictions_per_image]
+            out_boxes.append(img_out_boxes[indices])
+            out_confidences.append(img_out_confidences[indices])
+            out_classprobs.append(img_out_classprobs[indices])
+            out_labels.append(img_out_labels[indices])
 
         return out_boxes, out_confidences, out_classprobs, out_labels
 
@@ -450,17 +458,56 @@ def run_cli():
     pl.seed_everything(42)
 
     parser = ArgumentParser()
-    parser.add_argument('--config', type=str, help='model configuration file', required=True)
-    parser.add_argument('--darknet-weights', type=str, help='initialize the model weights from this Darknet model file')
-    parser.add_argument('--batch-size', type=int, help='number of images in one batch', default=16)
-    parser.add_argument('--lr', type=float, help='learning ratea after warmup', default=0.0013)
-    parser.add_argument('--momentum', type=float, help='optimizer momentum factor', default=0.9)
-    parser.add_argument('--weight-decay', type=float, help='weight decay (L2 penalty)', default=0.0005)
-    parser.add_argument('--warmup-epochs', type=int, help='length of the learning rate warmup', default=1)
-    parser.add_argument('--max-epochs', type=int, help='maximum number of epochs to train', default=271)
-    parser.add_argument('--initial-lr', type=float, help='learning rate before warmup', default=0.0)
-    parser.add_argument('--confidence-threshold', type=float, help='threshold for prediction confidence', default=0.01)
-    parser.add_argument('--nms-threshold', type=float, help='non-maximum suppression threshold', default=0.45)
+    parser.add_argument(
+        '--config', type=str, metavar='PATH', required=True,
+        help='read model configuration from PATH'
+    )
+    parser.add_argument(
+        '--darknet-weights', type=str, metavar='PATH',
+        help='read the initial model weights from PATH in Darknet format'
+    )
+    parser.add_argument(
+        '--batch-size', type=int, metavar='N', default=16,
+        help='batch size is N image'
+    )
+    parser.add_argument(
+        '--lr', type=float, metavar='LR', default=0.0013,
+        help='learning rate after the warmup period'
+    )
+    parser.add_argument(
+        '--momentum', type=float, metavar='GAMMA', default=0.9,
+        help='if nonzero, the optimizer uses momentum with factor GAMMA'
+    )
+    parser.add_argument(
+        '--weight-decay', type=float, metavar='LAMBDA', default=0.0005,
+        help='if nonzero, the optimizer uses weight decay (L2 penalty) with factor LAMBDA'
+    )
+    parser.add_argument(
+        '--warmup-epochs', type=int, metavar='N', default=1,
+        help='learning rate warmup period is N epochs'
+    )
+    parser.add_argument(
+        '--max-epochs', type=int, metavar='N', default=300,
+        help='train at most N epochs'
+    )
+    parser.add_argument(
+        '--initial-lr', type=float, metavar='LR', default=0.0,
+        help='learning rate before the warmup period'
+    )
+    parser.add_argument(
+        '--confidence-threshold', type=float, metavar='THRESHOLD', default=0.001,
+        help='keep predictions only if the confidence is above THRESHOLD'
+    )
+    parser.add_argument(
+        '--nms-threshold', type=float, metavar='THRESHOLD', default=0.45,
+        help='non-maximum suppression removes predicted boxes that have IoU greater than '
+             'THRESHOLD with a higher scoring box'
+    )
+    parser.add_argument(
+        '--max-predictions-per-image', type=int, metavar='N', default=100,
+        help='keep at most N best predictions'
+    )
+
     parser = VOCDetectionDataModule.add_argparse_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
@@ -486,7 +533,8 @@ def run_cli():
         optimizer_params=optimizer_params,
         lr_scheduler_params=lr_scheduler_params,
         confidence_threshold=args.confidence_threshold,
-        nms_threshold=args.nms_threshold
+        nms_threshold=args.nms_threshold,
+        max_predictions_per_image=args.max_predictions_per_image
     )
     if args.darknet_weights is not None:
         with open(args.darknet_weights, 'r') as weight_file:
