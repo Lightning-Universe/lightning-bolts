@@ -16,5 +16,5 @@ Faster R-CNN
 YOLO
 ----
 
-.. autoclass:: pl_bolts.models.detection.yolo.yolo_module.Yolo
+.. autoclass:: pl_bolts.models.detection.yolo.yolo_module.YOLO
     :noindex:
