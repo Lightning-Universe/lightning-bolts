@@ -154,7 +154,7 @@ class VOCDetectionDataModule(LightningDataModule):
     def train_dataloader(
         self,
         batch_size: int = 1,
-        transforms: List[Callable] = [],
+        transforms: List[Callable] = None,
         image_transforms: Optional[Callable] = None
     ) -> DataLoader:
         """
@@ -165,9 +165,13 @@ class VOCDetectionDataModule(LightningDataModule):
             transforms: custom transforms for image and target
             image_transforms: custom image-only transforms
         """
-        transforms = [_prepare_voc_instance] + transforms
+        if transforms is None:
+            transforms = [_prepare_voc_instance]
+        else:
+            transforms = [_prepare_voc_instance] + transforms
         image_transforms = image_transforms or self.train_transforms or self._default_transforms()
         transforms = Compose(transforms, image_transforms)
+
         dataset = VOCDetection(self.data_dir, year=self.year, image_set="train", transforms=transforms)
         loader = DataLoader(
             dataset,
@@ -183,7 +187,7 @@ class VOCDetectionDataModule(LightningDataModule):
     def val_dataloader(
         self,
         batch_size: int = 1,
-        transforms: List[Callable] = [],
+        transforms: List[Callable] = None,
         image_transforms: Optional[Callable] = None
     ) -> DataLoader:
         """
@@ -194,9 +198,13 @@ class VOCDetectionDataModule(LightningDataModule):
             transforms: custom transforms for image and target
             image_transforms: custom image-only transforms
         """
-        transforms = [_prepare_voc_instance] + transforms
+        if transforms is None:
+            transforms = [_prepare_voc_instance]
+        else:
+            transforms = [_prepare_voc_instance] + transforms
         image_transforms = image_transforms or self.train_transforms or self._default_transforms()
         transforms = Compose(transforms, image_transforms)
+
         dataset = VOCDetection(self.data_dir, year=self.year, image_set="val", transforms=transforms)
         loader = DataLoader(
             dataset,
