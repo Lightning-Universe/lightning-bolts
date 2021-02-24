@@ -3,8 +3,18 @@ from torch import nn
 
 
 class UpSampleConv(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel=4, strides=2, padding=1, activation=True, batchnorm=True,
-                 dropout=False):
+
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        kernel=4,
+        strides=2,
+        padding=1,
+        activation=True,
+        batchnorm=True,
+        dropout=False
+    ):
         super().__init__()
         self.activation = activation
         self.batchnorm = batchnorm
@@ -32,6 +42,7 @@ class UpSampleConv(nn.Module):
 
 
 class DownSampleConv(nn.Module):
+
     def __init__(self, in_channels, out_channels, kernel=4, strides=2, padding=1, activation=True, batchnorm=True):
         """
         Paper details:
@@ -61,7 +72,8 @@ class DownSampleConv(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, in_channels, out_channels, hidden_channels=64):
+
+    def __init__(self, in_channels, out_channels):
         """
         Paper details:
         - Encoder: C64-C128-C256-C512-C512-C512-C512-C512
@@ -110,13 +122,10 @@ class Generator(nn.Module):
         skips_cons = list(reversed(skips_cons[:-1]))
         decoders = self.decoders[:-1]
 
-        i = 0
         for decoder, skip in zip(decoders, skips_cons):
             x = decoder(x)
-            assert self.decoder_channels[i] == x.shape[1], f'{x.shape, self.decoder_channels[i]}'
             # print(x.shape, skip.shape)
             x = torch.cat((x, skip), axis=1)
-            i += 1
 
         x = self.decoders[-1](x)
         # print(x.shape)
