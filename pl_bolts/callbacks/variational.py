@@ -67,7 +67,7 @@ class LatentDimInterpolator(Callback):
             )
             images = torch.cat(images, dim=0)  # type: ignore[assignment]
 
-            num_rows = int(math.sqrt(self.steps))
+            num_rows = self.steps
             grid = torchvision.utils.make_grid(images, nrow=num_rows, normalize=self.normalize)
             str_title = f'{pl_module.__class__.__name__}_latent_space'
             trainer.logger.experiment.add_image(str_title, grid, global_step=trainer.global_step)
