@@ -1,6 +1,6 @@
 # type: ignore
 from contextlib import contextmanager
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, Iterable, List, Optional, Type
 
 import torch
 from pytorch_lightning import LightningModule, Trainer
@@ -16,6 +16,14 @@ class BatchGradientVerification(VerificationBase):
     This can happen if reshape- and/or permutation operations are carried out in the wrong order or
     on the wrong tensor dimensions.
     """
+
+    NORM_LAYER_CLASSES = (
+        torch.nn.BatchNorm1d,
+        torch.nn.BatchNorm2d,
+        torch.nn.BatchNorm3d,
+        torch.nn.SyncBatchNorm,
+        torch.nn.GroupNorm,
+    )
 
     def check(
         self,
@@ -59,7 +67,7 @@ class BatchGradientVerification(VerificationBase):
             input_batch.requires_grad = True
 
         self.model.zero_grad()
-        with eval_batchnorm(self.model):
+        with eval_norm_layers(self.model, self.NORM_LAYER_CLASSES):
             output = self._model_forward(input_array)
 
         # backward on the i-th sample should lead to gradient only in i-th input slice
@@ -195,11 +203,11 @@ def collect_tensors(data: Any) -> List[torch.Tensor]:
 
 
 @contextmanager
-def eval_batchnorm(model):
+def eval_norm_layers(model, layer_types: Iterable[Type[torch.nn.Module]]):
     to_revert = []
     try:
         for m in model.modules():
-            if isinstance(m, (torch.nn.BatchNorm1d, torch.nn.BatchNorm2d)):
+            if isinstance(m, layer_types):
                 if m.training:
                     m.eval()
                     to_revert.append(m)
