@@ -16,7 +16,6 @@ def test_vae(tmpdir, datadir, dm_cls):
     trainer = pl.Trainer(
         fast_dev_run=True,
         default_root_dir=tmpdir,
-        max_epochs=1,
         gpus=None,
     )
 
@@ -33,7 +32,6 @@ def test_ae(tmpdir, datadir, dm_cls):
     trainer = pl.Trainer(
         fast_dev_run=True,
         default_root_dir=tmpdir,
-        max_epochs=1,
         gpus=None,
     )
 
@@ -41,6 +39,7 @@ def test_ae(tmpdir, datadir, dm_cls):
     assert result == 1
 
 
+@torch.no_grad()
 def test_encoder():
     img = torch.rand(16, 3, 224, 224)
 
@@ -54,6 +53,7 @@ def test_encoder():
     assert out2.shape == (16, 2048)
 
 
+@torch.no_grad()
 def test_decoder():
     latent_dim = 128
     input_height = 288  # random but has to be a multiple of 32 for first_conv=True, maxpool1=True
@@ -104,9 +104,10 @@ def test_from_pretrained(datadir):
         ae = ae.from_pretrained('cifar10-resnet18')
 
         # test forward method on pre-trained weights
-        for x, y in data_loader:
-            ae(x)
-            break
+        with torch.no_grad():
+            for x, y in data_loader:
+                ae(x)
+                break
 
     except Exception:
         exception_raised = True
