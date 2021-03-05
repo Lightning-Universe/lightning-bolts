@@ -1,6 +1,6 @@
 # type: ignore
 from contextlib import contextmanager
-from typing import Any, Callable, Iterable, List, Optional, Type, Sequence, Tuple
+from typing import Any, Callable, Iterable, List, Optional, Sequence, Tuple, Type
 
 import torch
 import torch.nn as nn
