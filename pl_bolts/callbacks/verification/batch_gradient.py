@@ -1,8 +1,9 @@
 # type: ignore
 from contextlib import contextmanager
-from typing import Any, Callable, Iterable, List, Optional, Type
+from typing import Any, Callable, Iterable, List, Optional, Type, Sequence, Tuple
 
 import torch
+import torch.nn as nn
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.utilities.apply_func import apply_to_collection
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
@@ -67,7 +68,7 @@ class BatchGradientVerification(VerificationBase):
             input_batch.requires_grad = True
 
         self.model.zero_grad()
-        with eval_norm_layers(self.model, self.NORM_LAYER_CLASSES):
+        with selective_eval(self.model, self.NORM_LAYER_CLASSES):
             output = self._model_forward(input_array)
 
         # backward on the i-th sample should lead to gradient only in i-th input slice
@@ -203,15 +204,23 @@ def collect_tensors(data: Any) -> List[torch.Tensor]:
 
 
 @contextmanager
-def eval_norm_layers(model, layer_types: Iterable[Type[torch.nn.Module]]):
+def selective_eval(model: nn.Module, layer_types: Iterable[Type[nn.Module]]) -> None:
+    """
+    A context manager that sets all requested types of layers to eval mode. This method uses an ``isinstance``
+    check, so all subclasses are also affected.
+
+    Args:
+        model: A model which has layers that need to be set to eval mode.
+        layer_types: The list of class objects for which all layers of that type will be set to eval mode.
+    """
     to_revert = []
     try:
-        for m in model.modules():
-            if isinstance(m, layer_types):
-                if m.training:
-                    m.eval()
-                    to_revert.append(m)
+        for module in model.modules():
+            if isinstance(module, tuple(layer_types)):
+                if module.training:
+                    module.eval()
+                    to_revert.append(module)
         yield
     finally:
-        for m in to_revert:
-            m.train(True)
+        for module in to_revert:
+            module.train()
