@@ -2,6 +2,7 @@ import gzip
 import hashlib
 import os
 import shutil
+import sys
 import tarfile
 import tempfile
 import zipfile
@@ -9,7 +10,6 @@ from contextlib import contextmanager
 
 import numpy as np
 import torch
-from torch._six import PY3
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -245,6 +245,8 @@ def parse_devkit_archive(root, file=None):
 def extract_archive(from_path, to_path=None, remove_finished=False):
     if to_path is None:
         to_path = os.path.dirname(from_path)
+
+    PY3 = sys.version_info[0] == 3
 
     if _is_tar(from_path):
         with tarfile.open(from_path, 'r') as tar:
