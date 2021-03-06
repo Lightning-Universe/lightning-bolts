@@ -9,7 +9,7 @@ from contextlib import contextmanager
 
 import numpy as np
 import torch
-from torch._six import PY3
+from torch._six import PY37
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -252,7 +252,7 @@ def extract_archive(from_path, to_path=None, remove_finished=False):
     elif _is_targz(from_path):
         with tarfile.open(from_path, 'r:gz') as tar:
             tar.extractall(path=to_path)
-    elif _is_tarxz(from_path) and PY3:
+    elif _is_tarxz(from_path) and PY37:
         # .tar.xz archive only supported in Python 3.x
         with tarfile.open(from_path, 'r:xz') as tar:
             tar.extractall(path=to_path)
