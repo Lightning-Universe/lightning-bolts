@@ -2,7 +2,7 @@ import gzip
 import hashlib
 import os
 import shutil
-import sys
+import sys  # noqa F401
 import tarfile
 import tempfile
 import zipfile
