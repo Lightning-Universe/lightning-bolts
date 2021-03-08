@@ -200,9 +200,6 @@ class DetectionLayer(nn.Module):
         # x/y coordinates.
         xy = xy * self.xy_scale - 0.5 * (self.xy_scale - 1)
 
-        if not torch.isfinite(x).all():
-            raise ValueError('Detection layer output contains nan or inf values.')
-
         image_xy = self._global_xy(xy)
         image_wh = self._scale_wh(wh)
         boxes = _corner_coordinates(image_xy, image_wh)
