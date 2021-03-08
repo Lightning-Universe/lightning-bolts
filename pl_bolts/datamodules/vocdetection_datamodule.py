@@ -154,7 +154,7 @@ class VOCDetectionDataModule(LightningDataModule):
     def train_dataloader(
         self,
         batch_size: int = 1,
-        transforms: List[Callable] = None,
+        transforms: Optional[List[Callable]] = None,
         image_transforms: Optional[Callable] = None
     ) -> DataLoader:
         """
@@ -187,7 +187,7 @@ class VOCDetectionDataModule(LightningDataModule):
     def val_dataloader(
         self,
         batch_size: int = 1,
-        transforms: List[Callable] = None,
+        transforms: Optional[List[Callable]] = None,
         image_transforms: Optional[Callable] = None
     ) -> DataLoader:
         """
