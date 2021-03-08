@@ -20,7 +20,8 @@ def test_linear_regression_model(tmpdir):
     loader = DataLoader(SklearnDataset(X, y), batch_size=2)
 
     model = LinearRegression(input_dim=2, learning_rate=0.5)
-    trainer = pl.Trainer(max_epochs=300, default_root_dir=tmpdir, progress_bar_refresh_rate=0)
+    trainer = pl.Trainer(max_epochs=300, default_root_dir=tmpdir,
+                         progress_bar_refresh_rate=0, logger=False, checkpoint_callback=False)
     trainer.fit(
         model,
         loader,
@@ -46,7 +47,13 @@ def test_logistic_regression_model(tmpdir, datadir):
     model.val_dataloader = dm.val_dataloader
     model.test_dataloader = dm.test_dataloader
 
-    trainer = pl.Trainer(max_epochs=3, default_root_dir=tmpdir, progress_bar_refresh_rate=0)
+    trainer = pl.Trainer(
+        max_epochs=3,
+        default_root_dir=tmpdir,
+        progress_bar_refresh_rate=0,
+        logger=False,
+        checkpoint_callback=False,
+    )
     trainer.fit(model)
     trainer.test(model)
     assert trainer.progress_bar_dict['test_acc'] >= 0.9

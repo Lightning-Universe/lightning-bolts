@@ -1,6 +1,7 @@
 import gzip
 import hashlib
 import os
+import sys
 import shutil
 import tarfile
 import tempfile
@@ -9,10 +10,11 @@ from contextlib import contextmanager
 
 import numpy as np
 import torch
-from torch._six import PY3
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
+
+PY3 = sys.version_info[0] == 3
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import ImageNet

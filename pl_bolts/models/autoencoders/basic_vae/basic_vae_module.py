@@ -27,10 +27,10 @@ class VAE(pl.LightningModule):
         vae = VAE()
 
         # pretrained on cifar10
-        vae = VAE.from_pretrained('cifar10-resnet18')
+        vae = VAE(input_height=32).from_pretrained('cifar10-resnet18')
 
         # pretrained on stl10
-        vae = VAE.from_pretrained('stl10-resnet18')
+        vae = VAE(input_height=32).from_pretrained('stl10-resnet18')
     """
 
     pretrained_urls = {
