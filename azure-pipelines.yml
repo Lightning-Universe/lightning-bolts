@@ -48,6 +48,10 @@ jobs:
       displayName: 'Image info & NVIDIA'
 
     - bash: |
+        python -c "import torch ; mgpu = torch.cuda.device_count() ; assert mgpu >= 2, f'GPU: {mgpu}'"
+      displayName: 'Sanity check'
+
+    - bash: |
         # python -m pip install "pip==20.1"
         pip install --requirement ./requirements/devel.txt --upgrade-strategy only-if-needed
         pip list
@@ -55,7 +59,7 @@ jobs:
 
     - bash: |
         python -m coverage run --source pl_bolts -m pytest pl_bolts tests -v --durations=30
-      displayName: 'Testing: standard'
+      displayName: 'Testing'
 
     - bash: |
         python -m coverage report
