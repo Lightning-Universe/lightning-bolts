@@ -10,19 +10,19 @@
   <a href="https://www.pytorchlightning.ai/">Website</a> •
   <a href="#install">Installation</a> •
   <a href="#main-Goals-of-Bolts">Main goals</a> •
-  <a href="https://pytorch-lightning-bolts.readthedocs.io/en/latest/">latest Docs</a> •
-  <a href="https://pytorch-lightning-bolts.readthedocs.io/en/stable/">stable Docs</a> •
+  <a href="https://lightning-bolts.readthedocs.io/en/latest/">latest Docs</a> •
+  <a href="https://lightning-bolts.readthedocs.io/en/stable/">stable Docs</a> •
   <a href="#team">Community</a> •
   <a href="https://www.grid.ai/">Grid AI</a> •
   <a href="#licence">Licence</a>
 </p>
 
-[![PyPI Status](https://badge.fury.io/py/pytorch-lightning-bolts.svg)](https://badge.fury.io/py/pytorch-lightning-bolts)
-[![PyPI Status](https://pepy.tech/badge/pytorch-lightning-bolts)](https://pepy.tech/project/pytorch-lightning-bolts)
-[![codecov](https://codecov.io/gh/PyTorchLightning/pytorch-lightning-bolts/branch/master/graph/badge.svg)](https://codecov.io/gh/PyTorchLightning/pytorch-lightning-bolts)
-[![CodeFactor](https://www.codefactor.io/repository/github/pytorchlightning/pytorch-lightning-bolts/badge)](https://www.codefactor.io/repository/github/pytorchlightning/pytorch-lightning-bolts)
+[![PyPI Status](https://badge.fury.io/py/lightning-bolts.svg)](https://badge.fury.io/py/lightning-bolts)
+[![PyPI Status](https://pepy.tech/badge/lightning-bolts)](https://pepy.tech/project/lightning-bolts)
+[![codecov](https://codecov.io/gh/PyTorchLightning/lightning-bolts/branch/master/graph/badge.svg)](https://codecov.io/gh/PyTorchLightning/lightning-bolts)
+[![CodeFactor](https://www.codefactor.io/repository/github/pytorchlightning/lightning-bolts/badge)](https://www.codefactor.io/repository/github/pytorchlightning/lightning-bolts)
 
-[![Documentation Status](https://readthedocs.org/projects/pytorch-lightning-bolts/badge/?version=latest)](https://pytorch-lightning-bolts.readthedocs.io/en/latest/)
+[![Documentation Status](https://readthedocs.org/projects/lightning-bolts/badge/?version=latest)](https://lightning-bolts.readthedocs.io/en/latest/)
 [![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://join.slack.com/t/pytorch-lightning/shared_invite/zt-f6bl2l0l-JYMK3tbAgAmGRrlNr00f1A)
 [![Discourse status](https://img.shields.io/discourse/status?server=https%3A%2F%2Fforums.pytorchlightning.ai)](https://forums.pytorchlightning.ai/)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/PytorchLightning/pytorch-lightning/blob/master/LICENSE)
@@ -41,9 +41,9 @@
 
 | System / PyTorch ver. | 1.6 (min. req.) | 1.7 (latest) |
 | :---: | :---: | :---: |
-| Linux py3.{6,8} | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
-| OSX py3.{6,8} | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
-| Windows py3.7* | ![CI base testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) | ![CI base testing](https://github.com/PyTorchLightning/pytorch-lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) |
+| Linux py3.{6,8} | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
+| OSX py3.{6,8} | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
+| Windows py3.7* | ![CI base testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) | ![CI base testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) |
 
 </center>
 
@@ -53,17 +53,17 @@
 
 Simple installation from PyPI
 ```bash
-pip install pytorch-lightning-bolts
+pip install lightning-bolts
 ```
 
 Install bleeding-edge (no guarantees)   
 ```bash
-pip install git+https://github.com/PytorchLightning/pytorch-lightning-bolts.git@master --upgrade
+pip install git+https://github.com/PytorchLightning/lightning-bolts.git@master --upgrade
 ```
 
 In case you want to have full experience you can install all optional packages at once
 ```bash
-pip install pytorch-lightning-bolts["extra"]
+pip install lightning-bolts["extra"]
 ```
 
 ## What is Bolts

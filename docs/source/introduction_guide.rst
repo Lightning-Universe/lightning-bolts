@@ -111,10 +111,10 @@ We accept contributions directly to Bolts or via your own repository.
 To contribute:
 
 1. Submit a pull request to Bolts (we will help you finish it!).
-2. We'll help you add `tests <https://github.com/PyTorchLightning/pytorch-lightning-bolts/tree/master/tests>`_.
+2. We'll help you add `tests <https://github.com/PyTorchLightning/lightning-bolts/tree/master/tests>`_.
 3. We'll help you refactor models to work on `(GPU, TPU, CPU). <https://www.youtube.com/watch?v=neuNEcN9FK4>`_.
 4. We'll help you remove bottlenecks in your model.
-5. We'll help you write up `documentation <https://pytorch-lightning-bolts.readthedocs.io/en/latest/convolutional.html#image-gpt>`_.
+5. We'll help you write up `documentation <https://lightning-bolts.readthedocs.io/en/latest/convolutional.html#image-gpt>`_.
 6. We'll help you pretrain expensive models and host weights for you.
 7. We'll create proper attribution for you and link to your repo.
 8. Once all of this is ready, we will merge into bolts.
@@ -129,7 +129,7 @@ Contribution ideas
 ^^^^^^^^^^^^^^^^^^
 Don't have something to contribute? Ping us on
 `Slack <https://join.slack.com/t/pytorch-lightning/shared_invite/zt-f6bl2l0l-JYMK3tbAgAmGRrlNr00f1A>`_
-or look at our `Github issues <https://github.com/PyTorchLightning/pytorch-lightning-bolts/
+or look at our `Github issues <https://github.com/PyTorchLightning/lightning-bolts/
 issues?q=is%3Aissue+is%3Aopen+label%3A%22Model+to+implement%22>`_!
 
 **We'll help and guide you through the implementation / conversion**

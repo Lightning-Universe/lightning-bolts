@@ -91,7 +91,7 @@ Tests are written using [pytest](https://docs.pytest.org/en/stable/). Tests in P
 
 Along with these we have tests for losses, callbacks and transforms as well.
 
-Have a look at sample tests [here](https://github.com/PyTorchLightning/pytorch-lightning-bolts/tree/master/tests).
+Have a look at sample tests [here](https://github.com/PyTorchLightning/lightning-bolts/tree/master/tests).
 
 After you have added the respective tests, you can run the tests locally with make script:
 
@@ -118,7 +118,7 @@ In case you adding new dependencies, make sure that they are compatible with the
 
 1. **How can I help/contribute?**
 
-   All help is extremely welcome - reporting bugs, fixing documentation, adding test cases, solving issues and preparing bug fixes. To solve some issues you can start with label [good first issue](https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) or chose something close to your domain with label [help wanted](https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22). Before you start to implement anything check that the issue description that it is clear and self-assign the task to you (if it is not possible, just comment that you take it and we assign it to you...).
+   All help is extremely welcome - reporting bugs, fixing documentation, adding test cases, solving issues and preparing bug fixes. To solve some issues you can start with label [good first issue](https://github.com/PyTorchLightning/lightning-bolts/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) or chose something close to your domain with label [help wanted](https://github.com/PyTorchLightning/lightning-bolts/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22). Before you start to implement anything check that the issue description that it is clear and self-assign the task to you (if it is not possible, just comment that you take it and we assign it to you...).
 
 2. **Is there a recommendation for branch names?**
 
