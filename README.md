@@ -51,20 +51,24 @@
 
 ## Install
 
-Simple installation from PyPI
-```bash
-pip install lightning-bolts
-```
+<details>
+  <summary>View install</summary>
 
-Install bleeding-edge (no guarantees)   
-```bash
-pip install git+https://github.com/PytorchLightning/lightning-bolts.git@master --upgrade
-```
-
-In case you want to have full experience you can install all optional packages at once
-```bash
-pip install lightning-bolts["extra"]
-```
+  Simple installation from PyPI
+  ```bash
+  pip install lightning-bolts
+  ```
+  
+  Install bleeding-edge (no guarantees)   
+  ```bash
+  pip install git+https://github.com/PytorchLightning/lightning-bolts.git@master --upgrade
+  ```
+  
+  In case you want to have full experience you can install all optional packages at once
+  ```bash
+  pip install lightning-bolts["extra"]
+  ```
+</details>
 
 ## What is Bolts
 

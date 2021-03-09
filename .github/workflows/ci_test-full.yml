@@ -100,7 +100,7 @@ jobs:
       # see: https://github.com/actions/toolkit/issues/399
       continue-on-error: true
       with:
-        # token: ${{ secrets.CODECOV_TOKEN }}
+        token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
         flags: unittests
         env_vars: OS,PYTHON
