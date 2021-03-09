@@ -37,13 +37,13 @@ def _prepare_extras():
 # the goal of the project is simplicity for researchers, don't want to add too much
 # engineer specific practices
 setup(
-    name='pytorch-lightning-bolts',
+    name='lightning-bolts',
     version=pl_bolts.__version__,
     description=pl_bolts.__docs__,
     author=pl_bolts.__author__,
     author_email=pl_bolts.__author_email__,
     url=pl_bolts.__homepage__,
-    download_url='https://github.com/PyTorchLightning/pytorch-lightning-bolts',
+    download_url='https://github.com/PyTorchLightning/lightning-bolts',
     license=pl_bolts.__license__,
     packages=find_packages(exclude=['tests', 'docs']),
     long_description=_load_readme_description(_PATH_ROOT),
@@ -56,9 +56,9 @@ setup(
     install_requires=_load_requirements(_PATH_ROOT),
     extras_require=_prepare_extras(),
     project_urls={
-        "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",
-        "Documentation": "https://pytorch-lightning-bolts.rtfd.io/en/latest/",
-        "Source Code": "https://github.com/PyTorchLightning/pytorch-lightning-bolts",
+        "Bug Tracker": "https://github.com/PyTorchLightning/lightning-bolts/issues",
+        "Documentation": "https://lightning-bolts.rtfd.io/en/latest/",
+        "Source Code": "https://github.com/PyTorchLightning/lightning-bolts",
     },
     classifiers=[
         'Environment :: Console',

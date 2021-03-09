@@ -159,7 +159,7 @@ Results in table are reported from the
      - LR
    * - CIFAR-10
      - 84.52
-     - `CPCresnet101 <https://github.com/PyTorchLightning/pytorch-lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
+     - `CPCresnet101 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
      - Adam
      - 64
      - 1000 (upto 24 hours)
@@ -167,7 +167,7 @@ Results in table are reported from the
      - 4e-5
    * - STL-10
      - 78.36
-     - `CPCresnet101 <https://github.com/PyTorchLightning/pytorch-lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
+     - `CPCresnet101 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
      - Adam
      - 144
      - 1000 (upto 72 hours)
@@ -175,7 +175,7 @@ Results in table are reported from the
      - 1e-4
    * - ImageNet
      - 54.82
-     - `CPCresnet101 <https://github.com/PyTorchLightning/pytorch-lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
+     - `CPCresnet101 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
      - Adam
      - 3072
      - 1000 (upto 21 days)
@@ -311,8 +311,8 @@ CIFAR-10 baseline
      - 1.0/1.5
    * - Ours
      - 88.50
-     - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
-     - `LARS-SGD <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - `resnet50 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
+     - `LARS-SGD <https://lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
      - 2048
      - 800 (4 hours)
      - 8 V100 (16GB)
@@ -400,8 +400,8 @@ Imagenet baseline for SimCLR
      - 4.8
    * - Ours
      - 68.4
-     - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
-     - `LARS-SGD <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - `resnet50 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
+     - `LARS-SGD <https://lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
      - 4096
      - 800
      - 64 V100 (16GB)
@@ -533,7 +533,7 @@ The original paper does not provide baselines on STL10.
    * - Ours
      - `86.72 <https://tensorboard.dev/experiment/w2pq3bPPSxC4VIm5udhA2g/>`_
      - SwAV resnet50
-     - `LARS <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - `LARS <https://lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
      - 128
      - No
      - 100 (~9 hr)
@@ -629,8 +629,8 @@ Imagenet baseline for SwAV
      - 4.8
    * - Ours
      - 74
-     - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
-     - `LARS-SGD <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - `resnet50 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
+     - `LARS-SGD <https://lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
      - 4096
      - 800
      - 64 V100 (16GB)

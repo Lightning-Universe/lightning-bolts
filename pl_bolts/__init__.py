@@ -7,7 +7,7 @@ __author__ = 'PyTorchLightning et al.'
 __author_email__ = 'name@pytorchlightning.ai'
 __license__ = 'Apache-2.0'
 __copyright__ = f'Copyright (c) 2020-2021, {__author__}'
-__homepage__ = 'https://github.com/PyTorchLightning/pytorch-lightning-bolts'
+__homepage__ = 'https://github.com/PyTorchLightning/lightning-bolts'
 __docs__ = "PyTorch Lightning Bolts is a community contribution for ML researchers."
 __long_doc__ = """
 What is it?
