@@ -1,7 +1,7 @@
 Installation
 ============
 
-You can install using `pip <https://pypi.org/project/pytorch-lightning/>`_
+You can install using `pip <https://pypi.org/project/lightning-bolts/>`_
 
 .. code-block:: bash
 
