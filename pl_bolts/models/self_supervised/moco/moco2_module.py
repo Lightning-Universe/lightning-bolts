@@ -144,7 +144,7 @@ class MocoV2(pl.LightningModule):
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys):
         # gather keys before updating queue
-        if self.use_ddp or self.use_ddp2:
+        if self.trainer.use_ddp or self.trainer.use_ddp2:
             keys = concat_all_gather(keys)
 
         batch_size = keys.shape[0]
@@ -223,14 +223,14 @@ class MocoV2(pl.LightningModule):
             self._momentum_update_key_encoder()  # update the key encoder
 
             # shuffle for making use of BN
-            if self.use_ddp or self.use_ddp2:
+            if self.trainer.use_ddp or self.trainer.use_ddp2:
                 img_k, idx_unshuffle = self._batch_shuffle_ddp(img_k)
 
             k = self.encoder_k(img_k)  # keys: NxC
             k = nn.functional.normalize(k, dim=1)
 
             # undo shuffle
-            if self.use_ddp or self.use_ddp2:
+            if self.trainer.use_ddp or self.trainer.use_ddp2:
                 k = self._batch_unshuffle_ddp(k, idx_unshuffle)
 
         # compute logits
