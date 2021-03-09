@@ -3,6 +3,7 @@ import hashlib
 import os
 import sys
 import shutil
+import sys  # noqa F401
 import tarfile
 import tempfile
 import zipfile
@@ -247,6 +248,8 @@ def parse_devkit_archive(root, file=None):
 def extract_archive(from_path, to_path=None, remove_finished=False):
     if to_path is None:
         to_path = os.path.dirname(from_path)
+
+    PY3 = sys.version_info[0] == 3
 
     if _is_tar(from_path):
         with tarfile.open(from_path, 'r') as tar:
