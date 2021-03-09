@@ -206,13 +206,12 @@ def cli_main():
     parser.add_argument('--data_dir', default='.', type=str)
     parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
     parser.add_argument('--num_workers', default=8, type=int)
+    parser.add_argument('--hidden_mlp', default=2048, type=int, help='hidden layer dimension in projection head')
     parser.add_argument('--batch_size', type=int, default=128)
 
     args = parser.parse_args()
 
     datamodule = None
-
-    online_evaluator = SSLOnlineEvaluator(dataset=args.dataset)
     if args.dataset == 'cifar10':
         datamodule = CIFAR10DataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsCIFAR10()
@@ -227,6 +226,20 @@ def cli_main():
         datamodule.val_transforms = CPCEvalTransformsSTL10()
         args.patch_size = 16
 
+    elif args.dataset == 'imagenet2012':
+        datamodule = SSLImagenetDataModule.from_argparse_args(args)
+        datamodule.train_transforms = CPCTrainTransformsImageNet128()
+        datamodule.val_transforms = CPCEvalTransformsImageNet128()
+        args.patch_size = 32
+
+    online_evaluator = SSLOnlineEvaluator(
+        drop_p=0.,
+        hidden_dim=None,
+        z_dim=args.hidden_mlp,
+        num_classes=datamodule.num_classes,
+        dataset=args.dataset,
+    )
+    if args.dataset == 'stl10':
         # 16 GB RAM - 64
         # 32 GB RAM - 144
         args.batch_size = 144
@@ -238,12 +251,6 @@ def cli_main():
             return x2, y2
 
         online_evaluator.to_device = to_device
-
-    elif args.dataset == 'imagenet2012':
-        datamodule = SSLImagenetDataModule.from_argparse_args(args)
-        datamodule.train_transforms = CPCTrainTransformsImageNet128()
-        datamodule.val_transforms = CPCEvalTransformsImageNet128()
-        args.patch_size = 32
 
     model = CPCV2(**vars(args))
     trainer = pl.Trainer.from_argparse_args(args, callbacks=[online_evaluator])

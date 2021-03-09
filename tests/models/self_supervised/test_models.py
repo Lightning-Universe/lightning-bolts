@@ -11,10 +11,10 @@ from pl_bolts.models.self_supervised.moco.transforms import Moco2EvalCIFAR10Tran
 from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from pl_bolts.models.self_supervised.swav.transforms import SwAVEvalDataTransform, SwAVTrainDataTransform
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
+from tests import _MARK_REQUIRE_GPU
 
 
-# TODO: this test is hanging (runs for more then 10min) so we need to use GPU or optimize it...
-@pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
+@pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_cpcv2(tmpdir, datadir):
     seed_everything()
 
@@ -30,8 +30,7 @@ def test_cpcv2(tmpdir, datadir):
     assert float(loss) > 0
 
 
-# TODO: this test is hanging (runs for more then 10min) so we need to use GPU or optimize it...
-@pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
+@pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_byol(tmpdir, datadir):
     seed_everything()
 

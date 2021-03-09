@@ -1,20 +1,15 @@
 from unittest import mock
 
 import pytest
-import torch
 
-from tests import DATASETS_PATH
+from tests import _MARK_REQUIRE_GPU, DATASETS_PATH
 
 
 @pytest.mark.parametrize(
-    'cli_args', [
-        f"--data_dir {DATASETS_PATH}"
-        " --max_epochs 1"
-        " --max_steps 3"
-        " --fast_dev_run 1"
-        " --batch_size 2"
-        " --num_workers 0"
-    ]
+    'cli_args', [f"--data_dir {DATASETS_PATH}"
+                 " --fast_dev_run 1"
+                 " --batch_size 2"
+                 " --num_workers 0"]
 )
 def test_cli_run_self_supervised_amdim(cli_args):
     """Test running CLI for an example with default params."""
@@ -25,12 +20,10 @@ def test_cli_run_self_supervised_amdim(cli_args):
         cli_main()
 
 
-# TODO: this test is hanging (runs for more then 10min) so we need to use GPU or optimize it...
-@pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
+@pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 @pytest.mark.parametrize(
     'cli_args', [
         f' --data_dir {DATASETS_PATH} --max_epochs 1'
-        ' --max_steps 3'
         ' --fast_dev_run 1'
         ' --batch_size 2'
         ' --encoder resnet18'
@@ -47,14 +40,10 @@ def test_cli_run_self_supervised_cpc(cli_args):
 
 
 @pytest.mark.parametrize(
-    'cli_args', [
-        f' --data_dir {DATASETS_PATH}'
-        ' --max_epochs 1'
-        ' --max_steps 3'
-        ' --fast_dev_run 1'
-        ' --batch_size 2'
-        ' --num_workers 0'
-    ]
+    'cli_args', [f' --data_dir {DATASETS_PATH}'
+                 ' --fast_dev_run 1'
+                 ' --batch_size 2'
+                 ' --num_workers 0']
 )
 def test_cli_run_self_supervised_moco(cli_args):
     """Test running CLI for an example with default params."""
@@ -66,16 +55,13 @@ def test_cli_run_self_supervised_moco(cli_args):
 
 
 @pytest.mark.parametrize(
-    'cli_args', [
-        f' --data_dir {DATASETS_PATH}'
-        ' --max_epochs 1'
-        ' --max_steps 3'
-        ' --fast_dev_run 1'
-        ' --batch_size 2'
-        ' --online_ft'
-        ' --gpus 0'
-        ' --fp32'
-    ]
+    'cli_args',
+    [f' --data_dir {DATASETS_PATH}'
+     ' --fast_dev_run 1'
+     ' --batch_size 2'
+     ' --online_ft'
+     ' --gpus 0'
+     ' --fp32']
 )
 def test_cli_run_self_supervised_simclr(cli_args):
     """Test running CLI for an example with default params."""
@@ -87,15 +73,12 @@ def test_cli_run_self_supervised_simclr(cli_args):
 
 
 @pytest.mark.parametrize(
-    'cli_args', [
-        f' --data_dir {DATASETS_PATH}'
-        ' --max_epochs 1'
-        ' --max_steps 3'
-        ' --fast_dev_run 1'
-        ' --batch_size 2'
-        " --num_workers 0"
-        ' --online_ft'
-    ]
+    'cli_args',
+    [f' --data_dir {DATASETS_PATH}'
+     ' --fast_dev_run 1'
+     ' --batch_size 2'
+     " --num_workers 0"
+     ' --online_ft']
 )
 def test_cli_run_self_supervised_byol(cli_args):
     """Test running CLI for an example with default params."""
@@ -110,8 +93,6 @@ def test_cli_run_self_supervised_byol(cli_args):
     'cli_args', [
         ' --dataset cifar10'
         f' --data_dir {DATASETS_PATH}'
-        ' --max_epochs 1'
-        ' --max_steps 3'
         ' --fast_dev_run 1'
         ' --batch_size 2'
         ' --arch resnet18'
@@ -136,8 +117,6 @@ def test_cli_run_self_supervised_swav(cli_args):
     'cli_args', [
         ' --dataset cifar10'
         f' --data_dir {DATASETS_PATH}'
-        ' --max_epochs 1'
-        ' --max_steps 3'
         ' --fast_dev_run 1'
         ' --batch_size 2'
         ' --num_workers 0'

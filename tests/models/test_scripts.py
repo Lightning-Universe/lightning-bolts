@@ -37,7 +37,8 @@ def test_cli_run_dcgan(cli_args):
         f'--data_dir {DATASETS_PATH}'
         ' --max_epochs 1'
         ' --max_steps 2'
-        ' --batch_size 8',
+        ' --batch_size 8'
+        ' --gpus 1',
     ]
 )
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
@@ -58,8 +59,10 @@ def test_cli_run_mnist(cli_args):
         ' --max_epochs 1'
         ' --limit_train_batches 2'
         ' --limit_val_batches 2'
+        ' --hidden_mlp 512'
         ' --batch_size 8'
-        ' --encoder resnet18',
+        ' --encoder resnet18'
+        ' --gpus 1',
     ]
 )
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
@@ -81,6 +84,7 @@ def test_cli_run_cpc(cli_args, dataset_name):
         ' --batch_size 8'
         ' --fast_dev_run 1'
         ' --num_workers 0'
+        ' --gpus 1',
     ]
 )
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
@@ -101,7 +105,8 @@ def test_cli_run_basic_ae(cli_args, dataset_name):
         f' --data_dir {DATASETS_PATH}'
         ' --max_epochs 1'
         ' --batch_size 8'
-        ' --num_workers 0',
+        ' --num_workers 0'
+        ' --gpus 1',
     ]
 )
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
