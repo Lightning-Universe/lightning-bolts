@@ -19,7 +19,7 @@ def test_cli_run_basic_gan(cli_args, dataset_name):
         cli_main()
 
 
-@pytest.mark.parametrize('cli_args', [f'--dataset mnist' + _DEFAULT_ARGS])
+@pytest.mark.parametrize('cli_args', ['--dataset mnist' + _DEFAULT_ARGS])
 def test_cli_run_dcgan(cli_args):
     from pl_bolts.models.gans.dcgan.dcgan_module import cli_main
 
