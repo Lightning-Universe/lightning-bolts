@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - YYYY-MM-DD
+## [0.3.1] - YYYY-MM-DD
 
 ### Added
+
+- Added Pix2Pix model ([#533](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/533))
 
 ### Changed
 
@@ -14,9 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-### Removed
+- Fixed BYOL moving average update ([#574](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/574))
+- Fixed custom gamma in rl ([#550](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/550))
+- Fixed PyTorch 1.8 compatibility issue ([#580](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/580),
+    [#579](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/579))
+- Fixed handling batchnorms in `BatchGradientVerification` ([#569](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/569))
+- Corrected `num_rows` calculation in `LatentDimInterpolator` callback ([#573](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/573))
 
-### Deprecated
 
 ## [0.3.0] - 2021-01-20
 
