@@ -26,7 +26,6 @@ jobs:
     pool: gridai-spot-pool
 
     # ToDo: this need to have installed docker in the base image...
-    #container: pytorchlightning/pytorch_lightning:base-cuda-py3.7-torch1.6
     #container: "pytorchlightning/pytorch_lightning:base-cuda-py$[ variables['python.version'] ]-torch1.6"
     container:
       # base ML image: mcr.microsoft.com/azureml/openmpi3.1.2-cuda10.2-cudnn8-ubuntu18.04
@@ -49,8 +48,7 @@ jobs:
       displayName: 'Image info & NVIDIA'
 
     - bash: |
-        export GIT_TERMINAL_PROMPT=1
-        sudo apt-get install -y libgl1-mesa-dev
+        apt-get install -y libgl1-mesa-dev
         # python -m pip install "pip==20.1"
         pip install --requirement requirements.txt
         pip install --requirement ./requirements/devel.txt --upgrade-strategy only-if-needed
@@ -58,7 +56,7 @@ jobs:
       displayName: 'Install dependencies'
 
     - bash: |
-        python -m coverage run --source pl_bolts -m pytest pl_bolts tests -v --durations=50
+        python -m coverage run --source pl_bolts -m pytest pl_bolts tests -v --durations=30
       displayName: 'Testing: standard'
 
     - bash: |
