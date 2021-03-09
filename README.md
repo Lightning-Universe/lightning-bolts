@@ -39,7 +39,7 @@
 
 <center>
 
-| System / PyTorch ver. | 1.6 (min. req.) | 1.7 (latest) |
+| System / PyTorch ver. | 1.6 (min. req.) | 1.8 (latest) |
 | :---: | :---: | :---: |
 | Linux py3.{6,8} | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
 | OSX py3.{6,8} | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
