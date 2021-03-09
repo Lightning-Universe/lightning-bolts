@@ -1,7 +1,6 @@
 import gzip
 import hashlib
 import os
-import sys
 import shutil
 import sys  # noqa F401
 import tarfile

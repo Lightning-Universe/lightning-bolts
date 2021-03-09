@@ -212,7 +212,7 @@ def cli_main():
 
     datamodule = None
 
-    online_evaluator = SSLOnlineEvaluator()
+    online_evaluator = SSLOnlineEvaluator(dataset=args.dataset)
     if args.dataset == 'cifar10':
         datamodule = CIFAR10DataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsCIFAR10()
