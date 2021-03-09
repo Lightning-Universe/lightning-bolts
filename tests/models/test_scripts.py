@@ -37,11 +37,9 @@ def test_cli_run_dcgan(cli_args):
         f'--data_dir {DATASETS_PATH}'
         ' --max_epochs 1'
         ' --max_steps 2'
-        ' --batch_size 8'
-        ' --gpus 1',
+        ' --batch_size 4',
     ]
 )
-@pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_cli_run_mnist(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.mnist_module import cli_main
@@ -51,70 +49,36 @@ def test_cli_run_mnist(cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize('dataset_name', ['cifar10', 'stl10'])
 @pytest.mark.parametrize(
     'cli_args', [
-        ' --dataset %(dataset_name)s'
         f' --data_dir {DATASETS_PATH}'
         ' --max_epochs 1'
-        ' --limit_train_batches 2'
-        ' --limit_val_batches 2'
-        ' --hidden_mlp 512'
-        ' --batch_size 8'
-        ' --encoder resnet18'
-        ' --gpus 1',
-    ]
-)
-@pytest.mark.skipif(**_MARK_REQUIRE_GPU)
-def test_cli_run_cpc(cli_args, dataset_name):
-    from pl_bolts.models.self_supervised.cpc.cpc_module import cli_main
-
-    cli_args = cli_args % {'dataset_name': dataset_name}
-    cli_args = cli_args.strip().split(' ') if cli_args else []
-    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
-        cli_main()
-
-
-@pytest.mark.parametrize('dataset_name', ['cifar10', 'stl10'])
-@pytest.mark.parametrize(
-    'cli_args', [
-        ' --dataset %(dataset_name)s'
-        f' --data_dir {DATASETS_PATH}'
-        ' --max_epochs 1'
-        ' --batch_size 8'
+        ' --batch_size 4'
         ' --fast_dev_run 1'
-        ' --num_workers 0'
-        ' --gpus 1',
+        ' --num_workers 0',
     ]
 )
-@pytest.mark.skipif(**_MARK_REQUIRE_GPU)
-def test_cli_run_basic_ae(cli_args, dataset_name):
+def test_cli_run_basic_ae(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.autoencoders.basic_ae.basic_ae_module import cli_main
 
-    cli_args = cli_args % {'dataset_name': dataset_name}
     cli_args = cli_args.strip().split(' ') if cli_args else []
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize('dataset_name', ['cifar10', 'stl10'])
 @pytest.mark.parametrize(
     'cli_args', [
-        ' --dataset %(dataset_name)s'
         f' --data_dir {DATASETS_PATH}'
         ' --max_epochs 1'
-        ' --batch_size 8'
-        ' --num_workers 0'
-        ' --gpus 1',
+        ' --batch_size 4'
+        ' --num_workers 0',
     ]
 )
-@pytest.mark.skipif(**_MARK_REQUIRE_GPU)
-def test_cli_run_basic_vae(cli_args, dataset_name):
+def test_cli_run_basic_vae(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.autoencoders.basic_vae.basic_vae_module import cli_main
 
-    cli_args = cli_args % {'dataset_name': dataset_name}
     cli_args = cli_args.strip().split(' ') if cli_args else []
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
         cli_main()
@@ -141,7 +105,7 @@ def test_cli_run_log_regression(cli_args):
 
 
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
-@pytest.mark.parametrize('cli_args', [f'--data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 2'])
+@pytest.mark.parametrize('cli_args', [f'--data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 2 --gpus 1'])
 def test_cli_run_vision_image_gpt(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.vision.image_gpt.igpt_module import cli_main
