@@ -1,3 +1,5 @@
+import urllib
+
 from pl_bolts.datasets.base_dataset import LightDataset
 from pl_bolts.datasets.cifar10_dataset import CIFAR10, TrialCIFAR10
 from pl_bolts.datasets.concat_dataset import ConcatDataset
@@ -31,3 +33,9 @@ __all__ = [
     "CIFAR10Mixed",
     "SSLDatasetMixin",
 ]
+
+# TorchVision hotfix https://github.com/pytorch/vision/issues/1938
+opener = urllib.request.build_opener()
+opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+urllib.request.install_opener(opener)
+
