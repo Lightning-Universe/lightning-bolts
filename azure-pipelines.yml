@@ -50,7 +50,7 @@ jobs:
 
     - bash: |
         export GIT_TERMINAL_PROMPT=1
-        #sudo apt-get install -y cmake
+        apt-get install -y libgl1-mesa-dev
         # python -m pip install "pip==20.1"
         pip install --requirement requirements.txt
         pip install --requirement ./requirements/devel.txt --upgrade-strategy only-if-needed
