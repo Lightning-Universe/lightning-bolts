@@ -28,5 +28,5 @@ env:
 	pip install -r requirements/devel.txt
 
 format:
-    isort .
-    yapf . -rip
+	isort .
+	yapf . -rip
