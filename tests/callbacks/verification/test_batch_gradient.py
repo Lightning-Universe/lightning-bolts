@@ -9,6 +9,7 @@ from torch import nn as nn
 from pl_bolts.callbacks import BatchGradientVerificationCallback
 from pl_bolts.callbacks.verification.batch_gradient import default_input_mapping, default_output_mapping, selective_eval
 from pl_bolts.utils import BatchGradientVerification
+from tests import _MARK_REQUIRE_GPU
 
 
 class TemplateModel(nn.Module):
@@ -94,13 +95,8 @@ class LitModel(LightningModule):
 @pytest.mark.parametrize("mix_data", [True, False])
 @pytest.mark.parametrize(
     "device",
-    [
-        pytest.param(torch.device("cpu")),
-        pytest.param(
-            torch.device("cuda", 0),
-            marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU"),
-        ),
-    ],
+    [torch.device("cpu"),
+     pytest.param(torch.device("cuda", 0), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
 )
 def test_batch_gradient_verification(model_class, mix_data, device):
     """ Test detection of batch gradient mixing with different PyTorch models. """
@@ -114,13 +110,8 @@ def test_batch_gradient_verification(model_class, mix_data, device):
 @pytest.mark.parametrize("mix_data", [True, False])
 @pytest.mark.parametrize(
     "device",
-    [
-        pytest.param(torch.device("cpu")),
-        pytest.param(
-            torch.device("cuda", 0),
-            marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU"),
-        ),
-    ],
+    [torch.device("cpu"),
+     pytest.param(torch.device("cuda", 0), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
 )
 def test_batch_gradient_verification_pl_module(mix_data, device):
     """ Test detection of batch gradient mixing with a LightningModule. """
@@ -133,10 +124,7 @@ def test_batch_gradient_verification_pl_module(mix_data, device):
 
 @pytest.mark.parametrize(
     "gpus",
-    [
-        pytest.param(0),
-        pytest.param(1, marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU")),
-    ],
+    [0, pytest.param(1, marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
 )
 def test_batch_gradient_verification_callback(gpus):
     """ Test detection of batch gradient mixing with the callback implementation. """

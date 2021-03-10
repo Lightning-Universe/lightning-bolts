@@ -102,7 +102,8 @@ class BYOL(pl.LightningModule):
         return y
 
     def shared_step(self, batch, batch_idx):
-        (img_1, img_2, _), y = batch
+        imgs, y = batch
+        img_1, img_2 = imgs[:2]
 
         # Image 1 to image 2 loss
         y1, z1, h1 = self.online_network(img_1)
@@ -150,7 +151,7 @@ class BYOL(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true', help='run online finetuner')
-        parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, imagenet2012, stl10')
+        parser.add_argument('--dataset', type=str, default='cifar10', choices=['cifar10', 'imagenet2012', 'stl10'])
 
         (args, _) = parser.parse_known_args()
 

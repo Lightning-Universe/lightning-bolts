@@ -18,7 +18,7 @@ from pl_bolts.datasets.cifar10_dataset import CIFAR10
 def test_dev_datasets(datadir):
 
     ds = CIFAR10(data_dir=datadir)
-    for b in ds:
+    for _ in ds:
         pass
 
 
