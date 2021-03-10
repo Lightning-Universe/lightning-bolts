@@ -4,13 +4,7 @@ import pytest
 
 from tests import _MARK_REQUIRE_GPU, DATASETS_PATH
 
-_DEFAULT_ARGS = (
-    f"--data_dir {DATASETS_PATH}"
-    " --max_epochs 1"
-    " --max_steps 4"
-    " --batch_size 8"
-    " --num_workers 0"
-)
+_DEFAULT_ARGS = (f"--data_dir {DATASETS_PATH}" " --max_epochs 1" " --max_steps 4" " --batch_size 8" " --num_workers 0")
 
 
 @pytest.mark.parametrize('cli_args', [
