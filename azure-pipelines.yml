@@ -28,7 +28,7 @@ jobs:
     # ToDo: this need to have installed docker in the base image...
     #container: "pytorchlightning/pytorch_lightning:base-cuda-py$[ variables['python.version'] ]-torch1.6"
     container:
-      image: "pytorchlightning/pytorch_lightning:base-cuda-py3.8-torch1.7"
+      image: "pytorchlightning/pytorch_lightning:base-cuda-py3.7-torch1.8"
       #endpoint: azureContainerRegistryConnection
       options: "--runtime=nvidia -e NVIDIA_VISIBLE_DEVICES=all"
 
@@ -51,7 +51,6 @@ jobs:
       displayName: 'Sanity check'
 
     - bash: |
-        apt-get install -y zlib1g-dev
         # python -m pip install "pip==20.1"
         pip install --requirement ./requirements/devel.txt --upgrade-strategy only-if-needed
         pip list
