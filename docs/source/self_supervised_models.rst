@@ -242,14 +242,14 @@ Fine-tuning:
 
 |
 
-CPC_v2 API
-*********
+CPC (v2) API
+^^^^^^^^^^^^
 
 .. autoclass:: pl_bolts.models.self_supervised.CPC_v2
    :noindex:
 
-Moco (V2)
-^^^^^^^^^
+Moco (v2) API
+^^^^^^^^^^^^^
 
 .. autoclass:: pl_bolts.models.self_supervised.Moco_v2
    :noindex:
