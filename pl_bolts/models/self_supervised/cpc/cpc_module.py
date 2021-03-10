@@ -60,7 +60,7 @@ class CPCV2(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.online_evaluator = self.hparams.online_ft
+        self.online_evaluator = online_ft
 
         if pretrained:
             self.hparams.dataset = pretrained
@@ -69,14 +69,14 @@ class CPCV2(pl.LightningModule):
         self.encoder = self.init_encoder()
 
         # info nce loss
-        c, h = self.__compute_final_nb_c(self.hparams.patch_size)
+        c, h = self.__compute_final_nb_c(patch_size)
         self.contrastive_task = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
         self.z_dim = c * h * h
         self.num_classes = num_classes
 
         if pretrained:
-            self.load_pretrained(self.hparams.encoder_name)
+            self.load_pretrained(encoder_name)
 
     def load_pretrained(self, encoder_name):
         available_weights = {'resnet18'}
@@ -168,7 +168,11 @@ class CPCV2(pl.LightningModule):
 
     def configure_optimizers(self):
         opt = optim.Adam(
-            params=self.parameters(), lr=self.hparams.learning_rate, betas=(0.8, 0.999), weight_decay=1e-5, eps=1e-7
+            params=self.parameters(),
+            lr=self.hparams.learning_rate,
+            betas=(0.8, 0.999),
+            weight_decay=1e-5,
+            eps=1e-7,
         )
 
         # if self.hparams.dataset in ['cifar10', 'stl10']:
@@ -180,13 +184,20 @@ class CPCV2(pl.LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser):
+        possible_resnets = [
+            'resnet18',
+            'resnet34',
+            'resnet50',
+            'resnet101',
+            'resnet152',
+            'resnext50_32x4d',
+            'resnext101_32x8d',
+            'wide_resnet50_2',
+            'wide_resnet101_2',
+        ]
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true')
         parser.add_argument('--task', type=str, default='cpc')
-        possible_resnets = [
-            'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
-            'wide_resnet50_2', 'wide_resnet101_2'
-        ]
         parser.add_argument('--encoder', default='cpc_encoder', type=str, choices=possible_resnets)
         # cifar10: 1e-5, stl10: 3e-5, imagenet: 4e-4
         parser.add_argument('--learning_rate', type=float, default=1e-5)
