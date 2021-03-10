@@ -96,7 +96,7 @@ class LitModel(LightningModule):
 @pytest.mark.parametrize(
     "device",
     [torch.device("cpu"),
-     pytest.param(torch.device("cuda"), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
+     pytest.param(torch.device("cuda", 0), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
 )
 def test_batch_gradient_verification(model_class, mix_data, device):
     """ Test detection of batch gradient mixing with different PyTorch models. """

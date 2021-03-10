@@ -40,7 +40,7 @@ class LitModel(LightningModule):
 @pytest.mark.parametrize(
     "device",
     [torch.device("cpu"),
-     pytest.param(torch.device("cuda"), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
+     pytest.param(torch.device("cuda", 0), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
 )
 def test_verification_base_get_input_array(device):
     """ Test that the base class calls the correct methods to transfer the input to the device the model is on. """
