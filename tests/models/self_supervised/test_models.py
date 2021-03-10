@@ -12,10 +12,11 @@ from pl_bolts.models.self_supervised.moco.transforms import Moco2EvalCIFAR10Tran
 from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from pl_bolts.models.self_supervised.swav.transforms import SwAVEvalDataTransform, SwAVTrainDataTransform
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
+from tests import _MARK_REQUIRE_GPU
 
 
 # todo: seems to be failing on GH Actions for min config
-@pytest.mark.skipif(LooseVersion(torch.__version__) < LooseVersion('1.7.0'), reason='crashing GHA tests')
+@pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_cpcv2(tmpdir, datadir):
     datamodule = CIFAR10DataModule(data_dir=datadir, num_workers=0, batch_size=2)
     datamodule.train_transforms = CPCTrainTransformsCIFAR10()
