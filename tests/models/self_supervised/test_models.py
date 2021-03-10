@@ -85,10 +85,8 @@ def test_simclr(tmpdir, datadir):
     assert float(loss) > 0
 
 
-def test_swav(tmpdir, datadir):
+def test_swav(tmpdir, datadir, batch_size = 2):
     seed_everything()
-
-    batch_size = 2
 
     # inputs, y = batch  (doesn't receive y for some reason)
     datamodule = CIFAR10DataModule(data_dir=datadir, batch_size=batch_size, num_workers=0)

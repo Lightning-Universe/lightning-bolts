@@ -19,6 +19,7 @@
 
 [![PyPI Status](https://badge.fury.io/py/lightning-bolts.svg)](https://badge.fury.io/py/lightning-bolts)
 [![PyPI Status](https://pepy.tech/badge/lightning-bolts)](https://pepy.tech/project/lightning-bolts)
+[![Build Status](https://dev.azure.com/PytorchLightning/lightning%20Bolts/_apis/build/status/PyTorchLightning.lightning-bolts?branchName=master)](https://dev.azure.com/PytorchLightning/lightning%20Bolts/_build/latest?definitionId=5&branchName=master)
 [![codecov](https://codecov.io/gh/PyTorchLightning/lightning-bolts/branch/master/graph/badge.svg)](https://codecov.io/gh/PyTorchLightning/lightning-bolts)
 [![CodeFactor](https://www.codefactor.io/repository/github/pytorchlightning/lightning-bolts/badge)](https://www.codefactor.io/repository/github/pytorchlightning/lightning-bolts)
 
@@ -37,7 +38,8 @@
 
 ## Continuous Integration
 
-<center>
+<details>
+  <summary>CI testing</summary>
 
 | System / PyTorch ver. | 1.6 (min. req.) | 1.8 (latest) |
 | :---: | :---: | :---: |
@@ -45,29 +47,30 @@
 | OSX py3.{6,8} | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
 | Windows py3.7* | ![CI base testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) | ![CI base testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) |
 
-</center>
-
 - _\* testing just the package itself, we skip full test suite - excluding `tests` folder_
+
+</details>
 
 ## Install
 
 <details>
   <summary>View install</summary>
 
-  Simple installation from PyPI
-  ```bash
-  pip install lightning-bolts
-  ```
-  
-  Install bleeding-edge (no guarantees)   
-  ```bash
-  pip install git+https://github.com/PytorchLightning/lightning-bolts.git@master --upgrade
-  ```
-  
-  In case you want to have full experience you can install all optional packages at once
-  ```bash
-  pip install lightning-bolts["extra"]
-  ```
+Simple installation from PyPI
+```bash
+pip install lightning-bolts
+```
+
+Install bleeding-edge (no guarantees)   
+```bash
+pip install git+https://github.com/PytorchLightning/lightning-bolts.git@master --upgrade
+```
+
+In case you want to have full experience you can install all optional packages at once
+```bash
+pip install lightning-bolts["extra"]
+```
+
 </details>
 
 ## What is Bolts

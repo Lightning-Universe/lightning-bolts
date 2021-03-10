@@ -102,7 +102,11 @@ class BYOL(pl.LightningModule):
         return y
 
     def shared_step(self, batch, batch_idx):
-        (img_1, img_2), y = batch
+        imgs, y = batch
+        if len(imgs) == 2:
+            img_1, img_2 = imgs
+        else:
+            img_1, img_2, _ = imgs
 
         # Image 1 to image 2 loss
         y1, z1, h1 = self.online_network(img_1)
