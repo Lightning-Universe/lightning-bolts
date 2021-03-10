@@ -119,8 +119,7 @@ class CPC_v2(pl.LightningModule):
 
     def forward(self, img_1):
         # put all patches on the batch dim for simultaneous processing
-        b = img_1.size()[0]
-        c, w, h = img_1.size()[-3:]
+        b, _, c, w, h = img_1.size()
         img_1 = img_1.view(-1, c, w, h)
 
         # Z are the latent vars
@@ -153,8 +152,8 @@ class CPC_v2(pl.LightningModule):
 
     def shared_step(self, batch):
         if isinstance(self.datamodule, STL10DataModule):
-            unlabeled_batch = batch[0]
-            batch = unlabeled_batch
+            # unlabeled batch
+            batch = batch[0]
 
         img_1, y = batch
 
