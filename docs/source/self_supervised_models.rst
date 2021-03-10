@@ -69,11 +69,11 @@ Mix and match any part, or subclass to create your own new method
 
 .. code-block:: python
 
-    from pl_bolts.models.self_supervised import CPCV2
+    from pl_bolts.models.self_supervised import CPC_v2
     from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
 
     amdim_task = FeatureMapContrastiveTask(comparisons='01, 11, 02', bidirectional=True)
-    model = CPCV2(contrastive_task=amdim_task)
+    model = CPC_v2(contrastive_task=amdim_task)
 
 -----------------
 
@@ -114,7 +114,7 @@ Model implemented by:
 To Train::
 
     import pytorch_lightning as pl
-    from pl_bolts.models.self_supervised import CPCV2
+    from pl_bolts.models.self_supervised import CPC_v2
     from pl_bolts.datamodules import CIFAR10DataModule
     from pl_bolts.models.self_supervised.cpc import (
         CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10)
@@ -125,7 +125,7 @@ To Train::
     dm.val_transforms = CPCEvalTransformsCIFAR10()
 
     # model
-    model = CPCV2()
+    model = CPC_v2()
 
     # fit
     trainer = pl.Trainer()
@@ -186,10 +186,10 @@ Results in table are reported from the
 
 CIFAR-10 pretrained model::
 
-    from pl_bolts.models.self_supervised import CPCV2
+    from pl_bolts.models.self_supervised import CPC_v2
 
     weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/epoch%3D474.ckpt'
-    cpc_v2 = CPCV2.load_from_checkpoint(weight_path, strict=False)
+    cpc_v2 = CPC_v2.load_from_checkpoint(weight_path, strict=False)
 
     cpc_v2.freeze()
 
@@ -215,10 +215,10 @@ Fine-tuning:
 
 STL-10 pretrained model::
 
-    from pl_bolts.models.self_supervised import CPCV2
+    from pl_bolts.models.self_supervised import CPC_v2
 
     weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/epoch%3D624.ckpt'
-    cpc_v2 = CPCV2.load_from_checkpoint(weight_path, strict=False)
+    cpc_v2 = CPC_v2.load_from_checkpoint(weight_path, strict=False)
 
     cpc_v2.freeze()
 
@@ -242,16 +242,16 @@ Fine-tuning:
 
 |
 
-CPCV2 API
+CPC_v2 API
 *********
 
-.. autoclass:: pl_bolts.models.self_supervised.CPCV2
+.. autoclass:: pl_bolts.models.self_supervised.CPC_v2
    :noindex:
 
 Moco (V2)
 ^^^^^^^^^
 
-.. autoclass:: pl_bolts.models.self_supervised.MocoV2
+.. autoclass:: pl_bolts.models.self_supervised.Moco_v2
    :noindex:
 
 SimCLR

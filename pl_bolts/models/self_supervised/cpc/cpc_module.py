@@ -25,10 +25,10 @@ from pl_bolts.models.self_supervised.cpc.transforms import (
 from pl_bolts.utils.pretrained_weights import load_pretrained
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
-__all__ = ['CPCV2']
+__all__ = ['CPC_v2']
 
 
-class CPCV2(pl.LightningModule):
+class CPC_v2(pl.LightningModule):
 
     def __init__(
         self,
@@ -82,7 +82,7 @@ class CPCV2(pl.LightningModule):
         available_weights = {'resnet18'}
 
         if encoder_name in available_weights:
-            load_pretrained(self, f'CPCV2-{encoder_name}')
+            load_pretrained(self, f'CPC_v2-{encoder_name}')
         elif encoder_name not in available_weights:
             rank_zero_warn(f'{encoder_name} not yet available')
 
@@ -213,7 +213,7 @@ def cli_main():
     pl.seed_everything(1234)
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
-    parser = CPCV2.add_model_specific_args(parser)
+    parser = CPC_v2.add_model_specific_args(parser)
     parser.add_argument('--dataset', default='cifar10', type=str)
     parser.add_argument('--data_dir', default='.', type=str)
     parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
@@ -264,7 +264,7 @@ def cli_main():
 
         online_evaluator.to_device = to_device
 
-    model = CPCV2(**vars(args))
+    model = CPC_v2(**vars(args))
     trainer = pl.Trainer.from_argparse_args(args, callbacks=[online_evaluator])
     trainer.fit(model, datamodule=datamodule)
 

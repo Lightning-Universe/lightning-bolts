@@ -16,13 +16,13 @@ class SSLFineTuner(pl.LightningModule):
     Example::
 
         from pl_bolts.utils.self_supervised import SSLFineTuner
-        from pl_bolts.models.self_supervised import CPCV2
+        from pl_bolts.models.self_supervised import CPC_v2
         from pl_bolts.datamodules import CIFAR10DataModule
         from pl_bolts.models.self_supervised.cpc.transforms import CPCEvalTransformsCIFAR10,
                                                                     CPCTrainTransformsCIFAR10
 
         # pretrained model
-        backbone = CPCV2.load_from_checkpoint(PATH, strict=False)
+        backbone = CPC_v2.load_from_checkpoint(PATH, strict=False)
 
         # dataset + transforms
         dm = CIFAR10DataModule(data_dir='.')

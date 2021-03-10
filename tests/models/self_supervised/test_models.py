@@ -5,7 +5,7 @@ import pytorch_lightning as pl
 import torch
 
 from pl_bolts.datamodules import CIFAR10DataModule
-from pl_bolts.models.self_supervised import AMDIM, BYOL, CPCV2, MocoV2, SimCLR, SimSiam, SwAV
+from pl_bolts.models.self_supervised import AMDIM, BYOL, CPC_v2, Moco_v2, SimCLR, SimSiam, SwAV
 from pl_bolts.models.self_supervised.cpc import CPCEvalTransformsCIFAR10, CPCTrainTransformsCIFAR10
 from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
 from pl_bolts.models.self_supervised.moco.transforms import Moco2EvalCIFAR10Transforms, Moco2TrainCIFAR10Transforms
@@ -21,7 +21,7 @@ def test_cpcv2(tmpdir, datadir):
     datamodule.train_transforms = CPCTrainTransformsCIFAR10()
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 
-    model = CPCV2(
+    model = CPC_v2(
         encoder='mobilenet_v3_small',
         patch_size=8,
         patch_overlap=2,
@@ -55,7 +55,7 @@ def test_moco(tmpdir, datadir):
     datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
     datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
 
-    model = MocoV2(data_dir=datadir, batch_size=2, online_ft=True)
+    model = Moco_v2(data_dir=datadir, batch_size=2, online_ft=True)
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir, callbacks=[MocoLRScheduler()])
     trainer.fit(model, datamodule=datamodule)
 

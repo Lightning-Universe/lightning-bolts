@@ -20,7 +20,7 @@ All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, G
 
     from pl_bolts.models import VAE
     from pl_bolts.models.vision import GPT2, ImageGPT, PixelCNN
-    from pl_bolts.models.self_supervised import AMDIM, CPCV2, SimCLR, MocoV2
+    from pl_bolts.models.self_supervised import AMDIM, CPC_v2, SimCLR, Moco_v2
     from pl_bolts.models import LinearRegression, LogisticRegression
     from pl_bolts.models.gans import GAN
     from pl_bolts.callbacks import PrintTableMetricsCallback
@@ -149,15 +149,15 @@ For example, you could use a pretrained VAE to generate features for an image da
 .. testcode::
 
     from pl_bolts.models.autoencoders import VAE
-    from pl_bolts.models.self_supervised import CPCV2
+    from pl_bolts.models.self_supervised import CPC_v2
 
     model1 = VAE(input_height=32, pretrained='imagenet2012')
     encoder = model1.encoder
     encoder.eval()
 
     # bolts are pretrained on different datasets
-    model2 = CPCV2(encoder='resnet18', pretrained='imagenet128').freeze()
-    model3 = CPCV2(encoder='resnet18', pretrained='stl10').freeze()
+    model2 = CPC_v2(encoder='resnet18', pretrained='imagenet128').freeze()
+    model3 = CPC_v2(encoder='resnet18', pretrained='stl10').freeze()
 
 .. code-block:: python
 
@@ -178,7 +178,7 @@ you can use any finetuning protocol you prefer.
 .. code-block:: python
 
     # unfrozen finetune
-    model = CPCV2(encoder='resnet18', pretrained='imagenet128')
+    model = CPC_v2(encoder='resnet18', pretrained='imagenet128')
     resnet18 = model.encoder
     # don't call .freeze()
 
@@ -193,7 +193,7 @@ you can use any finetuning protocol you prefer.
 .. code-block:: python
 
     # FREEZE!
-    model = CPCV2(encoder='resnet18', pretrained='imagenet128')
+    model = CPC_v2(encoder='resnet18', pretrained='imagenet128')
     resnet18 = model.encoder
     resnet18.eval()
 

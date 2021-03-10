@@ -35,7 +35,7 @@ else:  # pragma: no cover
     warn_missing_pkg('torchvision')
 
 
-class MocoV2(pl.LightningModule):
+class Moco_v2(pl.LightningModule):
     """
     PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
 
@@ -46,8 +46,8 @@ class MocoV2(pl.LightningModule):
         - `William Falcon <https://github.com/williamFalcon>`_
 
     Example::
-        from pl_bolts.models.self_supervised import MocoV2
-        model = MocoV2()
+        from pl_bolts.models.self_supervised import Moco_v2
+        model = Moco_v2()
         trainer = Trainer()
         trainer.fit(model)
 
@@ -351,7 +351,7 @@ def cli_main():
     parser = pl.Trainer.add_argparse_args(parser)
 
     # model args
-    parser = MocoV2.add_model_specific_args(parser)
+    parser = Moco_v2.add_model_specific_args(parser)
     args = parser.parse_args()
 
     if args.dataset == 'cifar10':
@@ -375,7 +375,7 @@ def cli_main():
         # replace with your own dataset, otherwise CIFAR-10 will be used by default if `None` passed in
         datamodule = None
 
-    model = MocoV2(**args.__dict__)
+    model = Moco_v2(**args.__dict__)
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model, datamodule=datamodule)
