@@ -45,7 +45,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 The DQN was introduced in `Playing Atari with Deep Reinforcement Learning <https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf>`_ by
 researchers at DeepMind. This took the concept of tabular Q learning and scaled it to much larger problems by
-apporximating the Q function using a deep neural network.
+approximating the Q function using a deep neural network.
 
 The goal behind DQN was to take the simple control method of Q learning and scale it up in order to solve complicated \
 tasks. As well as this, the method needed to be stable. The DQN solves these issues with the following additions.
