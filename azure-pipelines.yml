@@ -51,6 +51,7 @@ jobs:
       displayName: 'Sanity check'
 
     - bash: |
+        apt-get install -y zlib1g-dev
         # python -m pip install "pip==20.1"
         pip install --requirement ./requirements/devel.txt --upgrade-strategy only-if-needed
         pip list
