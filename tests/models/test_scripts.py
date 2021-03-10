@@ -77,8 +77,8 @@ def test_cli_run_log_regression(cli_args):
         cli_main()
 
 
-@pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 @pytest.mark.parametrize('cli_args', [_DEFAULT_ARGS + ' --gpus 1'])
+@pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_cli_run_vision_image_gpt(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.vision.image_gpt.igpt_module import cli_main

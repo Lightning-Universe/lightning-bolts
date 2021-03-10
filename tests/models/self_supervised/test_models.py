@@ -19,7 +19,7 @@ def test_cpcv2(tmpdir, datadir):
     datamodule.train_transforms = CPCTrainTransformsCIFAR10()
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 
-    model = CPCV2(encoder='resnet18', online_ft=True, num_classes=datamodule.num_classes)
+    model = CPCV2(encoder='mobilenet_v3_small', online_ft=True, num_classes=datamodule.num_classes)
     trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, datamodule=datamodule)
 
