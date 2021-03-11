@@ -2,10 +2,10 @@ from typing import Optional, Sequence, Tuple, Union
 
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
-from pytorch_lightning.metrics.functional import accuracy
 from torch import device, Tensor
 from torch.nn import functional as F
 from torch.optim import Optimizer
+from torchmetrics.metrics.functional import accuracy
 
 
 class SSLOnlineEvaluator(Callback):  # pragma: no cover

@@ -2,12 +2,12 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import torch
-from pytorch_lightning.metrics.functional import accuracy
 from torch import nn
 from torch.nn import functional as F
 from torch.nn.functional import softmax
 from torch.optim import Adam
 from torch.optim.optimizer import Optimizer
+from torchmetrics.functional import accuracy
 
 
 class LogisticRegression(pl.LightningModule):
