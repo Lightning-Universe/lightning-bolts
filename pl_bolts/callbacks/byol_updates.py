@@ -69,5 +69,4 @@ class BYOLMAWeightUpdate(Callback):
             online_net.named_parameters(),  # type: ignore[union-attr]
             target_net.named_parameters()  # type: ignore[union-attr]
         ):
-            if 'weight' in name:
-                target_p.data = self.current_tau * target_p.data + (1 - self.current_tau) * online_p.data
+            target_p.data = self.current_tau * target_p.data + (1 - self.current_tau) * online_p.data

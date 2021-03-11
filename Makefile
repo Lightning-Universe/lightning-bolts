@@ -1,16 +1,32 @@
-.PHONY: test
+.PHONY: test clean docs env
 
-test:
-	# use this to run tests
+# assume you have installed need packages
+export SPHINX_MOCK_REQUIREMENTS=1
+
+clean:
+	# clean all temp runs
+	rm -rf $(shell find . -name "mlruns")
 	rm -rf _ckpt_*
-	rm -rf ./tests/save_dir*
-	rm -rf ./tests/mlruns_*
-	rm -rf ./tests/cometruns*
-	rm -rf ./tests/wandb*
-	rm -rf ./tests/tests/*
-	rm -rf ./lightning_logs
-	python -m coverage run --source pl_bolts -m pytest pl_bolts tests -v --flake8
-	python -m coverage report -m
+	rm -rf .mypy_cache
+	rm -rf .pytest_cache
+	rm -rf ./docs/build
+	rm -rf ./docs/source/generated
+	rm -rf ./docs/source/*/generated
+	rm -rf ./docs/source/api
 
-isort:
+test: clean env
+
+	# run tests with coverage
+	python -m coverage run --source pl_bolts -m pytest pl_bolts tests -v
+	python -m coverage report
+
+docs: clean
+	pip install --quiet -r docs/requirements.txt
+	python -m sphinx -b html -W docs/source docs/build
+
+env:
+	pip install -r requirements/devel.txt
+
+format:
 	isort .
+	yapf . -rip

@@ -114,7 +114,7 @@ class PERDQN(DQN):
         indices = indices.cpu().numpy()
 
         # calculates training loss
-        loss, batch_weights = per_dqn_loss(samples, weights, self.net, self.target_net)
+        loss, batch_weights = per_dqn_loss(samples, weights, self.net, self.target_net, self.gamma)
 
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)

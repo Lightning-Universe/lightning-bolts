@@ -72,7 +72,7 @@ def _load_readme_description(path_dir: str, homepage: str = __homepage__, ver: s
 
     # readthedocs badge
     text = text.replace('badge/?version=stable', f'badge/?version={ver}')
-    text = text.replace('pytorch-lightning.readthedocs.io/en/stable/', f'pytorch-lightning.readthedocs.io/en/{ver}')
+    text = text.replace('lightning-bolts.readthedocs.io/en/stable/', f'lightning-bolts.readthedocs.io/en/{ver}')
     # codecov badge
     text = text.replace('/branch/master/graph/badge.svg', f'/release/{ver}/graph/badge.svg')
     # replace github badges for release ones

@@ -36,7 +36,7 @@ import pl_bolts  # noqa: E402
 # -- Project information -----------------------------------------------------
 
 # this name shall match the project name in Github as it is used for linking to code
-project = 'PyTorch-Lightning-Bolts'
+project = 'Lightning-Bolts'
 copyright = pl_bolts.__copyright__
 author = pl_bolts.__author__
 
@@ -84,7 +84,7 @@ with open(os.path.join(PATH_HERE, 'CHANGELOG.md'), 'w') as fp:
 
 # If your documentation needs a minimal Sphinx version, state it here.
 
-needs_sphinx = '2.4'
+needs_sphinx = '3.4'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom

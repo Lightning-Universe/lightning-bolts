@@ -358,10 +358,10 @@ approaches.
 
 .. testcode::
 
-    from pl_bolts.models.self_supervised import AMDIM, CPCV2
+    from pl_bolts.models.self_supervised import AMDIM, CPC_v2
 
     default_amdim_task = AMDIM().contrastive_task
-    model = CPCV2(contrastive_task=default_amdim_task, encoder='cpc_default')
+    model = CPC_v2(contrastive_task=default_amdim_task, encoder='cpc_default')
     # you might need to modify the cpc encoder depending on what you use
 
 .. testoutput::
@@ -389,7 +389,7 @@ pieces together
             self.gan = GAN()
             self.vae = VAE()
             self.amdim = AMDIM()
-            self.cpc = CPCV2
+            self.cpc = CPC_v2
 
         def training_step(self, batch, batch_idx):
             (x, y) = batch
