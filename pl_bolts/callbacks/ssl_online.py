@@ -5,7 +5,7 @@ from pytorch_lightning import Callback, LightningModule, Trainer
 from torch import device, Tensor
 from torch.nn import functional as F
 from torch.optim import Optimizer
-from torchmetrics.metrics.functional import accuracy
+from torchmetrics.functional import accuracy
 
 
 class SSLOnlineEvaluator(Callback):  # pragma: no cover
