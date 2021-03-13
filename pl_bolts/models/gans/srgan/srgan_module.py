@@ -19,7 +19,7 @@ from pl_bolts.models.gans.srgan.utils import parse_args, prepare_datasets
 class SRGAN(pl.LightningModule):
     """
     SRGAN implementation from the paper `Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial
-    Network <https://arxiv.org/pdf/1609.04802.pdf>`_. It uses a pretrained SRResNet model as the generator if available.
+    Network <https://arxiv.org/abs/1609.04802>`_. It uses a pretrained SRResNet model as the generator if available.
 
     Code adapted from `https-deeplearning-ai/GANs-Public <https://github.com/https-deeplearning-ai/GANs-Public>`_ to Lightning by:
 
