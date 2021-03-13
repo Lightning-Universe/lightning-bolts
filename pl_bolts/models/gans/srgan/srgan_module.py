@@ -72,7 +72,7 @@ class SRGAN(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        if self.hparams.generator_checkpoint:
+        if generator_checkpoint:
             self.generator = torch.load(generator_checkpoint)
         else:
             assert scale_factor in [2, 4]
@@ -83,9 +83,8 @@ class SRGAN(pl.LightningModule):
         self.vgg_feature_extractor = VGG19FeatureExtractor(image_channels)
 
     def configure_optimizers(self) -> Tuple[List[torch.optim.Adam], List[torch.optim.lr_scheduler.MultiStepLR]]:
-        lr = self.hparams.learning_rate
-        opt_disc = torch.optim.Adam(self.discriminator.parameters(), lr=lr)
-        opt_gen = torch.optim.Adam(self.generator.parameters(), lr=lr)
+        opt_disc = torch.optim.Adam(self.discriminator.parameters(), lr=self.hparams.learning_rate)
+        opt_gen = torch.optim.Adam(self.generator.parameters(), lr=self.hparams.learning_rate)
 
         sched_disc = torch.optim.lr_scheduler.MultiStepLR(opt_disc, milestones=[self.hparams.scheduler_step], gamma=0.1)
         sched_gen = torch.optim.lr_scheduler.MultiStepLR(opt_gen, milestones=[self.hparams.scheduler_step], gamma=0.1)
@@ -103,7 +102,10 @@ class SRGAN(pl.LightningModule):
         return self.generator(lr_image)
 
     def training_step(
-            self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int, optimizer_idx: int,
+        self,
+        batch: Tuple[torch.Tensor, torch.Tensor],
+        batch_idx: int,
+        optimizer_idx: int,
     ) -> torch.Tensor:
         hr_image, lr_image = batch
 

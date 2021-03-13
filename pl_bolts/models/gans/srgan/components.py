@@ -22,7 +22,6 @@ class ResidualBlock(nn.Module):
             nn.Conv2d(feature_maps, feature_maps, kernel_size=3, padding=1),
             nn.BatchNorm2d(feature_maps),
             nn.PReLU(),
-
             nn.Conv2d(feature_maps, feature_maps, kernel_size=3, padding=1),
             nn.BatchNorm2d(feature_maps),
         )
