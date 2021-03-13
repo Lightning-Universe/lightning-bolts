@@ -166,3 +166,6 @@ CelebA results:
 
 .. autoclass:: pl_bolts.models.gans.SRGAN
    :noindex:
+
+.. autoclass:: pl_bolts.models.gans.SRResNet
+   :noindex:
