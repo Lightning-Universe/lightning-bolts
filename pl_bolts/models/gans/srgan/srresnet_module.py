@@ -1,3 +1,6 @@
+"""
+Adapted from: https://github.com/https-deeplearning-ai/GANs-Public
+"""
 from argparse import ArgumentParser
 from typing import Any, Tuple
 
@@ -15,6 +18,10 @@ class SRResNet(pl.LightningModule):
     """
     SRResNet implementation from the paper `Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial
     Network <https://arxiv.org/pdf/1609.04802.pdf>`_. A pretrained SRResNet model is used as the generator for SRGAN.
+
+    Code adapted from `https-deeplearning-ai/GANs-Public <https://github.com/https-deeplearning-ai/GANs-Public>`_ to Lightning by:
+
+        - `Christoph Clement <https://github.com/chris-clem>`_
 
     Example::
 

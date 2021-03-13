@@ -1,6 +1,5 @@
 """
-based on
-https://colab.research.google.com/github/https-deeplearning-ai/GANs-Public/blob/master/C3W2_SRGAN_(Optional).ipynb
+Adapted from: https://github.com/https-deeplearning-ai/GANs-Public
 """
 import torch
 import torch.nn as nn

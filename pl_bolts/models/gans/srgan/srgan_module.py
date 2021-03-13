@@ -1,3 +1,6 @@
+"""
+Adapted from: https://github.com/https-deeplearning-ai/GANs-Public
+"""
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import Any, List, Optional, Tuple
@@ -17,6 +20,10 @@ class SRGAN(pl.LightningModule):
     """
     SRGAN implementation from the paper `Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial
     Network <https://arxiv.org/pdf/1609.04802.pdf>`_. It uses a pretrained SRResNet model as the generator if available.
+
+    Code adapted from `https-deeplearning-ai/GANs-Public <https://github.com/https-deeplearning-ai/GANs-Public>`_ to Lightning by:
+
+        - `Christoph Clement <https://github.com/chris-clem>`_
 
     You can pretrain a SRResNet model with :code:`srresnet_module.py`.
 
