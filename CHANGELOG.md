@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.2] - 2021-03-DD
 
+### Added
+
+- Added `SRGAN` model ([#466](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/466))
+
+
 ### Changed
 
 - Renamed SSL modules: `CPCV2` >> `CPC_v2` and `MocoV2` >> `Moco_v2` ([#585](https://github.com/PyTorchLightning/lightning-bolts/pull/585))
@@ -43,7 +48,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added data monitor callbacks `ModuleDataMonitor` and `TrainingDataMonitor` ([#285](https://github.com/PyTorchLightning/lightning-bolts/pull/285))
 - Added DCGAN module ([#403](https://github.com/PyTorchLightning/lightning-bolts/pull/403)) 
 - Added `VisionDataModule` as parent class for `BinaryMNISTDataModule`, `CIFAR10DataModule`, `FashionMNISTDataModule`, and `MNISTDataModule` ([#400](https://github.com/PyTorchLightning/lightning-bolts/pull/400))
-- Added `SRGAN` module ([#466](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/466))
 - Added GIoU loss ([#347](https://github.com/PyTorchLightning/lightning-bolts/pull/347))
 - Added IoU loss ([#469](https://github.com/PyTorchLightning/lightning-bolts/pull/469))
 - Added semantic segmentation model `SemSegment` with `UNet` backend ([#259](https://github.com/PyTorchLightning/lightning-bolts/pull/259))
