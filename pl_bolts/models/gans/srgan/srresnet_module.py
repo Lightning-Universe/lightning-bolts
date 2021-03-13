@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from typing import Tuple
+from typing import Any, Tuple
 
 import pytorch_lightning as pl
 import torch
@@ -42,7 +42,7 @@ class SRResNet(pl.LightningModule):
         num_res_blocks: int = 16,
         scale_factor: int = 4,
         learning_rate: float = 1e-4,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Args:

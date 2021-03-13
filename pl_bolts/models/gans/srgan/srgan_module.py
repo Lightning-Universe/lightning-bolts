@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 from warnings import warn
 
 import pytorch_lightning as pl
@@ -49,7 +49,7 @@ class SRGAN(pl.LightningModule):
         generator_checkpoint: Optional[str] = None,
         learning_rate: float = 1e-4,
         scheduler_step: int = 100,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Args:
@@ -96,7 +96,7 @@ class SRGAN(pl.LightningModule):
         return self.generator(lr_image)
 
     def training_step(
-        self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int, optimizer_idx: int
+            self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int, optimizer_idx: int,
     ) -> torch.Tensor:
         hr_image, lr_image = batch
 
