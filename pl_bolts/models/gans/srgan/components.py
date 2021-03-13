@@ -19,18 +19,13 @@ class ResidualBlock(nn.Module):
     def __init__(self, feature_maps: int = 64) -> None:
         super().__init__()
 
-        # Residual block: k3n64s1 x2
         self.block = nn.Sequential(
-            self._make_conv_block(feature_maps),
-            self._make_conv_block(feature_maps, prelu=False),
-        )
-
-    @staticmethod
-    def _make_conv_block(feature_maps: int, prelu: bool = True) -> nn.Sequential:
-        return nn.Sequential(
             nn.Conv2d(feature_maps, feature_maps, kernel_size=3, padding=1),
             nn.BatchNorm2d(feature_maps),
-            nn.PReLU() if prelu else nn.Identity(),
+            nn.PReLU(),
+
+            nn.Conv2d(feature_maps, feature_maps, kernel_size=3, padding=1),
+            nn.BatchNorm2d(feature_maps),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -40,16 +35,20 @@ class ResidualBlock(nn.Module):
 class SRGANGenerator(nn.Module):
 
     def __init__(
-        self, image_channels: int, feature_maps: int = 64, num_res_blocks: int = 16, num_ps_blocks: int = 2
+        self,
+        image_channels: int,
+        feature_maps: int = 64,
+        num_res_blocks: int = 16,
+        num_ps_blocks: int = 2,
     ) -> None:
         super().__init__()
-        # Input block: k9n64s1
+        # Input block (k9n64s1)
         self.input_block = nn.Sequential(
             nn.Conv2d(image_channels, feature_maps, kernel_size=9, padding=4),
             nn.PReLU(),
         )
 
-        # B residual blocks (k3n64s1 x 2)
+        # B residual blocks (k3n64s1)
         res_blocks = []
         for _ in range(num_res_blocks):
             res_blocks += [ResidualBlock(feature_maps)]
@@ -71,7 +70,7 @@ class SRGANGenerator(nn.Module):
             ]
         self.ps_blocks = nn.Sequential(*ps_blocks)
 
-        # Output block: k9n3s1
+        # Output block (k9n3s1)
         self.output_block = nn.Sequential(
             nn.Conv2d(feature_maps, image_channels, kernel_size=9, padding=4),
             nn.Tanh(),
@@ -89,16 +88,15 @@ class SRGANDiscriminator(nn.Module):
 
     def __init__(self, image_channels: int, feature_maps: int = 64) -> None:
         super().__init__()
-        # k3n64s1 --> k3n64s2 --> k3n128s1 --> k3n128s2 --> k3n256s1 --> k3n256s2 --> k3n512s1 --> k3n512s2 --> MLP
 
         self.conv_blocks = nn.Sequential(
-            # k3n64s1 --> k3n64s2
+            # k3n64s1, k3n64s2
             self._make_double_conv_block(image_channels, feature_maps, first_batch_norm=False),
-            # k3n128s1 --> k3n128s2
+            # k3n128s1, k3n128s2
             self._make_double_conv_block(feature_maps, feature_maps * 2),
-            # k3n256s1 --> k3n256s2
+            # k3n256s1, k3n256s2
             self._make_double_conv_block(feature_maps * 2, feature_maps * 4),
-            # k3n512s1 --> k3n512s2
+            # k3n512s1, k3n512s2
             self._make_double_conv_block(feature_maps * 4, feature_maps * 8),
         )
 
@@ -111,7 +109,10 @@ class SRGANDiscriminator(nn.Module):
         )
 
     def _make_double_conv_block(
-        self, in_channels: int, out_channels: int, first_batch_norm: bool = True
+        self,
+        in_channels: int,
+        out_channels: int,
+        first_batch_norm: bool = True,
     ) -> nn.Sequential:
         return nn.Sequential(
             self._make_conv_block(in_channels, out_channels, batch_norm=first_batch_norm),
@@ -120,7 +121,10 @@ class SRGANDiscriminator(nn.Module):
 
     @staticmethod
     def _make_conv_block(
-        in_channels: int, out_channels: int, stride: int = 1, batch_norm: bool = True
+        in_channels: int,
+        out_channels: int,
+        stride: int = 1,
+        batch_norm: bool = True,
     ) -> nn.Sequential:
         return nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1),
