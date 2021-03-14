@@ -1,17 +1,16 @@
-coverage>=5.0
+# coverage>=5.0
 codecov>=2.1
 pytest>=6.0
-pytest-cov
+pytest-cov>2.10
 pytest-flake8
 flake8>=3.6
-flake8-black
+# flake8-black
 check-manifest
-twine==1.13.0
+twine>=3.2
 isort>=5.6.4
 pre-commit>=1.0
-mypy
-yapf
+mypy>=0.790
+yapf>=0.29.0
 
 atari-py==0.2.6  # needed for RL
-
 scikit-learn>=0.23
