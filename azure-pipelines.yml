@@ -57,11 +57,29 @@ jobs:
       displayName: 'Install dependencies'
 
     - bash: |
-        python -m coverage run --source pl_bolts -m pytest pl_bolts tests -v --durations=30
+        python -m pytest pl_bolts tests -v --cov=pl_bolts --junitxml=$(Build.StagingDirectory)/test-results.xml --durations=30
       displayName: 'Testing'
 
     - bash: |
         python -m coverage report
-        python -m coverage xml
-        codecov --token=$(CODECOV_TOKEN) --flags=gpu,pytest --name="GPU-coverage" --env=linux,azure
+        python -m coverage xml -o '$(Build.SourcesDirectory)/coverage.xml'
+        python -m coverage html
+        python -m codecov --token=$(CODECOV_TOKEN) --commit=$(Build.SourceVersion) --flags=gpu,pytest --name="GPU-coverage" --env=linux,azure
+        ls -l
       displayName: 'Statistics'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish test results'
+      inputs:
+        testResultsFiles: '$(Build.StagingDirectory)/test-results.xml'
+        testRunTitle: '$(Agent.OS) - $(Build.DefinitionName) - Python $(python.version)'
+      condition: succeededOrFailed()
+
+    - task: PublishCodeCoverageResults@1
+      displayName: 'Publish coverage report'
+      inputs:
+        codeCoverageTool: 'cobertura'
+        summaryFileLocation: '$(Build.SourcesDirectory)/coverage.xml'
+        reportDirectory: '$(Build.SourcesDirectory)/htmlcov'
+        testRunTitle: '$(Agent.OS) - $(Build.BuildNumber)[$(Agent.JobName)] - Python $(python.version)'
+      condition: succeededOrFailed()
