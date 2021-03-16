@@ -1,7 +1,9 @@
 from argparse import ArgumentParser
+from typing import List, Tuple,  Dict
 
 import pytorch_lightning as pl
 import torch
+from torch import Tensor
 from torch import nn
 from torch.nn import functional as F
 from torch.optim import Adam
@@ -24,7 +26,7 @@ class LinearRegression(pl.LightningModule):
         l1_strength: float = 0.0,
         l2_strength: float = 0.0,
         **kwargs
-    ):
+    ) -> None:
         """
         Args:
             input_dim: number of dimensions of the input (1+)
@@ -41,11 +43,11 @@ class LinearRegression(pl.LightningModule):
 
         self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=self.hparams.output_dim, bias=bias)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         y_hat = self.linear(x)
         return y_hat
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
         x, y = batch
 
         # flatten any input
@@ -71,30 +73,30 @@ class LinearRegression(pl.LightningModule):
         progress_bar_metrics = tensorboard_logs
         return {'loss': loss, 'log': tensorboard_logs, 'progress_bar': progress_bar_metrics}
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
         x, y = batch
         x = x.view(x.size(0), -1)
         y_hat = self(x)
         return {'val_loss': F.mse_loss(y_hat, y)}
 
-    def validation_epoch_end(self, outputs):
+    def validation_epoch_end(self, outputs: List[Dict[str, Tensor]]) -> Dict[str, Tensor]:
         val_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
         tensorboard_logs = {'val_mse_loss': val_loss}
         progress_bar_metrics = tensorboard_logs
         return {'val_loss': val_loss, 'log': tensorboard_logs, 'progress_bar': progress_bar_metrics}
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
         x, y = batch
         y_hat = self(x)
         return {'test_loss': F.mse_loss(y_hat, y)}
 
-    def test_epoch_end(self, outputs):
+    def test_epoch_end(self, outputs: List[Dict[str, Tensor]]) -> Dict[str, Tensor]:
         test_loss = torch.stack([x['test_loss'] for x in outputs]).mean()
         tensorboard_logs = {'test_mse_loss': test_loss}
         progress_bar_metrics = tensorboard_logs
         return {'test_loss': test_loss, 'log': tensorboard_logs, 'progress_bar': progress_bar_metrics}
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> Optimizer:
         return self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
 
     @staticmethod
@@ -108,7 +110,7 @@ class LinearRegression(pl.LightningModule):
         return parser
 
 
-def cli_main():
+def cli_main() -> None:
     from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
     from pl_bolts.utils import _SKLEARN_AVAILABLE
 

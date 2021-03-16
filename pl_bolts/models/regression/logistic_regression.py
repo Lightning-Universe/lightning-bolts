@@ -1,7 +1,9 @@
 from argparse import ArgumentParser
+from typing import List, Tuple,  Dict
 
 import pytorch_lightning as pl
 import torch
+from torch import Tensor
 from torch import nn
 from torch.nn import functional as F
 from torch.nn.functional import softmax
@@ -25,7 +27,7 @@ class LogisticRegression(pl.LightningModule):
         l1_strength: float = 0.0,
         l2_strength: float = 0.0,
         **kwargs
-    ):
+    ) -> None:
         """
         Args:
             input_dim: number of dimensions of the input (at least 1)
@@ -42,12 +44,12 @@ class LogisticRegression(pl.LightningModule):
 
         self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=self.hparams.num_classes, bias=bias)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         x = self.linear(x)
         y_hat = softmax(x)
         return y_hat
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
         x, y = batch
 
         # flatten any input
@@ -74,39 +76,38 @@ class LogisticRegression(pl.LightningModule):
         progress_bar_metrics = tensorboard_logs
         return {'loss': loss, 'log': tensorboard_logs, 'progress_bar': progress_bar_metrics}
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
         x, y = batch
         x = x.view(x.size(0), -1)
         y_hat = self(x)
         acc = accuracy(y_hat, y)
         return {'val_loss': F.cross_entropy(y_hat, y), 'acc': acc}
 
-    def validation_epoch_end(self, outputs):
+    def validation_epoch_end(self, outputs: List[Dict[str, Tensor]]) -> Dict[str, Tensor]:
         acc = torch.stack([x['acc'] for x in outputs]).mean()
         val_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
         tensorboard_logs = {'val_ce_loss': val_loss, 'val_acc': acc}
         progress_bar_metrics = tensorboard_logs
         return {'val_loss': val_loss, 'log': tensorboard_logs, 'progress_bar': progress_bar_metrics}
 
-    def test_step(self, batch, batch_idx):
-        x, y = batch
+    def test_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
         x = x.view(x.size(0), -1)
         y_hat = self(x)
         acc = accuracy(y_hat, y)
         return {'test_loss': F.cross_entropy(y_hat, y), 'acc': acc}
 
-    def test_epoch_end(self, outputs):
+    def test_epoch_end(self, outputs: List[Dict[str, Tensor]]) -> Dict[str, Tensor]:
         acc = torch.stack([x['acc'] for x in outputs]).mean()
         test_loss = torch.stack([x['test_loss'] for x in outputs]).mean()
         tensorboard_logs = {'test_ce_loss': test_loss, 'test_acc': acc}
         progress_bar_metrics = tensorboard_logs
         return {'test_loss': test_loss, 'log': tensorboard_logs, 'progress_bar': progress_bar_metrics}
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> Optimizer:
         return self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
 
     @staticmethod
-    def add_model_specific_args(parent_parser):
+    def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--learning_rate', type=float, default=0.0001)
         parser.add_argument('--input_dim', type=int, default=None)
@@ -116,7 +117,7 @@ class LogisticRegression(pl.LightningModule):
         return parser
 
 
-def cli_main():
+def cli_main() -> None:
     from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
     from pl_bolts.utils import _SKLEARN_AVAILABLE
 
