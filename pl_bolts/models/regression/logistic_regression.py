@@ -1,10 +1,9 @@
 from argparse import ArgumentParser
-from typing import List, Tuple,  Dict
+from typing import Dict, List, Tuple
 
 import pytorch_lightning as pl
 import torch
-from torch import Tensor
-from torch import nn
+from torch import nn, Tensor
 from torch.nn import functional as F
 from torch.nn.functional import softmax
 from torch.optim import Adam
