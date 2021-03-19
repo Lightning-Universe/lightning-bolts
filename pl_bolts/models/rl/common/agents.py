@@ -160,7 +160,6 @@ class ActorCriticAgent(Agent):
         if not isinstance(states, torch.Tensor):
             states = torch.tensor(states, device=device)
 
-        # get the logits and pass through softmax for probability distribution
         logprobs, _ = self.net(states)
         probabilities = logprobs.exp().squeeze(dim=-1)
         prob_np = probabilities.data.cpu().numpy()

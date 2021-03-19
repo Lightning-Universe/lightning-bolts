@@ -107,7 +107,6 @@ class ActorCriticMLP(nn.Module):
         super().__init__()
 
         self.fc1 = nn.Linear(input_shape[0], hidden_size)
-        self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.actor_head = nn.Linear(hidden_size, n_actions)
         self.critic_head = nn.Linear(hidden_size, 1)
 
@@ -122,10 +121,9 @@ class ActorCriticMLP(nn.Module):
             action log probs (logits), value
         """
         x = F.relu(self.fc1(x.float()))
-        x = F.relu(self.fc2(x))
         a = F.log_softmax(self.actor_head(x), dim=-1)
-        v = self.critic_head(x)
-        return a, v
+        c = self.critic_head(x)
+        return a, c
 
 
 class DuelingMLP(nn.Module):
