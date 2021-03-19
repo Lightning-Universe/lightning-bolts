@@ -33,7 +33,7 @@ try:
     from torchmetrics import info
 except ImportError:
     # alternative https://stackoverflow.com/a/67692/4521646
-    spec = spec_from_file_location("torchmetrics/info.py", os.path.join(_PATH_ROOT, "torchmetrics", "info.py"))
+    spec = spec_from_file_location("pl_bolts/info.py", os.path.join(_PATH_ROOT, "pl_bolts", "info.py"))
     info = module_from_spec(spec)
     spec.loader.exec_module(info)
 

@@ -10,10 +10,10 @@ _PATH_ROOT = os.path.realpath(os.path.dirname(__file__))
 _PATH_REQUIRE = os.path.join(_PATH_ROOT, 'requirements')
 
 try:
-    from torchmetrics import info, setup_tools
+    from pl_bolts import info, setup_tools
 except ImportError:
     # alternative https://stackoverflow.com/a/67692/4521646
-    sys.path.append("torchmetrics")
+    sys.path.append("pl_bolts")
     import info
     import setup_tools
 
