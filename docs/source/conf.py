@@ -30,10 +30,10 @@ sys.path.insert(0, os.path.abspath(_PATH_ROOT))
 SPHINX_MOCK_REQUIREMENTS = int(os.environ.get('SPHINX_MOCK_REQUIREMENTS', True))
 
 try:
-    from torchmetrics import info
+    from pl_bolts import info
 except ImportError:
     # alternative https://stackoverflow.com/a/67692/4521646
-    spec = spec_from_file_location("pl_bolts/info.py", os.path.join(_PATH_ROOT, "pl_bolts", "info.py"))
+    spec = spec_from_file_location("pl_bolts", os.path.join(_PATH_ROOT, "pl_bolts", "info.py"))
     info = module_from_spec(spec)
     spec.loader.exec_module(info)
 
@@ -323,7 +323,7 @@ def run_apidoc(_):
 def setup(app):
     # this is for hiding doctest decoration,
     # see: http://z4r.github.io/python/2011/12/02/hides-the-prompts-and-output/
-    app.add_javascript('copybutton.js')
+    app.add_js_file('copybutton.js')
     app.connect('builder-inited', run_apidoc)
 
 
