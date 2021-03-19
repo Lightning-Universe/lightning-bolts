@@ -2,7 +2,7 @@
 
 import os
 
-from pl_bolts.info import (__version__,__author__,__author_email__,__license__,__copyright__,__homepage__,__docs__,)
+from pl_bolts.info import __author__, __author_email__, __copyright__, __docs__, __homepage__, __license__, __version__
 
 _PACKAGE_ROOT = os.path.dirname(__file__)
 _PROJECT_ROOT = os.path.dirname(_PACKAGE_ROOT)

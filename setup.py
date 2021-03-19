@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-
 import sys
 
 # Always prefer setuptools over distutils
@@ -29,7 +28,12 @@ def _prepare_extras():
     extras['dev'] = extras['extra'] + extras['test']
     return extras
 
-long_description = setup_tools._load_readme_description(_PATH_ROOT, homepage=info.__homepage__, version=info.__version__,)
+
+long_description = setup_tools._load_readme_description(
+    _PATH_ROOT,
+    homepage=info.__homepage__,
+    version=info.__version__,
+)
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
 # keep the meta-data here for simplicity in reading this file... it's not obvious
