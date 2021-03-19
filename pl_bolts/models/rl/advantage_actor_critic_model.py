@@ -101,8 +101,6 @@ class AdvantageActorCritic(pl.LightningModule):
         self.batch_states = []
         self.batch_actions = []
         self.batch_rewards = []
-        self.batch_logprobs = []
-        self.batch_values = []
         self.batch_masks = []
 
         self.state = self.env.reset()
@@ -117,6 +115,11 @@ class AdvantageActorCritic(pl.LightningModule):
         Returns:
             action log probabilities, values
         """
+        if not isinstance(x, list):
+            x = [x]
+
+        if not isinstance(x, torch.Tensor):
+            x = torch.tensor(x, device=self.device)
         logprobs, values = self.net(x)
         return logprobs, values
 
@@ -126,18 +129,19 @@ class AdvantageActorCritic(pl.LightningModule):
 
         Returns:
             yields a tuple of Lists containing tensors for states, actions, returns, values, and log probabilities of the batch.
+
+            states: a list of numpy array
+            actions: a list of list of int
+            returns: a torch tensor
         """
 
         for _ in range(self.batch_size):
-            logprob, value = self.net(self.state)
-            action = self.agent.get_action(logprob)
+            action = self.agent(self.state, self.device)[0]
 
-            next_state, reward, done, _ = self.env.step(action[0])
+            next_state, reward, done, _ = self.env.step(action)
 
             self.batch_rewards.append(reward)
             self.batch_actions.append(action)
-            self.batch_logprobs.append(logprob)
-            self.batch_values.append(value)
             self.batch_states.append(self.state)
             self.batch_masks.append(done)
             self.state = next_state
@@ -150,15 +154,15 @@ class AdvantageActorCritic(pl.LightningModule):
                 self.episode_reward = 0
                 self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
 
-        returns = self.compute_returns(self.batch_rewards, self.batch_dones, self.batch_values[-1])
+        _, last_value = self.forward(self.state)
 
-        for idx in range(len(self.batch_actions)):
-            yield self.batch_states[idx], self.batch_actions[idx], returns[idx], self.batch_values[idx], self.batch_logprobs[idx]
+        returns = self.compute_returns(self.batch_rewards, self.batch_masks, last_value)
+        for idx in range(self.batch_size):
+            yield self.batch_states[idx], self.batch_actions[idx], returns[idx]
 
         self.batch_states = []
         self.batch_actions = []
-        self.batch_values = []
-        self.batch_logprobs = []
+        self.batch_rewards = []
         self.batch_masks = []
 
     def compute_returns(self, rewards, dones, last_value):
@@ -168,7 +172,7 @@ class AdvantageActorCritic(pl.LightningModule):
         Args:
             rewards: list of batched rewards
             dones: list of done masks
-            last_value: the predicted value for the last state
+            last_value: the predicted value for the last state (for bootstrap)
 
         Returns:
             list of discounted rewards
@@ -183,11 +187,24 @@ class AdvantageActorCritic(pl.LightningModule):
             reward = r + self.gamma * reward * (1 - d)
             returns.append(reward)
 
+        # reverse list and stop the gradients
         returns = torch.tensor(returns[::-1])
 
         return returns
 
-    def loss(self, states, actions, returns, values, logprobs):
+    def loss(self, states, actions, returns):
+        """
+        Calculates the loss for A2C which is a weighted sum of
+        actor loss (MSE), critic loss (PG), entropy (for exploration)
+
+        Args:
+            states: (batch_size, state dimension)
+            actions: (batch_size, )
+            returns: (batch_size, )
+        """
+
+        logprobs, values = self.net(states)
+
         with torch.no_grad():
             advs = returns - values
             advs = (advs - advs.mean()) / (advs.std() + self.eps)
@@ -197,7 +214,7 @@ class AdvantageActorCritic(pl.LightningModule):
         entropy = self.entropy_beta * entropy.sum(1).mean()
 
         # actor loss
-        logprobs = logprobs.gather(1, actions)
+        logprobs = logprobs[range(self.batch_size), actions[0]]
         actor_loss = -(logprobs * advs).mean()
 
         # critic loss
@@ -207,9 +224,14 @@ class AdvantageActorCritic(pl.LightningModule):
         return total_loss
 
     def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
-        states, actions, returns, values, logprobs = batch
+        """
+        Perform one actor-critic update using a batch of data
 
-        loss = self.loss(states, actions, returns, values)
+        Args:
+            batch: a batch of (states, actions, returns)
+        """
+        states, actions, returns = batch
+        loss = self.loss(states, actions, returns)
 
         log = {
             "episodes": self.done_episodes,

@@ -169,21 +169,3 @@ class ActorCriticAgent(Agent):
         actions = [np.random.choice(len(prob), p=prob) for prob in prob_np]
 
         return actions
-
-    def get_action(self, logprobs: torch.Tensor):
-        """
-        Takes in the current state and returns the action and value based on the agents policy
-
-        Args:
-            logprobs: the actor head output from the network
-
-        Returns:
-            action sampled according to logits
-        """
-        probabilities = logprobs.exp().squeeze(dim=-1)
-        prob_np = probabilities.data.cpu().numpy()
-
-        # take the numpy values and randomly select action based on prob distribution
-        actions = [np.random.choice(len(prob), p=prob) for prob in prob_np]
-
-        return actions
