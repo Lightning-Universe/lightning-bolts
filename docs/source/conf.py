@@ -29,13 +29,10 @@ sys.path.insert(0, os.path.abspath(_PATH_ROOT))
 
 SPHINX_MOCK_REQUIREMENTS = int(os.environ.get('SPHINX_MOCK_REQUIREMENTS', True))
 
-try:
-    from pl_bolts import info
-except ImportError:
-    # alternative https://stackoverflow.com/a/67692/4521646
-    spec = spec_from_file_location("pl_bolts", os.path.join(_PATH_ROOT, "pl_bolts", "info.py"))
-    info = module_from_spec(spec)
-    spec.loader.exec_module(info)
+# alternative https://stackoverflow.com/a/67692/4521646
+spec = spec_from_file_location("pl_bolts", os.path.join(_PATH_ROOT, "pl_bolts", "info.py"))
+info = module_from_spec(spec)
+spec.loader.exec_module(info)
 
 # -- Project information -----------------------------------------------------
 
@@ -153,7 +150,8 @@ exclude_patterns = [
     'api/modules.rst',
     'api/pl_bolts.submit.rst',
     'api/pl_bolts.utils.*',
-    'api/pl_bolts.setup_tools.*',
+    'api/pl_bolts.info.rst',
+    'api/pl_bolts.setup_tools.rst',
     'PULL_REQUEST_TEMPLATE.md',
 ]
 
