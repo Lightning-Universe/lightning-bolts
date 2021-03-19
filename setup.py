@@ -32,7 +32,7 @@ def _prepare_extras():
 long_description = setup_tools._load_readme_description(
     _PATH_ROOT,
     homepage=info.__homepage__,
-    version=info.__version__,
+    ver=info.__version__,
 )
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
