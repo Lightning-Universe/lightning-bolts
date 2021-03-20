@@ -74,15 +74,8 @@ class AdvantageActorCritic(pl.LightningModule):
             raise ModuleNotFoundError("This Module requires gym environment which is not installed yet.")
 
         # Hyperparameters
-        self.lr = lr
-        self.batch_size = batch_size
-        self.batches_per_epoch = self.batch_size * epoch_len
-        self.entropy_beta = entropy_beta
-        self.critic_beta = critic_beta
-        self.gamma = gamma
-        self.n_steps = n_steps
-
         self.save_hyperparameters()
+        self.batches_per_epoch = batch_size * epoch_len
 
         # Model components
         self.env = gym.make(env)
@@ -137,7 +130,7 @@ class AdvantageActorCritic(pl.LightningModule):
             returns: a torch tensor
         """
         while True:
-            for _ in range(self.batch_size):
+            for _ in range(self.hparams.batch_size):
                 action = self.agent(self.state, self.device)[0]
 
                 next_state, reward, done, _ = self.env.step(action)
@@ -159,7 +152,7 @@ class AdvantageActorCritic(pl.LightningModule):
             _, last_value = self.forward(self.state)
 
             returns = self.compute_returns(self.batch_rewards, self.batch_masks, last_value)
-            for idx in range(self.batch_size):
+            for idx in range(self.hparams.batch_size):
                 yield self.batch_states[idx], self.batch_actions[idx], returns[idx]
 
             self.batch_states = []
@@ -183,7 +176,7 @@ class AdvantageActorCritic(pl.LightningModule):
         returns = []
 
         for r, d in zip(rewards[::-1], dones[::-1]):
-            g = r + self.gamma * g * (1 - d)
+            g = r + self.hparams.gamma * g * (1 - d)
             returns.append(g)
 
         # reverse list and stop the gradients
@@ -211,14 +204,14 @@ class AdvantageActorCritic(pl.LightningModule):
 
         # entropy loss
         entropy = -logprobs.exp() * logprobs
-        entropy = self.entropy_beta * entropy.sum(1).mean()
+        entropy = self.hparams.entropy_beta * entropy.sum(1).mean()
 
         # actor loss
-        logprobs = logprobs[range(self.batch_size), actions]
+        logprobs = logprobs[range(self.hparams.batch_size), actions]
         actor_loss = -(logprobs * advs).mean()
 
         # critic loss
-        critic_loss = self.critic_beta * torch.square(returns - values).mean()
+        critic_loss = self.hparams.critic_beta * torch.square(returns - values).mean()
 
         # total loss (weighted sum)
         total_loss = actor_loss + critic_loss - entropy
@@ -248,13 +241,13 @@ class AdvantageActorCritic(pl.LightningModule):
 
     def configure_optimizers(self) -> List[Optimizer]:
         """Initialize Adam optimizer"""
-        optimizer = optim.Adam(self.net.parameters(), lr=self.lr)
+        optimizer = optim.Adam(self.net.parameters(), lr=self.hparams.lr)
         return [optimizer]
 
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""
         dataset = ExperienceSourceDataset(self.train_batch)
-        dataloader = DataLoader(dataset=dataset, batch_size=self.batch_size)
+        dataloader = DataLoader(dataset=dataset, batch_size=self.hparams.batch_size)
         return dataloader
 
     def train_dataloader(self) -> DataLoader:
