@@ -3,7 +3,7 @@ Advantage Actor Critic (A2C)
 """
 import argparse
 from collections import OrderedDict
-from typing import List, Tuple
+from typing import Any, List, Tuple
 
 import numpy as np
 import pytorch_lightning as pl
@@ -23,29 +23,24 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _GYM_AVAILABLE:
     import gym
 else:  # pragma: no cover
-    warn_missing_pkg('gym')
+    warn_missing_pkg("gym")
 
 
 class AdvantageActorCritic(pl.LightningModule):
     """
     PyTorch Lightning implementation of `Advantage Actor Critic
-    <https://arxiv.org/abs/1602.01783v2>`
+    <https://arxiv.org/abs/1602.01783v2>`_
 
     Paper Authors: Volodymyr Mnih, Adrià Puigdomènech Badia, et al.
 
     Model implemented by:
 
-        - `Jason Wang <https://github.com/blahBlahhhJ>`
+        - `Jason Wang <https://github.com/blahBlahhhJ>`_
 
     Example:
         >>> from pl_bolts.models.rl.advantage_actor_critic_model import AdvantageActorCritic
         ...
         >>> model = AdvantageActorCritic("CartPole-v0")
-
-    Train::
-
-        trainer = Trainer()
-        trainer.fit(model)
     """
 
     def __init__(
@@ -59,7 +54,7 @@ class AdvantageActorCritic(pl.LightningModule):
         entropy_beta: float = 0.01,
         critic_beta: float = 0.5,
         epoch_len: int = 1000,
-        **kwargs
+        **kwargs: Any,
     ) -> None:
         """
         Args:
@@ -76,7 +71,7 @@ class AdvantageActorCritic(pl.LightningModule):
         super().__init__()
 
         if not _GYM_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('This Module requires gym environment which is not installed yet.')
+            raise ModuleNotFoundError("This Module requires gym environment which is not installed yet.")
 
         # Hyperparameters
         self.lr = lr
@@ -128,7 +123,7 @@ class AdvantageActorCritic(pl.LightningModule):
         logprobs, values = self.net(x)
         return logprobs, values
 
-    def train_batch(self, ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
+    def train_batch(self) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -252,7 +247,7 @@ class AdvantageActorCritic(pl.LightningModule):
         })
 
     def configure_optimizers(self) -> List[Optimizer]:
-        """ Initialize Adam optimizer"""
+        """Initialize Adam optimizer"""
         optimizer = optim.Adam(self.net.parameters(), lr=self.lr)
         return [optimizer]
 
@@ -321,5 +316,5 @@ def cli_main():
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()
