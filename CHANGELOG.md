@@ -5,11 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [0.3.2] - 2021-03-DD
+## [0.3.2] - 2021-03-20
 
 ### Changed
 
 - Renamed SSL modules: `CPCV2` >> `CPC_v2` and `MocoV2` >> `Moco_v2` ([#585](https://github.com/PyTorchLightning/lightning-bolts/pull/585))
+- Refactored _setup.py_ to be typing friendly ([#601](https://github.com/PyTorchLightning/lightning-bolts/pull/601))
 
 
 ## [0.3.1] - 2021-03-09
