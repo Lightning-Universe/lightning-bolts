@@ -6,7 +6,7 @@ import gym
 import numpy as np
 import torch
 
-from pl_bolts.models.rl.common.agents import Agent, PolicyAgent, ValueAgent
+from pl_bolts.models.rl.common.agents import Agent, PolicyAgent, ValueAgent, ActorCriticAgent
 
 
 class TestAgents(TestCase):
@@ -57,6 +57,21 @@ class TestPolicyAgent(TestCase):
 
     def test_policy_agent(self):
         policy_agent = PolicyAgent(self.net)
+        action = policy_agent(self.states, self.device)
+        self.assertIsInstance(action, list)
+        self.assertEqual(action[0], 1)
+
+
+class TestActorCriticAgent(TestCase):
+
+    def setUp(self) -> None:
+        self.env = gym.make("CartPole-v0")
+        self.net = Mock(return_value=torch.Tensor([[0.0, 100.0]]))
+        self.states = [self.env.reset()]
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    def test_a2c_agent(self):
+        a2c_agent = ActorCriticAgent(self.net)
         action = policy_agent(self.states, self.device)
         self.assertIsInstance(action, list)
         self.assertEqual(action[0], 1)

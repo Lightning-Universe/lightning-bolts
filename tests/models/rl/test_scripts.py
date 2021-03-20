@@ -126,3 +126,18 @@ def test_cli_run_rl_vanilla_policy_gradient(cli_args):
     cli_args = cli_args.strip().split(' ') if cli_args else []
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
         cli_main()
+
+
+@pytest.mark.parametrize('cli_args', [
+    ' --env CartPole-v0'
+    ' --max_steps 10'
+    ' --fast_dev_run 1'
+    ' --batch_size 10',
+])
+def test_cli_run_rl_advantage_actor_critic(cli_args):
+    """Test running CLI for an example with default params."""
+    from pl_bolts.models.rl.advantage_actor_critic_model import cli_main
+
+    cli_args = cli_args.strip().split(' ') if cli_args else []
+    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
+        cli_main()
