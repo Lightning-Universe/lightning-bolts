@@ -72,6 +72,6 @@ class TestActorCriticAgent(TestCase):
 
     def test_a2c_agent(self):
         a2c_agent = ActorCriticAgent(self.net)
-        action = policy_agent(self.states, self.device)
+        action = a2c_agent(self.states, self.device)
         self.assertIsInstance(action, list)
         self.assertEqual(action[0], 1)
