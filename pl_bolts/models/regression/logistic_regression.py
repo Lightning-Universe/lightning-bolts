@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import pytorch_lightning as pl
 import torch
@@ -25,7 +25,7 @@ class LogisticRegression(pl.LightningModule):
         optimizer: Optimizer = Adam,
         l1_strength: float = 0.0,
         l2_strength: float = 0.0,
-        **kwargs
+        **kwargs: Any,
     ) -> None:
         """
         Args:
