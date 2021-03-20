@@ -47,6 +47,7 @@ class AdvantageActorCritic(pl.LightningModule):
         trainer = Trainer()
         trainer.fit(model)
     """
+
     def __init__(
         self,
         env: str,

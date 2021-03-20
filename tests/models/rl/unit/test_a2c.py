@@ -4,13 +4,13 @@ from unittest import TestCase
 import gym
 import torch
 
+from pl_bolts.models.rl.advantage_actor_critic_model import AdvantageActorCritic
 from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.gym_wrappers import ToTensor
 from pl_bolts.models.rl.common.networks import ActorCriticMLP
-from pl_bolts.models.rl.advantage_actor_critic_model import AdvantageActorCritic
 
 
-class TestPolicyGradient(TestCase):
+class TestActorCritic(TestCase):
 
     def setUp(self) -> None:
         self.env = ToTensor(gym.make("CartPole-v0"))
@@ -53,6 +53,5 @@ class TestPolicyGradient(TestCase):
         self.assertEqual(len(batch[0]), self.model.batch_size)
         self.assertTrue(isinstance(batch, list))
         self.assertIsInstance(batch[0], torch.Tensor)
-        self.assertIsInstance(batch[1], list)
-        self.assertIsInstance(batch[1][0], torch.Tensor)
+        self.assertIsInstance(batch[1], torch.Tensor)
         self.assertIsInstance(batch[2], torch.Tensor)
