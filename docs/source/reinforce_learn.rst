@@ -3,28 +3,11 @@ Reinforcement Learning
 
 This module is a collection of common RL approaches implemented in Lightning.
 
------------------
-
-Module authors
---------------
-
-Contributions by: `Donal Byrne <https://github.com/djbyrne>`_
-
-- DQN
-- Double DQN
-- Dueling DQN
-- Noisy DQN
-- NStep DQN
-- Prioritized Experience Replay DQN
-- Reinforce
-- Vanilla Policy Gradient
-
-------------
-
 .. note:: 
     RL models currently only support CPU and single GPU training with `distributed_backend=dp`.
     Full GPU support will be added in later updates.
 
+------------
 
 DQN Models
 ----------
@@ -86,7 +69,7 @@ Example::
     trainer = Trainer()
     trainer.fit(dqn)
 
-.. autoclass:: pl_bolts.models.rl.dqn_model.DQN
+.. autoclass:: pl_bolts.models.rl.DQN
    :noindex:
 
 ---------------
@@ -150,7 +133,7 @@ Example::
     trainer = Trainer()
     trainer.fit(ddqn)
 
-.. autoclass:: pl_bolts.models.rl.double_dqn_model.DoubleDQN
+.. autoclass:: pl_bolts.models.rl.DoubleDQN
    :noindex:
 
 ---------------
@@ -240,7 +223,7 @@ Example::
     trainer = Trainer()
     trainer.fit(dueling_dqn)
 
-.. autoclass:: pl_bolts.models.rl.dueling_dqn_model.DuelingDQN
+.. autoclass:: pl_bolts.models.rl.DuelingDQN
    :noindex:
 
 --------------
@@ -326,7 +309,7 @@ Example::
     trainer = Trainer()
     trainer.fit(noisy_dqn)
 
-.. autoclass:: pl_bolts.models.rl.noisy_dqn_model.NoisyDQN
+.. autoclass:: pl_bolts.models.rl.NoisyDQN
    :noindex:
 
 --------------
@@ -519,7 +502,7 @@ Example::
     trainer = Trainer()
     trainer.fit(per_dqn)
 
-.. autoclass:: pl_bolts.models.rl.per_dqn_model.PERDQN
+.. autoclass:: pl_bolts.models.rl.PERDQN
    :noindex:
 
 
@@ -611,7 +594,7 @@ Example::
     trainer = Trainer()
     trainer.fit(reinforce)
 
-.. autoclass:: pl_bolts.models.rl.reinforce_model.Reinforce
+.. autoclass:: pl_bolts.models.rl.Reinforce
    :noindex:
 
 --------------
@@ -664,5 +647,17 @@ Example::
     trainer = Trainer()
     trainer.fit(vpg)
 
-.. autoclass:: pl_bolts.models.rl.vanilla_policy_gradient_model.VanillaPolicyGradient
+.. autoclass:: pl_bolts.models.rl.VanillaPolicyGradient
    :noindex:
+
+--------------
+
+Actor-Critic Models
+-------------------
+
+Advantage Actor Critic (A2C)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: pl_bolts.models.rl.AdvantageActorCritic
+   :noindex:
+
