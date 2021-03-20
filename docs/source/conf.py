@@ -146,12 +146,6 @@ language = None
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = [
-    'api/pl_bolts.rst',
-    'api/modules.rst',
-    'api/pl_bolts.submit.rst',
-    'api/pl_bolts.utils.*',
-    'api/pl_bolts.info.rst',
-    'api/pl_bolts.setup_tools.rst',
     'PULL_REQUEST_TEMPLATE.md',
 ]
 
@@ -288,41 +282,11 @@ todo_include_todos = True
 # sphinx-apidoc for me, since it's easy to forget to regen API docs
 # and commit them to my repo after making changes to my code.
 
-# packages for which sphinx-apidoc should generate the docs (.rst files)
-PACKAGES = [
-    info.__name__,
-]
-
-apidoc_output_folder = os.path.join(_PATH_HERE, 'api')
-
-
-def run_apidoc(_):
-    sys.path.insert(0, apidoc_output_folder)
-
-    # delete api-doc files before generating them
-    if os.path.exists(apidoc_output_folder):
-        shutil.rmtree(apidoc_output_folder)
-
-    for pkg in PACKAGES:
-        argv = [
-            '-e',
-            '-o',
-            apidoc_output_folder,
-            os.path.join(_PATH_ROOT, pkg),
-            '**/test_*',
-            '--force',
-            '--private',
-            '--module-first',
-        ]
-
-        apidoc.main(argv)
-
 
 def setup(app):
     # this is for hiding doctest decoration,
     # see: http://z4r.github.io/python/2011/12/02/hides-the-prompts-and-output/
     app.add_js_file('copybutton.js')
-    app.connect('builder-inited', run_apidoc)
 
 
 # copy all notebooks to local folder
@@ -365,10 +329,6 @@ MOCK_PACKAGES = [PACKAGE_MAPPING.get(pkg, pkg) for pkg in MOCK_PACKAGES]
 
 autodoc_mock_imports = MOCK_PACKAGES
 
-# for mod_name in MOCK_REQUIRE_PACKAGES:
-#     sys.modules[mod_name] = mock.Mock()
-
-
 # Resolve function
 # This function is used to populate the (source) links in the API
 def linkcode_resolve(domain, info):
@@ -408,6 +368,8 @@ def linkcode_resolve(domain, info):
     return "https://github.com/%s/%s/blob/%s" \
            % (github_user, github_repo, filename)
 
+
+autosummary_generate = True
 
 autodoc_member_order = 'groupwise'
 autoclass_content = 'both'
