@@ -29,7 +29,7 @@ else:  # pragma: no cover
 
 class AdvantageActorCritic(pl.LightningModule):
     """
-    PyTorch Lightning implementation of `Advantage Actor Critic 
+    PyTorch Lightning implementation of `Advantage Actor Critic
     <https://arxiv.org/abs/1602.01783v2>`
 
     Paper Authors: Volodymyr Mnih, Adrià Puigdomènech Badia, et al.
@@ -52,8 +52,8 @@ class AdvantageActorCritic(pl.LightningModule):
         self,
         env: str,
         gamma: float = 0.99,
-        lr: float = 0.01,
-        batch_size: int = 8,
+        lr: float = 0.001,
+        batch_size: int = 32,
         n_steps: int = 10,
         avg_reward_len: int = 100,
         entropy_beta: float = 0.01,
@@ -110,7 +110,7 @@ class AdvantageActorCritic(pl.LightningModule):
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor]:
         """
-        Passes in a state x through the network and gets the log prob of each action 
+        Passes in a state x through the network and gets the log prob of each action
         and the value for the state as an output
 
         Args:
@@ -124,7 +124,7 @@ class AdvantageActorCritic(pl.LightningModule):
 
         if not isinstance(x, torch.Tensor):
             x = torch.tensor(x, device=self.device)
-        
+
         logprobs, values = self.net(x)
         return logprobs, values
 
@@ -133,7 +133,7 @@ class AdvantageActorCritic(pl.LightningModule):
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
         Returns:
-            yields a tuple of Lists containing tensors for 
+            yields a tuple of Lists containing tensors for
             states, actions, and returns of the batch.
 
         Note:
