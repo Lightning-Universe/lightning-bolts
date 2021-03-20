@@ -21,7 +21,6 @@ import sys
 from importlib.util import module_from_spec, spec_from_file_location
 
 import pt_lightning_sphinx_theme
-from sphinx.ext import apidoc
 
 _PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 _PATH_ROOT = os.path.join(_PATH_HERE, '..', '..')
@@ -328,6 +327,7 @@ if SPHINX_MOCK_REQUIREMENTS:
 MOCK_PACKAGES = [PACKAGE_MAPPING.get(pkg, pkg) for pkg in MOCK_PACKAGES]
 
 autodoc_mock_imports = MOCK_PACKAGES
+
 
 # Resolve function
 # This function is used to populate the (source) links in the API
