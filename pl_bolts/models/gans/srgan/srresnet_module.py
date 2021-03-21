@@ -11,7 +11,7 @@ import torch.nn.functional as F
 from pl_bolts.callbacks import SRImageLoggerCallback
 from pl_bolts.datamodules import SRDataModule
 from pl_bolts.models.gans.srgan.components import SRGANGenerator
-from pl_bolts.models.gans.srgan.utils import parse_args, prepare_datasets
+from pl_bolts.models.gans.srgan.utils import prepare_datasets
 
 
 class SRResNet(pl.LightningModule):
@@ -113,13 +113,22 @@ class SRResNet(pl.LightningModule):
 def cli_main(args=None):
     pl.seed_everything(1234)
 
-    pl_module_cls = SRResNet
-    args = parse_args(args, pl_module_cls)
+    parser = ArgumentParser()
+    parser.add_argument("--dataset", default="mnist", type=str, choices=["celeba", "mnist", "stl10"])
+    parser.add_argument("--data_dir", default="./", type=str)
+    parser.add_argument("--log_interval", default=1000, type=int)
+    parser.add_argument("--scale_factor", default=4, type=int)
+    parser.add_argument("--save_model_checkpoint", dest="save_model_checkpoint", action="store_true")
+
+    parser = SRDataModule.add_argparse_args(parser)
+    parser = SRResNet.add_model_specific_args(parser)
+    parser = pl.Trainer.add_argparse_args(parser)
+    args = parser.parse_args(args)
 
     datasets = prepare_datasets(args.dataset, args.scale_factor, args.data_dir)
     dm = SRDataModule(*datasets, **vars(args))
 
-    model = pl_module_cls(**vars(args), image_channels=dm.dataset_train.dataset.image_channels)
+    model = SRResNet(**vars(args), image_channels=dm.dataset_train.dataset.image_channels)
 
     trainer = pl.Trainer.from_argparse_args(
         args,

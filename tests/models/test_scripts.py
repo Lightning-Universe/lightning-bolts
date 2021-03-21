@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+import torch
 
 from tests import _MARK_REQUIRE_GPU, DATASETS_PATH
 
