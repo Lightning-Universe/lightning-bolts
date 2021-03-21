@@ -153,7 +153,6 @@ class AdvantageActorCritic(pl.LightningModule):
 
             returns = self.compute_returns(self.batch_rewards, self.batch_masks, last_value)
             for idx in range(self.hparams.batch_size):
-                print(type(self.batch_states[idx]), type(self.batch_actions[idx]), returns[idx])
                 yield self.batch_states[idx], self.batch_actions[idx], returns[idx]
 
             self.batch_states = []
@@ -210,8 +209,12 @@ class AdvantageActorCritic(pl.LightningModule):
 
         # calculates (normalized) advantage
         with torch.no_grad():
-            advs = returns - values
+            # critic is trained with normalized returns, so we need to scale the values here
+            advs = returns - values * returns.std() + returns.mean()
+            # normalize advantages to train actor
             advs = (advs - advs.mean()) / (advs.std() + self.eps)
+            # normalize returns to train critic
+            targets = (returns - returns.mean()) / (returns.std() + self.eps)
 
         # entropy loss
         entropy = -logprobs.exp() * logprobs
@@ -222,7 +225,7 @@ class AdvantageActorCritic(pl.LightningModule):
         actor_loss = -(logprobs * advs).mean()
 
         # critic loss
-        critic_loss = self.hparams.critic_beta * torch.square(returns - values).mean()
+        critic_loss = self.hparams.critic_beta * torch.square(targets - values).mean()
 
         # total loss (weighted sum)
         total_loss = actor_loss + critic_loss - entropy
