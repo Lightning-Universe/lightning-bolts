@@ -654,9 +654,95 @@ Example::
 
 Actor-Critic Models
 -------------------
+The following models are based on Actor Critic. Actor Critic conbines the approaches of value-based learning (the DQN family)
+and the policy-based learning (the PG family) by learning the value function as well as the policy distribution. This approach
+updates the policy network according to the policy gradient, and updates the value network to fit the discounted rewards.
+
+Actor Critic Key Points:
+    - Actor outputs a distribution of actions for controlling the agent
+    - Critic outputs a value of current state for policy update suggestion
+    - The addition of critic allows the model to do n-step training instead of generating an entire trajectory
 
 Advantage Actor Critic (A2C)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+(Asynchronous) Advantage Actor Critic model introduced in `Asynchronous Methods for Deep Reinforcement Learning <https://arxiv.org/abs/1602.01783>`_
+Paper authors: Volodymyr Mnih, Adrià Puigdomènech Badia, Mehdi Mirza, Alex Graves, Timothy P. Lillicrap, Tim Harley, David Silver, Koray Kavukcuoglu
+
+Original implementation by: `Jason Wang <https://github.com/blahBlahhhJ>`_
+
+Advantage Actor Critic (A2C) is the classical actor critic approach in reinforcement learning. The underlying neural
+network has an actor head and a critic head to output action distribution as well as value of current state. Usually the
+first few layers are shared by the two heads to prevent learning similar stuff twice. It builds upon the idea of using a
+baseline of average reward to reduce variance (in VPG) by using the critic as a baseline which could theoretically have
+better performance.
+
+The algorithm can use an n-step training approach instead of generating an entire trajectory. The algorithm is as follows:
+
+1. Initialize our network.
+2. Rollout n steps and save the transitions (states, actions, rewards, values, dones).
+3. Calculate the n-step (discounted) return by bootstrapping the last value.
+
+.. math::
+
+  G_{n+1} = V_{n+1}, G_t = r_t + \gamma G_{t+1} \ \forall t \in [0,n]
+
+4. Calculate actor loss using values as baseline.
+
+.. math::
+
+  L_{actor} = - \frac1n \sum_t (G_t - V_t) \log \pi (a_t | s_t)
+
+5. Calculate critic loss using returns as target.
+
+.. math::
+  L_{critic} = \frac1n \sum_t (V_t - G_t)^2
+
+6. Calculate entropy bonus to encourage exploration.
+
+.. math::
+
+  H_\pi = - \frac1n \sum_t \pi (a_t | s_t) \log \pi (a_t | s_t)
+
+7. Calculate total loss as a weighted sum of the three components above.
+
+.. math::
+
+  L = L_{actor} + \beta_{critic} L_{critic} - \beta_{entropy} H_\pi
+
+8. Perform gradient descent to update our network.
+
+.. note::
+  The current implementation only support discrete action space, and has only been tested on the CartPole environment.
+
+A2C Benefits
+~~~~~~~~~~~~~~~
+
+- Combines the benefit from value-based learning and policy-based learning
+
+- Further reduces variance using the critic as a value estimator
+
+A2C Results
+~~~~~~~~~~~~~~~~
+
+Hyperparameters:
+
+- Batch Size: 32
+- Learning Rate: 0.001
+- Entropy Beta: 0.01
+- Critic Beta: 0.5
+- Gamma: 0.99
+
+.. image:: _images/rl_benchmark/cartpole_a2c_results.jpg
+  :width: 800
+  :alt: A2C Results
+
+Example::
+
+    from pl_bolts.models.rl import AdvantageActorCritic
+    a2c = AdvantageActorCritic("CartPole-v0")
+    trainer = Trainer()
+    trainer.fit(a2c)
 
 .. autoclass:: pl_bolts.models.rl.AdvantageActorCritic
    :noindex:

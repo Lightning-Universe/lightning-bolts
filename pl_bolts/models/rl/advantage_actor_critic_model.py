@@ -49,7 +49,6 @@ class AdvantageActorCritic(pl.LightningModule):
         gamma: float = 0.99,
         lr: float = 0.001,
         batch_size: int = 32,
-        n_steps: int = 10,
         avg_reward_len: int = 100,
         entropy_beta: float = 0.01,
         critic_beta: float = 0.5,
@@ -116,7 +115,7 @@ class AdvantageActorCritic(pl.LightningModule):
         logprobs, values = self.net(x)
         return logprobs, values
 
-    def train_batch(self) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
+    def train_batch(self) -> Tuple[np.ndarray, int, torch.Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -125,6 +124,7 @@ class AdvantageActorCritic(pl.LightningModule):
             states, actions, and returns of the batch.
 
         Note:
+            This is what's taken by the dataloader:
             states: a list of numpy array
             actions: a list of list of int
             returns: a torch tensor
@@ -153,6 +153,7 @@ class AdvantageActorCritic(pl.LightningModule):
 
             returns = self.compute_returns(self.batch_rewards, self.batch_masks, last_value)
             for idx in range(self.hparams.batch_size):
+                print(type(self.batch_states[idx]), type(self.batch_actions[idx]), returns[idx])
                 yield self.batch_states[idx], self.batch_actions[idx], returns[idx]
 
             self.batch_states = []
@@ -160,17 +161,22 @@ class AdvantageActorCritic(pl.LightningModule):
             self.batch_rewards = []
             self.batch_masks = []
 
-    def compute_returns(self, rewards, dones, last_value):
+    def compute_returns(
+        self, 
+        rewards: List[float],
+        dones: List[bool],
+        last_value: torch.Tensor
+    ) -> torch.Tensor:
         """
         Calculate the discounted rewards of the batched rewards
 
         Args:
-            rewards: list of batched rewards
+            rewards: list of rewards
             dones: list of done masks
             last_value: the predicted value for the last state (for bootstrap)
 
         Returns:
-            list of discounted rewards
+            tensor of discounted rewards
         """
         g = last_value
         returns = []
@@ -184,7 +190,12 @@ class AdvantageActorCritic(pl.LightningModule):
 
         return returns
 
-    def loss(self, states, actions, returns):
+    def loss(
+        self,
+        states: torch.Tensor,
+        actions: torch.Tensor,
+        returns: torch.Tensor
+    ) -> torch.Tensor:
         """
         Calculates the loss for A2C which is a weighted sum of
         actor loss (MSE), critic loss (PG), and entropy (for exploration)
