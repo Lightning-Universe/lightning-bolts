@@ -162,7 +162,7 @@ class AdvantageActorCritic(pl.LightningModule):
             self.batch_masks = []
 
     def compute_returns(
-        self, 
+        self,
         rewards: List[float],
         dones: List[bool],
         last_value: torch.Tensor
