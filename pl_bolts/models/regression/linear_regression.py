@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Type
 
 import pytorch_lightning as pl
 import torch
@@ -21,7 +21,7 @@ class LinearRegression(pl.LightningModule):
         output_dim: int = 1,
         bias: bool = True,
         learning_rate: float = 1e-4,
-        optimizer: Optimizer = Adam,
+        optimizer: Type[Optimizer] = Adam,
         l1_strength: float = 0.0,
         l2_strength: float = 0.0,
         **kwargs: Any,
@@ -29,12 +29,12 @@ class LinearRegression(pl.LightningModule):
         """
         Args:
             input_dim: number of dimensions of the input (1+)
-            output_dim: number of dimensions of the output (default=1)
+            output_dim: number of dimensions of the output (default: ``1``)
             bias: If false, will not use $+b$
             learning_rate: learning_rate for the optimizer
-            optimizer: the optimizer to use (default='Adam')
-            l1_strength: L1 regularization strength (default=None)
-            l2_strength: L2 regularization strength (default=None)
+            optimizer: the optimizer to use (default: ``Adam``)
+            l1_strength: L1 regularization strength (default: ``0.0``)
+            l2_strength: L2 regularization strength (default: ``0.0``)
         """
         super().__init__()
         self.save_hyperparameters()
@@ -99,7 +99,7 @@ class LinearRegression(pl.LightningModule):
         return self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
 
     @staticmethod
-    def add_model_specific_args(parent_parser):
+    def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--learning_rate', type=float, default=0.0001)
         parser.add_argument('--input_dim', type=int, default=None)

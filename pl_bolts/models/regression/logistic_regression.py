@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Type
 
 import pytorch_lightning as pl
 import torch
@@ -22,7 +22,7 @@ class LogisticRegression(pl.LightningModule):
         num_classes: int,
         bias: bool = True,
         learning_rate: float = 1e-4,
-        optimizer: Optimizer = Adam,
+        optimizer: Type[Optimizer] = Adam,
         l1_strength: float = 0.0,
         l2_strength: float = 0.0,
         **kwargs: Any,
@@ -33,9 +33,9 @@ class LogisticRegression(pl.LightningModule):
             num_classes: number of class labels (binary: 2, multi-class: >2)
             bias: specifies if a constant or intercept should be fitted (equivalent to fit_intercept in sklearn)
             learning_rate: learning_rate for the optimizer
-            optimizer: the optimizer to use (default='Adam')
-            l1_strength: L1 regularization strength (default=None)
-            l2_strength: L2 regularization strength (default=None)
+            optimizer: the optimizer to use (default: ``Adam``)
+            l1_strength: L1 regularization strength (default: ``0.0``)
+            l2_strength: L2 regularization strength (default: ``0.0``)
         """
         super().__init__()
         self.save_hyperparameters()
