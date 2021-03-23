@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, List, Optional, Tuple, Type
 
 import numpy as np
@@ -18,6 +19,8 @@ if _TORCHVISION_AVAILABLE:
 else:
     warn_missing_pkg('torchvision')
 
+log = logging.getLogger(__name__)
+
 
 class YOLO(pl.LightningModule):
     """
@@ -33,14 +36,31 @@ class YOLO(pl.LightningModule):
 
     The network architecture can be read from a Darknet configuration file using the
     :class:`~pl_bolts.models.detection.yolo.yolo_config.YoloConfiguration` class, or created by
-    some other means, and provided as a list of PyTorch modules. Supports loading weights from a
-    Darknet model file too, if you don't want to start training from a randomly initialized model.
-    During training, the model expects both the images (list of tensors), as well as targets (list
-    of dictionaries).
+    some other means, and provided as a list of PyTorch modules.
 
-    The target dictionaries should contain:
-        - boxes (``FloatTensor[N, 4]``): the ground truth boxes in ``[x1, y1, x2, y2]`` format.
-        - labels (``LongTensor[N]``): the class label for each ground truh box
+    The input from the data loader is expected to be a list of images. Each image is a tensor with
+    shape ``[channels, height, width]``. The images from each batch are concatenated into a single
+    tensor, so the sizes have to match. Different batches can have different image sizes, as long
+    as the size is divisible by the ratio in which the network downsamples the input.
+
+    During training, the model expects both the input tensors and a list of targets. Each target is
+    a dictionary containing:
+        - boxes (``FloatTensor[N, 4]``): the ground-truth boxes in `(x1, y1, x2, y2)` format
+        - labels (``Int64Tensor[N]``): the class label for each ground-truth box
+
+    ``forward()`` method returns all predictions from all detection layers in all images in one
+    tensor with shape ``[images, predictors, classes + 5]``. The coordinates are in the `[0, 1]`
+    range. During training it also returns a dictionary containing the classification, box overlap,
+    and confidence losses.
+
+    During inference, the model requires only the input tensors. ``infer()`` method filters and
+    processes the predictions, producing the following tensors:
+        - boxes (``FloatTensor[N, 4]``): predicted bounding box `(x1, y1, x2, y2)` coordinates in image
+            space
+        - scores (``FloatTensor[N]``): detection confidences
+        - labels (``Int64Tensor[N]``): the predicted labels for each image
+
+    Weights can be loaded from a Darknet model file using ``load_darknet_weights()``.
 
     CLI command::
 
@@ -114,11 +134,12 @@ class YOLO(pl.LightningModule):
                 dictionaries, one for each image.
 
         Returns:
-            boxes (Tensor), confidences (Tensor), classprobs (Tensor), losses (Dict[str, Tensor]):
-                Detections, and if targets were provided, a dictionary of losses. The first
-                dimension of the detections is the index of the image in the batch and the second
-                dimension is the detection within the image. ``boxes`` contains the predicted
-                (x1, y1, x2, y2) coordinates, normalized to [0, 1].
+            detections (Tensor), losses (Dict[str, Tensor]):
+                Detections, and if targets were provided, a dictionary of losses. Detections are
+                shaped ``[batch_size, num_predictors, num_classes + 5]``, where ``num_predictors``
+                is the total number of cells in all detection layers times the number of boxes
+                predicted by one cell. The predicted box coordinates are in `(x1, y1, x2, y2)` format
+                and normalized to `[0, 1]`.
         """
         outputs = []  # Outputs from all layers
         detections = []  # Outputs from detection layers
@@ -146,15 +167,11 @@ class YOLO(pl.LightningModule):
             return torch.stack(loss_tuple).sum() / images.shape[0]
 
         detections = torch.cat(detections, 1)
-        boxes = detections[..., :4]
-        confidences = detections[..., 4]
-        classprobs = detections[..., 5:]
-
         if targets is None:
-            return boxes, confidences, classprobs
+            return detections
 
         losses = {loss_name: mean_loss(loss_name) for loss_name in losses[0].keys()}
-        return boxes, confidences, classprobs, losses
+        return detections, losses
 
     def configure_optimizers(self) -> Tuple[List, List]:
         """Constructs the optimizer and learning rate scheduler."""
@@ -175,11 +192,11 @@ class YOLO(pl.LightningModule):
             A dictionary that includes the training loss in 'loss'.
         """
         images, targets = self._validate_batch(batch)
-        _, _, _, losses = self(images, targets)
+        _, losses = self(images, targets)
         total_loss = torch.stack(tuple(losses.values())).sum()
 
         for name, value in losses.items():
-            self.log('train/{}_loss'.format(name), value)
+            self.log(f'train/{name}_loss', value, prog_bar=True)
         self.log('train/total_loss', total_loss)
 
         return {'loss': total_loss}
@@ -194,14 +211,14 @@ class YOLO(pl.LightningModule):
             batch_idx: The index of this batch
         """
         images, targets = self._validate_batch(batch)
-        boxes, confidences, classprobs, losses = self(images, targets)
-        classprobs, labels = torch.max(classprobs, -1)
-        boxes, confidences, classprobs, labels = self._filter_detections(boxes, confidences, classprobs, labels)
+        detections, losses = self(images, targets)
+        detections = self._split_detections(detections)
+        detections = self._filter_detections(detections)
         total_loss = torch.stack(tuple(losses.values())).sum()
 
         for name, value in losses.items():
-            self.log('val/{}_loss'.format(name), value)
-        self.log('val/total_loss', total_loss)
+            self.log(f'val/{name}_loss', value, sync_dist=True)
+        self.log('val/total_loss', total_loss, sync_dist=True)
 
     def test_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int) -> Dict[str, Tensor]:
         """
@@ -213,14 +230,14 @@ class YOLO(pl.LightningModule):
             batch_idx: The index of this batch.
         """
         images, targets = self._validate_batch(batch)
-        boxes, confidences, classprobs, losses = self(images, targets)
-        classprobs, labels = torch.max(classprobs, -1)
-        boxes, confidences, classprobs, labels = self._filter_detections(boxes, confidences, classprobs, labels)
+        detections, losses = self(images, targets)
+        detections = self._split_detections(detections)
+        detections = self._filter_detections(detections)
         total_loss = torch.stack(tuple(losses.values())).sum()
 
         for name, value in losses.items():
-            self.log('test/{}_loss'.format(name), value)
-        self.log('test/total_loss', total_loss)
+            self.log(f'test/{name}_loss', value, sync_dist=True)
+        self.log('test/total_loss', total_loss, sync_dist=True)
 
     def infer(self, image: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
         """
@@ -232,27 +249,26 @@ class YOLO(pl.LightningModule):
 
         Returns:
             boxes (:class:`~torch.Tensor`), confidences (:class:`~torch.Tensor`), labels (:class:`~torch.Tensor`):
-                A matrix of detected bounding box (x1, y1, x2, y2) coordinates, a vector of
+                A matrix of detected bounding box `(x1, y1, x2, y2)` coordinates, a vector of
                 confidences for the bounding box detections, and a vector of predicted class
                 labels.
         """
         network_input = image.float().div(255.0)
         network_input = network_input.unsqueeze(0)
         self.eval()
-        boxes, confidences, classprobs = self(network_input)
-        classprobs, labels = torch.max(classprobs, -1)
-        boxes, confidences, classprobs, labels = self._filter_detections(boxes, confidences, classprobs, labels)
-        assert len(boxes) == 1
-        boxes = boxes[0]
-        confidences = confidences[0]
-        labels = labels[0]
+        detections = self(network_input)
+        detections = self._split_detections(detections)
+        detections = self._filter_detections(detections)
+        boxes = detections['boxes'][0]
+        scores = detections['scores'][0]
+        labels = detections['labels'][0]
 
         height = image.shape[1]
         width = image.shape[2]
         scale = torch.tensor([width, height, width, height], device=boxes.device)
         boxes = boxes * scale
         boxes = torch.round(boxes).int()
-        return boxes, confidences, labels
+        return boxes, scores, labels
 
     def load_darknet_weights(self, weight_file):
         """
@@ -270,9 +286,9 @@ class YOLO(pl.LightningModule):
         """
         version = np.fromfile(weight_file, count=3, dtype=np.int32)
         images_seen = np.fromfile(weight_file, count=1, dtype=np.int64)
-        print(
-            'Loading weights from Darknet model version {}.{}.{} that has been trained on {} '
-            'images.'.format(version[0], version[1], version[2], images_seen[0])
+        log.info(
+            'Loading weights from Darknet model version %d.%d.%d that has been trained on %d '
+            'images.', version[0], version[1], version[2], images_seen[0]
         )
 
         def read(tensor):
@@ -349,47 +365,63 @@ class YOLO(pl.LightningModule):
         images = torch.stack(images)
         return images, targets
 
-    def _filter_detections(
-        self,
-        boxes: Tensor,
-        confidences: Tensor,
-        classprobs: Tensor,
-        labels: Tensor
-    ) -> Tuple[List[Tensor], List[Tensor], List[Tensor], List[Tensor]]:
+    def _split_detections(self, detections: Tensor) -> Dict[str, Tensor]:
+        """
+        Splits the detection tensor returned by a forward pass into a dictionary.
+
+        The fields of the dictionary are as follows:
+            - boxes (``Tensor[batch_size, N, 4]``): detected bounding box `(x1, y1, x2, y2)` coordinates
+            - scores (``Tensor[batch_size, N]``): detection confidences
+            - classprobs (``Tensor[batch_size, N]``): probabilities of the best classes
+            - labels (``Int64Tensor[batch_size, N]``): the predicted labels for each image
+
+        Args:
+            detections: A tensor of detected bounding boxes and their attributes.
+
+        Returns:
+            A dictionary of detection results.
+        """
+        boxes = detections[..., :4]
+        scores = detections[..., 4]
+        classprobs = detections[..., 5:]
+        classprobs, labels = torch.max(classprobs, -1)
+        return {'boxes': boxes, 'scores': scores, 'classprobs': classprobs, 'labels': labels}
+
+    def _filter_detections(self, detections: Dict[str, Tensor]) -> Dict[str, List[Tensor]]:
         """
         Filters detections based on confidence threshold. Then for every class performs non-maximum
         suppression (NMS). NMS iterates the bounding boxes that predict this class in descending
-        order of confidence score, and removes the bounding box, if its IoU with the next one is
-        higher than the NMS threshold.
+        order of confidence score, and removes lower scoring boxes that have an IoU greater than
+        the NMS threshold with a higher scoring box. Finally the detections are sorted by descending
+        confidence and possible truncated to the maximum number of predictions.
 
         Args:
-            boxes: Detected bounding box (x1, y1, x2, y2) coordinates in a tensor sized
-                ``[batch_size, N, 4]``.
-            confidences: Detection confidences in a tensor sized ``[batch_size, N]``.
-            classprobs: Probabilities of the best classes in a tensor sized ``[batch_size, N]``.
-            labels: Indices of the best classes in a tensor sized ``[batch_size, N]``.
+            detections: All detections. A dictionary of tensors, each containing the predictions
+                from all images.
 
         Returns:
-            boxes (List[Tensor]), confidences (List[Tensor]), classprobs (List[Tensor]), labels (List[Tensor]):
-                Four lists, each containing one tensor per image - bounding box (x1, y1, x2, y2)
-                coordinates, detection confidences, probabilities of the best class of each
-                prediction, and the predicted class labels.
+            Filtered detections. A dictionary of lists, each containing a tensor per image.
         """
+        boxes = detections['boxes']
+        scores = detections['scores']
+        classprobs = detections['classprobs']
+        labels = detections['labels']
+
         out_boxes = []
-        out_confidences = []
+        out_scores = []
         out_classprobs = []
         out_labels = []
 
-        for img_boxes, img_confidences, img_classprobs, img_labels in zip(boxes, confidences, classprobs, labels):
+        for img_boxes, img_scores, img_classprobs, img_labels in zip(boxes, scores, classprobs, labels):
             # Select detections with high confidence score.
-            selected = img_confidences > self.confidence_threshold
+            selected = img_scores > self.confidence_threshold
             img_boxes = img_boxes[selected]
-            img_confidences = img_confidences[selected]
+            img_scores = img_scores[selected]
             img_classprobs = img_classprobs[selected]
             img_labels = img_labels[selected]
 
             img_out_boxes = boxes.new_zeros((0, 4))
-            img_out_confidences = confidences.new_zeros(0)
+            img_out_scores = scores.new_zeros(0)
             img_out_classprobs = classprobs.new_zeros(0)
             img_out_labels = labels.new_zeros(0)
 
@@ -398,26 +430,26 @@ class YOLO(pl.LightningModule):
             for cls_label in labels.unique():
                 selected = img_labels == cls_label
                 cls_boxes = img_boxes[selected]
-                cls_confidences = img_confidences[selected]
+                cls_scores = img_scores[selected]
                 cls_classprobs = img_classprobs[selected]
                 cls_labels = img_labels[selected]
 
-                selected = nms(cls_boxes, cls_confidences, self.nms_threshold)
+                selected = nms(cls_boxes, cls_scores, self.nms_threshold)
                 img_out_boxes = torch.cat((img_out_boxes, cls_boxes[selected]))
-                img_out_confidences = torch.cat((img_out_confidences, cls_confidences[selected]))
+                img_out_scores = torch.cat((img_out_scores, cls_scores[selected]))
                 img_out_classprobs = torch.cat((img_out_classprobs, cls_classprobs[selected]))
                 img_out_labels = torch.cat((img_out_labels, cls_labels[selected]))
 
             # Sort by descending confidence and limit the maximum number of predictions.
-            indices = torch.argsort(img_out_confidences, descending=True)
+            indices = torch.argsort(img_out_scores, descending=True)
             if self.max_predictions_per_image >= 0:
                 indices = indices[:self.max_predictions_per_image]
             out_boxes.append(img_out_boxes[indices])
-            out_confidences.append(img_out_confidences[indices])
+            out_scores.append(img_out_scores[indices])
             out_classprobs.append(img_out_classprobs[indices])
             out_labels.append(img_out_labels[indices])
 
-        return out_boxes, out_confidences, out_classprobs, out_labels
+        return {'boxes': out_boxes, 'scores': out_scores, 'classprobs': out_classprobs, 'labels': out_labels}
 
 
 class Resize:

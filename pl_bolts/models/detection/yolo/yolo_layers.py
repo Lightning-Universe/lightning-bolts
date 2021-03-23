@@ -28,7 +28,7 @@ def _corner_coordinates(xy, wh):
         wh (Tensor): Width and height. Tensor of size ``[..., 2]``.
 
     Returns:
-        boxes (Tensor): A matrix of (x1, y1, x2, y2) coordinates.
+        boxes (Tensor): A matrix of `(x1, y1, x2, y2)` coordinates.
     """
     half_wh = wh / 2
     top_left = xy - half_wh
@@ -125,7 +125,7 @@ class DetectionLayer(nn.Module):
             confidence_loss_func: Loss function for confidence score. Default is the sum of squared
                 errors.
             image_space_loss: If set to ``True``, the overlap loss function will receive the bounding
-                box (x1, y1, x2, y2) coordinate normalized to the [0, 1] range. This is needed for
+                box `(x1, y1, x2, y2)` coordinate normalized to the `[0, 1]` range. This is needed for
                 the IoU losses introduced in YOLOv4. Otherwise the loss will be computed from the x,
                 y, width, and height values, as predicted by the network (i.e. relative to the
                 anchor box, and width and height are logarithmic).
@@ -160,7 +160,7 @@ class DetectionLayer(nn.Module):
         """
         Runs a forward pass through this YOLO detection layer.
 
-        Maps cell-local coordinates to global coordinates in the [0, 1] range, scales the bounding
+        Maps cell-local coordinates to global coordinates in the `[0, 1]` range, scales the bounding
         boxes with the anchors, converts the center coordinates to corner coordinates, and maps
         probabilities to ]0, 1[ range using sigmoid.
 
@@ -222,7 +222,7 @@ class DetectionLayer(nn.Module):
 
         The predicted coordinates are interpreted as coordinates inside a grid cell whose width and
         height is 1. Adding offset to the cell and dividing by the grid size, we get global
-        coordinates in the [0, 1] range.
+        coordinates in the `[0, 1]` range.
 
         Args:
             xy (Tensor): The predicted center coordinates before scaling. Values from zero to one
@@ -254,7 +254,7 @@ class DetectionLayer(nn.Module):
 
         Returns:
             result (Tensor): A tensor with the same shape as the input tensor, but scaled sizes
-                normalized to the [0, 1] range.
+                normalized to the `[0, 1]` range.
         """
         image_size = torch.tensor([self.image_width, self.image_height], device=wh.device)
         anchor_wh = [self.anchor_dims[i] for i in self.anchor_ids]
@@ -268,7 +268,7 @@ class DetectionLayer(nn.Module):
         significantly (IoU greater than ``self.ignore_threshold``).
 
         Args:
-            boxes (Tensor): The predicted corner coordinates, normalized to the [0, 1] range.
+            boxes (Tensor): The predicted corner coordinates, normalized to the `[0, 1]` range.
                 Tensor of size ``[batch_size, height, width, boxes_per_cell, 4]``.
             targets (List[Dict[str, Tensor]]): List of dictionaries of target values, one
                 dictionary for each image.
@@ -304,9 +304,9 @@ class DetectionLayer(nn.Module):
         Args:
             boxes (Tensor): The predicted bounding boxes. A tensor sized
                 ``[batch_size, height, width, boxes_per_cell, 4]``.
-            confidence (Tensor): The confidence predictions, normalized to [0, 1]. A tensor sized
+            confidence (Tensor): The confidence predictions, normalized to `[0, 1]`. A tensor sized
                 ``[batch_size, height, width, boxes_per_cell]``.
-            classprob (Tensor): The class probability predictions, normalized to [0, 1]. A tensor
+            classprob (Tensor): The class probability predictions, normalized to `[0, 1]`. A tensor
                 sized ``[batch_size, height, width, boxes_per_cell, num_classes]``.
             targets (List[Dict[str, Tensor]]): List of dictionaries of target values, one
                 dictionary for each image.
@@ -322,7 +322,7 @@ class DetectionLayer(nn.Module):
 
         # Divisor for converting targets from image coordinates to feature map coordinates
         image_to_feature_map = torch.tensor([self.image_width / width, self.image_height / height], device=device)
-        # Divisor for converting targets from image coordinates to [0, 1] range
+        # Divisor for converting targets from image coordinates to `[0, 1]` range
         image_to_unit = torch.tensor([self.image_width, self.image_height], device=device)
 
         anchor_wh = torch.tensor(self.anchor_dims, dtype=boxes.dtype, device=device)
@@ -344,7 +344,7 @@ class DetectionLayer(nn.Module):
                 continue
 
             # Bounding box corner coordinates are converted to center coordinates, width, and
-            # height, and normalized to [0, 1] range.
+            # height, and normalized to `[0, 1]` range.
             wh = target_boxes[:, 2:4] - target_boxes[:, 0:2]
             xy = target_boxes[:, 0:2] + (wh / 2)
             unit_xy = xy / image_to_unit
@@ -381,7 +381,7 @@ class DetectionLayer(nn.Module):
             # the target confidence.
             lc_mask[image_idx, cell_j, cell_i, predictors] = False
 
-            # IoU losses are calculated from the image space coordinates normalized to [0, 1]
+            # IoU losses are calculated from the image space coordinates normalized to `[0, 1]`
             # range. The squared-error loss is calculated from the raw predicted values.
             if self.image_space_loss:
                 target_xy.append(unit_xy)
