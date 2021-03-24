@@ -1,5 +1,5 @@
 import re
-from typing import List, Tuple
+from typing import Any, Dict, Iterable, List, Tuple
 from warnings import warn
 
 import torch.nn as nn
@@ -11,8 +11,8 @@ from pl_bolts.models.detection.yolo import yolo_layers
 class YOLOConfiguration:
     """
     This class can be used to parse the configuration files of the Darknet YOLOv4 implementation.
-    The ``get_network()`` method returns a PyTorch module list that can be used to construct a YOLO
-    model.
+    The :func:`~pl_bolts.models.detection.yolo.yolo_config.YOLOConfiguration.get_network` method
+    returns a PyTorch module list that can be used to construct a YOLO model.
     """
 
     def __init__(self, path: str) -> None:
@@ -39,7 +39,7 @@ class YOLOConfiguration:
         modules. Returns the network structure that can be used to create a YOLO model.
 
         Returns:
-            modules: A ``nn.ModuleList`` that defines the YOLO network.
+            A :class:`~torch.nn.ModuleList` that defines the YOLO network.
         """
         result = nn.ModuleList()
         num_inputs = [3]  # Number of channels in the input of every layer up to the current layer
@@ -50,15 +50,15 @@ class YOLOConfiguration:
             num_inputs.append(num_outputs)
         return result
 
-    def _read_file(self, config_file):
+    def _read_file(self, config_file: Iterable[str]) -> List[Dict[str, Any]]:
         """
         Reads a YOLOv4 network configuration file and returns a list of configuration sections.
 
         Args:
-            config_file (iterable over lines): The configuration file to read.
+            config_file: The configuration file to read.
 
         Returns:
-            sections (List[dict]): A list of configuration sections.
+            A list of configuration sections.
         """
         section_re = re.compile(r'\[([^]]+)\]')
         list_variables = ('layers', 'anchors', 'mask', 'scales')
@@ -158,7 +158,7 @@ def _create_layer(config: dict, num_inputs: List[int]) -> Tuple[nn.Module, int]:
 
     Returns:
         module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the
-            number of channels in its output.
+        number of channels in its output.
     """
     create_func = {
         'convolutional': _create_convolutional,

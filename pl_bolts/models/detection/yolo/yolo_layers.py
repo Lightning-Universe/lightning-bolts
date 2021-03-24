@@ -19,16 +19,16 @@ else:
     warn_missing_pkg('torchvision')
 
 
-def _corner_coordinates(xy, wh):
+def _corner_coordinates(xy: Tensor, wh: Tensor) -> Tensor:
     """
     Converts box center points and sizes to corner coordinates.
 
     Args:
-        xy (Tensor): Center coordinates. Tensor of size ``[..., 2]``.
-        wh (Tensor): Width and height. Tensor of size ``[..., 2]``.
+        xy: Center coordinates. Tensor of size ``[..., 2]``.
+        wh: Width and height. Tensor of size ``[..., 2]``.
 
     Returns:
-        boxes (Tensor): A matrix of `(x1, y1, x2, y2)` coordinates.
+        A matrix of `(x1, y1, x2, y2)` coordinates.
     """
     half_wh = wh / 2
     top_left = xy - half_wh
@@ -36,18 +36,18 @@ def _corner_coordinates(xy, wh):
     return torch.cat((top_left, bottom_right), -1)
 
 
-def _aligned_iou(dims1, dims2):
+def _aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
     """
     Calculates a matrix of intersections over union from box dimensions, assuming that the boxes
     are located at the same coordinates.
 
     Args:
-        dims1 (Tensor[N, 2]): width and height of N boxes
-        dims2 (Tensor[M, 2]): width and height of M boxes
+        dims1: Width and height of `N` boxes. Tensor of size ``[N, 2]``.
+        dims2: Width and height of `M` boxes. Tensor of size ``[M, 2]``.
 
     Returns:
-        iou (Tensor[N, M]): the NxM matrix containing the pairwise IoU values for every element in
-            ``dims1`` and ``dims2``
+        Tensor of size ``[N, M]`` containing the pairwise IoU values for every element in
+        ``dims1`` and ``dims2``
     """
     area1 = dims1[:, 0] * dims1[:, 1]  # [N]
     area2 = dims2[:, 0] * dims2[:, 1]  # [M]
@@ -162,7 +162,7 @@ class DetectionLayer(nn.Module):
 
         Maps cell-local coordinates to global coordinates in the `[0, 1]` range, scales the bounding
         boxes with the anchors, converts the center coordinates to corner coordinates, and maps
-        probabilities to ]0, 1[ range using sigmoid.
+        probabilities to the `]0, 1[` range using sigmoid.
 
         Args:
             x: The output from the previous layer. Tensor of size
@@ -172,8 +172,8 @@ class DetectionLayer(nn.Module):
 
         Returns:
             output (Tensor), losses (Dict[str, Tensor]): Layer output, and if training targets were
-                provided, a dictionary of losses. Layer output is sized
-                ``[batch_size, num_anchors * height * width, num_classes + 5]``.
+            provided, a dictionary of losses. Layer output is sized
+            ``[batch_size, num_anchors * height * width, num_classes + 5]``.
         """
         batch_size, num_features, height, width = x.shape
         num_attrs = self.num_classes + 5
@@ -215,7 +215,7 @@ class DetectionLayer(nn.Module):
         losses = self._calculate_losses(boxes, confidence, classprob, targets, lc_mask)
         return output, losses
 
-    def _global_xy(self, xy):
+    def _global_xy(self, xy: Tensor) -> Tensor:
         """
         Adds offsets to the predicted box center coordinates to obtain global coordinates to the
         image.
@@ -225,12 +225,12 @@ class DetectionLayer(nn.Module):
         coordinates in the `[0, 1]` range.
 
         Args:
-            xy (Tensor): The predicted center coordinates before scaling. Values from zero to one
-                in a tensor sized ``[batch_size, height, width, boxes_per_cell, 2]``.
+            xy: The predicted center coordinates before scaling. Values from zero to one in a
+                tensor sized ``[batch_size, height, width, boxes_per_cell, 2]``.
 
         Returns:
-            result (Tensor): Global coordinates from zero to one, in a tensor with the same shape
-                as the input tensor.
+            Global coordinates in the `[0, 1]` range, in a tensor with the same shape as the input
+            tensor.
         """
         height = xy.shape[1]
         width = xy.shape[2]
@@ -244,39 +244,37 @@ class DetectionLayer(nn.Module):
 
         return (xy + offset) / grid_size
 
-    def _scale_wh(self, wh):
+    def _scale_wh(self, wh: Tensor) -> Tensor:
         """
         Scales the box size predictions by the prior dimensions from the anchors.
 
         Args:
-            wh (Tensor): The unnormalized width and height predictions. Tensor of size
+            wh: The unnormalized width and height predictions. Tensor of size
                 ``[..., boxes_per_cell, 2]``.
 
         Returns:
-            result (Tensor): A tensor with the same shape as the input tensor, but scaled sizes
-                normalized to the `[0, 1]` range.
+            A tensor with the same shape as the input tensor, but scaled sizes normalized to the
+            `[0, 1]` range.
         """
         image_size = torch.tensor([self.image_width, self.image_height], device=wh.device)
         anchor_wh = [self.anchor_dims[i] for i in self.anchor_ids]
         anchor_wh = torch.tensor(anchor_wh, dtype=wh.dtype, device=wh.device)
         return torch.exp(wh) * anchor_wh / image_size
 
-    def _low_confidence_mask(self, boxes, targets):
+    def _low_confidence_mask(self, boxes: Tensor, targets: List[Dict[str, Tensor]]) -> Tensor:
         """
         Initializes the mask that will be used to select predictors that are not predicting any
         ground-truth target. The value will be ``True``, unless the predicted box overlaps any target
         significantly (IoU greater than ``self.ignore_threshold``).
 
         Args:
-            boxes (Tensor): The predicted corner coordinates, normalized to the `[0, 1]` range.
-                Tensor of size ``[batch_size, height, width, boxes_per_cell, 4]``.
-            targets (List[Dict[str, Tensor]]): List of dictionaries of target values, one
-                dictionary for each image.
+            boxes: The predicted corner coordinates, normalized to the `[0, 1]` range. Tensor of
+                size ``[batch_size, height, width, boxes_per_cell, 4]``.
+            targets: List of dictionaries of ground-truth targets, one dictionary per image.
 
         Returns:
-            results (Tensor): A boolean tensor shaped ``[batch_size, height, width, boxes_per_cell]``
-                with ``False`` where the predicted box overlaps a target significantly and ``True``
-                elsewhere.
+            A boolean tensor shaped ``[batch_size, height, width, boxes_per_cell]`` with ``False``
+            where the predicted box overlaps a target significantly and ``True`` elsewhere.
         """
         batch_size, height, width, boxes_per_cell, num_coords = boxes.shape
         num_preds = height * width * boxes_per_cell
@@ -296,25 +294,26 @@ class DetectionLayer(nn.Module):
 
         return results.view((batch_size, height, width, boxes_per_cell))
 
-    def _calculate_losses(self, boxes, confidence, classprob, targets, lc_mask):
+    def _calculate_losses(
+        self, boxes: Tensor, confidence: Tensor, classprob: Tensor, targets: List[Dict[str, Tensor]], lc_mask: Tensor
+    ) -> Dict[str, Tensor]:
         """
         From the targets that are in the image space calculates the actual targets for the network
         predictions, and returns a dictionary of training losses.
 
         Args:
-            boxes (Tensor): The predicted bounding boxes. A tensor sized
+            boxes: The predicted bounding boxes. A tensor sized
                 ``[batch_size, height, width, boxes_per_cell, 4]``.
-            confidence (Tensor): The confidence predictions, normalized to `[0, 1]`. A tensor sized
+            confidence: The confidence predictions, normalized to `[0, 1]`. A tensor sized
                 ``[batch_size, height, width, boxes_per_cell]``.
-            classprob (Tensor): The class probability predictions, normalized to `[0, 1]`. A tensor
-                sized ``[batch_size, height, width, boxes_per_cell, num_classes]``.
-            targets (List[Dict[str, Tensor]]): List of dictionaries of target values, one
-                dictionary for each image.
-            lc_mask (Tensor): A boolean mask containing ``True`` where the predicted box does not
-                overlap any target significantly.
+            classprob: The class probability predictions, normalized to `[0, 1]`. A tensor sized
+                ``[batch_size, height, width, boxes_per_cell, num_classes]``.
+            targets: List of dictionaries of target values, one dictionary for each image.
+            lc_mask: A boolean mask containing ``True`` where the predicted box does not overlap
+                any target significantly.
 
         Returns:
-            predicted (Dict[str, Tensor]): A dictionary of training losses.
+            A dictionary of training losses.
         """
         batch_size, height, width, boxes_per_cell, _ = boxes.shape
         device = boxes.device

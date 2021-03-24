@@ -27,38 +27,42 @@ class YOLO(pl.LightningModule):
     PyTorch Lightning implementation of `YOLOv3 <https://arxiv.org/abs/1804.02767>`_ with some
     improvements from `YOLOv4 <https://arxiv.org/abs/2004.10934>`_.
 
-    YOLOv3 paper authors: Joseph Redmon and Ali Farhadi
+    *YOLOv3 paper authors*: Joseph Redmon and Ali Farhadi
 
-    YOLOv4 paper authors: Alexey Bochkovskiy, Chien-Yao Wang, Hong-Yuan Mark Liao
+    *YOLOv4 paper authors*: Alexey Bochkovskiy, Chien-Yao Wang, Hong-Yuan Mark Liao
 
-    Model implemented by:
-        - `Seppo Enarvi <https://github.com/senarvi>`_
+    *Model implemented by*:
+
+    - `Seppo Enarvi <https://github.com/senarvi>`_
 
     The network architecture can be read from a Darknet configuration file using the
-    :class:`~pl_bolts.models.detection.yolo.yolo_config.YoloConfiguration` class, or created by
+    :class:`~pl_bolts.models.detection.yolo.yolo_config.YOLOConfiguration` class, or created by
     some other means, and provided as a list of PyTorch modules.
 
     The input from the data loader is expected to be a list of images. Each image is a tensor with
-    shape ``[channels, height, width]``. The images from each batch are concatenated into a single
-    tensor, so the sizes have to match. Different batches can have different image sizes, as long
-    as the size is divisible by the ratio in which the network downsamples the input.
+    shape ``[channels, height, width]``. The images from a single batch will be stacked into a
+    single tensor, so the sizes have to match. Different batches can have different image sizes, as
+    long as the size is divisible by the ratio in which the network downsamples the input.
 
-    During training, the model expects both the input tensors and a list of targets. Each target is
-    a dictionary containing:
-        - boxes (``FloatTensor[N, 4]``): the ground-truth boxes in `(x1, y1, x2, y2)` format
-        - labels (``Int64Tensor[N]``): the class label for each ground-truth box
+    During training, the model expects both the input tensors and a list of targets. *Each target is
+    a dictionary containing*:
 
-    ``forward()`` method returns all predictions from all detection layers in all images in one
-    tensor with shape ``[images, predictors, classes + 5]``. The coordinates are in the `[0, 1]`
-    range. During training it also returns a dictionary containing the classification, box overlap,
-    and confidence losses.
+    - boxes (``FloatTensor[N, 4]``): the ground-truth boxes in `(x1, y1, x2, y2)` format
+    - labels (``Int64Tensor[N]``): the class label for each ground-truth box
 
-    During inference, the model requires only the input tensors. ``infer()`` method filters and
-    processes the predictions, producing the following tensors:
-        - boxes (``FloatTensor[N, 4]``): predicted bounding box `(x1, y1, x2, y2)` coordinates in image
-            space
-        - scores (``FloatTensor[N]``): detection confidences
-        - labels (``Int64Tensor[N]``): the predicted labels for each image
+    :func:`~pl_bolts.models.detection.yolo.yolo_module.YOLO.forward` method returns all
+    predictions from all detection layers in all images in one tensor with shape
+    ``[images, predictors, classes + 5]``. The coordinates are in the `[0, 1]` range. During
+    training it also returns a dictionary containing the classification, box overlap, and
+    confidence losses.
+
+    During inference, the model requires only the input tensors.
+    :func:`~pl_bolts.models.detection.yolo.yolo_module.YOLO.infer` method filters and processes the
+    predictions. *The processed output includes the following tensors*:
+
+    - boxes (``FloatTensor[N, 4]``): predicted bounding box `(x1, y1, x2, y2)` coordinates in image space
+    - scores (``FloatTensor[N]``): detection confidences
+    - labels (``Int64Tensor[N]``): the predicted labels for each image
 
     Weights can be loaded from a Darknet model file using ``load_darknet_weights()``.
 
@@ -73,9 +77,9 @@ class YOLO(pl.LightningModule):
         self,
         network: nn.ModuleList,
         optimizer: Type[optim.Optimizer] = optim.SGD,
-        optimizer_params: Dict[str, Any] = {'lr': 0.0013, 'momentum': 0.9, 'weight_decay': 0.0005},
+        optimizer_params: Dict[str, Any] = {'lr': 0.001, 'momentum': 0.9, 'weight_decay': 0.0005},
         lr_scheduler: Type[optim.lr_scheduler._LRScheduler] = LinearWarmupCosineAnnealingLR,
-        lr_scheduler_params: Dict[str, Any] = {'warmup_epochs': 1, 'max_epochs': 271, 'warmup_start_lr': 0.0},
+        lr_scheduler_params: Dict[str, Any] = {'warmup_epochs': 1, 'max_epochs': 300, 'warmup_start_lr': 0.0},
         confidence_threshold: float = 0.2,
         nms_threshold: float = 0.45,
         max_predictions_per_image: int = -1
@@ -83,7 +87,8 @@ class YOLO(pl.LightningModule):
         """
         Args:
             network: A list of network modules. This can be obtained from a Darknet configuration
-                using the ``YoloConfiguration.get_network()`` method.
+                using the :func:`~pl_bolts.models.detection.yolo.yolo_config.YOLOConfiguration.get_network`
+                method.
             optimizer: Which optimizer class to use for training.
             optimizer_params: Parameters to pass to the optimizer constructor.
             lr_scheduler: Which learning rate scheduler class to use for training.
@@ -115,7 +120,7 @@ class YOLO(pl.LightningModule):
         self,
         images: Tensor,
         targets: Optional[List[Dict[str, Tensor]]] = None
-    ) -> Tuple[Tensor, Tensor, Tensor, Dict[str, Tensor]]:
+    ) -> Tuple[Tensor, Dict[str, Tensor]]:
         """
         Runs a forward pass through the network (all layers listed in ``self.network``), and if
         training targets are provided, computes the losses from the detection layers.
@@ -134,12 +139,12 @@ class YOLO(pl.LightningModule):
                 dictionaries, one for each image.
 
         Returns:
-            detections (Tensor), losses (Dict[str, Tensor]):
-                Detections, and if targets were provided, a dictionary of losses. Detections are
-                shaped ``[batch_size, num_predictors, num_classes + 5]``, where ``num_predictors``
-                is the total number of cells in all detection layers times the number of boxes
-                predicted by one cell. The predicted box coordinates are in `(x1, y1, x2, y2)` format
-                and normalized to `[0, 1]`.
+            detections (:class:`~torch.Tensor`), losses (Dict[str, :class:`~torch.Tensor`]):
+            Detections, and if targets were provided, a dictionary of losses. Detections are shaped
+            ``[batch_size, num_predictors, num_classes + 5]``, where ``num_predictors`` is the
+            total number of cells in all detection layers times the number of boxes predicted by
+            one cell. The predicted box coordinates are in `(x1, y1, x2, y2)` format and normalized
+            to `[0, 1]`.
         """
         outputs = []  # Outputs from all layers
         detections = []  # Outputs from detection layers
@@ -201,7 +206,7 @@ class YOLO(pl.LightningModule):
 
         return {'loss': total_loss}
 
-    def validation_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int) -> Dict[str, Tensor]:
+    def validation_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int):
         """
         Evaluates a batch of data from the validation set.
 
@@ -220,7 +225,7 @@ class YOLO(pl.LightningModule):
             self.log(f'val/{name}_loss', value, sync_dist=True)
         self.log('val/total_loss', total_loss, sync_dist=True)
 
-    def test_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int) -> Dict[str, Tensor]:
+    def test_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int):
         """
         Evaluates a batch of data from the test set.
 
@@ -249,9 +254,8 @@ class YOLO(pl.LightningModule):
 
         Returns:
             boxes (:class:`~torch.Tensor`), confidences (:class:`~torch.Tensor`), labels (:class:`~torch.Tensor`):
-                A matrix of detected bounding box `(x1, y1, x2, y2)` coordinates, a vector of
-                confidences for the bounding box detections, and a vector of predicted class
-                labels.
+            A matrix of detected bounding box `(x1, y1, x2, y2)` coordinates, a vector of
+            confidences for the bounding box detections, and a vector of predicted class labels.
         """
         network_input = image.float().div(255.0)
         network_input = network_input.unsqueeze(0)
@@ -335,7 +339,7 @@ class YOLO(pl.LightningModule):
             batch: The batch of data read by the :class:`~torch.utils.data.DataLoader`.
 
         Returns:
-            batch: The input batch with images stacked into a single tensor.
+            The input batch with images stacked into a single tensor.
         """
         images, targets = batch
 
