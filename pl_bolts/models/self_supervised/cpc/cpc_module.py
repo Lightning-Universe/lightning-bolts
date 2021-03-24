@@ -25,10 +25,10 @@ from pl_bolts.models.self_supervised.cpc.transforms import (
 from pl_bolts.utils.pretrained_weights import load_pretrained
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
-__all__ = ['CPCV2']
+__all__ = ['CPC_v2']
 
 
-class CPCV2(pl.LightningModule):
+class CPC_v2(pl.LightningModule):
 
     def __init__(
         self,
@@ -60,7 +60,7 @@ class CPCV2(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.online_evaluator = self.hparams.online_ft
+        self.online_evaluator = online_ft
 
         if pretrained:
             self.hparams.dataset = pretrained
@@ -69,20 +69,20 @@ class CPCV2(pl.LightningModule):
         self.encoder = self.init_encoder()
 
         # info nce loss
-        c, h = self.__compute_final_nb_c(self.hparams.patch_size)
+        c, h = self.__compute_final_nb_c(patch_size)
         self.contrastive_task = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
         self.z_dim = c * h * h
         self.num_classes = num_classes
 
         if pretrained:
-            self.load_pretrained(self.hparams.encoder_name)
+            self.load_pretrained(encoder_name)
 
     def load_pretrained(self, encoder_name):
         available_weights = {'resnet18'}
 
         if encoder_name in available_weights:
-            load_pretrained(self, f'CPCV2-{encoder_name}')
+            load_pretrained(self, f'CPC_v2-{encoder_name}')
         elif encoder_name not in available_weights:
             rank_zero_warn(f'{encoder_name} not yet available')
 
@@ -119,7 +119,7 @@ class CPCV2(pl.LightningModule):
 
     def forward(self, img_1):
         # put all patches on the batch dim for simultaneous processing
-        b, p, c, w, h = img_1.size()
+        b, _, c, w, h = img_1.size()
         img_1 = img_1.view(-1, c, w, h)
 
         # Z are the latent vars
@@ -152,8 +152,8 @@ class CPCV2(pl.LightningModule):
 
     def shared_step(self, batch):
         if isinstance(self.datamodule, STL10DataModule):
-            unlabeled_batch = batch[0]
-            batch = unlabeled_batch
+            # unlabeled batch
+            batch = batch[0]
 
         img_1, y = batch
 
@@ -167,7 +167,11 @@ class CPCV2(pl.LightningModule):
 
     def configure_optimizers(self):
         opt = optim.Adam(
-            params=self.parameters(), lr=self.hparams.learning_rate, betas=(0.8, 0.999), weight_decay=1e-5, eps=1e-7
+            params=self.parameters(),
+            lr=self.hparams.learning_rate,
+            betas=(0.8, 0.999),
+            weight_decay=1e-5,
+            eps=1e-7,
         )
 
         # if self.hparams.dataset in ['cifar10', 'stl10']:
@@ -179,13 +183,20 @@ class CPCV2(pl.LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser):
+        possible_resnets = [
+            'resnet18',
+            'resnet34',
+            'resnet50',
+            'resnet101',
+            'resnet152',
+            'resnext50_32x4d',
+            'resnext101_32x8d',
+            'wide_resnet50_2',
+            'wide_resnet101_2',
+        ]
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true')
         parser.add_argument('--task', type=str, default='cpc')
-        possible_resnets = [
-            'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
-            'wide_resnet50_2', 'wide_resnet101_2'
-        ]
         parser.add_argument('--encoder', default='cpc_encoder', type=str, choices=possible_resnets)
         # cifar10: 1e-5, stl10: 3e-5, imagenet: 4e-4
         parser.add_argument('--learning_rate', type=float, default=1e-5)
@@ -201,18 +212,17 @@ def cli_main():
     pl.seed_everything(1234)
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
-    parser = CPCV2.add_model_specific_args(parser)
+    parser = CPC_v2.add_model_specific_args(parser)
     parser.add_argument('--dataset', default='cifar10', type=str)
     parser.add_argument('--data_dir', default='.', type=str)
     parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
     parser.add_argument('--num_workers', default=8, type=int)
+    parser.add_argument('--hidden_mlp', default=2048, type=int, help='hidden layer dimension in projection head')
     parser.add_argument('--batch_size', type=int, default=128)
 
     args = parser.parse_args()
 
     datamodule = None
-
-    online_evaluator = SSLOnlineEvaluator()
     if args.dataset == 'cifar10':
         datamodule = CIFAR10DataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsCIFAR10()
@@ -227,6 +237,20 @@ def cli_main():
         datamodule.val_transforms = CPCEvalTransformsSTL10()
         args.patch_size = 16
 
+    elif args.dataset == 'imagenet2012':
+        datamodule = SSLImagenetDataModule.from_argparse_args(args)
+        datamodule.train_transforms = CPCTrainTransformsImageNet128()
+        datamodule.val_transforms = CPCEvalTransformsImageNet128()
+        args.patch_size = 32
+
+    online_evaluator = SSLOnlineEvaluator(
+        drop_p=0.,
+        hidden_dim=None,
+        z_dim=args.hidden_mlp,
+        num_classes=datamodule.num_classes,
+        dataset=args.dataset,
+    )
+    if args.dataset == 'stl10':
         # 16 GB RAM - 64
         # 32 GB RAM - 144
         args.batch_size = 144
@@ -239,13 +263,7 @@ def cli_main():
 
         online_evaluator.to_device = to_device
 
-    elif args.dataset == 'imagenet2012':
-        datamodule = SSLImagenetDataModule.from_argparse_args(args)
-        datamodule.train_transforms = CPCTrainTransformsImageNet128()
-        datamodule.val_transforms = CPCEvalTransformsImageNet128()
-        args.patch_size = 32
-
-    model = CPCV2(**vars(args))
+    model = CPC_v2(**vars(args))
     trainer = pl.Trainer.from_argparse_args(args, callbacks=[online_evaluator])
     trainer.fit(model, datamodule=datamodule)
 

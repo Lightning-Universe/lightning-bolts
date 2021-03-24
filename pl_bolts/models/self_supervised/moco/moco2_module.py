@@ -35,7 +35,7 @@ else:  # pragma: no cover
     warn_missing_pkg('torchvision')
 
 
-class MocoV2(pl.LightningModule):
+class Moco_v2(pl.LightningModule):
     """
     PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
 
@@ -46,8 +46,8 @@ class MocoV2(pl.LightningModule):
         - `William Falcon <https://github.com/williamFalcon>`_
 
     Example::
-        from pl_bolts.models.self_supervised import MocoV2
-        model = MocoV2()
+        from pl_bolts.models.self_supervised import Moco_v2
+        model = Moco_v2()
         trainer = Trainer()
         trainer.fit(model)
 
@@ -144,7 +144,7 @@ class MocoV2(pl.LightningModule):
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys):
         # gather keys before updating queue
-        if self.use_ddp or self.use_ddp2:
+        if self.trainer.use_ddp or self.trainer.use_ddp2:
             keys = concat_all_gather(keys)
 
         batch_size = keys.shape[0]
@@ -223,14 +223,14 @@ class MocoV2(pl.LightningModule):
             self._momentum_update_key_encoder()  # update the key encoder
 
             # shuffle for making use of BN
-            if self.use_ddp or self.use_ddp2:
+            if self.trainer.use_ddp or self.trainer.use_ddp2:
                 img_k, idx_unshuffle = self._batch_shuffle_ddp(img_k)
 
             k = self.encoder_k(img_k)  # keys: NxC
             k = nn.functional.normalize(k, dim=1)
 
             # undo shuffle
-            if self.use_ddp or self.use_ddp2:
+            if self.trainer.use_ddp or self.trainer.use_ddp2:
                 k = self._batch_unshuffle_ddp(k, idx_unshuffle)
 
         # compute logits
@@ -320,7 +320,7 @@ class MocoV2(pl.LightningModule):
         parser.add_argument('--momentum', type=float, default=0.9)
         parser.add_argument('--weight_decay', type=float, default=1e-4)
         parser.add_argument('--data_dir', type=str, default='./')
-        parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, stl10, imagenet2012')
+        parser.add_argument('--dataset', type=str, default='cifar10', choices=['cifar10', 'imagenet2012', 'stl10'])
         parser.add_argument('--batch_size', type=int, default=256)
         parser.add_argument('--use_mlp', action='store_true')
         parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
@@ -351,7 +351,7 @@ def cli_main():
     parser = pl.Trainer.add_argparse_args(parser)
 
     # model args
-    parser = MocoV2.add_model_specific_args(parser)
+    parser = Moco_v2.add_model_specific_args(parser)
     args = parser.parse_args()
 
     if args.dataset == 'cifar10':
@@ -375,7 +375,7 @@ def cli_main():
         # replace with your own dataset, otherwise CIFAR-10 will be used by default if `None` passed in
         datamodule = None
 
-    model = MocoV2(**args.__dict__)
+    model = Moco_v2(**args.__dict__)
 
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model, datamodule=datamodule)

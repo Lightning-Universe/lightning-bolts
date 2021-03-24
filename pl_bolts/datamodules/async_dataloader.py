@@ -1,10 +1,11 @@
+import collections.abc as container_abcs
 import re
 from queue import Queue
 from threading import Thread
 from typing import Any, Optional, Union
 
 import torch
-from torch._six import container_abcs, string_classes
+from torch._six import string_classes
 from torch.utils.data import DataLoader, Dataset
 
 

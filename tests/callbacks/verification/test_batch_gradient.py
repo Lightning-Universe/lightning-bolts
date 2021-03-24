@@ -7,8 +7,9 @@ from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import nn as nn
 
 from pl_bolts.callbacks import BatchGradientVerificationCallback
-from pl_bolts.callbacks.verification.batch_gradient import default_input_mapping, default_output_mapping
+from pl_bolts.callbacks.verification.batch_gradient import default_input_mapping, default_output_mapping, selective_eval
 from pl_bolts.utils import BatchGradientVerification
+from tests import _MARK_REQUIRE_GPU
 
 
 class TemplateModel(nn.Module):
@@ -18,6 +19,7 @@ class TemplateModel(nn.Module):
         super().__init__()
         self.mix_data = mix_data
         self.linear = nn.Linear(10, 5)
+        self.bn = nn.BatchNorm1d(10)
         self.input_array = torch.rand(10, 5, 2)
 
     def forward(self, *args, **kwargs):
@@ -29,7 +31,7 @@ class TemplateModel(nn.Module):
             x = x.view(10, -1).permute(1, 0).view(-1, 10)  # oops!
         else:
             x = x.view(-1, 10)  # good!
-        return self.linear(x)
+        return self.linear(self.bn(x))
 
 
 class MultipleInputModel(TemplateModel):
@@ -93,13 +95,8 @@ class LitModel(LightningModule):
 @pytest.mark.parametrize("mix_data", [True, False])
 @pytest.mark.parametrize(
     "device",
-    [
-        pytest.param(torch.device("cpu")),
-        pytest.param(
-            torch.device("cuda", 0),
-            marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU"),
-        ),
-    ],
+    [torch.device("cpu"),
+     pytest.param(torch.device("cuda", 0), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
 )
 def test_batch_gradient_verification(model_class, mix_data, device):
     """ Test detection of batch gradient mixing with different PyTorch models. """
@@ -113,13 +110,8 @@ def test_batch_gradient_verification(model_class, mix_data, device):
 @pytest.mark.parametrize("mix_data", [True, False])
 @pytest.mark.parametrize(
     "device",
-    [
-        pytest.param(torch.device("cpu")),
-        pytest.param(
-            torch.device("cuda", 0),
-            marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU"),
-        ),
-    ],
+    [torch.device("cpu"),
+     pytest.param(torch.device("cuda", 0), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
 )
 def test_batch_gradient_verification_pl_module(mix_data, device):
     """ Test detection of batch gradient mixing with a LightningModule. """
@@ -132,10 +124,7 @@ def test_batch_gradient_verification_pl_module(mix_data, device):
 
 @pytest.mark.parametrize(
     "gpus",
-    [
-        pytest.param(0),
-        pytest.param(1, marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU")),
-    ],
+    [0, pytest.param(1, marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
 )
 def test_batch_gradient_verification_callback(gpus):
     """ Test detection of batch gradient mixing with the callback implementation. """
@@ -255,3 +244,42 @@ def test_default_output_mapping():
     )
     output = default_output_mapping(data)
     assert torch.all(output == expected)
+
+
+class BatchNormModel(nn.Module):
+
+    def __init__(self):
+        super().__init__()
+        self.batch_norm0 = nn.BatchNorm1d(2)
+        self.batch_norm1 = nn.BatchNorm1d(3)
+        self.instance_norm = nn.InstanceNorm1d(4)
+
+
+def test_selective_eval():
+    """ Test that the selective_eval context manager only applies to selected layer types. """
+    model = BatchNormModel()
+    model.train()
+    with selective_eval(model, [nn.BatchNorm1d]):
+        assert not model.batch_norm0.training
+        assert not model.batch_norm1.training
+        assert model.instance_norm.training
+
+    assert model.batch_norm0.training
+    assert model.batch_norm1.training
+    assert model.instance_norm.training
+
+
+def test_selective_eval_invariant():
+    """ Test that the selective_eval context manager does not undo layers that were already in eval mode. """
+    model = BatchNormModel()
+    model.train()
+    model.batch_norm1.eval()
+    assert model.batch_norm0.training
+    assert not model.batch_norm1.training
+
+    with selective_eval(model, [nn.BatchNorm1d]):
+        assert not model.batch_norm0.training
+        assert not model.batch_norm1.training
+
+    assert model.batch_norm0.training
+    assert not model.batch_norm1.training
