@@ -66,7 +66,7 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
 
         super().__init__(optimizer, last_epoch)
 
-    def get_lr(self) -> List[float]:
+    def get_lr(self) -> List[float]:  # type: ignore[override]
         """Compute learning rate using chainable form of the scheduler."""
         if not self._get_lr_called_within_step:
             warnings.warn(
@@ -74,16 +74,17 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
                 UserWarning,
             )
 
-        if self.last_epoch == 0:
-            return [self.warmup_start_lr] * len(self.base_lrs)
-        elif self.last_epoch < self.warmup_epochs:
+        if self.last_epoch == 0:  # type: ignore[attr-defined]
+            return [self.warmup_start_lr] * len(self.base_lrs)  # type: ignore[attr-defined]
+        elif self.last_epoch < self.warmup_epochs:  # type: ignore[attr-defined]
             return [
                 group["lr"] + (base_lr - self.warmup_start_lr) / (self.warmup_epochs - 1)
-                for base_lr, group in zip(self.base_lrs, self.optimizer.param_groups)
+                for base_lr, group in zip(self.base_lrs, self.optimizer.param_groups)  # type: ignore[attr-defined]
             ]
-        elif self.last_epoch == self.warmup_epochs:
-            return self.base_lrs
-        elif (self.last_epoch - 1 - self.max_epochs) % (2 * (self.max_epochs - self.warmup_epochs)) == 0:
+        elif self.last_epoch == self.warmup_epochs:  # type: ignore[attr-defined]
+            return self.base_lrs  # type: ignore[attr-defined]
+        elif (self.last_epoch - 1  # type: ignore[attr-defined]
+              - self.max_epochs) % (2 * (self.max_epochs - self.warmup_epochs)) == 0:  # type: ignore[attr-defined]
             return [
                 group["lr"]
                 + (base_lr - self.eta_min) * (1 - math.cos(math.pi / (self.max_epochs - self.warmup_epochs))) / 2
@@ -105,10 +106,12 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
 
     def _get_closed_form_lr(self) -> List[float]:
         """Called when epoch is passed as a param to the `step` function of the scheduler."""
-        if self.last_epoch < self.warmup_epochs:
+        if self.last_epoch < self.warmup_epochs:  # type: ignore[attr-defined]
             return [
-                self.warmup_start_lr + self.last_epoch * (base_lr - self.warmup_start_lr) / (self.warmup_epochs - 1)
-                for base_lr in self.base_lrs
+                self.warmup_start_lr + self.last_epoch *  # type: ignore[attr-defined]
+                (base_lr - self.warmup_start_lr) /
+                (self.warmup_epochs - 1)
+                for base_lr in self.base_lrs  # type: ignore[attr-defined]
             ]
 
         return [
