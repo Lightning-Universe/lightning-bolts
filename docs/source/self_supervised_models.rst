@@ -654,3 +654,10 @@ SwAV API
 
 .. autoclass:: pl_bolts.models.self_supervised.SwAV
    :noindex:
+
+
+SimSiam
+^^^^^^^
+
+.. autoclass:: pl_bolts.models.self_supervised.SimSiam
+   :noindex:
