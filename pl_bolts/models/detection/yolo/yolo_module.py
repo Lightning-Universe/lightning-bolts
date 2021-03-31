@@ -7,7 +7,6 @@ import torch
 import torch.nn as nn
 from torch import optim, Tensor
 
-from pl_bolts.models.detection.yolo.yolo_config import YOLOConfiguration
 from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, RouteLayer, ShortcutLayer
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -52,8 +51,8 @@ class YOLO(pl.LightningModule):
 
     :func:`~pl_bolts.models.detection.yolo.yolo_module.YOLO.forward` method returns all
     predictions from all detection layers in all images in one tensor with shape
-    ``[images, predictors, classes + 5]``. The coordinates are in the `[0, 1]` range. During
-    training it also returns a dictionary containing the classification, box overlap, and
+    ``[images, predictors, classes + 5]``. The coordinates are scaled to the input image size.
+    During training it also returns a dictionary containing the classification, box overlap, and
     confidence losses.
 
     During inference, the model requires only the input tensors.
@@ -143,8 +142,8 @@ class YOLO(pl.LightningModule):
             Detections, and if targets were provided, a dictionary of losses. Detections are shaped
             ``[batch_size, num_predictors, num_classes + 5]``, where ``num_predictors`` is the
             total number of cells in all detection layers times the number of boxes predicted by
-            one cell. The predicted box coordinates are in `(x1, y1, x2, y2)` format and normalized
-            to `[0, 1]`.
+            one cell. The predicted box coordinates are in `(x1, y1, x2, y2)` format and scaled to
+            the input image size.
         """
         outputs = []  # Outputs from all layers
         detections = []  # Outputs from detection layers
@@ -246,8 +245,8 @@ class YOLO(pl.LightningModule):
 
     def infer(self, image: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
         """
-        Resizes given image to the network input size and feeds it to the network. Returns the
-        detected bounding boxes, confidences, and class labels.
+        Feeds an image to the network and returns the detected bounding boxes, confidence scores,
+        and class labels.
 
         Args:
             image: An input image, a tensor of uint8 values sized ``[channels, height, width]``.
@@ -266,11 +265,6 @@ class YOLO(pl.LightningModule):
         boxes = detections['boxes'][0]
         scores = detections['scores'][0]
         labels = detections['labels'][0]
-
-        height = image.shape[1]
-        width = image.shape[2]
-        scale = torch.tensor([width, height, width, height], device=boxes.device)
-        boxes = boxes * scale
         boxes = torch.round(boxes).int()
         return boxes, scores, labels
 
@@ -490,6 +484,7 @@ def run_cli():
     from argparse import ArgumentParser
 
     from pl_bolts.datamodules import VOCDetectionDataModule
+    from pl_bolts.models.detection.yolo.yolo_config import YOLOConfiguration
 
     pl.seed_everything(42)
 

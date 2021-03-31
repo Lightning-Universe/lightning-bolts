@@ -125,10 +125,10 @@ class DetectionLayer(nn.Module):
             confidence_loss_func: Loss function for confidence score. Default is the sum of squared
                 errors.
             image_space_loss: If set to ``True``, the overlap loss function will receive the bounding
-                box `(x1, y1, x2, y2)` coordinate normalized to the `[0, 1]` range. This is needed for
-                the IoU losses introduced in YOLOv4. Otherwise the loss will be computed from the x,
-                y, width, and height values, as predicted by the network (i.e. relative to the
-                anchor box, and width and height are logarithmic).
+                box `(x1, y1, x2, y2)` coordinates, scaled to the input image size. This is needed
+                for the IoU losses introduced in YOLOv4. Otherwise the loss will be computed from
+                the x, y, width, and height values, as predicted by the network (i.e. relative to
+                the anchor box, and width and height are logarithmic).
             coord_loss_multiplier: Multiply the coordinate/size loss by this factor.
             class_loss_multiplier: Multiply the classification loss by this factor.
             confidence_loss_multiplier: Multiply the confidence loss by this factor.
@@ -160,9 +160,11 @@ class DetectionLayer(nn.Module):
         """
         Runs a forward pass through this YOLO detection layer.
 
-        Maps cell-local coordinates to global coordinates in the `[0, 1]` range, scales the bounding
+        Maps cell-local coordinates to global coordinates in the image space, scales the bounding
         boxes with the anchors, converts the center coordinates to corner coordinates, and maps
         probabilities to the `]0, 1[` range using sigmoid.
+
+        If targets are given, computes also losses from the predictions and the targets.
 
         Args:
             x: The output from the previous layer. Tensor of size
@@ -221,16 +223,16 @@ class DetectionLayer(nn.Module):
         image.
 
         The predicted coordinates are interpreted as coordinates inside a grid cell whose width and
-        height is 1. Adding offset to the cell and dividing by the grid size, we get global
-        coordinates in the `[0, 1]` range.
+        height is 1. Adding offset to the cell, dividing by the grid size, and multiplying by the
+        image size, we get global coordinates in the image scale.
 
         Args:
             xy: The predicted center coordinates before scaling. Values from zero to one in a
                 tensor sized ``[batch_size, height, width, boxes_per_cell, 2]``.
 
         Returns:
-            Global coordinates in the `[0, 1]` range, in a tensor with the same shape as the input
-            tensor.
+            Global coordinates scaled to the size of the network input image, in a tensor with the
+            same shape as the input tensor.
         """
         height = xy.shape[1]
         width = xy.shape[2]
@@ -242,7 +244,9 @@ class DetectionLayer(nn.Module):
         offset = torch.stack((grid_x, grid_y), -1)  # [height, width, 2]
         offset = offset.unsqueeze(2)  # [height, width, 1, 2]
 
-        return (xy + offset) / grid_size
+        image_size = torch.tensor([self.image_width, self.image_height], device=xy.device)
+        scale = image_size / grid_size
+        return (xy + offset) * scale
 
     def _scale_wh(self, wh: Tensor) -> Tensor:
         """
@@ -253,13 +257,12 @@ class DetectionLayer(nn.Module):
                 ``[..., boxes_per_cell, 2]``.
 
         Returns:
-            A tensor with the same shape as the input tensor, but scaled sizes normalized to the
-            `[0, 1]` range.
+            A tensor with the same shape as the input tensor, containing final width and height in
+            the image space.
         """
-        image_size = torch.tensor([self.image_width, self.image_height], device=wh.device)
         anchor_wh = [self.anchor_dims[i] for i in self.anchor_ids]
         anchor_wh = torch.tensor(anchor_wh, dtype=wh.dtype, device=wh.device)
-        return torch.exp(wh) * anchor_wh / image_size
+        return torch.exp(wh) * anchor_wh
 
     def _low_confidence_mask(self, boxes: Tensor, targets: List[Dict[str, Tensor]]) -> Tensor:
         """
@@ -268,8 +271,8 @@ class DetectionLayer(nn.Module):
         significantly (IoU greater than ``self.ignore_threshold``).
 
         Args:
-            boxes: The predicted corner coordinates, normalized to the `[0, 1]` range. Tensor of
-                size ``[batch_size, height, width, boxes_per_cell, 4]``.
+            boxes: The predicted corner coordinates in the image space. Tensor of size
+                ``[batch_size, height, width, boxes_per_cell, 4]``.
             targets: List of dictionaries of ground-truth targets, one dictionary per image.
 
         Returns:
@@ -279,10 +282,6 @@ class DetectionLayer(nn.Module):
         batch_size, height, width, boxes_per_cell, num_coords = boxes.shape
         num_preds = height * width * boxes_per_cell
         boxes = boxes.view(batch_size, num_preds, num_coords)
-
-        scale = torch.tensor([self.image_width, self.image_height, self.image_width, self.image_height],
-                             device=boxes.device)
-        boxes = boxes * scale
 
         results = torch.ones((batch_size, num_preds), dtype=torch.bool, device=boxes.device)
         for image_idx, (image_boxes, image_targets) in enumerate(zip(boxes, targets)):
@@ -319,10 +318,10 @@ class DetectionLayer(nn.Module):
         device = boxes.device
         assert batch_size == len(targets)
 
-        # Divisor for converting targets from image coordinates to feature map coordinates
-        image_to_feature_map = torch.tensor([self.image_width / width, self.image_height / height], device=device)
-        # Divisor for converting targets from image coordinates to `[0, 1]` range
-        image_to_unit = torch.tensor([self.image_width, self.image_height], device=device)
+        image_size = torch.tensor([self.image_width, self.image_height], device=device)
+        grid_size = torch.tensor([width, height], device=device)
+        # For scaling image coordinates to feature map coordinates
+        image_to_grid = grid_size / image_size
 
         anchor_wh = torch.tensor(self.anchor_dims, dtype=boxes.dtype, device=device)
         anchor_map = torch.tensor(self.anchor_map, dtype=torch.int64, device=device)
@@ -343,17 +342,15 @@ class DetectionLayer(nn.Module):
                 continue
 
             # Bounding box corner coordinates are converted to center coordinates, width, and
-            # height, and normalized to `[0, 1]` range.
+            # height.
             wh = target_boxes[:, 2:4] - target_boxes[:, 0:2]
             xy = target_boxes[:, 0:2] + (wh / 2)
-            unit_xy = xy / image_to_unit
-            unit_wh = wh / image_to_unit
 
             # The center coordinates are converted to the feature map dimensions so that the whole
             # number tells the cell index and the fractional part tells the location inside the cell.
-            xy = xy / image_to_feature_map
-            cell_i = xy[:, 0].to(torch.int64).clamp(0, width - 1)
-            cell_j = xy[:, 1].to(torch.int64).clamp(0, height - 1)
+            grid_xy = xy * image_to_grid
+            cell_i = grid_xy[:, 0].to(torch.int64).clamp(0, width - 1)
+            cell_j = grid_xy[:, 1].to(torch.int64).clamp(0, height - 1)
 
             # We want to know which anchor box overlaps a ground truth box more than any other
             # anchor box. We know that the anchor box is located in the same grid cell as the
@@ -368,33 +365,33 @@ class DetectionLayer(nn.Module):
             # another layer.
             predictors = anchor_map[best_anchors]
             selected = predictors >= 0
-            unit_xy = unit_xy[selected]
-            unit_wh = unit_wh[selected]
             cell_i = cell_i[selected]
             cell_j = cell_j[selected]
             predictors = predictors[selected]
-            best_anchors = best_anchors[selected]
+            wh = wh[selected]
 
             # The "low-confidence" mask is used to select predictors that are not responsible for
             # predicting any object, for calculating the part of the confidence loss with zero as
             # the target confidence.
             lc_mask[image_idx, cell_j, cell_i, predictors] = False
 
-            # IoU losses are calculated from the image space coordinates normalized to `[0, 1]`
-            # range. The squared-error loss is calculated from the raw predicted values.
+            # IoU losses are calculated from the image space coordinates. The squared-error loss is
+            # calculated from the raw predicted values.
             if self.image_space_loss:
-                target_xy.append(unit_xy)
-                target_wh.append(unit_wh)
-            else:
                 xy = xy[selected]
-                wh = wh[selected]
-                relative_xy = xy - xy.floor()
+                target_xy.append(xy)
+                target_wh.append(wh)
+            else:
+                grid_xy = grid_xy[selected]
+                best_anchors = best_anchors[selected]
+                relative_xy = grid_xy - grid_xy.floor()
                 relative_wh = torch.log(wh / anchor_wh[best_anchors] + 1e-16)
                 target_xy.append(relative_xy)
                 target_wh.append(relative_wh)
 
-            # Size compensation factor for bounding box overlap loss is calculated from image space
-            # width and height.
+            # Size compensation factor for bounding box overlap loss is calculated from unit width
+            # and height.
+            unit_wh = wh / image_size
             size_compensation.append(2 - (unit_wh[:, 0] * unit_wh[:, 1]))
 
             # The data may contain a different number of classes than this detection layer. In case
