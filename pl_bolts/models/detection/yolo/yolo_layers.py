@@ -238,8 +238,8 @@ class DetectionLayer(nn.Module):
         width = xy.shape[2]
         grid_size = torch.tensor([width, height], device=xy.device)
 
-        x_range = torch.arange(width, dtype=xy.dtype, device=xy.device)
-        y_range = torch.arange(height, dtype=xy.dtype, device=xy.device)
+        x_range = torch.arange(width, device=xy.device)
+        y_range = torch.arange(height, device=xy.device)
         grid_y, grid_x = torch.meshgrid(y_range, x_range)
         offset = torch.stack((grid_x, grid_y), -1)  # [height, width, 2]
         offset = offset.unsqueeze(2)  # [height, width, 1, 2]
