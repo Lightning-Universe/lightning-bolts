@@ -252,8 +252,8 @@ class SimCLR(pl.LightningModule):
         sim = torch.exp(cov / temperature)
         neg = sim.sum(dim=-1)
 
-        # from each row, subtract e^1 to remove similarity measure for x1.x1
-        row_sub = torch.Tensor(neg.shape).fill_(math.e).to(neg.device)
+        # from each row, subtract e^(1/temp) to remove similarity measure for x1.x1
+        row_sub = torch.Tensor(neg.shape).fill_(math.e ** (1 / temperature)).to(neg.device)
         neg = torch.clamp(neg - row_sub, min=eps)  # clamp for numerical stability
 
         # Positive similarity, pos becomes [2 * batch_size]
