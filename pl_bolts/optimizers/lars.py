@@ -8,7 +8,7 @@ from torch.optim.optimizer import Optimizer, required
 
 
 class LARS(Optimizer):
-    r"""Extends SGD in PyTorch with LARS scaling from the paper
+    """Extends SGD in PyTorch with LARS scaling from the paper
     `Large batch training of Convolutional Networks <https://arxiv.org/pdf/1708.03888.pdf>`_.
     Args:
         params (iterable): iterable of parameters to optimize or dicts defining
@@ -21,6 +21,11 @@ class LARS(Optimizer):
         trust_coefficient (float, optional): trust coefficient for computing LR (default: 0.001)
         eps (float, optional): eps for division denominator (default: 1e-8)
     Example:
+        >>> model = torch.nn.Linear(10, 1)
+        >>> input = torch.Tensor(10)
+        >>> target = torch.Tensor([1.])
+        >>> loss_fn = lambda input, target: (input - target) ** 2
+        >>> #
         >>> optimizer = LARS(model.parameters(), lr=0.1, momentum=0.9)
         >>> optimizer.zero_grad()
         >>> loss_fn(model(input), target).backward()
