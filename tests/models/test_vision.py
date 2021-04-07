@@ -1,6 +1,7 @@
 import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader
+from packaging import version
 
 from pl_bolts.datamodules import FashionMNISTDataModule, MNISTDataModule
 from pl_bolts.datasets import DummyDataset
@@ -14,6 +15,9 @@ class DummyDataModule(pl.LightningDataModule):
         return DataLoader(train_ds, batch_size=1)
 
 
+@pytest.mark.skipif(
+    version.parse(pl.__version__) > version.parse("1.1.0"),
+    reason="igpt code not updated for latest lightning")
 def test_igpt(tmpdir, datadir):
     pl.seed_everything(0)
     dm = MNISTDataModule(data_dir=datadir, normalize=False)
