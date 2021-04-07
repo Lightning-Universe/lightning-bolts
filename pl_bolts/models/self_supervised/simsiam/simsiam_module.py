@@ -9,6 +9,8 @@ from pytorch_lightning import seed_everything
 from pytorch_lightning.utilities import AMPType
 from torch.nn import functional as F
 from torch.optim.optimizer import Optimizer
+from pytorch_lightning.callbacks import LearningRateMonitor
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
 from pl_bolts.models.self_supervised.simsiam.models import SiameseArm
