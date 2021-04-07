@@ -1,14 +1,9 @@
-import math
 from argparse import ArgumentParser
-from typing import Callable, Optional
 
-import numpy as np
 import pytorch_lightning as pl
 import torch
 from pytorch_lightning import seed_everything
-from pytorch_lightning.utilities import AMPType
 from torch.nn import functional as F
-from torch.optim.optimizer import Optimizer
 from pytorch_lightning.callbacks import LearningRateMonitor
 from pytorch_lightning.callbacks import ModelCheckpoint
 
