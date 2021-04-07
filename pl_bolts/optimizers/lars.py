@@ -20,6 +20,7 @@ class LARS(Optimizer):
         nesterov (bool, optional): enables Nesterov momentum (default: False)
         trust_coefficient (float, optional): trust coefficient for computing LR (default: 0.001)
         eps (float, optional): eps for division denominator (default: 1e-8)
+
     Example:
         >>> model = torch.nn.Linear(10, 1)
         >>> input = torch.Tensor(10)
@@ -30,6 +31,7 @@ class LARS(Optimizer):
         >>> optimizer.zero_grad()
         >>> loss_fn(model(input), target).backward()
         >>> optimizer.step()
+
     .. note::
         The application of momentum in the SGD part is modified according to
         the PyTorch standards. LARS scaling fits into the equation in the
