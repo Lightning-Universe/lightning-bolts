@@ -78,7 +78,7 @@ jobs:
 
     - name: Tests
       run: |
-        python -m pytest pl_bolts tests -v --cov=pl_bolts --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
+        python -m coverage run --source pl_bolts -m pytest pl_bolts tests -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@v2
