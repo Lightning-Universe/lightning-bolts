@@ -19,7 +19,9 @@ class VisionDataModule(LightningDataModule):
     def __init__(
         self,
         data_dir: Optional[str] = None,
+        train_split: Optional[str] = None,
         val_split: Union[int, float] = 0.2,
+        test_split: Optional[str] = None,
         num_workers: int = 16,
         normalize: bool = False,
         batch_size: int = 32,
@@ -33,7 +35,10 @@ class VisionDataModule(LightningDataModule):
         """
         Args:
             data_dir: Where to save/load the data
-            val_split: Percent (float) or number (int) of samples to use for the validation split
+            train_split: Split to use for train dataset (for torchvision datasets with string split kwarg)
+            val_split: Ratio (float) or number (int) of samples to use for the validation split (for torchvision datasets with boolean train arg).
+                       Split to use for val dataset (for torchvision datasets with string split kwarg)
+            test_split: Split to use for test dataset (for torchvision datasets with string split kwarg)
             num_workers: How many workers to use for loading data
             normalize: If true applies image normalize
             batch_size: How many samples per batch to load
@@ -47,7 +52,9 @@ class VisionDataModule(LightningDataModule):
         super().__init__(*args, **kwargs)
 
         self.data_dir = data_dir if data_dir is not None else os.getcwd()
+        self.train_split = train_split
         self.val_split = val_split
+        self.test_split = test_split
         self.num_workers = num_workers
         self.normalize = normalize
         self.batch_size = batch_size
@@ -56,12 +63,20 @@ class VisionDataModule(LightningDataModule):
         self.pin_memory = pin_memory
         self.drop_last = drop_last
 
+        if self.train_split and self.test_split is None:
+            raise ValueError("test_split must also be given if train_split is given")
+
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
         """
         Saves files to data_dir
         """
-        self.dataset_cls(self.data_dir, train=True, download=True)
-        self.dataset_cls(self.data_dir, train=False, download=True)
+        if self.train_split is None:
+            self.dataset_cls(self.data_dir, train=True, download=True)
+            self.dataset_cls(self.data_dir, train=False, download=True)
+        else:
+            self.dataset_cls(self.data_dir, split=self.train_split, download=True)
+            self.dataset_cls(self.data_dir, split=self.val_split, download=True)
+            self.dataset_cls(self.data_dir, split=self.test_split, download=True)
 
     def setup(self, stage: Optional[str] = None) -> None:
         """
@@ -71,18 +86,34 @@ class VisionDataModule(LightningDataModule):
             train_transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
             val_transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
 
-            dataset_train = self.dataset_cls(self.data_dir, train=True, transform=train_transforms, **self.EXTRA_ARGS)
-            dataset_val = self.dataset_cls(self.data_dir, train=True, transform=val_transforms, **self.EXTRA_ARGS)
+            if self.split_train is None:
+                dataset_train = self.dataset_cls(
+                    self.data_dir, train=True, transform=train_transforms, **self.EXTRA_ARGS
+                )
+                dataset_val = self.dataset_cls(self.data_dir, train=True, transform=val_transforms, **self.EXTRA_ARGS)
 
-            # Split
-            self.dataset_train = self._split_dataset(dataset_train)
-            self.dataset_val = self._split_dataset(dataset_val, train=False)
+                self.dataset_train = self._split_dataset(dataset_train)
+                self.dataset_val = self._split_dataset(dataset_val, train=False)
+
+            else:
+                dataset_train = self.dataset_cls(
+                    self.data_dir, split=self.train_split, transform=train_transforms, **self.EXTRA_ARGS
+                )
+                dataset_val = self.dataset_cls(
+                    self.data_dir, split=self.val_split, transform=val_transforms, **self.EXTRA_ARGS
+                )
 
         if stage == "test" or stage is None:
             test_transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
-            self.dataset_test = self.dataset_cls(
-                self.data_dir, train=False, transform=test_transforms, **self.EXTRA_ARGS
-            )
+
+            if self.test_split is None:
+                self.dataset_test = self.dataset_cls(
+                    self.data_dir, train=False, transform=test_transforms, **self.EXTRA_ARGS
+                )
+            else:
+                self.dataset_test = self.dataset_cls(
+                    self.data_dir, split=self.test_split, transform=test_transforms, **self.EXTRA_ARGS
+                )
 
     def _split_dataset(self, dataset: Dataset, train: bool = True) -> Dataset:
         """
