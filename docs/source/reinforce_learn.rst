@@ -435,7 +435,7 @@ batch. Instead of just randomly sampling from the buffer prioritized experience 
 based on training loss. This concept was introduced in the paper
 `Prioritized Experience Replay <https://arxiv.org/abs/1511.05952>`__
 
-Essentially we want to train more on the samples that sunrise the agent.
+Essentially we want to train more on the samples that surprise the agent.
 
 The priority of each sample is defined below where
 

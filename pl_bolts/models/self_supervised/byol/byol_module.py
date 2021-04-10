@@ -135,7 +135,7 @@ class BYOL(pl.LightningModule):
         loss_a, loss_b, total_loss = self.shared_step(batch, batch_idx)
 
         # log results
-        self.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'train_loss': total_loss})
+        self.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'val_loss': total_loss})
 
         return total_loss
 
