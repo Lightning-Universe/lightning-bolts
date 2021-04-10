@@ -87,8 +87,6 @@ class DetectionLayer(nn.Module):
     def __init__(
         self,
         num_classes: int,
-        image_width: int,
-        image_height: int,
         anchor_dims: List[Tuple[int, int]],
         anchor_ids: List[int],
         xy_scale: float = 1.0,
@@ -104,10 +102,6 @@ class DetectionLayer(nn.Module):
         """
         Args:
             num_classes: Number of different classes that this layer predicts.
-            image_width: Image width (defines the scale of the anchor box and target bounding box
-                dimensions).
-            image_height: Image height (defines the scale of the anchor box and target bounding box
-                dimensions).
             anchor_dims: A list of all the predefined anchor box dimensions. The list should
                 contain (width, height) tuples in the network input resolution (relative to the
                 width and height defined in the configuration file).
@@ -139,8 +133,6 @@ class DetectionLayer(nn.Module):
             raise ModuleNotFoundError('YOLO model uses `torchvision`, which is not installed yet.')
 
         self.num_classes = num_classes
-        self.image_width = image_width
-        self.image_height = image_height
         self.anchor_dims = anchor_dims
         self.anchor_ids = anchor_ids
         self.anchor_map = [anchor_ids.index(i) if i in anchor_ids else -1 for i in range(9)]
@@ -156,7 +148,10 @@ class DetectionLayer(nn.Module):
         self.class_loss_multiplier = class_loss_multiplier
         self.confidence_loss_multiplier = confidence_loss_multiplier
 
-    def forward(self, x: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None) -> Tuple[Tensor, Dict[str, Tensor]]:
+    def forward(self,
+                x: Tensor,
+                image_size: Tensor,
+                targets: Optional[List[Dict[str, Tensor]]] = None) -> Tuple[Tensor, Dict[str, Tensor]]:
         """
         Runs a forward pass through this YOLO detection layer.
 
@@ -169,6 +164,8 @@ class DetectionLayer(nn.Module):
         Args:
             x: The output from the previous layer. Tensor of size
                 ``[batch_size, boxes_per_cell * (num_classes + 5), height, width]``.
+            image_size: Image width and height in a vector (defines the scale of the predicted and
+                target coordinates).
             targets: If set, computes losses from detection layers against these targets. A list of
                 dictionaries, one for each image.
 
@@ -202,7 +199,7 @@ class DetectionLayer(nn.Module):
         # x/y coordinates.
         xy = xy * self.xy_scale - 0.5 * (self.xy_scale - 1)
 
-        image_xy = self._global_xy(xy)
+        image_xy = self._global_xy(xy, image_size)
         image_wh = self._scale_wh(wh)
         boxes = _corner_coordinates(image_xy, image_wh)
         output = torch.cat((boxes, confidence.unsqueeze(-1), classprob), -1)
@@ -214,10 +211,10 @@ class DetectionLayer(nn.Module):
         lc_mask = self._low_confidence_mask(boxes, targets)
         if not self.image_space_loss:
             boxes = torch.cat((xy, wh), -1)
-        losses = self._calculate_losses(boxes, confidence, classprob, targets, lc_mask)
+        losses = self._calculate_losses(boxes, confidence, classprob, targets, image_size, lc_mask)
         return output, losses
 
-    def _global_xy(self, xy: Tensor) -> Tensor:
+    def _global_xy(self, xy: Tensor, image_size: Tensor) -> Tensor:
         """
         Adds offsets to the predicted box center coordinates to obtain global coordinates to the
         image.
@@ -229,6 +226,7 @@ class DetectionLayer(nn.Module):
         Args:
             xy: The predicted center coordinates before scaling. Values from zero to one in a
                 tensor sized ``[batch_size, height, width, boxes_per_cell, 2]``.
+            image_size: Width and height in a vector that will be used to scale the coordinates.
 
         Returns:
             Global coordinates scaled to the size of the network input image, in a tensor with the
@@ -238,13 +236,12 @@ class DetectionLayer(nn.Module):
         width = xy.shape[2]
         grid_size = torch.tensor([width, height], device=xy.device)
 
-        x_range = torch.arange(width, dtype=xy.dtype, device=xy.device)
-        y_range = torch.arange(height, dtype=xy.dtype, device=xy.device)
+        x_range = torch.arange(width, device=xy.device)
+        y_range = torch.arange(height, device=xy.device)
         grid_y, grid_x = torch.meshgrid(y_range, x_range)
         offset = torch.stack((grid_x, grid_y), -1)  # [height, width, 2]
         offset = offset.unsqueeze(2)  # [height, width, 1, 2]
 
-        image_size = torch.tensor([self.image_width, self.image_height], device=xy.device)
         scale = image_size / grid_size
         return (xy + offset) * scale
 
@@ -294,7 +291,8 @@ class DetectionLayer(nn.Module):
         return results.view((batch_size, height, width, boxes_per_cell))
 
     def _calculate_losses(
-        self, boxes: Tensor, confidence: Tensor, classprob: Tensor, targets: List[Dict[str, Tensor]], lc_mask: Tensor
+        self, boxes: Tensor, confidence: Tensor, classprob: Tensor, targets: List[Dict[str, Tensor]],
+        image_size: Tensor, lc_mask: Tensor
     ) -> Dict[str, Tensor]:
         """
         From the targets that are in the image space calculates the actual targets for the network
@@ -308,6 +306,7 @@ class DetectionLayer(nn.Module):
             classprob: The class probability predictions, normalized to `[0, 1]`. A tensor sized
                 ``[batch_size, height, width, boxes_per_cell, num_classes]``.
             targets: List of dictionaries of target values, one dictionary for each image.
+            image_size: Width and height in a vector that defines the scale of the target coordinates.
             lc_mask: A boolean mask containing ``True`` where the predicted box does not overlap
                 any target significantly.
 
@@ -318,9 +317,8 @@ class DetectionLayer(nn.Module):
         device = boxes.device
         assert batch_size == len(targets)
 
-        image_size = torch.tensor([self.image_width, self.image_height], device=device)
+        # A multiplier for scaling image coordinates to feature map coordinates
         grid_size = torch.tensor([width, height], device=device)
-        # For scaling image coordinates to feature map coordinates
         image_to_grid = grid_size / image_size
 
         anchor_wh = torch.tensor(self.anchor_dims, dtype=boxes.dtype, device=device)

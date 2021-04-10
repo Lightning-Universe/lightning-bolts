@@ -249,8 +249,6 @@ def _create_yolo(config, num_inputs):
 
     module = yolo_layers.DetectionLayer(
         num_classes=config['classes'],
-        image_width=config['width'],
-        image_height=config['height'],
         anchor_dims=anchor_dims,
         anchor_ids=config['mask'],
         xy_scale=xy_scale,

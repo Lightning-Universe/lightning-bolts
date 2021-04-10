@@ -76,9 +76,17 @@ class YOLO(pl.LightningModule):
         self,
         network: nn.ModuleList,
         optimizer: Type[optim.Optimizer] = optim.SGD,
-        optimizer_params: Dict[str, Any] = {'lr': 0.001, 'momentum': 0.9, 'weight_decay': 0.0005},
+        optimizer_params: Dict[str, Any] = {
+            'lr': 0.001,
+            'momentum': 0.9,
+            'weight_decay': 0.0005
+        },
         lr_scheduler: Type[optim.lr_scheduler._LRScheduler] = LinearWarmupCosineAnnealingLR,
-        lr_scheduler_params: Dict[str, Any] = {'warmup_epochs': 1, 'max_epochs': 300, 'warmup_start_lr': 0.0},
+        lr_scheduler_params: Dict[str, Any] = {
+            'warmup_epochs': 1,
+            'max_epochs': 300,
+            'warmup_start_lr': 0.0
+        },
         confidence_threshold: float = 0.2,
         nms_threshold: float = 0.45,
         max_predictions_per_image: int = -1
@@ -103,8 +111,7 @@ class YOLO(pl.LightningModule):
 
         if not _TORCHVISION_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
-                'YOLO model uses `torchvision`, which is not installed yet.'
-            )
+                'YOLO model uses `torchvision`, which is not installed yet.')
 
         self.network = network
         self.optimizer_class = optimizer
@@ -149,16 +156,20 @@ class YOLO(pl.LightningModule):
         detections = []  # Outputs from detection layers
         losses = []  # Losses from detection layers
 
+        image_height = images.shape[2]
+        image_width = images.shape[3]
+        image_size = torch.tensor([image_width, image_height], device=images.device)
+
         x = images
         for module in self.network:
             if isinstance(module, (RouteLayer, ShortcutLayer)):
                 x = module(x, outputs)
             elif isinstance(module, DetectionLayer):
                 if targets is None:
-                    x = module(x)
+                    x = module(x, image_size)
                     detections.append(x)
                 else:
-                    x, layer_losses = module(x, targets)
+                    x, layer_losses = module(x, image_size, targets)
                     detections.append(x)
                     losses.append(layer_losses)
             else:
@@ -256,16 +267,16 @@ class YOLO(pl.LightningModule):
             A matrix of detected bounding box `(x1, y1, x2, y2)` coordinates, a vector of
             confidences for the bounding box detections, and a vector of predicted class labels.
         """
-        network_input = image.float().div(255.0)
-        network_input = network_input.unsqueeze(0)
+        if not isinstance(image, torch.Tensor):
+            image = F.to_tensor(image)
+
         self.eval()
-        detections = self(network_input)
+        detections = self(image.unsqueeze(0))
         detections = self._split_detections(detections)
         detections = self._filter_detections(detections)
         boxes = detections['boxes'][0]
         scores = detections['scores'][0]
         labels = detections['labels'][0]
-        boxes = torch.round(boxes).int()
         return boxes, scores, labels
 
     def load_darknet_weights(self, weight_file):
