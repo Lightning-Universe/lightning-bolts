@@ -3,9 +3,8 @@ from argparse import ArgumentParser
 import pytorch_lightning as pl
 import torch
 from pytorch_lightning import seed_everything
+from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from torch.nn import functional as F
-from pytorch_lightning.callbacks import LearningRateMonitor
-from pytorch_lightning.callbacks import ModelCheckpoint
 
 from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
 from pl_bolts.models.self_supervised.simsiam.models import SiameseArm

@@ -7,8 +7,7 @@ from argparse import ArgumentParser
 import numpy as np
 import pytorch_lightning as pl
 import torch
-from pytorch_lightning.callbacks import LearningRateMonitor
-from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from torch import distributed as dist
 from torch import nn
 
