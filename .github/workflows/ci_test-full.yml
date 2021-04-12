@@ -35,6 +35,7 @@ jobs:
     - name: Setup macOS
       if: runner.os == 'macOS'
       run: |
+        brew update  # Todo: find a better way...
         brew install libomp  # https://github.com/pytorch/pytorch/issues/20030
 
     - name: Set min. dependencies
