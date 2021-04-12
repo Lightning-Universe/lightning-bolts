@@ -164,7 +164,7 @@ class SimSiam(pl.LightningModule):
         loss = self.cosine_similarity(h1, z2) / 2 + self.cosine_similarity(h2, z1) / 2
 
         # log results
-        self.log_dict({"loss": loss})
+        self.log_dict({"train_loss": loss})
 
         return loss
 
@@ -177,7 +177,7 @@ class SimSiam(pl.LightningModule):
         loss = self.cosine_similarity(h1, z2) / 2 + self.cosine_similarity(h2, z1) / 2
 
         # log results
-        self.log_dict({"loss": loss})
+        self.log_dict({"val_loss": loss})
 
         return loss
 
