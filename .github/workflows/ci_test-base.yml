@@ -81,7 +81,6 @@ jobs:
 
     - name: Statistics
       if: success()
-      continue-on-error: true
       run: |
         coverage report
         coverage xml
