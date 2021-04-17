@@ -31,4 +31,5 @@ __all__ = [
     "__docs__",
     "__homepage__",
     "__license__",
-    "__version__",]
+    "__version__",
+]

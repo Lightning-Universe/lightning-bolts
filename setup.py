@@ -10,7 +10,8 @@ _PATH_ROOT = os.path.realpath(os.path.dirname(__file__))
 _PATH_REQUIRE = os.path.join(_PATH_ROOT, 'requirements')
 
 try:
-    from pl_bolts import __about__ as about, setup_tools
+    from pl_bolts import __about__ as about
+    from pl_bolts import setup_tools
 except ImportError:
     # alternative https://stackoverflow.com/a/67692/4521646
     sys.path.append("pl_bolts")
