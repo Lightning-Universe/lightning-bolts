@@ -10,11 +10,11 @@ _PATH_ROOT = os.path.realpath(os.path.dirname(__file__))
 _PATH_REQUIRE = os.path.join(_PATH_ROOT, 'requirements')
 
 try:
-    from pl_bolts import info, setup_tools
+    from pl_bolts import __about__ as about, setup_tools
 except ImportError:
     # alternative https://stackoverflow.com/a/67692/4521646
     sys.path.append("pl_bolts")
-    import info
+    import __about__ as about
     import setup_tools
 
 
@@ -31,8 +31,8 @@ def _prepare_extras():
 
 long_description = setup_tools._load_readme_description(
     _PATH_ROOT,
-    homepage=info.__homepage__,
-    ver=info.__version__,
+    homepage=about.__homepage__,
+    ver=about.__version__,
 )
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
@@ -42,13 +42,13 @@ long_description = setup_tools._load_readme_description(
 # engineer specific practices
 setup(
     name='lightning-bolts',
-    version=info.__version__,
-    description=info.__docs__,
-    author=info.__author__,
-    author_email=info.__author_email__,
-    url=info.__homepage__,
+    version=about.__version__,
+    description=about.__docs__,
+    author=about.__author__,
+    author_email=about.__author_email__,
+    url=about.__homepage__,
     download_url='https://github.com/PyTorchLightning/lightning-bolts',
-    license=info.__license__,
+    license=about.__license__,
     packages=find_packages(exclude=['tests', 'docs']),
     long_description=long_description,
     long_description_content_type='text/markdown',
