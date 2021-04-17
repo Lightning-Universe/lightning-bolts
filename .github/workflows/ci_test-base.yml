@@ -50,13 +50,12 @@ jobs:
 
     - name: Install dependencies
       run: |
+        python --version
         python -m pip install --upgrade --user pip
-        pip install --requirement ./requirements.txt --quiet  --find-links https://download.pytorch.org/whl/cpu/torch_stable.html --upgrade
-        pip install --requirement ./requirements/loggers.txt --quiet --upgrade-strategy only-if-needed
+        pip --version
+        pip install --requirement ./requirements.txt --quiet --find-links https://download.pytorch.org/whl/cpu/torch_stable.html --upgrade
         pip install --requirement ./requirements/test.txt --quiet --upgrade-strategy only-if-needed
         # pip install tox coverage
-        python --version
-        pip --version
         pip list
       shell: bash
 
