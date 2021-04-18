@@ -13,15 +13,8 @@ class TestPPOCategorical(TestCase):
 
         parent_parser = argparse.ArgumentParser(add_help=False)
         parent_parser = PPO.add_model_specific_args(parent_parser)
-        args_list = [
-            "--env",
-            "CartPole-v0",
-            "--batch_size",
-            "16",
-            "--gamma",
-            "0.99",
-        ]
-        self.hparams = parent_parser.parse_args(args_list)
+        cli_args = "--env CartPole-v0 --batch_size 16 --gamma 0.99".split()
+        self.hparams = parent_parser.parse_args(cli_args)
 
         self.model = PPO(**vars(self.hparams))
         self.obs_dim = self.model.env.observation_space.shape[0]
