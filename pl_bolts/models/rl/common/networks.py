@@ -344,7 +344,7 @@ class ActorCategorical(nn.Module):
     and an action given an observation
     """
 
-    def __init__(self, actor_net: nn.Module):
+    def __init__(self, actor_net: nn.Module) -> None:
         """
         Args:
             input_shape: observation shape of the environment
