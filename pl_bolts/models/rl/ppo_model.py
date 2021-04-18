@@ -136,6 +136,7 @@ class PPO(pl.LightningModule):
 
         Args:
             rewards: list of rewards/advantages
+            discount: discount factor
 
         Returns:
             list of discounted rewards/advantages
