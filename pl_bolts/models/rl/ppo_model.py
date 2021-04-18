@@ -133,8 +133,10 @@ class PPO(pl.LightningModule):
 
     def discount_rewards(self, rewards: List[float], discount: float) -> List[float]:
         """Calculate the discounted rewards of all rewards in list
+
         Args:
             rewards: list of rewards/advantages
+
         Returns:
             list of discounted rewards/advantages
         """
