@@ -332,7 +332,7 @@ class PPO(pl.LightningModule):
         return self._dataloader()
 
     @staticmethod
-    def add_model_specific_args(parent_parser):  # pragma: no-cover
+    def add_model_specific_args(parent_parser):  # pragma: no cover
         parser = argparse.ArgumentParser(parents=[parent_parser])
         parser.add_argument("--env", type=str, default="CartPole-v0")
         parser.add_argument("--gamma", type=float, default=0.99, help="discount factor")
