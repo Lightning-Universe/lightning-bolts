@@ -382,7 +382,7 @@ class ActorContinous(nn.Module):
     and an action given an observation
     """
 
-    def __init__(self, actor_net: nn.Module, act_dim: int):
+    def __init__(self, actor_net: nn.Module, act_dim: int) -> None:
         """
         Args:
             input_shape: observation shape of the environment

@@ -52,7 +52,7 @@ class PPO(pl.LightningModule):
         steps_per_epoch: int = 2048,
         nb_optim_iters: int = 4,
         clip_ratio: float = 0.2,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Args:
