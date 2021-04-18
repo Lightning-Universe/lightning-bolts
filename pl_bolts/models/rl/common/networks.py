@@ -347,8 +347,7 @@ class ActorCategorical(nn.Module):
     def __init__(self, actor_net: nn.Module) -> None:
         """
         Args:
-            input_shape: observation shape of the environment
-            n_actions: number of discrete actions available in the environment
+            actor_net: neural network that predicts action probabilities given the env state
         """
         super().__init__()
 
