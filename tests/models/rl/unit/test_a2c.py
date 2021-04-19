@@ -1,11 +1,8 @@
 import argparse
 
-import gym
 import torch
 
 from pl_bolts.models.rl.advantage_actor_critic_model import AdvantageActorCritic
-from pl_bolts.models.rl.common.gym_wrappers import ToTensor
-from pl_bolts.models.rl.common.networks import ActorCriticMLP
 
 
 def test_a2c_loss():
