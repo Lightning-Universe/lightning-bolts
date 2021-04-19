@@ -7,7 +7,7 @@ vae_imagenet2012 = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/' \
 
 cpcv2_resnet18 = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/' \
                  'cpc/resnet18-v6/epoch%3D85.ckpt'
-urls = {'vae-imagenet2012': vae_imagenet2012, 'CPCV2-resnet18': cpcv2_resnet18}
+urls = {'vae-imagenet2012': vae_imagenet2012, 'CPC_v2-resnet18': cpcv2_resnet18}
 
 
 def load_pretrained(model: LightningModule, class_name: Optional[str] = None) -> None:  # pragma: no cover

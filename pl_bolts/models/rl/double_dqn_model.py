@@ -56,7 +56,7 @@ class DoubleDQN(DQN):
         """
 
         # calculates training loss
-        loss = double_dqn_loss(batch, self.net, self.target_net)
+        loss = double_dqn_loss(batch, self.net, self.target_net, self.gamma)
 
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)

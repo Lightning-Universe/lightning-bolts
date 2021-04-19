@@ -1,53 +1,40 @@
 #!/usr/bin/env python
 
 import os
+import sys
 
 # Always prefer setuptools over distutils
 from setuptools import find_packages, setup
 
-try:
-    import builtins
-except ImportError:
-    import __builtin__ as builtins
+_PATH_ROOT = os.path.realpath(os.path.dirname(__file__))
+_PATH_REQUIRE = os.path.join(_PATH_ROOT, 'requirements')
 
 try:
-    import pytorch_lightning  # noqa: F401
+    from pl_bolts import __about__ as about
+    from pl_bolts import setup_tools
 except ImportError:
-    try:
-        import pip
-    except ImportError:
-        raise ImportError('Missing `pip` to install custom dependencies.')
-    pip.main(['install', 'pytorch-lightning>=1.1.0'])
-
-# https://packaging.python.org/guides/single-sourcing-package-version/
-# http://blog.ionelmc.ro/2014/05/25/python-packaging/
-
-_PATH_ROOT = os.path.dirname(__file__)
-builtins.__LIGHTNING_BOLT_SETUP__: bool = True
-
-import pl_bolts  # noqa: E402
-
-
-def _load_requirements(path_dir=_PATH_ROOT, file_name='requirements.txt', comment_char='#'):
-    from pytorch_lightning.setup_tools import _load_requirements as _lreq
-    return _lreq(path_dir=path_dir, file_name=file_name, comment_char=comment_char)
-
-
-def _load_long_description():
-    from pytorch_lightning.setup_tools import _load_long_description as _lld
-    return _lld(_PATH_ROOT)
+    # alternative https://stackoverflow.com/a/67692/4521646
+    sys.path.append("pl_bolts")
+    import __about__ as about
+    import setup_tools
 
 
 def _prepare_extras():
     extras = {
-        'loggers': _load_requirements(path_dir=os.path.join(_PATH_ROOT, 'requirements'), file_name='loggers.txt'),
-        'models': _load_requirements(path_dir=os.path.join(_PATH_ROOT, 'requirements'), file_name='models.txt'),
-        'test': _load_requirements(path_dir=os.path.join(_PATH_ROOT, 'requirements'), file_name='test.txt'),
+        'loggers': setup_tools._load_requirements(path_dir=_PATH_REQUIRE, file_name='loggers.txt'),
+        'models': setup_tools._load_requirements(path_dir=_PATH_REQUIRE, file_name='models.txt'),
+        'test': setup_tools._load_requirements(path_dir=_PATH_REQUIRE, file_name='test.txt'),
     }
     extras['extra'] = extras['models'] + extras['loggers']
     extras['dev'] = extras['extra'] + extras['test']
     return extras
 
+
+long_description = setup_tools._load_readme_description(
+    _PATH_ROOT,
+    homepage=about.__homepage__,
+    ver=about.__version__,
+)
 
 # https://packaging.python.org/discussions/install-requires-vs-requirements /
 # keep the meta-data here for simplicity in reading this file... it's not obvious
@@ -55,35 +42,35 @@ def _prepare_extras():
 # the goal of the project is simplicity for researchers, don't want to add too much
 # engineer specific practices
 setup(
-    name='pytorch-lightning-bolts',
-    version=pl_bolts.__version__,
-    description=pl_bolts.__docs__,
-    author=pl_bolts.__author__,
-    author_email=pl_bolts.__author_email__,
-    url=pl_bolts.__homepage__,
-    download_url='https://github.com/PyTorchLightning/pytorch-lightning-bolts',
-    license=pl_bolts.__license__,
+    name='lightning-bolts',
+    version=about.__version__,
+    description=about.__docs__,
+    author=about.__author__,
+    author_email=about.__author_email__,
+    url=about.__homepage__,
+    download_url='https://github.com/PyTorchLightning/lightning-bolts',
+    license=about.__license__,
     packages=find_packages(exclude=['tests', 'docs']),
-    long_description=_load_long_description(),
+    long_description=long_description,
     long_description_content_type='text/markdown',
     include_package_data=True,
     zip_safe=False,
     keywords=['deep learning', 'pytorch', 'AI'],
     python_requires='>=3.6',
-    setup_requires=['pytorch-lightning>=1.1.0'],
-    install_requires=_load_requirements(),
+    setup_requires=['wheel'],
+    install_requires=setup_tools._load_requirements(_PATH_ROOT),
     extras_require=_prepare_extras(),
     project_urls={
-        "Bug Tracker": "https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues",
-        "Documentation": "https://pytorch-lightning-bolts.rtfd.io/en/latest/",
-        "Source Code": "https://github.com/PyTorchLightning/pytorch-lightning-bolts",
+        "Bug Tracker": "https://github.com/PyTorchLightning/lightning-bolts/issues",
+        "Documentation": "https://lightning-bolts.rtfd.io/en/latest/",
+        "Source Code": "https://github.com/PyTorchLightning/lightning-bolts",
     },
     classifiers=[
         'Environment :: Console',
         'Natural Language :: English',
         # How mature is this project? Common values are
         #   3 - Alpha, 4 - Beta, 5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',

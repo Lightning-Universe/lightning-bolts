@@ -1,22 +1,19 @@
 """
 Adapted from official swav implementation: https://github.com/facebookresearch/swav
 """
-import math
 import os
 from argparse import ArgumentParser
-from typing import Callable, Optional
 
 import numpy as np
 import pytorch_lightning as pl
 import torch
-from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.core.optimizer import LightningOptimizer
+from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from torch import distributed as dist
 from torch import nn
-from torch.optim.optimizer import Optimizer
 
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet18, resnet50
-from pl_bolts.optimizers.lars_scheduling import LARSWrapper
+from pl_bolts.optimizers.lars import LARS
+from pl_bolts.optimizers.lr_scheduler import linear_warmup_decay
 from pl_bolts.transforms.dataset_normalizations import (
     cifar10_normalization,
     imagenet_normalization,
@@ -50,7 +47,6 @@ class SwAV(pl.LightningModule):
         first_conv: bool = True,
         maxpool1: bool = True,
         optimizer: str = 'adam',
-        lars_wrapper: bool = True,
         exclude_bn_bias: bool = False,
         start_lr: float = 0.,
         learning_rate: float = 1e-3,
@@ -90,7 +86,6 @@ class SwAV(pl.LightningModule):
             maxpool1: keep first maxpool layer same as the original resnet architecture,
                 if set to false, first maxpool is turned off (cifar10, maybe stl10)
             optimizer: optimizer to use
-            lars_wrapper: use LARS wrapper over the optimizer
             exclude_bn_bias: exclude batchnorm and bias layers from weight decay in optimizers
             start_lr: starting lr for linear warmup
             learning_rate: learning rate
@@ -124,7 +119,6 @@ class SwAV(pl.LightningModule):
         self.maxpool1 = maxpool1
 
         self.optim = optimizer
-        self.lars_wrapper = lars_wrapper
         self.exclude_bn_bias = exclude_bn_bias
         self.weight_decay = weight_decay
         self.epsilon = epsilon
@@ -136,7 +130,7 @@ class SwAV(pl.LightningModule):
         self.warmup_epochs = warmup_epochs
         self.max_epochs = max_epochs
 
-        if self.gpus or self.num_nodes > 1:
+        if self.gpus * self.num_nodes > 1:
             self.get_assignments = self.distributed_sinkhorn
         else:
             self.get_assignments = self.sinkhorn
@@ -144,23 +138,8 @@ class SwAV(pl.LightningModule):
         self.model = self.init_model()
 
         # compute iters per epoch
-        nb_gpus = len(self.gpus) if isinstance(gpus, (list, tuple)) else self.gpus
-        assert isinstance(nb_gpus, int)
-        global_batch_size = self.num_nodes * nb_gpus * self.batch_size if nb_gpus > 0 else self.batch_size
+        global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
-
-        # define LR schedule
-        warmup_lr_schedule = np.linspace(
-            self.start_lr, self.learning_rate, self.train_iters_per_epoch * self.warmup_epochs
-        )
-        iters = np.arange(self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs))
-        cosine_lr_schedule = np.array([
-            self.final_lr + 0.5 * (self.learning_rate - self.final_lr) *
-            (1 + math.cos(math.pi * t / (self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs))))
-            for t in iters
-        ])
-
-        self.lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
 
         self.queue = None
         self.softmax = nn.Softmax(dim=1)
@@ -270,9 +249,6 @@ class SwAV(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
 
-        # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
-        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
-
         self.log('train_loss', loss, on_step=True, on_epoch=False)
         return loss
 
@@ -302,41 +278,30 @@ class SwAV(pl.LightningModule):
         else:
             params = self.parameters()
 
-        if self.optim == 'sgd':
-            optimizer = torch.optim.SGD(params, lr=self.learning_rate, momentum=0.9, weight_decay=self.weight_decay)
+        if self.optim == 'lars':
+            optimizer = LARS(
+                params,
+                lr=self.learning_rate,
+                momentum=0.9,
+                weight_decay=self.weight_decay,
+                trust_coefficient=0.001,
+            )
         elif self.optim == 'adam':
             optimizer = torch.optim.Adam(params, lr=self.learning_rate, weight_decay=self.weight_decay)
 
-        if self.lars_wrapper:
-            optimizer = LARSWrapper(
+        warmup_steps = self.train_iters_per_epoch * self.warmup_epochs
+        total_steps = self.train_iters_per_epoch * self.max_epochs
+
+        scheduler = {
+            "scheduler": torch.optim.lr_scheduler.LambdaLR(
                 optimizer,
-                eta=0.001,  # trust coefficient
-                clip=False
-            )
+                linear_warmup_decay(warmup_steps, total_steps, cosine=True),
+            ),
+            "interval": "step",
+            "frequency": 1,
+        }
 
-        return optimizer
-
-    def optimizer_step(
-        self,
-        epoch: int = None,
-        batch_idx: int = None,
-        optimizer: Optimizer = None,
-        optimizer_idx: int = None,
-        optimizer_closure: Optional[Callable] = None,
-        on_tpu: bool = None,
-        using_native_amp: bool = None,
-        using_lbfgs: bool = None,
-    ) -> None:
-        # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
-        # adjust LR of optim contained within LARSWrapper
-        for param_group in optimizer.param_groups:
-            param_group["lr"] = self.lr_schedule[self.trainer.global_step]
-
-        # from lightning
-        if not isinstance(optimizer, LightningOptimizer):
-            # wraps into LightingOptimizer only for running step
-            optimizer = LightningOptimizer.to_lightning_optimizer(optimizer, self.trainer)
-        optimizer.step(closure=optimizer_closure)
+        return [optimizer], [scheduler]
 
     def sinkhorn(self, Q, nmb_iters):
         with torch.no_grad():
@@ -431,10 +396,14 @@ class SwAV(pl.LightningModule):
         )
 
         # training params
+        parser.add_argument("--fast_dev_run", default=1, type=int)
+        parser.add_argument("--num_nodes", default=1, type=int, help="number of nodes for training")
+        parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
-        parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
-        parser.add_argument("--lars_wrapper", action='store_true', help="apple lars wrapper over optimizer used")
+        parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/lars")
         parser.add_argument('--exclude_bn_bias', action='store_true', help="exclude bn/bias from weight decay")
+        parser.add_argument("--max_epochs", default=100, type=int, help="number of total epochs to run")
+        parser.add_argument("--max_steps", default=-1, type=int, help="max steps")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
         parser.add_argument("--batch_size", default=128, type=int, help="batch size per gpu")
 
@@ -487,7 +456,6 @@ def cli_main():
 
     # model args
     parser = SwAV.add_model_specific_args(parser)
-    parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
     if args.dataset == 'stl10':
@@ -534,8 +502,7 @@ def cli_main():
         args.gpus = 8  # per-node
         args.max_epochs = 800
 
-        args.optimizer = 'sgd'
-        args.lars_wrapper = True
+        args.optimizer = 'lars'
         args.learning_rate = 4.8
         args.final_lr = 0.0048
         args.start_lr = 0.3
@@ -584,13 +551,21 @@ def cli_main():
             dataset=args.dataset,
         )
 
+    lr_monitor = LearningRateMonitor(logging_interval="step")
     model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor='val_loss')
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
+    callbacks.append(lr_monitor)
 
-    trainer = pl.Trainer.from_argparse_args(
-        args,
+    trainer = pl.Trainer(
+        max_epochs=args.max_epochs,
+        max_steps=None if args.max_steps == -1 else args.max_steps,
+        gpus=args.gpus,
+        num_nodes=args.num_nodes,
+        distributed_backend='ddp' if args.gpus > 1 else None,
         sync_batchnorm=True if args.gpus > 1 else False,
+        precision=32 if args.fp32 else 16,
         callbacks=callbacks,
+        fast_dev_run=args.fast_dev_run
     )
 
     trainer.fit(model, datamodule=dm)

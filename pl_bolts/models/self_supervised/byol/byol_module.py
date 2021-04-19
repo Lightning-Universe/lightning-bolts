@@ -10,7 +10,6 @@ from torch.optim import Adam
 
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
 from pl_bolts.models.self_supervised.byol.models import SiameseArm
-from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
@@ -102,7 +101,8 @@ class BYOL(pl.LightningModule):
         return y
 
     def shared_step(self, batch, batch_idx):
-        (img_1, img_2, _), y = batch
+        imgs, y = batch
+        img_1, img_2 = imgs[:2]
 
         # Image 1 to image 2 loss
         y1, z1, h1 = self.online_network(img_1)
@@ -134,13 +134,12 @@ class BYOL(pl.LightningModule):
         loss_a, loss_b, total_loss = self.shared_step(batch, batch_idx)
 
         # log results
-        self.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'train_loss': total_loss})
+        self.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'val_loss': total_loss})
 
         return total_loss
 
     def configure_optimizers(self):
         optimizer = Adam(self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
-        optimizer = LARSWrapper(optimizer)
         scheduler = LinearWarmupCosineAnnealingLR(
             optimizer, warmup_epochs=self.hparams.warmup_epochs, max_epochs=self.hparams.max_epochs
         )
@@ -150,7 +149,7 @@ class BYOL(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--online_ft', action='store_true', help='run online finetuner')
-        parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10, imagenet2012, stl10')
+        parser.add_argument('--dataset', type=str, default='cifar10', choices=['cifar10', 'imagenet2012', 'stl10'])
 
         (args, _) = parser.parse_known_args()
 

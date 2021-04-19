@@ -2,11 +2,12 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import torch
-from pytorch_lightning.metrics.functional import accuracy
 from torch import nn
 from torch.nn import functional as F
+from torch.nn.functional import softmax
 from torch.optim import Adam
 from torch.optim.optimizer import Optimizer
+from torchmetrics.functional import accuracy
 
 
 class LogisticRegression(pl.LightningModule):
@@ -42,7 +43,8 @@ class LogisticRegression(pl.LightningModule):
         self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=self.hparams.num_classes, bias=bias)
 
     def forward(self, x):
-        y_hat = self.linear(x)
+        x = self.linear(x)
+        y_hat = softmax(x)
         return y_hat
 
     def training_step(self, batch, batch_idx):

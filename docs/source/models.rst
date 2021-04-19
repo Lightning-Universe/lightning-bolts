@@ -60,8 +60,8 @@ Tested
 ^^^^^^
 Models are tested on every PR (on CPUs, GPUs and soon TPUs).
 
-- `Live build <https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/59/checks>`_
-- `Tests <https://github.com/PyTorchLightning/pytorch-lightning-bolts/tree/master/tests>`_
+- `Live build <https://github.com/PyTorchLightning/lightning-bolts/pull/59/checks>`_
+- `Tests <https://github.com/PyTorchLightning/lightning-bolts/tree/master/tests>`_
 
 Modular
 ^^^^^^^

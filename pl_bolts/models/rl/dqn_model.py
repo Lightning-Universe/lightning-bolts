@@ -270,7 +270,7 @@ class DQN(pl.LightningModule):
         """
 
         # calculates training loss
-        loss = dqn_loss(batch, self.net, self.target_net)
+        loss = dqn_loss(batch, self.net, self.target_net, self.gamma)
 
         if self.trainer.use_dp or self.trainer.use_ddp2:
             loss = loss.unsqueeze(0)
