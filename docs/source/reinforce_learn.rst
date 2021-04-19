@@ -734,7 +734,7 @@ Hyperparameters:
 - Gamma: 0.99
 
 .. image:: _images/rl_benchmark/cartpole_a2c_results.jpg
-  :width: 800
+  :width: 300
   :alt: A2C Results
 
 Example::

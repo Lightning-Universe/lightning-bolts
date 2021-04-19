@@ -1,9 +1,9 @@
 """
 Advantage Actor Critic (A2C)
 """
-import argparse
+from argparse import ArgumentParser
 from collections import OrderedDict
-from typing import Any, List, Tuple
+from typing import Any, Iterator, List, Tuple
 
 import numpy as np
 import pytorch_lightning as pl
@@ -11,6 +11,7 @@ import torch
 from pytorch_lightning import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import optim as optim
+from torch import Tensor
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
@@ -38,7 +39,7 @@ class AdvantageActorCritic(pl.LightningModule):
         - `Jason Wang <https://github.com/blahBlahhhJ>`_
 
     Example:
-        >>> from pl_bolts.models.rl.advantage_actor_critic_model import AdvantageActorCritic
+        >>> from pl_bolts.models.rl import AdvantageActorCritic
         ...
         >>> model = AdvantageActorCritic("CartPole-v0")
     """
@@ -85,17 +86,17 @@ class AdvantageActorCritic(pl.LightningModule):
         self.total_rewards = [0]
         self.episode_reward = 0
         self.done_episodes = 0
-        self.avg_rewards = 0
+        self.avg_rewards = 0.0
         self.avg_reward_len = avg_reward_len
         self.eps = np.finfo(np.float32).eps.item()
-        self.batch_states = []
-        self.batch_actions = []
-        self.batch_rewards = []
-        self.batch_masks = []
+        self.batch_states: List = []
+        self.batch_actions: List = []
+        self.batch_rewards: List = []
+        self.batch_masks: List = []
 
         self.state = self.env.reset()
 
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor]:
+    def forward(self, x: Tensor) -> Tuple[Tensor, Tensor]:
         """
         Passes in a state x through the network and gets the log prob of each action
         and the value for the state as an output
@@ -109,13 +110,13 @@ class AdvantageActorCritic(pl.LightningModule):
         if not isinstance(x, list):
             x = [x]
 
-        if not isinstance(x, torch.Tensor):
+        if not isinstance(x, Tensor):
             x = torch.tensor(x, device=self.device)
 
         logprobs, values = self.net(x)
         return logprobs, values
 
-    def train_batch(self) -> Tuple[np.ndarray, int, torch.Tensor]:
+    def train_batch(self) -> Iterator[Tuple[np.ndarray, int, Tensor]]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -164,8 +165,8 @@ class AdvantageActorCritic(pl.LightningModule):
         self,
         rewards: List[float],
         dones: List[bool],
-        last_value: torch.Tensor
-    ) -> torch.Tensor:
+        last_value: Tensor,
+    ) -> Tensor:
         """
         Calculate the discounted rewards of the batched rewards
 
@@ -191,10 +192,10 @@ class AdvantageActorCritic(pl.LightningModule):
 
     def loss(
         self,
-        states: torch.Tensor,
-        actions: torch.Tensor,
-        returns: torch.Tensor
-    ) -> torch.Tensor:
+        states: Tensor,
+        actions: Tensor,
+        returns: Tensor,
+    ) -> Tensor:
         """
         Calculates the loss for A2C which is a weighted sum of
         actor loss (MSE), critic loss (PG), and entropy (for exploration)
@@ -231,7 +232,7 @@ class AdvantageActorCritic(pl.LightningModule):
         total_loss = actor_loss + critic_loss - entropy
         return total_loss
 
-    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
+    def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> OrderedDict:
         """
         Perform one actor-critic update using a batch of data
 
@@ -273,7 +274,7 @@ class AdvantageActorCritic(pl.LightningModule):
         return batch[0][0][0].device.index if self.on_gpu else "cpu"
 
     @staticmethod
-    def add_model_specific_args(arg_parser) -> argparse.ArgumentParser:
+    def add_model_specific_args(arg_parser: ArgumentParser) -> ArgumentParser:
         """
         Adds arguments for A2C model
 
@@ -303,8 +304,8 @@ class AdvantageActorCritic(pl.LightningModule):
         return arg_parser
 
 
-def cli_main():
-    parser = argparse.ArgumentParser(add_help=False)
+def cli_main() -> None:
+    parser = ArgumentParser(add_help=False)
 
     # trainer args
     parser = pl.Trainer.add_argparse_args(parser)
