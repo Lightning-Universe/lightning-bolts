@@ -10,12 +10,6 @@ from pl_bolts.models.rl.common.networks import ActorCriticMLP
 
 def test_a2c_loss():
     """Test the reinforce loss function"""
-
-    env = ToTensor(gym.make("CartPole-v0"))
-    obs_shape = env.observation_space.shape
-    n_actions = env.action_space.n
-    net = ActorCriticMLP(obs_shape, n_actions)
-
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = AdvantageActorCritic.add_model_specific_args(parent_parser)
     args_list = [
@@ -38,11 +32,6 @@ def test_a2c_loss():
 
 def test_a2c_train_batch():
     """Tests that a single batch generates correctly"""
-    env = ToTensor(gym.make("CartPole-v0"))
-    obs_shape = env.observation_space.shape
-    n_actions = env.action_space.n
-    net = ActorCriticMLP(obs_shape, n_actions)
-
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = AdvantageActorCritic.add_model_specific_args(parent_parser)
     args_list = [
