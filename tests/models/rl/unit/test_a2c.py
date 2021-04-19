@@ -8,6 +8,7 @@ from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.gym_wrappers import ToTensor
 from pl_bolts.models.rl.common.networks import ActorCriticMLP
 
+
 def test_a2c_loss():
     """Test the reinforce loss function"""
 
@@ -35,6 +36,7 @@ def test_a2c_loss():
     loss = model.loss(batch_states, batch_actions, batch_qvals)
 
     assert isinstance(loss, torch.Tensor)
+
 
 def test_a2c_train_batch():
     """Tests that a single batch generates correctly"""

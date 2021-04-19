@@ -4,6 +4,7 @@ import pytorch_lightning as pl
 
 from pl_bolts.models.rl.advantage_actor_critic_model import AdvantageActorCritic
 
+
 def test_a2c():
     """Smoke test that the A2C model runs"""
 
