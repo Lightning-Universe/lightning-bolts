@@ -4,7 +4,6 @@ import gym
 import torch
 
 from pl_bolts.models.rl.advantage_actor_critic_model import AdvantageActorCritic
-from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.gym_wrappers import ToTensor
 from pl_bolts.models.rl.common.networks import ActorCriticMLP
 
@@ -16,7 +15,6 @@ def test_a2c_loss():
     obs_shape = env.observation_space.shape
     n_actions = env.action_space.n
     net = ActorCriticMLP(obs_shape, n_actions)
-    agent = Agent(net)
 
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = AdvantageActorCritic.add_model_specific_args(parent_parser)
@@ -44,7 +42,6 @@ def test_a2c_train_batch():
     obs_shape = env.observation_space.shape
     n_actions = env.action_space.n
     net = ActorCriticMLP(obs_shape, n_actions)
-    agent = Agent(net)
 
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = AdvantageActorCritic.add_model_specific_args(parent_parser)
