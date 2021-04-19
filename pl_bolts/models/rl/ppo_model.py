@@ -19,24 +19,25 @@ else:  # pragma: no cover
 
 class PPO(pl.LightningModule):
     """
-    PyTorch Lightning implementation of Proximal Policy Optimization
+    PyTorch Lightning implementation of `Proximal Policy Optimization
     <https://arxiv.org/abs/1707.06347>`_
+
     Paper authors: John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov
 
     Model implemented by:
-    `Sidhant Sundrani <https://github.com/sid-sundrani>`
+        `Sidhant Sundrani <https://github.com/sid-sundrani>`_
 
     Example:
         >>> from pl_bolts.models.rl.ppo_model import PPO
         >>> model = PPO("CartPole-v0")
 
     Note:
-        This example is based on:
-        https://github.com/openai/baselines/blob/master/baselines/ppo2/ppo2.py
-        https://github.com/openai/spinningup/blob/master/spinup/algos/pytorch/ppo/ppo.py
+        This example is based on OpenAI's
+        `PPO <https://github.com/openai/spinningup/blob/master/spinup/algos/pytorch/ppo/ppo.py>`_ and
+        `PPO2 <https://github.com/openai/baselines/blob/master/baselines/ppo2/ppo2.py>`_.
 
     Note:
-        Currently only supports CPU and single GPU training with `distributed_backend=dp`
+        Currently only supports CPU and single GPU training with ``distributed_backend=dp``
     """
 
     def __init__(
@@ -68,7 +69,7 @@ class PPO(pl.LightningModule):
         """
         super().__init__()
 
-        if not _GYM_AVAILABLE:
+        if not _GYM_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError('This Module requires gym environment which is not installed yet.')
 
         # Hyperparameters
@@ -120,8 +121,10 @@ class PPO(pl.LightningModule):
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Passes in a state x through the network and returns the policy and a sampled action
+
         Args:
             x: environment state
+
         Returns:
             Tuple of policy and action
         """
@@ -315,7 +318,7 @@ class PPO(pl.LightningModule):
 
     def optimizer_step(self, *args, **kwargs):
         """
-        Run 'nb_optim_iters' number of iterations of gradient descent on actor and critic
+        Run ``nb_optim_iters`` number of iterations of gradient descent on actor and critic
         for each data sample.
         """
         for _ in range(self.nb_optim_iters):
