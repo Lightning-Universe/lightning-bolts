@@ -10,15 +10,16 @@ def _collate_fn(batch):
     return tuple(zip(*batch))
 
 
+@torch.no_grad()
 def test_fasterrcnn():
-    model = FasterRCNN()
+    model = FasterRCNN(pretrained=False, pretrained_backbone=False)
 
-    image = torch.rand(1, 3, 400, 400)
+    image = torch.rand(1, 3, 224, 224)
     model(image)
 
 
 def test_fasterrcnn_train(tmpdir):
-    model = FasterRCNN()
+    model = FasterRCNN(pretrained=False, pretrained_backbone=False)
 
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
@@ -28,7 +29,7 @@ def test_fasterrcnn_train(tmpdir):
 
 
 def test_fasterrcnn_bbone_train(tmpdir):
-    model = FasterRCNN(backbone="resnet18", fpn=True, pretrained_backbone=True)
+    model = FasterRCNN(backbone="resnet18", fpn=True, pretrained_backbone=False, pretrained=False)
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
 

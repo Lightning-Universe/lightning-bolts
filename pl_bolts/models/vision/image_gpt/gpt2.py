@@ -41,7 +41,7 @@ class GPT2(pl.LightningModule):
 
     Example::
 
-        from pl_bolts.models import GPT2
+        from pl_bolts.models.vision import GPT2
 
         seq_len = 17
         batch_size = 32

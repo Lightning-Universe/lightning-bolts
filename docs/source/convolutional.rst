@@ -8,7 +8,7 @@ This package lists contributed convolutional architectures.
 GPT-2
 -----
 
-.. autoclass:: pl_bolts.models.vision.image_gpt.gpt2.GPT2
+.. autoclass:: pl_bolts.models.vision.GPT2
     :noindex:
 
 -------------
@@ -16,7 +16,7 @@ GPT-2
 Image GPT
 ---------
 
-.. autoclass:: pl_bolts.models.vision.image_gpt.igpt_module.ImageGPT
+.. autoclass:: pl_bolts.models.vision.ImageGPT
     :noindex:
 
 -------------
@@ -24,7 +24,7 @@ Image GPT
 Pixel CNN
 ---------
 
-.. autoclass:: pl_bolts.models.vision.pixel_cnn.PixelCNN
+.. autoclass:: pl_bolts.models.vision.PixelCNN
     :noindex:
 
 -------------
@@ -32,7 +32,7 @@ Pixel CNN
 UNet
 ----
 
-.. autoclass:: pl_bolts.models.vision.unet.UNet
+.. autoclass:: pl_bolts.models.vision.UNet
     :noindex:
 
 -------------
@@ -53,5 +53,5 @@ of this model to build your own variation.
     trainer = pl.Trainer()
     trainer.fit(model)
 
-.. autoclass:: pl_bolts.models.vision.segmentation.SemSegment
+.. autoclass:: pl_bolts.models.vision.SemSegment
     :noindex:

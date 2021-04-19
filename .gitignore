@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+data/
 
 # C extensions
 *.so
@@ -163,3 +164,8 @@ tests/test-reports/
 
 # MLflow
 mlruns/
+
+
+# Downloaded Data through Scripts
+VOCdevkit/
+*.tar
