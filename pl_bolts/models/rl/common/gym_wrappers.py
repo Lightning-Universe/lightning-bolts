@@ -10,7 +10,7 @@ import collections
 import numpy as np
 import torch
 
-from pl_bolts.utils import _GYM_AVAILABLE, _OPENCV_AVAILABLE
+from pl_bolts.utils import _GYM_AVAILABLE, _OPENCV_AVAILABLE, _PROCGEN_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
@@ -27,6 +27,10 @@ if _OPENCV_AVAILABLE:
     import cv2
 else:  # pragma: no cover
     warn_missing_pkg('cv2', pypi_name='opencv-python')
+if _PROCGEN_AVAILABLE:
+    import procgen
+else:  # pragma: no cover
+    warn_missing_pkg('procgen')
 
 
 class NoopResetEnv(Wrapper):
@@ -413,11 +417,15 @@ def get_game_type(env_name):
     """For given Gym Env name, get the type of the game. (Atari or etc.)
     """
     all_envs = list(envs.registry.all())
-    env = [env for env in all_envs if env.id == env_name][0]
-    assert env, "Can find the {} in the Gym Env.".format(env_name)
+    env = [env for env in all_envs if env.id == env_name]
+    assert env, "Can find the {} in the Gym Env list.".format(env_name)
     # Entry point should be like gym.envs.atari:AtariEnv.
     # We would get atari.
-    return env.entry_point.split(".")[-1].split(":")[0]
+    if 'procgen' in env[0].entry_point:
+        # It is like 'procgen.gym_registration:make_env'
+        return 'procgen'
+    else:
+        return env[0].entry_point.split(".")[-1].split(":")[0]
 
 
 def make_atari_env(env_name):

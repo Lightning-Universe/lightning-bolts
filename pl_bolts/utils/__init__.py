@@ -12,5 +12,6 @@ _PIL_AVAILABLE: bool = _module_available("PIL")
 _OPENCV_AVAILABLE: bool = _module_available("cv2")
 _WANDB_AVAILABLE: bool = _module_available("wandb")
 _MATPLOTLIB_AVAILABLE: bool = _module_available("matplotlib")
+_PROCGEN_AVAILABLE: bool = _module_available("procgen")
 
 __all__ = ["BatchGradientVerification"]
