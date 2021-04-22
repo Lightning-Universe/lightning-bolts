@@ -1,6 +1,6 @@
 import argparse
 from collections import OrderedDict
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import numpy as np
 import pytorch_lightning as pl
@@ -14,14 +14,16 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.models.rl.common.agents import PolicyAgent
+from pl_bolts.models.rl.common.gym_wrappers import make_environment
 from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
-    import gym
+    from gym import Env
 else:  # pragma: no cover
     warn_missing_pkg('gym')
+    Env = object
 
 
 class VanillaPolicyGradient(pl.LightningModule):
@@ -55,16 +57,17 @@ class VanillaPolicyGradient(pl.LightningModule):
     """
 
     def __init__(
-        self,
-        env: str,
-        gamma: float = 0.99,
-        lr: float = 0.01,
-        batch_size: int = 8,
-        n_steps: int = 10,
-        avg_reward_len: int = 100,
-        entropy_beta: float = 0.01,
-        epoch_len: int = 1000,
-        **kwargs
+            self,
+            env: str,
+            gamma: float = 0.99,
+            lr: float = 0.01,
+            batch_size: int = 8,
+            n_steps: int = 10,
+            avg_reward_len: int = 100,
+            entropy_beta: float = 0.01,
+            seed: int = 123,
+            epoch_len: int = 1000,
+            **kwargs
     ) -> None:
         """
         Args:
@@ -93,7 +96,7 @@ class VanillaPolicyGradient(pl.LightningModule):
         self.save_hyperparameters()
 
         # Model components
-        self.env = gym.make(env)
+        self.env = self.make_environment(env, seed)
         self.net = MLP(self.env.observation_space.shape, self.env.action_space.n)
         self.agent = PolicyAgent(self.net)
 
@@ -254,6 +257,25 @@ class VanillaPolicyGradient(pl.LightningModule):
     def get_device(self, batch) -> str:
         """Retrieve device currently being used by minibatch"""
         return batch[0][0][0].device.index if self.on_gpu else "cpu"
+
+    @staticmethod
+    def make_environment(env_name: str, seed: Optional[int] = None) -> Env:
+        """
+        Initialise gym  environment
+
+        Args:
+            env_name: environment name or tag
+            seed: value to seed the environment RNG for reproducibility
+
+        Returns:
+            gym environment
+        """
+        env = make_environment(env_name)
+
+        if seed:
+            env.seed(seed)
+
+        return env
 
     @staticmethod
     def add_model_specific_args(arg_parser) -> argparse.ArgumentParser:

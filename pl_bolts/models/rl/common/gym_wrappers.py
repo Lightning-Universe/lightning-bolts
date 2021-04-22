@@ -16,6 +16,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _GYM_AVAILABLE:
     import gym.spaces
     from gym import make as gym_make
+    from gym import envs
     from gym import ObservationWrapper, RewardWrapper, Wrapper
 else:  # pragma: no cover
     warn_missing_pkg('gym')
@@ -408,6 +409,17 @@ class LazyFrames:
         return self._force()[..., i]
 
 
+def get_game_type(env_name):
+    """For given Gym Env name, get the type of the game. (Atari or etc.)
+    """
+    all_envs = list(envs.registry.all())
+    env = [env for env in all_envs if env.id == env_name][0]
+    assert env, "Can find the {} in the Gym Env.".format(env_name)
+    # Entry point should be like gym.envs.atari:AtariEnv.
+    # We would get atari.
+    return env.entry_point.split(".")[-1].split(":")[0]
+
+
 def make_atari_env(env_name):
     """Convert environment with wrappers"""
     # Modified from https://github.com/facebookresearch/torchbeast/blob/master/torchbeast/atari_wrappers.py#L289-L297
@@ -438,11 +450,13 @@ def make_deepmind_env(env_name, episode_life=True, clip_rewards=True, frame_stac
 
 def make_environment(env_name):
     """Convert environment with wrappers"""
-    # make_atari_environment is ready for Atari Game only.
-    env = gym_make(env_name)
-    env = MaxAndSkipEnv(env)
-    env = FireResetEnv(env)
-    env = ProcessFrame84(env)
-    env = ImageToPyTorch(env)
-    env = BufferWrapper(env, 4)
-    return ScaledFloatFrame(env)
+    if get_game_type(env_name) == 'atari':
+        env = gym_make(env_name)
+        env = MaxAndSkipEnv(env)
+        env = FireResetEnv(env)
+        env = ProcessFrame84(env)
+        env = ImageToPyTorch(env)
+        env = BufferWrapper(env, 4)
+        return ScaledFloatFrame(env)
+    else:
+        return gym_make(env_name)
