@@ -17,3 +17,16 @@ class TestToTensor(TestCase):
 
         new_state, _, _, _ = self.env.step(1)
         self.assertIsInstance(new_state, torch.Tensor)
+
+
+class TestAtari(TestCase):
+    def setUp(self) -> None:
+        from pl_bolts.models.rl.common.gym_wrappers import make_atari_env
+        self.env = ToTensor(make_atari_env("ZaxxonNoFrameskip-v0"))
+
+    def test_wrapper(self):
+        state = self.env.reset()
+        self.assertIsInstance(state, torch.Tensor)
+
+        new_state, _, _, _ = self.env.step(1)
+        self.assertIsInstance(new_state, torch.Tensor)
