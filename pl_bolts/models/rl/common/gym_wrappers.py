@@ -408,7 +408,7 @@ class LazyFrames:
         return self._force()[..., i]
 
 
-def make_atari(env_name):
+def make_atari_env(env_name):
     """Convert environment with wrappers"""
     # Modified from https://github.com/facebookresearch/torchbeast/blob/master/torchbeast/atari_wrappers.py#L289-L297
     env = gym_make(env_name)
@@ -418,10 +418,10 @@ def make_atari(env_name):
     return env
 
 
-def wrap_deepmind(env_name, episode_life=True, clip_rewards=True, frame_stack=False, scale=False):
+def make_deepmind_env(env_name, episode_life=True, clip_rewards=True, frame_stack=False, scale=False):
     """Configure environment for DeepMind-style Atari.
     """
-    env = make_atari(env_name)
+    env = make_atari_env(env_name)
     if episode_life:
         env = EpisodicLifeEnv(env)
     if 'FIRE' in env_name.unwrapped.get_action_meanings():
