@@ -44,17 +44,3 @@ class TestAtari(TestCase):
 
         new_state, _, _, _ = self.env.step(1)
         self.assertIsInstance(new_state, torch.Tensor)
-
-
-class TestGetName(TestCase):
-    def setUp(self) -> None:
-        from pl_bolts.models.rl.common.gym_wrappers import get_game_type
-        self.test_func = get_game_type
-
-    def test_get_game_type_robotics(self) -> None:
-        game_type = self.test_func("FetchSlideDense-v1")
-        assert game_type == 'robotics'
-
-    def test_get_game_type_procgen(self) -> None:
-        game_type = self.test_func("starpilot")
-        assert game_type == 'procgen'
