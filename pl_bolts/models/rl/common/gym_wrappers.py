@@ -548,5 +548,4 @@ def make_environment(env_name, **kwargs):
         envs = VecNormalize(venv=venv, norm_obs=False)
         envs = VecPyTorch(envs, torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
         return envs
-    else:
-        return gym_make(env_name)
+    return gym_make(env_name)
