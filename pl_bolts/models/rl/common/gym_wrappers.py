@@ -6,7 +6,6 @@ and
 
 """
 import collections
-import time
 
 import numpy as np
 import torch
@@ -29,8 +28,7 @@ if _OPENCV_AVAILABLE:
 else:  # pragma: no cover
     warn_missing_pkg('cv2', pypi_name='opencv-python')
 if _PROCGEN_AVAILABLE:
-    import procgen
-    from stable_baselines3.common.vec_env import VecEnvWrapper, VecNormalize
+    pass
 else:  # pragma: no cover
     warn_missing_pkg('procgen')
 
@@ -415,75 +413,6 @@ class LazyFrames:
         return self._force()[..., i]
 
 
-class VecExtractDictObs(VecEnvWrapper):
-    def __init__(self, venv, key):
-        self.key = key
-        super().__init__(venv=venv, observation_space=venv.observation_space.spaces[self.key])
-
-    def reset(self):
-        obs = self.venv.reset()
-        return obs[self.key]
-
-    def step_wait(self):
-        obs, reward, done, info = self.venv.step_wait()
-        return obs[self.key], reward, done, info
-
-
-class VecMonitor(VecEnvWrapper):
-    def __init__(self, venv):
-        VecEnvWrapper.__init__(self, venv)
-        self.eprets = None
-        self.eplens = None
-        self.epcount = 0
-        self.tstart = time.time()
-
-    def reset(self):
-        obs = self.venv.reset()
-        self.eprets = np.zeros(self.num_envs, 'f')
-        self.eplens = np.zeros(self.num_envs, 'i')
-        return obs
-
-    def step_wait(self):
-        obs, rews, dones, infos = self.venv.step_wait()
-        self.eprets += rews
-        self.eplens += 1
-
-        newinfos = list(infos[:])
-        for i in range(len(dones)):
-            if dones[i]:
-                info = infos[i].copy()
-                ret = self.eprets[i]
-                eplen = self.eplens[i]
-                epinfo = {'r': ret, 'l': eplen, 't': round(time.time() - self.tstart, 6)}
-                info['episode'] = epinfo
-                self.epcount += 1
-                self.eprets[i] = 0
-                self.eplens[i] = 0
-                newinfos[i] = info
-        return obs, rews, dones, newinfos
-
-
-class VecPyTorch(VecEnvWrapper):
-    def __init__(self, venv, device):
-        super(VecPyTorch, self).__init__(venv)
-        self.device = device
-
-    def reset(self):
-        obs = self.venv.reset()
-        obs = torch.from_numpy(obs).float().to(self.device)
-        return obs
-
-    def step_async(self, actions):
-        actions = actions.cpu().numpy()
-        self.venv.step_async(actions)
-
-    def step_wait(self):
-        obs, reward, done, info = self.venv.step_wait()
-        obs = torch.from_numpy(obs).float().to(self.device)
-        reward = torch.from_numpy(reward).unsqueeze(dim=1).float()
-        return obs, reward, done, info
-
-
 def get_game_type(env_name):
     """For given Gym Env name, get the type of the game. (Atari or etc.)
     """
@@ -526,7 +455,7 @@ def make_deepmind_env(env_name, episode_life=True, clip_rewards=True, frame_stac
     return ImageToPyTorch(env)
 
 
-def make_environment(env_name, **kwargs):
+def make_environment(env_name):
     """Convert environment with wrappers"""
     if get_game_type(env_name) == 'atari':
         env = gym_make(env_name)
@@ -536,15 +465,4 @@ def make_environment(env_name, **kwargs):
         env = ImageToPyTorch(env)
         env = BufferWrapper(env, 4)
         return ScaledFloatFrame(env)
-    elif get_game_type(env_name) == 'procgen':
-        venv = procgen.ProcgenEnv(num_envs=kwargs['num_envs'],
-                                  env_name=env_name,
-                                  num_levels=kwargs['num_levels'],
-                                  start_level=kwargs['start_level'],
-                                  distribution_mode=kwargs['distribution_mode'])
-        venv = VecExtractDictObs(venv, 'rgb')
-        venv = VecMonitor(venv=venv)
-        envs = VecNormalize(venv=venv, norm_obs=False)
-        envs = VecPyTorch(envs, torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
-        return envs
     return gym_make(env_name)
