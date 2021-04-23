@@ -495,8 +495,7 @@ def get_game_type(env_name):
     if 'procgen' in env[0].entry_point:
         # It is like 'procgen.gym_registration:make_env'
         return 'procgen'
-    else:
-        return env[0].entry_point.split(".")[-1].split(":")[0]
+    return env[0].entry_point.split(".")[-1].split(":")[0]
 
 
 def make_atari_env(env_name):
