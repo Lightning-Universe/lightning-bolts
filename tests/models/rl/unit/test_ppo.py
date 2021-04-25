@@ -27,7 +27,7 @@ def test_critic_loss():
 
     loss = model.critic_loss(batch_states, batch_qvals)
 
-    assert type(loss) == torch.Tensor
+    assert isinstance(loss, torch.Tensor)
 
 
 def test_actor_loss_categorical():
@@ -43,7 +43,7 @@ def test_actor_loss_categorical():
 
     loss = model.actor_loss(batch_states, batch_actions, batch_logp_old, batch_adv)
 
-    assert type(loss) == torch.Tensor
+    assert isinstance(loss, torch.Tensor)
 
 
 def test_actor_loss_continuous():
@@ -60,4 +60,4 @@ def test_actor_loss_continuous():
 
     loss = model.actor_loss(batch_states, batch_actions, batch_logp_old, batch_adv)
 
-    assert type(loss) == torch.Tensor
+    assert isinstance(loss, torch.Tensor)
