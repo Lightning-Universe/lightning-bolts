@@ -9,6 +9,8 @@ import torch
 from torch import nn, Tensor
 from torch.nn import functional as F
 
+from pl_bolts.models.rl.common.distributions import TanhMultivariateNormal
+
 
 class CNN(nn.Module):
     """
@@ -90,6 +92,73 @@ class MLP(nn.Module):
             output of network
         """
         return self.net(input_x.float())
+
+
+class ContinuousMLP(nn.Module):
+    """
+    MLP network that outputs continuous value via Gaussian distribution
+    """
+    def __init__(
+        self, 
+        input_shape: Tuple[int], 
+        n_actions: int, 
+        hidden_size: int = 128, 
+        action_bias: int = 0,
+        action_scale: int = 1
+    ):
+        """
+        Args:
+            input_shape: observation shape of the environment
+            n_actions: dimension of actions in the environment
+            hidden_size: size of hidden layers
+            action_bias: the center of the action space
+            action_scale: the scale of the action space
+        """
+        super(ContinuousMLP, self).__init__()
+        self.action_bias = action_bias
+        self.action_scale = action_scale
+
+        self.shared_net = nn.Sequential(
+            nn.Linear(input_shape[0], hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU()
+        )
+        self.mean_layer = nn.Linear(hidden_size, n_actions)
+        self.logstd_layer = nn.Linear(hidden_size, n_actions)
+
+    def forward(self, x: torch.FloatTensor) -> TanhMultivariateNormal:
+        """
+        Forward pass through network. Calculates the action distribution
+
+        Args:
+            x: input to network
+        Returns:
+            action distribution
+         """
+        x = self.shared_net(x.float())
+        batch_mean = self.mean_layer(x)
+        logstd = torch.clamp(self.logstd_layer(x), -20, 2)
+        batch_scale_tril = torch.diag_embed(torch.exp(logstd))
+        return TanhMultivariateNormal(
+            action_bias=self.action_bias,
+            action_scale=self.action_scale,
+            loc=batch_mean,
+            scale_tril=batch_scale_tril
+        )
+
+    def get_action(self, x: torch.FloatTensor) -> torch.Tensor:
+        """
+        Get the action greedily (without sampling)
+
+        Args:
+            x: input to network
+        Returns:
+            mean action
+        """
+        x = self.shared_net(x.float())
+        batch_mean = self.mean_layer(x)
+        return self.action_scale * torch.tanh(batch_mean) + self.action_bias
 
 
 class DuelingMLP(nn.Module):

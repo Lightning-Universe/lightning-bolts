@@ -138,3 +138,48 @@ class PolicyAgent(Agent):
         actions = [np.random.choice(len(prob), p=prob) for prob in prob_np]
 
         return actions
+
+class SoftActorCriticAgent(Agent):
+    """Actor-Critic based agent that returns a continuous action based on the policy"""
+    def __call__(self, states: torch.Tensor, device: str) -> List[float]:
+        """
+        Takes in the current state and returns the action based on the agents policy
+
+        Args:
+            states: current state of the environment
+            device: the device used for the current batch
+
+        Returns:
+            action defined by policy
+        """
+        if not isinstance(states, list):
+            states = [states]
+
+        if not isinstance(states, torch.Tensor):
+            states = torch.tensor(states, device=device)
+
+        dist = self.net(states)
+        actions = [a for a in dist.sample().cpu().numpy()]
+        
+        return actions
+
+    def get_action(self, states: torch.Tensor, device: str) -> List[float]:
+        """
+        Get the action greedily (without sampling)
+
+        Args:
+            states: current state of the environment
+            device: the device used for the current batch
+
+        Returns:
+            action defined by policy
+        """
+        if not isinstance(states, list):
+            states = [states]
+
+        if not isinstance(states, torch.Tensor):
+            states = torch.tensor(states, device=device)
+
+        actions = [self.net.get_action(states).cpu().numpy()]
+        
+        return actions
