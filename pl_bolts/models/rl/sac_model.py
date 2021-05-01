@@ -180,8 +180,8 @@ class SAC(pl.LightningModule):
         """
         for q_param, target_param in zip(q_net.parameters(), target_net.parameters()):
             target_param.data.copy_(
-                (1.0 - self.hparams.target_alpha) * target_param.data
-                + self.hparams.target_alpha * q_param
+                (1.0 - self.hparams.target_alpha) * target_param.data +
+                self.hparams.target_alpha * q_param
             )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
