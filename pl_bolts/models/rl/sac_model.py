@@ -138,10 +138,10 @@ class SAC(pl.LightningModule):
                 action = self.agent(self.state, self.device)
                 next_state, reward, done, _ = self.env.step(action[0])
                 exp = Experience(
-                    state=self.state, 
-                    action=action[0], 
-                    reward=reward, 
-                    done=done, 
+                    state=self.state,
+                    action=action[0],
+                    reward=reward,
+                    done=done,
                     new_state=next_state
                 )
                 self.buffer.append(exp)
@@ -155,9 +155,9 @@ class SAC(pl.LightningModule):
         action_bias = torch.from_numpy((self.env.action_space.high + self.env.action_space.low) / 2)
         action_scale = torch.from_numpy((self.env.action_space.high - self.env.action_space.low) / 2)
         self.policy = ContinuousMLP(
-            self.obs_shape, 
-            self.n_actions, 
-            action_bias=action_bias, 
+            self.obs_shape,
+            self.n_actions,
+            action_bias=action_bias,
             action_scale=action_scale
         )
 
@@ -180,8 +180,8 @@ class SAC(pl.LightningModule):
         """
         for q_param, target_param in zip(q_net.parameters(), target_net.parameters()):
             target_param.data.copy_(
-                (1.0 - self.hparams.target_alpha) * target_param.data + 
-                self.hparams.target_alpha * q_param
+                (1.0 - self.hparams.target_alpha) * target_param.data
+                + self.hparams.target_alpha * q_param
             )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -240,7 +240,7 @@ class SAC(pl.LightningModule):
                 break
 
     def loss(
-        self, 
+        self,
         batch: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """

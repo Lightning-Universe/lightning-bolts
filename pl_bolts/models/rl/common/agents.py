@@ -139,6 +139,7 @@ class PolicyAgent(Agent):
 
         return actions
 
+
 class SoftActorCriticAgent(Agent):
     """Actor-Critic based agent that returns a continuous action based on the policy"""
     def __call__(self, states: torch.Tensor, device: str) -> List[float]:
@@ -160,7 +161,7 @@ class SoftActorCriticAgent(Agent):
 
         dist = self.net(states)
         actions = [a for a in dist.sample().cpu().numpy()]
-        
+
         return actions
 
     def get_action(self, states: torch.Tensor, device: str) -> List[float]:
@@ -181,5 +182,5 @@ class SoftActorCriticAgent(Agent):
             states = torch.tensor(states, device=device)
 
         actions = [self.net.get_action(states).cpu().numpy()]
-        
+
         return actions

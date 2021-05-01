@@ -99,10 +99,10 @@ class ContinuousMLP(nn.Module):
     MLP network that outputs continuous value via Gaussian distribution
     """
     def __init__(
-        self, 
-        input_shape: Tuple[int], 
-        n_actions: int, 
-        hidden_size: int = 128, 
+        self,
+        input_shape: Tuple[int],
+        n_actions: int,
+        hidden_size: int = 128,
         action_bias: int = 0,
         action_scale: int = 1
     ):

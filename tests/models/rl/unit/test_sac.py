@@ -17,7 +17,7 @@ def test_sac_loss():
     ]
     hparams = parent_parser.parse_args(args_list)
     model = SAC(**vars(hparams))
-    
+
     batch_states = torch.rand(32, 3)
     batch_actions = torch.rand(32, 1)
     batch_rewards = torch.rand(32)

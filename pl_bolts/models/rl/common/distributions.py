@@ -47,7 +47,7 @@ class TanhMultivariateNormal(torch.distributions.MultivariateNormal):
         """
         Samples X and computes the log probability of the sample
 
-        Returns: 
+        Returns:
             Sampled X and log probability
         """
         z = super().rsample()
@@ -55,7 +55,7 @@ class TanhMultivariateNormal(torch.distributions.MultivariateNormal):
         value = torch.tanh(z)
         correction = torch.log(self.action_scale * (1 - value ** 2) + 1e-7).sum(1)
         return self.action_scale * value + self.action_bias, z_logprob - correction
-        
+
     """
     Some override methods
     """
@@ -65,5 +65,5 @@ class TanhMultivariateNormal(torch.distributions.MultivariateNormal):
 
     def log_prob(self, value):
         value = (value - self.action_bias) / self.action_scale
-        z = torch.log(1 + value) / 2 - torch.log(1-value) / 2
+        z = torch.log(1 + value) / 2 - torch.log(1 - value) / 2
         return self.log_prob_with_z(value, z)
