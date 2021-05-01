@@ -20,7 +20,7 @@ class VisionDataModule(LightningDataModule):
         self,
         data_dir: Optional[str] = None,
         train_split: Optional[str] = None,
-        val_split: Union[int, float] = 0.2,
+        val_split: Union[int, float, str] = 0.2,
         test_split: Optional[str] = None,
         num_workers: int = 16,
         normalize: bool = False,
@@ -36,7 +36,8 @@ class VisionDataModule(LightningDataModule):
         Args:
             data_dir: Where to save/load the data
             train_split: Split to use for train dataset (for torchvision datasets with string split kwarg)
-            val_split: Ratio (float) or number (int) of samples to use for the validation split (for torchvision datasets with boolean train arg).
+            val_split: Ratio (float) or number (int) of samples to use for the validation split
+                       (for torchvision datasets with boolean train arg).
                        Split to use for val dataset (for torchvision datasets with string split kwarg)
             test_split: Split to use for test dataset (for torchvision datasets with string split kwarg)
             num_workers: How many workers to use for loading data
@@ -83,36 +84,56 @@ class VisionDataModule(LightningDataModule):
         Creates train, val, and test dataset
         """
         if stage == "fit" or stage is None:
-            train_transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
-            val_transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+            train_transforms = (self.default_transforms() if self.train_transforms is None else self.train_transforms)
+            val_transforms = (self.default_transforms() if self.val_transforms is None else self.val_transforms)
 
-            if self.split_train is None:
+            if self.train_split is None:
                 dataset_train = self.dataset_cls(
-                    self.data_dir, train=True, transform=train_transforms, **self.EXTRA_ARGS
+                    self.data_dir,
+                    train=True,
+                    transform=train_transforms,
+                    **self.EXTRA_ARGS,
                 )
-                dataset_val = self.dataset_cls(self.data_dir, train=True, transform=val_transforms, **self.EXTRA_ARGS)
+                dataset_val = self.dataset_cls(
+                    self.data_dir,
+                    train=True,
+                    transform=val_transforms,
+                    **self.EXTRA_ARGS,
+                )
 
                 self.dataset_train = self._split_dataset(dataset_train)
                 self.dataset_val = self._split_dataset(dataset_val, train=False)
 
             else:
                 dataset_train = self.dataset_cls(
-                    self.data_dir, split=self.train_split, transform=train_transforms, **self.EXTRA_ARGS
+                    self.data_dir,
+                    split=self.train_split,
+                    transform=train_transforms,
+                    **self.EXTRA_ARGS,
                 )
                 dataset_val = self.dataset_cls(
-                    self.data_dir, split=self.val_split, transform=val_transforms, **self.EXTRA_ARGS
+                    self.data_dir,
+                    split=self.val_split,
+                    transform=val_transforms,
+                    **self.EXTRA_ARGS,
                 )
 
         if stage == "test" or stage is None:
-            test_transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
+            test_transforms = (self.default_transforms() if self.test_transforms is None else self.test_transforms)
 
             if self.test_split is None:
                 self.dataset_test = self.dataset_cls(
-                    self.data_dir, train=False, transform=test_transforms, **self.EXTRA_ARGS
+                    self.data_dir,
+                    train=False,
+                    transform=test_transforms,
+                    **self.EXTRA_ARGS,
                 )
             else:
                 self.dataset_test = self.dataset_cls(
-                    self.data_dir, split=self.test_split, transform=test_transforms, **self.EXTRA_ARGS
+                    self.data_dir,
+                    split=self.test_split,
+                    transform=test_transforms,
+                    **self.EXTRA_ARGS,
                 )
 
     def _split_dataset(self, dataset: Dataset, train: bool = True) -> Dataset:
@@ -139,7 +160,7 @@ class VisionDataModule(LightningDataModule):
             train_len = len_dataset - val_len
             splits = [train_len, val_len]
         else:
-            raise ValueError(f'Unsupported type {type(self.val_split)}')
+            raise ValueError(f"Unsupported type {type(self.val_split)}")
 
         return splits
 
@@ -166,5 +187,5 @@ class VisionDataModule(LightningDataModule):
             shuffle=shuffle,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
-            pin_memory=self.pin_memory
+            pin_memory=self.pin_memory,
         )
