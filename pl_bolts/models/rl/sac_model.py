@@ -43,13 +43,13 @@ class SAC(pl.LightningModule):
         policy_learning_rate: float = 3e-4,
         q_learning_rate: float = 3e-4,
         target_alpha: float = 5e-3,
-        batch_size: int = 256,
-        replay_size: int = 100000,
-        warm_start_size: int = 1000000,
+        batch_size: int = 128,
+        replay_size: int = 1000000,
+        warm_start_size: int = 10000,
         avg_reward_len: int = 100,
         min_episode_reward: int = -21,
         seed: int = 123,
-        batches_per_epoch: int = 1000,
+        batches_per_epoch: int = 10000,
         n_steps: int = 1,
         **kwargs,
     ):
@@ -149,7 +149,6 @@ class SAC(pl.LightningModule):
 
                 if done:
                     self.state = self.env.reset()
-        print("done populating")
 
     def build_networks(self) -> None:
         """Initializes the SAC policy and q networks (with targets)"""
@@ -383,7 +382,7 @@ class SAC(pl.LightningModule):
         arg_parser.add_argument(
             "--replay_size",
             type=int,
-            default=100000,
+            default=1000000,
             help="capacity of the replay buffer",
         )
         arg_parser.add_argument(

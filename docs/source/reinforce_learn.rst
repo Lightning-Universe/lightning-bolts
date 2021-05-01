@@ -666,3 +666,89 @@ Example::
 
 .. autoclass:: pl_bolts.models.rl.vanilla_policy_gradient_model.VanillaPolicyGradient
    :noindex:
+
+--------------
+
+Actor-Critic Models
+-------------------
+The following models are based on Actor Critic. Actor Critic conbines the approaches of value-based learning (the DQN family)
+and the policy-based learning (the PG family) by learning the value function as well as the policy distribution. This approach
+updates the policy network according to the policy gradient, and updates the value network to fit the discounted rewards.
+
+Actor Critic Key Points:
+    - Actor outputs a distribution of actions for controlling the agent
+    - Critic outputs a value of current state for policy update suggestion
+    - The addition of critic allows the model to do n-step training instead of generating an entire trajectory
+
+Soft Actor Critic (SAC)
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Soft Actor Critic model introduced in `Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor<https://arxiv.org/abs/1801.01290>`_
+Paper authors: Tuomas Haarnoja, Aurick Zhou, Pieter Abbeel, Sergey Levine
+
+Original implementation by: `Jason Wang <https://github.com/blahBlahhhJ>`_
+
+Soft Actor Critic (SAC) is a powerful actor critic algorithm in reinforcement learning. Unlike A2C, SAC's policy outputs a 
+special continuous distribution for actions, and its critic estimates the Q value instead of the state value, which 
+means it now takes in not only states but also actions. The new actor allows SAC to support continuous action tasks such 
+as controlling robots, and the new critic allows SAC to support off-policy learning which is more sample efficient. 
+
+The actor has a new objective to maximize entropy to encourage exploration while maximizing the expected rewards. 
+The critic uses two separate Q functions to "mitigate positive bias" during training by picking the minimum of the 
+two as the predicted Q value.
+
+Since SAC is off-policy, its algorithm's training step is quite similar to DQN:
+
+1. Initialize one policy network, two Q networks, and two corresponding target Q networks.
+2. Run 1 step using action sampled from policy and store the transition into the replay buffer.
+
+.. math::
+    a \sim tanh(N(\mu_\pi(s), \sigma_\pi(s)))
+
+3. Sample transitions (states, actions, rewards, dones, next states) from the replay buffer.
+
+.. math::
+  s, a, r, d, s' \sim B
+
+4. Compute actor loss and update policy network.
+
+.. math::
+  J_\pi = \frac1n\sum_i(\log\pi(\pi(a | s_i) | s_i) - Q_{min}(s_i, \pi(a | s_i)))
+
+5. Compute Q target
+
+.. math::
+  target_i = r_i + (1 - d_i) \gamma (\min_i Q_{target,i}(s'_i, \pi(a', s'_i)) - log\pi(\pi(a | s'_i) | s'_i))
+
+5. Compute critic loss and update Q network..
+
+.. math::
+  J_{Q_i} = \frac1n \sum_i(Q_i(s_i, a_i) - target_i)^2
+
+4. Soft update the target Q network using a weighted sum of itself and the Q network.
+
+.. math::
+  Q_{target,i} := \tau Q_{target,i} + (1-\tau) Q_i
+
+SAC Benefits
+~~~~~~~~~~~~~~~~~~~
+
+- More sample efficient due to off-policy training
+
+- Supports continuous action space
+
+SAC Results
+~~~~~~~~~~~~~~~~
+
+.. image:: _images/rl_benchmark/pendulum_sac_results.jpg
+  :width: 300
+  :alt: SAC Results
+
+Example::
+  from pl_bolts.models.rl import SAC
+  sac = SAC("Pendulum-v0")
+  trainer = Trainer()
+  trainer.fit(sac)
+
+.. autoclass:: pl_bolts.models.rl.SAC
+:noindex:
