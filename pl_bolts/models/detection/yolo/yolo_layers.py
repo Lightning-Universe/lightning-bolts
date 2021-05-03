@@ -242,7 +242,7 @@ class DetectionLayer(nn.Module):
         offset = torch.stack((grid_x, grid_y), -1)  # [height, width, 2]
         offset = offset.unsqueeze(2)  # [height, width, 1, 2]
 
-        scale = image_size / grid_size
+        scale = torch.true_divide(image_size, grid_size)
         return (xy + offset) * scale
 
     def _scale_wh(self, wh: Tensor) -> Tensor:
