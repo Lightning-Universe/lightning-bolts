@@ -29,7 +29,7 @@ sys.path.insert(0, os.path.abspath(_PATH_ROOT))
 SPHINX_MOCK_REQUIREMENTS = int(os.environ.get('SPHINX_MOCK_REQUIREMENTS', True))
 
 # alternative https://stackoverflow.com/a/67692/4521646
-spec = spec_from_file_location("pl_bolts", os.path.join(_PATH_ROOT, "pl_bolts", "info.py"))
+spec = spec_from_file_location("pl_bolts", os.path.join(_PATH_ROOT, "pl_bolts", "__about__.py"))
 info = module_from_spec(spec)
 spec.loader.exec_module(info)
 
