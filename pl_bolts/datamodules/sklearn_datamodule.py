@@ -125,17 +125,17 @@ class SklearnDataModule(LightningDataModule):
         >>> len(train_loader.dataset)
         310
         >>> len(train_loader)
-        12
+        10
         >>> # validation set
         >>> val_loader = loaders.val_dataloader()
         >>> len(val_loader.dataset)
-        100
+        88
         >>> len(val_loader)
-        4
+        3
         >>> # test set
         >>> test_loader = loaders.test_dataloader()
         >>> len(test_loader.dataset)
-        51
+        44
         >>> len(test_loader)
         2
     """
