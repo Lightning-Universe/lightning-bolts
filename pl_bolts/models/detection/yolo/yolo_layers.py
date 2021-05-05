@@ -319,7 +319,7 @@ class DetectionLayer(nn.Module):
 
         # A multiplier for scaling image coordinates to feature map coordinates
         grid_size = torch.tensor([width, height], device=device)
-        image_to_grid = grid_size / image_size
+        image_to_grid = torch.true_divide(grid_size, image_size)
 
         anchor_wh = torch.tensor(self.anchor_dims, dtype=boxes.dtype, device=device)
         anchor_map = torch.tensor(self.anchor_map, dtype=torch.int64, device=device)
