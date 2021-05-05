@@ -20,10 +20,10 @@ class SklearnDataset(Dataset):
     Mapping between numpy (or sklearn) datasets to PyTorch datasets.
 
     Example:
-        >>> from sklearn.datasets import load_boston
+        >>> from sklearn.datasets import load_diabetes
         >>> from pl_bolts.datamodules import SklearnDataset
         ...
-        >>> X, y = load_boston(return_X_y=True)
+        >>> X, y = load_diabetes(return_X_y=True)
         >>> dataset = SklearnDataset(X, y)
         >>> len(dataset)
         506
@@ -114,10 +114,10 @@ class SklearnDataModule(LightningDataModule):
 
     Example:
 
-        >>> from sklearn.datasets import load_boston
+        >>> from sklearn.datasets import load_diabetes
         >>> from pl_bolts.datamodules import SklearnDataModule
         ...
-        >>> X, y = load_boston(return_X_y=True)
+        >>> X, y = load_diabetes(return_X_y=True)
         >>> loaders = SklearnDataModule(X, y, batch_size=32)
         ...
         >>> # train set
