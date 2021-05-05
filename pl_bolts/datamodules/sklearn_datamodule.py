@@ -26,7 +26,7 @@ class SklearnDataset(Dataset):
         >>> X, y = load_diabetes(return_X_y=True)
         >>> dataset = SklearnDataset(X, y)
         >>> len(dataset)
-        506
+        442
     """
 
     def __init__(self, X: np.ndarray, y: np.ndarray, X_transform: Any = None, y_transform: Any = None) -> None:
@@ -123,7 +123,7 @@ class SklearnDataModule(LightningDataModule):
         >>> # train set
         >>> train_loader = loaders.train_dataloader()
         >>> len(train_loader.dataset)
-        355
+        310
         >>> len(train_loader)
         12
         >>> # validation set

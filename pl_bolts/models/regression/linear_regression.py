@@ -129,7 +129,7 @@ def cli_main():
     args = parser.parse_args()
 
     # model
-    model = LinearRegression(input_dim=13, l1_strength=1, l2_strength=1)
+    model = LinearRegression(input_dim=10, l1_strength=1, l2_strength=1)
     # model = LinearRegression(**vars(args))
 
     # data
