@@ -15,7 +15,7 @@ else:  # pragma: no cover
 # TODO(akihironitta): This is needed to avoid 503 error when downloading MNIST dataset
 # from http://yann.lecun.com/exdb/mnist/ and can be removed after `torchvision==0.9.1`.
 # See https://github.com/pytorch/vision/issues/3549 for details.
-if _TORCHVISION_LESS_THAN_0_9_1:
+if _TORCHVISION_AVAILABLE and _TORCHVISION_LESS_THAN_0_9_1:
     MNIST.resources = [
         ("https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz", "f68b3c2dcbeaaa9fbdd348bbdeb94873"),  # noqa: E501
         ("https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz", "d53e105ee54ea40749a09fcbcd1e9432"),  # noqa: E501
