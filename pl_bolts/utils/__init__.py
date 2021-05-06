@@ -1,5 +1,8 @@
+import operator
+
 import torch
 from pytorch_lightning.utilities import _module_available
+from pytorch_lightning.utilities.imports import _compare_version
 
 from pl_bolts.callbacks.verification.batch_gradient import BatchGradientVerification  # type: ignore
 
@@ -12,5 +15,7 @@ _PIL_AVAILABLE: bool = _module_available("PIL")
 _OPENCV_AVAILABLE: bool = _module_available("cv2")
 _WANDB_AVAILABLE: bool = _module_available("wandb")
 _MATPLOTLIB_AVAILABLE: bool = _module_available("matplotlib")
+_TORCHVISION_LESS_THAN_0_9_1: bool = _compare_version("torchvision", operator.ge, "0.9.1")
+
 
 __all__ = ["BatchGradientVerification"]
