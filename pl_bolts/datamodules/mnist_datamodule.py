@@ -1,7 +1,7 @@
 from typing import Any, Callable, Optional, Union
 
-from pl_bolts.datasets import MNIST
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
+from pl_bolts.datasets import MNIST
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 

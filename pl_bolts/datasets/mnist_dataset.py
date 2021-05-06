@@ -12,7 +12,6 @@ if _PIL_AVAILABLE:
 else:  # pragma: no cover
     warn_missing_pkg('PIL', pypi_name='Pillow')
 
-
 # TODO(akihironitta): This is needed to avoid 503 error when downloading MNIST dataset
 # from http://yann.lecun.com/exdb/mnist/ and can be removed after `torchvision==0.9.1`.
 # See https://github.com/pytorch/vision/issues/3549 for details.
