@@ -2,8 +2,7 @@
 Soft Actor Critic
 """
 import argparse
-from collections import OrderedDict
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 import pytorch_lightning as pl
@@ -16,9 +15,7 @@ from torch.nn import functional as F
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules.experience_source import Experience, ExperienceSourceDataset
-from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common.agents import SoftActorCriticAgent
-from pl_bolts.models.rl.common.gym_wrappers import make_environment
 from pl_bolts.models.rl.common.memory import MultiStepBuffer
 from pl_bolts.models.rl.common.networks import ContinuousMLP, MLP
 from pl_bolts.utils import _GYM_AVAILABLE
