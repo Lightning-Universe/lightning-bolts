@@ -62,17 +62,13 @@ class TestPolicyAgent(TestCase):
         self.assertEqual(action[0], 1)
 
 
-class TestActorCriticAgent(TestCase):
-
-    def setUp(self) -> None:
-        self.env = gym.make("CartPole-v0")
-        logprobs = torch.nn.functional.log_softmax(torch.Tensor([[0.0, 100.0]]))
-        self.net = Mock(return_value=(logprobs, torch.Tensor([[1]])))
-        self.states = [self.env.reset()]
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    def test_a2c_agent(self):
-        a2c_agent = ActorCriticAgent(self.net)
-        action = a2c_agent(self.states, self.device)
-        self.assertIsInstance(action, list)
-        self.assertEqual(action[0], 1)
+def test_a2c_agent():
+    env = gym.make("CartPole-v0")
+    logprobs = torch.nn.functional.log_softmax(torch.Tensor([[0.0, 100.0]]))
+    net = Mock(return_value=(logprobs, torch.Tensor([[1]])))
+    states = [env.reset()]
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    a2c_agent = ActorCriticAgent(net)
+    action = a2c_agent(states, device)
+    assert isinstance(action, list)
+    assert action[0] == 1
