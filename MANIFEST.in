@@ -12,7 +12,7 @@ include LICENSE
 
 exclude *.sh
 exclude *.toml
-exclude *.svg    
+exclude *.svg
 recursive-include pytorch_lightning *.py
 
 # exclude tests from package

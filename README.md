@@ -4,7 +4,7 @@
 
 **Pretrained SOTA Deep Learning models, callbacks and more for research and production with PyTorch Lightning and PyTorch**
 
---- 
+---
 
 <p align="center">
   <a href="https://www.pytorchlightning.ai/">Website</a> •
@@ -61,7 +61,7 @@ Simple installation from PyPI
 pip install lightning-bolts
 ```
 
-Install bleeding-edge (no guarantees)   
+Install bleeding-edge (no guarantees)
 ```bash
 pip install git+https://github.com/PytorchLightning/lightning-bolts.git@master --upgrade
 ```
@@ -141,7 +141,7 @@ class VideoGPT(ImageGPT):
 
 ## I don't need deep learning
 
-Great! 
+Great!
 We have LinearRegression and LogisticRegression implementations with numpy and sklearn bridges for datasets!
 But our implementations work on multiple GPUs, TPUs and scale dramatically...
 
@@ -168,7 +168,7 @@ trainer.test(test_dataloaders=loaders.test_dataloader())
 
 ## Is this another model zoo?
 
-No! 
+No!
 
 Bolts is unique because models are implemented using PyTorch Lightning and structured so that they can be easily
 subclassed and iterated on.
