@@ -4,7 +4,7 @@
 
 **Pretrained SOTA Deep Learning models, callbacks and more for research and production with PyTorch Lightning and PyTorch**
 
---- 
+---
 
 <p align="center">
   <a href="https://www.pytorchlightning.ai/">Website</a> •
