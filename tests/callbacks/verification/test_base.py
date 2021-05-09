@@ -7,6 +7,7 @@ from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities import move_data_to_device
 
 from pl_bolts.callbacks.verification.base import VerificationBase
+from tests import _MARK_REQUIRE_GPU
 
 
 class TrivialVerification(VerificationBase):
@@ -38,13 +39,8 @@ class LitModel(LightningModule):
 
 @pytest.mark.parametrize(
     "device",
-    [
-        pytest.param(torch.device("cpu")),
-        pytest.param(
-            torch.device("cuda", 0),
-            marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="Test requires GPU"),
-        ),
-    ],
+    [torch.device("cpu"),
+     pytest.param(torch.device("cuda", 0), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
 )
 def test_verification_base_get_input_array(device):
     """ Test that the base class calls the correct methods to transfer the input to the device the model is on. """
@@ -54,10 +50,7 @@ def test_verification_base_get_input_array(device):
     assert verification.model == model
 
     # for a PyTorch model, user must provide the input array
-    with patch(
-        "pl_bolts.callbacks.verification.base.move_data_to_device",
-        wraps=move_data_to_device,
-    ) as mocked:
+    with patch("pl_bolts.callbacks.verification.base.move_data_to_device", wraps=move_data_to_device) as mocked:
         copied_tensor = verification._get_input_array_copy(input_array=input_tensor)
         mocked.assert_called_once()
         assert copied_tensor.device == device
