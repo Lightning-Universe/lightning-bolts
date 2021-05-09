@@ -25,7 +25,7 @@ jobs:
     - name: Build
       run: >-
         python setup.py sdist bdist_wheel
-    
+
     # We do this, since failures on test.pypi aren't that bad
     - name: Publish to Test PyPI
       if: startsWith(github.event.ref, 'refs/tags') || github.event_name == 'release'
