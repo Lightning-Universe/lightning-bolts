@@ -50,4 +50,3 @@ comment:
   behavior: default  # update if exists else create new
   # branches: *
   after_n_builds: 17
-
