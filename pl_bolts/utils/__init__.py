@@ -39,5 +39,4 @@ _WANDB_AVAILABLE: bool = _module_available("wandb")
 _MATPLOTLIB_AVAILABLE: bool = _module_available("matplotlib")
 _TORCHVISION_LESS_THAN_0_9_1: bool = _compare_version("torchvision", operator.ge, "0.9.1")
 
-
 __all__ = ["BatchGradientVerification"]
