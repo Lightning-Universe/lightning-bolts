@@ -88,6 +88,10 @@ class BYOL(pl.LightningModule):
             num_workers: number of workers
             warmup_epochs: num of epochs for scheduler warm up
             max_epochs: max epochs for scheduler
+            base_encoder: the base encoder module or resnet name
+            encoder_out_dim: output dimension of base_encoder
+            projector_hidden_size: hidden layer size of projector MLP
+            projector_out_dim: output size of projector MLP
         """
         super().__init__()
         self.save_hyperparameters(ignore='base_encoder')
