@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from copy import deepcopy
-from typing import Any
+from typing import Any, Union
 
 import pytorch_lightning as pl
 import torch
@@ -72,6 +72,10 @@ class BYOL(pl.LightningModule):
         num_workers: int = 0,
         warmup_epochs: int = 10,
         max_epochs: int = 1000,
+        base_encoder: Union[str, torch.nn.Module] = 'resnet50',
+        emb_dim: int = 2048,
+        hidden_size: int = 4096,
+        proj_dim: int = 256,
         **kwargs
     ):
         """
@@ -86,9 +90,9 @@ class BYOL(pl.LightningModule):
             max_epochs: max epochs for scheduler
         """
         super().__init__()
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore='base_encoder')
 
-        self.online_network = SiameseArm()
+        self.online_network = SiameseArm(base_encoder, emb_dim, hidden_size, proj_dim)
         self.target_network = deepcopy(self.online_network)
         self.weight_callback = BYOLMAWeightUpdate()
 
