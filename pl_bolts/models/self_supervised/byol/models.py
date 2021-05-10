@@ -23,7 +23,7 @@ class MLP(nn.Module):
 
 class SiameseArm(nn.Module):
 
-    def __init__(self, encoder='resnet50', input_dim=2048, hidden_size=4096, output_dim=256):
+    def __init__(self, encoder='resnet50', encoder_out_dim=2048, projector_hidden_size=4096, projector_out_dim=256):
         super().__init__()
 
         if isinstance(encoder, str):
@@ -31,9 +31,9 @@ class SiameseArm(nn.Module):
         # Encoder
         self.encoder = encoder
         # Projector
-        self.projector = MLP(input_dim, hidden_size, output_dim)
+        self.projector = MLP(encoder_out_dim, projector_hidden_size, projector_out_dim)
         # Predictor
-        self.predictor = MLP(output_dim, hidden_size, output_dim)
+        self.predictor = MLP(projector_out_dim, projector_hidden_size, projector_out_dim)
 
     def forward(self, x):
         y = self.encoder(x)[0]
