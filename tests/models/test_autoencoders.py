@@ -19,8 +19,7 @@ def test_vae(tmpdir, datadir, dm_cls):
         gpus=None,
     )
 
-    result = trainer.fit(model, datamodule=dm)
-    assert result == 1
+    trainer.fit(model, datamodule=dm)
 
 
 @pytest.mark.parametrize("dm_cls", [pytest.param(CIFAR10DataModule, id="cifar10")])
@@ -35,8 +34,7 @@ def test_ae(tmpdir, datadir, dm_cls):
         gpus=None,
     )
 
-    result = trainer.fit(model, datamodule=dm)
-    assert result == 1
+    trainer.fit(model, datamodule=dm)
 
 
 @torch.no_grad()
