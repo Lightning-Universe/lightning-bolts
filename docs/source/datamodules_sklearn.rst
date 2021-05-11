@@ -7,10 +7,10 @@ Utilities to map sklearn or numpy datasets to PyTorch Dataloaders with automatic
 
 .. code-block:: python
 
-    from sklearn.datasets import load_boston
+    from sklearn.datasets import load_diabetes
     from pl_bolts.datamodules import SklearnDataModule
 
-    X, y = load_boston(return_X_y=True)
+    X, y = load_diabetes(return_X_y=True)
     loaders = SklearnDataModule(X, y)
 
     train_loader = loaders.train_dataloader(batch_size=32)
@@ -21,10 +21,10 @@ Or build your own torch datasets
 
 .. code-block:: python
 
-    from sklearn.datasets import load_boston
+    from sklearn.datasets import load_diabetes
     from pl_bolts.datamodules import SklearnDataset
 
-    X, y = load_boston(return_X_y=True)
+    X, y = load_diabetes(return_X_y=True)
     dataset = SklearnDataset(X, y)
     loader = DataLoader(dataset)
 
