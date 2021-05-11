@@ -5,12 +5,12 @@ from pytorch_lightning import LightningModule, Trainer
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
 
+from pl_bolts.datasets import MNIST
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms
-    from torchvision.datasets import MNIST
 else:  # pragma: no cover
     warn_missing_pkg('torchvision')
 
