@@ -123,7 +123,7 @@ class Moco_v2(pl.LightningModule):
 
         # create the validation queue
         self.register_buffer("val_queue", torch.randn(emb_dim, num_negatives))
-        self.queue = nn.functional.normalize(self.val_queue, dim=0)
+        self.val_queue = nn.functional.normalize(self.val_queue, dim=0)
 
         self.register_buffer("val_queue_ptr", torch.zeros(1, dtype=torch.long))
 
