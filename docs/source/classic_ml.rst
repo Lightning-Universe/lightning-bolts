@@ -22,9 +22,9 @@ Add either L1 or L2 regularization, or both, by specifying the regularization st
     from pl_bolts.models.regression import LinearRegression
     import pytorch_lightning as pl
     from pl_bolts.datamodules import SklearnDataModule
-    from sklearn.datasets import load_boston
+    from sklearn.datasets import load_diabetes
 
-    X, y = load_boston(return_X_y=True)
+    X, y = load_diabetes(return_X_y=True)
     loaders = SklearnDataModule(X, y)
 
     model = LinearRegression(input_dim=13)
