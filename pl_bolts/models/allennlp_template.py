@@ -28,8 +28,10 @@ def _is_loggable(x):
 
 def anlp_param(param):
     # Not sure if this is the best way to define the paramaters
-    for p in ["train_data_path", "validation_data_path", "test_data_path", "dataset_reader",
-              "val_dataset_reader", "model", "data_loader"]:
+    for p in [
+        "train_data_path", "validation_data_path", "test_data_path", "dataset_reader", "val_dataset_reader", "model",
+        "data_loader"
+    ]:
         if param == p or param.startswith(p + "."):
             return True
     return False
@@ -37,11 +39,7 @@ def anlp_param(param):
 
 class AllenNlpLightningModule(LightningModule):
 
-    def __init__(self,
-                 params: Union[Params, Dict, Namespace] = None,
-                 filter_params=True,
-                 **kwargs
-                 ):
+    def __init__(self, params: Union[Params, Dict, Namespace] = None, filter_params=True, **kwargs):
         """
         params -- The preferred way to pass params is via the kwargs. This allows loggers such as WandbLogger
         to use the real parameter name instead of prefixing it with "params." However you may also pass in
@@ -88,18 +86,13 @@ class AllenNlpLightningModule(LightningModule):
                     raise ConfigurationError(f"invalid 'dataset_for_vocab_creation' {key}")
 
         instance_generator = (
-            instance
-            for key, dataset in datasets.items()
-            if not datasets_for_vocab_creation or key in datasets_for_vocab_creation
-            for instance in dataset
+            instance for key, dataset in datasets.items()
+            if not datasets_for_vocab_creation or key in datasets_for_vocab_creation for instance in dataset
         )
 
         # Build vocabulary
         log.info("Building vocabulary...")
-        vocabulary = Vocabulary.from_params(
-            params=params.get('vocabulary', Params({})),
-            instances=instance_generator
-        )
+        vocabulary = Vocabulary.from_params(params=params.get('vocabulary', Params({})), instances=instance_generator)
 
         self.model = Model.from_params(params=params['model'], vocab=vocabulary)
 
@@ -109,17 +102,13 @@ class AllenNlpLightningModule(LightningModule):
             dataset.index_with(self.model.vocab)
 
         # Create the train DataLoader
-        self.data_loader = DataLoader.from_params(
-            params=deepcopy(params['data_loader']),
-            dataset=datasets["train"]
-        )
+        self.data_loader = DataLoader.from_params(params=deepcopy(params['data_loader']), dataset=datasets["train"])
 
         # Optionally, create the validation DataLoader
         validation_data = datasets.get("validation")
         if validation_data is not None:
             self.validation_data_loader = DataLoader.from_params(
-                params=deepcopy(params.get('validation_data_loader', params['data_loader'])),
-                dataset=validation_data
+                params=deepcopy(params.get('validation_data_loader', params['data_loader'])), dataset=validation_data
             )
         else:
             self.validation_data_loader = None
@@ -128,8 +117,7 @@ class AllenNlpLightningModule(LightningModule):
         test_data = datasets.get("test")
         if test_data is not None:
             self.test_data_loader = DataLoader.from_params(
-                params=deepcopy(params.get('validation_data_loader', params['data_loader'])),
-                dataset=test_data
+                params=deepcopy(params.get('validation_data_loader', params['data_loader'])), dataset=test_data
             )
         else:
             self.test_data_loader = None
@@ -153,8 +141,7 @@ class AllenNlpLightningModule(LightningModule):
         update['log'] = {k: v for k, v in output_dict.items() if _is_loggable(v)}
         update['log'].update(loss=output_dict['loss'], epoch=self.current_epoch)
         #         update['log']['batch'] = batch_idx
-        update['progress_bar'] = {k: v for k, v in output_dict.items()
-                                  if _is_scalar(v) and k != 'loss'}
+        update['progress_bar'] = {k: v for k, v in output_dict.items() if _is_scalar(v) and k != 'loss'}
         update['progress_bar'].update(batch=batch_idx)
         output_dict.update(update)
         return output_dict
@@ -170,11 +157,7 @@ class AllenNlpLightningModule(LightningModule):
 
         # Handle loss:
         val_loss = torch.stack([x['loss'] for x in outputs]).mean()
-        result = {
-            'val_loss': val_loss,
-            'log': {'val_loss': val_loss},
-            'progress_bar': {'val_loss': val_loss}
-        }
+        result = {'val_loss': val_loss, 'log': {'val_loss': val_loss}, 'progress_bar': {'val_loss': val_loss}}
 
         # Handle everything else
         for key in outputs[0].keys():
@@ -209,7 +192,4 @@ class AllenNlpLightningModule(LightningModule):
     def configure_optimizers(self):
         from allennlp.training.optimizers import Optimizer
         parameters = [[n, p] for n, p in self.model.named_parameters() if p.requires_grad]
-        return Optimizer.from_params(
-            params=parameters['trainer']['optimizer'],
-            model_parameters=parameters
-        )
+        return Optimizer.from_params(params=parameters['trainer']['optimizer'], model_parameters=parameters)
