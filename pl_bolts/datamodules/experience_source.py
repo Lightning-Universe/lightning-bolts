@@ -4,7 +4,7 @@ Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/
 """
 from abc import ABC
 from collections import deque, namedtuple
-from typing import Callable, Iterable, List, Tuple
+from typing import Callable, Iterator, List, Tuple
 
 import torch
 from torch.utils.data import IterableDataset
@@ -30,7 +30,7 @@ class ExperienceSourceDataset(IterableDataset):
     def __init__(self, generate_batch: Callable) -> None:
         self.generate_batch = generate_batch
 
-    def __iter__(self) -> Iterable:
+    def __iter__(self) -> Iterator:
         iterator = self.generate_batch()
         return iterator
 
