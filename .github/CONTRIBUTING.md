@@ -101,7 +101,7 @@ make test
 
 Want to add a new test case and not sure how? [Talk to us!](https://join.slack.com/t/pytorch-lightning/shared_invite/zt-pw5v393p-qRaDgEk24~EjiZNBpSQFgQ)
 
-**Note before submitting the PR, make sure you have run `make format`.**
+**Note before submitting the PR, make sure you have run `pre-commit run`.**
 ---
 
 ## Guidelines
