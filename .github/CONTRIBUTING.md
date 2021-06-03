@@ -106,7 +106,7 @@ Want to add a new test case and not sure how? [Talk to us!](https://join.slack.c
 
 ## Guidelines
 
-For this section, we refer to read the [parent PL guidelines](https://pytorch-lightning.readthedocs.io/en/latest/CONTRIBUTING.html)
+For this section, we refer to read the [parent PL guidelines](https://pytorch-lightning.readthedocs.io/en/latest/generated/CONTRIBUTING.html)
 
 **Reminder**
 
