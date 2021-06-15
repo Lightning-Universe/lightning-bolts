@@ -18,4 +18,3 @@ In case you want to have full experience you can install all optional packages a
 .. code-block:: bash
 
    pip install lightning-bolts["extra"]
-

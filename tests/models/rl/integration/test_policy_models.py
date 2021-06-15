@@ -30,13 +30,9 @@ class TestPolicyModels(TestCase):
         """Smoke test that the reinforce model runs"""
 
         model = Reinforce(self.hparams.env)
-        result = self.trainer.fit(model)
-
-        self.assertEqual(result, 1)
+        self.trainer.fit(model)
 
     def test_policy_gradient(self):
         """Smoke test that the policy gradient model runs"""
         model = VanillaPolicyGradient(self.hparams.env)
-        result = self.trainer.fit(model)
-
-        self.assertEqual(result, 1)
+        self.trainer.fit(model)
