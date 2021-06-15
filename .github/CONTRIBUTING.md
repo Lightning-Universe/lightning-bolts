@@ -101,12 +101,12 @@ make test
 
 Want to add a new test case and not sure how? [Talk to us!](https://join.slack.com/t/pytorch-lightning/shared_invite/zt-pw5v393p-qRaDgEk24~EjiZNBpSQFgQ)
 
-**Note before submitting the PR, make sure you have run `make isort`.**
+**Note before submitting the PR, make sure you have run `pre-commit run`.**
 ---
 
 ## Guidelines
 
-For this section, we refer to read the [parent PL guidelines](https://pytorch-lightning.readthedocs.io/en/latest/CONTRIBUTING.html)
+For this section, we refer to read the [parent PL guidelines](https://pytorch-lightning.readthedocs.io/en/latest/generated/CONTRIBUTING.html)
 
 **Reminder**
 

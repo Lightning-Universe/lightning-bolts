@@ -36,5 +36,5 @@ Creating a callback is simple:
         def on_epoch_end(self, trainer, pl_module):
             # do something
 
-Please refer to `Callback docs <https://pytorch-lightning.readthedocs.io/en/stable/callbacks.html#callback-base>`_
+Please refer to `Callback docs <https://pytorch-lightning.readthedocs.io/en/stable/extensions/callbacks.html#built-in-callbacks>`_
 for a full list of the 20+ hooks available.
