@@ -21,6 +21,7 @@ class TestToTensor(TestCase):
 
 
 class TestMakeEnv(TestCase):
+
     def setUp(self) -> None:
         from pl_bolts.models.rl.common.gym_wrappers import make_environment
         self.test_func = make_environment
@@ -34,6 +35,7 @@ class TestMakeEnv(TestCase):
 
 
 class TestAtari(TestCase):
+
     def setUp(self) -> None:
         from pl_bolts.models.rl.common.gym_wrappers import make_atari_env
         self.env = ToTensor(make_atari_env("ZaxxonNoFrameskip-v0"))

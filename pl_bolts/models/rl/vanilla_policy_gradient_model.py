@@ -57,17 +57,17 @@ class VanillaPolicyGradient(pl.LightningModule):
     """
 
     def __init__(
-            self,
-            env: str,
-            gamma: float = 0.99,
-            lr: float = 0.01,
-            batch_size: int = 8,
-            n_steps: int = 10,
-            avg_reward_len: int = 100,
-            entropy_beta: float = 0.01,
-            seed: int = 123,
-            epoch_len: int = 1000,
-            **kwargs
+        self,
+        env: str,
+        gamma: float = 0.99,
+        lr: float = 0.01,
+        batch_size: int = 8,
+        n_steps: int = 10,
+        avg_reward_len: int = 100,
+        entropy_beta: float = 0.01,
+        seed: int = 123,
+        epoch_len: int = 1000,
+        **kwargs
     ) -> None:
         """
         Args:

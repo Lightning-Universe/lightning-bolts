@@ -34,6 +34,7 @@ else:  # pragma: no cover
 
 
 class NoopResetEnv(Wrapper):
+
     def __init__(self, env, noop_max=30):
         """Sample initial states by taking random number of no-ops on reset.
         No-op is assumed to be action 0.
@@ -110,6 +111,7 @@ class FireResetEnv(Wrapper):
 
 
 class EpisodicLifeEnv(Wrapper):
+
     def __init__(self, env):
         """Make end-of-life == end-of-episode, but only reset on true game over.
         Done by DeepMind for the DQN and co. since it helps value estimation.
@@ -182,6 +184,7 @@ class MaxAndSkipEnv(Wrapper):
 
 
 class ClipRewardEnv(RewardWrapper):
+
     def __init__(self, env):
         super(ClipRewardEnv, self).__init__(env)
 
@@ -191,6 +194,7 @@ class ClipRewardEnv(RewardWrapper):
 
 
 class WarpFrame(ObservationWrapper):
+
     def __init__(self, env, width=84, height=84, grayscale=True, dict_space_key=None):
         """
         Warp frames to 84x84 as done in the Nature paper and later work.
@@ -229,9 +233,7 @@ class WarpFrame(ObservationWrapper):
 
         if self._grayscale:
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-        frame = cv2.resize(
-            frame, (self._width, self._height), interpolation=cv2.INTER_AREA
-        )
+        frame = cv2.resize(frame, (self._width, self._height), interpolation=cv2.INTER_AREA)
         if self._grayscale:
             frame = np.expand_dims(frame, -1)
 
@@ -251,8 +253,7 @@ class ProcessFrame84(ObservationWrapper):
             raise ModuleNotFoundError('This class uses OpenCV which it is not installed yet.')
 
         super(ProcessFrame84, self).__init__(env)
-        self.observation_space = gym.spaces.Box(
-            low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
+        self.observation_space = gym.spaces.Box(low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
 
     def observation(self, obs):
         """preprocess the obs"""
@@ -293,6 +294,7 @@ class ImageToPyTorch(ObservationWrapper):
 
 
 class FrameStack(Wrapper):
+
     def __init__(self, env, k):
         """Stack k last frames.
         Returns lazy array, which is much more memory efficient.
@@ -304,8 +306,9 @@ class FrameStack(Wrapper):
         self.k = k
         self.frames = collections.deque([], maxlen=k)
         shp = env.observation_space.shape
-        self.observation_space = gym.spaces.Box(low=0, high=255, shape=(shp[:-1] + (shp[-1] * k,)),
-                                                dtype=env.observation_space.dtype)
+        self.observation_space = gym.spaces.Box(
+            low=0, high=255, shape=(shp[:-1] + (shp[-1] * k, )), dtype=env.observation_space.dtype
+        )
 
     def reset(self):
         ob = self.env.reset()
@@ -378,6 +381,7 @@ class DataAugmentation(ObservationWrapper):
 
 
 class LazyFrames:
+
     def __init__(self, frames):
         """This object ensures that common frames between the observations are only stored once.
         It exists purely to optimize memory usage which can be huge for DQN's 1M frames replay
