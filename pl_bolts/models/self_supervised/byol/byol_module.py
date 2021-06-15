@@ -10,7 +10,6 @@ from torch.optim import Adam
 
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
 from pl_bolts.models.self_supervised.byol.models import SiameseArm
-from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
@@ -135,13 +134,12 @@ class BYOL(pl.LightningModule):
         loss_a, loss_b, total_loss = self.shared_step(batch, batch_idx)
 
         # log results
-        self.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'train_loss': total_loss})
+        self.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'val_loss': total_loss})
 
         return total_loss
 
     def configure_optimizers(self):
         optimizer = Adam(self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
-        optimizer = LARSWrapper(optimizer)
         scheduler = LinearWarmupCosineAnnealingLR(
             optimizer, warmup_epochs=self.hparams.warmup_epochs, max_epochs=self.hparams.max_epochs
         )

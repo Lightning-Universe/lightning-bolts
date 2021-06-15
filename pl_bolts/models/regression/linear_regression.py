@@ -117,7 +117,7 @@ def cli_main() -> None:
 
     # create dataset
     if _SKLEARN_AVAILABLE:
-        from sklearn.datasets import load_boston
+        from sklearn.datasets import load_diabetes
     else:  # pragma: no cover
         raise ModuleNotFoundError(
             'You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`.'
@@ -130,11 +130,11 @@ def cli_main() -> None:
     args = parser.parse_args()
 
     # model
-    model = LinearRegression(input_dim=13, l1_strength=1, l2_strength=1)
+    model = LinearRegression(input_dim=10, l1_strength=1, l2_strength=1)
     # model = LinearRegression(**vars(args))
 
     # data
-    X, y = load_boston(return_X_y=True)  # these are numpy arrays
+    X, y = load_diabetes(return_X_y=True)  # these are numpy arrays
     loaders = SklearnDataModule(X, y, batch_size=args.batch_size)
 
     # train
