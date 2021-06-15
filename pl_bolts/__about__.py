@@ -1,4 +1,4 @@
-__version__ = '0.3.2'
+__version__ = '0.4.0dev'
 __author__ = 'PyTorchLightning et al.'
 __author_email__ = 'name@pytorchlightning.ai'
 __license__ = 'Apache-2.0'
@@ -23,3 +23,13 @@ This repository is meant for model contributions from the community.
 To add a model, you can start with the MNIST template (or any other model in the repo).
 Please organize the functions of your lightning module.
 """
+
+__all__ = [
+    "__author__",
+    "__author_email__",
+    "__copyright__",
+    "__docs__",
+    "__homepage__",
+    "__license__",
+    "__version__",
+]

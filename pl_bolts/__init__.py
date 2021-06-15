@@ -2,15 +2,7 @@
 
 import os
 
-from pl_bolts.info import (  # noqa: F401
-    __author__,
-    __author_email__,
-    __copyright__,
-    __docs__,
-    __homepage__,
-    __license__,
-    __version__,
-)
+from pl_bolts.__about__ import *  # noqa: F401 F403
 
 _PACKAGE_ROOT = os.path.dirname(__file__)
 _PROJECT_ROOT = os.path.dirname(_PACKAGE_ROOT)
