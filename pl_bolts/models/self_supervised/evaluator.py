@@ -10,12 +10,7 @@ class SSLEvaluator(nn.Module):
         self.n_hidden = n_hidden
         if n_hidden is None:
             # use linear classifier
-            self.block_forward = nn.Sequential(
-                Flatten(),
-                nn.Dropout(p=p),
-                nn.Linear(n_input, n_classes, bias=True),
-                nn.Softmax(),
-            )
+            self.block_forward = nn.Sequential(Flatten(), nn.Dropout(p=p), nn.Linear(n_input, n_classes, bias=True))
         else:
             # use simple MLP classifier
             self.block_forward = nn.Sequential(
@@ -26,7 +21,6 @@ class SSLEvaluator(nn.Module):
                 nn.ReLU(inplace=True),
                 nn.Dropout(p=p),
                 nn.Linear(n_hidden, n_classes, bias=True),
-                nn.Softmax(),
             )
 
     def forward(self, x):
