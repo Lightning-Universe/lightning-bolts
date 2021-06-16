@@ -77,8 +77,8 @@ class LogisticRegression(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         x, y = batch
         x = x.view(x.size(0), -1)
-        y_hat = self(x)
-        acc = accuracy(y_hat, y)
+        y_hat = self.linear(x)
+        acc = accuracy(F.softmax(y_hat, -1), y)
         return {'val_loss': F.cross_entropy(y_hat, y), 'acc': acc}
 
     def validation_epoch_end(self, outputs):
@@ -91,8 +91,8 @@ class LogisticRegression(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         x, y = batch
         x = x.view(x.size(0), -1)
-        y_hat = self(x)
-        acc = accuracy(y_hat, y)
+        y_hat = self.linear(x)
+        acc = accuracy(F.softmax(y_hat, -1), y)
         return {'test_loss': F.cross_entropy(y_hat, y), 'acc': acc}
 
     def test_epoch_end(self, outputs):
