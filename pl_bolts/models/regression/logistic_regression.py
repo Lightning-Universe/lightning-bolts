@@ -54,7 +54,7 @@ class LogisticRegression(pl.LightningModule):
         # flatten any input
         x = x.view(x.size(0), -1)
 
-        y_hat = self(x)
+        y_hat = self.linear(x)
 
         # PyTorch cross_entropy function combines log_softmax and nll_loss in single function
         loss = F.cross_entropy(y_hat, y, reduction='sum')
