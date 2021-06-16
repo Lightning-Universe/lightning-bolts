@@ -13,8 +13,7 @@ class SSLEvaluator(nn.Module):
             self.block_forward = nn.Sequential(
                 Flatten(),
                 nn.Dropout(p=p),
-                nn.Linear(n_input, n_classes, bias=True),
-                nn.Softmax(),
+                nn.Linear(n_input, n_classes, bias=True)
             )
         else:
             # use simple MLP classifier
@@ -25,8 +24,7 @@ class SSLEvaluator(nn.Module):
                 nn.BatchNorm1d(n_hidden),
                 nn.ReLU(inplace=True),
                 nn.Dropout(p=p),
-                nn.Linear(n_hidden, n_classes, bias=True),
-                nn.Softmax(),
+                nn.Linear(n_hidden, n_classes, bias=True)
             )
 
     def forward(self, x):
