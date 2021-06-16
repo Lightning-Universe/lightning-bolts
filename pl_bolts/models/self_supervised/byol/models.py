@@ -23,17 +23,17 @@ class MLP(nn.Module):
 
 class SiameseArm(nn.Module):
 
-    def __init__(self, encoder=None):
+    def __init__(self, encoder='resnet50', encoder_out_dim=2048, projector_hidden_size=4096, projector_out_dim=256):
         super().__init__()
 
-        if encoder is None:
-            encoder = torchvision_ssl_encoder('resnet50')
+        if isinstance(encoder, str):
+            encoder = torchvision_ssl_encoder(encoder)
         # Encoder
         self.encoder = encoder
         # Projector
-        self.projector = MLP()
+        self.projector = MLP(encoder_out_dim, projector_hidden_size, projector_out_dim)
         # Predictor
-        self.predictor = MLP(input_dim=256)
+        self.predictor = MLP(projector_out_dim, projector_hidden_size, projector_out_dim)
 
     def forward(self, x):
         y = self.encoder(x)[0]
