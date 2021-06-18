@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 
+from pytorch_lightning import Trainer
 from pl_bolts.models.rl.ppo_model import PPO
 
 
@@ -61,3 +62,15 @@ def test_actor_loss_continuous():
     loss = model.actor_loss(batch_states, batch_actions, batch_logp_old, batch_adv)
 
     assert isinstance(loss, torch.Tensor)
+
+
+def test_training_categorical():
+    model = PPO('CartPole-v0', batch_size=16)
+    trainer = Trainer(max_epochs=1)
+    trainer.fit(model)
+
+
+def test_training_continous():
+    model = PPO('MountainCarContinuous-v0', batch_size=16)
+    trainer = Trainer(max_epochs=1)
+    trainer.fit(model)
