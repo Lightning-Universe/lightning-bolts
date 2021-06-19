@@ -16,19 +16,7 @@ import os
 import re
 from typing import List
 
-from pl_bolts import __homepage__, __version__, _PROJECT_ROOT
-
-_PATH_BADGES = os.path.join('.', 'docs', 'source', '_images', 'badges')
-# badge to download
-_DEFAULT_BADGES = (
-    'Conda',
-    'DockerHub',
-    'codecov',
-    'ReadTheDocs',
-    'Slack',
-    'Discourse status',
-    'license',
-)
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 
 
 def _load_requirements(path_dir: str, file_name: str = 'requirements.txt', comment_char: str = '#') -> List[str]:
@@ -52,10 +40,10 @@ def _load_requirements(path_dir: str, file_name: str = 'requirements.txt', comme
     return reqs
 
 
-def _load_readme_description(path_dir: str, homepage: str = __homepage__, ver: str = __version__) -> str:
+def _load_readme_description(path_dir: str, homepage: str, ver: str) -> str:
     """Load readme as decribtion
 
-    >>> _load_readme_description(_PROJECT_ROOT)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+    >>> _load_readme_description(_PROJECT_ROOT, "", "")  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
     '<div align="center">...'
     """
     path_readme = os.path.join(path_dir, "README.md")
@@ -72,7 +60,7 @@ def _load_readme_description(path_dir: str, homepage: str = __homepage__, ver: s
 
     # readthedocs badge
     text = text.replace('badge/?version=stable', f'badge/?version={ver}')
-    text = text.replace('pytorch-lightning.readthedocs.io/en/stable/', f'pytorch-lightning.readthedocs.io/en/{ver}')
+    text = text.replace('lightning-bolts.readthedocs.io/en/stable/', f'lightning-bolts.readthedocs.io/en/{ver}')
     # codecov badge
     text = text.replace('/branch/master/graph/badge.svg', f'/release/{ver}/graph/badge.svg')
     # replace github badges for release ones

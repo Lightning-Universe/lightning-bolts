@@ -1,4 +1,4 @@
-import os
+import urllib.parse
 from argparse import ArgumentParser
 
 import pytorch_lightning as pl
@@ -27,11 +27,11 @@ class AE(pl.LightningModule):
         ae = AE()
 
         # pretrained on cifar10
-        ae = AE.from_pretrained('cifar10-resnet18')
+        ae = AE(input_height=32).from_pretrained('cifar10-resnet18')
     """
 
     pretrained_urls = {
-        'cifar10-resnet18': os.path.join(_HTTPS_AWS_HUB, 'ae/ae-cifar10/checkpoints/epoch%3D96.ckpt'),
+        'cifar10-resnet18': urllib.parse.urljoin(_HTTPS_AWS_HUB, 'ae/ae-cifar10/checkpoints/epoch%3D96.ckpt'),
     }
 
     def __init__(

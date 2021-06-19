@@ -13,37 +13,37 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 # import m2r
-import builtins
 import glob
 import inspect
 import os
 import shutil
 import sys
+from importlib.util import module_from_spec, spec_from_file_location
 
 import pt_lightning_sphinx_theme
-from sphinx.ext import apidoc
 
-PATH_HERE = os.path.abspath(os.path.dirname(__file__))
-PATH_ROOT = os.path.join(PATH_HERE, '..', '..')
-sys.path.insert(0, os.path.abspath(PATH_ROOT))
-
-builtins.__LIGHTNING_BOLT_SETUP__: bool = True
+_PATH_HERE = os.path.abspath(os.path.dirname(__file__))
+_PATH_ROOT = os.path.join(_PATH_HERE, '..', '..')
+sys.path.insert(0, os.path.abspath(_PATH_ROOT))
 
 SPHINX_MOCK_REQUIREMENTS = int(os.environ.get('SPHINX_MOCK_REQUIREMENTS', True))
 
-import pl_bolts  # noqa: E402
+# alternative https://stackoverflow.com/a/67692/4521646
+spec = spec_from_file_location("pl_bolts", os.path.join(_PATH_ROOT, "pl_bolts", "__about__.py"))
+info = module_from_spec(spec)
+spec.loader.exec_module(info)
 
 # -- Project information -----------------------------------------------------
 
 # this name shall match the project name in Github as it is used for linking to code
-project = 'PyTorch-Lightning-Bolts'
-copyright = pl_bolts.__copyright__
-author = pl_bolts.__author__
+project = 'Lightning-Bolts'
+copyright = info.__copyright__
+author = info.__author__
 
 # The short X.Y version
-version = pl_bolts.__version__
+version = info.__version__
 # The full version, including alpha/beta/rc tags
-release = pl_bolts.__version__
+release = info.__version__
 
 # Options for the linkcode extension
 # ----------------------------------
@@ -63,11 +63,11 @@ github_repo = project
 #     fp.write(readme)
 
 # copy all documents from GH templates like contribution guide
-for md in glob.glob(os.path.join(PATH_ROOT, '.github', '*.md')):
-    shutil.copy(md, os.path.join(PATH_HERE, os.path.basename(md)))
+for md in glob.glob(os.path.join(_PATH_ROOT, '.github', '*.md')):
+    shutil.copy(md, os.path.join(_PATH_HERE, os.path.basename(md)))
 
 # export the changelog
-with open(os.path.join(PATH_ROOT, 'CHANGELOG.md'), 'r') as fp:
+with open(os.path.join(_PATH_ROOT, 'CHANGELOG.md'), 'r') as fp:
     chlog_lines = fp.readlines()
 # enrich short subsub-titles to be unique
 chlog_ver = ''
@@ -77,14 +77,14 @@ for i, ln in enumerate(chlog_lines):
     elif ln.startswith('### '):
         ln = ln.replace('###', f'### {chlog_ver} -')
         chlog_lines[i] = ln
-with open(os.path.join(PATH_HERE, 'CHANGELOG.md'), 'w') as fp:
+with open(os.path.join(_PATH_HERE, 'CHANGELOG.md'), 'w') as fp:
     fp.writelines(chlog_lines)
 
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
 
-needs_sphinx = '2.4'
+needs_sphinx = '3.4'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -145,11 +145,6 @@ language = None
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = [
-    'api/pl_bolts.rst',
-    'api/modules.rst',
-    'api/pl_bolts.submit.rst',
-    'api/pl_bolts.utils.*',
-    'api/pl_bolts.setup_tools.*',
     'PULL_REQUEST_TEMPLATE.md',
 ]
 
@@ -169,8 +164,8 @@ html_theme_path = [pt_lightning_sphinx_theme.get_html_theme_path()]
 # documentation.
 
 html_theme_options = {
-    'pytorch_project': pl_bolts.__homepage__,
-    'canonical_url': pl_bolts.__homepage__,
+    'pytorch_project': info.__homepage__,
+    'canonical_url': info.__homepage__,
     'collapse_navigation': False,
     'display_version': True,
     'logo_only': False,
@@ -286,48 +281,18 @@ todo_include_todos = True
 # sphinx-apidoc for me, since it's easy to forget to regen API docs
 # and commit them to my repo after making changes to my code.
 
-# packages for which sphinx-apidoc should generate the docs (.rst files)
-PACKAGES = [
-    pl_bolts.__name__,
-]
-
-apidoc_output_folder = os.path.join(PATH_HERE, 'api')
-
-
-def run_apidoc(_):
-    sys.path.insert(0, apidoc_output_folder)
-
-    # delete api-doc files before generating them
-    if os.path.exists(apidoc_output_folder):
-        shutil.rmtree(apidoc_output_folder)
-
-    for pkg in PACKAGES:
-        argv = [
-            '-e',
-            '-o',
-            apidoc_output_folder,
-            os.path.join(PATH_ROOT, pkg),
-            '**/test_*',
-            '--force',
-            '--private',
-            '--module-first',
-        ]
-
-        apidoc.main(argv)
-
 
 def setup(app):
     # this is for hiding doctest decoration,
     # see: http://z4r.github.io/python/2011/12/02/hides-the-prompts-and-output/
-    app.add_javascript('copybutton.js')
-    app.connect('builder-inited', run_apidoc)
+    app.add_js_file('copybutton.js')
 
 
 # copy all notebooks to local folder
-path_nbs = os.path.join(PATH_HERE, 'notebooks')
+path_nbs = os.path.join(_PATH_HERE, 'notebooks')
 if not os.path.isdir(path_nbs):
     os.mkdir(path_nbs)
-for path_ipynb in glob.glob(os.path.join(PATH_ROOT, 'notebooks', '*.ipynb')):
+for path_ipynb in glob.glob(os.path.join(_PATH_ROOT, 'notebooks', '*.ipynb')):
     path_ipynb2 = os.path.join(path_nbs, os.path.basename(path_ipynb))
     shutil.copy(path_ipynb, path_ipynb2)
 
@@ -355,16 +320,13 @@ PACKAGE_MAPPING = {
 MOCK_PACKAGES = []
 if SPHINX_MOCK_REQUIREMENTS:
     # mock also base packages when we are on RTD since we don't install them there
-    MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements.txt'))
-    MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements', 'models.txt'))
-    MOCK_PACKAGES += package_list_from_file(os.path.join(PATH_ROOT, 'requirements', 'loggers.txt'))
+    MOCK_PACKAGES += package_list_from_file(os.path.join(_PATH_ROOT, 'requirements.txt'))
+    MOCK_PACKAGES += package_list_from_file(os.path.join(_PATH_ROOT, 'requirements', 'models.txt'))
+    MOCK_PACKAGES += package_list_from_file(os.path.join(_PATH_ROOT, 'requirements', 'loggers.txt'))
 # replace PyPI packages by importing ones
 MOCK_PACKAGES = [PACKAGE_MAPPING.get(pkg, pkg) for pkg in MOCK_PACKAGES]
 
 autodoc_mock_imports = MOCK_PACKAGES
-
-# for mod_name in MOCK_REQUIRE_PACKAGES:
-#     sys.modules[mod_name] = mock.Mock()
 
 
 # Resolve function
@@ -406,6 +368,8 @@ def linkcode_resolve(domain, info):
     return "https://github.com/%s/%s/blob/%s" \
            % (github_user, github_repo, filename)
 
+
+autosummary_generate = True
 
 autodoc_member_order = 'groupwise'
 autoclass_content = 'both'

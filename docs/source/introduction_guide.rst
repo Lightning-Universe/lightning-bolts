@@ -20,7 +20,7 @@ All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, G
 
     from pl_bolts.models import VAE
     from pl_bolts.models.vision import GPT2, ImageGPT, PixelCNN
-    from pl_bolts.models.self_supervised import AMDIM, CPCV2, SimCLR, MocoV2
+    from pl_bolts.models.self_supervised import AMDIM, CPC_v2, SimCLR, Moco_v2
     from pl_bolts.models import LinearRegression, LogisticRegression
     from pl_bolts.models.gans import GAN
     from pl_bolts.callbacks import PrintTableMetricsCallback
@@ -111,10 +111,10 @@ We accept contributions directly to Bolts or via your own repository.
 To contribute:
 
 1. Submit a pull request to Bolts (we will help you finish it!).
-2. We'll help you add `tests <https://github.com/PyTorchLightning/pytorch-lightning-bolts/tree/master/tests>`_.
+2. We'll help you add `tests <https://github.com/PyTorchLightning/lightning-bolts/tree/master/tests>`_.
 3. We'll help you refactor models to work on `(GPU, TPU, CPU). <https://www.youtube.com/watch?v=neuNEcN9FK4>`_.
 4. We'll help you remove bottlenecks in your model.
-5. We'll help you write up `documentation <https://pytorch-lightning-bolts.readthedocs.io/en/latest/convolutional.html#image-gpt>`_.
+5. We'll help you write up `documentation <https://lightning-bolts.readthedocs.io/en/latest/convolutional.html#image-gpt>`_.
 6. We'll help you pretrain expensive models and host weights for you.
 7. We'll create proper attribution for you and link to your repo.
 8. Once all of this is ready, we will merge into bolts.
@@ -128,8 +128,8 @@ with the other components of the library!
 Contribution ideas
 ^^^^^^^^^^^^^^^^^^
 Don't have something to contribute? Ping us on
-`Slack <https://join.slack.com/t/pytorch-lightning/shared_invite/zt-f6bl2l0l-JYMK3tbAgAmGRrlNr00f1A>`_
-or look at our `Github issues <https://github.com/PyTorchLightning/pytorch-lightning-bolts/
+`Slack <https://join.slack.com/t/pytorch-lightning/shared_invite/zt-pw5v393p-qRaDgEk24~EjiZNBpSQFgQ>`_
+or look at our `Github issues <https://github.com/PyTorchLightning/lightning-bolts/
 issues?q=is%3Aissue+is%3Aopen+label%3A%22Model+to+implement%22>`_!
 
 **We'll help and guide you through the implementation / conversion**
@@ -149,15 +149,15 @@ For example, you could use a pretrained VAE to generate features for an image da
 .. testcode::
 
     from pl_bolts.models.autoencoders import VAE
-    from pl_bolts.models.self_supervised import CPCV2
+    from pl_bolts.models.self_supervised import CPC_v2
 
     model1 = VAE(input_height=32, pretrained='imagenet2012')
     encoder = model1.encoder
     encoder.eval()
 
     # bolts are pretrained on different datasets
-    model2 = CPCV2(encoder='resnet18', pretrained='imagenet128').freeze()
-    model3 = CPCV2(encoder='resnet18', pretrained='stl10').freeze()
+    model2 = CPC_v2(encoder='resnet18', pretrained='imagenet128').freeze()
+    model3 = CPC_v2(encoder='resnet18', pretrained='stl10').freeze()
 
 .. code-block:: python
 
@@ -178,7 +178,7 @@ you can use any finetuning protocol you prefer.
 .. code-block:: python
 
     # unfrozen finetune
-    model = CPCV2(encoder='resnet18', pretrained='imagenet128')
+    model = CPC_v2(encoder='resnet18', pretrained='imagenet128')
     resnet18 = model.encoder
     # don't call .freeze()
 
@@ -193,7 +193,7 @@ you can use any finetuning protocol you prefer.
 .. code-block:: python
 
     # FREEZE!
-    model = CPCV2(encoder='resnet18', pretrained='imagenet128')
+    model = CPC_v2(encoder='resnet18', pretrained='imagenet128')
     resnet18 = model.encoder
     resnet18.eval()
 
@@ -338,10 +338,10 @@ We even have prebuilt modules to bridge the gap between Numpy, Sklearn and PyTor
 
 .. code-block:: python
 
-    from sklearn.datasets import load_boston
+    from sklearn.datasets import load_diabetes
     from pl_bolts.datamodules import SklearnDataModule
 
-    X, y = load_boston(return_X_y=True)
+    X, y = load_diabetes(return_X_y=True)
     datamodule = SklearnDataModule(X, y)
 
     model = LitModel(datamodule)
@@ -382,10 +382,10 @@ Here's an example for Linear regression
 
     import pytorch_lightning as pl
     from pl_bolts.datamodules import SklearnDataModule
-    from sklearn.datasets import load_boston
+    from sklearn.datasets import load_diabetes
 
     # link the numpy dataset to PyTorch
-    X, y = load_boston(return_X_y=True)
+    X, y = load_diabetes(return_X_y=True)
     loaders = SklearnDataModule(X, y)
 
     # training runs training batches while validating against a validation set

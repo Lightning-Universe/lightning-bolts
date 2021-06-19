@@ -1,2 +1,5 @@
 torch>=1.6
-pytorch-lightning>=1.1.1, <1.2
+torchmetrics>=0.2.0
+pytorch-lightning>=1.1.1
+dataclasses ; python_version <= "3.6"
+packaging

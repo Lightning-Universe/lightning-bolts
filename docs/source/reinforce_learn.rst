@@ -21,7 +21,7 @@ Contributions by: `Donal Byrne <https://github.com/djbyrne>`_
 
 ------------
 
-.. note:: 
+.. note::
     RL models currently only support CPU and single GPU training with `distributed_backend=dp`.
     Full GPU support will be added in later updates.
 
@@ -45,7 +45,7 @@ Original implementation by: `Donal Byrne <https://github.com/djbyrne>`_
 
 The DQN was introduced in `Playing Atari with Deep Reinforcement Learning <https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf>`_ by
 researchers at DeepMind. This took the concept of tabular Q learning and scaled it to much larger problems by
-apporximating the Q function using a deep neural network.
+approximating the Q function using a deep neural network.
 
 The goal behind DQN was to take the simple control method of Q learning and scale it up in order to solve complicated \
 tasks. As well as this, the method needed to be stable. The DQN solves these issues with the following additions.
@@ -189,7 +189,7 @@ by subtracting the mean advantage from the Q value. This essentially pulls the m
 Dueling DQN Benefits
 ~~~~~~~~~~~~~~~~~~~~
 
-- Ability to efficiently learn the state value function. In the dueling network, every Q update also updates the value 
+- Ability to efficiently learn the state value function. In the dueling network, every Q update also updates the value
   stream, where as in DQN only the value of the chosen action is updated. This provides a better approximation of the
   values
 - The differences between total Q values for a given state are quite small in relation to the magnitude of Q. The
@@ -349,7 +349,7 @@ pair using a single step which looks like this
 
     Q(s_t,a_t)=r_t+{\gamma}\max_aQ(s_{t+1},a_{t+1})
 
-but because the Q function is recursive we can continue to roll this out into multiple steps, looking at the expected 
+but because the Q function is recursive we can continue to roll this out into multiple steps, looking at the expected
 return for each step into the future.
 
 .. math::
@@ -435,7 +435,7 @@ batch. Instead of just randomly sampling from the buffer prioritized experience 
 based on training loss. This concept was introduced in the paper
 `Prioritized Experience Replay <https://arxiv.org/abs/1511.05952>`__
 
-Essentially we want to train more on the samples that sunrise the agent.
+Essentially we want to train more on the samples that surprise the agent.
 
 The priority of each sample is defined below where
 
@@ -570,7 +570,7 @@ algorithm is as follows:
 .. math::
 
     L =  - \sum_{k,t} Q_{k,t} \log(\pi(S_{k,t}, A_{k,t}))
-    
+
 5. Perform SGD on the loss and repeat.
 
 What this loss function is saying is simply that we want to take the log probability of action A at state S given

@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-PyTorch-Lightning-Bolts documentation
-=====================================
+Lightning-Bolts documentation
+=============================
 .. toctree::
    :maxdepth: 1
    :name: start
@@ -113,17 +113,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-.. This is here to make sphinx aware of the modules but not throw an error/warning
-.. toctree::
-   :hidden:
-
-   api/pl_bolts.callbacks
-   api/pl_bolts.datamodules
-   api/pl_bolts.datasets
-   api/pl_bolts.metrics
-   api/pl_bolts.models
-   api/pl_bolts.callbacks
-   api/pl_bolts.losses
-   api/pl_bolts.optimizers
-   api/pl_bolts.transforms
