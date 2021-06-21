@@ -17,7 +17,7 @@ repos:
       - id: detect-private-key
 
   - repo: https://github.com/PyCQA/isort
-    rev: 5.8.0
+    rev: 5.9.1
     hooks:
       - id: isort
         args: [ --check, --diff ]
