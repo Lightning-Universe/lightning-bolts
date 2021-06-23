@@ -133,9 +133,9 @@ class DetectionLayer(nn.Module):
             raise ModuleNotFoundError('YOLO model uses `torchvision`, which is not installed yet.')
 
         self.num_classes = num_classes
-        self.anchor_dims = anchor_dims
-        self.anchor_ids = anchor_ids
-        self.anchor_map = [anchor_ids.index(i) if i in anchor_ids else -1 for i in range(9)]
+        self.all_anchor_dims = anchor_dims
+        self.anchor_dims = [anchor_dims[i] for i in anchor_ids]
+        self.anchor_map = [anchor_ids.index(i) if i in anchor_ids else -1 for i in range(len(anchor_dims))]
         self.xy_scale = xy_scale
         self.ignore_threshold = ignore_threshold
 
@@ -159,7 +159,9 @@ class DetectionLayer(nn.Module):
         boxes with the anchors, converts the center coordinates to corner coordinates, and maps
         probabilities to the `]0, 1[` range using sigmoid.
 
-        If targets are given, computes also losses from the predictions and the targets.
+        If targets are given, computes also losses from the predictions and the targets. This layer
+        is responsible only for the targets that best match one of the anchors assigned to this
+        layer.
 
         Args:
             x: The output from the previous layer. Tensor of size
@@ -170,17 +172,18 @@ class DetectionLayer(nn.Module):
                 dictionaries, one for each image.
 
         Returns:
-            output (Tensor), losses (Dict[str, Tensor]): Layer output, and if training targets were
-            provided, a dictionary of losses. Layer output is sized
-            ``[batch_size, num_anchors * height * width, num_classes + 5]``.
+            output (Tensor), losses (Dict[str, Tensor]), hits (int): Layer output tensor, sized
+            ``[batch_size, num_anchors * height * width, num_classes + 5]``. If training targets
+            were provided, also returns a dictionary of losses and the number of targets that this
+            layer was responsible for.
         """
         batch_size, num_features, height, width = x.shape
         num_attrs = self.num_classes + 5
         boxes_per_cell = num_features // num_attrs
-        if boxes_per_cell != len(self.anchor_ids):
+        if boxes_per_cell != len(self.anchor_dims):
             raise MisconfigurationException(
                 "The model predicts {} bounding boxes per cell, but {} anchor boxes are defined "
-                "for this layer.".format(boxes_per_cell, len(self.anchor_ids))
+                "for this layer.".format(boxes_per_cell, len(self.anchor_dims))
             )
 
         # Reshape the output to have the bounding box attributes of each grid cell on its own row.
@@ -200,7 +203,7 @@ class DetectionLayer(nn.Module):
         xy = xy * self.xy_scale - 0.5 * (self.xy_scale - 1)
 
         image_xy = self._global_xy(xy, image_size)
-        image_wh = self._scale_wh(wh)
+        image_wh = torch.exp(wh) * torch.tensor(self.anchor_dims, dtype=wh.dtype, device=wh.device)
         boxes = _corner_coordinates(image_xy, image_wh)
         output = torch.cat((boxes, confidence.unsqueeze(-1), classprob), -1)
         output = output.reshape(batch_size, height * width * boxes_per_cell, num_attrs)
@@ -211,8 +214,8 @@ class DetectionLayer(nn.Module):
         lc_mask = self._low_confidence_mask(boxes, targets)
         if not self.image_space_loss:
             boxes = torch.cat((xy, wh), -1)
-        losses = self._calculate_losses(boxes, confidence, classprob, targets, image_size, lc_mask)
-        return output, losses
+        losses, hits = self._calculate_losses(boxes, confidence, classprob, targets, image_size, lc_mask)
+        return output, losses, hits
 
     def _global_xy(self, xy: Tensor, image_size: Tensor) -> Tensor:
         """
@@ -244,22 +247,6 @@ class DetectionLayer(nn.Module):
 
         scale = torch.true_divide(image_size, grid_size)
         return (xy + offset) * scale
-
-    def _scale_wh(self, wh: Tensor) -> Tensor:
-        """
-        Scales the box size predictions by the prior dimensions from the anchors.
-
-        Args:
-            wh: The unnormalized width and height predictions. Tensor of size
-                ``[..., boxes_per_cell, 2]``.
-
-        Returns:
-            A tensor with the same shape as the input tensor, containing final width and height in
-            the image space.
-        """
-        anchor_wh = [self.anchor_dims[i] for i in self.anchor_ids]
-        anchor_wh = torch.tensor(anchor_wh, dtype=wh.dtype, device=wh.device)
-        return torch.exp(wh) * anchor_wh
 
     def _low_confidence_mask(self, boxes: Tensor, targets: List[Dict[str, Tensor]]) -> Tensor:
         """
@@ -306,12 +293,14 @@ class DetectionLayer(nn.Module):
             classprob: The class probability predictions, normalized to `[0, 1]`. A tensor sized
                 ``[batch_size, height, width, boxes_per_cell, num_classes]``.
             targets: List of dictionaries of target values, one dictionary for each image.
-            image_size: Width and height in a vector that defines the scale of the target coordinates.
+            image_size: Width and height in a vector that defines the scale of the target
+                coordinates.
             lc_mask: A boolean mask containing ``True`` where the predicted box does not overlap
                 any target significantly.
 
         Returns:
-            A dictionary of training losses.
+            losses (Dict[str, Tensor]), hits (int): A dictionary of training losses and the number
+            of targets that this layer was responsible for.
         """
         batch_size, height, width, boxes_per_cell, _ = boxes.shape
         device = boxes.device
@@ -321,7 +310,7 @@ class DetectionLayer(nn.Module):
         grid_size = torch.tensor([width, height], device=device)
         image_to_grid = torch.true_divide(grid_size, image_size)
 
-        anchor_wh = torch.tensor(self.anchor_dims, dtype=boxes.dtype, device=device)
+        anchor_wh = torch.tensor(self.all_anchor_dims, dtype=boxes.dtype, device=device)
         anchor_map = torch.tensor(self.anchor_map, dtype=torch.int64, device=device)
 
         # List of predicted and target values for the predictors that are responsible for
@@ -333,6 +322,7 @@ class DetectionLayer(nn.Module):
         pred_boxes = []
         pred_classprob = []
         pred_confidence = []
+        hits = 0
 
         for image_idx, image_targets in enumerate(targets):
             target_boxes = image_targets['boxes']
@@ -367,6 +357,7 @@ class DetectionLayer(nn.Module):
             cell_j = cell_j[selected]
             predictors = predictors[selected]
             wh = wh[selected]
+            hits += selected.count_nonzero()
 
             # The "low-confidence" mask is used to select predictors that are not responsible for
             # predicting any object, for calculating the part of the confidence loss with zero as
@@ -441,7 +432,7 @@ class DetectionLayer(nn.Module):
         confidence_loss = confidence_loss.sum() / batch_size
         losses['confidence'] = confidence_loss * self.confidence_loss_multiplier
 
-        return losses
+        return losses, hits
 
 
 class Mish(nn.Module):

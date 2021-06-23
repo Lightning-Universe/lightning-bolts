@@ -68,8 +68,8 @@ class YOLO(pl.LightningModule):
     CLI command::
 
         # PascalVOC
-        wget https://raw.githubusercontent.com/AlexeyAB/darknet/master/cfg/yolov4-tiny.cfg
-        python yolo_module.py --config yolov4-tiny.cfg --data_dir . --gpus 8 --batch-size 8
+        wget https://raw.githubusercontent.com/AlexeyAB/darknet/master/cfg/yolov4-tiny-3l.cfg
+        python yolo_module.py --config yolov4-tiny-3l.cfg --data_dir . --gpus 8 --batch-size 8
     """
 
     def __init__(
@@ -155,6 +155,7 @@ class YOLO(pl.LightningModule):
         outputs = []  # Outputs from all layers
         detections = []  # Outputs from detection layers
         losses = []  # Losses from detection layers
+        hits = []  # Number of targets each detection layer was responsible for
 
         image_height = images.shape[2]
         image_width = images.shape[3]
@@ -169,23 +170,35 @@ class YOLO(pl.LightningModule):
                     x = module(x, image_size)
                     detections.append(x)
                 else:
-                    x, layer_losses = module(x, image_size, targets)
+                    x, layer_losses, layer_hits = module(x, image_size, targets)
                     detections.append(x)
                     losses.append(layer_losses)
+                    hits.append(layer_hits)
             else:
                 x = module(x)
 
             outputs.append(x)
 
-        def mean_loss(loss_name):
-            loss_tuple = tuple(layer_losses[loss_name] for layer_losses in losses)
-            return torch.stack(loss_tuple).sum() / images.shape[0]
-
         detections = torch.cat(detections, 1)
         if targets is None:
             return detections
 
-        losses = {loss_name: mean_loss(loss_name) for loss_name in losses[0].keys()}
+        total_hits = sum(hits)
+        num_targets = sum(len(image_targets['boxes']) for image_targets in targets)
+        if total_hits != num_targets:
+            log.warning(
+                f'{num_targets} training targets were matched a total of {total_hits} times by detection layers. '
+                'Anchors may have been configured incorrectly.'
+            )
+        for layer_idx, layer_hits in enumerate(hits):
+            self.log(f'train/layer_{layer_idx}_hit_rate', layer_hits / total_hits, sync_dist=True)
+
+        def total_loss(loss_name):
+            """Returns the sum of the loss over detection layers."""
+            loss_tuple = tuple(layer_losses[loss_name] for layer_losses in losses)
+            return torch.stack(loss_tuple).sum()
+
+        losses = {loss_name: total_loss(loss_name) for loss_name in losses[0].keys()}
         return detections, losses
 
     def configure_optimizers(self) -> Tuple[List, List]:
@@ -211,8 +224,8 @@ class YOLO(pl.LightningModule):
         total_loss = torch.stack(tuple(losses.values())).sum()
 
         for name, value in losses.items():
-            self.log(f'train/{name}_loss', value, prog_bar=True)
-        self.log('train/total_loss', total_loss)
+            self.log(f'train/{name}_loss', value, prog_bar=True, sync_dist=True)
+        self.log('train/total_loss', total_loss, sync_dist=True)
 
         return {'loss': total_loss}
 
