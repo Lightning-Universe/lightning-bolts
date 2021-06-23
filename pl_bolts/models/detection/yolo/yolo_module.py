@@ -190,8 +190,9 @@ class YOLO(pl.LightningModule):
                 f'{num_targets} training targets were matched a total of {total_hits} times by detection layers. '
                 'Anchors may have been configured incorrectly.'
             )
-        for layer_idx, layer_hits in enumerate(hits):
-            self.log(f'train/layer_{layer_idx}_hit_rate', layer_hits / total_hits, sync_dist=True)
+        if total_hits > 0:
+            for layer_idx, layer_hits in enumerate(hits):
+                self.log(f'train/layer_{layer_idx}_hit_rate', layer_hits / total_hits, sync_dist=True)
 
         def total_loss(loss_name):
             """Returns the sum of the loss over detection layers."""
