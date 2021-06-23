@@ -61,12 +61,12 @@ class LogisticRegression(pl.LightningModule):
 
         # L1 regularizer
         if self.hparams.l1_strength > 0:
-            l1_reg = sum(param.abs().sum() for param in self.parameters())
+            l1_reg = self.linear.weight.abs().sum()
             loss += self.hparams.l1_strength * l1_reg
 
         # L2 regularizer
         if self.hparams.l2_strength > 0:
-            l2_reg = sum(param.pow(2).sum() for param in self.parameters())
+            l2_reg = self.linear.weight.pow(2).sum()
             loss += self.hparams.l2_strength * l2_reg
 
         loss /= x.size(0)
