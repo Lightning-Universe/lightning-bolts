@@ -98,6 +98,7 @@ class ContinuousMLP(nn.Module):
     """
     MLP network that outputs continuous value via Gaussian distribution
     """
+
     def __init__(
         self,
         input_shape: Tuple[int],
@@ -119,10 +120,7 @@ class ContinuousMLP(nn.Module):
         self.action_scale = action_scale
 
         self.shared_net = nn.Sequential(
-            nn.Linear(input_shape[0], hidden_size),
-            nn.ReLU(),
-            nn.Linear(hidden_size, hidden_size),
-            nn.ReLU()
+            nn.Linear(input_shape[0], hidden_size), nn.ReLU(), nn.Linear(hidden_size, hidden_size), nn.ReLU()
         )
         self.mean_layer = nn.Linear(hidden_size, n_actions)
         self.logstd_layer = nn.Linear(hidden_size, n_actions)
@@ -141,10 +139,7 @@ class ContinuousMLP(nn.Module):
         logstd = torch.clamp(self.logstd_layer(x), -20, 2)
         batch_scale_tril = torch.diag_embed(torch.exp(logstd))
         return TanhMultivariateNormal(
-            action_bias=self.action_bias,
-            action_scale=self.action_scale,
-            loc=batch_mean,
-            scale_tril=batch_scale_tril
+            action_bias=self.action_bias, action_scale=self.action_scale, loc=batch_mean, scale_tril=batch_scale_tril
         )
 
     def get_action(self, x: torch.FloatTensor) -> torch.Tensor:

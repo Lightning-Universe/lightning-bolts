@@ -142,6 +142,7 @@ class PolicyAgent(Agent):
 
 class SoftActorCriticAgent(Agent):
     """Actor-Critic based agent that returns a continuous action based on the policy"""
+
     def __call__(self, states: torch.Tensor, device: str) -> List[float]:
         """
         Takes in the current state and returns the action based on the agents policy

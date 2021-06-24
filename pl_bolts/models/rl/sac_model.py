@@ -10,8 +10,8 @@ import torch
 from pytorch_lightning import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import optim as optim
-from torch.optim.optimizer import Optimizer
 from torch.nn import functional as F
+from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules.experience_source import Experience, ExperienceSourceDataset
@@ -29,6 +29,7 @@ else:  # pragma: no cover
 
 
 class SAC(pl.LightningModule):
+
     def __init__(
         self,
         env: str,
@@ -134,13 +135,7 @@ class SAC(pl.LightningModule):
             for _ in range(warm_start):
                 action = self.agent(self.state, self.device)
                 next_state, reward, done, _ = self.env.step(action[0])
-                exp = Experience(
-                    state=self.state,
-                    action=action[0],
-                    reward=reward,
-                    done=done,
-                    new_state=next_state
-                )
+                exp = Experience(state=self.state, action=action[0], reward=reward, done=done, new_state=next_state)
                 self.buffer.append(exp)
                 self.state = next_state
 
@@ -151,12 +146,7 @@ class SAC(pl.LightningModule):
         """Initializes the SAC policy and q networks (with targets)"""
         action_bias = torch.from_numpy((self.env.action_space.high + self.env.action_space.low) / 2)
         action_scale = torch.from_numpy((self.env.action_space.high - self.env.action_space.low) / 2)
-        self.policy = ContinuousMLP(
-            self.obs_shape,
-            self.n_actions,
-            action_bias=action_bias,
-            action_scale=action_scale
-        )
+        self.policy = ContinuousMLP(self.obs_shape, self.n_actions, action_bias=action_bias, action_scale=action_scale)
 
         concat_shape = [self.obs_shape[0] + self.n_actions]
         self.q1 = MLP(concat_shape, 1)
@@ -176,10 +166,8 @@ class SAC(pl.LightningModule):
             target_net: the target (q) network
         """
         for q_param, target_param in zip(q_net.parameters(), target_net.parameters()):
-            target_param.data.copy_(
-                (1.0 - self.hparams.target_alpha) * target_param.data +
-                self.hparams.target_alpha * q_param
-            )
+            target_param.data.copy_((1.0 - self.hparams.target_alpha) * target_param.data
+                                    + self.hparams.target_alpha * q_param)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -237,8 +225,7 @@ class SAC(pl.LightningModule):
                 break
 
     def loss(
-        self,
-        batch: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
+        self, batch: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Calculates the loss for SAC which contains a total of 3 losses

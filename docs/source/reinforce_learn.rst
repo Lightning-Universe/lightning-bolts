@@ -688,13 +688,13 @@ Paper authors: Tuomas Haarnoja, Aurick Zhou, Pieter Abbeel, Sergey Levine
 
 Original implementation by: `Jason Wang <https://github.com/blahBlahhhJ>`_
 
-Soft Actor Critic (SAC) is a powerful actor critic algorithm in reinforcement learning. Unlike A2C, SAC's policy outputs a 
-special continuous distribution for actions, and its critic estimates the Q value instead of the state value, which 
-means it now takes in not only states but also actions. The new actor allows SAC to support continuous action tasks such 
-as controlling robots, and the new critic allows SAC to support off-policy learning which is more sample efficient. 
+Soft Actor Critic (SAC) is a powerful actor critic algorithm in reinforcement learning. Unlike A2C, SAC's policy outputs a
+special continuous distribution for actions, and its critic estimates the Q value instead of the state value, which
+means it now takes in not only states but also actions. The new actor allows SAC to support continuous action tasks such
+as controlling robots, and the new critic allows SAC to support off-policy learning which is more sample efficient.
 
-The actor has a new objective to maximize entropy to encourage exploration while maximizing the expected rewards. 
-The critic uses two separate Q functions to "mitigate positive bias" during training by picking the minimum of the 
+The actor has a new objective to maximize entropy to encourage exploration while maximizing the expected rewards.
+The critic uses two separate Q functions to "mitigate positive bias" during training by picking the minimum of the
 two as the predicted Q value.
 
 Since SAC is off-policy, its algorithm's training step is quite similar to DQN:

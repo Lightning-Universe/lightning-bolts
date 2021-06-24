@@ -10,6 +10,7 @@ class TanhMultivariateNormal(torch.distributions.MultivariateNormal):
         X = action_scale * tanh(Z) + action_bias
         Z ~ Normal(mean, variance)
     """
+
     def __init__(self, action_bias, action_scale, **kwargs):
         super().__init__(**kwargs)
 
@@ -40,7 +41,7 @@ class TanhMultivariateNormal(torch.distributions.MultivariateNormal):
         """
         value = (value - self.action_bias) / self.action_scale
         z_logprob = super().log_prob(z)
-        correction = torch.log(self.action_scale * (1 - value ** 2) + 1e-7).sum(1)
+        correction = torch.log(self.action_scale * (1 - value**2) + 1e-7).sum(1)
         return z_logprob - correction
 
     def rsample_and_log_prob(self, sample_shape=torch.Size()):
@@ -53,12 +54,13 @@ class TanhMultivariateNormal(torch.distributions.MultivariateNormal):
         z = super().rsample()
         z_logprob = super().log_prob(z)
         value = torch.tanh(z)
-        correction = torch.log(self.action_scale * (1 - value ** 2) + 1e-7).sum(1)
+        correction = torch.log(self.action_scale * (1 - value**2) + 1e-7).sum(1)
         return self.action_scale * value + self.action_bias, z_logprob - correction
 
     """
     Some override methods
     """
+
     def rsample(self, sample_shape=torch.Size()):
         fz, z = self.rsample_with_z(sample_shape)
         return fz
