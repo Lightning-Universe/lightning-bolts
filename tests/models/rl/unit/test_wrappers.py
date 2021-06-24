@@ -2,7 +2,6 @@ from unittest import TestCase
 
 import gym
 import numpy as np
-import torch
 from torch import Tensor
 
 from pl_bolts.models.rl.common.gym_wrappers import ToTensor
