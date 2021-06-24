@@ -1,13 +1,13 @@
 from argparse import ArgumentParser
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 from torch.nn import functional as F
 
 from pl_bolts.models.vision.unet import UNet
 
 
-class SemSegment(pl.LightningModule):
+class SemSegment(LightningModule):
 
     def __init__(
         self,
@@ -98,11 +98,11 @@ class SemSegment(pl.LightningModule):
 def cli_main():
     from pl_bolts.datamodules import KittiDataModule
 
-    pl.seed_everything(1234)
+    seed_everything(1234)
 
     parser = ArgumentParser()
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
     # model args
     parser = SemSegment.add_model_specific_args(parser)
     # datamodule args
@@ -117,7 +117,7 @@ def cli_main():
     model = SemSegment(**args.__dict__)
 
     # train
-    trainer = pl.Trainer().from_argparse_args(args)
+    trainer = Trainer().from_argparse_args(args)
     trainer.fit(model, datamodule=dm)
 
 

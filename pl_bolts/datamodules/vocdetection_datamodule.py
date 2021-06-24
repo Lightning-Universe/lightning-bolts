@@ -2,6 +2,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import torch
 from pytorch_lightning import LightningDataModule
+from torch import Tensor
 from torch.utils.data import DataLoader
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -23,7 +24,7 @@ class Compose(object):
         self.transforms = transforms
         self.image_transforms = image_transforms
 
-    def __call__(self, image: Any, target: Any) -> Tuple[torch.Tensor, torch.Tensor]:
+    def __call__(self, image: Any, target: Any) -> Tuple[Tensor, Tensor]:
         for t in self.transforms:
             image, target = t(image, target)
         if self.image_transforms:
@@ -31,7 +32,7 @@ class Compose(object):
         return image, target
 
 
-def _collate_fn(batch: List[torch.Tensor]) -> tuple:
+def _collate_fn(batch: List[Tensor]) -> tuple:
     return tuple(zip(*batch))
 
 

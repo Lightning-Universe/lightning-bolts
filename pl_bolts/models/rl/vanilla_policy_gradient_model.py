@@ -3,11 +3,11 @@ from collections import OrderedDict
 from typing import List, Tuple
 
 import numpy as np
-import pytorch_lightning as pl
 import torch
-from pytorch_lightning import seed_everything
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import optim as optim
+from torch import Tensor
 from torch.nn.functional import log_softmax, softmax
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
@@ -24,7 +24,7 @@ else:  # pragma: no cover
     warn_missing_pkg('gym')
 
 
-class VanillaPolicyGradient(pl.LightningModule):
+class VanillaPolicyGradient(LightningModule):
     """
     PyTorch Lightning implementation of `Vanilla Policy Gradient
     <https://papers.nips.cc/paper/
@@ -109,7 +109,7 @@ class VanillaPolicyGradient(pl.LightningModule):
 
         self.state = self.env.reset()
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         """
         Passes in a state x through the network and gets the q_values of each action as an output
 
@@ -122,7 +122,7 @@ class VanillaPolicyGradient(pl.LightningModule):
         output = self.net(x)
         return output
 
-    def train_batch(self, ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
+    def train_batch(self, ) -> Tuple[List[Tensor], List[Tensor], List[Tensor]]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -178,7 +178,7 @@ class VanillaPolicyGradient(pl.LightningModule):
 
         return returns
 
-    def loss(self, states, actions, scaled_rewards) -> torch.Tensor:
+    def loss(self, states, actions, scaled_rewards) -> Tensor:
         """
         Calculates the loss for VPG
 
@@ -208,7 +208,7 @@ class VanillaPolicyGradient(pl.LightningModule):
 
         return loss
 
-    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
+    def training_step(self, batch: Tuple[Tensor, Tensor], _) -> OrderedDict:
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved
@@ -292,7 +292,7 @@ def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = VanillaPolicyGradient.add_model_specific_args(parser)
@@ -304,7 +304,7 @@ def cli_main():
     checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True)
 
     seed_everything(123)
-    trainer = pl.Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
+    trainer = Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
     trainer.fit(model)
 
 
