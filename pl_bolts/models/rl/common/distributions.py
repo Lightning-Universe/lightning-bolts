@@ -57,7 +57,6 @@ class TanhMultivariateNormal(torch.distributions.MultivariateNormal):
         correction = torch.log(self.action_scale * (1 - value**2) + 1e-7).sum(1)
         return self.action_scale * value + self.action_bias, z_logprob - correction
 
-
     def rsample(self, sample_shape=torch.Size()):
         fz, z = self.rsample_with_z(sample_shape)
         return fz
