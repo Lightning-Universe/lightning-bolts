@@ -6,11 +6,11 @@ from collections import OrderedDict
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-import pytorch_lightning as pl
 import torch
-from pytorch_lightning import seed_everything
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import optim as optim
+from torch import Tensor
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
@@ -30,7 +30,7 @@ else:  # pragma: no cover
     Env = object
 
 
-class DQN(pl.LightningModule):
+class DQN(LightningModule):
     """
     Basic DQN Model
 
@@ -200,7 +200,7 @@ class DQN(pl.LightningModule):
         self.net = CNN(self.obs_shape, self.n_actions)
         self.target_net = CNN(self.obs_shape, self.n_actions)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         """
         Passes in a state x through the network and gets the q_values of each action as an output
 
@@ -213,7 +213,7 @@ class DQN(pl.LightningModule):
         output = self.net(x)
         return output
 
-    def train_batch(self, ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def train_batch(self, ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -256,7 +256,7 @@ class DQN(pl.LightningModule):
             if self.total_steps % self.batches_per_epoch == 0:
                 break
 
-    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
+    def training_step(self, batch: Tuple[Tensor, Tensor], _) -> OrderedDict:
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved
@@ -292,13 +292,13 @@ class DQN(pl.LightningModule):
             "avg_reward": self.avg_rewards,
         })
 
-    def test_step(self, *args, **kwargs) -> Dict[str, torch.Tensor]:
+    def test_step(self, *args, **kwargs) -> Dict[str, Tensor]:
         """Evaluate the agent for 10 episodes"""
         test_reward = self.run_n_episodes(self.test_env, 1, 0)
         avg_reward = sum(test_reward) / len(test_reward)
         return {"test_reward": avg_reward}
 
-    def test_epoch_end(self, outputs) -> Dict[str, torch.Tensor]:
+    def test_epoch_end(self, outputs) -> Dict[str, Tensor]:
         """Log the avg of the test results"""
         rewards = [x["test_reward"] for x in outputs]
         avg_reward = sum(rewards) / len(rewards)
@@ -409,7 +409,7 @@ def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = DQN.add_model_specific_args(parser)
@@ -421,7 +421,7 @@ def cli_main():
     checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True)
 
     seed_everything(123)
-    trainer = pl.Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
+    trainer = Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
 
     trainer.fit(model)
 

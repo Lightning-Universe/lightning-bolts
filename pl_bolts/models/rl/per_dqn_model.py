@@ -6,8 +6,8 @@ from collections import OrderedDict
 from typing import Tuple
 
 import numpy as np
-import pytorch_lightning as pl
-import torch
+from pytorch_lightning import Trainer
+from torch import Tensor
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import ExperienceSourceDataset
@@ -45,7 +45,7 @@ class PERDQN(DQN):
 
         """
 
-    def train_batch(self, ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def train_batch(self, ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -151,7 +151,7 @@ def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = PERDQN.add_model_specific_args(parser)
@@ -159,7 +159,7 @@ def cli_main():
 
     model = PERDQN(**args.__dict__)
 
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model)
 
 

@@ -3,6 +3,7 @@ from typing import Optional, Tuple, Union
 import numpy as np
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
+from torch import Tensor
 from torch.utils.data import DataLoader
 
 from pl_bolts.utils import _SKLEARN_AVAILABLE
@@ -51,7 +52,7 @@ class KNNOnlineEvaluator(Callback):  # pragma: no cover
         self.num_classes = num_classes
         self.dataset = dataset
 
-    def get_representations(self, pl_module: LightningModule, x: torch.Tensor) -> torch.Tensor:
+    def get_representations(self, pl_module: LightningModule, x: Tensor) -> Tensor:
         with torch.no_grad():
             representations = pl_module(x)
         representations = representations.reshape(representations.size(0), -1)
@@ -83,7 +84,7 @@ class KNNOnlineEvaluator(Callback):  # pragma: no cover
 
         return all_representations.cpu().numpy(), ys.cpu().numpy()  # type: ignore[union-attr]
 
-    def to_device(self, batch: torch.Tensor, device: Union[str, torch.device]) -> Tuple[torch.Tensor, torch.Tensor]:
+    def to_device(self, batch: Tensor, device: Union[str, torch.device]) -> Tuple[Tensor, Tensor]:
         # get the labeled batch
         if self.dataset == 'stl10':
             labeled_batch = batch[1]

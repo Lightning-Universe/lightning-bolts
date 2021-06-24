@@ -1,9 +1,9 @@
 from argparse import ArgumentParser
 from typing import Any
 
-import pytorch_lightning as pl
 import torch
-from torch import nn
+from pytorch_lightning import LightningModule, seed_everything, Trainer
+from torch import nn, Tensor
 from torch.utils.data import DataLoader
 
 from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
@@ -18,7 +18,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-class DCGAN(pl.LightningModule):
+class DCGAN(LightningModule):
     """
     DCGAN implementation.
 
@@ -91,7 +91,7 @@ class DCGAN(pl.LightningModule):
         opt_gen = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=betas)
         return [opt_disc, opt_gen], []
 
-    def forward(self, noise: torch.Tensor) -> torch.Tensor:
+    def forward(self, noise: Tensor) -> Tensor:
         """
         Generates an image given input noise
 
@@ -118,17 +118,17 @@ class DCGAN(pl.LightningModule):
 
         return result
 
-    def _disc_step(self, real: torch.Tensor) -> torch.Tensor:
+    def _disc_step(self, real: Tensor) -> Tensor:
         disc_loss = self._get_disc_loss(real)
         self.log("loss/disc", disc_loss, on_epoch=True)
         return disc_loss
 
-    def _gen_step(self, real: torch.Tensor) -> torch.Tensor:
+    def _gen_step(self, real: Tensor) -> Tensor:
         gen_loss = self._get_gen_loss(real)
         self.log("loss/gen", gen_loss, on_epoch=True)
         return gen_loss
 
-    def _get_disc_loss(self, real: torch.Tensor) -> torch.Tensor:
+    def _get_disc_loss(self, real: Tensor) -> Tensor:
         # Train with real
         real_pred = self.discriminator(real)
         real_gt = torch.ones_like(real_pred)
@@ -143,7 +143,7 @@ class DCGAN(pl.LightningModule):
 
         return disc_loss
 
-    def _get_gen_loss(self, real: torch.Tensor) -> torch.Tensor:
+    def _get_gen_loss(self, real: Tensor) -> Tensor:
         # Train with fake
         fake_pred = self._get_fake_pred(real)
         fake_gt = torch.ones_like(fake_pred)
@@ -151,7 +151,7 @@ class DCGAN(pl.LightningModule):
 
         return gen_loss
 
-    def _get_fake_pred(self, real: torch.Tensor) -> torch.Tensor:
+    def _get_fake_pred(self, real: Tensor) -> Tensor:
         batch_size = len(real)
         noise = self._get_noise(batch_size, self.hparams.latent_dim)
         fake = self(noise)
@@ -159,7 +159,7 @@ class DCGAN(pl.LightningModule):
 
         return fake_pred
 
-    def _get_noise(self, n_samples: int, latent_dim: int) -> torch.Tensor:
+    def _get_noise(self, n_samples: int, latent_dim: int) -> Tensor:
         return torch.randn(n_samples, latent_dim, device=self.device)
 
     @staticmethod
@@ -174,7 +174,7 @@ class DCGAN(pl.LightningModule):
 
 
 def cli_main(args=None):
-    pl.seed_everything(1234)
+    seed_everything(1234)
 
     parser = ArgumentParser()
     parser.add_argument("--batch_size", default=64, type=int)
@@ -208,7 +208,7 @@ def cli_main(args=None):
     )
 
     parser = DCGAN.add_model_specific_args(parser)
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
     args = parser.parse_args(args)
 
     model = DCGAN(**vars(args), image_channels=image_channels)
@@ -216,7 +216,7 @@ def cli_main(args=None):
         TensorboardGenerativeModelImageSampler(num_samples=5),
         LatentDimInterpolator(interpolate_epoch_interval=5),
     ]
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks)
+    trainer = Trainer.from_argparse_args(args, callbacks=callbacks)
     trainer.fit(model, dataloader)
 
 

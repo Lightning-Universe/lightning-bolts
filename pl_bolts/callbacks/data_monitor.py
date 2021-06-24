@@ -6,8 +6,7 @@ from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.loggers import LightningLoggerBase, TensorBoardLogger, WandbLogger
 from pytorch_lightning.utilities import rank_zero_warn
 from pytorch_lightning.utilities.apply_func import apply_to_collection
-from torch import nn as nn
-from torch import Tensor
+from torch import nn, Tensor
 from torch.nn import Module
 from torch.utils.hooks import RemovableHandle
 

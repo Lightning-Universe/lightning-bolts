@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentParser
 
-import pytorch_lightning as pl
+from pytorch_lightning import seed_everything, Trainer
 
 from pl_bolts.models.self_supervised.simclr.simclr_module import SimCLR
 from pl_bolts.models.self_supervised.simclr.transforms import SimCLRFinetuneTransform
@@ -16,7 +16,7 @@ from pl_bolts.transforms.dataset_normalizations import (
 def cli_main():  # pragma: no cover
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
 
-    pl.seed_everything(1234)
+    seed_everything(1234)
 
     parser = ArgumentParser()
     parser.add_argument('--dataset', type=str, help='cifar10, stl10, imagenet', default='cifar10')
@@ -119,7 +119,7 @@ def cli_main():  # pragma: no cover
         final_lr=args.final_lr
     )
 
-    trainer = pl.Trainer(
+    trainer = Trainer(
         gpus=args.gpus,
         num_nodes=1,
         precision=16,

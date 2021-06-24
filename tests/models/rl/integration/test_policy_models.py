@@ -1,7 +1,7 @@
 import argparse
 from unittest import TestCase
 
-import pytorch_lightning as pl
+from pytorch_lightning import Trainer
 
 from pl_bolts.models.rl.reinforce_model import Reinforce
 from pl_bolts.models.rl.vanilla_policy_gradient_model import VanillaPolicyGradient
@@ -18,7 +18,7 @@ class TestPolicyModels(TestCase):
         ]
         self.hparams = parent_parser.parse_args(args_list)
 
-        self.trainer = pl.Trainer(
+        self.trainer = Trainer(
             gpus=0,
             max_steps=100,
             max_epochs=100,  # Set this as the same as max steps to ensure that it doesn't stop early
