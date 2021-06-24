@@ -408,6 +408,8 @@ class DetectionLayer(nn.Module):
             overlap_loss = overlap_loss * size_compensation
             overlap_loss = overlap_loss.sum() / batch_size
             losses['overlap'] = overlap_loss * self.overlap_loss_multiplier
+        else:
+            losses['overlap'] = torch.tensor(0.0, device=device)
 
         if pred_classprob and target_label:
             pred_classprob = torch.cat(pred_classprob)
@@ -417,6 +419,8 @@ class DetectionLayer(nn.Module):
             class_loss = self.class_loss_func(pred_classprob, target_classprob)
             class_loss = class_loss.sum() / batch_size
             losses['class'] = class_loss * self.class_loss_multiplier
+        else:
+            losses['class'] = torch.tensor(0.0, device=device)
 
         pred_low_confidence = confidence[lc_mask]
         target_low_confidence = torch.zeros_like(pred_low_confidence)
