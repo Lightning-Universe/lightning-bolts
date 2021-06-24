@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 from typing import Any, Dict, List, Tuple, Type
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 from torch import nn, Tensor
 from torch.nn import functional as F
 from torch.nn.functional import softmax
@@ -11,7 +11,7 @@ from torch.optim.optimizer import Optimizer
 from torchmetrics.functional import accuracy
 
 
-class LogisticRegression(pl.LightningModule):
+class LogisticRegression(LightningModule):
     """
     Logistic regression model
     """
@@ -121,7 +121,7 @@ def cli_main() -> None:
     from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
     from pl_bolts.utils import _SKLEARN_AVAILABLE
 
-    pl.seed_everything(1234)
+    seed_everything(1234)
 
     # Example: Iris dataset in Sklearn (4 features, 3 class labels)
     if _SKLEARN_AVAILABLE:
@@ -134,7 +134,7 @@ def cli_main() -> None:
     # args
     parser = ArgumentParser()
     parser = LogisticRegression.add_model_specific_args(parser)
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
     # model
@@ -146,7 +146,7 @@ def cli_main() -> None:
     loaders = SklearnDataModule(X, y, batch_size=args.batch_size, num_workers=0)
 
     # train
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
 
 
