@@ -53,8 +53,4 @@ def test_sac_train_batch():
     assert len(batch) == 5
     assert len(batch[0]) == model.hparams.batch_size
     assert isinstance(batch, list)
-    assert isinstance(batch[0], Tensor)
-    assert isinstance(batch[1], Tensor)
-    assert isinstance(batch[2], Tensor)
-    assert isinstance(batch[3], Tensor)
-    assert isinstance(batch[4], Tensor)
+    assert all(isinstance(batch[i], Tensor) for i in range(5))
