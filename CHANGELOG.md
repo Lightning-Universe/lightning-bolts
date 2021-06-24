@@ -5,6 +5,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.3.4] - 2021-06-17
+
+### Changed
+
+- Replaced `load_boston` with `load_diabetes` in the docs and tests ([#629](https://github.com/PyTorchLightning/lightning-bolts/pull/629))
+- Added base encoder and MLP dimension arguments to BYOL constructor ([#637](https://github.com/PyTorchLightning/lightning-bolts/pull/637))
+
+### Fixed
+
+- Fixed the MNIST download giving HTTP 503 ([#633](https://github.com/PyTorchLightning/lightning-bolts/pull/633))
+- Fixed type annotation of `ExperienceSource.__iter__` ([#645](https://github.com/PyTorchLightning/lightning-bolts/pull/645))
+- Fixed `pretrained_urls` on Windows ([#652](https://github.com/PyTorchLightning/lightning-bolts/pull/652))
+- Fixed logistic regression ([#655](https://github.com/PyTorchLightning/lightning-bolts/pull/655), [#664](https://github.com/PyTorchLightning/lightning-bolts/pull/664))
+- Fixed double softmax in `SSLEvaluator` ([#663](https://github.com/PyTorchLightning/lightning-bolts/pull/663))
+
+
 ## [0.3.3] - 2021-04-17
 
 ### Changed
@@ -54,8 +70,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     [#348](https://github.com/PyTorchLightning/lightning-bolts/pull/348),
     [#323](https://github.com/PyTorchLightning/lightning-bolts/pull/323))
 - Added data monitor callbacks `ModuleDataMonitor` and `TrainingDataMonitor` ([#285](https://github.com/PyTorchLightning/lightning-bolts/pull/285))
-- Added DCGAN module ([#403](https://github.com/PyTorchLightning/lightning-bolts/pull/403)) 
-- Added `VisionDataModule` as parent class for `BinaryMNISTDataModule`, `CIFAR10DataModule`, `FashionMNISTDataModule`, 
+- Added DCGAN module ([#403](https://github.com/PyTorchLightning/lightning-bolts/pull/403))
+- Added `VisionDataModule` as parent class for `BinaryMNISTDataModule`, `CIFAR10DataModule`, `FashionMNISTDataModule`,
   and `MNISTDataModule` ([#400](https://github.com/PyTorchLightning/lightning-bolts/pull/400))
 - Added GIoU loss ([#347](https://github.com/PyTorchLightning/lightning-bolts/pull/347))
 - Added IoU loss ([#469](https://github.com/PyTorchLightning/lightning-bolts/pull/469))
@@ -217,7 +233,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved rl.common.experience to datamodules
 - train_batch function to VPG model to generate batch of data at each step (POC)
 - Experience source no longer gets initialized with a device, instead the device is passed at each step()
-- Refactored ExperienceSource classes to be handle multiple environments. 
+- Refactored ExperienceSource classes to be handle multiple environments.
 
 ### Removed
 
@@ -226,7 +242,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Documentation 
+- Documentation
 - Doct tests
 - CI pipeline
 - Imports and pkg
