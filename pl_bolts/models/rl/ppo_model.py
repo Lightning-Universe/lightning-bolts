@@ -1,8 +1,9 @@
 import argparse
 from typing import Any, List, Tuple
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule, seed_everything, Trainer
+from torch import Tensor
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
@@ -17,7 +18,7 @@ else:  # pragma: no cover
     warn_missing_pkg('gym')
 
 
-class PPO(pl.LightningModule):
+class PPO(LightningModule):
     """
     PyTorch Lightning implementation of `Proximal Policy Optimization
     <https://arxiv.org/abs/1707.06347>`_
@@ -118,7 +119,7 @@ class PPO(pl.LightningModule):
 
         self.state = torch.FloatTensor(self.env.reset())
 
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def forward(self, x: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
         """
         Passes in a state x through the network and returns the policy and a sampled action
 
@@ -173,7 +174,7 @@ class PPO(pl.LightningModule):
 
         return adv
 
-    def generate_trajectory_samples(self) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]]:
+    def generate_trajectory_samples(self) -> Tuple[List[Tensor], List[Tensor], List[Tensor]]:
         """
         Contains the logic for generating trajectory data to train policy and value network
 
@@ -258,7 +259,7 @@ class PPO(pl.LightningModule):
 
                 self.epoch_rewards.clear()
 
-    def actor_loss(self, state, action, logp_old, adv) -> torch.Tensor:
+    def actor_loss(self, state, action, logp_old, adv) -> Tensor:
         pi, _ = self.actor(state)
         logp = self.actor.get_log_prob(pi, action)
         ratio = torch.exp(logp - logp_old)
@@ -266,12 +267,12 @@ class PPO(pl.LightningModule):
         loss_actor = -(torch.min(ratio * adv, clip_adv)).mean()
         return loss_actor
 
-    def critic_loss(self, state, qval) -> torch.Tensor:
+    def critic_loss(self, state, qval) -> Tensor:
         value = self.critic(state)
         loss_critic = (qval - value).pow(2).mean()
         return loss_critic
 
-    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx, optimizer_idx):
+    def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx, optimizer_idx):
         """
         Carries out a single update to actor and critic network from a batch of replay buffer.
 
@@ -362,15 +363,15 @@ class PPO(pl.LightningModule):
 
 def cli_main() -> None:
     parent_parser = argparse.ArgumentParser(add_help=False)
-    parent_parser = pl.Trainer.add_argparse_args(parent_parser)
+    parent_parser = Trainer.add_argparse_args(parent_parser)
 
     parser = PPO.add_model_specific_args(parent_parser)
     args = parser.parse_args()
 
     model = PPO(**vars(args))
 
-    pl.seed_everything(0)
-    trainer = pl.Trainer.from_argparse_args(args)
+    seed_everything(0)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model)
 
 

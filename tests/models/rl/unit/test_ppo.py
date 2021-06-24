@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 from pytorch_lightning import Trainer
+from torch import Tensor
 
 from pl_bolts.models.rl.ppo_model import PPO
 
@@ -28,7 +29,7 @@ def test_critic_loss():
 
     loss = model.critic_loss(batch_states, batch_qvals)
 
-    assert isinstance(loss, torch.Tensor)
+    assert isinstance(loss, Tensor)
 
 
 def test_actor_loss_categorical():
@@ -44,7 +45,7 @@ def test_actor_loss_categorical():
 
     loss = model.actor_loss(batch_states, batch_actions, batch_logp_old, batch_adv)
 
-    assert isinstance(loss, torch.Tensor)
+    assert isinstance(loss, Tensor)
 
 
 def test_actor_loss_continuous():
@@ -61,7 +62,7 @@ def test_actor_loss_continuous():
 
     loss = model.actor_loss(batch_states, batch_actions, batch_logp_old, batch_adv)
 
-    assert isinstance(loss, torch.Tensor)
+    assert isinstance(loss, Tensor)
 
 
 def test_generate_trajectory_samples():

@@ -360,7 +360,7 @@ class ActorCategorical(nn.Module):
 
         return pi, actions
 
-    def get_log_prob(self, pi: Categorical, actions: torch.Tensor):
+    def get_log_prob(self, pi: Categorical, actions: Tensor):
         """
         Takes in a distribution and actions and returns log prob of actions
         under the distribution
@@ -400,7 +400,7 @@ class ActorContinous(nn.Module):
 
         return pi, actions
 
-    def get_log_prob(self, pi: Normal, actions: torch.Tensor):
+    def get_log_prob(self, pi: Normal, actions: Tensor):
         """
         Takes in a distribution and actions and returns log prob of actions
         under the distribution
