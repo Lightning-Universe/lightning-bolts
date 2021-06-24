@@ -1,6 +1,6 @@
 import pytorch_lightning as pl
 import torch
-from torch import nn as nn
+from torch import nn
 
 
 class Block(nn.Module):

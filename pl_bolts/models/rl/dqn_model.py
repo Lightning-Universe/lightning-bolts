@@ -11,6 +11,7 @@ import torch
 from pytorch_lightning import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import optim as optim
+from torch import Tensor
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
@@ -200,7 +201,7 @@ class DQN(pl.LightningModule):
         self.net = CNN(self.obs_shape, self.n_actions)
         self.target_net = CNN(self.obs_shape, self.n_actions)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         """
         Passes in a state x through the network and gets the q_values of each action as an output
 
@@ -213,7 +214,7 @@ class DQN(pl.LightningModule):
         output = self.net(x)
         return output
 
-    def train_batch(self, ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def train_batch(self, ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -256,7 +257,7 @@ class DQN(pl.LightningModule):
             if self.total_steps % self.batches_per_epoch == 0:
                 break
 
-    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
+    def training_step(self, batch: Tuple[Tensor, Tensor], _) -> OrderedDict:
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved
@@ -292,13 +293,13 @@ class DQN(pl.LightningModule):
             "avg_reward": self.avg_rewards,
         })
 
-    def test_step(self, *args, **kwargs) -> Dict[str, torch.Tensor]:
+    def test_step(self, *args, **kwargs) -> Dict[str, Tensor]:
         """Evaluate the agent for 10 episodes"""
         test_reward = self.run_n_episodes(self.test_env, 1, 0)
         avg_reward = sum(test_reward) / len(test_reward)
         return {"test_reward": avg_reward}
 
-    def test_epoch_end(self, outputs) -> Dict[str, torch.Tensor]:
+    def test_epoch_end(self, outputs) -> Dict[str, Tensor]:
         """Log the avg of the test results"""
         rewards = [x["test_reward"] for x in outputs]
         avg_reward = sum(rewards) / len(rewards)

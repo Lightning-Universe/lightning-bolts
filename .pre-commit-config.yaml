@@ -20,7 +20,6 @@ repos:
     rev: 5.9.1
     hooks:
       - id: isort
-        args: [ --check, --diff ]
 
   - repo: https://github.com/pre-commit/mirrors-yapf
     rev: 'v0.31.0'

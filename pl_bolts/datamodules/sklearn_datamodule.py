@@ -4,6 +4,7 @@ from typing import Any, Tuple
 import numpy as np
 import torch
 from pytorch_lightning import LightningDataModule
+from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 
 from pl_bolts.utils import _SKLEARN_AVAILABLE
@@ -77,7 +78,7 @@ class TensorDataset(Dataset):
         10
     """
 
-    def __init__(self, X: torch.Tensor, y: torch.Tensor, X_transform: Any = None, y_transform: Any = None) -> None:
+    def __init__(self, X: Tensor, y: Tensor, X_transform: Any = None, y_transform: Any = None) -> None:
         """
         Args:
             X: PyTorch tensor
@@ -94,7 +95,7 @@ class TensorDataset(Dataset):
     def __len__(self) -> int:
         return len(self.X)
 
-    def __getitem__(self, idx) -> Tuple[torch.Tensor, torch.Tensor]:
+    def __getitem__(self, idx) -> Tuple[Tensor, Tensor]:
         x = self.X[idx].float()
         y = self.Y[idx]
 
