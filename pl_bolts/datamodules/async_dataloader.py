@@ -5,6 +5,7 @@ from threading import Thread
 from typing import Any, Optional, Union
 
 import torch
+from torch import Tensor
 from torch._six import string_classes
 from torch.utils.data import DataLoader, Dataset
 
@@ -100,7 +101,7 @@ class AsynchronousLoader(object):
             self.worker.start()
         return self
 
-    def __next__(self) -> torch.Tensor:
+    def __next__(self) -> Tensor:
         # If we've reached the number of batches to return
         # or the queue is empty and the worker is dead then exit
         done = not self.worker.is_alive() and self.queue.empty()

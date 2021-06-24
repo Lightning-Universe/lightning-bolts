@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 import pytorch_lightning as pl
 import torch
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
-from torch import nn
+from torch import nn, Tensor
 from torch.nn import functional as F
 
 from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
@@ -249,7 +249,7 @@ class SimCLR(pl.LightningModule):
         neg = sim.sum(dim=-1)
 
         # from each row, subtract e^(1/temp) to remove similarity measure for x1.x1
-        row_sub = torch.Tensor(neg.shape).fill_(math.e**(1 / temperature)).to(neg.device)
+        row_sub = Tensor(neg.shape).fill_(math.e**(1 / temperature)).to(neg.device)
         neg = torch.clamp(neg - row_sub, min=eps)  # clamp for numerical stability
 
         # Positive similarity, pos becomes [2 * batch_size]

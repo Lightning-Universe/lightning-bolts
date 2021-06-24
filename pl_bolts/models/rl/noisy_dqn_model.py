@@ -6,7 +6,7 @@ from typing import Tuple
 
 import numpy as np
 import pytorch_lightning as pl
-import torch
+from torch import Tensor
 
 from pl_bolts.datamodules.experience_source import Experience
 from pl_bolts.models.rl.common.networks import NoisyCNN
@@ -47,7 +47,7 @@ class NoisyDQN(DQN):
         """Set the agents epsilon to 0 as the exploration comes from the network"""
         self.agent.epsilon = 0.0
 
-    def train_batch(self, ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def train_batch(self, ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader.
         This is the same function as the standard DQN except that we dont update epsilon as it is always 0. The

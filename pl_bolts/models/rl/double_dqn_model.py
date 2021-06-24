@@ -6,7 +6,7 @@ from collections import OrderedDict
 from typing import Tuple
 
 import pytorch_lightning as pl
-import torch
+from torch import Tensor
 
 from pl_bolts.losses.rl import double_dqn_loss
 from pl_bolts.models.rl.dqn_model import DQN
@@ -42,7 +42,7 @@ class DoubleDQN(DQN):
         Currently only supports CPU and single GPU training with `distributed_backend=dp`
     """
 
-    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _) -> OrderedDict:
+    def training_step(self, batch: Tuple[Tensor, Tensor], _) -> OrderedDict:
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved

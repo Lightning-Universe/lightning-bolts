@@ -7,7 +7,7 @@ from typing import Tuple
 
 import numpy as np
 import pytorch_lightning as pl
-import torch
+from torch import Tensor
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import ExperienceSourceDataset
@@ -45,7 +45,7 @@ class PERDQN(DQN):
 
         """
 
-    def train_batch(self, ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def train_batch(self, ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
