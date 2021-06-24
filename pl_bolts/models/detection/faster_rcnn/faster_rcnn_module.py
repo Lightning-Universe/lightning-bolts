@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 from typing import Any, Optional
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -30,7 +30,7 @@ def _evaluate_iou(target, pred):
     return box_iou(target["boxes"], pred["boxes"]).diag().mean()
 
 
-class FasterRCNN(pl.LightningModule):
+class FasterRCNN(LightningModule):
     """
     PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with
     Region Proposal Networks <https://arxiv.org/abs/1506.01497>`_.
@@ -149,9 +149,9 @@ class FasterRCNN(pl.LightningModule):
 def run_cli():
     from pl_bolts.datamodules import VOCDetectionDataModule
 
-    pl.seed_everything(42)
+    seed_everything(42)
     parser = ArgumentParser()
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
     parser.add_argument("--data_dir", type=str, default=".")
     parser.add_argument("--batch_size", type=int, default=1)
     parser = FasterRCNN.add_model_specific_args(parser)
@@ -162,7 +162,7 @@ def run_cli():
     args.num_classes = datamodule.num_classes
 
     model = FasterRCNN(**vars(args))
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model, datamodule=datamodule)
 
 
