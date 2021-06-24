@@ -1,6 +1,7 @@
 import argparse
 
 import torch
+from torch import Tensor
 
 from pl_bolts.models.rl.sac_model import SAC
 
@@ -27,9 +28,9 @@ def test_sac_loss():
 
     policy_loss, q1_loss, q2_loss = model.loss(batch)
 
-    assert isinstance(policy_loss, torch.Tensor)
-    assert isinstance(q1_loss, torch.Tensor)
-    assert isinstance(q2_loss, torch.Tensor)
+    assert isinstance(policy_loss, Tensor)
+    assert isinstance(q1_loss, Tensor)
+    assert isinstance(q2_loss, Tensor)
 
 
 def test_sac_train_batch():
@@ -52,8 +53,8 @@ def test_sac_train_batch():
     assert len(batch) == 5
     assert len(batch[0]) == model.hparams.batch_size
     assert isinstance(batch, list)
-    assert isinstance(batch[0], torch.Tensor)
-    assert isinstance(batch[1], torch.Tensor)
-    assert isinstance(batch[2], torch.Tensor)
-    assert isinstance(batch[3], torch.Tensor)
-    assert isinstance(batch[4], torch.Tensor)
+    assert isinstance(batch[0], Tensor)
+    assert isinstance(batch[1], Tensor)
+    assert isinstance(batch[2], Tensor)
+    assert isinstance(batch[3], Tensor)
+    assert isinstance(batch[4], Tensor)

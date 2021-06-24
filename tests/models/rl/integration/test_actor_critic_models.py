@@ -1,6 +1,6 @@
 import argparse
 
-import pytorch_lightning as pl
+from pytorch_lightning import Trainer
 
 from pl_bolts.models.rl.sac_model import SAC
 
@@ -9,7 +9,7 @@ def test_sac():
     """Smoke test that the SAC model runs"""
 
     parent_parser = argparse.ArgumentParser(add_help=False)
-    parent_parser = pl.Trainer.add_argparse_args(parent_parser)
+    parent_parser = Trainer.add_argparse_args(parent_parser)
     parent_parser = SAC.add_model_specific_args(parent_parser)
     args_list = [
         "--warm_start_size",
@@ -23,7 +23,7 @@ def test_sac():
     ]
     hparams = parent_parser.parse_args(args_list)
 
-    trainer = pl.Trainer(
+    trainer = Trainer(
         gpus=hparams.gpus,
         max_steps=100,
         max_epochs=100,  # Set this as the same as max steps to ensure that it doesn't stop early

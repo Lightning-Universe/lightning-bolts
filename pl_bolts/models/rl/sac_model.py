@@ -5,13 +5,13 @@ import argparse
 from typing import Dict, List, Tuple
 
 import numpy as np
-import pytorch_lightning as pl
 import torch
-from pytorch_lightning import seed_everything
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import optim as optim
-from torch.optim.optimizer import Optimizer
+from torch import Tensor
 from torch.nn import functional as F
+from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules.experience_source import Experience, ExperienceSourceDataset
@@ -28,7 +28,8 @@ else:  # pragma: no cover
     Env = object
 
 
-class SAC(pl.LightningModule):
+class SAC(LightningModule):
+
     def __init__(
         self,
         env: str,
@@ -134,13 +135,7 @@ class SAC(pl.LightningModule):
             for _ in range(warm_start):
                 action = self.agent(self.state, self.device)
                 next_state, reward, done, _ = self.env.step(action[0])
-                exp = Experience(
-                    state=self.state,
-                    action=action[0],
-                    reward=reward,
-                    done=done,
-                    new_state=next_state
-                )
+                exp = Experience(state=self.state, action=action[0], reward=reward, done=done, new_state=next_state)
                 self.buffer.append(exp)
                 self.state = next_state
 
@@ -151,12 +146,7 @@ class SAC(pl.LightningModule):
         """Initializes the SAC policy and q networks (with targets)"""
         action_bias = torch.from_numpy((self.env.action_space.high + self.env.action_space.low) / 2)
         action_scale = torch.from_numpy((self.env.action_space.high - self.env.action_space.low) / 2)
-        self.policy = ContinuousMLP(
-            self.obs_shape,
-            self.n_actions,
-            action_bias=action_bias,
-            action_scale=action_scale
-        )
+        self.policy = ContinuousMLP(self.obs_shape, self.n_actions, action_bias=action_bias, action_scale=action_scale)
 
         concat_shape = [self.obs_shape[0] + self.n_actions]
         self.q1 = MLP(concat_shape, 1)
@@ -176,12 +166,10 @@ class SAC(pl.LightningModule):
             target_net: the target (q) network
         """
         for q_param, target_param in zip(q_net.parameters(), target_net.parameters()):
-            target_param.data.copy_(
-                (1.0 - self.hparams.target_alpha) * target_param.data +
-                self.hparams.target_alpha * q_param
-            )
+            target_param.data.copy_((1.0 - self.hparams.target_alpha) * target_param.data
+                                    + self.hparams.target_alpha * q_param)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         """
         Passes in a state x through the network and gets the q_values of each action as an output
 
@@ -194,7 +182,7 @@ class SAC(pl.LightningModule):
         output = self.policy(x).sample()
         return output
 
-    def train_batch(self, ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def train_batch(self, ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -236,10 +224,7 @@ class SAC(pl.LightningModule):
             if self.total_steps % self.batches_per_epoch == 0:
                 break
 
-    def loss(
-        self,
-        batch: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def loss(self, batch: Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]) -> Tuple[Tensor, Tensor, Tensor]:
         """
         Calculates the loss for SAC which contains a total of 3 losses
 
@@ -283,7 +268,7 @@ class SAC(pl.LightningModule):
 
         return policy_loss, q1_loss, q2_loss
 
-    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], _, optimizer_idx):
+    def training_step(self, batch: Tuple[Tensor, Tensor], _, optimizer_idx):
         """
         Carries out a single step through the environment to update the replay buffer.
         Then calculates loss based on the minibatch recieved
@@ -323,13 +308,13 @@ class SAC(pl.LightningModule):
             "episode_steps": self.total_episode_steps[-1]
         })
 
-    def test_step(self, *args, **kwargs) -> Dict[str, torch.Tensor]:
+    def test_step(self, *args, **kwargs) -> Dict[str, Tensor]:
         """Evaluate the agent for 10 episodes"""
         test_reward = self.run_n_episodes(self.test_env, 1)
         avg_reward = sum(test_reward) / len(test_reward)
         return {"test_reward": avg_reward}
 
-    def test_epoch_end(self, outputs) -> Dict[str, torch.Tensor]:
+    def test_epoch_end(self, outputs) -> Dict[str, Tensor]:
         """Log the avg of the test results"""
         rewards = [x["test_reward"] for x in outputs]
         avg_reward = sum(rewards) / len(rewards)
@@ -415,7 +400,7 @@ def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = SAC.add_model_specific_args(parser)
@@ -427,7 +412,7 @@ def cli_main():
     checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True)
 
     seed_everything(123)
-    trainer = pl.Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
+    trainer = Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
 
     trainer.fit(model)
 
