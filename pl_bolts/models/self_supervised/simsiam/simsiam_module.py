@@ -1,8 +1,7 @@
 from argparse import ArgumentParser
 
-import pytorch_lightning as pl
 import torch
-from pytorch_lightning import seed_everything
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from torch.nn import functional as F
 
@@ -17,7 +16,7 @@ from pl_bolts.transforms.dataset_normalizations import (
 )
 
 
-class SimSiam(pl.LightningModule):
+class SimSiam(LightningModule):
     """
     PyTorch Lightning implementation of `Exploring Simple Siamese Representation Learning (SimSiam)
     <https://arxiv.org/pdf/2011.10566v1.pdf>`_
@@ -42,7 +41,7 @@ class SimSiam(pl.LightningModule):
         dm.train_transforms = SimCLRTrainDataTransform(32)
         dm.val_transforms = SimCLREvalDataTransform(32)
 
-        trainer = pl.Trainer()
+        trainer = Trainer()
         trainer.fit(model, datamodule=dm)
 
     Train::
@@ -279,7 +278,7 @@ def cli_main():
     parser = ArgumentParser()
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = SimSiam.add_model_specific_args(parser)
@@ -387,7 +386,7 @@ def cli_main():
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
     callbacks.append(lr_monitor)
 
-    trainer = pl.Trainer.from_argparse_args(
+    trainer = Trainer.from_argparse_args(
         args,
         sync_batchnorm=True if args.gpus > 1 else False,
         callbacks=callbacks,

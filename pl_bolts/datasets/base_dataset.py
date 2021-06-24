@@ -5,15 +5,14 @@ from abc import ABC
 from typing import Sequence, Tuple
 from urllib.error import HTTPError
 
-import torch
 from torch import Tensor
 from torch.utils.data import Dataset
 
 
 class LightDataset(ABC, Dataset):
 
-    data: torch.Tensor
-    targets: torch.Tensor
+    data: Tensor
+    targets: Tensor
     normalize: tuple
     dir_path: str
     cache_folder_name: str
@@ -28,8 +27,8 @@ class LightDataset(ABC, Dataset):
 
     @staticmethod
     def _prepare_subset(
-        full_data: torch.Tensor,
-        full_targets: torch.Tensor,
+        full_data: Tensor,
+        full_targets: Tensor,
         num_samples: int,
         labels: Sequence,
     ) -> Tuple[Tensor, Tensor]:

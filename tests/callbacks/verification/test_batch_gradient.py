@@ -4,7 +4,7 @@ import pytest
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
-from torch import nn as nn
+from torch import nn, Tensor
 
 from pl_bolts.callbacks import BatchGradientVerificationCallback
 from pl_bolts.callbacks.verification.batch_gradient import default_input_mapping, default_output_mapping, selective_eval
@@ -160,7 +160,7 @@ def test_batch_verification_calls_custom_input_output_mappings():
         return [inputs[0]]
 
     def output_mapping(outputs):
-        assert isinstance(outputs, torch.Tensor)
+        assert isinstance(outputs, Tensor)
         return torch.cat((outputs, outputs), 1)
 
     mocked_input_mapping = Mock(wraps=input_mapping)

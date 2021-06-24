@@ -1,8 +1,8 @@
 from warnings import warn
 
 import pytest
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import seed_everything
 
 try:
     from torchvision import transforms
@@ -44,7 +44,7 @@ from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTran
     (3, 160, 160),
 ])
 def test_simclr_transforms(img_size):
-    pl.seed_everything(0)
+    seed_everything(0)
 
     (c, h, w) = img_size
     x = torch.rand(c, h, w)

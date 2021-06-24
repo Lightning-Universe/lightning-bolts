@@ -1,7 +1,6 @@
 from typing import Optional, Tuple
 
-import torch
-from torch import nn
+from torch import nn, Tensor
 
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
@@ -19,7 +18,7 @@ class MLP(nn.Module):
             nn.Linear(hidden_size, output_dim, bias=True),
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         x = self.model(x)
         return x
 
@@ -44,7 +43,7 @@ class SiameseArm(nn.Module):
         # Predictor
         self.predictor = MLP(output_dim, hidden_size, output_dim)
 
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def forward(self, x: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
         y = self.encoder(x)[0]
         z = self.projector(y)
         h = self.predictor(z)

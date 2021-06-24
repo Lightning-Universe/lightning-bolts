@@ -1,14 +1,14 @@
 from typing import List, Optional
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule
 from torch.nn import functional as F
 from torchmetrics import Accuracy
 
 from pl_bolts.models.self_supervised import SSLEvaluator
 
 
-class SSLFineTuner(pl.LightningModule):
+class SSLFineTuner(LightningModule):
     """
     Finetunes a self-supervised learning backbone using the standard evaluation protocol of a singler layer MLP
     with 1024 units

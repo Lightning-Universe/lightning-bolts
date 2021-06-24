@@ -1,5 +1,5 @@
 import torch
-from torch import nn as nn
+from torch import nn
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
