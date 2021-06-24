@@ -1,5 +1,5 @@
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule
 from torch import nn
 
 
@@ -28,7 +28,7 @@ class Block(nn.Module):
         return x
 
 
-class GPT2(pl.LightningModule):
+class GPT2(LightningModule):
     """
     GPT-2 from `language Models are Unsupervised Multitask Learners <https://d4mucfpksywv.cloudfront.net/
     better-language-models/language-models.pdf>`_

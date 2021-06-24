@@ -1,5 +1,5 @@
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule
 from torch import nn
 
 from pl_bolts.models.gans.pix2pix.components import Generator, PatchGAN
@@ -13,7 +13,7 @@ def _weights_init(m):
         torch.nn.init.constant_(m.bias, 0)
 
 
-class Pix2Pix(pl.LightningModule):
+class Pix2Pix(LightningModule):
 
     def __init__(self, in_channels, out_channels, learning_rate=0.0002, lambda_recon=200):
 

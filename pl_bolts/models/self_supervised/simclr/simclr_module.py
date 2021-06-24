@@ -1,8 +1,8 @@
 import math
 from argparse import ArgumentParser
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from torch import nn, Tensor
 from torch.nn import functional as F
@@ -58,7 +58,7 @@ class Projection(nn.Module):
         return F.normalize(x, dim=1)
 
 
-class SimCLR(pl.LightningModule):
+class SimCLR(LightningModule):
 
     def __init__(
         self,
@@ -405,7 +405,7 @@ def cli_main():
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
     callbacks.append(lr_monitor)
 
-    trainer = pl.Trainer(
+    trainer = Trainer(
         max_epochs=args.max_epochs,
         max_steps=None if args.max_steps == -1 else args.max_steps,
         gpus=args.gpus,

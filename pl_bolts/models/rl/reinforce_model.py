@@ -3,8 +3,7 @@ from collections import OrderedDict
 from typing import List, Tuple
 
 import numpy as np
-import pytorch_lightning as pl
-from pytorch_lightning import seed_everything
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import optim as optim
 from torch import Tensor
@@ -25,7 +24,7 @@ else:  # pragma: no cover
     warn_missing_pkg('gym')
 
 
-class Reinforce(pl.LightningModule):
+class Reinforce(LightningModule):
     """
     PyTorch Lightning implementation of `REINFORCE
     <https://papers.nips.cc/paper/
@@ -307,7 +306,7 @@ def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = Reinforce.add_model_specific_args(parser)
@@ -319,7 +318,7 @@ def cli_main():
     checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True)
 
     seed_everything(123)
-    trainer = pl.Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
+    trainer = Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
     trainer.fit(model)
 
 
