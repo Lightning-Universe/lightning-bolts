@@ -143,7 +143,7 @@ class PolicyAgent(Agent):
 class ActorCriticAgent(Agent):
     """Actor-Critic based agent that returns an action based on the networks policy"""
 
-    def __call__(self, states: torch.Tensor, device: str) -> List[int]:
+    def __call__(self, states: Tensor, device: str) -> List[int]:
         """
         Takes in the current state and returns the action based on the agents policy
 
@@ -157,7 +157,7 @@ class ActorCriticAgent(Agent):
         if not isinstance(states, list):
             states = [states]
 
-        if not isinstance(states, torch.Tensor):
+        if not isinstance(states, Tensor):
             states = torch.tensor(states, device=device)
 
         logprobs, _ = self.net(states)

@@ -1,6 +1,6 @@
 import argparse
 
-import pytorch_lightning as pl
+from pytorch_lightning import Trainer
 
 from pl_bolts.models.rl.advantage_actor_critic_model import AdvantageActorCritic
 
@@ -16,7 +16,7 @@ def test_a2c():
     ]
     hparams = parent_parser.parse_args(args_list)
 
-    trainer = pl.Trainer(
+    trainer = Trainer(
         gpus=0,
         max_steps=100,
         max_epochs=100,  # Set this as the same as max steps to ensure that it doesn't stop early

@@ -1,6 +1,7 @@
 import argparse
 
 import torch
+from torch import Tensor
 
 from pl_bolts.models.rl.advantage_actor_critic_model import AdvantageActorCritic
 
@@ -24,7 +25,7 @@ def test_a2c_loss():
 
     loss = model.loss(batch_states, batch_actions, batch_qvals)
 
-    assert isinstance(loss, torch.Tensor)
+    assert isinstance(loss, Tensor)
 
 
 def test_a2c_train_batch():
@@ -49,6 +50,6 @@ def test_a2c_train_batch():
     assert len(batch) == 3
     assert len(batch[0]) == model.hparams.batch_size
     assert isinstance(batch, list)
-    assert isinstance(batch[0], torch.Tensor)
-    assert isinstance(batch[1], torch.Tensor)
-    assert isinstance(batch[2], torch.Tensor)
+    assert isinstance(batch[0], Tensor)
+    assert isinstance(batch[1], Tensor)
+    assert isinstance(batch[2], Tensor)

@@ -65,8 +65,8 @@ class TestPolicyAgent(TestCase):
 
 def test_a2c_agent():
     env = gym.make("CartPole-v0")
-    logprobs = torch.nn.functional.log_softmax(torch.Tensor([[0.0, 100.0]]))
-    net = Mock(return_value=(logprobs, torch.Tensor([[1]])))
+    logprobs = torch.nn.functional.log_softmax(Tensor([[0.0, 100.0]]))
+    net = Mock(return_value=(logprobs, Tensor([[1]])))
     states = [env.reset()]
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     a2c_agent = ActorCriticAgent(net)

@@ -764,4 +764,3 @@ Example::
 
 .. autoclass:: pl_bolts.models.rl.AdvantageActorCritic
    :noindex:
-
