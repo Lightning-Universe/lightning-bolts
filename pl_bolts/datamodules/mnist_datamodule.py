@@ -1,15 +1,14 @@
 from typing import Any, Callable, Optional, Union
 
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
+from pl_bolts.datasets import MNIST
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
-    from torchvision.datasets import MNIST
 else:  # pragma: no cover
     warn_missing_pkg('torchvision')
-    MNIST = None
 
 
 class MNISTDataModule(VisionDataModule):

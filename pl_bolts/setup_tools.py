@@ -16,19 +16,7 @@ import os
 import re
 from typing import List
 
-from pl_bolts import __homepage__, __version__, _PROJECT_ROOT
-
-_PATH_BADGES = os.path.join('.', 'docs', 'source', '_images', 'badges')
-# badge to download
-_DEFAULT_BADGES = (
-    'Conda',
-    'DockerHub',
-    'codecov',
-    'ReadTheDocs',
-    'Slack',
-    'Discourse status',
-    'license',
-)
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 
 
 def _load_requirements(path_dir: str, file_name: str = 'requirements.txt', comment_char: str = '#') -> List[str]:
@@ -52,10 +40,10 @@ def _load_requirements(path_dir: str, file_name: str = 'requirements.txt', comme
     return reqs
 
 
-def _load_readme_description(path_dir: str, homepage: str = __homepage__, ver: str = __version__) -> str:
+def _load_readme_description(path_dir: str, homepage: str, ver: str) -> str:
     """Load readme as decribtion
 
-    >>> _load_readme_description(_PROJECT_ROOT)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+    >>> _load_readme_description(_PROJECT_ROOT, "", "")  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
     '<div align="center">...'
     """
     path_readme = os.path.join(path_dir, "README.md")
@@ -64,7 +52,7 @@ def _load_readme_description(path_dir: str, homepage: str = __homepage__, ver: s
     # drop images from readme
     text = text.replace('![PT to PL](docs/source/_images/general/pl_quick_start_full_compressed.gif)', '')
 
-    # https://github.com/PyTorchLightning/pytorch-lightning/raw/master/docs/source/_images/lightning_module/pt_to_pl.png
+    # https://github.com/PyTorchLightning/pytorch-lightning/raw/master/docs/source/_images/lightning_module/pt_to_png
     github_source_url = os.path.join(homepage, "raw", ver)
     # replace relative repository path to absolute link to the release
     #  do not replace all "docs" as in the readme we reger some other sources with particular path to docs

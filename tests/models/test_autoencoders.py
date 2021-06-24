@@ -1,7 +1,6 @@
 import pytest
-import pytorch_lightning as pl
 import torch
-from pytorch_lightning import seed_everything
+from pytorch_lightning import seed_everything, Trainer
 
 from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.models.autoencoders import AE, resnet18_decoder, resnet18_encoder, resnet50_encoder, VAE
@@ -13,14 +12,13 @@ def test_vae(tmpdir, datadir, dm_cls):
 
     dm = dm_cls(data_dir=datadir, batch_size=4)
     model = VAE(input_height=dm.size()[-1])
-    trainer = pl.Trainer(
+    trainer = Trainer(
         fast_dev_run=True,
         default_root_dir=tmpdir,
         gpus=None,
     )
 
-    result = trainer.fit(model, datamodule=dm)
-    assert result == 1
+    trainer.fit(model, datamodule=dm)
 
 
 @pytest.mark.parametrize("dm_cls", [pytest.param(CIFAR10DataModule, id="cifar10")])
@@ -29,14 +27,13 @@ def test_ae(tmpdir, datadir, dm_cls):
 
     dm = dm_cls(data_dir=datadir, batch_size=4)
     model = AE(input_height=dm.size()[-1])
-    trainer = pl.Trainer(
+    trainer = Trainer(
         fast_dev_run=True,
         default_root_dir=tmpdir,
         gpus=None,
     )
 
-    result = trainer.fit(model, datamodule=dm)
-    assert result == 1
+    trainer.fit(model, datamodule=dm)
 
 
 @torch.no_grad()

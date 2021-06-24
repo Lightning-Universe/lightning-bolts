@@ -5,8 +5,8 @@ import argparse
 from typing import Tuple
 
 import numpy as np
-import pytorch_lightning as pl
-import torch
+from pytorch_lightning import Trainer
+from torch import Tensor
 
 from pl_bolts.datamodules.experience_source import Experience
 from pl_bolts.models.rl.common.networks import NoisyCNN
@@ -47,7 +47,7 @@ class NoisyDQN(DQN):
         """Set the agents epsilon to 0 as the exploration comes from the network"""
         self.agent.epsilon = 0.0
 
-    def train_batch(self, ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def train_batch(self, ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader.
         This is the same function as the standard DQN except that we dont update epsilon as it is always 0. The
@@ -96,7 +96,7 @@ def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = NoisyDQN.add_model_specific_args(parser)
@@ -104,7 +104,7 @@ def cli_main():
 
     model = NoisyDQN(**args.__dict__)
 
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model)
 
 

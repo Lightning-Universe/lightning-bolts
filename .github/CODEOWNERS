@@ -5,19 +5,19 @@
 # the repo. Unless a later match takes precedence,
 # @global-owner1 and @global-owner2 will be requested for
 # review when someone opens a pull request.
-* @borda @akihironitta @ananyahjha93
+* @borda @akihironitta @ananyahjha93 @ethanwharris @awaelchli
 
 # owners
-/.github/CODEOWNERS   @borda
+/.github/CODEOWNERS   @borda @ethanwharris
 # main
 /README.md            @borda @ananyahjha93
 # installation
-/setup.py             @borda
+/setup.py             @borda @ethanwharris
 
 # CI/CD
-/.github/workflows/   @borda
+/.github/workflows/   @borda @ethanwharris
 # configs in root
-/*.yml                @borda
+/*.yml                @borda @ethanwharris
 
 # Docs
 /docs/                          @edenlightning @borda @ananyahjha93
