@@ -12,8 +12,8 @@ You may obtain a copy of the License from the LICENSE file present in this folde
 from argparse import ArgumentParser
 from typing import Union
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule, Trainer
 from torch import nn
 from torch.nn import functional as F
 
@@ -35,7 +35,7 @@ else:  # pragma: no cover
     warn_missing_pkg('torchvision')
 
 
-class Moco_v2(pl.LightningModule):
+class Moco_v2(LightningModule):
     """
     PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
 
@@ -348,7 +348,7 @@ def cli_main():
     parser = ArgumentParser()
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = Moco_v2.add_model_specific_args(parser)
@@ -377,7 +377,7 @@ def cli_main():
 
     model = Moco_v2(**args.__dict__)
 
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model, datamodule=datamodule)
 
 

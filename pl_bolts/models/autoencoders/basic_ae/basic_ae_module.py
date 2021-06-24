@@ -1,8 +1,8 @@
 import urllib.parse
 from argparse import ArgumentParser
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule, Trainer
 from torch import nn
 from torch.nn import functional as F
 
@@ -15,7 +15,7 @@ from pl_bolts.models.autoencoders.components import (
 )
 
 
-class AE(pl.LightningModule):
+class AE(LightningModule):
     """
     Standard AE
 
@@ -168,7 +168,7 @@ def cli_main(args=None):
         raise ValueError(f"undefined dataset {script_args.dataset}")
 
     parser = AE.add_model_specific_args(parser)
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
     args = parser.parse_args(args)
 
     dm = dm_cls.from_argparse_args(args)
@@ -179,7 +179,7 @@ def cli_main(args=None):
 
     model = AE(**vars(args))
 
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model, datamodule=dm)
     return dm, model, trainer
 

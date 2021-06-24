@@ -1,15 +1,15 @@
 from argparse import ArgumentParser
 from typing import Any, Dict, List, Tuple, Type
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 from torch import nn, Tensor
 from torch.nn import functional as F
 from torch.optim import Adam
 from torch.optim.optimizer import Optimizer
 
 
-class LinearRegression(pl.LightningModule):
+class LinearRegression(LightningModule):
     """
     Linear regression model implementing - with optional L1/L2 regularization
     $$min_{W} ||(Wx + b) - y ||_2^2 $$
@@ -113,7 +113,7 @@ def cli_main() -> None:
     from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
     from pl_bolts.utils import _SKLEARN_AVAILABLE
 
-    pl.seed_everything(1234)
+    seed_everything(1234)
 
     # create dataset
     if _SKLEARN_AVAILABLE:
@@ -126,7 +126,7 @@ def cli_main() -> None:
     # args
     parser = ArgumentParser()
     parser = LinearRegression.add_model_specific_args(parser)
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
     # model
@@ -138,7 +138,7 @@ def cli_main() -> None:
     loaders = SklearnDataModule(X, y, batch_size=args.batch_size)
 
     # train
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
 
 

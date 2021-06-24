@@ -2,9 +2,8 @@ from argparse import ArgumentParser
 from copy import deepcopy
 from typing import Any, Union
 
-import pytorch_lightning as pl
 import torch
-from pytorch_lightning import seed_everything
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 from torch.nn import functional as F
 from torch.optim import Adam
 
@@ -13,7 +12,7 @@ from pl_bolts.models.self_supervised.byol.models import SiameseArm
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
-class BYOL(pl.LightningModule):
+class BYOL(LightningModule):
     """
     PyTorch Lightning implementation of `Bootstrap Your Own Latent (BYOL)
     <https://arxiv.org/pdf/2006.07733.pdf>`_
@@ -187,7 +186,7 @@ def cli_main():
     parser = ArgumentParser()
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = BYOL.add_model_specific_args(parser)
@@ -225,7 +224,7 @@ def cli_main():
     # finetune in real-time
     online_eval = SSLOnlineEvaluator(dataset=args.dataset, z_dim=2048, num_classes=dm.num_classes)
 
-    trainer = pl.Trainer.from_argparse_args(args, max_steps=300000, callbacks=[online_eval])
+    trainer = Trainer.from_argparse_args(args, max_steps=300000, callbacks=[online_eval])
 
     trainer.fit(model, datamodule=dm)
 

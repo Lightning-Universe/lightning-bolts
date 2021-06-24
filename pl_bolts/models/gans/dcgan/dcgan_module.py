@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 from typing import Any
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 from torch import nn, Tensor
 from torch.utils.data import DataLoader
 
@@ -18,7 +18,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-class DCGAN(pl.LightningModule):
+class DCGAN(LightningModule):
     """
     DCGAN implementation.
 
@@ -174,7 +174,7 @@ class DCGAN(pl.LightningModule):
 
 
 def cli_main(args=None):
-    pl.seed_everything(1234)
+    seed_everything(1234)
 
     parser = ArgumentParser()
     parser.add_argument("--batch_size", default=64, type=int)
@@ -208,7 +208,7 @@ def cli_main(args=None):
     )
 
     parser = DCGAN.add_model_specific_args(parser)
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
     args = parser.parse_args(args)
 
     model = DCGAN(**vars(args), image_channels=image_channels)
@@ -216,7 +216,7 @@ def cli_main(args=None):
         TensorboardGenerativeModelImageSampler(num_samples=5),
         LatentDimInterpolator(interpolate_epoch_interval=5),
     ]
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks)
+    trainer = Trainer.from_argparse_args(args, callbacks=callbacks)
     trainer.fit(model, dataloader)
 
 

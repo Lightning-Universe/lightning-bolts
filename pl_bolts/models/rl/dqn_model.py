@@ -6,9 +6,8 @@ from collections import OrderedDict
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-import pytorch_lightning as pl
 import torch
-from pytorch_lightning import seed_everything
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import optim as optim
 from torch import Tensor
@@ -31,7 +30,7 @@ else:  # pragma: no cover
     Env = object
 
 
-class DQN(pl.LightningModule):
+class DQN(LightningModule):
     """
     Basic DQN Model
 
@@ -410,7 +409,7 @@ def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = DQN.add_model_specific_args(parser)
@@ -422,7 +421,7 @@ def cli_main():
     checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True)
 
     seed_everything(123)
-    trainer = pl.Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
+    trainer = Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
 
     trainer.fit(model)
 

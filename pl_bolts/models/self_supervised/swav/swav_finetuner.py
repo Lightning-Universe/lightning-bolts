@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentParser
 
-import pytorch_lightning as pl
+from pytorch_lightning import seed_everything, Trainer
 
 from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner
 from pl_bolts.models.self_supervised.swav.swav_module import SwAV
@@ -12,7 +12,7 @@ from pl_bolts.transforms.dataset_normalizations import imagenet_normalization, s
 def cli_main():  # pragma: no cover
     from pl_bolts.datamodules import ImagenetDataModule, STL10DataModule
 
-    pl.seed_everything(1234)
+    seed_everything(1234)
 
     parser = ArgumentParser()
     parser.add_argument('--dataset', type=str, help='stl10, imagenet', default='stl10')
@@ -100,7 +100,7 @@ def cli_main():  # pragma: no cover
         final_lr=args.final_lr
     )
 
-    trainer = pl.Trainer(
+    trainer = Trainer(
         gpus=args.gpus,
         num_nodes=1,
         precision=16,

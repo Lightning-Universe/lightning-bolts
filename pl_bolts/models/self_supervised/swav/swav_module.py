@@ -5,8 +5,8 @@ import os
 from argparse import ArgumentParser
 
 import numpy as np
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from torch import distributed as dist
 from torch import nn
@@ -21,7 +21,7 @@ from pl_bolts.transforms.dataset_normalizations import (
 )
 
 
-class SwAV(pl.LightningModule):
+class SwAV(LightningModule):
 
     def __init__(
         self,
@@ -556,7 +556,7 @@ def cli_main():
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
     callbacks.append(lr_monitor)
 
-    trainer = pl.Trainer(
+    trainer = Trainer(
         max_epochs=args.max_epochs,
         max_steps=None if args.max_steps == -1 else args.max_steps,
         gpus=args.gpus,

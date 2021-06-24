@@ -5,7 +5,7 @@ import argparse
 from typing import Tuple
 
 import numpy as np
-import pytorch_lightning as pl
+from pytorch_lightning import Trainer
 from torch import Tensor
 
 from pl_bolts.datamodules.experience_source import Experience
@@ -96,7 +96,7 @@ def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = NoisyDQN.add_model_specific_args(parser)
@@ -104,7 +104,7 @@ def cli_main():
 
     model = NoisyDQN(**args.__dict__)
 
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model)
 
 

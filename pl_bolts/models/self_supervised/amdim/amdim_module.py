@@ -2,8 +2,8 @@ import os
 from argparse import ArgumentParser
 from typing import Union
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 from torch import optim as optim
 from torch.utils.data import DataLoader
 
@@ -59,7 +59,7 @@ DATASET_IMAGENET2012 = {
 }
 
 
-class AMDIM(pl.LightningModule):
+class AMDIM(LightningModule):
     """
     PyTorch Lightning implementation of
     `Augmented Multiscale Deep InfoMax (AMDIM) <https://arxiv.org/abs/1906.00910>`_.
@@ -85,8 +85,8 @@ class AMDIM(pl.LightningModule):
 
     def __init__(
         self,
-        datamodule: Union[str, pl.LightningDataModule] = 'cifar10',
-        encoder: Union[str, torch.nn.Module, pl.LightningModule] = 'amdim_encoder',
+        datamodule: Union[str, LightningDataModule] = 'cifar10',
+        encoder: Union[str, torch.nn.Module, LightningModule] = 'amdim_encoder',
         contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask('01, 02, 11'),
         image_channels: int = 3,
         image_height: int = 32,
@@ -321,13 +321,13 @@ class AMDIM(pl.LightningModule):
 
 def cli_main():
     parser = ArgumentParser()
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
     parser = AMDIM.add_model_specific_args(parser)
 
     args = parser.parse_args()
 
     model = AMDIM(**vars(args), encoder='resnet18')
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model)
 
 
