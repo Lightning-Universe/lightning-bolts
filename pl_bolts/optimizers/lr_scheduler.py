@@ -2,7 +2,7 @@ import math
 import warnings
 from typing import List
 
-from torch import nn as nn
+from torch import nn
 from torch.optim import Adam, Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
 

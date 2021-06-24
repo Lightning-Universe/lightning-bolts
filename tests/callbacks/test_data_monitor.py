@@ -5,7 +5,7 @@ import pytest
 import torch
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import LoggerCollection, TensorBoardLogger
-from torch import nn as nn
+from torch import nn
 
 from pl_bolts.callbacks import ModuleDataMonitor, TrainingDataMonitor
 from pl_bolts.models import LitMNIST

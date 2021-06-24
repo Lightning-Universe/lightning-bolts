@@ -4,6 +4,7 @@ from unittest import TestCase
 import gym
 import numpy as np
 import torch
+from torch import Tensor
 
 from pl_bolts.datamodules.experience_source import DiscountedExperienceSource
 from pl_bolts.models.rl.common.agents import Agent
@@ -46,7 +47,7 @@ class TestReinforce(TestCase):
 
         loss = self.model.loss(batch_states, batch_actions, batch_qvals)
 
-        self.assertIsInstance(loss, torch.Tensor)
+        self.assertIsInstance(loss, Tensor)
 
     def test_get_qvals(self):
         """Test that given an batch of episodes that it will return a list of qvals for each episode"""

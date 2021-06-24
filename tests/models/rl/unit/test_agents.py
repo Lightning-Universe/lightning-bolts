@@ -5,6 +5,7 @@ from unittest.mock import Mock
 import gym
 import numpy as np
 import torch
+from torch import Tensor
 
 from pl_bolts.models.rl.common.agents import Agent, PolicyAgent, ValueAgent
 
@@ -26,7 +27,7 @@ class TestValueAgent(TestCase):
 
     def setUp(self) -> None:
         self.env = gym.make("CartPole-v0")
-        self.net = Mock(return_value=torch.Tensor([[0.0, 100.0]]))
+        self.net = Mock(return_value=Tensor([[0.0, 100.0]]))
         self.state = [self.env.reset()]
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.value_agent = ValueAgent(self.net, self.env.action_space.n)
@@ -51,7 +52,7 @@ class TestPolicyAgent(TestCase):
 
     def setUp(self) -> None:
         self.env = gym.make("CartPole-v0")
-        self.net = Mock(return_value=torch.Tensor([[0.0, 100.0]]))
+        self.net = Mock(return_value=Tensor([[0.0, 100.0]]))
         self.states = [self.env.reset()]
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
