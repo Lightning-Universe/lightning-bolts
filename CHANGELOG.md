@@ -5,25 +5,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [unReleased] - 2021-MM-DD
-
-### Added
-
+## [0.3.4] - 2021-06-17
 
 ### Changed
 
 - Replaced `load_boston` with `load_diabetes` in the docs and tests ([#629](https://github.com/PyTorchLightning/lightning-bolts/pull/629))
-
-
-### Deprecated
-
-
-### Removed
-
+- Added base encoder and MLP dimension arguments to BYOL constructor ([#637](https://github.com/PyTorchLightning/lightning-bolts/pull/637))
 
 ### Fixed
 
 - Fixed the MNIST download giving HTTP 503 ([#633](https://github.com/PyTorchLightning/lightning-bolts/pull/633))
+- Fixed type annotation of `ExperienceSource.__iter__` ([#645](https://github.com/PyTorchLightning/lightning-bolts/pull/645))
+- Fixed `pretrained_urls` on Windows ([#652](https://github.com/PyTorchLightning/lightning-bolts/pull/652))
+- Fixed logistic regression ([#655](https://github.com/PyTorchLightning/lightning-bolts/pull/655), [#664](https://github.com/PyTorchLightning/lightning-bolts/pull/664))
+- Fixed double softmax in `SSLEvaluator` ([#663](https://github.com/PyTorchLightning/lightning-bolts/pull/663))
 
 
 ## [0.3.3] - 2021-04-17
