@@ -13,6 +13,7 @@ from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
 from pl_bolts.datamodules.vocdetection_datamodule import VOCDetectionDataModule
 from pl_bolts.datasets.kitti_dataset import KittiDataset
 from pl_bolts.datamodules.emnist_datamodule import EMNISTDataModule
+from pl_bolts.datamodules.binary_emnist_datamodule import BinaryEMNISTDataModule
 
 __all__ = [
     'AsynchronousLoader',
@@ -35,4 +36,5 @@ __all__ = [
     'VOCDetectionDataModule',
     'KittiDataset',
     'EMNISTDataModule',
+    'BinaryEMNISTDataModule',
 ]
