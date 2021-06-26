@@ -1,4 +1,3 @@
-
 from typing import Any, Callable, Optional, Union
 
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
@@ -19,10 +18,10 @@ class EMNISTDataModule(VisionDataModule):
         :alt: EMNIST
     Specs:
         - 6 splits: ``byclass``, ``bymerge``,
-                    ``balanced``, ``letters``, 
+                    ``balanced``, ``letters``,
                     ``digits`` and ``mnist``.
         - For each split:
-          - 10 classes (1 per digit) 
+          - 10 classes (1 per digit)
           - Each image is (1 x 28 x 28)
     Standard EMNIST, train, val, test splits and transforms
     Transforms::
@@ -37,8 +36,9 @@ class EMNISTDataModule(VisionDataModule):
     """
     name = "emnist"
     dataset_cls = EMNIST
-    dims = (1, 28, 28) # TODO: cross-check the data shape
-                       # TODO: corss-check and fix docs (10 classes?)      
+    dims = (1, 28, 28)  # TODO: cross-check the data shape
+
+    # TODO: corss-check and fix docs (10 classes?)
 
     def __init__(
         self,
@@ -59,16 +59,16 @@ class EMNISTDataModule(VisionDataModule):
         Args:
             data_dir (string, optional): Where to save/load the data.
             split (string): The dataset has 6 different splits: ``byclass``, ``bymerge``,
-                            ``balanced``, ``letters``, ``digits`` and ``mnist``. 
-                            This argument specifies which one to use. 
-            val_split (int, float): Percent (float) or number (int) of samples 
+                            ``balanced``, ``letters``, ``digits`` and ``mnist``.
+                            This argument specifies which one to use.
+            val_split (int, float): Percent (float) or number (int) of samples
                                     to use for the validation split.
             num_workers (int): How many workers to use for loading data
             normalize (bool): If ``True``, applies image normalize.
             batch_size (int): How many samples per batch to load.
             seed (int): Random seed to be used for train/val/test splits.
             shuffle (bool): If ``True``, shuffles the train data every epoch.
-            pin_memory (bool): If ``True``, the data loader will copy Tensors into 
+            pin_memory (bool): If ``True``, the data loader will copy Tensors into
                                CUDA pinned memory before returning them.
             drop_last (bool): If ``True``, drops the last incomplete batch.
         """
@@ -92,26 +92,23 @@ class EMNISTDataModule(VisionDataModule):
         )
         self.split = split
 
-
     @property
     def num_classes(self) -> int:
         """
         Return:
             10
         """
-        return 10 # TODO: check and return correct num_classes
-
+        return 10  # TODO: check and return correct num_classes
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
         """
         Saves files to data_dir
         """
-        def _prepare_splits(split: str):    
-            self.dataset_cls(self.data_dir, split=split, 
-                             train=True, download=True)
-            self.dataset_cls(self.data_dir, split=split, 
-                             train=False, download=True)
-        
+
+        def _prepare_splits(split: str):
+            self.dataset_cls(self.data_dir, split=split, train=True, download=True)
+            self.dataset_cls(self.data_dir, split=split, train=False, download=True)
+
         # TODO: expose split = 'all' option to the api later
         # If you choose ``all`` for split, that will use **all** splits.
         if self.split == 'all':
@@ -120,12 +117,11 @@ class EMNISTDataModule(VisionDataModule):
                 _prepare_splits(split)
         else:
             _prepare_splits(self.split)
-       
 
     def default_transforms(self) -> Callable:
         if self.normalize:
             emnist_transforms = transform_lib.Compose([
-                transform_lib.ToTensor(), 
+                transform_lib.ToTensor(),
                 transform_lib.Normalize(mean=(0.5, ), std=(0.5, )),
                 # TODO: check that EMNIST also uses mean=0.5 and std=0.5
             ])

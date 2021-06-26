@@ -10,11 +10,11 @@ from pl_bolts.datasets.dummy_dataset import (
     RandomDictDataset,
     RandomDictStringDataset,
 )
+from pl_bolts.datasets.emnist_dataset import BinaryEMNIST, EMNIST
 from pl_bolts.datasets.imagenet_dataset import extract_archive, parse_devkit_archive, UnlabeledImagenet
 from pl_bolts.datasets.kitti_dataset import KittiDataset
 from pl_bolts.datasets.mnist_dataset import BinaryMNIST, MNIST
 from pl_bolts.datasets.ssl_amdim_datasets import CIFAR10Mixed, SSLDatasetMixin
-from pl_bolts.datasets.emnist_dataset import BinaryEMNIST, EMNIST
 
 __all__ = [
     "LightDataset",
@@ -34,7 +34,7 @@ __all__ = [
     "BinaryMNIST",
     "CIFAR10Mixed",
     "SSLDatasetMixin",
-    "EMNIST", 
+    "EMNIST",
     "BinaryEMNIST",
 ]
 
