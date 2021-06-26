@@ -6,7 +6,7 @@ if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import EMNIST
 else:  # pragma: no cover
     warn_missing_pkg('torchvision')
-    MNIST = object
+    EMNIST = object
 
 if _PIL_AVAILABLE:
     from PIL import Image
