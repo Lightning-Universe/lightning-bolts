@@ -104,19 +104,45 @@ class EMNISTDataModule(VisionDataModule):
         """
         Saves files to data_dir
         """
+        def _prepare_with_splits(split: str):    
+            self.dataset_cls(self.data_dir, split=split, 
+                             train=True, download=True)
+            self.dataset_cls(self.data_dir, split=split, 
+                             train=False, download=True)        
+        
+        _prepare_with_splits(self.split)
 
-        def _prepare_splits(split: str):
-            self.dataset_cls(self.data_dir, split=split, train=True, download=True)
-            self.dataset_cls(self.data_dir, split=split, train=False, download=True)
 
-        # TODO: expose split = 'all' option to the api later
-        # If you choose ``all`` for split, that will use **all** splits.
-        if self.split == 'all':
-            splits = self.dataset_cls.splits
-            for split in splits:
-                _prepare_splits(split)
-        else:
-            _prepare_splits(self.split)
+    def setup(self, stage: Optional[str] = None) -> None:
+        """
+        Creates train, val, and test dataset
+        """
+        # TODO: change type: Any to something like torch
+        def _setup_with_splits(split: str, train: bool, transform: Any):  # type: ignore[misc]  
+            return self.dataset_cls(
+                self.data_dir, 
+                split=split, 
+                train=train, 
+                transform=transform, 
+                **self.EXTRA_ARGS
+            )
+            
+        if stage == "fit" or stage is None:
+            train_transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
+            val_transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
+            
+            dataset_train = _setup_with_splits(split=self.split, train=True, transform=train_transforms) 
+                            
+            dataset_val = _setup_with_splits(split=self.split, train=True, transform=val_transforms)
+
+            # Split
+            self.dataset_train = self._split_dataset(dataset_train)
+            self.dataset_val = self._split_dataset(dataset_val, train=False)
+
+        if stage == "test" or stage is None:
+            test_transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
+            self.dataset_test = _setup_with_splits(
+                split=self.split, train=False, transform=test_transforms)  
 
     def default_transforms(self) -> Callable:
         if self.normalize:
