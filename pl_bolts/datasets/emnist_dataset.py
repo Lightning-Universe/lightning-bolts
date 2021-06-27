@@ -32,7 +32,7 @@ EMNIST_METADATA = {
         'byclass': {
             'name': 'byclass',
             'num_classes': 62,
-            'num_train': 697_932, 
+            'num_train': 697_932,
             'num_test': 116_323,
             'validation': False,
             'num_total': 814_255,
@@ -40,7 +40,7 @@ EMNIST_METADATA = {
         'bymerge': {
             'name': 'bymerge',
             'num_classes': 47,
-            'num_train': 697_932, 
+            'num_train': 697_932,
             'num_test': 116_323,
             'validation': False,
             'num_total': 814_255,
@@ -48,7 +48,7 @@ EMNIST_METADATA = {
         'balanced': {
             'name': 'balanced',
             'num_classes': 47,
-            'num_train': 112_800, 
+            'num_train': 112_800,
             'num_test': 18_800,
             'validation': True,
             'num_total': 131_600,
@@ -56,7 +56,7 @@ EMNIST_METADATA = {
         'digits': {
             'name': 'digits',
             'num_classes': 10,
-            'num_train': 240_000, 
+            'num_train': 240_000,
             'num_test': 40_000,
             'validation': True,
             'num_total': 280_000,
@@ -64,7 +64,7 @@ EMNIST_METADATA = {
         'letters': {
             'name': 'letters',
             'num_classes': 37,
-            'num_train': 88_800, 
+            'num_train': 88_800,
             'num_test': 14_800,
             'validation': True,
             'num_total': 103_000,
@@ -72,7 +72,7 @@ EMNIST_METADATA = {
         'mnist': {
             'name': 'mnist',
             'num_classes': 10,
-            'num_train': 60_000, 
+            'num_train': 60_000,
             'num_test': 10_000,
             'validation': True,
             'num_total': 70_000,
@@ -105,6 +105,7 @@ if _TORCHVISION_AVAILABLE and _TORCHVISION_LESS_THAN_0_9_1:
     ]
 
 EMNIST._metadata = EMNIST_METADATA
+
 
 class BinaryEMNIST(EMNIST):
 
