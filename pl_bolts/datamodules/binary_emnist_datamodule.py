@@ -20,10 +20,23 @@ class BinaryEMNISTDataModule(VisionDataModule):
         - 6 splits: ``byclass``, ``bymerge``,
                     ``balanced``, ``letters``, 
                     ``digits`` and ``mnist``.
-        - For each split:
-          - 10 classes (1 per digit) 
+
+        - Table:
+          
+          | Split Name   | Classes | No. Training | No. Testing | Validation | Total   |
+          |--------------|---------|--------------|-------------|------------|---------|
+          | ``byclass``  | 62      | 697,932      | 116,323     | No         | 814,255 |
+          | ``bymerge``  | 47      | 697,932      | 116,323     | No         | 814,255 |
+          | ``balanced`` | 47      | 112,800      | 18,800      | Yes        | 131,600 |
+          | ``digits``   | 10      | 240,000      | 40,000      | Yes        | 280,000 |
+          | ``letters``  | 37      | 88,800       | 14,800      | Yes        | 103,600 |
+          | ``mnist``    | 10      | 60,000       | 10,000      | Yes        | 70,000  |
+
+          source: https://arxiv.org/pdf/1702.05373.pdf [Table-II]
+
+        - For each split:          
           - Each image is (1 x 28 x 28)
-    Binary EMNIST, train, val, test splits and transforms
+    Standard EMNIST, train, val, test-splits and transforms
     Transforms::
         emnist_transforms = transform_lib.Compose([
             transform_lib.ToTensor()
@@ -92,15 +105,24 @@ class BinaryEMNISTDataModule(VisionDataModule):
         )
         self.split = split
 
-
     @property
     def num_classes(self) -> int:
         """
         Return:
-            10
+           - for ``byclass``: 62
+           - for ``bymerge``: 47
+           - for ``balanced``: 47
+           - for ``digits``: 10
+           - for ``letters``: 47
+           - for ``mnist``: 10 
         """
-        return 10 # TODO: check and return correct num_classes
-
+        # The _metadata is only added to EMNIST dataset 
+        # to get split-specific metadata.
+        nc = (self.dataset_cls._metadata.get('splits')
+                  .get(self.split)
+                  .get('num_classes')
+        )
+        return nc
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
         """
@@ -113,7 +135,6 @@ class BinaryEMNISTDataModule(VisionDataModule):
                              train=False, download=True)        
         
         _prepare_with_splits(self.split)
-
 
     def setup(self, stage: Optional[str] = None) -> None:
         """
@@ -145,7 +166,6 @@ class BinaryEMNISTDataModule(VisionDataModule):
             test_transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
             self.dataset_test = _setup_with_splits(
                 split=self.split, train=False, transform=test_transforms)            
-       
 
     def default_transforms(self) -> Callable:
         if self.normalize:
