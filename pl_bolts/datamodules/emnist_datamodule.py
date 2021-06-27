@@ -119,19 +119,18 @@ class EMNISTDataModule(VisionDataModule):
         nc = (self.dataset_cls
                   ._metadata.get('splits')
                   .get(self.split)
-                  .get('num_classes')
-             )
+                  .get('num_classes'))
         return nc
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
         """
         Saves files to data_dir
         """
-        def _prepare_with_splits(split: str):    
-            self.dataset_cls(self.data_dir, split=split, 
+        def _prepare_with_splits(split: str):
+            self.dataset_cls(self.data_dir, split=split,
                              train=True, download=True)
-            self.dataset_cls(self.data_dir, split=split, 
-                             train=False, download=True)        
+            self.dataset_cls(self.data_dir, split=split,
+                             train=False, download=True)
         
         _prepare_with_splits(self.split)
 
@@ -140,21 +139,21 @@ class EMNISTDataModule(VisionDataModule):
         Creates train, val, and test dataset
         """
         # TODO: change type: Any to something like torch
-        def _setup_with_splits(split: str, train: bool, transform: Any):  # type: ignore[misc]  
+        def _setup_with_splits(split: str, train: bool, transform: Any):  # type: ignore[misc]
             return self.dataset_cls(
-                self.data_dir, 
-                split=split, 
-                train=train, 
-                transform=transform, 
+                self.data_dir,
+                split=split,
+                train=train,
+                transform=transform,
                 **self.EXTRA_ARGS
             )
-            
+        
         if stage == "fit" or stage is None:
             train_transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
             val_transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
             
             dataset_train = _setup_with_splits(split=self.split, train=True, transform=train_transforms) 
-                            
+            
             dataset_val = _setup_with_splits(split=self.split, train=True, transform=val_transforms)
 
             # Split
