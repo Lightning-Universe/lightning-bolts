@@ -18,11 +18,11 @@ class EMNISTDataModule(VisionDataModule):
         :alt: EMNIST
     Specs:
         - 6 splits: ``byclass``, ``bymerge``,
-                    ``balanced``, ``letters``, 
+                    ``balanced``, ``letters``,
                     ``digits`` and ``mnist``.
 
         - Table:
-          
+
           | Split Name   | Classes | No. Training | No. Testing | Validation | Total   |
           |--------------|---------|--------------|-------------|------------|---------|
           | ``byclass``  | 62      | 697,932      | 116,323     | No         | 814,255 |
@@ -34,7 +34,7 @@ class EMNISTDataModule(VisionDataModule):
 
           source: https://arxiv.org/pdf/1702.05373.pdf [Table-II]
 
-        - For each split:          
+        - For each split:
           - Each image is (1 x 28 x 28)
     Standard EMNIST, train, val, test-splits and transforms
     Transforms::
@@ -49,7 +49,7 @@ class EMNISTDataModule(VisionDataModule):
     """
     name = "emnist"
     dataset_cls = EMNIST
-    dims = (1, 28, 28) 
+    dims = (1, 28, 28)
 
     def __init__(
         self,
@@ -70,16 +70,16 @@ class EMNISTDataModule(VisionDataModule):
         Args:
             data_dir (string, optional): Where to save/load the data.
             split (string): The dataset has 6 different splits: ``byclass``, ``bymerge``,
-                            ``balanced``, ``letters``, ``digits`` and ``mnist``. 
-                            This argument specifies which one to use. 
-            val_split (int, float): Percent (float) or number (int) of samples 
+                            ``balanced``, ``letters``, ``digits`` and ``mnist``.
+                            This argument specifies which one to use.
+            val_split (int, float): Percent (float) or number (int) of samples
                                     to use for the validation split.
             num_workers (int): How many workers to use for loading data
             normalize (bool): If ``True``, applies image normalize.
             batch_size (int): How many samples per batch to load.
             seed (int): Random seed to be used for train/val/test splits.
             shuffle (bool): If ``True``, shuffles the train data every epoch.
-            pin_memory (bool): If ``True``, the data loader will copy Tensors into 
+            pin_memory (bool): If ``True``, the data loader will copy Tensors into
                                CUDA pinned memory before returning them.
             drop_last (bool): If ``True``, drops the last incomplete batch.
         """
@@ -112,14 +112,15 @@ class EMNISTDataModule(VisionDataModule):
            - for ``balanced``: 47
            - for ``digits``: 10
            - for ``letters``: 47
-           - for ``mnist``: 10 
+           - for ``mnist``: 10
         """
-        # The _metadata is only added to EMNIST dataset 
+        # The _metadata is only added to EMNIST dataset
         # to get split-specific metadata.
-        nc = (self.dataset_cls._metadata.get('splits')
+        nc = (self.dataset_cls
+                  ._metadata.get('splits')
                   .get(self.split)
                   .get('num_classes')
-        )
+             )
         return nc
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
