@@ -12,6 +12,75 @@ if _PIL_AVAILABLE:
 else:  # pragma: no cover
     warn_missing_pkg('PIL', pypi_name='Pillow')
 
+_TABLE = """
+
+| Name     | Classes | No. Training | No. Testing | Validation | Total   |
+|----------|---------|--------------|-------------|------------|---------|
+| By_Class | 62      | 697,932      | 116,323     | No         | 814,255 |
+| By_Merge | 47      | 697,932      | 116,323     | No         | 814,255 |
+| Balanced | 47      | 112,800      | 18,800      | Yes        | 131,600 |
+| Digits   | 10      | 240,000      | 40,000      | Yes        | 280,000 |
+| Letters  | 37      | 88,800       | 14,800      | Yes        | 103,600 |
+| MNIST    | 10      | 60,000       | 10,000      | Yes        | 70,000  |
+
+"""
+
+EMNIST_METADATA = {
+    'table': _TABLE,
+    'source': 'Table-II in paper: https://arxiv.org/pdf/1702.05373.pdf',
+    'splits': {
+        'byclass': {
+            'name': 'byclass',
+            'num_classes': 62,
+            'num_train': 697_932, 
+            'num_test': 116_323,
+            'validation': False,
+            'num_total': 814_255,
+        },
+        'bymerge': {
+            'name': 'bymerge',
+            'num_classes': 47,
+            'num_train': 697_932, 
+            'num_test': 116_323,
+            'validation': False,
+            'num_total': 814_255,
+        },
+        'balanced': {
+            'name': 'balanced',
+            'num_classes': 47,
+            'num_train': 112_800, 
+            'num_test': 18_800,
+            'validation': True,
+            'num_total': 131_600,
+        },
+        'digits': {
+            'name': 'digits',
+            'num_classes': 10,
+            'num_train': 240_000, 
+            'num_test': 40_000,
+            'validation': True,
+            'num_total': 280_000,
+        },
+        'letters': {
+            'name': 'letters',
+            'num_classes': 37,
+            'num_train': 88_800, 
+            'num_test': 14_800,
+            'validation': True,
+            'num_total': 103_000,
+        },
+        'mnist': {
+            'name': 'mnist',
+            'num_classes': 10,
+            'num_train': 60_000, 
+            'num_test': 10_000,
+            'validation': True,
+            'num_total': 70_000,
+        },
+    },
+}
+
+
 # TODO(sugatoray): This is needed to avoid 503 error when downloading MNIST dataset
 # from http://yann.lecun.com/exdb/mnist/ and can be removed after `torchvision==0.9.1`.
 # See https://github.com/pytorch/vision/issues/3549 for details.
@@ -25,12 +94,17 @@ if _TORCHVISION_AVAILABLE and _TORCHVISION_LESS_THAN_0_9_1:
             "https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz",
             "d53e105ee54ea40749a09fcbcd1e9432"
         ),  # noqa: E501
-        ("https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz",
-         "9fb629c4189551a2d022fa330f9573f3"),  # noqa: E501
-        ("https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz", "ec29112dd5afa0611ce80d1b7f02629c"
-         )  # noqa: E501
+        (
+            "https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz",
+            "9fb629c4189551a2d022fa330f9573f3"
+        ),  # noqa: E501
+        (
+            "https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz",
+            "ec29112dd5afa0611ce80d1b7f02629c"
+        )   # noqa: E501
     ]
 
+EMNIST._metadata = EMNIST_METADATA
 
 class BinaryEMNIST(EMNIST):
 
