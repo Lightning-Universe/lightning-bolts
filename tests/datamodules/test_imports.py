@@ -25,6 +25,8 @@ import pytest
         ("CityscapesDataModule", ["torchvision"]),
         ("KittiDataset", ["PIL"]),
         ("KittiDataModule", ["torchvision"]),
+        ("EMNISTDataModule", ["torchvision"]),
+        ("BinaryEMNISTDataModule", ["torchvision"]),
     ]
 )
 def test_import(dm_cls, deps):
