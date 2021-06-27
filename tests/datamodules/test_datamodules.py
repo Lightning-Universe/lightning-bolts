@@ -89,7 +89,7 @@ def _create_dm(dm_cls, datadir, val_split=0.2):
     return dm
 
 
-#@pytest.mark.parametrize("datadir", ['./tempdata']) ## TODO: Remove this before final commit
+# @pytest.mark.parametrize("datadir", ['./tempdata']) ## TODO: Remove this before final commit
 @pytest.mark.parametrize("split", ['byclass', 'bymerge', 'balanced', 'letters', 'digits', 'mnist'])
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
 def test_data_modules(datadir, dm_cls, split):
@@ -101,10 +101,10 @@ def test_data_modules(datadir, dm_cls, split):
 
 def _create_dm_emnistlike(dm_cls, datadir, split='digits', val_split=0.2):
     dm = dm_cls(
-        data_dir=datadir, 
-        split=split, 
-        val_split=val_split, 
-        num_workers=1, 
+        data_dir=datadir,
+        split=split,
+        val_split=val_split,
+        num_workers=1,
         batch_size=2
     )
     dm.prepare_data()
