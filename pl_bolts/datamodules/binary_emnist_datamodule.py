@@ -18,11 +18,9 @@ class BinaryEMNISTDataModule(VisionDataModule):
         :alt: EMNIST
     Specs:
         - 6 splits: ``byclass``, ``bymerge``,
-                    ``balanced``, ``letters``, 
+                    ``balanced``, ``letters``,
                     ``digits`` and ``mnist``.
-
         - Table:
-          
           | Split Name   | Classes | No. Training | No. Testing | Validation | Total   |
           |--------------|---------|--------------|-------------|------------|---------|
           | ``byclass``  | 62      | 697,932      | 116,323     | No         | 814,255 |
@@ -31,10 +29,8 @@ class BinaryEMNISTDataModule(VisionDataModule):
           | ``digits``   | 10      | 240,000      | 40,000      | Yes        | 280,000 |
           | ``letters``  | 37      | 88,800       | 14,800      | Yes        | 103,600 |
           | ``mnist``    | 10      | 60,000       | 10,000      | Yes        | 70,000  |
-
           source: https://arxiv.org/pdf/1702.05373.pdf [Table-II]
-
-        - For each split:          
+        - For each split:
           - Each image is (1 x 28 x 28)
     Standard EMNIST, train, val, test-splits and transforms
     Transforms::
@@ -47,7 +43,6 @@ class BinaryEMNISTDataModule(VisionDataModule):
         model = LitModel()
         Trainer().fit(model, datamodule=dm)
     """
-
     name = "binary_emnist"
     dataset_cls = BinaryEMNIST
     dims = (1, 28, 28)
@@ -55,7 +50,7 @@ class BinaryEMNISTDataModule(VisionDataModule):
     def __init__(
         self,
         data_dir: Optional[str] = None,
-        split: str = 'digits',
+        split: str = 'mnist',
         val_split: Union[int, float] = 0.2,
         num_workers: int = 16,
         normalize: bool = False,
@@ -71,23 +66,22 @@ class BinaryEMNISTDataModule(VisionDataModule):
         Args:
             data_dir (string, optional): Where to save/load the data.
             split (string): The dataset has 6 different splits: ``byclass``, ``bymerge``,
-                            ``balanced``, ``letters``, ``digits`` and ``mnist``. 
-                            This argument specifies which one to use. 
-            val_split (int, float): Percent (float) or number (int) of samples 
+                            ``balanced``, ``letters``, ``digits`` and ``mnist``.
+                            This argument specifies which one to use.
+            val_split (int, float): Percent (float) or number (int) of samples
                                     to use for the validation split.
             num_workers (int): How many workers to use for loading data
             normalize (bool): If ``True``, applies image normalize.
             batch_size (int): How many samples per batch to load.
             seed (int): Random seed to be used for train/val/test splits.
             shuffle (bool): If ``True``, shuffles the train data every epoch.
-            pin_memory (bool): If ``True``, the data loader will copy Tensors into 
+            pin_memory (bool): If ``True``, the data loader will copy Tensors into
                                CUDA pinned memory before returning them.
             drop_last (bool): If ``True``, drops the last incomplete batch.
         """
-
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
-                "You want to use transforms loaded from `torchvision` which is not installed yet."
+                'You want to use MNIST dataset loaded from `torchvision` which is not installed yet.'
             )
 
         super(BinaryEMNISTDataModule, self).__init__(  # type: ignore[misc]
@@ -114,26 +108,26 @@ class BinaryEMNISTDataModule(VisionDataModule):
            - for ``balanced``: 47
            - for ``digits``: 10
            - for ``letters``: 47
-           - for ``mnist``: 10 
+           - for ``mnist``: 10
         """
-        # The _metadata is only added to EMNIST dataset 
+        # The _metadata is only added to EMNIST dataset
         # to get split-specific metadata.
-        nc = (self.dataset_cls._metadata.get('splits')
+        nc = (self.dataset_cls
+                  ._metadata.get('splits')
                   .get(self.split)
-                  .get('num_classes')
-        )
+                  .get('num_classes'))
         return nc
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
         """
         Saves files to data_dir
         """
-        def _prepare_with_splits(split: str):    
-            self.dataset_cls(self.data_dir, split=split, 
+        def _prepare_with_splits(split: str):
+            self.dataset_cls(self.data_dir, split=split,
                              train=True, download=True)
-            self.dataset_cls(self.data_dir, split=split, 
-                             train=False, download=True)        
-        
+            self.dataset_cls(self.data_dir, split=split,
+                             train=False, download=True)
+
         _prepare_with_splits(self.split)
 
     def setup(self, stage: Optional[str] = None) -> None:
@@ -141,40 +135,47 @@ class BinaryEMNISTDataModule(VisionDataModule):
         Creates train, val, and test dataset
         """
         # TODO: change type: Any to something like torch
-        def _setup_with_splits(split: str, train: bool, transform: Any):  # type: ignore[misc]  
+        # type: ignore[misc]
+        def _setup_with_splits(split: str, train: bool, transform: Any):
             return self.dataset_cls(
-                self.data_dir, 
-                split=split, 
-                train=train, 
-                transform=transform, 
+                self.data_dir,
+                split=split,
+                train=train,
+                transform=transform,
                 **self.EXTRA_ARGS
             )
-            
+
         if stage == "fit" or stage is None:
-            train_transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
-            val_transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
-            
-            dataset_train = _setup_with_splits(split=self.split, train=True, transform=train_transforms) 
-                            
-            dataset_val = _setup_with_splits(split=self.split, train=True, transform=val_transforms)
+            train_transforms = self.default_transforms(
+            ) if self.train_transforms is None else self.train_transforms
+            val_transforms = self.default_transforms(
+            ) if self.val_transforms is None else self.val_transforms
+
+            dataset_train = _setup_with_splits(
+                split=self.split, train=True, transform=train_transforms)
+
+            dataset_val = _setup_with_splits(
+                split=self.split, train=True, transform=val_transforms)
 
             # Split
             self.dataset_train = self._split_dataset(dataset_train)
             self.dataset_val = self._split_dataset(dataset_val, train=False)
 
         if stage == "test" or stage is None:
-            test_transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
+            test_transforms = self.default_transforms(
+            ) if self.test_transforms is None else self.test_transforms
             self.dataset_test = _setup_with_splits(
-                split=self.split, train=False, transform=test_transforms)            
+                split=self.split, train=False, transform=test_transforms)
 
     def default_transforms(self) -> Callable:
         if self.normalize:
             emnist_transforms = transform_lib.Compose([
-                transform_lib.ToTensor(), 
+                transform_lib.ToTensor(),
                 transform_lib.Normalize(mean=(0.5, ), std=(0.5, )),
                 # TODO: check that EMNIST also uses mean=0.5 and std=0.5
             ])
         else:
-            emnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
+            emnist_transforms = transform_lib.Compose(
+                [transform_lib.ToTensor()])
 
         return emnist_transforms
