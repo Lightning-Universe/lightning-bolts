@@ -127,8 +127,7 @@ class PolicyAgent(Agent):
         if not isinstance(states, list):
             states = [states]
 
-        if not isinstance(states, Tensor):
-            states = torch.tensor(states, device=device)
+        states = torch.tensor(states, device=device)
 
         # get the logits and pass through softmax for probability distribution
         probabilities = F.softmax(self.net(states)).squeeze(dim=-1)
