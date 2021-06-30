@@ -6,13 +6,13 @@ import torch
 from PIL import Image
 
 from pl_bolts.datamodules import (
+    BinaryEMNISTDataModule,
     BinaryMNISTDataModule,
     CIFAR10DataModule,
     CityscapesDataModule,
+    EMNISTDataModule,
     FashionMNISTDataModule,
     MNISTDataModule,
-    BinaryEMNISTDataModule,
-    EMNISTDataModule,
 )
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
 
