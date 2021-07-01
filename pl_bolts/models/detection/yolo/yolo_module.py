@@ -2,9 +2,10 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple, Type
 
 import numpy as np
-import pytorch_lightning as pl
 import torch
 import torch.nn as nn
+from pytorch_lightning import LightningModule
+from pytorch_lightning.utilities import rank_zero_info
 from torch import optim, Tensor
 
 from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, RouteLayer, ShortcutLayer
@@ -21,7 +22,7 @@ else:
 log = logging.getLogger(__name__)
 
 
-class YOLO(pl.LightningModule):
+class YOLO(LightningModule):
     """
     PyTorch Lightning implementation of `YOLOv3 <https://arxiv.org/abs/1804.02767>`_ with some
     improvements from `YOLOv4 <https://arxiv.org/abs/2004.10934>`_.
@@ -192,7 +193,7 @@ class YOLO(pl.LightningModule):
             )
         for layer_idx, layer_hits in enumerate(hits):
             hit_rate = layer_hits / total_hits if total_hits > 0 else 1.0
-            self.log(f'train/layer_{layer_idx}_hit_rate', hit_rate, sync_dist=True)
+            self.log(f'layer_{layer_idx}_hit_rate', hit_rate, sync_dist=True)
 
         def total_loss(loss_name):
             """Returns the sum of the loss over detection layers."""
@@ -309,9 +310,9 @@ class YOLO(pl.LightningModule):
         """
         version = np.fromfile(weight_file, count=3, dtype=np.int32)
         images_seen = np.fromfile(weight_file, count=1, dtype=np.int64)
-        log.info(
-            'Loading weights from Darknet model version %d.%d.%d that has been trained on %d '
-            'images.', version[0], version[1], version[2], images_seen[0]
+        rank_zero_info(
+            f'Loading weights from Darknet model version {version[0]}.{version[1]}.{version[2]} '
+            f'that has been trained on {images_seen[0]} images.'
         )
 
         def read(tensor):
@@ -508,10 +509,12 @@ class Resize:
 def run_cli():
     from argparse import ArgumentParser
 
+    from pytorch_lightning import seed_everything, Trainer
+
     from pl_bolts.datamodules import VOCDetectionDataModule
     from pl_bolts.models.detection.yolo.yolo_config import YOLOConfiguration
 
-    pl.seed_everything(42)
+    seed_everything(42)
 
     parser = ArgumentParser()
     parser.add_argument(
@@ -565,7 +568,7 @@ def run_cli():
     )
 
     parser = VOCDetectionDataModule.add_argparse_args(parser)
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
     config = YOLOConfiguration(args.config)
@@ -596,7 +599,7 @@ def run_cli():
         with open(args.darknet_weights, 'r') as weight_file:
             model.load_darknet_weights(weight_file)
 
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(
         model, datamodule.train_dataloader(args.batch_size, transforms),
         datamodule.val_dataloader(args.batch_size, transforms)
