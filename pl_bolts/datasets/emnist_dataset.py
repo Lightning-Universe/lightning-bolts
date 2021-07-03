@@ -113,6 +113,7 @@ class BinaryEMNIST(EMNIST):
         """
         Args:
             index (int): Index
+
         Returns:
             tuple: (image, target) where target is index of the target class.
         """
