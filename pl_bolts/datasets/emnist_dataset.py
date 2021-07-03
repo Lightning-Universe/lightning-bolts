@@ -104,7 +104,8 @@ if _TORCHVISION_AVAILABLE and _TORCHVISION_LESS_THAN_0_9_1:
         )   # noqa: E501
     ]
 
-EMNIST._metadata = EMNIST_METADATA
+if _TORCHVISION_AVAILABLE:  # pragma: no cover
+    EMNIST._metadata = EMNIST_METADATA
 
 
 class BinaryEMNIST(EMNIST):
