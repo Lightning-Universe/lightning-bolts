@@ -81,7 +81,7 @@ class BinaryEMNISTDataModule(VisionDataModule):
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
-                'You want to use MNIST dataset loaded from `torchvision` which is not installed yet.'
+                'You want to use EMNIST dataset loaded from `torchvision` which is not installed yet.'
             )
 
         super(BinaryEMNISTDataModule, self).__init__(  # type: ignore[misc]
