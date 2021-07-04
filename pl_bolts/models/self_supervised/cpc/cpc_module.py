@@ -100,7 +100,7 @@ class CPC_v2(LightningModule):
         dummy_batch = self.encoder(dummy_batch)
 
         # other encoders return a list
-        if self.hparams.encoder != 'cpc_encoder':
+        if self.hparams.encoder_name != 'cpc_encoder':
             dummy_batch = dummy_batch[0]
 
         dummy_batch = self.__recover_z_shape(dummy_batch, 2)
