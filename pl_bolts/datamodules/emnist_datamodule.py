@@ -77,7 +77,9 @@ class EMNISTDataModule(VisionDataModule):
                             ``balanced``, ``letters``, ``digits`` and ``mnist``.
                             This argument specifies which one to use.
             val_split (int, float): Percent (float) or number (int) of samples
-                                    to use for the validation split.
+                                    to use for the validation split. If ``val_split = None``,
+                                    the default size (as in the EMNIST documentation) of
+                                    validation dataset is disbursed.
             num_workers (int): How many workers to use for loading data
             normalize (bool): If ``True``, applies image normalize.
             batch_size (int): How many samples per batch to load.
