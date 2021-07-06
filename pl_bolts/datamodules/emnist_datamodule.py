@@ -50,6 +50,10 @@ class EMNISTDataModule(VisionDataModule):
     name = "emnist"
     dataset_cls = EMNIST
     dims = (1, 28, 28)
+    # _DEFAULT_NO_VALIDATION_VAL_SPLIT: This is the `val_split` to use when
+    # "validation = False" for a given split in the metadata.
+    _DEFAULT_NO_VALIDATION_VAL_SPLIT: Union[int, float] = 0.
+
 
     def __init__(
         self,
@@ -103,6 +107,33 @@ class EMNISTDataModule(VisionDataModule):
         )
         self.split = split
 
+    def _check_and_update(self):
+        if self._emnist_split_exists:
+            self._update_val_split()
+
+    def _update_val_split(self):
+        if (self.val_split is None):
+            if self.split_metadata.get('validation'):
+                self.val_split = int(self.split_metadata.get('num_test'))
+            else:
+                self.val_split = self._DEFAULT_NO_VALIDATION_VAL_SPLIT
+
+    @property
+    def _emnist_split_exists(self) -> bool:
+        """Checks if the split exists in emnist or not."""
+        if any(s == self.split for s in self.dataset_cls.splits):
+            return True
+        else:
+            allowed_values = ', '.join(
+                [f'"{v}"' for v in self.dataset_cls.splits])
+            raise ValueError(
+                f'Invalid value provided for split (="{self.split}"). ' +
+                f'Allowed splits are: {allowed_values}')
+
+    @property
+    def split_metadata(self):
+        return self.dataset_cls._metadata.get('splits').get(self.split)
+
     @property
     def num_classes(self) -> int:
         """
@@ -116,11 +147,7 @@ class EMNISTDataModule(VisionDataModule):
         """
         # The _metadata is only added to EMNIST dataset
         # to get split-specific metadata.
-        nc = (self.dataset_cls
-                  ._metadata.get('splits')
-                  .get(self.split)
-                  .get('num_classes'))
-        return nc
+        return self.split_metadata.get('num_classes')
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
         """
