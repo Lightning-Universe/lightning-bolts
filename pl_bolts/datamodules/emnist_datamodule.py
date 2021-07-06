@@ -17,7 +17,7 @@ class EMNISTDataModule(VisionDataModule):
         :width: 400
         :alt: EMNIST
 
-    .. list-table:: Dataset information (source: https://arxiv.org/pdf/1702.05373.pdf [Table-II])
+    .. list-table:: Dataset information (source: `EMNIST: an extension of MNIST to handwritten letters <https://arxiv.org/abs/1702.05373>`_ [Table-II])
        :header-rows: 1
 
        * - Split Name
