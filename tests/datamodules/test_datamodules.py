@@ -15,6 +15,7 @@ from pl_bolts.datamodules import (
     MNISTDataModule,
 )
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
+from pl_bolts.datasets.emnist_dataset import EMNIST_METADATA
 
 
 def test_dev_datasets(datadir):
@@ -91,11 +92,35 @@ def _create_dm(dm_cls, datadir, val_split=0.2):
 
 @pytest.mark.parametrize("split", ['byclass', 'bymerge', 'balanced', 'letters', 'digits', 'mnist'])
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
-def test_emnist_data_modules(datadir, dm_cls, split):
+def test_emnist_datamodules(datadir, dm_cls, split):
     dm = _create_dm_emnistlike(dm_cls, datadir, split)
     loader = dm.train_dataloader()
     img, _ = next(iter(loader))
     assert img.size() == torch.Size([2, *dm.size()])
+
+
+@pytest.mark.parametrize("val_split", [None, 0, 0., 0.2, 10_000])
+@pytest.mark.parametrize("split", ['byclass', 'bymerge', 'balanced', 'letters', 'digits', 'mnist'])
+@pytest.mark.parametrize("dm_cls", [EMNISTDataModule])  # BinaryEMNISTDataModule,
+def test_emnist_datamodules_val_split(dm_cls, datadir, split, val_split):
+    dm = _create_dm_emnistlike(dm_cls, datadir, split, val_split)
+    assert dm.dataset_cls._metadata == EMNIST_METADATA, \
+        "ERROR!!!... `EMNIST_METADATA` mismatch detected!"
+    assert dm.split_metadata == EMNIST_METADATA.get('splits').get(split), \
+        "ERROR!!!... `split_metadata` mismatch detected."
+    if val_split is None:
+        if dm.split_metadata.get('validation'):
+            assert dm.val_split == dm.split_metadata.get('num_test'), \
+                f"ERROR!!!... `val_split` was NOT mapped to default 'num_test' value: {dm.split_metadata.get('num_test')}"
+        else:
+            assert dm.val_split == dm._DEFAULT_NO_VALIDATION_VAL_SPLIT, \
+                f"ERROR!!!... expected val_split = {dm._DEFAULT_NO_VALIDATION_VAL_SPLIT}, assigned val_split = {dm.val_split}"
+    else:
+        if isinstance(val_split, (int, float)):
+            assert dm.val_split == val_split, \
+                f"ERROR!!!... `val_split` = {val_split} was NOT assigned."
+        else:
+            raise TypeError(f'For `val_split`, ACCEPTED dtypes: `int`, `float`. RECEIVED dtype: {type(val_split)}')
 
 
 def _create_dm_emnistlike(dm_cls, datadir, split='digits', val_split=0.2):
