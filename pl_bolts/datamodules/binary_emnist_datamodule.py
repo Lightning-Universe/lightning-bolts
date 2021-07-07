@@ -135,11 +135,8 @@ class BinaryEMNISTDataModule(VisionDataModule):
         Saves files to data_dir
         """
 
-        def _prepare_with_splits(split: str):
-            self.dataset_cls(self.data_dir, split=split, train=True, download=True)
-            self.dataset_cls(self.data_dir, split=split, train=False, download=True)
-
-        _prepare_with_splits(self.split)
+        self.dataset_cls(self.data_dir, split=split, train=True, download=True)
+        self.dataset_cls(self.data_dir, split=split, train=False, download=True)
 
     def setup(self, stage: Optional[str] = None) -> None:
         """
