@@ -93,7 +93,7 @@ class EMNISTDataModule(VisionDataModule):
     # _DEFAULT_NO_VALIDATION_VAL_SPLIT: This is the `val_split` to use when
     # "validation = False" for a given split in the metadata and the user-input
     # for `val_split` is `None`.
-    _DEFAULT_NO_VALIDATION_VAL_SPLIT: Union[int, float] = 1
+    _DEFAULT_NO_VALIDATION_VAL_SPLIT: Union[int, float] = 0
 
     def __init__(
         self,
@@ -149,6 +149,7 @@ class EMNISTDataModule(VisionDataModule):
             **kwargs,
         )
         self.split = split
+        self._check_and_update()
 
     def _check_and_update(self):
         if self._emnist_split_exists:
