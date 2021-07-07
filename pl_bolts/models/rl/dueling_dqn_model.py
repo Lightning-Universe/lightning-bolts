@@ -3,7 +3,7 @@ Dueling DQN
 """
 import argparse
 
-import pytorch_lightning as pl
+from pytorch_lightning import Trainer
 
 from pl_bolts.models.rl.common.networks import DuelingCNN
 from pl_bolts.models.rl.dqn_model import DQN
@@ -44,7 +44,7 @@ def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = DuelingDQN.add_model_specific_args(parser)
@@ -52,7 +52,7 @@ def cli_main():
 
     model = DuelingDQN(**args.__dict__)
 
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model)
 
 

@@ -1,13 +1,13 @@
 from argparse import ArgumentParser
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 from torch.nn import functional as F
 
 from pl_bolts.models.gans.basic.components import Discriminator, Generator
 
 
-class GAN(pl.LightningModule):
+class GAN(LightningModule):
     """
     Vanilla GAN implementation.
 
@@ -170,7 +170,7 @@ def cli_main(args=None):
     from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, MNISTDataModule, STL10DataModule
 
-    pl.seed_everything(1234)
+    seed_everything(1234)
 
     parser = ArgumentParser()
     parser.add_argument("--dataset", default="mnist", type=str, help="mnist, cifar10, stl10, imagenet")
@@ -186,14 +186,14 @@ def cli_main(args=None):
         dm_cls = ImagenetDataModule
 
     parser = dm_cls.add_argparse_args(parser)
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
     parser = GAN.add_model_specific_args(parser)
     args = parser.parse_args(args)
 
     dm = dm_cls.from_argparse_args(args)
     model = GAN(*dm.size(), **vars(args))
     callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5)]
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks, progress_bar_refresh_rate=20)
+    trainer = Trainer.from_argparse_args(args, callbacks=callbacks, progress_bar_refresh_rate=20)
     trainer.fit(model, datamodule=dm)
     return dm, model, trainer
 

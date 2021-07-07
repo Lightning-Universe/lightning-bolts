@@ -6,8 +6,8 @@ import math
 from argparse import ArgumentParser
 from typing import Optional
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 from pytorch_lightning.utilities import rank_zero_warn
 from torch import optim as optim
 
@@ -28,7 +28,7 @@ from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 __all__ = ['CPC_v2']
 
 
-class CPC_v2(pl.LightningModule):
+class CPC_v2(LightningModule):
 
     def __init__(
         self,
@@ -100,7 +100,7 @@ class CPC_v2(pl.LightningModule):
         dummy_batch = self.encoder(dummy_batch)
 
         # other encoders return a list
-        if self.hparams.encoder != 'cpc_encoder':
+        if self.hparams.encoder_name != 'cpc_encoder':
             dummy_batch = dummy_batch[0]
 
         dummy_batch = self.__recover_z_shape(dummy_batch, 2)
@@ -209,9 +209,9 @@ def cli_main():
     from pl_bolts.datamodules import CIFAR10DataModule
     from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 
-    pl.seed_everything(1234)
+    seed_everything(1234)
     parser = ArgumentParser()
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
     parser = CPC_v2.add_model_specific_args(parser)
     parser.add_argument('--dataset', default='cifar10', type=str)
     parser.add_argument('--data_dir', default='.', type=str)
@@ -264,7 +264,7 @@ def cli_main():
         online_evaluator.to_device = to_device
 
     model = CPC_v2(**vars(args))
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=[online_evaluator])
+    trainer = Trainer.from_argparse_args(args, callbacks=[online_evaluator])
     trainer.fit(model, datamodule=datamodule)
 
 

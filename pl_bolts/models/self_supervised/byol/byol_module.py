@@ -1,20 +1,18 @@
 from argparse import ArgumentParser
 from copy import deepcopy
-from typing import Any
+from typing import Any, Union
 
-import pytorch_lightning as pl
 import torch
-from pytorch_lightning import seed_everything
+from pytorch_lightning import LightningModule, seed_everything, Trainer
 from torch.nn import functional as F
 from torch.optim import Adam
 
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
 from pl_bolts.models.self_supervised.byol.models import SiameseArm
-from pl_bolts.optimizers.lars_scheduling import LARSWrapper
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
-class BYOL(pl.LightningModule):
+class BYOL(LightningModule):
     """
     PyTorch Lightning implementation of `Bootstrap Your Own Latent (BYOL)
     <https://arxiv.org/pdf/2006.07733.pdf>`_
@@ -73,6 +71,10 @@ class BYOL(pl.LightningModule):
         num_workers: int = 0,
         warmup_epochs: int = 10,
         max_epochs: int = 1000,
+        base_encoder: Union[str, torch.nn.Module] = 'resnet50',
+        encoder_out_dim: int = 2048,
+        projector_hidden_size: int = 4096,
+        projector_out_dim: int = 256,
         **kwargs
     ):
         """
@@ -85,11 +87,15 @@ class BYOL(pl.LightningModule):
             num_workers: number of workers
             warmup_epochs: num of epochs for scheduler warm up
             max_epochs: max epochs for scheduler
+            base_encoder: the base encoder module or resnet name
+            encoder_out_dim: output dimension of base_encoder
+            projector_hidden_size: hidden layer size of projector MLP
+            projector_out_dim: output size of projector MLP
         """
         super().__init__()
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore='base_encoder')
 
-        self.online_network = SiameseArm()
+        self.online_network = SiameseArm(base_encoder, encoder_out_dim, projector_hidden_size, projector_out_dim)
         self.target_network = deepcopy(self.online_network)
         self.weight_callback = BYOLMAWeightUpdate()
 
@@ -135,13 +141,12 @@ class BYOL(pl.LightningModule):
         loss_a, loss_b, total_loss = self.shared_step(batch, batch_idx)
 
         # log results
-        self.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'train_loss': total_loss})
+        self.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'val_loss': total_loss})
 
         return total_loss
 
     def configure_optimizers(self):
         optimizer = Adam(self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
-        optimizer = LARSWrapper(optimizer)
         scheduler = LinearWarmupCosineAnnealingLR(
             optimizer, warmup_epochs=self.hparams.warmup_epochs, max_epochs=self.hparams.max_epochs
         )
@@ -181,7 +186,7 @@ def cli_main():
     parser = ArgumentParser()
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = BYOL.add_model_specific_args(parser)
@@ -219,7 +224,7 @@ def cli_main():
     # finetune in real-time
     online_eval = SSLOnlineEvaluator(dataset=args.dataset, z_dim=2048, num_classes=dm.num_classes)
 
-    trainer = pl.Trainer.from_argparse_args(args, max_steps=300000, callbacks=[online_eval])
+    trainer = Trainer.from_argparse_args(args, max_steps=300000, callbacks=[online_eval])
 
     trainer.fit(model, datamodule=dm)
 

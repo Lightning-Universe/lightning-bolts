@@ -4,6 +4,7 @@ from typing import Any, Tuple
 import numpy as np
 import torch
 from pytorch_lightning import LightningDataModule
+from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 
 from pl_bolts.utils import _SKLEARN_AVAILABLE
@@ -20,13 +21,13 @@ class SklearnDataset(Dataset):
     Mapping between numpy (or sklearn) datasets to PyTorch datasets.
 
     Example:
-        >>> from sklearn.datasets import load_boston
+        >>> from sklearn.datasets import load_diabetes
         >>> from pl_bolts.datamodules import SklearnDataset
         ...
-        >>> X, y = load_boston(return_X_y=True)
+        >>> X, y = load_diabetes(return_X_y=True)
         >>> dataset = SklearnDataset(X, y)
         >>> len(dataset)
-        506
+        442
     """
 
     def __init__(self, X: np.ndarray, y: np.ndarray, X_transform: Any = None, y_transform: Any = None) -> None:
@@ -77,7 +78,7 @@ class TensorDataset(Dataset):
         10
     """
 
-    def __init__(self, X: torch.Tensor, y: torch.Tensor, X_transform: Any = None, y_transform: Any = None) -> None:
+    def __init__(self, X: Tensor, y: Tensor, X_transform: Any = None, y_transform: Any = None) -> None:
         """
         Args:
             X: PyTorch tensor
@@ -94,7 +95,7 @@ class TensorDataset(Dataset):
     def __len__(self) -> int:
         return len(self.X)
 
-    def __getitem__(self, idx) -> Tuple[torch.Tensor, torch.Tensor]:
+    def __getitem__(self, idx) -> Tuple[Tensor, Tensor]:
         x = self.X[idx].float()
         y = self.Y[idx]
 
@@ -114,28 +115,28 @@ class SklearnDataModule(LightningDataModule):
 
     Example:
 
-        >>> from sklearn.datasets import load_boston
+        >>> from sklearn.datasets import load_diabetes
         >>> from pl_bolts.datamodules import SklearnDataModule
         ...
-        >>> X, y = load_boston(return_X_y=True)
+        >>> X, y = load_diabetes(return_X_y=True)
         >>> loaders = SklearnDataModule(X, y, batch_size=32)
         ...
         >>> # train set
         >>> train_loader = loaders.train_dataloader()
         >>> len(train_loader.dataset)
-        355
+        310
         >>> len(train_loader)
-        12
+        10
         >>> # validation set
         >>> val_loader = loaders.val_dataloader()
         >>> len(val_loader.dataset)
-        100
+        88
         >>> len(val_loader)
-        4
+        3
         >>> # test set
         >>> test_loader = loaders.test_dataloader()
         >>> len(test_loader.dataset)
-        51
+        44
         >>> len(test_loader)
         2
     """

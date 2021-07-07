@@ -128,7 +128,7 @@ with the other components of the library!
 Contribution ideas
 ^^^^^^^^^^^^^^^^^^
 Don't have something to contribute? Ping us on
-`Slack <https://join.slack.com/t/pytorch-lightning/shared_invite/zt-f6bl2l0l-JYMK3tbAgAmGRrlNr00f1A>`_
+`Slack <https://join.slack.com/t/pytorch-lightning/shared_invite/zt-pw5v393p-qRaDgEk24~EjiZNBpSQFgQ>`_
 or look at our `Github issues <https://github.com/PyTorchLightning/lightning-bolts/
 issues?q=is%3Aissue+is%3Aopen+label%3A%22Model+to+implement%22>`_!
 
@@ -338,10 +338,10 @@ We even have prebuilt modules to bridge the gap between Numpy, Sklearn and PyTor
 
 .. code-block:: python
 
-    from sklearn.datasets import load_boston
+    from sklearn.datasets import load_diabetes
     from pl_bolts.datamodules import SklearnDataModule
 
-    X, y = load_boston(return_X_y=True)
+    X, y = load_diabetes(return_X_y=True)
     datamodule = SklearnDataModule(X, y)
 
     model = LitModel(datamodule)
@@ -382,10 +382,10 @@ Here's an example for Linear regression
 
     import pytorch_lightning as pl
     from pl_bolts.datamodules import SklearnDataModule
-    from sklearn.datasets import load_boston
+    from sklearn.datasets import load_diabetes
 
     # link the numpy dataset to PyTorch
-    X, y = load_boston(return_X_y=True)
+    X, y = load_diabetes(return_X_y=True)
     loaders = SklearnDataModule(X, y)
 
     # training runs training batches while validating against a validation set

@@ -21,7 +21,7 @@ Contributions by: `Donal Byrne <https://github.com/djbyrne>`_
 
 ------------
 
-.. note:: 
+.. note::
     RL models currently only support CPU and single GPU training with `distributed_backend=dp`.
     Full GPU support will be added in later updates.
 
@@ -189,7 +189,7 @@ by subtracting the mean advantage from the Q value. This essentially pulls the m
 Dueling DQN Benefits
 ~~~~~~~~~~~~~~~~~~~~
 
-- Ability to efficiently learn the state value function. In the dueling network, every Q update also updates the value 
+- Ability to efficiently learn the state value function. In the dueling network, every Q update also updates the value
   stream, where as in DQN only the value of the chosen action is updated. This provides a better approximation of the
   values
 - The differences between total Q values for a given state are quite small in relation to the magnitude of Q. The
@@ -349,7 +349,7 @@ pair using a single step which looks like this
 
     Q(s_t,a_t)=r_t+{\gamma}\max_aQ(s_{t+1},a_{t+1})
 
-but because the Q function is recursive we can continue to roll this out into multiple steps, looking at the expected 
+but because the Q function is recursive we can continue to roll this out into multiple steps, looking at the expected
 return for each step into the future.
 
 .. math::
@@ -435,7 +435,7 @@ batch. Instead of just randomly sampling from the buffer prioritized experience 
 based on training loss. This concept was introduced in the paper
 `Prioritized Experience Replay <https://arxiv.org/abs/1511.05952>`__
 
-Essentially we want to train more on the samples that sunrise the agent.
+Essentially we want to train more on the samples that surprise the agent.
 
 The priority of each sample is defined below where
 
@@ -570,7 +570,7 @@ algorithm is as follows:
 .. math::
 
     L =  - \sum_{k,t} Q_{k,t} \log(\pi(S_{k,t}, A_{k,t}))
-    
+
 5. Perform SGD on the loss and repeat.
 
 What this loss function is saying is simply that we want to take the log probability of action A at state S given
@@ -688,13 +688,13 @@ Paper authors: Tuomas Haarnoja, Aurick Zhou, Pieter Abbeel, Sergey Levine
 
 Original implementation by: `Jason Wang <https://github.com/blahBlahhhJ>`_
 
-Soft Actor Critic (SAC) is a powerful actor critic algorithm in reinforcement learning. Unlike A2C, SAC's policy outputs a 
-special continuous distribution for actions, and its critic estimates the Q value instead of the state value, which 
-means it now takes in not only states but also actions. The new actor allows SAC to support continuous action tasks such 
-as controlling robots, and the new critic allows SAC to support off-policy learning which is more sample efficient. 
+Soft Actor Critic (SAC) is a powerful actor critic algorithm in reinforcement learning. Unlike A2C, SAC's policy outputs a
+special continuous distribution for actions, and its critic estimates the Q value instead of the state value, which
+means it now takes in not only states but also actions. The new actor allows SAC to support continuous action tasks such
+as controlling robots, and the new critic allows SAC to support off-policy learning which is more sample efficient.
 
-The actor has a new objective to maximize entropy to encourage exploration while maximizing the expected rewards. 
-The critic uses two separate Q functions to "mitigate positive bias" during training by picking the minimum of the 
+The actor has a new objective to maximize entropy to encourage exploration while maximizing the expected rewards.
+The critic uses two separate Q functions to "mitigate positive bias" during training by picking the minimum of the
 two as the predicted Q value.
 
 Since SAC is off-policy, its algorithm's training step is quite similar to DQN:

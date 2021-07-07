@@ -1,5 +1,4 @@
-import pytorch_lightning as pl
-from pytorch_lightning import seed_everything
+from pytorch_lightning import seed_everything, Trainer
 
 from pl_bolts.models import LitMNIST
 
@@ -8,7 +7,7 @@ def test_mnist(tmpdir, datadir):
     seed_everything()
 
     model = LitMNIST(data_dir=datadir, num_workers=0)
-    trainer = pl.Trainer(
+    trainer = Trainer(
         limit_train_batches=0.01,
         limit_val_batches=0.01,
         max_epochs=1,

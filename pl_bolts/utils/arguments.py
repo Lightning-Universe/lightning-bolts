@@ -3,7 +3,7 @@ from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-import pytorch_lightning as pl
+from pytorch_lightning import LightningDataModule, LightningModule
 
 
 @dataclass(frozen=True)
@@ -76,10 +76,10 @@ class LightningArgumentParser(ArgumentParser):
 def gather_lit_args(cls: Any, root_cls: Optional[Any] = None) -> List[LitArg]:
 
     if root_cls is None:
-        if issubclass(cls, pl.LightningModule):
-            root_cls = pl.LightningModule
-        elif issubclass(cls, pl.LightningDataModule):
-            root_cls = pl.LightningDataModule
+        if issubclass(cls, LightningModule):
+            root_cls = LightningModule
+        elif issubclass(cls, LightningDataModule):
+            root_cls = LightningDataModule
         else:
             root_cls = cls
 

@@ -4,6 +4,8 @@ from typing import Callable, Dict, Optional
 
 MISSING_PACKAGE_WARNINGS: Dict[str, int] = {}
 
+WARN_MISSING_PACKAGE = int(os.environ.get('WARN_MISSING_PACKAGE', False))
+
 
 def warn_missing_pkg(
     pkg_name: str,
@@ -23,6 +25,9 @@ def warn_missing_pkg(
     Returns:
         Number of warning calls
     """
+    if not WARN_MISSING_PACKAGE:
+        return -1
+
     if pkg_name not in MISSING_PACKAGE_WARNINGS:
         extra_text = os.linesep + extra_text if extra_text else ''
         if not pypi_name:

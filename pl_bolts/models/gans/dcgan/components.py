@@ -1,6 +1,5 @@
 # Based on https://github.com/pytorch/examples/blob/master/dcgan/main.py
-import torch
-from torch import nn
+from torch import nn, Tensor
 
 
 class DCGANGenerator(nn.Module):
@@ -45,7 +44,7 @@ class DCGANGenerator(nn.Module):
 
         return gen_block
 
-    def forward(self, noise: torch.Tensor) -> torch.Tensor:
+    def forward(self, noise: Tensor) -> Tensor:
         return self.gen(noise)
 
 
@@ -91,5 +90,5 @@ class DCGANDiscriminator(nn.Module):
 
         return disc_block
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         return self.disc(x).view(-1, 1).squeeze(1)
