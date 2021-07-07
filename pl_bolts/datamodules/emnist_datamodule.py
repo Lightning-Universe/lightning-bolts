@@ -51,7 +51,8 @@ class EMNISTDataModule(VisionDataModule):
     dataset_cls = EMNIST
     dims = (1, 28, 28)
     # _DEFAULT_NO_VALIDATION_VAL_SPLIT: This is the `val_split` to use when
-    # "validation = False" for a given split in the metadata.
+    # "validation = False" for a given split in the metadata and the user-input
+    # for `val_split` is `None`.
     _DEFAULT_NO_VALIDATION_VAL_SPLIT: Union[int, float] = 0.
 
 
@@ -59,7 +60,7 @@ class EMNISTDataModule(VisionDataModule):
         self,
         data_dir: Optional[str] = None,
         split: str = 'mnist',
-        val_split: Union[int, float] = 0.2,
+        val_split: Optional[Union[int, float]] = 0.2,
         num_workers: int = 16,
         normalize: bool = False,
         batch_size: int = 32,
@@ -76,10 +77,11 @@ class EMNISTDataModule(VisionDataModule):
             split (string): The dataset has 6 different splits: ``byclass``, ``bymerge``,
                             ``balanced``, ``letters``, ``digits`` and ``mnist``.
                             This argument specifies which one to use.
-            val_split (int, float): Percent (float) or number (int) of samples
-                                    to use for the validation split. If ``val_split = None``,
-                                    the default size (as in the EMNIST documentation) of
-                                    validation dataset is disbursed.
+            val_split (int, float, None): Percent (float) or number (int) of samples
+                                          to use for the validation split.
+                                          If ``val_split = None``, the default size
+                                          (as in the EMNIST documentation) of
+                                          validation dataset is disbursed based on the ``split``.
             num_workers (int): How many workers to use for loading data
             normalize (bool): If ``True``, applies image normalize.
             batch_size (int): How many samples per batch to load.
