@@ -128,7 +128,7 @@ class BinaryEMNISTDataModule(VisionDataModule):
         """
         # The _metadata is only added to EMNIST dataset
         # to get split-specific metadata.
-        return self.split_metadata.get('num_classes')
+        return len(self.dataset_cls.classes_split_dict[self.split])
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
         """
