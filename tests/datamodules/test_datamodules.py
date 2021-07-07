@@ -111,7 +111,7 @@ def test_emnist_datamodules_val_split(dm_cls, datadir, split, val_split):
     if val_split is None:
         if dm.split_metadata.get('validation'):
             assert dm.val_split == dm.split_metadata.get('num_test'), \
-                f"ERROR!!!... `val_split` was NOT mapped to default " + \
+                "ERROR!!!... `val_split` was NOT mapped to default " + \
                 f"'num_test' value: {dm.split_metadata.get('num_test')}"
         else:
             assert dm.val_split == dm._DEFAULT_NO_VALIDATION_VAL_SPLIT, \
@@ -123,7 +123,8 @@ def test_emnist_datamodules_val_split(dm_cls, datadir, split, val_split):
                 f"ERROR!!!... `val_split` = {val_split} was NOT assigned."
         else:
             raise TypeError(
-                f'For `val_split`, ACCEPTED dtypes: `int`, `float`. ' + f'RECEIVED dtype: {type(val_split)}'
+                'For `val_split`, ACCEPTED dtypes: `int`, `float`. ' + \
+                f'RECEIVED dtype: {type(val_split)}'
             )
 
 
