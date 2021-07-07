@@ -15,7 +15,7 @@ from pl_bolts.datamodules import (
     MNISTDataModule,
 )
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
-from pl_bolts.datasets.emnist_dataset import EMNIST_METADATA, EMNIST
+from pl_bolts.datasets.emnist_dataset import EMNIST, EMNIST_METADATA
 
 
 def test_dev_datasets(datadir):
@@ -122,8 +122,9 @@ def test_emnist_datamodules_val_split(dm_cls, datadir, split, val_split):
             assert dm.val_split == val_split, \
                 f"ERROR!!!... `val_split` = {val_split} was NOT assigned."
         else:
-            raise TypeError(f'For `val_split`, ACCEPTED dtypes: `int`, `float`. ' +
-                            f'RECEIVED dtype: {type(val_split)}')
+            raise TypeError(
+                f'For `val_split`, ACCEPTED dtypes: `int`, `float`. ' + f'RECEIVED dtype: {type(val_split)}'
+            )
 
 
 def _create_dm_emnistlike(dm_cls, datadir, split='digits', val_split=0.2):
