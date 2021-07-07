@@ -103,13 +103,12 @@ class BinaryEMNISTDataModule(VisionDataModule):
     @property
     def _emnist_split_exists(self) -> bool:
         """Checks if the split exists in emnist or not."""
-        if any(s == self.split for s in self.dataset_cls.splits):
-            return True
-        else:
+        if not any(s == self.split for s in self.dataset_cls.splits):
             allowed_values = ', '.join([f'"{v}"' for v in self.dataset_cls.splits])
             raise ValueError(
                 f'Invalid value provided for split (="{self.split}"). ' + f'Allowed splits are: {allowed_values}'
             )
+        return True
 
     @property
     def split_metadata(self):
