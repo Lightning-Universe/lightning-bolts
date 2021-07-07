@@ -101,7 +101,7 @@ def test_emnist_datamodules(datadir, dm_cls, split):
 
 @pytest.mark.parametrize("val_split", [None, 0, 0., 0.2, 10_000])
 @pytest.mark.parametrize("split", ['byclass', 'bymerge', 'balanced', 'letters', 'digits', 'mnist'])
-@pytest.mark.parametrize("dm_cls", [EMNISTDataModule])  # BinaryEMNISTDataModule,
+@pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
 def test_emnist_datamodules_val_split(dm_cls, datadir, split, val_split):
     dm = _create_dm_emnistlike(dm_cls, datadir, split, val_split)
     assert dm.dataset_cls._metadata == EMNIST_METADATA, \
