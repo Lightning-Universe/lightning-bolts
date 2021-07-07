@@ -33,4 +33,4 @@ Example::
     for batch in dm.test_dataloader():
         ...
 
-Please visit the PyTorch Lightning documentation for more details on DataModules
+Please visit the PyTorch Lightning documentation for more details on DataModules.
