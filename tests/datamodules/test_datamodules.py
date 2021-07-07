@@ -15,7 +15,7 @@ from pl_bolts.datamodules import (
     MNISTDataModule,
 )
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
-from pl_bolts.datasets.emnist_dataset import EMNIST_METADATA
+from pl_bolts.datasets.emnist_dataset import EMNIST_METADATA, EMNIST
 
 
 def test_dev_datasets(datadir):
@@ -90,7 +90,7 @@ def _create_dm(dm_cls, datadir, val_split=0.2):
     return dm
 
 
-@pytest.mark.parametrize("split", ['byclass', 'bymerge', 'balanced', 'letters', 'digits', 'mnist'])
+@pytest.mark.parametrize("split", EMNIST.splits)
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
 def test_emnist_datamodules(datadir, dm_cls, split):
     dm = _create_dm_emnistlike(dm_cls, datadir, split)
@@ -100,7 +100,7 @@ def test_emnist_datamodules(datadir, dm_cls, split):
 
 
 @pytest.mark.parametrize("val_split", [None, 0, 0., 0.2, 10_000])
-@pytest.mark.parametrize("split", ['byclass', 'bymerge', 'balanced', 'letters', 'digits', 'mnist'])
+@pytest.mark.parametrize("split", EMNIST.splits)
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
 def test_emnist_datamodules_val_split(dm_cls, datadir, split, val_split):
     dm = _create_dm_emnistlike(dm_cls, datadir, split, val_split)
@@ -111,16 +111,19 @@ def test_emnist_datamodules_val_split(dm_cls, datadir, split, val_split):
     if val_split is None:
         if dm.split_metadata.get('validation'):
             assert dm.val_split == dm.split_metadata.get('num_test'), \
-                f"ERROR!!!... `val_split` was NOT mapped to default 'num_test' value: {dm.split_metadata.get('num_test')}"
+                f"ERROR!!!... `val_split` was NOT mapped to default " + \
+                f"'num_test' value: {dm.split_metadata.get('num_test')}"
         else:
             assert dm.val_split == dm._DEFAULT_NO_VALIDATION_VAL_SPLIT, \
-                f"ERROR!!!... expected val_split = {dm._DEFAULT_NO_VALIDATION_VAL_SPLIT}, assigned val_split = {dm.val_split}"
+                f"ERROR!!!... expected val_split = {dm._DEFAULT_NO_VALIDATION_VAL_SPLIT}, " + \
+                f"assigned val_split = {dm.val_split}"
     else:
         if isinstance(val_split, (int, float)):
             assert dm.val_split == val_split, \
                 f"ERROR!!!... `val_split` = {val_split} was NOT assigned."
         else:
-            raise TypeError(f'For `val_split`, ACCEPTED dtypes: `int`, `float`. RECEIVED dtype: {type(val_split)}')
+            raise TypeError(f'For `val_split`, ACCEPTED dtypes: `int`, `float`. ' +
+                            f'RECEIVED dtype: {type(val_split)}')
 
 
 def _create_dm_emnistlike(dm_cls, datadir, split='digits', val_split=0.2):
