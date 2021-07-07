@@ -16,28 +16,11 @@ class BinaryEMNISTDataModule(VisionDataModule):
     .. figure:: https://user-images.githubusercontent.com/4632336/123210742-4d6b3380-d477-11eb-80da-3e9a74a18a07.png
         :width: 400
         :alt: EMNIST
-    Specs:
-        - 6 splits: ``byclass``, ``bymerge``,
-                    ``balanced``, ``letters``,
-                    ``digits`` and ``mnist``.
-        - Table:
-          | Split Name   | Classes | No. Training | No. Testing | Validation | Total   |
-          |--------------|---------|--------------|-------------|------------|---------|
-          | ``byclass``  | 62      | 697,932      | 116,323     | No         | 814,255 |
-          | ``bymerge``  | 47      | 697,932      | 116,323     | No         | 814,255 |
-          | ``balanced`` | 47      | 112,800      | 18,800      | Yes        | 131,600 |
-          | ``digits``   | 10      | 240,000      | 40,000      | Yes        | 280,000 |
-          | ``letters``  | 37      | 88,800       | 14,800      | Yes        | 103,600 |
-          | ``mnist``    | 10      | 60,000       | 10,000      | Yes        | 70,000  |
-          source: https://arxiv.org/pdf/1702.05373.pdf [Table-II]
-        - For each split:
-          - Each image is (1 x 28 x 28)
-    Standard EMNIST, train, val, test-splits and transforms
-    Transforms::
-        emnist_transforms = transform_lib.Compose([
-            transform_lib.ToTensor()
-        ])
+
+    Please see :class:`~pl_bolts.datamodules.emnist_datamodule.EMNISTDataModule` for more details.
+
     Example::
+
         from pl_bolts.datamodules import BinaryEMNISTDataModule
         dm = BinaryEMNISTDataModule('.')
         model = LitModel()
