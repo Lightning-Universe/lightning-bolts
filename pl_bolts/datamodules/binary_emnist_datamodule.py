@@ -32,7 +32,8 @@ class BinaryEMNISTDataModule(VisionDataModule):
     # _DEFAULT_NO_VALIDATION_VAL_SPLIT: This is the `val_split` to use when
     # "validation = False" for a given split in the metadata and the user-input
     # for `val_split` is `None`.
-    _DEFAULT_NO_VALIDATION_VAL_SPLIT: Union[int, float] = 0.
+    # TODO: setting to 1 as a fix for build error when val_split = None
+    _DEFAULT_NO_VALIDATION_VAL_SPLIT: Union[int, float] = 1
 
     def __init__(
         self,
