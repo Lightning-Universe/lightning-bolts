@@ -73,14 +73,6 @@ class SAC(pl.LightningModule):
         self.agent = SoftActorCriticAgent(self.policy)
 
         # Hyperparameters
-        self.sync_rate = sync_rate
-        self.gamma = gamma
-        self.batch_size = batch_size
-        self.replay_size = replay_size
-        self.warm_start_size = warm_start_size
-        self.batches_per_epoch = batches_per_epoch
-        self.n_steps = n_steps
-
         self.save_hyperparameters()
 
         # Metrics
@@ -227,13 +219,13 @@ class SAC(pl.LightningModule):
                 episode_steps = 0
                 episode_reward = 0
 
-            states, actions, rewards, dones, new_states = self.buffer.sample(self.batch_size)
+            states, actions, rewards, dones, new_states = self.buffer.sample(self.hparams.batch_size)
 
             for idx, _ in enumerate(dones):
                 yield states[idx], actions[idx], rewards[idx], dones[idx], new_states[idx]
 
             # Simulates epochs
-            if self.total_steps % self.batches_per_epoch == 0:
+            if self.total_steps % self.hparams.batches_per_epoch == 0:
                 break
 
     def loss(
@@ -276,7 +268,7 @@ class SAC(pl.LightningModule):
             next_q1_values = self.target_q1(new_next_states_actions)
             next_q2_values = self.target_q2(new_next_states_actions)
             next_qmin_values = torch.min(next_q1_values, next_q2_values) - new_next_logprobs
-            target_values = rewards + (1. - dones) * self.gamma * next_qmin_values
+            target_values = rewards + (1. - dones) * self.hparams.gamma * next_qmin_values
 
         q1_loss = F.mse_loss(q1_values, target_values)
         q2_loss = F.mse_loss(q2_values, target_values)
@@ -309,7 +301,7 @@ class SAC(pl.LightningModule):
         q2_optim.step()
 
         # Soft update of target network
-        if self.global_step % self.sync_rate == 0:
+        if self.global_step % self.hparams.sync_rate == 0:
             self.soft_update_target(self.q1, self.target_q1)
             self.soft_update_target(self.q2, self.target_q2)
 
@@ -338,11 +330,11 @@ class SAC(pl.LightningModule):
 
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""
-        self.buffer = MultiStepBuffer(self.replay_size, self.n_steps)
-        self.populate(self.warm_start_size)
+        self.buffer = MultiStepBuffer(self.hparams.replay_size, self.hparams.n_steps)
+        self.populate(self.hparams.warm_start_size)
 
         self.dataset = ExperienceSourceDataset(self.train_batch)
-        return DataLoader(dataset=self.dataset, batch_size=self.batch_size)
+        return DataLoader(dataset=self.dataset, batch_size=self.hparams.batch_size)
 
     def train_dataloader(self) -> DataLoader:
         """Get train loader"""
