@@ -80,8 +80,6 @@ EMNIST_METADATA = {
     },
 }
 
-
-
 if _TORCHVISION_AVAILABLE:  # pragma: no cover
     EMNIST._metadata = EMNIST_METADATA
 

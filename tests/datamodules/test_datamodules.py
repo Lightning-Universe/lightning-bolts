@@ -124,13 +124,7 @@ def test_emnist_datamodules_val_split(dm_cls, datadir, split, val_split):
 
 
 def _create_dm_emnistlike(dm_cls, datadir, split='digits', val_split=0.2):
-    dm = dm_cls(
-        data_dir=datadir,
-        split=split,
-        val_split=val_split,
-        num_workers=1,
-        batch_size=2
-    )
+    dm = dm_cls(data_dir=datadir, split=split, val_split=val_split, num_workers=1, batch_size=2)
     dm.prepare_data()
     dm.setup()
     return dm

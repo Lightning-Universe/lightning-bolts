@@ -106,11 +106,10 @@ class BinaryEMNISTDataModule(VisionDataModule):
         if any(s == self.split for s in self.dataset_cls.splits):
             return True
         else:
-            allowed_values = ', '.join(
-                [f'"{v}"' for v in self.dataset_cls.splits])
+            allowed_values = ', '.join([f'"{v}"' for v in self.dataset_cls.splits])
             raise ValueError(
-                f'Invalid value provided for split (="{self.split}"). ' +
-                f'Allowed splits are: {allowed_values}')
+                f'Invalid value provided for split (="{self.split}"). ' + f'Allowed splits are: {allowed_values}'
+            )
 
     @property
     def split_metadata(self):
@@ -135,11 +134,10 @@ class BinaryEMNISTDataModule(VisionDataModule):
         """
         Saves files to data_dir
         """
+
         def _prepare_with_splits(split: str):
-            self.dataset_cls(self.data_dir, split=split,
-                             train=True, download=True)
-            self.dataset_cls(self.data_dir, split=split,
-                             train=False, download=True)
+            self.dataset_cls(self.data_dir, split=split, train=True, download=True)
+            self.dataset_cls(self.data_dir, split=split, train=False, download=True)
 
         _prepare_with_splits(self.split)
 
@@ -147,38 +145,27 @@ class BinaryEMNISTDataModule(VisionDataModule):
         """
         Creates train, val, and test dataset
         """
+
         # TODO: change type: Any to something like torch
         # type: ignore[misc]
         def _setup_with_splits(split: str, train: bool, transform: Any):
-            return self.dataset_cls(
-                self.data_dir,
-                split=split,
-                train=train,
-                transform=transform,
-                **self.EXTRA_ARGS
-            )
+            return self.dataset_cls(self.data_dir, split=split, train=train, transform=transform, **self.EXTRA_ARGS)
 
         if stage == "fit" or stage is None:
-            train_transforms = self.default_transforms(
-            ) if self.train_transforms is None else self.train_transforms
-            val_transforms = self.default_transforms(
-            ) if self.val_transforms is None else self.val_transforms
+            train_transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
+            val_transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
 
-            dataset_train = _setup_with_splits(
-                split=self.split, train=True, transform=train_transforms)
+            dataset_train = _setup_with_splits(split=self.split, train=True, transform=train_transforms)
 
-            dataset_val = _setup_with_splits(
-                split=self.split, train=True, transform=val_transforms)
+            dataset_val = _setup_with_splits(split=self.split, train=True, transform=val_transforms)
 
             # Split
             self.dataset_train = self._split_dataset(dataset_train)
             self.dataset_val = self._split_dataset(dataset_val, train=False)
 
         if stage == "test" or stage is None:
-            test_transforms = self.default_transforms(
-            ) if self.test_transforms is None else self.test_transforms
-            self.dataset_test = _setup_with_splits(
-                split=self.split, train=False, transform=test_transforms)
+            test_transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
+            self.dataset_test = _setup_with_splits(split=self.split, train=False, transform=test_transforms)
 
     def default_transforms(self) -> Callable:
         if self.normalize:
@@ -188,7 +175,6 @@ class BinaryEMNISTDataModule(VisionDataModule):
                 # TODO: check that EMNIST also uses mean=0.5 and std=0.5
             ])
         else:
-            emnist_transforms = transform_lib.Compose(
-                [transform_lib.ToTensor()])
+            emnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
 
         return emnist_transforms
