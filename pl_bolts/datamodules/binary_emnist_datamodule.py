@@ -30,8 +30,8 @@ class BinaryEMNISTDataModule(VisionDataModule):
     dataset_cls = BinaryEMNIST
     dims = (1, 28, 28)
     # _DEFAULT_NO_VALIDATION_VAL_SPLIT: This is the `val_split` to use when
-    # "validation = False" for a given split in the metadata and the user-input
-    # for `val_split` is `None`.
+    # "validation = False" for a given split in the dataset_cls._metadata
+    # and the user-input for `val_split` is `None`.
     _DEFAULT_NO_VALIDATION_VAL_SPLIT: Union[int, float] = 0
 
     def __init__(
