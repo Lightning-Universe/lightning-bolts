@@ -126,8 +126,6 @@ class BinaryEMNISTDataModule(VisionDataModule):
            - for ``letters``: 47
            - for ``mnist``: 10
         """
-        # The _metadata is only added to EMNIST dataset
-        # to get split-specific metadata.
         return len(self.dataset_cls.classes_split_dict[self.split])
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
@@ -143,7 +141,6 @@ class BinaryEMNISTDataModule(VisionDataModule):
         Creates train, val, and test dataset
         """
 
-        # TODO: change type: Any to something like torch
         # type: ignore[misc]
         def _setup_with_splits(split: str, train: bool, transform: Any):
             return self.dataset_cls(self.data_dir, split=split, train=train, transform=transform, **self.EXTRA_ARGS)
@@ -169,7 +166,6 @@ class BinaryEMNISTDataModule(VisionDataModule):
             emnist_transforms = transform_lib.Compose([
                 transform_lib.ToTensor(),
                 transform_lib.Normalize(mean=(0.5, ), std=(0.5, )),
-                # TODO: check that EMNIST also uses mean=0.5 and std=0.5
             ])
         else:
             emnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
