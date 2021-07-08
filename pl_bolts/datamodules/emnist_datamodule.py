@@ -72,12 +72,13 @@ class EMNISTDataModule(VisionDataModule):
 
     |
 
-    Standard EMNIST, train, val, test-splits and transforms
+    Standard EMNIST, train, val, test-splits and transforms.
 
     Transforms::
 
         emnist_transforms = transform_lib.Compose([
-            transform_lib.ToTensor()
+            transform_lib.ToTensor(),
+            transform_lib.Normalize(mean=(0.5, ), std=(0.5, )),
         ])
 
     Example::
@@ -232,7 +233,6 @@ class EMNISTDataModule(VisionDataModule):
             emnist_transforms = transform_lib.Compose([
                 transform_lib.ToTensor(),
                 transform_lib.Normalize(mean=(0.5, ), std=(0.5, )),
-                # TODO: check that EMNIST also uses mean=0.5 and std=0.5
             ])
         else:
             emnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
