@@ -31,7 +31,6 @@ Lightning-Bolts documentation
    :caption: DataModules
 
    datamodules
-   datamodules_others
    datamodules_sklearn
    datamodules_vision
 
@@ -41,7 +40,6 @@ Lightning-Bolts documentation
    :caption: Datasets
 
    datasets
-   datasets_others
 
 .. toctree::
    :maxdepth: 2
