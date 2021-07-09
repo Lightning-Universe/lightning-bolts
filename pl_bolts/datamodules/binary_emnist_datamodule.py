@@ -133,8 +133,8 @@ class BinaryEMNISTDataModule(VisionDataModule):
         Saves files to data_dir
         """
 
-        self.dataset_cls(self.data_dir, split=split, train=True, download=True)
-        self.dataset_cls(self.data_dir, split=split, train=False, download=True)
+        self.dataset_cls(self.data_dir, split=self.split, train=True, download=True)
+        self.dataset_cls(self.data_dir, split=self.split, train=False, download=True)
 
     def setup(self, stage: Optional[str] = None) -> None:
         """

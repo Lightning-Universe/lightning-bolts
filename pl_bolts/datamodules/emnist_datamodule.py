@@ -195,18 +195,14 @@ class EMNISTDataModule(VisionDataModule):
         Saves files to data_dir
         """
 
-        def _prepare_with_splits(split: str):
-            self.dataset_cls(self.data_dir, split=split, train=True, download=True)
-            self.dataset_cls(self.data_dir, split=split, train=False, download=True)
-
-        _prepare_with_splits(self.split)
+        self.dataset_cls(self.data_dir, split=self.split, train=True, download=True)
+        self.dataset_cls(self.data_dir, split=self.split, train=False, download=True)
 
     def setup(self, stage: Optional[str] = None) -> None:
         """
         Creates train, val, and test dataset
         """
 
-        # TODO: change type: Any to something like torch
         def _setup_with_splits(split: str, train: bool, transform: Any):  # type: ignore[misc]
             return self.dataset_cls(self.data_dir, split=split, train=train, transform=transform, **self.EXTRA_ARGS)
 
