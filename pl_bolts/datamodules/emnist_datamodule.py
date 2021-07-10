@@ -166,7 +166,7 @@ class EMNISTDataModule(VisionDataModule):
     @property
     def _emnist_split_exists(self) -> bool:
         """Checks if the split exists in emnist or not."""
-        if not any(s == self.split for s in self.dataset_cls.splits):
+        if not any(s == self.split for s in self.dataset_cls.splits):  # pragma: no cover
             allowed_values = ', '.join([f'"{v}"' for v in self.dataset_cls.splits])
             raise ValueError(
                 f'Invalid value provided for split (="{self.split}"). ' + f'Allowed splits are: {allowed_values}'
