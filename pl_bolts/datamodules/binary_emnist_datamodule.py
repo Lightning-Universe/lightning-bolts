@@ -1,6 +1,5 @@
 from typing import Any, Callable, Optional, Union
 
-#from pl_bolts.datamodules.vision_datamodule import VisionDataModule ## TODO: remove this comment
 from pl_bolts.datamodules.emnist_datamodule import EMNISTDataModule
 from pl_bolts.datasets import BinaryEMNIST
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -89,91 +88,4 @@ class BinaryEMNISTDataModule(EMNISTDataModule):
             *args,
             **kwargs,
         )
-        ## TODO: remove the comments below
-        #? WHY?  this is an intermediate step to
-        #?       - [x] subclass EMNISTDataModule and
-        #?       - [x] avoid code-duplication
-        # self.split = split
-        # self._check_and_update()
 
-    # def _check_and_update(self):
-    #     if self._emnist_split_exists:
-    #         self._update_val_split()
-
-    # def _update_val_split(self):
-    #     if (self.val_split is None):
-    #         if self.split_metadata.get('validation'):
-    #             self.val_split = int(self.split_metadata.get('num_test'))
-    #         else:
-    #             self.val_split = self._DEFAULT_NO_VALIDATION_VAL_SPLIT
-
-    # @property
-    # def _emnist_split_exists(self) -> bool:
-    #     """Checks if the split exists in emnist or not."""
-    #     if not any(s == self.split for s in self.dataset_cls.splits):
-    #         allowed_values = ', '.join([f'"{v}"' for v in self.dataset_cls.splits])
-    #         raise ValueError(
-    #             f'Invalid value provided for split (="{self.split}"). ' + f'Allowed splits are: {allowed_values}'
-    #         )
-    #     return True
-
-    # @property
-    # def split_metadata(self):
-    #     return self.dataset_cls._metadata.get('splits').get(self.split)
-
-    # @property
-    # def num_classes(self) -> int:
-    #     """
-    #     Return:
-    #        - for ``byclass``: 62
-    #        - for ``bymerge``: 47
-    #        - for ``balanced``: 47
-    #        - for ``digits``: 10
-    #        - for ``letters``: 47
-    #        - for ``mnist``: 10
-    #     """
-    #     return len(self.dataset_cls.classes_split_dict[self.split])
-
-    # def prepare_data(self, *args: Any, **kwargs: Any) -> None:
-    #     """
-    #     Saves files to data_dir
-    #     """
-
-    #     self.dataset_cls(self.data_dir, split=self.split, train=True, download=True)
-    #     self.dataset_cls(self.data_dir, split=self.split, train=False, download=True)
-
-    # def setup(self, stage: Optional[str] = None) -> None:
-    #     """
-    #     Creates train, val, and test dataset
-    #     """
-
-    #     # type: ignore[misc]
-    #     def _setup_with_splits(split: str, train: bool, transform: Any):
-    #         return self.dataset_cls(self.data_dir, split=split, train=train, transform=transform, **self.EXTRA_ARGS)
-
-    #     if stage == "fit" or stage is None:
-    #         train_transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
-    #         val_transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
-
-    #         dataset_train = _setup_with_splits(split=self.split, train=True, transform=train_transforms)
-
-    #         dataset_val = _setup_with_splits(split=self.split, train=True, transform=val_transforms)
-
-    #         # Split
-    #         self.dataset_train = self._split_dataset(dataset_train)
-    #         self.dataset_val = self._split_dataset(dataset_val, train=False)
-
-    #     if stage == "test" or stage is None:
-    #         test_transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
-    #         self.dataset_test = _setup_with_splits(split=self.split, train=False, transform=test_transforms)
-
-    # def default_transforms(self) -> Callable:
-    #     if self.normalize:
-    #         emnist_transforms = transform_lib.Compose([
-    #             transform_lib.ToTensor(),
-    #             transform_lib.Normalize(mean=(0.5, ), std=(0.5, )),
-    #         ])
-    #     else:
-    #         emnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
-
-    #     return emnist_transforms
