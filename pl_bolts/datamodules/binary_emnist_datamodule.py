@@ -88,4 +88,3 @@ class BinaryEMNISTDataModule(EMNISTDataModule):
             *args,
             **kwargs,
         )
-
