@@ -1,11 +1,15 @@
+.. _vision-datamodules:
+
 Vision DataModules
 ==================
 The following are pre-built datamodules for computer-vision.
 
 -------------
 
+.. _vision-datamodule-supervised-learning:
+
 Supervised learning
---------------------
+-------------------
 These are standard vision datasets with the train, test, val splits pre-generated in DataLoaders with
 the standard transforms (and Normalization) values
 
@@ -49,6 +53,8 @@ MNIST
 ^^^^^
 
 .. autoclass:: pl_bolts.datamodules.mnist_datamodule.MNISTDataModule
+
+.. _vision-datamodule-semi-supervised-learning:
 
 Semi-supervised learning
 ------------------------
