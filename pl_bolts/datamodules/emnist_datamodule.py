@@ -33,37 +33,37 @@ class EMNISTDataModule(VisionDataModule):
          - 116,323
          - No
          - 814,255
-       * - ``byclass``
+       * - ``"byclass"``
          - 62
          - 697,932
          - 116,323
          - No
          - 814,255
-       * - ``bymerge``
+       * - ``"bymerge"``
          - 47
          - 697,932
          - 116,323
          - No
          - 814,255
-       * - ``balanced``
+       * - ``"balanced"``
          - 47
          - 112,800
          - 18,800
          - Yes
          - 131,600
-       * - ``digits``
+       * - ``"digits"``
          - 10
          - 240,000
          - 40,000
          - Yes
          - 280,000
-       * - ``letters``
+       * - ``"letters"``
          - 37
          - 88,800
          - 14,800
          - Yes
          - 103,600
-       * - ``mnist``
+       * - ``"mnist"``
          - 10
          - 60,000
          - 10,000
