@@ -38,3 +38,22 @@ def stl10_normalization():
 
     normalize = transforms.Normalize(mean=(0.43, 0.42, 0.39), std=(0.27, 0.26, 0.27))
     return normalize
+
+
+def emnist_normalization(split: str):
+    if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+        raise ModuleNotFoundError(
+            'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
+        )
+
+    # `stats` contains mean and std for each `split`.
+    stats = {
+        'balanced': (0.17510417221708502, 0.3332070017067981),
+        'byclass': (0.17359222670426913, 0.33162134741938604),
+        'bymerge': (0.17359632632958918, 0.33161854660044826),
+        'digits': (0.17325182375113168, 0.33163191505859535),
+        'letters': (0.17222730561708793, 0.33091591285642147),
+        'mnist': (0.17330445484320323, 0.33169403605816716),
+    }
+
+    return transforms.Normalize(mean=stats[split][0], std=stats[split][1])
