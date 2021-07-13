@@ -115,20 +115,20 @@ class EMNISTDataModule(VisionDataModule):
         Args:
             data_dir: Where to save/load the data.
             split: The dataset has 6 different splits: ``byclass``, ``bymerge``,
-                    ``balanced``, ``letters``, ``digits`` and ``mnist``.
-                    This argument specifies which one to use.
+                ``balanced``, ``letters``, ``digits`` and ``mnist``.
+                This argument specifies which one to use.
             val_split: Percent (float) or number (int) of samples
-                        to use for the validation split.
-                        If ``val_split = None``, the default size
-                        (as in the EMNIST documentation) of
-                        validation dataset is disbursed based on the ``split``.
+                to use for the validation split.
+                If ``val_split = None``, the default size
+                (as in the EMNIST documentation) of
+                validation dataset is disbursed based on the ``split``.
             num_workers: How many workers to use for loading data
             normalize: If ``True``, applies image normalize.
             batch_size: How many samples per batch to load.
             seed: Random seed to be used for train/val/test splits.
             shuffle: If ``True``, shuffles the train data every epoch.
             pin_memory: If ``True``, the data loader will copy Tensors into
-                        CUDA pinned memory before returning them.
+                CUDA pinned memory before returning them.
             drop_last: If ``True``, drops the last incomplete batch.
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover

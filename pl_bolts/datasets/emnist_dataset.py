@@ -89,7 +89,7 @@ class BinaryEMNIST(EMNIST):
     def __getitem__(self, idx):
         """
         Args:
-            index (int): Index
+            index: Index
 
         Returns:
             tuple: (image, target) where target is index of the target class.
