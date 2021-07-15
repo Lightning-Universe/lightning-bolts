@@ -7,21 +7,22 @@ else:  # pragma: no cover
     warn_missing_pkg('torchvision')
 
 
-def imagenet_normalization():
+def _check_torchvision_avilable():
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError(
             'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
         )
+
+
+def imagenet_normalization():
+    _check_torchvision_avilable()
 
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     return normalize
 
 
 def cifar10_normalization():
-    if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-        raise ModuleNotFoundError(
-            'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
-        )
+    _check_torchvision_avilable()
 
     normalize = transforms.Normalize(
         mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -31,20 +32,14 @@ def cifar10_normalization():
 
 
 def stl10_normalization():
-    if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-        raise ModuleNotFoundError(
-            'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
-        )
+    _check_torchvision_avilable()
 
     normalize = transforms.Normalize(mean=(0.43, 0.42, 0.39), std=(0.27, 0.26, 0.27))
     return normalize
 
 
 def emnist_normalization(split: str):
-    if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-        raise ModuleNotFoundError(
-            'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
-        )
+    _check_torchvision_avilable()
 
     # `stats` contains mean and std for each `split`.
     stats = {
