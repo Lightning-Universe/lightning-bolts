@@ -24,6 +24,4 @@ def test_a2c():
         fast_dev_run=True
     )
     model = AdvantageActorCritic(hparams.env)
-    result = trainer.fit(model)
-
-    assert result == 1
+    trainer.fit(model)
