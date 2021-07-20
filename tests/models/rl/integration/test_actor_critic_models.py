@@ -32,5 +32,3 @@ def test_sac():
     )
     model = SAC(**hparams.__dict__)
     result = trainer.fit(model)
-
-    assert result == 1
