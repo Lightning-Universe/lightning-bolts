@@ -35,7 +35,6 @@ EMNIST_METADATA = {
             'num_train': 697_932,
             'num_test': 116_323,
             'validation': False,
-            'num_total': 814_255,
         },
         'bymerge': {
             'name': 'bymerge',
@@ -43,7 +42,6 @@ EMNIST_METADATA = {
             'num_train': 697_932,
             'num_test': 116_323,
             'validation': False,
-            'num_total': 814_255,
         },
         'balanced': {
             'name': 'balanced',
@@ -51,7 +49,6 @@ EMNIST_METADATA = {
             'num_train': 112_800,
             'num_test': 18_800,
             'validation': True,
-            'num_total': 131_600,
         },
         'digits': {
             'name': 'digits',
@@ -59,7 +56,6 @@ EMNIST_METADATA = {
             'num_train': 240_000,
             'num_test': 40_000,
             'validation': True,
-            'num_total': 280_000,
         },
         'letters': {
             'name': 'letters',
@@ -67,7 +63,6 @@ EMNIST_METADATA = {
             'num_train': 88_800,
             'num_test': 14_800,
             'validation': True,
-            'num_total': 103_000,
         },
         'mnist': {
             'name': 'mnist',
@@ -75,7 +70,6 @@ EMNIST_METADATA = {
             'num_train': 60_000,
             'num_test': 10_000,
             'validation': True,
-            'num_total': 70_000,
         },
     },
 }
