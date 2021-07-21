@@ -2,6 +2,7 @@ from typing import Any, Callable, Optional, Union
 
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.datasets import EMNIST
+from pl_bolts.transforms.dataset_normalizations import emnist_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -226,7 +227,7 @@ class EMNISTDataModule(VisionDataModule):
         if self.normalize:
             emnist_transforms = transform_lib.Compose([
                 transform_lib.ToTensor(),
-                transform_lib.Normalize(mean=(0.5, ), std=(0.5, )),
+                emnist_normalization(self.split),
             ])
         else:
             emnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
