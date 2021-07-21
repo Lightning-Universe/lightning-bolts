@@ -1,8 +1,9 @@
-from typing import Any, Callable, Optional, Union
+from typing import Any, Optional, Union
 
 from pl_bolts.datamodules.emnist_datamodule import EMNISTDataModule
 from pl_bolts.datasets import BinaryEMNIST
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+
 
 class BinaryEMNISTDataModule(EMNISTDataModule):
     """

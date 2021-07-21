@@ -123,7 +123,7 @@ def test_emnist_datamodules_val_split(dm_cls, datadir, split, val_split):
                 f"ERROR!!!... `val_split` = {val_split} was NOT assigned."
         else:
             raise TypeError(
-                'For `val_split`, ACCEPTED dtypes: `int`, `float`. ' + \
+                'For `val_split`, ACCEPTED dtypes: `int`, `float`. ' +
                 f'RECEIVED dtype: {type(val_split)}'
             )
 
