@@ -94,7 +94,7 @@ class GPT2(LightningModule):
         h = self.token_embeddings(x.long())
 
         # prepend sos token
-        sos = torch.ones(1, batch, self.hparams.embed_dim, device=x.device) * self.sos
+        sos = torch.ones(1, batch, self.hparams.embed_dim, device=x.device, dtype=x.dtype) * self.sos
         h = torch.cat([sos, h[:-1, :, :]], axis=0)
 
         # add positional embeddings
