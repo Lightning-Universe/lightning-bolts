@@ -183,7 +183,7 @@ class SwAV(LightningModule):
                     self.feat_dim,
                 )
 
-            self.queue is not None:
+            if self.queue is not None:
                 self.queue = self.queue.to(self.device)
 
         self.use_the_queue = False
