@@ -1,5 +1,3 @@
-.. _vision-datamodules:
-
 Vision DataModules
 ==================
 The following are pre-built datamodules for computer-vision.

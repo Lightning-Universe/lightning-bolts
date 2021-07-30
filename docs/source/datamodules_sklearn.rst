@@ -1,5 +1,3 @@
-.. _sklearn-datamodules:
-
 .. role:: hidden
     :class: hidden-section
 

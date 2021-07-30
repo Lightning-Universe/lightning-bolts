@@ -37,5 +37,3 @@ Example::
         ...
 
 Please visit the PyTorch Lightning documentation for more details on DataModules
-
-For pre-defined datamodules, see :ref:`vision-datamodules` and :ref:`sklearn-datamodules`.
