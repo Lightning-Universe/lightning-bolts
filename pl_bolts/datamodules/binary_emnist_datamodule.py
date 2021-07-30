@@ -48,7 +48,7 @@ class BinaryEMNISTDataModule(EMNISTDataModule):
             data_dir: Where to save/load the data.
             split: The dataset has 6 different splits: ``byclass``, ``bymerge``,
                 ``balanced``, ``letters``, ``digits`` and ``mnist``.
-                This argument specifies which one to use.
+                This argument is passed to :class:`torchvision.datasets.EMNIST`.
             val_split: Percent (float) or number (int) of samples
                 to use for the validation split.
                 If ``val_split = None``, the default size

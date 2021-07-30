@@ -73,7 +73,7 @@ class EMNISTDataModule(VisionDataModule):
 
     |
 
-    Standard EMNIST, train, val, test-splits and transforms.
+    Here is the default EMNIST, train, val, test-splits and transforms.
 
     Transforms::
 
@@ -117,7 +117,7 @@ class EMNISTDataModule(VisionDataModule):
             data_dir: Where to save/load the data.
             split: The dataset has 6 different splits: ``byclass``, ``bymerge``,
                 ``balanced``, ``letters``, ``digits`` and ``mnist``.
-                This argument specifies which one to use.
+                This argument is passed to :class:`torchvision.datasets.EMNIST`.
             val_split: Percent (float) or number (int) of samples
                 to use for the validation split.
                 If ``val_split = None``, the default size
@@ -193,7 +193,7 @@ class EMNISTDataModule(VisionDataModule):
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
         """
-        Saves files to data_dir
+        Saves files to ``data_dir``.
         """
 
         self.dataset_cls(self.data_dir, split=self.split, train=True, download=True)

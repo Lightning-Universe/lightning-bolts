@@ -36,34 +36,6 @@ Example::
     for batch in dm.test_dataloader():
         ...
 
-Please visit the PyTorch Lightning documentation for more details on DataModules.
+Please visit the PyTorch Lightning documentation for more details on DataModules
 
-- :ref:`vision-datamodules`
-
-  - :ref:`vision-datamodule-supervised-learning`
-
-    - :class:`~pl_bolts.datamodules.binary_emnist_datamodule.BinaryEMNISTDataModule`
-
-    - :class:`~pl_bolts.datamodules.binary_mnist_datamodule.BinaryMNISTDataModule`
-
-    - :class:`~pl_bolts.datamodules.cityscapes_datamodule.CityscapesDataModule`
-
-    - :class:`~pl_bolts.datamodules.cifar10_datamodule.CIFAR10DataModule`
-
-    - :class:`~pl_bolts.datamodules.emnist_datamodule.EMNISTDataModule`
-
-    - :class:`~pl_bolts.datamodules.fashion_mnist_datamodule.FashionMNISTDataModule`
-
-    - :class:`~pl_bolts.datamodules.imagenet_datamodule.ImagenetDataModule`
-
-    - :class:`~pl_bolts.datamodules.mnist_datamodule.MNISTDataModule`
-
-  - :ref:`vision-datamodule-semi-supervised-learning`
-
-    - :class:`~pl_bolts.datamodules.ssl_imagenet_datamodule.SSLImagenetDataModule`
-
-    - :class:`~pl_bolts.datamodules.stl10_datamodule.STL10DataModule`
-
-- Sklearn Datamodule
-
-  - :class:`~pl_bolts.datamodules.sklearn_datamodule.SklearnDataModule`
+For pre-defined datamodules, see :ref:`vision-datamodules` and :ref:`sklearn-datamodules`.
