@@ -12,7 +12,7 @@ if _PIL_AVAILABLE:
 else:  # pragma: no cover
     warn_missing_pkg('PIL', pypi_name='Pillow')
 
-EMNIST_METADATA = {
+_EMNIST_METADATA = {
     'splits': {
         'byclass': {
             'num_test': 116_323,
@@ -42,7 +42,7 @@ EMNIST_METADATA = {
 }
 
 if _TORCHVISION_AVAILABLE:  # pragma: no cover
-    EMNIST._metadata = EMNIST_METADATA
+    EMNIST._metadata = _EMNIST_METADATA
 
 
 class BinaryEMNIST(EMNIST):
