@@ -193,16 +193,16 @@ class EMNISTDataModule(VisionDataModule):
         Creates train, val, and test dataset
         """
 
-        def _setup_with_splits(split: str, train: bool, transform: Any):  # type: ignore[misc]
-            return self.dataset_cls(self.data_dir, split=split, train=train, transform=transform, **self.EXTRA_ARGS)
-
         if stage == "fit" or stage is None:
             train_transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
             val_transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
 
-            dataset_train = _setup_with_splits(split=self.split, train=True, transform=train_transforms)
-
-            dataset_val = _setup_with_splits(split=self.split, train=True, transform=val_transforms)
+            dataset_train = self.dataset_cls(
+                self.data_dir, split=self.split, train=True, transform=train_transforms, **self.EXTRA_ARGS
+            )
+            dataset_val = self.dataset_cls(
+                self.data_dir, split=self.split, train=True, transform=val_transforms, **self.EXTRA_ARGS
+            )
 
             # Split
             self.dataset_train = self._split_dataset(dataset_train)
@@ -210,7 +210,9 @@ class EMNISTDataModule(VisionDataModule):
 
         if stage == "test" or stage is None:
             test_transforms = self.default_transforms() if self.test_transforms is None else self.test_transforms
-            self.dataset_test = _setup_with_splits(split=self.split, train=False, transform=test_transforms)
+            self.dataset_test = self.dataset_cls(
+                self.data_dir, split=self.split, train=False, transform=test_transforms, **self.EXTRA_ARGS
+            )
 
     def default_transforms(self) -> Callable:
         if self.normalize:
