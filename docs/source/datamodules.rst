@@ -26,6 +26,9 @@ Or use it manually with plain PyTorch
 Example::
 
     dm = MNISTDataModule('path/to/data')
+    # download data and setup dataloaders
+    dm.prepare_data()
+    dm.setup()
     for batch in dm.train_dataloader():
         ...
     for batch in dm.val_dataloader():
