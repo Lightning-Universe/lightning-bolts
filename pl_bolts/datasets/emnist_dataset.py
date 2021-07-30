@@ -12,62 +12,29 @@ if _PIL_AVAILABLE:
 else:  # pragma: no cover
     warn_missing_pkg('PIL', pypi_name='Pillow')
 
-_TABLE = """
-
-| Name     | Classes | No. Training | No. Testing | Validation | Total   |
-|----------|---------|--------------|-------------|------------|---------|
-| By_Class | 62      | 697,932      | 116,323     | No         | 814,255 |
-| By_Merge | 47      | 697,932      | 116,323     | No         | 814,255 |
-| Balanced | 47      | 112,800      | 18,800      | Yes        | 131,600 |
-| Digits   | 10      | 240,000      | 40,000      | Yes        | 280,000 |
-| Letters  | 37      | 88,800       | 14,800      | Yes        | 103,600 |
-| MNIST    | 10      | 60,000       | 10,000      | Yes        | 70,000  |
-
-"""
-
 EMNIST_METADATA = {
-    'table': _TABLE,
-    'source': 'Table-II in paper: https://arxiv.org/pdf/1702.05373.pdf',
     'splits': {
         'byclass': {
-            'name': 'byclass',
-            'num_classes': 62,
-            'num_train': 697_932,
             'num_test': 116_323,
             'validation': False,
         },
         'bymerge': {
-            'name': 'bymerge',
-            'num_classes': 47,
-            'num_train': 697_932,
             'num_test': 116_323,
             'validation': False,
         },
         'balanced': {
-            'name': 'balanced',
-            'num_classes': 47,
-            'num_train': 112_800,
             'num_test': 18_800,
             'validation': True,
         },
         'digits': {
-            'name': 'digits',
-            'num_classes': 10,
-            'num_train': 240_000,
             'num_test': 40_000,
             'validation': True,
         },
         'letters': {
-            'name': 'letters',
-            'num_classes': 37,
-            'num_train': 88_800,
             'num_test': 14_800,
             'validation': True,
         },
         'mnist': {
-            'name': 'mnist',
-            'num_classes': 10,
-            'num_train': 60_000,
             'num_test': 10_000,
             'validation': True,
         },
