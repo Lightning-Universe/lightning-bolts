@@ -12,9 +12,6 @@ trigger:
       - master
       - release/*
       - refs/tags/*
-pr:
-  - master
-  - release/*
 
 jobs:
   - job: pytest
