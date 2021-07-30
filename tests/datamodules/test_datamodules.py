@@ -15,7 +15,7 @@ from pl_bolts.datamodules import (
     MNISTDataModule,
 )
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
-from pl_bolts.datasets.emnist_dataset import EMNIST, EMNIST_METADATA
+from pl_bolts.datasets.emnist_dataset import EMNIST, _EMNIST_METADATA
 
 
 def test_dev_datasets(datadir):
@@ -104,9 +104,9 @@ def test_emnist_datamodules(datadir, dm_cls, split):
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
 def test_emnist_datamodules_val_split(dm_cls, datadir, split, val_split):
     dm = _create_dm_emnistlike(dm_cls, datadir, split, val_split)
-    assert dm.dataset_cls._metadata == EMNIST_METADATA, \
-        "ERROR!!!... `EMNIST_METADATA` mismatch detected!"
-    assert dm.split_metadata == EMNIST_METADATA.get('splits').get(split), \
+    assert dm.dataset_cls._metadata == _EMNIST_METADATA, \
+        "ERROR!!!... `_EMNIST_METADATA` mismatch detected!"
+    assert dm.split_metadata == _EMNIST_METADATA.get('splits').get(split), \
         "ERROR!!!... `split_metadata` mismatch detected."
     if val_split is None:
         if dm.split_metadata.get('validation'):
