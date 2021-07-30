@@ -15,7 +15,7 @@ from pl_bolts.datamodules import (
     MNISTDataModule,
 )
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
-from pl_bolts.datasets.emnist_dataset import EMNIST, _EMNIST_METADATA
+from pl_bolts.datasets.emnist_dataset import _EMNIST_METADATA, EMNIST
 
 
 def test_dev_datasets(datadir):
