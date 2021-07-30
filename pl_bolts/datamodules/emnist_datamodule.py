@@ -137,6 +137,11 @@ class EMNISTDataModule(VisionDataModule):
                 'You want to use MNIST dataset loaded from `torchvision` which is not installed yet.'
             )
 
+        if split not in self.dataset_cls.splits:
+            raise ValueError(
+                f"Unknown value {split} for argument split. Valid values are {self.dataset_cls.splits}."
+            )
+
         super(EMNISTDataModule, self).__init__(  # type: ignore[misc]
             data_dir=data_dir,
             val_split=val_split,
@@ -151,11 +156,7 @@ class EMNISTDataModule(VisionDataModule):
             **kwargs,
         )
         self.split = split
-        self._check_and_update()
-
-    def _check_and_update(self):
-        if self._emnist_split_exists:
-            self._update_val_split()
+        self._update_val_split()
 
     def _update_val_split(self):
         if (self.val_split is None):
@@ -163,16 +164,6 @@ class EMNISTDataModule(VisionDataModule):
                 self.val_split = int(self.split_metadata.get('num_test'))
             else:
                 self.val_split = self._DEFAULT_NO_VALIDATION_VAL_SPLIT
-
-    @property
-    def _emnist_split_exists(self) -> bool:
-        """Checks if the split exists in emnist or not."""
-        if not any(s == self.split for s in self.dataset_cls.splits):  # pragma: no cover
-            allowed_values = ', '.join([f'"{v}"' for v in self.dataset_cls.splits])
-            raise ValueError(
-                f'Invalid value provided for split (="{self.split}"). ' + f'Allowed splits are: {allowed_values}'
-            )
-        return True
 
     @property
     def split_metadata(self):
