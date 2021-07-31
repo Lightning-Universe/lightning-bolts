@@ -212,7 +212,7 @@ class EMNISTDataModule(VisionDataModule):
         if self.normalize:
             emnist_transforms = transform_lib.Compose([
                 transform_lib.ToTensor(),
-                emnist_normalization(self.split),  # TODO: update documentation
+                emnist_normalization(self.split),
             ])
         else:
             emnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
