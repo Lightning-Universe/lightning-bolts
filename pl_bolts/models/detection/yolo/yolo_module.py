@@ -193,7 +193,7 @@ class YOLO(LightningModule):
             )
         for layer_idx, layer_hits in enumerate(hits):
             hit_rate = layer_hits / total_hits if total_hits > 0 else 1.0
-            self.log(f'layer_{layer_idx}_hit_rate', hit_rate, sync_dist=True)
+            self.log(f'layer_{layer_idx}_hit_rate', hit_rate, sync_dist=False)
 
         def total_loss(loss_name):
             """Returns the sum of the loss over detection layers."""
@@ -225,9 +225,11 @@ class YOLO(LightningModule):
         _, losses = self(images, targets)
         total_loss = torch.stack(tuple(losses.values())).sum()
 
+        # sync_dist=True is broken in some versions of Lightning and may cause the sum of the loss
+        # across GPUs to be returned.
         for name, value in losses.items():
-            self.log(f'train/{name}_loss', value, prog_bar=True, sync_dist=True)
-        self.log('train/total_loss', total_loss, sync_dist=True)
+            self.log(f'train/{name}_loss', value, prog_bar=True, sync_dist=False)
+        self.log('train/total_loss', total_loss, sync_dist=False)
 
         return {'loss': total_loss}
 

@@ -398,7 +398,7 @@ class DetectionLayer(nn.Module):
         losses = dict()
 
         if pred_boxes and target_xy and target_wh:
-            size_compensation = torch.cat(size_compensation).unsqueeze(1)
+            size_compensation = torch.cat(size_compensation)
             pred_boxes = torch.cat(pred_boxes)
             if self.image_space_loss:
                 target_boxes = _corner_coordinates(torch.cat(target_xy), torch.cat(target_wh))
