@@ -48,12 +48,12 @@ def emnist_normalization(split: str):
 
     # `stats` contains mean and std for each `split`.
     stats = {
-        'balanced': (0.17510417221708502, 0.3332070017067981),
-        'byclass': (0.17359222670426913, 0.33162134741938604),
-        'bymerge': (0.17359632632958918, 0.33161854660044826),
-        'digits': (0.17325182375113168, 0.33163191505859535),
-        'letters': (0.17222730561708793, 0.33091591285642147),
-        'mnist': (0.17330445484320323, 0.33169403605816716),
+        'balanced': (0.175, 0.333),
+        'byclass': (0.174, 0.332),
+        'bymerge': (0.174, 0.332),
+        'digits': (0.173, 0.332),
+        'letters': (0.172, 0.331),
+        'mnist': (0.173, 0.332),
     }
 
     return transforms.Normalize(mean=stats[split][0], std=stats[split][1])
