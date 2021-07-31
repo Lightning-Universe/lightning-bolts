@@ -93,7 +93,7 @@ def _create_dm(dm_cls, datadir, val_split=0.2):
 @pytest.mark.parametrize("split", EMNIST.splits)
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
 def test_emnist_datamodules(datadir, dm_cls, split):
-    dm = _create_dm_emnistlike(dm_cls, datadir, split)
+    dm = _create_dm_with_split(dm_cls, datadir, split)
     loader = dm.train_dataloader()
     img, _ = next(iter(loader))
     assert img.size() == torch.Size([2, *dm.size()])
@@ -103,7 +103,7 @@ def test_emnist_datamodules(datadir, dm_cls, split):
 @pytest.mark.parametrize("split", EMNIST.splits)
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
 def test_emnist_datamodules_val_split(dm_cls, datadir, split, val_split):
-    dm = _create_dm_emnistlike(dm_cls, datadir, split, val_split)
+    dm = _create_dm_with_split(dm_cls, datadir, split, val_split)
     assert dm.dataset_cls._metadata == _EMNIST_METADATA, \
         "ERROR!!!... `_EMNIST_METADATA` mismatch detected!"
     assert dm.split_metadata == _EMNIST_METADATA.get('splits').get(split), \
@@ -125,7 +125,7 @@ def test_emnist_datamodules_val_split(dm_cls, datadir, split, val_split):
             raise TypeError('For `val_split`, ACCEPTED dtypes: `int`, `float`. ' + f'RECEIVED dtype: {type(val_split)}')
 
 
-def _create_dm_emnistlike(dm_cls, datadir, split='digits', val_split=0.2):
+def _create_dm_with_split(dm_cls, datadir, split='digits', val_split=0.2):
     dm = dm_cls(data_dir=datadir, split=split, val_split=val_split, num_workers=1, batch_size=2)
     dm.prepare_data()
     dm.setup()
