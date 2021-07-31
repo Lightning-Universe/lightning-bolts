@@ -24,6 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed the MNIST download giving HTTP 404 with torchvision>=0.9.1 ([#674](https://github.com/PyTorchLightning/lightning-bolts/pull/674))
 
 
+- Removed momentum updating from val step and add separate val queue ([#631](https://github.com/PyTorchLightning/lightning-bolts/pull/631))
+
+
+- Fixed FP16 support with vision GPT model ([#694](https://github.com/PyTorchLightning/lightning-bolts/pull/694))
+
+
 ## [0.3.4] - 2021-06-17
 
 ### Changed

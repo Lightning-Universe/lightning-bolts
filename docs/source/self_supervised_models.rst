@@ -324,7 +324,7 @@ CIFAR-10 pretrained model::
 
     from pl_bolts.models.self_supervised import SimCLR
 
-    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-sgd/simclr-cifar10-sgd.ckpt'
     simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
 
     simclr.freeze()
