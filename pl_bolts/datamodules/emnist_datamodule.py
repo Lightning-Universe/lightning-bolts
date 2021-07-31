@@ -171,15 +171,7 @@ class EMNISTDataModule(VisionDataModule):
 
     @property
     def num_classes(self) -> int:
-        """
-        Return:
-           - for ``byclass``: 62
-           - for ``bymerge``: 47
-           - for ``balanced``: 47
-           - for ``digits``: 10
-           - for ``letters``: 47
-           - for ``mnist``: 10
-        """
+        """Returns the number of classes. See the table above."""
         return len(self.dataset_cls.classes_split_dict[self.split])
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
