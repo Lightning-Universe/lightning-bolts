@@ -103,7 +103,7 @@ class EMNISTDataModule(VisionDataModule):
         self,
         data_dir: Optional[str] = None,
         split: str = 'mnist',
-        val_split: Optional[Union[int, float]] = 0.2,
+        val_split: Union[int, float] = 0.2,
         num_workers: int = 16,
         normalize: bool = False,
         batch_size: int = 32,
@@ -123,9 +123,6 @@ class EMNISTDataModule(VisionDataModule):
                 This argument is passed to :class:`torchvision.datasets.EMNIST`.
             val_split: Percent (float) or number (int) of samples
                 to use for the validation split.
-                If ``val_split = None``, the default size
-                (as in the EMNIST documentation) of
-                validation dataset is disbursed based on the ``split``.
             num_workers: How many workers to use for loading data
             normalize: If ``True``, applies image normalize.
             batch_size: How many samples per batch to load.
@@ -134,9 +131,8 @@ class EMNISTDataModule(VisionDataModule):
             pin_memory: If ``True``, the data loader will copy Tensors into
                 CUDA pinned memory before returning them.
             drop_last: If ``True``, drops the last incomplete batch.
-            strict_val_split: If ``True``, uses the validation split defined in `the paper
-                <https://arxiv.org/abs/1702.05373>`_ and only works with ``balanced``, ``digits``, ``letters``,
-                ``mnist`` splits.
+            strict_val_split: If ``True``, uses the validation split defined in the paper and ignores ``val_split``.
+                Note that it only works with ``"balanced"``, ``"digits"``, ``"letters"``, ``"mnist"`` splits.
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
