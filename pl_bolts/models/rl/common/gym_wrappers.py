@@ -1,9 +1,7 @@
 """
 Set of wrapper functions for gym environments taken from
 https://github.com/Shmuma/ptan/blob/master/ptan/common/wrappers.py
-and
-    https://raw.githubusercontent.com/openai/baselines/7c520852d9cf4eaaad326a3d548efc915dc60c10/baselines/common/atari_wrappers.py
-
+https://github.com/openai/baselines/blob/7c520852d9cf4eaaad326a3d548efc915dc60c10/baselines/common/atari_wrappers.py
 """
 import collections
 
