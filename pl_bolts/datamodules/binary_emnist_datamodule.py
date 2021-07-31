@@ -23,10 +23,6 @@ class BinaryEMNISTDataModule(EMNISTDataModule):
     name = "binary_emnist"
     dataset_cls = BinaryEMNIST
     dims = (1, 28, 28)
-    # _DEFAULT_NO_VALIDATION_VAL_SPLIT: This is the `val_split` to use when
-    # "validation = False" for a given split in the dataset_cls._metadata
-    # and the user-input for `val_split` is `None`.
-    _DEFAULT_NO_VALIDATION_VAL_SPLIT: Union[int, float] = 0
 
     def __init__(
         self,
@@ -40,6 +36,7 @@ class BinaryEMNISTDataModule(EMNISTDataModule):
         shuffle: bool = False,
         pin_memory: bool = False,
         drop_last: bool = False,
+        strict_val_split: bool = False,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -62,6 +59,9 @@ class BinaryEMNISTDataModule(EMNISTDataModule):
             pin_memory: If ``True``, the data loader will copy Tensors into
                 CUDA pinned memory before returning them.
             drop_last: If ``True``, drops the last incomplete batch.
+            strict_val_split: If ``True``, uses the validation split defined in `the paper
+                <https://arxiv.org/abs/1702.05373>`_ and only works with ``balanced``, ``digits``, ``letters``,
+                ``mnist`` splits.
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(

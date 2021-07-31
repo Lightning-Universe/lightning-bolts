@@ -12,38 +12,6 @@ if _PIL_AVAILABLE:
 else:  # pragma: no cover
     warn_missing_pkg('PIL', pypi_name='Pillow')
 
-_EMNIST_METADATA = {
-    'splits': {
-        'byclass': {
-            'num_test': 116_323,
-            'validation': False,
-        },
-        'bymerge': {
-            'num_test': 116_323,
-            'validation': False,
-        },
-        'balanced': {
-            'num_test': 18_800,
-            'validation': True,
-        },
-        'digits': {
-            'num_test': 40_000,
-            'validation': True,
-        },
-        'letters': {
-            'num_test': 14_800,
-            'validation': True,
-        },
-        'mnist': {
-            'num_test': 10_000,
-            'validation': True,
-        },
-    },
-}
-
-if _TORCHVISION_AVAILABLE:  # pragma: no cover
-    EMNIST._metadata = _EMNIST_METADATA
-
 
 class BinaryEMNIST(EMNIST):
 

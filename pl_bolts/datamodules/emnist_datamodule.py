@@ -92,10 +92,13 @@ class EMNISTDataModule(VisionDataModule):
     name = "emnist"
     dataset_cls = EMNIST
     dims = (1, 28, 28)
-    # _DEFAULT_NO_VALIDATION_VAL_SPLIT: This is the `val_split` to use when
-    # "validation = False" for a given split in the dataset_cls._metadata
-    # and the user-input for `val_split` is `None`.
-    _DEFAULT_NO_VALIDATION_VAL_SPLIT: Union[int, float] = 0
+
+    _official_val_split = {
+        'balanced': 18_800,
+        'digits': 40_000,
+        'letters': 14_800,
+        'mnist': 10_000,
+    }
 
     def __init__(
         self,
@@ -109,6 +112,7 @@ class EMNISTDataModule(VisionDataModule):
         shuffle: bool = False,
         pin_memory: bool = False,
         drop_last: bool = False,
+        strict_val_split: bool = False,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -131,6 +135,9 @@ class EMNISTDataModule(VisionDataModule):
             pin_memory: If ``True``, the data loader will copy Tensors into
                 CUDA pinned memory before returning them.
             drop_last: If ``True``, drops the last incomplete batch.
+            strict_val_split: If ``True``, uses the validation split defined in `the paper
+                <https://arxiv.org/abs/1702.05373>`_ and only works with ``balanced``, ``digits``, ``letters``,
+                ``mnist`` splits.
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
@@ -138,7 +145,9 @@ class EMNISTDataModule(VisionDataModule):
             )
 
         if split not in self.dataset_cls.splits:
-            raise ValueError(f"Unknown value {split} for argument split. Valid values are {self.dataset_cls.splits}.")
+            raise ValueError(
+                f"Unknown value '{split}' for argument `split`. Valid values are {self.dataset_cls.splits}."
+            )
 
         super(EMNISTDataModule, self).__init__(  # type: ignore[misc]
             data_dir=data_dir,
@@ -154,18 +163,16 @@ class EMNISTDataModule(VisionDataModule):
             **kwargs,
         )
         self.split = split
-        self._update_val_split()
 
-    def _update_val_split(self):
-        if (self.val_split is None):
-            if self.split_metadata.get('validation'):
-                self.val_split = int(self.split_metadata.get('num_test'))
+        if strict_val_split:
+            # replaces the value in `val_split` with the one defined in the paper
+            if self.split in self._official_val_split:
+                self.val_split = self._official_val_split[self.split]
             else:
-                self.val_split = self._DEFAULT_NO_VALIDATION_VAL_SPLIT
-
-    @property
-    def split_metadata(self):
-        return self.dataset_cls._metadata.get('splits').get(self.split)
+                raise ValueError(
+                    f"Invalid value '{self.split}' for argument `split` with `strict_val_split=True`. "
+                    f"Valid values are {set(self._official_val_split)}."
+                )
 
     @property
     def num_classes(self) -> int:
