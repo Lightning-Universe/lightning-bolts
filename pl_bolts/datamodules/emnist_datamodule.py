@@ -1,15 +1,16 @@
 from typing import Any, Callable, Optional, Union
 
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
-from pl_bolts.datasets import EMNIST
 from pl_bolts.transforms.dataset_normalizations import emnist_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
+    from torchvision.datasets import EMNIST
 else:  # pragma: no cover
     warn_missing_pkg('torchvision')
+    EMNIST = object
 
 
 class EMNISTDataModule(VisionDataModule):
