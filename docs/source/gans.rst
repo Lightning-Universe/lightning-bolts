@@ -91,7 +91,7 @@ LSUN Loss curves:
 SRGAN
 ---------
 SRGAN implementation from the paper `Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial
-Network <https://arxiv.org/pdf/1609.04802.pdf>`_. The implementation is based on the version from 
+Network <https://arxiv.org/pdf/1609.04802.pdf>`_. The implementation is based on the version from
 `deeplearning.ai <https://github.com/https-deeplearning-ai/GANs-Public/blob/master/C3W2_SRGAN_(Optional).ipynb>`_.
 
 Implemented by:
@@ -101,7 +101,7 @@ Implemented by:
 MNIST results:
 
     SRGAN MNIST with scale factor of 2 (left: low res, middle: generated high res, right: ground truth high res):
-    
+
         .. image:: _images/gans/srgan-mnist-scale_factor=2.png
             :width: 200
             :alt: SRGAN MNIST with scale factor of 2
@@ -123,13 +123,13 @@ MNIST results:
 STL10 results:
 
     SRGAN STL10 with scale factor of 2:
-    
+
         .. image:: _images/gans/srgan-stl10-scale_factor=2.png
             :width: 200
             :alt: SRGAN STL10 with scale factor of 2
 
     SRGAN STL10 with scale factor of 4:
-    
+
         .. image:: _images/gans/srgan-stl10-scale_factor=4.png
             :width: 200
             :alt: SRGAN STL10 with scale factor of 4
@@ -145,13 +145,13 @@ STL10 results:
 CelebA results:
 
     SRGAN CelebA with scale factor of 2:
-    
+
         .. image:: _images/gans/srgan-celeba-scale_factor=2.png
             :width: 200
             :alt: SRGAN CelebA with scale factor of 2
 
     SRGAN CelebA with scale factor of 4:
-    
+
         .. image:: _images/gans/srgan-celeba-scale_factor=4.png
             :width: 200
             :alt: SRGAN CelebA with scale factor of 4
