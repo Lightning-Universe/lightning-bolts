@@ -15,7 +15,6 @@ from pl_bolts.datamodules import (
     MNISTDataModule,
 )
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
-from pl_bolts.datasets.emnist_dataset import _EMNIST_METADATA, EMNIST
 
 
 def test_dev_datasets(datadir):
@@ -83,50 +82,54 @@ def test_data_modules(datadir, dm_cls):
     assert img.size() == torch.Size([2, *dm.size()])
 
 
-def _create_dm(dm_cls, datadir, val_split=0.2):
-    dm = dm_cls(data_dir=datadir, val_split=val_split, num_workers=1, batch_size=2)
+def _create_dm(dm_cls, datadir, **kwargs):
+    dm = dm_cls(data_dir=datadir, num_workers=1, batch_size=2, **kwargs)
     dm.prepare_data()
     dm.setup()
     return dm
 
 
-@pytest.mark.parametrize("split", EMNIST.splits)
+@pytest.mark.parametrize("split", ["byclass", "bymerge", "balanced", "letters", "digits", "mnist"])
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
 def test_emnist_datamodules(datadir, dm_cls, split):
-    dm = _create_dm_with_split(dm_cls, datadir, split)
+    """Test EMNIST datamodules download data and have the correct shape."""
+
+    dm = _create_dm(dm_cls, datadir, split=split)
     loader = dm.train_dataloader()
     img, _ = next(iter(loader))
-    assert img.size() == torch.Size([2, *dm.size()])
+    assert img.size() == torch.Size([2, 1, 28, 28])
 
 
-@pytest.mark.parametrize("val_split", [None, 0, 0., 0.2, 10_000])
-@pytest.mark.parametrize("split", EMNIST.splits)
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
-def test_emnist_datamodules_val_split(dm_cls, datadir, split, val_split):
-    dm = _create_dm_with_split(dm_cls, datadir, split, val_split)
-    assert dm.dataset_cls._metadata == _EMNIST_METADATA, \
-        "ERROR!!!... `_EMNIST_METADATA` mismatch detected!"
-    assert dm.split_metadata == _EMNIST_METADATA.get('splits').get(split), \
-        "ERROR!!!... `split_metadata` mismatch detected."
-    if val_split is None:
-        if dm.split_metadata.get('validation'):
-            assert dm.val_split == dm.split_metadata.get('num_test'), \
-                "ERROR!!!... `val_split` was NOT mapped to default " + \
-                f"'num_test' value: {dm.split_metadata.get('num_test')}"
-        else:
-            assert dm.val_split == dm._DEFAULT_NO_VALIDATION_VAL_SPLIT, \
-                f"ERROR!!!... expected val_split = {dm._DEFAULT_NO_VALIDATION_VAL_SPLIT}, " + \
-                f"assigned val_split = {dm.val_split}"
+def test_emnist_datamodules_with_invalid_split(datadir, dm_cls):
+    """Test EMNIST datamodules raise an exception if the provided `split` doesn't exist."""
+
+    with pytest.raises(ValueError, match="Unknown value"):
+        dm_cls(data_dir=datadir, split="this_split_doesnt_exist")
+
+
+@pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
+@pytest.mark.parametrize(
+    "split, expected_val_split", [
+        ("byclass", None),
+        ("bymerge", None),
+        ("balanced", 18_800),
+        ("digits", 40_000),
+        ("letters", 14_800),
+        ("mnist", 10_000),
+    ]
+)
+def test_emnist_datamodules_with_strict_val_split(datadir, dm_cls, split, expected_val_split):
+    """
+    Test EMNIST datamodules when strict_val_split is specified to use the validation set defined in the paper.
+    Refer to https://arxiv.org/abs/1702.05373 for `expected_val_split` values.
+    """
+
+    if expected_val_split is None:
+        with pytest.raises(ValueError, match="Invalid value"):
+            dm = _create_dm(dm_cls, datadir, split=split, strict_val_split=True)
+
     else:
-        if isinstance(val_split, (int, float)):
-            assert dm.val_split == val_split, \
-                f"ERROR!!!... `val_split` = {val_split} was NOT assigned."
-        else:
-            raise TypeError('For `val_split`, ACCEPTED dtypes: `int`, `float`. ' + f'RECEIVED dtype: {type(val_split)}')
-
-
-def _create_dm_with_split(dm_cls, datadir, split='digits', val_split=0.2):
-    dm = dm_cls(data_dir=datadir, split=split, val_split=val_split, num_workers=1, batch_size=2)
-    dm.prepare_data()
-    dm.setup()
-    return dm
+        dm = _create_dm(dm_cls, datadir, split=split, strict_val_split=True)
+        assert dm.val_split == expected_val_split
+        assert len(dm.dataset_val) == expected_val_split
