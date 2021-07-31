@@ -6,6 +6,7 @@ from unittest import TestCase
 
 import numpy as np
 import torch
+from torch import Tensor
 
 from pl_bolts.losses.rl import double_dqn_loss, dqn_loss, per_dqn_loss
 from pl_bolts.models.rl.common.gym_wrappers import make_environment
@@ -34,18 +35,18 @@ class TestRLLoss(TestCase):
         """Test the dqn loss function"""
 
         loss = dqn_loss(self.batch, self.net, self.target_net)
-        self.assertIsInstance(loss, torch.Tensor)
+        self.assertIsInstance(loss, Tensor)
 
     def test_double_dqn_loss(self):
         """Test the double dqn loss function"""
 
         loss = double_dqn_loss(self.batch, self.net, self.target_net)
-        self.assertIsInstance(loss, torch.Tensor)
+        self.assertIsInstance(loss, Tensor)
 
     def test_per_dqn_loss(self):
         """Test the double dqn loss function"""
         prios = torch.ones([32])
 
         loss, batch_weights = per_dqn_loss(self.batch, prios, self.net, self.target_net)
-        self.assertIsInstance(loss, torch.Tensor)
+        self.assertIsInstance(loss, Tensor)
         self.assertIsInstance(batch_weights, np.ndarray)

@@ -1,0 +1,10 @@
+{% extends "!layout.html" %}
+<link rel="canonical" href="{{ theme_canonical_url }}{{ pagename }}.html" />
+
+{% block footer %}
+{{ super() }}
+<script script type="text/javascript">
+  var collapsedSections = ['Callbacks', 'DataModules', 'Datasets', 'DataLoaders', 'Losses', 'Models', 'Vision models', 'Learning Rate Schedulers', 'Data Processing', 'Learning Tasks', 'Community'];
+</script>
+
+{% endblock %}

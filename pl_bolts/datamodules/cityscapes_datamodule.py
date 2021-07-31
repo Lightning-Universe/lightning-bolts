@@ -209,7 +209,7 @@ class CityscapesDataModule(LightningDataModule):
         return cityscapes_transforms
 
     def _default_target_transforms(self) -> Callable:
-        cityscapes_target_trasnforms = transform_lib.Compose([
+        cityscapes_target_transforms = transform_lib.Compose([
             transform_lib.ToTensor(), transform_lib.Lambda(lambda t: t.squeeze())
         ])
-        return cityscapes_target_trasnforms
+        return cityscapes_target_transforms

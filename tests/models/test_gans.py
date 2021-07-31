@@ -1,6 +1,5 @@
 import pytest
-import pytorch_lightning as pl
-from pytorch_lightning import seed_everything
+from pytorch_lightning import seed_everything, Trainer
 from torch.utils.data.dataloader import DataLoader
 from torchvision import transforms as transform_lib
 
@@ -20,7 +19,7 @@ def test_gan(tmpdir, datadir, dm_cls):
 
     dm = dm_cls(data_dir=datadir, num_workers=0)
     model = GAN(*dm.size())
-    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, datamodule=dm)
     trainer.test(datamodule=dm, ckpt_path=None)
 
@@ -36,7 +35,7 @@ def test_dcgan(tmpdir, datadir, dm_cls):
     dm = dm_cls(data_dir=datadir, train_transforms=transforms, val_transforms=transforms, test_transforms=transforms)
 
     model = DCGAN(image_channels=dm.dims[0])
-    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, dm)
     trainer.test(datamodule=dm, ckpt_path=None)
 
@@ -48,6 +47,6 @@ def test_sr_modules(tmpdir, datadir, sr_module_cls, scale_factor):
 
     dl = DataLoader(SRMNISTDataset(scale_factor, root=datadir))
     model = sr_module_cls(image_channels=1, scale_factor=scale_factor)
-    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, dl)
     trainer.test(test_dataloaders=dl, ckpt_path=None)

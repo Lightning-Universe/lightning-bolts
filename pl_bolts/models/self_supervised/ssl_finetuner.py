@@ -1,14 +1,14 @@
 from typing import List, Optional
 
-import pytorch_lightning as pl
 import torch
-from pytorch_lightning.metrics import Accuracy
+from pytorch_lightning import LightningModule
 from torch.nn import functional as F
+from torchmetrics import Accuracy
 
 from pl_bolts.models.self_supervised import SSLEvaluator
 
 
-class SSLFineTuner(pl.LightningModule):
+class SSLFineTuner(LightningModule):
     """
     Finetunes a self-supervised learning backbone using the standard evaluation protocol of a singler layer MLP
     with 1024 units
@@ -88,7 +88,7 @@ class SSLFineTuner(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         loss, logits, y = self.shared_step(batch)
-        acc = self.train_acc(logits, y)
+        acc = self.train_acc(logits.softmax(-1), y)
 
         self.log('train_loss', loss, prog_bar=True)
         self.log('train_acc_step', acc, prog_bar=True)
@@ -98,7 +98,7 @@ class SSLFineTuner(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         loss, logits, y = self.shared_step(batch)
-        self.val_acc(logits, y)
+        self.val_acc(logits.softmax(-1), y)
 
         self.log('val_loss', loss, prog_bar=True, sync_dist=True)
         self.log('val_acc', self.val_acc)
@@ -107,7 +107,7 @@ class SSLFineTuner(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         loss, logits, y = self.shared_step(batch)
-        self.test_acc(logits, y)
+        self.test_acc(logits.softmax(-1), y)
 
         self.log('test_loss', loss, sync_dist=True)
         self.log('test_acc', self.test_acc)

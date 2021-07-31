@@ -7,7 +7,7 @@ from typing import List
 
 import numpy as np
 import torch
-from torch import nn
+from torch import nn, Tensor
 from torch.nn import functional as F
 
 
@@ -17,7 +17,7 @@ class Agent(ABC):
     def __init__(self, net: nn.Module):
         self.net = net
 
-    def __call__(self, state: torch.Tensor, device: str, *args, **kwargs) -> List[int]:
+    def __call__(self, state: Tensor, device: str, *args, **kwargs) -> List[int]:
         """
         Using the given network, decide what action to carry
 
@@ -50,7 +50,7 @@ class ValueAgent(Agent):
         self.eps_frames = eps_frames
 
     @torch.no_grad()
-    def __call__(self, state: torch.Tensor, device: str) -> List[int]:
+    def __call__(self, state: Tensor, device: str) -> List[int]:
         """
         Takes in the current state and returns the action based on the agents policy
 
@@ -71,7 +71,7 @@ class ValueAgent(Agent):
 
         return action
 
-    def get_random_action(self, state: torch.Tensor) -> int:
+    def get_random_action(self, state: Tensor) -> int:
         """returns a random action"""
         actions = []
 
@@ -81,7 +81,7 @@ class ValueAgent(Agent):
 
         return actions
 
-    def get_action(self, state: torch.Tensor, device: torch.device):
+    def get_action(self, state: Tensor, device: torch.device):
         """
         Returns the best action based on the Q values of the network
 
@@ -92,7 +92,7 @@ class ValueAgent(Agent):
         Returns:
             action defined by Q values
         """
-        if not isinstance(state, torch.Tensor):
+        if not isinstance(state, Tensor):
             state = torch.tensor(state, device=device)
 
         q_values = self.net(state)
@@ -113,7 +113,7 @@ class PolicyAgent(Agent):
     """Policy based agent that returns an action based on the networks policy"""
 
     @torch.no_grad()
-    def __call__(self, states: torch.Tensor, device: str) -> List[int]:
+    def __call__(self, states: Tensor, device: str) -> List[int]:
         """
         Takes in the current state and returns the action based on the agents policy
 
@@ -127,8 +127,7 @@ class PolicyAgent(Agent):
         if not isinstance(states, list):
             states = [states]
 
-        if not isinstance(states, torch.Tensor):
-            states = torch.tensor(states, device=device)
+        states = torch.tensor(states, device=device)
 
         # get the logits and pass through softmax for probability distribution
         probabilities = F.softmax(self.net(states)).squeeze(dim=-1)

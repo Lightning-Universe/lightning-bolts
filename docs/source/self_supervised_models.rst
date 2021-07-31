@@ -312,7 +312,7 @@ CIFAR-10 baseline
    * - Ours
      - 88.50
      - `resnet50 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
-     - `LARS-SGD <https://lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - LARS
      - 2048
      - 800 (4 hours)
      - 8 V100 (16GB)
@@ -324,7 +324,7 @@ CIFAR-10 pretrained model::
 
     from pl_bolts.models.self_supervised import SimCLR
 
-    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-sgd/simclr-cifar10-sgd.ckpt'
     simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
 
     simclr.freeze()
@@ -361,7 +361,6 @@ To reproduce::
         -- num_workers 16
         --optimizer sgd
         --learning_rate 1.5
-        --lars_wrapper
         --exclude_bn_bias
         --max_epochs 800
         --online_ft
@@ -401,7 +400,7 @@ Imagenet baseline for SimCLR
    * - Ours
      - 68.4
      - `resnet50 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
-     - `LARS-SGD <https://lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - LARS
      - 4096
      - 800
      - 64 V100 (16GB)
@@ -533,7 +532,7 @@ The original paper does not provide baselines on STL10.
    * - Ours
      - `86.72 <https://tensorboard.dev/experiment/w2pq3bPPSxC4VIm5udhA2g/>`_
      - SwAV resnet50
-     - `LARS <https://lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - LARS
      - 128
      - No
      - 100 (~9 hr)
@@ -585,7 +584,6 @@ To reproduce::
     python swav_module.py
         --online_ft
         --gpus 1
-        --lars_wrapper
         --batch_size 128
         --learning_rate 1e-3
         --gaussian_blur
@@ -630,7 +628,7 @@ Imagenet baseline for SwAV
    * - Ours
      - 74
      - `resnet50 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
-     - `LARS-SGD <https://lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - LARS
      - 4096
      - 800
      - 64 V100 (16GB)
@@ -653,4 +651,11 @@ SwAV API
 ********
 
 .. autoclass:: pl_bolts.models.self_supervised.SwAV
+   :noindex:
+
+
+SimSiam
+^^^^^^^
+
+.. autoclass:: pl_bolts.models.self_supervised.SimSiam
    :noindex:

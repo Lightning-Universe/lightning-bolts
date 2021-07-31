@@ -12,7 +12,7 @@ from pl_bolts.datasets.dummy_dataset import (
 )
 from pl_bolts.datasets.imagenet_dataset import extract_archive, parse_devkit_archive, UnlabeledImagenet
 from pl_bolts.datasets.kitti_dataset import KittiDataset
-from pl_bolts.datasets.mnist_dataset import BinaryMNIST
+from pl_bolts.datasets.mnist_dataset import BinaryMNIST, MNIST
 from pl_bolts.datasets.ssl_amdim_datasets import CIFAR10Mixed, SSLDatasetMixin
 
 __all__ = [
@@ -22,6 +22,7 @@ __all__ = [
     "ConcatDataset",
     "DummyDataset",
     "DummyDetectionDataset",
+    "MNIST",
     "RandomDataset",
     "RandomDictDataset",
     "RandomDictStringDataset",

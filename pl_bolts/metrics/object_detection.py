@@ -1,7 +1,8 @@
 import torch
+from torch import Tensor
 
 
-def iou(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+def iou(preds: Tensor, target: Tensor) -> Tensor:
     """
     Calculates the intersection over union.
 
@@ -34,7 +35,7 @@ def iou(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     return iou
 
 
-def giou(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+def giou(preds: Tensor, target: Tensor) -> Tensor:
     """
     Calculates the generalized intersection over union.
 

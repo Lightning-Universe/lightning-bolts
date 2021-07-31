@@ -1,6 +1,6 @@
-import pytorch_lightning as pl
 import torch
-from torch import nn as nn
+from pytorch_lightning import LightningModule
+from torch import nn
 
 
 class Block(nn.Module):
@@ -28,7 +28,7 @@ class Block(nn.Module):
         return x
 
 
-class GPT2(pl.LightningModule):
+class GPT2(LightningModule):
     """
     GPT-2 from `language Models are Unsupervised Multitask Learners <https://d4mucfpksywv.cloudfront.net/
     better-language-models/language-models.pdf>`_
@@ -94,7 +94,7 @@ class GPT2(pl.LightningModule):
         h = self.token_embeddings(x.long())
 
         # prepend sos token
-        sos = torch.ones(1, batch, self.hparams.embed_dim, device=x.device) * self.sos
+        sos = torch.ones(1, batch, self.hparams.embed_dim, device=x.device, dtype=x.dtype) * self.sos
         h = torch.cat([sos, h[:-1, :, :]], axis=0)
 
         # add positional embeddings

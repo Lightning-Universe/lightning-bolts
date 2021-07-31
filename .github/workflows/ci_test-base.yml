@@ -30,6 +30,7 @@ jobs:
     - name: Setup macOS
       if: runner.os == 'macOS'
       run: |
+        brew update  # Todo: find a better way...
         brew install libomp  # https://github.com/pytorch/pytorch/issues/20030
 
     # Note: This uses an internal pip API and may not always work
@@ -49,13 +50,12 @@ jobs:
 
     - name: Install dependencies
       run: |
+        python --version
         python -m pip install --upgrade --user pip
-        pip install --requirement ./requirements.txt --quiet  --find-links https://download.pytorch.org/whl/cpu/torch_stable.html --upgrade
-        pip install --requirement ./requirements/loggers.txt --quiet --upgrade-strategy only-if-needed
+        pip --version
+        pip install --requirement ./requirements.txt --quiet --find-links https://download.pytorch.org/whl/cpu/torch_stable.html --upgrade
         pip install --requirement ./requirements/test.txt --quiet --upgrade-strategy only-if-needed
         # pip install tox coverage
-        python --version
-        pip --version
         pip list
       shell: bash
 
@@ -69,7 +69,7 @@ jobs:
     - name: Test Package [only]
       run: |
         # NOTE: run coverage on tests does not propagare faler status for Win, https://github.com/nedbat/coveragepy/issues/1003
-        coverage run --source pl_bolts -m pytest pl_bolts -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml --ignore=pl_bolts/datamodules --ignore=pl_bolts/datasets --ignore=pl_bolts/models/self_supervised/amdim/transforms.py --ignore=pl_bolts/models/rl
+        python -m pytest pl_bolts -v --cov=pl_bolts --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml --ignore=pl_bolts/datamodules --ignore=pl_bolts/datasets --ignore=pl_bolts/models/self_supervised/amdim/transforms.py --ignore=pl_bolts/models/rl
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@master
