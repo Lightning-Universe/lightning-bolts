@@ -31,4 +31,4 @@ def test_sac():
         fast_dev_run=True
     )
     model = SAC(**hparams.__dict__)
-    result = trainer.fit(model)
+    trainer.fit(model)
