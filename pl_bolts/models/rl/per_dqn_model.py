@@ -14,6 +14,7 @@ from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.losses.rl import per_dqn_loss
 from pl_bolts.models.rl.common.memory import Experience, PERBuffer
 from pl_bolts.models.rl.dqn_model import DQN
+from pl_bolts.utils import _PL_GREATER_EQUAL_1_4
 
 
 class PERDQN(DQN):
@@ -116,7 +117,7 @@ class PERDQN(DQN):
         # calculates training loss
         loss, batch_weights = per_dqn_loss(samples, weights, self.net, self.target_net, self.gamma)
 
-        if self.trainer.use_dp or self.trainer.use_ddp2:
+        if self._use_dp_or_ddp2(self.trainer):
             loss = loss.unsqueeze(0)
 
         # update priorities in buffer
