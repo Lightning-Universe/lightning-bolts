@@ -26,7 +26,7 @@ from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainImagenetTransforms,
     Moco2TrainSTL10Transforms,
 )
-from pl_bolts.utils import _TORCHVISION_AVAILABLE, _PL_GREATER_EQUAL_1_4
+from pl_bolts.utils import _PL_GREATER_EQUAL_1_4, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
