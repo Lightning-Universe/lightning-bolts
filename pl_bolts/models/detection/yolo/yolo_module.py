@@ -460,7 +460,11 @@ class YOLO(LightningModule):
                 cls_classprobs = img_classprobs[selected]
                 cls_labels = img_labels[selected]
 
+                # NMS will crash if there are too many boxes.
+                cls_boxes = cls_boxes[:100000]
+                cls_scores = cls_scores[:100000]
                 selected = nms(cls_boxes, cls_scores, self.nms_threshold)
+
                 img_out_boxes = torch.cat((img_out_boxes, cls_boxes[selected]))
                 img_out_scores = torch.cat((img_out_scores, cls_scores[selected]))
                 img_out_classprobs = torch.cat((img_out_classprobs, cls_classprobs[selected]))
