@@ -26,7 +26,7 @@ from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainImagenetTransforms,
     Moco2TrainSTL10Transforms,
 )
-from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils import _TORCHVISION_AVAILABLE, _PL_GREATER_EQUAL_1_4
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -150,7 +150,7 @@ class Moco_v2(LightningModule):
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys, queue_ptr, queue):
         # gather keys before updating queue
-        if self.trainer.use_ddp or self.trainer.use_ddp2:
+        if self._use_ddp_or_ddp2(self.trainer):
             keys = concat_all_gather(keys)
 
         batch_size = keys.shape[0]
@@ -229,14 +229,14 @@ class Moco_v2(LightningModule):
         with torch.no_grad():  # no gradient to keys
 
             # shuffle for making use of BN
-            if self.trainer.use_ddp or self.trainer.use_ddp2:
+            if self._use_ddp_or_ddp2(self.trainer):
                 img_k, idx_unshuffle = self._batch_shuffle_ddp(img_k)
 
             k = self.encoder_k(img_k)  # keys: NxC
             k = nn.functional.normalize(k, dim=1)
 
             # undo shuffle
-            if self.trainer.use_ddp or self.trainer.use_ddp2:
+            if self._use_ddp_or_ddp2(self.trainer):
                 k = self._batch_unshuffle_ddp(k, idx_unshuffle)
 
         # compute logits
@@ -334,6 +334,12 @@ class Moco_v2(LightningModule):
         parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
 
         return parser
+
+    def _use_ddp_or_ddp2(self, trainer: Trainer) -> bool:
+        # for backwards compatibility
+        if _PL_GREATER_EQUAL_1_4:
+            return trainer.accelerator_connector.use_ddp or trainer.accelerator_connector.use_ddp2
+        return trainer.use_ddp or trainer.use_ddp2
 
 
 # utils
