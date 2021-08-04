@@ -14,7 +14,6 @@ from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.losses.rl import per_dqn_loss
 from pl_bolts.models.rl.common.memory import Experience, PERBuffer
 from pl_bolts.models.rl.dqn_model import DQN
-from pl_bolts.utils import _PL_GREATER_EQUAL_1_4
 
 
 class PERDQN(DQN):
