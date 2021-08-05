@@ -335,7 +335,8 @@ class Moco_v2(LightningModule):
 
         return parser
 
-    def _use_ddp_or_ddp2(self, trainer: Trainer) -> bool:
+    @staticmethod
+    def _use_ddp_or_ddp2(trainer: Trainer) -> bool:
         # for backwards compatibility
         if _PL_GREATER_EQUAL_1_4:
             return trainer.accelerator_connector.use_ddp or trainer.accelerator_connector.use_ddp2

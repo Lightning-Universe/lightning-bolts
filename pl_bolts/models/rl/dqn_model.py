@@ -404,7 +404,8 @@ class DQN(LightningModule):
 
         return arg_parser
 
-    def _use_dp_or_ddp2(self, trainer: Trainer) -> bool:
+    @staticmethod
+    def _use_dp_or_ddp2(trainer: Trainer) -> bool:
         # for backwards compatibility
         if _PL_GREATER_EQUAL_1_4:
             return trainer.accelerator_connector.use_dp or trainer.accelerator_connector.use_ddp2
