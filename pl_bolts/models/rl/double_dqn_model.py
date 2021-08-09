@@ -58,7 +58,7 @@ class DoubleDQN(DQN):
         # calculates training loss
         loss = double_dqn_loss(batch, self.net, self.target_net, self.gamma)
 
-        if self.trainer.use_dp or self.trainer.use_ddp2:
+        if self._use_dp_or_ddp2(self.trainer):
             loss = loss.unsqueeze(0)
 
         # Soft update of target network

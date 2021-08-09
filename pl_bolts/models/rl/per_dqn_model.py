@@ -116,7 +116,7 @@ class PERDQN(DQN):
         # calculates training loss
         loss, batch_weights = per_dqn_loss(samples, weights, self.net, self.target_net, self.gamma)
 
-        if self.trainer.use_dp or self.trainer.use_ddp2:
+        if self._use_dp_or_ddp2(self.trainer):
             loss = loss.unsqueeze(0)
 
         # update priorities in buffer
