@@ -1,7 +1,6 @@
 from unittest import mock
 
 import pytest
-import torch
 
 from tests import _MARK_REQUIRE_GPU, DATASETS_PATH
 
@@ -53,26 +52,6 @@ def test_cli_run_srresnet(cli_args):
     from pl_bolts.models.gans.srgan.srresnet_module import cli_main
 
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args.strip().split()):
-        cli_main()
-
-
-# TODO: this test is hanging (runs for more then 10min) so we need to use GPU or optimize it...
-@pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
-@pytest.mark.parametrize(
-    'cli_args', [
-        f' --data_dir {DATASETS_PATH}'
-        ' --max_epochs 1'
-        ' --limit_train_batches 2'
-        ' --limit_val_batches 2'
-        ' --batch_size 2'
-        ' --encoder resnet18'
-    ]
-)
-def test_cli_run_cpc(cli_args):
-    from pl_bolts.models.self_supervised.cpc.cpc_module import cli_main
-
-    cli_args = cli_args.strip().split(' ') if cli_args else []
-    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
         cli_main()
 
 
