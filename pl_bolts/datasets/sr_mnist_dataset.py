@@ -11,7 +11,7 @@ else:  # pragma: no cover
     warn_missing_pkg('PIL', pypi_name='Pillow')
 
 
-class SRMNISTDataset(SRDatasetMixin, MNIST):
+class SRMNIST(SRDatasetMixin, MNIST):
     """
     MNIST dataset that can be used to train Super Resolution models.
 

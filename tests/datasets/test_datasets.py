@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from pl_bolts.datasets import DummyDataset, RandomDataset, RandomDictDataset, RandomDictStringDataset
-from pl_bolts.datasets.sr_mnist_dataset import SRMNISTDataset
+from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 
 
 def test_dummy_ds():
@@ -40,7 +40,7 @@ def test_rand_str_dict_ds():
 
 @pytest.mark.parametrize("scale_factor", [2, 4])
 def test_sr_datasets(datadir, scale_factor):
-    dl = DataLoader(SRMNISTDataset(scale_factor, root=datadir))
+    dl = DataLoader(SRMNIST(scale_factor, root=datadir))
     hr_image, lr_image = next(iter(dl))
 
     hr_image_size = 28

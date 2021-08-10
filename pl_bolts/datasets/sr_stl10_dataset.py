@@ -16,7 +16,7 @@ else:  # pragma: no cover
     STL10 = object
 
 
-class SRSTL10Dataset(SRDatasetMixin, STL10):
+class SRSTL10(SRDatasetMixin, STL10):
     """
     STL10 dataset that can be used to train Super Resolution models.
 

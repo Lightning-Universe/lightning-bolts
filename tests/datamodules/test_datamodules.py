@@ -14,7 +14,7 @@ from pl_bolts.datamodules import (
 )
 from pl_bolts.datamodules.sr_datamodule import SRDataModule
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
-from pl_bolts.datasets.sr_mnist_dataset import SRMNISTDataset
+from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 
 
 def test_dev_datasets(datadir):
@@ -90,7 +90,7 @@ def _create_dm(dm_cls, datadir, val_split=0.2):
 
 
 def test_sr_datamodule(datadir):
-    dataset = SRMNISTDataset(scale_factor=4, root=datadir)
+    dataset = SRMNIST(scale_factor=4, root=datadir)
     dm = SRDataModule(dataset_train=dataset, dataset_val=dataset, dataset_test=dataset, batch_size=2)
 
     next(iter(dm.train_dataloader()))

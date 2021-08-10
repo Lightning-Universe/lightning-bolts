@@ -16,7 +16,7 @@ else:  # pragma: no cover
     CelebA = object
 
 
-class SRCelebADataset(SRDatasetMixin, CelebA):
+class SRCelebA(SRDatasetMixin, CelebA):
     """
     CelebA dataset that can be used to train Super Resolution models.
 
