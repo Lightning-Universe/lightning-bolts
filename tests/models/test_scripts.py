@@ -27,13 +27,7 @@ def test_cli_run_dcgan(cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize(
-    "cli_args",
-    [
-        f"--dataset mnist --scale_factor 4 --data_dir {DATASETS_PATH} --max_epochs 1"
-        " --batch_size 2 --limit_train_batches 2 --limit_val_batches 2"
-    ],
-)
+@pytest.mark.parametrize("cli_args", ["--dataset mnist --scale_factor 4" + _DEFAULT_ARGS])
 def test_cli_run_srgan(cli_args):
     from pl_bolts.models.gans.srgan.srgan_module import cli_main
 
@@ -41,13 +35,7 @@ def test_cli_run_srgan(cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize(
-    "cli_args",
-    [
-        f"--dataset mnist --data_dir {DATASETS_PATH} --max_epochs 1"
-        " --batch_size 2 --limit_train_batches 2 --limit_val_batches 2"
-    ],
-)
+@pytest.mark.parametrize("cli_args", ["--dataset mnist --scale_factor 4" + _DEFAULT_ARGS])
 def test_cli_run_srresnet(cli_args):
     from pl_bolts.models.gans.srgan.srresnet_module import cli_main
 
