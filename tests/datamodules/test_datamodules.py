@@ -14,7 +14,7 @@ from pl_bolts.datamodules import (
 )
 from pl_bolts.datamodules.sr_datamodule import SRDataModule
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
-from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
+from pl_bolts.datasets.sr_mnist_dataset import SRMNISTDataset
 
 
 def test_dev_datasets(datadir):

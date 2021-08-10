@@ -10,7 +10,7 @@ class SRDataModule(LightningDataModule):
 
     Example::
         from pl_bolts.datamodules import SRDataModule
-        from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
+        from pl_bolts.datasets.sr_mnist_dataset import SRMNISTDataset
 
         dataset_dev = SRMNISTDataset(scale_factor=4, root=".", train=True)
         dataset_train, dataset_val = random_split(dataset_dev, lengths=[55_000, 5_000])

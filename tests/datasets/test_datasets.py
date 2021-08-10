@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from pl_bolts.datasets import DummyDataset, RandomDataset, RandomDictDataset, RandomDictStringDataset
-from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
+from pl_bolts.datasets.sr_mnist_dataset import SRMNISTDataset
 
 
 def test_dummy_ds():

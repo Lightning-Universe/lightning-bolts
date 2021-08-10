@@ -1,6 +1,3 @@
-import os
-
-from pl_bolts.datasets.sr_dataset_mixin import SRDatasetMixin
 from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE, _TORCHVISION_LESS_THAN_0_9_1
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -64,29 +61,3 @@ class BinaryMNIST(MNIST):
         img[img >= 0.5] = 1.0
 
         return img, target
-
-
-class SRMNISTDataset(SRDatasetMixin, MNIST):
-    """
-    MNIST dataset that can be used to train Super Resolution models.
-
-    Function __getitem__ (implemented in SRDatasetMixin) returns tuple of high and low resolution image.
-
-    """
-
-    def __init__(self, scale_factor: int, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.hr_image_size = 28
-        self.lr_image_size = self.hr_image_size // scale_factor
-        self.image_channels = 1
-
-    def _get_image(self, index: int):
-        return Image.fromarray(self.data[index].numpy(), mode="L")
-
-    @property
-    def raw_folder(self) -> str:
-        return os.path.join(self.root, "MNIST", "raw")
-
-    @property
-    def processed_folder(self) -> str:
-        return os.path.join(self.root, "MNIST", "processed")

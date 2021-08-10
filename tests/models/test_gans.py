@@ -4,7 +4,7 @@ from torch.utils.data.dataloader import DataLoader
 from torchvision import transforms as transform_lib
 
 from pl_bolts.datamodules import CIFAR10DataModule, MNISTDataModule
-from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
+from pl_bolts.datasets.sr_mnist_dataset import SRMNISTDataset
 from pl_bolts.models.gans import DCGAN, GAN, SRGAN, SRResNet
 
 

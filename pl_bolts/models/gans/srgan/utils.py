@@ -1,7 +1,7 @@
 from torch.utils.data.dataset import random_split
 
-from pl_bolts.datasets.mnist_dataset import SRMNISTDataset
 from pl_bolts.datasets.sr_celeba_dataset import SRCelebADataset
+from pl_bolts.datasets.sr_mnist_dataset import SRMNISTDataset
 from pl_bolts.datasets.sr_stl10_dataset import SRSTL10Dataset
 
 
