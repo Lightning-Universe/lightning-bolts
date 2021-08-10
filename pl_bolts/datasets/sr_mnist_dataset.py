@@ -1,5 +1,3 @@
-import os
-
 from pl_bolts.datasets.mnist_dataset import MNIST
 from pl_bolts.datasets.sr_dataset_mixin import SRDatasetMixin
 from pl_bolts.utils import _PIL_AVAILABLE
@@ -26,11 +24,3 @@ class SRMNIST(SRDatasetMixin, MNIST):
 
     def _get_image(self, index: int):
         return Image.fromarray(self.data[index].numpy(), mode="L")
-
-    @property
-    def raw_folder(self) -> str:
-        return os.path.join(self.root, "MNIST", "raw")
-
-    @property
-    def processed_folder(self) -> str:
-        return os.path.join(self.root, "MNIST", "processed")
