@@ -93,6 +93,6 @@ def test_sr_datamodule(datadir):
     dataset = SRMNISTDataset(scale_factor=4, root=datadir)
     dm = SRDataModule(dataset_train=dataset, dataset_val=dataset, dataset_test=dataset, batch_size=2)
 
-    b = next(iter(dm.train_dataloader()))  # noqa: F841
-    b = next(iter(dm.val_dataloader()))  # noqa: F841
-    b = next(iter(dm.test_dataloader()))  # noqa: F841
+    next(iter(dm.train_dataloader()))
+    next(iter(dm.val_dataloader()))
+    next(iter(dm.test_dataloader()))
