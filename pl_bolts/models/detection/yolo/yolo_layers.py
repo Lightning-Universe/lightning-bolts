@@ -357,7 +357,8 @@ class DetectionLayer(nn.Module):
             cell_j = cell_j[selected]
             predictors = predictors[selected]
             wh = wh[selected]
-            hits += selected.count_nonzero()
+            # sum() is equivalent to count_nonzero() and available before PyTorch 1.7.
+            hits += selected.sum()
 
             # The "low-confidence" mask is used to select predictors that are not responsible for
             # predicting any object, for calculating the part of the confidence loss with zero as
