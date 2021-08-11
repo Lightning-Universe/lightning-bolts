@@ -117,7 +117,7 @@ class VOCDetectionDataModule(LightningDataModule):
         num_workers: int = 0,
         normalize: bool = False,
         shuffle: bool = False,
-        pin_memory: bool = False,
+        pin_memory: bool = True,
         drop_last: bool = False,
         *args: Any,
         **kwargs: Any,

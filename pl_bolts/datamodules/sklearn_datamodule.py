@@ -157,7 +157,7 @@ class SklearnDataModule(LightningDataModule):
         random_state=1234,
         shuffle=True,
         batch_size: int = 16,
-        pin_memory=False,
+        pin_memory=True,
         drop_last=False,
         *args,
         **kwargs,

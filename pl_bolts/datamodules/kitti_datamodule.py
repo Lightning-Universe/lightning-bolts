@@ -30,7 +30,7 @@ class KittiDataModule(LightningDataModule):
         batch_size: int = 32,
         seed: int = 42,
         shuffle: bool = False,
-        pin_memory: bool = False,
+        pin_memory: bool = True,
         drop_last: bool = False,
         *args: Any,
         **kwargs: Any,

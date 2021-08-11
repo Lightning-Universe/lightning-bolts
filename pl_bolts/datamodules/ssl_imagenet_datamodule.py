@@ -27,7 +27,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         num_workers: int = 0,
         batch_size: int = 32,
         shuffle: bool = False,
-        pin_memory: bool = False,
+        pin_memory: bool = True,
         drop_last: bool = False,
         *args: Any,
         **kwargs: Any,
