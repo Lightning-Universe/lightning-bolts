@@ -116,7 +116,7 @@ class VOCDetectionDataModule(LightningDataModule):
         year: str = "2012",
         num_workers: int = 0,
         normalize: bool = False,
-        shuffle: bool = False,
+        shuffle: bool = True,
         pin_memory: bool = True,
         drop_last: bool = False,
         *args: Any,

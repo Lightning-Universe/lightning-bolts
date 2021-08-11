@@ -51,7 +51,7 @@ class BinaryMNISTDataModule(VisionDataModule):
         normalize: bool = False,
         batch_size: int = 32,
         seed: int = 42,
-        shuffle: bool = False,
+        shuffle: bool = True,
         pin_memory: bool = True,
         drop_last: bool = False,
         *args: Any,

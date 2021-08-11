@@ -69,7 +69,7 @@ class CityscapesDataModule(LightningDataModule):
         num_workers: int = 0,
         batch_size: int = 32,
         seed: int = 42,
-        shuffle: bool = False,
+        shuffle: bool = True,
         pin_memory: bool = True,
         drop_last: bool = False,
         *args: Any,

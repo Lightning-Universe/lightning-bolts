@@ -56,7 +56,7 @@ class ImagenetDataModule(LightningDataModule):
         image_size: int = 224,
         num_workers: int = 0,
         batch_size: int = 32,
-        shuffle: bool = False,
+        shuffle: bool = True,
         pin_memory: bool = True,
         drop_last: bool = False,
         *args: Any,
