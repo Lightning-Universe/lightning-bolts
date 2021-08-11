@@ -58,7 +58,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         data_dir: Optional[str] = None,
         unlabeled_val_split: int = 5000,
         train_val_split: int = 500,
-        num_workers: int = 16,
+        num_workers: int = 0,
         batch_size: int = 32,
         seed: int = 42,
         shuffle: bool = False,

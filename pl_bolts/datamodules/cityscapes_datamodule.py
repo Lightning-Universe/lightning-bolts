@@ -66,7 +66,7 @@ class CityscapesDataModule(LightningDataModule):
         data_dir: str,
         quality_mode: str = 'fine',
         target_type: str = 'instance',
-        num_workers: int = 16,
+        num_workers: int = 0,
         batch_size: int = 32,
         seed: int = 42,
         shuffle: bool = False,

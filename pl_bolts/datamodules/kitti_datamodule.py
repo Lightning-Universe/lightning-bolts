@@ -26,7 +26,7 @@ class KittiDataModule(LightningDataModule):
         data_dir: Optional[str] = None,
         val_split: float = 0.2,
         test_split: float = 0.1,
-        num_workers: int = 16,
+        num_workers: int = 0,
         batch_size: int = 32,
         seed: int = 42,
         shuffle: bool = False,

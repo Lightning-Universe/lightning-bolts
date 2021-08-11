@@ -54,7 +54,7 @@ class ImagenetDataModule(LightningDataModule):
         meta_dir: Optional[str] = None,
         num_imgs_per_val_class: int = 50,
         image_size: int = 224,
-        num_workers: int = 16,
+        num_workers: int = 0,
         batch_size: int = 32,
         shuffle: bool = False,
         pin_memory: bool = False,

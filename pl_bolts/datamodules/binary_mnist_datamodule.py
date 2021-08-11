@@ -47,7 +47,7 @@ class BinaryMNISTDataModule(VisionDataModule):
         self,
         data_dir: Optional[str] = None,
         val_split: Union[int, float] = 0.2,
-        num_workers: int = 16,
+        num_workers: int = 0,
         normalize: bool = False,
         batch_size: int = 32,
         seed: int = 42,

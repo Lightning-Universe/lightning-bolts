@@ -153,7 +153,7 @@ class SklearnDataModule(LightningDataModule):
         y_test=None,
         val_split=0.2,
         test_split=0.1,
-        num_workers=2,
+        num_workers=0,
         random_state=1234,
         shuffle=True,
         batch_size: int = 16,
