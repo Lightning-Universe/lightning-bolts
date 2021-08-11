@@ -210,12 +210,8 @@ class EMNISTDataModule(VisionDataModule):
             )
 
     def default_transforms(self) -> Callable:
-        if self.normalize:
-            emnist_transforms = transform_lib.Compose([
-                transform_lib.ToTensor(),
-                emnist_normalization(self.split),
-            ])
-        else:
-            emnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
 
-        return emnist_transforms
+        return transform_lib.Compose([
+            transform_lib.ToTensor(),
+            emnist_normalization(self.split),
+        ]) if self.normalize else transform_lib.Compose([transform_lib.ToTensor()])
