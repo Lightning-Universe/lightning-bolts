@@ -10,20 +10,20 @@ def prepare_datasets(dataset, scale_factor, data_dir):
 
     if dataset == "celeba":
         dataset_cls = SRCelebA
-        dataset_train = dataset_cls(scale_factor, root=data_dir, split="train")
-        dataset_val = dataset_cls(scale_factor, root=data_dir, split="valid")
-        dataset_test = dataset_cls(scale_factor, root=data_dir, split="test")
+        dataset_train = dataset_cls(scale_factor, root=data_dir, split="train", download=True)
+        dataset_val = dataset_cls(scale_factor, root=data_dir, split="valid", download=True)
+        dataset_test = dataset_cls(scale_factor, root=data_dir, split="test", download=True)
 
     elif dataset == "mnist":
         dataset_cls = SRMNIST
-        dataset_dev = dataset_cls(scale_factor, root=data_dir, train=True)
+        dataset_dev = dataset_cls(scale_factor, root=data_dir, train=True, download=True)
         dataset_train, dataset_val = random_split(dataset_dev, lengths=[55_000, 5_000])
-        dataset_test = dataset_cls(scale_factor, root=data_dir, train=False)
+        dataset_test = dataset_cls(scale_factor, root=data_dir, train=False, download=True)
 
     elif dataset == "stl10":
         dataset_cls = SRSTL10
-        dataset_dev = dataset_cls(scale_factor, root=data_dir, split="train")
+        dataset_dev = dataset_cls(scale_factor, root=data_dir, split="train", download=True)
         dataset_train, dataset_val = random_split(dataset_dev, lengths=[4_500, 500])
-        dataset_test = dataset_cls(scale_factor, root=data_dir, split="test")
+        dataset_test = dataset_cls(scale_factor, root=data_dir, split="test", download=True)
 
     return (dataset_train, dataset_val, dataset_test)
