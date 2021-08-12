@@ -45,7 +45,7 @@ def test_dcgan(tmpdir, datadir, dm_cls):
 def test_sr_modules(tmpdir, datadir, sr_module_cls, scale_factor):
     seed_everything(42)
 
-    dl = DataLoader(SRMNIST(scale_factor, root=datadir))
+    dl = DataLoader(SRMNIST(scale_factor, root=datadir, download=True))
     model = sr_module_cls(image_channels=1, scale_factor=scale_factor)
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, dl)
