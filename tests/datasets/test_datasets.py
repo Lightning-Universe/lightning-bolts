@@ -40,7 +40,7 @@ def test_rand_str_dict_ds():
 
 @pytest.mark.parametrize("scale_factor", [2, 4])
 def test_sr_datasets(datadir, scale_factor):
-    dl = DataLoader(SRMNIST(scale_factor, root=datadir))
+    dl = DataLoader(SRMNIST(scale_factor, root=datadir, download=True))
     hr_image, lr_image = next(iter(dl))
 
     hr_image_size = 28
