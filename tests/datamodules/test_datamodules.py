@@ -90,7 +90,7 @@ def _create_dm(dm_cls, datadir, val_split=0.2):
 
 
 def test_sr_datamodule(datadir):
-    dataset = SRMNIST(scale_factor=4, root=datadir)
+    dataset = SRMNIST(scale_factor=4, root=datadir, download=True)
     dm = SRDataModule(dataset_train=dataset, dataset_val=dataset, dataset_test=dataset, batch_size=2)
 
     next(iter(dm.train_dataloader()))
