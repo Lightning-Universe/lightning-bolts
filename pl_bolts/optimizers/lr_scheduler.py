@@ -66,7 +66,7 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         self.warmup_start_lr = warmup_start_lr
         self.eta_min = eta_min
 
-        super(LinearWarmupCosineAnnealingLR, self).__init__(optimizer, last_epoch)
+        super().__init__(optimizer, last_epoch)
 
     def get_lr(self) -> List[float]:
         """

@@ -14,7 +14,7 @@ class CPCResNet(nn.Module):
         replace_stride_with_dilation=None,
         norm_layer=None,
     ):
-        super(CPCResNet, self).__init__()
+        super().__init__()
         if norm_layer is None:
             norm_layer = nn.LayerNorm
         self._norm_layer = norm_layer
@@ -150,7 +150,7 @@ class LNBottleneck(nn.Module):
         norm_layer=None,
         expansion=4,
     ):
-        super(LNBottleneck, self).__init__()
+        super().__init__()
         width = int(planes * (base_width / 64.0)) * groups
         # Both self.conv2 and self.downsample layers downsample the input when stride != 1
         self.conv1 = conv1x1(inplanes, width)

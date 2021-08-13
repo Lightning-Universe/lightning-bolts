@@ -41,7 +41,7 @@ class Buffer:
         Returns:
             a batch of tuple np arrays of state, action, reward, done, next_state
         """
-        states, actions, rewards, dones, next_states = zip(*[self.buffer[idx] for idx in range(self.__len__())])
+        states, actions, rewards, dones, next_states = zip(*(self.buffer[idx] for idx in range(self.__len__())))
 
         self.buffer.clear()
 
@@ -71,7 +71,7 @@ class ReplayBuffer(Buffer):
         """
 
         indices = np.random.choice(len(self.buffer), batch_size, replace=False)
-        states, actions, rewards, dones, next_states = zip(*[self.buffer[idx] for idx in indices])
+        states, actions, rewards, dones, next_states = zip(*(self.buffer[idx] for idx in indices))
 
         return (
             np.array(states),
@@ -297,7 +297,7 @@ class PERBuffer(ReplayBuffer):
         # choise sample of indices based on the priority prob distribution
         indices = np.random.choice(len(self.buffer), batch_size, p=probs)
         # samples = [self.buffer[idx] for idx in indices]
-        states, actions, rewards, dones, next_states = zip(*[self.buffer[idx] for idx in indices])
+        states, actions, rewards, dones, next_states = zip(*(self.buffer[idx] for idx in indices))
 
         samples = (
             np.array(states),

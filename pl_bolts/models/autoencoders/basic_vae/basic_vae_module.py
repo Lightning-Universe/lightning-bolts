@@ -64,7 +64,7 @@ class VAE(LightningModule):
             lr: learning rate for Adam
         """
 
-        super(VAE, self).__init__()
+        super().__init__()
 
         self.save_hyperparameters()
 

@@ -7,7 +7,7 @@ def test_printtable_metrics_callback():
     metrics_a = {"loss": 1.0, "epoch": 0}
     metrics_b = {"loss": 0.5, "epoch": 2}
 
-    class FakeTrainer(object):
+    class FakeTrainer:
         def __init__(self):
             self.callback_metrics = {}
 

@@ -39,7 +39,7 @@ class BasicBlock(nn.Module):
         dilation=1,
         norm_layer=None,
     ):
-        super(BasicBlock, self).__init__()
+        super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         if groups != 1 or base_width != 64:
@@ -89,7 +89,7 @@ class Bottleneck(nn.Module):
         dilation=1,
         norm_layer=None,
     ):
-        super(Bottleneck, self).__init__()
+        super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         width = int(planes * (base_width / 64.0)) * groups
@@ -146,7 +146,7 @@ class ResNet(nn.Module):
         first_conv=True,
         maxpool1=True,
     ):
-        super(ResNet, self).__init__()
+        super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         self._norm_layer = norm_layer
@@ -340,7 +340,7 @@ class ResNet(nn.Module):
 
 class MultiPrototypes(nn.Module):
     def __init__(self, output_dim, nmb_prototypes):
-        super(MultiPrototypes, self).__init__()
+        super().__init__()
         self.nmb_heads = len(nmb_prototypes)
         for i, k in enumerate(nmb_prototypes):
             self.add_module("prototypes" + str(i), nn.Linear(output_dim, k, bias=False))

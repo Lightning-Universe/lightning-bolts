@@ -32,7 +32,7 @@ class ToTensor(Wrapper):
         if not _GYM_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `gym` which is not installed yet.")
 
-        super(ToTensor, self).__init__(env)
+        super().__init__(env)
 
     def step(self, action):
         """Take 1 step and cast to tensor"""
@@ -51,7 +51,7 @@ class FireResetEnv(Wrapper):
         if not _GYM_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `gym` which is not installed yet.")
 
-        super(FireResetEnv, self).__init__(env)
+        super().__init__(env)
         assert env.unwrapped.get_action_meanings()[1] == "FIRE"
         assert len(env.unwrapped.get_action_meanings()) >= 3
 
@@ -78,7 +78,7 @@ class MaxAndSkipEnv(Wrapper):
         if not _GYM_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `gym` which is not installed yet.")
 
-        super(MaxAndSkipEnv, self).__init__(env)
+        super().__init__(env)
         # most recent raw observations (for max pooling across time steps)
         self._obs_buffer = collections.deque(maxlen=2)
         self._skip = skip
@@ -111,7 +111,7 @@ class ProcessFrame84(ObservationWrapper):
         if not _OPENCV_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("This class uses OpenCV which it is not installed yet.")
 
-        super(ProcessFrame84, self).__init__(env)
+        super().__init__(env)
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
 
     def observation(self, obs):
@@ -141,7 +141,7 @@ class ImageToPyTorch(ObservationWrapper):
         if not _OPENCV_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("This class uses OpenCV which it is not installed yet.")
 
-        super(ImageToPyTorch, self).__init__(env)
+        super().__init__(env)
         old_shape = self.observation_space.shape
         new_shape = (old_shape[-1], old_shape[0], old_shape[1])
         self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=new_shape, dtype=np.float32)
@@ -164,7 +164,7 @@ class BufferWrapper(ObservationWrapper):
     """ "Wrapper for image stacking"""
 
     def __init__(self, env, n_steps, dtype=np.float32):
-        super(BufferWrapper, self).__init__(env)
+        super().__init__(env)
         self.dtype = dtype
         self.buffer = None
         old_space = env.observation_space

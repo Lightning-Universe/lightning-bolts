@@ -58,7 +58,7 @@ class AE(LightningModule):
             lr: learning rate for Adam
         """
 
-        super(AE, self).__init__()
+        super().__init__()
 
         self.save_hyperparameters()
 

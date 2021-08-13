@@ -146,7 +146,7 @@ class EMNISTDataModule(VisionDataModule):
                 f"Unknown value '{split}' for argument `split`. Valid values are {self.dataset_cls.splits}."
             )
 
-        super(EMNISTDataModule, self).__init__(  # type: ignore[misc]
+        super().__init__(  # type: ignore[misc]
             data_dir=data_dir,
             val_split=val_split,
             num_workers=num_workers,

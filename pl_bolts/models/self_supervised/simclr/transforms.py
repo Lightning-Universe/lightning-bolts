@@ -14,7 +14,7 @@ else:  # pragma: no cover
     warn_missing_pkg("cv2", pypi_name="opencv-python")
 
 
-class SimCLRTrainDataTransform(object):
+class SimCLRTrainDataTransform:
     """
     Transforms for SimCLR
 
@@ -128,7 +128,7 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
         )
 
 
-class SimCLRFinetuneTransform(object):
+class SimCLRFinetuneTransform:
     def __init__(
         self, input_height: int = 224, jitter_strength: float = 1.0, normalize=None, eval_transform: bool = False
     ) -> None:
@@ -169,7 +169,7 @@ class SimCLRFinetuneTransform(object):
         return self.transform(sample)
 
 
-class GaussianBlur(object):
+class GaussianBlur:
     # Implements Gaussian blur as described in the SimCLR paper
     def __init__(self, kernel_size, p=0.5, min=0.1, max=2.0):
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover

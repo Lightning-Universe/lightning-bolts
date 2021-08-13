@@ -65,7 +65,7 @@ class BinaryEMNISTDataModule(EMNISTDataModule):
                 "You want to use EMNIST dataset loaded from `torchvision` which is not installed yet."
             )
 
-        super(BinaryEMNISTDataModule, self).__init__(  # type: ignore[misc]
+        super().__init__(  # type: ignore[misc]
             data_dir=data_dir,
             split=split,
             val_split=val_split,

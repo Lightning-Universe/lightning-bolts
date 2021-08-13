@@ -55,7 +55,7 @@ class RandomTranslateWithReflect:
         return new_image
 
 
-class Patchify(object):
+class Patchify:
     def __init__(self, patch_size, overlap_size):
         self.patch_size = patch_size
         self.overlap_size = self.patch_size - overlap_size

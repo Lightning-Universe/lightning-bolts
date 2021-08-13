@@ -22,7 +22,7 @@ class CNN(nn.Module):
             input_shape: observation shape of the environment
             n_actions: number of discrete actions available in the environment
         """
-        super(CNN, self).__init__()
+        super().__init__()
 
         self.conv = nn.Sequential(
             nn.Conv2d(input_shape[0], 32, kernel_size=8, stride=4),
@@ -73,7 +73,7 @@ class MLP(nn.Module):
             n_actions: number of discrete actions available in the environment
             hidden_size: size of hidden layers
         """
-        super(MLP, self).__init__()
+        super().__init__()
         self.net = nn.Sequential(
             nn.Linear(input_shape[0], hidden_size),
             nn.ReLU(),
@@ -139,7 +139,7 @@ class DuelingMLP(nn.Module):
             n_actions: number of discrete actions available in the environment
             hidden_size: size of hidden layers
         """
-        super(DuelingMLP, self).__init__()
+        super().__init__()
 
         self.net = nn.Sequential(
             nn.Linear(input_shape[0], hidden_size),
@@ -330,7 +330,7 @@ class NoisyLinear(nn.Linear):
             sigma_init: initial fill value of noisy weights
             bias: flag to include bias to linear layer
         """
-        super(NoisyLinear, self).__init__(in_features, out_features, bias=bias)
+        super().__init__(in_features, out_features, bias=bias)
 
         weights = torch.full((out_features, in_features), sigma_init)
         self.sigma_weight = nn.Parameter(weights)
