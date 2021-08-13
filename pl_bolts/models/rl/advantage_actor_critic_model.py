@@ -25,9 +25,7 @@ else:  # pragma: no cover
 
 
 class AdvantageActorCritic(LightningModule):
-    """PyTorch Lightning implementation of `Advantage Actor Critic.
-
-    <https://arxiv.org/abs/1602.01783v2>`_
+    """PyTorch Lightning implementation of `Advantage Actor Critic <https://arxiv.org/abs/1602.01783v2>`_.
 
     Paper Authors: Volodymyr Mnih, Adrià Puigdomènech Badia, et al.
 

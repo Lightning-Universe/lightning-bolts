@@ -25,10 +25,7 @@ else:  # pragma: no cover
 
 
 class VanillaPolicyGradient(LightningModule):
-    """PyTorch Lightning implementation of `Vanilla Policy Gradient.
-
-    <https://papers.nips.cc/paper/
-    1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
+    r"""PyTorch Lightning implementation of `Vanilla Policy Gradient`_.
 
     Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
 
@@ -52,6 +49,9 @@ class VanillaPolicyGradient(LightningModule):
 
     Note:
         Currently only supports CPU and single GPU training with `distributed_backend=dp`
+
+    .. _`Vanilla Policy Gradient`:
+    https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf
     """
 
     def __init__(

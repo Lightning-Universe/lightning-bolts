@@ -15,7 +15,8 @@ from pl_bolts.models.rl.dqn_model import DQN
 
 
 class PERDQN(DQN):
-    """PyTorch Lightning implementation of `DQN With Prioritized Experience Replay
+    """PyTorch Lightning implementation of `DQN With Prioritized Experience Replay.
+
     <https://arxiv.org/abs/1511.05952>`_
 
     Paper authors: Tom Schaul, John Quan, Ioannis Antonoglou, David Silver

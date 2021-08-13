@@ -11,7 +11,8 @@ from pl_bolts.models.rl.dqn_model import DQN
 
 
 class DoubleDQN(DQN):
-    """Double Deep Q-network (DDQN) PyTorch Lightning implementation of `Double DQN
+    """Double Deep Q-network (DDQN) PyTorch Lightning implementation of `Double DQN.
+
     <https://arxiv.org/pdf/1509.06461.pdf>`_
 
     Paper authors: Hado van Hasselt, Arthur Guez, David Silver

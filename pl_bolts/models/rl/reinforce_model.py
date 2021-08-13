@@ -25,12 +25,8 @@ else:  # pragma: no cover
 
 
 class Reinforce(LightningModule):
-    """PyTorch Lightning implementation of `REINFORCE.
-
-    <https://papers.nips.cc/paper/
-    1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
-    Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
-    Model implemented by:
+    r"""PyTorch Lightning implementation of `REINFORCE`_. Paper authors: Richard S. Sutton, David McAllester,
+    Satinder Singh, Yishay Mansour Model implemented by:
 
         - `Donal Byrne <https://github.com/djbyrne>`
 
@@ -50,6 +46,9 @@ class Reinforce(LightningModule):
 
     Note:
         Currently only supports CPU and single GPU training with `distributed_backend=dp`
+
+    .. _REINFORCE:
+    https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf
     """
 
     def __init__(

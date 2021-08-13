@@ -1,5 +1,7 @@
 """Agent module containing classes for Agent logic Based on the implementations found here:
-https://github.com/Shmuma/ptan/blob/master/ptan/agent.py."""
+
+https://github.com/Shmuma/ptan/blob/master/ptan/agent.py.
+"""
 from abc import ABC
 from typing import List
 
