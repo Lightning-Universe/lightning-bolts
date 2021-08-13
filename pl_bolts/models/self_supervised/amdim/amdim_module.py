@@ -60,9 +60,7 @@ DATASET_IMAGENET2012 = {
 
 
 class AMDIM(LightningModule):
-    """PyTorch Lightning implementation of `Augmented Multiscale Deep InfoMax (AMDIM)
-
-    <https://arxiv.org/abs/1906.00910>`_.
+    """PyTorch Lightning implementation of Augmented Multiscale Deep InfoMax (AMDIM_)
 
     Paper authors: Philip Bachman, R Devon Hjelm, William Buchwalter.
 
@@ -81,6 +79,8 @@ class AMDIM(LightningModule):
 
         trainer = Trainer()
         trainer.fit(model)
+
+    .. _AMDIM: https://arxiv.org/abs/1906.00910
     """
 
     def __init__(

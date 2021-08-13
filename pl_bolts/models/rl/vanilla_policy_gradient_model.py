@@ -51,7 +51,7 @@ class VanillaPolicyGradient(LightningModule):
         Currently only supports CPU and single GPU training with `distributed_backend=dp`
 
     .. _`Vanilla Policy Gradient`:
-    https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf
+        https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf
     """
 
     def __init__(

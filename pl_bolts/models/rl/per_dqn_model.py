@@ -15,9 +15,7 @@ from pl_bolts.models.rl.dqn_model import DQN
 
 
 class PERDQN(DQN):
-    """PyTorch Lightning implementation of `DQN With Prioritized Experience Replay.
-
-    <https://arxiv.org/abs/1511.05952>`_
+    """PyTorch Lightning implementation of `DQN With Prioritized Experience Replay`_.
 
     Paper authors: Tom Schaul, John Quan, Ioannis Antonoglou, David Silver
 
@@ -41,6 +39,8 @@ class PERDQN(DQN):
          https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter08/05_dqn_prio_replay.py
 
     .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
+
+    .. _`DQN With Prioritized Experience Replay`: https://arxiv.org/abs/1511.05952
     """
 
     def train_batch(
