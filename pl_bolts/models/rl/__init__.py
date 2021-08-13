@@ -16,5 +16,6 @@ __all__ = [
     "NoisyDQN",
     "PERDQN",
     "Reinforce",
-    "SAC" "VanillaPolicyGradient",
+    "SAC",
+    "VanillaPolicyGradient",
 ]
