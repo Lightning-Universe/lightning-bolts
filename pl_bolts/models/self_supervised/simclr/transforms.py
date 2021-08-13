@@ -15,8 +15,7 @@ else:  # pragma: no cover
 
 
 class SimCLRTrainDataTransform:
-    """
-    Transforms for SimCLR
+    """Transforms for SimCLR.
 
     Transform::
 
@@ -93,8 +92,7 @@ class SimCLRTrainDataTransform:
 
 
 class SimCLREvalDataTransform(SimCLRTrainDataTransform):
-    """
-    Transforms for SimCLR
+    """Transforms for SimCLR.
 
     Transform::
 

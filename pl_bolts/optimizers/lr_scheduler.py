@@ -8,10 +8,8 @@ from torch.optim.lr_scheduler import _LRScheduler
 
 
 class LinearWarmupCosineAnnealingLR(_LRScheduler):
-    """
-    Sets the learning rate of each parameter group to follow a linear warmup schedule
-    between warmup_start_lr and base_lr followed by a cosine annealing schedule between
-    base_lr and eta_min.
+    """Sets the learning rate of each parameter group to follow a linear warmup schedule between warmup_start_lr
+    and base_lr followed by a cosine annealing schedule between base_lr and eta_min.
 
     .. warning::
         It is recommended to call :func:`.step()` for :class:`LinearWarmupCosineAnnealingLR`
@@ -69,9 +67,7 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         super().__init__(optimizer, last_epoch)
 
     def get_lr(self) -> List[float]:
-        """
-        Compute learning rate using chainable form of the scheduler
-        """
+        """Compute learning rate using chainable form of the scheduler."""
         if not self._get_lr_called_within_step:
             warnings.warn(
                 "To get the last learning rate computed by the scheduler, " "please use `get_last_lr()`.",
@@ -108,9 +104,7 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         ]
 
     def _get_closed_form_lr(self) -> List[float]:
-        """
-        Called when epoch is passed as a param to the `step` function of the scheduler.
-        """
+        """Called when epoch is passed as a param to the `step` function of the scheduler."""
         if self.last_epoch < self.warmup_epochs:
             return [
                 self.warmup_start_lr + self.last_epoch * (base_lr - self.warmup_start_lr) / (self.warmup_epochs - 1)
@@ -128,10 +122,7 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
 
 # warmup + decay as a function
 def linear_warmup_decay(warmup_steps, total_steps, cosine=True, linear=False):
-    """
-    Linear warmup for warmup_steps, optionally with cosine annealing or
-    linear decay to 0 at total_steps
-    """
+    """Linear warmup for warmup_steps, optionally with cosine annealing or linear decay to 0 at total_steps."""
     assert not (linear and cosine)
 
     def fn(step):

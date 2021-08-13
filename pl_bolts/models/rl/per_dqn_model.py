@@ -1,6 +1,4 @@
-"""
-Prioritized Experience Replay DQN
-"""
+"""Prioritized Experience Replay DQN."""
 import argparse
 from collections import OrderedDict
 from typing import Tuple
@@ -17,8 +15,7 @@ from pl_bolts.models.rl.dqn_model import DQN
 
 
 class PERDQN(DQN):
-    """
-    PyTorch Lightning implementation of `DQN With Prioritized Experience Replay <https://arxiv.org/abs/1511.05952>`_
+    """PyTorch Lightning implementation of `DQN With Prioritized Experience Replay`_.
 
     Paper authors: Tom Schaul, John Quan, Ioannis Antonoglou, David Silver
 
@@ -43,13 +40,13 @@ class PERDQN(DQN):
 
     .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
 
+    .. _`DQN With Prioritized Experience Replay`: https://arxiv.org/abs/1511.05952
     """
 
     def train_batch(
         self,
     ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
-        """
-        Contains the logic for generating a new batch of data to be passed to the DataLoader
+        """Contains the logic for generating a new batch of data to be passed to the DataLoader.
 
         Returns:
             yields a Experience tuple containing the state, action, reward, done and next_state.
@@ -97,9 +94,8 @@ class PERDQN(DQN):
                 ], weights[idx]
 
     def training_step(self, batch, _) -> OrderedDict:
-        """
-        Carries out a single step through the environment to update the replay buffer.
-        Then calculates loss based on the minibatch recieved
+        """Carries out a single step through the environment to update the replay buffer. Then calculates loss
+        based on the minibatch recieved.
 
         Args:
             batch: current mini batch of replay data
@@ -141,7 +137,7 @@ class PERDQN(DQN):
         )
 
     def _dataloader(self) -> DataLoader:
-        """Initialize the Replay Buffer dataset used for retrieving experiences"""
+        """Initialize the Replay Buffer dataset used for retrieving experiences."""
         self.buffer = PERBuffer(self.replay_size)
         self.populate(self.warm_start_size)
 

@@ -9,8 +9,7 @@ from torchmetrics.functional import accuracy
 
 
 class SSLOnlineEvaluator(Callback):  # pragma: no cover
-    """
-    Attaches a MLP for fine-tuning using the standard self-supervised protocol.
+    """Attaches a MLP for fine-tuning using the standard self-supervised protocol.
 
     Example::
 
@@ -24,7 +23,6 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
             num_classes=model.num_classes,
             dataset='imagenet'
         )
-
     """
 
     def __init__(

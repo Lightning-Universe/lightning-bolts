@@ -1,6 +1,4 @@
-"""
-Test Object Detection Loss Functions
-"""
+"""Test Object Detection Loss Functions."""
 
 import pytest
 import torch

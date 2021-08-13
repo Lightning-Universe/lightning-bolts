@@ -34,8 +34,8 @@ class UpSampleConv(nn.Module):
 
 class DownSampleConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel=4, strides=2, padding=1, activation=True, batchnorm=True):
-        """
-        Paper details:
+        """Paper details:
+
         - C64-C128-C256-C512-C512-C512-C512-C512
         - All convolutions are 4×4 spatial filters applied with stride 2
         - Convolutions in the encoder downsample by a factor of 2
@@ -63,8 +63,8 @@ class DownSampleConv(nn.Module):
 
 class Generator(nn.Module):
     def __init__(self, in_channels, out_channels):
-        """
-        Paper details:
+        """Paper details:
+
         - Encoder: C64-C128-C256-C512-C512-C512-C512-C512
         - All convolutions are 4×4 spatial filters applied with stride 2
         - Convolutions in the encoder downsample by a factor of 2

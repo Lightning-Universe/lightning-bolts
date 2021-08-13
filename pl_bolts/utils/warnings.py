@@ -13,8 +13,7 @@ def warn_missing_pkg(
     extra_text: Optional[str] = None,
     stdout_func: Callable = warnings.warn,
 ) -> int:
-    """
-    Template for warning on missing packages, show them just once.
+    """Template for warning on missing packages, show them just once.
 
     Args:
         pkg_name: Name of missing package

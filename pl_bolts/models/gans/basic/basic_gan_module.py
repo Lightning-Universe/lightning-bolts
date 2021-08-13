@@ -8,8 +8,7 @@ from pl_bolts.models.gans.basic.components import Discriminator, Generator
 
 
 class GAN(LightningModule):
-    """
-    Vanilla GAN implementation.
+    """Vanilla GAN implementation.
 
     Example::
 
@@ -65,8 +64,7 @@ class GAN(LightningModule):
         return discriminator
 
     def forward(self, z):
-        """
-        Generates an image given input noise z
+        """Generates an image given input noise z.
 
         Example::
 

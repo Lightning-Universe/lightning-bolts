@@ -1,6 +1,4 @@
-"""
-Double DQN
-"""
+"""Double DQN."""
 import argparse
 from collections import OrderedDict
 from typing import Tuple
@@ -13,9 +11,7 @@ from pl_bolts.models.rl.dqn_model import DQN
 
 
 class DoubleDQN(DQN):
-    """
-    Double Deep Q-network (DDQN)
-    PyTorch Lightning implementation of `Double DQN <https://arxiv.org/pdf/1509.06461.pdf>`_
+    """Double Deep Q-network (DDQN) PyTorch Lightning implementation of `Double DQN`_.
 
     Paper authors: Hado van Hasselt, Arthur Guez, David Silver
 
@@ -40,12 +36,13 @@ class DoubleDQN(DQN):
 
     Note:
         Currently only supports CPU and single GPU training with `distributed_backend=dp`
+
+    .. _`Double DQN`: https://arxiv.org/pdf/1509.06461.pdf
     """
 
     def training_step(self, batch: Tuple[Tensor, Tensor], _) -> OrderedDict:
-        """
-        Carries out a single step through the environment to update the replay buffer.
-        Then calculates loss based on the minibatch recieved
+        """Carries out a single step through the environment to update the replay buffer. Then calculates loss
+        based on the minibatch recieved.
 
         Args:
             batch: current mini batch of replay data

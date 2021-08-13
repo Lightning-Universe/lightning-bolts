@@ -17,8 +17,7 @@ else:  # pragma: no cover
 
 
 class SklearnDataset(Dataset):
-    """
-    Mapping between numpy (or sklearn) datasets to PyTorch datasets.
+    """Mapping between numpy (or sklearn) datasets to PyTorch datasets.
 
     Example:
         >>> from sklearn.datasets import load_diabetes
@@ -65,8 +64,7 @@ class SklearnDataset(Dataset):
 
 
 class TensorDataset(Dataset):
-    """
-    Prepare PyTorch tensor dataset for data loaders.
+    """Prepare PyTorch tensor dataset for data loaders.
 
     Example:
         >>> from pl_bolts.datamodules import TensorDataset
@@ -109,8 +107,7 @@ class TensorDataset(Dataset):
 
 
 class SklearnDataModule(LightningDataModule):
-    """
-    Automatically generates the train, validation and test splits for a Numpy dataset. They are set up as
+    """Automatically generates the train, validation and test splits for a Numpy dataset. They are set up as
     dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
 
     Example:

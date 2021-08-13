@@ -9,8 +9,7 @@ else:  # pragma: no cover
 
 
 class AMDIMTrainTransformsCIFAR10:
-    """
-    Transforms applied to AMDIM
+    """Transforms applied to AMDIM.
 
     Transforms::
 
@@ -26,7 +25,6 @@ class AMDIMTrainTransformsCIFAR10:
 
         transform = AMDIMTrainTransformsCIFAR10()
         (view1, view2) = transform(x)
-
     """
 
     def __init__(self):
@@ -55,8 +53,7 @@ class AMDIMTrainTransformsCIFAR10:
 
 
 class AMDIMEvalTransformsCIFAR10:
-    """
-    Transforms applied to AMDIM
+    """Transforms applied to AMDIM.
 
     Transforms::
 
@@ -92,8 +89,7 @@ class AMDIMEvalTransformsCIFAR10:
 
 
 class AMDIMTrainTransformsSTL10:
-    """
-    Transforms applied to AMDIM
+    """Transforms applied to AMDIM.
 
     Transforms::
 
@@ -133,8 +129,7 @@ class AMDIMTrainTransformsSTL10:
 
 
 class AMDIMEvalTransformsSTL10:
-    """
-    Transforms applied to AMDIM
+    """Transforms applied to AMDIM.
 
     Transforms::
 
@@ -176,8 +171,7 @@ class AMDIMEvalTransformsSTL10:
 
 
 class AMDIMTrainTransformsImageNet128:
-    """
-    Transforms applied to AMDIM
+    """Transforms applied to AMDIM.
 
     Transforms::
 
@@ -220,8 +214,7 @@ class AMDIMTrainTransformsImageNet128:
 
 
 class AMDIMEvalTransformsImageNet128:
-    """
-    Transforms applied to AMDIM
+    """Transforms applied to AMDIM.
 
     Transforms::
 

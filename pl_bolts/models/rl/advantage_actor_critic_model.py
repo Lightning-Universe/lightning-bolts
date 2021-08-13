@@ -1,6 +1,4 @@
-"""
-Advantage Actor Critic (A2C)
-"""
+"""Advantage Actor Critic (A2C)"""
 from argparse import ArgumentParser
 from collections import OrderedDict
 from typing import Any, Iterator, List, Tuple
@@ -27,9 +25,7 @@ else:  # pragma: no cover
 
 
 class AdvantageActorCritic(LightningModule):
-    """
-    PyTorch Lightning implementation of `Advantage Actor Critic
-    <https://arxiv.org/abs/1602.01783v2>`_
+    """PyTorch Lightning implementation of `Advantage Actor Critic <https://arxiv.org/abs/1602.01783v2>`_.
 
     Paper Authors: Volodymyr Mnih, Adrià Puigdomènech Badia, et al.
 
@@ -96,9 +92,8 @@ class AdvantageActorCritic(LightningModule):
         self.state = self.env.reset()
 
     def forward(self, x: Tensor) -> Tuple[Tensor, Tensor]:
-        """
-        Passes in a state x through the network and gets the log prob of each action
-        and the value for the state as an output
+        """Passes in a state x through the network and gets the log prob of each action and the value for the state
+        as an output.
 
         Args:
             x: environment state
@@ -116,8 +111,7 @@ class AdvantageActorCritic(LightningModule):
         return logprobs, values
 
     def train_batch(self) -> Iterator[Tuple[np.ndarray, int, Tensor]]:
-        """
-        Contains the logic for generating a new batch of data to be passed to the DataLoader
+        """Contains the logic for generating a new batch of data to be passed to the DataLoader.
 
         Returns:
             yields a tuple of Lists containing tensors for
@@ -166,8 +160,7 @@ class AdvantageActorCritic(LightningModule):
         dones: List[bool],
         last_value: Tensor,
     ) -> Tensor:
-        """
-        Calculate the discounted rewards of the batched rewards
+        """Calculate the discounted rewards of the batched rewards.
 
         Args:
             rewards: list of rewards
@@ -195,9 +188,8 @@ class AdvantageActorCritic(LightningModule):
         actions: Tensor,
         returns: Tensor,
     ) -> Tensor:
-        """
-        Calculates the loss for A2C which is a weighted sum of
-        actor loss (MSE), critic loss (PG), and entropy (for exploration)
+        """Calculates the loss for A2C which is a weighted sum of actor loss (MSE), critic loss (PG), and entropy
+        (for exploration)
 
         Args:
             states: tensor of shape (batch_size, state dimension)
@@ -232,8 +224,7 @@ class AdvantageActorCritic(LightningModule):
         return total_loss
 
     def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> OrderedDict:
-        """
-        Perform one actor-critic update using a batch of data
+        """Perform one actor-critic update using a batch of data.
 
         Args:
             batch: a batch of (states, actions, returns)
@@ -256,28 +247,27 @@ class AdvantageActorCritic(LightningModule):
         )
 
     def configure_optimizers(self) -> List[Optimizer]:
-        """Initialize Adam optimizer"""
+        """Initialize Adam optimizer."""
         optimizer = optim.Adam(self.net.parameters(), lr=self.hparams.lr)
         return [optimizer]
 
     def _dataloader(self) -> DataLoader:
-        """Initialize the Replay Buffer dataset used for retrieving experiences"""
+        """Initialize the Replay Buffer dataset used for retrieving experiences."""
         dataset = ExperienceSourceDataset(self.train_batch)
         dataloader = DataLoader(dataset=dataset, batch_size=self.hparams.batch_size)
         return dataloader
 
     def train_dataloader(self) -> DataLoader:
-        """Get train loader"""
+        """Get train loader."""
         return self._dataloader()
 
     def get_device(self, batch) -> str:
-        """Retrieve device currently being used by minibatch"""
+        """Retrieve device currently being used by minibatch."""
         return batch[0][0][0].device.index if self.on_gpu else "cpu"
 
     @staticmethod
     def add_model_specific_args(arg_parser: ArgumentParser) -> ArgumentParser:
-        """
-        Adds arguments for A2C model
+        """Adds arguments for A2C model.
 
         Args:
             arg_parser: the current argument parser to add to

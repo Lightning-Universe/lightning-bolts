@@ -16,8 +16,7 @@ from pl_bolts.models.autoencoders.components import (
 
 
 class VAE(LightningModule):
-    """
-    Standard VAE with Gaussian Prior and approx posterior.
+    """Standard VAE with Gaussian Prior and approx posterior.
 
     Model is available pretrained on different datasets:
 

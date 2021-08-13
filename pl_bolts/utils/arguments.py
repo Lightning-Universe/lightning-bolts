@@ -8,7 +8,7 @@ from pytorch_lightning import LightningDataModule, LightningModule
 
 @dataclass(frozen=True)
 class LitArg:
-    """Dataclass to represent init args of an object"""
+    """Dataclass to represent init args of an object."""
 
     name: str
     types: tuple
@@ -18,8 +18,7 @@ class LitArg:
 
 
 class LightningArgumentParser(ArgumentParser):
-    """
-    Extension of argparse.ArgumentParser that lets you parse arbitrary object init args.
+    """Extension of argparse.ArgumentParser that lets you parse arbitrary object init args.
 
     Example::
 

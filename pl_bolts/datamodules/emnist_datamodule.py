@@ -173,21 +173,20 @@ class EMNISTDataModule(VisionDataModule):
 
     @property
     def num_classes(self) -> int:
-        """Returns the number of classes. See the table above."""
+        """Returns the number of classes.
+
+        See the table above.
+        """
         return len(self.dataset_cls.classes_split_dict[self.split])
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
-        """
-        Saves files to ``data_dir``.
-        """
+        """Saves files to ``data_dir``."""
 
         self.dataset_cls(self.data_dir, split=self.split, train=True, download=True)
         self.dataset_cls(self.data_dir, split=self.split, train=False, download=True)
 
     def setup(self, stage: Optional[str] = None) -> None:
-        """
-        Creates train, val, and test dataset
-        """
+        """Creates train, val, and test dataset."""
 
         if stage == "fit" or stage is None:
             train_transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms

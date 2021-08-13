@@ -123,8 +123,7 @@ class CIFAR10DataModule(VisionDataModule):
 
 
 class TinyCIFAR10DataModule(CIFAR10DataModule):
-    """
-    Standard CIFAR10, train, val, test splits and transforms
+    """Standard CIFAR10, train, val, test splits and transforms.
 
     Transforms::
 

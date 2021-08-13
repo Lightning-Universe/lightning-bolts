@@ -16,8 +16,7 @@ from pl_bolts.models.autoencoders.components import (
 
 
 class AE(LightningModule):
-    """
-    Standard AE
+    """Standard AE.
 
     Model is available pretrained on different datasets:
 

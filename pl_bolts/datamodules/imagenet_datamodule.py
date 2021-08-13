@@ -114,9 +114,7 @@ class ImagenetDataModule(LightningDataModule):
             )
 
     def prepare_data(self) -> None:
-        """
-        This method already assumes you have imagenet2012 downloaded.
-        It validates the data using the meta.bin.
+        """This method already assumes you have imagenet2012 downloaded. It validates the data using the meta.bin.
 
         .. warning:: Please download imagenet on your own first.
         """
@@ -144,9 +142,7 @@ class ImagenetDataModule(LightningDataModule):
                 )
 
     def train_dataloader(self) -> DataLoader:
-        """
-        Uses the train split of imagenet2012 and puts away a portion of it for the validation split
-        """
+        """Uses the train split of imagenet2012 and puts away a portion of it for the validation split."""
         transforms = self.train_transform() if self.train_transforms is None else self.train_transforms
 
         dataset = UnlabeledImagenet(
@@ -168,8 +164,8 @@ class ImagenetDataModule(LightningDataModule):
         return loader
 
     def val_dataloader(self) -> DataLoader:
-        """
-        Uses the part of the train split of imagenet2012  that was not used for training via `num_imgs_per_val_class`
+        """Uses the part of the train split of imagenet2012  that was not used for training via
+        `num_imgs_per_val_class`
 
         Args:
             batch_size: the batch size
@@ -195,9 +191,7 @@ class ImagenetDataModule(LightningDataModule):
         return loader
 
     def test_dataloader(self) -> DataLoader:
-        """
-        Uses the validation split of imagenet2012 for testing
-        """
+        """Uses the validation split of imagenet2012 for testing."""
         transforms = self.val_transform() if self.test_transforms is None else self.test_transforms
 
         dataset = UnlabeledImagenet(
@@ -214,8 +208,7 @@ class ImagenetDataModule(LightningDataModule):
         return loader
 
     def train_transform(self) -> Callable:
-        """
-        The standard imagenet transforms
+        """The standard imagenet transforms.
 
         .. code-block:: python
 
@@ -228,7 +221,6 @@ class ImagenetDataModule(LightningDataModule):
                     std=[0.229, 0.224, 0.225]
                 ),
             ])
-
         """
         preprocessing = transform_lib.Compose(
             [
@@ -242,8 +234,7 @@ class ImagenetDataModule(LightningDataModule):
         return preprocessing
 
     def val_transform(self) -> Callable:
-        """
-        The standard imagenet transforms for validation
+        """The standard imagenet transforms for validation.
 
         .. code-block:: python
 
@@ -256,7 +247,6 @@ class ImagenetDataModule(LightningDataModule):
                     std=[0.229, 0.224, 0.225]
                 ),
             ])
-
         """
 
         preprocessing = transform_lib.Compose(

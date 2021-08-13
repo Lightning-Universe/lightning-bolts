@@ -7,7 +7,7 @@ from pl_bolts.models.rl.advantage_actor_critic_model import AdvantageActorCritic
 
 
 def test_a2c_loss():
-    """Test the reinforce loss function"""
+    """Test the reinforce loss function."""
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = AdvantageActorCritic.add_model_specific_args(parent_parser)
     args_list = [
@@ -29,7 +29,7 @@ def test_a2c_loss():
 
 
 def test_a2c_train_batch():
-    """Tests that a single batch generates correctly"""
+    """Tests that a single batch generates correctly."""
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = AdvantageActorCritic.add_model_specific_args(parent_parser)
     args_list = [

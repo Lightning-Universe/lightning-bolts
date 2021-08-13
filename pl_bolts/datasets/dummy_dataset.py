@@ -3,8 +3,7 @@ from torch.utils.data import Dataset
 
 
 class DummyDataset(Dataset):
-    """
-    Generate a dummy dataset
+    """Generate a dummy dataset.
 
     Example:
         >>> from pl_bolts.datasets import DummyDataset
@@ -43,8 +42,7 @@ class DummyDataset(Dataset):
 
 
 class DummyDetectionDataset(Dataset):
-    """
-    Generate a dummy dataset for detection
+    """Generate a dummy dataset for detection.
 
     Example:
         >>> from pl_bolts.datasets import DummyDetectionDataset
@@ -84,8 +82,7 @@ class DummyDetectionDataset(Dataset):
 
 
 class RandomDictDataset(Dataset):
-    """
-    Generate a dummy dataset with a dict structure
+    """Generate a dummy dataset with a dict structure.
 
     Example:
         >>> from pl_bolts.datasets import RandomDictDataset
@@ -113,8 +110,7 @@ class RandomDictDataset(Dataset):
 
 
 class RandomDictStringDataset(Dataset):
-    """
-    Generate a dummy dataset with strings
+    """Generate a dummy dataset with strings.
 
     Example:
         >>> from pl_bolts.datasets import RandomDictStringDataset
@@ -140,8 +136,7 @@ class RandomDictStringDataset(Dataset):
 
 
 class RandomDataset(Dataset):
-    """
-    Generate a dummy dataset
+    """Generate a dummy dataset.
 
     Example:
         >>> from pl_bolts.datasets import RandomDataset
