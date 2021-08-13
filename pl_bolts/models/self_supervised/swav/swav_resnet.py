@@ -128,7 +128,6 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-
     def __init__(
         self,
         block,
@@ -145,7 +144,7 @@ class ResNet(nn.Module):
         nmb_prototypes=0,
         eval_mode=False,
         first_conv=True,
-        maxpool1=True
+        maxpool1=True,
     ):
         super(ResNet, self).__init__()
         if norm_layer is None:
@@ -319,13 +318,14 @@ class ResNet(nn.Module):
             torch.unique_consecutive(
                 torch.tensor([inp.shape[-1] for inp in inputs]),
                 return_counts=True,
-            )[1], 0
+            )[1],
+            0,
         )
         start_idx = 0
         for end_idx in idx_crops:
             _out = torch.cat(inputs[start_idx:end_idx])
 
-            if 'cuda' in str(self.conv1.weight.device):
+            if "cuda" in str(self.conv1.weight.device):
                 _out = self.forward_backbone(_out.cuda(non_blocking=True))
             else:
                 _out = self.forward_backbone(_out)
@@ -339,7 +339,6 @@ class ResNet(nn.Module):
 
 
 class MultiPrototypes(nn.Module):
-
     def __init__(self, output_dim, nmb_prototypes):
         super(MultiPrototypes, self).__init__()
         self.nmb_heads = len(nmb_prototypes)

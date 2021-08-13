@@ -65,17 +65,21 @@ class DoubleDQN(DQN):
         if self.global_step % self.sync_rate == 0:
             self.target_net.load_state_dict(self.net.state_dict())
 
-        self.log_dict({
-            "total_reward": self.total_rewards[-1],
-            "avg_reward": self.avg_rewards,
-            "train_loss": loss,
-            # "episodes": self.total_episode_steps,
-        })
+        self.log_dict(
+            {
+                "total_reward": self.total_rewards[-1],
+                "avg_reward": self.avg_rewards,
+                "train_loss": loss,
+                # "episodes": self.total_episode_steps,
+            }
+        )
 
-        return OrderedDict({
-            "loss": loss,
-            "avg_reward": self.avg_rewards,
-        })
+        return OrderedDict(
+            {
+                "loss": loss,
+                "avg_reward": self.avg_rewards,
+            }
+        )
 
 
 def cli_main():
@@ -94,5 +98,5 @@ def cli_main():
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

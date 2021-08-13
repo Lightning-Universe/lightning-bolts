@@ -8,7 +8,7 @@ from pl_bolts.models.rl.ppo_model import PPO
 
 def test_discount_rewards():
     """Test calculation of discounted rewards"""
-    model = PPO(env='CartPole-v0', batch_size=16, gamma=0.99)
+    model = PPO(env="CartPole-v0", batch_size=16, gamma=0.99)
 
     rewards = np.ones(4)
     gt_qvals = [3.9403989999999998, 2.9701, 1.99, 1.0]
@@ -21,7 +21,7 @@ def test_discount_rewards():
 def test_critic_loss():
     """Test the critic loss function"""
 
-    model = PPO(env='CartPole-v0', batch_size=16, gamma=0.99)
+    model = PPO(env="CartPole-v0", batch_size=16, gamma=0.99)
     obs_dim = model.env.observation_space.shape[0]
 
     batch_states = torch.rand(8, obs_dim)
@@ -35,7 +35,7 @@ def test_critic_loss():
 def test_actor_loss_categorical():
     """Test the actor loss function on categorical action-space environment"""
 
-    model = PPO(env='CartPole-v0', batch_size=16, gamma=0.99)
+    model = PPO(env="CartPole-v0", batch_size=16, gamma=0.99)
     obs_dim = model.env.observation_space.shape[0]
 
     batch_states = torch.rand(8, obs_dim)
@@ -51,7 +51,7 @@ def test_actor_loss_categorical():
 def test_actor_loss_continuous():
     """Test the actor loss function on continuous action-space environment"""
 
-    model = PPO(env='MountainCarContinuous-v0', batch_size=16, gamma=0.99)
+    model = PPO(env="MountainCarContinuous-v0", batch_size=16, gamma=0.99)
     obs_dim = model.env.observation_space.shape[0]
     action_dim = model.env.action_space.shape[0]
 
@@ -66,7 +66,7 @@ def test_actor_loss_continuous():
 
 
 def test_generate_trajectory_samples():
-    model = PPO('CartPole-v0', batch_size=16)
+    model = PPO("CartPole-v0", batch_size=16)
 
     obs_dim = model.env.observation_space.shape[0]
 
@@ -81,12 +81,12 @@ def test_generate_trajectory_samples():
 
 
 def test_training_categorical():
-    model = PPO('CartPole-v0', batch_size=16)
+    model = PPO("CartPole-v0", batch_size=16)
     trainer = Trainer(max_epochs=1)
     trainer.fit(model)
 
 
 def test_training_continous():
-    model = PPO('MountainCarContinuous-v0', batch_size=16)
+    model = PPO("MountainCarContinuous-v0", batch_size=16)
     trainer = Trainer(max_epochs=1)
     trainer.fit(model)

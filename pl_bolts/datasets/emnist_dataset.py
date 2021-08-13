@@ -4,17 +4,16 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import EMNIST
 else:  # pragma: no cover
-    warn_missing_pkg('torchvision')
+    warn_missing_pkg("torchvision")
     EMNIST = object
 
 if _PIL_AVAILABLE:
     from PIL import Image
 else:  # pragma: no cover
-    warn_missing_pkg('PIL', pypi_name='Pillow')
+    warn_missing_pkg("PIL", pypi_name="Pillow")
 
 
 class BinaryEMNIST(EMNIST):
-
     def __getitem__(self, idx):
         """
         Args:
@@ -24,13 +23,13 @@ class BinaryEMNIST(EMNIST):
             tuple: (image, target) where target is index of the target class.
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('You want to use `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError("You want to use `torchvision` which is not installed yet.")
 
         img, target = self.data[idx], int(self.targets[idx])
 
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
-        img = Image.fromarray(img.numpy(), mode='L')
+        img = Image.fromarray(img.numpy(), mode="L")
 
         if self.transform is not None:
             img = self.transform(img)

@@ -2,7 +2,6 @@ from torch import nn
 
 
 class SSLEvaluator(nn.Module):
-
     def __init__(self, n_input, n_classes, n_hidden=512, p=0.1):
         super().__init__()
         self.n_input = n_input
@@ -29,7 +28,6 @@ class SSLEvaluator(nn.Module):
 
 
 class Flatten(nn.Module):
-
     def __init__(self):
         super(Flatten, self).__init__()
 

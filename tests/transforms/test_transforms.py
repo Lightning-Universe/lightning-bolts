@@ -8,7 +8,7 @@ try:
     from torchvision import transforms
 except ImportError:
     warn(  # pragma: no-cover
-        'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
+        "You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`."
     )
 
 from pl_bolts.models.self_supervised.amdim.transforms import (
@@ -38,17 +38,20 @@ from pl_bolts.models.self_supervised.moco.transforms import (
 from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
 
-@pytest.mark.parametrize("img_size", [
-    (3, 32, 32),
-    (3, 96, 96),
-    (3, 160, 160),
-])
+@pytest.mark.parametrize(
+    "img_size",
+    [
+        (3, 32, 32),
+        (3, 96, 96),
+        (3, 160, 160),
+    ],
+)
 def test_simclr_transforms(img_size):
     seed_everything(0)
 
     (c, h, w) = img_size
     x = torch.rand(c, h, w)
-    x = transforms.ToPILImage(mode='RGB')(x)
+    x = transforms.ToPILImage(mode="RGB")(x)
 
     transform = SimCLREvalDataTransform(input_height=h)
     transform(x)
@@ -58,54 +61,57 @@ def test_simclr_transforms(img_size):
 
 
 @pytest.mark.parametrize(
-    "transform", [
+    "transform",
+    [
         CPCTrainTransformsCIFAR10,
         CPCEvalTransformsCIFAR10,
         AMDIMEvalTransformsCIFAR10,
         AMDIMTrainTransformsCIFAR10,
         Moco2TrainCIFAR10Transforms,
         Moco2EvalCIFAR10Transforms,
-    ]
+    ],
 )
 def test_cifar10_transforms(transform):
     x = torch.rand(3, 32, 32)
-    x = transforms.ToPILImage(mode='RGB')(x)
+    x = transforms.ToPILImage(mode="RGB")(x)
 
     transform = transform()
     transform(x)
 
 
 @pytest.mark.parametrize(
-    "transform", [
+    "transform",
+    [
         CPCTrainTransformsSTL10,
         CPCEvalTransformsSTL10,
         AMDIMTrainTransformsSTL10,
         AMDIMEvalTransformsSTL10,
         Moco2TrainSTL10Transforms,
         Moco2EvalSTL10Transforms,
-    ]
+    ],
 )
 def test_stl10_transforms(transform):
     x = torch.rand(3, 64, 64)
-    x = transforms.ToPILImage(mode='RGB')(x)
+    x = transforms.ToPILImage(mode="RGB")(x)
 
     transform = transform()
     transform(x)
 
 
 @pytest.mark.parametrize(
-    "transform", [
+    "transform",
+    [
         CPCTrainTransformsImageNet128,
         CPCEvalTransformsImageNet128,
         AMDIMTrainTransformsImageNet128,
         AMDIMEvalTransformsImageNet128,
         Moco2TrainImagenetTransforms,
         Moco2EvalImagenetTransforms,
-    ]
+    ],
 )
 def test_imagenet_transforms(transform):
     x = torch.rand(3, 128, 128)
-    x = transforms.ToPILImage(mode='RGB')(x)
+    x = transforms.ToPILImage(mode="RGB")(x)
 
     transform = transform()
     transform(x)

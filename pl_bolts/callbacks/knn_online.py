@@ -86,7 +86,7 @@ class KNNOnlineEvaluator(Callback):  # pragma: no cover
 
     def to_device(self, batch: Tensor, device: Union[str, torch.device]) -> Tuple[Tensor, Tensor]:
         # get the labeled batch
-        if self.dataset == 'stl10':
+        if self.dataset == "stl10":
             labeled_batch = batch[1]
             batch = labeled_batch
 
@@ -118,5 +118,5 @@ class KNNOnlineEvaluator(Callback):  # pragma: no cover
         val_acc = pl_module.knn_evaluator.score(representations, y)  # type: ignore[union-attr,operator]
 
         # log metrics
-        pl_module.log('online_knn_train_acc', train_acc, on_step=False, on_epoch=True, sync_dist=True)
-        pl_module.log('online_knn_val_acc', val_acc, on_step=False, on_epoch=True, sync_dist=True)
+        pl_module.log("online_knn_train_acc", train_acc, on_step=False, on_epoch=True, sync_dist=True)
+        pl_module.log("online_knn_val_acc", val_acc, on_step=False, on_epoch=True, sync_dist=True)

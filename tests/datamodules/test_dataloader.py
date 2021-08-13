@@ -9,7 +9,7 @@ def test_async_dataloader(datadir):
     ds = CIFAR10(data_dir=datadir)
 
     if torch.cuda.device_count() > 0:  # Can only run this test with a GPU
-        device = torch.device('cuda', 0)
+        device = torch.device("cuda", 0)
         dataloader = AsynchronousLoader(ds, device=device)
 
         for b in dataloader:

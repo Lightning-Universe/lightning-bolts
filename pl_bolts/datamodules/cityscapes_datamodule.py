@@ -11,7 +11,7 @@ if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import Cityscapes
 else:  # pragma: no cover
-    warn_missing_pkg('torchvision')
+    warn_missing_pkg("torchvision")
 
 
 class CityscapesDataModule(LightningDataModule):
@@ -58,14 +58,14 @@ class CityscapesDataModule(LightningDataModule):
         dm.target_transforms = ...
     """
 
-    name = 'Cityscapes'
+    name = "Cityscapes"
     extra_args: dict = {}
 
     def __init__(
         self,
         data_dir: str,
-        quality_mode: str = 'fine',
-        target_type: str = 'instance',
+        quality_mode: str = "fine",
+        target_type: str = "instance",
         num_workers: int = 0,
         batch_size: int = 32,
         seed: int = 42,
@@ -93,10 +93,10 @@ class CityscapesDataModule(LightningDataModule):
 
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
-                'You want to use CityScapes dataset loaded from `torchvision` which is not installed yet.'
+                "You want to use CityScapes dataset loaded from `torchvision` which is not installed yet."
             )
 
-        if target_type not in ['instance', 'semantic']:
+        if target_type not in ["instance", "semantic"]:
             raise ValueError(f'Only "semantic" and "instance" target types are supported. Got {target_type}.')
 
         self.dims = (3, 1024, 2048)
@@ -128,12 +128,12 @@ class CityscapesDataModule(LightningDataModule):
 
         dataset = Cityscapes(
             self.data_dir,
-            split='train',
+            split="train",
             target_type=self.target_type,
             mode=self.quality_mode,
             transform=transforms,
             target_transform=target_transforms,
-            **self.extra_args
+            **self.extra_args,
         )
 
         loader = DataLoader(
@@ -142,7 +142,7 @@ class CityscapesDataModule(LightningDataModule):
             shuffle=self.shuffle,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
-            pin_memory=self.pin_memory
+            pin_memory=self.pin_memory,
         )
         return loader
 
@@ -155,12 +155,12 @@ class CityscapesDataModule(LightningDataModule):
 
         dataset = Cityscapes(
             self.data_dir,
-            split='val',
+            split="val",
             target_type=self.target_type,
             mode=self.quality_mode,
             transform=transforms,
             target_transform=target_transforms,
-            **self.extra_args
+            **self.extra_args,
         )
 
         loader = DataLoader(
@@ -169,7 +169,7 @@ class CityscapesDataModule(LightningDataModule):
             shuffle=False,
             num_workers=self.num_workers,
             pin_memory=self.pin_memory,
-            drop_last=self.drop_last
+            drop_last=self.drop_last,
         )
         return loader
 
@@ -182,12 +182,12 @@ class CityscapesDataModule(LightningDataModule):
 
         dataset = Cityscapes(
             self.data_dir,
-            split='test',
+            split="test",
             target_type=self.target_type,
             mode=self.quality_mode,
             transform=transforms,
             target_transform=target_transforms,
-            **self.extra_args
+            **self.extra_args,
         )
         loader = DataLoader(
             dataset,
@@ -195,21 +195,23 @@ class CityscapesDataModule(LightningDataModule):
             shuffle=False,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
-            pin_memory=self.pin_memory
+            pin_memory=self.pin_memory,
         )
         return loader
 
     def _default_transforms(self) -> Callable:
-        cityscapes_transforms = transform_lib.Compose([
-            transform_lib.ToTensor(),
-            transform_lib.Normalize(
-                mean=[0.28689554, 0.32513303, 0.28389177], std=[0.18696375, 0.19017339, 0.18720214]
-            )
-        ])
+        cityscapes_transforms = transform_lib.Compose(
+            [
+                transform_lib.ToTensor(),
+                transform_lib.Normalize(
+                    mean=[0.28689554, 0.32513303, 0.28389177], std=[0.18696375, 0.19017339, 0.18720214]
+                ),
+            ]
+        )
         return cityscapes_transforms
 
     def _default_target_transforms(self) -> Callable:
-        cityscapes_target_transforms = transform_lib.Compose([
-            transform_lib.ToTensor(), transform_lib.Lambda(lambda t: t.squeeze())
-        ])
+        cityscapes_target_transforms = transform_lib.Compose(
+            [transform_lib.ToTensor(), transform_lib.Lambda(lambda t: t.squeeze())]
+        )
         return cityscapes_target_transforms

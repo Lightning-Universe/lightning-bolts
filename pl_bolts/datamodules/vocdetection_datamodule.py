@@ -12,7 +12,7 @@ if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import VOCDetection
 else:  # pragma: no cover
-    warn_missing_pkg('torchvision')
+    warn_missing_pkg("torchvision")
 
 
 class Compose(object):
@@ -124,7 +124,7 @@ class VOCDetectionDataModule(LightningDataModule):
     ) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
-                'You want to use VOC dataset loaded from `torchvision` which is not installed yet.'
+                "You want to use VOC dataset loaded from `torchvision` which is not installed yet."
             )
 
         super().__init__(*args, **kwargs)
@@ -202,10 +202,12 @@ class VOCDetectionDataModule(LightningDataModule):
 
     def _default_transforms(self) -> Callable:
         if self.normalize:
-            voc_transforms = transform_lib.Compose([
-                transform_lib.ToTensor(),
-                transform_lib.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-            ])
+            voc_transforms = transform_lib.Compose(
+                [
+                    transform_lib.ToTensor(),
+                    transform_lib.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                ]
+            )
         else:
             voc_transforms = transform_lib.Compose([transform_lib.ToTensor()])
         return voc_transforms

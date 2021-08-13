@@ -4,11 +4,10 @@ from pl_bolts.callbacks import PrintTableMetricsCallback
 def test_printtable_metrics_callback():
     callback = PrintTableMetricsCallback()
 
-    metrics_a = {'loss': 1.0, 'epoch': 0}
-    metrics_b = {'loss': 0.5, 'epoch': 2}
+    metrics_a = {"loss": 1.0, "epoch": 0}
+    metrics_b = {"loss": 0.5, "epoch": 2}
 
     class FakeTrainer(object):
-
         def __init__(self):
             self.callback_metrics = {}
 

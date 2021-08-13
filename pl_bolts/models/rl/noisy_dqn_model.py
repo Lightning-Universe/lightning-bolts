@@ -47,7 +47,9 @@ class NoisyDQN(DQN):
         """Set the agents epsilon to 0 as the exploration comes from the network"""
         self.agent.epsilon = 0.0
 
-    def train_batch(self, ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
+    def train_batch(
+        self,
+    ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader.
         This is the same function as the standard DQN except that we dont update epsilon as it is always 0. The
@@ -77,7 +79,7 @@ class NoisyDQN(DQN):
                 self.done_episodes += 1
                 self.total_rewards.append(episode_reward)
                 self.total_episode_steps.append(episode_steps)
-                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len :]))
                 self.state = self.env.reset()
                 episode_steps = 0
                 episode_reward = 0
@@ -108,5 +110,5 @@ def cli_main():
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

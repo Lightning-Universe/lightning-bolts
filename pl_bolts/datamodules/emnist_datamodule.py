@@ -9,7 +9,7 @@ if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import EMNIST
 else:  # pragma: no cover
-    warn_missing_pkg('torchvision')
+    warn_missing_pkg("torchvision")
     EMNIST = object
 
 
@@ -89,21 +89,22 @@ class EMNISTDataModule(VisionDataModule):
         model = LitModel()
         Trainer().fit(model, datamodule=dm)
     """
+
     name = "emnist"
     dataset_cls = EMNIST
     dims = (1, 28, 28)
 
     _official_val_split = {
-        'balanced': 18_800,
-        'digits': 40_000,
-        'letters': 14_800,
-        'mnist': 10_000,
+        "balanced": 18_800,
+        "digits": 40_000,
+        "letters": 14_800,
+        "mnist": 10_000,
     }
 
     def __init__(
         self,
         data_dir: Optional[str] = None,
-        split: str = 'mnist',
+        split: str = "mnist",
         val_split: Union[int, float] = 0.2,
         num_workers: int = 0,
         normalize: bool = False,
@@ -137,7 +138,7 @@ class EMNISTDataModule(VisionDataModule):
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
-                'You want to use MNIST dataset loaded from `torchvision` which is not installed yet.'
+                "You want to use MNIST dataset loaded from `torchvision` which is not installed yet."
             )
 
         if split not in self.dataset_cls.splits:
@@ -211,7 +212,13 @@ class EMNISTDataModule(VisionDataModule):
 
     def default_transforms(self) -> Callable:
 
-        return transform_lib.Compose([
-            transform_lib.ToTensor(),
-            emnist_normalization(self.split),
-        ]) if self.normalize else transform_lib.Compose([transform_lib.ToTensor()])
+        return (
+            transform_lib.Compose(
+                [
+                    transform_lib.ToTensor(),
+                    emnist_normalization(self.split),
+                ]
+            )
+            if self.normalize
+            else transform_lib.Compose([transform_lib.ToTensor()])
+        )

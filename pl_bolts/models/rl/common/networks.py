@@ -6,7 +6,7 @@ from typing import Tuple
 
 import numpy as np
 import torch
-from torch import nn, Tensor
+from torch import Tensor, nn
 from torch.distributions import Categorical, Normal
 from torch.nn import functional as F
 
@@ -338,7 +338,7 @@ class NoisyLinear(nn.Linear):
         self.register_buffer("epsilon_weight", epsilon_weight)
 
         if bias:
-            bias = torch.full((out_features, ), sigma_init)
+            bias = torch.full((out_features,), sigma_init)
             self.sigma_bias = nn.Parameter(bias)
             epsilon_bias = torch.zeros(out_features)
             self.register_buffer("epsilon_bias", epsilon_bias)

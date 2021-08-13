@@ -20,7 +20,7 @@ if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import ImageNet
     from torchvision.datasets.imagenet import load_meta_file
 else:  # pragma: no cover
-    warn_missing_pkg('torchvision')
+    warn_missing_pkg("torchvision")
     ImageNet = object
 
 
@@ -35,7 +35,7 @@ class UnlabeledImagenet(ImageNet):
     def __init__(
         self,
         root,
-        split: str = 'train',
+        split: str = "train",
         num_classes: int = -1,
         num_imgs_per_class: int = -1,
         num_imgs_per_class_val_split: int = 50,
@@ -54,18 +54,18 @@ class UnlabeledImagenet(ImageNet):
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
-                'You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`.'
+                "You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`."
             )
 
         root = self.root = os.path.expanduser(root)
 
         # [train], [val] --> [train, val], [test]
         original_split = split
-        if split == 'train' or split == 'val':
-            split = 'train'
+        if split == "train" or split == "val":
+            split = "train"
 
-        if split == 'test':
-            split = 'val'
+        if split == "test":
+            split = "val"
 
         self.split = split
         split_root = os.path.join(root, split)
@@ -80,15 +80,15 @@ class UnlabeledImagenet(ImageNet):
         np.random.shuffle(self.imgs)
 
         # partition train set into [train, val]
-        if split == 'train':
+        if split == "train":
             train, val = self.partition_train_set(self.imgs, num_imgs_per_class_val_split)
-            if original_split == 'train':
+            if original_split == "train":
                 self.imgs = train
-            if original_split == 'val':
+            if original_split == "val":
                 self.imgs = val
 
         # limit the number of images in train or test set since the limit was already applied to the val set
-        if split in ['train', 'test']:
+        if split in ["train", "test"]:
             if num_imgs_per_class != -1:
                 clean_imgs = []
                 cts = {x: 0 for x in range(len(self.classes))}
@@ -148,15 +148,15 @@ class UnlabeledImagenet(ImageNet):
     @classmethod
     def generate_meta_bins(cls, devkit_dir):
         files = os.listdir(devkit_dir)
-        if 'ILSVRC2012_devkit_t12.tar.gz' not in files:
+        if "ILSVRC2012_devkit_t12.tar.gz" not in files:
             raise FileNotFoundError(
-                'devkit_path must point to the devkit file'
-                'ILSVRC2012_devkit_t12.tar.gz. Download from here:'
-                'http://www.image-net.org/challenges/LSVRC/2012/downloads'
+                "devkit_path must point to the devkit file"
+                "ILSVRC2012_devkit_t12.tar.gz. Download from here:"
+                "http://www.image-net.org/challenges/LSVRC/2012/downloads"
             )
 
         parse_devkit_archive(devkit_dir)
-        print(f'meta.bin generated at {devkit_dir}/meta.bin')
+        print(f"meta.bin generated at {devkit_dir}/meta.bin")
 
 
 def _verify_archive(root, file, md5):
@@ -181,8 +181,8 @@ def _check_md5(fpath, md5, **kwargs):
 
 def _calculate_md5(fpath, chunk_size=1024 * 1024):
     md5 = hashlib.md5()
-    with open(fpath, 'rb') as f:
-        for chunk in iter(lambda: f.read(chunk_size), b''):
+    with open(fpath, "rb") as f:
+        for chunk in iter(lambda: f.read(chunk_size), b""):
             md5.update(chunk)
     return md5.hexdigest()
 
@@ -201,18 +201,18 @@ def parse_devkit_archive(root, file=None):
 
     def parse_meta_mat(devkit_root):
         metafile = os.path.join(devkit_root, "data", "meta.mat")
-        meta = sio.loadmat(metafile, squeeze_me=True)['synsets']
+        meta = sio.loadmat(metafile, squeeze_me=True)["synsets"]
         nums_children = list(zip(*meta))[4]
         meta = [meta[idx] for idx, num_children in enumerate(nums_children) if num_children == 0]
         idcs, wnids, classes = list(zip(*meta))[:3]
-        classes = [tuple(clss.split(', ')) for clss in classes]
+        classes = [tuple(clss.split(", ")) for clss in classes]
         idx_to_wnid = {idx: wnid for idx, wnid in zip(idcs, wnids)}
         wnid_to_classes = {wnid: clss for wnid, clss in zip(wnids, classes)}
         return idx_to_wnid, wnid_to_classes
 
     def parse_val_groundtruth_txt(devkit_root):
         file = os.path.join(devkit_root, "data", "ILSVRC2012_validation_ground_truth.txt")
-        with open(file, 'r') as txtfh:
+        with open(file, "r") as txtfh:
             val_idcs = txtfh.readlines()
         return [int(val_idx) for val_idx in val_idcs]
 
@@ -224,7 +224,7 @@ def parse_devkit_archive(root, file=None):
         finally:
             shutil.rmtree(tmp_dir)
 
-    archive_meta = ('ILSVRC2012_devkit_t12.tar.gz', 'fa75699e90414af021442c21a62c3abf')
+    archive_meta = ("ILSVRC2012_devkit_t12.tar.gz", "fa75699e90414af021442c21a62c3abf")
     if file is None:
         file = archive_meta[0]
     md5 = archive_meta[1]
@@ -251,21 +251,21 @@ def extract_archive(from_path, to_path=None, remove_finished=False):
     PY3 = sys.version_info[0] == 3
 
     if _is_tar(from_path):
-        with tarfile.open(from_path, 'r') as tar:
+        with tarfile.open(from_path, "r") as tar:
             tar.extractall(path=to_path)
     elif _is_targz(from_path):
-        with tarfile.open(from_path, 'r:gz') as tar:
+        with tarfile.open(from_path, "r:gz") as tar:
             tar.extractall(path=to_path)
     elif _is_tarxz(from_path) and PY3:
         # .tar.xz archive only supported in Python 3.x
-        with tarfile.open(from_path, 'r:xz') as tar:
+        with tarfile.open(from_path, "r:xz") as tar:
             tar.extractall(path=to_path)
     elif _is_gzip(from_path):
         to_path = os.path.join(to_path, os.path.splitext(os.path.basename(from_path))[0])
         with open(to_path, "wb") as out_f, gzip.GzipFile(from_path) as zip_f:
             out_f.write(zip_f.read())
     elif _is_zip(from_path):
-        with zipfile.ZipFile(from_path, 'r') as z:
+        with zipfile.ZipFile(from_path, "r") as z:
             z.extractall(to_path)
     else:
         raise ValueError(f"Extraction of {from_path} not supported")

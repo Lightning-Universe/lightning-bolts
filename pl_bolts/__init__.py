@@ -21,13 +21,13 @@ from pl_bolts import (  # noqa: E402
 )
 
 __all__ = [
-    'callbacks',
-    'datamodules',
-    'datasets',
-    'losses',
-    'metrics',
-    'models',
-    'optimizers',
-    'transforms',
-    'utils',
+    "callbacks",
+    "datamodules",
+    "datasets",
+    "losses",
+    "metrics",
+    "models",
+    "optimizers",
+    "transforms",
+    "utils",
 ]

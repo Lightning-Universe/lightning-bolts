@@ -108,24 +108,24 @@ class VisionDataModule(LightningDataModule):
             train_len = len_dataset - val_len
             splits = [train_len, val_len]
         else:
-            raise ValueError(f'Unsupported type {type(self.val_split)}')
+            raise ValueError(f"Unsupported type {type(self.val_split)}")
 
         return splits
 
     @abstractmethod
     def default_transforms(self) -> Callable:
-        """ Default transform for the dataset """
+        """Default transform for the dataset"""
 
     def train_dataloader(self, *args: Any, **kwargs: Any) -> DataLoader:
-        """ The train dataloader """
+        """The train dataloader"""
         return self._data_loader(self.dataset_train, shuffle=self.shuffle)
 
     def val_dataloader(self, *args: Any, **kwargs: Any) -> Union[DataLoader, List[DataLoader]]:
-        """ The val dataloader """
+        """The val dataloader"""
         return self._data_loader(self.dataset_val)
 
     def test_dataloader(self, *args: Any, **kwargs: Any) -> Union[DataLoader, List[DataLoader]]:
-        """ The test dataloader """
+        """The test dataloader"""
         return self._data_loader(self.dataset_test)
 
     def _data_loader(self, dataset: Dataset, shuffle: bool = False) -> DataLoader:
@@ -135,5 +135,5 @@ class VisionDataModule(LightningDataModule):
             shuffle=shuffle,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
-            pin_memory=self.pin_memory
+            pin_memory=self.pin_memory,
         )

@@ -43,9 +43,11 @@ class PERDQN(DQN):
 
     .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
 
-        """
+    """
 
-    def train_batch(self, ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
+    def train_batch(
+        self,
+    ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -80,7 +82,7 @@ class PERDQN(DQN):
                 self.done_episodes += 1
                 self.total_rewards.append(episode_reward)
                 self.total_episode_steps.append(episode_steps)
-                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len :]))
                 self.state = self.env.reset()
                 episode_steps = 0
                 episode_reward = 0
@@ -90,13 +92,9 @@ class PERDQN(DQN):
             states, actions, rewards, dones, new_states = samples
 
             for idx, _ in enumerate(dones):
-                yield (
-                    states[idx],
-                    actions[idx],
-                    rewards[idx],
-                    dones[idx],
-                    new_states[idx],
-                ), indices[idx], weights[idx]
+                yield (states[idx], actions[idx], rewards[idx], dones[idx], new_states[idx],), indices[
+                    idx
+                ], weights[idx]
 
     def training_step(self, batch, _) -> OrderedDict:
         """
@@ -126,17 +124,21 @@ class PERDQN(DQN):
         if self.global_step % self.sync_rate == 0:
             self.target_net.load_state_dict(self.net.state_dict())
 
-        self.log_dict({
-            "total_reward": self.total_rewards[-1],
-            "avg_reward": self.avg_rewards,
-            "train_loss": loss,
-            # "episodes": self.total_episode_steps,
-        })
+        self.log_dict(
+            {
+                "total_reward": self.total_rewards[-1],
+                "avg_reward": self.avg_rewards,
+                "train_loss": loss,
+                # "episodes": self.total_episode_steps,
+            }
+        )
 
-        return OrderedDict({
-            "loss": loss,
-            "avg_reward": self.avg_rewards,
-        })
+        return OrderedDict(
+            {
+                "loss": loss,
+                "avg_reward": self.avg_rewards,
+            }
+        )
 
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences"""

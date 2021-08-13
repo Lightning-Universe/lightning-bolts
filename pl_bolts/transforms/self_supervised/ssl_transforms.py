@@ -7,7 +7,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _PIL_AVAILABLE:
     from PIL import Image
 else:  # pragma: no cover
-    warn_missing_pkg('PIL', pypi_name='Pillow')
+    warn_missing_pkg("PIL", pypi_name="Pillow")
 
 
 class RandomTranslateWithReflect:
@@ -56,7 +56,6 @@ class RandomTranslateWithReflect:
 
 
 class Patchify(object):
-
     def __init__(self, patch_size, overlap_size):
         self.patch_size = patch_size
         self.overlap_size = self.patch_size - overlap_size

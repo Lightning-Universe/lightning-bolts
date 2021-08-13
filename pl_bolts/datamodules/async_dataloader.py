@@ -32,7 +32,7 @@ class AsynchronousLoader(object):
     def __init__(
         self,
         data: Union[DataLoader, Dataset],
-        device: torch.device = torch.device('cuda', 0),
+        device: torch.device = torch.device("cuda", 0),
         q_size: int = 10,
         num_batches: Optional[int] = None,
         **kwargs: Any,
@@ -44,7 +44,7 @@ class AsynchronousLoader(object):
 
         if num_batches is not None:
             self.num_batches = num_batches
-        elif hasattr(self.dataloader, '__len__'):
+        elif hasattr(self.dataloader, "__len__"):
             self.num_batches = len(self.dataloader)
         else:
             raise Exception("num_batches must be specified or data must have finite __len__")
@@ -57,7 +57,7 @@ class AsynchronousLoader(object):
 
         self.idx = 0
 
-        self.np_str_obj_array_pattern = re.compile(r'[SaUO]')
+        self.np_str_obj_array_pattern = re.compile(r"[SaUO]")
 
     def load_loop(self) -> None:  # The loop that will load into the queue in the background
         for i, sample in enumerate(self.dataloader):
@@ -75,15 +75,13 @@ class AsynchronousLoader(object):
                 if not sample.is_pinned():
                     sample = sample.pin_memory()
                 return sample.to(self.device, non_blocking=True)
-        elif elem_type.__module__ == 'numpy' and elem_type.__name__ != 'str_' \
-                and elem_type.__name__ != 'string_':
-            if elem_type.__name__ == 'ndarray' \
-                    and self.np_str_obj_array_pattern.search(sample.dtype.str) is not None:
+        elif elem_type.__module__ == "numpy" and elem_type.__name__ != "str_" and elem_type.__name__ != "string_":
+            if elem_type.__name__ == "ndarray" and self.np_str_obj_array_pattern.search(sample.dtype.str) is not None:
                 return self.load_instance(sample)
             return self.load_instance(torch.as_tensor(sample))
         elif isinstance(sample, container_abcs.Mapping):
             return {key: self.load_instance(sample[key]) for key in sample}
-        elif isinstance(sample, tuple) and hasattr(sample, '_fields'):  # namedtuple
+        elif isinstance(sample, tuple) and hasattr(sample, "_fields"):  # namedtuple
             return elem_type(*(self.load_instance(d) for d in sample))
         elif isinstance(sample, container_abcs.Sequence) and not isinstance(sample, string_classes):
             return [self.load_instance(s) for s in sample]
@@ -94,7 +92,7 @@ class AsynchronousLoader(object):
         # We don't want to run the thread more than once
         # Start a new thread if we are at the beginning of a new epoch, and our current worker is dead
 
-        if_worker = (not hasattr(self, 'worker') or not self.worker.is_alive())  # type: ignore[has-type]
+        if_worker = not hasattr(self, "worker") or not self.worker.is_alive()  # type: ignore[has-type]
         if if_worker and self.queue.empty() and self.idx == 0:
             self.worker = Thread(target=self.load_loop)
             self.worker.daemon = True

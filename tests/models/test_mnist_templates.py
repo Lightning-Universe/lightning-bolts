@@ -1,4 +1,4 @@
-from pytorch_lightning import seed_everything, Trainer
+from pytorch_lightning import Trainer, seed_everything
 
 from pl_bolts.models import LitMNIST
 
@@ -16,6 +16,6 @@ def test_mnist(tmpdir, datadir):
     )
     trainer.fit(model)
     trainer.test(model)
-    loss = trainer.callback_metrics['train_loss']
+    loss = trainer.callback_metrics["train_loss"]
 
-    assert loss <= 2.2, 'mnist failed'
+    assert loss <= 2.2, "mnist failed"

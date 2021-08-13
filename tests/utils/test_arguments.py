@@ -3,7 +3,7 @@ from dataclasses import FrozenInstanceError
 import pytest
 from pytorch_lightning import LightningDataModule, LightningModule
 
-from pl_bolts.utils.arguments import gather_lit_args, LightningArgumentParser, LitArg
+from pl_bolts.utils.arguments import LightningArgumentParser, LitArg, gather_lit_args
 
 
 class DummyParentModel(LightningModule):
@@ -38,13 +38,13 @@ def test_lightning_argument_parser():
 @pytest.mark.xfail()
 def test_parser_bad_argument():
     parser = LightningArgumentParser()
-    parser.add_object_args('dm', DummyParentDataModule)
-    parser.add_object_args('model', DummyParentModel)
-    parser.parse_lit_args(['--some-bad-arg', 'asdf'])
+    parser.add_object_args("dm", DummyParentDataModule)
+    parser.add_object_args("model", DummyParentModel)
+    parser.parse_lit_args(["--some-bad-arg", "asdf"])
 
 
 def test_lit_arg_immutable():
-    arg = LitArg("some_arg", (int, ), 1, False)
+    arg = LitArg("some_arg", (int,), 1, False)
     with pytest.raises(FrozenInstanceError):
         arg.default = 0
     assert arg.default == 1

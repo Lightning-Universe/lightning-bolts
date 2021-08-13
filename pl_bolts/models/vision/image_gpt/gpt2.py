@@ -4,7 +4,6 @@ from torch import nn
 
 
 class Block(nn.Module):
-
     def __init__(self, embed_dim, heads):
         super(Block, self).__init__()
         self.ln_1 = nn.LayerNorm(embed_dim)
