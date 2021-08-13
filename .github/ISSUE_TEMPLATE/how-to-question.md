@@ -4,14 +4,14 @@ about: Asking how-to questions
 title: ''
 labels: question
 assignees: ''
-
 ---
 
 ## ❓ Questions and Help
 
 ### Before asking:
+
 1. search the issues.
-2. search the docs.
+1. search the docs.
 
 <!-- If you still can't find what you need: -->
 
@@ -25,6 +25,6 @@ assignees: ''
 
 #### What's your environment?
 
- - OS: [e.g. iOS, Linux, Win]
- - Packaging [e.g. pip, conda]
- - Version [e.g. 0.5.2.1]
+- OS: \[e.g. iOS, Linux, Win\]
+- Packaging \[e.g. pip, conda\]
+- Version \[e.g. 0.5.2.1\]

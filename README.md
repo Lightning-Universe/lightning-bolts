@@ -4,7 +4,7 @@
 
 **Pretrained SOTA Deep Learning models, callbacks and more for research and production with PyTorch Lightning and PyTorch**
 
----
+______________________________________________________________________
 
 <p align="center">
   <a href="https://www.pytorchlightning.ai/">Website</a> •
@@ -34,18 +34,18 @@
 
 </div>
 
----
+______________________________________________________________________
 
 ## Continuous Integration
 
 <details>
   <summary>CI testing</summary>
 
-| System / PyTorch ver. | 1.6 (min. req.) | 1.8 (latest) |
-| :---: | :---: | :---: |
-| Linux py3.{6,8} | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
-| OSX py3.{6,8} | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
-| Windows py3.7* | ![CI base testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) | ![CI base testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) |
+| System / PyTorch ver. |                                                             1.6 (min. req.)                                                              |                                                               1.8 (latest)                                                               |
+| :-------------------: | :--------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------: |
+|    Linux py3.{6,8}    | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
+|     OSX py3.{6,8}     | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
+|    Windows py3.7\*    | ![CI base testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) | ![CI base testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) |
 
 - _\* testing just the package itself, we skip full test suite - excluding `tests` folder_
 
@@ -57,16 +57,19 @@
   <summary>View install</summary>
 
 Simple installation from PyPI
+
 ```bash
 pip install lightning-bolts
 ```
 
 Install bleeding-edge (no guarantees)
+
 ```bash
 pip install git+https://github.com/PytorchLightning/lightning-bolts.git@master --upgrade
 ```
 
 In case you want to have full experience you can install all optional packages at once
+
 ```bash
 pip install lightning-bolts["extra"]
 ```
@@ -91,7 +94,10 @@ The main goal of Bolts is to enable rapid model idea iteration.
 
 ```python
 from pl_bolts.models.self_supervised import SimCLR
-from pl_bolts.models.self_supervised.simclr.transforms import SimCLRTrainDataTransform, SimCLREvalDataTransform
+from pl_bolts.models.self_supervised.simclr.transforms import (
+    SimCLRTrainDataTransform,
+    SimCLREvalDataTransform,
+)
 import pytorch_lightning as pl
 
 # data
@@ -99,7 +105,7 @@ train_data = DataLoader(MyDataset(transforms=SimCLRTrainDataTransform(input_heig
 val_data = DataLoader(MyDataset(transforms=SimCLREvalDataTransform(input_height=32)))
 
 # model
-weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+weight_path = "https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt"
 simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
 
 simclr.freeze()
@@ -113,8 +119,8 @@ simclr.freeze()
 from pl_bolts.models import ImageGPT
 from pl_bolts.models.self_supervised import SimCLR
 
-class VideoGPT(ImageGPT):
 
+class VideoGPT(ImageGPT):
     def training_step(self, batch, batch_idx):
         x, y = batch
         x = _shape_input(x)
@@ -162,7 +168,11 @@ model = LinearRegression(input_dim=13)
 # try with gpus=4!
 # trainer = pl.Trainer(gpus=4)
 trainer = pl.Trainer()
-trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
+trainer.fit(
+    model,
+    train_dataloader=loaders.train_dataloader(),
+    val_dataloaders=loaders.val_dataloader(),
+)
 trainer.test(test_dataloaders=loaders.test_dataloader())
 ```
 
@@ -181,14 +191,15 @@ with your implementation.
 
 Bolts is supported by the PyTorch Lightning team and the PyTorch Lightning community!
 
----
+______________________________________________________________________
 
 ## Licence
 
 Please observe the Apache 2.0 license that is listed in this repository.
- In addition the Lightning framework is Patent Pending.
+In addition the Lightning framework is Patent Pending.
 
 ## Citation
+
 To cite bolts use:
 
 ```
