@@ -137,3 +137,33 @@ class PolicyAgent(Agent):
         actions = [np.random.choice(len(prob), p=prob) for prob in prob_np]
 
         return actions
+
+
+class ActorCriticAgent(Agent):
+    """Actor-Critic based agent that returns an action based on the networks policy"""
+
+    def __call__(self, states: Tensor, device: str) -> List[int]:
+        """
+        Takes in the current state and returns the action based on the agents policy
+
+        Args:
+            states: current state of the environment
+            device: the device used for the current batch
+
+        Returns:
+            action defined by policy
+        """
+        if not isinstance(states, list):
+            states = [states]
+
+        if not isinstance(states, Tensor):
+            states = torch.tensor(states, device=device)
+
+        logprobs, _ = self.net(states)
+        probabilities = logprobs.exp().squeeze(dim=-1)
+        prob_np = probabilities.data.cpu().numpy()
+
+        # take the numpy values and randomly select action based on prob distribution
+        actions = [np.random.choice(len(prob), p=prob) for prob in prob_np]
+
+        return actions
