@@ -29,4 +29,4 @@ env:
 
 format:
 	isort .
-	yapf . -rip
+	black .
