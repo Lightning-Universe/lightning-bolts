@@ -22,7 +22,6 @@ from pl_bolts.transforms.dataset_normalizations import (
 
 
 class SwAV(LightningModule):
-
     def __init__(
         self,
         gpus: int,
@@ -30,7 +29,7 @@ class SwAV(LightningModule):
         batch_size: int,
         dataset: str,
         num_nodes: int = 1,
-        arch: str = 'resnet50',
+        arch: str = "resnet50",
         hidden_mlp: int = 2048,
         feat_dim: int = 128,
         warmup_epochs: int = 10,
@@ -46,11 +45,11 @@ class SwAV(LightningModule):
         nmb_crops: list = [2, 6],
         first_conv: bool = True,
         maxpool1: bool = True,
-        optimizer: str = 'adam',
+        optimizer: str = "adam",
         exclude_bn_bias: bool = False,
-        start_lr: float = 0.,
+        start_lr: float = 0.0,
         learning_rate: float = 1e-3,
-        final_lr: float = 0.,
+        final_lr: float = 0.0,
         weight_decay: float = 1e-6,
         epsilon: float = 0.05,
         **kwargs
@@ -156,9 +155,9 @@ class SwAV(LightningModule):
                 self.queue = torch.load(self.queue_path)["queue"]
 
     def init_model(self):
-        if self.arch == 'resnet18':
+        if self.arch == "resnet18":
             backbone = resnet18
-        elif self.arch == 'resnet50':
+        elif self.arch == "resnet50":
             backbone = resnet50
 
         return backbone(
@@ -167,7 +166,7 @@ class SwAV(LightningModule):
             output_dim=self.feat_dim,
             nmb_prototypes=self.nmb_prototypes,
             first_conv=self.first_conv,
-            maxpool1=self.maxpool1
+            maxpool1=self.maxpool1,
         )
 
     def forward(self, x):
@@ -199,7 +198,7 @@ class SwAV(LightningModule):
                     p.grad = None
 
     def shared_step(self, batch):
-        if self.dataset == 'stl10':
+        if self.dataset == "stl10":
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
 
@@ -221,7 +220,7 @@ class SwAV(LightningModule):
         loss = 0
         for i, crop_id in enumerate(self.crops_for_assign):
             with torch.no_grad():
-                out = output[bs * crop_id:bs * (crop_id + 1)]
+                out = output[bs * crop_id : bs * (crop_id + 1)]
 
                 # 4. time to use the queue
                 if self.queue is not None:
@@ -230,7 +229,7 @@ class SwAV(LightningModule):
                         out = torch.cat((torch.mm(self.queue[i], self.model.prototypes.weight.t()), out))
                     # fill the queue
                     self.queue[i, bs:] = self.queue[i, :-bs].clone()
-                    self.queue[i, :bs] = embedding[crop_id * bs:(crop_id + 1) * bs]
+                    self.queue[i, :bs] = embedding[crop_id * bs : (crop_id + 1) * bs]
 
                 # 5. get assignments
                 q = torch.exp(out / self.epsilon).t()
@@ -239,7 +238,7 @@ class SwAV(LightningModule):
             # cluster assignment prediction
             subloss = 0
             for v in np.delete(np.arange(np.sum(self.nmb_crops)), crop_id):
-                p = self.softmax(output[bs * v:bs * (v + 1)] / self.temperature)
+                p = self.softmax(output[bs * v : bs * (v + 1)] / self.temperature)
                 subloss -= torch.mean(torch.sum(q * torch.log(p), dim=1))
             loss += subloss / (np.sum(self.nmb_crops) - 1)
         loss /= len(self.crops_for_assign)
@@ -249,16 +248,16 @@ class SwAV(LightningModule):
     def training_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
 
-        self.log('train_loss', loss, on_step=True, on_epoch=False)
+        self.log("train_loss", loss, on_step=True, on_epoch=False)
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
 
-        self.log('val_loss', loss, on_step=False, on_epoch=True)
+        self.log("val_loss", loss, on_step=False, on_epoch=True)
         return loss
 
-    def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=['bias', 'bn']):
+    def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=["bias", "bn"]):
         params = []
         excluded_params = []
 
@@ -270,7 +269,7 @@ class SwAV(LightningModule):
             else:
                 params.append(param)
 
-        return [{'params': params, 'weight_decay': weight_decay}, {'params': excluded_params, 'weight_decay': 0.}]
+        return [{"params": params, "weight_decay": weight_decay}, {"params": excluded_params, "weight_decay": 0.0}]
 
     def configure_optimizers(self):
         if self.exclude_bn_bias:
@@ -278,7 +277,7 @@ class SwAV(LightningModule):
         else:
             params = self.parameters()
 
-        if self.optim == 'lars':
+        if self.optim == "lars":
             optimizer = LARS(
                 params,
                 lr=self.learning_rate,
@@ -286,7 +285,7 @@ class SwAV(LightningModule):
                 weight_decay=self.weight_decay,
                 trust_coefficient=0.001,
             )
-        elif self.optim == 'adam':
+        elif self.optim == "adam":
             optimizer = torch.optim.Adam(params, lr=self.learning_rate, weight_decay=self.weight_decay)
 
         warmup_steps = self.train_iters_per_epoch * self.warmup_epochs
@@ -360,12 +359,12 @@ class SwAV(LightningModule):
         # model params
         parser.add_argument("--arch", default="resnet50", type=str, help="convnet architecture")
         # specify flags to store false
-        parser.add_argument("--first_conv", action='store_false')
-        parser.add_argument("--maxpool1", action='store_false')
+        parser.add_argument("--first_conv", action="store_false")
+        parser.add_argument("--maxpool1", action="store_false")
         parser.add_argument("--hidden_mlp", default=2048, type=int, help="hidden layer dimension in projection head")
         parser.add_argument("--feat_dim", default=128, type=int, help="feature dimension")
-        parser.add_argument("--online_ft", action='store_true')
-        parser.add_argument("--fp32", action='store_true')
+        parser.add_argument("--online_ft", action="store_true")
+        parser.add_argument("--fp32", action="store_true")
 
         # transform params
         parser.add_argument("--gaussian_blur", action="store_true", help="add gaussian blur")
@@ -385,14 +384,14 @@ class SwAV(LightningModule):
             type=float,
             default=[0.33, 0.10],
             nargs="+",
-            help="argument in RandomResizedCrop (example: [0.14, 0.05])"
+            help="argument in RandomResizedCrop (example: [0.14, 0.05])",
         )
         parser.add_argument(
             "--max_scale_crops",
             type=float,
             default=[1, 0.33],
             nargs="+",
-            help="argument in RandomResizedCrop (example: [1., 0.14])"
+            help="argument in RandomResizedCrop (example: [1., 0.14])",
         )
 
         # training params
@@ -401,7 +400,7 @@ class SwAV(LightningModule):
         parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/lars")
-        parser.add_argument('--exclude_bn_bias', action='store_true', help="exclude bn/bias from weight decay")
+        parser.add_argument("--exclude_bn_bias", action="store_true", help="exclude bn/bias from weight decay")
         parser.add_argument("--max_epochs", default=100, type=int, help="number of total epochs to run")
         parser.add_argument("--max_steps", default=-1, type=int, help="max steps")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
@@ -418,7 +417,7 @@ class SwAV(LightningModule):
             type=int,
             nargs="+",
             default=[0, 1],
-            help="list of crops id used for computing assignments"
+            help="list of crops id used for computing assignments",
         )
         parser.add_argument("--temperature", default=0.1, type=float, help="temperature parameter in training loss")
         parser.add_argument(
@@ -432,7 +431,7 @@ class SwAV(LightningModule):
             "--queue_length",
             type=int,
             default=0,
-            help="length of the queue (0 for no queue); must be divisible by total batch size"
+            help="length of the queue (0 for no queue); must be divisible by total batch size",
         )
         parser.add_argument(
             "--epoch_queue_starts", type=int, default=15, help="from this epoch, we start using a queue"
@@ -441,7 +440,7 @@ class SwAV(LightningModule):
             "--freeze_prototypes_epochs",
             default=1,
             type=int,
-            help="freeze the prototypes during this many epochs from the start"
+            help="freeze the prototypes during this many epochs from the start",
         )
 
         return parser
@@ -458,7 +457,7 @@ def cli_main():
     parser = SwAV.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    if args.dataset == 'stl10':
+    if args.dataset == "stl10":
         dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         dm.train_dataloader = dm.train_dataloader_mixed
@@ -468,7 +467,7 @@ def cli_main():
         args.maxpool1 = False
 
         normalization = stl10_normalization()
-    elif args.dataset == 'cifar10':
+    elif args.dataset == "cifar10":
         args.batch_size = 2
         args.num_workers = 0
 
@@ -485,7 +484,7 @@ def cli_main():
         args.size_crops = [32, 16]
         args.nmb_crops = [2, 1]
         args.gaussian_blur = False
-    elif args.dataset == 'imagenet':
+    elif args.dataset == "imagenet":
         args.maxpool1 = True
         args.first_conv = True
         normalization = imagenet_normalization()
@@ -493,16 +492,16 @@ def cli_main():
         args.size_crops = [224, 96]
         args.nmb_crops = [2, 6]
         args.min_scale_crops = [0.14, 0.05]
-        args.max_scale_crops = [1., 0.14]
+        args.max_scale_crops = [1.0, 0.14]
         args.gaussian_blur = True
-        args.jitter_strength = 1.
+        args.jitter_strength = 1.0
 
         args.batch_size = 64
         args.num_nodes = 8
         args.gpus = 8  # per-node
         args.max_epochs = 800
 
-        args.optimizer = 'lars'
+        args.optimizer = "lars"
         args.learning_rate = 4.8
         args.final_lr = 0.0048
         args.start_lr = 0.3
@@ -524,7 +523,7 @@ def cli_main():
         min_scale_crops=args.min_scale_crops,
         max_scale_crops=args.max_scale_crops,
         gaussian_blur=args.gaussian_blur,
-        jitter_strength=args.jitter_strength
+        jitter_strength=args.jitter_strength,
     )
 
     dm.val_transforms = SwAVEvalDataTransform(
@@ -534,7 +533,7 @@ def cli_main():
         min_scale_crops=args.min_scale_crops,
         max_scale_crops=args.max_scale_crops,
         gaussian_blur=args.gaussian_blur,
-        jitter_strength=args.jitter_strength
+        jitter_strength=args.jitter_strength,
     )
 
     # swav model init
@@ -544,7 +543,7 @@ def cli_main():
     if args.online_ft:
         # online eval
         online_evaluator = SSLOnlineEvaluator(
-            drop_p=0.,
+            drop_p=0.0,
             hidden_dim=None,
             z_dim=args.hidden_mlp,
             num_classes=dm.num_classes,
@@ -552,7 +551,7 @@ def cli_main():
         )
 
     lr_monitor = LearningRateMonitor(logging_interval="step")
-    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor='val_loss')
+    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor="val_loss")
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
     callbacks.append(lr_monitor)
 
@@ -561,15 +560,15 @@ def cli_main():
         max_steps=None if args.max_steps == -1 else args.max_steps,
         gpus=args.gpus,
         num_nodes=args.num_nodes,
-        distributed_backend='ddp' if args.gpus > 1 else None,
+        distributed_backend="ddp" if args.gpus > 1 else None,
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=32 if args.fp32 else 16,
         callbacks=callbacks,
-        fast_dev_run=args.fast_dev_run
+        fast_dev_run=args.fast_dev_run,
     )
 
     trainer.fit(model, datamodule=dm)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

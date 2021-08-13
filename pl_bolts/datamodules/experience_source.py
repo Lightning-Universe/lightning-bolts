@@ -265,7 +265,7 @@ class DiscountedExperienceSource(ExperienceSource):
                 action=experiences[0].action,
                 reward=total_reward,
                 done=experiences[0].done,
-                new_state=last_exp_state
+                new_state=last_exp_state,
             )
 
     def split_head_tail_exp(self, experiences: Tuple[Experience]) -> Tuple[List, Tuple[Experience]]:

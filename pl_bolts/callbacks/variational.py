@@ -61,14 +61,13 @@ class LatentDimInterpolator(Callback):
     def on_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         if (trainer.current_epoch + 1) % self.interpolate_epoch_interval == 0:
             images = self.interpolate_latent_space(
-                pl_module,
-                latent_dim=pl_module.hparams.latent_dim  # type: ignore[union-attr]
+                pl_module, latent_dim=pl_module.hparams.latent_dim  # type: ignore[union-attr]
             )
             images = torch.cat(images, dim=0)  # type: ignore[assignment]
 
             num_rows = self.steps
             grid = torchvision.utils.make_grid(images, nrow=num_rows, normalize=self.normalize)
-            str_title = f'{pl_module.__class__.__name__}_latent_space'
+            str_title = f"{pl_module.__class__.__name__}_latent_space"
             trainer.logger.experiment.add_image(str_title, grid, global_step=trainer.global_step)
 
     def interpolate_latent_space(self, pl_module: LightningModule, latent_dim: int) -> List[Tensor]:

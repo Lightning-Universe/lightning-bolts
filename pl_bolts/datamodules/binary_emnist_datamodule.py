@@ -20,6 +20,7 @@ class BinaryEMNISTDataModule(EMNISTDataModule):
         model = LitModel()
         Trainer().fit(model, datamodule=dm)
     """
+
     name = "binary_emnist"
     dataset_cls = BinaryEMNIST
     dims = (1, 28, 28)
@@ -27,7 +28,7 @@ class BinaryEMNISTDataModule(EMNISTDataModule):
     def __init__(
         self,
         data_dir: Optional[str] = None,
-        split: str = 'mnist',
+        split: str = "mnist",
         val_split: Union[int, float] = 0.2,
         num_workers: int = 0,
         normalize: bool = False,
@@ -61,7 +62,7 @@ class BinaryEMNISTDataModule(EMNISTDataModule):
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
-                'You want to use EMNIST dataset loaded from `torchvision` which is not installed yet.'
+                "You want to use EMNIST dataset loaded from `torchvision` which is not installed yet."
             )
 
         super(BinaryEMNISTDataModule, self).__init__(  # type: ignore[misc]

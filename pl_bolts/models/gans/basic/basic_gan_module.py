@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning import LightningModule, seed_everything, Trainer
+from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch.nn import functional as F
 
 from pl_bolts.models.gans.basic.components import Discriminator, Generator
@@ -134,7 +134,7 @@ class GAN(LightningModule):
 
         # log to prog bar on each step AND for the full epoch
         # use the generator loss for checkpointing
-        self.log('g_loss', g_loss, on_epoch=True, prog_bar=True)
+        self.log("g_loss", g_loss, on_epoch=True, prog_bar=True)
         return g_loss
 
     def discriminator_step(self, x):
@@ -142,7 +142,7 @@ class GAN(LightningModule):
         d_loss = self.discriminator_loss(x)
 
         # log to prog bar on each step AND for the full epoch
-        self.log('d_loss', d_loss, on_epoch=True, prog_bar=True)
+        self.log("d_loss", d_loss, on_epoch=True, prog_bar=True)
         return d_loss
 
     def configure_optimizers(self):
@@ -155,14 +155,14 @@ class GAN(LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--learning_rate', type=float, default=0.0002, help="adam: learning rate")
+        parser.add_argument("--learning_rate", type=float, default=0.0002, help="adam: learning rate")
         parser.add_argument(
-            '--adam_b1', type=float, default=0.5, help="adam: decay of first order momentum of gradient"
+            "--adam_b1", type=float, default=0.5, help="adam: decay of first order momentum of gradient"
         )
         parser.add_argument(
-            '--adam_b2', type=float, default=0.999, help="adam: decay of first order momentum of gradient"
+            "--adam_b2", type=float, default=0.999, help="adam: decay of first order momentum of gradient"
         )
-        parser.add_argument('--latent_dim', type=int, default=100, help="generator embedding dim")
+        parser.add_argument("--latent_dim", type=int, default=100, help="generator embedding dim")
         return parser
 
 
@@ -198,5 +198,5 @@ def cli_main(args=None):
     return dm, model, trainer
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     dm, model, trainer = cli_main()

@@ -11,7 +11,6 @@ from pl_bolts.models.rl.common.agents import ActorCriticAgent, Agent, PolicyAgen
 
 
 class TestAgents(TestCase):
-
     def setUp(self) -> None:
         self.env = gym.make("CartPole-v0")
         self.state = self.env.reset()
@@ -19,17 +18,16 @@ class TestAgents(TestCase):
 
     def test_base_agent(self):
         agent = Agent(self.net)
-        action = agent(self.state, 'cuda:0')
+        action = agent(self.state, "cuda:0")
         self.assertIsInstance(action, list)
 
 
 class TestValueAgent(TestCase):
-
     def setUp(self) -> None:
         self.env = gym.make("CartPole-v0")
         self.net = Mock(return_value=Tensor([[0.0, 100.0]]))
         self.state = [self.env.reset()]
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.value_agent = ValueAgent(self.net, self.env.action_space.n)
 
     def test_value_agent(self):
@@ -49,12 +47,11 @@ class TestValueAgent(TestCase):
 
 
 class TestPolicyAgent(TestCase):
-
     def setUp(self) -> None:
         self.env = gym.make("CartPole-v0")
         self.net = Mock(return_value=Tensor([[0.0, 100.0]]))
         self.states = [self.env.reset()]
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def test_policy_agent(self):
         policy_agent = PolicyAgent(self.net)
@@ -68,7 +65,7 @@ def test_a2c_agent():
     logprobs = torch.nn.functional.log_softmax(Tensor([[0.0, 100.0]]))
     net = Mock(return_value=(logprobs, Tensor([[1]])))
     states = [env.reset()]
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     a2c_agent = ActorCriticAgent(net)
     action = a2c_agent(states, device)
     assert isinstance(action, list)

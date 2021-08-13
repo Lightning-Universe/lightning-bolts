@@ -15,7 +15,7 @@ from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
 def generate_power_seq(lr, nb):
     half = int(nb / 2)
-    coefs = [2**pow for pow in range(half, -half - 1, -1)]
+    coefs = [2 ** pow for pow in range(half, -half - 1, -1)]
     lrs = [lr * coef for coef in coefs]
     return lrs
 
@@ -23,39 +23,39 @@ def generate_power_seq(lr, nb):
 # CIFAR 10
 LEARNING_RATE_CIFAR = 2e-4
 DATASET_CIFAR10 = {
-    'dataset': 'cifar10',
-    'ndf': 320,
-    'n_rkhs': 1280,
-    'depth': 10,
-    'image_height': 32,
-    'batch_size': 200,
-    'nb_classes': 10,
-    'lr_options': generate_power_seq(LEARNING_RATE_CIFAR, 11),
+    "dataset": "cifar10",
+    "ndf": 320,
+    "n_rkhs": 1280,
+    "depth": 10,
+    "image_height": 32,
+    "batch_size": 200,
+    "nb_classes": 10,
+    "lr_options": generate_power_seq(LEARNING_RATE_CIFAR, 11),
 }
 
 # stl-10
 LEARNING_RATE_STL = 2e-4
 DATASET_STL10 = {
-    'dataset': 'stl10',
-    'ndf': 192,
-    'n_rkhs': 1536,
-    'depth': 8,
-    'image_height': 64,
-    'batch_size': 200,
-    'nb_classes': 10,
-    'lr_options': generate_power_seq(LEARNING_RATE_STL, 11),
+    "dataset": "stl10",
+    "ndf": 192,
+    "n_rkhs": 1536,
+    "depth": 8,
+    "image_height": 64,
+    "batch_size": 200,
+    "nb_classes": 10,
+    "lr_options": generate_power_seq(LEARNING_RATE_STL, 11),
 }
 
 LEARNING_RATE_IMAGENET = 2e-4
 DATASET_IMAGENET2012 = {
-    'dataset': 'imagenet2012',
-    'ndf': 320,
-    'n_rkhs': 2560,
-    'depth': 10,
-    'image_height': 128,
-    'batch_size': 200,
-    'nb_classes': 1000,
-    'lr_options': generate_power_seq(LEARNING_RATE_IMAGENET, 11),
+    "dataset": "imagenet2012",
+    "ndf": 320,
+    "n_rkhs": 2560,
+    "depth": 10,
+    "image_height": 128,
+    "batch_size": 200,
+    "nb_classes": 1000,
+    "lr_options": generate_power_seq(LEARNING_RATE_IMAGENET, 11),
 }
 
 
@@ -85,9 +85,9 @@ class AMDIM(LightningModule):
 
     def __init__(
         self,
-        datamodule: Union[str, LightningDataModule] = 'cifar10',
-        encoder: Union[str, torch.nn.Module, LightningModule] = 'amdim_encoder',
-        contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask('01, 02, 11'),
+        datamodule: Union[str, LightningDataModule] = "cifar10",
+        encoder: Union[str, torch.nn.Module, LightningModule] = "amdim_encoder",
+        contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask("01, 02, 11"),
         image_channels: int = 3,
         image_height: int = 32,
         encoder_feature_dim: int = 320,
@@ -96,7 +96,7 @@ class AMDIM(LightningModule):
         use_bn: bool = False,
         tclip: int = 20.0,
         learning_rate: int = 2e-4,
-        data_dir: str = '',
+        data_dir: str = "",
         num_classes: int = 10,
         batch_size: int = 200,
         num_workers: int = 16,
@@ -140,7 +140,7 @@ class AMDIM(LightningModule):
         )
         encoder_name = self.hparams.encoder
 
-        if encoder_name == 'amdim_encoder':
+        if encoder_name == "amdim_encoder":
             encoder = AMDIMEncoder(
                 dummy_batch,
                 num_channels=self.hparams.image_channels,
@@ -148,7 +148,7 @@ class AMDIM(LightningModule):
                 embedding_fx_dim=self.hparams.embedding_fx_dim,
                 conv_block_depth=self.hparams.conv_block_depth,
                 encoder_size=self.hparams.image_height,
-                use_bn=self.hparams.use_bn
+                use_bn=self.hparams.use_bn,
             )
             encoder.init_weights()
             return encoder
@@ -185,23 +185,23 @@ class AMDIM(LightningModule):
         r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2 = self.forward(img_1, img_2)
 
         result = {
-            'r1_x1': r1_x1,
-            'r5_x1': r5_x1,
-            'r7_x1': r7_x1,
-            'r1_x2': r1_x2,
-            'r5_x2': r5_x2,
-            'r7_x2': r7_x2,
+            "r1_x1": r1_x1,
+            "r5_x1": r5_x1,
+            "r7_x1": r7_x1,
+            "r1_x2": r1_x2,
+            "r5_x2": r5_x2,
+            "r7_x2": r7_x2,
         }
 
         return result
 
     def training_step_end(self, outputs):
-        r1_x1 = outputs['r1_x1']
-        r5_x1 = outputs['r5_x1']
-        r7_x1 = outputs['r7_x1']
-        r1_x2 = outputs['r1_x2']
-        r5_x2 = outputs['r5_x2']
-        r7_x2 = outputs['r7_x2']
+        r1_x1 = outputs["r1_x1"]
+        r5_x1 = outputs["r5_x1"]
+        r7_x1 = outputs["r7_x1"]
+        r1_x2 = outputs["r1_x2"]
+        r5_x2 = outputs["r5_x2"]
+        r7_x2 = outputs["r7_x2"]
 
         # Contrastive task
         loss, lgt_reg = self.contrastive_task((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
@@ -211,8 +211,8 @@ class AMDIM(LightningModule):
         # FULL LOSS
         total_loss = unsupervised_loss
 
-        tensorboard_logs = {'train_nce_loss': total_loss}
-        result = {'loss': total_loss, 'log': tensorboard_logs}
+        tensorboard_logs = {"train_nce_loss": total_loss}
+        result = {"loss": total_loss, "log": tensorboard_logs}
 
         return result
 
@@ -226,17 +226,17 @@ class AMDIM(LightningModule):
         loss, lgt_reg = self.contrastive_task((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
         unsupervised_loss = loss.sum() + lgt_reg
 
-        result = {'val_nce': unsupervised_loss}
+        result = {"val_nce": unsupervised_loss}
         return result
 
     def validation_epoch_end(self, outputs):
         val_nce = 0
         for output in outputs:
-            val_nce += output['val_nce']
+            val_nce += output["val_nce"]
 
         val_nce = val_nce / len(outputs)
-        tensorboard_logs = {'val_nce': val_nce}
-        return {'val_loss': val_nce, 'log': tensorboard_logs}
+        tensorboard_logs = {"val_nce": val_nce}
+        return {"val_loss": val_nce, "log": tensorboard_logs}
 
     def configure_optimizers(self):
         opt = optim.Adam(
@@ -251,8 +251,8 @@ class AMDIM(LightningModule):
         return opt  # [opt], [lr_scheduler]
 
     def train_dataloader(self):
-        kwargs = dict(nb_classes=self.hparams.nb_classes) if self.hparams.datamodule == 'imagenet2012' else {}
-        dataset = AMDIMPretraining.get_dataset(self.hparams.datamodule, self.hparams.data_dir, split='train', **kwargs)
+        kwargs = dict(nb_classes=self.hparams.nb_classes) if self.hparams.datamodule == "imagenet2012" else {}
+        dataset = AMDIMPretraining.get_dataset(self.hparams.datamodule, self.hparams.data_dir, split="train", **kwargs)
 
         # LOADER
         loader = DataLoader(
@@ -265,8 +265,8 @@ class AMDIM(LightningModule):
         return loader
 
     def val_dataloader(self):
-        kwargs = dict(nb_classes=self.hparams.nb_classes) if self.hparams.datamodule == 'imagenet2012' else {}
-        dataset = AMDIMPretraining.get_dataset(self.hparams.datamodule, self.hparams.data_dir, split='val', **kwargs)
+        kwargs = dict(nb_classes=self.hparams.nb_classes) if self.hparams.datamodule == "imagenet2012" else {}
+        dataset = AMDIMPretraining.get_dataset(self.hparams.datamodule, self.hparams.data_dir, split="val", **kwargs)
 
         # LOADER
         loader = DataLoader(
@@ -281,41 +281,41 @@ class AMDIM(LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--datamodule', type=str, default='cifar10')
+        parser.add_argument("--datamodule", type=str, default="cifar10")
 
-        DATASETS = {'cifar10': DATASET_CIFAR10, 'stl10': DATASET_STL10, 'imagenet2012': DATASET_IMAGENET2012}
+        DATASETS = {"cifar10": DATASET_CIFAR10, "stl10": DATASET_STL10, "imagenet2012": DATASET_IMAGENET2012}
 
         (args, _) = parser.parse_known_args()
         dataset = DATASETS[args.datamodule]
 
         # dataset options
-        parser.add_argument('--num_classes', default=dataset['nb_classes'], type=int)
+        parser.add_argument("--num_classes", default=dataset["nb_classes"], type=int)
 
         # network params
-        parser.add_argument('--tclip', type=float, default=20.0, help='soft clipping range for NCE scores')
-        parser.add_argument('--use_bn', type=int, default=0)
-        parser.add_argument('--encoder_feature_dim', type=int, default=dataset['ndf'], help='feature size for encoder')
+        parser.add_argument("--tclip", type=float, default=20.0, help="soft clipping range for NCE scores")
+        parser.add_argument("--use_bn", type=int, default=0)
+        parser.add_argument("--encoder_feature_dim", type=int, default=dataset["ndf"], help="feature size for encoder")
         parser.add_argument(
-            '--embedding_fx_dim',
+            "--embedding_fx_dim",
             type=int,
-            default=dataset['n_rkhs'],
-            help='number of dimensions in fake RKHS embeddings'
+            default=dataset["n_rkhs"],
+            help="number of dimensions in fake RKHS embeddings",
         )
-        parser.add_argument('--conv_block_depth', type=int, default=dataset['depth'])
-        parser.add_argument('--image_height', type=int, default=dataset['image_height'])
+        parser.add_argument("--conv_block_depth", type=int, default=dataset["depth"])
+        parser.add_argument("--image_height", type=int, default=dataset["image_height"])
 
         # trainin params
         # resnets = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152',
         #            'resnext50_32x4d', 'resnext101_32x8d',
         #            'wide_resnet50_2', 'wide_resnet101_2']
         parser.add_argument(
-            '--batch_size', type=int, default=dataset['batch_size'], help='input batch size (default: 200)'
+            "--batch_size", type=int, default=dataset["batch_size"], help="input batch size (default: 200)"
         )
-        parser.add_argument('--learning_rate', type=float, default=0.0002)
+        parser.add_argument("--learning_rate", type=float, default=0.0002)
 
         # data
-        parser.add_argument('--data_dir', default=os.getcwd(), type=str)
-        parser.add_argument('--num_workers', type=int, default=16)
+        parser.add_argument("--data_dir", default=os.getcwd(), type=str)
+        parser.add_argument("--num_workers", type=int, default=16)
         return parser
 
 
@@ -326,10 +326,10 @@ def cli_main():
 
     args = parser.parse_args()
 
-    model = AMDIM(**vars(args), encoder='resnet18')
+    model = AMDIM(**vars(args), encoder="resnet18")
     trainer = Trainer.from_argparse_args(args)
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

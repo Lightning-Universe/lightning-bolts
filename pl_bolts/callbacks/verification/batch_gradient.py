@@ -193,7 +193,7 @@ def default_output_mapping(data: Any) -> Tensor:
 
 
 def collect_tensors(data: Any) -> List[Tensor]:
-    """ Filters all tensors in a collection and returns them in a list. """
+    """Filters all tensors in a collection and returns them in a list."""
     tensors = []
 
     def collect_batches(tensor: Tensor) -> Tensor:

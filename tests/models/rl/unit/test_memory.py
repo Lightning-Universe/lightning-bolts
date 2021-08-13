@@ -8,7 +8,6 @@ from pl_bolts.models.rl.common.memory import Buffer, Experience, MultiStepBuffer
 
 
 class TestBuffer(TestCase):
-
     def train_batch(self):
         """Returns an iterator used for testing"""
         return iter([i for i in range(100)])
@@ -40,7 +39,6 @@ class TestBuffer(TestCase):
 
 
 class TestReplayBuffer(TestCase):
-
     def setUp(self) -> None:
         self.state = np.random.rand(32, 32)
         self.next_state = np.random.rand(32, 32)
@@ -106,7 +104,6 @@ class TestReplayBuffer(TestCase):
 
 
 class TestPrioReplayBuffer(TestCase):
-
     def setUp(self) -> None:
         self.buffer = PERBuffer(10)
 
@@ -158,7 +155,6 @@ class TestPrioReplayBuffer(TestCase):
 
 
 class TestMultiStepReplayBuffer(TestCase):
-
     def setUp(self) -> None:
         self.gamma = 0.9
         self.buffer = MultiStepBuffer(capacity=10, n_steps=2, gamma=self.gamma)

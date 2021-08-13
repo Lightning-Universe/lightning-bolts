@@ -3,7 +3,7 @@ from copy import deepcopy
 from typing import Any, Union
 
 import torch
-from pytorch_lightning import LightningModule, seed_everything, Trainer
+from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch.nn import functional as F
 from torch.optim import Adam
 
@@ -71,7 +71,7 @@ class BYOL(LightningModule):
         num_workers: int = 0,
         warmup_epochs: int = 10,
         max_epochs: int = 1000,
-        base_encoder: Union[str, torch.nn.Module] = 'resnet50',
+        base_encoder: Union[str, torch.nn.Module] = "resnet50",
         encoder_out_dim: int = 2048,
         projector_hidden_size: int = 4096,
         projector_out_dim: int = 256,
@@ -93,7 +93,7 @@ class BYOL(LightningModule):
             projector_out_dim: output size of projector MLP
         """
         super().__init__()
-        self.save_hyperparameters(ignore='base_encoder')
+        self.save_hyperparameters(ignore="base_encoder")
 
         self.online_network = SiameseArm(base_encoder, encoder_out_dim, projector_hidden_size, projector_out_dim)
         self.target_network = deepcopy(self.online_network)
@@ -133,7 +133,7 @@ class BYOL(LightningModule):
         loss_a, loss_b, total_loss = self.shared_step(batch, batch_idx)
 
         # log results
-        self.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'train_loss': total_loss})
+        self.log_dict({"1_2_loss": loss_a, "2_1_loss": loss_b, "train_loss": total_loss})
 
         return total_loss
 
@@ -141,7 +141,7 @@ class BYOL(LightningModule):
         loss_a, loss_b, total_loss = self.shared_step(batch, batch_idx)
 
         # log results
-        self.log_dict({'1_2_loss': loss_a, '2_1_loss': loss_b, 'val_loss': total_loss})
+        self.log_dict({"1_2_loss": loss_a, "2_1_loss": loss_b, "val_loss": total_loss})
 
         return total_loss
 
@@ -155,23 +155,23 @@ class BYOL(LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--online_ft', action='store_true', help='run online finetuner')
-        parser.add_argument('--dataset', type=str, default='cifar10', choices=['cifar10', 'imagenet2012', 'stl10'])
+        parser.add_argument("--online_ft", action="store_true", help="run online finetuner")
+        parser.add_argument("--dataset", type=str, default="cifar10", choices=["cifar10", "imagenet2012", "stl10"])
 
         (args, _) = parser.parse_known_args()
 
         # Data
-        parser.add_argument('--data_dir', type=str, default='.')
-        parser.add_argument('--num_workers', default=8, type=int)
+        parser.add_argument("--data_dir", type=str, default=".")
+        parser.add_argument("--num_workers", default=8, type=int)
 
         # optim
-        parser.add_argument('--batch_size', type=int, default=256)
-        parser.add_argument('--learning_rate', type=float, default=1e-3)
-        parser.add_argument('--weight_decay', type=float, default=1.5e-6)
-        parser.add_argument('--warmup_epochs', type=float, default=10)
+        parser.add_argument("--batch_size", type=int, default=256)
+        parser.add_argument("--learning_rate", type=float, default=1e-3)
+        parser.add_argument("--weight_decay", type=float, default=1.5e-6)
+        parser.add_argument("--warmup_epochs", type=float, default=10)
 
         # Model
-        parser.add_argument('--meta_dir', default='.', type=str, help='path to meta.bin for imagenet')
+        parser.add_argument("--meta_dir", default=".", type=str, help="path to meta.bin for imagenet")
 
         return parser
 
@@ -196,13 +196,13 @@ def cli_main():
     dm = None
 
     # init default datamodule
-    if args.dataset == 'cifar10':
+    if args.dataset == "cifar10":
         dm = CIFAR10DataModule.from_argparse_args(args)
         dm.train_transforms = SimCLRTrainDataTransform(32)
         dm.val_transforms = SimCLREvalDataTransform(32)
         args.num_classes = dm.num_classes
 
-    elif args.dataset == 'stl10':
+    elif args.dataset == "stl10":
         dm = STL10DataModule.from_argparse_args(args)
         dm.train_dataloader = dm.train_dataloader_mixed
         dm.val_dataloader = dm.val_dataloader_mixed
@@ -212,7 +212,7 @@ def cli_main():
         dm.val_transforms = SimCLREvalDataTransform(h)
         args.num_classes = dm.num_classes
 
-    elif args.dataset == 'imagenet2012':
+    elif args.dataset == "imagenet2012":
         dm = ImagenetDataModule.from_argparse_args(args, image_size=196)
         (c, h, w) = dm.size()
         dm.train_transforms = SimCLRTrainDataTransform(h)
@@ -229,5 +229,5 @@ def cli_main():
     trainer.fit(model, datamodule=dm)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

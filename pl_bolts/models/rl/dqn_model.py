@@ -7,10 +7,10 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
-from pytorch_lightning import LightningModule, seed_everything, Trainer
+from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
-from torch import optim as optim
 from torch import Tensor
+from torch import optim as optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
@@ -26,7 +26,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _GYM_AVAILABLE:
     from gym import Env
 else:  # pragma: no cover
-    warn_missing_pkg('gym')
+    warn_missing_pkg("gym")
     Env = object
 
 
@@ -148,7 +148,7 @@ class DQN(LightningModule):
         for _ in range(avg_reward_len):
             self.total_rewards.append(torch.tensor(min_episode_reward, device=self.device))
 
-        self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+        self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len :]))
 
         self.state = self.env.reset()
 
@@ -213,7 +213,9 @@ class DQN(LightningModule):
         output = self.net(x)
         return output
 
-    def train_batch(self, ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
+    def train_batch(
+        self,
+    ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -242,7 +244,7 @@ class DQN(LightningModule):
                 self.done_episodes += 1
                 self.total_rewards.append(episode_reward)
                 self.total_episode_steps.append(episode_steps)
-                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len :]))
                 self.state = self.env.reset()
                 episode_steps = 0
                 episode_reward = 0
@@ -279,18 +281,22 @@ class DQN(LightningModule):
         if self.global_step % self.sync_rate == 0:
             self.target_net.load_state_dict(self.net.state_dict())
 
-        self.log_dict({
-            "total_reward": self.total_rewards[-1],
-            "avg_reward": self.avg_rewards,
-            "train_loss": loss,
-            "episodes": self.done_episodes,
-            "episode_steps": self.total_episode_steps[-1]
-        })
+        self.log_dict(
+            {
+                "total_reward": self.total_rewards[-1],
+                "avg_reward": self.avg_rewards,
+                "train_loss": loss,
+                "episodes": self.done_episodes,
+                "episode_steps": self.total_episode_steps[-1],
+            }
+        )
 
-        return OrderedDict({
-            "loss": loss,
-            "avg_reward": self.avg_rewards,
-        })
+        return OrderedDict(
+            {
+                "loss": loss,
+                "avg_reward": self.avg_rewards,
+            }
+        )
 
     def test_step(self, *args, **kwargs) -> Dict[str, Tensor]:
         """Evaluate the agent for 10 episodes"""
@@ -306,7 +312,7 @@ class DQN(LightningModule):
         return {"avg_test_reward": avg_reward}
 
     def configure_optimizers(self) -> List[Optimizer]:
-        """ Initialize Adam optimizer"""
+        """Initialize Adam optimizer"""
         optimizer = optim.Adam(self.net.parameters(), lr=self.lr)
         return [optimizer]
 
@@ -346,7 +352,9 @@ class DQN(LightningModule):
         return env
 
     @staticmethod
-    def add_model_specific_args(arg_parser: argparse.ArgumentParser, ) -> argparse.ArgumentParser:
+    def add_model_specific_args(
+        arg_parser: argparse.ArgumentParser,
+    ) -> argparse.ArgumentParser:
         """
         Adds arguments for DQN model
 
@@ -433,5 +441,5 @@ def cli_main():
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

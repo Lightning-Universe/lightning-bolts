@@ -7,10 +7,10 @@ from typing import Any, Iterator, List, Tuple
 
 import numpy as np
 import torch
-from pytorch_lightning import LightningModule, seed_everything, Trainer
+from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
-from torch import optim as optim
 from torch import Tensor
+from torch import optim as optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
@@ -147,7 +147,7 @@ class AdvantageActorCritic(LightningModule):
                     self.state = self.env.reset()
                     self.total_rewards.append(self.episode_reward)
                     self.episode_reward = 0
-                    self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+                    self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len :]))
 
             _, last_value = self.forward(self.state)
 
@@ -246,12 +246,14 @@ class AdvantageActorCritic(LightningModule):
             "reward": self.total_rewards[-1],
             "avg_reward": self.avg_rewards,
         }
-        return OrderedDict({
-            "loss": loss,
-            "avg_reward": self.avg_rewards,
-            "log": log,
-            "progress_bar": log,
-        })
+        return OrderedDict(
+            {
+                "loss": loss,
+                "avg_reward": self.avg_rewards,
+                "log": log,
+                "progress_bar": log,
+            }
+        )
 
     def configure_optimizers(self) -> List[Optimizer]:
         """Initialize Adam optimizer"""

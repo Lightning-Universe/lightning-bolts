@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentParser
 
-from pytorch_lightning import seed_everything, Trainer
+from pytorch_lightning import Trainer, seed_everything
 
 from pl_bolts.models.self_supervised import CPC_v2, SSLFineTuner
 from pl_bolts.models.self_supervised.cpc.transforms import (
@@ -19,21 +19,21 @@ def cli_main():  # pragma: no cover
 
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
-    parser.add_argument('--dataset', type=str, help='stl10, cifar10', default='cifar10')
-    parser.add_argument('--ckpt_path', type=str, help='path to ckpt')
-    parser.add_argument('--data_dir', type=str, help='path to ckpt', default=os.getcwd())
+    parser.add_argument("--dataset", type=str, help="stl10, cifar10", default="cifar10")
+    parser.add_argument("--ckpt_path", type=str, help="path to ckpt")
+    parser.add_argument("--data_dir", type=str, help="path to ckpt", default=os.getcwd())
     args = parser.parse_args()
 
     # load the backbone
     backbone = CPC_v2.load_from_checkpoint(args.ckpt_path, strict=False)
 
-    if args.dataset == 'cifar10':
+    if args.dataset == "cifar10":
         dm = CIFAR10DataModule.from_argparse_args(args)
         dm.train_transforms = CPCTrainTransformsCIFAR10()
         dm.val_transforms = CPCEvalTransformsCIFAR10()
         dm.test_transforms = CPCEvalTransformsCIFAR10()
 
-    elif args.dataset == 'stl10':
+    elif args.dataset == "stl10":
         dm = STL10DataModule.from_argparse_args(args)
         dm.train_dataloader = dm.train_dataloader_labeled
         dm.val_dataloader = dm.val_dataloader_labeled
@@ -49,5 +49,5 @@ def cli_main():  # pragma: no cover
     trainer.test(datamodule=dm)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

@@ -3,17 +3,8 @@ from torch import nn
 
 
 class UpSampleConv(nn.Module):
-
     def __init__(
-        self,
-        in_channels,
-        out_channels,
-        kernel=4,
-        strides=2,
-        padding=1,
-        activation=True,
-        batchnorm=True,
-        dropout=False
+        self, in_channels, out_channels, kernel=4, strides=2, padding=1, activation=True, batchnorm=True, dropout=False
     ):
         super().__init__()
         self.activation = activation
@@ -42,7 +33,6 @@ class UpSampleConv(nn.Module):
 
 
 class DownSampleConv(nn.Module):
-
     def __init__(self, in_channels, out_channels, kernel=4, strides=2, padding=1, activation=True, batchnorm=True):
         """
         Paper details:
@@ -72,7 +62,6 @@ class DownSampleConv(nn.Module):
 
 
 class Generator(nn.Module):
-
     def __init__(self, in_channels, out_channels):
         """
         Paper details:
@@ -134,7 +123,6 @@ class Generator(nn.Module):
 
 
 class PatchGAN(nn.Module):
-
     def __init__(self, input_channels):
         super().__init__()
         self.d1 = DownSampleConv(input_channels, 64, batchnorm=False)

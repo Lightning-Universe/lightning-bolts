@@ -2,7 +2,7 @@ from typing import Sequence
 
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
-from torch import nn, Tensor
+from torch import Tensor, nn
 
 from pl_bolts.utils import _MATPLOTLIB_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -53,7 +53,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
         projection_factor: int = 3,
         min_logit_value: float = 5.0,
         logging_batch_interval: int = 20,
-        max_logit_difference: float = 0.1
+        max_logit_difference: float = 0.1,
     ):
         """
         Args:
@@ -124,11 +124,11 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
     ) -> None:
         if not _MATPLOTLIB_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
-                'You want to use `matplotlib` which is not installed yet, install it with `pip install matplotlib`.'
+                "You want to use `matplotlib` which is not installed yet, install it with `pip install matplotlib`."
             )
 
-        confusing_x = confusing_x[:self.top_k]
-        confusing_y = confusing_y[:self.top_k]
+        confusing_x = confusing_x[: self.top_k]
+        confusing_y = confusing_y[: self.top_k]
 
         x_param_a = nn.Parameter(confusing_x)
         x_param_b = nn.Parameter(confusing_x)
@@ -152,13 +152,13 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
             mask_idx = mask_idxs[img_i].cpu()
 
             fig, axarr = plt.subplots(nrows=2, ncols=3, figsize=(15, 10))
-            self.__draw_sample(fig, axarr, 0, 0, x, f'True: {y}')
-            self.__draw_sample(fig, axarr, 0, 1, ga, f'd{mask_idx[0]}-logit/dx')
-            self.__draw_sample(fig, axarr, 0, 2, gb, f'd{mask_idx[1]}-logit/dx')
-            self.__draw_sample(fig, axarr, 1, 1, ga * 2 + x, f'd{mask_idx[0]}-logit/dx')
-            self.__draw_sample(fig, axarr, 1, 2, gb * 2 + x, f'd{mask_idx[1]}-logit/dx')
+            self.__draw_sample(fig, axarr, 0, 0, x, f"True: {y}")
+            self.__draw_sample(fig, axarr, 0, 1, ga, f"d{mask_idx[0]}-logit/dx")
+            self.__draw_sample(fig, axarr, 0, 2, gb, f"d{mask_idx[1]}-logit/dx")
+            self.__draw_sample(fig, axarr, 1, 1, ga * 2 + x, f"d{mask_idx[0]}-logit/dx")
+            self.__draw_sample(fig, axarr, 1, 2, gb * 2 + x, f"d{mask_idx[1]}-logit/dx")
 
-            trainer.logger.experiment.add_figure('confusing_imgs', fig, global_step=trainer.global_step)
+            trainer.logger.experiment.add_figure("confusing_imgs", fig, global_step=trainer.global_step)
 
     @staticmethod
     def __draw_sample(fig: Figure, axarr: Axes, row_idx: int, col_idx: int, img: Tensor, title: str) -> None:

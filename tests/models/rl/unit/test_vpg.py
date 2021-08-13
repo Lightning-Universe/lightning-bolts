@@ -12,7 +12,6 @@ from pl_bolts.models.rl.vanilla_policy_gradient_model import VanillaPolicyGradie
 
 
 class TestPolicyGradient(TestCase):
-
     def setUp(self) -> None:
         self.env = ToTensor(gym.make("CartPole-v0"))
         self.obs_shape = self.env.observation_space.shape

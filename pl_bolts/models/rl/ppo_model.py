@@ -2,20 +2,20 @@ import argparse
 from typing import Any, List, Tuple
 
 import torch
-from pytorch_lightning import LightningModule, seed_everything, Trainer
+from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch import Tensor
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import ExperienceSourceDataset
-from pl_bolts.models.rl.common.networks import ActorCategorical, ActorContinous, MLP
+from pl_bolts.models.rl.common.networks import MLP, ActorCategorical, ActorContinous
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
     import gym
 else:  # pragma: no cover
-    warn_missing_pkg('gym')
+    warn_missing_pkg("gym")
 
 
 class PPO(LightningModule):
@@ -71,7 +71,7 @@ class PPO(LightningModule):
         super().__init__()
 
         if not _GYM_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('This Module requires gym environment which is not installed yet.')
+            raise ModuleNotFoundError("This Module requires gym environment which is not installed yet.")
 
         # Hyperparameters
         self.lr_actor = lr_actor
@@ -98,8 +98,8 @@ class PPO(LightningModule):
             self.actor = ActorCategorical(actor_mlp)
         else:
             raise NotImplementedError(
-                'Env action space should be of type Box (continous) or Discrete (categorical). '
-                f'Got type: {type(self.env.action_space)}'
+                "Env action space should be of type Box (continous) or Discrete (categorical). "
+                f"Got type: {type(self.env.action_space)}"
             )
 
         self.batch_states = []
@@ -295,23 +295,23 @@ class PPO(LightningModule):
 
         if optimizer_idx == 0:
             loss_actor = self.actor_loss(state, action, old_logp, adv)
-            self.log('loss_actor', loss_actor, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+            self.log("loss_actor", loss_actor, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
             return loss_actor
 
         elif optimizer_idx == 1:
             loss_critic = self.critic_loss(state, qval)
-            self.log('loss_critic', loss_critic, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+            self.log("loss_critic", loss_critic, on_step=False, on_epoch=True, prog_bar=False, logger=True)
 
             return loss_critic
 
         raise NotImplementedError(
-            f'Got optimizer_idx: {optimizer_idx}. Expected only 2 optimizers from configure_optimizers. '
-            'Modify optimizer logic in training_step to account for this. '
+            f"Got optimizer_idx: {optimizer_idx}. Expected only 2 optimizers from configure_optimizers. "
+            "Modify optimizer logic in training_step to account for this. "
         )
 
     def configure_optimizers(self) -> List[Optimizer]:
-        """ Initialize Adam optimizer"""
+        """Initialize Adam optimizer"""
         optimizer_actor = torch.optim.Adam(self.actor.parameters(), lr=self.lr_actor)
         optimizer_critic = torch.optim.Adam(self.critic.parameters(), lr=self.lr_critic)
 
@@ -349,7 +349,7 @@ class PPO(LightningModule):
             "--steps_per_epoch",
             type=int,
             default=2048,
-            help="how many action-state pairs to rollout for trajectory collection per epoch"
+            help="how many action-state pairs to rollout for trajectory collection per epoch",
         )
         parser.add_argument(
             "--nb_optim_iters", type=int, default=4, help="how many steps of gradient descent to perform on each batch"
@@ -375,5 +375,5 @@ def cli_main() -> None:
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

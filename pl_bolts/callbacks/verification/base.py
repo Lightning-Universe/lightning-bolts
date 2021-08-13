@@ -25,7 +25,7 @@ class VerificationBase:
 
     @abstractmethod
     def check(self, *args: Any, **kwargs: Any) -> bool:
-        """ Runs the actual test on the model. All verification classes must implement this.
+        """Runs the actual test on the model. All verification classes must implement this.
 
         Arguments:
             *args: Any positional arguments that are needed to run the test
@@ -109,11 +109,11 @@ class VerificationCallbackBase(Callback):
         """
 
     def warning_message(self, *args: Any, **kwargs: Any) -> str:
-        """ The warning message printed when the model does not pass the verification. """
+        """The warning message printed when the model does not pass the verification."""
         return self.message(*args, **kwargs)
 
     def error_message(self, *args: Any, **kwargs: Any) -> str:
-        """ The error message printed when the model does not pass the verification. """
+        """The error message printed when the model does not pass the verification."""
         return self.message(*args, **kwargs)
 
     def _raise(self, *args: Any, **kwargs: Any) -> None:

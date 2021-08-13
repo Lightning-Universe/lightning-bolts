@@ -19,21 +19,21 @@ from typing import List
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 
 
-def _load_requirements(path_dir: str, file_name: str = 'requirements.txt', comment_char: str = '#') -> List[str]:
+def _load_requirements(path_dir: str, file_name: str = "requirements.txt", comment_char: str = "#") -> List[str]:
     """Load requirements from a file
 
     >>> _load_requirements(_PROJECT_ROOT)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
     ['torch...', 'pytorch-lightning...'...]
     """
-    with open(os.path.join(path_dir, file_name), 'r') as file:
+    with open(os.path.join(path_dir, file_name), "r") as file:
         lines = [ln.strip() for ln in file.readlines()]
     reqs = []
     for ln in lines:
         # filer all comments
         if comment_char in ln:
-            ln = ln[:ln.index(comment_char)].strip()
+            ln = ln[: ln.index(comment_char)].strip()
         # skip directly installed dependencies
-        if ln.startswith('http'):
+        if ln.startswith("http"):
             continue
         if ln:  # if requirement is not empty
             reqs.append(ln)
@@ -50,7 +50,7 @@ def _load_readme_description(path_dir: str, homepage: str, ver: str) -> str:
     text = open(path_readme, encoding="utf-8").read()
 
     # drop images from readme
-    text = text.replace('![PT to PL](docs/source/_images/general/pl_quick_start_full_compressed.gif)', '')
+    text = text.replace("![PT to PL](docs/source/_images/general/pl_quick_start_full_compressed.gif)", "")
 
     # https://github.com/PyTorchLightning/pytorch-lightning/raw/master/docs/source/_images/lightning_module/pt_to_png
     github_source_url = os.path.join(homepage, "raw", ver)
@@ -59,17 +59,17 @@ def _load_readme_description(path_dir: str, homepage: str, ver: str) -> str:
     text = text.replace("docs/source/_images/", f"{os.path.join(github_source_url, 'docs/source/_images/')}")
 
     # readthedocs badge
-    text = text.replace('badge/?version=stable', f'badge/?version={ver}')
-    text = text.replace('lightning-bolts.readthedocs.io/en/stable/', f'lightning-bolts.readthedocs.io/en/{ver}')
+    text = text.replace("badge/?version=stable", f"badge/?version={ver}")
+    text = text.replace("lightning-bolts.readthedocs.io/en/stable/", f"lightning-bolts.readthedocs.io/en/{ver}")
     # codecov badge
-    text = text.replace('/branch/master/graph/badge.svg', f'/release/{ver}/graph/badge.svg')
+    text = text.replace("/branch/master/graph/badge.svg", f"/release/{ver}/graph/badge.svg")
     # replace github badges for release ones
-    text = text.replace('badge.svg?branch=master&event=push', f'badge.svg?tag={ver}')
+    text = text.replace("badge.svg?branch=master&event=push", f"badge.svg?tag={ver}")
 
-    skip_begin = r'<!-- following section will be skipped from PyPI description -->'
-    skip_end = r'<!-- end skipping PyPI description -->'
+    skip_begin = r"<!-- following section will be skipped from PyPI description -->"
+    skip_end = r"<!-- end skipping PyPI description -->"
     # todo: wrap content as commented description
-    text = re.sub(rf"{skip_begin}.+?{skip_end}", '<!--  -->', text, flags=re.IGNORECASE + re.DOTALL)
+    text = re.sub(rf"{skip_begin}.+?{skip_end}", "<!--  -->", text, flags=re.IGNORECASE + re.DOTALL)
 
     # # https://github.com/Borda/pytorch-lightning/releases/download/1.1.0a6/codecov_badge.png
     # github_release_url = os.path.join(homepage, "releases", "download", ver)

@@ -141,7 +141,7 @@ class SklearnDataModule(LightningDataModule):
         2
     """
 
-    name = 'sklearn'
+    name = "sklearn"
 
     def __init__(
         self,
@@ -175,7 +175,7 @@ class SklearnDataModule(LightningDataModule):
             X, y = sk_shuffle(X, y, random_state=random_state)
         elif shuffle and not _SKLEARN_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
-                'You want to use shuffle function from `scikit-learn` which is not installed yet.'
+                "You want to use shuffle function from `scikit-learn` which is not installed yet."
             )
 
         val_split = 0 if x_val is not None or y_val is not None else val_split
@@ -215,7 +215,7 @@ class SklearnDataModule(LightningDataModule):
             shuffle=self.shuffle,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
-            pin_memory=self.pin_memory
+            pin_memory=self.pin_memory,
         )
         return loader
 
@@ -226,7 +226,7 @@ class SklearnDataModule(LightningDataModule):
             shuffle=False,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
-            pin_memory=self.pin_memory
+            pin_memory=self.pin_memory,
         )
         return loader
 
@@ -237,7 +237,7 @@ class SklearnDataModule(LightningDataModule):
             shuffle=False,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
-            pin_memory=self.pin_memory
+            pin_memory=self.pin_memory,
         )
         return loader
 

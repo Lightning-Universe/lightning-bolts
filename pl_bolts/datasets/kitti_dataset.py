@@ -9,7 +9,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _PIL_AVAILABLE:
     from PIL import Image
 else:  # pragma: no cover
-    warn_missing_pkg('PIL', pypi_name='Pillow')
+    warn_missing_pkg("PIL", pypi_name="Pillow")
 
 DEFAULT_VOID_LABELS = (0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1)
 DEFAULT_VALID_LABELS = (7, 8, 11, 12, 13, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 31, 32, 33)
@@ -30,8 +30,9 @@ class KittiDataset(Dataset):
     `len(valid_labels)` (since that is the number of valid classes), so it can be used properly by
     the loss function when comparing with the output.
     """
-    IMAGE_PATH = os.path.join('training', 'image_2')
-    MASK_PATH = os.path.join('training', 'semantic')
+
+    IMAGE_PATH = os.path.join("training", "image_2")
+    MASK_PATH = os.path.join("training", "semantic")
 
     def __init__(
         self,
@@ -39,7 +40,7 @@ class KittiDataset(Dataset):
         img_size: tuple = (1242, 376),
         void_labels: list = DEFAULT_VOID_LABELS,
         valid_labels: list = DEFAULT_VALID_LABELS,
-        transform=None
+        transform=None,
     ):
         """
         Args:
@@ -49,7 +50,7 @@ class KittiDataset(Dataset):
             valid_labels: useful classes to include
         """
         if not _PIL_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('You want to use `PIL` which is not installed yet.')
+            raise ModuleNotFoundError("You want to use `PIL` which is not installed yet.")
 
         self.img_size = img_size
         self.void_labels = void_labels
@@ -72,7 +73,7 @@ class KittiDataset(Dataset):
         img = img.resize(self.img_size)
         img = np.array(img)
 
-        mask = Image.open(self.mask_list[idx]).convert('L')
+        mask = Image.open(self.mask_list[idx]).convert("L")
         mask = mask.resize(self.img_size)
         mask = np.array(mask)
         mask = self.encode_segmap(mask)

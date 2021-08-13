@@ -26,6 +26,6 @@ def test_generate_half_labeled_batches():
 
     # only half the batch should be unlabeled
     for i in range(0, len(mixed_y), 10):
-        batch = mixed_y[i:i + 10]
+        batch = mixed_y[i : i + 10]
         counts = Counter(batch.flatten().tolist())
         assert counts[-1] == 5

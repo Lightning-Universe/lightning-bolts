@@ -6,7 +6,7 @@ from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.loggers import LightningLoggerBase, TensorBoardLogger, WandbLogger
 from pytorch_lightning.utilities import rank_zero_warn
 from pytorch_lightning.utilities.apply_func import apply_to_collection
-from torch import nn, Tensor
+from torch import Tensor, nn
 from torch.nn import Module
 from torch.utils.hooks import RemovableHandle
 
@@ -181,8 +181,8 @@ class ModuleDataMonitor(DataMonitorBase):
         return names
 
     def _register_hook(self, module_name: str, module: nn.Module) -> RemovableHandle:
-        input_group_name = (f"{self.GROUP_NAME_INPUT}/{module_name}" if module_name else self.GROUP_NAME_INPUT)
-        output_group_name = (f"{self.GROUP_NAME_OUTPUT}/{module_name}" if module_name else self.GROUP_NAME_OUTPUT)
+        input_group_name = f"{self.GROUP_NAME_INPUT}/{module_name}" if module_name else self.GROUP_NAME_INPUT
+        output_group_name = f"{self.GROUP_NAME_OUTPUT}/{module_name}" if module_name else self.GROUP_NAME_OUTPUT
 
         def hook(_: Module, inp: Sequence, out: Sequence) -> None:
             inp = inp[0] if len(inp) == 1 else inp

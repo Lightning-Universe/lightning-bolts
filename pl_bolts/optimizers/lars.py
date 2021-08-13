@@ -64,7 +64,7 @@ class LARS(Optimizer):
         weight_decay=0,
         nesterov=False,
         trust_coefficient=0.001,
-        eps=1e-8
+        eps=1e-8,
     ):
         if lr is not required and lr < 0.0:
             raise ValueError("Invalid learning rate: {}".format(lr))
@@ -80,7 +80,7 @@ class LARS(Optimizer):
             weight_decay=weight_decay,
             nesterov=nesterov,
             trust_coefficient=trust_coefficient,
-            eps=eps
+            eps=eps,
         )
         if nesterov and (momentum <= 0 or dampening != 0):
             raise ValueError("Nesterov momentum requires a momentum and zero dampening")
@@ -91,7 +91,7 @@ class LARS(Optimizer):
         super(LARS, self).__setstate__(state)
 
         for group in self.param_groups:
-            group.setdefault('nesterov', False)
+            group.setdefault("nesterov", False)
 
     @torch.no_grad()
     def step(self, closure=None):
@@ -107,12 +107,12 @@ class LARS(Optimizer):
 
         # exclude scaling for params with 0 weight decay
         for group in self.param_groups:
-            weight_decay = group['weight_decay']
-            momentum = group['momentum']
-            dampening = group['dampening']
-            nesterov = group['nesterov']
+            weight_decay = group["weight_decay"]
+            momentum = group["momentum"]
+            dampening = group["dampening"]
+            nesterov = group["nesterov"]
 
-            for p in group['params']:
+            for p in group["params"]:
                 if p.grad is None:
                     continue
 
@@ -123,8 +123,8 @@ class LARS(Optimizer):
                 # lars scaling + weight decay part
                 if weight_decay != 0:
                     if p_norm != 0 and g_norm != 0:
-                        lars_lr = p_norm / (g_norm + p_norm * weight_decay + group['eps'])
-                        lars_lr *= group['trust_coefficient']
+                        lars_lr = p_norm / (g_norm + p_norm * weight_decay + group["eps"])
+                        lars_lr *= group["trust_coefficient"]
 
                         d_p = d_p.add(p, alpha=weight_decay)
                         d_p *= lars_lr
@@ -132,16 +132,16 @@ class LARS(Optimizer):
                 # sgd part
                 if momentum != 0:
                     param_state = self.state[p]
-                    if 'momentum_buffer' not in param_state:
-                        buf = param_state['momentum_buffer'] = torch.clone(d_p).detach()
+                    if "momentum_buffer" not in param_state:
+                        buf = param_state["momentum_buffer"] = torch.clone(d_p).detach()
                     else:
-                        buf = param_state['momentum_buffer']
+                        buf = param_state["momentum_buffer"]
                         buf.mul_(momentum).add_(d_p, alpha=1 - dampening)
                     if nesterov:
                         d_p = d_p.add(buf, alpha=momentum)
                     else:
                         d_p = buf
 
-                p.add_(d_p, alpha=-group['lr'])
+                p.add_(d_p, alpha=-group["lr"])
 
         return loss

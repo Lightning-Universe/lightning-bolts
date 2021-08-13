@@ -11,7 +11,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _SKLEARN_AVAILABLE:
     from sklearn.utils import shuffle as sk_shuffle
 else:  # pragma: no cover
-    warn_missing_pkg('sklearn', pypi_name='scikit-learn')
+    warn_missing_pkg("sklearn", pypi_name="scikit-learn")
 
 
 class Identity(torch.nn.Module):
@@ -34,8 +34,9 @@ class Identity(torch.nn.Module):
         return x
 
 
-def balance_classes(X: Union[Tensor, np.ndarray], Y: Union[Tensor, np.ndarray, Sequence[int]],
-                    batch_size: int) -> Tuple[np.ndarray, np.ndarray]:
+def balance_classes(
+    X: Union[Tensor, np.ndarray], Y: Union[Tensor, np.ndarray, Sequence[int]], batch_size: int
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Makes sure each batch has an equal amount of data from each class.
     Perfect balance
@@ -46,7 +47,7 @@ def balance_classes(X: Union[Tensor, np.ndarray], Y: Union[Tensor, np.ndarray, S
         batch_size: the ultimate batch size
     """
     if not _SKLEARN_AVAILABLE:  # pragma: no cover
-        raise ModuleNotFoundError('You want to use `shuffle` function from `scikit-learn` which is not installed yet.')
+        raise ModuleNotFoundError("You want to use `shuffle` function from `scikit-learn` which is not installed yet.")
 
     nb_classes = len(set(Y))
 

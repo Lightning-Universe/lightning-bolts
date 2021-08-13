@@ -2,7 +2,7 @@ from typing import Optional, Sequence, Tuple, Union
 
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
-from torch import device, Tensor
+from torch import Tensor, device
 from torch.nn import functional as F
 from torch.optim import Optimizer
 from torchmetrics.functional import accuracy
@@ -72,7 +72,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
 
     def to_device(self, batch: Sequence, device: Union[str, device]) -> Tuple[Tensor, Tensor]:
         # get the labeled batch
-        if self.dataset == 'stl10':
+        if self.dataset == "stl10":
             labeled_batch = batch[1]
             batch = labeled_batch
 
@@ -112,8 +112,8 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
 
         # log metrics
         train_acc = accuracy(mlp_logits.softmax(-1), y)
-        pl_module.log('online_train_acc', train_acc, on_step=True, on_epoch=False)
-        pl_module.log('online_train_loss', mlp_loss, on_step=True, on_epoch=False)
+        pl_module.log("online_train_acc", train_acc, on_step=True, on_epoch=False)
+        pl_module.log("online_train_loss", mlp_loss, on_step=True, on_epoch=False)
 
     def on_validation_batch_end(
         self,
@@ -137,5 +137,5 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
 
         # log metrics
         val_acc = accuracy(mlp_logits.softmax(-1), y)
-        pl_module.log('online_val_acc', val_acc, on_step=False, on_epoch=True, sync_dist=True)
-        pl_module.log('online_val_loss', mlp_loss, on_step=False, on_epoch=True, sync_dist=True)
+        pl_module.log("online_val_acc", val_acc, on_step=False, on_epoch=True, sync_dist=True)
+        pl_module.log("online_val_loss", mlp_loss, on_step=False, on_epoch=True, sync_dist=True)

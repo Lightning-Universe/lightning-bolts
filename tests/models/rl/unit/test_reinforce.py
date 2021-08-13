@@ -14,7 +14,6 @@ from pl_bolts.models.rl.reinforce_model import Reinforce
 
 
 class TestReinforce(TestCase):
-
     def setUp(self) -> None:
         self.env = ToTensor(gym.make("CartPole-v0"))
         self.obs_shape = self.env.observation_space.shape

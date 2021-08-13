@@ -3,10 +3,10 @@ from collections import OrderedDict
 from typing import List, Tuple
 
 import numpy as np
-from pytorch_lightning import LightningModule, seed_everything, Trainer
+from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
-from torch import optim as optim
 from torch import Tensor
+from torch import optim as optim
 from torch.nn.functional import log_softmax
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
@@ -21,7 +21,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _GYM_AVAILABLE:
     import gym
 else:  # pragma: no cover
-    warn_missing_pkg('gym')
+    warn_missing_pkg("gym")
 
 
 class Reinforce(LightningModule):
@@ -80,7 +80,7 @@ class Reinforce(LightningModule):
         super().__init__()
 
         if not _GYM_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('This Module requires gym environment which is not installed yet.')
+            raise ModuleNotFoundError("This Module requires gym environment which is not installed yet.")
 
         # Hyperparameters
         self.lr = lr
@@ -162,7 +162,9 @@ class Reinforce(LightningModule):
             total_reward = (self.gamma * total_reward) + exp.reward
         return total_reward
 
-    def train_batch(self, ) -> Tuple[List[Tensor], List[Tensor], List[Tensor]]:
+    def train_batch(
+        self,
+    ) -> Tuple[List[Tensor], List[Tensor], List[Tensor]]:
         """
         Contains the logic for generating a new batch of data to be passed to the DataLoader
 
@@ -188,7 +190,7 @@ class Reinforce(LightningModule):
                 self.batch_episodes += 1
                 self.done_episodes += 1
                 self.total_rewards.append(sum(self.cur_rewards))
-                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len :]))
                 self.cur_rewards = []
                 self.state = self.env.reset()
 
@@ -238,15 +240,17 @@ class Reinforce(LightningModule):
             "avg_reward": self.avg_rewards,
         }
 
-        return OrderedDict({
-            "loss": loss,
-            "avg_reward": self.avg_rewards,
-            "log": log,
-            "progress_bar": log,
-        })
+        return OrderedDict(
+            {
+                "loss": loss,
+                "avg_reward": self.avg_rewards,
+                "log": log,
+                "progress_bar": log,
+            }
+        )
 
     def configure_optimizers(self) -> List[Optimizer]:
-        """ Initialize Adam optimizer"""
+        """Initialize Adam optimizer"""
         optimizer = optim.Adam(self.net.parameters(), lr=self.lr)
         return [optimizer]
 
@@ -322,5 +326,5 @@ def cli_main():
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()
