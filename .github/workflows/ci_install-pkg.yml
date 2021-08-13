@@ -53,4 +53,4 @@ jobs:
         working-directory: ./dist
         run: |
           pip install $(python -c "import glob ; pkg = glob.glob('*.whl')[0] ; print(pkg)")
-          python -c "import imsegm ; print(imsegm.__version__)"
+          python -c "import pl_bolts ; print(pl_bolts.__version__)"
