@@ -18,7 +18,6 @@ def test_a2c():
     hparams = parent_parser.parse_args(args_list)
 
     trainer = Trainer(
-
         gpus=0,
         max_steps=100,
         max_epochs=100,  # Set this as the same as max steps to ensure that it doesn't stop early
@@ -28,8 +27,9 @@ def test_a2c():
     model = AdvantageActorCritic(hparams.env)
     trainer.fit(model)
 
+
 def test_sac():
-    """Smoke test that the SAC model runs"""
+    """Smoke test that the SAC model runs."""
 
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = Trainer.add_argparse_args(parent_parser)
@@ -51,7 +51,7 @@ def test_sac():
         max_steps=100,
         max_epochs=100,  # Set this as the same as max steps to ensure that it doesn't stop early
         val_check_interval=1,  # This just needs 'some' value, does not effect training right now
-        fast_dev_run=True
+        fast_dev_run=True,
     )
     model = SAC(**hparams.__dict__)
     trainer.fit(model)

@@ -7,7 +7,7 @@ from pl_bolts.models.rl.sac_model import SAC
 
 
 def test_sac_loss():
-    """Test the reinforce loss function"""
+    """Test the reinforce loss function."""
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = SAC.add_model_specific_args(parent_parser)
     args_list = [
@@ -34,7 +34,7 @@ def test_sac_loss():
 
 
 def test_sac_train_batch():
-    """Tests that a single batch generates correctly"""
+    """Tests that a single batch generates correctly."""
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = SAC.add_model_specific_args(parent_parser)
     args_list = [

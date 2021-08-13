@@ -164,12 +164,11 @@ class ActorCriticAgent(Agent):
 
 
 class SoftActorCriticAgent(Agent):
-    """Actor-Critic based agent that returns a continuous action based on the policy"""
+    """Actor-Critic based agent that returns a continuous action based on the policy."""
 
     def __call__(self, states: Tensor, device: str) -> List[float]:
-        """
-        Takes in the current state and returns the action based on the agents policy
-        
+        """Takes in the current state and returns the action based on the agents policy.
+
         Args:
             states: current state of the environment
             device: the device used for the current batch
@@ -189,8 +188,7 @@ class SoftActorCriticAgent(Agent):
         return actions
 
     def get_action(self, states: Tensor, device: str) -> List[float]:
-        """
-        Get the action greedily (without sampling)
+        """Get the action greedily (without sampling)
 
         Args:
             states: current state of the environment
@@ -206,5 +204,5 @@ class SoftActorCriticAgent(Agent):
             states = torch.tensor(states, device=device)
 
         actions = [self.net.get_action(states).cpu().numpy()]
-        
+
         return actions

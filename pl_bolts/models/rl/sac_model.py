@@ -1,15 +1,13 @@
-"""
-Soft Actor Critic
-"""
+"""Soft Actor Critic."""
 import argparse
 from typing import Dict, List, Tuple
 
 import numpy as np
 import torch
-from pytorch_lightning import LightningModule, seed_everything, Trainer
+from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
-from torch import optim as optim
 from torch import Tensor
+from torch import optim as optim
 from torch.nn import functional as F
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
@@ -17,19 +15,18 @@ from torch.utils.data import DataLoader
 from pl_bolts.datamodules.experience_source import Experience, ExperienceSourceDataset
 from pl_bolts.models.rl.common.agents import SoftActorCriticAgent
 from pl_bolts.models.rl.common.memory import MultiStepBuffer
-from pl_bolts.models.rl.common.networks import ContinuousMLP, MLP
+from pl_bolts.models.rl.common.networks import MLP, ContinuousMLP
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
     import gym
 else:  # pragma: no cover
-    warn_missing_pkg('gym')
+    warn_missing_pkg("gym")
     Env = object
 
 
 class SAC(LightningModule):
-
     def __init__(
         self,
         env: str,
@@ -88,15 +85,14 @@ class SAC(LightningModule):
         for _ in range(avg_reward_len):
             self.total_rewards.append(torch.tensor(min_episode_reward, device=self.device))
 
-        self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+        self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len :]))
 
         self.state = self.env.reset()
 
         self.automatic_optimization = False
 
     def run_n_episodes(self, env, n_epsiodes: int = 1) -> List[int]:
-        """
-        Carries out N episodes of the environment with the current agent without exploration
+        """Carries out N episodes of the environment with the current agent without exploration.
 
         Args:
             env: environment to use, either train environment or test environment
@@ -120,7 +116,7 @@ class SAC(LightningModule):
         return total_rewards
 
     def populate(self, warm_start: int) -> None:
-        """Populates the buffer with initial experience"""
+        """Populates the buffer with initial experience."""
         if warm_start > 0:
             self.state = self.env.reset()
 
@@ -149,8 +145,8 @@ class SAC(LightningModule):
         self.target_q2.load_state_dict(self.q2.state_dict())
 
     def soft_update_target(self, q_net, target_net):
-        """
-        Update the weights in target network using a weighted sum
+        """Update the weights in target network using a weighted sum.
+
         w_target := (1-a) * w_target + a * w_q
 
         Args:
@@ -158,12 +154,12 @@ class SAC(LightningModule):
             target_net: the target (q) network
         """
         for q_param, target_param in zip(q_net.parameters(), target_net.parameters()):
-            target_param.data.copy_((1.0 - self.hparams.target_alpha) * target_param.data
-                                    + self.hparams.target_alpha * q_param)
+            target_param.data.copy_(
+                (1.0 - self.hparams.target_alpha) * target_param.data + self.hparams.target_alpha * q_param
+            )
 
     def forward(self, x: Tensor) -> Tensor:
-        """
-        Passes in a state x through the network and gets the q_values of each action as an output
+        """Passes in a state x through the network and gets the q_values of each action as an output.
 
         Args:
             x: environment state
@@ -174,9 +170,10 @@ class SAC(LightningModule):
         output = self.policy(x).sample()
         return output
 
-    def train_batch(self, ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
-        """
-        Contains the logic for generating a new batch of data to be passed to the DataLoader
+    def train_batch(
+        self,
+    ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
+        """Contains the logic for generating a new batch of data to be passed to the DataLoader.
 
         Returns:
             yields a Experience tuple containing the state, action, reward, done and next_state.
@@ -202,7 +199,7 @@ class SAC(LightningModule):
                 self.done_episodes += 1
                 self.total_rewards.append(episode_reward)
                 self.total_episode_steps.append(episode_steps)
-                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len :]))
                 self.state = self.env.reset()
                 episode_steps = 0
                 episode_reward = 0
@@ -217,8 +214,7 @@ class SAC(LightningModule):
                 break
 
     def loss(self, batch: Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]) -> Tuple[Tensor, Tensor, Tensor]:
-        """
-        Calculates the loss for SAC which contains a total of 3 losses
+        """Calculates the loss for SAC which contains a total of 3 losses.
 
         Args:
             batch: a batch of states, actions, rewards, dones, and next states
@@ -253,7 +249,7 @@ class SAC(LightningModule):
             next_q1_values = self.target_q1(new_next_states_actions)
             next_q2_values = self.target_q2(new_next_states_actions)
             next_qmin_values = torch.min(next_q1_values, next_q2_values) - new_next_logprobs
-            target_values = rewards + (1. - dones) * self.hparams.gamma * next_qmin_values
+            target_values = rewards + (1.0 - dones) * self.hparams.gamma * next_qmin_values
 
         q1_loss = F.mse_loss(q1_values, target_values)
         q2_loss = F.mse_loss(q2_values, target_values)
@@ -261,9 +257,8 @@ class SAC(LightningModule):
         return policy_loss, q1_loss, q2_loss
 
     def training_step(self, batch: Tuple[Tensor, Tensor], _, optimizer_idx):
-        """
-        Carries out a single step through the environment to update the replay buffer.
-        Then calculates loss based on the minibatch recieved
+        """Carries out a single step through the environment to update the replay buffer. Then calculates loss
+        based on the minibatch recieved.
 
         Args:
             batch: current mini batch of replay data
@@ -290,31 +285,33 @@ class SAC(LightningModule):
             self.soft_update_target(self.q1, self.target_q1)
             self.soft_update_target(self.q2, self.target_q2)
 
-        self.log_dict({
-            "total_reward": self.total_rewards[-1],
-            "avg_reward": self.avg_rewards,
-            "policy_loss": policy_loss,
-            "q1_loss": q1_loss,
-            "q2_loss": q2_loss,
-            "episodes": self.done_episodes,
-            "episode_steps": self.total_episode_steps[-1]
-        })
+        self.log_dict(
+            {
+                "total_reward": self.total_rewards[-1],
+                "avg_reward": self.avg_rewards,
+                "policy_loss": policy_loss,
+                "q1_loss": q1_loss,
+                "q2_loss": q2_loss,
+                "episodes": self.done_episodes,
+                "episode_steps": self.total_episode_steps[-1],
+            }
+        )
 
     def test_step(self, *args, **kwargs) -> Dict[str, Tensor]:
-        """Evaluate the agent for 10 episodes"""
+        """Evaluate the agent for 10 episodes."""
         test_reward = self.run_n_episodes(self.test_env, 1)
         avg_reward = sum(test_reward) / len(test_reward)
         return {"test_reward": avg_reward}
 
     def test_epoch_end(self, outputs) -> Dict[str, Tensor]:
-        """Log the avg of the test results"""
+        """Log the avg of the test results."""
         rewards = [x["test_reward"] for x in outputs]
         avg_reward = sum(rewards) / len(rewards)
         self.log("avg_test_reward", avg_reward)
         return {"avg_test_reward": avg_reward}
 
     def _dataloader(self) -> DataLoader:
-        """Initialize the Replay Buffer dataset used for retrieving experiences"""
+        """Initialize the Replay Buffer dataset used for retrieving experiences."""
         self.buffer = MultiStepBuffer(self.hparams.replay_size, self.hparams.n_steps)
         self.populate(self.hparams.warm_start_size)
 
@@ -322,24 +319,25 @@ class SAC(LightningModule):
         return DataLoader(dataset=self.dataset, batch_size=self.hparams.batch_size)
 
     def train_dataloader(self) -> DataLoader:
-        """Get train loader"""
+        """Get train loader."""
         return self._dataloader()
 
     def test_dataloader(self) -> DataLoader:
-        """Get test loader"""
+        """Get test loader."""
         return self._dataloader()
 
     def configure_optimizers(self) -> Tuple[Optimizer]:
-        """ Initialize Adam optimizer"""
+        """Initialize Adam optimizer."""
         policy_optim = optim.Adam(self.policy.parameters(), self.hparams.policy_learning_rate)
         q1_optim = optim.Adam(self.q1.parameters(), self.hparams.q_learning_rate)
         q2_optim = optim.Adam(self.q2.parameters(), self.hparams.q_learning_rate)
         return policy_optim, q1_optim, q2_optim
 
     @staticmethod
-    def add_model_specific_args(arg_parser: argparse.ArgumentParser, ) -> argparse.ArgumentParser:
-        """
-        Adds arguments for DQN model
+    def add_model_specific_args(
+        arg_parser: argparse.ArgumentParser,
+    ) -> argparse.ArgumentParser:
+        """Adds arguments for DQN model.
 
         Note:
             These params are fine tuned for Pong env.
@@ -409,5 +407,5 @@ def cli_main():
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

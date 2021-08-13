@@ -4,7 +4,7 @@ from typing import Tuple
 
 import numpy as np
 import torch
-from torch import FloatTensor, nn, Tensor
+from torch import FloatTensor, Tensor, nn
 from torch.distributions import Categorical, Normal
 from torch.nn import functional as F
 
@@ -87,9 +87,7 @@ class MLP(nn.Module):
 
 
 class ContinuousMLP(nn.Module):
-    """
-    MLP network that outputs continuous value via Gaussian distribution
-    """
+    """MLP network that outputs continuous value via Gaussian distribution."""
 
     def __init__(
         self,
@@ -97,7 +95,7 @@ class ContinuousMLP(nn.Module):
         n_actions: int,
         hidden_size: int = 128,
         action_bias: int = 0,
-        action_scale: int = 1
+        action_scale: int = 1,
     ):
         """
         Args:
@@ -107,7 +105,7 @@ class ContinuousMLP(nn.Module):
             action_bias: the center of the action space
             action_scale: the scale of the action space
         """
-        super(ContinuousMLP, self).__init__()
+        super().__init__()
         self.action_bias = action_bias
         self.action_scale = action_scale
 
@@ -118,14 +116,13 @@ class ContinuousMLP(nn.Module):
         self.logstd_layer = nn.Linear(hidden_size, n_actions)
 
     def forward(self, x: FloatTensor) -> TanhMultivariateNormal:
-        """
-        Forward pass through network. Calculates the action distribution
+        """Forward pass through network. Calculates the action distribution.
 
         Args:
             x: input to network
         Returns:
             action distribution
-         """
+        """
         x = self.shared_net(x.float())
         batch_mean = self.mean_layer(x)
         logstd = torch.clamp(self.logstd_layer(x), -20, 2)
@@ -135,8 +132,7 @@ class ContinuousMLP(nn.Module):
         )
 
     def get_action(self, x: FloatTensor) -> Tensor:
-        """
-        Get the action greedily (without sampling)
+        """Get the action greedily (without sampling)
 
         Args:
             x: input to network
@@ -146,6 +142,7 @@ class ContinuousMLP(nn.Module):
         x = self.shared_net(x.float())
         batch_mean = self.mean_layer(x)
         return self.action_scale * torch.tanh(batch_mean) + self.action_bias
+
 
 class ActorCriticMLP(nn.Module):
     """MLP network with heads for actor and critic."""
