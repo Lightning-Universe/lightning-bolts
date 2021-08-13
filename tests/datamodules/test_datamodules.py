@@ -6,9 +6,11 @@ import torch
 from PIL import Image
 
 from pl_bolts.datamodules import (
+    BinaryEMNISTDataModule,
     BinaryMNISTDataModule,
     CIFAR10DataModule,
     CityscapesDataModule,
+    EMNISTDataModule,
     FashionMNISTDataModule,
     MNISTDataModule,
 )
@@ -80,8 +82,54 @@ def test_data_modules(datadir, dm_cls):
     assert img.size() == torch.Size([2, *dm.size()])
 
 
-def _create_dm(dm_cls, datadir, val_split=0.2):
-    dm = dm_cls(data_dir=datadir, val_split=val_split, num_workers=1, batch_size=2)
+def _create_dm(dm_cls, datadir, **kwargs):
+    dm = dm_cls(data_dir=datadir, num_workers=1, batch_size=2, **kwargs)
     dm.prepare_data()
     dm.setup()
     return dm
+
+
+@pytest.mark.parametrize("split", ["byclass", "bymerge", "balanced", "letters", "digits", "mnist"])
+@pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
+def test_emnist_datamodules(datadir, dm_cls, split):
+    """Test EMNIST datamodules download data and have the correct shape."""
+
+    dm = _create_dm(dm_cls, datadir, split=split)
+    loader = dm.train_dataloader()
+    img, _ = next(iter(loader))
+    assert img.size() == torch.Size([2, 1, 28, 28])
+
+
+@pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
+def test_emnist_datamodules_with_invalid_split(datadir, dm_cls):
+    """Test EMNIST datamodules raise an exception if the provided `split` doesn't exist."""
+
+    with pytest.raises(ValueError, match="Unknown value"):
+        dm_cls(data_dir=datadir, split="this_split_doesnt_exist")
+
+
+@pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
+@pytest.mark.parametrize(
+    "split, expected_val_split", [
+        ("byclass", None),
+        ("bymerge", None),
+        ("balanced", 18_800),
+        ("digits", 40_000),
+        ("letters", 14_800),
+        ("mnist", 10_000),
+    ]
+)
+def test_emnist_datamodules_with_strict_val_split(datadir, dm_cls, split, expected_val_split):
+    """
+    Test EMNIST datamodules when strict_val_split is specified to use the validation set defined in the paper.
+    Refer to https://arxiv.org/abs/1702.05373 for `expected_val_split` values.
+    """
+
+    if expected_val_split is None:
+        with pytest.raises(ValueError, match="Invalid value"):
+            dm = _create_dm(dm_cls, datadir, split=split, strict_val_split=True)
+
+    else:
+        dm = _create_dm(dm_cls, datadir, split=split, strict_val_split=True)
+        assert dm.val_split == expected_val_split
+        assert len(dm.dataset_val) == expected_val_split
