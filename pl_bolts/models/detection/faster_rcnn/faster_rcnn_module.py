@@ -90,9 +90,10 @@ class FasterRCNN(LightningModule):
                 backbone_model = self.backbone
                 if pretrained_backbone:
                     import warnings
+
                     warnings.warn(
-                        'You would need to load the pretrained state_dict yourself if you are '
-                        'providing backbone of type torch.nn.Module / pl.LightningModule.'
+                        "You would need to load the pretrained state_dict yourself if you are "
+                        "providing backbone of type torch.nn.Module / pl.LightningModule."
                     )
             else:
                 backbone_model = create_fasterrcnn_backbone(
