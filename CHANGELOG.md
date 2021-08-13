@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed momentum updating from val step and add separate val queue ([#631](https://github.com/PyTorchLightning/lightning-bolts/pull/631))
 
+- Fixed moving the queue to GPU when resuming checkpoint for SwAV model ([#684](https://github.com/PyTorchLightning/lightning-bolts/pull/684))
+
 
 - Fixed FP16 support with vision GPT model ([#694](https://github.com/PyTorchLightning/lightning-bolts/pull/694))
 
