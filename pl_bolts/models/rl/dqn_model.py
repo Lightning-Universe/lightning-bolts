@@ -20,7 +20,7 @@ from pl_bolts.models.rl.common.agents import ValueAgent
 from pl_bolts.models.rl.common.gym_wrappers import make_environment
 from pl_bolts.models.rl.common.memory import MultiStepBuffer
 from pl_bolts.models.rl.common.networks import CNN
-from pl_bolts.utils import _GYM_AVAILABLE
+from pl_bolts.utils import _GYM_AVAILABLE, _PL_GREATER_EQUAL_1_4
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
@@ -272,7 +272,7 @@ class DQN(LightningModule):
         # calculates training loss
         loss = dqn_loss(batch, self.net, self.target_net, self.gamma)
 
-        if self.trainer.use_dp or self.trainer.use_ddp2:
+        if self._use_dp_or_ddp2(self.trainer):
             loss = loss.unsqueeze(0)
 
         # Soft update of target network
@@ -403,6 +403,13 @@ class DQN(LightningModule):
         )
 
         return arg_parser
+
+    @staticmethod
+    def _use_dp_or_ddp2(trainer: Trainer) -> bool:
+        # for backwards compatibility
+        if _PL_GREATER_EQUAL_1_4:
+            return trainer.accelerator_connector.use_dp or trainer.accelerator_connector.use_ddp2
+        return trainer.use_dp or trainer.use_ddp2
 
 
 def cli_main():
