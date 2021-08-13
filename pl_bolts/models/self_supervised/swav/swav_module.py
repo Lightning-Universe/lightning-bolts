@@ -183,8 +183,8 @@ class SwAV(LightningModule):
                     self.feat_dim,
                 )
 
-                if self.gpus > 0:
-                    self.queue = self.queue.cuda()
+            if self.queue is not None:
+                self.queue = self.queue.to(self.device)
 
         self.use_the_queue = False
 
