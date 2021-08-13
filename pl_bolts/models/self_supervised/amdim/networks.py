@@ -154,7 +154,7 @@ class AMDIMEncoder(nn.Module):
 
 class Conv3x3(nn.Module):
     def __init__(self, n_in, n_out, n_kern, n_stride, n_pad, use_bn=True, pad_mode="constant"):
-        super(Conv3x3, self).__init__()
+        super().__init__()
         assert pad_mode in ["constant", "reflect"]
         self.n_pad = (n_pad, n_pad, n_pad, n_pad)
         self.pad_mode = pad_mode
@@ -177,7 +177,7 @@ class Conv3x3(nn.Module):
 
 class ConvResBlock(nn.Module):
     def __init__(self, n_in, n_out, width, stride, pad, depth, use_bn):
-        super(ConvResBlock, self).__init__()
+        super().__init__()
         layer_list = [ConvResNxN(n_in, n_out, width, stride, pad, use_bn)]
         for i in range(depth - 1):
             layer_list.append(ConvResNxN(n_out, n_out, 1, 1, 0, use_bn))
@@ -198,7 +198,7 @@ class ConvResBlock(nn.Module):
 
 class ConvResNxN(nn.Module):
     def __init__(self, n_in, n_out, width, stride, pad, use_bn=False):
-        super(ConvResNxN, self).__init__()
+        super().__init__()
         self.n_in = n_in
         self.n_out = n_out
         self.width = width
@@ -242,7 +242,7 @@ class ConvResNxN(nn.Module):
 
 class MaybeBatchNorm2d(nn.Module):
     def __init__(self, n_ftr, affine, use_bn):
-        super(MaybeBatchNorm2d, self).__init__()
+        super().__init__()
         self.bn = nn.BatchNorm2d(n_ftr, affine=affine)
         self.use_bn = use_bn
 
@@ -254,7 +254,7 @@ class MaybeBatchNorm2d(nn.Module):
 
 class NopNet(nn.Module):
     def __init__(self, norm_dim=None):
-        super(NopNet, self).__init__()
+        super().__init__()
         self.norm_dim = norm_dim
 
     def forward(self, x):
@@ -267,7 +267,7 @@ class NopNet(nn.Module):
 
 class FakeRKHSConvNet(nn.Module):
     def __init__(self, n_input, n_output, use_bn=False):
-        super(FakeRKHSConvNet, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(n_input, n_output, kernel_size=1, stride=1, padding=0, bias=False)
         self.bn1 = MaybeBatchNorm2d(n_output, True, use_bn)
         self.relu1 = nn.ReLU(inplace=True)

@@ -29,7 +29,7 @@ class SSLEvaluator(nn.Module):
 
 class Flatten(nn.Module):
     def __init__(self):
-        super(Flatten, self).__init__()
+        super().__init__()
 
     def forward(self, input_tensor):
         return input_tensor.view(input_tensor.size(0), -1)

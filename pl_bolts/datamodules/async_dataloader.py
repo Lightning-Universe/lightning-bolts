@@ -10,7 +10,7 @@ from torch._six import string_classes
 from torch.utils.data import DataLoader, Dataset
 
 
-class AsynchronousLoader(object):
+class AsynchronousLoader:
     """
     Class for asynchronously loading from CPU memory to device memory with DataLoader.
 

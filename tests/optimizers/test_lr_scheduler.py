@@ -18,7 +18,7 @@ class SchedulerTestNet(torch.nn.Module):
     """
 
     def __init__(self):
-        super(SchedulerTestNet, self).__init__()
+        super().__init__()
         self.conv1 = torch.nn.Conv2d(1, 1, 1)
         self.conv2 = torch.nn.Conv2d(1, 1, 1)
 
@@ -26,7 +26,7 @@ class SchedulerTestNet(torch.nn.Module):
         return self.conv2(F.relu(self.conv1(x)))
 
 
-class TestLRScheduler(object):
+class TestLRScheduler:
     """
     adapted from: https://github.com/pytorch/pytorch/blob/master/test/test_optim.py
     """

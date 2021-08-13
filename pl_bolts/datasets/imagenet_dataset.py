@@ -212,7 +212,7 @@ def parse_devkit_archive(root, file=None):
 
     def parse_val_groundtruth_txt(devkit_root):
         file = os.path.join(devkit_root, "data", "ILSVRC2012_validation_ground_truth.txt")
-        with open(file, "r") as txtfh:
+        with open(file) as txtfh:
             val_idcs = txtfh.readlines()
         return [int(val_idx) for val_idx in val_idcs]
 

@@ -40,11 +40,11 @@ class LARS(Optimizer):
         .. math::
             \begin{aligned}
                 g_{t+1} & = \text{lars_lr} * (\beta * p_{t} + g_{t+1}), \\
-                v_{t+1} & = \mu * v_{t} + g_{t+1}, \\
+                v_{t+1} & = \\mu * v_{t} + g_{t+1}, \\
                 p_{t+1} & = p_{t} - \text{lr} * v_{t+1},
-            \end{aligned}
+            \\end{aligned}
 
-        where :math:`p`, :math:`g`, :math:`v`, :math:`\mu` and :math:`\beta` denote the
+        where :math:`p`, :math:`g`, :math:`v`, :math:`\\mu` and :math:`\beta` denote the
         parameters, gradient, velocity, momentum, and weight decay respectively.
         The :math:`lars_lr` is defined by Eq. 6 in the paper.
         The Nesterov version is analogously modified.
@@ -67,11 +67,11 @@ class LARS(Optimizer):
         eps=1e-8,
     ):
         if lr is not required and lr < 0.0:
-            raise ValueError("Invalid learning rate: {}".format(lr))
+            raise ValueError(f"Invalid learning rate: {lr}")
         if momentum < 0.0:
-            raise ValueError("Invalid momentum value: {}".format(momentum))
+            raise ValueError(f"Invalid momentum value: {momentum}")
         if weight_decay < 0.0:
-            raise ValueError("Invalid weight_decay value: {}".format(weight_decay))
+            raise ValueError(f"Invalid weight_decay value: {weight_decay}")
 
         defaults = dict(
             lr=lr,
@@ -85,10 +85,10 @@ class LARS(Optimizer):
         if nesterov and (momentum <= 0 or dampening != 0):
             raise ValueError("Nesterov momentum requires a momentum and zero dampening")
 
-        super(LARS, self).__init__(params, defaults)
+        super().__init__(params, defaults)
 
     def __setstate__(self, state):
-        super(LARS, self).__setstate__(state)
+        super().__setstate__(state)
 
         for group in self.param_groups:
             group.setdefault("nesterov", False)

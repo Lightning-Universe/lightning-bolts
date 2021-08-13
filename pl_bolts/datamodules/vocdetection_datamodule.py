@@ -15,7 +15,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-class Compose(object):
+class Compose:
     """
     Like `torchvision.transforms.compose` but works for (image, target)
     """

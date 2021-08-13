@@ -5,7 +5,7 @@ from pl_bolts.models.gans import GAN
 
 
 def test_latent_dim_interpolator():
-    class FakeTrainer(object):
+    class FakeTrainer:
         def __init__(self):
             self.current_epoch = 1
             self.global_step = 1

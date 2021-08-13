@@ -132,7 +132,7 @@ class AMDIMTrainTransformsSTL10:
         return out1, out2
 
 
-class AMDIMEvalTransformsSTL10(object):
+class AMDIMEvalTransformsSTL10:
     """
     Transforms applied to AMDIM
 
@@ -175,7 +175,7 @@ class AMDIMEvalTransformsSTL10(object):
         return out1
 
 
-class AMDIMTrainTransformsImageNet128(object):
+class AMDIMTrainTransformsImageNet128:
     """
     Transforms applied to AMDIM
 
@@ -219,7 +219,7 @@ class AMDIMTrainTransformsImageNet128(object):
         return out1, out2
 
 
-class AMDIMEvalTransformsImageNet128(object):
+class AMDIMEvalTransformsImageNet128:
     """
     Transforms applied to AMDIM
 
