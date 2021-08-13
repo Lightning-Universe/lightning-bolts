@@ -162,7 +162,7 @@ class ScaledFloatFrame(ObservationWrapper):
 
 
 class BufferWrapper(ObservationWrapper):
-    """ "Wrapper for image stacking."""
+    """Wrapper for image stacking."""
 
     def __init__(self, env, n_steps, dtype=np.float32):
         super().__init__(env)

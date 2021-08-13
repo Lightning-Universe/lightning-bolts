@@ -14,7 +14,7 @@ else:  # pragma: no cover
 
 
 class AMDIMPretraining:
-    """ " For pretraining we use the train transform for both train and val."""
+    """For pretraining we use the train transform for both train and val."""
 
     @staticmethod
     def cifar10(dataset_root, split: str = "train"):
@@ -75,7 +75,7 @@ class AMDIMPretraining:
 
 
 class AMDIMPatchesPretraining:
-    """ " For pretraining we use the train transform for both train and val."""
+    """For pretraining we use the train transform for both train and val."""
 
     @staticmethod
     def cifar10(dataset_root, patch_size, patch_overlap, split: str = "train"):
