@@ -20,8 +20,8 @@ else:  # pragma: no cover
 
 
 class Moco2TrainCIFAR10Transforms:
-    """
-    Moco 2 augmentation:
+    """Moco 2 augmentation:
+
     https://arxiv.org/pdf/2003.04297.pdf
     """
 
@@ -49,8 +49,8 @@ class Moco2TrainCIFAR10Transforms:
 
 
 class Moco2EvalCIFAR10Transforms:
-    """
-    Moco 2 augmentation:
+    """Moco 2 augmentation:
+
     https://arxiv.org/pdf/2003.04297.pdf
     """
 
@@ -74,8 +74,8 @@ class Moco2EvalCIFAR10Transforms:
 
 
 class Moco2TrainSTL10Transforms:
-    """
-    Moco 2 augmentation:
+    """Moco 2 augmentation:
+
     https://arxiv.org/pdf/2003.04297.pdf
     """
 
@@ -103,8 +103,8 @@ class Moco2TrainSTL10Transforms:
 
 
 class Moco2EvalSTL10Transforms:
-    """
-    Moco 2 augmentation:
+    """Moco 2 augmentation:
+
     https://arxiv.org/pdf/2003.04297.pdf
     """
 
@@ -128,10 +128,9 @@ class Moco2EvalSTL10Transforms:
 
 
 class Moco2TrainImagenetTransforms:
-    """
-    Moco 2 augmentation:
-    https://arxiv.org/pdf/2003.04297.pdf
+    """Moco 2 augmentation:
 
+    https://arxiv.org/pdf/2003.04297.pdf
     """
 
     def __init__(self, height: int = 128):
@@ -158,8 +157,8 @@ class Moco2TrainImagenetTransforms:
 
 
 class Moco2EvalImagenetTransforms:
-    """
-    Moco 2 augmentation:
+    """Moco 2 augmentation:
+
     https://arxiv.org/pdf/2003.04297.pdf
     """
 
@@ -183,7 +182,7 @@ class Moco2EvalImagenetTransforms:
 
 
 class GaussianBlur:
-    """Gaussian blur augmentation in SimCLR https://arxiv.org/abs/2002.05709"""
+    """Gaussian blur augmentation in SimCLR https://arxiv.org/abs/2002.05709."""
 
     def __init__(self, sigma=(0.1, 2.0)):
         if not _PIL_AVAILABLE:  # pragma: no cover

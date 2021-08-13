@@ -18,8 +18,7 @@ else:  # pragma: no cover
 
 
 class ConfusedLogitCallback(Callback):  # pragma: no cover
-    """
-    Takes the logit predictions of a model and when the probabilities of two classes are very close, the model
+    """Takes the logit predictions of a model and when the probabilities of two classes are very close, the model
     doesn't have high certainty that it should pick one vs the other class.
 
     This callback shows how the input would have to change to swing the model from one label prediction

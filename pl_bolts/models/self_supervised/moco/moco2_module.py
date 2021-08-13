@@ -1,5 +1,4 @@
-"""
-Adapted from: https://github.com/facebookresearch/moco
+"""Adapted from: https://github.com/facebookresearch/moco.
 
 Original work is: Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 This implementation is: Copyright (c) PyTorch Lightning, Inc. and its affiliates. All Rights Reserved
@@ -36,8 +35,7 @@ else:  # pragma: no cover
 
 
 class Moco_v2(LightningModule):
-    """
-    PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
+    """PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
 
     Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.
 
@@ -128,9 +126,7 @@ class Moco_v2(LightningModule):
         self.register_buffer("val_queue_ptr", torch.zeros(1, dtype=torch.long))
 
     def init_encoders(self, base_encoder):
-        """
-        Override to add your own encoders
-        """
+        """Override to add your own encoders."""
 
         template_model = getattr(torchvision.models, base_encoder)
         encoder_q = template_model(num_classes=self.hparams.emb_dim)
@@ -140,9 +136,7 @@ class Moco_v2(LightningModule):
 
     @torch.no_grad()
     def _momentum_update_key_encoder(self):
-        """
-        Momentum update of the key encoder
-        """
+        """Momentum update of the key encoder."""
         for param_q, param_k in zip(self.encoder_q.parameters(), self.encoder_k.parameters()):
             em = self.hparams.encoder_momentum
             param_k.data = param_k.data * em + param_q.data * (1.0 - em)
@@ -166,8 +160,8 @@ class Moco_v2(LightningModule):
 
     @torch.no_grad()
     def _batch_shuffle_ddp(self, x):  # pragma: no cover
-        """
-        Batch shuffle, for making use of BatchNorm.
+        """Batch shuffle, for making use of BatchNorm.
+
         *** Only support DistributedDataParallel (DDP) model. ***
         """
         # gather from all gpus
@@ -194,8 +188,8 @@ class Moco_v2(LightningModule):
 
     @torch.no_grad()
     def _batch_unshuffle_ddp(self, x, idx_unshuffle):  # pragma: no cover
-        """
-        Undo batch shuffle.
+        """Undo batch shuffle.
+
         *** Only support DistributedDataParallel (DDP) model. ***
         """
         # gather from all gpus
@@ -346,8 +340,8 @@ class Moco_v2(LightningModule):
 # utils
 @torch.no_grad()
 def concat_all_gather(tensor):
-    """
-    Performs all_gather operation on the provided tensors.
+    """Performs all_gather operation on the provided tensors.
+
     *** Warning ***: torch.distributed.all_gather has no gradient.
     """
     tensors_gather = [torch.ones_like(tensor) for _ in range(torch.distributed.get_world_size())]

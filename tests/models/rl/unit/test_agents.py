@@ -1,4 +1,4 @@
-"""Tests that the agent module works correctly"""
+"""Tests that the agent module works correctly."""
 from unittest import TestCase
 from unittest.mock import Mock
 

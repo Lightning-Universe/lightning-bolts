@@ -1,6 +1,4 @@
-"""
-Loss functions for the RL models
-"""
+"""Loss functions for the RL models."""
 
 from typing import List, Tuple
 
@@ -10,8 +8,7 @@ from torch import Tensor, nn
 
 
 def dqn_loss(batch: Tuple[Tensor, Tensor], net: nn.Module, target_net: nn.Module, gamma: float = 0.99) -> Tensor:
-    """
-    Calculates the mse loss using a mini batch from the replay buffer
+    """Calculates the mse loss using a mini batch from the replay buffer.
 
     Args:
         batch: current mini batch of replay data
@@ -44,10 +41,9 @@ def double_dqn_loss(
     target_net: nn.Module,
     gamma: float = 0.99,
 ) -> Tensor:
-    """
-    Calculates the mse loss using a mini batch from the replay buffer. This uses an improvement to the original
-    DQN loss by using the double dqn. This is shown by using the actions of the train network to pick the
-    value from the target network. This code is heavily commented in order to explain the process clearly
+    """Calculates the mse loss using a mini batch from the replay buffer. This uses an improvement to the original
+    DQN loss by using the double dqn. This is shown by using the actions of the train network to pick the value
+    from the target network. This code is heavily commented in order to explain the process clearly.
 
     Args:
         batch: current mini batch of replay data
@@ -91,8 +87,7 @@ def per_dqn_loss(
     target_net: nn.Module,
     gamma: float = 0.99,
 ) -> Tuple[Tensor, np.ndarray]:
-    """
-    Calculates the mse loss with the priority weights of the batch from the PER buffer
+    """Calculates the mse loss with the priority weights of the batch from the PER buffer.
 
     Args:
         batch: current mini batch of replay data

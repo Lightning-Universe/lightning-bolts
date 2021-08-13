@@ -65,9 +65,7 @@ class UNet(nn.Module):
 
 
 class DoubleConv(nn.Module):
-    """
-    [ Conv2d => BatchNorm (optional) => ReLU ] x 2
-    """
+    """[ Conv2d => BatchNorm (optional) => ReLU ] x 2."""
 
     def __init__(self, in_ch: int, out_ch: int):
         super().__init__()
@@ -85,9 +83,7 @@ class DoubleConv(nn.Module):
 
 
 class Down(nn.Module):
-    """
-    Downscale with MaxPool => DoubleConvolution block
-    """
+    """Downscale with MaxPool => DoubleConvolution block."""
 
     def __init__(self, in_ch: int, out_ch: int):
         super().__init__()
@@ -98,10 +94,8 @@ class Down(nn.Module):
 
 
 class Up(nn.Module):
-    """
-    Upsampling (by either bilinear interpolation or transpose convolutions)
-    followed by concatenation of feature map from contracting path, followed by DoubleConv.
-    """
+    """Upsampling (by either bilinear interpolation or transpose convolutions) followed by concatenation of feature
+    map from contracting path, followed by DoubleConv."""
 
     def __init__(self, in_ch: int, out_ch: int, bilinear: bool = False):
         super().__init__()

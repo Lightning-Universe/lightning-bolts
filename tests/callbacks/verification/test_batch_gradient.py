@@ -14,7 +14,10 @@ from tests import _MARK_REQUIRE_GPU
 
 class TemplateModel(nn.Module):
     def __init__(self, mix_data=False):
-        """Base model for testing. The setting ``mix_data=True`` simulates a wrong implementation."""
+        """Base model for testing.
+
+        The setting ``mix_data=True`` simulates a wrong implementation.
+        """
         super().__init__()
         self.mix_data = mix_data
         self.linear = nn.Linear(10, 5)
@@ -147,7 +150,8 @@ def test_batch_verification_raises_on_batch_size_1():
 
 
 def test_batch_verification_calls_custom_input_output_mappings():
-    """Test that batch gradient verification can support different input and outputs with user-provided mappings."""
+    """Test that batch gradient verification can support different input and outputs with user-provided
+    mappings."""
     model = MultipleInputModel()
 
     def input_mapping(inputs):

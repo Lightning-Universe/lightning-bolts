@@ -120,9 +120,7 @@ class CityscapesDataModule(LightningDataModule):
         return 30
 
     def train_dataloader(self) -> DataLoader:
-        """
-        Cityscapes train set
-        """
+        """Cityscapes train set."""
         transforms = self.train_transforms or self._default_transforms()
         target_transforms = self.target_transforms or self._default_target_transforms()
 
@@ -147,9 +145,7 @@ class CityscapesDataModule(LightningDataModule):
         return loader
 
     def val_dataloader(self) -> DataLoader:
-        """
-        Cityscapes val set
-        """
+        """Cityscapes val set."""
         transforms = self.val_transforms or self._default_transforms()
         target_transforms = self.target_transforms or self._default_target_transforms()
 
@@ -174,9 +170,7 @@ class CityscapesDataModule(LightningDataModule):
         return loader
 
     def test_dataloader(self) -> DataLoader:
-        """
-        Cityscapes test set
-        """
+        """Cityscapes test set."""
         transforms = self.test_transforms or self._default_transforms()
         target_transforms = self.target_transforms or self._default_target_transforms()
 

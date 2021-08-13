@@ -9,8 +9,7 @@ else:  # pragma: no cover
 
 
 class CPCTrainTransformsCIFAR10:
-    """
-    Transforms used for CPC:
+    """Transforms used for CPC:
 
     Transforms::
 
@@ -30,7 +29,6 @@ class CPCTrainTransformsCIFAR10:
         # in a DataModule
         module = CIFAR10DataModule(PATH)
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsCIFAR10())
-
     """
 
     def __init__(self, patch_size=8, overlap=4):
@@ -72,8 +70,7 @@ class CPCTrainTransformsCIFAR10:
 
 
 class CPCEvalTransformsCIFAR10:
-    """
-    Transforms used for CPC:
+    """Transforms used for CPC:
 
     Transforms::
 
@@ -90,7 +87,6 @@ class CPCEvalTransformsCIFAR10:
         # in a DataModule
         module = CIFAR10DataModule(PATH)
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsCIFAR10())
-
     """
 
     def __init__(self, patch_size: int = 8, overlap: int = 4):
@@ -126,8 +122,7 @@ class CPCEvalTransformsCIFAR10:
 
 
 class CPCTrainTransformsSTL10:
-    """
-    Transforms used for CPC:
+    """Transforms used for CPC:
 
     Transforms::
 
@@ -187,8 +182,7 @@ class CPCTrainTransformsSTL10:
 
 
 class CPCEvalTransformsSTL10:
-    """
-    Transforms used for CPC:
+    """Transforms used for CPC:
 
     Transforms::
 
@@ -205,7 +199,6 @@ class CPCEvalTransformsSTL10:
         # in a DataModule
         module = STL10DataModule(PATH)
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsSTL10())
-
     """
 
     def __init__(self, patch_size: int = 16, overlap: int = 8):
@@ -239,8 +232,7 @@ class CPCEvalTransformsSTL10:
 
 
 class CPCTrainTransformsImageNet128:
-    """
-    Transforms used for CPC:
+    """Transforms used for CPC:
 
     Transforms::
 
@@ -293,8 +285,7 @@ class CPCTrainTransformsImageNet128:
 
 
 class CPCEvalTransformsImageNet128:
-    """
-    Transforms used for CPC:
+    """Transforms used for CPC:
 
     Transforms::
 

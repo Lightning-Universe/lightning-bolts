@@ -19,8 +19,8 @@ else:  # pragma: no cover
 
 
 class PPO(LightningModule):
-    """
-    PyTorch Lightning implementation of `Proximal Policy Optimization
+    """PyTorch Lightning implementation of `Proximal Policy Optimization.
+
     <https://arxiv.org/abs/1707.06347>`_
 
     Paper authors: John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov
@@ -120,8 +120,7 @@ class PPO(LightningModule):
         self.state = torch.FloatTensor(self.env.reset())
 
     def forward(self, x: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
-        """
-        Passes in a state x through the network and returns the policy and a sampled action
+        """Passes in a state x through the network and returns the policy and a sampled action.
 
         Args:
             x: environment state
@@ -135,7 +134,7 @@ class PPO(LightningModule):
         return pi, action, value
 
     def discount_rewards(self, rewards: List[float], discount: float) -> List[float]:
-        """Calculate the discounted rewards of all rewards in list
+        """Calculate the discounted rewards of all rewards in list.
 
         Args:
             rewards: list of rewards/advantages
@@ -156,7 +155,7 @@ class PPO(LightningModule):
         return list(reversed(cumul_reward))
 
     def calc_advantage(self, rewards: List[float], values: List[float], last_value: float) -> List[float]:
-        """Calculate the advantage given rewards, state values, and the last value of episode
+        """Calculate the advantage given rewards, state values, and the last value of episode.
 
         Args:
             rewards: list of episode rewards
@@ -175,8 +174,7 @@ class PPO(LightningModule):
         return adv
 
     def generate_trajectory_samples(self) -> Tuple[List[Tensor], List[Tensor], List[Tensor]]:
-        """
-        Contains the logic for generating trajectory data to train policy and value network
+        """Contains the logic for generating trajectory data to train policy and value network.
 
         Yield:
            Tuple of Lists containing tensors for states, actions, log probs, qvals and advantage
@@ -273,8 +271,7 @@ class PPO(LightningModule):
         return loss_critic
 
     def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx, optimizer_idx):
-        """
-        Carries out a single update to actor and critic network from a batch of replay buffer.
+        """Carries out a single update to actor and critic network from a batch of replay buffer.
 
         Args:
             batch: batch of replay buffer/trajectory data
@@ -311,28 +308,26 @@ class PPO(LightningModule):
         )
 
     def configure_optimizers(self) -> List[Optimizer]:
-        """Initialize Adam optimizer"""
+        """Initialize Adam optimizer."""
         optimizer_actor = torch.optim.Adam(self.actor.parameters(), lr=self.lr_actor)
         optimizer_critic = torch.optim.Adam(self.critic.parameters(), lr=self.lr_critic)
 
         return optimizer_actor, optimizer_critic
 
     def optimizer_step(self, *args, **kwargs):
-        """
-        Run ``nb_optim_iters`` number of iterations of gradient descent on actor and critic
-        for each data sample.
-        """
+        """Run ``nb_optim_iters`` number of iterations of gradient descent on actor and critic for each data
+        sample."""
         for _ in range(self.nb_optim_iters):
             super().optimizer_step(*args, **kwargs)
 
     def _dataloader(self) -> DataLoader:
-        """Initialize the Replay Buffer dataset used for retrieving experiences"""
+        """Initialize the Replay Buffer dataset used for retrieving experiences."""
         dataset = ExperienceSourceDataset(self.generate_trajectory_samples)
         dataloader = DataLoader(dataset=dataset, batch_size=self.batch_size)
         return dataloader
 
     def train_dataloader(self) -> DataLoader:
-        """Get train loader"""
+        """Get train loader."""
         return self._dataloader()
 
     @staticmethod

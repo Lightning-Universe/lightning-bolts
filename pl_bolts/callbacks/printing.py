@@ -8,8 +8,7 @@ from pytorch_lightning.utilities import rank_zero_info
 
 
 class PrintTableMetricsCallback(Callback):
-    """
-    Prints a table with the metrics in columns on every epoch end
+    """Prints a table with the metrics in columns on every epoch end.
 
     Example::
 
@@ -31,7 +30,6 @@ class PrintTableMetricsCallback(Callback):
         # loss│train_loss│val_loss│epoch
         # ──────────────────────────────
         # 2.2541470527648926│2.2541470527648926│2.2158432006835938│0
-
     """
 
     def __init__(self) -> None:
@@ -53,9 +51,8 @@ def dicts_to_table(
     skip_none_lines: bool = False,
     replace_values: Optional[Dict[str, Any]] = None,
 ) -> str:
-    """
-    Generate ascii table from dictionary
-    Taken from (https://stackoverflow.com/questions/40056747/print-a-list-of-dictionaries-in-table-form)
+    """Generate ascii table from dictionary Taken from (https://stackoverflow.com/questions/40056747/print-a-list-
+    of-dictionaries-in-table-form)
 
     Args:
         dicts: input dictionary list; empty lists make keys OR header_names mandatory

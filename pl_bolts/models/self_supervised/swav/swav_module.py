@@ -1,6 +1,4 @@
-"""
-Adapted from official swav implementation: https://github.com/facebookresearch/swav
-"""
+"""Adapted from official swav implementation: https://github.com/facebookresearch/swav."""
 import os
 from argparse import ArgumentParser
 

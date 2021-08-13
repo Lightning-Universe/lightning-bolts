@@ -19,8 +19,7 @@ else:  # pragma: no cover
 
 
 class DCGAN(LightningModule):
-    """
-    DCGAN implementation.
+    """DCGAN implementation.
 
     Example::
 
@@ -92,8 +91,7 @@ class DCGAN(LightningModule):
         return [opt_disc, opt_gen], []
 
     def forward(self, noise: Tensor) -> Tensor:
-        """
-        Generates an image given input noise
+        """Generates an image given input noise.
 
         Example::
 

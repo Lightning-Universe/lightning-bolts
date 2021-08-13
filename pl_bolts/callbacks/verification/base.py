@@ -10,8 +10,8 @@ from pytorch_lightning.utilities import move_data_to_device, rank_zero_warn
 
 
 class VerificationBase:
-    """
-    Base class for model verification.
+    """Base class for model verification.
+
     All verifications should run with any :class:`torch.nn.Module` unless otherwise stated.
     """
 
@@ -38,9 +38,8 @@ class VerificationBase:
         """
 
     def _get_input_array_copy(self, input_array: Optional[Any] = None) -> Any:
-        """
-        Returns a deep copy of the example input array in cases where it is expected that the
-        input changes during the verification process.
+        """Returns a deep copy of the example input array in cases where it is expected that the input changes
+        during the verification process.
 
         Arguments:
             input_array: The input to clone.
@@ -57,8 +56,7 @@ class VerificationBase:
         return input_array
 
     def _model_forward(self, input_array: Any) -> Any:
-        """
-        Feeds the input array to the model via the ``__call__`` method.
+        """Feeds the input array to the model via the ``__call__`` method.
 
         Arguments:
             input_array: The input that goes into the model. If it is a tuple, it gets
@@ -77,8 +75,8 @@ class VerificationBase:
 
 
 class VerificationCallbackBase(Callback):
-    """
-    Base class for model verification in form of a callback.
+    """Base class for model verification in form of a callback.
+
     This type of verification is expected to only work with
     :class:`~pytorch_lightning.core.lightning.LightningModule` and will take the input array
     from :attr:`~pytorch_lightning.core.lightning.LightningModule.example_input_array` if needed.

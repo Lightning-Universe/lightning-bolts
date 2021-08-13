@@ -31,7 +31,7 @@ class TestPolicyGradient(TestCase):
         self.model = VanillaPolicyGradient(**vars(self.hparams))
 
     def test_loss(self):
-        """Test the reinforce loss function"""
+        """Test the reinforce loss function."""
 
         batch_states = torch.rand(32, 4)
         batch_actions = torch.rand(32).long()
@@ -42,7 +42,7 @@ class TestPolicyGradient(TestCase):
         self.assertIsInstance(loss, Tensor)
 
     def test_train_batch(self):
-        """Tests that a single batch generates correctly"""
+        """Tests that a single batch generates correctly."""
 
         self.model.n_steps = 4
         self.model.batch_size = 1

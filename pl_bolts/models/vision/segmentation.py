@@ -16,8 +16,7 @@ class SemSegment(LightningModule):
         features_start: int = 64,
         bilinear: bool = False,
     ):
-        """
-        Basic model for semantic segmentation. Uses UNet architecture by default.
+        """Basic model for semantic segmentation. Uses UNet architecture by default.
 
         The default parameters in this model are for the KITTI dataset. Note, if you'd like to use this model as is,
         you will first need to download the KITTI dataset yourself. You can download the dataset `here.

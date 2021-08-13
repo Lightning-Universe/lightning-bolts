@@ -35,8 +35,7 @@ class KittiDataModule(LightningDataModule):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        """
-        Kitti train, validation and test dataloaders.
+        """Kitti train, validation and test dataloaders.
 
         Note:
             You need to have downloaded the Kitti dataset first and provide the path to where it is saved.

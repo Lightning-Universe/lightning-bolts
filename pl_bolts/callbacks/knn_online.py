@@ -16,8 +16,7 @@ else:  # pragma: no cover
 
 
 class KNNOnlineEvaluator(Callback):  # pragma: no cover
-    """
-    Evaluates self-supervised K nearest neighbors.
+    """Evaluates self-supervised K nearest neighbors.
 
     Example::
 
@@ -29,7 +28,6 @@ class KNNOnlineEvaluator(Callback):  # pragma: no cover
             num_classes=model.num_classes,
             dataset='imagenet'
         )
-
     """
 
     def __init__(

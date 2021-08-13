@@ -13,9 +13,7 @@ else:  # pragma: no cover
 
 
 class TensorboardGenerativeModelImageSampler(Callback):
-    """
-    Generates images and logs to tensorboard.
-    Your model must implement the ``forward`` function for generation
+    """Generates images and logs to tensorboard. Your model must implement the ``forward`` function for generation.
 
     Requirements::
 

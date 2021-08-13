@@ -16,9 +16,7 @@ else:  # pragma: no cover
 
 
 class Compose:
-    """
-    Like `torchvision.transforms.compose` but works for (image, target)
-    """
+    """Like `torchvision.transforms.compose` but works for (image, target)"""
 
     def __init__(self, transforms: List[Callable], image_transforms: Optional[Callable] = None) -> None:
         self.transforms = transforms
@@ -62,8 +60,7 @@ CLASSES = (
 
 
 def _prepare_voc_instance(image: Any, target: Dict[str, Any]):
-    """
-    Prepares VOC dataset into appropriate target for fasterrcnn
+    """Prepares VOC dataset into appropriate target for fasterrcnn.
 
     https://github.com/pytorch/vision/issues/1097#issuecomment-508917489
     """
@@ -104,9 +101,7 @@ def _prepare_voc_instance(image: Any, target: Dict[str, Any]):
 
 
 class VOCDetectionDataModule(LightningDataModule):
-    """
-    TODO(teddykoker) docstring
-    """
+    """TODO(teddykoker) docstring."""
 
     name = "vocdetection"
 
@@ -146,17 +141,14 @@ class VOCDetectionDataModule(LightningDataModule):
         return 21
 
     def prepare_data(self) -> None:
-        """
-        Saves VOCDetection files to data_dir
-        """
+        """Saves VOCDetection files to data_dir."""
         VOCDetection(self.data_dir, year=self.year, image_set="train", download=True)
         VOCDetection(self.data_dir, year=self.year, image_set="val", download=True)
 
     def train_dataloader(
         self, batch_size: int = 1, image_transforms: Union[List[Callable], Callable] = None
     ) -> DataLoader:
-        """
-        VOCDetection train set uses the `train` subset
+        """VOCDetection train set uses the `train` subset.
 
         Args:
             batch_size: size of batch
@@ -178,8 +170,7 @@ class VOCDetectionDataModule(LightningDataModule):
         return loader
 
     def val_dataloader(self, batch_size: int = 1, image_transforms: Optional[List[Callable]] = None) -> DataLoader:
-        """
-        VOCDetection val set uses the `val` subset
+        """VOCDetection val set uses the `val` subset.
 
         Args:
             batch_size: size of batch

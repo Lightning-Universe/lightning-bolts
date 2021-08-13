@@ -17,10 +17,7 @@ else:  # pragma: no cover
 
 
 def _evaluate_iou(target, pred):
-    """
-    Evaluate intersection over union (IOU) for target from dataset and output prediction
-    from model
-    """
+    """Evaluate intersection over union (IOU) for target from dataset and output prediction from model."""
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError("You want to use `torchvision` which is not installed yet.")
 
@@ -31,9 +28,8 @@ def _evaluate_iou(target, pred):
 
 
 class FasterRCNN(LightningModule):
-    """
-    PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with
-    Region Proposal Networks <https://arxiv.org/abs/1506.01497>`_.
+    """PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with Region Proposal
+    Networks <https://arxiv.org/abs/1506.01497>`_.
 
     Paper authors: Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun
 

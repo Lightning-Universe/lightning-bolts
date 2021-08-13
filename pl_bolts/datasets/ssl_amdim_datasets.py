@@ -16,9 +16,7 @@ else:  # pragma: no cover
 class SSLDatasetMixin(ABC):
     @classmethod
     def generate_train_val_split(cls, examples, labels, pct_val):
-        """
-        Splits dataset uniformly across classes
-        """
+        """Splits dataset uniformly across classes."""
         nb_classes = len(set(labels))
 
         nb_val_images = int(len(examples) * pct_val) // nb_classes
@@ -46,8 +44,8 @@ class SSLDatasetMixin(ABC):
 
     @classmethod
     def select_nb_imgs_per_class(cls, examples, labels, nb_imgs_in_val):
-        """
-        Splits a dataset into two parts.
+        """Splits a dataset into two parts.
+
         The labeled split has nb_imgs_in_val per class
         """
         nb_classes = len(set(labels))

@@ -25,8 +25,8 @@ else:  # pragma: no cover
 
 
 class Reinforce(LightningModule):
-    """
-    PyTorch Lightning implementation of `REINFORCE
+    """PyTorch Lightning implementation of `REINFORCE.
+
     <https://papers.nips.cc/paper/
     1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
     Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
@@ -115,8 +115,7 @@ class Reinforce(LightningModule):
         self.state = self.env.reset()
 
     def forward(self, x: Tensor) -> Tensor:
-        """
-        Passes in a state x through the network and gets the q_values of each action as an output
+        """Passes in a state x through the network and gets the q_values of each action as an output.
 
         Args:
             x: environment state
@@ -128,7 +127,7 @@ class Reinforce(LightningModule):
         return output
 
     def calc_qvals(self, rewards: List[float]) -> List[float]:
-        """Calculate the discounted rewards of all rewards in list
+        """Calculate the discounted rewards of all rewards in list.
 
         Args:
             rewards: list of rewards from latest batch
@@ -148,8 +147,7 @@ class Reinforce(LightningModule):
         return list(reversed(cumul_reward))
 
     def discount_rewards(self, experiences: Tuple[Experience]) -> float:
-        """
-        Calculates the discounted reward over N experiences
+        """Calculates the discounted reward over N experiences.
 
         Args:
             experiences: Tuple of Experience
@@ -165,8 +163,7 @@ class Reinforce(LightningModule):
     def train_batch(
         self,
     ) -> Tuple[List[Tensor], List[Tensor], List[Tensor]]:
-        """
-        Contains the logic for generating a new batch of data to be passed to the DataLoader
+        """Contains the logic for generating a new batch of data to be passed to the DataLoader.
 
         Yield:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
@@ -219,9 +216,8 @@ class Reinforce(LightningModule):
         return loss
 
     def training_step(self, batch: Tuple[Tensor, Tensor], _) -> OrderedDict:
-        """
-        Carries out a single step through the environment to update the replay buffer.
-        Then calculates loss based on the minibatch recieved
+        """Carries out a single step through the environment to update the replay buffer. Then calculates loss
+        based on the minibatch recieved.
 
         Args:
             batch: current mini batch of replay data
@@ -250,28 +246,27 @@ class Reinforce(LightningModule):
         )
 
     def configure_optimizers(self) -> List[Optimizer]:
-        """Initialize Adam optimizer"""
+        """Initialize Adam optimizer."""
         optimizer = optim.Adam(self.net.parameters(), lr=self.lr)
         return [optimizer]
 
     def _dataloader(self) -> DataLoader:
-        """Initialize the Replay Buffer dataset used for retrieving experiences"""
+        """Initialize the Replay Buffer dataset used for retrieving experiences."""
         dataset = ExperienceSourceDataset(self.train_batch)
         dataloader = DataLoader(dataset=dataset, batch_size=self.batch_size)
         return dataloader
 
     def train_dataloader(self) -> DataLoader:
-        """Get train loader"""
+        """Get train loader."""
         return self._dataloader()
 
     def get_device(self, batch) -> str:
-        """Retrieve device currently being used by minibatch"""
+        """Retrieve device currently being used by minibatch."""
         return batch[0][0][0].device.index if self.on_gpu else "cpu"
 
     @staticmethod
     def add_model_specific_args(arg_parser) -> argparse.ArgumentParser:
-        """
-        Adds arguments for DQN model
+        """Adds arguments for DQN model.
 
         Note:
             These params are fine tuned for Pong env.

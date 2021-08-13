@@ -17,8 +17,8 @@ from pl_bolts.transforms.dataset_normalizations import (
 
 
 class SimSiam(LightningModule):
-    """
-    PyTorch Lightning implementation of `Exploring Simple Siamese Representation Learning (SimSiam)
+    """PyTorch Lightning implementation of `Exploring Simple Siamese Representation Learning (SimSiam)
+
     <https://arxiv.org/pdf/2011.10566v1.pdf>`_
 
     Paper authors: Xinlei Chen, Kaiming He.

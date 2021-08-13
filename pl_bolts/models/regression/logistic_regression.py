@@ -12,9 +12,7 @@ from torchmetrics.functional import accuracy
 
 
 class LogisticRegression(LightningModule):
-    """
-    Logistic regression model
-    """
+    """Logistic regression model."""
 
     def __init__(
         self,

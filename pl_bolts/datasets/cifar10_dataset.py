@@ -17,8 +17,7 @@ else:  # pragma: no cover
 
 
 class CIFAR10(LightDataset):
-    """
-    Customized `CIFAR10 <http://www.cs.toronto.edu/~kriz/cifar.html>`_ dataset for testing Pytorch Lightning
+    """Customized `CIFAR10 <http://www.cs.toronto.edu/~kriz/cifar.html>`_ dataset for testing Pytorch Lightning
     without the torchvision dependency.
 
     Part of the code was copied from

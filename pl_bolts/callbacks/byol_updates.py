@@ -7,8 +7,7 @@ from torch.nn import Module
 
 
 class BYOLMAWeightUpdate(Callback):
-    """
-    Weight update rule from BYOL.
+    """Weight update rule from BYOL.
 
     Your model should have:
 

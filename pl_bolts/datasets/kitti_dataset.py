@@ -84,9 +84,7 @@ class KittiDataset(Dataset):
         return img, mask
 
     def encode_segmap(self, mask):
-        """
-        Sets void classes to zero so they won't be considered for training
-        """
+        """Sets void classes to zero so they won't be considered for training."""
         for voidc in self.void_labels:
             mask[mask == voidc] = self.ignore_index
         for validc in self.valid_labels:
@@ -96,9 +94,7 @@ class KittiDataset(Dataset):
         return mask
 
     def get_filenames(self, path):
-        """
-        Returns a list of absolute paths to images inside given `path`
-        """
+        """Returns a list of absolute paths to images inside given `path`"""
         files_list = list()
         for filename in os.listdir(path):
             files_list.append(os.path.join(path, filename))

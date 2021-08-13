@@ -7,7 +7,7 @@ from pl_bolts.models.rl.ppo_model import PPO
 
 
 def test_discount_rewards():
-    """Test calculation of discounted rewards"""
+    """Test calculation of discounted rewards."""
     model = PPO(env="CartPole-v0", batch_size=16, gamma=0.99)
 
     rewards = np.ones(4)
@@ -19,7 +19,7 @@ def test_discount_rewards():
 
 
 def test_critic_loss():
-    """Test the critic loss function"""
+    """Test the critic loss function."""
 
     model = PPO(env="CartPole-v0", batch_size=16, gamma=0.99)
     obs_dim = model.env.observation_space.shape[0]
@@ -33,7 +33,7 @@ def test_critic_loss():
 
 
 def test_actor_loss_categorical():
-    """Test the actor loss function on categorical action-space environment"""
+    """Test the actor loss function on categorical action-space environment."""
 
     model = PPO(env="CartPole-v0", batch_size=16, gamma=0.99)
     obs_dim = model.env.observation_space.shape[0]
@@ -49,7 +49,7 @@ def test_actor_loss_categorical():
 
 
 def test_actor_loss_continuous():
-    """Test the actor loss function on continuous action-space environment"""
+    """Test the actor loss function on continuous action-space environment."""
 
     model = PPO(env="MountainCarContinuous-v0", batch_size=16, gamma=0.99)
     obs_dim = model.env.observation_space.shape[0]

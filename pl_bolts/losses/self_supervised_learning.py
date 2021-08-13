@@ -6,9 +6,7 @@ from pl_bolts.models.vision.pixel_cnn import PixelCNN
 
 
 def nt_xent_loss(out_1, out_2, temperature):
-    """
-    Loss used in SimCLR
-    """
+    """Loss used in SimCLR."""
     out = torch.cat([out_1, out_2], dim=0)
     n_samples = len(out)
 
@@ -29,9 +27,7 @@ def nt_xent_loss(out_1, out_2, temperature):
 
 
 class CPCTask(nn.Module):
-    """
-    Loss used in CPC
-    """
+    """Loss used in CPC."""
 
     def __init__(self, num_input_channels, target_dim=64, embed_scale=0.1):
         super().__init__()
@@ -92,9 +88,7 @@ class CPCTask(nn.Module):
 
 
 class AmdimNCELoss(nn.Module):
-    """
-    Compute the NCE scores for predicting r_src->r_trg.
-    """
+    """Compute the NCE scores for predicting r_src->r_trg."""
 
     def __init__(self, tclip):
         super().__init__()
@@ -188,8 +182,7 @@ class AmdimNCELoss(nn.Module):
 
 
 class FeatureMapContrastiveTask(nn.Module):
-    """
-    Performs an anchor, positive negative pair comparison for each each tuple of feature maps passed.
+    """Performs an anchor, positive negative pair comparison for each each tuple of feature maps passed.
 
     .. code-block:: python
 
@@ -312,8 +305,7 @@ class FeatureMapContrastiveTask(nn.Module):
         return loss, regularizer
 
     def forward(self, anchor_maps, positive_maps):
-        """
-        Takes in a set of tuples, each tuple has two feature maps with all matching dimensions
+        """Takes in a set of tuples, each tuple has two feature maps with all matching dimensions.
 
         Example:
 
@@ -374,9 +366,7 @@ class FeatureMapContrastiveTask(nn.Module):
 
 
 def tanh_clip(x, clip_val=10.0):
-    """
-    soft clip values to the range [-clip_val, +clip_val]
-    """
+    """soft clip values to the range [-clip_val, +clip_val]"""
     if clip_val is not None:
         x_clip = clip_val * torch.tanh((1.0 / clip_val) * x)
     else:

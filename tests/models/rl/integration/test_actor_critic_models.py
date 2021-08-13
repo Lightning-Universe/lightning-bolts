@@ -6,7 +6,7 @@ from pl_bolts.models.rl.advantage_actor_critic_model import AdvantageActorCritic
 
 
 def test_a2c():
-    """Smoke test that the A2C model runs"""
+    """Smoke test that the A2C model runs."""
 
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = AdvantageActorCritic.add_model_specific_args(parent_parser)

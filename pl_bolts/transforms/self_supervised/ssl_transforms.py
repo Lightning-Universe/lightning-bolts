@@ -11,11 +11,9 @@ else:  # pragma: no cover
 
 
 class RandomTranslateWithReflect:
-    """
-    Translate image randomly
-    Translate vertically and horizontally by n pixels where
-    n is integer drawn uniformly independently for each axis
-    from [-max_translation, max_translation].
+    """Translate image randomly Translate vertically and horizontally by n pixels where n is integer drawn
+    uniformly independently for each axis from [-max_translation, max_translation].
+
     Fill the uncovered blank area with reflect padding.
     """
 

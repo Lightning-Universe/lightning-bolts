@@ -13,8 +13,8 @@ from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
 class BYOL(LightningModule):
-    """
-    PyTorch Lightning implementation of `Bootstrap Your Own Latent (BYOL)
+    """PyTorch Lightning implementation of `Bootstrap Your Own Latent (BYOL)
+
     <https://arxiv.org/pdf/2006.07733.pdf>`_
 
     Paper authors: Jean-Bastien Grill, Florian Strub, Florent Altché, Corentin Tallec, Pierre H. Richemond, \

@@ -1,6 +1,4 @@
-"""
-Loss functions for Object Detection task
-"""
+"""Loss functions for Object Detection task."""
 
 from torch import Tensor
 
@@ -8,8 +6,7 @@ from pl_bolts.metrics.object_detection import giou, iou
 
 
 def iou_loss(preds: Tensor, target: Tensor) -> Tensor:
-    """
-    Calculates the intersection over union loss.
+    """Calculates the intersection over union loss.
 
     Args:
         preds: batch of prediction bounding boxes with representation ``[x_min, y_min, x_max, y_max]``
@@ -32,8 +29,7 @@ def iou_loss(preds: Tensor, target: Tensor) -> Tensor:
 
 
 def giou_loss(preds: Tensor, target: Tensor) -> Tensor:
-    """
-    Calculates the generalized intersection over union loss.
+    """Calculates the generalized intersection over union loss.
 
     It has been proposed in `Generalized Intersection over Union: A Metric and A
     Loss for Bounding Box Regression <https://arxiv.org/abs/1902.09630>`_.
