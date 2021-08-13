@@ -46,17 +46,11 @@ jobs:
 
       - name: Create package
         run: |
-          # python setup.py check --metadata --strict
-          python setup.py sdist
+          pip install cython setuptools wheel
+          python setup.py sdist bdist_wheel
 
       - name: Install package
-        if: runner.os != 'windows'
+        working-directory: ./dist
         run: |
-          pip install virtualenv
-          virtualenv vEnv ; source vEnv/bin/activate
-          # pip install -r requirements.txt
-          pip install torchvision matplotlib
-          pip install dist/*
-          cd .. & python -c "import pytorch_lightning as pl ; print(pl.__version__)"
-          cd .. & python -c "import pl_bolts ; print(pl_bolts.__version__)"
-          deactivate ; rm -rf vEnv
+          pip install $(python -c "import glob ; pkg = glob.glob('*.whl')[0] ; print(pkg)")
+          python -c "import imsegm ; print(imsegm.__version__)"
