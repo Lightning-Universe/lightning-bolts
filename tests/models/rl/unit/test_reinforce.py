@@ -14,7 +14,6 @@ from pl_bolts.models.rl.reinforce_model import Reinforce
 
 
 class TestReinforce(TestCase):
-
     def setUp(self) -> None:
         self.env = ToTensor(gym.make("CartPole-v0"))
         self.obs_shape = self.env.observation_space.shape
@@ -39,7 +38,7 @@ class TestReinforce(TestCase):
         self.rl_dataloader = self.model.train_dataloader()
 
     def test_loss(self):
-        """Test the reinforce loss function"""
+        """Test the reinforce loss function."""
 
         batch_states = torch.rand(16, 4)
         batch_actions = torch.rand(16).long()
@@ -50,7 +49,7 @@ class TestReinforce(TestCase):
         self.assertIsInstance(loss, Tensor)
 
     def test_get_qvals(self):
-        """Test that given an batch of episodes that it will return a list of qvals for each episode"""
+        """Test that given an batch of episodes that it will return a list of qvals for each episode."""
 
         batch_qvals = []
         rewards = np.ones(32)

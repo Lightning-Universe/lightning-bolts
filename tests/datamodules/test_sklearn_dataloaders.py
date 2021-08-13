@@ -9,7 +9,7 @@ try:
     from sklearn.utils import shuffle as sk_shuffle
 except ImportError:
     warn(  # pragma: no-cover
-        'You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`.'
+        "You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`."
     )
 
 

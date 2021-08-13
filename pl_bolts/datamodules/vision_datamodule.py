@@ -57,16 +57,12 @@ class VisionDataModule(LightningDataModule):
         self.drop_last = drop_last
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
-        """
-        Saves files to data_dir
-        """
+        """Saves files to data_dir."""
         self.dataset_cls(self.data_dir, train=True, download=True)
         self.dataset_cls(self.data_dir, train=False, download=True)
 
     def setup(self, stage: Optional[str] = None) -> None:
-        """
-        Creates train, val, and test dataset
-        """
+        """Creates train, val, and test dataset."""
         if stage == "fit" or stage is None:
             train_transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
             val_transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
@@ -85,9 +81,7 @@ class VisionDataModule(LightningDataModule):
             )
 
     def _split_dataset(self, dataset: Dataset, train: bool = True) -> Dataset:
-        """
-        Splits the dataset into train and validation set
-        """
+        """Splits the dataset into train and validation set."""
         len_dataset = len(dataset)  # type: ignore[arg-type]
         splits = self._get_splits(len_dataset)
         dataset_train, dataset_val = random_split(dataset, splits, generator=torch.Generator().manual_seed(self.seed))
@@ -97,9 +91,7 @@ class VisionDataModule(LightningDataModule):
         return dataset_val
 
     def _get_splits(self, len_dataset: int) -> List[int]:
-        """
-        Computes split lengths for train and validation set
-        """
+        """Computes split lengths for train and validation set."""
         if isinstance(self.val_split, int):
             train_len = len_dataset - self.val_split
             splits = [train_len, self.val_split]
@@ -108,24 +100,24 @@ class VisionDataModule(LightningDataModule):
             train_len = len_dataset - val_len
             splits = [train_len, val_len]
         else:
-            raise ValueError(f'Unsupported type {type(self.val_split)}')
+            raise ValueError(f"Unsupported type {type(self.val_split)}")
 
         return splits
 
     @abstractmethod
     def default_transforms(self) -> Callable:
-        """ Default transform for the dataset """
+        """Default transform for the dataset."""
 
     def train_dataloader(self, *args: Any, **kwargs: Any) -> DataLoader:
-        """ The train dataloader """
+        """The train dataloader."""
         return self._data_loader(self.dataset_train, shuffle=self.shuffle)
 
     def val_dataloader(self, *args: Any, **kwargs: Any) -> Union[DataLoader, List[DataLoader]]:
-        """ The val dataloader """
+        """The val dataloader."""
         return self._data_loader(self.dataset_val)
 
     def test_dataloader(self, *args: Any, **kwargs: Any) -> Union[DataLoader, List[DataLoader]]:
-        """ The test dataloader """
+        """The test dataloader."""
         return self._data_loader(self.dataset_test)
 
     def _data_loader(self, dataset: Dataset, shuffle: bool = False) -> DataLoader:
@@ -135,5 +127,5 @@ class VisionDataModule(LightningDataModule):
             shuffle=shuffle,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
-            pin_memory=self.pin_memory
+            pin_memory=self.pin_memory,
         )

@@ -10,7 +10,7 @@ if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import CIFAR10
 else:  # pragma: no cover
-    warn_missing_pkg('torchvision')
+    warn_missing_pkg("torchvision")
     CIFAR10 = None
 
 
@@ -54,6 +54,7 @@ class CIFAR10DataModule(VisionDataModule):
         dm.test_transforms = ...
         dm.val_transforms  = ...
     """
+
     name = "cifar10"
     dataset_cls = CIFAR10
     dims = (3, 32, 32)
@@ -122,8 +123,7 @@ class CIFAR10DataModule(VisionDataModule):
 
 
 class TinyCIFAR10DataModule(CIFAR10DataModule):
-    """
-    Standard CIFAR10, train, val, test splits and transforms
+    """Standard CIFAR10, train, val, test splits and transforms.
 
     Transforms::
 

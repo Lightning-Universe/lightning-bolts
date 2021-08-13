@@ -1,17 +1,14 @@
-"""
-Loss functions for the RL models
-"""
+"""Loss functions for the RL models."""
 
 from typing import List, Tuple
 
 import numpy as np
 import torch
-from torch import nn, Tensor
+from torch import Tensor, nn
 
 
 def dqn_loss(batch: Tuple[Tensor, Tensor], net: nn.Module, target_net: nn.Module, gamma: float = 0.99) -> Tensor:
-    """
-    Calculates the mse loss using a mini batch from the replay buffer
+    """Calculates the mse loss using a mini batch from the replay buffer.
 
     Args:
         batch: current mini batch of replay data
@@ -26,7 +23,7 @@ def dqn_loss(batch: Tuple[Tensor, Tensor], net: nn.Module, target_net: nn.Module
 
     actions = actions.long().squeeze(-1)
 
-    state_action_values = (net(states).gather(1, actions.unsqueeze(-1)).squeeze(-1))
+    state_action_values = net(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
 
     with torch.no_grad():
         next_state_values = target_net(next_states).max(1)[0]
@@ -44,10 +41,9 @@ def double_dqn_loss(
     target_net: nn.Module,
     gamma: float = 0.99,
 ) -> Tensor:
-    """
-    Calculates the mse loss using a mini batch from the replay buffer. This uses an improvement to the original
-    DQN loss by using the double dqn. This is shown by using the actions of the train network to pick the
-    value from the target network. This code is heavily commented in order to explain the process clearly
+    """Calculates the mse loss using a mini batch from the replay buffer. This uses an improvement to the original
+    DQN loss by using the double dqn. This is shown by using the actions of the train network to pick the value
+    from the target network. This code is heavily commented in order to explain the process clearly.
 
     Args:
         batch: current mini batch of replay data
@@ -62,7 +58,7 @@ def double_dqn_loss(
 
     actions = actions.long().squeeze(-1)
 
-    state_action_values = (net(states).gather(1, actions.unsqueeze(-1)).squeeze(-1))
+    state_action_values = net(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
 
     # dont want to mess with gradients when using the target network
     with torch.no_grad():
@@ -74,7 +70,7 @@ def double_dqn_loss(
         # Take the value of the action chosen by the train network
         next_state_values = next_tgt_out.gather(1, next_state_acts).squeeze(-1)
         next_state_values[dones] = 0.0  # any steps flagged as done get a 0 value
-        next_state_values = (next_state_values.detach())  # remove values from the graph, no grads needed
+        next_state_values = next_state_values.detach()  # remove values from the graph, no grads needed
 
     # calc expected discounted return of next_state_values
     expected_state_action_values = next_state_values * gamma + rewards
@@ -91,8 +87,7 @@ def per_dqn_loss(
     target_net: nn.Module,
     gamma: float = 0.99,
 ) -> Tuple[Tensor, np.ndarray]:
-    """
-    Calculates the mse loss with the priority weights of the batch from the PER buffer
+    """Calculates the mse loss with the priority weights of the batch from the PER buffer.
 
     Args:
         batch: current mini batch of replay data
@@ -119,6 +114,6 @@ def per_dqn_loss(
         next_s_vals = target_net(next_states).max(1)[0]
         next_s_vals[dones] = 0.0
         exp_sa_vals = next_s_vals.detach() * gamma + rewards
-    loss = (state_action_vals - exp_sa_vals)**2
+    loss = (state_action_vals - exp_sa_vals) ** 2
     losses_v = batch_weights * loss
     return losses_v.mean(), (losses_v + 1e-5).data.cpu().numpy()

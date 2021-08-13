@@ -11,13 +11,11 @@ from tests import _MARK_REQUIRE_GPU
 
 
 class TrivialVerification(VerificationBase):
-
     def check(self, *args, **kwargs):
         return True
 
 
 class PyTorchModel(nn.Module):
-
     def __init__(self):
         super().__init__()
         self.layer = nn.Linear(5, 2)
@@ -27,7 +25,6 @@ class PyTorchModel(nn.Module):
 
 
 class LitModel(LightningModule):
-
     def __init__(self):
         super().__init__()
         self.example_input_array = None
@@ -39,11 +36,10 @@ class LitModel(LightningModule):
 
 @pytest.mark.parametrize(
     "device",
-    [torch.device("cpu"),
-     pytest.param(torch.device("cuda", 0), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
+    [torch.device("cpu"), pytest.param(torch.device("cuda", 0), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
 )
 def test_verification_base_get_input_array(device):
-    """ Test that the base class calls the correct methods to transfer the input to the device the model is on. """
+    """Test that the base class calls the correct methods to transfer the input to the device the model is on."""
     model = PyTorchModel().to(device)
     verification = TrivialVerification(model)
     input_tensor = torch.rand(5)
@@ -69,7 +65,7 @@ def test_verification_base_get_input_array(device):
 
 
 def test_verification_base_model_forward_for_input_array():
-    """ Test that the input_array is correctly fed to the forward method depending on its type. """
+    """Test that the input_array is correctly fed to the forward method depending on its type."""
     model = Mock()
     verification = TrivialVerification(model)
 

@@ -1,5 +1,5 @@
 import numpy as np
-from pytorch_lightning import seed_everything, Trainer
+from pytorch_lightning import Trainer, seed_everything
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import MNISTDataModule

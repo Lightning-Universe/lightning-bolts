@@ -8,8 +8,7 @@ from pytorch_lightning.utilities import rank_zero_info
 
 
 class PrintTableMetricsCallback(Callback):
-    """
-    Prints a table with the metrics in columns on every epoch end
+    """Prints a table with the metrics in columns on every epoch end.
 
     Example::
 
@@ -31,7 +30,6 @@ class PrintTableMetricsCallback(Callback):
         # loss│train_loss│val_loss│epoch
         # ──────────────────────────────
         # 2.2541470527648926│2.2541470527648926│2.2158432006835938│0
-
     """
 
     def __init__(self) -> None:
@@ -51,11 +49,10 @@ def dicts_to_table(
     convert_headers: Optional[Dict[str, Callable]] = None,
     header_names: Optional[List[str]] = None,
     skip_none_lines: bool = False,
-    replace_values: Optional[Dict[str, Any]] = None
+    replace_values: Optional[Dict[str, Any]] = None,
 ) -> str:
-    """
-    Generate ascii table from dictionary
-    Taken from (https://stackoverflow.com/questions/40056747/print-a-list-of-dictionaries-in-table-form)
+    """Generate ascii table from dictionary Taken from (https://stackoverflow.com/questions/40056747/print-a-list-
+    of-dictionaries-in-table-form)
 
     Args:
         dicts: input dictionary list; empty lists make keys OR header_names mandatory
@@ -86,15 +83,15 @@ def dicts_to_table(
         elif header_names is not None:
             keys = header_names
         else:
-            raise ValueError('keys or header_names mandatory on empty input list')
+            raise ValueError("keys or header_names mandatory on empty input list")
     if pads is None:
-        pads = [''] * len(keys)  # type: ignore[arg-type]
+        pads = [""] * len(keys)  # type: ignore[arg-type]
     elif len(pads) != len(keys):  # type: ignore[arg-type]
-        raise ValueError(f'bad pad length {len(pads)}, expected: {len(keys)}')  # type: ignore[arg-type]
+        raise ValueError(f"bad pad length {len(pads)}, expected: {len(keys)}")  # type: ignore[arg-type]
     if fcodes is None:
-        fcodes = [''] * len(keys)  # type: ignore[arg-type]
+        fcodes = [""] * len(keys)  # type: ignore[arg-type]
     elif len(fcodes) != len(fcodes):
-        raise ValueError(f'bad fcodes length {len(fcodes)}, expected: {len(keys)}')  # type: ignore[arg-type]
+        raise ValueError(f"bad fcodes length {len(fcodes)}, expected: {len(keys)}")  # type: ignore[arg-type]
     if convert_headers is None:
         convert_headers = {}
     if header_names is None:
@@ -102,12 +99,12 @@ def dicts_to_table(
     if replace_values is None:
         replace_values = {}
     # build header
-    headline = '│'.join(f"{v:{pad}}" for v, pad in zip_longest(header_names, pads))  # type: ignore[arg-type]
-    underline = '─' * len(headline)
+    headline = "│".join(f"{v:{pad}}" for v, pad in zip_longest(header_names, pads))  # type: ignore[arg-type]
+    underline = "─" * len(headline)
     # suffix special keys to apply converters to later on
-    marked_keys = [h + '____' if h in convert_headers else h for h in keys]  # type: ignore[union-attr]
+    marked_keys = [h + "____" if h in convert_headers else h for h in keys]  # type: ignore[union-attr]
     marked_values = {}
-    s = '│'.join(f"{{{h}:{pad}{fcode}}}" for h, pad, fcode in zip_longest(marked_keys, pads, fcodes))
+    s = "│".join(f"{{{h}:{pad}{fcode}}}" for h, pad, fcode in zip_longest(marked_keys, pads, fcodes))
     lines = [headline, underline]
     for d in dicts:
         none_keys = [k for k, v in d.items() if v is None]
@@ -120,11 +117,11 @@ def dicts_to_table(
                 if d[k] is None:
                     raise ValueError(f"bad or no mapping for key '{k}' is None. Use skip or change replace mapping.")
         elif none_keys:
-            raise ValueError(f'keys {none_keys} are None in {d}. Do skip or use replace mapping.')
+            raise ValueError(f"keys {none_keys} are None in {d}. Do skip or use replace mapping.")
         for h in convert_headers:
             if h in keys:  # type: ignore[operator]
                 converter = convert_headers[h]
-                marked_values[h + '____'] = converter(d)
+                marked_values[h + "____"] = converter(d)
         line = s.format(**d, **marked_values)
         lines.append(line)
-    return '\n'.join(lines)
+    return "\n".join(lines)

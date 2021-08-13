@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Configuration file for the Sphinx documentation builder.
 #
@@ -23,10 +22,10 @@ from importlib.util import module_from_spec, spec_from_file_location
 import pt_lightning_sphinx_theme
 
 _PATH_HERE = os.path.abspath(os.path.dirname(__file__))
-_PATH_ROOT = os.path.join(_PATH_HERE, '..', '..')
+_PATH_ROOT = os.path.join(_PATH_HERE, "..", "..")
 sys.path.insert(0, os.path.abspath(_PATH_ROOT))
 
-SPHINX_MOCK_REQUIREMENTS = int(os.environ.get('SPHINX_MOCK_REQUIREMENTS', True))
+SPHINX_MOCK_REQUIREMENTS = int(os.environ.get("SPHINX_MOCK_REQUIREMENTS", True))
 
 # alternative https://stackoverflow.com/a/67692/4521646
 spec = spec_from_file_location("pl_bolts", os.path.join(_PATH_ROOT, "pl_bolts", "__about__.py"))
@@ -36,7 +35,7 @@ spec.loader.exec_module(info)
 # -- Project information -----------------------------------------------------
 
 # this name shall match the project name in Github as it is used for linking to code
-project = 'Lightning-Bolts'
+project = "Lightning-Bolts"
 copyright = info.__copyright__
 author = info.__author__
 
@@ -47,7 +46,7 @@ release = info.__version__
 
 # Options for the linkcode extension
 # ----------------------------------
-github_user = 'PyTorchLightning'
+github_user = "PyTorchLightning"
 github_repo = project
 
 # -- Project documents -------------------------------------------------------
@@ -63,76 +62,76 @@ github_repo = project
 #     fp.write(readme)
 
 # copy all documents from GH templates like contribution guide
-for md in glob.glob(os.path.join(_PATH_ROOT, '.github', '*.md')):
+for md in glob.glob(os.path.join(_PATH_ROOT, ".github", "*.md")):
     shutil.copy(md, os.path.join(_PATH_HERE, os.path.basename(md)))
 
 # export the changelog
-with open(os.path.join(_PATH_ROOT, 'CHANGELOG.md'), 'r') as fp:
+with open(os.path.join(_PATH_ROOT, "CHANGELOG.md")) as fp:
     chlog_lines = fp.readlines()
 # enrich short subsub-titles to be unique
-chlog_ver = ''
+chlog_ver = ""
 for i, ln in enumerate(chlog_lines):
-    if ln.startswith('## '):
-        chlog_ver = ln[2:].split('-')[0].strip()
-    elif ln.startswith('### '):
-        ln = ln.replace('###', f'### {chlog_ver} -')
+    if ln.startswith("## "):
+        chlog_ver = ln[2:].split("-")[0].strip()
+    elif ln.startswith("### "):
+        ln = ln.replace("###", f"### {chlog_ver} -")
         chlog_lines[i] = ln
-with open(os.path.join(_PATH_HERE, 'CHANGELOG.md'), 'w') as fp:
+with open(os.path.join(_PATH_HERE, "CHANGELOG.md"), "w") as fp:
     fp.writelines(chlog_lines)
 
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
 
-needs_sphinx = '3.4'
+needs_sphinx = "3.4"
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
+    "sphinx.ext.autodoc",
     # 'sphinxcontrib.mockautodoc',  # raises error: directive 'automodule' is already registered ...
     # 'sphinxcontrib.fulltoc',  # breaks pytorch-theme with unexpected kw argument 'titles_only'
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
-    'sphinx.ext.linkcode',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.imgmath',
-    'recommonmark',
-    'sphinx.ext.autosectionlabel',
+    "sphinx.ext.doctest",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.todo",
+    "sphinx.ext.coverage",
+    "sphinx.ext.linkcode",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.imgmath",
+    "recommonmark",
+    "sphinx.ext.autosectionlabel",
     # 'm2r',
     # 'nbsphinx',  # it seems some sphinx issue
-    'sphinx_autodoc_typehints',
-    'sphinx_copybutton',
-    'sphinx_paramlinks',
-    'sphinx_togglebutton',
+    "sphinx_autodoc_typehints",
+    "sphinx_copybutton",
+    "sphinx_paramlinks",
+    "sphinx_togglebutton",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # https://berkeley-stat159-f17.github.io/stat159-f17/lectures/14-sphinx..html#conf.py-(cont.)
 # https://stackoverflow.com/questions/38526888/embed-ipython-notebook-in-sphinx-document
 # I execute the notebooks manually in advance. If notebooks test the code,
 # they should be run at build time.
-nbsphinx_execute = 'never'
+nbsphinx_execute = "never"
 nbsphinx_allow_errors = True
-nbsphinx_requirejs_path = ''
+nbsphinx_requirejs_path = ""
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 source_suffix = {
-    '.rst': 'restructuredtext',
-    '.txt': 'markdown',
-    '.md': 'markdown',
-    '.ipynb': 'nbsphinx',
+    ".rst": "restructuredtext",
+    ".txt": "markdown",
+    ".md": "markdown",
+    ".ipynb": "nbsphinx",
 }
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # The language for content autogenerated by Sphinx. Refer to documentation
 # for a list of supported languages.
@@ -145,7 +144,7 @@ language = None
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = [
-    'PULL_REQUEST_TEMPLATE.md',
+    "PULL_REQUEST_TEMPLATE.md",
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -156,7 +155,7 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'pt_lightning_sphinx_theme'
+html_theme = "pt_lightning_sphinx_theme"
 html_theme_path = [pt_lightning_sphinx_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -164,21 +163,21 @@ html_theme_path = [pt_lightning_sphinx_theme.get_html_theme_path()]
 # documentation.
 
 html_theme_options = {
-    'pytorch_project': info.__homepage__,
-    'canonical_url': info.__homepage__,
-    'collapse_navigation': False,
-    'display_version': True,
-    'logo_only': False,
+    "pytorch_project": info.__homepage__,
+    "canonical_url": info.__homepage__,
+    "collapse_navigation": False,
+    "display_version": True,
+    "logo_only": False,
 }
 
-html_logo = '_images/logos/bolts_logo.png'
+html_logo = "_images/logos/bolts_logo.png"
 
-html_favicon = '_images/logos/lightning_icon.svg'
+html_favicon = "_images/logos/lightning_icon.svg"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_images', '_templates', '_static']
+html_static_path = ["_images", "_templates", "_static"]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -193,51 +192,50 @@ html_static_path = ['_images', '_templates', '_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = project + '-doc'
+htmlhelp_basename = project + "-doc"
 
 # -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     # 'papersize': 'letterpaper',
-
     # The font size ('10pt', '11pt' or '12pt').
     # 'pointsize': '10pt',
-
     # Additional stuff for the LaTeX preamble.
     # 'preamble': '',
-
     # Latex figure (float) alignment
-    'figure_align': 'htbp',
+    "figure_align": "htbp",
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, project + '.tex', project + ' Documentation', author, 'manual'),
+    (master_doc, project + ".tex", project + " Documentation", author, "manual"),
 ]
 
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, project, project + ' Documentation', [author], 1)]
+man_pages = [(master_doc, project, project + " Documentation", [author], 1)]
 
 # -- Options for Texinfo output ----------------------------------------------
 
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
-texinfo_documents = [(
-    master_doc,
-    project,
-    project + ' Documentation',
-    author,
-    project,
-    'The lightweight PyTorch wrapper for ML researchers. Scale your models. Write less boilerplate.',
-    'Miscellaneous',
-)]
+texinfo_documents = [
+    (
+        master_doc,
+        project,
+        project + " Documentation",
+        author,
+        project,
+        "The lightweight PyTorch wrapper for ML researchers. Scale your models. Write less boilerplate.",
+        "Miscellaneous",
+    )
+]
 
 # -- Options for Epub output -------------------------------------------------
 
@@ -254,7 +252,7 @@ epub_title = project
 # epub_uid = ''
 
 # A list of files that should not be packed into the epub file.
-epub_exclude_files = ['search.html']
+epub_exclude_files = ["search.html"]
 
 # -- Extension configuration -------------------------------------------------
 
@@ -262,11 +260,11 @@ epub_exclude_files = ['search.html']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    'pytorch_lightning': ('https://pytorch-lightning.readthedocs.io/en/stable/', None),
-    'python': ('https://docs.python.org/3', None),
-    'torch': ('https://pytorch.org/docs/stable/', None),
-    'numpy': ('https://numpy.org/doc/stable/', None),
-    'PIL': ('https://pillow.readthedocs.io/en/stable/', None),
+    "pytorch_lightning": ("https://pytorch-lightning.readthedocs.io/en/stable/", None),
+    "python": ("https://docs.python.org/3", None),
+    "torch": ("https://pytorch.org/docs/stable/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "PIL": ("https://pillow.readthedocs.io/en/stable/", None),
 }
 
 # -- Options for todo extension ----------------------------------------------
@@ -285,14 +283,14 @@ todo_include_todos = True
 def setup(app):
     # this is for hiding doctest decoration,
     # see: http://z4r.github.io/python/2011/12/02/hides-the-prompts-and-output/
-    app.add_js_file('copybutton.js')
+    app.add_js_file("copybutton.js")
 
 
 # copy all notebooks to local folder
-path_nbs = os.path.join(_PATH_HERE, 'notebooks')
+path_nbs = os.path.join(_PATH_HERE, "notebooks")
 if not os.path.isdir(path_nbs):
     os.mkdir(path_nbs)
-for path_ipynb in glob.glob(os.path.join(_PATH_ROOT, 'notebooks', '*.ipynb')):
+for path_ipynb in glob.glob(os.path.join(_PATH_ROOT, "notebooks", "*.ipynb")):
     path_ipynb2 = os.path.join(path_nbs, os.path.basename(path_ipynb))
     shutil.copy(path_ipynb, path_ipynb2)
 
@@ -301,10 +299,10 @@ for path_ipynb in glob.glob(os.path.join(_PATH_ROOT, 'notebooks', '*.ipynb')):
 # https://stackoverflow.com/questions/15889621/sphinx-how-to-exclude-imports-in-automodule
 def package_list_from_file(file):
     mocked_packages = []
-    with open(file, 'r') as fp:
+    with open(file) as fp:
         for ln in fp.readlines():
-            found = [ln.index(ch) for ch in list(',=<>#') if ch in ln]
-            pkg = ln[:min(found)] if found else ln
+            found = [ln.index(ch) for ch in list(",=<>#") if ch in ln]
+            pkg = ln[: min(found)] if found else ln
             if pkg.strip():
                 mocked_packages.append(pkg.strip())
     return mocked_packages
@@ -312,17 +310,17 @@ def package_list_from_file(file):
 
 # define mapping from PyPI names to python imports
 PACKAGE_MAPPING = {
-    'pytorch-lightning': 'pytorch_lightning',
-    'scikit-learn': 'sklearn',
-    'Pillow': 'PIL',
-    'opencv-python': 'cv2',
+    "pytorch-lightning": "pytorch_lightning",
+    "scikit-learn": "sklearn",
+    "Pillow": "PIL",
+    "opencv-python": "cv2",
 }
 MOCK_PACKAGES = []
 if SPHINX_MOCK_REQUIREMENTS:
     # mock also base packages when we are on RTD since we don't install them there
-    MOCK_PACKAGES += package_list_from_file(os.path.join(_PATH_ROOT, 'requirements.txt'))
-    MOCK_PACKAGES += package_list_from_file(os.path.join(_PATH_ROOT, 'requirements', 'models.txt'))
-    MOCK_PACKAGES += package_list_from_file(os.path.join(_PATH_ROOT, 'requirements', 'loggers.txt'))
+    MOCK_PACKAGES += package_list_from_file(os.path.join(_PATH_ROOT, "requirements.txt"))
+    MOCK_PACKAGES += package_list_from_file(os.path.join(_PATH_ROOT, "requirements", "models.txt"))
+    MOCK_PACKAGES += package_list_from_file(os.path.join(_PATH_ROOT, "requirements", "loggers.txt"))
 # replace PyPI packages by importing ones
 MOCK_PACKAGES = [PACKAGE_MAPPING.get(pkg, pkg) for pkg in MOCK_PACKAGES]
 
@@ -332,56 +330,54 @@ autodoc_mock_imports = MOCK_PACKAGES
 # Resolve function
 # This function is used to populate the (source) links in the API
 def linkcode_resolve(domain, info):
-
     def find_source():
         # try to find the file and line number, based on code from numpy:
         # https://github.com/numpy/numpy/blob/master/doc/source/conf.py#L286
-        obj = sys.modules[info['module']]
-        for part in info['fullname'].split('.'):
+        obj = sys.modules[info["module"]]
+        for part in info["fullname"].split("."):
             obj = getattr(obj, part)
         fname = inspect.getsourcefile(obj)
         # https://github.com/rtfd/readthedocs.org/issues/5735
-        if any([s in fname for s in ('readthedocs', 'rtfd', 'checkouts')]):
+        if any([s in fname for s in ("readthedocs", "rtfd", "checkouts")]):
             # /home/docs/checkouts/readthedocs.org/user_builds/pytorch_lightning/checkouts/
             #  devel/pytorch_lightning/utilities/cls_experiment.py#L26-L176
-            path_top = os.path.abspath(os.path.join('..', '..', '..'))
+            path_top = os.path.abspath(os.path.join("..", "..", ".."))
             fname = os.path.relpath(fname, start=path_top)
         else:
             # Local build, imitate master
-            fname = 'master/' + os.path.relpath(fname, start=os.path.abspath('..'))
+            fname = "master/" + os.path.relpath(fname, start=os.path.abspath(".."))
         source, lineno = inspect.getsourcelines(obj)
         return fname, lineno, lineno + len(source) - 1
 
-    if domain != 'py' or not info['module']:
+    if domain != "py" or not info["module"]:
         return None
     try:
-        filename = '%s#L%d-L%d' % find_source()
+        filename = "%s#L%d-L%d" % find_source()
     except Exception:
-        filename = info['module'].replace('.', '/') + '.py'
+        filename = info["module"].replace(".", "/") + ".py"
     # import subprocess
     # tag = subprocess.Popen(['git', 'rev-parse', 'HEAD'], stdout=subprocess.PIPE,
     #                        universal_newlines=True).communicate()[0][:-1]
-    branch = filename.split('/')[0]
+    branch = filename.split("/")[0]
     # do mapping from latest tags to master
-    branch = {'latest': 'master', 'stable': 'master'}.get(branch, branch)
-    filename = '/'.join([branch] + filename.split('/')[1:])
-    return "https://github.com/%s/%s/blob/%s" \
-           % (github_user, github_repo, filename)
+    branch = {"latest": "master", "stable": "master"}.get(branch, branch)
+    filename = "/".join([branch] + filename.split("/")[1:])
+    return f"https://github.com/{github_user}/{github_repo}/blob/{filename}"
 
 
 autosummary_generate = True
 
-autodoc_member_order = 'groupwise'
-autoclass_content = 'both'
+autodoc_member_order = "groupwise"
+autoclass_content = "both"
 # the options are fixed and will be soon in release,
 #  see https://github.com/sphinx-doc/sphinx/issues/5459
 autodoc_default_options = {
-    'members': True,
-    'methods': True,
-    'special-members': '__call__',
-    'exclude-members': '_abc_impl',
-    'show-inheritance': True,
-    'noindex': True,
+    "members": True,
+    "methods": True,
+    "special-members": "__call__",
+    "exclude-members": "_abc_impl",
+    "show-inheritance": True,
+    "noindex": True,
 }
 
 # Sphinx will add “permalinks” for each heading and description environment as paragraph signs that
@@ -398,7 +394,7 @@ html_add_permalinks = "¶"
 autosectionlabel_prefix_document = True
 
 # only run doctests marked with a ".. doctest::" directive
-doctest_test_doctest_blocks = ''
+doctest_test_doctest_blocks = ""
 doctest_global_setup = """
 
 import importlib

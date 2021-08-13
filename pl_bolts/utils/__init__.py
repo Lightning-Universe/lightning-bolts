@@ -11,8 +11,8 @@ from pl_bolts.callbacks.verification.batch_gradient import BatchGradientVerifica
 
 # Ported from https://github.com/PyTorchLightning/pytorch-lightning/blob/master/pytorch_lightning/utilities/imports.py
 def _compare_version(package: str, op, version) -> bool:
-    """
-    Compare package version with some requirements
+    """Compare package version with some requirements.
+
     >>> _compare_version("torch", operator.ge, "0.1")
     True
     """

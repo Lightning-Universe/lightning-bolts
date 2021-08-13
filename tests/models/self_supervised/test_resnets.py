@@ -24,7 +24,8 @@ def test_cpc_resnet():
 
 
 @pytest.mark.parametrize(
-    "model_class", [
+    "model_class",
+    [
         resnet18,
         resnet34,
         resnet50,
@@ -34,7 +35,7 @@ def test_cpc_resnet():
         resnext101_32x8d,
         wide_resnet50_2,
         wide_resnet101_2,
-    ]
+    ],
 )
 @torch.no_grad()
 def test_torchvision_resnets(model_class):

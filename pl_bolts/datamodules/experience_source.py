@@ -1,7 +1,5 @@
-"""
-Datamodules for RL models that rely on experiences generated during training
-Based on implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/experience.py
-"""
+"""Datamodules for RL models that rely on experiences generated during training Based on implementations found
+here: https://github.com/Shmuma/ptan/blob/master/ptan/experience.py."""
 from abc import ABC
 from collections import deque, namedtuple
 from typing import Callable, Iterator, List, Tuple
@@ -22,9 +20,10 @@ Experience = namedtuple("Experience", field_names=["state", "action", "reward", 
 
 
 class ExperienceSourceDataset(IterableDataset):
-    """
-    Basic experience source dataset. Takes a generate_batch function that returns an iterator.
-    The logic for the experience source and how the batch is generated is defined the Lightning model itself
+    """Basic experience source dataset.
+
+    Takes a generate_batch function that returns an iterator. The logic for the experience source and how the batch is
+    generated is defined the Lightning model itself
     """
 
     def __init__(self, generate_batch: Callable) -> None:
@@ -37,9 +36,7 @@ class ExperienceSourceDataset(IterableDataset):
 
 # Experience Sources
 class BaseExperienceSource(ABC):
-    """
-    Simplest form of the experience source
-    """
+    """Simplest form of the experience source."""
 
     def __init__(self, env, agent) -> None:
         """
@@ -51,14 +48,12 @@ class BaseExperienceSource(ABC):
         self.agent = agent
 
     def runner(self) -> Experience:
-        """Iterable method that yields steps from the experience source"""
+        """Iterable method that yields steps from the experience source."""
         raise NotImplementedError("ExperienceSource has no stepper method implemented")
 
 
 class ExperienceSource(BaseExperienceSource):
-    """
-    Experience source class handling single and multiple environment steps
-    """
+    """Experience source class handling single and multiple environment steps."""
 
     def __init__(self, env, agent, n_steps: int = 1) -> None:
         """
@@ -85,8 +80,8 @@ class ExperienceSource(BaseExperienceSource):
         self.init_environments()
 
     def runner(self, device: torch.device) -> Tuple[Experience]:
-        """Experience Source iterator yielding Tuple of experiences for n_steps. These come from the pool
-        of environments provided by the user.
+        """Experience Source iterator yielding Tuple of experiences for n_steps. These come from the pool of
+        environments provided by the user.
 
         Args:
             device: current device to be used for executing experience steps
@@ -115,10 +110,9 @@ class ExperienceSource(BaseExperienceSource):
             self.iter_idx += 1
 
     def update_history_queue(self, env_idx, exp, history) -> None:
-        """
-        Updates the experience history queue with the lastest experiences. In the event of an experience step is in
-        the done state, the history will be incrementally appended to the queue, removing the tail of the history
-        each time.
+        """Updates the experience history queue with the lastest experiences. In the event of an experience step is
+        in the done state, the history will be incrementally appended to the queue, removing the tail of the
+        history each time.
 
         Args:
             env_idx: index of the environment
@@ -150,10 +144,8 @@ class ExperienceSource(BaseExperienceSource):
             history.clear()
 
     def init_environments(self) -> None:
-        """
-        For each environment in the pool setups lists for tracking history of size n, state, current reward and
-        current step
-        """
+        """For each environment in the pool setups lists for tracking history of size n, state, current reward and
+        current step."""
         for env in self.pool:
             self.states.append(env.reset())
             self.histories.append(deque(maxlen=self.n_steps))
@@ -177,8 +169,7 @@ class ExperienceSource(BaseExperienceSource):
         return actions
 
     def env_step(self, env_idx: int, env: Env, action: List[int]) -> Experience:
-        """
-        Carries out a step through the given environment using the given action
+        """Carries out a step through the given environment using the given action.
 
         Args:
             env_idx: index of the current environment
@@ -198,9 +189,8 @@ class ExperienceSource(BaseExperienceSource):
         return exp
 
     def update_env_stats(self, env_idx: int) -> None:
-        """
-        To be called at the end of the history tail generation during the termination state. Updates the stats
-        tracked for all environments
+        """To be called at the end of the history tail generation during the termination state. Updates the stats
+        tracked for all environments.
 
         Args:
             env_idx: index of the environment used to update stats
@@ -238,7 +228,7 @@ class ExperienceSource(BaseExperienceSource):
 
 
 class DiscountedExperienceSource(ExperienceSource):
-    """Outputs experiences with a discounted reward over N steps"""
+    """Outputs experiences with a discounted reward over N steps."""
 
     def __init__(self, env: Env, agent, n_steps: int = 1, gamma: float = 0.99) -> None:
         super().__init__(env, agent, (n_steps + 1))
@@ -246,8 +236,7 @@ class DiscountedExperienceSource(ExperienceSource):
         self.steps = n_steps
 
     def runner(self, device: torch.device) -> Experience:
-        """
-        Iterates through experience tuple and calculate discounted experience
+        """Iterates through experience tuple and calculate discounted experience.
 
         Args:
             device: current device to be used for executing experience steps
@@ -265,13 +254,12 @@ class DiscountedExperienceSource(ExperienceSource):
                 action=experiences[0].action,
                 reward=total_reward,
                 done=experiences[0].done,
-                new_state=last_exp_state
+                new_state=last_exp_state,
             )
 
     def split_head_tail_exp(self, experiences: Tuple[Experience]) -> Tuple[List, Tuple[Experience]]:
-        """
-        Takes in a tuple of experiences and returns the last state and tail experiences based on
-        if the last state is the end of an episode
+        """Takes in a tuple of experiences and returns the last state and tail experiences based on if the last
+        state is the end of an episode.
 
         Args:
             experiences: Tuple of N Experience
@@ -288,8 +276,7 @@ class DiscountedExperienceSource(ExperienceSource):
         return last_exp_state, tail_experiences
 
     def discount_rewards(self, experiences: Tuple[Experience]) -> float:
-        """
-        Calculates the discounted reward over N experiences
+        """Calculates the discounted reward over N experiences.
 
         Args:
             experiences: Tuple of Experience

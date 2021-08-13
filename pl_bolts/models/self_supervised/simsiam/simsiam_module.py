@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning import LightningModule, seed_everything, Trainer
+from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from torch.nn import functional as F
 
@@ -17,9 +17,7 @@ from pl_bolts.transforms.dataset_normalizations import (
 
 
 class SimSiam(LightningModule):
-    """
-    PyTorch Lightning implementation of `Exploring Simple Siamese Representation Learning (SimSiam)
-    <https://arxiv.org/pdf/2011.10566v1.pdf>`_
+    """PyTorch Lightning implementation of Exploring Simple Siamese Representation Learning (SimSiam_)
 
     Paper authors: Xinlei Chen, Kaiming He.
 
@@ -61,6 +59,8 @@ class SimSiam(LightningModule):
             --data_dir /path/to/imagenet/
             --meta_dir /path/to/folder/with/meta.bin/
             --batch_size 32
+
+    .. _SimSiam: https://arxiv.org/pdf/2011.10566v1.pdf
     """
 
     def __init__(
@@ -70,7 +70,7 @@ class SimSiam(LightningModule):
         batch_size: int,
         dataset: str,
         num_nodes: int = 1,
-        arch: str = 'resnet50',
+        arch: str = "resnet50",
         hidden_mlp: int = 2048,
         feat_dim: int = 128,
         warmup_epochs: int = 10,
@@ -78,11 +78,11 @@ class SimSiam(LightningModule):
         temperature: float = 0.1,
         first_conv: bool = True,
         maxpool1: bool = True,
-        optimizer: str = 'adam',
+        optimizer: str = "adam",
         exclude_bn_bias: bool = False,
-        start_lr: float = 0.,
+        start_lr: float = 0.0,
         learning_rate: float = 1e-3,
-        final_lr: float = 0.,
+        final_lr: float = 0.0,
         weight_decay: float = 1e-6,
         **kwargs
     ):
@@ -132,9 +132,9 @@ class SimSiam(LightningModule):
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
     def init_model(self):
-        if self.arch == 'resnet18':
+        if self.arch == "resnet18":
             backbone = resnet18
-        elif self.arch == 'resnet50':
+        elif self.arch == "resnet50":
             backbone = resnet50
 
         encoder = backbone(first_conv=self.first_conv, maxpool1=self.maxpool1, return_all_feature_maps=False)
@@ -179,7 +179,7 @@ class SimSiam(LightningModule):
 
         return loss
 
-    def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=['bias', 'bn']):
+    def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=["bias", "bn"]):
         params = []
         excluded_params = []
 
@@ -192,14 +192,8 @@ class SimSiam(LightningModule):
                 params.append(param)
 
         return [
-            {
-                'params': params,
-                'weight_decay': weight_decay
-            },
-            {
-                'params': excluded_params,
-                'weight_decay': 0.
-            },
+            {"params": params, "weight_decay": weight_decay},
+            {"params": excluded_params, "weight_decay": 0.0},
         ]
 
     def configure_optimizers(self):
@@ -208,7 +202,7 @@ class SimSiam(LightningModule):
         else:
             params = self.parameters()
 
-        if self.optim == 'lars':
+        if self.optim == "lars":
             optimizer = LARS(
                 params,
                 lr=self.learning_rate,
@@ -216,7 +210,7 @@ class SimSiam(LightningModule):
                 weight_decay=self.weight_decay,
                 trust_coefficient=0.001,
             )
-        elif self.optim == 'adam':
+        elif self.optim == "adam":
             optimizer = torch.optim.Adam(params, lr=self.learning_rate, weight_decay=self.weight_decay)
 
         warmup_steps = self.train_iters_per_epoch * self.warmup_epochs
@@ -382,7 +376,7 @@ def cli_main():
         )
 
     lr_monitor = LearningRateMonitor(logging_interval="step")
-    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor='val_loss')
+    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor="val_loss")
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
     callbacks.append(lr_monitor)
 

@@ -8,9 +8,8 @@ from pl_bolts.models.rl.common.memory import Buffer, Experience, MultiStepBuffer
 
 
 class TestBuffer(TestCase):
-
     def train_batch(self):
-        """Returns an iterator used for testing"""
+        """Returns an iterator used for testing."""
         return iter([i for i in range(100)])
 
     def setUp(self) -> None:
@@ -29,7 +28,7 @@ class TestBuffer(TestCase):
             self.buffer.append(self.experience)
 
     def test_sample_batch(self):
-        """check that a sinlge sample is returned"""
+        """check that a sinlge sample is returned."""
         sample = self.buffer.sample()
         self.assertEqual(len(sample), 5)
         self.assertEqual(sample[0].shape, (self.batch_size, 4, 84, 84))
@@ -40,7 +39,6 @@ class TestBuffer(TestCase):
 
 
 class TestReplayBuffer(TestCase):
-
     def setUp(self) -> None:
         self.state = np.random.rand(32, 32)
         self.next_state = np.random.rand(32, 32)
@@ -57,7 +55,7 @@ class TestReplayBuffer(TestCase):
             self.buffer.append(self.experience)
 
     def test_replay_buffer_append(self):
-        """Test that you can append to the replay buffer"""
+        """Test that you can append to the replay buffer."""
 
         self.assertEqual(len(self.buffer), self.warm_start)
 
@@ -66,11 +64,11 @@ class TestReplayBuffer(TestCase):
         self.assertEqual(len(self.buffer), self.warm_start + 1)
 
     def test_replay_buffer_populate(self):
-        """Tests that the buffer is populated correctly with warm_start"""
+        """Tests that the buffer is populated correctly with warm_start."""
         self.assertEqual(len(self.buffer.buffer), self.warm_start)
 
     def test_replay_buffer_update(self):
-        """Tests that buffer append works correctly"""
+        """Tests that buffer append works correctly."""
         batch_size = 3
         self.assertEqual(len(self.buffer.buffer), self.warm_start)
         for i in range(batch_size):
@@ -78,7 +76,7 @@ class TestReplayBuffer(TestCase):
         self.assertEqual(len(self.buffer.buffer), self.warm_start + batch_size)
 
     def test_replay_buffer_sample(self):
-        """Test that you can sample from the buffer and the outputs are the correct shape"""
+        """Test that you can sample from the buffer and the outputs are the correct shape."""
         batch_size = 3
 
         for i in range(10):
@@ -106,7 +104,6 @@ class TestReplayBuffer(TestCase):
 
 
 class TestPrioReplayBuffer(TestCase):
-
     def setUp(self) -> None:
         self.buffer = PERBuffer(10)
 
@@ -118,7 +115,7 @@ class TestPrioReplayBuffer(TestCase):
         self.experience = Experience(self.state, self.action, self.reward, self.done, self.next_state)
 
     def test_replay_buffer_append(self):
-        """Test that you can append to the replay buffer and the latest experience has max priority"""
+        """Test that you can append to the replay buffer and the latest experience has max priority."""
 
         self.assertEqual(len(self.buffer), 0)
 
@@ -128,7 +125,7 @@ class TestPrioReplayBuffer(TestCase):
         self.assertEqual(self.buffer.priorities[0], 1.0)
 
     def test_replay_buffer_sample(self):
-        """Test that you can sample from the buffer and the outputs are the correct shape"""
+        """Test that you can sample from the buffer and the outputs are the correct shape."""
         batch_size = 3
 
         for i in range(10):
@@ -158,7 +155,6 @@ class TestPrioReplayBuffer(TestCase):
 
 
 class TestMultiStepReplayBuffer(TestCase):
-
     def setUp(self) -> None:
         self.gamma = 0.9
         self.buffer = MultiStepBuffer(capacity=10, n_steps=2, gamma=self.gamma)
@@ -179,10 +175,8 @@ class TestMultiStepReplayBuffer(TestCase):
         self.experience03 = Experience(self.state_02, self.action_02, self.reward_02, self.done_02, self.next_state_02)
 
     def test_append_single_experience_less_than_n(self):
-        """
-        If a single experience is added and n > 1 nothing should be added to the buffer as it is waiting experiences
-        to equal n
-        """
+        """If a single experience is added and n > 1 nothing should be added to the buffer as it is waiting
+        experiences to equal n."""
         self.assertEqual(len(self.buffer), 0)
 
         self.buffer.append(self.experience01)
@@ -190,10 +184,8 @@ class TestMultiStepReplayBuffer(TestCase):
         self.assertEqual(len(self.buffer), 0)
 
     def test_append_single_experience(self):
-        """
-        If a single experience is added and n > 1 nothing should be added to the buffer as it is waiting experiences
-        to equal n
-        """
+        """If a single experience is added and n > 1 nothing should be added to the buffer as it is waiting
+        experiences to equal n."""
         self.assertEqual(len(self.buffer), 0)
 
         self.buffer.append(self.experience01)
@@ -202,10 +194,8 @@ class TestMultiStepReplayBuffer(TestCase):
         self.assertEqual(len(self.buffer.history), 1)
 
     def test_append_single_experience2(self):
-        """
-        If a single experience is added and the number of experiences collected >= n, the multi step experience should
-        be added to the full buffer.
-        """
+        """If a single experience is added and the number of experiences collected >= n, the multi step experience
+        should be added to the full buffer."""
         self.assertEqual(len(self.buffer), 0)
 
         self.buffer.append(self.experience01)
@@ -215,7 +205,7 @@ class TestMultiStepReplayBuffer(TestCase):
         self.assertEqual(len(self.buffer.history), 2)
 
     def test_sample_single_experience(self):
-        """if there is only a single experience added, sample should return nothing"""
+        """if there is only a single experience added, sample should return nothing."""
         self.buffer.append(self.experience01)
 
         with self.assertRaises(Exception) as context:
@@ -224,7 +214,7 @@ class TestMultiStepReplayBuffer(TestCase):
         self.assertIsInstance(context.exception, Exception)
 
     def test_sample_multi_experience(self):
-        """if there is only a single experience added, sample should return nothing"""
+        """if there is only a single experience added, sample should return nothing."""
         self.buffer.append(self.experience01)
         self.buffer.append(self.experience02)
 
@@ -234,7 +224,7 @@ class TestMultiStepReplayBuffer(TestCase):
         self.assertEqual(next_state.all(), self.next_state_02.all())
 
     def test_get_transition_info_2_step(self):
-        """Test that the accumulated experience is correct and"""
+        """Test that the accumulated experience is correct and."""
         self.buffer.append(self.experience01)
         self.buffer.append(self.experience02)
 
@@ -249,7 +239,7 @@ class TestMultiStepReplayBuffer(TestCase):
         self.assertEqual(self.experience02.done, done)
 
     def test_get_transition_info_3_step(self):
-        """Test that the accumulated experience is correct with multi step"""
+        """Test that the accumulated experience is correct with multi step."""
         self.buffer = MultiStepBuffer(capacity=10, n_steps=3, gamma=self.gamma)
 
         self.buffer.append(self.experience01)
@@ -268,7 +258,7 @@ class TestMultiStepReplayBuffer(TestCase):
         self.assertEqual(self.experience03.done, done)
 
     def test_sample_3_step(self):
-        """Test that final output of the 3 step sample is correct"""
+        """Test that final output of the 3 step sample is correct."""
         self.buffer = MultiStepBuffer(capacity=10, n_steps=3, gamma=self.gamma)
 
         self.buffer.append(self.experience01)

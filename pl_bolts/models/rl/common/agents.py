@@ -1,25 +1,24 @@
-"""
-Agent module containing classes for Agent logic
-Based on the implementations found here: https://github.com/Shmuma/ptan/blob/master/ptan/agent.py
+"""Agent module containing classes for Agent logic Based on the implementations found here:
+
+https://github.com/Shmuma/ptan/blob/master/ptan/agent.py.
 """
 from abc import ABC
 from typing import List
 
 import numpy as np
 import torch
-from torch import nn, Tensor
+from torch import Tensor, nn
 from torch.nn import functional as F
 
 
 class Agent(ABC):
-    """Basic agent that always returns 0"""
+    """Basic agent that always returns 0."""
 
     def __init__(self, net: nn.Module):
         self.net = net
 
     def __call__(self, state: Tensor, device: str, *args, **kwargs) -> List[int]:
-        """
-        Using the given network, decide what action to carry
+        """Using the given network, decide what action to carry.
 
         Args:
             state: current state of the environment
@@ -32,7 +31,7 @@ class Agent(ABC):
 
 
 class ValueAgent(Agent):
-    """Value based agent that returns an action based on the Q values from the network"""
+    """Value based agent that returns an action based on the Q values from the network."""
 
     def __init__(
         self,
@@ -51,8 +50,7 @@ class ValueAgent(Agent):
 
     @torch.no_grad()
     def __call__(self, state: Tensor, device: str) -> List[int]:
-        """
-        Takes in the current state and returns the action based on the agents policy
+        """Takes in the current state and returns the action based on the agents policy.
 
         Args:
             state: current state of the environment
@@ -72,7 +70,7 @@ class ValueAgent(Agent):
         return action
 
     def get_random_action(self, state: Tensor) -> int:
-        """returns a random action"""
+        """returns a random action."""
         actions = []
 
         for i in range(len(state)):
@@ -82,8 +80,7 @@ class ValueAgent(Agent):
         return actions
 
     def get_action(self, state: Tensor, device: torch.device):
-        """
-        Returns the best action based on the Q values of the network
+        """Returns the best action based on the Q values of the network.
 
         Args:
             state: current state of the environment
@@ -100,8 +97,7 @@ class ValueAgent(Agent):
         return actions.detach().cpu().numpy()
 
     def update_epsilon(self, step: int) -> None:
-        """
-        Updates the epsilon value based on the current step
+        """Updates the epsilon value based on the current step.
 
         Args:
             step: current global step
@@ -110,12 +106,11 @@ class ValueAgent(Agent):
 
 
 class PolicyAgent(Agent):
-    """Policy based agent that returns an action based on the networks policy"""
+    """Policy based agent that returns an action based on the networks policy."""
 
     @torch.no_grad()
     def __call__(self, states: Tensor, device: str) -> List[int]:
-        """
-        Takes in the current state and returns the action based on the agents policy
+        """Takes in the current state and returns the action based on the agents policy.
 
         Args:
             states: current state of the environment
@@ -139,13 +134,42 @@ class PolicyAgent(Agent):
         return actions
 
 
+class ActorCriticAgent(Agent):
+    """Actor-Critic based agent that returns an action based on the networks policy."""
+
+    def __call__(self, states: Tensor, device: str) -> List[int]:
+        """Takes in the current state and returns the action based on the agents policy.
+
+        Args:
+            states: current state of the environment
+            device: the device used for the current batch
+
+        Returns:
+            action defined by policy
+        """
+        if not isinstance(states, list):
+            states = [states]
+
+        if not isinstance(states, Tensor):
+            states = torch.tensor(states, device=device)
+
+        logprobs, _ = self.net(states)
+        probabilities = logprobs.exp().squeeze(dim=-1)
+        prob_np = probabilities.data.cpu().numpy()
+
+        # take the numpy values and randomly select action based on prob distribution
+        actions = [np.random.choice(len(prob), p=prob) for prob in prob_np]
+
+        return actions
+
+
 class SoftActorCriticAgent(Agent):
     """Actor-Critic based agent that returns a continuous action based on the policy"""
 
     def __call__(self, states: Tensor, device: str) -> List[float]:
         """
         Takes in the current state and returns the action based on the agents policy
-
+        
         Args:
             states: current state of the environment
             device: the device used for the current batch
@@ -182,5 +206,5 @@ class SoftActorCriticAgent(Agent):
             states = torch.tensor(states, device=device)
 
         actions = [self.net.get_action(states).cpu().numpy()]
-
+        
         return actions
