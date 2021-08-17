@@ -40,11 +40,11 @@ class LARS(Optimizer):
         .. math::
             \begin{aligned}
                 g_{t+1} & = \text{lars_lr} * (\beta * p_{t} + g_{t+1}), \\
-                v_{t+1} & = \mu * v_{t} + g_{t+1}, \\
+                v_{t+1} & = \\mu * v_{t} + g_{t+1}, \\
                 p_{t+1} & = p_{t} - \text{lr} * v_{t+1},
-            \end{aligned}
+            \\end{aligned}
 
-        where :math:`p`, :math:`g`, :math:`v`, :math:`\mu` and :math:`\beta` denote the
+        where :math:`p`, :math:`g`, :math:`v`, :math:`\\mu` and :math:`\beta` denote the
         parameters, gradient, velocity, momentum, and weight decay respectively.
         The :math:`lars_lr` is defined by Eq. 6 in the paper.
         The Nesterov version is analogously modified.
@@ -64,14 +64,14 @@ class LARS(Optimizer):
         weight_decay=0,
         nesterov=False,
         trust_coefficient=0.001,
-        eps=1e-8
+        eps=1e-8,
     ):
         if lr is not required and lr < 0.0:
-            raise ValueError("Invalid learning rate: {}".format(lr))
+            raise ValueError(f"Invalid learning rate: {lr}")
         if momentum < 0.0:
-            raise ValueError("Invalid momentum value: {}".format(momentum))
+            raise ValueError(f"Invalid momentum value: {momentum}")
         if weight_decay < 0.0:
-            raise ValueError("Invalid weight_decay value: {}".format(weight_decay))
+            raise ValueError(f"Invalid weight_decay value: {weight_decay}")
 
         defaults = dict(
             lr=lr,
@@ -80,22 +80,23 @@ class LARS(Optimizer):
             weight_decay=weight_decay,
             nesterov=nesterov,
             trust_coefficient=trust_coefficient,
-            eps=eps
+            eps=eps,
         )
         if nesterov and (momentum <= 0 or dampening != 0):
             raise ValueError("Nesterov momentum requires a momentum and zero dampening")
 
-        super(LARS, self).__init__(params, defaults)
+        super().__init__(params, defaults)
 
     def __setstate__(self, state):
-        super(LARS, self).__setstate__(state)
+        super().__setstate__(state)
 
         for group in self.param_groups:
-            group.setdefault('nesterov', False)
+            group.setdefault("nesterov", False)
 
     @torch.no_grad()
     def step(self, closure=None):
         """Performs a single optimization step.
+
         Args:
             closure (callable, optional): A closure that reevaluates the model
                 and returns the loss.
@@ -107,12 +108,12 @@ class LARS(Optimizer):
 
         # exclude scaling for params with 0 weight decay
         for group in self.param_groups:
-            weight_decay = group['weight_decay']
-            momentum = group['momentum']
-            dampening = group['dampening']
-            nesterov = group['nesterov']
+            weight_decay = group["weight_decay"]
+            momentum = group["momentum"]
+            dampening = group["dampening"]
+            nesterov = group["nesterov"]
 
-            for p in group['params']:
+            for p in group["params"]:
                 if p.grad is None:
                     continue
 
@@ -123,8 +124,8 @@ class LARS(Optimizer):
                 # lars scaling + weight decay part
                 if weight_decay != 0:
                     if p_norm != 0 and g_norm != 0:
-                        lars_lr = p_norm / (g_norm + p_norm * weight_decay + group['eps'])
-                        lars_lr *= group['trust_coefficient']
+                        lars_lr = p_norm / (g_norm + p_norm * weight_decay + group["eps"])
+                        lars_lr *= group["trust_coefficient"]
 
                         d_p = d_p.add(p, alpha=weight_decay)
                         d_p *= lars_lr
@@ -132,16 +133,16 @@ class LARS(Optimizer):
                 # sgd part
                 if momentum != 0:
                     param_state = self.state[p]
-                    if 'momentum_buffer' not in param_state:
-                        buf = param_state['momentum_buffer'] = torch.clone(d_p).detach()
+                    if "momentum_buffer" not in param_state:
+                        buf = param_state["momentum_buffer"] = torch.clone(d_p).detach()
                     else:
-                        buf = param_state['momentum_buffer']
+                        buf = param_state["momentum_buffer"]
                         buf.mul_(momentum).add_(d_p, alpha=1 - dampening)
                     if nesterov:
                         d_p = d_p.add(buf, alpha=momentum)
                     else:
                         d_p = buf
 
-                p.add_(d_p, alpha=-group['lr'])
+                p.add_(d_p, alpha=-group["lr"])
 
         return loss

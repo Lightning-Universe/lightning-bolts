@@ -2,25 +2,25 @@ import argparse
 from typing import Any, List, Tuple
 
 import torch
-from pytorch_lightning import LightningModule, seed_everything, Trainer
+from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch import Tensor
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import ExperienceSourceDataset
-from pl_bolts.models.rl.common.networks import ActorCategorical, ActorContinous, MLP
+from pl_bolts.models.rl.common.networks import MLP, ActorCategorical, ActorContinous
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
     import gym
 else:  # pragma: no cover
-    warn_missing_pkg('gym')
+    warn_missing_pkg("gym")
 
 
 class PPO(LightningModule):
-    """
-    PyTorch Lightning implementation of `Proximal Policy Optimization
+    """PyTorch Lightning implementation of `Proximal Policy Optimization.
+
     <https://arxiv.org/abs/1707.06347>`_
 
     Paper authors: John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov
@@ -71,7 +71,7 @@ class PPO(LightningModule):
         super().__init__()
 
         if not _GYM_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('This Module requires gym environment which is not installed yet.')
+            raise ModuleNotFoundError("This Module requires gym environment which is not installed yet.")
 
         # Hyperparameters
         self.lr_actor = lr_actor
@@ -98,8 +98,8 @@ class PPO(LightningModule):
             self.actor = ActorCategorical(actor_mlp)
         else:
             raise NotImplementedError(
-                'Env action space should be of type Box (continous) or Discrete (categorical). '
-                f'Got type: {type(self.env.action_space)}'
+                "Env action space should be of type Box (continous) or Discrete (categorical). "
+                f"Got type: {type(self.env.action_space)}"
             )
 
         self.batch_states = []
@@ -120,8 +120,7 @@ class PPO(LightningModule):
         self.state = torch.FloatTensor(self.env.reset())
 
     def forward(self, x: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
-        """
-        Passes in a state x through the network and returns the policy and a sampled action
+        """Passes in a state x through the network and returns the policy and a sampled action.
 
         Args:
             x: environment state
@@ -135,7 +134,7 @@ class PPO(LightningModule):
         return pi, action, value
 
     def discount_rewards(self, rewards: List[float], discount: float) -> List[float]:
-        """Calculate the discounted rewards of all rewards in list
+        """Calculate the discounted rewards of all rewards in list.
 
         Args:
             rewards: list of rewards/advantages
@@ -156,7 +155,7 @@ class PPO(LightningModule):
         return list(reversed(cumul_reward))
 
     def calc_advantage(self, rewards: List[float], values: List[float], last_value: float) -> List[float]:
-        """Calculate the advantage given rewards, state values, and the last value of episode
+        """Calculate the advantage given rewards, state values, and the last value of episode.
 
         Args:
             rewards: list of episode rewards
@@ -175,8 +174,7 @@ class PPO(LightningModule):
         return adv
 
     def generate_trajectory_samples(self) -> Tuple[List[Tensor], List[Tensor], List[Tensor]]:
-        """
-        Contains the logic for generating trajectory data to train policy and value network
+        """Contains the logic for generating trajectory data to train policy and value network.
 
         Yield:
            Tuple of Lists containing tensors for states, actions, log probs, qvals and advantage
@@ -273,8 +271,7 @@ class PPO(LightningModule):
         return loss_critic
 
     def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx, optimizer_idx):
-        """
-        Carries out a single update to actor and critic network from a batch of replay buffer.
+        """Carries out a single update to actor and critic network from a batch of replay buffer.
 
         Args:
             batch: batch of replay buffer/trajectory data
@@ -295,44 +292,42 @@ class PPO(LightningModule):
 
         if optimizer_idx == 0:
             loss_actor = self.actor_loss(state, action, old_logp, adv)
-            self.log('loss_actor', loss_actor, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+            self.log("loss_actor", loss_actor, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
             return loss_actor
 
         elif optimizer_idx == 1:
             loss_critic = self.critic_loss(state, qval)
-            self.log('loss_critic', loss_critic, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+            self.log("loss_critic", loss_critic, on_step=False, on_epoch=True, prog_bar=False, logger=True)
 
             return loss_critic
 
         raise NotImplementedError(
-            f'Got optimizer_idx: {optimizer_idx}. Expected only 2 optimizers from configure_optimizers. '
-            'Modify optimizer logic in training_step to account for this. '
+            f"Got optimizer_idx: {optimizer_idx}. Expected only 2 optimizers from configure_optimizers. "
+            "Modify optimizer logic in training_step to account for this. "
         )
 
     def configure_optimizers(self) -> List[Optimizer]:
-        """ Initialize Adam optimizer"""
+        """Initialize Adam optimizer."""
         optimizer_actor = torch.optim.Adam(self.actor.parameters(), lr=self.lr_actor)
         optimizer_critic = torch.optim.Adam(self.critic.parameters(), lr=self.lr_critic)
 
         return optimizer_actor, optimizer_critic
 
     def optimizer_step(self, *args, **kwargs):
-        """
-        Run ``nb_optim_iters`` number of iterations of gradient descent on actor and critic
-        for each data sample.
-        """
+        """Run ``nb_optim_iters`` number of iterations of gradient descent on actor and critic for each data
+        sample."""
         for _ in range(self.nb_optim_iters):
             super().optimizer_step(*args, **kwargs)
 
     def _dataloader(self) -> DataLoader:
-        """Initialize the Replay Buffer dataset used for retrieving experiences"""
+        """Initialize the Replay Buffer dataset used for retrieving experiences."""
         dataset = ExperienceSourceDataset(self.generate_trajectory_samples)
         dataloader = DataLoader(dataset=dataset, batch_size=self.batch_size)
         return dataloader
 
     def train_dataloader(self) -> DataLoader:
-        """Get train loader"""
+        """Get train loader."""
         return self._dataloader()
 
     @staticmethod
@@ -349,7 +344,7 @@ class PPO(LightningModule):
             "--steps_per_epoch",
             type=int,
             default=2048,
-            help="how many action-state pairs to rollout for trajectory collection per epoch"
+            help="how many action-state pairs to rollout for trajectory collection per epoch",
         )
         parser.add_argument(
             "--nb_optim_iters", type=int, default=4, help="how many steps of gradient descent to perform on each batch"
@@ -375,5 +370,5 @@ def cli_main() -> None:
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

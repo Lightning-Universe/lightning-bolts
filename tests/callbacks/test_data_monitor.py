@@ -14,7 +14,7 @@ from pl_bolts.models import LitMNIST
 @pytest.mark.parametrize(["log_every_n_steps", "max_steps", "expected_calls"], [pytest.param(3, 10, 3)])
 @mock.patch("pl_bolts.callbacks.data_monitor.DataMonitorBase.log_histogram")
 def test_base_log_interval_override(log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir):
-    """ Test logging interval set by log_every_n_steps argument. """
+    """Test logging interval set by log_every_n_steps argument."""
     monitor = TrainingDataMonitor(log_every_n_steps=log_every_n_steps)
     model = LitMNIST(data_dir=datadir, num_workers=0)
     trainer = Trainer(
@@ -39,7 +39,7 @@ def test_base_log_interval_override(log_histogram, tmpdir, log_every_n_steps, ma
 )
 @mock.patch("pl_bolts.callbacks.data_monitor.DataMonitorBase.log_histogram")
 def test_base_log_interval_fallback(log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir):
-    """ Test that if log_every_n_steps not set in the callback, fallback to what is defined in the Trainer. """
+    """Test that if log_every_n_steps not set in the callback, fallback to what is defined in the Trainer."""
     monitor = TrainingDataMonitor()
     model = LitMNIST(data_dir=datadir, num_workers=0)
     trainer = Trainer(
@@ -53,7 +53,7 @@ def test_base_log_interval_fallback(log_histogram, tmpdir, log_every_n_steps, ma
 
 
 def test_base_no_logger_warning():
-    """ Test a warning is displayed when Trainer has no logger. """
+    """Test a warning is displayed when Trainer has no logger."""
     monitor = TrainingDataMonitor()
     trainer = Trainer(logger=False, callbacks=[monitor])
     with pytest.warns(UserWarning, match="Cannot log histograms because Trainer has no logger"):
@@ -61,7 +61,7 @@ def test_base_no_logger_warning():
 
 
 def test_base_unsupported_logger_warning(tmpdir):
-    """ Test a warning is displayed when an unsupported logger is used. """
+    """Test a warning is displayed when an unsupported logger is used."""
     monitor = TrainingDataMonitor()
     trainer = Trainer(logger=LoggerCollection([TensorBoardLogger(tmpdir)]), callbacks=[monitor])
     with pytest.warns(UserWarning, match="does not support logging with LoggerCollection"):
@@ -70,7 +70,7 @@ def test_base_unsupported_logger_warning(tmpdir):
 
 @mock.patch("pl_bolts.callbacks.data_monitor.TrainingDataMonitor.log_histogram")
 def test_training_data_monitor(log_histogram, tmpdir, datadir):
-    """ Test that the TrainingDataMonitor logs histograms of data points going into training_step. """
+    """Test that the TrainingDataMonitor logs histograms of data points going into training_step."""
     monitor = TrainingDataMonitor()
     model = LitMNIST(data_dir=datadir)
     trainer = Trainer(
@@ -113,7 +113,6 @@ def test_training_data_monitor(log_histogram, tmpdir, datadir):
 
 
 class SubModule(nn.Module):
-
     def __init__(self, inp, out):
         super().__init__()
         self.sub_layer = nn.Linear(inp, out)
@@ -123,7 +122,6 @@ class SubModule(nn.Module):
 
 
 class ModuleDataMonitorModel(nn.Module):
-
     def __init__(self):
         super().__init__()
         self.layer1 = nn.Linear(12, 5)
@@ -144,7 +142,7 @@ class ModuleDataMonitorModel(nn.Module):
 
 @mock.patch("pl_bolts.callbacks.data_monitor.ModuleDataMonitor.log_histogram")
 def test_module_data_monitor_forward(log_histogram, tmpdir):
-    """ Test that the default ModuleDataMonitor logs inputs and outputs of model's forward. """
+    """Test that the default ModuleDataMonitor logs inputs and outputs of model's forward."""
     monitor = ModuleDataMonitor(submodules=None)
     model = ModuleDataMonitorModel()
     trainer = Trainer(
@@ -165,7 +163,7 @@ def test_module_data_monitor_forward(log_histogram, tmpdir):
 
 @mock.patch("pl_bolts.callbacks.data_monitor.ModuleDataMonitor.log_histogram")
 def test_module_data_monitor_submodules_all(log_histogram, tmpdir):
-    """ Test that the ModuleDataMonitor logs the inputs and outputs of each submodule. """
+    """Test that the ModuleDataMonitor logs the inputs and outputs of each submodule."""
     monitor = ModuleDataMonitor(submodules=True)
     model = ModuleDataMonitorModel()
     trainer = Trainer(
@@ -192,7 +190,7 @@ def test_module_data_monitor_submodules_all(log_histogram, tmpdir):
 
 @mock.patch("pl_bolts.callbacks.data_monitor.ModuleDataMonitor.log_histogram")
 def test_module_data_monitor_submodules_specific(log_histogram, tmpdir):
-    """ Test that the ModuleDataMonitor logs the inputs and outputs of selected submodules. """
+    """Test that the ModuleDataMonitor logs the inputs and outputs of selected submodules."""
     monitor = ModuleDataMonitor(submodules=["layer1", "layer2.sub_layer"])
     model = ModuleDataMonitorModel()
     trainer = Trainer(

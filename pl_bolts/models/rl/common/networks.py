@@ -1,20 +1,16 @@
-"""Series of networks used
-Based on implementations found here:
-"""
+"""Series of networks used Based on implementations found here:"""
 import math
 from typing import Tuple
 
 import numpy as np
 import torch
-from torch import nn, Tensor
+from torch import Tensor, nn
 from torch.distributions import Categorical, Normal
 from torch.nn import functional as F
 
 
 class CNN(nn.Module):
-    """
-    Simple MLP network
-    """
+    """Simple MLP network."""
 
     def __init__(self, input_shape: Tuple[int], n_actions: int):
         """
@@ -22,7 +18,7 @@ class CNN(nn.Module):
             input_shape: observation shape of the environment
             n_actions: number of discrete actions available in the environment
         """
-        super(CNN, self).__init__()
+        super().__init__()
 
         self.conv = nn.Sequential(
             nn.Conv2d(input_shape[0], 32, kernel_size=8, stride=4),
@@ -37,8 +33,7 @@ class CNN(nn.Module):
         self.head = nn.Sequential(nn.Linear(conv_out_size, 512), nn.ReLU(), nn.Linear(512, n_actions))
 
     def _get_conv_out(self, shape) -> int:
-        """
-        Calculates the output size of the last conv layer
+        """Calculates the output size of the last conv layer.
 
         Args:
             shape: input dimensions
@@ -49,8 +44,7 @@ class CNN(nn.Module):
         return int(np.prod(conv_out.size()))
 
     def forward(self, input_x) -> Tensor:
-        """
-        Forward pass through network
+        """Forward pass through network.
 
         Args:
             x: input to network
@@ -62,9 +56,7 @@ class CNN(nn.Module):
 
 
 class MLP(nn.Module):
-    """
-    Simple MLP network
-    """
+    """Simple MLP network."""
 
     def __init__(self, input_shape: Tuple[int], n_actions: int, hidden_size: int = 128):
         """
@@ -73,7 +65,7 @@ class MLP(nn.Module):
             n_actions: number of discrete actions available in the environment
             hidden_size: size of hidden layers
         """
-        super(MLP, self).__init__()
+        super().__init__()
         self.net = nn.Sequential(
             nn.Linear(input_shape[0], hidden_size),
             nn.ReLU(),
@@ -81,8 +73,7 @@ class MLP(nn.Module):
         )
 
     def forward(self, input_x):
-        """
-        Forward pass through network
+        """Forward pass through network.
 
         Args:
             x: input to network
@@ -93,10 +84,8 @@ class MLP(nn.Module):
         return self.net(input_x.float())
 
 
-class DuelingMLP(nn.Module):
-    """
-    MLP network with duel heads for val and advantage
-    """
+class ActorCriticMLP(nn.Module):
+    """MLP network with heads for actor and critic."""
 
     def __init__(self, input_shape: Tuple[int], n_actions: int, hidden_size: int = 128):
         """
@@ -105,7 +94,38 @@ class DuelingMLP(nn.Module):
             n_actions: number of discrete actions available in the environment
             hidden_size: size of hidden layers
         """
-        super(DuelingMLP, self).__init__()
+        super().__init__()
+
+        self.fc1 = nn.Linear(input_shape[0], hidden_size)
+        self.actor_head = nn.Linear(hidden_size, n_actions)
+        self.critic_head = nn.Linear(hidden_size, 1)
+
+    def forward(self, x) -> Tuple[Tensor, Tensor]:
+        """Forward pass through network. Calculates the action logits and the value.
+
+        Args:
+            x: input to network
+
+        Returns:
+            action log probs (logits), value
+        """
+        x = F.relu(self.fc1(x.float()))
+        a = F.log_softmax(self.actor_head(x), dim=-1)
+        c = self.critic_head(x)
+        return a, c
+
+
+class DuelingMLP(nn.Module):
+    """MLP network with duel heads for val and advantage."""
+
+    def __init__(self, input_shape: Tuple[int], n_actions: int, hidden_size: int = 128):
+        """
+        Args:
+            input_shape: observation shape of the environment
+            n_actions: number of discrete actions available in the environment
+            hidden_size: size of hidden layers
+        """
+        super().__init__()
 
         self.net = nn.Sequential(
             nn.Linear(input_shape[0], hidden_size),
@@ -121,8 +141,7 @@ class DuelingMLP(nn.Module):
         self.head_val = nn.Sequential(nn.Linear(hidden_size, 256), nn.ReLU(), nn.Linear(256, 1))
 
     def forward(self, input_x):
-        """
-        Forward pass through network. Calculates the Q using the value and advantage
+        """Forward pass through network. Calculates the Q using the value and advantage.
 
         Args:
             x: input to network
@@ -135,9 +154,7 @@ class DuelingMLP(nn.Module):
         return q_val
 
     def adv_val(self, input_x) -> Tuple[Tensor, Tensor]:
-        """
-        Gets the advantage and value by passing out of the base network through the
-        value and advantage heads
+        """Gets the advantage and value by passing out of the base network through the value and advantage heads.
 
         Args:
             input_x: input to network
@@ -151,9 +168,7 @@ class DuelingMLP(nn.Module):
 
 
 class DuelingCNN(nn.Module):
-    """
-    CNN network with duel heads for val and advantage
-    """
+    """CNN network with duel heads for val and advantage."""
 
     def __init__(self, input_shape: Tuple[int], n_actions: int, _: int = 128):
         """
@@ -182,8 +197,7 @@ class DuelingCNN(nn.Module):
         self.head_val = nn.Sequential(nn.Linear(conv_out_size, 256), nn.ReLU(), nn.Linear(256, 1))
 
     def _get_conv_out(self, shape) -> int:
-        """
-        Calculates the output size of the last conv layer
+        """Calculates the output size of the last conv layer.
 
         Args:
             shape: input dimensions
@@ -195,8 +209,7 @@ class DuelingCNN(nn.Module):
         return int(np.prod(conv_out.size()))
 
     def forward(self, input_x):
-        """
-        Forward pass through network. Calculates the Q using the value and advantage
+        """Forward pass through network. Calculates the Q using the value and advantage.
 
         Args:
             input_x: input to network
@@ -209,9 +222,7 @@ class DuelingCNN(nn.Module):
         return q_val
 
     def adv_val(self, input_x):
-        """
-        Gets the advantage and value by passing out of the base network through the
-        value and advantage heads
+        """Gets the advantage and value by passing out of the base network through the value and advantage heads.
 
         Args:
             input_x: input to network
@@ -225,9 +236,7 @@ class DuelingCNN(nn.Module):
 
 
 class NoisyCNN(nn.Module):
-    """
-    CNN with Noisy Linear layers for exploration
-    """
+    """CNN with Noisy Linear layers for exploration."""
 
     def __init__(self, input_shape: Tuple[int], n_actions: int):
         """
@@ -250,8 +259,7 @@ class NoisyCNN(nn.Module):
         self.head = nn.Sequential(NoisyLinear(conv_out_size, 512), nn.ReLU(), NoisyLinear(512, n_actions))
 
     def _get_conv_out(self, shape) -> int:
-        """
-        Calculates the output size of the last conv layer
+        """Calculates the output size of the last conv layer.
 
         Args:
             shape: input dimensions
@@ -263,8 +271,7 @@ class NoisyCNN(nn.Module):
         return int(np.prod(conv_out.size()))
 
     def forward(self, input_x) -> Tensor:
-        """
-        Forward pass through network
+        """Forward pass through network.
 
         Args:
             x: input to network
@@ -282,8 +289,8 @@ class NoisyCNN(nn.Module):
 
 
 class NoisyLinear(nn.Linear):
-    """
-    Noisy Layer using Independent Gaussian Noise.
+    """Noisy Layer using Independent Gaussian Noise.
+
     based on https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/
     Chapter08/lib/dqn_extra.py#L19
     """
@@ -296,7 +303,7 @@ class NoisyLinear(nn.Linear):
             sigma_init: initial fill value of noisy weights
             bias: flag to include bias to linear layer
         """
-        super(NoisyLinear, self).__init__(in_features, out_features, bias=bias)
+        super().__init__(in_features, out_features, bias=bias)
 
         weights = torch.full((out_features, in_features), sigma_init)
         self.sigma_weight = nn.Parameter(weights)
@@ -304,7 +311,7 @@ class NoisyLinear(nn.Linear):
         self.register_buffer("epsilon_weight", epsilon_weight)
 
         if bias:
-            bias = torch.full((out_features, ), sigma_init)
+            bias = torch.full((out_features,), sigma_init)
             self.sigma_bias = nn.Parameter(bias)
             epsilon_bias = torch.zeros(out_features)
             self.register_buffer("epsilon_bias", epsilon_bias)
@@ -312,14 +319,13 @@ class NoisyLinear(nn.Linear):
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        """initializes or resets the paramseter of the layer"""
+        """initializes or resets the paramseter of the layer."""
         std = math.sqrt(3 / self.in_features)
         self.weight.data.uniform_(-std, std)
         self.bias.data.uniform_(-std, std)
 
     def forward(self, input_x: Tensor) -> Tensor:
-        """
-        Forward pass of the layer
+        """Forward pass of the layer.
 
         Args:
             input_x: input tensor
@@ -339,10 +345,8 @@ class NoisyLinear(nn.Linear):
 
 
 class ActorCategorical(nn.Module):
-    """
-    Policy network, for discrete action spaces, which returns a distribution
-    and an action given an observation
-    """
+    """Policy network, for discrete action spaces, which returns a distribution and an action given an
+    observation."""
 
     def __init__(self, actor_net: nn.Module) -> None:
         """
@@ -361,9 +365,7 @@ class ActorCategorical(nn.Module):
         return pi, actions
 
     def get_log_prob(self, pi: Categorical, actions: Tensor):
-        """
-        Takes in a distribution and actions and returns log prob of actions
-        under the distribution
+        """Takes in a distribution and actions and returns log prob of actions under the distribution.
 
         Args:
             pi: torch distribution
@@ -376,10 +378,8 @@ class ActorCategorical(nn.Module):
 
 
 class ActorContinous(nn.Module):
-    """
-    Policy network, for continous action spaces, which returns a distribution
-    and an action given an observation
-    """
+    """Policy network, for continous action spaces, which returns a distribution and an action given an
+    observation."""
 
     def __init__(self, actor_net: nn.Module, act_dim: int) -> None:
         """
@@ -401,9 +401,7 @@ class ActorContinous(nn.Module):
         return pi, actions
 
     def get_log_prob(self, pi: Normal, actions: Tensor):
-        """
-        Takes in a distribution and actions and returns log prob of actions
-        under the distribution
+        """Takes in a distribution and actions and returns log prob of actions under the distribution.
 
         Args:
             pi: torch distribution

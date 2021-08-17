@@ -1,7 +1,5 @@
-"""
-Set of wrapper functions for gym environments taken from
-https://github.com/Shmuma/ptan/blob/master/ptan/common/wrappers.py
-"""
+"""Set of wrapper functions for gym environments taken from
+https://github.com/Shmuma/ptan/blob/master/ptan/common/wrappers.py."""
 import collections
 
 import numpy as np
@@ -12,17 +10,17 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
     import gym.spaces
-    from gym import make as gym_make
     from gym import ObservationWrapper, Wrapper
+    from gym import make as gym_make
 else:  # pragma: no cover
-    warn_missing_pkg('gym')
+    warn_missing_pkg("gym")
     Wrapper = object
     ObservationWrapper = object
 
 if _OPENCV_AVAILABLE:
     import cv2
 else:  # pragma: no cover
-    warn_missing_pkg('cv2', pypi_name='opencv-python')
+    warn_missing_pkg("cv2", pypi_name="opencv-python")
 
 
 class ToTensor(Wrapper):
@@ -30,17 +28,17 @@ class ToTensor(Wrapper):
 
     def __init__(self, env=None):
         if not _GYM_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('You want to use `gym` which is not installed yet.')
+            raise ModuleNotFoundError("You want to use `gym` which is not installed yet.")
 
-        super(ToTensor, self).__init__(env)
+        super().__init__(env)
 
     def step(self, action):
-        """Take 1 step and cast to tensor"""
+        """Take 1 step and cast to tensor."""
         state, reward, done, info = self.env.step(action)
         return torch.tensor(state), torch.tensor(reward), done, info
 
     def reset(self):
-        """reset the env and cast to tensor"""
+        """reset the env and cast to tensor."""
         return torch.tensor(self.env.reset())
 
 
@@ -49,18 +47,18 @@ class FireResetEnv(Wrapper):
 
     def __init__(self, env=None):
         if not _GYM_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('You want to use `gym` which is not installed yet.')
+            raise ModuleNotFoundError("You want to use `gym` which is not installed yet.")
 
-        super(FireResetEnv, self).__init__(env)
+        super().__init__(env)
         assert env.unwrapped.get_action_meanings()[1] == "FIRE"
         assert len(env.unwrapped.get_action_meanings()) >= 3
 
     def step(self, action):
-        """Take 1 step"""
+        """Take 1 step."""
         return self.env.step(action)
 
     def reset(self):
-        """reset the env"""
+        """reset the env."""
         self.env.reset()
         obs, _, done, _ = self.env.step(1)
         if done:
@@ -72,19 +70,19 @@ class FireResetEnv(Wrapper):
 
 
 class MaxAndSkipEnv(Wrapper):
-    """Return only every `skip`-th frame"""
+    """Return only every `skip`-th frame."""
 
     def __init__(self, env=None, skip=4):
         if not _GYM_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('You want to use `gym` which is not installed yet.')
+            raise ModuleNotFoundError("You want to use `gym` which is not installed yet.")
 
-        super(MaxAndSkipEnv, self).__init__(env)
+        super().__init__(env)
         # most recent raw observations (for max pooling across time steps)
         self._obs_buffer = collections.deque(maxlen=2)
         self._skip = skip
 
     def step(self, action):
-        """take 1 step"""
+        """take 1 step."""
         total_reward = 0.0
         done = None
         for _ in range(self._skip):
@@ -97,7 +95,10 @@ class MaxAndSkipEnv(Wrapper):
         return max_frame, total_reward, done, info
 
     def reset(self):
-        """Clear past frame buffer and init. to first obs. from inner env."""
+        """Clear past frame buffer and init.
+
+        to first obs. from inner env.
+        """
         self._obs_buffer.clear()
         obs = self.env.reset()
         self._obs_buffer.append(obs)
@@ -105,22 +106,22 @@ class MaxAndSkipEnv(Wrapper):
 
 
 class ProcessFrame84(ObservationWrapper):
-    """preprocessing images from env"""
+    """preprocessing images from env."""
 
     def __init__(self, env=None):
         if not _OPENCV_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('This class uses OpenCV which it is not installed yet.')
+            raise ModuleNotFoundError("This class uses OpenCV which it is not installed yet.")
 
-        super(ProcessFrame84, self).__init__(env)
+        super().__init__(env)
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
 
     def observation(self, obs):
-        """preprocess the obs"""
+        """preprocess the obs."""
         return ProcessFrame84.process(obs)
 
     @staticmethod
     def process(frame):
-        """image preprocessing, formats to 84x84"""
+        """image preprocessing, formats to 84x84."""
         if frame.size == 210 * 160 * 3:
             img = np.reshape(frame, [210, 160, 3]).astype(np.float32)
         elif frame.size == 250 * 160 * 3:
@@ -135,25 +136,25 @@ class ProcessFrame84(ObservationWrapper):
 
 
 class ImageToPyTorch(ObservationWrapper):
-    """converts image to pytorch format"""
+    """converts image to pytorch format."""
 
     def __init__(self, env):
         if not _OPENCV_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('This class uses OpenCV which it is not installed yet.')
+            raise ModuleNotFoundError("This class uses OpenCV which it is not installed yet.")
 
-        super(ImageToPyTorch, self).__init__(env)
+        super().__init__(env)
         old_shape = self.observation_space.shape
         new_shape = (old_shape[-1], old_shape[0], old_shape[1])
         self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=new_shape, dtype=np.float32)
 
     @staticmethod
     def observation(observation):
-        """convert observation"""
+        """convert observation."""
         return np.moveaxis(observation, 2, 0)
 
 
 class ScaledFloatFrame(ObservationWrapper):
-    """scales the pixels"""
+    """scales the pixels."""
 
     @staticmethod
     def observation(obs):
@@ -161,10 +162,10 @@ class ScaledFloatFrame(ObservationWrapper):
 
 
 class BufferWrapper(ObservationWrapper):
-    """"Wrapper for image stacking"""
+    """Wrapper for image stacking."""
 
     def __init__(self, env, n_steps, dtype=np.float32):
-        super(BufferWrapper, self).__init__(env)
+        super().__init__(env)
         self.dtype = dtype
         self.buffer = None
         old_space = env.observation_space
@@ -175,20 +176,20 @@ class BufferWrapper(ObservationWrapper):
         )
 
     def reset(self):
-        """reset env"""
+        """reset env."""
         self.buffer = np.zeros_like(self.observation_space.low, dtype=self.dtype)
         return self.observation(self.env.reset())
 
     def observation(self, observation):
-        """convert observation"""
+        """convert observation."""
         self.buffer[:-1] = self.buffer[1:]
         self.buffer[-1] = observation
         return self.buffer
 
 
 class DataAugmentation(ObservationWrapper):
-    """
-    Carries out basic data augmentation on the env observations
+    """Carries out basic data augmentation on the env observations.
+
     - ToTensor
     - GrayScale
     - RandomCrop
@@ -196,18 +197,18 @@ class DataAugmentation(ObservationWrapper):
 
     def __init__(self, env=None):
         if not _GYM_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('You want to use `gym` which is not installed yet.')
+            raise ModuleNotFoundError("You want to use `gym` which is not installed yet.")
 
         super().__init__(env)
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
 
     def observation(self, obs):
-        """preprocess the obs"""
+        """preprocess the obs."""
         return ProcessFrame84.process(obs)
 
 
 def make_environment(env_name):
-    """Convert environment with wrappers"""
+    """Convert environment with wrappers."""
     env = gym_make(env_name)
     env = MaxAndSkipEnv(env)
     env = FireResetEnv(env)

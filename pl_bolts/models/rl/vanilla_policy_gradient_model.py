@@ -4,10 +4,10 @@ from typing import List, Tuple
 
 import numpy as np
 import torch
-from pytorch_lightning import LightningModule, seed_everything, Trainer
+from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
-from torch import optim as optim
 from torch import Tensor
+from torch import optim as optim
 from torch.nn.functional import log_softmax, softmax
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
@@ -21,14 +21,11 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _GYM_AVAILABLE:
     import gym
 else:  # pragma: no cover
-    warn_missing_pkg('gym')
+    warn_missing_pkg("gym")
 
 
 class VanillaPolicyGradient(LightningModule):
-    """
-    PyTorch Lightning implementation of `Vanilla Policy Gradient
-    <https://papers.nips.cc/paper/
-    1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
+    r"""PyTorch Lightning implementation of `Vanilla Policy Gradient`_.
 
     Paper authors: Richard S. Sutton, David McAllester, Satinder Singh, Yishay Mansour
 
@@ -52,6 +49,9 @@ class VanillaPolicyGradient(LightningModule):
 
     Note:
         Currently only supports CPU and single GPU training with `distributed_backend=dp`
+
+    .. _`Vanilla Policy Gradient`:
+        https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf
     """
 
     def __init__(
@@ -80,7 +80,7 @@ class VanillaPolicyGradient(LightningModule):
         super().__init__()
 
         if not _GYM_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('This Module requires gym environment which is not installed yet.')
+            raise ModuleNotFoundError("This Module requires gym environment which is not installed yet.")
 
         # Hyperparameters
         self.lr = lr
@@ -110,8 +110,7 @@ class VanillaPolicyGradient(LightningModule):
         self.state = self.env.reset()
 
     def forward(self, x: Tensor) -> Tensor:
-        """
-        Passes in a state x through the network and gets the q_values of each action as an output
+        """Passes in a state x through the network and gets the q_values of each action as an output.
 
         Args:
             x: environment state
@@ -122,9 +121,10 @@ class VanillaPolicyGradient(LightningModule):
         output = self.net(x)
         return output
 
-    def train_batch(self, ) -> Tuple[List[Tensor], List[Tensor], List[Tensor]]:
-        """
-        Contains the logic for generating a new batch of data to be passed to the DataLoader
+    def train_batch(
+        self,
+    ) -> Tuple[List[Tensor], List[Tensor], List[Tensor]]:
+        """Contains the logic for generating a new batch of data to be passed to the DataLoader.
 
         Returns:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
@@ -145,7 +145,7 @@ class VanillaPolicyGradient(LightningModule):
                 self.done_episodes += 1
                 self.state = self.env.reset()
                 self.total_rewards.append(sum(self.episode_rewards))
-                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len :]))
 
                 returns = self.compute_returns(self.episode_rewards)
 
@@ -157,8 +157,7 @@ class VanillaPolicyGradient(LightningModule):
                 self.episode_rewards = []
 
     def compute_returns(self, rewards):
-        """
-        Calculate the discounted rewards of the batched rewards
+        """Calculate the discounted rewards of the batched rewards.
 
         Args:
             rewards: list of batched rewards
@@ -179,8 +178,7 @@ class VanillaPolicyGradient(LightningModule):
         return returns
 
     def loss(self, states, actions, scaled_rewards) -> Tensor:
-        """
-        Calculates the loss for VPG
+        """Calculates the loss for VPG.
 
         Args:
             states: batched states
@@ -209,9 +207,8 @@ class VanillaPolicyGradient(LightningModule):
         return loss
 
     def training_step(self, batch: Tuple[Tensor, Tensor], _) -> OrderedDict:
-        """
-        Carries out a single step through the environment to update the replay buffer.
-        Then calculates loss based on the minibatch recieved
+        """Carries out a single step through the environment to update the replay buffer. Then calculates loss
+        based on the minibatch recieved.
 
         Args:
             batch: current mini batch of replay data
@@ -229,36 +226,37 @@ class VanillaPolicyGradient(LightningModule):
             "reward": self.total_rewards[-1],
             "avg_reward": self.avg_rewards,
         }
-        return OrderedDict({
-            "loss": loss,
-            "avg_reward": self.avg_rewards,
-            "log": log,
-            "progress_bar": log,
-        })
+        return OrderedDict(
+            {
+                "loss": loss,
+                "avg_reward": self.avg_rewards,
+                "log": log,
+                "progress_bar": log,
+            }
+        )
 
     def configure_optimizers(self) -> List[Optimizer]:
-        """ Initialize Adam optimizer"""
+        """Initialize Adam optimizer."""
         optimizer = optim.Adam(self.net.parameters(), lr=self.lr)
         return [optimizer]
 
     def _dataloader(self) -> DataLoader:
-        """Initialize the Replay Buffer dataset used for retrieving experiences"""
+        """Initialize the Replay Buffer dataset used for retrieving experiences."""
         dataset = ExperienceSourceDataset(self.train_batch)
         dataloader = DataLoader(dataset=dataset, batch_size=self.batch_size)
         return dataloader
 
     def train_dataloader(self) -> DataLoader:
-        """Get train loader"""
+        """Get train loader."""
         return self._dataloader()
 
     def get_device(self, batch) -> str:
-        """Retrieve device currently being used by minibatch"""
+        """Retrieve device currently being used by minibatch."""
         return batch[0][0][0].device.index if self.on_gpu else "cpu"
 
     @staticmethod
     def add_model_specific_args(arg_parser) -> argparse.ArgumentParser:
-        """
-        Adds arguments for DQN model
+        """Adds arguments for DQN model.
 
         Note:
             These params are fine tuned for Pong env.
@@ -308,5 +306,5 @@ def cli_main():
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

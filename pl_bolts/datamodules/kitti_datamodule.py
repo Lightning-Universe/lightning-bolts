@@ -14,29 +14,28 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transforms
 else:  # pragma: no cover
-    warn_missing_pkg('torchvision')
+    warn_missing_pkg("torchvision")
 
 
 class KittiDataModule(LightningDataModule):
 
-    name = 'kitti'
+    name = "kitti"
 
     def __init__(
         self,
         data_dir: Optional[str] = None,
         val_split: float = 0.2,
         test_split: float = 0.1,
-        num_workers: int = 16,
+        num_workers: int = 0,
         batch_size: int = 32,
         seed: int = 42,
-        shuffle: bool = False,
-        pin_memory: bool = False,
+        shuffle: bool = True,
+        pin_memory: bool = True,
         drop_last: bool = False,
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        """
-        Kitti train, validation and test dataloaders.
+        """Kitti train, validation and test dataloaders.
 
         Note:
             You need to have downloaded the Kitti dataset first and provide the path to where it is saved.
@@ -72,7 +71,7 @@ class KittiDataModule(LightningDataModule):
             drop_last: If true drops the last incomplete batch
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('You want to use `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError("You want to use `torchvision` which is not installed yet.")
 
         super().__init__(*args, **kwargs)
         self.data_dir = data_dir if data_dir is not None else os.getcwd()
@@ -112,7 +111,7 @@ class KittiDataModule(LightningDataModule):
             shuffle=False,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
-            pin_memory=self.pin_memory
+            pin_memory=self.pin_memory,
         )
         return loader
 
@@ -128,8 +127,12 @@ class KittiDataModule(LightningDataModule):
         return loader
 
     def _default_transforms(self) -> Callable:
-        kitti_transforms = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.35675976, 0.37380189, 0.3764753], std=[0.32064945, 0.32098866, 0.32325324])
-        ])
+        kitti_transforms = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.35675976, 0.37380189, 0.3764753], std=[0.32064945, 0.32098866, 0.32325324]
+                ),
+            ]
+        )
         return kitti_transforms

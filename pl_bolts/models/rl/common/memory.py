@@ -1,4 +1,4 @@
-"""Series of memory buffers sued"""
+"""Series of memory buffers sued."""
 
 # Named tuple for storing experience steps gathered in training
 import collections
@@ -11,9 +11,7 @@ Experience = namedtuple("Experience", field_names=["state", "action", "reward", 
 
 
 class Buffer:
-    """
-    Basic Buffer for storing a single experience at a time
-    """
+    """Basic Buffer for storing a single experience at a time."""
 
     def __init__(self, capacity: int) -> None:
         """
@@ -26,8 +24,7 @@ class Buffer:
         return len(self.buffer)
 
     def append(self, experience: Experience) -> None:
-        """
-        Add experience to the buffer
+        """Add experience to the buffer.
 
         Args:
             experience: tuple (state, action, reward, done, new_state)
@@ -41,7 +38,7 @@ class Buffer:
         Returns:
             a batch of tuple np arrays of state, action, reward, done, next_state
         """
-        states, actions, rewards, dones, next_states = zip(*[self.buffer[idx] for idx in range(self.__len__())])
+        states, actions, rewards, dones, next_states = zip(*(self.buffer[idx] for idx in range(self.__len__())))
 
         self.buffer.clear()
 
@@ -55,13 +52,10 @@ class Buffer:
 
 
 class ReplayBuffer(Buffer):
-    """
-    Replay Buffer for storing past experiences allowing the agent to learn from them
-    """
+    """Replay Buffer for storing past experiences allowing the agent to learn from them."""
 
     def sample(self, batch_size: int) -> Tuple:
-        """
-        Takes a sample of the buffer
+        """Takes a sample of the buffer.
 
         Args:
             batch_size: current batch_size
@@ -71,7 +65,7 @@ class ReplayBuffer(Buffer):
         """
 
         indices = np.random.choice(len(self.buffer), batch_size, replace=False)
-        states, actions, rewards, dones, next_states = zip(*[self.buffer[idx] for idx in indices])
+        states, actions, rewards, dones, next_states = zip(*(self.buffer[idx] for idx in indices))
 
         return (
             np.array(states),
@@ -83,9 +77,7 @@ class ReplayBuffer(Buffer):
 
 
 class MultiStepBuffer(ReplayBuffer):
-    """
-    N Step Replay Buffer
-    """
+    """N Step Replay Buffer."""
 
     def __init__(self, capacity: int, n_steps: int = 1, gamma: float = 0.99) -> None:
         """
@@ -102,8 +94,7 @@ class MultiStepBuffer(ReplayBuffer):
         self.exp_history_queue = deque()
 
     def append(self, exp: Experience) -> None:
-        """
-        Add experience to the buffer
+        """Add experience to the buffer.
 
         Args:
             exp: tuple (state, action, reward, done, new_state)
@@ -121,16 +112,15 @@ class MultiStepBuffer(ReplayBuffer):
                 action=experiences[0].action,
                 reward=total_reward,
                 done=experiences[0].done,
-                new_state=last_exp_state
+                new_state=last_exp_state,
             )
 
             self.buffer.append(n_step_exp)  # add n_step experience to buffer
 
     def update_history_queue(self, exp) -> None:
-        """
-        Updates the experience history queue with the lastest experiences. In the event of an experience step is in
-        the done state, the history will be incrementally appended to the queue, removing the tail of the history
-        each time.
+        """Updates the experience history queue with the lastest experiences. In the event of an experience step is
+        in the done state, the history will be incrementally appended to the queue, removing the tail of the
+        history each time.
 
         Args:
             env_idx: index of the environment
@@ -162,9 +152,8 @@ class MultiStepBuffer(ReplayBuffer):
             self.history.clear()
 
     def split_head_tail_exp(self, experiences: Tuple[Experience]) -> Tuple[List, Tuple[Experience]]:
-        """
-        Takes in a tuple of experiences and returns the last state and tail experiences based on
-        if the last state is the end of an episode
+        """Takes in a tuple of experiences and returns the last state and tail experiences based on if the last
+        state is the end of an episode.
 
         Args:
             experiences: Tuple of N Experience
@@ -181,8 +170,7 @@ class MultiStepBuffer(ReplayBuffer):
         return last_exp_state, tail_experiences
 
     def discount_rewards(self, experiences: Tuple[Experience]) -> float:
-        """
-        Calculates the discounted reward over N experiences
+        """Calculates the discounted reward over N experiences.
 
         Args:
             experiences: Tuple of Experience
@@ -197,9 +185,7 @@ class MultiStepBuffer(ReplayBuffer):
 
 
 class MeanBuffer:
-    """
-    Stores a deque of items and calculates the mean
-    """
+    """Stores a deque of items and calculates the mean."""
 
     def __init__(self, capacity):
         self.capacity = capacity
@@ -207,23 +193,22 @@ class MeanBuffer:
         self.sum = 0.0
 
     def add(self, val: float) -> None:
-        """Add to the buffer"""
+        """Add to the buffer."""
         if len(self.deque) == self.capacity:
             self.sum -= self.deque[0]
         self.deque.append(val)
         self.sum += val
 
     def mean(self) -> float:
-        """Retrieve the mean"""
+        """Retrieve the mean."""
         if not self.deque:
             return 0.0
         return self.sum / len(self.deque)
 
 
 class PERBuffer(ReplayBuffer):
-    """
-    simple list based Prioritized Experience Replay Buffer
-    Based on implementation found here:
+    """simple list based Prioritized Experience Replay Buffer Based on implementation found here:
+
     https://github.com/Shmuma/ptan/blob/master/ptan/experience.py#L371
     """
 
@@ -236,11 +221,10 @@ class PERBuffer(ReplayBuffer):
         self.capacity = buffer_size
         self.pos = 0
         self.buffer = []
-        self.priorities = np.zeros((buffer_size, ), dtype=np.float32)
+        self.priorities = np.zeros((buffer_size,), dtype=np.float32)
 
     def update_beta(self, step) -> float:
-        """
-        Update the beta value which accounts for the bias in the PER
+        """Update the beta value which accounts for the bias in the PER.
 
         Args:
             step: current global step
@@ -254,8 +238,7 @@ class PERBuffer(ReplayBuffer):
         return self.beta
 
     def append(self, exp) -> None:
-        """
-        Adds experiences from exp_source to the PER buffer
+        """Adds experiences from exp_source to the PER buffer.
 
         Args:
             exp: experience tuple being added to the buffer
@@ -275,8 +258,7 @@ class PERBuffer(ReplayBuffer):
         self.pos = (self.pos + 1) % self.capacity
 
     def sample(self, batch_size=32) -> Tuple:
-        """
-        Takes a prioritized sample from the buffer
+        """Takes a prioritized sample from the buffer.
 
         Args:
             batch_size: size of sample
@@ -288,16 +270,16 @@ class PERBuffer(ReplayBuffer):
         if len(self.buffer) == self.capacity:
             prios = self.priorities
         else:
-            prios = self.priorities[:self.pos]
+            prios = self.priorities[: self.pos]
 
         # probability to the power of alpha to weight how important that probability it, 0 = normal distirbution
-        probs = prios**self.prob_alpha
+        probs = prios ** self.prob_alpha
         probs /= probs.sum()
 
         # choise sample of indices based on the priority prob distribution
         indices = np.random.choice(len(self.buffer), batch_size, p=probs)
         # samples = [self.buffer[idx] for idx in indices]
-        states, actions, rewards, dones, next_states = zip(*[self.buffer[idx] for idx in indices])
+        states, actions, rewards, dones, next_states = zip(*(self.buffer[idx] for idx in indices))
 
         samples = (
             np.array(states),
@@ -309,15 +291,14 @@ class PERBuffer(ReplayBuffer):
         total = len(self.buffer)
 
         # weight of each sample datum to compensate for the bias added in with prioritising samples
-        weights = (total * probs[indices])**(-self.beta)
+        weights = (total * probs[indices]) ** (-self.beta)
         weights /= weights.max()
 
         # return the samples, the indices chosen and the weight of each datum in the sample
         return samples, indices, np.array(weights, dtype=np.float32)
 
     def update_priorities(self, batch_indices: List, batch_priorities: List) -> None:
-        """
-        Update the priorities from the last batch, this should be called after the loss for this batch has been
+        """Update the priorities from the last batch, this should be called after the loss for this batch has been
         calculated.
 
         Args:

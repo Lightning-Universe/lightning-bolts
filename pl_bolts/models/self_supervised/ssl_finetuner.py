@@ -9,9 +9,8 @@ from pl_bolts.models.self_supervised import SSLEvaluator
 
 
 class SSLFineTuner(LightningModule):
-    """
-    Finetunes a self-supervised learning backbone using the standard evaluation protocol of a singler layer MLP
-    with 1024 units
+    """Finetunes a self-supervised learning backbone using the standard evaluation protocol of a singler layer MLP
+    with 1024 units.
 
     Example::
 
@@ -47,14 +46,14 @@ class SSLFineTuner(LightningModule):
         num_classes: int = 1000,
         epochs: int = 100,
         hidden_dim: Optional[int] = None,
-        dropout: float = 0.,
+        dropout: float = 0.0,
         learning_rate: float = 0.1,
         weight_decay: float = 1e-6,
         nesterov: bool = False,
-        scheduler_type: str = 'cosine',
+        scheduler_type: str = "cosine",
         decay_epochs: List = [60, 80],
         gamma: float = 0.1,
-        final_lr: float = 0.
+        final_lr: float = 0.0,
     ):
         """
         Args:
@@ -90,9 +89,9 @@ class SSLFineTuner(LightningModule):
         loss, logits, y = self.shared_step(batch)
         acc = self.train_acc(logits.softmax(-1), y)
 
-        self.log('train_loss', loss, prog_bar=True)
-        self.log('train_acc_step', acc, prog_bar=True)
-        self.log('train_acc_epoch', self.train_acc)
+        self.log("train_loss", loss, prog_bar=True)
+        self.log("train_acc_step", acc, prog_bar=True)
+        self.log("train_acc_epoch", self.train_acc)
 
         return loss
 
@@ -100,8 +99,8 @@ class SSLFineTuner(LightningModule):
         loss, logits, y = self.shared_step(batch)
         self.val_acc(logits.softmax(-1), y)
 
-        self.log('val_loss', loss, prog_bar=True, sync_dist=True)
-        self.log('val_acc', self.val_acc)
+        self.log("val_loss", loss, prog_bar=True, sync_dist=True)
+        self.log("val_acc", self.val_acc)
 
         return loss
 
@@ -109,8 +108,8 @@ class SSLFineTuner(LightningModule):
         loss, logits, y = self.shared_step(batch)
         self.test_acc(logits.softmax(-1), y)
 
-        self.log('test_loss', loss, sync_dist=True)
-        self.log('test_acc', self.test_acc)
+        self.log("test_loss", loss, sync_dist=True)
+        self.log("test_acc", self.test_acc)
 
         return loss
 
@@ -140,9 +139,7 @@ class SSLFineTuner(LightningModule):
             scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, self.decay_epochs, gamma=self.gamma)
         elif self.scheduler_type == "cosine":
             scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-                optimizer,
-                self.epochs,
-                eta_min=self.final_lr  # total epochs to run
+                optimizer, self.epochs, eta_min=self.final_lr  # total epochs to run
             )
 
         return [optimizer], [scheduler]

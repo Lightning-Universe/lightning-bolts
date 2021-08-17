@@ -1,12 +1,11 @@
 from typing import Optional, Tuple
 
-from torch import nn, Tensor
+from torch import Tensor, nn
 
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
 
 class MLP(nn.Module):
-
     def __init__(self, input_dim: int = 2048, hidden_size: int = 4096, output_dim: int = 256) -> None:
         super().__init__()
         self.output_dim = output_dim
@@ -24,7 +23,6 @@ class MLP(nn.Module):
 
 
 class SiameseArm(nn.Module):
-
     def __init__(
         self,
         encoder: Optional[nn.Module] = None,
@@ -35,7 +33,7 @@ class SiameseArm(nn.Module):
         super().__init__()
 
         if encoder is None:
-            encoder = torchvision_ssl_encoder('resnet50')
+            encoder = torchvision_ssl_encoder("resnet50")
         # Encoder
         self.encoder = encoder
         # Projector

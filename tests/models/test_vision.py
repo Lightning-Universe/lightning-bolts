@@ -1,8 +1,9 @@
 import pytest
 import torch
 from packaging import version
+from pytorch_lightning import LightningDataModule, Trainer
 from pytorch_lightning import __version__ as pl_version
-from pytorch_lightning import LightningDataModule, seed_everything, Trainer
+from pytorch_lightning import seed_everything
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import FashionMNISTDataModule, MNISTDataModule
@@ -11,7 +12,6 @@ from pl_bolts.models.vision import GPT2, ImageGPT, SemSegment, UNet
 
 
 class DummyDataModule(LightningDataModule):
-
     def train_dataloader(self):
         train_ds = DummyDataset((3, 35, 120), (35, 120), num_samples=100)
         return DataLoader(train_ds, batch_size=1)
@@ -82,6 +82,6 @@ def test_semantic_segmentation(tmpdir):
 
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, datamodule=dm)
-    loss = trainer.progress_bar_dict['loss']
+    loss = trainer.progress_bar_dict["loss"]
 
     assert float(loss) > 0

@@ -23,7 +23,7 @@ def test_cpcv2(tmpdir, datadir):
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()
 
     model = CPC_v2(
-        encoder='mobilenet_v3_small',
+        encoder="mobilenet_v3_small",
         patch_size=8,
         patch_overlap=2,
         online_ft=True,
@@ -34,7 +34,7 @@ def test_cpcv2(tmpdir, datadir):
 
 
 # todo: some pickling issue with min config
-@pytest.mark.skipif(LooseVersion(torch.__version__) < LooseVersion('1.7.0'), reason='Pickling issue')
+@pytest.mark.skipif(LooseVersion(torch.__version__) < LooseVersion("1.7.0"), reason="Pickling issue")
 def test_byol(tmpdir, datadir):
     datamodule = CIFAR10DataModule(data_dir=datadir, num_workers=0, batch_size=2)
     datamodule.train_transforms = CPCTrainTransformsCIFAR10()
@@ -46,7 +46,7 @@ def test_byol(tmpdir, datadir):
 
 
 def test_amdim(tmpdir, datadir):
-    model = AMDIM(data_dir=datadir, batch_size=2, online_ft=True, encoder='resnet18', num_workers=0)
+    model = AMDIM(data_dir=datadir, batch_size=2, online_ft=True, encoder="resnet18", num_workers=0)
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model)
 
@@ -66,7 +66,7 @@ def test_simclr(tmpdir, datadir):
     datamodule.train_transforms = SimCLRTrainDataTransform(32)
     datamodule.val_transforms = SimCLREvalDataTransform(32)
 
-    model = SimCLR(batch_size=2, num_samples=datamodule.num_samples, gpus=0, nodes=1, dataset='cifar10')
+    model = SimCLR(batch_size=2, num_samples=datamodule.num_samples, gpus=0, nodes=1, dataset="cifar10")
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, datamodule=datamodule)
 
@@ -83,7 +83,7 @@ def test_swav(tmpdir, datadir, batch_size=2):
     )
 
     model = SwAV(
-        arch='resnet18',
+        arch="resnet18",
         hidden_mlp=512,
         gpus=0,
         nodes=1,
@@ -95,7 +95,7 @@ def test_swav(tmpdir, datadir, batch_size=2):
         queue_length=0,
         maxpool1=False,
         first_conv=False,
-        dataset='cifar10'
+        dataset="cifar10",
     )
 
     trainer = Trainer(gpus=0, fast_dev_run=True, default_root_dir=tmpdir)
@@ -108,6 +108,6 @@ def test_simsiam(tmpdir, datadir):
     datamodule.train_transforms = SimCLRTrainDataTransform(32)
     datamodule.val_transforms = SimCLREvalDataTransform(32)
 
-    model = SimSiam(batch_size=2, num_samples=datamodule.num_samples, gpus=0, nodes=1, dataset='cifar10')
+    model = SimSiam(batch_size=2, num_samples=datamodule.num_samples, gpus=0, nodes=1, dataset="cifar10")
     trainer = Trainer(gpus=0, fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, datamodule=datamodule)

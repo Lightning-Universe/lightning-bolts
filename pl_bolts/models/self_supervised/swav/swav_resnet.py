@@ -1,12 +1,10 @@
-"""
-Adapted from: https://github.com/facebookresearch/swav/blob/master/src/resnet50.py
-"""
+"""Adapted from: https://github.com/facebookresearch/swav/blob/master/src/resnet50.py."""
 import torch
 from torch import nn
 
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
-    """3x3 convolution with padding"""
+    """3x3 convolution with padding."""
     return nn.Conv2d(
         in_planes,
         out_planes,
@@ -20,7 +18,7 @@ def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
 
 
 def conv1x1(in_planes, out_planes, stride=1):
-    """1x1 convolution"""
+    """1x1 convolution."""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
@@ -39,7 +37,7 @@ class BasicBlock(nn.Module):
         dilation=1,
         norm_layer=None,
     ):
-        super(BasicBlock, self).__init__()
+        super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         if groups != 1 or base_width != 64:
@@ -89,7 +87,7 @@ class Bottleneck(nn.Module):
         dilation=1,
         norm_layer=None,
     ):
-        super(Bottleneck, self).__init__()
+        super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         width = int(planes * (base_width / 64.0)) * groups
@@ -128,7 +126,6 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-
     def __init__(
         self,
         block,
@@ -145,9 +142,9 @@ class ResNet(nn.Module):
         nmb_prototypes=0,
         eval_mode=False,
         first_conv=True,
-        maxpool1=True
+        maxpool1=True,
     ):
-        super(ResNet, self).__init__()
+        super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         self._norm_layer = norm_layer
@@ -319,13 +316,14 @@ class ResNet(nn.Module):
             torch.unique_consecutive(
                 torch.tensor([inp.shape[-1] for inp in inputs]),
                 return_counts=True,
-            )[1], 0
+            )[1],
+            0,
         )
         start_idx = 0
         for end_idx in idx_crops:
             _out = torch.cat(inputs[start_idx:end_idx])
 
-            if 'cuda' in str(self.conv1.weight.device):
+            if "cuda" in str(self.conv1.weight.device):
                 _out = self.forward_backbone(_out.cuda(non_blocking=True))
             else:
                 _out = self.forward_backbone(_out)
@@ -339,9 +337,8 @@ class ResNet(nn.Module):
 
 
 class MultiPrototypes(nn.Module):
-
     def __init__(self, output_dim, nmb_prototypes):
-        super(MultiPrototypes, self).__init__()
+        super().__init__()
         self.nmb_heads = len(nmb_prototypes)
         for i, k in enumerate(nmb_prototypes):
             self.add_module("prototypes" + str(i), nn.Linear(output_dim, k, bias=False))

@@ -2,7 +2,7 @@
 
 import os
 
-from pl_bolts.__about__ import *  # noqa: F401 F403
+from pl_bolts.__about__ import *  # noqa: F401, F403
 
 _PACKAGE_ROOT = os.path.dirname(__file__)
 _PROJECT_ROOT = os.path.dirname(_PACKAGE_ROOT)
@@ -21,13 +21,13 @@ from pl_bolts import (  # noqa: E402
 )
 
 __all__ = [
-    'callbacks',
-    'datamodules',
-    'datasets',
-    'losses',
-    'metrics',
-    'models',
-    'optimizers',
-    'transforms',
-    'utils',
+    "callbacks",
+    "datamodules",
+    "datasets",
+    "losses",
+    "metrics",
+    "models",
+    "optimizers",
+    "transforms",
+    "utils",
 ]

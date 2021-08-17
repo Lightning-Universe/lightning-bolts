@@ -10,8 +10,8 @@ from pytorch_lightning.utilities import move_data_to_device, rank_zero_warn
 
 
 class VerificationBase:
-    """
-    Base class for model verification.
+    """Base class for model verification.
+
     All verifications should run with any :class:`torch.nn.Module` unless otherwise stated.
     """
 
@@ -25,7 +25,7 @@ class VerificationBase:
 
     @abstractmethod
     def check(self, *args: Any, **kwargs: Any) -> bool:
-        """ Runs the actual test on the model. All verification classes must implement this.
+        """Runs the actual test on the model. All verification classes must implement this.
 
         Arguments:
             *args: Any positional arguments that are needed to run the test
@@ -38,9 +38,8 @@ class VerificationBase:
         """
 
     def _get_input_array_copy(self, input_array: Optional[Any] = None) -> Any:
-        """
-        Returns a deep copy of the example input array in cases where it is expected that the
-        input changes during the verification process.
+        """Returns a deep copy of the example input array in cases where it is expected that the input changes
+        during the verification process.
 
         Arguments:
             input_array: The input to clone.
@@ -57,8 +56,7 @@ class VerificationBase:
         return input_array
 
     def _model_forward(self, input_array: Any) -> Any:
-        """
-        Feeds the input array to the model via the ``__call__`` method.
+        """Feeds the input array to the model via the ``__call__`` method.
 
         Arguments:
             input_array: The input that goes into the model. If it is a tuple, it gets
@@ -77,8 +75,8 @@ class VerificationBase:
 
 
 class VerificationCallbackBase(Callback):
-    """
-    Base class for model verification in form of a callback.
+    """Base class for model verification in form of a callback.
+
     This type of verification is expected to only work with
     :class:`~pytorch_lightning.core.lightning.LightningModule` and will take the input array
     from :attr:`~pytorch_lightning.core.lightning.LightningModule.example_input_array` if needed.
@@ -109,11 +107,11 @@ class VerificationCallbackBase(Callback):
         """
 
     def warning_message(self, *args: Any, **kwargs: Any) -> str:
-        """ The warning message printed when the model does not pass the verification. """
+        """The warning message printed when the model does not pass the verification."""
         return self.message(*args, **kwargs)
 
     def error_message(self, *args: Any, **kwargs: Any) -> str:
-        """ The error message printed when the model does not pass the verification. """
+        """The error message printed when the model does not pass the verification."""
         return self.message(*args, **kwargs)
 
     def _raise(self, *args: Any, **kwargs: Any) -> None:

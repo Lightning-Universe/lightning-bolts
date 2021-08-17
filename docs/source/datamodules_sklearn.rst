@@ -45,4 +45,3 @@ Automatically generates the train, validation and test splits for a Numpy datase
 They are set up as dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
 
 .. autoclass:: pl_bolts.datamodules.sklearn_datamodule.SklearnDataModule
-   :noindex:
