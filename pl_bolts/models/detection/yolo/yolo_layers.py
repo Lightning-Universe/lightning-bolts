@@ -59,6 +59,15 @@ def _aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
     return inter / union
 
 
+class SELoss(nn.MSELoss):
+
+    def __init__(self):
+        super().__init__(reduction='none')
+
+    def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
+        return super().forward(inputs, target).sum(1)
+
+
 class IoULoss(nn.Module):
 
     def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
@@ -118,12 +127,12 @@ class DetectionLayer(nn.Module):
                 of squared errors.
             confidence_loss_func: Loss function for confidence score. Default is the sum of squared
                 errors.
-            image_space_loss: If set to ``True``, the overlap loss function will receive the bounding
-                box `(x1, y1, x2, y2)` coordinates, scaled to the input image size. This is needed
-                for the IoU losses introduced in YOLOv4. Otherwise the loss will be computed from
-                the x, y, width, and height values, as predicted by the network (i.e. relative to
-                the anchor box, and width and height are logarithmic).
-            coord_loss_multiplier: Multiply the coordinate/size loss by this factor.
+            image_space_loss: If set to ``True``, the overlap loss function will receive the
+                bounding box `(x1, y1, x2, y2)` coordinates, scaled to the input image size. This is
+                needed for the IoU losses introduced in YOLOv4. Otherwise the loss will be computed
+                from the x, y, width, and height values, as predicted by the network (i.e. relative
+                to the anchor box, and width and height are logarithmic).
+            overlap_loss_multiplier: Multiply the overlap loss by this factor.
             class_loss_multiplier: Multiply the classification loss by this factor.
             confidence_loss_multiplier: Multiply the confidence loss by this factor.
         """
@@ -139,10 +148,9 @@ class DetectionLayer(nn.Module):
         self.xy_scale = xy_scale
         self.ignore_threshold = ignore_threshold
 
-        se_loss = nn.MSELoss(reduction='none')
-        self.overlap_loss_func = overlap_loss_func or se_loss
-        self.class_loss_func = class_loss_func or se_loss
-        self.confidence_loss_func = confidence_loss_func or se_loss
+        self.overlap_loss_func = overlap_loss_func or SELoss()
+        self.class_loss_func = class_loss_func or SELoss()
+        self.confidence_loss_func = confidence_loss_func or nn.MSELoss(reduction='none')
         self.image_space_loss = image_space_loss
         self.overlap_loss_multiplier = overlap_loss_multiplier
         self.class_loss_multiplier = class_loss_multiplier

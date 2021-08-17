@@ -241,7 +241,7 @@ def _create_yolo(config, num_inputs):
 
     overlap_loss_name = config.get('iou_loss', 'mse')
     if overlap_loss_name == 'mse':
-        overlap_loss_func = nn.MSELoss(reduction='none')
+        overlap_loss_func = yolo_layers.SELoss()
     elif overlap_loss_name == 'giou':
         overlap_loss_func = yolo_layers.GIoULoss()
     else:
