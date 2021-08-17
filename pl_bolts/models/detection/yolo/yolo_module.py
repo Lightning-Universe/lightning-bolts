@@ -337,10 +337,8 @@ class YOLO(LightningModule):
             conv = module[0]
             assert isinstance(conv, nn.Conv2d)
 
-            if len(module) > 1:
+            if len(module) > 1 and isinstance(module[1], nn.BatchNorm2d):
                 bn = module[1]
-                assert isinstance(bn, nn.BatchNorm2d)
-
                 read(bn.bias)
                 read(bn.weight)
                 read(bn.running_mean)

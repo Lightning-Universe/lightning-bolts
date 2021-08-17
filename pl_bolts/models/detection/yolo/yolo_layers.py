@@ -99,6 +99,7 @@ class DetectionLayer(nn.Module):
         anchor_dims: List[Tuple[int, int]],
         anchor_ids: List[int],
         xy_scale: float = 1.0,
+        input_is_normalized: bool = False,
         ignore_threshold: float = 0.5,
         overlap_loss_func: Optional[Callable] = None,
         class_loss_func: Optional[Callable] = None,
@@ -118,6 +119,10 @@ class DetectionLayer(nn.Module):
                 anchors that this layer uses.
             xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor.
                 Using a value > 1.0 helps to produce coordinate values close to one.
+            input_is_normalized: The input is normalized by logistic activation in the previous
+                layer. In this case the detection layer will not take the sigmoid of the coordinate
+                and probability predictions, and the width and height are scaled up so that the
+                maximum value is four times the anchor dimension
             ignore_threshold: If a predictor is not responsible for predicting any target, but the
                 corresponding anchor has IoU with some target greater than this threshold, the
                 predictor will not be taken into account when calculating the confidence loss.
@@ -146,6 +151,7 @@ class DetectionLayer(nn.Module):
         self.anchor_dims = [anchor_dims[i] for i in anchor_ids]
         self.anchor_map = [anchor_ids.index(i) if i in anchor_ids else -1 for i in range(len(anchor_dims))]
         self.xy_scale = xy_scale
+        self.input_is_normalized = input_is_normalized
         self.ignore_threshold = ignore_threshold
 
         self.overlap_loss_func = overlap_loss_func or SELoss()
@@ -199,11 +205,16 @@ class DetectionLayer(nn.Module):
         x = x.view(batch_size, height, width, boxes_per_cell, num_attrs)
 
         # Take the sigmoid of the bounding box coordinates, confidence score, and class
-        # probabilities.
-        xy = torch.sigmoid(x[..., :2])
+        # probabilities, unless the input is normalized by the previous layer activation.
+        if self.input_is_normalized:
+            xy = x[..., :2]
+            confidence = x[..., 4]
+            classprob = x[..., 5:]
+        else:
+            xy = torch.sigmoid(x[..., :2])
+            confidence = torch.sigmoid(x[..., 4])
+            classprob = torch.sigmoid(x[..., 5:])
         wh = x[..., 2:4]
-        confidence = torch.sigmoid(x[..., 4])
-        classprob = torch.sigmoid(x[..., 5:])
 
         # Eliminate grid sensitivity. The previous layer should output extremely high values for
         # the sigmoid to produce x/y coordinates close to one. YOLOv4 solves this by scaling the
@@ -211,7 +222,10 @@ class DetectionLayer(nn.Module):
         xy = xy * self.xy_scale - 0.5 * (self.xy_scale - 1)
 
         image_xy = self._global_xy(xy, image_size)
-        image_wh = torch.exp(wh) * torch.tensor(self.anchor_dims, dtype=wh.dtype, device=wh.device)
+        if self.input_is_normalized:
+            image_wh = 4 * torch.square(wh) * torch.tensor(self.anchor_dims, dtype=wh.dtype, device=wh.device)
+        else:
+            image_wh = torch.exp(wh) * torch.tensor(self.anchor_dims, dtype=wh.dtype, device=wh.device)
         boxes = _corner_coordinates(image_xy, image_wh)
         output = torch.cat((boxes, confidence.unsqueeze(-1), classprob), -1)
         output = output.reshape(batch_size, height * width * boxes_per_cell, num_attrs)
@@ -383,7 +397,10 @@ class DetectionLayer(nn.Module):
                 grid_xy = grid_xy[selected]
                 best_anchors = best_anchors[selected]
                 relative_xy = grid_xy - grid_xy.floor()
-                relative_wh = torch.log(wh / anchor_wh[best_anchors] + 1e-16)
+                if self.input_is_normalized:
+                    relative_wh = torch.sqrt(wh / (4 * anchor_wh[best_anchors] + 1e-16))
+                else:
+                    relative_wh = torch.log(wh / anchor_wh[best_anchors] + 1e-16)
                 target_xy.append(relative_xy)
                 target_wh.append(relative_wh)
 

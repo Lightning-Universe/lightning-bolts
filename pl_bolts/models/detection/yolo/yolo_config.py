@@ -93,6 +93,7 @@ class YOLOConfiguration:
             'max_delta': float,
             'momentum': float,
             'mosaic': bool,
+            'new_coords': int,
             'nms_kind': str,
             'num': int,
             'obj_normalizer': float,
@@ -186,12 +187,23 @@ def _create_convolutional(config, num_inputs):
         bn = nn.BatchNorm2d(config['filters'])
         module.add_module('bn', bn)
 
-    if config['activation'] == 'leaky':
+    activation_name = config['activation']
+    if activation_name == 'leaky':
         leakyrelu = nn.LeakyReLU(0.1, inplace=True)
         module.add_module('leakyrelu', leakyrelu)
-    elif config['activation'] == 'mish':
+    elif activation_name == 'mish':
         mish = yolo_layers.Mish()
         module.add_module('mish', mish)
+    elif activation_name == 'swish':
+        swish = nn.SiLU(inplace=True)
+        module.add_module('swish', swish)
+    elif activation_name == 'logistic':
+        logistic = nn.Sigmoid()
+        module.add_module('logistic', logistic)
+    elif activation_name == 'linear':
+        pass
+    else:
+        raise ValueError('Unknown activation: ' + activation_name)
 
     return module, config['filters']
 
@@ -234,6 +246,7 @@ def _create_yolo(config, num_inputs):
     anchor_dims = [(anchor_dims[i], anchor_dims[i + 1]) for i in range(0, len(anchor_dims), 2)]
 
     xy_scale = config.get('scale_x_y', 1.0)
+    input_is_normalized = config.get('new_coords', 0) > 0
     ignore_threshold = config.get('ignore_thresh', 1.0)
     overlap_loss_multiplier = config.get('iou_normalizer', 1.0)
     class_loss_multiplier = config.get('cls_normalizer', 1.0)
@@ -252,6 +265,7 @@ def _create_yolo(config, num_inputs):
         anchor_dims=anchor_dims,
         anchor_ids=config['mask'],
         xy_scale=xy_scale,
+        input_is_normalized=input_is_normalized,
         ignore_threshold=ignore_threshold,
         overlap_loss_func=overlap_loss_func,
         image_space_loss=overlap_loss_name != 'mse',
