@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities import rank_zero_info
-from torch import optim, Tensor
+from torch import Tensor, optim
 
 from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, RouteLayer, ShortcutLayer
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
@@ -17,15 +17,15 @@ if _TORCHVISION_AVAILABLE:
     from torchvision.ops import nms
     from torchvision.transforms import functional as F
 else:
-    warn_missing_pkg('torchvision')
+    warn_missing_pkg("torchvision")
 
 log = logging.getLogger(__name__)
 
 
 class YOLO(LightningModule):
-    """
-    PyTorch Lightning implementation of `YOLOv3 <https://arxiv.org/abs/1804.02767>`_ with some
-    improvements from `YOLOv4 <https://arxiv.org/abs/2004.10934>`_.
+    """PyTorch Lightning implementation of `YOLOv3
+    <https://arxiv.org/abs/1804.02767>`_ with some improvements from `YOLOv4
+    <https://arxiv.org/abs/2004.10934>`_.
 
     *YOLOv3 paper authors*: Joseph Redmon and Ali Farhadi
 
@@ -77,20 +77,12 @@ class YOLO(LightningModule):
         self,
         network: nn.ModuleList,
         optimizer: Type[optim.Optimizer] = optim.SGD,
-        optimizer_params: Dict[str, Any] = {
-            'lr': 0.001,
-            'momentum': 0.9,
-            'weight_decay': 0.0005
-        },
+        optimizer_params: Dict[str, Any] = {"lr": 0.001, "momentum": 0.9, "weight_decay": 0.0005},
         lr_scheduler: Type[optim.lr_scheduler._LRScheduler] = LinearWarmupCosineAnnealingLR,
-        lr_scheduler_params: Dict[str, Any] = {
-            'warmup_epochs': 1,
-            'max_epochs': 300,
-            'warmup_start_lr': 0.0
-        },
+        lr_scheduler_params: Dict[str, Any] = {"warmup_epochs": 1, "max_epochs": 300, "warmup_start_lr": 0.0},
         confidence_threshold: float = 0.2,
         nms_threshold: float = 0.45,
-        max_predictions_per_image: int = -1
+        max_predictions_per_image: int = -1,
     ) -> None:
         """
         Args:
@@ -111,8 +103,7 @@ class YOLO(LightningModule):
         super().__init__()
 
         if not _TORCHVISION_AVAILABLE:
-            raise ModuleNotFoundError(  # pragma: no-cover
-                'YOLO model uses `torchvision`, which is not installed yet.')
+            raise ModuleNotFoundError("YOLO model uses `torchvision`, which is not installed yet.")  # pragma: no-cover
 
         self.network = network
         self.optimizer_class = optimizer
@@ -124,13 +115,11 @@ class YOLO(LightningModule):
         self.max_predictions_per_image = max_predictions_per_image
 
     def forward(
-        self,
-        images: Tensor,
-        targets: Optional[List[Dict[str, Tensor]]] = None
+        self, images: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None
     ) -> Tuple[Tensor, Dict[str, Tensor]]:
-        """
-        Runs a forward pass through the network (all layers listed in ``self.network``), and if
-        training targets are provided, computes the losses from the detection layers.
+        """Runs a forward pass through the network (all layers listed in
+        ``self.network``), and if training targets are provided, computes the
+        losses from the detection layers.
 
         Detections are concatenated from the detection layers. Each image will produce
         `N * num_anchors * grid_height * grid_width` detections, where `N` depends on the number of
@@ -185,15 +174,15 @@ class YOLO(LightningModule):
             return detections
 
         total_hits = sum(hits)
-        num_targets = sum(len(image_targets['boxes']) for image_targets in targets)
+        num_targets = sum(len(image_targets["boxes"]) for image_targets in targets)
         if total_hits != num_targets:
             log.warning(
-                f'{num_targets} training targets were matched a total of {total_hits} times by detection layers. '
-                'Anchors may have been configured incorrectly.'
+                f"{num_targets} training targets were matched a total of {total_hits} times by detection layers. "
+                "Anchors may have been configured incorrectly."
             )
         for layer_idx, layer_hits in enumerate(hits):
             hit_rate = layer_hits / total_hits if total_hits > 0 else 1.0
-            self.log(f'layer_{layer_idx}_hit_rate', hit_rate, sync_dist=False)
+            self.log(f"layer_{layer_idx}_hit_rate", hit_rate, sync_dist=False)
 
         def total_loss(loss_name):
             """Returns the sum of the loss over detection layers."""
@@ -210,8 +199,7 @@ class YOLO(LightningModule):
         return [optimizer], [lr_scheduler]
 
     def training_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int) -> Dict[str, Tensor]:
-        """
-        Computes the training loss.
+        """Computes the training loss.
 
         Args:
             batch: A tuple of images and targets. Images is a list of 3-dimensional tensors.
@@ -228,14 +216,13 @@ class YOLO(LightningModule):
         # sync_dist=True is broken in some versions of Lightning and may cause the sum of the loss
         # across GPUs to be returned.
         for name, value in losses.items():
-            self.log(f'train/{name}_loss', value, prog_bar=True, sync_dist=False)
-        self.log('train/total_loss', total_loss, sync_dist=False)
+            self.log(f"train/{name}_loss", value, prog_bar=True, sync_dist=False)
+        self.log("train/total_loss", total_loss, sync_dist=False)
 
-        return {'loss': total_loss}
+        return {"loss": total_loss}
 
     def validation_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int):
-        """
-        Evaluates a batch of data from the validation set.
+        """Evaluates a batch of data from the validation set.
 
         Args:
             batch: A tuple of images and targets. Images is a list of 3-dimensional tensors.
@@ -249,12 +236,11 @@ class YOLO(LightningModule):
         total_loss = torch.stack(tuple(losses.values())).sum()
 
         for name, value in losses.items():
-            self.log(f'val/{name}_loss', value, sync_dist=True)
-        self.log('val/total_loss', total_loss, sync_dist=True)
+            self.log(f"val/{name}_loss", value, sync_dist=True)
+        self.log("val/total_loss", total_loss, sync_dist=True)
 
     def test_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int):
-        """
-        Evaluates a batch of data from the test set.
+        """Evaluates a batch of data from the test set.
 
         Args:
             batch: A tuple of images and targets. Images is a list of 3-dimensional tensors.
@@ -268,13 +254,12 @@ class YOLO(LightningModule):
         total_loss = torch.stack(tuple(losses.values())).sum()
 
         for name, value in losses.items():
-            self.log(f'test/{name}_loss', value, sync_dist=True)
-        self.log('test/total_loss', total_loss, sync_dist=True)
+            self.log(f"test/{name}_loss", value, sync_dist=True)
+        self.log("test/total_loss", total_loss, sync_dist=True)
 
     def infer(self, image: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
-        """
-        Feeds an image to the network and returns the detected bounding boxes, confidence scores,
-        and class labels.
+        """Feeds an image to the network and returns the detected bounding
+        boxes, confidence scores, and class labels.
 
         Args:
             image: An input image, a tensor of uint8 values sized ``[channels, height, width]``.
@@ -291,14 +276,13 @@ class YOLO(LightningModule):
         detections = self(image.unsqueeze(0))
         detections = self._split_detections(detections)
         detections = self._filter_detections(detections)
-        boxes = detections['boxes'][0]
-        scores = detections['scores'][0]
-        labels = detections['labels'][0]
+        boxes = detections["boxes"][0]
+        scores = detections["scores"][0]
+        labels = detections["labels"][0]
         return boxes, scores, labels
 
     def load_darknet_weights(self, weight_file):
-        """
-        Loads weights to layer modules from a pretrained Darknet model.
+        """Loads weights to layer modules from a pretrained Darknet model.
 
         One may want to continue training from the pretrained weights, on a dataset with a
         different number of object categories. The number of kernels in the convolutional layers
@@ -313,14 +297,16 @@ class YOLO(LightningModule):
         version = np.fromfile(weight_file, count=3, dtype=np.int32)
         images_seen = np.fromfile(weight_file, count=1, dtype=np.int64)
         rank_zero_info(
-            f'Loading weights from Darknet model version {version[0]}.{version[1]}.{version[2]} '
-            f'that has been trained on {images_seen[0]} images.'
+            f"Loading weights from Darknet model version {version[0]}.{version[1]}.{version[2]} "
+            f"that has been trained on {images_seen[0]} images."
         )
 
         def read(tensor):
-            """
-            Reads the contents of ``tensor`` from the current position of ``weight_file``.
-            If there's no more data in ``weight_file``, returns without error.
+            """Reads the contents of ``tensor`` from the current position of
+            ``weight_file``.
+
+            If there's no more data in ``weight_file``, returns without
+            error.
             """
             x = np.fromfile(weight_file, count=tensor.numel(), dtype=np.float32)
             if x.shape[0] == 0:
@@ -351,11 +337,10 @@ class YOLO(LightningModule):
             read(conv.weight)
 
     def _validate_batch(
-        self,
-        batch: Tuple[List[Tensor], List[Dict[str, Tensor]]]
+        self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]]
     ) -> Tuple[Tensor, List[Dict[str, Tensor]]]:
-        """
-        Reads a batch of data, validates the format, and stacks the images into a single tensor.
+        """Reads a batch of data, validates the format, and stacks the images
+        into a single tensor.
 
         Args:
             batch: The batch of data read by the :class:`~torch.utils.data.DataLoader`.
@@ -373,14 +358,14 @@ class YOLO(LightningModule):
                 raise ValueError("Expected image to be of type Tensor, got {}.".format(type(image)))
 
         for target in targets:
-            boxes = target['boxes']
+            boxes = target["boxes"]
             if not isinstance(boxes, Tensor):
                 raise ValueError("Expected target boxes to be of type Tensor, got {}.".format(type(boxes)))
             if (len(boxes.shape) != 2) or (boxes.shape[-1] != 4):
                 raise ValueError(
                     "Expected target boxes to be tensors of shape [N, 4], got {}.".format(list(boxes.shape))
                 )
-            labels = target['labels']
+            labels = target["labels"]
             if not isinstance(labels, Tensor):
                 raise ValueError("Expected target labels to be of type Tensor, got {}.".format(type(labels)))
             if len(labels.shape) != 1:
@@ -392,8 +377,8 @@ class YOLO(LightningModule):
         return images, targets
 
     def _split_detections(self, detections: Tensor) -> Dict[str, Tensor]:
-        """
-        Splits the detection tensor returned by a forward pass into a dictionary.
+        """Splits the detection tensor returned by a forward pass into a
+        dictionary.
 
         The fields of the dictionary are as follows:
             - boxes (``Tensor[batch_size, N, 4]``): detected bounding box `(x1, y1, x2, y2)` coordinates
@@ -411,15 +396,16 @@ class YOLO(LightningModule):
         scores = detections[..., 4]
         classprobs = detections[..., 5:]
         classprobs, labels = torch.max(classprobs, -1)
-        return {'boxes': boxes, 'scores': scores, 'classprobs': classprobs, 'labels': labels}
+        return {"boxes": boxes, "scores": scores, "classprobs": classprobs, "labels": labels}
 
     def _filter_detections(self, detections: Dict[str, Tensor]) -> Dict[str, List[Tensor]]:
-        """
-        Filters detections based on confidence threshold. Then for every class performs non-maximum
-        suppression (NMS). NMS iterates the bounding boxes that predict this class in descending
-        order of confidence score, and removes lower scoring boxes that have an IoU greater than
-        the NMS threshold with a higher scoring box. Finally the detections are sorted by descending
-        confidence and possible truncated to the maximum number of predictions.
+        """Filters detections based on confidence threshold. Then for every
+        class performs non-maximum suppression (NMS). NMS iterates the bounding
+        boxes that predict this class in descending order of confidence score,
+        and removes lower scoring boxes that have an IoU greater than the NMS
+        threshold with a higher scoring box. Finally the detections are sorted
+        by descending confidence and possible truncated to the maximum number
+        of predictions.
 
         Args:
             detections: All detections. A dictionary of tensors, each containing the predictions
@@ -428,10 +414,10 @@ class YOLO(LightningModule):
         Returns:
             Filtered detections. A dictionary of lists, each containing a tensor per image.
         """
-        boxes = detections['boxes']
-        scores = detections['scores']
-        classprobs = detections['classprobs']
-        labels = detections['labels']
+        boxes = detections["boxes"]
+        scores = detections["scores"]
+        classprobs = detections["classprobs"]
+        labels = detections["labels"]
 
         out_boxes = []
         out_scores = []
@@ -473,13 +459,13 @@ class YOLO(LightningModule):
             # Sort by descending confidence and limit the maximum number of predictions.
             indices = torch.argsort(img_out_scores, descending=True)
             if self.max_predictions_per_image >= 0:
-                indices = indices[:self.max_predictions_per_image]
+                indices = indices[: self.max_predictions_per_image]
             out_boxes.append(img_out_boxes[indices])
             out_scores.append(img_out_scores[indices])
             out_classprobs.append(img_out_classprobs[indices])
             out_labels.append(img_out_labels[indices])
 
-        return {'boxes': out_boxes, 'scores': out_scores, 'classprobs': out_classprobs, 'labels': out_labels}
+        return {"boxes": out_boxes, "scores": out_scores, "classprobs": out_classprobs, "labels": out_labels}
 
 
 class Resize:
@@ -500,22 +486,17 @@ class Resize:
         resize_ratio = torch.tensor(self.output_size) / original_size
         image = F.resize(image, self.output_size)
         scale = torch.tensor(
-            [
-                resize_ratio[1],  # y
-                resize_ratio[0],  # x
-                resize_ratio[1],  # y
-                resize_ratio[0]  # x
-            ],
-            device=target['boxes'].device
+            [resize_ratio[1], resize_ratio[0], resize_ratio[1], resize_ratio[0]],  # y, x, y, x
+            device=target["boxes"].device,
         )
-        target['boxes'] = target['boxes'] * scale
+        target["boxes"] = target["boxes"] * scale
         return image, target
 
 
 def run_cli():
     from argparse import ArgumentParser
 
-    from pytorch_lightning import seed_everything, Trainer
+    from pytorch_lightning import Trainer, seed_everything
 
     from pl_bolts.datamodules import VOCDetectionDataModule
     from pl_bolts.models.detection.yolo.yolo_config import YOLOConfiguration
@@ -523,54 +504,50 @@ def run_cli():
     seed_everything(42)
 
     parser = ArgumentParser()
+    parser.add_argument("--config", type=str, metavar="PATH", required=True, help="read model configuration from PATH")
     parser.add_argument(
-        '--config', type=str, metavar='PATH', required=True,
-        help='read model configuration from PATH'
+        "--darknet-weights", type=str, metavar="PATH", help="read the initial model weights from PATH in Darknet format"
+    )
+    parser.add_argument("--batch-size", type=int, metavar="N", default=16, help="batch size is N image")
+    parser.add_argument("--lr", type=float, metavar="LR", default=0.0013, help="learning rate after the warmup period")
+    parser.add_argument(
+        "--momentum",
+        type=float,
+        metavar="GAMMA",
+        default=0.9,
+        help="if nonzero, the optimizer uses momentum with factor GAMMA",
     )
     parser.add_argument(
-        '--darknet-weights', type=str, metavar='PATH',
-        help='read the initial model weights from PATH in Darknet format'
+        "--weight-decay",
+        type=float,
+        metavar="LAMBDA",
+        default=0.0005,
+        help="if nonzero, the optimizer uses weight decay (L2 penalty) with factor LAMBDA",
     )
     parser.add_argument(
-        '--batch-size', type=int, metavar='N', default=16,
-        help='batch size is N image'
+        "--warmup-epochs", type=int, metavar="N", default=1, help="learning rate warmup period is N epochs"
+    )
+    parser.add_argument("--max-epochs", type=int, metavar="N", default=300, help="train at most N epochs")
+    parser.add_argument(
+        "--initial-lr", type=float, metavar="LR", default=0.0, help="learning rate before the warmup period"
     )
     parser.add_argument(
-        '--lr', type=float, metavar='LR', default=0.0013,
-        help='learning rate after the warmup period'
+        "--confidence-threshold",
+        type=float,
+        metavar="THRESHOLD",
+        default=0.001,
+        help="keep predictions only if the confidence is above THRESHOLD",
     )
     parser.add_argument(
-        '--momentum', type=float, metavar='GAMMA', default=0.9,
-        help='if nonzero, the optimizer uses momentum with factor GAMMA'
+        "--nms-threshold",
+        type=float,
+        metavar="THRESHOLD",
+        default=0.45,
+        help="non-maximum suppression removes predicted boxes that have IoU greater than "
+        "THRESHOLD with a higher scoring box",
     )
     parser.add_argument(
-        '--weight-decay', type=float, metavar='LAMBDA', default=0.0005,
-        help='if nonzero, the optimizer uses weight decay (L2 penalty) with factor LAMBDA'
-    )
-    parser.add_argument(
-        '--warmup-epochs', type=int, metavar='N', default=1,
-        help='learning rate warmup period is N epochs'
-    )
-    parser.add_argument(
-        '--max-epochs', type=int, metavar='N', default=300,
-        help='train at most N epochs'
-    )
-    parser.add_argument(
-        '--initial-lr', type=float, metavar='LR', default=0.0,
-        help='learning rate before the warmup period'
-    )
-    parser.add_argument(
-        '--confidence-threshold', type=float, metavar='THRESHOLD', default=0.001,
-        help='keep predictions only if the confidence is above THRESHOLD'
-    )
-    parser.add_argument(
-        '--nms-threshold', type=float, metavar='THRESHOLD', default=0.45,
-        help='non-maximum suppression removes predicted boxes that have IoU greater than '
-             'THRESHOLD with a higher scoring box'
-    )
-    parser.add_argument(
-        '--max-predictions-per-image', type=int, metavar='N', default=100,
-        help='keep at most N best predictions'
+        "--max-predictions-per-image", type=int, metavar="N", default=100, help="keep at most N best predictions"
     )
 
     parser = VOCDetectionDataModule.add_argparse_args(parser)
@@ -583,15 +560,11 @@ def run_cli():
     datamodule = VOCDetectionDataModule.from_argparse_args(args)
     datamodule.prepare_data()
 
-    optimizer_params = {
-        'lr': args.lr,
-        'momentum': args.momentum,
-        'weight_decay': args.weight_decay
-    }
+    optimizer_params = {"lr": args.lr, "momentum": args.momentum, "weight_decay": args.weight_decay}
     lr_scheduler_params = {
-        'warmup_epochs': args.warmup_epochs,
-        'max_epochs': args.max_epochs,
-        'warmup_start_lr': args.initial_lr
+        "warmup_epochs": args.warmup_epochs,
+        "max_epochs": args.max_epochs,
+        "warmup_start_lr": args.initial_lr,
     }
     model = YOLO(
         network=config.get_network(),
@@ -599,16 +572,17 @@ def run_cli():
         lr_scheduler_params=lr_scheduler_params,
         confidence_threshold=args.confidence_threshold,
         nms_threshold=args.nms_threshold,
-        max_predictions_per_image=args.max_predictions_per_image
+        max_predictions_per_image=args.max_predictions_per_image,
     )
     if args.darknet_weights is not None:
-        with open(args.darknet_weights, 'r') as weight_file:
+        with open(args.darknet_weights, "r") as weight_file:
             model.load_darknet_weights(weight_file)
 
     trainer = Trainer.from_argparse_args(args)
     trainer.fit(
-        model, datamodule.train_dataloader(args.batch_size, transforms),
-        datamodule.val_dataloader(args.batch_size, transforms)
+        model,
+        datamodule.train_dataloader(args.batch_size, transforms),
+        datamodule.val_dataloader(args.batch_size, transforms),
     )
 
 

@@ -2,13 +2,14 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 import torch
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
-from torch import nn, Tensor
+from torch import Tensor, nn
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.ops import box_iou
+
     try:
         from torchvision.ops import generalized_box_iou
     except ImportError:
@@ -16,12 +17,11 @@ if _TORCHVISION_AVAILABLE:
     else:
         _GIOU_AVAILABLE = True
 else:
-    warn_missing_pkg('torchvision')
+    warn_missing_pkg("torchvision")
 
 
 def _corner_coordinates(xy: Tensor, wh: Tensor) -> Tensor:
-    """
-    Converts box center points and sizes to corner coordinates.
+    """Converts box center points and sizes to corner coordinates.
 
     Args:
         xy: Center coordinates. Tensor of size ``[..., 2]``.
@@ -37,9 +37,8 @@ def _corner_coordinates(xy: Tensor, wh: Tensor) -> Tensor:
 
 
 def _aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
-    """
-    Calculates a matrix of intersections over union from box dimensions, assuming that the boxes
-    are located at the same coordinates.
+    """Calculates a matrix of intersections over union from box dimensions,
+    assuming that the boxes are located at the same coordinates.
 
     Args:
         dims1: Width and height of `N` boxes. Tensor of size ``[N, 2]``.
@@ -60,27 +59,24 @@ def _aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
 
 
 class SELoss(nn.MSELoss):
-
     def __init__(self):
-        super().__init__(reduction='none')
+        super().__init__(reduction="none")
 
     def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
         return super().forward(inputs, target).sum(1)
 
 
 class IoULoss(nn.Module):
-
     def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
         return 1.0 - box_iou(inputs, target).diagonal()
 
 
 class GIoULoss(nn.Module):
-
     def __init__(self) -> None:
         super().__init__()
         if not _GIOU_AVAILABLE:
             raise ModuleNotFoundError(  # pragma: no-cover
-                'A more recent version of `torchvision` is needed for generalized IoU loss.'
+                "A more recent version of `torchvision` is needed for generalized IoU loss."
             )
 
     def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
@@ -88,8 +84,9 @@ class GIoULoss(nn.Module):
 
 
 class DetectionLayer(nn.Module):
-    """
-    A YOLO detection layer. A YOLO model has usually 1 - 3 detection layers at different
+    """A YOLO detection layer.
+
+    A YOLO model has usually 1 - 3 detection layers at different
     resolutions. The loss should be summed from all of them.
     """
 
@@ -107,7 +104,7 @@ class DetectionLayer(nn.Module):
         image_space_loss: bool = False,
         overlap_loss_multiplier: float = 1.0,
         class_loss_multiplier: float = 1.0,
-        confidence_loss_multiplier: float = 1.0
+        confidence_loss_multiplier: float = 1.0,
     ) -> None:
         """
         Args:
@@ -144,7 +141,7 @@ class DetectionLayer(nn.Module):
         super().__init__()
 
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('YOLO model uses `torchvision`, which is not installed yet.')
+            raise ModuleNotFoundError("YOLO model uses `torchvision`, which is not installed yet.")
 
         self.num_classes = num_classes
         self.all_anchor_dims = anchor_dims
@@ -156,18 +153,16 @@ class DetectionLayer(nn.Module):
 
         self.overlap_loss_func = overlap_loss_func or SELoss()
         self.class_loss_func = class_loss_func or SELoss()
-        self.confidence_loss_func = confidence_loss_func or nn.MSELoss(reduction='none')
+        self.confidence_loss_func = confidence_loss_func or nn.MSELoss(reduction="none")
         self.image_space_loss = image_space_loss
         self.overlap_loss_multiplier = overlap_loss_multiplier
         self.class_loss_multiplier = class_loss_multiplier
         self.confidence_loss_multiplier = confidence_loss_multiplier
 
-    def forward(self,
-                x: Tensor,
-                image_size: Tensor,
-                targets: Optional[List[Dict[str, Tensor]]] = None) -> Tuple[Tensor, Dict[str, Tensor]]:
-        """
-        Runs a forward pass through this YOLO detection layer.
+    def forward(
+        self, x: Tensor, image_size: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None
+    ) -> Tuple[Tensor, Dict[str, Tensor]]:
+        """Runs a forward pass through this YOLO detection layer.
 
         Maps cell-local coordinates to global coordinates in the image space, scales the bounding
         boxes with the anchors, converts the center coordinates to corner coordinates, and maps
@@ -240,9 +235,8 @@ class DetectionLayer(nn.Module):
         return output, losses, hits
 
     def _global_xy(self, xy: Tensor, image_size: Tensor) -> Tensor:
-        """
-        Adds offsets to the predicted box center coordinates to obtain global coordinates to the
-        image.
+        """Adds offsets to the predicted box center coordinates to obtain
+        global coordinates to the image.
 
         The predicted coordinates are interpreted as coordinates inside a grid cell whose width and
         height is 1. Adding offset to the cell, dividing by the grid size, and multiplying by the
@@ -271,10 +265,10 @@ class DetectionLayer(nn.Module):
         return (xy + offset) * scale
 
     def _low_confidence_mask(self, boxes: Tensor, targets: List[Dict[str, Tensor]]) -> Tensor:
-        """
-        Initializes the mask that will be used to select predictors that are not predicting any
-        ground-truth target. The value will be ``True``, unless the predicted box overlaps any target
-        significantly (IoU greater than ``self.ignore_threshold``).
+        """Initializes the mask that will be used to select predictors that are
+        not predicting any ground-truth target. The value will be ``True``,
+        unless the predicted box overlaps any target significantly (IoU greater
+        than ``self.ignore_threshold``).
 
         Args:
             boxes: The predicted corner coordinates in the image space. Tensor of size
@@ -291,7 +285,7 @@ class DetectionLayer(nn.Module):
 
         results = torch.ones((batch_size, num_preds), dtype=torch.bool, device=boxes.device)
         for image_idx, (image_boxes, image_targets) in enumerate(zip(boxes, targets)):
-            target_boxes = image_targets['boxes']
+            target_boxes = image_targets["boxes"]
             if target_boxes.shape[0] > 0:
                 ious = box_iou(image_boxes, target_boxes)  # [num_preds, num_targets]
                 best_iou = ious.max(-1).values  # [num_preds]
@@ -300,12 +294,17 @@ class DetectionLayer(nn.Module):
         return results.view((batch_size, height, width, boxes_per_cell))
 
     def _calculate_losses(
-        self, boxes: Tensor, confidence: Tensor, classprob: Tensor, targets: List[Dict[str, Tensor]],
-        image_size: Tensor, lc_mask: Tensor
+        self,
+        boxes: Tensor,
+        confidence: Tensor,
+        classprob: Tensor,
+        targets: List[Dict[str, Tensor]],
+        image_size: Tensor,
+        lc_mask: Tensor,
     ) -> Dict[str, Tensor]:
-        """
-        From the targets that are in the image space calculates the actual targets for the network
-        predictions, and returns a dictionary of training losses.
+        """From the targets that are in the image space calculates the actual
+        targets for the network predictions, and returns a dictionary of
+        training losses.
 
         Args:
             boxes: The predicted bounding boxes. A tensor sized
@@ -347,7 +346,7 @@ class DetectionLayer(nn.Module):
         hits = 0
 
         for image_idx, image_targets in enumerate(targets):
-            target_boxes = image_targets['boxes']
+            target_boxes = image_targets["boxes"]
             if target_boxes.shape[0] < 1:
                 continue
 
@@ -412,7 +411,7 @@ class DetectionLayer(nn.Module):
             # The data may contain a different number of classes than this detection layer. In case
             # a label is greater than the number of classes that this layer predicts, it will be
             # mapped to the last class.
-            labels = image_targets['labels']
+            labels = image_targets["labels"]
             labels = labels[selected]
             labels = torch.min(labels, torch.tensor(self.num_classes - 1, device=device))
             target_label.append(labels)
@@ -433,9 +432,9 @@ class DetectionLayer(nn.Module):
             overlap_loss = self.overlap_loss_func(pred_boxes, target_boxes)
             overlap_loss = overlap_loss * size_compensation
             overlap_loss = overlap_loss.sum() / batch_size
-            losses['overlap'] = overlap_loss * self.overlap_loss_multiplier
+            losses["overlap"] = overlap_loss * self.overlap_loss_multiplier
         else:
-            losses['overlap'] = torch.tensor(0.0, device=device)
+            losses["overlap"] = torch.tensor(0.0, device=device)
 
         if pred_classprob and target_label:
             pred_classprob = torch.cat(pred_classprob)
@@ -444,9 +443,9 @@ class DetectionLayer(nn.Module):
             target_classprob = target_classprob.to(dtype=pred_classprob.dtype)
             class_loss = self.class_loss_func(pred_classprob, target_classprob)
             class_loss = class_loss.sum() / batch_size
-            losses['class'] = class_loss * self.class_loss_multiplier
+            losses["class"] = class_loss * self.class_loss_multiplier
         else:
-            losses['class'] = torch.tensor(0.0, device=device)
+            losses["class"] = torch.tensor(0.0, device=device)
 
         pred_low_confidence = confidence[lc_mask]
         target_low_confidence = torch.zeros_like(pred_low_confidence)
@@ -460,7 +459,7 @@ class DetectionLayer(nn.Module):
             target_confidence = target_low_confidence
         confidence_loss = self.confidence_loss_func(pred_confidence, target_confidence)
         confidence_loss = confidence_loss.sum() / batch_size
-        losses['confidence'] = confidence_loss * self.confidence_loss_multiplier
+        losses["confidence"] = confidence_loss * self.confidence_loss_multiplier
 
         return losses, hits
 
@@ -473,7 +472,8 @@ class Mish(nn.Module):
 
 
 class RouteLayer(nn.Module):
-    """Route layer concatenates the output (or part of it) from given layers."""
+    """Route layer concatenates the output (or part of it) from given
+    layers."""
 
     def __init__(self, source_layers: List[int], num_chunks: int, chunk_idx: int) -> None:
         """

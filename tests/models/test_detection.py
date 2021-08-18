@@ -6,7 +6,7 @@ from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datasets import DummyDetectionDataset
-from pl_bolts.models.detection import FasterRCNN, YOLO, YOLOConfiguration
+from pl_bolts.models.detection import YOLO, FasterRCNN, YOLOConfiguration
 from pl_bolts.models.detection.yolo.yolo_layers import _aligned_iou
 from tests import TEST_ROOT
 
@@ -43,7 +43,7 @@ def test_fasterrcnn_bbone_train(tmpdir):
 
 
 def test_yolo(tmpdir):
-    config_path = Path(TEST_ROOT) / 'data' / 'yolo.cfg'
+    config_path = Path(TEST_ROOT) / "data" / "yolo.cfg"
     config = YOLOConfiguration(config_path)
     model = YOLO(config.get_network())
 
@@ -52,7 +52,7 @@ def test_yolo(tmpdir):
 
 
 def test_yolo_train(tmpdir):
-    config_path = Path(TEST_ROOT) / 'data' / 'yolo.cfg'
+    config_path = Path(TEST_ROOT) / "data" / "yolo.cfg"
     config = YOLOConfiguration(config_path)
     model = YOLO(config.get_network())
 
@@ -64,10 +64,14 @@ def test_yolo_train(tmpdir):
 
 
 @pytest.mark.parametrize(
-    "dims1, dims2, expected_ious", [(
-        torch.tensor([[1.0, 1.0], [10.0, 1.0], [100.0, 10.0]]), torch.tensor([[1.0, 10.0], [2.0, 20.0]]),
-        torch.tensor([[1.0 / 10.0, 1.0 / 40.0], [1.0 / 19.0, 2.0 / 48.0], [10.0 / 1000.0, 20.0 / 1020.0]])
-    )]
+    "dims1, dims2, expected_ious",
+    [
+        (
+            torch.tensor([[1.0, 1.0], [10.0, 1.0], [100.0, 10.0]]),
+            torch.tensor([[1.0, 10.0], [2.0, 20.0]]),
+            torch.tensor([[1.0 / 10.0, 1.0 / 40.0], [1.0 / 19.0, 2.0 / 48.0], [10.0 / 1000.0, 20.0 / 1020.0]]),
+        )
+    ],
 )
 def test_aligned_iou(dims1, dims2, expected_ious):
     torch.testing.assert_allclose(_aligned_iou(dims1, dims2), expected_ious)

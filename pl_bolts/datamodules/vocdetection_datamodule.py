@@ -149,7 +149,7 @@ class VOCDetectionDataModule(LightningDataModule):
         self,
         batch_size: int = 1,
         transforms: Optional[List[Callable]] = None,
-        image_transforms: Optional[Callable] = None
+        image_transforms: Optional[Callable] = None,
     ) -> DataLoader:
         """VOCDetection train set uses the `train` subset.
 
@@ -181,7 +181,7 @@ class VOCDetectionDataModule(LightningDataModule):
         self,
         batch_size: int = 1,
         transforms: Optional[List[Callable]] = None,
-        image_transforms: Optional[Callable] = None
+        image_transforms: Optional[Callable] = None,
     ) -> DataLoader:
         """VOCDetection val set uses the `val` subset
 
