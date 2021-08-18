@@ -337,6 +337,8 @@ class YOLO(LightningModule):
             conv = module[0]
             assert isinstance(conv, nn.Conv2d)
 
+            # Convolution may be followed by batch normalization, in which case we read the batch
+            # normalization parameters and not the convolution bias.
             if len(module) > 1 and isinstance(module[1], nn.BatchNorm2d):
                 bn = module[1]
                 read(bn.bias)
