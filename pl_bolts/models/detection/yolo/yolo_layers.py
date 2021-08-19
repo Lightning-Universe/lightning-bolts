@@ -37,8 +37,8 @@ def _corner_coordinates(xy: Tensor, wh: Tensor) -> Tensor:
 
 
 def _aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
-    """Calculates a matrix of intersections over union from box dimensions,
-    assuming that the boxes are located at the same coordinates.
+    """Calculates a matrix of intersections over union from box dimensions, assuming that the boxes are located at
+    the same coordinates.
 
     Args:
         dims1: Width and height of `N` boxes. Tensor of size ``[N, 2]``.
@@ -235,8 +235,7 @@ class DetectionLayer(nn.Module):
         return output, losses, hits
 
     def _global_xy(self, xy: Tensor, image_size: Tensor) -> Tensor:
-        """Adds offsets to the predicted box center coordinates to obtain
-        global coordinates to the image.
+        """Adds offsets to the predicted box center coordinates to obtain global coordinates to the image.
 
         The predicted coordinates are interpreted as coordinates inside a grid cell whose width and
         height is 1. Adding offset to the cell, dividing by the grid size, and multiplying by the
@@ -265,9 +264,8 @@ class DetectionLayer(nn.Module):
         return (xy + offset) * scale
 
     def _low_confidence_mask(self, boxes: Tensor, targets: List[Dict[str, Tensor]]) -> Tensor:
-        """Initializes the mask that will be used to select predictors that are
-        not predicting any ground-truth target. The value will be ``True``,
-        unless the predicted box overlaps any target significantly (IoU greater
+        """Initializes the mask that will be used to select predictors that are not predicting any ground-truth
+        target. The value will be ``True``, unless the predicted box overlaps any target significantly (IoU greater
         than ``self.ignore_threshold``).
 
         Args:
@@ -302,9 +300,8 @@ class DetectionLayer(nn.Module):
         image_size: Tensor,
         lc_mask: Tensor,
     ) -> Dict[str, Tensor]:
-        """From the targets that are in the image space calculates the actual
-        targets for the network predictions, and returns a dictionary of
-        training losses.
+        """From the targets that are in the image space calculates the actual targets for the network predictions,
+        and returns a dictionary of training losses.
 
         Args:
             boxes: The predicted bounding boxes. A tensor sized
@@ -472,8 +469,7 @@ class Mish(nn.Module):
 
 
 class RouteLayer(nn.Module):
-    """Route layer concatenates the output (or part of it) from given
-    layers."""
+    """Route layer concatenates the output (or part of it) from given layers."""
 
     def __init__(self, source_layers: List[int], num_chunks: int, chunk_idx: int) -> None:
         """

@@ -183,7 +183,7 @@ class VOCDetectionDataModule(LightningDataModule):
         transforms: Optional[List[Callable]] = None,
         image_transforms: Optional[Callable] = None,
     ) -> DataLoader:
-        """VOCDetection val set uses the `val` subset
+        """VOCDetection val set uses the `val` subset.
 
         Args:
             batch_size: size of batch

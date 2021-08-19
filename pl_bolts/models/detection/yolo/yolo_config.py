@@ -9,17 +9,15 @@ from pl_bolts.models.detection.yolo import yolo_layers
 
 
 class YOLOConfiguration:
-    """This class can be used to parse the configuration files of the Darknet
-    YOLOv4 implementation.
+    """This class can be used to parse the configuration files of the Darknet YOLOv4 implementation.
 
     The :func:`~pl_bolts.models.detection.yolo.yolo_config.YOLOConfiguration.get_network` method
     returns a PyTorch module list that can be used to construct a YOLO model.
     """
 
     def __init__(self, path: str) -> None:
-        """Saves the variables from the first configuration section to
-        attributes of this object, and the rest of the sections to the
-        ``layer_configs`` list.
+        """Saves the variables from the first configuration section to attributes of this object, and the rest of
+        the sections to the ``layer_configs`` list.
 
         Args:
             path: Path to a configuration file
@@ -35,9 +33,8 @@ class YOLOConfiguration:
         self.layer_configs = sections[1:]
 
     def get_network(self) -> nn.ModuleList:
-        """Iterates through the layers from the configuration and creates
-        corresponding PyTorch modules. Returns the network structure that can
-        be used to create a YOLO model.
+        """Iterates through the layers from the configuration and creates corresponding PyTorch modules. Returns
+        the network structure that can be used to create a YOLO model.
 
         Returns:
             A :class:`~torch.nn.ModuleList` that defines the YOLO network.
@@ -52,8 +49,7 @@ class YOLOConfiguration:
         return result
 
     def _read_file(self, config_file: Iterable[str]) -> List[Dict[str, Any]]:
-        """Reads a YOLOv4 network configuration file and returns a list of
-        configuration sections.
+        """Reads a YOLOv4 network configuration file and returns a list of configuration sections.
 
         Args:
             config_file: The configuration file to read.
@@ -150,8 +146,8 @@ class YOLOConfiguration:
 
 
 def _create_layer(config: dict, num_inputs: List[int]) -> Tuple[nn.Module, int]:
-    """Calls one of the ``_create_<layertype>(config, num_inputs)`` functions
-    to create a PyTorch module from the layer config.
+    """Calls one of the ``_create_<layertype>(config, num_inputs)`` functions to create a PyTorch module from the
+    layer config.
 
     Args:
         config: Dictionary of configuration options for this layer.

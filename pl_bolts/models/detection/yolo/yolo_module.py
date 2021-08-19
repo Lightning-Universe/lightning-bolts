@@ -23,17 +23,13 @@ log = logging.getLogger(__name__)
 
 
 class YOLO(LightningModule):
-    """PyTorch Lightning implementation of `YOLOv3
-    <https://arxiv.org/abs/1804.02767>`_ with some improvements from `YOLOv4
-    <https://arxiv.org/abs/2004.10934>`_.
+    """PyTorch Lightning implementation of YOLOv3 and YOLOv4.
 
-    *YOLOv3 paper authors*: Joseph Redmon and Ali Farhadi
+    *YOLOv3 paper*: `Joseph Redmon and Ali Farhadi <https://arxiv.org/abs/1804.02767>`_
 
-    *YOLOv4 paper authors*: Alexey Bochkovskiy, Chien-Yao Wang, Hong-Yuan Mark Liao
+    *YOLOv4 paper*: `Alexey Bochkovskiy, Chien-Yao Wang, and Hong-Yuan Mark Liao <https://arxiv.org/abs/2004.10934>`_
 
-    *Model implemented by*:
-
-    - `Seppo Enarvi <https://github.com/senarvi>`_
+    *Implementation*: `Seppo Enarvi <https://github.com/senarvi>`_
 
     The network architecture can be read from a Darknet configuration file using the
     :class:`~pl_bolts.models.detection.yolo.yolo_config.YOLOConfiguration` class, or created by
@@ -117,9 +113,8 @@ class YOLO(LightningModule):
     def forward(
         self, images: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None
     ) -> Tuple[Tensor, Dict[str, Tensor]]:
-        """Runs a forward pass through the network (all layers listed in
-        ``self.network``), and if training targets are provided, computes the
-        losses from the detection layers.
+        """Runs a forward pass through the network (all layers listed in ``self.network``), and if training targets
+        are provided, computes the losses from the detection layers.
 
         Detections are concatenated from the detection layers. Each image will produce
         `N * num_anchors * grid_height * grid_width` detections, where `N` depends on the number of
@@ -258,8 +253,8 @@ class YOLO(LightningModule):
         self.log("test/total_loss", total_loss, sync_dist=True)
 
     def infer(self, image: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
-        """Feeds an image to the network and returns the detected bounding
-        boxes, confidence scores, and class labels.
+        """Feeds an image to the network and returns the detected bounding boxes, confidence scores, and class
+        labels.
 
         Args:
             image: An input image, a tensor of uint8 values sized ``[channels, height, width]``.
@@ -302,11 +297,9 @@ class YOLO(LightningModule):
         )
 
         def read(tensor):
-            """Reads the contents of ``tensor`` from the current position of
-            ``weight_file``.
+            """Reads the contents of ``tensor`` from the current position of ``weight_file``.
 
-            If there's no more data in ``weight_file``, returns without
-            error.
+            If there's no more data in ``weight_file``, returns without error.
             """
             x = np.fromfile(weight_file, count=tensor.numel(), dtype=np.float32)
             if x.shape[0] == 0:
@@ -339,8 +332,7 @@ class YOLO(LightningModule):
     def _validate_batch(
         self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]]
     ) -> Tuple[Tensor, List[Dict[str, Tensor]]]:
-        """Reads a batch of data, validates the format, and stacks the images
-        into a single tensor.
+        """Reads a batch of data, validates the format, and stacks the images into a single tensor.
 
         Args:
             batch: The batch of data read by the :class:`~torch.utils.data.DataLoader`.
@@ -377,8 +369,7 @@ class YOLO(LightningModule):
         return images, targets
 
     def _split_detections(self, detections: Tensor) -> Dict[str, Tensor]:
-        """Splits the detection tensor returned by a forward pass into a
-        dictionary.
+        """Splits the detection tensor returned by a forward pass into a dictionary.
 
         The fields of the dictionary are as follows:
             - boxes (``Tensor[batch_size, N, 4]``): detected bounding box `(x1, y1, x2, y2)` coordinates
@@ -399,13 +390,11 @@ class YOLO(LightningModule):
         return {"boxes": boxes, "scores": scores, "classprobs": classprobs, "labels": labels}
 
     def _filter_detections(self, detections: Dict[str, Tensor]) -> Dict[str, List[Tensor]]:
-        """Filters detections based on confidence threshold. Then for every
-        class performs non-maximum suppression (NMS). NMS iterates the bounding
-        boxes that predict this class in descending order of confidence score,
-        and removes lower scoring boxes that have an IoU greater than the NMS
-        threshold with a higher scoring box. Finally the detections are sorted
-        by descending confidence and possible truncated to the maximum number
-        of predictions.
+        """Filters detections based on confidence threshold. Then for every class performs non-maximum suppression
+        (NMS). NMS iterates the bounding boxes that predict this class in descending order of confidence score, and
+        removes lower scoring boxes that have an IoU greater than the NMS threshold with a higher scoring box.
+        Finally the detections are sorted by descending confidence and possible truncated to the maximum number of
+        predictions.
 
         Args:
             detections: All detections. A dictionary of tensors, each containing the predictions
