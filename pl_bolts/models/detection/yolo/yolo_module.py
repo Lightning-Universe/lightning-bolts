@@ -354,16 +354,12 @@ class YOLO(LightningModule):
             if not isinstance(boxes, Tensor):
                 raise ValueError(f"Expected target boxes to be of type Tensor, got {type(boxes)}.")
             if (len(boxes.shape) != 2) or (boxes.shape[-1] != 4):
-                raise ValueError(
-                    f"Expected target boxes to be tensors of shape [N, 4], got {list(boxes.shape)}."
-                )
+                raise ValueError(f"Expected target boxes to be tensors of shape [N, 4], got {list(boxes.shape)}.")
             labels = target["labels"]
             if not isinstance(labels, Tensor):
                 raise ValueError(f"Expected target labels to be of type Tensor, got {type(labels)}.")
             if len(labels.shape) != 1:
-                raise ValueError(
-                    f"Expected target labels to be tensors of shape [N], got {list(labels.shape)}."
-                )
+                raise ValueError(f"Expected target labels to be tensors of shape [N], got {list(labels.shape)}.")
 
         images = torch.stack(images)
         return images, targets
