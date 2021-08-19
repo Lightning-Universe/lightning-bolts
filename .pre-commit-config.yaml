@@ -34,6 +34,16 @@ repos:
       - id: docformatter
         args: [--in-place, --wrap-summaries=115, --wrap-descriptions=120]
 
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.7
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-black
+          - mdformat_frontmatter
+        exclude: CHANGELOG.md
+
   - repo: https://github.com/PyCQA/isort
     rev: 5.9.2
     hooks:
