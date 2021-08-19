@@ -343,26 +343,26 @@ class YOLO(LightningModule):
         images, targets = batch
 
         if len(images) != len(targets):
-            raise ValueError("Got {} images, but targets for {} images.".format(len(images), len(targets)))
+            raise ValueError(f"Got {len(images)} images, but targets for {len(targets)} images.")
 
         for image in images:
             if not isinstance(image, Tensor):
-                raise ValueError("Expected image to be of type Tensor, got {}.".format(type(image)))
+                raise ValueError(f"Expected image to be of type Tensor, got {type(image)}.")
 
         for target in targets:
             boxes = target["boxes"]
             if not isinstance(boxes, Tensor):
-                raise ValueError("Expected target boxes to be of type Tensor, got {}.".format(type(boxes)))
+                raise ValueError(f"Expected target boxes to be of type Tensor, got {type(boxes)}.")
             if (len(boxes.shape) != 2) or (boxes.shape[-1] != 4):
                 raise ValueError(
-                    "Expected target boxes to be tensors of shape [N, 4], got {}.".format(list(boxes.shape))
+                    f"Expected target boxes to be tensors of shape [N, 4], got {list(boxes.shape)}."
                 )
             labels = target["labels"]
             if not isinstance(labels, Tensor):
-                raise ValueError("Expected target labels to be of type Tensor, got {}.".format(type(labels)))
+                raise ValueError(f"Expected target labels to be of type Tensor, got {type(labels)}.")
             if len(labels.shape) != 1:
                 raise ValueError(
-                    "Expected target labels to be tensors of shape [N], got {}.".format(list(labels.shape))
+                    f"Expected target labels to be tensors of shape [N], got {list(labels.shape)}."
                 )
 
         images = torch.stack(images)
@@ -564,7 +564,7 @@ def run_cli():
         max_predictions_per_image=args.max_predictions_per_image,
     )
     if args.darknet_weights is not None:
-        with open(args.darknet_weights, "r") as weight_file:
+        with open(args.darknet_weights) as weight_file:
             model.load_darknet_weights(weight_file)
 
     trainer = Trainer.from_argparse_args(args)

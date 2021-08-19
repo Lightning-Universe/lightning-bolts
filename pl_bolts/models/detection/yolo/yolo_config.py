@@ -22,7 +22,7 @@ class YOLOConfiguration:
         Args:
             path: Path to a configuration file
         """
-        with open(path, "r") as config_file:
+        with open(path) as config_file:
             sections = self._read_file(config_file)
 
         if len(sections) < 2:
