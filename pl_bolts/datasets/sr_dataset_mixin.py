@@ -37,7 +37,9 @@ class SRDatasetMixin:
         self.lr_transforms = transform_lib.Compose(
             [
                 transform_lib.Normalize(mean=(-1.0,) * image_channels, std=(2.0,) * image_channels),
+                transform_lib.ToPILImage(),
                 transform_lib.Resize(lr_image_size, Image.BICUBIC),
+                transform_lib.ToTensor(),
             ]
         )
 
