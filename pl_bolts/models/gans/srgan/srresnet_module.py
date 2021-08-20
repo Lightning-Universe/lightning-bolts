@@ -10,8 +10,8 @@ import torch.nn.functional as F
 
 from pl_bolts.callbacks import SRImageLoggerCallback
 from pl_bolts.datamodules import SRDataModule
+from pl_bolts.datasets.utils import prepare_sr_datasets
 from pl_bolts.models.gans.srgan.components import SRGANGenerator
-from pl_bolts.models.gans.srgan.utils import prepare_datasets
 
 
 class SRResNet(pl.LightningModule):
@@ -126,7 +126,7 @@ def cli_main(args=None):
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args(args)
 
-    datasets = prepare_datasets(args.dataset, args.scale_factor, args.data_dir)
+    datasets = prepare_sr_datasets(args.dataset, args.scale_factor, args.data_dir)
     dm = SRDataModule(*datasets, **vars(args))
 
     model = SRResNet(**vars(args), image_channels=dm.dataset_train.dataset.image_channels)

@@ -12,8 +12,8 @@ import torch.nn.functional as F
 
 from pl_bolts.callbacks import SRImageLoggerCallback
 from pl_bolts.datamodules import SRDataModule
+from pl_bolts.datasets.utils import prepare_sr_datasets
 from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, SRGANGenerator, VGG19FeatureExtractor
-from pl_bolts.models.gans.srgan.utils import prepare_datasets
 
 
 class SRGAN(pl.LightningModule):
@@ -200,7 +200,7 @@ def cli_main(args=None):
 
     args = parser.parse_args(args)
 
-    datasets = prepare_datasets(args.dataset, args.scale_factor, args.data_dir)
+    datasets = prepare_sr_datasets(args.dataset, args.scale_factor, args.data_dir)
     dm = SRDataModule(*datasets, **vars(args))
 
     generator_checkpoint = Path(f"model_checkpoints/srresnet-{args.dataset}-scale_factor={args.scale_factor}.pt")

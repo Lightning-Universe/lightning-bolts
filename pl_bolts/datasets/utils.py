@@ -5,7 +5,17 @@ from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 from pl_bolts.datasets.sr_stl10_dataset import SRSTL10
 
 
-def prepare_datasets(dataset, scale_factor, data_dir):
+def prepare_sr_datasets(dataset: str, scale_factor: int, data_dir: str):
+    """Creates train, val, and test datasets for training a Super Resolution GAN.
+
+    Args:
+        dataset: string indicating which dataset class to use (celeba, mnist, or stl10).
+        scale_factor: scale factor between low- and high resolution images.
+        data_dir: root dir of dataset.
+
+    Returns:
+        sr_datasets: tuple containing train, val, and test dataset.
+    """
     assert dataset in ["celeba", "mnist", "stl10"]
 
     if dataset == "celeba":
