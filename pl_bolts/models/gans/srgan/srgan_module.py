@@ -11,7 +11,7 @@ import torch
 import torch.nn.functional as F
 
 from pl_bolts.callbacks import SRImageLoggerCallback
-from pl_bolts.datamodules import SRDataModule
+from pl_bolts.datamodules import TVTDataModule
 from pl_bolts.datasets.utils import prepare_sr_datasets
 from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, SRGANGenerator, VGG19FeatureExtractor
 
@@ -194,14 +194,14 @@ def cli_main(args=None):
     parser.add_argument("--scale_factor", default=4, type=int)
     parser.add_argument("--save_model_checkpoint", dest="save_model_checkpoint", action="store_true")
 
-    parser = SRDataModule.add_argparse_args(parser)
+    parser = TVTDataModule.add_argparse_args(parser)
     parser = SRGAN.add_model_specific_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)
 
     args = parser.parse_args(args)
 
     datasets = prepare_sr_datasets(args.dataset, args.scale_factor, args.data_dir)
-    dm = SRDataModule(*datasets, **vars(args))
+    dm = TVTDataModule(*datasets, **vars(args))
 
     generator_checkpoint = Path(f"model_checkpoints/srresnet-{args.dataset}-scale_factor={args.scale_factor}.pt")
     if not generator_checkpoint.exists():

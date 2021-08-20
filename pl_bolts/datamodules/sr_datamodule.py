@@ -4,18 +4,18 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
 
 
-class SRDataModule(LightningDataModule):
+class TVTDataModule(LightningDataModule):
     """
-    DataModule for Super Resolution datasets.
+    Simple DataModule creating train, val, and test dataloaders from given train, val, and test dataset.
 
     Example::
-        from pl_bolts.datamodules import SRDataModule
+        from pl_bolts.datamodules import TVTDataModule
         from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 
         dataset_dev = SRMNIST(scale_factor=4, root=".", train=True)
         dataset_train, dataset_val = random_split(dataset_dev, lengths=[55_000, 5_000])
         dataset_test = SRMNIST(scale_factor=4, root=".", train=True)
-        dm = SRDataModule(dataset_train, dataset_val, dataset_test)
+        dm = TVTDataModule(dataset_train, dataset_val, dataset_test)
     """
 
     def __init__(
