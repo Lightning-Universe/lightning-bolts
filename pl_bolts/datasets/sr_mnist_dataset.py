@@ -8,12 +8,11 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _PIL_AVAILABLE:
     from PIL import Image
 else:  # pragma: no cover
-    warn_missing_pkg('PIL', pypi_name='Pillow')
+    warn_missing_pkg("PIL", pypi_name="Pillow")
 
 
 class SRMNIST(SRDatasetMixin, MNIST):
-    """
-    MNIST dataset that can be used to train Super Resolution models.
+    """MNIST dataset that can be used to train Super Resolution models.
 
     Function __getitem__ (implemented in SRDatasetMixin) returns tuple of high and low resolution image.
     """

@@ -19,11 +19,9 @@ else:  # pragma: no cover
 
 
 class SRSTL10(SRDatasetMixin, STL10):
-    """
-    STL10 dataset that can be used to train Super Resolution models.
+    """STL10 dataset that can be used to train Super Resolution models.
 
     Function __getitem__ (implemented in SRDatasetMixin) returns tuple of high and low resolution image.
-
     """
 
     def __init__(self, scale_factor: int, *args: Any, **kwargs: Any) -> None:

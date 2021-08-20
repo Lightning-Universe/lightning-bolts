@@ -15,9 +15,8 @@ else:  # pragma: no cover
 
 
 class SRImageLoggerCallback(Callback):
-    """
-    Logs low-res, generated high-res, and ground truth high-res images to TensorBoard
-    Your model must implement the ``forward`` function for generation.
+    """Logs low-res, generated high-res, and ground truth high-res images to TensorBoard Your model must implement
+    the ``forward`` function for generation.
 
     Requirements::
 
@@ -59,9 +58,9 @@ class SRImageLoggerCallback(Callback):
             hr_fake = pl_module(lr_image)
             lr_image = F.interpolate(lr_image, scale_factor=self.scale_factor)
 
-            lr_image_grid = make_grid(lr_image[:self.num_samples], nrow=1, normalize=True)
-            hr_fake_grid = make_grid(hr_fake[:self.num_samples], nrow=1, normalize=True)
-            hr_image_grid = make_grid(hr_image[:self.num_samples], nrow=1, normalize=True)
+            lr_image_grid = make_grid(lr_image[: self.num_samples], nrow=1, normalize=True)
+            hr_fake_grid = make_grid(hr_fake[: self.num_samples], nrow=1, normalize=True)
+            hr_image_grid = make_grid(hr_image[: self.num_samples], nrow=1, normalize=True)
 
             grid = torch.cat((lr_image_grid, hr_fake_grid, hr_image_grid), -1)
             title = "sr_images"

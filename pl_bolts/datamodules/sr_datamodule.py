@@ -5,8 +5,7 @@ from torch.utils.data import DataLoader, Dataset
 
 
 class TVTDataModule(LightningDataModule):
-    """
-    Simple DataModule creating train, val, and test dataloaders from given train, val, and test dataset.
+    """Simple DataModule creating train, val, and test dataloaders from given train, val, and test dataset.
 
     Example::
         from pl_bolts.datamodules import TVTDataModule

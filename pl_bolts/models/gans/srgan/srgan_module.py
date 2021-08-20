@@ -1,6 +1,4 @@
-"""
-Adapted from: https://github.com/https-deeplearning-ai/GANs-Public
-"""
+"""Adapted from: https://github.com/https-deeplearning-ai/GANs-Public."""
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import Any, List, Optional, Tuple
@@ -17,9 +15,9 @@ from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, SRGANGener
 
 
 class SRGAN(pl.LightningModule):
-    """
-    SRGAN implementation from the paper `Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial
-    Network <https://arxiv.org/abs/1609.04802>`__. It uses a pretrained SRResNet model as the generator if available.
+    """SRGAN implementation from the paper `Photo-Realistic Single Image Super-Resolution Using a Generative
+    Adversarial Network <https://arxiv.org/abs/1609.04802>`__. It uses a pretrained SRResNet model as the generator
+    if available.
 
     Code adapted from `https-deeplearning-ai/GANs-Public <https://github.com/https-deeplearning-ai/GANs-Public>`_ to
     Lightning by:
@@ -92,8 +90,7 @@ class SRGAN(pl.LightningModule):
         return [opt_disc, opt_gen], [sched_disc, sched_gen]
 
     def forward(self, lr_image: torch.Tensor) -> torch.Tensor:
-        """
-        Generates a high resolution image given a low resolution image
+        """Generates a high resolution image given a low resolution image.
 
         Example::
 

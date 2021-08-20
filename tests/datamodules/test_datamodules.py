@@ -100,7 +100,7 @@ def test_sr_datamodule(datadir):
     next(iter(dm.val_dataloader()))
     next(iter(dm.test_dataloader()))
 
-    
+
 @pytest.mark.parametrize("split", ["byclass", "bymerge", "balanced", "letters", "digits", "mnist"])
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
 def test_emnist_datamodules(datadir, dm_cls, split):
