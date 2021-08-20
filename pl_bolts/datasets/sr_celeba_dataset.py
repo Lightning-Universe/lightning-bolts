@@ -1,4 +1,5 @@
 import os
+from typing import Any
 
 from pl_bolts.datasets.sr_dataset_mixin import SRDatasetMixin
 from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE
@@ -24,7 +25,7 @@ class SRCelebA(SRDatasetMixin, CelebA):
 
     """
 
-    def __init__(self, scale_factor: int, *args, **kwargs) -> None:
+    def __init__(self, scale_factor: int, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.hr_image_size = 128
         self.lr_image_size = self.hr_image_size // scale_factor
