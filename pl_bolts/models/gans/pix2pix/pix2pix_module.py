@@ -14,7 +14,6 @@ def _weights_init(m):
 
 
 class Pix2Pix(LightningModule):
-
     def __init__(self, in_channels, out_channels, learning_rate=0.0002, lambda_recon=200):
 
         super().__init__()
@@ -65,14 +64,14 @@ class Pix2Pix(LightningModule):
         loss = None
         if optimizer_idx == 0:
             loss = self._disc_step(real, condition)
-            self.log('PatchGAN Loss', loss)
+            self.log("PatchGAN Loss", loss)
         elif optimizer_idx == 1:
             loss = self._gen_step(real, condition)
-            self.log('Generator Loss', loss)
+            self.log("Generator Loss", loss)
 
         return loss
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pix2pix = Pix2Pix(3, 3)
     print(pix2pix(torch.randn(1, 3, 256, 256)).shape)

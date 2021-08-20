@@ -8,16 +8,15 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transforms
 else:  # pragma: no cover
-    warn_missing_pkg('torchvision')
+    warn_missing_pkg("torchvision")
 
 if _OPENCV_AVAILABLE:
     import cv2
 else:  # pragma: no cover
-    warn_missing_pkg('cv2', pypi_name='opencv-python')
+    warn_missing_pkg("cv2", pypi_name="opencv-python")
 
 
-class SwAVTrainDataTransform(object):
-
+class SwAVTrainDataTransform:
     def __init__(
         self,
         normalize=None,
@@ -26,7 +25,7 @@ class SwAVTrainDataTransform(object):
         min_scale_crops: List[float] = [0.33, 0.10],
         max_scale_crops: List[float] = [1, 0.33],
         gaussian_blur: bool = True,
-        jitter_strength: float = 1.
+        jitter_strength: float = 1.0,
     ):
         self.jitter_strength = jitter_strength
         self.gaussian_blur = gaussian_blur
@@ -41,8 +40,10 @@ class SwAVTrainDataTransform(object):
         self.max_scale_crops = max_scale_crops
 
         self.color_jitter = transforms.ColorJitter(
-            0.8 * self.jitter_strength, 0.8 * self.jitter_strength, 0.8 * self.jitter_strength,
-            0.2 * self.jitter_strength
+            0.8 * self.jitter_strength,
+            0.8 * self.jitter_strength,
+            0.8 * self.jitter_strength,
+            0.2 * self.jitter_strength,
         )
 
         transform = []
@@ -68,20 +69,26 @@ class SwAVTrainDataTransform(object):
                 scale=(self.min_scale_crops[i], self.max_scale_crops[i]),
             )
 
-            transform.extend([
-                transforms.Compose([
-                    random_resized_crop,
-                    transforms.RandomHorizontalFlip(p=0.5), self.color_transform, self.final_transform
-                ])
-            ] * self.nmb_crops[i])
+            transform.extend(
+                [
+                    transforms.Compose(
+                        [
+                            random_resized_crop,
+                            transforms.RandomHorizontalFlip(p=0.5),
+                            self.color_transform,
+                            self.final_transform,
+                        ]
+                    )
+                ]
+                * self.nmb_crops[i]
+            )
 
         self.transform = transform
 
         # add online train transform of the size of global view
-        online_train_transform = transforms.Compose([
-            transforms.RandomResizedCrop(self.size_crops[0]),
-            transforms.RandomHorizontalFlip(), self.final_transform
-        ])
+        online_train_transform = transforms.Compose(
+            [transforms.RandomResizedCrop(self.size_crops[0]), transforms.RandomHorizontalFlip(), self.final_transform]
+        )
 
         self.transform.append(online_train_transform)
 
@@ -92,7 +99,6 @@ class SwAVTrainDataTransform(object):
 
 
 class SwAVEvalDataTransform(SwAVTrainDataTransform):
-
     def __init__(
         self,
         normalize=None,
@@ -101,7 +107,7 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
         min_scale_crops: List[float] = [0.33, 0.10],
         max_scale_crops: List[float] = [1, 0.33],
         gaussian_blur: bool = True,
-        jitter_strength: float = 1.
+        jitter_strength: float = 1.0,
     ):
         super().__init__(
             normalize=normalize,
@@ -110,28 +116,25 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
             min_scale_crops=min_scale_crops,
             max_scale_crops=max_scale_crops,
             gaussian_blur=gaussian_blur,
-            jitter_strength=jitter_strength
+            jitter_strength=jitter_strength,
         )
 
         input_height = self.size_crops[0]  # get global view crop
-        test_transform = transforms.Compose([
-            transforms.Resize(int(input_height + 0.1 * input_height)),
-            transforms.CenterCrop(input_height),
-            self.final_transform,
-        ])
+        test_transform = transforms.Compose(
+            [
+                transforms.Resize(int(input_height + 0.1 * input_height)),
+                transforms.CenterCrop(input_height),
+                self.final_transform,
+            ]
+        )
 
         # replace last transform to eval transform in self.transform list
         self.transform[-1] = test_transform
 
 
-class SwAVFinetuneTransform(object):
-
+class SwAVFinetuneTransform:
     def __init__(
-        self,
-        input_height: int = 224,
-        jitter_strength: float = 1.,
-        normalize=None,
-        eval_transform: bool = False
+        self, input_height: int = 224, jitter_strength: float = 1.0, normalize=None, eval_transform: bool = False
     ) -> None:
 
         self.jitter_strength = jitter_strength
@@ -150,12 +153,12 @@ class SwAVFinetuneTransform(object):
                 transforms.RandomResizedCrop(size=self.input_height),
                 transforms.RandomHorizontalFlip(p=0.5),
                 transforms.RandomApply([self.color_jitter], p=0.8),
-                transforms.RandomGrayscale(p=0.2)
+                transforms.RandomGrayscale(p=0.2),
             ]
         else:
             data_transforms = [
                 transforms.Resize(int(self.input_height + 0.1 * self.input_height)),
-                transforms.CenterCrop(self.input_height)
+                transforms.CenterCrop(self.input_height),
             ]
 
         if normalize is None:
@@ -170,7 +173,7 @@ class SwAVFinetuneTransform(object):
         return self.transform(sample)
 
 
-class GaussianBlur(object):
+class GaussianBlur:
     # Implements Gaussian blur as described in the SimCLR paper
     def __init__(self, kernel_size, p=0.5, min=0.1, max=2.0):
         self.min = min

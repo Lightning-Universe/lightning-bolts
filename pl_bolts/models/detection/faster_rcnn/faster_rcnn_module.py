@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from typing import Any, Optional
 
 import torch
-from pytorch_lightning import LightningModule, seed_everything, Trainer
+from pytorch_lightning import LightningModule, Trainer, seed_everything
 
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -10,19 +10,16 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
-    from torchvision.models.detection.faster_rcnn import fasterrcnn_resnet50_fpn, FastRCNNPredictor
+    from torchvision.models.detection.faster_rcnn import FastRCNNPredictor, fasterrcnn_resnet50_fpn
     from torchvision.ops import box_iou
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
 def _evaluate_iou(target, pred):
-    """
-    Evaluate intersection over union (IOU) for target from dataset and output prediction
-    from model
-    """
+    """Evaluate intersection over union (IOU) for target from dataset and output prediction from model."""
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-        raise ModuleNotFoundError('You want to use `torchvision` which is not installed yet.')
+        raise ModuleNotFoundError("You want to use `torchvision` which is not installed yet.")
 
     if pred["boxes"].shape[0] == 0:
         # no box detected, 0 IOU
@@ -31,9 +28,8 @@ def _evaluate_iou(target, pred):
 
 
 class FasterRCNN(LightningModule):
-    """
-    PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with
-    Region Proposal Networks <https://arxiv.org/abs/1506.01497>`_.
+    """PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with Region Proposal
+    Networks <https://arxiv.org/abs/1506.01497>`_.
 
     Paper authors: Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun
 
@@ -72,7 +68,7 @@ class FasterRCNN(LightningModule):
             trainable_backbone_layers: number of trainable resnet layers starting from final block
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('You want to use `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError("You want to use `torchvision` which is not installed yet.")
 
         super().__init__()
 

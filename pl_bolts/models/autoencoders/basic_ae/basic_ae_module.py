@@ -16,8 +16,7 @@ from pl_bolts.models.autoencoders.components import (
 
 
 class AE(LightningModule):
-    """
-    Standard AE
+    """Standard AE.
 
     Model is available pretrained on different datasets:
 
@@ -31,13 +30,13 @@ class AE(LightningModule):
     """
 
     pretrained_urls = {
-        'cifar10-resnet18': urllib.parse.urljoin(_HTTPS_AWS_HUB, 'ae/ae-cifar10/checkpoints/epoch%3D96.ckpt'),
+        "cifar10-resnet18": urllib.parse.urljoin(_HTTPS_AWS_HUB, "ae/ae-cifar10/checkpoints/epoch%3D96.ckpt"),
     }
 
     def __init__(
         self,
         input_height: int,
-        enc_type: str = 'resnet18',
+        enc_type: str = "resnet18",
         first_conv: bool = False,
         maxpool1: bool = False,
         enc_out_dim: int = 512,
@@ -58,7 +57,7 @@ class AE(LightningModule):
             lr: learning rate for Adam
         """
 
-        super(AE, self).__init__()
+        super().__init__()
 
         self.save_hyperparameters()
 
@@ -68,13 +67,13 @@ class AE(LightningModule):
         self.input_height = input_height
 
         valid_encoders = {
-            'resnet18': {
-                'enc': resnet18_encoder,
-                'dec': resnet18_decoder,
+            "resnet18": {
+                "enc": resnet18_encoder,
+                "dec": resnet18_decoder,
             },
-            'resnet50': {
-                'enc': resnet50_encoder,
-                'dec': resnet50_decoder,
+            "resnet50": {
+                "enc": resnet50_encoder,
+                "dec": resnet50_decoder,
             },
         }
 
@@ -82,8 +81,8 @@ class AE(LightningModule):
             self.encoder = resnet18_encoder(first_conv, maxpool1)
             self.decoder = resnet18_decoder(self.latent_dim, self.input_height, first_conv, maxpool1)
         else:
-            self.encoder = valid_encoders[enc_type]['enc'](first_conv, maxpool1)
-            self.decoder = valid_encoders[enc_type]['dec'](self.latent_dim, self.input_height, first_conv, maxpool1)
+            self.encoder = valid_encoders[enc_type]["enc"](first_conv, maxpool1)
+            self.decoder = valid_encoders[enc_type]["dec"](self.latent_dim, self.input_height, first_conv, maxpool1)
 
         self.fc = nn.Linear(self.enc_out_dim, self.latent_dim)
 
@@ -93,7 +92,7 @@ class AE(LightningModule):
 
     def from_pretrained(self, checkpoint_name):
         if checkpoint_name not in AE.pretrained_urls:
-            raise KeyError(str(checkpoint_name) + ' not present in pretrained weights.')
+            raise KeyError(str(checkpoint_name) + " not present in pretrained weights.")
 
         return self.load_from_checkpoint(AE.pretrained_urls[checkpoint_name], strict=False)
 
@@ -110,7 +109,7 @@ class AE(LightningModule):
         z = self.fc(feats)
         x_hat = self.decoder(z)
 
-        loss = F.mse_loss(x_hat, x, reduction='mean')
+        loss = F.mse_loss(x_hat, x, reduction="mean")
 
         return loss, {"loss": loss}
 
@@ -131,16 +130,16 @@ class AE(LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
 
-        parser.add_argument("--enc_type", type=str, default='resnet18', help="resnet18/resnet50")
-        parser.add_argument("--first_conv", action='store_true')
-        parser.add_argument("--maxpool1", action='store_true')
+        parser.add_argument("--enc_type", type=str, default="resnet18", help="resnet18/resnet50")
+        parser.add_argument("--first_conv", action="store_true")
+        parser.add_argument("--maxpool1", action="store_true")
         parser.add_argument("--lr", type=float, default=1e-4)
 
         parser.add_argument(
             "--enc_out_dim",
             type=int,
             default=512,
-            help="512 for resnet18, 2048 for bigger resnets, adjust for wider resnets"
+            help="512 for resnet18, 2048 for bigger resnets, adjust for wider resnets",
         )
         parser.add_argument("--latent_dim", type=int, default=256)
 

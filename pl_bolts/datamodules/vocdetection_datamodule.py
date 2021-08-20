@@ -12,13 +12,11 @@ if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import VOCDetection
 else:  # pragma: no cover
-    warn_missing_pkg('torchvision')
+    warn_missing_pkg("torchvision")
 
 
-class Compose(object):
-    """
-    Like `torchvision.transforms.compose` but works for (image, target)
-    """
+class Compose:
+    """Like `torchvision.transforms.compose` but works for (image, target)"""
 
     def __init__(self, transforms: List[Callable], image_transforms: Optional[Callable] = None) -> None:
         self.transforms = transforms
@@ -62,8 +60,7 @@ CLASSES = (
 
 
 def _prepare_voc_instance(image: Any, target: Dict[str, Any]):
-    """
-    Prepares VOC dataset into appropriate target for fasterrcnn
+    """Prepares VOC dataset into appropriate target for fasterrcnn.
 
     https://github.com/pytorch/vision/issues/1097#issuecomment-508917489
     """
@@ -104,9 +101,7 @@ def _prepare_voc_instance(image: Any, target: Dict[str, Any]):
 
 
 class VOCDetectionDataModule(LightningDataModule):
-    """
-    TODO(teddykoker) docstring
-    """
+    """TODO(teddykoker) docstring."""
 
     name = "vocdetection"
 
@@ -114,17 +109,17 @@ class VOCDetectionDataModule(LightningDataModule):
         self,
         data_dir: str,
         year: str = "2012",
-        num_workers: int = 16,
+        num_workers: int = 0,
         normalize: bool = False,
-        shuffle: bool = False,
-        pin_memory: bool = False,
+        shuffle: bool = True,
+        pin_memory: bool = True,
         drop_last: bool = False,
         *args: Any,
         **kwargs: Any,
     ) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
-                'You want to use VOC dataset loaded from `torchvision` which is not installed yet.'
+                "You want to use VOC dataset loaded from `torchvision` which is not installed yet."
             )
 
         super().__init__(*args, **kwargs)
@@ -146,17 +141,14 @@ class VOCDetectionDataModule(LightningDataModule):
         return 21
 
     def prepare_data(self) -> None:
-        """
-        Saves VOCDetection files to data_dir
-        """
+        """Saves VOCDetection files to data_dir."""
         VOCDetection(self.data_dir, year=self.year, image_set="train", download=True)
         VOCDetection(self.data_dir, year=self.year, image_set="val", download=True)
 
     def train_dataloader(
         self, batch_size: int = 1, image_transforms: Union[List[Callable], Callable] = None
     ) -> DataLoader:
-        """
-        VOCDetection train set uses the `train` subset
+        """VOCDetection train set uses the `train` subset.
 
         Args:
             batch_size: size of batch
@@ -178,8 +170,7 @@ class VOCDetectionDataModule(LightningDataModule):
         return loader
 
     def val_dataloader(self, batch_size: int = 1, image_transforms: Optional[List[Callable]] = None) -> DataLoader:
-        """
-        VOCDetection val set uses the `val` subset
+        """VOCDetection val set uses the `val` subset.
 
         Args:
             batch_size: size of batch
@@ -202,10 +193,12 @@ class VOCDetectionDataModule(LightningDataModule):
 
     def _default_transforms(self) -> Callable:
         if self.normalize:
-            voc_transforms = transform_lib.Compose([
-                transform_lib.ToTensor(),
-                transform_lib.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-            ])
+            voc_transforms = transform_lib.Compose(
+                [
+                    transform_lib.ToTensor(),
+                    transform_lib.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                ]
+            )
         else:
             voc_transforms = transform_lib.Compose([transform_lib.ToTensor()])
         return voc_transforms

@@ -7,8 +7,7 @@ from torch.nn import Module
 
 
 class BYOLMAWeightUpdate(Callback):
-    """
-    Weight update rule from BYOL.
+    """Weight update rule from BYOL.
 
     Your model should have:
 
@@ -67,6 +66,6 @@ class BYOLMAWeightUpdate(Callback):
         # apply MA weight update
         for (name, online_p), (_, target_p) in zip(
             online_net.named_parameters(),  # type: ignore[union-attr]
-            target_net.named_parameters()  # type: ignore[union-attr]
+            target_net.named_parameters(),  # type: ignore[union-attr]
         ):
             target_p.data = self.current_tau * target_p.data + (1 - self.current_tau) * online_p.data

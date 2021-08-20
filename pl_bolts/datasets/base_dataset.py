@@ -16,7 +16,7 @@ class LightDataset(ABC, Dataset):
     normalize: tuple
     dir_path: str
     cache_folder_name: str
-    DATASET_NAME = 'light'
+    DATASET_NAME = "light"
 
     def __len__(self) -> int:
         return len(self.data)
@@ -37,7 +37,7 @@ class LightDataset(ABC, Dataset):
         indexes = []
         for idx, target in enumerate(full_targets):
             label = target.item()
-            if classes.get(label, float('inf')) >= num_samples:
+            if classes.get(label, float("inf")) >= num_samples:
                 continue
             indexes.append(idx)
             classes[label] += 1
@@ -49,9 +49,9 @@ class LightDataset(ABC, Dataset):
 
     def _download_from_url(self, base_url: str, data_folder: str, file_name: str):
         url = os.path.join(base_url, file_name)
-        logging.info(f'Downloading {url}')
+        logging.info(f"Downloading {url}")
         fpath = os.path.join(data_folder, file_name)
         try:
             urllib.request.urlretrieve(url, fpath)
         except HTTPError as err:
-            raise RuntimeError(f'Failed download from {url}') from err
+            raise RuntimeError(f"Failed download from {url}") from err

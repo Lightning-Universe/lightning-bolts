@@ -4,7 +4,7 @@ import pytest
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
-from torch import nn, Tensor
+from torch import Tensor, nn
 
 from pl_bolts.callbacks import BatchGradientVerificationCallback
 from pl_bolts.callbacks.verification.batch_gradient import default_input_mapping, default_output_mapping, selective_eval
@@ -13,9 +13,11 @@ from tests import _MARK_REQUIRE_GPU
 
 
 class TemplateModel(nn.Module):
-
     def __init__(self, mix_data=False):
-        """ Base model for testing. The setting ``mix_data=True`` simulates a wrong implementation. """
+        """Base model for testing.
+
+        The setting ``mix_data=True`` simulates a wrong implementation.
+        """
         super().__init__()
         self.mix_data = mix_data
         self.linear = nn.Linear(10, 5)
@@ -35,7 +37,7 @@ class TemplateModel(nn.Module):
 
 
 class MultipleInputModel(TemplateModel):
-    """ Base model for testing verification when forward accepts multiple arguments. """
+    """Base model for testing verification when forward accepts multiple arguments."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -47,7 +49,7 @@ class MultipleInputModel(TemplateModel):
 
 
 class MultipleOutputModel(TemplateModel):
-    """ Base model for testing verification when forward has multiple outputs. """
+    """Base model for testing verification when forward has multiple outputs."""
 
     def forward(self, x):
         out = super().forward(x)
@@ -55,15 +57,13 @@ class MultipleOutputModel(TemplateModel):
 
 
 class DictInputDictOutputModel(TemplateModel):
-    """ Base model for testing verification when forward has a collection of outputs. """
+    """Base model for testing verification when forward has a collection of outputs."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.input_array = {
             "w": 42,
-            "x": {
-                "a": torch.rand(3, 5, 2)
-            },
+            "x": {"a": torch.rand(3, 5, 2)},
             "y": torch.rand(3, 1, 5, 2),
             "z": torch.tensor(2),
         }
@@ -77,7 +77,7 @@ class DictInputDictOutputModel(TemplateModel):
 
 
 class LitModel(LightningModule):
-    """ Base model for testing verification with LightningModules. """
+    """Base model for testing verification with LightningModules."""
 
     def __init__(self, *args, **kwargs):
         super().__init__()
@@ -95,11 +95,10 @@ class LitModel(LightningModule):
 @pytest.mark.parametrize("mix_data", [True, False])
 @pytest.mark.parametrize(
     "device",
-    [torch.device("cpu"),
-     pytest.param(torch.device("cuda", 0), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
+    [torch.device("cpu"), pytest.param(torch.device("cuda", 0), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
 )
 def test_batch_gradient_verification(model_class, mix_data, device):
-    """ Test detection of batch gradient mixing with different PyTorch models. """
+    """Test detection of batch gradient mixing with different PyTorch models."""
     model = model_class(mix_data).to(device)
     is_valid = not mix_data
     verification = BatchGradientVerification(model)
@@ -110,11 +109,10 @@ def test_batch_gradient_verification(model_class, mix_data, device):
 @pytest.mark.parametrize("mix_data", [True, False])
 @pytest.mark.parametrize(
     "device",
-    [torch.device("cpu"),
-     pytest.param(torch.device("cuda", 0), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
+    [torch.device("cpu"), pytest.param(torch.device("cuda", 0), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
 )
 def test_batch_gradient_verification_pl_module(mix_data, device):
-    """ Test detection of batch gradient mixing with a LightningModule. """
+    """Test detection of batch gradient mixing with a LightningModule."""
     model = LitModel(mix_data).to(device)
     is_valid = not mix_data
     verification = BatchGradientVerification(model)
@@ -127,7 +125,7 @@ def test_batch_gradient_verification_pl_module(mix_data, device):
     [0, pytest.param(1, marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
 )
 def test_batch_gradient_verification_callback(gpus):
-    """ Test detection of batch gradient mixing with the callback implementation. """
+    """Test detection of batch gradient mixing with the callback implementation."""
     trainer = Trainer(gpus=gpus)
     model = LitModel(mix_data=True)
 
@@ -143,7 +141,7 @@ def test_batch_gradient_verification_callback(gpus):
 
 
 def test_batch_verification_raises_on_batch_size_1():
-    """ Test that batch gradient verification only works with batch size greater than one. """
+    """Test that batch gradient verification only works with batch size greater than one."""
     model = TemplateModel()
     verification = BatchGradientVerification(model)
     small_batch = model.input_array[0:1]
@@ -152,7 +150,8 @@ def test_batch_verification_raises_on_batch_size_1():
 
 
 def test_batch_verification_calls_custom_input_output_mappings():
-    """ Test that batch gradient verification can support different input and outputs with user-provided mappings. """
+    """Test that batch gradient verification can support different input and outputs with user-provided
+    mappings."""
     model = MultipleInputModel()
 
     def input_mapping(inputs):
@@ -176,7 +175,7 @@ def test_batch_verification_calls_custom_input_output_mappings():
 
 
 def test_default_input_mapping():
-    """ Test the data types and nesting the default input mapping can handle. """
+    """Test the data types and nesting the default input mapping can handle."""
     b = 3
     tensor0 = torch.rand(b, 2, 5)
     tensor1 = torch.rand(b, 9)
@@ -205,7 +204,7 @@ def test_default_input_mapping():
 
 
 def test_default_output_mapping():
-    """ Test the data types and nesting the default output mapping can handle. """
+    """Test the data types and nesting the default output mapping can handle."""
     b = 3
     tensor0 = torch.rand(b, 2, 5)
     tensor1 = torch.rand(b, 9)
@@ -227,9 +226,7 @@ def test_default_output_mapping():
     # dict + nesting
     data = {
         "one": tensor1,
-        "two": {
-            "three": tensor3.double()
-        },  # will convert to float
+        "two": {"three": tensor3.double()},  # will convert to float
         "four": scalar,  # ignored
         "five": [tensor0, tensor0],
     }
@@ -247,7 +244,6 @@ def test_default_output_mapping():
 
 
 class BatchNormModel(nn.Module):
-
     def __init__(self):
         super().__init__()
         self.batch_norm0 = nn.BatchNorm1d(2)
@@ -256,7 +252,7 @@ class BatchNormModel(nn.Module):
 
 
 def test_selective_eval():
-    """ Test that the selective_eval context manager only applies to selected layer types. """
+    """Test that the selective_eval context manager only applies to selected layer types."""
     model = BatchNormModel()
     model.train()
     with selective_eval(model, [nn.BatchNorm1d]):
@@ -270,7 +266,7 @@ def test_selective_eval():
 
 
 def test_selective_eval_invariant():
-    """ Test that the selective_eval context manager does not undo layers that were already in eval mode. """
+    """Test that the selective_eval context manager does not undo layers that were already in eval mode."""
     model = BatchNormModel()
     model.train()
     model.batch_norm1.eval()

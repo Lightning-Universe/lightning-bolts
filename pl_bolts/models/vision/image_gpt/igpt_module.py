@@ -9,7 +9,7 @@ from pl_bolts.models.vision.image_gpt.gpt2 import GPT2
 
 
 def _shape_input(x):
-    """shape batch of images for input into GPT2 model"""
+    """shape batch of images for input into GPT2 model."""
     x = x.view(x.shape[0], -1)  # flatten images into sequences
     x = x.transpose(0, 1).contiguous()  # to shape [seq len, batch]
     return x
@@ -262,5 +262,5 @@ def cli_main():
     trainer.fit(model, datamodule=datamodule)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

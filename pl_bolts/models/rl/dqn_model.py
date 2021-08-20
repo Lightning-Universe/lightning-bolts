@@ -1,16 +1,14 @@
-"""
-Deep Q Network
-"""
+"""Deep Q Network."""
 import argparse
 from collections import OrderedDict
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
-from pytorch_lightning import LightningModule, seed_everything, Trainer
+from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
-from torch import optim as optim
 from torch import Tensor
+from torch import optim as optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
@@ -26,13 +24,12 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _GYM_AVAILABLE:
     from gym import Env
 else:  # pragma: no cover
-    warn_missing_pkg('gym')
+    warn_missing_pkg("gym")
     Env = object
 
 
 class DQN(LightningModule):
-    """
-    Basic DQN Model
+    """Basic DQN Model.
 
     PyTorch Lightning implementation of `DQN <https://arxiv.org/abs/1312.5602>`_
     Paper authors: Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves,
@@ -148,13 +145,12 @@ class DQN(LightningModule):
         for _ in range(avg_reward_len):
             self.total_rewards.append(torch.tensor(min_episode_reward, device=self.device))
 
-        self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+        self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len :]))
 
         self.state = self.env.reset()
 
     def run_n_episodes(self, env, n_epsiodes: int = 1, epsilon: float = 1.0) -> List[int]:
-        """
-        Carries out N episodes of the environment with the current agent
+        """Carries out N episodes of the environment with the current agent.
 
         Args:
             env: environment to use, either train environment or test environment
@@ -180,7 +176,7 @@ class DQN(LightningModule):
         return total_rewards
 
     def populate(self, warm_start: int) -> None:
-        """Populates the buffer with initial experience"""
+        """Populates the buffer with initial experience."""
         if warm_start > 0:
             self.state = self.env.reset()
 
@@ -196,13 +192,12 @@ class DQN(LightningModule):
                     self.state = self.env.reset()
 
     def build_networks(self) -> None:
-        """Initializes the DQN train and target networks"""
+        """Initializes the DQN train and target networks."""
         self.net = CNN(self.obs_shape, self.n_actions)
         self.target_net = CNN(self.obs_shape, self.n_actions)
 
     def forward(self, x: Tensor) -> Tensor:
-        """
-        Passes in a state x through the network and gets the q_values of each action as an output
+        """Passes in a state x through the network and gets the q_values of each action as an output.
 
         Args:
             x: environment state
@@ -213,9 +208,10 @@ class DQN(LightningModule):
         output = self.net(x)
         return output
 
-    def train_batch(self, ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
-        """
-        Contains the logic for generating a new batch of data to be passed to the DataLoader
+    def train_batch(
+        self,
+    ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
+        """Contains the logic for generating a new batch of data to be passed to the DataLoader.
 
         Returns:
             yields a Experience tuple containing the state, action, reward, done and next_state.
@@ -242,7 +238,7 @@ class DQN(LightningModule):
                 self.done_episodes += 1
                 self.total_rewards.append(episode_reward)
                 self.total_episode_steps.append(episode_steps)
-                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len:]))
+                self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len :]))
                 self.state = self.env.reset()
                 episode_steps = 0
                 episode_reward = 0
@@ -257,9 +253,8 @@ class DQN(LightningModule):
                 break
 
     def training_step(self, batch: Tuple[Tensor, Tensor], _) -> OrderedDict:
-        """
-        Carries out a single step through the environment to update the replay buffer.
-        Then calculates loss based on the minibatch recieved
+        """Carries out a single step through the environment to update the replay buffer. Then calculates loss
+        based on the minibatch recieved.
 
         Args:
             batch: current mini batch of replay data
@@ -279,39 +274,43 @@ class DQN(LightningModule):
         if self.global_step % self.sync_rate == 0:
             self.target_net.load_state_dict(self.net.state_dict())
 
-        self.log_dict({
-            "total_reward": self.total_rewards[-1],
-            "avg_reward": self.avg_rewards,
-            "train_loss": loss,
-            "episodes": self.done_episodes,
-            "episode_steps": self.total_episode_steps[-1]
-        })
+        self.log_dict(
+            {
+                "total_reward": self.total_rewards[-1],
+                "avg_reward": self.avg_rewards,
+                "train_loss": loss,
+                "episodes": self.done_episodes,
+                "episode_steps": self.total_episode_steps[-1],
+            }
+        )
 
-        return OrderedDict({
-            "loss": loss,
-            "avg_reward": self.avg_rewards,
-        })
+        return OrderedDict(
+            {
+                "loss": loss,
+                "avg_reward": self.avg_rewards,
+            }
+        )
 
     def test_step(self, *args, **kwargs) -> Dict[str, Tensor]:
-        """Evaluate the agent for 10 episodes"""
+        """Evaluate the agent for 10 episodes."""
         test_reward = self.run_n_episodes(self.test_env, 1, 0)
         avg_reward = sum(test_reward) / len(test_reward)
         return {"test_reward": avg_reward}
 
     def test_epoch_end(self, outputs) -> Dict[str, Tensor]:
-        """Log the avg of the test results"""
+        """Log the avg of the test results."""
         rewards = [x["test_reward"] for x in outputs]
         avg_reward = sum(rewards) / len(rewards)
         self.log("avg_test_reward", avg_reward)
         return {"avg_test_reward": avg_reward}
 
     def configure_optimizers(self) -> List[Optimizer]:
-        """ Initialize Adam optimizer"""
+        """Initialize Adam optimizer."""
         optimizer = optim.Adam(self.net.parameters(), lr=self.lr)
         return [optimizer]
 
     def _dataloader(self) -> DataLoader:
-        """Initialize the Replay Buffer dataset used for retrieving experiences"""
+        """Initialize the Replay Buffer dataset used for retrieving experiences."""
         self.buffer = MultiStepBuffer(self.replay_size, self.n_steps)
         self.populate(self.warm_start_size)
 
@@ -319,17 +318,16 @@ class DQN(LightningModule):
         return DataLoader(dataset=self.dataset, batch_size=self.batch_size)
 
     def train_dataloader(self) -> DataLoader:
-        """Get train loader"""
+        """Get train loader."""
         return self._dataloader()
 
     def test_dataloader(self) -> DataLoader:
-        """Get test loader"""
+        """Get test loader."""
         return self._dataloader()
 
     @staticmethod
     def make_environment(env_name: str, seed: Optional[int] = None) -> Env:
-        """
-        Initialise gym  environment
+        """Initialise gym  environment.
 
         Args:
             env_name: environment name or tag
@@ -346,9 +344,10 @@ class DQN(LightningModule):
         return env
 
     @staticmethod
-    def add_model_specific_args(arg_parser: argparse.ArgumentParser, ) -> argparse.ArgumentParser:
-        """
-        Adds arguments for DQN model
+    def add_model_specific_args(
+        arg_parser: argparse.ArgumentParser,
+    ) -> argparse.ArgumentParser:
+        """Adds arguments for DQN model.
 
         Note:
             These params are fine tuned for Pong env.
@@ -433,5 +432,5 @@ def cli_main():
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

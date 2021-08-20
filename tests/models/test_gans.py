@@ -1,5 +1,5 @@
 import pytest
-from pytorch_lightning import seed_everything, Trainer
+from pytorch_lightning import Trainer, seed_everything
 from torch.utils.data.dataloader import DataLoader
 from torchvision import transforms as transform_lib
 
@@ -9,10 +9,11 @@ from pl_bolts.models.gans import DCGAN, GAN, SRGAN, SRResNet
 
 
 @pytest.mark.parametrize(
-    "dm_cls", [
+    "dm_cls",
+    [
         pytest.param(MNISTDataModule, id="mnist"),
         pytest.param(CIFAR10DataModule, id="cifar10"),
-    ]
+    ],
 )
 def test_gan(tmpdir, datadir, dm_cls):
     seed_everything()
@@ -25,8 +26,7 @@ def test_gan(tmpdir, datadir, dm_cls):
 
 
 @pytest.mark.parametrize(
-    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"),
-               pytest.param(CIFAR10DataModule, id="cifar10")]
+    "dm_cls", [pytest.param(MNISTDataModule, id="mnist"), pytest.param(CIFAR10DataModule, id="cifar10")]
 )
 def test_dcgan(tmpdir, datadir, dm_cls):
     seed_everything()

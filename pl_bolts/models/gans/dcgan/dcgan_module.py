@@ -2,8 +2,8 @@ from argparse import ArgumentParser
 from typing import Any
 
 import torch
-from pytorch_lightning import LightningModule, seed_everything, Trainer
-from torch import nn, Tensor
+from pytorch_lightning import LightningModule, Trainer, seed_everything
+from torch import Tensor, nn
 from torch.utils.data import DataLoader
 
 from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
@@ -19,8 +19,7 @@ else:  # pragma: no cover
 
 
 class DCGAN(LightningModule):
-    """
-    DCGAN implementation.
+    """DCGAN implementation.
 
     Example::
 
@@ -92,8 +91,7 @@ class DCGAN(LightningModule):
         return [opt_disc, opt_gen], []
 
     def forward(self, noise: Tensor) -> Tensor:
-        """
-        Generates an image given input noise
+        """Generates an image given input noise.
 
         Example::
 
@@ -186,20 +184,24 @@ def cli_main(args=None):
     script_args, _ = parser.parse_known_args(args)
 
     if script_args.dataset == "lsun":
-        transforms = transform_lib.Compose([
-            transform_lib.Resize(script_args.image_size),
-            transform_lib.CenterCrop(script_args.image_size),
-            transform_lib.ToTensor(),
-            transform_lib.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-        ])
+        transforms = transform_lib.Compose(
+            [
+                transform_lib.Resize(script_args.image_size),
+                transform_lib.CenterCrop(script_args.image_size),
+                transform_lib.ToTensor(),
+                transform_lib.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
         dataset = LSUN(root=script_args.data_dir, classes=["bedroom_train"], transform=transforms)
         image_channels = 3
     elif script_args.dataset == "mnist":
-        transforms = transform_lib.Compose([
-            transform_lib.Resize(script_args.image_size),
-            transform_lib.ToTensor(),
-            transform_lib.Normalize((0.5, ), (0.5, )),
-        ])
+        transforms = transform_lib.Compose(
+            [
+                transform_lib.Resize(script_args.image_size),
+                transform_lib.ToTensor(),
+                transform_lib.Normalize((0.5,), (0.5,)),
+            ]
+        )
         dataset = MNIST(root=script_args.data_dir, download=True, transform=transforms)
         image_channels = 1
 

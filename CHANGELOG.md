@@ -4,15 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## [unReleased] - 2021-MM-DD
 
 ### Added
 
 - Added `SRGAN` model ([#466](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/466))
 
+- Added `EMNISTDataModule`, `BinaryEMNISTDataModule`, and `BinaryEMNIST` dataset ([#676](https://github.com/PyTorchLightning/lightning-bolts/pull/676))
+
+- Added Advantage Actor-Critic (A2C) Model [#598](https://github.com/PyTorchLightning/lightning-bolts/pull/598))
+
 
 ### Changed
+
+- Changed the default values `pin_memory=False`, `shuffle=False` and `num_workers=16` to `pin_memory=True`, `shuffle=True` and `num_workers=0` of datamodules ([#701](https://github.com/PyTorchLightning/lightning-bolts/pull/701))
 
 
 ### Deprecated
@@ -27,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 - Removed momentum updating from val step and add separate val queue ([#631](https://github.com/PyTorchLightning/lightning-bolts/pull/631))
+
+- Fixed moving the queue to GPU when resuming checkpoint for SwAV model ([#684](https://github.com/PyTorchLightning/lightning-bolts/pull/684))
 
 
 - Fixed FP16 support with vision GPT model ([#694](https://github.com/PyTorchLightning/lightning-bolts/pull/694))
