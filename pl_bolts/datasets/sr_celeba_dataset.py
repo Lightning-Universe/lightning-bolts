@@ -26,10 +26,10 @@ class SRCelebA(SRDatasetMixin, CelebA):
     """
 
     def __init__(self, scale_factor: int, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self.hr_image_size = 128
-        self.lr_image_size = self.hr_image_size // scale_factor
+        hr_image_size = 128
+        lr_image_size = hr_image_size // scale_factor
         self.image_channels = 3
+        super().__init__(hr_image_size, lr_image_size, self.image_channels, *args, **kwargs)
 
     def _get_image(self, index: int):
         return Image.open(os.path.join(self.root, self.base_folder, "img_align_celeba", self.filename[index]))

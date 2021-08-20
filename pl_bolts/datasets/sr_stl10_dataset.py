@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np
 
 from pl_bolts.datasets.sr_dataset_mixin import SRDatasetMixin
@@ -24,11 +26,11 @@ class SRSTL10(SRDatasetMixin, STL10):
 
     """
 
-    def __init__(self, scale_factor: int, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.hr_image_size = 96
-        self.lr_image_size = self.hr_image_size // scale_factor
+    def __init__(self, scale_factor: int, *args: Any, **kwargs: Any) -> None:
+        hr_image_size = 96
+        lr_image_size = hr_image_size // scale_factor
         self.image_channels = 3
+        super().__init__(hr_image_size, lr_image_size, self.image_channels, *args, **kwargs)
 
     def _get_image(self, index: int):
         return PIL.Image.fromarray(np.transpose(self.data[index], (1, 2, 0)))
