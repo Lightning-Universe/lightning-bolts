@@ -11,14 +11,15 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
-    from torchvision.models.detection.faster_rcnn import FastRCNNPredictor, fasterrcnn_resnet50_fpn
+    from torchvision.models.detection.faster_rcnn import fasterrcnn_resnet50_fpn, FastRCNNPredictor
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
 class FasterRCNN(LightningModule):
-    """PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with Region Proposal
-    Networks <https://arxiv.org/abs/1506.01497>`_.
+    """
+    PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with
+    Region Proposal Networks <https://arxiv.org/abs/1506.01497>`_.
 
     Paper authors: Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun
 
