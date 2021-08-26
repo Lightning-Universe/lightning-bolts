@@ -3,10 +3,7 @@ from torch import Tensor
 
 
 def _evaluate_iou(preds: torch.Tensor, target: torch.Tensor):
-    """
-    Evaluate intersection over union (IOU) for target from dataset and output prediction
-    from model
-    """
+    """Evaluate intersection over union (IOU) for target from dataset and output prediction from model."""
 
     if preds["boxes"].shape[0] == 0:
         # no box detected, 0 IOU
@@ -15,10 +12,7 @@ def _evaluate_iou(preds: torch.Tensor, target: torch.Tensor):
 
 
 def _evaluate_iou(preds: torch.Tensor, target: torch.Tensor):
-    """
-    Evaluate intersection over union (IOU) for target from dataset and output prediction
-    from model
-    """
+    """Evaluate intersection over union (IOU) for target from dataset and output prediction from model."""
 
     if preds["boxes"].shape[0] == 0:
         # no box detected, 0 IOU
@@ -27,8 +21,7 @@ def _evaluate_iou(preds: torch.Tensor, target: torch.Tensor):
 
 
 def iou(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-    """
-    Calculates the intersection over union.
+    """Calculates the intersection over union.
 
     Args:
         preds: an Nx4 batch of prediction bounding boxes with representation ``[x_min, y_min, x_max, y_max]``

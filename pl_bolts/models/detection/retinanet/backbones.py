@@ -13,11 +13,7 @@ else:  # pragma: no cover
 
 
 def create_retinanet_backbone(
-    backbone: str,
-    fpn: bool = True,
-    pretrained: Optional[str] = None,
-    trainable_backbone_layers: int = 3,
-    **kwargs: Any
+    backbone: str, fpn: bool = True, pretrained: Optional[str] = None, trainable_backbone_layers: int = 3, **kwargs: Any
 ) -> nn.Module:
     """
     Args:
