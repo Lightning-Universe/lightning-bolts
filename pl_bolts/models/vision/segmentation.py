@@ -1,24 +1,22 @@
 from argparse import ArgumentParser
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch.nn import functional as F
 
 from pl_bolts.models.vision.unet import UNet
 
 
-class SemSegment(pl.LightningModule):
-
+class SemSegment(LightningModule):
     def __init__(
         self,
         lr: float = 0.01,
         num_classes: int = 19,
         num_layers: int = 5,
         features_start: int = 64,
-        bilinear: bool = False
+        bilinear: bool = False,
     ):
-        """
-        Basic model for semantic segmentation. Uses UNet architecture by default.
+        """Basic model for semantic segmentation. Uses UNet architecture by default.
 
         The default parameters in this model are for the KITTI dataset. Note, if you'd like to use this model as is,
         you will first need to download the KITTI dataset yourself. You can download the dataset `here.
@@ -46,7 +44,7 @@ class SemSegment(pl.LightningModule):
             num_classes=num_classes,
             num_layers=self.num_layers,
             features_start=self.features_start,
-            bilinear=self.bilinear
+            bilinear=self.bilinear,
         )
 
     def forward(self, x):
@@ -58,8 +56,8 @@ class SemSegment(pl.LightningModule):
         mask = mask.long()
         out = self(img)
         loss_val = F.cross_entropy(out, mask, ignore_index=250)
-        log_dict = {'train_loss': loss_val}
-        return {'loss': loss_val, 'log': log_dict, 'progress_bar': log_dict}
+        log_dict = {"train_loss": loss_val}
+        return {"loss": loss_val, "log": log_dict, "progress_bar": log_dict}
 
     def validation_step(self, batch, batch_idx):
         img, mask = batch
@@ -67,12 +65,12 @@ class SemSegment(pl.LightningModule):
         mask = mask.long()
         out = self(img)
         loss_val = F.cross_entropy(out, mask, ignore_index=250)
-        return {'val_loss': loss_val}
+        return {"val_loss": loss_val}
 
     def validation_epoch_end(self, outputs):
-        loss_val = torch.stack([x['val_loss'] for x in outputs]).mean()
-        log_dict = {'val_loss': loss_val}
-        return {'log': log_dict, 'val_loss': log_dict['val_loss'], 'progress_bar': log_dict}
+        loss_val = torch.stack([x["val_loss"] for x in outputs]).mean()
+        log_dict = {"val_loss": loss_val}
+        return {"log": log_dict, "val_loss": log_dict["val_loss"], "progress_bar": log_dict}
 
     def configure_optimizers(self):
         opt = torch.optim.Adam(self.net.parameters(), lr=self.lr)
@@ -86,10 +84,7 @@ class SemSegment(pl.LightningModule):
         parser.add_argument("--num_layers", type=int, default=5, help="number of layers on u-net")
         parser.add_argument("--features_start", type=float, default=64, help="number of features in first layer")
         parser.add_argument(
-            "--bilinear",
-            action='store_true',
-            default=False,
-            help="whether to use bilinear interpolation or transposed"
+            "--bilinear", action="store_true", default=False, help="whether to use bilinear interpolation or transposed"
         )
 
         return parser
@@ -98,11 +93,11 @@ class SemSegment(pl.LightningModule):
 def cli_main():
     from pl_bolts.datamodules import KittiDataModule
 
-    pl.seed_everything(1234)
+    seed_everything(1234)
 
     parser = ArgumentParser()
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
     # model args
     parser = SemSegment.add_model_specific_args(parser)
     # datamodule args
@@ -117,9 +112,9 @@ def cli_main():
     model = SemSegment(**args.__dict__)
 
     # train
-    trainer = pl.Trainer().from_argparse_args(args)
+    trainer = Trainer().from_argparse_args(args)
     trainer.fit(model, datamodule=dm)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

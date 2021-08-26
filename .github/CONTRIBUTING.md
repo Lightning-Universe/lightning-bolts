@@ -31,7 +31,7 @@ As a researcher, you can't have any part of your code going wrong. So, make thor
 
 PyTorch Lightning Bolts is highly interoperable with PyTorch Lightning and PyTorch.
 
----
+______________________________________________________________________
 
 ## Contribution Types
 
@@ -48,26 +48,28 @@ A lot of good work has already been done in project mechanics (requirements/base
    - Add details on how to reproduce the issue - a minimal test case is always best, colab is also great.
      Note, that the sample code shall be minimal and if needed with publicly available data.
 
-2. Try to fix it or recommend a solution. We highly recommend to use test-driven approach:
+1. Try to fix it or recommend a solution. We highly recommend to use test-driven approach:
 
    - Convert your minimal code example to a unit/integration test with assert on expected results.
    - Start by debugging the issue... You can run just this particular test in your IDE and draft a fix.
    - Verify that your test case fails on the master branch and only passes with the fix applied.
 
-3. Submit a PR!
+1. Submit a PR!
 
-_**Note**, even if you do not find the solution, sending a PR with a test covering the issue is a valid contribution and we can help you or finish it with you :]_
+_**Note**, even if you do not find the solution, sending a PR with a test covering the issue is a valid contribution and we can help you or finish it with you :\]_
 
 ### New Features:
 
 1. Submit a GitHub issue - describe what is the motivation of such feature (adding the use case or an example is helpful).
-2. Let's discuss to determine the feature scope.
-3. Submit a PR! We recommend test driven approach to adding new features as well:
+
+1. Let's discuss to determine the feature scope.
+
+1. Submit a PR! We recommend test driven approach to adding new features as well:
 
    - Write a test for the functionality you want to add.
    - Write the functional code until the test passes.
 
-4. Add/update the relevant tests!
+1. Add/update the relevant tests!
 
 - [This PR](https://github.com/PyTorchLightning/pytorch-lightning/pull/2671) is a good example for adding a new metric, and [this one for a new logger](https://github.com/PyTorchLightning/pytorch-lightning/pull/2721).
 
@@ -76,10 +78,10 @@ _**Note**, even if you do not find the solution, sending a PR with a test coveri
 PyTorch Lightning Bolts makes several research models for ready usage. Following are general guidelines for adding new models.
 
 1. Models which are standard baselines
-2. Whose results are reproduced properly either by us or by authors.
-3. Top models which are not SOTA but highly cited for production usage / for other uses. (E.g. Mobile BERT, MobileNets, FBNets).
-4. Do not reinvent the wheel, natively support torchvision, torchtext, torchaudio models.
-5. Use open source licensed models.
+1. Whose results are reproduced properly either by us or by authors.
+1. Top models which are not SOTA but highly cited for production usage / for other uses. (E.g. Mobile BERT, MobileNets, FBNets).
+1. Do not reinvent the wheel, natively support torchvision, torchtext, torchaudio models.
+1. Use open source licensed models.
 
 Please raise an issue before adding a new model. Please let us know why the particular model is important for bolts. There are tons of models that keep coming. It is very difficult to support every model.
 
@@ -91,7 +93,7 @@ Tests are written using [pytest](https://docs.pytest.org/en/stable/). Tests in P
 
 Along with these we have tests for losses, callbacks and transforms as well.
 
-Have a look at sample tests [here](https://github.com/PyTorchLightning/pytorch-lightning-bolts/tree/master/tests).
+Have a look at sample tests [here](https://github.com/PyTorchLightning/lightning-bolts/tree/master/tests).
 
 After you have added the respective tests, you can run the tests locally with make script:
 
@@ -99,14 +101,13 @@ After you have added the respective tests, you can run the tests locally with ma
 make test
 ```
 
-Want to add a new test case and not sure how? [Talk to us!](https://join.slack.com/t/pytorch-lightning/shared_invite/zt-f6bl2l0l-JYMK3tbAgAmGRrlNr00f1A)
+Want to add a new test case and not sure how? [Talk to us!](https://join.slack.com/t/pytorch-lightning/shared_invite/zt-pw5v393p-qRaDgEk24~EjiZNBpSQFgQ)
 
-**Note before submitting the PR, make sure you have run `make isort`.**
----
+## **Note before submitting the PR, make sure you have run `pre-commit run`.**
 
 ## Guidelines
 
-For this section, we refer to read the [parent PL guidelines](https://pytorch-lightning.readthedocs.io/en/latest/CONTRIBUTING.html)
+For this section, we refer to read the [parent PL guidelines](https://pytorch-lightning.readthedocs.io/en/latest/generated/CONTRIBUTING.html)
 
 **Reminder**
 
@@ -118,12 +119,12 @@ In case you adding new dependencies, make sure that they are compatible with the
 
 1. **How can I help/contribute?**
 
-   All help is extremely welcome - reporting bugs, fixing documentation, adding test cases, solving issues and preparing bug fixes. To solve some issues you can start with label [good first issue](https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) or chose something close to your domain with label [help wanted](https://github.com/PyTorchLightning/pytorch-lightning-bolts/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22). Before you start to implement anything check that the issue description that it is clear and self-assign the task to you (if it is not possible, just comment that you take it and we assign it to you...).
+   All help is extremely welcome - reporting bugs, fixing documentation, adding test cases, solving issues and preparing bug fixes. To solve some issues you can start with label [good first issue](https://github.com/PyTorchLightning/lightning-bolts/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) or chose something close to your domain with label [help wanted](https://github.com/PyTorchLightning/lightning-bolts/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22). Before you start to implement anything check that the issue description that it is clear and self-assign the task to you (if it is not possible, just comment that you take it and we assign it to you...).
 
-2. **Is there a recommendation for branch names?**
+1. **Is there a recommendation for branch names?**
 
    We do not rely on the name convention so far you are working with your own fork. Anyway it would be nice to follow this convention `<type>/<issue-id>_<short-name>` where the types are: `bugfix`, `feature`, `docs`, `tests`, ...
 
-3. **I have a model in other framework than PyTorch, how do I add it here?**
+1. **I have a model in other framework than PyTorch, how do I add it here?**
 
    Since PyTorch Lightning is written on top of PyTorch. We need models in PyTorch only. Also, we would need same or equivalent results with PyTorch Lightning after converting the models from other frameworks.

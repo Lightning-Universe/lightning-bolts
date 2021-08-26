@@ -6,8 +6,7 @@ from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.loggers import LightningLoggerBase, TensorBoardLogger, WandbLogger
 from pytorch_lightning.utilities import rank_zero_warn
 from pytorch_lightning.utilities.apply_func import apply_to_collection
-from torch import nn as nn
-from torch import Tensor
+from torch import Tensor, nn
 from torch.nn import Module
 from torch.utils.hooks import RemovableHandle
 
@@ -29,10 +28,9 @@ class DataMonitorBase(Callback):
     )
 
     def __init__(self, log_every_n_steps: int = None):
-        """
-        Base class for monitoring data histograms in a LightningModule.
-        This requires a logger configured in the Trainer, otherwise no data is logged.
-        The specific class that inherits from this base defines what data gets collected.
+        """Base class for monitoring data histograms in a LightningModule. This requires a logger configured in the
+        Trainer, otherwise no data is logged. The specific class that inherits from this base defines what data
+        gets collected.
 
         Args:
             log_every_n_steps: The interval at which histograms should be logged. This defaults to the
@@ -55,8 +53,7 @@ class DataMonitorBase(Callback):
         self._train_batch_idx = batch_idx
 
     def log_histograms(self, batch: Any, group: str = "") -> None:
-        """
-        Logs the histograms at the interval defined by `row_log_interval`, given a logger is available.
+        """Logs the histograms at the interval defined by `row_log_interval`, given a logger is available.
 
         Args:
             batch: torch or numpy arrays, or a collection of it (tuple, list, dict, ...), can be nested.
@@ -76,9 +73,8 @@ class DataMonitorBase(Callback):
             self.log_histogram(tensor, name)
 
     def log_histogram(self, tensor: Tensor, name: str) -> None:
-        """
-        Override this method to customize the logging of histograms.
-        Detaches the tensor from the graph and moves it to the CPU for logging.
+        """Override this method to customize the logging of histograms. Detaches the tensor from the graph and
+        moves it to the CPU for logging.
 
         Args:
             tensor: The tensor for which to log a histogram
@@ -182,8 +178,8 @@ class ModuleDataMonitor(DataMonitorBase):
         return names
 
     def _register_hook(self, module_name: str, module: nn.Module) -> RemovableHandle:
-        input_group_name = (f"{self.GROUP_NAME_INPUT}/{module_name}" if module_name else self.GROUP_NAME_INPUT)
-        output_group_name = (f"{self.GROUP_NAME_OUTPUT}/{module_name}" if module_name else self.GROUP_NAME_OUTPUT)
+        input_group_name = f"{self.GROUP_NAME_INPUT}/{module_name}" if module_name else self.GROUP_NAME_INPUT
+        output_group_name = f"{self.GROUP_NAME_OUTPUT}/{module_name}" if module_name else self.GROUP_NAME_OUTPUT
 
         def hook(_: Module, inp: Sequence, out: Sequence) -> None:
             inp = inp[0] if len(inp) == 1 else inp
@@ -199,8 +195,7 @@ class TrainingDataMonitor(DataMonitorBase):
     GROUP_NAME = "training_step"
 
     def __init__(self, log_every_n_steps: int = None):
-        """
-        Callback that logs the histogram of values in the batched data passed to `training_step`.
+        """Callback that logs the histogram of values in the batched data passed to `training_step`.
 
         Args:
             log_every_n_steps: The interval at which histograms should be logged. This defaults to the
@@ -228,10 +223,9 @@ class TrainingDataMonitor(DataMonitorBase):
 
 
 def collect_and_name_tensors(data: Any, output: Dict[str, Tensor], parent_name: str = "input") -> None:
-    """
-    Recursively fetches all tensors in a (nested) collection of data (depth-first search) and names them.
-    Data in dictionaries get named by their corresponding keys and otherwise they get indexed by an
-    increasing integer. The shape of the tensor gets appended to the name as well.
+    """Recursively fetches all tensors in a (nested) collection of data (depth-first search) and names them. Data
+    in dictionaries get named by their corresponding keys and otherwise they get indexed by an increasing integer.
+    The shape of the tensor gets appended to the name as well.
 
     Args:
         data: A collection of data (potentially nested).
@@ -260,8 +254,7 @@ def collect_and_name_tensors(data: Any, output: Dict[str, Tensor], parent_name: 
 
 
 def shape2str(tensor: Tensor) -> str:
-    """
-    Returns the shape of a tensor in bracket notation as a string.
+    """Returns the shape of a tensor in bracket notation as a string.
 
     Example:
         >>> shape2str(torch.rand(1, 2, 3))

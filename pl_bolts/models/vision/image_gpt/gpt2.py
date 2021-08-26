@@ -1,12 +1,11 @@
-import pytorch_lightning as pl
 import torch
-from torch import nn as nn
+from pytorch_lightning import LightningModule
+from torch import nn
 
 
 class Block(nn.Module):
-
     def __init__(self, embed_dim, heads):
-        super(Block, self).__init__()
+        super().__init__()
         self.ln_1 = nn.LayerNorm(embed_dim)
         self.ln_2 = nn.LayerNorm(embed_dim)
         self.attn = nn.MultiheadAttention(embed_dim, heads)
@@ -28,9 +27,8 @@ class Block(nn.Module):
         return x
 
 
-class GPT2(pl.LightningModule):
-    """
-    GPT-2 from `language Models are Unsupervised Multitask Learners <https://d4mucfpksywv.cloudfront.net/
+class GPT2(LightningModule):
+    """GPT-2 from `language Models are Unsupervised Multitask Learners <https://d4mucfpksywv.cloudfront.net/
     better-language-models/language-models.pdf>`_
 
     Paper by:  Alec Radford, Jeffrey Wu, Rewon Child, David Luan, Dario Amodei, Ilya Sutskever
@@ -41,7 +39,7 @@ class GPT2(pl.LightningModule):
 
     Example::
 
-        from pl_bolts.models import GPT2
+        from pl_bolts.models.vision import GPT2
 
         seq_len = 17
         batch_size = 32
@@ -60,7 +58,7 @@ class GPT2(pl.LightningModule):
         vocab_size: int,
         num_classes: int,
     ):
-        super(GPT2, self).__init__()
+        super().__init__()
         self.save_hyperparameters()
 
         self._init_sos_token()
@@ -85,16 +83,13 @@ class GPT2(pl.LightningModule):
         self.clf_head = nn.Linear(self.hparams.embed_dim, self.hparams.num_classes)
 
     def forward(self, x, classify=False):
-        """
-        Expect input as shape [sequence len, batch]
-        If classify, return classification logits
-        """
+        """Expect input as shape [sequence len, batch] If classify, return classification logits."""
         length, batch = x.shape
 
         h = self.token_embeddings(x.long())
 
         # prepend sos token
-        sos = torch.ones(1, batch, self.hparams.embed_dim, device=x.device) * self.sos
+        sos = torch.ones(1, batch, self.hparams.embed_dim, device=x.device, dtype=x.dtype) * self.sos
         h = torch.cat([sos, h[:-1, :, :]], axis=0)
 
         # add positional embeddings

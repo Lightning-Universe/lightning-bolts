@@ -1,6 +1,6 @@
-from pl_bolts.models.self_supervised.cpc.cpc_module import CPCV2  # noqa: F401
-from pl_bolts.models.self_supervised.cpc.networks import cpc_resnet50, cpc_resnet101  # noqa: F401
-from pl_bolts.models.self_supervised.cpc.transforms import (  # noqa: F401
+from pl_bolts.models.self_supervised.cpc.cpc_module import CPC_v2
+from pl_bolts.models.self_supervised.cpc.networks import cpc_resnet50, cpc_resnet101
+from pl_bolts.models.self_supervised.cpc.transforms import (
     CPCEvalTransformsCIFAR10,
     CPCEvalTransformsImageNet128,
     CPCEvalTransformsSTL10,
@@ -10,7 +10,7 @@ from pl_bolts.models.self_supervised.cpc.transforms import (  # noqa: F401
 )
 
 __all__ = [
-    "CPCV2",
+    "CPC_v2",
     "cpc_resnet50",
     "cpc_resnet101",
     "CPCEvalTransformsCIFAR10",

@@ -3,6 +3,7 @@ from unittest import TestCase
 
 import gym
 import torch
+from torch import Tensor
 
 from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.gym_wrappers import ToTensor
@@ -11,7 +12,6 @@ from pl_bolts.models.rl.vanilla_policy_gradient_model import VanillaPolicyGradie
 
 
 class TestPolicyGradient(TestCase):
-
     def setUp(self) -> None:
         self.env = ToTensor(gym.make("CartPole-v0"))
         self.obs_shape = self.env.observation_space.shape
@@ -31,7 +31,7 @@ class TestPolicyGradient(TestCase):
         self.model = VanillaPolicyGradient(**vars(self.hparams))
 
     def test_loss(self):
-        """Test the reinforce loss function"""
+        """Test the reinforce loss function."""
 
         batch_states = torch.rand(32, 4)
         batch_actions = torch.rand(32).long()
@@ -39,10 +39,10 @@ class TestPolicyGradient(TestCase):
 
         loss = self.model.loss(batch_states, batch_actions, batch_qvals)
 
-        self.assertIsInstance(loss, torch.Tensor)
+        self.assertIsInstance(loss, Tensor)
 
     def test_train_batch(self):
-        """Tests that a single batch generates correctly"""
+        """Tests that a single batch generates correctly."""
 
         self.model.n_steps = 4
         self.model.batch_size = 1
@@ -52,7 +52,7 @@ class TestPolicyGradient(TestCase):
         self.assertEqual(len(batch), 3)
         self.assertEqual(len(batch[0]), self.model.batch_size)
         self.assertTrue(isinstance(batch, list))
-        self.assertIsInstance(batch[0], torch.Tensor)
+        self.assertIsInstance(batch[0], Tensor)
         self.assertIsInstance(batch[1], list)
-        self.assertIsInstance(batch[1][0], torch.Tensor)
-        self.assertIsInstance(batch[2], torch.Tensor)
+        self.assertIsInstance(batch[1][0], Tensor)
+        self.assertIsInstance(batch[2], Tensor)

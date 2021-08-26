@@ -3,6 +3,7 @@ from typing import Optional, Tuple, Union
 import numpy as np
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
+from torch import Tensor
 from torch.utils.data import DataLoader
 
 from pl_bolts.utils import _SKLEARN_AVAILABLE
@@ -15,8 +16,7 @@ else:  # pragma: no cover
 
 
 class KNNOnlineEvaluator(Callback):  # pragma: no cover
-    """
-    Evaluates self-supervised K nearest neighbors.
+    """Evaluates self-supervised K nearest neighbors.
 
     Example::
 
@@ -28,7 +28,6 @@ class KNNOnlineEvaluator(Callback):  # pragma: no cover
             num_classes=model.num_classes,
             dataset='imagenet'
         )
-
     """
 
     def __init__(
@@ -51,7 +50,7 @@ class KNNOnlineEvaluator(Callback):  # pragma: no cover
         self.num_classes = num_classes
         self.dataset = dataset
 
-    def get_representations(self, pl_module: LightningModule, x: torch.Tensor) -> torch.Tensor:
+    def get_representations(self, pl_module: LightningModule, x: Tensor) -> Tensor:
         with torch.no_grad():
             representations = pl_module(x)
         representations = representations.reshape(representations.size(0), -1)
@@ -83,9 +82,9 @@ class KNNOnlineEvaluator(Callback):  # pragma: no cover
 
         return all_representations.cpu().numpy(), ys.cpu().numpy()  # type: ignore[union-attr]
 
-    def to_device(self, batch: torch.Tensor, device: Union[str, torch.device]) -> Tuple[torch.Tensor, torch.Tensor]:
+    def to_device(self, batch: Tensor, device: Union[str, torch.device]) -> Tuple[Tensor, Tensor]:
         # get the labeled batch
-        if self.dataset == 'stl10':
+        if self.dataset == "stl10":
             labeled_batch = batch[1]
             batch = labeled_batch
 
@@ -117,5 +116,5 @@ class KNNOnlineEvaluator(Callback):  # pragma: no cover
         val_acc = pl_module.knn_evaluator.score(representations, y)  # type: ignore[union-attr,operator]
 
         # log metrics
-        pl_module.log('online_knn_train_acc', train_acc, on_step=False, on_epoch=True, sync_dist=True)
-        pl_module.log('online_knn_val_acc', val_acc, on_step=False, on_epoch=True, sync_dist=True)
+        pl_module.log("online_knn_train_acc", train_acc, on_step=False, on_epoch=True, sync_dist=True)
+        pl_module.log("online_knn_val_acc", val_acc, on_step=False, on_epoch=True, sync_dist=True)

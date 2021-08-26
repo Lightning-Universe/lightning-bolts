@@ -1,11 +1,10 @@
-"""Contains generic arguments used for all models"""
+"""Contains generic arguments used for all models."""
 
 import argparse
 
 
 def add_base_args(parent) -> argparse.ArgumentParser:
-    """
-    Adds arguments for DQN model
+    """Adds arguments for DQN model.
 
     Note:
         These params are fine tuned for Pong env.

@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentParser
 
-import pytorch_lightning as pl
+from pytorch_lightning import Trainer, seed_everything
 
 from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner
 from pl_bolts.models.self_supervised.swav.swav_module import SwAV
@@ -12,31 +12,31 @@ from pl_bolts.transforms.dataset_normalizations import imagenet_normalization, s
 def cli_main():  # pragma: no cover
     from pl_bolts.datamodules import ImagenetDataModule, STL10DataModule
 
-    pl.seed_everything(1234)
+    seed_everything(1234)
 
     parser = ArgumentParser()
-    parser.add_argument('--dataset', type=str, help='stl10, imagenet', default='stl10')
-    parser.add_argument('--ckpt_path', type=str, help='path to ckpt')
-    parser.add_argument('--data_dir', type=str, help='path to dataset', default=os.getcwd())
+    parser.add_argument("--dataset", type=str, help="stl10, imagenet", default="stl10")
+    parser.add_argument("--ckpt_path", type=str, help="path to ckpt")
+    parser.add_argument("--data_dir", type=str, help="path to dataset", default=os.getcwd())
 
     parser.add_argument("--batch_size", default=64, type=int, help="batch size per gpu")
     parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
     parser.add_argument("--gpus", default=4, type=int, help="number of GPUs")
-    parser.add_argument('--num_epochs', default=100, type=int, help="number of epochs")
+    parser.add_argument("--num_epochs", default=100, type=int, help="number of epochs")
 
     # fine-tuner params
-    parser.add_argument('--in_features', type=int, default=2048)
-    parser.add_argument('--dropout', type=float, default=0.)
-    parser.add_argument('--learning_rate', type=float, default=0.3)
-    parser.add_argument('--weight_decay', type=float, default=1e-6)
-    parser.add_argument('--nesterov', type=bool, default=False)
-    parser.add_argument('--scheduler_type', type=str, default='cosine')
-    parser.add_argument('--gamma', type=float, default=0.1)
-    parser.add_argument('--final_lr', type=float, default=0.)
+    parser.add_argument("--in_features", type=int, default=2048)
+    parser.add_argument("--dropout", type=float, default=0.0)
+    parser.add_argument("--learning_rate", type=float, default=0.3)
+    parser.add_argument("--weight_decay", type=float, default=1e-6)
+    parser.add_argument("--nesterov", type=bool, default=False)
+    parser.add_argument("--scheduler_type", type=str, default="cosine")
+    parser.add_argument("--gamma", type=float, default=0.1)
+    parser.add_argument("--final_lr", type=float, default=0.0)
 
     args = parser.parse_args()
 
-    if args.dataset == 'stl10':
+    if args.dataset == "stl10":
         dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         dm.train_dataloader = dm.train_dataloader_labeled
@@ -55,7 +55,7 @@ def cli_main():  # pragma: no cover
 
         args.maxpool1 = False
         args.first_conv = True
-    elif args.dataset == 'imagenet':
+    elif args.dataset == "imagenet":
         dm = ImagenetDataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         dm.train_transforms = SwAVFinetuneTransform(
@@ -97,15 +97,15 @@ def cli_main():  # pragma: no cover
         nesterov=args.nesterov,
         scheduler_type=args.scheduler_type,
         gamma=args.gamma,
-        final_lr=args.final_lr
+        final_lr=args.final_lr,
     )
 
-    trainer = pl.Trainer(
+    trainer = Trainer(
         gpus=args.gpus,
         num_nodes=1,
         precision=16,
         max_epochs=args.num_epochs,
-        distributed_backend='ddp',
+        distributed_backend="ddp",
         sync_batchnorm=True if args.gpus > 1 else False,
     )
 
@@ -113,5 +113,5 @@ def cli_main():  # pragma: no cover
     trainer.test(datamodule=dm)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

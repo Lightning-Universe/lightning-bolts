@@ -2,15 +2,14 @@ from typing import Optional, Sequence, Tuple, Union
 
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
-from pytorch_lightning.metrics.functional import accuracy
-from torch import device, Tensor
+from torch import Tensor, device
 from torch.nn import functional as F
 from torch.optim import Optimizer
+from torchmetrics.functional import accuracy
 
 
 class SSLOnlineEvaluator(Callback):  # pragma: no cover
-    """
-    Attaches a MLP for fine-tuning using the standard self-supervised protocol.
+    """Attaches a MLP for fine-tuning using the standard self-supervised protocol.
 
     Example::
 
@@ -24,7 +23,6 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
             num_classes=model.num_classes,
             dataset='imagenet'
         )
-
     """
 
     def __init__(
@@ -72,7 +70,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
 
     def to_device(self, batch: Sequence, device: Union[str, device]) -> Tuple[Tensor, Tensor]:
         # get the labeled batch
-        if self.dataset == 'stl10':
+        if self.dataset == "stl10":
             labeled_batch = batch[1]
             batch = labeled_batch
 
@@ -102,8 +100,8 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         representations = representations.detach()
 
         # forward pass
-        mlp_preds = pl_module.non_linear_evaluator(representations)  # type: ignore[operator]
-        mlp_loss = F.cross_entropy(mlp_preds, y)
+        mlp_logits = pl_module.non_linear_evaluator(representations)  # type: ignore[operator]
+        mlp_loss = F.cross_entropy(mlp_logits, y)
 
         # update finetune weights
         mlp_loss.backward()
@@ -111,9 +109,9 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         self.optimizer.zero_grad()
 
         # log metrics
-        train_acc = accuracy(mlp_preds, y)
-        pl_module.log('online_train_acc', train_acc, on_step=True, on_epoch=False)
-        pl_module.log('online_train_loss', mlp_loss, on_step=True, on_epoch=False)
+        train_acc = accuracy(mlp_logits.softmax(-1), y)
+        pl_module.log("online_train_acc", train_acc, on_step=True, on_epoch=False)
+        pl_module.log("online_train_loss", mlp_loss, on_step=True, on_epoch=False)
 
     def on_validation_batch_end(
         self,
@@ -132,10 +130,10 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         representations = representations.detach()
 
         # forward pass
-        mlp_preds = pl_module.non_linear_evaluator(representations)  # type: ignore[operator]
-        mlp_loss = F.cross_entropy(mlp_preds, y)
+        mlp_logits = pl_module.non_linear_evaluator(representations)  # type: ignore[operator]
+        mlp_loss = F.cross_entropy(mlp_logits, y)
 
         # log metrics
-        val_acc = accuracy(mlp_preds, y)
-        pl_module.log('online_val_acc', val_acc, on_step=False, on_epoch=True, sync_dist=True)
-        pl_module.log('online_val_loss', mlp_loss, on_step=False, on_epoch=True, sync_dist=True)
+        val_acc = accuracy(mlp_logits.softmax(-1), y)
+        pl_module.log("online_val_acc", val_acc, on_step=False, on_epoch=True, sync_dist=True)
+        pl_module.log("online_val_loss", mlp_loss, on_step=False, on_epoch=True, sync_dist=True)

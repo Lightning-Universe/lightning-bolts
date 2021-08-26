@@ -1,18 +1,14 @@
-import math
 from argparse import ArgumentParser
-from typing import Callable, Optional
 
-import numpy as np
-import pytorch_lightning as pl
 import torch
-from pytorch_lightning import seed_everything
-from pytorch_lightning.utilities import AMPType
+from pytorch_lightning import LightningModule, Trainer, seed_everything
+from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from torch.nn import functional as F
-from torch.optim.optimizer import Optimizer
 
 from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
 from pl_bolts.models.self_supervised.simsiam.models import SiameseArm
-from pl_bolts.optimizers.lars_scheduling import LARSWrapper
+from pl_bolts.optimizers.lars import LARS
+from pl_bolts.optimizers.lr_scheduler import linear_warmup_decay
 from pl_bolts.transforms.dataset_normalizations import (
     cifar10_normalization,
     imagenet_normalization,
@@ -20,10 +16,8 @@ from pl_bolts.transforms.dataset_normalizations import (
 )
 
 
-class SimSiam(pl.LightningModule):
-    """
-    PyTorch Lightning implementation of `Exploring Simple Siamese Representation Learning (SimSiam)
-    <https://arxiv.org/pdf/2011.10566v1.pdf>`_
+class SimSiam(LightningModule):
+    """PyTorch Lightning implementation of Exploring Simple Siamese Representation Learning (SimSiam_)
 
     Paper authors: Xinlei Chen, Kaiming He.
 
@@ -45,7 +39,7 @@ class SimSiam(pl.LightningModule):
         dm.train_transforms = SimCLRTrainDataTransform(32)
         dm.val_transforms = SimCLREvalDataTransform(32)
 
-        trainer = pl.Trainer()
+        trainer = Trainer()
         trainer.fit(model, datamodule=dm)
 
     Train::
@@ -65,6 +59,8 @@ class SimSiam(pl.LightningModule):
             --data_dir /path/to/imagenet/
             --meta_dir /path/to/folder/with/meta.bin/
             --batch_size 32
+
+    .. _SimSiam: https://arxiv.org/pdf/2011.10566v1.pdf
     """
 
     def __init__(
@@ -74,7 +70,7 @@ class SimSiam(pl.LightningModule):
         batch_size: int,
         dataset: str,
         num_nodes: int = 1,
-        arch: str = 'resnet50',
+        arch: str = "resnet50",
         hidden_mlp: int = 2048,
         feat_dim: int = 128,
         warmup_epochs: int = 10,
@@ -82,12 +78,11 @@ class SimSiam(pl.LightningModule):
         temperature: float = 0.1,
         first_conv: bool = True,
         maxpool1: bool = True,
-        optimizer: str = 'adam',
-        lars_wrapper: bool = True,
+        optimizer: str = "adam",
         exclude_bn_bias: bool = False,
-        start_lr: float = 0.,
+        start_lr: float = 0.0,
         learning_rate: float = 1e-3,
-        final_lr: float = 0.,
+        final_lr: float = 0.0,
         weight_decay: float = 1e-6,
         **kwargs
     ):
@@ -118,7 +113,6 @@ class SimSiam(pl.LightningModule):
         self.maxpool1 = maxpool1
 
         self.optim = optimizer
-        self.lars_wrapper = lars_wrapper
         self.exclude_bn_bias = exclude_bn_bias
         self.weight_decay = weight_decay
         self.temperature = temperature
@@ -137,23 +131,10 @@ class SimSiam(pl.LightningModule):
         global_batch_size = self.num_nodes * nb_gpus * self.batch_size if nb_gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
-        # define LR schedule
-        warmup_lr_schedule = np.linspace(
-            self.start_lr, self.learning_rate, self.train_iters_per_epoch * self.warmup_epochs
-        )
-        iters = np.arange(self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs))
-        cosine_lr_schedule = np.array([
-            self.final_lr + 0.5 * (self.learning_rate - self.final_lr) *
-            (1 + math.cos(math.pi * t / (self.train_iters_per_epoch * (self.max_epochs - self.warmup_epochs))))
-            for t in iters
-        ])
-
-        self.lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
-
     def init_model(self):
-        if self.arch == 'resnet18':
+        if self.arch == "resnet18":
             backbone = resnet18
-        elif self.arch == 'resnet50':
+        elif self.arch == "resnet50":
             backbone = resnet50
 
         encoder = backbone(first_conv=self.first_conv, maxpool1=self.maxpool1, return_all_feature_maps=False)
@@ -181,7 +162,7 @@ class SimSiam(pl.LightningModule):
         loss = self.cosine_similarity(h1, z2) / 2 + self.cosine_similarity(h2, z1) / 2
 
         # log results
-        self.log_dict({"loss": loss})
+        self.log_dict({"train_loss": loss})
 
         return loss
 
@@ -194,11 +175,11 @@ class SimSiam(pl.LightningModule):
         loss = self.cosine_similarity(h1, z2) / 2 + self.cosine_similarity(h2, z1) / 2
 
         # log results
-        self.log_dict({"loss": loss})
+        self.log_dict({"val_loss": loss})
 
         return loss
 
-    def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=['bias', 'bn']):
+    def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=["bias", "bn"]):
         params = []
         excluded_params = []
 
@@ -211,14 +192,8 @@ class SimSiam(pl.LightningModule):
                 params.append(param)
 
         return [
-            {
-                'params': params,
-                'weight_decay': weight_decay
-            },
-            {
-                'params': excluded_params,
-                'weight_decay': 0.
-            },
+            {"params": params, "weight_decay": weight_decay},
+            {"params": excluded_params, "weight_decay": 0.0},
         ]
 
     def configure_optimizers(self):
@@ -227,52 +202,30 @@ class SimSiam(pl.LightningModule):
         else:
             params = self.parameters()
 
-        if self.optim == 'sgd':
-            optimizer = torch.optim.SGD(params, lr=self.learning_rate, momentum=0.9, weight_decay=self.weight_decay)
-        elif self.optim == 'adam':
+        if self.optim == "lars":
+            optimizer = LARS(
+                params,
+                lr=self.learning_rate,
+                momentum=0.9,
+                weight_decay=self.weight_decay,
+                trust_coefficient=0.001,
+            )
+        elif self.optim == "adam":
             optimizer = torch.optim.Adam(params, lr=self.learning_rate, weight_decay=self.weight_decay)
 
-        if self.lars_wrapper:
-            optimizer = LARSWrapper(
+        warmup_steps = self.train_iters_per_epoch * self.warmup_epochs
+        total_steps = self.train_iters_per_epoch * self.max_epochs
+
+        scheduler = {
+            "scheduler": torch.optim.lr_scheduler.LambdaLR(
                 optimizer,
-                eta=0.001,  # trust coefficient
-                clip=False
-            )
+                linear_warmup_decay(warmup_steps, total_steps, cosine=True),
+            ),
+            "interval": "step",
+            "frequency": 1,
+        }
 
-        return optimizer
-
-    def optimizer_step(
-        self,
-        epoch: int,
-        batch_idx: int,
-        optimizer: Optimizer,
-        optimizer_idx: int,
-        optimizer_closure: Optional[Callable] = None,
-        on_tpu: bool = False,
-        using_native_amp: bool = False,
-        using_lbfgs: bool = False,
-    ) -> None:
-        # warm-up + decay schedule placed here since LARSWrapper is not optimizer class
-        # adjust LR of optim contained within LARSWrapper
-        if self.lars_wrapper:
-            for param_group in optimizer.optim.param_groups:
-                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
-        else:
-            for param_group in optimizer.param_groups:
-                param_group["lr"] = self.lr_schedule[self.trainer.global_step]
-
-        # log LR (LearningRateLogger callback doesn't work with LARSWrapper)
-        self.log('learning_rate', self.lr_schedule[self.trainer.global_step], on_step=True, on_epoch=False)
-
-        # from lightning
-        if self.trainer.amp_backend == AMPType.NATIVE:
-            optimizer_closure()
-            self.trainer.scaler.step(optimizer)
-        elif self.trainer.amp_backend == AMPType.APEX:
-            optimizer_closure()
-            optimizer.step()
-        else:
-            optimizer.step(closure=optimizer_closure)
+        return [optimizer], [scheduler]
 
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -295,8 +248,7 @@ class SimSiam(pl.LightningModule):
 
         # training params
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
-        parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/sgd")
-        parser.add_argument("--lars_wrapper", action="store_true", help="apple lars wrapper over optimizer used")
+        parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/lars")
         parser.add_argument("--exclude_bn_bias", action="store_true", help="exclude bn/bias from weight decay")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
         parser.add_argument("--batch_size", default=128, type=int, help="batch size per gpu")
@@ -320,7 +272,7 @@ def cli_main():
     parser = ArgumentParser()
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = SimSiam.add_model_specific_args(parser)
@@ -381,7 +333,7 @@ def cli_main():
         args.gpus = 8  # per-node
         args.max_epochs = 800
 
-        args.optimizer = "sgd"
+        args.optimizer = "lars"
         args.lars_wrapper = True
         args.learning_rate = 4.8
         args.final_lr = 0.0048
@@ -423,10 +375,15 @@ def cli_main():
             dataset=args.dataset,
         )
 
-    trainer = pl.Trainer.from_argparse_args(
+    lr_monitor = LearningRateMonitor(logging_interval="step")
+    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor="val_loss")
+    callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
+    callbacks.append(lr_monitor)
+
+    trainer = Trainer.from_argparse_args(
         args,
         sync_batchnorm=True if args.gpus > 1 else False,
-        callbacks=[online_evaluator] if args.online_ft else None,
+        callbacks=callbacks,
     )
 
     trainer.fit(model, datamodule=dm)

@@ -1,21 +1,21 @@
 import os
 from argparse import ArgumentParser
 
-import pytorch_lightning as pl
 import torch
-from torch import nn as nn
+from pytorch_lightning import LightningModule, Trainer
+from torch import nn
 
 from pl_bolts.models.vision.image_gpt.gpt2 import GPT2
 
 
 def _shape_input(x):
-    """shape batch of images for input into GPT2 model"""
+    """shape batch of images for input into GPT2 model."""
     x = x.view(x.shape[0], -1)  # flatten images into sequences
     x = x.transpose(0, 1).contiguous()  # to shape [seq len, batch]
     return x
 
 
-class ImageGPT(pl.LightningModule):
+class ImageGPT(LightningModule):
     """
     **Paper**: `Generative Pretraining from Pixels
     <https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf>`_
@@ -244,7 +244,7 @@ def cli_main():
     parser = ArgumentParser()
 
     # trainer args
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
 
     # model args
     parser = ImageGPT.add_model_specific_args(parser)
@@ -258,9 +258,9 @@ def cli_main():
 
     model = ImageGPT(**args.__dict__)
 
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model, datamodule=datamodule)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

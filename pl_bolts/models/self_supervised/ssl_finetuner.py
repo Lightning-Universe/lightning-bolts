@@ -1,28 +1,27 @@
 from typing import List, Optional
 
-import pytorch_lightning as pl
 import torch
-from pytorch_lightning.metrics import Accuracy
+from pytorch_lightning import LightningModule
 from torch.nn import functional as F
+from torchmetrics import Accuracy
 
 from pl_bolts.models.self_supervised import SSLEvaluator
 
 
-class SSLFineTuner(pl.LightningModule):
-    """
-    Finetunes a self-supervised learning backbone using the standard evaluation protocol of a singler layer MLP
-    with 1024 units
+class SSLFineTuner(LightningModule):
+    """Finetunes a self-supervised learning backbone using the standard evaluation protocol of a singler layer MLP
+    with 1024 units.
 
     Example::
 
         from pl_bolts.utils.self_supervised import SSLFineTuner
-        from pl_bolts.models.self_supervised import CPCV2
+        from pl_bolts.models.self_supervised import CPC_v2
         from pl_bolts.datamodules import CIFAR10DataModule
         from pl_bolts.models.self_supervised.cpc.transforms import CPCEvalTransformsCIFAR10,
                                                                     CPCTrainTransformsCIFAR10
 
         # pretrained model
-        backbone = CPCV2.load_from_checkpoint(PATH, strict=False)
+        backbone = CPC_v2.load_from_checkpoint(PATH, strict=False)
 
         # dataset + transforms
         dm = CIFAR10DataModule(data_dir='.')
@@ -47,14 +46,14 @@ class SSLFineTuner(pl.LightningModule):
         num_classes: int = 1000,
         epochs: int = 100,
         hidden_dim: Optional[int] = None,
-        dropout: float = 0.,
+        dropout: float = 0.0,
         learning_rate: float = 0.1,
         weight_decay: float = 1e-6,
         nesterov: bool = False,
-        scheduler_type: str = 'cosine',
+        scheduler_type: str = "cosine",
         decay_epochs: List = [60, 80],
         gamma: float = 0.1,
-        final_lr: float = 0.
+        final_lr: float = 0.0,
     ):
         """
         Args:
@@ -88,29 +87,29 @@ class SSLFineTuner(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         loss, logits, y = self.shared_step(batch)
-        acc = self.train_acc(logits, y)
+        acc = self.train_acc(logits.softmax(-1), y)
 
-        self.log('train_loss', loss, prog_bar=True)
-        self.log('train_acc_step', acc, prog_bar=True)
-        self.log('train_acc_epoch', self.train_acc)
+        self.log("train_loss", loss, prog_bar=True)
+        self.log("train_acc_step", acc, prog_bar=True)
+        self.log("train_acc_epoch", self.train_acc)
 
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss, logits, y = self.shared_step(batch)
-        self.val_acc(logits, y)
+        self.val_acc(logits.softmax(-1), y)
 
-        self.log('val_loss', loss, prog_bar=True, sync_dist=True)
-        self.log('val_acc', self.val_acc)
+        self.log("val_loss", loss, prog_bar=True, sync_dist=True)
+        self.log("val_acc", self.val_acc)
 
         return loss
 
     def test_step(self, batch, batch_idx):
         loss, logits, y = self.shared_step(batch)
-        self.test_acc(logits, y)
+        self.test_acc(logits.softmax(-1), y)
 
-        self.log('test_loss', loss, sync_dist=True)
-        self.log('test_acc', self.test_acc)
+        self.log("test_loss", loss, sync_dist=True)
+        self.log("test_acc", self.test_acc)
 
         return loss
 
@@ -140,9 +139,7 @@ class SSLFineTuner(pl.LightningModule):
             scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, self.decay_epochs, gamma=self.gamma)
         elif self.scheduler_type == "cosine":
             scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-                optimizer,
-                self.epochs,
-                eta_min=self.final_lr  # total epochs to run
+                optimizer, self.epochs, eta_min=self.final_lr  # total epochs to run
             )
 
         return [optimizer], [scheduler]

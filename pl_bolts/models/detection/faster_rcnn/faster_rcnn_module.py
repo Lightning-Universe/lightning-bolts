@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 from typing import Any, Optional
 
-import pytorch_lightning as pl
 import torch
+from pytorch_lightning import LightningModule, Trainer, seed_everything
 
 from pl_bolts.metrics.object_detection import _evaluate_iou
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
@@ -11,15 +11,14 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
-    from torchvision.models.detection.faster_rcnn import fasterrcnn_resnet50_fpn, FastRCNNPredictor
+    from torchvision.models.detection.faster_rcnn import FastRCNNPredictor, fasterrcnn_resnet50_fpn
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-class FasterRCNN(pl.LightningModule):
-    """
-    PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with
-    Region Proposal Networks <https://arxiv.org/abs/1506.01497>`_.
+class FasterRCNN(LightningModule):
+    """PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with Region Proposal
+    Networks <https://arxiv.org/abs/1506.01497>`_.
 
     Paper authors: Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun
 
@@ -58,7 +57,7 @@ class FasterRCNN(pl.LightningModule):
             trainable_backbone_layers: number of trainable resnet layers starting from final block
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('You want to use `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError("You want to use `torchvision` which is not installed yet.")
 
         super().__init__()
 
@@ -137,9 +136,9 @@ class FasterRCNN(pl.LightningModule):
 def cli_main():
     from pl_bolts.datamodules import VOCDetectionDataModule
 
-    pl.seed_everything(42)
+    seed_everything(42)
     parser = ArgumentParser()
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
     parser.add_argument("--data_dir", type=str, default=".")
     parser.add_argument("--batch_size", type=int, default=1)
     parser = FasterRCNN.add_model_specific_args(parser)
@@ -150,7 +149,7 @@ def cli_main():
     args.num_classes = datamodule.num_classes
 
     model = FasterRCNN(**vars(args))
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model, datamodule=datamodule)
 
 

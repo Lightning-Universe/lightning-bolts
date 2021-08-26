@@ -1,5 +1,5 @@
 import torch
-from torch import nn as nn
+from torch import nn
 from torch.nn import functional as F
 
 
@@ -29,11 +29,11 @@ class UNet(nn.Module):
         input_channels: int = 3,
         num_layers: int = 5,
         features_start: int = 64,
-        bilinear: bool = False
+        bilinear: bool = False,
     ):
 
         if num_layers < 1:
-            raise ValueError(f'num_layers = {num_layers}, expected: num_layers > 0')
+            raise ValueError(f"num_layers = {num_layers}, expected: num_layers > 0")
 
         super().__init__()
         self.num_layers = num_layers
@@ -56,24 +56,26 @@ class UNet(nn.Module):
     def forward(self, x):
         xi = [self.layers[0](x)]
         # Down path
-        for layer in self.layers[1:self.num_layers]:
+        for layer in self.layers[1 : self.num_layers]:
             xi.append(layer(xi[-1]))
         # Up path
-        for i, layer in enumerate(self.layers[self.num_layers:-1]):
+        for i, layer in enumerate(self.layers[self.num_layers : -1]):
             xi[-1] = layer(xi[-1], xi[-2 - i])
         return self.layers[-1](xi[-1])
 
 
 class DoubleConv(nn.Module):
-    """
-    [ Conv2d => BatchNorm (optional) => ReLU ] x 2
-    """
+    """[ Conv2d => BatchNorm (optional) => ReLU ] x 2."""
 
     def __init__(self, in_ch: int, out_ch: int):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Conv2d(in_ch, out_ch, kernel_size=3, padding=1), nn.BatchNorm2d(out_ch), nn.ReLU(inplace=True),
-            nn.Conv2d(out_ch, out_ch, kernel_size=3, padding=1), nn.BatchNorm2d(out_ch), nn.ReLU(inplace=True)
+            nn.Conv2d(in_ch, out_ch, kernel_size=3, padding=1),
+            nn.BatchNorm2d(out_ch),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_ch, out_ch, kernel_size=3, padding=1),
+            nn.BatchNorm2d(out_ch),
+            nn.ReLU(inplace=True),
         )
 
     def forward(self, x):
@@ -81,9 +83,7 @@ class DoubleConv(nn.Module):
 
 
 class Down(nn.Module):
-    """
-    Downscale with MaxPool => DoubleConvolution block
-    """
+    """Downscale with MaxPool => DoubleConvolution block."""
 
     def __init__(self, in_ch: int, out_ch: int):
         super().__init__()
@@ -94,10 +94,8 @@ class Down(nn.Module):
 
 
 class Up(nn.Module):
-    """
-    Upsampling (by either bilinear interpolation or transpose convolutions)
-    followed by concatenation of feature map from contracting path, followed by DoubleConv.
-    """
+    """Upsampling (by either bilinear interpolation or transpose convolutions) followed by concatenation of feature
+    map from contracting path, followed by DoubleConv."""
 
     def __init__(self, in_ch: int, out_ch: int, bilinear: bool = False):
         super().__init__()

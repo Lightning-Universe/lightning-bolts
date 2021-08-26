@@ -8,7 +8,7 @@ if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
     from torchvision.datasets import FashionMNIST
 else:  # pragma: no cover
-    warn_missing_pkg('torchvision')
+    warn_missing_pkg("torchvision")
     FashionMNIST = None
 
 
@@ -40,6 +40,7 @@ class FashionMNISTDataModule(VisionDataModule):
 
         Trainer().fit(model, datamodule=dm)
     """
+
     name = "fashion_mnist"
     dataset_cls = FashionMNIST
     dims = (1, 28, 28)
@@ -48,12 +49,12 @@ class FashionMNISTDataModule(VisionDataModule):
         self,
         data_dir: Optional[str] = None,
         val_split: Union[int, float] = 0.2,
-        num_workers: int = 16,
+        num_workers: int = 0,
         normalize: bool = False,
         batch_size: int = 32,
         seed: int = 42,
-        shuffle: bool = False,
-        pin_memory: bool = False,
+        shuffle: bool = True,
+        pin_memory: bool = True,
         drop_last: bool = False,
         *args: Any,
         **kwargs: Any,
@@ -73,7 +74,7 @@ class FashionMNISTDataModule(VisionDataModule):
         """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
-                'You want to use FashionMNIST dataset loaded from `torchvision` which is not installed yet.'
+                "You want to use FashionMNIST dataset loaded from `torchvision` which is not installed yet."
             )
 
         super().__init__(  # type: ignore[misc]
@@ -100,9 +101,9 @@ class FashionMNISTDataModule(VisionDataModule):
 
     def default_transforms(self) -> Callable:
         if self.normalize:
-            mnist_transforms = transform_lib.Compose([
-                transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5, ), std=(0.5, ))
-            ])
+            mnist_transforms = transform_lib.Compose(
+                [transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5,), std=(0.5,))]
+            )
         else:
             mnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
 

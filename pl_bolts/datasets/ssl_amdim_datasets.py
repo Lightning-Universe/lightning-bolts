@@ -9,17 +9,14 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import CIFAR10
 else:  # pragma: no cover
-    warn_missing_pkg('torchvision')
+    warn_missing_pkg("torchvision")
     CIFAR10 = object
 
 
 class SSLDatasetMixin(ABC):
-
     @classmethod
     def generate_train_val_split(cls, examples, labels, pct_val):
-        """
-        Splits dataset uniformly across classes
-        """
+        """Splits dataset uniformly across classes."""
         nb_classes = len(set(labels))
 
         nb_val_images = int(len(examples) * pct_val) // nb_classes
@@ -47,8 +44,8 @@ class SSLDatasetMixin(ABC):
 
     @classmethod
     def select_nb_imgs_per_class(cls, examples, labels, nb_imgs_in_val):
-        """
-        Splits a dataset into two parts.
+        """Splits a dataset into two parts.
+
         The labeled split has nb_imgs_in_val per class
         """
         nb_classes = len(set(labels))
@@ -93,29 +90,28 @@ class SSLDatasetMixin(ABC):
 
 
 class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
-
     def __init__(
         self,
         root: str,
-        split: str = 'val',
+        split: str = "val",
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
         download: bool = False,
         nb_labeled_per_class: Optional[int] = None,
-        val_pct: float = 0.10
+        val_pct: float = 0.10,
     ):
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('You want to use `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError("You want to use `torchvision` which is not installed yet.")
 
         if nb_labeled_per_class == -1:
             nb_labeled_per_class = None
 
         # use train for all of these splits
-        train = split in ('val', 'train', 'train+unlabeled')
+        train = split in ("val", "train", "train+unlabeled")
         super().__init__(root, train, transform, target_transform, download)
 
         # modify only for val, train
-        if split != 'test':
+        if split != "test":
             # limit nb of examples per class
             X_test, y_test, X_train, y_train = self.generate_train_val_split(self.data, self.targets, val_pct)
 
@@ -123,7 +119,7 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
             X_train, y_train = self.deterministic_shuffle(X_train, y_train)
             X_test, y_test = self.deterministic_shuffle(X_test, y_test)
 
-            if split == 'val':
+            if split == "val":
                 self.data = X_test
                 self.targets = y_test
 
@@ -133,5 +129,4 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
             # limit the number of items per class
             if nb_labeled_per_class is not None:
-                self.data, self.targets = \
-                    self.select_nb_imgs_per_class(self.data, self.targets, nb_labeled_per_class)
+                self.data, self.targets = self.select_nb_imgs_per_class(self.data, self.targets, nb_labeled_per_class)

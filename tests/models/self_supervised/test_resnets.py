@@ -16,6 +16,7 @@ from pl_bolts.models.self_supervised.resnets import (
 )
 
 
+@torch.no_grad()
 def test_cpc_resnet():
     x = torch.rand(3, 3, 64, 64)
     model = cpc_resnet50(x)
@@ -23,7 +24,8 @@ def test_cpc_resnet():
 
 
 @pytest.mark.parametrize(
-    "model_class", [
+    "model_class",
+    [
         resnet18,
         resnet34,
         resnet50,
@@ -33,14 +35,16 @@ def test_cpc_resnet():
         resnext101_32x8d,
         wide_resnet50_2,
         wide_resnet101_2,
-    ]
+    ],
 )
+@torch.no_grad()
 def test_torchvision_resnets(model_class):
     x = torch.rand(3, 3, 64, 64)
-    model = model_class()
+    model = model_class(pretrained=False)
     model(x)
 
 
+@torch.no_grad()
 @pytest.mark.parametrize("size", [32, 64, 128])
 def test_amdim_encoder(size):
     dummy_batch = torch.zeros((2, 3, size, size))

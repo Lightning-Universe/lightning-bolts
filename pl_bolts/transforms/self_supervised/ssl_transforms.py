@@ -7,15 +7,13 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _PIL_AVAILABLE:
     from PIL import Image
 else:  # pragma: no cover
-    warn_missing_pkg('PIL', pypi_name='Pillow')
+    warn_missing_pkg("PIL", pypi_name="Pillow")
 
 
 class RandomTranslateWithReflect:
-    """
-    Translate image randomly
-    Translate vertically and horizontally by n pixels where
-    n is integer drawn uniformly independently for each axis
-    from [-max_translation, max_translation].
+    """Translate image randomly Translate vertically and horizontally by n pixels where n is integer drawn
+    uniformly independently for each axis from [-max_translation, max_translation].
+
     Fill the uncovered blank area with reflect padding.
     """
 
@@ -55,8 +53,7 @@ class RandomTranslateWithReflect:
         return new_image
 
 
-class Patchify(object):
-
+class Patchify:
     def __init__(self, patch_size, overlap_size):
         self.patch_size = patch_size
         self.overlap_size = self.patch_size - overlap_size

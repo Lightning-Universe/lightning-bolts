@@ -3,7 +3,6 @@ from torch.nn import functional as F
 
 
 class CPCResNet(nn.Module):
-
     def __init__(
         self,
         sample_batch,
@@ -13,9 +12,9 @@ class CPCResNet(nn.Module):
         groups=1,
         width_per_group=64,
         replace_stride_with_dilation=None,
-        norm_layer=None
+        norm_layer=None,
     ):
-        super(CPCResNet, self).__init__()
+        super().__init__()
         if norm_layer is None:
             norm_layer = nn.LayerNorm
         self._norm_layer = norm_layer
@@ -61,7 +60,7 @@ class CPCResNet(nn.Module):
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm, nn.LayerNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
@@ -79,8 +78,16 @@ class CPCResNet(nn.Module):
 
         layers = []
         layer = block(
-            sample_batch, self.inplanes, planes, stride, downsample, self.groups, self.base_width, previous_dilation,
-            norm_layer, expansion
+            sample_batch,
+            self.inplanes,
+            planes,
+            stride,
+            downsample,
+            self.groups,
+            self.base_width,
+            previous_dilation,
+            norm_layer,
+            expansion,
         )
 
         sample_batch = layer(sample_batch)
@@ -95,7 +102,7 @@ class CPCResNet(nn.Module):
                 base_width=self.base_width,
                 dilation=self.dilation,
                 norm_layer=norm_layer,
-                expansion=expansion
+                expansion=expansion,
             )
             sample_batch = layer(sample_batch)
             layers.append(layer)
@@ -130,7 +137,6 @@ def cpc_resnet50(sample_batch, **kwargs):
 
 
 class LNBottleneck(nn.Module):
-
     def __init__(
         self,
         sample_batch,
@@ -142,10 +148,10 @@ class LNBottleneck(nn.Module):
         base_width=64,
         dilation=1,
         norm_layer=None,
-        expansion=4
+        expansion=4,
     ):
-        super(LNBottleneck, self).__init__()
-        width = int(planes * (base_width / 64.)) * groups
+        super().__init__()
+        width = int(planes * (base_width / 64.0)) * groups
         # Both self.conv2 and self.downsample layers downsample the input when stride != 1
         self.conv1 = conv1x1(inplanes, width)
         self.conv2 = conv3x3(width, width, stride, groups, dilation)
@@ -196,7 +202,7 @@ class LNBottleneck(nn.Module):
 
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
-    """3x3 convolution with padding"""
+    """3x3 convolution with padding."""
     return nn.Conv2d(
         in_planes,
         out_planes,
@@ -205,10 +211,10 @@ def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
         padding=dilation,
         groups=groups,
         bias=False,
-        dilation=dilation
+        dilation=dilation,
     )
 
 
 def conv1x1(in_planes, out_planes, stride=1):
-    """1x1 convolution"""
+    """1x1 convolution."""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)

@@ -7,10 +7,10 @@ Utilities to map sklearn or numpy datasets to PyTorch Dataloaders with automatic
 
 .. code-block:: python
 
-    from sklearn.datasets import load_boston
+    from sklearn.datasets import load_diabetes
     from pl_bolts.datamodules import SklearnDataModule
 
-    X, y = load_boston(return_X_y=True)
+    X, y = load_diabetes(return_X_y=True)
     loaders = SklearnDataModule(X, y)
 
     train_loader = loaders.train_dataloader(batch_size=32)
@@ -21,10 +21,10 @@ Or build your own torch datasets
 
 .. code-block:: python
 
-    from sklearn.datasets import load_boston
+    from sklearn.datasets import load_diabetes
     from pl_bolts.datamodules import SklearnDataset
 
-    X, y = load_boston(return_X_y=True)
+    X, y = load_diabetes(return_X_y=True)
     dataset = SklearnDataset(X, y)
     loader = DataLoader(dataset)
 
@@ -45,4 +45,3 @@ Automatically generates the train, validation and test splits for a Numpy datase
 They are set up as dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
 
 .. autoclass:: pl_bolts.datamodules.sklearn_datamodule.SklearnDataModule
-   :noindex:

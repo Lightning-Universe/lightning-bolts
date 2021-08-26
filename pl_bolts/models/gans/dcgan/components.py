@@ -1,10 +1,8 @@
 # Based on https://github.com/pytorch/examples/blob/master/dcgan/main.py
-import torch
-from torch import nn
+from torch import Tensor, nn
 
 
 class DCGANGenerator(nn.Module):
-
     def __init__(self, latent_dim: int, feature_maps: int, image_channels: int) -> None:
         """
         Args:
@@ -45,12 +43,11 @@ class DCGANGenerator(nn.Module):
 
         return gen_block
 
-    def forward(self, noise: torch.Tensor) -> torch.Tensor:
+    def forward(self, noise: Tensor) -> Tensor:
         return self.gen(noise)
 
 
 class DCGANDiscriminator(nn.Module):
-
     def __init__(self, feature_maps: int, image_channels: int) -> None:
         """
         Args:
@@ -91,5 +88,5 @@ class DCGANDiscriminator(nn.Module):
 
         return disc_block
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         return self.disc(x).view(-1, 1).squeeze(1)

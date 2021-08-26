@@ -69,11 +69,11 @@ Mix and match any part, or subclass to create your own new method
 
 .. code-block:: python
 
-    from pl_bolts.models.self_supervised import CPCV2
+    from pl_bolts.models.self_supervised import CPC_v2
     from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
 
     amdim_task = FeatureMapContrastiveTask(comparisons='01, 11, 02', bidirectional=True)
-    model = CPCV2(contrastive_task=amdim_task)
+    model = CPC_v2(contrastive_task=amdim_task)
 
 -----------------
 
@@ -114,7 +114,7 @@ Model implemented by:
 To Train::
 
     import pytorch_lightning as pl
-    from pl_bolts.models.self_supervised import CPCV2
+    from pl_bolts.models.self_supervised import CPC_v2
     from pl_bolts.datamodules import CIFAR10DataModule
     from pl_bolts.models.self_supervised.cpc import (
         CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10)
@@ -125,7 +125,7 @@ To Train::
     dm.val_transforms = CPCEvalTransformsCIFAR10()
 
     # model
-    model = CPCV2()
+    model = CPC_v2()
 
     # fit
     trainer = pl.Trainer()
@@ -159,7 +159,7 @@ Results in table are reported from the
      - LR
    * - CIFAR-10
      - 84.52
-     - `CPCresnet101 <https://github.com/PyTorchLightning/pytorch-lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
+     - `CPCresnet101 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
      - Adam
      - 64
      - 1000 (upto 24 hours)
@@ -167,7 +167,7 @@ Results in table are reported from the
      - 4e-5
    * - STL-10
      - 78.36
-     - `CPCresnet101 <https://github.com/PyTorchLightning/pytorch-lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
+     - `CPCresnet101 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
      - Adam
      - 144
      - 1000 (upto 72 hours)
@@ -175,7 +175,7 @@ Results in table are reported from the
      - 1e-4
    * - ImageNet
      - 54.82
-     - `CPCresnet101 <https://github.com/PyTorchLightning/pytorch-lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
+     - `CPCresnet101 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/cpc/networks.py#L103>`_
      - Adam
      - 3072
      - 1000 (upto 21 days)
@@ -186,10 +186,10 @@ Results in table are reported from the
 
 CIFAR-10 pretrained model::
 
-    from pl_bolts.models.self_supervised import CPCV2
+    from pl_bolts.models.self_supervised import CPC_v2
 
     weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-cifar10-v4-exp3/epoch%3D474.ckpt'
-    cpc_v2 = CPCV2.load_from_checkpoint(weight_path, strict=False)
+    cpc_v2 = CPC_v2.load_from_checkpoint(weight_path, strict=False)
 
     cpc_v2.freeze()
 
@@ -215,10 +215,10 @@ Fine-tuning:
 
 STL-10 pretrained model::
 
-    from pl_bolts.models.self_supervised import CPCV2
+    from pl_bolts.models.self_supervised import CPC_v2
 
     weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/cpc-stl10-v0-exp3/epoch%3D624.ckpt'
-    cpc_v2 = CPCV2.load_from_checkpoint(weight_path, strict=False)
+    cpc_v2 = CPC_v2.load_from_checkpoint(weight_path, strict=False)
 
     cpc_v2.freeze()
 
@@ -242,16 +242,16 @@ Fine-tuning:
 
 |
 
-CPCV2 API
-*********
+CPC (v2) API
+^^^^^^^^^^^^
 
-.. autoclass:: pl_bolts.models.self_supervised.CPCV2
+.. autoclass:: pl_bolts.models.self_supervised.CPC_v2
    :noindex:
 
-Moco (V2)
-^^^^^^^^^
+Moco (v2) API
+^^^^^^^^^^^^^
 
-.. autoclass:: pl_bolts.models.self_supervised.MocoV2
+.. autoclass:: pl_bolts.models.self_supervised.Moco_v2
    :noindex:
 
 SimCLR
@@ -311,8 +311,8 @@ CIFAR-10 baseline
      - 1.0/1.5
    * - Ours
      - 88.50
-     - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
-     - `LARS-SGD <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - `resnet50 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
+     - LARS
      - 2048
      - 800 (4 hours)
      - 8 V100 (16GB)
@@ -324,7 +324,7 @@ CIFAR-10 pretrained model::
 
     from pl_bolts.models.self_supervised import SimCLR
 
-    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
+    weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/simclr-cifar10-sgd/simclr-cifar10-sgd.ckpt'
     simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
 
     simclr.freeze()
@@ -361,7 +361,6 @@ To reproduce::
         -- num_workers 16
         --optimizer sgd
         --learning_rate 1.5
-        --lars_wrapper
         --exclude_bn_bias
         --max_epochs 800
         --online_ft
@@ -400,8 +399,8 @@ Imagenet baseline for SimCLR
      - 4.8
    * - Ours
      - 68.4
-     - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
-     - `LARS-SGD <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - `resnet50 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
+     - LARS
      - 4096
      - 800
      - 64 V100 (16GB)
@@ -533,7 +532,7 @@ The original paper does not provide baselines on STL10.
    * - Ours
      - `86.72 <https://tensorboard.dev/experiment/w2pq3bPPSxC4VIm5udhA2g/>`_
      - SwAV resnet50
-     - `LARS <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - LARS
      - 128
      - No
      - 100 (~9 hr)
@@ -585,7 +584,6 @@ To reproduce::
     python swav_module.py
         --online_ft
         --gpus 1
-        --lars_wrapper
         --batch_size 128
         --learning_rate 1e-3
         --gaussian_blur
@@ -629,8 +627,8 @@ Imagenet baseline for SwAV
      - 4.8
    * - Ours
      - 74
-     - `resnet50 <https://github.com/PyTorchLightning/PyTorch-Lightning-Bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
-     - `LARS-SGD <https://pytorch-lightning-bolts.readthedocs.io/en/latest/api/pl_bolts.optimizers.lars_scheduling.html#pl_bolts.optimizers.lars_scheduling.LARSWrapper>`_
+     - `resnet50 <https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/models/self_supervised/resnets.py#L301-L309>`_
+     - LARS
      - 4096
      - 800
      - 64 V100 (16GB)
@@ -653,4 +651,11 @@ SwAV API
 ********
 
 .. autoclass:: pl_bolts.models.self_supervised.SwAV
+   :noindex:
+
+
+SimSiam
+^^^^^^^
+
+.. autoclass:: pl_bolts.models.self_supervised.SimSiam
    :noindex:

@@ -1,18 +1,31 @@
-import pytorch_lightning as pl
+import pytest
 import torch
+from packaging import version
+from pytorch_lightning import LightningDataModule, Trainer
+from pytorch_lightning import __version__ as pl_version
+from pytorch_lightning import seed_everything
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import FashionMNISTDataModule, MNISTDataModule
 from pl_bolts.datasets import DummyDataset
-from pl_bolts.models import GPT2, ImageGPT, SemSegment, UNet
+from pl_bolts.models.vision import GPT2, ImageGPT, SemSegment, UNet
 
 
-def test_igpt(datadir):
-    pl.seed_everything(0)
+class DummyDataModule(LightningDataModule):
+    def train_dataloader(self):
+        train_ds = DummyDataset((3, 35, 120), (35, 120), num_samples=100)
+        return DataLoader(train_ds, batch_size=1)
+
+
+@pytest.mark.skipif(
+    version.parse(pl_version) > version.parse("1.1.0"), reason="igpt code not updated for latest lightning"
+)
+def test_igpt(tmpdir, datadir):
+    seed_everything(0)
     dm = MNISTDataModule(data_dir=datadir, normalize=False)
     model = ImageGPT()
 
-    trainer = pl.Trainer(
+    trainer = Trainer(
         limit_train_batches=2,
         limit_val_batches=2,
         limit_test_batches=2,
@@ -24,16 +37,20 @@ def test_igpt(datadir):
 
     dm = FashionMNISTDataModule(data_dir=datadir, num_workers=1)
     model = ImageGPT(classify=True)
-    trainer = pl.Trainer(
+    trainer = Trainer(
         limit_train_batches=2,
         limit_val_batches=2,
         limit_test_batches=2,
         max_epochs=1,
+        logger=False,
+        checkpoint_callback=False,
     )
     trainer.fit(model, datamodule=dm)
 
 
+@torch.no_grad()
 def test_gpt2():
+    seed_everything(0)
     seq_len = 17
     batch_size = 32
     vocab_size = 16
@@ -50,6 +67,7 @@ def test_gpt2():
     model(x)
 
 
+@torch.no_grad()
 def test_unet():
     x = torch.rand(10, 3, 28, 28)
     model = UNet(num_classes=2)
@@ -57,20 +75,13 @@ def test_unet():
     assert y.shape == torch.Size([10, 2, 28, 28])
 
 
-def test_semantic_segmentation():
-
-    class DummyDataModule(pl.LightningDataModule):
-
-        def train_dataloader(self):
-            train_ds = DummyDataset((3, 35, 120), (35, 120), num_samples=100)
-            return DataLoader(train_ds, batch_size=1)
-
+def test_semantic_segmentation(tmpdir):
     dm = DummyDataModule()
 
     model = SemSegment(num_classes=19)
 
-    trainer = pl.Trainer(fast_dev_run=True, max_epochs=1)
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, datamodule=dm)
-    loss = trainer.progress_bar_dict['loss']
+    loss = trainer.progress_bar_dict["loss"]
 
     assert float(loss) > 0

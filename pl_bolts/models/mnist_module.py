@@ -5,21 +5,20 @@ from pytorch_lightning import LightningModule, Trainer
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
 
+from pl_bolts.datasets import MNIST
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms
-    from torchvision.datasets import MNIST
 else:  # pragma: no cover
-    warn_missing_pkg('torchvision')
+    warn_missing_pkg("torchvision")
 
 
 class LitMNIST(LightningModule):
-
-    def __init__(self, hidden_dim=128, learning_rate=1e-3, batch_size=32, num_workers=4, data_dir='', **kwargs):
+    def __init__(self, hidden_dim=128, learning_rate=1e-3, batch_size=32, num_workers=4, data_dir="", **kwargs):
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError('You want to use `torchvision` which is not installed yet.')
+            raise ModuleNotFoundError("You want to use `torchvision` which is not installed yet.")
 
         super().__init__()
         self.save_hyperparameters()
@@ -40,20 +39,20 @@ class LitMNIST(LightningModule):
         x, y = batch
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log('train_loss', loss)
+        self.log("train_loss", loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log('val_loss', loss)
+        self.log("val_loss", loss)
 
     def test_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log('test_loss', loss)
+        self.log("test_loss", loss)
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
@@ -81,11 +80,11 @@ class LitMNIST(LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--batch_size', type=int, default=32)
-        parser.add_argument('--num_workers', type=int, default=4)
-        parser.add_argument('--hidden_dim', type=int, default=128)
-        parser.add_argument('--data_dir', type=str, default='')
-        parser.add_argument('--learning_rate', type=float, default=0.0001)
+        parser.add_argument("--batch_size", type=int, default=32)
+        parser.add_argument("--num_workers", type=int, default=4)
+        parser.add_argument("--hidden_dim", type=int, default=128)
+        parser.add_argument("--data_dir", type=str, default="")
+        parser.add_argument("--learning_rate", type=float, default=0.0001)
         return parser
 
 
@@ -104,5 +103,5 @@ def cli_main():
     trainer.fit(model)
 
 
-if __name__ == '__main__':  # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     cli_main()

@@ -6,9 +6,7 @@ from pl_bolts.models.vision.pixel_cnn import PixelCNN
 
 
 def nt_xent_loss(out_1, out_2, temperature):
-    """
-    Loss used in SimCLR
-    """
+    """Loss used in SimCLR."""
     out = torch.cat([out_1, out_2], dim=0)
     n_samples = len(out)
 
@@ -29,9 +27,7 @@ def nt_xent_loss(out_1, out_2, temperature):
 
 
 class CPCTask(nn.Module):
-    """
-    Loss used in CPC
-    """
+    """Loss used in CPC."""
 
     def __init__(self, num_input_channels, target_dim=64, embed_scale=0.1):
         super().__init__()
@@ -51,7 +47,7 @@ class CPCTask(nn.Module):
 
         # select the future (south) targets to predict
         # selects all of the ones south of the current source
-        preds_i = preds[:, :, :-(i + 1), :] * self.embed_scale
+        preds_i = preds[:, :, : -(i + 1), :] * self.embed_scale
 
         # (b, c, h, w) -> (b*w*h, c) (all features)
         # this ordering matches the targets
@@ -92,9 +88,7 @@ class CPCTask(nn.Module):
 
 
 class AmdimNCELoss(nn.Module):
-    """
-    Compute the NCE scores for predicting r_src->r_trg.
-    """
+    """Compute the NCE scores for predicting r_src->r_trg."""
 
     def __init__(self, tclip):
         super().__init__()
@@ -124,7 +118,7 @@ class AmdimNCELoss(nn.Module):
         mask_pos = mask_mat.unsqueeze(dim=2).expand(-1, -1, nb_feat_vectors).float()
 
         # negative mask
-        mask_neg = 1. - mask_pos
+        mask_neg = 1.0 - mask_pos
 
         # -------------------------------
         # ALL SCORES COMPUTATION
@@ -137,8 +131,8 @@ class AmdimNCELoss(nn.Module):
         # -----------------------
         # STABILITY TRICKS
         # trick 1: weighted regularization term
-        raw_scores = raw_scores / emb_dim**0.5
-        lgt_reg = 5e-2 * (raw_scores**2.).mean()
+        raw_scores = raw_scores / emb_dim ** 0.5
+        lgt_reg = 5e-2 * (raw_scores ** 2.0).mean()
 
         # trick 2: tanh clip
         raw_scores = tanh_clip(raw_scores, clip_val=self.tclip)
@@ -188,8 +182,7 @@ class AmdimNCELoss(nn.Module):
 
 
 class FeatureMapContrastiveTask(nn.Module):
-    """
-    Performs an anchor, positive negative pair comparison for each each tuple of feature maps passed.
+    """Performs an anchor, positive negative pair comparison for each each tuple of feature maps passed.
 
     .. code-block:: python
 
@@ -220,7 +213,7 @@ class FeatureMapContrastiveTask(nn.Module):
         # 02: (pos_0, anc_2), (anc_0, pos_2)
     """
 
-    def __init__(self, comparisons: str = '00, 11', tclip: float = 10.0, bidirectional: bool = True):
+    def __init__(self, comparisons: str = "00, 11", tclip: float = 10.0, bidirectional: bool = True):
         """
         Args:
             comparisons: groupings of feature map indices to compare (zero indexed, 'r' means random) ex: '00, 1r'
@@ -247,13 +240,13 @@ class FeatureMapContrastiveTask(nn.Module):
             >>> FeatureMapContrastiveTask.parse_map_indexes('11,59, 2r')
             [(1, 1), (5, 9), (2, -1)]
         """
-        map_indexes = [x.strip() for x in comparisons.split(',')]
+        map_indexes = [x.strip() for x in comparisons.split(",")]
         for tup_i in range(len(map_indexes)):
             (a, b) = map_indexes[tup_i]
-            if a == 'r':
-                a = '-1'
-            if b == 'r':
-                b = '-1'
+            if a == "r":
+                a = "-1"
+            if b == "r":
+                b = "-1"
             map_indexes[tup_i] = (int(a), int(b))
 
         return map_indexes
@@ -273,7 +266,7 @@ class FeatureMapContrastiveTask(nn.Module):
 
         if masks is not None:
             # subsample from conv-ish r_cnv to get a single vector
-            mask_idx = torch.randint(0, masks.size(0), (n_batch, ), device=r_cnv.device)
+            mask_idx = torch.randint(0, masks.size(0), (n_batch,), device=r_cnv.device)
             mask = masks[mask_idx]
             r_cnv = torch.masked_select(r_cnv, mask)
 
@@ -312,8 +305,7 @@ class FeatureMapContrastiveTask(nn.Module):
         return loss, regularizer
 
     def forward(self, anchor_maps, positive_maps):
-        """
-        Takes in a set of tuples, each tuple has two feature maps with all matching dimensions
+        """Takes in a set of tuples, each tuple has two feature maps with all matching dimensions.
 
         Example:
 
@@ -334,7 +326,7 @@ class FeatureMapContrastiveTask(nn.Module):
             >>> regularizer
             tensor(0.0324)
         """
-        assert len(anchor_maps) == len(self.map_indexes), f'expected each input to have {len(self.map_indexes)} tensors'
+        assert len(anchor_maps) == len(self.map_indexes), f"expected each input to have {len(self.map_indexes)} tensors"
 
         self.__cache_dimension_masks(*(anchor_maps + positive_maps))
 
@@ -373,12 +365,10 @@ class FeatureMapContrastiveTask(nn.Module):
         return torch.stack(losses), regularizer
 
 
-def tanh_clip(x, clip_val=10.):
-    """
-    soft clip values to the range [-clip_val, +clip_val]
-    """
+def tanh_clip(x, clip_val=10.0):
+    """soft clip values to the range [-clip_val, +clip_val]"""
     if clip_val is not None:
-        x_clip = clip_val * torch.tanh((1. / clip_val) * x)
+        x_clip = clip_val * torch.tanh((1.0 / clip_val) * x)
     else:
         x_clip = x
     return x_clip

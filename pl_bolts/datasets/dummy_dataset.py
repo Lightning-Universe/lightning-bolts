@@ -3,8 +3,7 @@ from torch.utils.data import Dataset
 
 
 class DummyDataset(Dataset):
-    """
-    Generate a dummy dataset
+    """Generate a dummy dataset.
 
     Example:
         >>> from pl_bolts.datasets import DummyDataset
@@ -43,8 +42,7 @@ class DummyDataset(Dataset):
 
 
 class DummyDetectionDataset(Dataset):
-    """
-    Generate a dummy dataset for detection
+    """Generate a dummy dataset for detection.
 
     Example:
         >>> from pl_bolts.datasets import DummyDetectionDataset
@@ -72,20 +70,19 @@ class DummyDetectionDataset(Dataset):
 
     def _random_bbox(self):
         c, h, w = self.img_shape
-        xs = torch.randint(w, (2, ))
-        ys = torch.randint(h, (2, ))
+        xs = torch.randint(w, (2,))
+        ys = torch.randint(h, (2,))
         return [min(xs), min(ys), max(xs), max(ys)]
 
     def __getitem__(self, idx: int):
         img = torch.rand(self.img_shape)
         boxes = torch.tensor([self._random_bbox() for _ in range(self.num_boxes)], dtype=torch.float32)
-        labels = torch.randint(self.num_classes, (self.num_boxes, ), dtype=torch.long)
+        labels = torch.randint(self.num_classes, (self.num_boxes,), dtype=torch.long)
         return img, {"boxes": boxes, "labels": labels}
 
 
 class RandomDictDataset(Dataset):
-    """
-    Generate a dummy dataset with a dict structure
+    """Generate a dummy dataset with a dict structure.
 
     Example:
         >>> from pl_bolts.datasets import RandomDictDataset
@@ -106,15 +103,14 @@ class RandomDictDataset(Dataset):
     def __getitem__(self, index):
         a = self.data[index]
         b = a + 2
-        return {'a': a, 'b': b}
+        return {"a": a, "b": b}
 
     def __len__(self):
         return self.len
 
 
 class RandomDictStringDataset(Dataset):
-    """
-    Generate a dummy dataset with strings
+    """Generate a dummy dataset with strings.
 
     Example:
         >>> from pl_bolts.datasets import RandomDictStringDataset
@@ -140,8 +136,7 @@ class RandomDictStringDataset(Dataset):
 
 
 class RandomDataset(Dataset):
-    """
-    Generate a dummy dataset
+    """Generate a dummy dataset.
 
     Example:
         >>> from pl_bolts.datasets import RandomDataset
