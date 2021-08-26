@@ -17,7 +17,8 @@ else:  # pragma: no cover
 
 
 class RetinaNet(pl.LightningModule):
-    """PyTorch Lightning implementation of Retina Net `Focal Loss for Dense Object Detection
+    """PyTorch Lightning implementation of Retina Net `Focal Loss for Dense Object Detection.
+
     <https://arxiv.org/abs/1708.02002>`_.
 
     Paper authors: Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, Piotr Dollár
