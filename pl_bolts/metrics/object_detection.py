@@ -14,18 +14,6 @@ def _evaluate_iou(preds: torch.Tensor, target: torch.Tensor):
     return iou(target["boxes"], preds["boxes"]).diag().mean()
 
 
-def _evaluate_iou(preds: torch.Tensor, target: torch.Tensor):
-    """
-    Evaluate intersection over union (IOU) for target from dataset and output prediction
-    from model
-    """
-
-    if preds["boxes"].shape[0] == 0:
-        # no box detected, 0 IOU
-        return torch.tensor(0.0, device=preds["boxes"].device)
-    return iou(target["boxes"], preds["boxes"]).diag().mean()
-
-
 def iou(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     """
     Calculates the intersection over union.
