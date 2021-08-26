@@ -11,15 +11,14 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.models.detection.retinanet import RetinaNet as torchvision_RetinaNet
-    from torchvision.models.detection.retinanet import retinanet_resnet50_fpn, RetinaNetHead
+    from torchvision.models.detection.retinanet import RetinaNetHead, retinanet_resnet50_fpn
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
 class RetinaNet(pl.LightningModule):
-    """
-    PyTorch Lightning implementation of Retina Net `Focal Loss for
-    Dense Object Detection <https://arxiv.org/abs/1708.02002>`_.
+    """PyTorch Lightning implementation of Retina Net `Focal Loss for Dense Object Detection
+    <https://arxiv.org/abs/1708.02002>`_.
 
     Paper authors: Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, Piotr Dollár
 
@@ -68,7 +67,7 @@ class RetinaNet(pl.LightningModule):
                 in_channels=self.model.backbone.out_channels,
                 num_anchors=self.model.head.classification_head.num_anchors,
                 num_classes=num_classes,
-                **kwargs
+                **kwargs,
             )
 
         else:
@@ -91,7 +90,7 @@ class RetinaNet(pl.LightningModule):
         # fasterrcnn takes both images and targets for training, returns
         loss_dict = self.model(images, targets)
         loss = sum(loss for loss in loss_dict.values())
-        self.log('loss', loss, prog_bar=True)
+        self.log("loss", loss, prog_bar=True)
 
     def validation_step(self, batch, batch_idx):
         images, targets = batch

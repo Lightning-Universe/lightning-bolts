@@ -11,15 +11,14 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
-    from torchvision.models.detection.faster_rcnn import fasterrcnn_resnet50_fpn, FastRCNNPredictor
+    from torchvision.models.detection.faster_rcnn import FastRCNNPredictor, fasterrcnn_resnet50_fpn
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
 class FasterRCNN(LightningModule):
-    """
-    PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with
-    Region Proposal Networks <https://arxiv.org/abs/1506.01497>`_.
+    """PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with Region Proposal
+    Networks <https://arxiv.org/abs/1506.01497>`_.
 
     Paper authors: Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun
 
@@ -99,7 +98,7 @@ class FasterRCNN(LightningModule):
         # fasterrcnn takes both images and targets for training, returns
         loss_dict = self.model(images, targets)
         loss = sum(loss for loss in loss_dict.values())
-        self.log('loss', loss, prog_bar=True)
+        self.log("loss", loss, prog_bar=True)
 
     def validation_step(self, batch, batch_idx):
         images, targets = batch
