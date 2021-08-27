@@ -17,6 +17,7 @@ from tests import _MARK_REQUIRE_GPU
 
 # todo: seems to be failing on GH Actions for min config
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
+# TODO: RuntimeError: Given groups=1, weight of size [256, 2048, 1, 1], expected input[2, 1, 32, 32]
 @pytest.mark.skip(
     reason="FIXME: RuntimeError: Given groups=1, weight of size [256, 2048, 1, 1], expected input[2, 1, 32, 32]"
 )
