@@ -49,7 +49,7 @@ class VerificationBase:
         input_array = deepcopy(input_array)
 
         if isinstance(self.model, LightningModule):
-            input_array = self.model.transfer_batch_to_device(input_array, self.model.device)
+            input_array = self.model.transfer_batch_to_device(input_array, self.model.device, dataloader_idx=0)
         else:
             input_array = move_data_to_device(input_array, device=next(self.model.parameters()).device)
 
