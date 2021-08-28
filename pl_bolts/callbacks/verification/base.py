@@ -7,6 +7,7 @@ import torch.nn as nn
 from pytorch_lightning import Callback
 from pytorch_lightning.core.lightning import LightningModule
 from pytorch_lightning.utilities import move_data_to_device, rank_zero_warn
+from pytorch_lightning.utilities.signature_utils import is_param_in_hook_signature
 
 
 class VerificationBase:
@@ -47,8 +48,6 @@ class VerificationBase:
         if input_array is None and isinstance(self.model, LightningModule):
             input_array = self.model.example_input_array
         input_array = deepcopy(input_array)
-
-        from pytorch_lightning.utilities.signature_utils import is_param_in_hook_signature
 
         if isinstance(self.model, LightningModule):
             kwargs = {}

@@ -57,7 +57,12 @@ def test_verification_base_get_input_array(device):
     verification = TrivialVerification(model)
 
     # for a LightningModule, user can rely on the example_input_array
-    with patch.object(model, "transfer_batch_to_device", wraps=model.transfer_batch_to_device) as mocked:
+    with patch.object(
+        model,
+        "transfer_batch_to_device",
+        autospec=model.transfer_batch_to_device,
+        side_effect=model.transfer_batch_to_device,
+    ) as mocked:
         copied_tensor = verification._get_input_array_copy(input_array=None)
         mocked.assert_called_once()
         assert copied_tensor.device == model.device == device
