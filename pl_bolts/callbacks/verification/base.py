@@ -48,8 +48,14 @@ class VerificationBase:
             input_array = self.model.example_input_array
         input_array = deepcopy(input_array)
 
+        from pytorch_lightning.utilities.signature_utils import is_param_in_hook_signature
+
         if isinstance(self.model, LightningModule):
-            input_array = self.model.transfer_batch_to_device(input_array, self.model.device, dataloader_idx=0)
+            kwargs = {}
+            if is_param_in_hook_signature(self.model.transfer_batch_to_device, "dataloader_idx"):
+                # Requires for Lightning 1.4 and above
+                kwargs["dataloader_idx"] = 0
+            input_array = self.model.transfer_batch_to_device(input_array, self.model.device, **kwargs)
         else:
             input_array = move_data_to_device(input_array, device=next(self.model.parameters()).device)
 
