@@ -80,6 +80,7 @@ class SimCLR(LightningModule):
         learning_rate: float = 1e-3,
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
+        relic: bool=False,
         **kwargs
     ):
         """
@@ -121,6 +122,7 @@ class SimCLR(LightningModule):
 
         self.projection = Projection(input_dim=self.hidden_mlp, hidden_dim=self.hidden_mlp, output_dim=self.feat_dim)
 
+        self.relic = relic
         # compute iters per epoch
         global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
@@ -142,19 +144,28 @@ class SimCLR(LightningModule):
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
 
-        # final image in tuple is for online eval
-        (img1, img2, _), y = batch
 
-        # get h representations, bolts resnet returns a list
-        h1 = self(img1)
-        h2 = self(img2)
+        if not self.relic:
+            # final image in tuple is for online eval
+            # import ipdb; ipdb.set_trace()
+            (img1, img2, _), y = batch
 
-        # get z representations
-        z1 = self.projection(h1)
-        z2 = self.projection(h2)
+            # # get h representations, bolts resnet returns a list
+            h1 = self(img1)
+            h2 = self(img2)
 
-        loss = self.nt_xent_loss(z1, z2, self.temperature)
+            # # get z representations
+            z1 = self.projection(h1)
+            z2 = self.projection(h2)
 
+            loss, _ = self.nt_xent_loss(z1, z2, self.temperature)
+        else:
+            # import ipdb; ipdb.set_trace()
+            (img_list, _), y = batch
+            z_list = []
+            for img in img_list:
+                z_list.append(self.projection(self(img)))
+            loss = self.relic_loss(z_list)
         return loss
 
     def training_step(self, batch, batch_idx):
@@ -243,6 +254,7 @@ class SimCLR(LightningModule):
 
         # cov and sim: [2 * batch_size, 2 * batch_size * world_size]
         # neg: [2 * batch_size]
+        # import ipdb; ipdb.set_trace()
         cov = torch.mm(out, out_dist.t().contiguous())
         sim = torch.exp(cov / temperature)
         neg = sim.sum(dim=-1)
@@ -257,13 +269,37 @@ class SimCLR(LightningModule):
 
         loss = -torch.log(pos / (neg + eps)).mean()
 
-        return loss
+        return loss, sim[out_1.shape[0]:, :out_1.shape[0]]
 
+    def relic_loss(self, z_list, alfa=0.5):
+        
+        _nt_xent_loss, _relic_loss = 0, 0
+        p_do_list = []
+        batch_size = z_list[0].shape[0]
+        device = 'cuda'
+        mask = torch.ones([batch_size, batch_size], device=device) - torch.eye(batch_size, device=device)
+
+        for i in range(len(z_list) - 1):
+            for j in range(i + 1, len(z_list)):
+                _loss, p_do = self.nt_xent_loss(z_list[i], z_list[j], self.temperature)
+                _nt_xent_loss += _loss
+                p_do_list.append(p_do)
+        
+        for i in range(len(p_do_list) - 1):
+            for j in range(i + 1, len(p_do_list)):
+                do1_log = p_do_list[i].log() * mask
+                do2 = p_do_list[j] * mask
+                _relic_loss += nn.KLDivLoss()(do1_log, do2)
+
+        loss = _nt_xent_loss +  _relic_loss
+        
+        return loss
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
 
         # model params
+        parser.add_argument("--relic", default=False, type=bool, help="use relic loss")
         parser.add_argument("--arch", default="resnet50", type=str, help="convnet architecture")
         # specify flags to store false
         parser.add_argument("--first_conv", action="store_false")
@@ -344,7 +380,8 @@ def cli_main():
 
         normalization = cifar10_normalization()
 
-        args.gaussian_blur = False
+        # args.gaussian_blur = False
+        args.gaussian_blur = True  # test relic.
         args.jitter_strength = 0.5
     elif args.dataset == "imagenet":
         args.maxpool1 = True
@@ -377,6 +414,7 @@ def cli_main():
         gaussian_blur=args.gaussian_blur,
         jitter_strength=args.jitter_strength,
         normalize=normalization,
+        relic=args.relic,
     )
 
     dm.val_transforms = SimCLREvalDataTransform(
@@ -384,6 +422,7 @@ def cli_main():
         gaussian_blur=args.gaussian_blur,
         jitter_strength=args.jitter_strength,
         normalize=normalization,
+        relic=args.relic,
     )
 
     model = SimCLR(**args.__dict__)

@@ -36,9 +36,9 @@ class SimCLRTrainDataTransform:
     """
 
     def __init__(
-        self, input_height: int = 224, gaussian_blur: bool = True, jitter_strength: float = 1.0, normalize=None
+        self, input_height: int = 224, gaussian_blur: bool = True, jitter_strength: float = 1.0, normalize=None, relic=False
     ) -> None:
-
+        self.relic = relic
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -65,7 +65,7 @@ class SimCLRTrainDataTransform:
             kernel_size = int(0.1 * self.input_height)
             if kernel_size % 2 == 0:
                 kernel_size += 1
-
+            self.gaussian_blur_transform = GaussianBlur(kernel_size=kernel_size, p=0.5)  # relic
             data_transforms.append(GaussianBlur(kernel_size=kernel_size, p=0.5))
 
         data_transforms = transforms.Compose(data_transforms)
@@ -83,12 +83,24 @@ class SimCLRTrainDataTransform:
         )
 
     def __call__(self, sample):
-        transform = self.train_transform
+        if self.relic:
+            z1 = transforms.Compose([transforms.RandomResizedCrop(size=self.input_height), self.final_transform])(sample)
+            z2 = transforms.Compose([transforms.RandomHorizontalFlip(p=0.5), self.final_transform])(sample)
+            z3 = transforms.Compose([transforms.RandomApply([self.color_jitter], p=0.8), self.final_transform])(sample)
+            z4 = transforms.Compose([transforms.RandomGrayscale(p=0.2), self.final_transform])(sample)
+            z5 = transforms.Compose([transforms.RandomSolarize(threshold=0.5, p=0.5), self.final_transform])(sample)
+            if self.gaussian_blur:
+                z6 = transforms.Compose([self.gaussian_blur_transform, self.final_transform])(sample)
+                return [z1, z2, z3, z4, z5, z6], self.online_transform(sample)
+            
+            return [z1, z2, z3, z4, z5], self.online_transform(sample)
+        else:
+            transform = self.train_transform
 
-        xi = transform(sample)
-        xj = transform(sample)
+            xi = transform(sample)
+            xj = transform(sample)
 
-        return xi, xj, self.online_transform(sample)
+            return xi, xj, self.online_transform(sample)
 
 
 class SimCLREvalDataTransform(SimCLRTrainDataTransform):
@@ -110,10 +122,10 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
     """
 
     def __init__(
-        self, input_height: int = 224, gaussian_blur: bool = True, jitter_strength: float = 1.0, normalize=None
+        self, input_height: int = 224, gaussian_blur: bool = True, jitter_strength: float = 1.0, normalize=None, relic=False
     ):
         super().__init__(
-            normalize=normalize, input_height=input_height, gaussian_blur=gaussian_blur, jitter_strength=jitter_strength
+            normalize=normalize, input_height=input_height, gaussian_blur=gaussian_blur, jitter_strength=jitter_strength, relic=relic
         )
 
         # replace online transform with eval time transform
