@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed ImageNet val loader to use val transform instead of train transform.
+
 - Fixed the MNIST download giving HTTP 404 with torchvision>=0.9.1 ([#674](https://github.com/PyTorchLightning/lightning-bolts/pull/674))
 
 
