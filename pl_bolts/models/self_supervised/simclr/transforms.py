@@ -191,3 +191,4 @@ class GaussianBlur:
             sample = cv2.GaussianBlur(sample, (self.kernel_size, self.kernel_size), sigma)
 
         return sample
+
