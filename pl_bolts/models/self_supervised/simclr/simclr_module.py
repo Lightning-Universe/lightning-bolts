@@ -123,9 +123,11 @@ class SimCLR(LightningModule):
         self.projection = Projection(input_dim=self.hidden_mlp, hidden_dim=self.hidden_mlp, output_dim=self.feat_dim)
 
         self.relic = relic
+        
         # compute iters per epoch
         global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
+        print(global_batch_size, 'self.num_samples: ', self.num_samples)
 
     def init_model(self):
         if self.arch == "resnet18":
@@ -143,11 +145,16 @@ class SimCLR(LightningModule):
         if self.dataset == "stl10":
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
+        if self.relic:
+            
+            (img_list, _), y = batch
+            z_list = []
+            for img in img_list:
+                z_list.append(self.projection(self(img)))
 
-
-        if not self.relic:
+            loss = self.relic_loss(z_list)
+        else:
             # final image in tuple is for online eval
-            # import ipdb; ipdb.set_trace()
             (img1, img2, _), y = batch
 
             # # get h representations, bolts resnet returns a list
@@ -159,13 +166,6 @@ class SimCLR(LightningModule):
             z2 = self.projection(h2)
 
             loss, _ = self.nt_xent_loss(z1, z2, self.temperature)
-        else:
-            # import ipdb; ipdb.set_trace()
-            (img_list, _), y = batch
-            z_list = []
-            for img in img_list:
-                z_list.append(self.projection(self(img)))
-            loss = self.relic_loss(z_list)
         return loss
 
     def training_step(self, batch, batch_idx):
@@ -316,7 +316,7 @@ class SimCLR(LightningModule):
         parser.add_argument("--data_dir", type=str, default=".", help="path to download data")
 
         # training params
-        parser.add_argument("--fast_dev_run", default=1, type=int)
+        parser.add_argument("--fast_dev_run", default=10, type=int)
         parser.add_argument("--num_nodes", default=1, type=int, help="number of nodes for training")
         parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
@@ -370,7 +370,7 @@ def cli_main():
         dm = CIFAR10DataModule(
             data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers, val_split=val_split
         )
-
+        print(dm.num_samples)
         args.num_samples = dm.num_samples
 
         args.maxpool1 = False
@@ -443,6 +443,7 @@ def cli_main():
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
     callbacks.append(lr_monitor)
 
+
     trainer = Trainer(
         max_epochs=args.max_epochs,
         max_steps=None if args.max_steps == -1 else args.max_steps,
@@ -452,7 +453,7 @@ def cli_main():
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=32 if args.fp32 else 16,
         callbacks=callbacks,
-        fast_dev_run=args.fast_dev_run,
+        fast_dev_run=False,
     )
 
     trainer.fit(model, datamodule=dm)
