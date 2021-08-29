@@ -36,7 +36,12 @@ class SimCLRTrainDataTransform:
     """
 
     def __init__(
-        self, input_height: int = 224, gaussian_blur: bool = True, jitter_strength: float = 1.0, normalize=None, relic=False
+        self,
+        input_height: int = 224,
+        gaussian_blur: bool = True,
+        jitter_strength: float = 1.0,
+        normalize=None,
+        relic=False,
     ) -> None:
         self.relic = relic
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
@@ -84,7 +89,9 @@ class SimCLRTrainDataTransform:
 
     def __call__(self, sample):
         if self.relic:
-            z1 = transforms.Compose([transforms.RandomResizedCrop(size=self.input_height), self.final_transform])(sample)
+            z1 = transforms.Compose([transforms.RandomResizedCrop(size=self.input_height), self.final_transform])(
+                sample
+            )
             z2 = transforms.Compose([transforms.RandomHorizontalFlip(p=0.5), self.final_transform])(sample)
             z3 = transforms.Compose([transforms.RandomApply([self.color_jitter], p=0.8), self.final_transform])(sample)
             z4 = transforms.Compose([transforms.RandomGrayscale(p=0.2), self.final_transform])(sample)
@@ -92,7 +99,7 @@ class SimCLRTrainDataTransform:
             if self.gaussian_blur:
                 z6 = transforms.Compose([self.gaussian_blur_transform, self.final_transform])(sample)
                 return [z1, z2, z3, z4, z5, z6], self.online_transform(sample)
-            
+
             return [z1, z2, z3, z4, z5], self.online_transform(sample)
         else:
             transform = self.train_transform
@@ -122,10 +129,19 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
     """
 
     def __init__(
-        self, input_height: int = 224, gaussian_blur: bool = True, jitter_strength: float = 1.0, normalize=None, relic=False
+        self,
+        input_height: int = 224,
+        gaussian_blur: bool = True,
+        jitter_strength: float = 1.0,
+        normalize=None,
+        relic=False,
     ):
         super().__init__(
-            normalize=normalize, input_height=input_height, gaussian_blur=gaussian_blur, jitter_strength=jitter_strength, relic=relic
+            normalize=normalize,
+            input_height=input_height,
+            gaussian_blur=gaussian_blur,
+            jitter_strength=jitter_strength,
+            relic=relic,
         )
 
         # replace online transform with eval time transform
@@ -203,4 +219,3 @@ class GaussianBlur:
             sample = cv2.GaussianBlur(sample, (self.kernel_size, self.kernel_size), sigma)
 
         return sample
-
