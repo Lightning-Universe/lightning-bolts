@@ -1,13 +1,6 @@
 import torch
 from torch import nn
-
-from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.warnings import warn_missing_pkg
-
-if _TORCHVISION_AVAILABLE:
-    from torchvision.models.utils import load_state_dict_from_url
-else:  # pragma: no cover
-    warn_missing_pkg("torchvision")
+from torch.utils.model_zoo import load_url as load_state_dict_from_url
 
 __all__ = [
     "ResNet",

@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+from pytorch_lightning.loggers import WandbLogger
 from torch import Tensor, nn
 from torch.nn import functional as F
 
@@ -47,10 +48,19 @@ class Projection(nn.Module):
         self.hidden_dim = hidden_dim
 
         self.model = nn.Sequential(
-            nn.Linear(self.input_dim, self.hidden_dim),
-            nn.BatchNorm1d(self.hidden_dim),
+            nn.Linear(self.input_dim, 4096),
+            nn.BatchNorm1d(4096),
             nn.ReLU(),
-            nn.Linear(self.hidden_dim, self.output_dim, bias=False),
+            nn.Linear(4096, 2048),
+            nn.BatchNorm1d(2048),
+            nn.ReLU(),
+            nn.Linear(2048, 1024),
+            nn.BatchNorm1d(1024),
+            nn.ReLU(),
+            nn.Linear(1024, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
+            nn.Linear(512, self.output_dim, bias=False),
         )
 
     def forward(self, x):
@@ -80,6 +90,12 @@ class SimCLR(LightningModule):
         learning_rate: float = 1e-3,
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
+<<<<<<< HEAD
+        relic: bool=False,
+        alfa: float = 0.1,
+=======
+        relic: bool = False,
+>>>>>>> 3eb270b704af88b200abe8123fcd9012325a59dd
         **kwargs
     ):
         """
@@ -121,9 +137,21 @@ class SimCLR(LightningModule):
 
         self.projection = Projection(input_dim=self.hidden_mlp, hidden_dim=self.hidden_mlp, output_dim=self.feat_dim)
 
+        # relic params
+        self.relic = relic
+<<<<<<< HEAD
+        self.alfa = alfa
+=======
+>>>>>>> 3eb270b704af88b200abe8123fcd9012325a59dd
+
         # compute iters per epoch
         global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
+<<<<<<< HEAD
+        print('global_batch_size:', global_batch_size, 'self.num_samples: ', self.num_samples)
+=======
+        print(global_batch_size, "self.num_samples: ", self.num_samples)
+>>>>>>> 3eb270b704af88b200abe8123fcd9012325a59dd
 
     def init_model(self):
         if self.arch == "resnet18":
@@ -141,20 +169,27 @@ class SimCLR(LightningModule):
         if self.dataset == "stl10":
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
+        if self.relic:
 
-        # final image in tuple is for online eval
-        (img1, img2, _), y = batch
+            (img_list, _), y = batch
+            z_list = []
+            for img in img_list:
+                z_list.append(self.projection(self(img)))
 
-        # get h representations, bolts resnet returns a list
-        h1 = self(img1)
-        h2 = self(img2)
+            loss = self.relic_loss(z_list, alfa=self.alfa)
+        else:
+            # final image in tuple is for online eval
+            (img1, img2, _), y = batch
 
-        # get z representations
-        z1 = self.projection(h1)
-        z2 = self.projection(h2)
+            # # get h representations, bolts resnet returns a list
+            h1 = self(img1)
+            h2 = self(img2)
 
-        loss = self.nt_xent_loss(z1, z2, self.temperature)
+            # # get z representations
+            z1 = self.projection(h1)
+            z2 = self.projection(h2)
 
+            loss, _ = self.nt_xent_loss(z1, z2, self.temperature)
         return loss
 
     def training_step(self, batch, batch_idx):
@@ -243,6 +278,7 @@ class SimCLR(LightningModule):
 
         # cov and sim: [2 * batch_size, 2 * batch_size * world_size]
         # neg: [2 * batch_size]
+        # import ipdb; ipdb.set_trace()
         cov = torch.mm(out, out_dist.t().contiguous())
         sim = torch.exp(cov / temperature)
         neg = sim.sum(dim=-1)
@@ -257,12 +293,49 @@ class SimCLR(LightningModule):
 
         loss = -torch.log(pos / (neg + eps)).mean()
 
+        return loss, sim[out_1.shape[0] :, : out_1.shape[0]]
+
+<<<<<<< HEAD
+    def relic_loss(self, z_list, alfa=0.1):
+
+=======
+    def relic_loss(self, z_list, alfa=0.5):
+
+>>>>>>> 3eb270b704af88b200abe8123fcd9012325a59dd
+        _nt_xent_loss, _relic_loss = 0, 0
+        p_do_list = []
+        batch_size = z_list[0].shape[0]
+        device = "cuda"
+        mask = torch.ones([batch_size, batch_size], device=device) - torch.eye(batch_size, device=device)
+
+        for i in range(len(z_list) - 1):
+            for j in range(i + 1, len(z_list)):
+                _loss, p_do = self.nt_xent_loss(z_list[i], z_list[j], self.temperature)
+                _nt_xent_loss += _loss
+                p_do_list.append(p_do)
+
+        for i in range(len(p_do_list) - 1):
+            for j in range(i + 1, len(p_do_list)):
+                do1_log = p_do_list[i].log() * mask
+                do2 = p_do_list[j] * mask
+                _relic_loss += nn.KLDivLoss()(do1_log, do2)
+
+<<<<<<< HEAD
+        loss = _nt_xent_loss +  alfa * _relic_loss
+
+=======
+        loss = _nt_xent_loss + _relic_loss
+
+>>>>>>> 3eb270b704af88b200abe8123fcd9012325a59dd
         return loss
 
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
 
+        # relic params
+        parser.add_argument("--relic", default=True, type=bool, help="use relic loss")
+        parser.add_argument("--alfa", default=0.1, type=float, help="alfa of relic loss")
         # model params
         parser.add_argument("--arch", default="resnet50", type=str, help="convnet architecture")
         # specify flags to store false
@@ -280,20 +353,20 @@ class SimCLR(LightningModule):
         parser.add_argument("--data_dir", type=str, default=".", help="path to download data")
 
         # training params
-        parser.add_argument("--fast_dev_run", default=1, type=int)
+        parser.add_argument("--fast_dev_run", default=10, type=int)
         parser.add_argument("--num_nodes", default=1, type=int, help="number of nodes for training")
-        parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
+        parser.add_argument("--gpus", default=2, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/lars")
         parser.add_argument("--exclude_bn_bias", action="store_true", help="exclude bn/bias from weight decay")
         parser.add_argument("--max_epochs", default=100, type=int, help="number of total epochs to run")
         parser.add_argument("--max_steps", default=-1, type=int, help="max steps")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
-        parser.add_argument("--batch_size", default=128, type=int, help="batch size per gpu")
+        parser.add_argument("--batch_size", default=256, type=int, help="batch size per gpu")
 
         parser.add_argument("--temperature", default=0.1, type=float, help="temperature parameter in training loss")
-        parser.add_argument("--weight_decay", default=1e-6, type=float, help="weight decay")
-        parser.add_argument("--learning_rate", default=1e-3, type=float, help="base learning rate")
+        parser.add_argument("--weight_decay", default=1.5 * 1e-6, type=float, help="weight decay")
+        parser.add_argument("--learning_rate", default=0.3, type=float, help="base learning rate")
         parser.add_argument("--start_lr", default=0, type=float, help="initial warmup learning rate")
         parser.add_argument("--final_lr", type=float, default=1e-6, help="final learning rate")
 
@@ -310,6 +383,8 @@ def cli_main():
     # model args
     parser = SimCLR.add_model_specific_args(parser)
     args = parser.parse_args()
+
+    wandb_logger = WandbLogger()
 
     if args.dataset == "stl10":
         dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
@@ -334,7 +409,7 @@ def cli_main():
         dm = CIFAR10DataModule(
             data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers, val_split=val_split
         )
-
+        print(dm.num_samples)
         args.num_samples = dm.num_samples
 
         args.maxpool1 = False
@@ -345,6 +420,7 @@ def cli_main():
         normalization = cifar10_normalization()
 
         args.gaussian_blur = False
+        # args.gaussian_blur = True  # test relic.
         args.jitter_strength = 0.5
     elif args.dataset == "imagenet":
         args.maxpool1 = True
@@ -377,6 +453,7 @@ def cli_main():
         gaussian_blur=args.gaussian_blur,
         jitter_strength=args.jitter_strength,
         normalize=normalization,
+        relic=args.relic,
     )
 
     dm.val_transforms = SimCLREvalDataTransform(
@@ -384,6 +461,7 @@ def cli_main():
         gaussian_blur=args.gaussian_blur,
         jitter_strength=args.jitter_strength,
         normalize=normalization,
+        relic=args.relic,
     )
 
     model = SimCLR(**args.__dict__)
@@ -413,7 +491,8 @@ def cli_main():
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=32 if args.fp32 else 16,
         callbacks=callbacks,
-        fast_dev_run=args.fast_dev_run,
+        fast_dev_run=False,
+        logger=wandb_logger,
     )
 
     trainer.fit(model, datamodule=dm)
