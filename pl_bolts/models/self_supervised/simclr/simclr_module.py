@@ -90,11 +90,7 @@ class SimCLR(LightningModule):
         learning_rate: float = 1e-3,
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
-<<<<<<< HEAD
-        use_relic_loss: bool=False,
-=======
         use_relic_loss: bool = False,
->>>>>>> 6c4d1e56e844f34b3f7395ff6749e4b5bc4b681a
         alfa: float = 0.1,
         **kwargs
     ):
@@ -307,12 +303,8 @@ class SimCLR(LightningModule):
                 do2 = p_do_list[j] * mask
                 _relic_loss += nn.KLDivLoss()(do1_log, do2)
 
-<<<<<<< HEAD
-        loss = _nt_xent_loss +  alfa * _relic_loss
-=======
         loss = _nt_xent_loss + alfa * _relic_loss
 
->>>>>>> 6c4d1e56e844f34b3f7395ff6749e4b5bc4b681a
         return loss
 
     @staticmethod
