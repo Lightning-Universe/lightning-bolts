@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import torch
 from pytorch_lightning import LightningDataModule
 from torch import Tensor
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -185,7 +185,7 @@ class VOCDetectionDataModule(LightningDataModule):
         voc_transforms = transform_lib.Compose(voc_transforms)
         return lambda image, target: (voc_transforms(image), target)
 
-    def _data_loader(self, dataset: VOCDetection, shuffle: bool = False) -> DataLoader:
+    def _data_loader(self, dataset: Dataset, shuffle: bool = False) -> DataLoader:
         return DataLoader(
             dataset,
             batch_size=self.batch_size,
