@@ -70,7 +70,7 @@ class SimCLRTrainDataTransform:
             kernel_size = int(0.1 * self.input_height)
             if kernel_size % 2 == 0:
                 kernel_size += 1
-            self.gaussian_blur_transform = GaussianBlur(kernel_size=kernel_size, p=0.5)  # relic
+            self.gaussian_blur_transform = GaussianBlur(kernel_size=kernel_size, p=0.5)  # for use_relic_loss
             data_transforms.append(GaussianBlur(kernel_size=kernel_size, p=0.5))
 
         data_transforms = transforms.Compose(data_transforms)
@@ -88,10 +88,9 @@ class SimCLRTrainDataTransform:
         )
 
     def __call__(self, sample):
-        if self.relic:
-            z1 = transforms.Compose([transforms.RandomResizedCrop(size=self.input_height), self.final_transform])(
-                sample
-            )
+        if self.use_relic_loss:
+            # https://arxiv.org/pdf/2010.07922.pdf
+            z1 = transforms.Compose([transforms.RandomResizedCrop(size=self.input_height), self.final_transform])(sample)
             z2 = transforms.Compose([transforms.RandomHorizontalFlip(p=0.5), self.final_transform])(sample)
             z3 = transforms.Compose([transforms.RandomApply([self.color_jitter], p=0.8), self.final_transform])(sample)
             z4 = transforms.Compose([transforms.RandomGrayscale(p=0.2), self.final_transform])(sample)
