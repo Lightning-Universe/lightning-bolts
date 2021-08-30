@@ -90,7 +90,7 @@ class SimCLR(LightningModule):
         learning_rate: float = 1e-3,
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
-        relic: bool=False,
+        use_relic_loss: bool=False,
         alfa: float = 0.1,
         **kwargs
     ):
@@ -134,7 +134,7 @@ class SimCLR(LightningModule):
         self.projection = Projection(input_dim=self.hidden_mlp, hidden_dim=self.hidden_mlp, output_dim=self.feat_dim)
 
         # relic params
-        self.relic = relic
+        self.use_relic_loss = use_relic_loss
         self.alfa = alfa
 
         # compute iters per epoch
@@ -158,8 +158,9 @@ class SimCLR(LightningModule):
         if self.dataset == "stl10":
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
-        if self.relic:
-
+        if self.use_relic_loss:
+            # Add the causal regularization.
+            # https://arxiv.org/pdf/2010.07922.pdf
             (img_list, _), y = batch
             z_list = []
             for img in img_list:
@@ -282,14 +283,12 @@ class SimCLR(LightningModule):
 
         loss = -torch.log(pos / (neg + eps)).mean()
 
-        return loss, sim[out_1.shape[0] :, : out_1.shape[0]]
+        return loss, sim[out_1.shape[0] :, : out_1.shape[0]]  # sim[] is for use_relic_loss
 
     def relic_loss(self, z_list, alfa=0.1):
 
-        _nt_xent_loss, _relic_loss = 0, 0
-        p_do_list = []
-        batch_size = z_list[0].shape[0]
-        device = "cuda"
+        _nt_xent_loss, _relic_loss, p_do_list = 0, 0, []
+        batch_size, device = z_list[0].shape[0], z_list[0].device
         mask = torch.ones([batch_size, batch_size], device=device) - torch.eye(batch_size, device=device)
 
         for i in range(len(z_list) - 1):
@@ -305,7 +304,6 @@ class SimCLR(LightningModule):
                 _relic_loss += nn.KLDivLoss()(do1_log, do2)
 
         loss = _nt_xent_loss +  alfa * _relic_loss
-
         return loss
 
     @staticmethod
@@ -313,7 +311,7 @@ class SimCLR(LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
 
         # relic params
-        parser.add_argument("--relic", default=True, type=bool, help="use relic loss")
+        parser.add_argument("--use_relic_loss", default=False, type=bool, help="use relic loss")
         parser.add_argument("--alfa", default=0.1, type=float, help="alfa of relic loss")
         # model params
         parser.add_argument("--arch", default="resnet50", type=str, help="convnet architecture")
