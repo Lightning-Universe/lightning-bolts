@@ -1,5 +1,6 @@
 import os
 from argparse import ArgumentParser
+from pytorch_lightning.loggers import WandbLogger
 
 from pytorch_lightning import Trainer, seed_everything
 
@@ -19,6 +20,11 @@ def cli_main():  # pragma: no cover
     seed_everything(1234)
 
     parser = ArgumentParser()
+    
+    # relic params
+    parser.add_argument("--use_relic_loss", type=bool, help="to use_relic_loss.", default=False)
+    parser.add_argument("--alfa", type=float, help="how depend on relic loss.", default=0.1)
+    
     parser.add_argument("--dataset", type=str, help="cifar10, stl10, imagenet", default="cifar10")
     parser.add_argument("--ckpt_path", type=str, help="path to ckpt")
     parser.add_argument("--data_dir", type=str, help="path to dataset", default=os.getcwd())
@@ -40,17 +46,19 @@ def cli_main():  # pragma: no cover
 
     args = parser.parse_args()
 
+    wandb_logger = WandbLogger(project="simclr-finetune-cifar10", name='relic simple augmentation.')
+
     if args.dataset == "cifar10":
         dm = CIFAR10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         dm.train_transforms = SimCLRFinetuneTransform(
-            normalize=cifar10_normalization(), input_height=dm.size()[-1], eval_transform=False
+            normalize=cifar10_normalization(), input_height=dm.size()[-1], eval_transform=False, use_relic_loss=args.use_relic_loss,
         )
         dm.val_transforms = SimCLRFinetuneTransform(
-            normalize=cifar10_normalization(), input_height=dm.size()[-1], eval_transform=True
+            normalize=cifar10_normalization(), input_height=dm.size()[-1], eval_transform=True,
         )
         dm.test_transforms = SimCLRFinetuneTransform(
-            normalize=cifar10_normalization(), input_height=dm.size()[-1], eval_transform=True
+            normalize=cifar10_normalization(), input_height=dm.size()[-1], eval_transform=True,
         )
 
         args.maxpool1 = False
@@ -102,6 +110,7 @@ def cli_main():  # pragma: no cover
         maxpool1=args.maxpool1,
         first_conv=args.first_conv,
         dataset=args.dataset,
+        use_relic_loss=args.use_relic_loss,
     ).load_from_checkpoint(args.ckpt_path, strict=False)
 
     tuner = SSLFineTuner(
@@ -117,6 +126,7 @@ def cli_main():  # pragma: no cover
         scheduler_type=args.scheduler_type,
         gamma=args.gamma,
         final_lr=args.final_lr,
+        use_relic_loss=args.use_relic_loss
     )
 
     trainer = Trainer(
@@ -126,6 +136,7 @@ def cli_main():  # pragma: no cover
         max_epochs=args.num_epochs,
         distributed_backend="ddp",
         sync_batchnorm=True if args.gpus > 1 else False,
+        logger=wandb_logger,
     )
 
     trainer.fit(tuner, dm)

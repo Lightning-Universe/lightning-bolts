@@ -41,9 +41,9 @@ class SimCLRTrainDataTransform:
         gaussian_blur: bool = True,
         jitter_strength: float = 1.0,
         normalize=None,
-        relic=False,
+        use_relic_loss=False,
     ) -> None:
-        self.relic = relic
+        self.use_relic_loss = use_relic_loss
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -135,14 +135,14 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
         gaussian_blur: bool = True,
         jitter_strength: float = 1.0,
         normalize=None,
-        relic=False,
+        use_relic_loss=False,
     ):
         super().__init__(
             normalize=normalize,
             input_height=input_height,
             gaussian_blur=gaussian_blur,
             jitter_strength=jitter_strength,
-            relic=relic,
+            use_relic_loss=use_relic_loss,
         )
 
         # replace online transform with eval time transform
@@ -157,7 +157,7 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
 
 class SimCLRFinetuneTransform:
     def __init__(
-        self, input_height: int = 224, jitter_strength: float = 1.0, normalize=None, eval_transform: bool = False
+        self, input_height: int = 224, jitter_strength: float = 1.0, normalize=None, eval_transform: bool = False, use_relic_loss: bool = False,
     ) -> None:
 
         self.jitter_strength = jitter_strength
@@ -170,6 +170,15 @@ class SimCLRFinetuneTransform:
             0.8 * self.jitter_strength,
             0.2 * self.jitter_strength,
         )
+        
+        self.use_relic_loss = use_relic_loss
+        if self.use_relic_loss:
+            # self.gaussian_blur_transform
+            kernel_size = int(0.1 * self.input_height)
+            if kernel_size % 2 == 0:
+                kernel_size += 1
+            self.gaussian_blur_transform = GaussianBlur(kernel_size=kernel_size, p=0.5)
+
 
         if not eval_transform:
             data_transforms = [
@@ -185,15 +194,27 @@ class SimCLRFinetuneTransform:
             ]
 
         if normalize is None:
-            final_transform = transforms.ToTensor()
+            self.final_transform = transforms.ToTensor()
         else:
-            final_transform = transforms.Compose([transforms.ToTensor(), normalize])
+            self.final_transform = transforms.Compose([transforms.ToTensor(), normalize])
 
-        data_transforms.append(final_transform)
+        data_transforms.append(self.final_transform)
         self.transform = transforms.Compose(data_transforms)
 
     def __call__(self, sample):
-        return self.transform(sample)
+        # print('use_relic_loss in SimCLRFinetuneTransform :', self.use_relic_loss)
+        if self.use_relic_loss:
+            z1 = transforms.Compose([transforms.RandomResizedCrop(size=self.input_height), self.final_transform])(
+                sample
+            )
+            z2 = transforms.Compose([transforms.RandomHorizontalFlip(p=0.5), self.final_transform])(sample)
+            z3 = transforms.Compose([transforms.RandomApply([self.color_jitter], p=0.8), self.final_transform])(sample)
+            z4 = transforms.Compose([transforms.RandomGrayscale(p=0.2), self.final_transform])(sample)
+            z5 = transforms.Compose([transforms.RandomSolarize(threshold=0.5, p=0.5), self.final_transform])(sample)
+            z6 = transforms.Compose([self.gaussian_blur_transform, self.final_transform])(sample)
+            return [z1, z2, z3, z4, z5, z6]
+        else:
+            return self.transform(sample)
 
 
 class GaussianBlur:

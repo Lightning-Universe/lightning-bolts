@@ -48,20 +48,27 @@ class Projection(nn.Module):
         self.hidden_dim = hidden_dim
 
         self.model = nn.Sequential(
-            nn.Linear(self.input_dim, 4096),
-            nn.BatchNorm1d(4096),
+            nn.Linear(self.input_dim, self.hidden_dim),
+            nn.BatchNorm1d(self.hidden_dim),
             nn.ReLU(),
-            nn.Linear(4096, 2048),
-            nn.BatchNorm1d(2048),
-            nn.ReLU(),
-            nn.Linear(2048, 1024),
-            nn.BatchNorm1d(1024),
-            nn.ReLU(),
-            nn.Linear(1024, 512),
-            nn.BatchNorm1d(512),
-            nn.ReLU(),
-            nn.Linear(512, self.output_dim, bias=False),
+            nn.Linear(self.hidden_dim, self.output_dim, bias=False),
         )
+        # use_relic_loss
+        # self.model = nn.Sequential(
+        #     nn.Linear(self.input_dim, 4096),
+        #     nn.BatchNorm1d(4096),
+        #     nn.ReLU(),
+        #     nn.Linear(4096, 2048),
+        #     nn.BatchNorm1d(2048),
+        #     nn.ReLU(),
+        #     nn.Linear(2048, 1024),
+        #     nn.BatchNorm1d(1024),
+        #     nn.ReLU(),
+        #     nn.Linear(1024, 512),
+        #     nn.BatchNorm1d(512),
+        #     nn.ReLU(),
+        #     nn.Linear(512, self.output_dim, bias=False),
+        # )
 
     def forward(self, x):
         x = self.model(x)
@@ -158,6 +165,7 @@ class SimCLR(LightningModule):
         if self.dataset == "stl10":
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
+        
         if self.use_relic_loss:
             # Add the causal regularization.
             # https://arxiv.org/pdf/2010.07922.pdf
@@ -230,6 +238,8 @@ class SimCLR(LightningModule):
             )
         elif self.optim == "adam":
             optimizer = torch.optim.Adam(params, lr=self.learning_rate, weight_decay=self.weight_decay)
+        elif self.optim == "sgd":
+            optimizer = torch.optim.SGD(params, lr=self.learning_rate)
 
         warmup_steps = self.train_iters_per_epoch * self.warmup_epochs
         total_steps = self.train_iters_per_epoch * self.max_epochs
@@ -362,7 +372,7 @@ def cli_main():
     parser = SimCLR.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    wandb_logger = WandbLogger()
+    wandb_logger = WandbLogger(name='simclr-pretrian')
 
     if args.dataset == "stl10":
         dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
@@ -387,7 +397,7 @@ def cli_main():
         dm = CIFAR10DataModule(
             data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers, val_split=val_split
         )
-        print(dm.num_samples)
+        print('dm.num_samples: ', dm.num_samples)
         args.num_samples = dm.num_samples
 
         args.maxpool1 = False
@@ -431,7 +441,7 @@ def cli_main():
         gaussian_blur=args.gaussian_blur,
         jitter_strength=args.jitter_strength,
         normalize=normalization,
-        relic=args.relic,
+        use_relic_loss=args.use_relic_loss,
     )
 
     dm.val_transforms = SimCLREvalDataTransform(
@@ -439,7 +449,7 @@ def cli_main():
         gaussian_blur=args.gaussian_blur,
         jitter_strength=args.jitter_strength,
         normalize=normalization,
-        relic=args.relic,
+        use_relic_loss=args.use_relic_loss,
     )
 
     model = SimCLR(**args.__dict__)

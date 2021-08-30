@@ -1,4 +1,5 @@
 from typing import List, Optional
+import numpy as np
 
 import torch
 from pytorch_lightning import LightningModule
@@ -54,6 +55,7 @@ class SSLFineTuner(LightningModule):
         decay_epochs: List = [60, 80],
         gamma: float = 0.1,
         final_lr: float = 0.0,
+        use_relic_loss: bool = False,
     ):
         """
         Args:
@@ -82,18 +84,36 @@ class SSLFineTuner(LightningModule):
         self.val_acc = Accuracy(compute_on_step=False)
         self.test_acc = Accuracy(compute_on_step=False)
 
+        # relic
+        self.use_relic_loss = use_relic_loss
+
     def on_train_epoch_start(self) -> None:
         self.backbone.eval()
 
     def training_step(self, batch, batch_idx):
-        loss, logits, y = self.shared_step(batch)
-        acc = self.train_acc(logits.softmax(-1), y)
+        if self.use_relic_loss:
+            loss_list, logits_list, y = self.shared_step(batch, image_list=True)
+            acc, l = 0, 0
+            n = len(loss_list)
+            for loss, logits in zip(loss_list, logits_list):
+                acc += self.train_acc(logits.softmax(-1), y)
+                l += loss
 
-        self.log("train_loss", loss, prog_bar=True)
-        self.log("train_acc_step", acc, prog_bar=True)
-        self.log("train_acc_epoch", self.train_acc)
+            self.log("train_loss", loss / n, prog_bar=True)
+            self.log("train_acc_step", acc / n, prog_bar=True)
+            self.log("train_acc_epoch", self.train_acc)
+            
+            return loss / n
+        else:
+            loss, logits, y = self.shared_step(batch)
 
-        return loss
+            acc = self.train_acc(logits.softmax(-1), y)
+
+            self.log("train_loss", loss, prog_bar=True)
+            self.log("train_acc_step", acc, prog_bar=True)
+            self.log("train_acc_epoch", self.train_acc)
+
+            return loss
 
     def validation_step(self, batch, batch_idx):
         loss, logits, y = self.shared_step(batch)
@@ -113,17 +133,30 @@ class SSLFineTuner(LightningModule):
 
         return loss
 
-    def shared_step(self, batch):
-        x, y = batch
+    def shared_step(self, batch, image_list=False):
+        if image_list:
+            x_list, y = batch
+            loss_list, logits_list = [], []
+            for x in x_list:
+                with torch.no_grad():
+                    feats = self.backbone(x)
+                feats = feats.view(feats.size(0), -1)
+                logits = self.linear_layer(feats)
+                logits_list.append(logits)
+                loss_list.append(F.cross_entropy(logits, y))
 
-        with torch.no_grad():
-            feats = self.backbone(x)
+            return loss_list, logits_list, y
+        else:
+            x, y = batch
 
-        feats = feats.view(feats.size(0), -1)
-        logits = self.linear_layer(feats)
-        loss = F.cross_entropy(logits, y)
-
-        return loss, logits, y
+            with torch.no_grad():
+                feats = self.backbone(x)
+        
+            feats = feats.view(feats.size(0), -1)
+            logits= self.linear_layer(feats)
+            loss = F.cross_entropy(logits, y)
+            
+            return loss, logits, y
 
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(
