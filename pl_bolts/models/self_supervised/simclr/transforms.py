@@ -90,7 +90,9 @@ class SimCLRTrainDataTransform:
     def __call__(self, sample):
         if self.use_relic_loss:
             # https://arxiv.org/pdf/2010.07922.pdf
-            z1 = transforms.Compose([transforms.RandomResizedCrop(size=self.input_height), self.final_transform])(sample)
+            z1 = transforms.Compose([transforms.RandomResizedCrop(size=self.input_height), self.final_transform])(
+                sample
+            )
             z2 = transforms.Compose([transforms.RandomHorizontalFlip(p=0.5), self.final_transform])(sample)
             z3 = transforms.Compose([transforms.RandomApply([self.color_jitter], p=0.8), self.final_transform])(sample)
             z4 = transforms.Compose([transforms.RandomGrayscale(p=0.2), self.final_transform])(sample)
