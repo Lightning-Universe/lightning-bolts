@@ -90,7 +90,7 @@ class SimCLR(LightningModule):
         learning_rate: float = 1e-3,
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
-        relic: bool=False,
+        relic: bool = False,
         alfa: float = 0.1,
         **kwargs
     ):
@@ -140,7 +140,7 @@ class SimCLR(LightningModule):
         # compute iters per epoch
         global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
-        print('global_batch_size:', global_batch_size, 'self.num_samples: ', self.num_samples)
+        print("global_batch_size:", global_batch_size, "self.num_samples: ", self.num_samples)
 
     def init_model(self):
         if self.arch == "resnet18":
@@ -304,7 +304,7 @@ class SimCLR(LightningModule):
                 do2 = p_do_list[j] * mask
                 _relic_loss += nn.KLDivLoss()(do1_log, do2)
 
-        loss = _nt_xent_loss +  alfa * _relic_loss
+        loss = _nt_xent_loss + alfa * _relic_loss
 
         return loss
 
