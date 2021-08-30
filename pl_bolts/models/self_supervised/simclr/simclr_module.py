@@ -1,3 +1,4 @@
+from pytorch_lightning.loggers import WandbLogger
 import math
 from argparse import ArgumentParser
 
@@ -47,10 +48,19 @@ class Projection(nn.Module):
         self.hidden_dim = hidden_dim
 
         self.model = nn.Sequential(
-            nn.Linear(self.input_dim, self.hidden_dim),
-            nn.BatchNorm1d(self.hidden_dim),
+            nn.Linear(self.input_dim, 4096),
+            nn.BatchNorm1d(4096),
             nn.ReLU(),
-            nn.Linear(self.hidden_dim, self.output_dim, bias=False),
+            nn.Linear(4096, 2048),
+            nn.BatchNorm1d(2048),
+            nn.ReLU(),
+            nn.Linear(2048, 1024),
+            nn.BatchNorm1d(1024),
+            nn.ReLU(),
+            nn.Linear(1024, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
+            nn.Linear(512, self.output_dim, bias=False),
         )
 
     def forward(self, x):
@@ -81,6 +91,7 @@ class SimCLR(LightningModule):
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
         relic: bool=False,
+        alfa: float = 0.1,
         **kwargs
     ):
         """
@@ -122,12 +133,14 @@ class SimCLR(LightningModule):
 
         self.projection = Projection(input_dim=self.hidden_mlp, hidden_dim=self.hidden_mlp, output_dim=self.feat_dim)
 
+        # relic params
         self.relic = relic
-        
+        self.alfa = alfa
+
         # compute iters per epoch
         global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
-        print(global_batch_size, 'self.num_samples: ', self.num_samples)
+        print('global_batch_size:', global_batch_size, 'self.num_samples: ', self.num_samples)
 
     def init_model(self):
         if self.arch == "resnet18":
@@ -152,7 +165,7 @@ class SimCLR(LightningModule):
             for img in img_list:
                 z_list.append(self.projection(self(img)))
 
-            loss = self.relic_loss(z_list)
+            loss = self.relic_loss(z_list, alfa=self.alfa)
         else:
             # final image in tuple is for online eval
             (img1, img2, _), y = batch
@@ -271,7 +284,7 @@ class SimCLR(LightningModule):
 
         return loss, sim[out_1.shape[0]:, :out_1.shape[0]]
 
-    def relic_loss(self, z_list, alfa=0.5):
+    def relic_loss(self, z_list, alfa=0.1):
         
         _nt_xent_loss, _relic_loss = 0, 0
         p_do_list = []
@@ -291,15 +304,17 @@ class SimCLR(LightningModule):
                 do2 = p_do_list[j] * mask
                 _relic_loss += nn.KLDivLoss()(do1_log, do2)
 
-        loss = _nt_xent_loss +  _relic_loss
+        loss = _nt_xent_loss +  alfa * _relic_loss
         
         return loss
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
 
+        # relic params
+        parser.add_argument("--relic", default=True, type=bool, help="use relic loss")
+        parser.add_argument("--alfa", default=0.1, type=float, help="alfa of relic loss")
         # model params
-        parser.add_argument("--relic", default=False, type=bool, help="use relic loss")
         parser.add_argument("--arch", default="resnet50", type=str, help="convnet architecture")
         # specify flags to store false
         parser.add_argument("--first_conv", action="store_false")
@@ -318,18 +333,18 @@ class SimCLR(LightningModule):
         # training params
         parser.add_argument("--fast_dev_run", default=10, type=int)
         parser.add_argument("--num_nodes", default=1, type=int, help="number of nodes for training")
-        parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
+        parser.add_argument("--gpus", default=2, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/lars")
         parser.add_argument("--exclude_bn_bias", action="store_true", help="exclude bn/bias from weight decay")
         parser.add_argument("--max_epochs", default=100, type=int, help="number of total epochs to run")
         parser.add_argument("--max_steps", default=-1, type=int, help="max steps")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
-        parser.add_argument("--batch_size", default=128, type=int, help="batch size per gpu")
+        parser.add_argument("--batch_size", default=256, type=int, help="batch size per gpu")
 
         parser.add_argument("--temperature", default=0.1, type=float, help="temperature parameter in training loss")
-        parser.add_argument("--weight_decay", default=1e-6, type=float, help="weight decay")
-        parser.add_argument("--learning_rate", default=1e-3, type=float, help="base learning rate")
+        parser.add_argument("--weight_decay", default=1.5 * 1e-6, type=float, help="weight decay")
+        parser.add_argument("--learning_rate", default=0.3, type=float, help="base learning rate")
         parser.add_argument("--start_lr", default=0, type=float, help="initial warmup learning rate")
         parser.add_argument("--final_lr", type=float, default=1e-6, help="final learning rate")
 
@@ -346,6 +361,8 @@ def cli_main():
     # model args
     parser = SimCLR.add_model_specific_args(parser)
     args = parser.parse_args()
+
+    wandb_logger = WandbLogger()
 
     if args.dataset == "stl10":
         dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
@@ -380,8 +397,8 @@ def cli_main():
 
         normalization = cifar10_normalization()
 
-        # args.gaussian_blur = False
-        args.gaussian_blur = True  # test relic.
+        args.gaussian_blur = False
+        # args.gaussian_blur = True  # test relic.
         args.jitter_strength = 0.5
     elif args.dataset == "imagenet":
         args.maxpool1 = True
@@ -454,6 +471,7 @@ def cli_main():
         precision=32 if args.fp32 else 16,
         callbacks=callbacks,
         fast_dev_run=False,
+        logger=wandb_logger,
     )
 
     trainer.fit(model, datamodule=dm)
