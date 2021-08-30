@@ -176,7 +176,7 @@ class YOLO(LightningModule):
                 "Anchors may have been configured incorrectly."
             )
         for layer_idx, layer_hits in enumerate(hits):
-            hit_rate = layer_hits / total_hits if total_hits > 0 else 1.0
+            hit_rate = torch.true_divide(layer_hits, total_hits) if total_hits > 0 else 1.0
             self.log(f"layer_{layer_idx}_hit_rate", hit_rate, sync_dist=False)
 
         def total_loss(loss_name):
