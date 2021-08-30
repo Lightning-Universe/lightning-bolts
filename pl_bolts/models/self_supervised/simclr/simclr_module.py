@@ -1,10 +1,10 @@
-from pytorch_lightning.loggers import WandbLogger
 import math
 from argparse import ArgumentParser
 
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+from pytorch_lightning.loggers import WandbLogger
 from torch import Tensor, nn
 from torch.nn import functional as F
 
@@ -297,7 +297,7 @@ class SimCLR(LightningModule):
 
 <<<<<<< HEAD
     def relic_loss(self, z_list, alfa=0.1):
-        
+
 =======
     def relic_loss(self, z_list, alfa=0.5):
 
@@ -322,7 +322,7 @@ class SimCLR(LightningModule):
 
 <<<<<<< HEAD
         loss = _nt_xent_loss +  alfa * _relic_loss
-        
+
 =======
         loss = _nt_xent_loss + _relic_loss
 
