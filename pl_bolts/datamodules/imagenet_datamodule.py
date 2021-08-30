@@ -171,7 +171,7 @@ class ImagenetDataModule(LightningDataModule):
             batch_size: the batch size
             transforms: the transforms
         """
-        transforms = self.train_transform() if self.val_transforms is None else self.val_transforms
+        transforms = self.val_transform() if self.val_transforms is None else self.val_transforms
 
         dataset = UnlabeledImagenet(
             self.data_dir,
