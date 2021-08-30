@@ -1,6 +1,6 @@
 from typing import List, Optional
-import numpy as np
 
+import numpy as np
 import torch
 from pytorch_lightning import LightningModule
 from torch.nn import functional as F
@@ -102,7 +102,7 @@ class SSLFineTuner(LightningModule):
             self.log("train_loss", loss / n, prog_bar=True)
             self.log("train_acc_step", acc / n, prog_bar=True)
             self.log("train_acc_epoch", self.train_acc)
-            
+
             return loss / n
         else:
             loss, logits, y = self.shared_step(batch)
@@ -151,11 +151,11 @@ class SSLFineTuner(LightningModule):
 
             with torch.no_grad():
                 feats = self.backbone(x)
-        
+
             feats = feats.view(feats.size(0), -1)
-            logits= self.linear_layer(feats)
+            logits = self.linear_layer(feats)
             loss = F.cross_entropy(logits, y)
-            
+
             return loss, logits, y
 
     def configure_optimizers(self):

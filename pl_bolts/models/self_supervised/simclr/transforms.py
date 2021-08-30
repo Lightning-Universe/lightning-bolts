@@ -157,7 +157,12 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
 
 class SimCLRFinetuneTransform:
     def __init__(
-        self, input_height: int = 224, jitter_strength: float = 1.0, normalize=None, eval_transform: bool = False, use_relic_loss: bool = False,
+        self,
+        input_height: int = 224,
+        jitter_strength: float = 1.0,
+        normalize=None,
+        eval_transform: bool = False,
+        use_relic_loss: bool = False,
     ) -> None:
 
         self.jitter_strength = jitter_strength
@@ -170,7 +175,7 @@ class SimCLRFinetuneTransform:
             0.8 * self.jitter_strength,
             0.2 * self.jitter_strength,
         )
-        
+
         self.use_relic_loss = use_relic_loss
         if self.use_relic_loss:
             # self.gaussian_blur_transform
@@ -178,7 +183,6 @@ class SimCLRFinetuneTransform:
             if kernel_size % 2 == 0:
                 kernel_size += 1
             self.gaussian_blur_transform = GaussianBlur(kernel_size=kernel_size, p=0.5)
-
 
         if not eval_transform:
             data_transforms = [

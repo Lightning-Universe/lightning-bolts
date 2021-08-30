@@ -165,7 +165,7 @@ class SimCLR(LightningModule):
         if self.dataset == "stl10":
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
-        
+
         if self.use_relic_loss:
             # Add the causal regularization.
             # https://arxiv.org/pdf/2010.07922.pdf
@@ -372,7 +372,7 @@ def cli_main():
     parser = SimCLR.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    wandb_logger = WandbLogger(name='simclr-pretrian')
+    wandb_logger = WandbLogger(name="simclr-pretrian")
 
     if args.dataset == "stl10":
         dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
@@ -397,7 +397,7 @@ def cli_main():
         dm = CIFAR10DataModule(
             data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers, val_split=val_split
         )
-        print('dm.num_samples: ', dm.num_samples)
+        print("dm.num_samples: ", dm.num_samples)
         args.num_samples = dm.num_samples
 
         args.maxpool1 = False
