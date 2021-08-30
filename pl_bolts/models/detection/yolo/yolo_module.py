@@ -66,7 +66,7 @@ class YOLO(LightningModule):
 
         # PascalVOC
         wget https://raw.githubusercontent.com/AlexeyAB/darknet/master/cfg/yolov4-tiny-3l.cfg
-        python yolo_module.py --config yolov4-tiny-3l.cfg --data_dir . --gpus 8 --batch-size 8
+        python yolo_module.py --config yolov4-tiny-3l.cfg --data_dir . --gpus 8 --batch_size 8
     """
 
     def __init__(
@@ -465,15 +465,20 @@ class Resize:
     def __init__(self, output_size: tuple) -> None:
         self.output_size = output_size
 
-    def __call__(self, image, target):
-        width, height = image.size
+    def __call__(self, image: Tensor, target: Dict[str, Any]):
+        """
+        Args:
+            tensor: Tensor image to be resized.
+            target: Dictionary of detection targets.
+
+        Returns:
+            Resized Tensor image.
+        """
+        height, width = image.shape[-2:]
         original_size = torch.tensor([height, width])
-        resize_ratio = torch.tensor(self.output_size) / original_size
+        scale_y, scale_x = torch.tensor(self.output_size) / original_size
+        scale = torch.tensor([scale_x, scale_y, scale_x, scale_y], device=target["boxes"].device)
         image = F.resize(image, self.output_size)
-        scale = torch.tensor(
-            [resize_ratio[1], resize_ratio[0], resize_ratio[1], resize_ratio[0]],  # y, x, y, x
-            device=target["boxes"].device,
-        )
         target["boxes"] = target["boxes"] * scale
         return image, target
 
@@ -484,17 +489,32 @@ def run_cli():
     from pytorch_lightning import Trainer, seed_everything
 
     from pl_bolts.datamodules import VOCDetectionDataModule
+    from pl_bolts.datamodules.vocdetection_datamodule import Compose
     from pl_bolts.models.detection.yolo.yolo_config import YOLOConfiguration
 
     seed_everything(42)
 
     parser = ArgumentParser()
-    parser.add_argument("--config", type=str, metavar="PATH", required=True, help="read model configuration from PATH")
     parser.add_argument(
-        "--darknet-weights", type=str, metavar="PATH", help="read the initial model weights from PATH in Darknet format"
+        "--config",
+        type=str,
+        metavar="PATH",
+        required=True,
+        help="read model configuration from PATH",
     )
-    parser.add_argument("--batch-size", type=int, metavar="N", default=16, help="batch size is N image")
-    parser.add_argument("--lr", type=float, metavar="LR", default=0.0013, help="learning rate after the warmup period")
+    parser.add_argument(
+        "--darknet-weights",
+        type=str,
+        metavar="PATH",
+        help="read the initial model weights from PATH in Darknet format",
+    )
+    parser.add_argument(
+        "--lr",
+        type=float,
+        metavar="LR",
+        default=0.0013,
+        help="learning rate after the warmup period",
+    )
     parser.add_argument(
         "--momentum",
         type=float,
@@ -510,11 +530,25 @@ def run_cli():
         help="if nonzero, the optimizer uses weight decay (L2 penalty) with factor LAMBDA",
     )
     parser.add_argument(
-        "--warmup-epochs", type=int, metavar="N", default=1, help="learning rate warmup period is N epochs"
+        "--warmup-epochs",
+        type=int,
+        metavar="N",
+        default=1,
+        help="learning rate warmup period is N epochs",
     )
-    parser.add_argument("--max-epochs", type=int, metavar="N", default=300, help="train at most N epochs")
     parser.add_argument(
-        "--initial-lr", type=float, metavar="LR", default=0.0, help="learning rate before the warmup period"
+        "--max-epochs",
+        type=int,
+        metavar="N",
+        default=300,
+        help="train at most N epochs",
+    )
+    parser.add_argument(
+        "--initial-lr",
+        type=float,
+        metavar="LR",
+        default=0.0,
+        help="learning rate before the warmup period",
     )
     parser.add_argument(
         "--confidence-threshold",
@@ -532,7 +566,11 @@ def run_cli():
         "THRESHOLD with a higher scoring box",
     )
     parser.add_argument(
-        "--max-predictions-per-image", type=int, metavar="N", default=100, help="keep at most N best predictions"
+        "--max-predictions-per-image",
+        type=int,
+        metavar="N",
+        default=100,
+        help="keep at most N best predictions",
     )
 
     parser = VOCDetectionDataModule.add_argparse_args(parser)
@@ -541,9 +579,9 @@ def run_cli():
 
     config = YOLOConfiguration(args.config)
 
-    transforms = [Resize((config.height, config.width))]
-    datamodule = VOCDetectionDataModule.from_argparse_args(args)
-    datamodule.prepare_data()
+    transforms = [lambda image, target: (F.to_tensor(image), target), Resize((config.height, config.width))]
+    transforms = Compose(transforms)
+    datamodule = VOCDetectionDataModule.from_argparse_args(args, train_transforms=transforms, val_transforms=transforms)
 
     optimizer_params = {"lr": args.lr, "momentum": args.momentum, "weight_decay": args.weight_decay}
     lr_scheduler_params = {
@@ -564,11 +602,7 @@ def run_cli():
             model.load_darknet_weights(weight_file)
 
     trainer = Trainer.from_argparse_args(args)
-    trainer.fit(
-        model,
-        datamodule.train_dataloader(args.batch_size, transforms),
-        datamodule.val_dataloader(args.batch_size, transforms),
-    )
+    trainer.fit(model, datamodule=datamodule)
 
 
 if __name__ == "__main__":
