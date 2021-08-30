@@ -90,7 +90,7 @@ class SimCLR(LightningModule):
         learning_rate: float = 1e-3,
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
-        relic: bool = False,
+        use_relic_loss: bool = False,
         alfa: float = 0.1,
         **kwargs
     ):
