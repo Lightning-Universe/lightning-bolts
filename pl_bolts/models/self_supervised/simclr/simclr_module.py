@@ -90,12 +90,8 @@ class SimCLR(LightningModule):
         learning_rate: float = 1e-3,
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
-<<<<<<< HEAD
         relic: bool=False,
         alfa: float = 0.1,
-=======
-        relic: bool = False,
->>>>>>> 3eb270b704af88b200abe8123fcd9012325a59dd
         **kwargs
     ):
         """
@@ -139,19 +135,12 @@ class SimCLR(LightningModule):
 
         # relic params
         self.relic = relic
-<<<<<<< HEAD
         self.alfa = alfa
-=======
->>>>>>> 3eb270b704af88b200abe8123fcd9012325a59dd
 
         # compute iters per epoch
         global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
-<<<<<<< HEAD
         print('global_batch_size:', global_batch_size, 'self.num_samples: ', self.num_samples)
-=======
-        print(global_batch_size, "self.num_samples: ", self.num_samples)
->>>>>>> 3eb270b704af88b200abe8123fcd9012325a59dd
 
     def init_model(self):
         if self.arch == "resnet18":
@@ -295,13 +284,8 @@ class SimCLR(LightningModule):
 
         return loss, sim[out_1.shape[0] :, : out_1.shape[0]]
 
-<<<<<<< HEAD
     def relic_loss(self, z_list, alfa=0.1):
 
-=======
-    def relic_loss(self, z_list, alfa=0.5):
-
->>>>>>> 3eb270b704af88b200abe8123fcd9012325a59dd
         _nt_xent_loss, _relic_loss = 0, 0
         p_do_list = []
         batch_size = z_list[0].shape[0]
@@ -320,13 +304,8 @@ class SimCLR(LightningModule):
                 do2 = p_do_list[j] * mask
                 _relic_loss += nn.KLDivLoss()(do1_log, do2)
 
-<<<<<<< HEAD
         loss = _nt_xent_loss +  alfa * _relic_loss
 
-=======
-        loss = _nt_xent_loss + _relic_loss
-
->>>>>>> 3eb270b704af88b200abe8123fcd9012325a59dd
         return loss
 
     @staticmethod
