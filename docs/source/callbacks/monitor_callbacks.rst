@@ -1,8 +1,8 @@
 .. role:: hidden
     :class: hidden-section
 
-Info Callbacks
-==============
+Monitoring Callbacks
+====================
 
 These callbacks give all sorts of useful information during training.
 
