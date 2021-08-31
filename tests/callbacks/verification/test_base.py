@@ -7,6 +7,7 @@ from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities import move_data_to_device
 
 from pl_bolts.callbacks.verification.base import VerificationBase
+from pl_bolts.utils import _PL_GREATER_EQUAL_1_4
 from tests import _MARK_REQUIRE_GPU
 
 
@@ -34,6 +35,7 @@ class LitModel(LightningModule):
         return self.model(*args)
 
 
+@pytest.mark.skipif(not _PL_GREATER_EQUAL_1_4, reason="Verification test requires Lightning 1.4.")
 @pytest.mark.parametrize(
     "device",
     [torch.device("cpu"), pytest.param(torch.device("cuda", 0), marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
@@ -57,7 +59,12 @@ def test_verification_base_get_input_array(device):
     verification = TrivialVerification(model)
 
     # for a LightningModule, user can rely on the example_input_array
-    with patch.object(model, "transfer_batch_to_device", wraps=model.transfer_batch_to_device) as mocked:
+    with patch.object(
+        model,
+        "transfer_batch_to_device",
+        autospec=model.transfer_batch_to_device,
+        side_effect=model.transfer_batch_to_device,
+    ) as mocked:
         copied_tensor = verification._get_input_array_copy(input_array=None)
         mocked.assert_called_once()
         assert copied_tensor.device == model.device == device
