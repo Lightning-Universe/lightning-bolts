@@ -3,7 +3,7 @@ Deprecated Modules
 
 Below is a list of deprecated modules in Lightning Bolts.
 
-Below modules are not being actively maintained, and we welcome the community to help keep them up to date!
+These modules are not being actively maintained by the Lightning Team, however we welcome the community to help keep them up to date!
 
 .. toctree::
    :maxdepth: 2
