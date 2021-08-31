@@ -234,12 +234,21 @@ class RelicDALearner(LightningModule):
         for params in self.backbone.parameters():
             params.requires_grad = False
         self.data_augmentation = nn.Sequential(
-            nn.Conv2d(3, 3, 1),
-            nn.Conv2d(3, 3, 1),
-            nn.Conv2d(3, 3, 1),
+            nn.Conv2d(3, 16, kernel_size=3, padding=1),
+            nn.BatchNorm2d(16),
+            nn.ReLU(),
+            nn.Conv2d(16, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.Conv2d(64, 16, kernel_size=3, padding=1),
+            nn.BatchNorm2d(16),
+            nn.ReLU(),
+            nn.Conv2d(16, 3, kernel_size=3, padding=1),
+            nn.BatchNorm2d(3),
+            nn.ReLU(),
         )
         # self.data_augmentation = MLP_Augmentation()
-        print(self.backbone)
+        # print(self.backbone)
         print(self.data_augmentation)
 
         # metrics
@@ -381,4 +390,17 @@ class View(LightningModule):
 
 
 if __name__ == "__main__":
-    test = MLP_Augmentation()
+    # test = MLP_Augmentation()
+    input = [256, 3, 32, 32]
+    padding = 0
+    dilation = 1
+    kernel_size = 1
+    In_w = input[2]
+
+    h = 1 + (In_w + 2 * padding - dilation * (kernel_size - 1) - 1) / 1
+    print(h)
+
+    '''
+    256, 3, 32, 32  => 256, 16, 32, 32 (padding=1, dilation=1, kernel_size=3, strade(1))
+    256, 16, 32, 32 => 256, 3, 32, 32
+    '''

@@ -216,7 +216,8 @@ class SimCLRFinetuneTransform:
             z4 = transforms.Compose([transforms.RandomGrayscale(p=0.2), self.final_transform])(sample)
             z5 = transforms.Compose([transforms.RandomSolarize(threshold=0.5, p=0.5), self.final_transform])(sample)
             z6 = transforms.Compose([self.gaussian_blur_transform, self.final_transform])(sample)
-            return [z1, z2, z3, z4, z5, z6]
+            learned_augmentation = transforms.ToTensor()(sample)
+            return [z1, z2, z3, z4, z5, z6, learned_augmentation]
         else:
             return self.transform(sample)
 
