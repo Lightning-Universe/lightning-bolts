@@ -8,9 +8,9 @@ from pytorch_lightning.loggers import WandbLogger
 from torch import Tensor, nn
 from torch.nn import functional as F
 
-from pl_bolts.models.self_supervised.ssl_finetuner import RelicDALearner
 # from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
 from pl_bolts.models.self_supervised.simclr.simclr_module import SimCLR
+from pl_bolts.models.self_supervised.ssl_finetuner import RelicDALearner
 from pl_bolts.optimizers.lars import LARS
 from pl_bolts.optimizers.lr_scheduler import linear_warmup_decay
 from pl_bolts.transforms.dataset_normalizations import (
@@ -20,23 +20,21 @@ from pl_bolts.transforms.dataset_normalizations import (
 )
 
 
-
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule
     from pl_bolts.models.self_supervised.simclr.transforms import SimCLRFinetuneTransform, SimCLRTrainDataTransform
 
-
     seed_everything(1234)
     parser = ArgumentParser()
 
     parser = SimCLR.add_model_specific_args(parser)
-    
-    args = parser.parse_args()
-    
-    wandb_logger = WandbLogger(project='simclr-finetune-cifar10', name='without data_augmentation')
 
-    if args.dataset == 'cifar10':
+    args = parser.parse_args()
+
+    wandb_logger = WandbLogger(project="simclr-finetune-cifar10", name="without data_augmentation")
+
+    if args.dataset == "cifar10":
         val_split = 5000
         # if args.num_nodes * args.gpus * args.batch_size > val_split:
         #     val_split = args.num_nodes * args.gpus * args.batch_size
@@ -58,19 +56,19 @@ def cli_main():
         args.jitter_strength = 0.5
 
     args.use_relic_loss = True
-    print('args.use_relic_loss: ', args.use_relic_loss)
+    print("args.use_relic_loss: ", args.use_relic_loss)
     dm.train_transforms = SimCLRFinetuneTransform(
-            normalize=cifar10_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=False,
-            use_relic_loss=args.use_relic_loss,
-        )
+        normalize=cifar10_normalization(),
+        input_height=dm.size()[-1],
+        eval_transform=False,
+        use_relic_loss=args.use_relic_loss,
+    )
     dm.val_transforms = SimCLRFinetuneTransform(
-            normalize=cifar10_normalization(),
-            input_height=dm.size()[-1],
-            eval_transform=True,
-            use_relic_loss=args.use_relic_loss,
-        )
+        normalize=cifar10_normalization(),
+        input_height=dm.size()[-1],
+        eval_transform=True,
+        use_relic_loss=args.use_relic_loss,
+    )
     # dm.test_transforms = SimCLRFinetuneTransform(
     #     input_height=args.input_height,
     #     jitter_strength=args.jitter_strength,
@@ -87,7 +85,7 @@ def cli_main():
         first_conv=args.first_conv,
         dataset=args.dataset,
         use_relic_loss=args.use_relic_loss,
-        ).load_from_checkpoint(args.ckpt_path, strict=False)
+    ).load_from_checkpoint(args.ckpt_path, strict=False)
 
     # import ipdb; ipdb.set_trace()
     # add relic loss and data augmentation based on pre-trained SimCLR.
@@ -127,6 +125,7 @@ def cli_main():
     )
 
     trainer.fit(model, datamodule=dm)
+
 
 if __name__ == "__main__":
     cli_main()

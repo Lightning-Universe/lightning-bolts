@@ -1,7 +1,7 @@
+import math
 from typing import List, Optional
 
 import numpy as np
-import math
 import torch
 from pytorch_lightning import LightningModule
 from torch import Tensor, nn
@@ -234,10 +234,10 @@ class RelicDALearner(LightningModule):
         for params in self.backbone.parameters():
             params.requires_grad = False
         self.data_augmentation = nn.Sequential(
-                                    nn.Conv2d(3, 3, 1),
-                                    nn.Conv2d(3, 3, 1),
-                                    nn.Conv2d(3, 3, 1),
-                                    )
+            nn.Conv2d(3, 3, 1),
+            nn.Conv2d(3, 3, 1),
+            nn.Conv2d(3, 3, 1),
+        )
         # self.data_augmentation = MLP_Augmentation()
         print(self.backbone)
         print(self.data_augmentation)
@@ -253,12 +253,12 @@ class RelicDALearner(LightningModule):
     def training_step(self, batch, batch_idx):
         # print(batch[0][0].shape)  # torch.Size([256, 3, 32, 32])
         loss = self.shared_step(batch)
-        self.log('train_loss', loss)
+        self.log("train_loss", loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
-        self.log('val_loss', loss)
+        self.log("val_loss", loss)
         return loss
 
     def forward(self, x):
@@ -293,7 +293,7 @@ class RelicDALearner(LightningModule):
                 do1_log = p_do_list[i].log() * mask
                 do2 = p_do_list[j] * mask
                 _relic_loss += nn.KLDivLoss()(do1_log, do2)
-        
+
         loss = _nt_xent_loss + alfa * _relic_loss
 
         return loss
@@ -330,7 +330,7 @@ class RelicDALearner(LightningModule):
         loss = -torch.log(pos / (neg + eps)).mean()
 
         return loss, sim[out_1.shape[0] :, : out_1.shape[0]]  # sim[] is for use_relic_loss
-  
+
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(
             self.data_augmentation.parameters(),
@@ -371,12 +371,14 @@ class MLP_Augmentation(LightningModule):
     def forward(self, x):
         return self.model(x)
 
+
 class View(LightningModule):
     def __init__(self, shape):
         self.shape = shape
-    
+
     def forward(self, x):
         return x.view(*self.shape)
-        
+
+
 if __name__ == "__main__":
     test = MLP_Augmentation()

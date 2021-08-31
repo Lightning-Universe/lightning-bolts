@@ -322,7 +322,7 @@ class SimCLR(LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
 
         # relic params
-        parser.add_argument("--ckpt_path", default='./', type=str, help="to load pre-trained model")
+        parser.add_argument("--ckpt_path", default="./", type=str, help="to load pre-trained model")
         parser.add_argument("--use_relic_loss", default=False, type=bool, help="use relic loss")
         parser.add_argument("--alfa", default=0.1, type=float, help="alfa of relic loss")
         # model params
