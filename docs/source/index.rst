@@ -19,11 +19,11 @@ Lightning-Bolts documentation
    :name: callbacks
    :caption: Callbacks
 
-   callbacks
-   info_callbacks
-   self_supervised_callbacks
-   variational_callbacks
-   vision_callbacks
+   callbacks/monitor_callbacks
+   callbacks/self_supervised_callbacks
+   callbacks/variational_callbacks
+   callbacks/vision_callbacks
+   callbacks/torch_ort
 
 .. toctree::
    :maxdepth: 2
