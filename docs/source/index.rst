@@ -39,7 +39,7 @@ Lightning-Bolts documentation
 .. toctree::
    :maxdepth: 2
    :name: deprecated
-   :caption: Deprecated Modules
+   :caption: Deprecated
 
    deprecated
 
