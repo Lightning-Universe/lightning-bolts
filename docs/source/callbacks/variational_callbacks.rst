@@ -13,7 +13,7 @@ Interpolates latent dims.
 
 Example output:
 
-    .. image:: _images/gans/basic_gan_interpolate.jpg
+    .. image:: ../_images/gans/basic_gan_interpolate.jpg
         :width: 400
         :alt: Example latent space interpolation
 
