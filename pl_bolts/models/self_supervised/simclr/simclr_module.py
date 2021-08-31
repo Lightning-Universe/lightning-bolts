@@ -322,16 +322,12 @@ class SimCLR(LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
 
         # relic params
-<<<<<<< HEAD
-        parser.add_argument("--ckpt_path", default="./", type=str, help="to load pre-trained model")
-=======
         parser.add_argument(
             "--ckpt_path",
             default="/home/acc12252dc/pretained-model/simclr-cifar10-sgd.ckpt",
             type=str,
             help="to load pre-trained model",
         )
->>>>>>> baa8bf55ecac0d7ad3aeaf2791641a4a56bca90b
         parser.add_argument("--use_relic_loss", default=False, type=bool, help="use relic loss")
         parser.add_argument("--alfa", default=0.1, type=float, help="alfa of relic loss")
         # model params
@@ -353,14 +349,14 @@ class SimCLR(LightningModule):
         # training params
         parser.add_argument("--fast_dev_run", default=10, type=int)
         parser.add_argument("--num_nodes", default=1, type=int, help="number of nodes for training")
-        parser.add_argument("--gpus", default=2, type=int, help="number of gpus to train on")
+        parser.add_argument("--gpus", default=1, type=int, help="number of gpus to train on")
         parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
         parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/lars")
         parser.add_argument("--exclude_bn_bias", action="store_true", help="exclude bn/bias from weight decay")
         parser.add_argument("--max_epochs", default=100, type=int, help="number of total epochs to run")
         parser.add_argument("--max_steps", default=-1, type=int, help="max steps")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
-        parser.add_argument("--batch_size", default=32, type=int, help="batch size per gpu")
+        parser.add_argument("--batch_size", default=256, type=int, help="batch size per gpu")
 
         parser.add_argument("--temperature", default=0.1, type=float, help="temperature parameter in training loss")
         parser.add_argument("--weight_decay", default=1.5 * 1e-6, type=float, help="weight decay")
