@@ -32,4 +32,4 @@ This is primarily useful for when training with a Transformer model. The ORT cal
     trainer.fit(model)
 
 
-For even easier setup and integration, have a look at our Lightning Flash integration for `Text Classification <https://lightning-flash.readthedocs.io/en/latest/reference/text_classification.html#accelerate-training-inference-with-torch-ort>`__, `Summarization <https://lightning-flash.readthedocs.io/en/latest/reference/summarization.html#accelerate-training-inference-with-torch-ort>`__ and `Translation <https://lightning-flash.readthedocs.io/en/latest/reference/translation.html#accelerate-training-inference-with-torch-ort>`__.
+For even easier setup and integration, have a look at our Lightning Flash integration for :ref:`lightning_flash:text_classification_ort`, :ref:`lightning_flash:translation_ort`, :ref:`lightning_flash:summarization_ort`.
