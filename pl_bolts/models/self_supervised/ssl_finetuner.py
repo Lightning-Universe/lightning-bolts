@@ -1,8 +1,10 @@
 from typing import List, Optional
 
 import numpy as np
+import math
 import torch
 from pytorch_lightning import LightningModule
+from torch import Tensor, nn
 from torch.nn import functional as F
 from torchmetrics import Accuracy
 
@@ -55,7 +57,6 @@ class SSLFineTuner(LightningModule):
         decay_epochs: List = [60, 80],
         gamma: float = 0.1,
         final_lr: float = 0.0,
-        use_relic_loss: bool = False,
     ):
         """
         Args:
@@ -85,35 +86,20 @@ class SSLFineTuner(LightningModule):
         self.test_acc = Accuracy(compute_on_step=False)
 
         # relic
-        self.use_relic_loss = use_relic_loss
 
     def on_train_epoch_start(self) -> None:
         self.backbone.eval()
 
     def training_step(self, batch, batch_idx):
-        if self.use_relic_loss:
-            loss_list, logits_list, y = self.shared_step(batch, image_list=True)
-            acc, l = 0, 0
-            n = len(loss_list)
-            for loss, logits in zip(loss_list, logits_list):
-                acc += self.train_acc(logits.softmax(-1), y)
-                l += loss
+        loss, logits, y = self.shared_step(batch)
 
-            self.log("train_loss", loss / n, prog_bar=True)
-            self.log("train_acc_step", acc / n, prog_bar=True)
-            self.log("train_acc_epoch", self.train_acc)
+        acc = self.train_acc(logits.softmax(-1), y)
 
-            return loss / n
-        else:
-            loss, logits, y = self.shared_step(batch)
+        self.log("train_loss", loss, prog_bar=True)
+        self.log("train_acc_step", acc, prog_bar=True)
+        self.log("train_acc_epoch", self.train_acc)
 
-            acc = self.train_acc(logits.softmax(-1), y)
-
-            self.log("train_loss", loss, prog_bar=True)
-            self.log("train_acc_step", acc, prog_bar=True)
-            self.log("train_acc_epoch", self.train_acc)
-
-            return loss
+        return loss
 
     def validation_step(self, batch, batch_idx):
         loss, logits, y = self.shared_step(batch)
@@ -224,7 +210,6 @@ class RelicDALearner(LightningModule):
         decay_epochs: List = [60, 80],
         gamma: float = 0.1,
         final_lr: float = 0.0,
-        use_relic_loss: bool = False,
     ):
         """
         Args:
@@ -246,90 +231,109 @@ class RelicDALearner(LightningModule):
         self.final_lr = final_lr
 
         self.backbone = backbone
-        self.linear_layer = SSLEvaluator(n_input=in_features, n_classes=num_classes, p=dropout, n_hidden=hidden_dim)
+        for params in self.backbone.parameters():
+            params.requires_grad = False
+        self.data_augmentation = nn.Sequential(
+                                    nn.Conv2d(3, 3, 1),
+                                    nn.Conv2d(3, 3, 1),
+                                    nn.Conv2d(3, 3, 1),
+                                    )
+        # self.data_augmentation = MLP_Augmentation()
+        print(self.backbone)
+        print(self.data_augmentation)
 
         # metrics
         self.train_acc = Accuracy()
         self.val_acc = Accuracy(compute_on_step=False)
         self.test_acc = Accuracy(compute_on_step=False)
 
-        # relic
-        self.use_relic_loss = use_relic_loss
-
     def on_train_epoch_start(self) -> None:
         self.backbone.eval()
 
     def training_step(self, batch, batch_idx):
-        if self.use_relic_loss:
-            loss_list, logits_list, y = self.shared_step(batch, image_list=True)
-            acc, l = 0, 0
-            n = len(loss_list)
-            for loss, logits in zip(loss_list, logits_list):
-                acc += self.train_acc(logits.softmax(-1), y)
-                l += loss
-
-            self.log("train_loss", loss / n, prog_bar=True)
-            self.log("train_acc_step", acc / n, prog_bar=True)
-            self.log("train_acc_epoch", self.train_acc)
-
-            return loss / n
-        else:
-            loss, logits, y = self.shared_step(batch)
-
-            acc = self.train_acc(logits.softmax(-1), y)
-
-            self.log("train_loss", loss, prog_bar=True)
-            self.log("train_acc_step", acc, prog_bar=True)
-            self.log("train_acc_epoch", self.train_acc)
-
-            return loss
+        # print(batch[0][0].shape)  # torch.Size([256, 3, 32, 32])
+        loss = self.shared_step(batch)
+        self.log('train_loss', loss)
+        return loss
 
     def validation_step(self, batch, batch_idx):
-        loss, logits, y = self.shared_step(batch)
-        self.val_acc(logits.softmax(-1), y)
+        loss = self.shared_step(batch)
+        self.log('val_loss', loss)
+        return loss
 
-        self.log("val_loss", loss, prog_bar=True, sync_dist=True)
-        self.log("val_acc", self.val_acc)
+    def forward(self, x):
+        # x = x.view(x.size(0), -1)
+        x = self.data_augmentation(x)
+        # x = x.view(-1, 3, 32, 32)
+        return self.backbone(x)
+
+    def shared_step(self, batch):
+        img_list, y = batch
+        i = self.data_augmentation(img_list[-1])
+        z_list = [self.backbone(i)]  # img_list[-1] is the original image.
+        for img in img_list[:-1]:
+            z_list.append(self.backbone(img))
+        loss = self.relic_loss(z_list)
+        return loss
+
+    def relic_loss(self, z_list, alfa=0.1):
+
+        _nt_xent_loss, _relic_loss, p_do_list = 0, 0, []
+        batch_size, device = z_list[0].shape[0], z_list[0].device
+        mask = torch.ones([batch_size, batch_size], device=device) - torch.eye(batch_size, device=device)
+
+        for i in range(len(z_list) - 1):
+            for j in range(i + 1, len(z_list)):
+                _loss, p_do = self.nt_xent_loss(z_list[i], z_list[j])
+                _nt_xent_loss += _loss
+                p_do_list.append(p_do)
+
+        for i in range(len(p_do_list) - 1):
+            for j in range(i + 1, len(p_do_list)):
+                do1_log = p_do_list[i].log() * mask
+                do2 = p_do_list[j] * mask
+                _relic_loss += nn.KLDivLoss()(do1_log, do2)
+        
+        loss = _nt_xent_loss + alfa * _relic_loss
 
         return loss
 
-    def test_step(self, batch, batch_idx):
-        loss, logits, y = self.shared_step(batch)
-        self.test_acc(logits.softmax(-1), y)
+    def nt_xent_loss(self, out_1, out_2, temperature=0.5, eps=1e-6):
+        """
+        assume out_1 and out_2 are normalized
+        out_1: [batch_size, dim]
+        out_2: [batch_size, dim]
+        """
+        out_1_dist = out_1
+        out_2_dist = out_2
 
-        self.log("test_loss", loss, sync_dist=True)
-        self.log("test_acc", self.test_acc)
+        # out: [2 * batch_size, dim]
+        # out_dist: [2 * batch_size * world_size, dim]
+        out = torch.cat([out_1, out_2], dim=0)
+        out_dist = torch.cat([out_1_dist, out_2_dist], dim=0)
 
-        return loss
+        # cov and sim: [2 * batch_size, 2 * batch_size * world_size]
+        # neg: [2 * batch_size]
+        # import ipdb; ipdb.set_trace()
+        cov = torch.mm(out, out_dist.t().contiguous())
+        sim = torch.exp(cov / temperature)
+        neg = sim.sum(dim=-1)
 
-    def shared_step(self, batch, image_list=False):
-        if image_list:
-            x_list, y = batch
-            loss_list, logits_list = [], []
-            for x in x_list:
-                with torch.no_grad():
-                    feats = self.backbone(x)
-                feats = feats.view(feats.size(0), -1)
-                logits = self.linear_layer(feats)
-                logits_list.append(logits)
-                loss_list.append(F.cross_entropy(logits, y))
+        # from each row, subtract e^(1/temp) to remove similarity measure for x1.x1
+        row_sub = Tensor(neg.shape).fill_(math.e ** (1 / temperature)).to(neg.device)
+        neg = torch.clamp(neg - row_sub, min=eps)  # clamp for numerical stability
 
-            return loss_list, logits_list, y
-        else:
-            x, y = batch
+        # Positive similarity, pos becomes [2 * batch_size]
+        pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
+        pos = torch.cat([pos, pos], dim=0)
 
-            with torch.no_grad():
-                feats = self.backbone(x)
+        loss = -torch.log(pos / (neg + eps)).mean()
 
-            feats = feats.view(feats.size(0), -1)
-            logits = self.linear_layer(feats)
-            loss = F.cross_entropy(logits, y)
-
-            return loss, logits, y
-
+        return loss, sim[out_1.shape[0] :, : out_1.shape[0]]  # sim[] is for use_relic_loss
+  
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(
-            self.linear_layer.parameters(),
+            self.data_augmentation.parameters(),
             lr=self.learning_rate,
             nesterov=self.nesterov,
             momentum=0.9,
@@ -347,3 +351,32 @@ class RelicDALearner(LightningModule):
         return [optimizer], [scheduler]
 
 
+class MLP_Augmentation(LightningModule):
+    def __init__(self, input_size=3 * 32 * 32, output_size=3 * 32 * 32, num_layer=3, hidden_dim=[128, 32, 128]):
+        super().__init__()
+        assert num_layer == len(hidden_dim)
+        mlp_list = []
+        zView()
+        for idx, dim in enumerate(hidden_dim):
+            if idx == 0:
+                mlp_list.append(nn.Linear(input_size, dim))
+            else:
+                mlp_list.append(nn.Linear(pre_dim, dim))
+            mlp_list.append(nn.ReLU())
+            if idx == num_layer - 1:
+                mlp_list.append(nn.Linear(dim, output_size))
+            pre_dim = dim
+        self.model = nn.Sequential(*mlp_list)
+
+    def forward(self, x):
+        return self.model(x)
+
+class View(LightningModule):
+    def __init__(self, shape):
+        self.shape = shape
+    
+    def forward(self, x):
+        return x.view(*self.shape)
+        
+if __name__ == "__main__":
+    test = MLP_Augmentation()

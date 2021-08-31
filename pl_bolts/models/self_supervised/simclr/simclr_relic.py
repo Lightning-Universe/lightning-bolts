@@ -34,7 +34,7 @@ def cli_main():
     
     args = parser.parse_args()
     
-    wandb_logger = WandbLogger(project='simclr-finetune-cifar10')
+    wandb_logger = WandbLogger(project='simclr-finetune-cifar10', name='without data_augmentation')
 
     if args.dataset == 'cifar10':
         val_split = 5000
@@ -57,6 +57,8 @@ def cli_main():
         # args.gaussian_blur = True  # test relic.
         args.jitter_strength = 0.5
 
+    args.use_relic_loss = True
+    print('args.use_relic_loss: ', args.use_relic_loss)
     dm.train_transforms = SimCLRFinetuneTransform(
             normalize=cifar10_normalization(),
             input_height=dm.size()[-1],
@@ -93,8 +95,23 @@ def cli_main():
         backbone,
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
-        use_relic_loss=args.use_relic_loss,
     )
+
+    args.online_ft = True
+    if args.online_ft:
+        # online eval
+        online_evaluator = SSLOnlineEvaluator(
+            drop_p=0.0,
+            hidden_dim=None,
+            z_dim=args.hidden_mlp,
+            num_classes=dm.num_classes,
+            dataset=args.dataset,
+        )
+
+    lr_monitor = LearningRateMonitor(logging_interval="step")
+    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor="val_loss")
+    callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
+    callbacks.append(lr_monitor)
 
     trainer = Trainer(
         max_epochs=args.max_epochs,
@@ -104,6 +121,7 @@ def cli_main():
         distributed_backend="ddp" if args.gpus > 1 else None,
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=32 if args.fp32 else 16,
+        callbacks=callbacks,
         fast_dev_run=False,
         logger=wandb_logger,
     )

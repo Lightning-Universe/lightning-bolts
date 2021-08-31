@@ -351,7 +351,7 @@ class SimCLR(LightningModule):
         parser.add_argument("--max_epochs", default=100, type=int, help="number of total epochs to run")
         parser.add_argument("--max_steps", default=-1, type=int, help="max steps")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
-        parser.add_argument("--batch_size", default=256, type=int, help="batch size per gpu")
+        parser.add_argument("--batch_size", default=32, type=int, help="batch size per gpu")
 
         parser.add_argument("--temperature", default=0.1, type=float, help="temperature parameter in training loss")
         parser.add_argument("--weight_decay", default=1.5 * 1e-6, type=float, help="weight decay")
