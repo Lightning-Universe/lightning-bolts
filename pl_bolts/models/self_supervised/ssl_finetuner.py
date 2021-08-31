@@ -400,7 +400,7 @@ if __name__ == "__main__":
     h = 1 + (In_w + 2 * padding - dilation * (kernel_size - 1) - 1) / 1
     print(h)
 
-    '''
+    """
     256, 3, 32, 32  => 256, 16, 32, 32 (padding=1, dilation=1, kernel_size=3, strade(1))
     256, 16, 32, 32 => 256, 3, 32, 32
-    '''
+    """
