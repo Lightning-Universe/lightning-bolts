@@ -494,3 +494,4 @@ def cli_main():
 
 if __name__ == "__main__":
     cli_main()
+    #  nohup python simclr_relic.py --run_name conv_kernel_size_1 --batch_size 1024 --gpus 2 --ckpt_path /root/share/pretrained_model/simclr-cifar10-sgd.ckpt &!

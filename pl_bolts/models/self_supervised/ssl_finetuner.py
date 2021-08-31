@@ -234,19 +234,27 @@ class RelicDALearner(LightningModule):
         for params in self.backbone.parameters():
             params.requires_grad = False
         self.data_augmentation = nn.Sequential(
-            nn.Conv2d(3, 16, kernel_size=3, padding=1),
-            nn.BatchNorm2d(16),
-            nn.ReLU(),
-            nn.Conv2d(16, 64, kernel_size=3, padding=1),
+            nn.Conv2d(3, 64, kernel_size=3, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
-            nn.Conv2d(64, 16, kernel_size=3, padding=1),
-            nn.BatchNorm2d(16),
-            nn.ReLU(),
-            nn.Conv2d(16, 3, kernel_size=3, padding=1),
+            nn.Conv2d(64, 3, kernel_size=3, padding=1),
             nn.BatchNorm2d(3),
             nn.ReLU(),
         )
+        # self.data_augmentation = nn.Sequential(
+        #     nn.Conv2d(3, 16, kernel_size=1, padding=1),
+        #     nn.BatchNorm2d(16),
+        #     nn.ReLU(),
+        #     nn.Conv2d(16, 64, kernel_size=3, padding=1),
+        #     nn.BatchNorm2d(64),
+        #     nn.ReLU(),
+        #     nn.Conv2d(64, 16, kernel_size=3, padding=1),
+        #     nn.BatchNorm2d(16),
+        #     nn.ReLU(),
+        #     nn.Conv2d(16, 3, kernel_size=3, padding=1),
+        #     nn.BatchNorm2d(3),
+        #     nn.ReLU(),
+        # )
         # self.data_augmentation = MLP_Augmentation()
         # print(self.backbone)
         print(self.data_augmentation)

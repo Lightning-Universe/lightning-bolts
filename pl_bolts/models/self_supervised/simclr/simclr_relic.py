@@ -29,10 +29,11 @@ def cli_main():
     parser = ArgumentParser()
 
     parser = SimCLR.add_model_specific_args(parser)
+    parser.add_argument("--run_name", default="test", type=str, help="wandb run_name")
 
     args = parser.parse_args()
 
-    wandb_logger = WandbLogger(project="simclr-finetune-cifar10", name="without data_augmentation")
+    wandb_logger = WandbLogger(project="simclr-finetune-cifar10", name=args.run_name)
 
     if args.dataset == "cifar10":
         val_split = 5000
