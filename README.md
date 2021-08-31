@@ -2,17 +2,17 @@
 
 <img src="docs/source/_images/logos/bolts_logo.png" width="400px">
 
-**Pretrained SOTA Deep Learning models, callbacks and more for research and production with PyTorch Lightning and PyTorch**
+**Deep Learning components for extending PyTorch Lightning**
 
 ______________________________________________________________________
 
 <p align="center">
-  <a href="https://www.pytorchlightning.ai/">Website</a> •
   <a href="#install">Installation</a> •
-  <a href="#main-Goals-of-Bolts">Main goals</a> •
-  <a href="https://lightning-bolts.readthedocs.io/en/latest/">latest Docs</a> •
-  <a href="https://lightning-bolts.readthedocs.io/en/stable/">stable Docs</a> •
+  <a href="https://lightning-bolts.readthedocs.io/en/latest/">Latest Docs</a> •
+  <a href="https://lightning-bolts.readthedocs.io/en/stable/">Stable Docs</a> •
+  <a href="#what-is-bolts">About</a> •
   <a href="#team">Community</a> •
+  <a href="https://www.pytorchlightning.ai/">Website</a> •
   <a href="https://www.grid.ai/">Grid AI</a> •
   <a href="#licence">Licence</a>
 </p>
@@ -25,12 +25,7 @@ ______________________________________________________________________
 
 [![Documentation Status](https://readthedocs.org/projects/lightning-bolts/badge/?version=latest)](https://pytorch-lightning-bolts.readthedocs.io/en/latest/)
 [![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://join.slack.com/t/pytorch-lightning/shared_invite/zt-pw5v393p-qRaDgEk24~EjiZNBpSQFgQ)
-[![Discourse status](https://img.shields.io/discourse/status?server=https%3A%2F%2Fforums.pytorchlightning.ai)](https://forums.pytorchlightning.ai/)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/PytorchLightning/lightning-bolts/blob/master/LICENSE)
-
-<!--
-[![Next Release](https://img.shields.io/badge/Next%20Release-Oct%2005-purple.svg)](https://shields.io/)
--->
 
 </div>
 
@@ -53,14 +48,14 @@ ______________________________________________________________________
 
 ## Install
 
-<details>
-  <summary>View install</summary>
-
-Simple installation from PyPI
+Pip / Conda
 
 ```bash
 pip install lightning-bolts
 ```
+
+<details>
+  <summary>Other installations</summary>
 
 Install bleeding-edge (no guarantees)
 
@@ -78,17 +73,13 @@ pip install lightning-bolts["extra"]
 
 ## What is Bolts
 
-Bolts is a Deep learning research and production toolbox of:
+Bolts provides a variety of components and modules to use with PyTorch Lightning such as callbacks & datasets, for applied research and production.
 
-- SOTA pretrained models.
-- Model components.
-- Callbacks.
-- Losses.
-- Datasets.
+TODO: Add a news section like this: https://github.com/microsoft/DeepSpeed#news
 
-## Main Goals of Bolts
+promote ORT/DeepSparse
 
-The main goal of Bolts is to enable rapid model idea iteration.
+TODO Add Grid python folder with an __init__
 
 #### Example 1: Finetuning on data
 
@@ -98,7 +89,6 @@ from pl_bolts.models.self_supervised.simclr.transforms import (
     SimCLRTrainDataTransform,
     SimCLREvalDataTransform,
 )
-import pytorch_lightning as pl
 
 # data
 train_data = DataLoader(MyDataset(transforms=SimCLRTrainDataTransform(input_height=32)))
@@ -117,7 +107,6 @@ simclr.freeze()
 
 ```python
 from pl_bolts.models import ImageGPT
-from pl_bolts.models.self_supervised import SimCLR
 
 
 class VideoGPT(ImageGPT):
@@ -137,13 +126,6 @@ class VideoGPT(ImageGPT):
         logs = {"loss": loss}
         return {"loss": loss, "log": logs}
 ```
-
-## Who is Bolts for?
-
-- Corporate production teams
-- Professional researchers
-- Ph.D. students
-- Linear + Logistic regression heroes
 
 ## I don't need deep learning
 
@@ -176,27 +158,23 @@ trainer.fit(
 trainer.test(test_dataloaders=loaders.test_dataloader())
 ```
 
-## Is this another model zoo?
+## Are specific research implementations supported?
 
-No!
+We've deprecated a bunch of specific model research, primarily because they've grown outdated or support for them was not possible. This also means in the future, we'll not accept any model specific research. We'd like to encourage users to contribute general component that will help a broad range, however components that help specifics domains will also be welcomed!
 
-Bolts is unique because models are implemented using PyTorch Lightning and structured so that they can be easily
-subclassed and iterated on.
+For example a tool to help train SSL models as a callback would be accepted, however the next greatest SSL model would not be, and be a good contribution to [Lightning Flash](<>).
 
-For example, you can override the elbo loss of a VAE, or the generator_step of a GAN to quickly try out a new idea.
-The best part is that all the models are benchmarked so you won't waste time trying to "reproduce" or find the bugs
-with your implementation.
+We've done a better job within [Lightning Flash](<>) to implement SOTA models for applied research, and suggest looking out our [VISSL](<>) Flash integration for SSL based tasks.
 
-## Team
+See our [deprecated implementations](<>) for more information.
+
+## Contribute!
 
 Bolts is supported by the PyTorch Lightning team and the PyTorch Lightning community!
 
+Join our Slack and/or read our [CONTRIBUTING](./.github/CONTRIBUTING.md) guidelines to get help becoming a contributor!
+
 ______________________________________________________________________
-
-## Licence
-
-Please observe the Apache 2.0 license that is listed in this repository.
-In addition the Lightning framework is Patent Pending.
 
 ## Citation
 
@@ -212,3 +190,8 @@ To cite bolts use:
 ```
 
 To cite other contributed models or modules, please cite the authors directly (if they don't have bibtex, ping the authors on a GH issue)
+
+## Licence
+
+Please observe the Apache 2.0 license that is listed in this repository.
+In addition the Lightning framework is Patent Pending.
