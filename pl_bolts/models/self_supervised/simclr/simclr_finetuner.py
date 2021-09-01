@@ -21,10 +21,9 @@ def cli_main():  # pragma: no cover
 
     parser = ArgumentParser()
 
-
     # wandb params
-    parser.add_argument("--project", type=str, help="wandb project name", default='simclr-cifar10')
-    parser.add_argument("--name", type=str, help="wandb run name.", default='baseline')
+    parser.add_argument("--project", type=str, help="wandb project name", default="simclr-cifar10")
+    parser.add_argument("--name", type=str, help="wandb run name.", default="baseline")
     # relic params
     parser.add_argument("--use_relic_loss", type=bool, help="to use_relic_loss.", default=False)
     parser.add_argument("--alfa", type=float, help="how depend on relic loss.", default=0.1)
