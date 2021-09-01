@@ -49,7 +49,6 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
     def __init__(
         self,
         top_k: int,
-        projection_factor: int = 3,
         min_logit_value: float = 5.0,
         logging_batch_interval: int = 20,
         max_logit_difference: float = 0.1,
@@ -64,7 +63,6 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
         """
         super().__init__()
         self.top_k = top_k
-        self.projection_factor = projection_factor
         self.max_logit_difference = max_logit_difference
         self.logging_batch_interval = logging_batch_interval
         self.min_logit_value = min_logit_value
@@ -79,7 +77,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
         dataloader_idx: int,
     ) -> None:
         # show images only every 20 batches
-        if (trainer.batch_idx + 1) % self.logging_batch_interval != 0:  # type: ignore[attr-defined]
+        if (batch_idx + 1) % self.logging_batch_interval != 0:  # type: ignore[attr-defined]
             return
 
         # pick the last batch and logits
@@ -135,7 +133,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
         batch_size, c, w, h = confusing_x.size()
         for logit_i, x_param in enumerate((x_param_a, x_param_b)):
             x_param = x_param.to(model.device)  # type: ignore[assignment]
-            logits = model(x_param.view(batch_size, -1))
+            logits = model(x_param)
             logits[:, mask_idxs[:, logit_i]].sum().backward()
 
         # reshape grads
