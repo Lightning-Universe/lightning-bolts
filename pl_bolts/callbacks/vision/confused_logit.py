@@ -40,7 +40,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
     def __init__(
         self,
         top_k: int,
-        projection_factor: int = 3,
+#         projection_factor: int = 3,
         min_logit_value: float = 5.0,
         logging_batch_interval: int = 20,
         max_logit_difference: float = 0.1
@@ -55,7 +55,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
         """
         super().__init__()
         self.top_k = top_k
-        self.projection_factor = projection_factor
+#         self.projection_factor = projection_factor
         self.max_logit_difference = max_logit_difference
         self.logging_batch_interval = logging_batch_interval
         self.min_logit_value = min_logit_value
