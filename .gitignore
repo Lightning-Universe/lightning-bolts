@@ -1,6 +1,7 @@
 # logs
 lightning-bolts-pl_bolts_models_self_supervised_simclr/
 simclr-finetune-cifar10/
+simclr-cifar10/
 *.out
 wandb/
 

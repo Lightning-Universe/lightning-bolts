@@ -210,6 +210,7 @@ class RelicDALearner(LightningModule):
         decay_epochs: List = [60, 80],
         gamma: float = 0.1,
         final_lr: float = 0.0,
+        alfa: float = 0.1,
     ):
         """
         Args:
@@ -258,11 +259,9 @@ class RelicDALearner(LightningModule):
         # self.data_augmentation = MLP_Augmentation()
         # print(self.backbone)
         print(self.data_augmentation)
-
-        # metrics
-        self.train_acc = Accuracy()
-        self.val_acc = Accuracy(compute_on_step=False)
-        self.test_acc = Accuracy(compute_on_step=False)
+        
+        # relic params
+        self.alfa = alfa
 
     def on_train_epoch_start(self) -> None:
         self.backbone.eval()
@@ -279,9 +278,7 @@ class RelicDALearner(LightningModule):
         return loss
 
     def forward(self, x):
-        # x = x.view(x.size(0), -1)
         x = self.data_augmentation(x)
-        # x = x.view(-1, 3, 32, 32)
         return self.backbone(x)
 
     def shared_step(self, batch):
@@ -290,8 +287,7 @@ class RelicDALearner(LightningModule):
         z_list = [self.backbone(i)]  # img_list[-1] is the original image.
         for img in img_list[:-1]:
             z_list.append(self.backbone(img))
-        loss = self.relic_loss(z_list)
-        return loss
+        return self.relic_loss(z_list, self.alfa)
 
     def relic_loss(self, z_list, alfa=0.1):
 
@@ -311,6 +307,8 @@ class RelicDALearner(LightningModule):
                 do2 = p_do_list[j] * mask
                 _relic_loss += nn.KLDivLoss()(do1_log, do2)
 
+        self.log('_nt_xent_loss', _nt_xent_loss)
+        self.log('_relic_loss', _relic_loss)
         loss = _nt_xent_loss + alfa * _relic_loss
 
         return loss
