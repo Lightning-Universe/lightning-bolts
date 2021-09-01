@@ -84,9 +84,7 @@ class SimCLRTrainDataTransform:
 
         # add online train transform of the size of global view
         self.online_transform = transforms.Compose(
-            [transforms.RandomResizedCrop(self.input_height),
-            transforms.RandomHorizontalFlip(),
-            self.final_transform]
+            [transforms.RandomResizedCrop(self.input_height), transforms.RandomHorizontalFlip(), self.final_transform]
         )
 
     def __call__(self, sample):
@@ -181,7 +179,7 @@ class SimCLRFinetuneTransform:
         )
 
         self.use_relic_loss = use_relic_loss
-        
+
         if not eval_transform:
             data_transforms = [
                 transforms.RandomResizedCrop(size=self.input_height),

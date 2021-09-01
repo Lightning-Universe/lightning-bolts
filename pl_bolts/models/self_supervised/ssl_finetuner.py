@@ -1,9 +1,9 @@
 import math
 from typing import List, Optional
-import wandb
 
 import numpy as np
 import torch
+import wandb
 from pytorch_lightning import LightningModule
 from torch import Tensor, nn
 from torch.nn import functional as F
@@ -166,8 +166,7 @@ class SSLFineTuner(LightningModule):
 
 
 class RelicDALearner(LightningModule):
-    """Finetunes a self-supervised learning backbone using the standard evaluation protocol of a 
-    """
+    """Finetunes a self-supervised learning backbone using the standard evaluation protocol of a."""
 
     def __init__(
         self,
@@ -222,13 +221,13 @@ class RelicDALearner(LightningModule):
         # )
         # import ipdb; ipdb.set_trace()
         self.data_augmentation = nn.Sequential(
-                                    nn.Conv2d(3, 3, 1),
-                                    nn.BatchNorm2d(3),
-                                    )
+            nn.Conv2d(3, 3, 1),
+            nn.BatchNorm2d(3),
+        )
         # self.data_augmentation = MLP_Augmentation()
         # print(self.backbone)
         # print(self.data_augmentation)
-        
+
         # relic params
         self.alfa = alfa
 
@@ -238,28 +237,33 @@ class RelicDALearner(LightningModule):
     def training_step(self, batch, batch_idx):
         # print(batch[0][0].shape)  # torch.Size([256, 3, 32, 32])
         loss = self.shared_step(batch)
-        wandb.log({"train_loss": loss.to('cpu').detach().numpy()})
+        wandb.log({"train_loss": loss.to("cpu").detach().numpy()})
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
-        wandb.log({"val_loss": loss.to('cpu').detach().numpy()})
+        wandb.log({"val_loss": loss.to("cpu").detach().numpy()})
         return loss
 
     def forward(self, x):
-        return self.data_augmentation(x) 
+        return self.data_augmentation(x)
 
     def shared_step(self, batch):
         img_list, y = batch
         i = self(img_list[-1])
-        
+
         self.visualization = True
         if self.visualization:
             # other augmentation
             # _list = img_list[:][0].to('cpu').detach().numpy().transpose(0, 2, 3, 1)
-            i_before = img_list[-1][0].to('cpu').detach().numpy().transpose(1, 2, 0)
-            i_after = i[0].to('cpu').detach().numpy().transpose(1, 2, 0)
-            wandb.log({"before": [wandb.Image(i_before, caption=f'{y[0]}')], 'after': [wandb.Image(i_after, caption=f'{y[0]}')]})
+            i_before = img_list[-1][0].to("cpu").detach().numpy().transpose(1, 2, 0)
+            i_after = i[0].to("cpu").detach().numpy().transpose(1, 2, 0)
+            wandb.log(
+                {
+                    "before": [wandb.Image(i_before, caption=f"{y[0]}")],
+                    "after": [wandb.Image(i_after, caption=f"{y[0]}")],
+                }
+            )
         z_list = [self.backbone(i)]  # img_list[-1] is the original image.
         for img in img_list[:-1]:
             z_list.append(self.backbone(img))
@@ -284,7 +288,12 @@ class RelicDALearner(LightningModule):
                 _relic_loss += nn.KLDivLoss()(do1_log, do2)
 
         loss = _nt_xent_loss + alfa * _relic_loss
-        wandb.log({'_nt_xent_loss': _nt_xent_loss.to('cpu').detach().numpy(), '_relic_loss': _relic_loss.to('cpu').detach().numpy()})
+        wandb.log(
+            {
+                "_nt_xent_loss": _nt_xent_loss.to("cpu").detach().numpy(),
+                "_relic_loss": _relic_loss.to("cpu").detach().numpy(),
+            }
+        )
         return loss
 
     def nt_xent_loss(self, out_1, out_2, temperature=0.1, eps=1e-6):
