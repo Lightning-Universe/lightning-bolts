@@ -70,7 +70,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
         dataloader_idx: int,
     ) -> None:
         # show images only every 20 batches
-        if (trainer.batch_idx + 1) % self.logging_batch_interval != 0:  # type: ignore[attr-defined]
+        if (batch_idx + 1) % self.logging_batch_interval != 0:  # type: ignore[attr-defined]
             return
 
         # pick the last batch and logits
@@ -126,7 +126,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
         batch_size, c, w, h = confusing_x.size()
         for logit_i, x_param in enumerate((x_param_a, x_param_b)):
             x_param = x_param.to(model.device)  # type: ignore[assignment]
-            logits = model(x_param.view(batch_size, -1))
+            logits = model(x_param)
             logits[:, mask_idxs[:, logit_i]].sum().backward()
 
         # reshape grads
@@ -149,7 +149,6 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
             self.__draw_sample(fig, axarr, 1, 2, gb * 2 + x, f'd{mask_idx[1]}-logit/dx')
 
             trainer.logger.experiment.add_figure('confusing_imgs', fig, global_step=trainer.global_step)
-            fig.savefig(str(trainer.log_dir)+'/Confusing_images_step_{:06d}.pdf'.format(trainer.global_step))
 
     @staticmethod
     def __draw_sample(fig: Figure, axarr: Axes, row_idx: int, col_idx: int, img: Tensor, title: str) -> None:
