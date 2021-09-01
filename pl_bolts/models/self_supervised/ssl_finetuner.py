@@ -1,5 +1,6 @@
 import math
 from typing import List, Optional
+import wandb
 
 import numpy as np
 import torch
@@ -148,7 +149,7 @@ class SSLFineTuner(LightningModule):
         optimizer = torch.optim.SGD(
             self.linear_layer.parameters(),
             lr=self.learning_rate,
-            nesterov=self.nesterov,
+            nesterov=self.nesterov,  # hypar
             momentum=0.9,
             weight_decay=self.weight_decay,
         )
@@ -165,34 +166,7 @@ class SSLFineTuner(LightningModule):
 
 
 class RelicDALearner(LightningModule):
-    """Finetunes a self-supervised learning backbone using the standard evaluation protocol of a singler layer MLP
-    with 1024 units.
-
-    Example::
-
-        from pl_bolts.utils.self_supervised import SSLFineTuner
-        from pl_bolts.models.self_supervised import CPC_v2
-        from pl_bolts.datamodules import CIFAR10DataModule
-        from pl_bolts.models.self_supervised.cpc.transforms import CPCEvalTransformsCIFAR10,
-                                                                    CPCTrainTransformsCIFAR10
-
-        # pretrained model
-        backbone = CPC_v2.load_from_checkpoint(PATH, strict=False)
-
-        # dataset + transforms
-        dm = CIFAR10DataModule(data_dir='.')
-        dm.train_transforms = CPCTrainTransformsCIFAR10()
-        dm.val_transforms = CPCEvalTransformsCIFAR10()
-
-        # finetuner
-        finetuner = SSLFineTuner(backbone, in_features=backbone.z_dim, num_classes=backbone.num_classes)
-
-        # train
-        trainer = pl.Trainer()
-        trainer.fit(finetuner, dm)
-
-        # test
-        trainer.test(datamodule=dm)
+    """Finetunes a self-supervised learning backbone using the standard evaluation protocol of a 
     """
 
     def __init__(
@@ -231,34 +205,29 @@ class RelicDALearner(LightningModule):
         self.epochs = epochs
         self.final_lr = final_lr
 
-        self.backbone = backbone
+        self.backbone = backbone  # backbone + projection. output_dim=128.
         for params in self.backbone.parameters():
             params.requires_grad = False
-        self.data_augmentation = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=3, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.Conv2d(64, 3, kernel_size=3, padding=1),
-            nn.BatchNorm2d(3),
-            nn.ReLU(),
-        )
+
+        # self.kernel_size = [3, 3]
+        # self.channel_size = [3, 3]
+        # self.padding_size = [1, 1]
         # self.data_augmentation = nn.Sequential(
-        #     nn.Conv2d(3, 16, kernel_size=1, padding=1),
-        #     nn.BatchNorm2d(16),
+        #     nn.Conv2d(3, self.channel_size[0], kernel_size=self.kernel_size[0], padding=self.padding_size[0]),
+        #     nn.BatchNorm2d(self.channel_size[0]),
         #     nn.ReLU(),
-        #     nn.Conv2d(16, 64, kernel_size=3, padding=1),
-        #     nn.BatchNorm2d(64),
-        #     nn.ReLU(),
-        #     nn.Conv2d(64, 16, kernel_size=3, padding=1),
-        #     nn.BatchNorm2d(16),
-        #     nn.ReLU(),
-        #     nn.Conv2d(16, 3, kernel_size=3, padding=1),
-        #     nn.BatchNorm2d(3),
+        #     nn.Conv2d(self.channel_size[0], self.channel_size[1], kernel_size=self.kernel_size[1], padding=self.padding_size[1]),
+        #     nn.BatchNorm2d(self.channel_size[1]),
         #     nn.ReLU(),
         # )
+        # import ipdb; ipdb.set_trace()
+        self.data_augmentation = nn.Sequential(
+                                    nn.Conv2d(3, 3, 1),
+                                    nn.BatchNorm2d(3),
+                                    )
         # self.data_augmentation = MLP_Augmentation()
         # print(self.backbone)
-        print(self.data_augmentation)
+        # print(self.data_augmentation)
         
         # relic params
         self.alfa = alfa
@@ -269,21 +238,28 @@ class RelicDALearner(LightningModule):
     def training_step(self, batch, batch_idx):
         # print(batch[0][0].shape)  # torch.Size([256, 3, 32, 32])
         loss = self.shared_step(batch)
-        self.log("train_loss", loss)
+        wandb.log({"train_loss": loss.to('cpu').detach().numpy()})
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
-        self.log("val_loss", loss)
+        wandb.log({"val_loss": loss.to('cpu').detach().numpy()})
         return loss
 
     def forward(self, x):
-        x = self.data_augmentation(x)
-        return self.backbone(x)
+        return self.data_augmentation(x) 
 
     def shared_step(self, batch):
         img_list, y = batch
-        i = self.data_augmentation(img_list[-1])
+        i = self(img_list[-1])
+        
+        self.visualization = True
+        if self.visualization:
+            # other augmentation
+            # _list = img_list[:][0].to('cpu').detach().numpy().transpose(0, 2, 3, 1)
+            i_before = img_list[-1][0].to('cpu').detach().numpy().transpose(1, 2, 0)
+            i_after = i[0].to('cpu').detach().numpy().transpose(1, 2, 0)
+            wandb.log({"before": [wandb.Image(i_before, caption=f'{y[0]}')], 'after': [wandb.Image(i_after, caption=f'{y[0]}')]})
         z_list = [self.backbone(i)]  # img_list[-1] is the original image.
         for img in img_list[:-1]:
             z_list.append(self.backbone(img))
@@ -307,13 +283,11 @@ class RelicDALearner(LightningModule):
                 do2 = p_do_list[j] * mask
                 _relic_loss += nn.KLDivLoss()(do1_log, do2)
 
-        self.log('_nt_xent_loss', _nt_xent_loss)
-        self.log('_relic_loss', _relic_loss)
         loss = _nt_xent_loss + alfa * _relic_loss
-
+        wandb.log({'_nt_xent_loss': _nt_xent_loss.to('cpu').detach().numpy(), '_relic_loss': _relic_loss.to('cpu').detach().numpy()})
         return loss
 
-    def nt_xent_loss(self, out_1, out_2, temperature=0.5, eps=1e-6):
+    def nt_xent_loss(self, out_1, out_2, temperature=0.1, eps=1e-6):
         """
         assume out_1 and out_2 are normalized
         out_1: [batch_size, dim]
@@ -350,18 +324,14 @@ class RelicDALearner(LightningModule):
         optimizer = torch.optim.SGD(
             self.data_augmentation.parameters(),
             lr=self.learning_rate,
-            nesterov=self.nesterov,
+            nesterov=self.nesterov,  # hyparams.
             momentum=0.9,
             weight_decay=self.weight_decay,
         )
 
-        # set scheduler
-        if self.scheduler_type == "step":
-            scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, self.decay_epochs, gamma=self.gamma)
-        elif self.scheduler_type == "cosine":
-            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-                optimizer, self.epochs, eta_min=self.final_lr  # total epochs to run
-            )
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, self.epochs, eta_min=self.final_lr  # total epochs to run
+        )
 
         return [optimizer], [scheduler]
 

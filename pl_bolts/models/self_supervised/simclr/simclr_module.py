@@ -81,6 +81,8 @@ class SimCLR(LightningModule):
         learning_rate: float = 1e-3,
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
+        use_relic_loss: bool = False,
+        alfa: float = 0.1,
         **kwargs
     ):
         """
@@ -119,14 +121,18 @@ class SimCLR(LightningModule):
         self.max_epochs = max_epochs
 
         self.encoder = self.init_model()
-        print(self.encoder)
+        # print(self.encoder)
         self.projection = Projection(input_dim=self.hidden_mlp, hidden_dim=self.hidden_mlp, output_dim=self.feat_dim)
-        print(self.projection)
+        # print(self.projection)
 
         # compute iters per epoch
         global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
         print("global_batch_size:", global_batch_size, "self.num_samples: ", self.num_samples)
+
+        self.use_relic_loss = use_relic_loss
+        # print('SimCLR.use_relic_loss: ', self.use_relic_loss)
+        self.alfa = alfa
 
     def init_model(self):
         if self.arch == "resnet18":
@@ -145,17 +151,28 @@ class SimCLR(LightningModule):
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
 
-        (img1, img2, _), y = batch
+        if self.use_relic_loss:
+            # Add the causal regularization.
+            # https://arxiv.org/pdf/2010.07922.pdf
+            (img_list, _), y = batch
+            z_list = []
+            for img in img_list:
+                z_list.append(self.projection(self(img)))
 
-        # # get h representations, bolts resnet returns a list
-        h1 = self(img1)
-        h2 = self(img2)
+            loss = self.relic_loss(z_list, alfa=self.alfa)
+        else:
+            # final image in tuple is for online eval
+            (img1, img2, _), y = batch
 
-        # # get z representations
-        z1 = self.projection(h1)
-        z2 = self.projection(h2)
+            # # get h representations, bolts resnet returns a list
+            h1 = self(img1)
+            h2 = self(img2)
 
-        loss = self.nt_xent_loss(z1, z2, self.temperature)
+            # # get z representations
+            z1 = self.projection(h1)
+            z2 = self.projection(h2)
+
+            loss, _ = self.nt_xent_loss(z1, z2, self.temperature)
         return loss
 
     def training_step(self, batch, batch_idx):
@@ -261,8 +278,7 @@ class SimCLR(LightningModule):
 
         loss = -torch.log(pos / (neg + eps)).mean()
 
-        # return loss, sim[out_1.shape[0] :, : out_1.shape[0]]  # sim[] is for use_relic_loss
-        return loss
+        return loss, sim[out_1.shape[0] :, : out_1.shape[0]]
 
     def relic_loss(self, z_list, alfa=0.1):
 
@@ -297,8 +313,9 @@ class SimCLR(LightningModule):
             type=str,
             help="to load pre-trained model",
         )
-        parser.add_argument("--use_relic_loss", default=False, type=bool, help="use relic loss")
+        
         parser.add_argument("--alfa", default=0.1, type=float, help="alfa of relic loss")
+        
         # model params
         parser.add_argument("--arch", default="resnet50", type=str, help="convnet architecture")
         # specify flags to store false
@@ -342,12 +359,11 @@ def cli_main():
     from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
     parser = ArgumentParser()
-
-    # model args
     parser = SimCLR.add_model_specific_args(parser)
+    parser.add_argument("--use_relic_loss", default=False, type=bool, help="use relic loss")
     args = parser.parse_args()
 
-    wandb_logger = WandbLogger(name="simclr-pretrian")
+    wandb_logger = WandbLogger(project='simclr-cifar10', name="relic-pretrian")
 
     if args.dataset == "stl10":
         dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
@@ -416,6 +432,7 @@ def cli_main():
         gaussian_blur=args.gaussian_blur,
         jitter_strength=args.jitter_strength,
         normalize=normalization,
+        use_relic_loss=args.use_relic_loss,
     )
 
     dm.val_transforms = SimCLREvalDataTransform(
@@ -423,6 +440,7 @@ def cli_main():
         gaussian_blur=args.gaussian_blur,
         jitter_strength=args.jitter_strength,
         normalize=normalization,
+        use_relic_loss=args.use_relic_loss,
     )
 
     model = SimCLR(**args.__dict__)
@@ -439,7 +457,7 @@ def cli_main():
         )
 
     lr_monitor = LearningRateMonitor(logging_interval="step")
-    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor="val_loss", filename=f'simclr-baseline-{epoch:02d}-{val_loss:.2f}')
+    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor="val_loss", filename='simclr-baseline-{epoch:02d}-{val_loss:.2f}')
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
     callbacks.append(lr_monitor)
 
