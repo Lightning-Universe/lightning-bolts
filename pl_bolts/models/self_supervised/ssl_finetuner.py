@@ -259,7 +259,7 @@ class RelicDALearner(LightningModule):
         # self.data_augmentation = MLP_Augmentation()
         # print(self.backbone)
         print(self.data_augmentation)
-        
+
         # relic params
         self.alfa = alfa
 
@@ -307,8 +307,8 @@ class RelicDALearner(LightningModule):
                 do2 = p_do_list[j] * mask
                 _relic_loss += nn.KLDivLoss()(do1_log, do2)
 
-        self.log('_nt_xent_loss', _nt_xent_loss)
-        self.log('_relic_loss', _relic_loss)
+        self.log("_nt_xent_loss", _nt_xent_loss)
+        self.log("_relic_loss", _relic_loss)
         loss = _nt_xent_loss + alfa * _relic_loss
 
         return loss

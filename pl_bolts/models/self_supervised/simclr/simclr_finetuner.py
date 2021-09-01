@@ -53,7 +53,7 @@ def cli_main():  # pragma: no cover
 
     if args.dataset == "cifar10":
         dm = CIFAR10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
-        
+
         dm.train_transforms = SimCLRFinetuneTransform(
             normalize=cifar10_normalization(),
             input_height=dm.size()[-1],
