@@ -1,7 +1,8 @@
 python ../simclr_module.py \
+--use_relic_loss True \
 --gpus 4 \
 --dataset cifar10 \
---batch_size 512 \
+--batch_size 256 \
 --num_workers 16 \
 --optimizer sgd \
 --learning_rate 1.5 \
