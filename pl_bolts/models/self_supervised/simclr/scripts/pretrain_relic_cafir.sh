@@ -1,5 +1,6 @@
 python ../simclr_module.py \
 --use_relic_loss True \
+--alfa 0.5 \
 --gpus 4 \
 --dataset cifar10 \
 --batch_size 256 \

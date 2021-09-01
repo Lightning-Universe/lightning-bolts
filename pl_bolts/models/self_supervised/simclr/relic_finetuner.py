@@ -30,19 +30,21 @@ def cli_main():
 
     parser = ArgumentParser()
 
+    # nohup python relic_finetuner.py --ckpt_path /root/share/pretrained_model/simclr-cifar10-sgd.ckpt --use_relic_loss True --gpus 2 --aug_hidden_dim [512, 256, 512] &!
     # wandb params
     parser.add_argument("--project", type=str, help="wandb project name", default="simclr-cifar10")
     parser.add_argument("--name", type=str, help="wandb run name.", default="testing")
     # relic params
     parser.add_argument("--use_relic_loss", type=bool, help="to use_relic_loss.", default=False)
     parser.add_argument("--alfa", type=float, help="how depend on relic loss.", default=0.1)
+    parser.add_argument("--aug_hidden_dim", type=int, help="aug_hidden_dim", default=512)
 
     parser.add_argument("--dataset", type=str, help="cifar10, stl10, imagenet", default="cifar10")
     parser.add_argument("--ckpt_path", type=str, help="path to ckpt")
     parser.add_argument("--data_dir", type=str, help="path to dataset", default=os.getcwd())
 
     parser.add_argument("--batch_size", default=256, type=int, help="batch size per gpu")
-    parser.add_argument("--num_workers", default=16, type=int, help="num of workers per GPU")
+    parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
     parser.add_argument("--gpus", default=4, type=int, help="number of GPUs")
     parser.add_argument("--num_epochs", default=200, type=int, help="number of epochs")
 
@@ -57,8 +59,9 @@ def cli_main():
     parser.add_argument("--final_lr", type=float, default=0.0)
 
     args = parser.parse_args()
-    wandb.init(project=args.project, name=args.name)
-    wandb_logger = WandbLogger(project=args.project, name=args.name)
+    name = f'aug_hidden_dim-{args.aug_hidden_dim}-alfa-{args.alfa}'
+    wandb.init(project=args.project, name=name)
+    # wandb_logger = WandbLogger(project=args.project, name=name)
 
     if args.dataset == "cifar10":
         dm = CIFAR10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
@@ -95,6 +98,7 @@ def cli_main():
         backbone,
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
+        aug_hidden_dim=args.aug_hidden_dim,
     )
     #############################################################################
 
@@ -113,7 +117,6 @@ def cli_main():
         sync_batchnorm=True if args.gpus > 1 else False,
         callbacks=callbacks,
         fast_dev_run=False,
-        logger=wandb_logger,
     )
 
     trainer.fit(model, datamodule=dm)

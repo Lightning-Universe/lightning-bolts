@@ -184,6 +184,7 @@ class RelicDALearner(LightningModule):
         gamma: float = 0.1,
         final_lr: float = 0.0,
         alfa: float = 0.1,
+        aug_hidden_dim: Optional[int] = [512],
     ):
         """
         Args:
@@ -220,13 +221,13 @@ class RelicDALearner(LightningModule):
         #     nn.ReLU(),
         # )
         # import ipdb; ipdb.set_trace()
-        self.data_augmentation = nn.Sequential(
-            nn.Conv2d(3, 3, 1),
-            nn.BatchNorm2d(3),
-        )
-        # self.data_augmentation = MLP_Augmentation()
+        # self.data_augmentation = nn.Sequential(
+        #     nn.Conv2d(3, 19, 1),
+        #     nn.Conv2d(19, 3, 1),
+        # )
+        self.data_augmentation = MLP_Augmentation()
         # print(self.backbone)
-        # print(self.data_augmentation)
+        print(self.data_augmentation)
         
         # relic params
         self.alfa = alfa
@@ -236,20 +237,23 @@ class RelicDALearner(LightningModule):
 
     def training_step(self, batch, batch_idx):
         # print(batch[0][0].shape)  # torch.Size([256, 3, 32, 32])
-        loss = self.shared_step(batch)
-        wandb.log({"train_loss": loss.to("cpu").detach().numpy()})
+        loss = self.shared_step(batch, log_flag=True)
+        wandb.log({"train_loss": loss})
+        # self.log("train_loss", loss, prog_bar=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
-        wandb.log({"val_loss": loss.to("cpu").detach().numpy()})
+        wandb.log({"val_loss": loss})
+        # self.log("val_loss", loss, prog_bar=True)
         return loss
 
     def forward(self, x):
         return self.data_augmentation(x)
 
-    def shared_step(self, batch):
+    def shared_step(self, batch, log_flag=False):
         img_list, y = batch
+        # print(img_list[0].size)
         i = self(img_list[-1])
 
         self.visualization = True
@@ -258,18 +262,16 @@ class RelicDALearner(LightningModule):
             # _list = img_list[:][0].to('cpu').detach().numpy().transpose(0, 2, 3, 1)
             i_before = img_list[-1][0].to("cpu").detach().numpy().transpose(1, 2, 0)
             i_after = i[0].to("cpu").detach().numpy().transpose(1, 2, 0)
-            wandb.log(
-                {
+            wandb.log({
                     "before": [wandb.Image(i_before, caption=f"{y[0]}")],
                     "after": [wandb.Image(i_after, caption=f"{y[0]}")],
-                }
-            )
+            })
         z_list = [self.backbone(i)]  # img_list[-1] is the original image.
         for img in img_list[:-1]:
             z_list.append(self.backbone(img))
-        return self.relic_loss(z_list, self.alfa)
+        return self.relic_loss(z_list, self.alfa, log_flag)
 
-    def relic_loss(self, z_list, alfa=0.1):
+    def relic_loss(self, z_list, alfa=0.1, log_flag=False):
 
         _nt_xent_loss, _relic_loss, p_do_list = 0, 0, []
         batch_size, device = z_list[0].shape[0], z_list[0].device
@@ -288,12 +290,10 @@ class RelicDALearner(LightningModule):
                 _relic_loss += nn.KLDivLoss()(do1_log, do2)
 
         loss = _nt_xent_loss + alfa * _relic_loss
-        wandb.log(
-            {
-                "_nt_xent_loss": _nt_xent_loss.to("cpu").detach().numpy(),
-                "_relic_loss": _relic_loss.to("cpu").detach().numpy(),
-            }
-        )
+        if log_flag:
+            wandb.log({"_nt_xent_loss": _nt_xent_loss, "_relic_loss": _relic_loss})
+            # self.log("_nt_xent_loss", _nt_xent_loss, prog_bar=True)
+            # self.log("_relic_loss", _relic_loss, prog_bar=True)
         return loss
 
     def nt_xent_loss(self, out_1, out_2, temperature=0.1, eps=1e-6):
@@ -346,44 +346,47 @@ class RelicDALearner(LightningModule):
 
 
 class MLP_Augmentation(LightningModule):
-    def __init__(self, input_size=3 * 32 * 32, output_size=3 * 32 * 32, num_layer=3, hidden_dim=[128, 32, 128]):
+    def __init__(self, input_size=3 * 32 * 32, output_size=3 * 32 * 32, hidden_dim=[512, 512]):
         super().__init__()
-        assert num_layer == len(hidden_dim)
-        mlp_list = []
-        zView()
-        for idx, dim in enumerate(hidden_dim):
-            if idx == 0:
-                mlp_list.append(nn.Linear(input_size, dim))
-            else:
-                mlp_list.append(nn.Linear(pre_dim, dim))
-            mlp_list.append(nn.ReLU())
-            if idx == num_layer - 1:
-                mlp_list.append(nn.Linear(dim, output_size))
-            pre_dim = dim
-        self.model = nn.Sequential(*mlp_list)
+        if len(hidden_dim) == 0:
+            self.model = nn.Linear(input_size, output_size)
+        else:
+            mlp_list = []
+            for idx, dim in enumerate(hidden_dim):
+                if idx == 0:
+                    mlp_list.append(nn.Linear(input_size, dim))
+                else:
+                    mlp_list.append(nn.Linear(pre_dim, dim))
+                mlp_list.append(nn.ReLU())
+                if idx == len(hidden_dim) - 1:
+                    mlp_list.append(nn.Linear(dim, output_size))
+                pre_dim = dim
+            self.model = nn.Sequential(*mlp_list)
 
     def forward(self, x):
-        return self.model(x)
+        x = nn.Flatten()(x)
+        # x = x.view(-1, num_flat_features(x))
+        x = self.model(x)
+        x = x.view(-1, 3, 32, 32)
+        return x
 
-
-class View(LightningModule):
-    def __init__(self, shape):
-        self.shape = shape
-
-    def forward(self, x):
-        return x.view(*self.shape)
-
+    # def num_flat_features(self, x):
+    #     size = x.size()[1:]   # バッチの次元以外のすべての次元
+    #     num_features = 1
+    #     for s in size:
+    #         num_features *= s
+    #     return num_features
 
 if __name__ == "__main__":
-    # test = MLP_Augmentation()
-    input = [256, 3, 32, 32]
-    padding = 0
-    dilation = 1
-    kernel_size = 1
-    In_w = input[2]
+    test = MLP_Augmentation()
+    # input = [256, 3, 32, 32]
+    # padding = 0
+    # dilation = 1
+    # kernel_size = 1
+    # In_w = input[2]
 
-    h = 1 + (In_w + 2 * padding - dilation * (kernel_size - 1) - 1) / 1
-    print(h)
+    # h = 1 + (In_w + 2 * padding - dilation * (kernel_size - 1) - 1) / 1
+    # print(h)
 
     """
     256, 3, 32, 32  => 256, 16, 32, 32 (padding=1, dilation=1, kernel_size=3, strade(1))
