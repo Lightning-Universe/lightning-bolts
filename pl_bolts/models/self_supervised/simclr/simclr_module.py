@@ -53,22 +53,6 @@ class Projection(nn.Module):
             nn.ReLU(),
             nn.Linear(self.hidden_dim, self.output_dim, bias=False),
         )
-        # use_relic_loss
-        # self.model = nn.Sequential(
-        #     nn.Linear(self.input_dim, 4096),
-        #     nn.BatchNorm1d(4096),
-        #     nn.ReLU(),
-        #     nn.Linear(4096, 2048),
-        #     nn.BatchNorm1d(2048),
-        #     nn.ReLU(),
-        #     nn.Linear(2048, 1024),
-        #     nn.BatchNorm1d(1024),
-        #     nn.ReLU(),
-        #     nn.Linear(1024, 512),
-        #     nn.BatchNorm1d(512),
-        #     nn.ReLU(),
-        #     nn.Linear(512, self.output_dim, bias=False),
-        # )
 
     def forward(self, x):
         x = self.model(x)
@@ -97,8 +81,6 @@ class SimCLR(LightningModule):
         learning_rate: float = 1e-3,
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
-        use_relic_loss: bool = False,
-        alfa: float = 0.1,
         **kwargs
     ):
         """
@@ -137,12 +119,9 @@ class SimCLR(LightningModule):
         self.max_epochs = max_epochs
 
         self.encoder = self.init_model()
-
+        print(self.encoder)
         self.projection = Projection(input_dim=self.hidden_mlp, hidden_dim=self.hidden_mlp, output_dim=self.feat_dim)
-
-        # relic params
-        self.use_relic_loss = use_relic_loss
-        self.alfa = alfa
+        print(self.projection)
 
         # compute iters per epoch
         global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
@@ -166,28 +145,17 @@ class SimCLR(LightningModule):
             unlabeled_batch = batch[0]
             batch = unlabeled_batch
 
-        if self.use_relic_loss:
-            # Add the causal regularization.
-            # https://arxiv.org/pdf/2010.07922.pdf
-            (img_list, _), y = batch
-            z_list = []
-            for img in img_list:
-                z_list.append(self.projection(self(img)))
+        (img1, img2, _), y = batch
 
-            loss = self.relic_loss(z_list, alfa=self.alfa)
-        else:
-            # final image in tuple is for online eval
-            (img1, img2, _), y = batch
+        # # get h representations, bolts resnet returns a list
+        h1 = self(img1)
+        h2 = self(img2)
 
-            # # get h representations, bolts resnet returns a list
-            h1 = self(img1)
-            h2 = self(img2)
+        # # get z representations
+        z1 = self.projection(h1)
+        z2 = self.projection(h2)
 
-            # # get z representations
-            z1 = self.projection(h1)
-            z2 = self.projection(h2)
-
-            loss, _ = self.nt_xent_loss(z1, z2, self.temperature)
+        loss = self.nt_xent_loss(z1, z2, self.temperature)
         return loss
 
     def training_step(self, batch, batch_idx):
@@ -293,7 +261,8 @@ class SimCLR(LightningModule):
 
         loss = -torch.log(pos / (neg + eps)).mean()
 
-        return loss, sim[out_1.shape[0] :, : out_1.shape[0]]  # sim[] is for use_relic_loss
+        # return loss, sim[out_1.shape[0] :, : out_1.shape[0]]  # sim[] is for use_relic_loss
+        return loss
 
     def relic_loss(self, z_list, alfa=0.1):
 
@@ -447,7 +416,6 @@ def cli_main():
         gaussian_blur=args.gaussian_blur,
         jitter_strength=args.jitter_strength,
         normalize=normalization,
-        use_relic_loss=args.use_relic_loss,
     )
 
     dm.val_transforms = SimCLREvalDataTransform(
@@ -455,7 +423,6 @@ def cli_main():
         gaussian_blur=args.gaussian_blur,
         jitter_strength=args.jitter_strength,
         normalize=normalization,
-        use_relic_loss=args.use_relic_loss,
     )
 
     model = SimCLR(**args.__dict__)
