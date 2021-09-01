@@ -29,11 +29,12 @@ def cli_main():
     parser = ArgumentParser()
 
     parser = SimCLR.add_model_specific_args(parser)
-    parser.add_argument("--run_name", default="test", type=str, help="wandb run_name")
+    parser.add_argument("--project", default="simclr-cifar10", type=str, help="wandb run_name")
+    parser.add_argument("--name", default="relic", type=str, help="wandb run_name")
 
     args = parser.parse_args()
 
-    wandb_logger = WandbLogger(project="simclr-finetune-cifar10", name=args.run_name)
+    wandb_logger = WandbLogger(project=args.project, name=args.name)
 
     if args.dataset == "cifar10":
         val_split = 5000
@@ -53,7 +54,6 @@ def cli_main():
         normalization = cifar10_normalization()
 
         args.gaussian_blur = False
-        # args.gaussian_blur = True  # test relic.
         args.jitter_strength = 0.5
 
     args.use_relic_loss = True
@@ -67,7 +67,7 @@ def cli_main():
     dm.val_transforms = SimCLRFinetuneTransform(
         normalize=cifar10_normalization(),
         input_height=dm.size()[-1],
-        eval_transform=True,
+        eval_transform=False,
         use_relic_loss=args.use_relic_loss,
     )
     # dm.test_transforms = SimCLRFinetuneTransform(
@@ -85,7 +85,6 @@ def cli_main():
         maxpool1=args.maxpool1,
         first_conv=args.first_conv,
         dataset=args.dataset,
-        use_relic_loss=args.use_relic_loss,
     ).load_from_checkpoint(args.ckpt_path, strict=False)
 
     # import ipdb; ipdb.set_trace()
@@ -108,7 +107,7 @@ def cli_main():
         )
 
     lr_monitor = LearningRateMonitor(logging_interval="step")
-    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor="val_loss")
+    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor="val_loss", filename=f"relic-{epoch:02d}-{val_loss:.2f}")
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
     callbacks.append(lr_monitor)
 

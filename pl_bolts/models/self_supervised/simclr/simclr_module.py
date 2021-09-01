@@ -439,7 +439,7 @@ def cli_main():
         )
 
     lr_monitor = LearningRateMonitor(logging_interval="step")
-    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor="val_loss")
+    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor="val_loss", filename=f'simclr-baseline-{epoch:02d}-{val_loss:.2f}')
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
     callbacks.append(lr_monitor)
 

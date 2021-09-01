@@ -84,7 +84,9 @@ class SimCLRTrainDataTransform:
 
         # add online train transform of the size of global view
         self.online_transform = transforms.Compose(
-            [transforms.RandomResizedCrop(self.input_height), transforms.RandomHorizontalFlip(), self.final_transform]
+            [transforms.RandomResizedCrop(self.input_height),
+            transforms.RandomHorizontalFlip(),
+            self.final_transform]
         )
 
     def __call__(self, sample):
@@ -165,6 +167,8 @@ class SimCLRFinetuneTransform:
         use_relic_loss: bool = False,
     ) -> None:
 
+        self.eval_transform = eval_transform
+
         self.jitter_strength = jitter_strength
         self.input_height = input_height
         self.normalize = normalize
@@ -177,13 +181,7 @@ class SimCLRFinetuneTransform:
         )
 
         self.use_relic_loss = use_relic_loss
-        if self.use_relic_loss:
-            # self.gaussian_blur_transform
-            kernel_size = int(0.1 * self.input_height)
-            if kernel_size % 2 == 0:
-                kernel_size += 1
-            self.gaussian_blur_transform = GaussianBlur(kernel_size=kernel_size, p=0.5)
-
+        
         if not eval_transform:
             data_transforms = [
                 transforms.RandomResizedCrop(size=self.input_height),
@@ -207,7 +205,7 @@ class SimCLRFinetuneTransform:
 
     def __call__(self, sample):
         # print('use_relic_loss in SimCLRFinetuneTransform :', self.use_relic_loss)
-        if self.use_relic_loss:
+        if self.use_relic_loss and not self.eval_transform:
             z1 = transforms.Compose([transforms.RandomResizedCrop(size=self.input_height), self.final_transform])(
                 sample
             )
@@ -215,9 +213,8 @@ class SimCLRFinetuneTransform:
             z3 = transforms.Compose([transforms.RandomApply([self.color_jitter], p=0.8), self.final_transform])(sample)
             z4 = transforms.Compose([transforms.RandomGrayscale(p=0.2), self.final_transform])(sample)
             z5 = transforms.Compose([transforms.RandomSolarize(threshold=0.5, p=0.5), self.final_transform])(sample)
-            z6 = transforms.Compose([self.gaussian_blur_transform, self.final_transform])(sample)
-            learned_augmentation = transforms.ToTensor()(sample)
-            return [z1, z2, z3, z4, z5, z6, learned_augmentation]
+            original = transforms.ToTensor()(sample)
+            return [z1, z2, z3, z4, z5, original]
         else:
             return self.transform(sample)
 
