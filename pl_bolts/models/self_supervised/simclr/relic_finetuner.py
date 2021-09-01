@@ -1,7 +1,9 @@
 import math
+import os
 from argparse import ArgumentParser
-import wandb 
+
 import torch
+import wandb
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
@@ -10,7 +12,8 @@ from torch.nn import functional as F
 
 # from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
 from pl_bolts.models.self_supervised.simclr.simclr_module import SimCLR
-from pl_bolts.models.self_supervised.ssl_finetuner import RelicDALearner
+from pl_bolts.models.self_supervised.simclr.transforms import SimCLRFinetuneTransform
+from pl_bolts.models.self_supervised.ssl_finetuner import RelicDALearner, SSLFineTuner
 from pl_bolts.optimizers.lars import LARS
 from pl_bolts.optimizers.lr_scheduler import linear_warmup_decay
 from pl_bolts.transforms.dataset_normalizations import (
@@ -18,12 +21,6 @@ from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization,
     stl10_normalization,
 )
-
-import os
-from pytorch_lightning import Trainer, seed_everything
-from pl_bolts.models.self_supervised.simclr.transforms import SimCLRFinetuneTransform
-from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner
-
 
 
 def cli_main():
@@ -102,7 +99,9 @@ def cli_main():
     #############################################################################
 
     lr_monitor = LearningRateMonitor(logging_interval="step")
-    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor="val_loss", filename="relic-{epoch:02d}-{val_loss:.2f}")
+    model_checkpoint = ModelCheckpoint(
+        save_last=True, save_top_k=1, monitor="val_loss", filename="relic-{epoch:02d}-{val_loss:.2f}"
+    )
     callbacks = [model_checkpoint, lr_monitor]
 
     trainer = Trainer(
@@ -118,6 +117,7 @@ def cli_main():
     )
 
     trainer.fit(model, datamodule=dm)
+
 
 if __name__ == "__main__":
     cli_main()

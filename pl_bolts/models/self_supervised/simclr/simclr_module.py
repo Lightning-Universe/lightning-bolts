@@ -317,9 +317,9 @@ class SimCLR(LightningModule):
             type=str,
             help="to load pre-trained model",
         )
-        
+
         parser.add_argument("--alfa", default=0.1, type=float, help="alfa of relic loss")
-        
+
         # model params
         parser.add_argument("--arch", default="resnet50", type=str, help="convnet architecture")
         # specify flags to store false
@@ -367,7 +367,7 @@ def cli_main():
     parser.add_argument("--use_relic_loss", default=False, type=bool, help="use relic loss")
     args = parser.parse_args()
 
-    wandb_logger = WandbLogger(project='simclr-cifar10', name="relic-pretrian")
+    wandb_logger = WandbLogger(project="simclr-cifar10", name="relic-pretrian")
 
     if args.dataset == "stl10":
         dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
@@ -462,12 +462,18 @@ def cli_main():
 
     lr_monitor = LearningRateMonitor(logging_interval="step")
 <<<<<<< HEAD
+<<<<<<< HEAD
     model_checkpoint = ModelCheckpoint(
         save_last=True, save_top_k=1, monitor="val_loss", filename=f"simclr-baseline-{epoch:02d}-{val_loss:.2f}"
     )
 =======
     model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor="val_loss", filename='simclr-baseline-{epoch:02d}-{val_loss:.2f}')
 >>>>>>> 7cf8871ee7811d11df0be0ca3aa032b881bbb76d
+=======
+    model_checkpoint = ModelCheckpoint(
+        save_last=True, save_top_k=1, monitor="val_loss", filename="simclr-baseline-{epoch:02d}-{val_loss:.2f}"
+    )
+>>>>>>> 5fe2d5e21d4d81efd87dfa1997c33b0c770852ed
     callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
     callbacks.append(lr_monitor)
 
