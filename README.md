@@ -73,37 +73,31 @@ pip install lightning-bolts["extra"]
 
 ## What is Bolts
 
-Bolts provides a variety of components and modules to use with PyTorch Lightning such as callbacks & datasets, for applied research and production.
+Bolts provides a variety of components to extend PyTorch Lightning such as callbacks & datasets, for applied research and production.
 
-TODO: Add a news section like this: https://github.com/microsoft/DeepSpeed#news
+## News
 
-promote ORT/DeepSparse
+- \[2021/08/26\] [Fine-tune Transformers Faster with Lightning Flash and Torch ORT](https://devblog.pytorchlightning.ai/fine-tune-transformers-faster-with-lightning-flash-and-torch-ort-ec2d53789dc3)
 
-TODO Add Grid python folder with an __init__
+#### Example 1: Accelerate Lightning Training with the Torch ORT Callback
 
-#### Example 1: Finetuning on data
+TODO: We need something here that is more general than using the transformers package... maybe just an CNN model with the MNISTDataModule?
 
 ```python
-from pl_bolts.models.self_supervised import SimCLR
-from pl_bolts.models.self_supervised.simclr.transforms import (
-    SimCLRTrainDataTransform,
-    SimCLREvalDataTransform,
-)
-
-# data
-train_data = DataLoader(MyDataset(transforms=SimCLRTrainDataTransform(input_height=32)))
-val_data = DataLoader(MyDataset(transforms=SimCLREvalDataTransform(input_height=32)))
-
-# model
-weight_path = "https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt"
-simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
-
-simclr.freeze()
-
-# finetune
+    from pytorch_lightning import LightningModule, Trainer
+    from transformers import AutoModel
+    from pl_bolts.callbacks import ORTCallback
+    class MyTransformerModel(LightningModule):
+        def __init__(self):
+            super().__init__()
+            self.model = AutoModel.from_pretrained('bert-base-cased')
+        ...
+    model = MyTransformerModel()
+    trainer = Trainer(gpus=1, callbacks=ORTCallback())
+    trainer.fit(model)
 ```
 
-#### Example 2: Subclass and ideate
+#### Example 2: Lightning SparseML Pruning Callback to accelerate inference
 
 ```python
 from pl_bolts.models import ImageGPT
@@ -127,44 +121,13 @@ class VideoGPT(ImageGPT):
         return {"loss": loss, "log": logs}
 ```
 
-## I don't need deep learning
-
-Great!
-We have LinearRegression and LogisticRegression implementations with numpy and sklearn bridges for datasets!
-But our implementations work on multiple GPUs, TPUs and scale dramatically...
-
-[Check out our Linear Regression on TPU demo](https://colab.research.google.com/drive/13glsKiwMu1-H24cBLYaWdJ4_TxC2Z3ox?usp=sharing)
-
-```python
-from pl_bolts.models.regression import LinearRegression
-from pl_bolts.datamodules import SklearnDataModule
-from sklearn.datasets import load_diabetes
-import pytorch_lightning as pl
-
-# sklearn dataset
-X, y = load_diabetes(return_X_y=True)
-loaders = SklearnDataModule(X, y)
-
-model = LinearRegression(input_dim=13)
-
-# try with gpus=4!
-# trainer = pl.Trainer(gpus=4)
-trainer = pl.Trainer()
-trainer.fit(
-    model,
-    train_dataloader=loaders.train_dataloader(),
-    val_dataloaders=loaders.val_dataloader(),
-)
-trainer.test(test_dataloaders=loaders.test_dataloader())
-```
-
 ## Are specific research implementations supported?
 
-We've deprecated a bunch of specific model research, primarily because they've grown outdated or support for them was not possible. This also means in the future, we'll not accept any model specific research. We'd like to encourage users to contribute general component that will help a broad range, however components that help specifics domains will also be welcomed!
+We've deprecated a bunch of specific model research, primarily because they've grown outdated or support for them was not possible. This also means in the future, we'll not accept any model specific research. We'd like to encourage users to contribute general component that will help a broad range of problems, however components that help specifics domains will also be welcomed!
 
-For example a tool to help train SSL models as a callback would be accepted, however the next greatest SSL model would not be, and be a good contribution to [Lightning Flash](<>).
+For example a tool to help train SSL models as a callback would be accepted, however the next greatest SSL model would be a good contribution to [Lightning Flash](<>).
 
-We've done a better job within [Lightning Flash](<>) to implement SOTA models for applied research, and suggest looking out our [VISSL](<>) Flash integration for SSL based tasks.
+We've done a better job within [Lightning Flash](<>) to implement SOTA models for applied research. We suggest looking at our [VISSL](<>) Flash integration for SSL based tasks.
 
 See our [deprecated implementations](<>) for more information.
 
