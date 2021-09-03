@@ -45,6 +45,9 @@ Note this assumes either you have implemented the property ``example_input_array
 
     import torch
 
+    model = MyModel()
+    ...
+
     # export the onnx model, using the `model.example_input_array`
     SparseMLCallback.export_to_sparse_onnx(model, 'onnx_export/')
 
