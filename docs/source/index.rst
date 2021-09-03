@@ -24,6 +24,7 @@ Lightning-Bolts documentation
    callbacks/variational_callbacks
    callbacks/vision_callbacks
    callbacks/torch_ort
+   callbacks/sparseml
 
 .. toctree::
    :maxdepth: 2
