@@ -40,5 +40,6 @@ _MATPLOTLIB_AVAILABLE: bool = _module_available("matplotlib")
 _TORCHVISION_LESS_THAN_0_9_1: bool = _compare_version("torchvision", operator.lt, "0.9.1")
 _PL_GREATER_EQUAL_1_4 = _compare_version("pytorch_lightning", operator.ge, "1.4.0")
 _TORCH_ORT_AVAILABLE = _module_available("torch_ort")
+_SPARSEML_AVAILABLE = _module_available("sparseml")
 
 __all__ = ["BatchGradientVerification"]
