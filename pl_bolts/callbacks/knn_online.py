@@ -1,8 +1,9 @@
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.accelerators import Accelerator
+from torch import Tensor
 from torch.nn import functional as F
 
 
@@ -41,7 +42,7 @@ class KNNOnlineEvaluator(Callback):
         self.num_classes = trainer.datamodule.num_classes
         self.dataset = trainer.datamodule.name
 
-    def predict(self, query_feature: torch.Tensor, feature_bank: torch.Tensor, target_bank: torch.Tensor):
+    def predict(self, query_feature: Tensor, feature_bank: Tensor, target_bank: Tensor):
         """
         Args:
             query_feature: (B, D) a batch of B query vectors with dim=D
@@ -72,7 +73,7 @@ class KNNOnlineEvaluator(Callback):
         pred_labels = pred_scores.argsort(dim=-1, descending=True)
         return pred_labels
 
-    def to_device(self, batch: torch.Tensor, device: Union[str, torch.device]) -> tuple[torch.Tensor, torch.Tensor]:
+    def to_device(self, batch: Tensor, device: Union[str, torch.device]) -> Tuple[Tensor, Tensor]:
         # get the labeled batch
         if self.dataset == "stl10":
             labeled_batch = batch[1]
@@ -131,5 +132,5 @@ class KNNOnlineEvaluator(Callback):
         pl_module.log("online_knn_val_acc", total_top1 / total_num, on_step=False, on_epoch=True, sync_dist=True)
 
 
-def concat_all_gather(tensor: torch.Tensor, accelerator: Accelerator):
+def concat_all_gather(tensor: Tensor, accelerator: Accelerator):
     return accelerator.all_gather(tensor).view(-1, *tensor.shape[1:])
