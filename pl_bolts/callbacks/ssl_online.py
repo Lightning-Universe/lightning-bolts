@@ -74,9 +74,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
             if trainer.accelerator_connector.use_ddp:
                 from torch.nn.parallel import DistributedDataParallel as DDP
 
-                self.online_evaluator = DDP(
-                    self.online_evaluator, device_ids=[pl_module.device]
-                )
+                self.online_evaluator = DDP(self.online_evaluator, device_ids=[pl_module.device])
             elif trainer.accelerator_connector.use_dp:
                 from torch.nn.parallel import DataParallel as DP
 
@@ -89,8 +87,8 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         self.optimizer = torch.optim.Adam(self.online_evaluator.parameters(), lr=1e-4)
 
         if self._recovered_callback_state is not None:
-            self.online_evaluator.load_state_dict(self._recovered_callback_state['state_dict'])
-            self.optimizer.load_state_dict(self._recovered_callback_state['optimizer_state'])
+            self.online_evaluator.load_state_dict(self._recovered_callback_state["state_dict"])
+            self.optimizer.load_state_dict(self._recovered_callback_state["optimizer_state"])
 
     def to_device(self, batch: Sequence, device: Union[str, torch.device]) -> Tuple[Tensor, Tensor]:
         # get the labeled batch
