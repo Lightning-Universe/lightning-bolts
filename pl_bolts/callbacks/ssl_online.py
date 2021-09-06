@@ -1,19 +1,18 @@
-from typing import Optional, Sequence, Tuple, Union, Dict, Any
+from typing import Any, Dict, Optional, Sequence, Tuple, Union
 
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
+from pytorch_lightning.utilities import rank_zero_warn
 from torch import Tensor
 from torch.nn import functional as F
 from torch.optim import Optimizer
 from torchmetrics.functional import accuracy
-from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 
-from pytorch_lightning.utilities import rank_zero_warn
+from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
 
 
 class SSLOnlineEvaluator(Callback):  # pragma: no cover
-    """
-    Attaches a MLP for fine-tuning using the standard self-supervised protocol.
+    """Attaches a MLP for fine-tuning using the standard self-supervised protocol.
 
     Example::
 
@@ -29,14 +28,13 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         online_eval = SSLOnlineEvaluator(
             z_dim=model.z_dim
         )
-
     """
 
     def __init__(
-            self,
-            z_dim: int,
-            drop_p: float = 0.2,
-            hidden_dim: Optional[int] = None,
+        self,
+        z_dim: int,
+        drop_p: float = 0.2,
+        hidden_dim: Optional[int] = None,
     ):
         """
         Args:
@@ -72,18 +70,24 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         if trainer.accelerator_connector.is_distributed:
             if trainer.accelerator_connector.use_ddp:
                 from torch.nn.parallel import DistributedDataParallel as DDP
-                self.online_evaluator = DDP(self.online_evaluator, find_unused_parameters=True, device_ids=[pl_module.device])
+
+                self.online_evaluator = DDP(
+                    self.online_evaluator, find_unused_parameters=True, device_ids=[pl_module.device]
+                )
             elif trainer.accelerator_connector.use_dp:
                 from torch.nn.parallel import DataParallel as DP
+
                 self.online_evaluator = DP(self.online_evaluator, device_ids=[pl_module.device])
             else:
-                rank_zero_warn("Does not support this type of distributed accelerator. The online evaluator will not sync.")
+                rank_zero_warn(
+                    "Does not support this type of distributed accelerator. The online evaluator will not sync."
+                )
 
         self.optimizer = torch.optim.Adam(self.online_evaluator.parameters(), lr=1e-4)
 
     def to_device(self, batch: Sequence, device: Union[str, torch.device]) -> Tuple[Tensor, Tensor]:
         # get the labeled batch
-        if self.dataset == 'stl10':
+        if self.dataset == "stl10":
             labeled_batch = batch[1]
             batch = labeled_batch
 
@@ -97,9 +101,9 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         return x, y
 
     def shared_step(
-            self,
-            pl_module: LightningModule,
-            batch: Sequence,
+        self,
+        pl_module: LightningModule,
+        batch: Sequence,
     ):
         x, y = self.to_device(batch, pl_module.device)
 
@@ -122,47 +126,34 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         return acc, mlp_loss
 
     def on_train_batch_end(
-            self,
-            trainer: Trainer,
-            pl_module: LightningModule,
-            outputs: Sequence,
-            batch: Sequence,
-            batch_idx: int,
-            dataloader_idx: int,
+        self,
+        trainer: Trainer,
+        pl_module: LightningModule,
+        outputs: Sequence,
+        batch: Sequence,
+        batch_idx: int,
+        dataloader_idx: int,
     ) -> None:
         train_acc, mlp_loss = self.shared_step(pl_module, batch)
-        pl_module.log('online_train_acc', train_acc, on_step=True, on_epoch=False)
-        pl_module.log('online_train_loss', mlp_loss, on_step=True, on_epoch=False)
+        pl_module.log("online_train_acc", train_acc, on_step=True, on_epoch=False)
+        pl_module.log("online_train_loss", mlp_loss, on_step=True, on_epoch=False)
 
     def on_validation_batch_end(
-            self,
-            trainer: Trainer,
-            pl_module: LightningModule,
-            outputs: Sequence,
-            batch: Sequence,
-            batch_idx: int,
-            dataloader_idx: int,
+        self,
+        trainer: Trainer,
+        pl_module: LightningModule,
+        outputs: Sequence,
+        batch: Sequence,
+        batch_idx: int,
+        dataloader_idx: int,
     ) -> None:
         val_acc, mlp_loss = self.shared_step(pl_module, batch)
-        pl_module.log('online_val_acc', val_acc, on_step=False, on_epoch=True, sync_dist=True)
-        pl_module.log('online_val_loss', mlp_loss, on_step=False, on_epoch=True, sync_dist=True)
+        pl_module.log("online_val_acc", val_acc, on_step=False, on_epoch=True, sync_dist=True)
+        pl_module.log("online_val_loss", mlp_loss, on_step=False, on_epoch=True, sync_dist=True)
 
-    def on_save_checkpoint(
-            self,
-            trainer: Trainer,
-            pl_module: LightningModule,
-            checkpoint: Dict[str, Any]
-    ) -> dict:
-        return {
-            'state_dict': self.online_evaluator.state_dict(),
-            'optimizer_state': self.optimizer.state_dict()
-        }
+    def on_save_checkpoint(self, trainer: Trainer, pl_module: LightningModule, checkpoint: Dict[str, Any]) -> dict:
+        return {"state_dict": self.online_evaluator.state_dict(), "optimizer_state": self.optimizer.state_dict()}
 
-    def on_load_checkpoint(
-            self,
-            trainer: Trainer,
-            pl_module: LightningModule,
-            callback_state: Dict[str, Any]
-    ) -> None:
-        self.online_evaluator.load_state_dict(callback_state['state_dict'])
-        self.optimizer.load_state_dict(callback_state['optimizer_state'])
+    def on_load_checkpoint(self, trainer: Trainer, pl_module: LightningModule, callback_state: Dict[str, Any]) -> None:
+        self.online_evaluator.load_state_dict(callback_state["state_dict"])
+        self.optimizer.load_state_dict(callback_state["optimizer_state"])
