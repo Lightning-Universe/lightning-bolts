@@ -51,7 +51,6 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
 
         self.optimizer: Optional[Optimizer] = None
         self.online_evaluator: Optional[SSLEvaluator] = None
-        self.z_dim: Optional[int] = None
         self.num_classes: Optional[int] = None
         self.dataset: Optional[str] = None
 
