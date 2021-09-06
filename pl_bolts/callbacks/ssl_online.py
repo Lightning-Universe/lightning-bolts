@@ -9,6 +9,8 @@ from torch.optim import Optimizer
 from torchmetrics.functional import accuracy
 
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
+from contextlib import contextmanager
+from torch import nn
 
 
 class SSLOnlineEvaluator(Callback):  # pragma: no cover
@@ -105,12 +107,10 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         pl_module: LightningModule,
         batch: Sequence,
     ):
-        x, y = self.to_device(batch, pl_module.device)
-
         with torch.no_grad():
-            representations = pl_module(x).flatten(start_dim=1)
-
-        representations = representations.detach()
+            with set_training(pl_module, False):
+                x, y = self.to_device(batch, pl_module.device)
+                representations = pl_module(x).flatten(start_dim=1)
 
         # forward pass
         mlp_logits = self.online_evaluator(representations)  # type: ignore[operator]
@@ -158,3 +158,18 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
     def on_load_checkpoint(self, trainer: Trainer, pl_module: LightningModule, callback_state: Dict[str, Any]) -> None:
         self.online_evaluator.load_state_dict(callback_state["state_dict"])
         self.optimizer.load_state_dict(callback_state["optimizer_state"])
+
+@contextmanager
+def set_training(module: nn.Module, mode: bool):
+    """Context manager to set training mode. When exit, recover the original training mode.
+    Args:
+        module: module to set training mode
+        mode: whether to set training mode (True) or evaluation mode (False).
+    """
+    original_mode = module.training
+
+    try:
+        module.train(mode)
+        yield module
+    finally:
+        module.train(original_mode)
