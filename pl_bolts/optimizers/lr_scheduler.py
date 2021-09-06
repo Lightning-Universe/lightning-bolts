@@ -83,8 +83,9 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
             ]
         elif self.last_epoch == self.warmup_epochs:  # type: ignore[attr-defined]
             return self.base_lrs  # type: ignore[attr-defined]
-        elif (self.last_epoch - 1  # type: ignore[attr-defined]
-              - self.max_epochs) % (2 * (self.max_epochs - self.warmup_epochs)) == 0:  # type: ignore[attr-defined]
+        elif (self.last_epoch - 1 - self.max_epochs) % (  # type: ignore[attr-defined]
+            2 * (self.max_epochs - self.warmup_epochs)
+        ) == 0:  # type: ignore[attr-defined]
             return [
                 group["lr"]
                 + (base_lr - self.eta_min) * (1 - math.cos(math.pi / (self.max_epochs - self.warmup_epochs))) / 2
@@ -108,9 +109,10 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         """Called when epoch is passed as a param to the `step` function of the scheduler."""
         if self.last_epoch < self.warmup_epochs:  # type: ignore[attr-defined]
             return [
-                self.warmup_start_lr + self.last_epoch *  # type: ignore[attr-defined]
-                (base_lr - self.warmup_start_lr) /
-                (self.warmup_epochs - 1)
+                self.warmup_start_lr
+                + self.last_epoch
+                * (base_lr - self.warmup_start_lr)  # type: ignore[attr-defined]
+                / (self.warmup_epochs - 1)
                 for base_lr in self.base_lrs  # type: ignore[attr-defined]
             ]
 
