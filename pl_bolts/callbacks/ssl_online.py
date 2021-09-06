@@ -12,38 +12,41 @@ from pytorch_lightning.utilities import rank_zero_warn
 
 
 class SSLOnlineEvaluator(Callback):  # pragma: no cover
-    """Attaches a MLP for fine-tuning using the standard self-supervised protocol.
+    """
+    Attaches a MLP for fine-tuning using the standard self-supervised protocol.
 
     Example::
 
-        # your model must have 2 attributes
+        # your datamodule must have 2 attributes
+        dm = DataModule()
+        dm.num_classes = ... # the num of classes in the datamodule
+        dm.name = ... # name of the datamodule (e.g. ImageNet, STL10, CIFAR10)
+
+        # your model must have 1 attribute
         model = Model()
         model.z_dim = ... # the representation dim
-        model.num_classes = ... # the num of classes in the model
 
         online_eval = SSLOnlineEvaluator(
-            z_dim=model.z_dim,
-            num_classes=model.num_classes,
-            dataset='imagenet'
+            z_dim=model.z_dim
         )
 
     """
 
     def __init__(
             self,
+            z_dim: int,
             drop_p: float = 0.2,
             hidden_dim: Optional[int] = None,
     ):
         """
         Args:
-            dataset: if stl10, need to get the labeled batch
+            z_dim: Representation dimension
             drop_p: Dropout probability
             hidden_dim: Hidden dimension for the fine-tune MLP
-            z_dim: Representation dimension
-            num_classes: Number of classes
         """
         super().__init__()
 
+        self.z_dim = z_dim
         self.hidden_dim = hidden_dim
         self.drop_p = drop_p
 
@@ -54,21 +57,17 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         self.dataset: Optional[str] = None
 
     def setup(self, trainer: Trainer, pl_module: LightningModule, stage: Optional[str] = None) -> None:
-        self.z_dim = pl_module.online_network.backbone.fc.in_features
         self.num_classes = trainer.datamodule.num_classes
         self.dataset = trainer.datamodule.name
 
+    def on_pretrain_routine_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        # must move to device after setup, as during setup, pl_module is still on cpu
         self.online_evaluator = SSLEvaluator(
             n_input=self.z_dim,
             n_classes=self.num_classes,
             p=self.drop_p,
             n_hidden=self.hidden_dim,
-        )
-
-        self.optimizer = torch.optim.Adam(self.online_evaluator.parameters(), lr=1e-4)
-
-    def on_pretrain_routine_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
-        self.online_evaluator.to(pl_module.device)  # must move to device after setup, as during setup, pl_module is still on cpu
+        ).to(pl_module.device)
 
         if trainer.accelerator_connector.is_distributed:
             if trainer.accelerator_connector.use_ddp:
@@ -80,11 +79,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
             else:
                 rank_zero_warn("Does not support this type of distributed accelerator. The online evaluator will not sync.")
 
-    @staticmethod
-    def get_representations(pl_module: LightningModule, x: Tensor) -> Tensor:
-        representations = pl_module(x)
-        representations = representations.reshape(representations.size(0), -1)
-        return representations
+        self.optimizer = torch.optim.Adam(self.online_evaluator.parameters(), lr=1e-4)
 
     def to_device(self, batch: Sequence, device: Union[str, torch.device]) -> Tuple[Tensor, Tensor]:
         # get the labeled batch
@@ -101,6 +96,31 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
 
         return x, y
 
+    def shared_step(
+            self,
+            pl_module: LightningModule,
+            batch: Sequence,
+    ):
+        x, y = self.to_device(batch, pl_module.device)
+
+        with torch.no_grad():
+            representations = pl_module(x).flatten(start_dim=1)
+
+        representations = representations.detach()
+
+        # forward pass
+        mlp_logits = self.online_evaluator(representations)  # type: ignore[operator]
+        mlp_loss = F.cross_entropy(mlp_logits, y)
+
+        # update finetune weights
+        mlp_loss.backward()
+        self.optimizer.step()
+        self.optimizer.zero_grad()
+
+        acc = accuracy(mlp_logits.softmax(-1), y)
+
+        return acc, mlp_loss
+
     def on_train_batch_end(
             self,
             trainer: Trainer,
@@ -110,29 +130,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
             batch_idx: int,
             dataloader_idx: int,
     ) -> None:
-        x, y = self.to_device(batch, pl_module.device)
-
-        with torch.no_grad():
-            representations = self.get_representations(pl_module, x)
-
-        representations = representations.detach()
-
-        # forward pass
-        mlp_logits = self.online_evaluator(representations)  # type: ignore[operator]
-        mlp_loss = F.cross_entropy(mlp_logits, y)
-
-        # print(f"mlp_loss:{mlp_loss}")
-        # print(f"before step norm:{sum([torch.norm(p) for p in self.online_evaluator.parameters()])}")
-
-        # update finetune weights
-        mlp_loss.backward()
-        self.optimizer.step()
-        self.optimizer.zero_grad()
-
-        # print(f"after step norm:{sum([torch.norm(p) for p in self.online_evaluator.parameters()])}")
-
-        # log metrics
-        train_acc = accuracy(mlp_logits.softmax(-1), y)
+        train_acc, mlp_loss = self.shared_step(pl_module, batch)
         pl_module.log('online_train_acc', train_acc, on_step=True, on_epoch=False)
         pl_module.log('online_train_loss', mlp_loss, on_step=True, on_epoch=False)
 
@@ -145,19 +143,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
             batch_idx: int,
             dataloader_idx: int,
     ) -> None:
-        x, y = self.to_device(batch, pl_module.device)
-
-        with torch.no_grad():
-            representations = self.get_representations(pl_module, x)
-
-        representations = representations.detach()
-
-        # forward pass
-        mlp_logits = self.online_evaluator(representations)  # type: ignore[operator]
-        mlp_loss = F.cross_entropy(mlp_logits, y)
-
-        # log metrics
-        val_acc = accuracy(mlp_logits.softmax(-1), y)
+        val_acc, mlp_loss = self.shared_step(pl_module, batch)
         pl_module.log('online_val_acc', val_acc, on_step=False, on_epoch=True, sync_dist=True)
         pl_module.log('online_val_loss', mlp_loss, on_step=False, on_epoch=True, sync_dist=True)
 
