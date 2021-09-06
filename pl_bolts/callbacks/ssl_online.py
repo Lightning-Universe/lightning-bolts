@@ -1,16 +1,15 @@
+from contextlib import contextmanager
 from typing import Any, Dict, Optional, Sequence, Tuple, Union
 
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.utilities import rank_zero_warn
-from torch import Tensor
+from torch import Tensor, nn
 from torch.nn import functional as F
 from torch.optim import Optimizer
 from torchmetrics.functional import accuracy
 
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-from contextlib import contextmanager
-from torch import nn
 
 
 class SSLOnlineEvaluator(Callback):  # pragma: no cover
@@ -159,9 +158,12 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         self.online_evaluator.load_state_dict(callback_state["state_dict"])
         self.optimizer.load_state_dict(callback_state["optimizer_state"])
 
+
 @contextmanager
 def set_training(module: nn.Module, mode: bool):
-    """Context manager to set training mode. When exit, recover the original training mode.
+    """Context manager to set training mode.
+
+    When exit, recover the original training mode.
     Args:
         module: module to set training mode
         mode: whether to set training mode (True) or evaluation mode (False).
