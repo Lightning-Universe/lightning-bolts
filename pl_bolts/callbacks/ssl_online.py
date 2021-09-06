@@ -130,7 +130,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         dataloader_idx: int,
     ) -> None:
         train_acc, mlp_loss = self.shared_step(pl_module, batch)
-        
+
         # update finetune weights
         mlp_loss.backward()
         self.optimizer.step()
