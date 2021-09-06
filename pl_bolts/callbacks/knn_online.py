@@ -1,8 +1,7 @@
-from typing import Optional
-from typing import Union
+from typing import Optional, Union
 
 import torch
-from pytorch_lightning import LightningModule, Trainer, Callback
+from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.accelerators import Accelerator
 from torch.nn import functional as F
 
@@ -26,6 +25,7 @@ class KNNOnlineEvaluator(Callback):
             temperature=0.1
         )
     """
+
     def __init__(self, k=200, temperature=0.07) -> None:
         """
         Args:
@@ -74,7 +74,7 @@ class KNNOnlineEvaluator(Callback):
 
     def to_device(self, batch: torch.Tensor, device: Union[str, torch.device]) -> tuple[torch.Tensor, torch.Tensor]:
         # get the labeled batch
-        if self.dataset == 'stl10':
+        if self.dataset == "stl10":
             labeled_batch = batch[1]
             batch = labeled_batch
 
@@ -128,7 +128,7 @@ class KNNOnlineEvaluator(Callback):
                 total_num += x.shape[0]
                 total_top1 += (pred_labels[:, 0] == target).float().sum().item()
 
-        pl_module.log('online_knn_val_acc', total_top1 / total_num, on_step=False, on_epoch=True, sync_dist=True)
+        pl_module.log("online_knn_val_acc", total_top1 / total_num, on_step=False, on_epoch=True, sync_dist=True)
 
 
 def concat_all_gather(tensor: torch.Tensor, accelerator: Accelerator):
