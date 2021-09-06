@@ -1,4 +1,4 @@
-from typing import Optional, Union, Tuple
+from typing import Optional, Tuple, Union
 
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
