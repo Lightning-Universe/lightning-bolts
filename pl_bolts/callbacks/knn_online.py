@@ -13,7 +13,7 @@ class KNNOnlineEvaluator(Callback):
     The implementation follows:
         1. https://github.com/zhirongw/lemniscate.pytorch/blob/master/test.py
         2. https://github.com/leftthomas/SimCLR
-        3. https://colab.research.google.com/github/facebookresearch/moco/blob/colab-notebook/colab/moco_cifar10_demo.ipynb
+        3. https://github.com/facebookresearch/moco/blob/colab-notebook/colab/moco_cifar10_demo.ipynb
     Example::
 
         # your datamodule must have 2 attributes
