@@ -49,7 +49,7 @@ def test_fasterrcnn_pyt_module_bbone_train(tmpdir):
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
 
-    trainer = pl.Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, train_dl, valid_dl)
 
 
