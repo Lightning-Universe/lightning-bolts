@@ -849,4 +849,4 @@ Example::
   trainer.fit(sac)
 
 .. autoclass:: pl_bolts.models.rl.SAC
-:noindex:
+    :noindex:
