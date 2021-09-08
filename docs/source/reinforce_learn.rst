@@ -781,7 +781,7 @@ Actor Critic Key Points:
 Soft Actor Critic (SAC)
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Soft Actor Critic model introduced in `Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor<https://arxiv.org/abs/1801.01290>`_
+Soft Actor Critic model introduced in `Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor <https://arxiv.org/abs/1801.01290>`__
 Paper authors: Tuomas Haarnoja, Aurick Zhou, Pieter Abbeel, Sergey Levine
 
 Original implementation by: `Jason Wang <https://github.com/blahBlahhhJ>`_
