@@ -767,16 +767,6 @@ Example::
 
 --------------
 
-Actor-Critic Models
--------------------
-The following models are based on Actor Critic. Actor Critic conbines the approaches of value-based learning (the DQN family)
-and the policy-based learning (the PG family) by learning the value function as well as the policy distribution. This approach
-updates the policy network according to the policy gradient, and updates the value network to fit the discounted rewards.
-
-Actor Critic Key Points:
-    - Actor outputs a distribution of actions for controlling the agent
-    - Critic outputs a value of current state for policy update suggestion
-    - The addition of critic allows the model to do n-step training instead of generating an entire trajectory
 
 Soft Actor Critic (SAC)
 ^^^^^^^^^^^^^^^^^^^^^^^
