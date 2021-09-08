@@ -8,17 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `EMNISTDataModule`, `BinaryEMNISTDataModule`, and `BinaryEMNIST` dataset ([#676](https://github.com/PyTorchLightning/lightning-bolts/pull/676))
 
+- Added Soft Actor Critic (SAC) Model [#627](https://github.com/PyTorchLightning/lightning-bolts/pull/627))
+
+- Added `EMNISTDataModule`, `BinaryEMNISTDataModule`, and `BinaryEMNIST` dataset ([#676](https://github.com/PyTorchLightning/lightning-bolts/pull/676))
 
 - Added Advantage Actor-Critic (A2C) Model [#598](https://github.com/PyTorchLightning/lightning-bolts/pull/598))
 
-
 - Added Torch ORT Callback [#720](https://github.com/PyTorchLightning/lightning-bolts/pull/720))
 
-
 - Added SparseML Callback [#724](https://github.com/PyTorchLightning/lightning-bolts/pull/724))
-
 
 ### Changed
 
