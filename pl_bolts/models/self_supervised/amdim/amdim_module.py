@@ -4,7 +4,7 @@ from typing import Union
 
 import torch
 from pytorch_lightning import LightningDataModule, LightningModule, Trainer
-from torch import optim as optim
+from torch import optim
 from torch.utils.data import DataLoader
 
 from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
