@@ -2,6 +2,7 @@
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
 from pl_bolts.callbacks.data_monitor import ModuleDataMonitor, TrainingDataMonitor
 from pl_bolts.callbacks.printing import PrintTableMetricsCallback
+from pl_bolts.callbacks.sparseml import SparseMLCallback
 from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
 from pl_bolts.callbacks.torch_ort import ORTCallback
 from pl_bolts.callbacks.variational import LatentDimInterpolator
@@ -22,4 +23,5 @@ __all__ = [
     "TensorboardGenerativeModelImageSampler",
     "SRImageLoggerCallback",
     "ORTCallback",
+    "SparseMLCallback",
 ]
