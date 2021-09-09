@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import torch
 from pytorch_lightning import LightningModule
@@ -51,7 +51,7 @@ class SSLFineTuner(LightningModule):
         weight_decay: float = 1e-6,
         nesterov: bool = False,
         scheduler_type: str = "cosine",
-        decay_epochs: List = None,
+        decay_epochs: Tuple = (60, 80),
         gamma: float = 0.1,
         final_lr: float = 0.0,
     ):
@@ -62,8 +62,6 @@ class SSLFineTuner(LightningModule):
             num_classes: classes of the dataset
             hidden_dim: dim of the MLP (1024 default used in self-supervised literature)
         """
-        if decay_epochs is None:
-            decay_epochs = [60, 80]
         super().__init__()
 
         self.learning_rate = learning_rate
