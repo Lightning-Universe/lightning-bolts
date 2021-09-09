@@ -76,14 +76,14 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
 
         if self.last_epoch == 0:
             return [self.warmup_start_lr] * len(self.base_lrs)
-        elif self.last_epoch < self.warmup_epochs:
+        if self.last_epoch < self.warmup_epochs:
             return [
                 group["lr"] + (base_lr - self.warmup_start_lr) / (self.warmup_epochs - 1)
                 for base_lr, group in zip(self.base_lrs, self.optimizer.param_groups)
             ]
-        elif self.last_epoch == self.warmup_epochs:
+        if self.last_epoch == self.warmup_epochs:
             return self.base_lrs
-        elif (self.last_epoch - 1 - self.max_epochs) % (2 * (self.max_epochs - self.warmup_epochs)) == 0:
+        if (self.last_epoch - 1 - self.max_epochs) % (2 * (self.max_epochs - self.warmup_epochs)) == 0:
             return [
                 group["lr"]
                 + (base_lr - self.eta_min) * (1 - math.cos(math.pi / (self.max_epochs - self.warmup_epochs))) / 2
