@@ -1,4 +1,4 @@
-from typing import List
+from typing import Tuple
 
 import numpy as np
 
@@ -20,10 +20,10 @@ class SwAVTrainDataTransform:
     def __init__(
         self,
         normalize=None,
-        size_crops: List[int] = [96, 36],
-        nmb_crops: List[int] = [2, 4],
-        min_scale_crops: List[float] = [0.33, 0.10],
-        max_scale_crops: List[float] = [1, 0.33],
+        size_crops: Tuple[int] = (96, 36),
+        nmb_crops: Tuple[int] = (2, 4),
+        min_scale_crops: Tuple[float] = (0.33, 0.10),
+        max_scale_crops: Tuple[float] = (1, 0.33),
         gaussian_blur: bool = True,
         jitter_strength: float = 1.0,
     ):
@@ -102,10 +102,10 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
     def __init__(
         self,
         normalize=None,
-        size_crops: List[int] = [96, 36],
-        nmb_crops: List[int] = [2, 4],
-        min_scale_crops: List[float] = [0.33, 0.10],
-        max_scale_crops: List[float] = [1, 0.33],
+        size_crops: Tuple[int] = (96, 36),
+        nmb_crops: Tuple[int] = (2, 4),
+        min_scale_crops: Tuple[float] = (0.33, 0.10),
+        max_scale_crops: Tuple[float] = (1, 0.33),
         gaussian_blur: bool = True,
         jitter_strength: float = 1.0,
     ):
