@@ -152,8 +152,7 @@ class AMDIM(LightningModule):
             )
             encoder.init_weights()
             return encoder
-        else:
-            return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=True)
+        return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=True)
 
     def forward(self, img_1, img_2):
         # feats for img 1
