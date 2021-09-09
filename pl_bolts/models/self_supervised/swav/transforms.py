@@ -20,13 +20,21 @@ class SwAVTrainDataTransform:
     def __init__(
         self,
         normalize=None,
-        size_crops: List[int] = [96, 36],
-        nmb_crops: List[int] = [2, 4],
-        min_scale_crops: List[float] = [0.33, 0.10],
-        max_scale_crops: List[float] = [1, 0.33],
+        size_crops: List[int] = None,
+        nmb_crops: List[int] = None,
+        min_scale_crops: List[float] = None,
+        max_scale_crops: List[float] = None,
         gaussian_blur: bool = True,
         jitter_strength: float = 1.0,
     ):
+        if size_crops is None:
+            size_crops = [96, 36]
+        if nmb_crops is None:
+            nmb_crops = [2, 4]
+        if min_scale_crops is None:
+            min_scale_crops = [0.33, 0.10]
+        if max_scale_crops is None:
+            max_scale_crops = [1, 0.33]
         self.jitter_strength = jitter_strength
         self.gaussian_blur = gaussian_blur
 
@@ -102,13 +110,21 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
     def __init__(
         self,
         normalize=None,
-        size_crops: List[int] = [96, 36],
-        nmb_crops: List[int] = [2, 4],
-        min_scale_crops: List[float] = [0.33, 0.10],
-        max_scale_crops: List[float] = [1, 0.33],
+        size_crops: List[int] = None,
+        nmb_crops: List[int] = None,
+        min_scale_crops: List[float] = None,
+        max_scale_crops: List[float] = None,
         gaussian_blur: bool = True,
         jitter_strength: float = 1.0,
     ):
+        if size_crops is None:
+            size_crops = [96, 36]
+        if nmb_crops is None:
+            nmb_crops = [2, 4]
+        if min_scale_crops is None:
+            min_scale_crops = [0.33, 0.10]
+        if max_scale_crops is None:
+            max_scale_crops = [1, 0.33]
         super().__init__(
             normalize=normalize,
             size_crops=size_crops,

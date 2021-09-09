@@ -39,8 +39,8 @@ class SwAV(LightningModule):
         queue_length: int = 0,  # must be divisible by total batch-size
         queue_path: str = "queue",
         epoch_queue_starts: int = 15,
-        crops_for_assign: list = [0, 1],
-        nmb_crops: list = [2, 6],
+        crops_for_assign: list = None,
+        nmb_crops: list = None,
         first_conv: bool = True,
         maxpool1: bool = True,
         optimizer: str = "adam",
@@ -90,6 +90,10 @@ class SwAV(LightningModule):
             weight_decay: weight decay for optimizer
             epsilon: epsilon val for swav assignments
         """
+        if crops_for_assign is None:
+            crops_for_assign = [0, 1]
+        if nmb_crops is None:
+            nmb_crops = [2, 6]
         super().__init__()
         self.save_hyperparameters()
 
@@ -255,7 +259,9 @@ class SwAV(LightningModule):
         self.log("val_loss", loss, on_step=False, on_epoch=True)
         return loss
 
-    def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=["bias", "bn"]):
+    def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=None):
+        if skip_list is None:
+            skip_list = ["bias", "bn"]
         params = []
         excluded_params = []
 
