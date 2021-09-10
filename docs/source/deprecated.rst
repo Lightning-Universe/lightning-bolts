@@ -33,6 +33,7 @@ These modules are not being actively maintained by the Lightning Team, however w
    :name: deprecated models
    :caption: Models
 
+   deprecated/models/models_howto
    deprecated/models/autoencoders
    deprecated/models/convolutional
    deprecated/models/gans
