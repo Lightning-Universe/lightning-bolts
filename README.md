@@ -63,7 +63,7 @@ Install bleeding-edge (no guarantees)
 pip install git+https://github.com/PytorchLightning/lightning-bolts.git@master --upgrade
 ```
 
-In case you want to have full experience you can install all optional packages at once
+To install all optional dependencies
 
 ```bash
 pip install lightning-bolts["extra"]
@@ -81,53 +81,57 @@ Bolts provides a variety of components to extend PyTorch Lightning such as callb
 
 #### Example 1: Accelerate Lightning Training with the Torch ORT Callback
 
-TODO: We need something here that is more general than using the transformers package... maybe just an CNN model with the MNISTDataModule?
+Torch ORT converts your model into an optimized ONNX graph, speeding up training & inference when using NVIDIA or AMD GPUs. See the [documentation](https://lightning-bolts.readthedocs.io/en/latest/callbacks/torch_ort.html) for more details.
 
 ```python
-    from pytorch_lightning import LightningModule, Trainer
-    from transformers import AutoModel
-    from pl_bolts.callbacks import ORTCallback
-    class MyTransformerModel(LightningModule):
-        def __init__(self):
-            super().__init__()
-            self.model = AutoModel.from_pretrained('bert-base-cased')
-        ...
-    model = MyTransformerModel()
-    trainer = Trainer(gpus=1, callbacks=ORTCallback())
-    trainer.fit(model)
+from pytorch_lightning import LightningModule, Trainer
+import torchvision.models as models
+from pl_bolts.callbacks import ORTCallback
+
+
+class VisionModel(LightningModule):
+    def __init__(self):
+        super().__init__()
+        self.model = models.vgg19_bn(pretrained=True)
+
+    ...
+
+
+model = VisionModel()
+trainer = Trainer(gpus=1, callbacks=ORTCallback())
+trainer.fit(model)
 ```
 
-#### Example 2: Lightning SparseML Pruning Callback to accelerate inference
+#### Example 2: Introduce Sparsity with the SparseMLCallback to Accelerate Inference
+
+We can introduce sparsity during fine-tuning with [SparseML](https://github.com/neuralmagic/sparseml), which ultimately allows us to leverage the [DeepSparse](https://github.com/neuralmagic/deepsparse) engine to see performance improvements at inference time.
 
 ```python
-from pl_bolts.models import ImageGPT
+from pytorch_lightning import LightningModule, Trainer
+import torchvision.models as models
+from pl_bolts.callbacks import SparseMLCallback
 
 
-class VideoGPT(ImageGPT):
-    def training_step(self, batch, batch_idx):
-        x, y = batch
-        x = _shape_input(x)
+class VisionModel(LightningModule):
+    def __init__(self):
+        super().__init__()
+        self.model = models.vgg19_bn(pretrained=True)
 
-        logits = self.gpt(x)
-        simclr_features = self.simclr(x)
+    ...
 
-        # -----------------
-        # do something new with GPT logits + simclr_features
-        # -----------------
 
-        loss = self.criterion(logits.view(-1, logits.size(-1)), x.view(-1).long())
-
-        logs = {"loss": loss}
-        return {"loss": loss, "log": logs}
+model = VisionModel()
+trainer = Trainer(gpus=1, callbacks=SparseMLCallback(recipe_path="recipe.yaml"))
+trainer.fit(model)
 ```
 
 ## Are specific research implementations supported?
 
-We've deprecated a bunch of specific model research, primarily because they've grown outdated or support for them was not possible. This also means in the future, we'll not accept any model specific research. We'd like to encourage users to contribute general component that will help a broad range of problems, however components that help specifics domains will also be welcomed!
+We've deprecated a bunch of specific model research, primarily because they've grown outdated or support for them was not possible. This also means in the future we'll not accept any model specific research. We'd like to encourage users to contribute general components that will help a broad range of problems, however components that help specifics domains will also be welcomed!
 
-For example a tool to help train SSL models as a callback would be accepted, however the next greatest SSL model would be a good contribution to [Lightning Flash](<>).
+For example a callback to help train SSL models would be a great contribution, however the next greatest SSL model from your latest paper would be a good contribution to [Lightning Flash](https://github.com/PyTorchLightning/lightning-flash).
 
-We've done a better job within [Lightning Flash](<>) to implement SOTA models for applied research. We suggest looking at our [VISSL](<>) Flash integration for SSL based tasks.
+We've done a better job within [Lightning Flash](https://github.com/PyTorchLightning/lightning-flash) to implement SOTA models for applied research. We suggest looking at our [VISSL](<>) Flash integration for SSL based tasks.
 
 See our [deprecated implementations](<>) for more information.
 
