@@ -39,6 +39,9 @@ _WANDB_AVAILABLE: bool = _module_available("wandb")
 _MATPLOTLIB_AVAILABLE: bool = _module_available("matplotlib")
 _TORCHVISION_LESS_THAN_0_9_1: bool = _compare_version("torchvision", operator.lt, "0.9.1")
 _PL_GREATER_EQUAL_1_4 = _compare_version("pytorch_lightning", operator.ge, "1.4.0")
+_PL_GREATER_EQUAL_1_4_5 = _compare_version("pytorch_lightning", operator.ge, "1.4.5")
 _TORCH_ORT_AVAILABLE = _module_available("torch_ort")
+_TORCH_MAX_VERSION_1_8_1 = _compare_version("torch", operator.le, "1.8.1")
+_SPARSEML_AVAILABLE = _module_available("sparseml") and _PL_GREATER_EQUAL_1_4_5 and _TORCH_MAX_VERSION_1_8_1
 
 __all__ = ["BatchGradientVerification"]
