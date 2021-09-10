@@ -12,7 +12,7 @@ from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
-    from torchvision import transforms as transforms
+    from torchvision import transforms
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
