@@ -6,8 +6,7 @@ import numpy as np
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
-from torch import Tensor
-from torch import optim as optim
+from torch import Tensor, optim
 from torch.nn.functional import log_softmax, softmax
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader

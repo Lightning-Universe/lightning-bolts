@@ -258,16 +258,15 @@ class ResNet(nn.Module):
             x4 = self.layer4(x3)
 
             return [x0, x1, x2, x3, x4]
-        else:
-            x0 = self.layer1(x0)
-            x0 = self.layer2(x0)
-            x0 = self.layer3(x0)
-            x0 = self.layer4(x0)
+        x0 = self.layer1(x0)
+        x0 = self.layer2(x0)
+        x0 = self.layer3(x0)
+        x0 = self.layer4(x0)
 
-            x0 = self.avgpool(x0)
-            x0 = torch.flatten(x0, 1)
+        x0 = self.avgpool(x0)
+        x0 = torch.flatten(x0, 1)
 
-            return [x0]
+        return [x0]
 
 
 def _resnet(arch, block, layers, pretrained, progress, **kwargs):

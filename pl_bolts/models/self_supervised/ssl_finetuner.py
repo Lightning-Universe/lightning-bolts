@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional, Tuple
 
 import torch
 from pytorch_lightning import LightningModule
@@ -51,7 +51,7 @@ class SSLFineTuner(LightningModule):
         weight_decay: float = 1e-6,
         nesterov: bool = False,
         scheduler_type: str = "cosine",
-        decay_epochs: List = [60, 80],
+        decay_epochs: Tuple = (60, 80),
         gamma: float = 0.1,
         final_lr: float = 0.0,
     ):
