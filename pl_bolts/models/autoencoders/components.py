@@ -28,16 +28,14 @@ def resize_conv3x3(in_planes, out_planes, scale=1):
     """upsample + 3x3 convolution with padding to avoid checkerboard artifact."""
     if scale == 1:
         return conv3x3(in_planes, out_planes)
-    else:
-        return nn.Sequential(Interpolate(scale_factor=scale), conv3x3(in_planes, out_planes))
+    return nn.Sequential(Interpolate(scale_factor=scale), conv3x3(in_planes, out_planes))
 
 
 def resize_conv1x1(in_planes, out_planes, scale=1):
     """upsample + 1x1 convolution with padding to avoid checkerboard artifact."""
     if scale == 1:
         return conv1x1(in_planes, out_planes)
-    else:
-        return nn.Sequential(Interpolate(scale_factor=scale), conv1x1(in_planes, out_planes))
+    return nn.Sequential(Interpolate(scale_factor=scale), conv1x1(in_planes, out_planes))
 
 
 class EncoderBlock(nn.Module):
