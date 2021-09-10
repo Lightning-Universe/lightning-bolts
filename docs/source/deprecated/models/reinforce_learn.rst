@@ -828,7 +828,7 @@ SAC Benefits
 SAC Results
 ~~~~~~~~~~~~~~~~
 
-.. image:: _images/rl_benchmark/pendulum_sac_results.jpg
+.. image:: ../../_images/rl_benchmark/pendulum_sac_results.jpg
   :width: 300
   :alt: SAC Results
 
