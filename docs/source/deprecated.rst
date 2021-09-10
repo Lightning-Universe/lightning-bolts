@@ -37,6 +37,7 @@ These modules are not being actively maintained by the Lightning Team, however w
    deprecated/models/autoencoders
    deprecated/models/convolutional
    deprecated/models/gans
+   deprecated/models/object_detection
    deprecated/models/reinforce_learn
    deprecated/models/self_supervised
    deprecated/models/classic_ml
