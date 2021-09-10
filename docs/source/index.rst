@@ -19,11 +19,12 @@ Lightning-Bolts documentation
    :name: callbacks
    :caption: Callbacks
 
-   callbacks
-   info_callbacks
-   self_supervised_callbacks
-   variational_callbacks
-   vision_callbacks
+   callbacks/monitor_callbacks
+   callbacks/self_supervised_callbacks
+   callbacks/variational_callbacks
+   callbacks/vision_callbacks
+   callbacks/torch_ort
+   callbacks/sparseml
 
 .. toctree::
    :maxdepth: 2
@@ -70,6 +71,7 @@ Lightning-Bolts documentation
 
    autoencoders
    convolutional
+   object_detection
    gans
    reinforce_learn
    self_supervised_models

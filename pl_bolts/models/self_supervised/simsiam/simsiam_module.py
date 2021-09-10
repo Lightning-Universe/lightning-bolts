@@ -179,7 +179,7 @@ class SimSiam(LightningModule):
 
         return loss
 
-    def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=["bias", "bn"]):
+    def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=("bias", "bn")):
         params = []
         excluded_params = []
 
