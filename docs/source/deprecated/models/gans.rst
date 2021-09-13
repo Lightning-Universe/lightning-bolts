@@ -16,17 +16,17 @@ Implemented by:
 
 Example outputs:
 
-    .. image:: _images/gans/basic_gan_interpolate.jpg
+    .. image:: ../../_images/gans/basic_gan_interpolate.jpg
         :width: 400
         :alt: Basic GAN generated samples
 
 Loss curves:
 
-    .. image:: _images/gans/basic_gan_dloss.jpg
+    .. image:: ../../_images/gans/basic_gan_dloss.jpg
         :width: 200
         :alt: Basic GAN disc loss
 
-    .. image:: _images/gans/basic_gan_gloss.jpg
+    .. image:: ../../_images/gans/basic_gan_gloss.jpg
         :width: 200
         :alt: Basic GAN gen loss
 
@@ -54,33 +54,33 @@ Implemented by:
 
 Example MNIST outputs:
 
-    .. image:: _images/gans/dcgan_mnist_outputs.png
+    .. image:: ../../_images/gans/dcgan_mnist_outputs.png
         :width: 400
         :alt: DCGAN generated MNIST samples
 
 Example LSUN bedroom outputs:
 
-    .. image:: _images/gans/dcgan_lsun_outputs.png
+    .. image:: ../../_images/gans/dcgan_lsun_outputs.png
         :width: 400
         :alt: DCGAN generated LSUN bedroom samples
 
 MNIST Loss curves:
 
-    .. image:: _images/gans/dcgan_mnist_dloss.png
+    .. image:: ../../_images/gans/dcgan_mnist_dloss.png
         :width: 200
         :alt: DCGAN MNIST disc loss
 
-    .. image:: _images/gans/dcgan_mnist_gloss.png
+    .. image:: ../../_images/gans/dcgan_mnist_gloss.png
         :width: 200
         :alt: DCGAN MNIST gen loss
 
 LSUN Loss curves:
 
-    .. image:: _images/gans/dcgan_lsun_dloss.png
+    .. image:: ../../_images/gans/dcgan_lsun_dloss.png
         :width: 200
         :alt: DCGAN LSUN disc loss
 
-    .. image:: _images/gans/dcgan_lsun_gloss.png
+    .. image:: ../../_images/gans/dcgan_lsun_gloss.png
         :width: 200
         :alt: DCGAN LSUN gen loss
 
