@@ -7,6 +7,7 @@ import torch.nn as nn
 from pytorch_lightning import Callback
 from pytorch_lightning.core.lightning import LightningModule
 from pytorch_lightning.utilities import move_data_to_device, rank_zero_warn
+from pytorch_lightning.utilities.signature_utils import is_param_in_hook_signature
 
 
 class VerificationBase:
@@ -49,7 +50,11 @@ class VerificationBase:
         input_array = deepcopy(input_array)
 
         if isinstance(self.model, LightningModule):
-            input_array = self.model.transfer_batch_to_device(input_array, self.model.device)
+            kwargs = {}
+            if is_param_in_hook_signature(self.model.transfer_batch_to_device, "dataloader_idx"):
+                # Requires for Lightning 1.4 and above
+                kwargs["dataloader_idx"] = 0
+            input_array = self.model.transfer_batch_to_device(input_array, self.model.device, **kwargs)
         else:
             input_array = move_data_to_device(input_array, device=next(self.model.parameters()).device)
 

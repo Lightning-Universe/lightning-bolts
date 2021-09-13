@@ -6,8 +6,7 @@ import numpy as np
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
-from torch import Tensor
-from torch import optim as optim
+from torch import Tensor, optim
 from torch.nn.functional import log_softmax, softmax
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
@@ -302,7 +301,7 @@ def cli_main():
     checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True)
 
     seed_everything(123)
-    trainer = Trainer.from_argparse_args(args, deterministic=True, checkpoint_callback=checkpoint_callback)
+    trainer = Trainer.from_argparse_args(args, deterministic=True, callbacks=checkpoint_callback)
     trainer.fit(model)
 
 

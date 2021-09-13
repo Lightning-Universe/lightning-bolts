@@ -138,9 +138,8 @@ def cli_main():
 
     seed_everything(42)
     parser = ArgumentParser()
+    parser = VOCDetectionDataModule.add_argparse_args(parser)
     parser = Trainer.add_argparse_args(parser)
-    parser.add_argument("--data_dir", type=str, default=".")
-    parser.add_argument("--batch_size", type=int, default=1)
     parser = FasterRCNN.add_model_specific_args(parser)
 
     args = parser.parse_args()

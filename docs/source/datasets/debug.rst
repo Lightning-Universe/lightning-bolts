@@ -1,14 +1,6 @@
-########
-Datasets
-########
-Collection of useful datasets
-
---------
-
-*********
-Debugging
-*********
-Use these datasets to debug
+**************
+Debug Datasets
+**************
 
 DummyDataset
 ============
