@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.optim as optim
 from pytorch_lightning import LightningModule, Trainer
 
-from pl_bolts.optimizers import WarmupCosineLrScheduler
+from .lr_scheduler import WarmupCosineLrScheduler
 from .networks import WideResnet, ema_model_update, get_ema_model
 
 
@@ -57,7 +57,7 @@ class FixMatch(LightningModule):
         logits_u_weak, logits_u_strong = torch.split(logits[batch_size:], batch_size * mu)
         loss_x = self.criteria_x(logits_x, label_x)
         with torch.no_grad():
-            probs=self.get_unlabled_logits_weak_probs(logits_u_weak)
+            probs = self.get_unlabled_logits_weak_probs(logits_u_weak)
             scores, label_u_guess = torch.max(probs, dim=1)
             mask = scores.ge(self.hparams.pseudo_thr).float()
 
