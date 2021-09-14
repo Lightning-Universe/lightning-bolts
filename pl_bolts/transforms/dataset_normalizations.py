@@ -30,6 +30,19 @@ def cifar10_normalization():
     return normalize
 
 
+def cifar100_normalization():
+    if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+        raise ModuleNotFoundError(
+            "You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`."
+        )
+
+    normalize = transforms.Normalize(
+        mean=[x / 255.0 for x in [129.3, 124.1, 112.4]],
+        std=[x / 255.0 for x in [68.2, 65.4, 70.4]],
+    )
+    return normalize
+
+
 def stl10_normalization():
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError(
