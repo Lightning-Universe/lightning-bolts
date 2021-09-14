@@ -5,8 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 from pytorch_lightning import LightningModule, Trainer
 
-from pl_bolts.optimizers import WarmupCosineLrScheduler
-
+from .lr_scheduler import WarmupCosineLrScheduler
 from .networks import WideResnet, ema_model_update, get_ema_model
 
 
@@ -31,8 +30,9 @@ class FixMatch(LightningModule):
             if self.ema_eval:
                 self.ema_model = get_ema_model(self.model)
             self.total_steps = (
-                len(train_loader["labeled"].dataset) // (self.hparams.batch_size * max(1, self.hparams.gpus))
-            ) * float(self.hparams.max_epochs)
+                                       len(train_loader["labeled"].dataset) // (
+                                           self.hparams.batch_size * max(1, self.hparams.gpus))
+                               ) * float(self.hparams.max_epochs)
 
     def training_step(self, batch, batch_idx):
         labeled_batch = batch["labeled"]  # X
@@ -129,8 +129,8 @@ class FixMatch(LightningModule):
             type=int,
             metavar="N",
             help="mini-batch size (default: 256), this is the total "
-            "batch size of all GPUs on the current node when "
-            "using Data Parallel or Distributed Data Parallel",
+                 "batch size of all GPUs on the current node when "
+                 "using Data Parallel or Distributed Data Parallel",
         )
         # SSL related args.
         parser.add_argument("--eval-step", type=int, default=1024, help="eval step in Fix Match.")
