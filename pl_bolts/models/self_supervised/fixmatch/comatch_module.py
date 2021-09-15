@@ -16,7 +16,7 @@ class Queue:
         return self.value
 
     def update(self, new_value, total_batch_size):
-        self.value = self.value[self.ptr: self.ptr + total_batch_size, :] = new_value
+        self.value = self.value[self.ptr : self.ptr + total_batch_size, :] = new_value
         self.ptr = (self.ptr + total_batch_size) % self.size
 
 
@@ -77,7 +77,12 @@ class CoMatch(FixMatch):
 
             features_weak = torch.cat([features_u_weak, features_x], dim=0)
             probs_weak = torch.cat(
-                [probs_orig, torch.zeros(batch_size, self.n_classes).scatter(1, supervised_labels.view(-1, 1), 1).to(self.device)]
+                [
+                    probs_orig,
+                    torch.zeros(batch_size, self.n_classes)
+                    .scatter(1, supervised_labels.view(-1, 1), 1)
+                    .to(self.device),
+                ]
             )
             # Update memory bank.
             total_batch_size = batch_size + unlabeled_batch_size
@@ -100,9 +105,9 @@ class CoMatch(FixMatch):
         unsupervised_loss = unsupervised_loss.mean()
 
         loss = (
-                supervised_loss
-                + self.hparams.coefficient_unsupervised * unsupervised_loss
-                + self.hparams.coefficient_contrastive * contrastive_loss
+            supervised_loss
+            + self.hparams.coefficient_unsupervised * unsupervised_loss
+            + self.hparams.coefficient_contrastive * contrastive_loss
         )
         self.log("loss", loss, on_step=True, on_epoch=True, logger=True)
         self.log("supervised_loss", supervised_loss, on_step=True, on_epoch=True, logger=True)
@@ -125,8 +130,8 @@ class CoMatch(FixMatch):
             type=int,
             metavar="N",
             help="mini-batch size (default: 16), this is the total "
-                 "batch size of all GPUs on the current node when "
-                 "using Data Parallel or Distributed Data Parallel",
+            "batch size of all GPUs on the current node when "
+            "using Data Parallel or Distributed Data Parallel",
         )
         # SSL related args.
         parser.add_argument("--eval-step", type=int, default=1024, help="eval step in Fix Match.")
