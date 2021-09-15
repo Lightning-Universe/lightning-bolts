@@ -6,16 +6,8 @@ from .networks import WideResnet, get_ema_model
 
 class CoMatch(FixMatch):
     def setup(self, stage):
-        if stage == "fit":
-            train_loader = self.train_dataloader()
-            n_classes = len(train_loader["labeled"].dataset.classes)
-            self.model = WideResnet(n_classes=n_classes, k=self.hparams.wresnet_k, n=self.hparams.wresnet_n, proj=True)
-            if self.ema_eval:
-                self.ema_model = get_ema_model(self.model)
-            self.total_steps = (
-                len(train_loader["labeled"].dataset) // (self.hparams.batch_size * max(1, self.hparams.gpus))
-            ) * float(self.hparams.max_epochs)
-            # Mem Bank
+        super(CoMatch, self).setup(stage)
+        # Mem Bank
 
     def training_step(self, batch, batch_idx):
         labeled_batch = batch["labeled"]  # X
@@ -58,3 +50,32 @@ class CoMatch(FixMatch):
         self.log("num of strong aug", mask.sum().item(), on_step=True, on_epoch=True)
         self.log("num of mask", mask.mean().item(), on_step=True, on_epoch=True)
         return loss
+
+    @staticmethod
+    def add_model_specific_args(parent_parser):  # pragma: no-cover
+        parser = ArgumentParser(parents=[parent_parser])
+        parser.add_argument("-a", "--arch", metavar="ARCH", default="wideresnet")
+        parser.add_argument("-b", "--batch-size", default=16, type=int, metavar="N",
+                            help="mini-batch size (default: 16), this is the total "
+                                 "batch size of all GPUs on the current node when "
+                                 "using Data Parallel or Distributed Data Parallel",
+                            )
+        # SSL related args.
+        parser.add_argument("--eval-step", type=int, default=1024, help="eval step in Fix Match.")
+        parser.add_argument("--expand-labels", action="store_true", help="expand labels in SSL.")
+        parser.add_argument("--distribution-alignment", action="store_true", help="expand labels in SSL.")
+        parser.add_argument("--pseudo-thr", type=float, default=0.95, help="pseudo label threshold")
+        parser.add_argument("--coefficient-u", type=float, default=1.0, help="coefficient of unlabeled loss")
+        # Model related args.
+        parser.add_argument("--ema-decay", type=float, default=0.999)
+        parser.add_argument("--wresnet-k", default=8, type=int, help="width factor of wide resnet")
+        parser.add_argument("--wresnet-n", default=28, type=int, help="depth of wide resnet")
+        # Training related args.
+        parser.add_argument(
+            "-lr", "--learning-rate", default=0.03, type=float, metavar="LR", help="initial learning rate", dest="lr"
+        )
+        parser.add_argument("--momentum", default=0.9, type=float, metavar="M", help="momentum")
+        parser.add_argument("--wd", "--weight-decay", default=5e-4, type=float, metavar="W",
+                            help="weight decay (default: 5e-4)", dest="weight_decay")
+        parser.add_argument("--pretrained", dest="pretrained", action="store_true", help="use layer0-trained model")
+        return parser
