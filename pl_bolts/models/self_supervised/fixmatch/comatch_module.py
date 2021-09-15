@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 import torch
 
 from .fixmatch_module import FixMatch
+from .networks import WideResnet
 
 
 class Queue:
@@ -15,13 +16,15 @@ class Queue:
         return self.value
 
     def update(self, new_value, total_batch_size):
-        self.value = self.value[self.ptr : self.ptr + total_batch_size, :] = new_value
+        self.value = self.value[self.ptr: self.ptr + total_batch_size, :] = new_value
         self.ptr = (self.ptr + total_batch_size) % self.size
 
 
 class CoMatch(FixMatch):
     def setup(self, stage):
         super().setup(stage)
+        # Init Model
+        self.model = WideResnet(n_classes=self.n_classes, k=self.hparams.wresnet_k, n=self.hparams.wresnet_n, proj=True)
         # Loss
         self.criteria_u = torch.nn.LogSoftmax(dim=1)
         # Mem Bank
@@ -41,18 +44,18 @@ class CoMatch(FixMatch):
         labeled_batch = batch["labeled"]  # X
         unlabeled_batch = batch["unlabeled"]  # U
 
-        img_x_weak, label_x = labeled_batch
+        supervised_imgs, supervised_labels = labeled_batch
         (img_u_weak, img_u_strong0, img_u_strong1), label_u = unlabeled_batch
 
-        batch_size = img_x_weak.size(0)
+        batch_size = supervised_imgs.size(0)
         unlabeled_batch_size = img_u_weak.size(0)
 
         # Concate Different Input together.
-        images = torch.cat([img_x_weak, img_u_weak, img_u_strong0, img_u_strong1], dim=0)
+        images = torch.cat([supervised_imgs, img_u_weak, img_u_strong0, img_u_strong1], dim=0)
 
         logits, features = self.model(images)
         # Split logits
-        logits_x = logits[:batch_size]
+        supervised_logits = logits[:batch_size]
         logits_u_weak, logits_u_strong0, logits_u_strong1 = torch.split(logits[batch_size:], unlabeled_batch_size)
         # Split features
         features_x = features[:batch_size]
@@ -60,7 +63,7 @@ class CoMatch(FixMatch):
             features[batch_size:], unlabeled_batch_size
         )
 
-        supervised_loss = self.criteria_x(logits_x, label_x)
+        supervised_loss = self.criteria_x(supervised_logits, supervised_labels)
         with torch.no_grad():
             probs = self.get_unlabled_logits_weak_probs(logits_u_weak)
             mask, label_u_guess = self.get_pesudo_mask_and_infer_u_label(probs)
@@ -74,7 +77,7 @@ class CoMatch(FixMatch):
 
             features_weak = torch.cat([features_u_weak, features_x], dim=0)
             probs_weak = torch.cat(
-                [probs_orig, torch.zeros(batch_size, self.n_classes).scatter(1, label_x.view(-1, 1), 1).to(self.device)]
+                [probs_orig, torch.zeros(batch_size, self.n_classes).scatter(1, supervised_labels.view(-1, 1), 1).to(self.device)]
             )
             # Update memory bank.
             total_batch_size = batch_size + unlabeled_batch_size
@@ -97,9 +100,9 @@ class CoMatch(FixMatch):
         unsupervised_loss = unsupervised_loss.mean()
 
         loss = (
-            supervised_loss
-            + self.hparams.coefficient_unsupervised * unsupervised_loss
-            + self.hparams.coefficient_contrastive * contrastive_loss
+                supervised_loss
+                + self.hparams.coefficient_unsupervised * unsupervised_loss
+                + self.hparams.coefficient_contrastive * contrastive_loss
         )
         self.log("loss", loss, on_step=True, on_epoch=True, logger=True)
         self.log("supervised_loss", supervised_loss, on_step=True, on_epoch=True, logger=True)
@@ -122,8 +125,8 @@ class CoMatch(FixMatch):
             type=int,
             metavar="N",
             help="mini-batch size (default: 16), this is the total "
-            "batch size of all GPUs on the current node when "
-            "using Data Parallel or Distributed Data Parallel",
+                 "batch size of all GPUs on the current node when "
+                 "using Data Parallel or Distributed Data Parallel",
         )
         # SSL related args.
         parser.add_argument("--eval-step", type=int, default=1024, help="eval step in Fix Match.")
