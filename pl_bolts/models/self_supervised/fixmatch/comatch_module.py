@@ -50,8 +50,7 @@ class CoMatch(FixMatch):
         supervised_loss = self.criteria_x(logits_x, label_x)
         with torch.no_grad():
             probs = self.get_unlabled_logits_weak_probs(logits_u_weak)
-            scores, label_u_guess = torch.max(probs, dim=1)
-            mask = scores.ge(self.hparams.pseudo_thr).float()
+            mask, label_u_guess = self.get_pesudo_mask_and_infer_u_label(probs)
             probs_orig = probs.clone()
 
             features_weak = torch.cat([features_u_weak, features_x], dim=0)
