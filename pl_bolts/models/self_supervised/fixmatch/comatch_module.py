@@ -5,16 +5,33 @@ import torch
 from .fixmatch_module import FixMatch
 
 
+class Queue:
+    def __init__(self, value, size):
+        self.value = value
+        self.size = size
+        self.ptr = 0
+
+    def __call__(self):
+        return self.value
+
+    def update(self, new_value, total_batch_size):
+        self.value = self.value[self.ptr:self.ptr + total_batch_size, :] = new_value
+        self.ptr = (self.ptr + total_batch_size) % self.size
+
+
 class CoMatch(FixMatch):
     def setup(self, stage):
         super().setup(stage)
         # Loss
         self.criteria_u = torch.nn.LogSoftmax(dim=1)
         # Mem Bank
-        self.queue_size = self.hparams.queue_batch * (self.hparams.mu + 1) * self.hparams.batch_size
-        self.queue_features = torch.zeros(self.queue_size, self.hparams.low_ndembedd).to(self.device)
-        self.queue_probs = torch.zeros(self.queue_size, self.n_classes)
-        self.queue_ptr = 0
+        queue_size = self.hparams.queue_batch * (self.hparams.mu + 1) * self.hparams.batch_size
+        self.queue_features = Queue(
+            torch.zeros(self.queue_size, self.hparams.low_ndembedd).to(self.device), queue_size
+        )
+        self.queue_probs = Queue(
+            torch.zeros(self.queue_size, self.n_classes).to(self.device), queue_size
+        )
 
     def train_epoch_start(self):
         self.current_step_number = 0
@@ -53,14 +70,21 @@ class CoMatch(FixMatch):
             mask, label_u_guess = self.get_pesudo_mask_and_infer_u_label(probs)
             probs_orig = probs.clone()
 
+            # Memory Smoothing
+            if self.current_epoch > 0 or self.current_step_number > self.hparams.queue_batch:
+                probs = self.hparams.alpha * probs + (1 - self.hparams.alpha) * torch.mm(
+                    self._get_similarity_probabilities(features_u_weak, self.queue_features().t()),
+                    self.queue_probs()
+                )
+
             features_weak = torch.cat([features_u_weak, features_x], dim=0)
             probs_weak = torch.cat(
                 [probs_orig, torch.zeros(batch_size, self.n_classes).scatter(1, label_x.view(-1, 1), 1).to(self.device)]
             )
             # Update memory bank.
             total_batch_size = batch_size + unlabeled_batch_size
-            self.queue_features[self.queue_ptr : self.queue_ptr + total_batch_size, :] = features_weak
-            self.queue_probs[self.queue_ptr : self.queue_ptr + total_batch_size, :] = probs_weak
+            self.queue_features.update(features_weak, total_batch_size)
+            self.queue_probs.update(probs_weak, total_batch_size)
 
         # Embedding Similarity
         sim_probs = self._get_similarity_probabilities(features_u_strong0, features_u_strong1)
@@ -78,9 +102,9 @@ class CoMatch(FixMatch):
         unsupervised_loss = unsupervised_loss.mean()
 
         loss = (
-            supervised_loss
-            + self.hparams.coefficient_unsupervised * unsupervised_loss
-            + self.hparams.coefficient_contrastive * contrastive_loss
+                supervised_loss
+                + self.hparams.coefficient_unsupervised * unsupervised_loss
+                + self.hparams.coefficient_contrastive * contrastive_loss
         )
         self.log("loss", loss, on_step=True, on_epoch=True, logger=True)
         self.log("supervised_loss", supervised_loss, on_step=True, on_epoch=True, logger=True)
@@ -103,8 +127,8 @@ class CoMatch(FixMatch):
             type=int,
             metavar="N",
             help="mini-batch size (default: 16), this is the total "
-            "batch size of all GPUs on the current node when "
-            "using Data Parallel or Distributed Data Parallel",
+                 "batch size of all GPUs on the current node when "
+                 "using Data Parallel or Distributed Data Parallel",
         )
         # SSL related args.
         parser.add_argument("--eval-step", type=int, default=1024, help="eval step in Fix Match.")
