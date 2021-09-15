@@ -139,7 +139,7 @@ class FixMatch(LightningModule):
         parser.add_argument("--pseudo-thr", type=float, default=0.95, help="pseudo label threshold")
         parser.add_argument("--coefficient-u", type=float, default=1.0, help="coefficient of unlabeled loss")
         # Model related args.
-        parser.add_argument("--ema-m", type=float, default=0.999)
+        parser.add_argument("--ema-decay", type=float, default=0.999)
         parser.add_argument("--wresnet-k", default=2, type=int, help="width factor of wide resnet")
         parser.add_argument("--wresnet-n", default=28, type=int, help="depth of wide resnet")
         # Training related args.
