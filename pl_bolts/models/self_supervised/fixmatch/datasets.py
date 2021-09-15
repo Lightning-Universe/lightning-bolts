@@ -5,7 +5,8 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-from pl_bolts.transforms.dataset_normalizations import cifar100_normalization, cifar10_normalization
+from pl_bolts.transforms.dataset_normalizations import cifar10_normalization, cifar100_normalization
+
 from .transforms import RandAugmentMC
 
 TRANS_WEAK = transforms.Compose(
@@ -100,7 +101,7 @@ def x_u_split(dataset, labels, num_labeled=4000, eval_step=1024, expand_labels=T
 
 
 def get_dataset(
-        data_path, dataset, mode="fixmatch", num_labeled=4000, batch_size=128, eval_step=1024, expand_labels=True
+    data_path, dataset, mode="fixmatch", num_labeled=4000, batch_size=128, eval_step=1024, expand_labels=True
 ):
     assert mode in ["fixmatch", "comatch"]
     base_dataset = MAP_DATASET[dataset](data_path, train=True, download=True)
@@ -119,16 +120,16 @@ def get_dataset(
 
 class SSLDataModule(LightningDataModule):
     def __init__(
-            self,
-            data_path,
-            dataset,
-            mu=7,
-            mode="fixmatch",
-            num_labeled=4000,
-            batch_size=128,
-            eval_step=1024,
-            expand_labels=True,
-            **kwargs
+        self,
+        data_path,
+        dataset,
+        mu=7,
+        mode="fixmatch",
+        num_labeled=4000,
+        batch_size=128,
+        eval_step=1024,
+        expand_labels=True,
+        **kwargs
     ):
         self.batch_size = batch_size
         self.mu = mu
@@ -141,8 +142,11 @@ class SSLDataModule(LightningDataModule):
             self.train_labeled_dataset, batch_size=self.batch_size, pin_memory=True, num_workers=16, drop_last=True
         )
         unlabeled_loader = DataLoader(
-            self.train_unlabeled_dataset, batch_size=self.batch_size * self.mu, pin_memory=True, num_workers=16,
-            drop_last=True
+            self.train_unlabeled_dataset,
+            batch_size=self.batch_size * self.mu,
+            pin_memory=True,
+            num_workers=16,
+            drop_last=True,
         )
         return {"labeled": labeled_loader, "unlabeled": unlabeled_loader}
 

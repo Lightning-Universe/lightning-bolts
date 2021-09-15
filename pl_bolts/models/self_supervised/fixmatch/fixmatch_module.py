@@ -136,8 +136,7 @@ class FixMatch(LightningModule):
             "using Data Parallel or Distributed Data Parallel",
         )
         # SSL related args.
-        parser.add_argument('--mu', default=7, type=int,
-                            help='coefficient of unlabeled batch size')
+        parser.add_argument("--mu", default=7, type=int, help="coefficient of unlabeled batch size")
         parser.add_argument("--num-labeled", type=int, default=4000, help="number of labeled samples for training")
         parser.add_argument("--eval-step", type=int, default=1024, help="eval step in Fix Match.")
         parser.add_argument("--expand-labels", action="store_true", help="expand labels in SSL.")
