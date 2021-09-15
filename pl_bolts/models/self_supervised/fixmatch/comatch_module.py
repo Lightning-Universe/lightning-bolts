@@ -15,7 +15,7 @@ class Queue:
         return self.value
 
     def update(self, new_value, total_batch_size):
-        self.value = self.value[self.ptr:self.ptr + total_batch_size, :] = new_value
+        self.value = self.value[self.ptr : self.ptr + total_batch_size, :] = new_value
         self.ptr = (self.ptr + total_batch_size) % self.size
 
 
@@ -26,12 +26,8 @@ class CoMatch(FixMatch):
         self.criteria_u = torch.nn.LogSoftmax(dim=1)
         # Mem Bank
         queue_size = self.hparams.queue_batch * (self.hparams.mu + 1) * self.hparams.batch_size
-        self.queue_features = Queue(
-            torch.zeros(self.queue_size, self.hparams.low_ndembedd).to(self.device), queue_size
-        )
-        self.queue_probs = Queue(
-            torch.zeros(self.queue_size, self.n_classes).to(self.device), queue_size
-        )
+        self.queue_features = Queue(torch.zeros(self.queue_size, self.hparams.low_ndembedd).to(self.device), queue_size)
+        self.queue_probs = Queue(torch.zeros(self.queue_size, self.n_classes).to(self.device), queue_size)
 
     def train_epoch_start(self):
         self.current_step_number = 0
@@ -73,8 +69,7 @@ class CoMatch(FixMatch):
             # Memory Smoothing
             if self.current_epoch > 0 or self.current_step_number > self.hparams.queue_batch:
                 probs = self.hparams.alpha * probs + (1 - self.hparams.alpha) * torch.mm(
-                    self._get_similarity_probabilities(features_u_weak, self.queue_features().t()),
-                    self.queue_probs()
+                    self._get_similarity_probabilities(features_u_weak, self.queue_features().t()), self.queue_probs()
                 )
 
             features_weak = torch.cat([features_u_weak, features_x], dim=0)
@@ -102,9 +97,9 @@ class CoMatch(FixMatch):
         unsupervised_loss = unsupervised_loss.mean()
 
         loss = (
-                supervised_loss
-                + self.hparams.coefficient_unsupervised * unsupervised_loss
-                + self.hparams.coefficient_contrastive * contrastive_loss
+            supervised_loss
+            + self.hparams.coefficient_unsupervised * unsupervised_loss
+            + self.hparams.coefficient_contrastive * contrastive_loss
         )
         self.log("loss", loss, on_step=True, on_epoch=True, logger=True)
         self.log("supervised_loss", supervised_loss, on_step=True, on_epoch=True, logger=True)
@@ -127,8 +122,8 @@ class CoMatch(FixMatch):
             type=int,
             metavar="N",
             help="mini-batch size (default: 16), this is the total "
-                 "batch size of all GPUs on the current node when "
-                 "using Data Parallel or Distributed Data Parallel",
+            "batch size of all GPUs on the current node when "
+            "using Data Parallel or Distributed Data Parallel",
         )
         # SSL related args.
         parser.add_argument("--eval-step", type=int, default=1024, help="eval step in Fix Match.")
