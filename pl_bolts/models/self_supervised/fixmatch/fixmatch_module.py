@@ -30,9 +30,8 @@ class FixMatch(LightningModule):
             if self.ema_eval:
                 self.ema_model = get_ema_model(self.model)
             self.total_steps = (
-                                       len(train_loader["labeled"].dataset) // (
-                                       self.hparams.batch_size * max(1, self.hparams.gpus))
-                               ) * float(self.hparams.max_epochs)
+                len(train_loader["labeled"].dataset) // (self.hparams.batch_size * max(1, self.hparams.gpus))
+            ) * float(self.hparams.max_epochs)
 
     def training_step(self, batch, batch_idx):
         labeled_batch = batch["labeled"]  # X
@@ -122,10 +121,16 @@ class FixMatch(LightningModule):
     def add_model_specific_args(parent_parser):  # pragma: no-cover
         parser = ArgumentParser(parents=[parent_parser])
         parser.add_argument("-a", "--arch", metavar="ARCH", default="wideresnet")
-        parser.add_argument("-b", "--batch-size", default=16, type=int, metavar="N",
-                            help="mini-batch size (default: 16), this is the total "
-                                 "batch size of all GPUs on the current node when "
-                                 "using Data Parallel or Distributed Data Parallel")
+        parser.add_argument(
+            "-b",
+            "--batch-size",
+            default=16,
+            type=int,
+            metavar="N",
+            help="mini-batch size (default: 16), this is the total "
+            "batch size of all GPUs on the current node when "
+            "using Data Parallel or Distributed Data Parallel",
+        )
         # SSL related args.
         parser.add_argument("--num-labeled", type=int, default=4000, help="number of labeled samples for training")
         parser.add_argument("--eval-step", type=int, default=1024, help="eval step in Fix Match.")
@@ -142,8 +147,15 @@ class FixMatch(LightningModule):
             "-lr", "--learning-rate", default=0.03, type=float, metavar="LR", help="initial learning rate", dest="lr"
         )
         parser.add_argument("--momentum", default=0.9, type=float, metavar="M", help="momentum")
-        parser.add_argument("--wd", "--weight-decay", default=5e-4, type=float, metavar="W",
-                            help="weight decay (default: 5e-4)", dest="weight_decay")
+        parser.add_argument(
+            "--wd",
+            "--weight-decay",
+            default=5e-4,
+            type=float,
+            metavar="W",
+            help="weight decay (default: 5e-4)",
+            dest="weight_decay",
+        )
         parser.add_argument("--pretrained", dest="pretrained", action="store_true", help="use layer0-trained model")
         return parser
 

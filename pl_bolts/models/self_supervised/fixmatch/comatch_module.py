@@ -6,7 +6,7 @@ from .networks import WideResnet, get_ema_model
 
 class CoMatch(FixMatch):
     def setup(self, stage):
-        super(CoMatch, self).setup(stage)
+        super().setup(stage)
         # Mem Bank
 
     def training_step(self, batch, batch_idx):
@@ -55,11 +55,16 @@ class CoMatch(FixMatch):
     def add_model_specific_args(parent_parser):  # pragma: no-cover
         parser = ArgumentParser(parents=[parent_parser])
         parser.add_argument("-a", "--arch", metavar="ARCH", default="wideresnet")
-        parser.add_argument("-b", "--batch-size", default=16, type=int, metavar="N",
-                            help="mini-batch size (default: 16), this is the total "
-                                 "batch size of all GPUs on the current node when "
-                                 "using Data Parallel or Distributed Data Parallel",
-                            )
+        parser.add_argument(
+            "-b",
+            "--batch-size",
+            default=16,
+            type=int,
+            metavar="N",
+            help="mini-batch size (default: 16), this is the total "
+            "batch size of all GPUs on the current node when "
+            "using Data Parallel or Distributed Data Parallel",
+        )
         # SSL related args.
         parser.add_argument("--eval-step", type=int, default=1024, help="eval step in Fix Match.")
         parser.add_argument("--expand-labels", action="store_true", help="expand labels in SSL.")
@@ -75,7 +80,14 @@ class CoMatch(FixMatch):
             "-lr", "--learning-rate", default=0.03, type=float, metavar="LR", help="initial learning rate", dest="lr"
         )
         parser.add_argument("--momentum", default=0.9, type=float, metavar="M", help="momentum")
-        parser.add_argument("--wd", "--weight-decay", default=5e-4, type=float, metavar="W",
-                            help="weight decay (default: 5e-4)", dest="weight_decay")
+        parser.add_argument(
+            "--wd",
+            "--weight-decay",
+            default=5e-4,
+            type=float,
+            metavar="W",
+            help="weight decay (default: 5e-4)",
+            dest="weight_decay",
+        )
         parser.add_argument("--pretrained", dest="pretrained", action="store_true", help="use layer0-trained model")
         return parser
