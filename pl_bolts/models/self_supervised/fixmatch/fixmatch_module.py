@@ -40,7 +40,7 @@ class FixMatch(LightningModule):
         img_x_weak, label_x = labeled_batch
         (img_u_weak, img_u_strong), label_u = unlabeled_batch
 
-        batch_size = img_u_weak.size(0)
+        batch_size = img_x_weak.size(0)
         mu = int(img_u_weak.size(0) // batch_size)
         imgs = torch.cat([img_x_weak, img_u_weak, img_u_strong], dim=0)
         logits = self.model(imgs)
