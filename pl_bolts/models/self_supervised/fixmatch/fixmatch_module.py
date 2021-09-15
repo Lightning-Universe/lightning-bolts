@@ -30,8 +30,9 @@ class FixMatch(LightningModule):
             if self.ema_eval:
                 self.ema_model = get_ema_model(self.model)
             self.total_steps = (
-                len(train_loader["labeled"].dataset) // (self.hparams.batch_size * max(1, self.hparams.gpus))
-            ) * float(self.hparams.max_epochs)
+                                       len(train_loader["labeled"].dataset) // (
+                                       self.hparams.batch_size * max(1, self.hparams.gpus))
+                               ) * float(self.hparams.max_epochs)
 
     def training_step(self, batch, batch_idx):
         labeled_batch = batch["labeled"]  # X
@@ -72,7 +73,7 @@ class FixMatch(LightningModule):
         # ema eval
         if self.ema_eval:
             with torch.no_grad():
-                ema_model_update(self.model, self.ema_model, self.hparams.ema_m)
+                ema_model_update(self.model, self.ema_model, self.hparams.ema_decay)
         self.log("val_loss", loss, on_step=True, on_epoch=True)
         self.log("val_acc1", acc1, on_step=True, prog_bar=True, on_epoch=True)
         self.log("val_acc5", acc5, on_step=True, on_epoch=True)
@@ -128,10 +129,12 @@ class FixMatch(LightningModule):
             type=int,
             metavar="N",
             help="mini-batch size (default: 256), this is the total "
-            "batch size of all GPUs on the current node when "
-            "using Data Parallel or Distributed Data Parallel",
+                 "batch size of all GPUs on the current node when "
+                 "using Data Parallel or Distributed Data Parallel",
         )
         # SSL related args.
+        parser.add_argument('--num-labeled', type=int, default=4000,
+                            help='number of labeled samples for training')
         parser.add_argument("--eval-step", type=int, default=1024, help="eval step in Fix Match.")
         parser.add_argument("--expand-labels", action="store_true", help="expand labels in SSL.")
         parser.add_argument("--distribution_alignment", action="store_true", help="expand labels in SSL.")
@@ -178,6 +181,7 @@ def cli_main():
     dm = SSLDataModule(
         args.data_path,
         args.dataset,
+        num_labeled=args.num_labeled,
         batch_size=args.batch_size,
         eval_step=args.eval_step,
         expand_labels=args.expand_labels,

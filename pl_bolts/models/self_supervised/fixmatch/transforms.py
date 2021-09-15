@@ -1,14 +1,14 @@
 import random
 
-import numpy as np
 import PIL
 import PIL.ImageDraw
 import PIL.ImageEnhance
 import PIL.ImageOps
+import numpy as np
 from PIL import Image
 from torchvision import transforms
 
-from pl_bolts.transforms.dataset_normalizations import cifar10_normalization, cifar100_normalization
+from pl_bolts.transforms.dataset_normalizations import cifar100_normalization, cifar10_normalization
 
 PARAMETER_MAX = 10
 
