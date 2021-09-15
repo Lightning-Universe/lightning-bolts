@@ -5,7 +5,8 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-from pl_bolts.transforms.dataset_normalizations import cifar100_normalization, cifar10_normalization
+from pl_bolts.transforms.dataset_normalizations import cifar10_normalization, cifar100_normalization
+
 from .transforms import RandAugmentMC
 
 TRANS_WEAK = transforms.Compose(
@@ -26,8 +27,7 @@ TRANS_STRONG_ANOTHER = transforms.Compose(
     [
         transforms.RandomResizedCrop(32, scale=(0.2, 1.0)),
         transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomApply([
-            transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
+        transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
         transforms.RandomGrayscale(p=0.2),
     ]
 )
@@ -100,13 +100,14 @@ def x_u_split(dataset, labels, num_labeled=4000, eval_step=1024, expand_labels=T
     return labeled_idx, unlabeled_idx
 
 
-def get_dataset(data_path, dataset, mode="fixmatch", num_labeled=4000,
-                batch_size=128, eval_step=1024, expand_labels=True):
+def get_dataset(
+    data_path, dataset, mode="fixmatch", num_labeled=4000, batch_size=128, eval_step=1024, expand_labels=True
+):
     assert mode in ["fixmatch", "comatch"]
     base_dataset = MAP_DATASET[dataset](data_path, train=True, download=True)
     train_labeled_idxs, train_unlabeled_idxs = x_u_split(
-        dataset, base_dataset.targets, num_labeled, eval_step, expand_labels,
-        batch_size)
+        dataset, base_dataset.targets, num_labeled, eval_step, expand_labels, batch_size
+    )
     train_labeled_dataset = MAP_SSL_DATASET[dataset](
         data_path, train_labeled_idxs, train=True, transform=TransformSSL(dataset, "casual")
     )
@@ -119,15 +120,16 @@ def get_dataset(data_path, dataset, mode="fixmatch", num_labeled=4000,
 
 class SSLDataModule(LightningDataModule):
     def __init__(
-            self,
-            data_path,
-            dataset,
-            mode="fixmatch",
-            num_labeled=4000,
-            batch_size=128,
-            eval_step=1024,
-            expand_labels=True,
-            **kwargs):
+        self,
+        data_path,
+        dataset,
+        mode="fixmatch",
+        num_labeled=4000,
+        batch_size=128,
+        eval_step=1024,
+        expand_labels=True,
+        **kwargs
+    ):
         self.batch_size = batch_size
         self.train_labeled_dataset, self.train_unlabeled_dataset, self.test_dataset = get_dataset(
             data_path, dataset, mode, num_labeled, batch_size, eval_step, expand_labels
