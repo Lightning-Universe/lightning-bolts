@@ -137,15 +137,15 @@ class SSLDataModule(LightningDataModule):
 
     def train_dataloader(self):
         labeled_loader = DataLoader(
-            self.train_labeled_dataset, batch_size=self.batch_size, pin_memory=False, num_workers=0, drop_last=True
+            self.train_labeled_dataset, batch_size=self.batch_size, pin_memory=True, num_workers=16, drop_last=True
         )
         unlabeled_loader = DataLoader(
-            self.train_unlabeled_dataset, batch_size=self.batch_size, pin_memory=False, num_workers=0, drop_last=True
+            self.train_unlabeled_dataset, batch_size=self.batch_size, pin_memory=True, num_workers=16, drop_last=True
         )
         return {"labeled": labeled_loader, "unlabeled": unlabeled_loader}
 
     def val_dataloader(self):
-        return DataLoader(self.test_dataset, batch_size=self.batch_size, num_workers=0)
+        return DataLoader(self.test_dataset, batch_size=self.batch_size, num_workers=8)
 
 
 if __name__ == "__main__":
