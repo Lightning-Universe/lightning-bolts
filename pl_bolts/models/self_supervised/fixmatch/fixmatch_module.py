@@ -44,9 +44,8 @@ class FixMatch(LightningModule):
             if self.ema_eval:
                 self.ema_model = get_ema_model(self.model)
             self.total_steps = (
-                                       len(train_loader["labeled"].dataset) // (
-                                       self.hparams.batch_size * max(1, self.hparams.gpus))
-                               ) * float(self.hparams.max_epochs)
+                len(train_loader["labeled"].dataset) // (self.hparams.batch_size * max(1, self.hparams.gpus))
+            ) * float(self.hparams.max_epochs)
 
     def training_step(self, batch, batch_idx):
         labeled_batch = batch["labeled"]  # X
@@ -56,15 +55,9 @@ class FixMatch(LightningModule):
         (img_u_weak, img_u_strong), label_u = unlabeled_batch
 
         batch_size = img_x_weak.size(0)
-        imgs = interleave(
-            torch.cat([
-                img_x_weak, img_u_weak, img_u_strong
-            ]), 2 * self.hparams.mu + 1
-        )
+        imgs = interleave(torch.cat([img_x_weak, img_u_weak, img_u_strong]), 2 * self.hparams.mu + 1)
         logits = self.model(imgs)
-        logits = de_interleave(
-            logits, 2 * self.hparams.mu + 1
-        )
+        logits = de_interleave(logits, 2 * self.hparams.mu + 1)
         logits_x = logits[:batch_size]
         logits_u_weak, logits_u_strong = logits[batch_size:].chunk(2)
         del logits
@@ -106,18 +99,19 @@ class FixMatch(LightningModule):
             ema_logits = self.ema_model(images)
             ema_loss = self.criteria_x(ema_logits, labels)
             ema_acc1, ema_acc5 = self.__accuracy(ema_logits, labels, topk=(1, 5))
-            self.log('val/ema_loss', ema_loss, on_step=True, on_epoch=True)
-            self.log('val/ema_acc1', ema_acc1, on_step=True, on_epoch=True)
-            self.log('val/ema_acc5', ema_acc5, on_step=True, on_epoch=True)
+            self.log("val/ema_loss", ema_loss, on_step=True, on_epoch=True)
+            self.log("val/ema_acc1", ema_acc1, on_step=True, on_epoch=True)
+            self.log("val/ema_acc5", ema_acc5, on_step=True, on_epoch=True)
         return loss
 
     def configure_optimizers(self):
-        no_decay = ['bias', 'bn']
+        no_decay = ["bias", "bn"]
         grouped_params = [
-            {'params': [p for n, p in self.named_parameters() if not any(
-                nd in n for nd in no_decay)], 'weight_decay': self.hparams.weight_decay},
-            {'params': [p for n, p in self.named_parameters() if any(
-                nd in n for nd in no_decay)], 'weight_decay': 0}
+            {
+                "params": [p for n, p in self.named_parameters() if not any(nd in n for nd in no_decay)],
+                "weight_decay": self.hparams.weight_decay,
+            },
+            {"params": [p for n, p in self.named_parameters() if any(nd in n for nd in no_decay)], "weight_decay": 0},
         ]
         optimizer = optim.SGD(
             grouped_params,
@@ -172,8 +166,7 @@ class FixMatch(LightningModule):
             default=16,
             type=int,
             metavar="N",
-            help="mini-batch size (default: 16), this is the total "
-                 "batch size of all GPUs on the current node."
+            help="mini-batch size (default: 16), this is the total " "batch size of all GPUs on the current node.",
         )
         # SSL related args.
         parser.add_argument("--mu", default=7, type=int, help="coefficient of unlabeled batch size")
@@ -193,9 +186,15 @@ class FixMatch(LightningModule):
             "-lr", "--learning-rate", default=0.03, type=float, metavar="LR", help="initial learning rate", dest="lr"
         )
         parser.add_argument("--momentum", default=0.9, type=float, metavar="M", help="momentum")
-        parser.add_argument("--wd", "--weight-decay", default=1e-3, type=float,
-                            metavar="W", help="weight decay (default: 1e-3)", dest="weight_decay",
-                            )
+        parser.add_argument(
+            "--wd",
+            "--weight-decay",
+            default=1e-3,
+            type=float,
+            metavar="W",
+            help="weight decay (default: 1e-3)",
+            dest="weight_decay",
+        )
         parser.add_argument("--pretrained", dest="pretrained", action="store_true", help="use layer0-trained model")
         return parser
 

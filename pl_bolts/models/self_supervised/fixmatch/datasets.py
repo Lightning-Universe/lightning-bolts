@@ -100,8 +100,9 @@ def x_u_split(dataset, labels, num_labeled=4000, eval_step=1024, expand_labels=T
     return labeled_idx, unlabeled_idx
 
 
-def get_train_dataset(data_path, dataset, mode="fixmatch", num_labeled=4000, batch_size=128,
-                      eval_step=1024, expand_labels=True):
+def get_train_dataset(
+    data_path, dataset, mode="fixmatch", num_labeled=4000, batch_size=128, eval_step=1024, expand_labels=True
+):
     assert mode in ["fixmatch", "comatch"]
     base_dataset = MAP_DATASET[dataset](data_path, train=True, download=True)
     train_labeled_idxs, train_unlabeled_idxs = x_u_split(
@@ -118,16 +119,16 @@ def get_train_dataset(data_path, dataset, mode="fixmatch", num_labeled=4000, bat
 
 class SSLDataModule(LightningDataModule):
     def __init__(
-            self,
-            data_path,
-            dataset,
-            mu=7,
-            mode="fixmatch",
-            num_labeled=4000,
-            batch_size=128,
-            eval_step=1024,
-            expand_labels=True,
-            **kwargs
+        self,
+        data_path,
+        dataset,
+        mu=7,
+        mode="fixmatch",
+        num_labeled=4000,
+        batch_size=128,
+        eval_step=1024,
+        expand_labels=True,
+        **kwargs
     ):
         self.batch_size = batch_size
         self.mu = mu
@@ -140,11 +141,7 @@ class SSLDataModule(LightningDataModule):
 
     def train_dataloader(self):
         labeled_loader = DataLoader(
-            self.train_labeled_dataset,
-            batch_size=self.batch_size,
-            pin_memory=True,
-            num_workers=16,
-            drop_last=True
+            self.train_labeled_dataset, batch_size=self.batch_size, pin_memory=True, num_workers=16, drop_last=True
         )
         unlabeled_loader = DataLoader(
             self.train_unlabeled_dataset,
@@ -156,8 +153,9 @@ class SSLDataModule(LightningDataModule):
         return {"labeled": labeled_loader, "unlabeled": unlabeled_loader}
 
     def val_dataloader(self):
-        return DataLoader(self.test_dataset, batch_size=self.batch_size, num_workers=8,
-                          sampler=SequentialSampler(self.test_dataset))
+        return DataLoader(
+            self.test_dataset, batch_size=self.batch_size, num_workers=8, sampler=SequentialSampler(self.test_dataset)
+        )
 
 
 if __name__ == "__main__":
