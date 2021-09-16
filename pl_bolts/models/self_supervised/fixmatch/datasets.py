@@ -4,11 +4,10 @@ import numpy as np
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, SequentialSampler
 
-from pl_bolts.transforms.dataset_normalizations import cifar10_normalization, cifar100_normalization
+from pl_bolts.models.self_supervised.fixmatch import RandAugmentMC
+from pl_bolts.transforms.dataset_normalizations import cifar100_normalization, cifar10_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
-
-from .transforms import RandAugmentMC
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import datasets, transforms
