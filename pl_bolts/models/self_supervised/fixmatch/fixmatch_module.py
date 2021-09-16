@@ -6,7 +6,8 @@ warnings.filterwarnings("ignore")
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from pytorch_lightning import LightningModule, Trainer
+from pytorch_lightning import LightningModule
+
 from pytorch_lightning.utilities.cli import LightningCLI
 
 from pl_bolts.models.self_supervised.fixmatch.datasets import SSLDataModule
@@ -14,15 +15,6 @@ from pl_bolts.models.self_supervised.fixmatch.datasets import SSLDataModule
 from .lr_scheduler import WarmupCosineLrScheduler
 from .networks import WideResnet, ema_model_update, get_ema_model
 
-
-def interleave(x, size):
-    s = list(x.shape)
-    return x.reshape([-1, size] + s[1:]).transpose(0, 1).reshape([-1] + s[1:])
-
-
-def de_interleave(x, size):
-    s = list(x.shape)
-    return x.reshape([size, -1] + s[1:]).transpose(0, 1).reshape([-1] + s[1:])
 
 
 class FixMatch(LightningModule):
@@ -65,6 +57,16 @@ class FixMatch(LightningModule):
         self.criteria_u = nn.CrossEntropyLoss(reduction="none")
         self.prob_list = []
 
+    @staticmethod
+    def interleave(x, size):
+        s = list(x.shape)
+        return x.reshape([-1, size] + s[1:]).transpose(0, 1).reshape([-1] + s[1:])
+
+    @staticmethod
+    def de_interleave(x, size):
+        s = list(x.shape)
+        return x.reshape([size, -1] + s[1:]).transpose(0, 1).reshape([-1] + s[1:])
+
     def forward(self, x):
         return self.model(x)
 
@@ -87,9 +89,9 @@ class FixMatch(LightningModule):
         (img_u_weak, img_u_strong), label_u = unlabeled_batch
 
         batch_size = img_x_weak.size(0)
-        imgs = interleave(torch.cat([img_x_weak, img_u_weak, img_u_strong]), 2 * self.mu + 1)
+        imgs = self.interleave(torch.cat([img_x_weak, img_u_weak, img_u_strong]), 2 * self.mu + 1)
         logits = self.model(imgs)
-        logits = de_interleave(logits, 2 * self.mu + 1)
+        logits = self.de_interleave(logits, 2 * self.mu + 1)
         logits_x = logits[:batch_size]
         logits_u_weak, logits_u_strong = logits[batch_size:].chunk(2)
         del logits
@@ -106,7 +108,7 @@ class FixMatch(LightningModule):
         if self.ema_eval:
             with torch.no_grad():
                 ema_model_update(self.model, self.ema_model, self.ema_decay)
-        self.log("train/loss", loss, on_step=True, on_epoch=True)
+        self.log("train/loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.log("train/supervised_loss", supervised_loss, on_step=True, on_epoch=True)
         self.log("train/unsupervised_loss", unsupervised_loss, on_step=True, on_epoch=True)
         corr_u_label = (label_u_guess == label_u).float() * mask
@@ -115,9 +117,12 @@ class FixMatch(LightningModule):
         self.log("train/mask", mask.mean().item(), on_step=True, on_epoch=True, prog_bar=True)
         return loss
 
+    def eval_forward(self, images):
+        return self.model(images)
+
     def validation_step(self, batch, batch_idx):
         images, labels = batch
-        logits = self.model(images)
+        logits = self.eval_forward(images)
         loss = self.criteria_x(logits, labels)
         acc1, acc5 = self.__accuracy(logits, labels, topk=(1, 5))
         self.log("val/loss", loss, on_step=True, on_epoch=True)
@@ -195,4 +200,6 @@ class FixMatchCLI(LightningCLI):
 
 
 if __name__ == "__main__":
+    from pl_bolts.models.self_supervised.fixmatch.datasets import SSLDataModule
+
     cli = FixMatchCLI(FixMatch, SSLDataModule)

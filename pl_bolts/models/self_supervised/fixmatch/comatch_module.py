@@ -1,9 +1,12 @@
-from argparse import ArgumentParser
+import warnings
+
+warnings.filterwarnings("ignore")
 
 import torch
 
 from .fixmatch_module import FixMatch
 from .networks import WideResnet
+from pytorch_lightning.utilities.cli import LightningCLI
 
 
 class Queue:
@@ -16,27 +19,53 @@ class Queue:
         return self.value
 
     def update(self, new_value, total_batch_size):
-        self.value = self.value[self.ptr : self.ptr + total_batch_size, :] = new_value
+        if new_value.device != self.value.device:
+            # Move to the updated device.
+            self.value = self.value.to(new_value.device)
+        self.value[self.ptr: self.ptr + total_batch_size, :] = new_value
         self.ptr = (self.ptr + total_batch_size) % self.size
 
 
 class CoMatch(FixMatch):
+    def __init__(self, ema_eval: bool = True, batch_size: int = 16,
+                 mu: int = 7, wresnet_k: int = 8, wresnet_n: int = 28,
+                 ema_decay: float = 0.999, softmax_temperature: float = 1.0,
+                 distribution_alignment: bool = True, coefficient_unsupervised: float = 1.0,
+                 pseudo_thr: float = 0.95, lr: float = 0.03, weight_decay: float = 1e-3,
+                 momentum: float = 0.9, gpus: int = 1, max_epochs: int = 300,
+                 coefficient_contrastive: float = 1.0, contrast_thr: float = 0.8,
+                 alpha: float = 0.9, low_ndembedd: int = 64, queue_batch: int = 5):
+        super(CoMatch, self).__init__(ema_eval, batch_size, mu, wresnet_k, wresnet_n,
+                                      ema_decay, softmax_temperature, distribution_alignment,
+                                      coefficient_unsupervised, pseudo_thr, lr, weight_decay,
+                                      momentum, gpus, max_epochs)
+        self.coefficient_contrastive = coefficient_contrastive
+        self.contrast_thr = contrast_thr
+        self.alpha = alpha
+        self.low_ndembedd = low_ndembedd
+        self.queue_batch = queue_batch
+
+    def on_train_epoch_start(self) -> None:
+        super(CoMatch, self).on_train_epoch_start()
+        self.current_step_number = 0
+
+    def on_train_epoch_end(self, unused=None) -> None:
+        super(CoMatch, self).on_train_epoch_end()
+        self.current_step_number += 1
+
     def setup(self, stage):
         super().setup(stage)
         # Init Model
-        self.model = WideResnet(n_classes=self.n_classes, k=self.hparams.wresnet_k, n=self.hparams.wresnet_n, proj=True)
+        self.model = WideResnet(n_classes=self.n_classes, k=self.wresnet_k, n=self.wresnet_n, proj=True)
         # Loss
         self.criteria_u = torch.nn.LogSoftmax(dim=1)
         # Mem Bank
-        queue_size = self.hparams.queue_batch * (self.hparams.mu + 1) * self.hparams.batch_size
-        self.queue_features = Queue(torch.zeros(self.queue_size, self.hparams.low_ndembedd).to(self.device), queue_size)
-        self.queue_probs = Queue(torch.zeros(self.queue_size, self.n_classes).to(self.device), queue_size)
-
-    def train_epoch_start(self):
-        self.current_step_number = 0
+        queue_size = self.queue_batch * (self.mu + 1) * self.batch_size
+        self.queue_features = Queue(torch.zeros(queue_size, self.low_ndembedd), queue_size)
+        self.queue_probs = Queue(torch.zeros(queue_size, self.n_classes), queue_size)
 
     def _get_similarity_probabilities(self, a, b):
-        sim = torch.exp(torch.mm(a, b.t()) / self.hparams.temperature)
+        sim = torch.exp(torch.mm(a, b.t()) / self.softmax_temperature)
         sim = sim / sim.sum(1, keepdim=True)
         return sim
 
@@ -51,17 +80,27 @@ class CoMatch(FixMatch):
         unlabeled_batch_size = img_u_weak.size(0)
 
         # Concate Different Input together.
-        images = torch.cat([supervised_imgs, img_u_weak, img_u_strong0, img_u_strong1], dim=0)
-
+        images = self.interleave(
+            torch.cat([supervised_imgs, img_u_weak, img_u_strong0, img_u_strong1]),
+            3 * self.mu + 1
+        )
         logits, features = self.model(images)
+        logits = self.de_interleave(
+            logits, 3 * self.mu + 1
+        )
+        features = self.de_interleave(
+            features, 3 * self.mu + 1
+        )
         # Split logits
         supervised_logits = logits[:batch_size]
-        logits_u_weak, logits_u_strong0, logits_u_strong1 = torch.split(logits[batch_size:], unlabeled_batch_size)
+        # logits_u_weak, logits_u_strong0, logits_u_strong1 = torch.split(logits[batch_size:], unlabeled_batch_size)
+        logits_u_weak, logits_u_strong0, logits_u_strong1 = logits[batch_size:].chunk(3)
         # Split features
         features_x = features[:batch_size]
-        features_u_weak, features_u_strong0, features_u_strong1 = torch.split(
-            features[batch_size:], unlabeled_batch_size
-        )
+        # features_u_weak, features_u_strong0, features_u_strong1 = torch.split(
+        #     features[batch_size:], unlabeled_batch_size
+        # )
+        features_u_weak, features_u_strong0, features_u_strong1 = features[batch_size:].chunk(3)
 
         supervised_loss = self.criteria_x(supervised_logits, supervised_labels)
         with torch.no_grad():
@@ -70,20 +109,15 @@ class CoMatch(FixMatch):
             probs_orig = probs.clone()
 
             # Memory Smoothing
-            if self.current_epoch > 0 or self.current_step_number > self.hparams.queue_batch:
-                probs = self.hparams.alpha * probs + (1 - self.hparams.alpha) * torch.mm(
-                    self._get_similarity_probabilities(features_u_weak, self.queue_features().t()), self.queue_probs()
+            if self.current_epoch > 0 or self.current_step_number > self.queue_batch:
+                probs = self.alpha * probs + (1 - self.alpha) * torch.mm(
+                    self._get_similarity_probabilities(features_u_weak, self.queue_features()), self.queue_probs()
                 )
-
             features_weak = torch.cat([features_u_weak, features_x], dim=0)
             probs_weak = torch.cat(
-                [
-                    probs_orig,
-                    torch.zeros(batch_size, self.n_classes)
-                    .scatter(1, supervised_labels.view(-1, 1), 1)
-                    .to(self.device),
-                ]
-            )
+                [probs_orig,
+                 torch.zeros(batch_size, self.n_classes).to(self.device).scatter(1, supervised_labels.view(-1, 1), 1)],
+                dim=0)
             # Update memory bank.
             total_batch_size = batch_size + unlabeled_batch_size
             self.queue_features.update(features_weak, total_batch_size)
@@ -94,7 +128,7 @@ class CoMatch(FixMatch):
         # pseudo-label graph with self-loop
         Q = torch.mm(probs, probs.t())
         Q.fill_diagonal_(1)
-        pos_mask = (Q >= self.hparams.contrast_thr).float()
+        pos_mask = (Q >= self.contrast_thr).float()
         Q = Q * pos_mask
         Q = Q / Q.sum(1, keepdim=True)
         # contrastive loss
@@ -105,67 +139,40 @@ class CoMatch(FixMatch):
         unsupervised_loss = unsupervised_loss.mean()
 
         loss = (
-            supervised_loss
-            + self.hparams.coefficient_unsupervised * unsupervised_loss
-            + self.hparams.coefficient_contrastive * contrastive_loss
+                supervised_loss
+                + self.coefficient_unsupervised * unsupervised_loss
+                + self.coefficient_contrastive * contrastive_loss
         )
-        self.log("loss", loss, on_step=True, on_epoch=True, logger=True)
-        self.log("supervised_loss", supervised_loss, on_step=True, on_epoch=True, logger=True)
-        self.log("unsupervised_loss", unsupervised_loss, on_step=True, on_epoch=True)
+        self.log("train/loss", loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log("train/supervised_loss", supervised_loss, on_step=True, on_epoch=True)
+        self.log("train/unsupervised_loss", unsupervised_loss, on_step=True, on_epoch=True)
         corr_u_label = (label_u_guess == label_u).float() * mask
-        self.log("num_acc@unlabeled", corr_u_label.sum().item(), on_step=True, on_epoch=True)
-        self.log("num_strong_aug", mask.sum().item(), on_step=True, on_epoch=True)
-        self.log("num_mask", mask.mean().item(), on_step=True, on_epoch=True)
-        self.log("num_pos", pos_mask.sum(1).float().mean().item(), on_step=True, on_epoch=True)
+        self.log("acc@unlabeled", corr_u_label.sum().item(), on_step=True, on_epoch=True, prog_bar=True)
+        self.log("train/acc@strong", mask.sum().item(), on_step=True, on_epoch=True)
+        self.log("train/mask", mask.mean().item(), on_step=True, on_epoch=True)
+        self.log("train/pos_mask", pos_mask.sum(1).float().mean().item(), on_step=True, on_epoch=True, prog_bar=True)
         return loss
 
-    @staticmethod
-    def add_model_specific_args(parent_parser):  # pragma: no-cover
-        parser = ArgumentParser(parents=[parent_parser])
-        parser.add_argument("-a", "--arch", metavar="ARCH", default="wideresnet")
-        parser.add_argument(
-            "-b",
-            "--batch-size",
-            default=16,
-            type=int,
-            metavar="N",
-            help="mini-batch size (default: 16), this is the total "
-            "batch size of all GPUs on the current node when "
-            "using Data Parallel or Distributed Data Parallel",
+    def eval_forward(self, images):
+        logits, _ = self.model(images)
+        return logits
+
+
+class CoMatchCLI(LightningCLI):
+    def add_arguments_to_parser(self, parser):
+        # Link args.
+        parser.link_arguments('model.batch_size', 'data.batch_size')
+        parser.link_arguments('trainer.gpus', 'model.gpus')
+        parser.link_arguments('data.mu', 'model.mu')
+        parser.link_arguments('model.max_epochs', 'trainer.max_epochs')
+        parser.set_defaults(
+            {
+                'data.mode': 'comatch'
+            }
         )
-        # SSL related args.
-        parser.add_argument("--mu", type=int, default=7, help="factor of train batch size of unlabeled samples")
-        parser.add_argument("--num-labeled", type=int, default=4000, help="number of labeled samples for training")
-        parser.add_argument("--eval-step", type=int, default=1024, help="eval step in Fix Match.")
-        parser.add_argument("--expand-labels", action="store_true", help="expand labels in SSL.")
-        parser.add_argument("--distribution-alignment", action="store_true", help="expand labels in SSL.")
-        parser.add_argument("--pseudo-thr", type=float, default=0.95, help="pseudo label threshold")
-        parser.add_argument("--coefficient-unsupervised", type=float, default=1.0, help="coefficient of unlabeled loss")
-        parser.add_argument(
-            "--coefficient-contrastive", type=float, default=1.0, help="coefficient of contrastive loss"
-        )
-        parser.add_argument("--contrast-thr", default=0.8, type=float, help="pseudo label graph threshold")
-        # Model related args.
-        parser.add_argument("--alpha", type=float, default=0.9)
-        parser.add_argument("--temperature", default=0.2, type=float, help="softmax temperature")
-        parser.add_argument("--low-ndembedd", type=int, default=64, help="Dimension of low dimension embedding.")
-        parser.add_argument("--ema-decay", type=float, default=0.999)
-        parser.add_argument("--wresnet-k", default=8, type=int, help="width factor of wide resnet")
-        parser.add_argument("--wresnet-n", default=28, type=int, help="depth of wide resnet")
-        parser.add_argument("--queue-batch", type=float, default=5, help="number of batches stored in memory bank")
-        # Training related args.
-        parser.add_argument(
-            "-lr", "--learning-rate", default=0.03, type=float, metavar="LR", help="initial learning rate", dest="lr"
-        )
-        parser.add_argument("--momentum", default=0.9, type=float, metavar="M", help="momentum")
-        parser.add_argument(
-            "--wd",
-            "--weight-decay",
-            default=5e-4,
-            type=float,
-            metavar="W",
-            help="weight decay (default: 5e-4)",
-            dest="weight_decay",
-        )
-        parser.add_argument("--pretrained", dest="pretrained", action="store_true", help="use layer0-trained model")
-        return parser
+
+
+if __name__ == '__main__':
+    from pl_bolts.models.self_supervised.fixmatch.datasets import SSLDataModule
+
+    cli = CoMatchCLI(CoMatch, SSLDataModule)
