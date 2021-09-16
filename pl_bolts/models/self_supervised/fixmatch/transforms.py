@@ -8,7 +8,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _PIL_AVAILABLE:
     from PIL import Image, ImageDraw, ImageEnhance, ImageOps
 else:  # pragma: no cover
-    warn_missing_pkg("torchvision")
+    warn_missing_pkg("PIL")
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms
 else:  # pragma: no cover
