@@ -58,8 +58,8 @@ class WideResnetBackbone(nn.Module):
         assert (self.n - 4) % 6 == 0
         n_blocks = (self.n - 4) // 6
         n_layers = [
-                       16,
-                   ] + [self.k * 16 * (2 ** i) for i in range(3)]
+            16,
+        ] + [self.k * 16 * (2 ** i) for i in range(3)]
 
         self.conv1 = nn.Conv2d(3, n_layers[0], kernel_size=3, stride=1, padding=1, bias=False)
         self.layer1 = self.create_layer(
