@@ -10,26 +10,27 @@ from pytorch_lightning.utilities.cli import LightningCLI
 
 from .lr_scheduler import WarmupCosineLrScheduler
 from .networks import WideResnet, ema_model_update, get_ema_model
+from pl_bolts.metrics import precision_at_k
 
 
 class FixMatch(LightningModule):
     def __init__(
-        self,
-        ema_eval: bool = True,
-        batch_size: int = 16,
-        mu: int = 7,
-        wresnet_k: int = 8,
-        wresnet_n: int = 28,
-        ema_decay: float = 0.999,
-        softmax_temperature: float = 1.0,
-        distribution_alignment: bool = True,
-        coefficient_unsupervised: float = 1.0,
-        pseudo_thr: float = 0.95,
-        lr: float = 0.03,
-        weight_decay: float = 1e-3,
-        momentum: float = 0.9,
-        gpus: int = 1,
-        max_epochs: int = 300,
+            self,
+            ema_eval: bool = True,
+            batch_size: int = 16,
+            mu: int = 7,
+            wresnet_k: int = 8,
+            wresnet_n: int = 28,
+            ema_decay: float = 0.999,
+            softmax_temperature: float = 1.0,
+            distribution_alignment: bool = True,
+            coefficient_unsupervised: float = 1.0,
+            pseudo_thr: float = 0.95,
+            lr: float = 0.03,
+            weight_decay: float = 1e-3,
+            momentum: float = 0.9,
+            gpus: int = 1,
+            max_epochs: int = 300,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -119,14 +120,14 @@ class FixMatch(LightningModule):
         images, labels = batch
         logits = self.eval_forward(images)
         loss = self.criteria_x(logits, labels)
-        acc1, acc5 = self.__accuracy(logits, labels, topk=(1, 5))
+        acc1, acc5 = precision_at_k(logits, labels, topk=(1, 5))
         self.log("val/loss", loss, on_step=True, on_epoch=True)
         self.log("val/acc@1", acc1, on_step=True, prog_bar=True, on_epoch=True)
         self.log("val/acc@5", acc5, on_step=True, on_epoch=True)
         if self.ema_eval:
             ema_logits = self.ema_model(images)
             ema_loss = self.criteria_x(ema_logits, labels)
-            ema_acc1, ema_acc5 = self.__accuracy(ema_logits, labels, topk=(1, 5))
+            ema_acc1, ema_acc5 = precision_at_k(ema_logits, labels, topk=(1, 5))
             self.log("val/ema_loss", ema_loss, on_step=True, on_epoch=True)
             self.log("val/ema_acc1", ema_acc1, on_step=True, on_epoch=True)
             self.log("val/ema_acc5", ema_acc5, on_step=True, on_epoch=True)
@@ -166,23 +167,6 @@ class FixMatch(LightningModule):
         scores, label_u_guess = torch.max(probs, dim=1)
         mask = scores.ge(self.pseudo_thr).float()
         return mask, label_u_guess
-
-    @staticmethod
-    def __accuracy(output, target, topk=(1,)):
-        """Computes the accuracy over the k top predictions for the specified values of k."""
-        with torch.no_grad():
-            maxk = max(topk)
-            batch_size = target.size(0)
-
-            _, pred = output.topk(maxk, 1, True, True)
-            pred = pred.t()
-            correct = pred.eq(target.view(1, -1).expand_as(pred))
-
-            res = []
-            for k in topk:
-                correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
-                res.append(correct_k.mul_(100.0 / batch_size))
-            return res
 
 
 class FixMatchCLI(LightningCLI):
