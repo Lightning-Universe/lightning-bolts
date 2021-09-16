@@ -134,6 +134,8 @@ class CoMatch(FixMatch):
             "using Data Parallel or Distributed Data Parallel",
         )
         # SSL related args.
+        parser.add_argument("--mu", type=int, default=7, help="factor of train batch size of unlabeled samples")
+        parser.add_argument("--num-labeled", type=int, default=4000, help="number of labeled samples for training")
         parser.add_argument("--eval-step", type=int, default=1024, help="eval step in Fix Match.")
         parser.add_argument("--expand-labels", action="store_true", help="expand labels in SSL.")
         parser.add_argument("--distribution-alignment", action="store_true", help="expand labels in SSL.")
@@ -145,7 +147,6 @@ class CoMatch(FixMatch):
         parser.add_argument("--contrast-thr", default=0.8, type=float, help="pseudo label graph threshold")
         # Model related args.
         parser.add_argument("--alpha", type=float, default=0.9)
-        parser.add_argument("--mu", type=int, default=7, help="factor of train batch size of unlabeled samples")
         parser.add_argument("--temperature", default=0.2, type=float, help="softmax temperature")
         parser.add_argument("--low-ndembedd", type=int, default=64, help="Dimension of low dimension embedding.")
         parser.add_argument("--ema-decay", type=float, default=0.999)
