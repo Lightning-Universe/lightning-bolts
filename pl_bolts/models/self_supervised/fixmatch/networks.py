@@ -58,8 +58,8 @@ class WideResnetBackbone(nn.Module):
         assert (self.n - 4) % 6 == 0
         n_blocks = (self.n - 4) // 6
         n_layers = [
-            16,
-        ] + [self.k * 16 * (2 ** i) for i in range(3)]
+                       16,
+                   ] + [self.k * 16 * (2 ** i) for i in range(3)]
 
         self.conv1 = nn.Conv2d(3, n_layers[0], kernel_size=3, stride=1, padding=1, bias=False)
         self.layer1 = self.create_layer(
@@ -90,7 +90,8 @@ class WideResnetBackbone(nn.Module):
         self.relu_last = nn.LeakyReLU(inplace=True, negative_slope=0.1)
         self.init_weight()
 
-    def create_layer(self, input_channel, out_channel, bnum, stride=1, drop_rate=0, pre_res_act=False):
+    @staticmethod
+    def create_layer(input_channel, out_channel, bnum, stride=1, drop_rate=0, pre_res_act=False):
         layers = [
             BasicBlockPreAct(input_channel, out_channel, drop_rate=drop_rate, stride=stride, pre_res_act=pre_res_act),
         ]
