@@ -127,16 +127,25 @@ class SSLDataModule(LightningDataModule):
         num_labeled=4000,
         batch_size=128,
         eval_step=1024,
-        expand_labels=True,
-        **kwargs
+        expand_labels=True
     ):
+        super().__init__()
         self.batch_size = batch_size
         self.mu = mu
-        self.test_dataset = MAP_DATASET[dataset](
-            data_path, train=False, transform=TransformSSL(dataset, mode).normalize
+        self.data_path = data_path
+        self.dataset = dataset
+        self.mode = mode
+        self.num_labeled = num_labeled
+        self.eval_step = eval_step
+        self.expand_labels = expand_labels
+
+    def prepare_data(self):
+        self.test_dataset = MAP_DATASET[self.dataset](
+            self.data_path, train=False, transform=TransformSSL(self.dataset, self.mode).normalize
         )
         self.train_labeled_dataset, self.train_unlabeled_dataset = get_train_dataset(
-            data_path, dataset, mode, num_labeled, batch_size, eval_step, expand_labels
+            self.data_path, self.dataset, self.mode, self.num_labeled, self.batch_size, self.eval_step,
+            self.expand_labels
         )
 
     def train_dataloader(self):

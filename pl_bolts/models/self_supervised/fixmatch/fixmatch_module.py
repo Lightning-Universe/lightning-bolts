@@ -8,6 +8,8 @@ import torch.nn as nn
 import torch.optim as optim
 from pytorch_lightning import LightningModule, Trainer
 
+from pytorch_lightning.utilities.cli import LightningCLI
+from pl_bolts.models.self_supervised.fixmatch.datasets import SSLDataModule
 from .lr_scheduler import WarmupCosineLrScheduler
 from .networks import WideResnet, ema_model_update, get_ema_model
 
@@ -23,15 +25,32 @@ def de_interleave(x, size):
 
 
 class FixMatch(LightningModule):
-    def __init__(self, ema_eval=True, **kwargs):
+    def __init__(self, ema_eval: bool = True, batch_size: int = 16,
+                 mu: int = 7, wresnet_k: int = 8, wresnet_n: int = 28,
+                 ema_decay: float = 0.999, softmax_temperature: float = 1.0,
+                 distribution_alignment: bool = True, coefficient_unsupervised: float = 1.0,
+                 pseudo_thr: float = 0.95, lr: float = 0.03, weight_decay: float = 1e-3,
+                 momentum: float = 0.9, gpus: int = 1, max_epochs: int = 300):
         super().__init__()
         self.save_hyperparameters()
         self.ema_eval = ema_eval
-
+        self.mu = mu
+        self.batch_size = batch_size
+        self.wresnet_k = wresnet_k
+        self.wresnet_n = wresnet_n
+        self.ema_decay = ema_decay
+        self.softmax_temperature = softmax_temperature
+        self.distribution_alignment = distribution_alignment
+        self.coefficient_unsupervised = coefficient_unsupervised
+        self.pseudo_thr = pseudo_thr
+        self.lr = lr
+        self.weight_decay = weight_decay
+        self.momentum = momentum
+        self.gpus = gpus
+        self.max_epochs = max_epochs
         self.criteria_x = nn.CrossEntropyLoss()
         self.criteria_u = nn.CrossEntropyLoss(reduction="none")
         self.prob_list = []
-        self.automatic_optimization = False
 
     def forward(self, x):
         return self.model(x)
@@ -40,12 +59,13 @@ class FixMatch(LightningModule):
         if stage == "fit":
             train_loader = self.train_dataloader()
             self.n_classes = len(train_loader["labeled"].dataset.classes)
-            self.model = WideResnet(n_classes=self.n_classes, k=self.hparams.wresnet_k, n=self.hparams.wresnet_n)
+            self.model = WideResnet(n_classes=self.n_classes, k=self.wresnet_k, n=self.wresnet_n)
             if self.ema_eval:
                 self.ema_model = get_ema_model(self.model)
             self.total_steps = (
-                len(train_loader["labeled"].dataset) // (self.hparams.batch_size * max(1, self.hparams.gpus))
-            ) * float(self.hparams.max_epochs)
+                                       len(train_loader["labeled"].dataset) // (
+                                       self.batch_size * max(1, self.gpus))
+                               ) * float(self.max_epochs)
 
     def training_step(self, batch, batch_idx):
         labeled_batch = batch["labeled"]  # X
@@ -55,9 +75,15 @@ class FixMatch(LightningModule):
         (img_u_weak, img_u_strong), label_u = unlabeled_batch
 
         batch_size = img_x_weak.size(0)
-        imgs = interleave(torch.cat([img_x_weak, img_u_weak, img_u_strong]), 2 * self.hparams.mu + 1)
+        imgs = interleave(
+            torch.cat([
+                img_x_weak, img_u_weak, img_u_strong
+            ]), 2 * self.mu + 1
+        )
         logits = self.model(imgs)
-        logits = de_interleave(logits, 2 * self.hparams.mu + 1)
+        logits = de_interleave(
+            logits, 2 * self.mu + 1
+        )
         logits_x = logits[:batch_size]
         logits_u_weak, logits_u_strong = logits[batch_size:].chunk(2)
         del logits
@@ -69,15 +95,11 @@ class FixMatch(LightningModule):
 
         unsupervised_loss = (self.criteria_u(logits_u_strong, label_u_guess) * mask).mean()
 
-        loss = supervised_loss + self.hparams.coefficient_unsupervised * unsupervised_loss
+        loss = supervised_loss + self.coefficient_unsupervised * unsupervised_loss
         # ema eval
-        opt = self.optimizers()
-        opt.zero_grad()
-        self.manual_backward(loss)
-        opt.step()
         if self.ema_eval:
             with torch.no_grad():
-                ema_model_update(self.model, self.ema_model, self.hparams.ema_decay)
+                ema_model_update(self.model, self.ema_model, self.ema_decay)
         self.log("train/loss", loss, on_step=True, on_epoch=True)
         self.log("train/supervised_loss", supervised_loss, on_step=True, on_epoch=True)
         self.log("train/unsupervised_loss", unsupervised_loss, on_step=True, on_epoch=True)
@@ -109,23 +131,23 @@ class FixMatch(LightningModule):
         grouped_params = [
             {
                 "params": [p for n, p in self.named_parameters() if not any(nd in n for nd in no_decay)],
-                "weight_decay": self.hparams.weight_decay,
+                "weight_decay": self.weight_decay,
             },
             {"params": [p for n, p in self.named_parameters() if any(nd in n for nd in no_decay)], "weight_decay": 0},
         ]
         optimizer = optim.SGD(
             grouped_params,
-            lr=self.hparams.lr,
-            momentum=self.hparams.momentum,
-            weight_decay=self.hparams.weight_decay,
+            lr=self.lr,
+            momentum=self.momentum,
+            weight_decay=self.weight_decay,
             nesterov=True,
         )
         scheduler = WarmupCosineLrScheduler(optimizer, max_iter=self.total_steps, warmup_iter=0)
         return [optimizer], [scheduler]
 
     def get_unlabled_logits_weak_probs(self, logits_u_weak):
-        probs = torch.softmax(logits_u_weak / self.hparams.temperature, dim=1)
-        if self.hparams.distribution_alignment:
+        probs = torch.softmax(logits_u_weak / self.softmax_temperature, dim=1)
+        if self.distribution_alignment:
             self.prob_list.append(probs.mean(0))
             if len(self.prob_list) > 32:
                 self.prob_list.pop(0)
@@ -136,7 +158,7 @@ class FixMatch(LightningModule):
 
     def get_pesudo_mask_and_infer_u_label(self, probs):
         scores, label_u_guess = torch.max(probs, dim=1)
-        mask = scores.ge(self.hparams.pseudo_thr).float()
+        mask = scores.ge(self.pseudo_thr).float()
         return mask, label_u_guess
 
     @staticmethod
@@ -156,82 +178,16 @@ class FixMatch(LightningModule):
                 res.append(correct_k.mul_(100.0 / batch_size))
             return res
 
-    @staticmethod
-    def add_model_specific_args(parent_parser):  # pragma: no-cover
-        parser = ArgumentParser(parents=[parent_parser])
-        parser.add_argument("-a", "--arch", metavar="ARCH", default="wideresnet")
-        parser.add_argument(
-            "-b",
-            "--batch-size",
-            default=16,
-            type=int,
-            metavar="N",
-            help="mini-batch size (default: 16), this is the total " "batch size of all GPUs on the current node.",
-        )
-        # SSL related args.
-        parser.add_argument("--mu", default=7, type=int, help="coefficient of unlabeled batch size")
-        parser.add_argument("--num-labeled", type=int, default=4000, help="number of labeled samples for training")
-        parser.add_argument("--eval-step", type=int, default=1024, help="eval step in Fix Match.")
-        parser.add_argument("--expand-labels", action="store_true", help="expand labels in SSL.")
-        parser.add_argument("--distribution_alignment", action="store_true", help="expand labels in SSL.")
-        parser.add_argument("--pseudo-thr", type=float, default=0.95, help="pseudo label threshold")
-        parser.add_argument("--coefficient-unsupervised", type=float, default=1.0, help="coefficient of unlabeled loss")
-        # Model related args.
-        parser.add_argument("--temperature", default=0.2, type=float, help="softmax temperature")
-        parser.add_argument("--ema-decay", type=float, default=0.999)
-        parser.add_argument("--wresnet-k", default=8, type=int, help="width factor of wide resnet")
-        parser.add_argument("--wresnet-n", default=28, type=int, help="depth of wide resnet")
-        # Training related args.
-        parser.add_argument(
-            "-lr", "--learning-rate", default=0.03, type=float, metavar="LR", help="initial learning rate", dest="lr"
-        )
-        parser.add_argument("--momentum", default=0.9, type=float, metavar="M", help="momentum")
-        parser.add_argument(
-            "--wd",
-            "--weight-decay",
-            default=1e-3,
-            type=float,
-            metavar="W",
-            help="weight decay (default: 1e-3)",
-            dest="weight_decay",
-        )
-        parser.add_argument("--pretrained", dest="pretrained", action="store_true", help="use layer0-trained model")
-        return parser
 
 
-def cli_main():
-    from pl_bolts.models.self_supervised.fixmatch.datasets import SSLDataModule
-
-    parent_parser = ArgumentParser(add_help=False)
-    parent_parser = Trainer.add_argparse_args(parent_parser)
-    parent_parser.add_argument("--data-path", metavar="DIR", type=str, help="path to dataset", default="./data")
-    parent_parser.add_argument(
-        "--dataset", default="cifar10", type=str, choices=["cifar10", "cifar100", "stl10", "imagenet"]
-    )
-    parent_parser.add_argument(
-        "-e", "--evaluate", dest="evaluate", action="store_true", help="evaluate model on validation set"
-    )
-    parent_parser.add_argument("--seed", type=int, default=42, help="seed for initializing training.")
-    parser = FixMatch.add_model_specific_args(parent_parser)
-    parser.set_defaults(deterministic=True, max_epochs=300)
-    args = parser.parse_args()
-    dm = SSLDataModule(
-        args.data_path,
-        args.dataset,
-        mu=args.mu,
-        num_labeled=args.num_labeled,
-        batch_size=args.batch_size,
-        eval_step=args.eval_step,
-        expand_labels=args.expand_labels,
-    )
-    model = FixMatch(**vars(args))
-    trainer = Trainer.from_argparse_args(args)
-
-    if args.evaluate:
-        trainer.test(model)
-    else:
-        trainer.fit(model, dm.train_dataloader(), dm.val_dataloader())
+class FixMatchCLI(LightningCLI):
+    def add_arguments_to_parser(self, parser):
+        # Link args.
+        parser.link_arguments('model.batch_size', 'data.batch_size')
+        parser.link_arguments('trainer.gpus', 'model.gpus')
+        parser.link_arguments('data.mu', 'model.mu')
+        parser.link_arguments('model.max_epochs', 'trainer.max_epochs')
 
 
 if __name__ == "__main__":
-    cli_main()
+    cli = FixMatchCLI(FixMatch, SSLDataModule)
