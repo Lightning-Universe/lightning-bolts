@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 from pytorch_lightning import LightningDataModule
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, SequentialSampler
 from torchvision import datasets, transforms
 
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization, cifar100_normalization
@@ -100,9 +100,8 @@ def x_u_split(dataset, labels, num_labeled=4000, eval_step=1024, expand_labels=T
     return labeled_idx, unlabeled_idx
 
 
-def get_dataset(
-    data_path, dataset, mode="fixmatch", num_labeled=4000, batch_size=128, eval_step=1024, expand_labels=True
-):
+def get_train_dataset(data_path, dataset, mode="fixmatch", num_labeled=4000, batch_size=128,
+                      eval_step=1024, expand_labels=True):
     assert mode in ["fixmatch", "comatch"]
     base_dataset = MAP_DATASET[dataset](data_path, train=True, download=True)
     train_labeled_idxs, train_unlabeled_idxs = x_u_split(
@@ -114,32 +113,38 @@ def get_dataset(
     train_unlabeled_dataset = MAP_SSL_DATASET[dataset](
         data_path, train_unlabeled_idxs, train=True, transform=TransformSSL(dataset, mode)
     )
-    test_dataset = MAP_DATASET[dataset](data_path, train=False, transform=TransformSSL(dataset, mode).normalize)
-    return train_labeled_dataset, train_unlabeled_dataset, test_dataset
+    return train_labeled_dataset, train_unlabeled_dataset
 
 
 class SSLDataModule(LightningDataModule):
     def __init__(
-        self,
-        data_path,
-        dataset,
-        mu=7,
-        mode="fixmatch",
-        num_labeled=4000,
-        batch_size=128,
-        eval_step=1024,
-        expand_labels=True,
-        **kwargs
+            self,
+            data_path,
+            dataset,
+            mu=7,
+            mode="fixmatch",
+            num_labeled=4000,
+            batch_size=128,
+            eval_step=1024,
+            expand_labels=True,
+            **kwargs
     ):
         self.batch_size = batch_size
         self.mu = mu
-        self.train_labeled_dataset, self.train_unlabeled_dataset, self.test_dataset = get_dataset(
+        self.test_dataset = MAP_DATASET[dataset](
+            data_path, train=False, transform=TransformSSL(dataset, mode).normalize
+        )
+        self.train_labeled_dataset, self.train_unlabeled_dataset = get_train_dataset(
             data_path, dataset, mode, num_labeled, batch_size, eval_step, expand_labels
         )
 
     def train_dataloader(self):
         labeled_loader = DataLoader(
-            self.train_labeled_dataset, batch_size=self.batch_size, pin_memory=True, num_workers=16, drop_last=True
+            self.train_labeled_dataset,
+            batch_size=self.batch_size,
+            pin_memory=True,
+            num_workers=16,
+            drop_last=True
         )
         unlabeled_loader = DataLoader(
             self.train_unlabeled_dataset,
@@ -151,7 +156,8 @@ class SSLDataModule(LightningDataModule):
         return {"labeled": labeled_loader, "unlabeled": unlabeled_loader}
 
     def val_dataloader(self):
-        return DataLoader(self.test_dataset, batch_size=self.batch_size, num_workers=8)
+        return DataLoader(self.test_dataset, batch_size=self.batch_size, num_workers=8,
+                          sampler=SequentialSampler(self.test_dataset))
 
 
 if __name__ == "__main__":

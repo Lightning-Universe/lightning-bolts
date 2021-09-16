@@ -1,4 +1,7 @@
+import warnings
 from argparse import ArgumentParser
+
+warnings.filterwarnings("ignore")
 
 import torch
 import torch.nn as nn
@@ -7,6 +10,16 @@ from pytorch_lightning import LightningModule, Trainer
 
 from .lr_scheduler import WarmupCosineLrScheduler
 from .networks import WideResnet, ema_model_update, get_ema_model
+
+
+def interleave(x, size):
+    s = list(x.shape)
+    return x.reshape([-1, size] + s[1:]).transpose(0, 1).reshape([-1] + s[1:])
+
+
+def de_interleave(x, size):
+    s = list(x.shape)
+    return x.reshape([size, -1] + s[1:]).transpose(0, 1).reshape([-1] + s[1:])
 
 
 class FixMatch(LightningModule):
@@ -18,6 +31,7 @@ class FixMatch(LightningModule):
         self.criteria_x = nn.CrossEntropyLoss()
         self.criteria_u = nn.CrossEntropyLoss(reduction="none")
         self.prob_list = []
+        self.automatic_optimization = False
 
     def forward(self, x):
         return self.model(x)
@@ -30,8 +44,9 @@ class FixMatch(LightningModule):
             if self.ema_eval:
                 self.ema_model = get_ema_model(self.model)
             self.total_steps = (
-                len(train_loader["labeled"].dataset) // (self.hparams.batch_size * max(1, self.hparams.gpus))
-            ) * float(self.hparams.max_epochs)
+                                       len(train_loader["labeled"].dataset) // (
+                                       self.hparams.batch_size * max(1, self.hparams.gpus))
+                               ) * float(self.hparams.max_epochs)
 
     def training_step(self, batch, batch_idx):
         labeled_batch = batch["labeled"]  # X
@@ -41,11 +56,19 @@ class FixMatch(LightningModule):
         (img_u_weak, img_u_strong), label_u = unlabeled_batch
 
         batch_size = img_x_weak.size(0)
-        mu = int(img_u_weak.size(0) // batch_size)
-        imgs = torch.cat([img_x_weak, img_u_weak, img_u_strong], dim=0)
+        imgs = interleave(
+            torch.cat([
+                img_x_weak, img_u_weak, img_u_strong
+            ]), 2 * self.hparams.mu + 1
+        )
         logits = self.model(imgs)
+        logits = de_interleave(
+            logits, 2 * self.hparams.mu + 1
+        )
         logits_x = logits[:batch_size]
-        logits_u_weak, logits_u_strong = torch.split(logits[batch_size:], batch_size * mu)
+        logits_u_weak, logits_u_strong = logits[batch_size:].chunk(2)
+        del logits
+
         supervised_loss = self.criteria_x(logits_x, label_x)
         with torch.no_grad():
             probs = self.get_unlabled_logits_weak_probs(logits_u_weak)
@@ -54,13 +77,21 @@ class FixMatch(LightningModule):
         unsupervised_loss = (self.criteria_u(logits_u_strong, label_u_guess) * mask).mean()
 
         loss = supervised_loss + self.hparams.coefficient_unsupervised * unsupervised_loss
-        self.log("loss", loss, on_step=True, on_epoch=True, logger=True)
-        self.log("supervised_loss", supervised_loss, on_step=True, on_epoch=True, logger=True)
-        self.log("unsupervised_loss", unsupervised_loss, on_step=True, on_epoch=True)
+        # ema eval
+        opt = self.optimizers()
+        opt.zero_grad()
+        self.manual_backward(loss)
+        opt.step()
+        if self.ema_eval:
+            with torch.no_grad():
+                ema_model_update(self.model, self.ema_model, self.hparams.ema_decay)
+        self.log("train/loss", loss, on_step=True, on_epoch=True)
+        self.log("train/supervised_loss", supervised_loss, on_step=True, on_epoch=True)
+        self.log("train/unsupervised_loss", unsupervised_loss, on_step=True, on_epoch=True)
         corr_u_label = (label_u_guess == label_u).float() * mask
-        self.log("num of acc@unlabeled", corr_u_label.sum().item(), on_step=True, on_epoch=True)
-        self.log("num of strong aug", mask.sum().item(), on_step=True, on_epoch=True)
-        self.log("num of mask", mask.mean().item(), on_step=True, on_epoch=True)
+        self.log("train/acc@unlabeled", corr_u_label.sum().item(), on_step=True, on_epoch=True, prog_bar=True)
+        self.log("train/acc@strong", mask.sum().item(), on_step=True, on_epoch=True)
+        self.log("train/mask", mask.mean().item(), on_step=True, on_epoch=True, prog_bar=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -68,18 +99,28 @@ class FixMatch(LightningModule):
         logits = self.model(images)
         loss = self.criteria_x(logits, labels)
         acc1, acc5 = self.__accuracy(logits, labels, topk=(1, 5))
-        # ema eval
+        self.log("val/loss", loss, on_step=True, on_epoch=True)
+        self.log("val/acc@1", acc1, on_step=True, prog_bar=True, on_epoch=True)
+        self.log("val/acc@5", acc5, on_step=True, on_epoch=True)
         if self.ema_eval:
-            with torch.no_grad():
-                ema_model_update(self.model, self.ema_model, self.hparams.ema_decay)
-        self.log("val_loss", loss, on_step=True, on_epoch=True)
-        self.log("val_acc1", acc1, on_step=True, prog_bar=True, on_epoch=True)
-        self.log("val_acc5", acc5, on_step=True, on_epoch=True)
+            ema_logits = self.ema_model(images)
+            ema_loss = self.criteria_x(ema_logits, labels)
+            ema_acc1, ema_acc5 = self.__accuracy(ema_logits, labels, topk=(1, 5))
+            self.log('val/ema_loss', ema_loss, on_step=True, on_epoch=True)
+            self.log('val/ema_acc1', ema_acc1, on_step=True, on_epoch=True)
+            self.log('val/ema_acc5', ema_acc5, on_step=True, on_epoch=True)
         return loss
 
     def configure_optimizers(self):
+        no_decay = ['bias', 'bn']
+        grouped_params = [
+            {'params': [p for n, p in self.named_parameters() if not any(
+                nd in n for nd in no_decay)], 'weight_decay': self.hparams.weight_decay},
+            {'params': [p for n, p in self.named_parameters() if any(
+                nd in n for nd in no_decay)], 'weight_decay': 0}
+        ]
         optimizer = optim.SGD(
-            self.parameters(),
+            grouped_params,
             lr=self.hparams.lr,
             momentum=self.hparams.momentum,
             weight_decay=self.hparams.weight_decay,
@@ -89,7 +130,7 @@ class FixMatch(LightningModule):
         return [optimizer], [scheduler]
 
     def get_unlabled_logits_weak_probs(self, logits_u_weak):
-        probs = torch.softmax(logits_u_weak, dim=1)
+        probs = torch.softmax(logits_u_weak / self.hparams.temperature, dim=1)
         if self.hparams.distribution_alignment:
             self.prob_list.append(probs.mean(0))
             if len(self.prob_list) > 32:
@@ -132,8 +173,7 @@ class FixMatch(LightningModule):
             type=int,
             metavar="N",
             help="mini-batch size (default: 16), this is the total "
-            "batch size of all GPUs on the current node when "
-            "using Data Parallel or Distributed Data Parallel",
+                 "batch size of all GPUs on the current node."
         )
         # SSL related args.
         parser.add_argument("--mu", default=7, type=int, help="coefficient of unlabeled batch size")
@@ -144,6 +184,7 @@ class FixMatch(LightningModule):
         parser.add_argument("--pseudo-thr", type=float, default=0.95, help="pseudo label threshold")
         parser.add_argument("--coefficient-unsupervised", type=float, default=1.0, help="coefficient of unlabeled loss")
         # Model related args.
+        parser.add_argument("--temperature", default=0.2, type=float, help="softmax temperature")
         parser.add_argument("--ema-decay", type=float, default=0.999)
         parser.add_argument("--wresnet-k", default=8, type=int, help="width factor of wide resnet")
         parser.add_argument("--wresnet-n", default=28, type=int, help="depth of wide resnet")
@@ -152,15 +193,9 @@ class FixMatch(LightningModule):
             "-lr", "--learning-rate", default=0.03, type=float, metavar="LR", help="initial learning rate", dest="lr"
         )
         parser.add_argument("--momentum", default=0.9, type=float, metavar="M", help="momentum")
-        parser.add_argument(
-            "--wd",
-            "--weight-decay",
-            default=5e-4,
-            type=float,
-            metavar="W",
-            help="weight decay (default: 5e-4)",
-            dest="weight_decay",
-        )
+        parser.add_argument("--wd", "--weight-decay", default=1e-3, type=float,
+                            metavar="W", help="weight decay (default: 1e-3)", dest="weight_decay",
+                            )
         parser.add_argument("--pretrained", dest="pretrained", action="store_true", help="use layer0-trained model")
         return parser
 
