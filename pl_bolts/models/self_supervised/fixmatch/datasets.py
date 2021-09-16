@@ -5,9 +5,15 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, SequentialSampler
 from torchvision import datasets, transforms
 
-from pl_bolts.transforms.dataset_normalizations import cifar10_normalization, cifar100_normalization
-
+from pl_bolts.transforms.dataset_normalizations import cifar100_normalization, cifar10_normalization
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
 from .transforms import RandAugmentMC
+
+if _TORCHVISION_AVAILABLE:
+    from torchvision import transforms, datasets
+else:  # pragma: no cover
+    warn_missing_pkg("torchvision")
 
 TRANS_WEAK = transforms.Compose(
     [
@@ -101,7 +107,7 @@ def x_u_split(dataset, labels, num_labeled=4000, eval_step=1024, expand_labels=T
 
 
 def get_train_dataset(
-    data_path, dataset, mode="fixmatch", num_labeled=4000, batch_size=128, eval_step=1024, expand_labels=True
+        data_path, dataset, mode="fixmatch", num_labeled=4000, batch_size=128, eval_step=1024, expand_labels=True
 ):
     assert mode in ["fixmatch", "comatch"]
     base_dataset = MAP_DATASET[dataset](data_path, train=True, download=True)
@@ -119,15 +125,15 @@ def get_train_dataset(
 
 class SSLDataModule(LightningDataModule):
     def __init__(
-        self,
-        data_path,
-        dataset,
-        mu=7,
-        mode="fixmatch",
-        num_labeled=4000,
-        batch_size=128,
-        eval_step=1024,
-        expand_labels=True,
+            self,
+            data_path,
+            dataset,
+            mu=7,
+            mode="fixmatch",
+            num_labeled=4000,
+            batch_size=128,
+            eval_step=1024,
+            expand_labels=True,
     ):
         super().__init__()
         self.batch_size = batch_size
