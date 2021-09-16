@@ -8,29 +8,30 @@ import torch.optim as optim
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities.cli import LightningCLI
 
+from pl_bolts.metrics import precision_at_k
+
 from .lr_scheduler import WarmupCosineLrScheduler
 from .networks import WideResnet, ema_model_update, get_ema_model
-from pl_bolts.metrics import precision_at_k
 
 
 class FixMatch(LightningModule):
     def __init__(
-            self,
-            ema_eval: bool = True,
-            batch_size: int = 16,
-            mu: int = 7,
-            wresnet_k: int = 8,
-            wresnet_n: int = 28,
-            ema_decay: float = 0.999,
-            softmax_temperature: float = 1.0,
-            distribution_alignment: bool = True,
-            coefficient_unsupervised: float = 1.0,
-            pseudo_thr: float = 0.95,
-            lr: float = 0.03,
-            weight_decay: float = 1e-3,
-            momentum: float = 0.9,
-            gpus: int = 1,
-            max_epochs: int = 300,
+        self,
+        ema_eval: bool = True,
+        batch_size: int = 16,
+        mu: int = 7,
+        wresnet_k: int = 8,
+        wresnet_n: int = 28,
+        ema_decay: float = 0.999,
+        softmax_temperature: float = 1.0,
+        distribution_alignment: bool = True,
+        coefficient_unsupervised: float = 1.0,
+        pseudo_thr: float = 0.95,
+        lr: float = 0.03,
+        weight_decay: float = 1e-3,
+        momentum: float = 0.9,
+        gpus: int = 1,
+        max_epochs: int = 300,
     ):
         super().__init__()
         self.save_hyperparameters()
