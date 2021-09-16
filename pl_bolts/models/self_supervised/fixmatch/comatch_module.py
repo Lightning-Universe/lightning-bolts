@@ -3,10 +3,10 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import torch
+from pytorch_lightning.utilities.cli import LightningCLI
 
 from .fixmatch_module import FixMatch
 from .networks import WideResnet
-from pytorch_lightning.utilities.cli import LightningCLI
 
 
 class Queue:
@@ -22,23 +22,51 @@ class Queue:
         if new_value.device != self.value.device:
             # Move to the updated device.
             self.value = self.value.to(new_value.device)
-        self.value[self.ptr: self.ptr + total_batch_size, :] = new_value
+        self.value[self.ptr : self.ptr + total_batch_size, :] = new_value
         self.ptr = (self.ptr + total_batch_size) % self.size
 
 
 class CoMatch(FixMatch):
-    def __init__(self, ema_eval: bool = True, batch_size: int = 16,
-                 mu: int = 7, wresnet_k: int = 8, wresnet_n: int = 28,
-                 ema_decay: float = 0.999, softmax_temperature: float = 1.0,
-                 distribution_alignment: bool = True, coefficient_unsupervised: float = 1.0,
-                 pseudo_thr: float = 0.95, lr: float = 0.03, weight_decay: float = 1e-3,
-                 momentum: float = 0.9, gpus: int = 1, max_epochs: int = 300,
-                 coefficient_contrastive: float = 1.0, contrast_thr: float = 0.8,
-                 alpha: float = 0.9, low_ndembedd: int = 64, queue_batch: int = 5):
-        super(CoMatch, self).__init__(ema_eval, batch_size, mu, wresnet_k, wresnet_n,
-                                      ema_decay, softmax_temperature, distribution_alignment,
-                                      coefficient_unsupervised, pseudo_thr, lr, weight_decay,
-                                      momentum, gpus, max_epochs)
+    def __init__(
+        self,
+        ema_eval: bool = True,
+        batch_size: int = 16,
+        mu: int = 7,
+        wresnet_k: int = 8,
+        wresnet_n: int = 28,
+        ema_decay: float = 0.999,
+        softmax_temperature: float = 1.0,
+        distribution_alignment: bool = True,
+        coefficient_unsupervised: float = 1.0,
+        pseudo_thr: float = 0.95,
+        lr: float = 0.03,
+        weight_decay: float = 1e-3,
+        momentum: float = 0.9,
+        gpus: int = 1,
+        max_epochs: int = 300,
+        coefficient_contrastive: float = 1.0,
+        contrast_thr: float = 0.8,
+        alpha: float = 0.9,
+        low_ndembedd: int = 64,
+        queue_batch: int = 5,
+    ):
+        super().__init__(
+            ema_eval,
+            batch_size,
+            mu,
+            wresnet_k,
+            wresnet_n,
+            ema_decay,
+            softmax_temperature,
+            distribution_alignment,
+            coefficient_unsupervised,
+            pseudo_thr,
+            lr,
+            weight_decay,
+            momentum,
+            gpus,
+            max_epochs,
+        )
         self.coefficient_contrastive = coefficient_contrastive
         self.contrast_thr = contrast_thr
         self.alpha = alpha
@@ -46,11 +74,11 @@ class CoMatch(FixMatch):
         self.queue_batch = queue_batch
 
     def on_train_epoch_start(self) -> None:
-        super(CoMatch, self).on_train_epoch_start()
+        super().on_train_epoch_start()
         self.current_step_number = 0
 
     def on_train_epoch_end(self, unused=None) -> None:
-        super(CoMatch, self).on_train_epoch_end()
+        super().on_train_epoch_end()
         self.current_step_number += 1
 
     def setup(self, stage):
@@ -81,16 +109,11 @@ class CoMatch(FixMatch):
 
         # Concate Different Input together.
         images = self.interleave(
-            torch.cat([supervised_imgs, img_u_weak, img_u_strong0, img_u_strong1]),
-            3 * self.mu + 1
+            torch.cat([supervised_imgs, img_u_weak, img_u_strong0, img_u_strong1]), 3 * self.mu + 1
         )
         logits, features = self.model(images)
-        logits = self.de_interleave(
-            logits, 3 * self.mu + 1
-        )
-        features = self.de_interleave(
-            features, 3 * self.mu + 1
-        )
+        logits = self.de_interleave(logits, 3 * self.mu + 1)
+        features = self.de_interleave(features, 3 * self.mu + 1)
         # Split logits
         supervised_logits = logits[:batch_size]
         # logits_u_weak, logits_u_strong0, logits_u_strong1 = torch.split(logits[batch_size:], unlabeled_batch_size)
@@ -115,9 +138,14 @@ class CoMatch(FixMatch):
                 )
             features_weak = torch.cat([features_u_weak, features_x], dim=0)
             probs_weak = torch.cat(
-                [probs_orig,
-                 torch.zeros(batch_size, self.n_classes).to(self.device).scatter(1, supervised_labels.view(-1, 1), 1)],
-                dim=0)
+                [
+                    probs_orig,
+                    torch.zeros(batch_size, self.n_classes)
+                    .to(self.device)
+                    .scatter(1, supervised_labels.view(-1, 1), 1),
+                ],
+                dim=0,
+            )
             # Update memory bank.
             total_batch_size = batch_size + unlabeled_batch_size
             self.queue_features.update(features_weak, total_batch_size)
@@ -139,9 +167,9 @@ class CoMatch(FixMatch):
         unsupervised_loss = unsupervised_loss.mean()
 
         loss = (
-                supervised_loss
-                + self.coefficient_unsupervised * unsupervised_loss
-                + self.coefficient_contrastive * contrastive_loss
+            supervised_loss
+            + self.coefficient_unsupervised * unsupervised_loss
+            + self.coefficient_contrastive * contrastive_loss
         )
         self.log("train/loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.log("train/supervised_loss", supervised_loss, on_step=True, on_epoch=True)
@@ -161,18 +189,14 @@ class CoMatch(FixMatch):
 class CoMatchCLI(LightningCLI):
     def add_arguments_to_parser(self, parser):
         # Link args.
-        parser.link_arguments('model.batch_size', 'data.batch_size')
-        parser.link_arguments('trainer.gpus', 'model.gpus')
-        parser.link_arguments('data.mu', 'model.mu')
-        parser.link_arguments('model.max_epochs', 'trainer.max_epochs')
-        parser.set_defaults(
-            {
-                'data.mode': 'comatch'
-            }
-        )
+        parser.link_arguments("model.batch_size", "data.batch_size")
+        parser.link_arguments("trainer.gpus", "model.gpus")
+        parser.link_arguments("data.mu", "model.mu")
+        parser.link_arguments("model.max_epochs", "trainer.max_epochs")
+        parser.set_defaults({"data.mode": "comatch"})
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from pl_bolts.models.self_supervised.fixmatch.datasets import SSLDataModule
 
     cli = CoMatchCLI(CoMatch, SSLDataModule)

@@ -7,14 +7,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from pytorch_lightning import LightningModule
-
 from pytorch_lightning.utilities.cli import LightningCLI
 
 from pl_bolts.models.self_supervised.fixmatch.datasets import SSLDataModule
 
 from .lr_scheduler import WarmupCosineLrScheduler
 from .networks import WideResnet, ema_model_update, get_ema_model
-
 
 
 class FixMatch(LightningModule):
