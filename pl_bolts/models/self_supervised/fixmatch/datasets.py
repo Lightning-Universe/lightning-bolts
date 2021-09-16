@@ -127,7 +127,7 @@ class SSLDataModule(LightningDataModule):
         num_labeled=4000,
         batch_size=128,
         eval_step=1024,
-        expand_labels=True
+        expand_labels=True,
     ):
         super().__init__()
         self.batch_size = batch_size
@@ -144,8 +144,13 @@ class SSLDataModule(LightningDataModule):
             self.data_path, train=False, transform=TransformSSL(self.dataset, self.mode).normalize
         )
         self.train_labeled_dataset, self.train_unlabeled_dataset = get_train_dataset(
-            self.data_path, self.dataset, self.mode, self.num_labeled, self.batch_size, self.eval_step,
-            self.expand_labels
+            self.data_path,
+            self.dataset,
+            self.mode,
+            self.num_labeled,
+            self.batch_size,
+            self.eval_step,
+            self.expand_labels,
         )
 
     def train_dataloader(self):

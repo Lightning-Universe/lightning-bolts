@@ -7,9 +7,10 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from pytorch_lightning import LightningModule, Trainer
-
 from pytorch_lightning.utilities.cli import LightningCLI
+
 from pl_bolts.models.self_supervised.fixmatch.datasets import SSLDataModule
+
 from .lr_scheduler import WarmupCosineLrScheduler
 from .networks import WideResnet, ema_model_update, get_ema_model
 
@@ -25,12 +26,24 @@ def de_interleave(x, size):
 
 
 class FixMatch(LightningModule):
-    def __init__(self, ema_eval: bool = True, batch_size: int = 16,
-                 mu: int = 7, wresnet_k: int = 8, wresnet_n: int = 28,
-                 ema_decay: float = 0.999, softmax_temperature: float = 1.0,
-                 distribution_alignment: bool = True, coefficient_unsupervised: float = 1.0,
-                 pseudo_thr: float = 0.95, lr: float = 0.03, weight_decay: float = 1e-3,
-                 momentum: float = 0.9, gpus: int = 1, max_epochs: int = 300):
+    def __init__(
+        self,
+        ema_eval: bool = True,
+        batch_size: int = 16,
+        mu: int = 7,
+        wresnet_k: int = 8,
+        wresnet_n: int = 28,
+        ema_decay: float = 0.999,
+        softmax_temperature: float = 1.0,
+        distribution_alignment: bool = True,
+        coefficient_unsupervised: float = 1.0,
+        pseudo_thr: float = 0.95,
+        lr: float = 0.03,
+        weight_decay: float = 1e-3,
+        momentum: float = 0.9,
+        gpus: int = 1,
+        max_epochs: int = 300,
+    ):
         super().__init__()
         self.save_hyperparameters()
         self.ema_eval = ema_eval
@@ -62,10 +75,9 @@ class FixMatch(LightningModule):
             self.model = WideResnet(n_classes=self.n_classes, k=self.wresnet_k, n=self.wresnet_n)
             if self.ema_eval:
                 self.ema_model = get_ema_model(self.model)
-            self.total_steps = (
-                                       len(train_loader["labeled"].dataset) // (
-                                       self.batch_size * max(1, self.gpus))
-                               ) * float(self.max_epochs)
+            self.total_steps = (len(train_loader["labeled"].dataset) // (self.batch_size * max(1, self.gpus))) * float(
+                self.max_epochs
+            )
 
     def training_step(self, batch, batch_idx):
         labeled_batch = batch["labeled"]  # X
@@ -75,15 +87,9 @@ class FixMatch(LightningModule):
         (img_u_weak, img_u_strong), label_u = unlabeled_batch
 
         batch_size = img_x_weak.size(0)
-        imgs = interleave(
-            torch.cat([
-                img_x_weak, img_u_weak, img_u_strong
-            ]), 2 * self.mu + 1
-        )
+        imgs = interleave(torch.cat([img_x_weak, img_u_weak, img_u_strong]), 2 * self.mu + 1)
         logits = self.model(imgs)
-        logits = de_interleave(
-            logits, 2 * self.mu + 1
-        )
+        logits = de_interleave(logits, 2 * self.mu + 1)
         logits_x = logits[:batch_size]
         logits_u_weak, logits_u_strong = logits[batch_size:].chunk(2)
         del logits
@@ -179,14 +185,13 @@ class FixMatch(LightningModule):
             return res
 
 
-
 class FixMatchCLI(LightningCLI):
     def add_arguments_to_parser(self, parser):
         # Link args.
-        parser.link_arguments('model.batch_size', 'data.batch_size')
-        parser.link_arguments('trainer.gpus', 'model.gpus')
-        parser.link_arguments('data.mu', 'model.mu')
-        parser.link_arguments('model.max_epochs', 'trainer.max_epochs')
+        parser.link_arguments("model.batch_size", "data.batch_size")
+        parser.link_arguments("trainer.gpus", "model.gpus")
+        parser.link_arguments("data.mu", "model.mu")
+        parser.link_arguments("model.max_epochs", "trainer.max_epochs")
 
 
 if __name__ == "__main__":
