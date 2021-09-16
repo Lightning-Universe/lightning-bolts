@@ -1,3 +1,13 @@
+"""Adapted from: https://github.com/kekmodel/FixMatch-pytorch.
+
+Original work is: Copyright (c) 2019 Jungdae Kim, Qing Yu
+This implementation is: Copyright (c) PyTorch Lightning, Inc. and its affiliates. All Rights Reserved
+
+This implementation is licensed under MIT License;
+You may not use this file except in compliance with the License.
+
+You may obtain a copy of the License from the LICENSE file present in this folder.
+"""
 import torch
 import torch.nn as nn
 import torch.optim as optim
