@@ -3,7 +3,6 @@ import math
 import numpy as np
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, SequentialSampler
-from torchvision import datasets, transforms
 
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization, cifar100_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
