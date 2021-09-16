@@ -19,7 +19,7 @@ class BasicBlockPreAct(nn.Module):
         self.conv1 = nn.Conv2d(in_chan, out_chan, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn2 = BatchNorm2d(out_chan, momentum=0.001)
         self.relu2 = nn.LeakyReLU(inplace=True, negative_slope=0.1)
-        self.dropout = nn.Dropout(drop_rate) if not drop_rate == 0 else None
+        self.dropout = nn.Dropout(drop_rate) if drop_rate != 0 else None
         self.conv2 = nn.Conv2d(out_chan, out_chan, kernel_size=3, stride=1, padding=1, bias=False)
         self.downsample = None
         if in_chan != out_chan or stride != 1:
@@ -172,8 +172,7 @@ class WideResnet(nn.Module):
 
             feat = self.l2norm(feat)
             return out, feat
-        else:
-            return out
+        return out
 
     def init_weight(self):
         nn.init.xavier_normal_(self.classifier.weight)
