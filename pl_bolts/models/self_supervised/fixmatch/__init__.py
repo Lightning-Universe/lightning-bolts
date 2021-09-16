@@ -14,5 +14,5 @@ __all__ = [
     "WideResnet",
     "RandAugmentMC",
     "ema_model_update",
-    "get_ema_model"
+    "get_ema_model",
 ]
