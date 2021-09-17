@@ -15,8 +15,8 @@ from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities.cli import LightningCLI
 
 from pl_bolts.metrics import precision_at_k
-from pl_bolts.models.self_supervised.fixmatch.networks import WideResnet, ema_model_update, get_ema_model
 from pl_bolts.models.self_supervised.fixmatch.lr_scheduler import WarmupCosineLrScheduler
+from pl_bolts.models.self_supervised.fixmatch.networks import WideResnet, ema_model_update, get_ema_model
 
 
 class FixMatch(LightningModule):
