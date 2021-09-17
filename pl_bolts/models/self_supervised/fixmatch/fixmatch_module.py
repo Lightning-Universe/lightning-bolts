@@ -15,8 +15,8 @@ from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities.cli import LightningCLI
 
 from pl_bolts.metrics import precision_at_k
-from pl_bolts.models.self_supervised.fixmatch.lr_scheduler import WarmupCosineLrScheduler
 from pl_bolts.models.self_supervised.fixmatch.networks import WideResnet, ema_model_update, get_ema_model
+from pl_bolts.models.self_supervised.fixmatch.lr_scheduler import WarmupCosineLrScheduler
 
 
 class FixMatch(LightningModule):
@@ -126,14 +126,14 @@ class FixMatch(LightningModule):
         images, labels = batch
         logits = self.eval_forward(images)
         loss = self.criteria_x(logits, labels)
-        acc1, acc5 = precision_at_k(logits, labels, topk=(1, 5))
+        acc1, acc5 = precision_at_k(logits, labels, top_k=(1, 5))
         self.log("val/loss", loss, on_step=True, on_epoch=True)
         self.log("val/acc@1", acc1, on_step=True, prog_bar=True, on_epoch=True)
         self.log("val/acc@5", acc5, on_step=True, on_epoch=True)
         if self.ema_eval:
             ema_logits = self.ema_model(images)
             ema_loss = self.criteria_x(ema_logits, labels)
-            ema_acc1, ema_acc5 = precision_at_k(ema_logits, labels, topk=(1, 5))
+            ema_acc1, ema_acc5 = precision_at_k(ema_logits, labels, top_k=(1, 5))
             self.log("val/ema_loss", ema_loss, on_step=True, on_epoch=True)
             self.log("val/ema_acc1", ema_acc1, on_step=True, on_epoch=True)
             self.log("val/ema_acc5", ema_acc5, on_step=True, on_epoch=True)
