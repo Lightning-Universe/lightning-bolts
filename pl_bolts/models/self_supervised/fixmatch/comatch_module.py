@@ -1,7 +1,7 @@
 import torch
 from pytorch_lightning.utilities.cli import LightningCLI
 
-from pl_bolts.models.self_supervised.fixmatch import FixMatch, WideResnet
+from pl_bolts.models.self_supervised.fixmatch.fixmatch_module import FixMatch, WideResnet
 
 
 class Queue:
