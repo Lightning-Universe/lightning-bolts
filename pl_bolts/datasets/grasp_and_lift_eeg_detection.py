@@ -81,12 +81,14 @@ class GraspAndLiftEEGDetection(data.Dataset):
         International Creative Commons License (http://creativecommons.org/licenses/by/4.0/).
     """
 
-    GRASPLIFT_DATA_HEADER = 'id,Fp1,Fp2,F7,F3,Fz,F4,F8,FC5,FC1,FC2,FC6,T7,C3,Cz,C4,T8,TP9,CP5,CP1,CP2,CP6,' + \
-        'TP10,P7,P3,Pz,P4,P8,PO9,O1,Oz,O2,PO10\n'
+    GRASPLIFT_DATA_HEADER = (
+        "id,Fp1,Fp2,F7,F3,Fz,F4,F8,FC5,FC1,FC2,FC6,T7,C3,Cz,C4,T8,TP9,CP5,CP1,CP2,CP6,"
+        + "TP10,P7,P3,Pz,P4,P8,PO9,O1,Oz,O2,PO10\n"
+    )
 
-    GRASPLIFT_EVENTS_HEADER = 'id,HandStart,FirstDigitTouch,BothStartLoadPhase,LiftOff,Replace,BothReleased\n'
+    GRASPLIFT_EVENTS_HEADER = "id,HandStart,FirstDigitTouch,BothStartLoadPhase,LiftOff,Replace,BothReleased\n"
 
-    ZIP_URL = 'https://grasplifteeg.nyc3.digitaloceanspaces.com/grasp-and-lift-eeg-detection.zip'
+    ZIP_URL = "https://grasplifteeg.nyc3.digitaloceanspaces.com/grasp-and-lift-eeg-detection.zip"
 
     ZIP_SIZE_BYTES = 980887394
 
@@ -100,65 +102,62 @@ class GraspAndLiftEEGDetection(data.Dataset):
         subjects: Optional[List[int]] = None,
         series: Optional[List[int]] = None,
     ) -> None:
-        super(GraspAndLiftEEGDetection, self).__init__()
+        super().__init__()
         if num_samples is None and last_label_only:
-            raise ValueError(
-                'last_label_only cannot be used without setting num_samples')
+            raise ValueError("last_label_only cannot be used without setting num_samples")
         self.num_samples = num_samples
         self.last_label_only = last_label_only
-        data_dir = os.path.join(root, 'train' if train else 'test')
+        data_dir = os.path.join(root, "train" if train else "test")
         if not os.path.exists(data_dir):
             if not download:
-                raise ValueError(f'{data_dir} does not exist')
+                raise ValueError(f"{data_dir} does not exist")
             if not os.path.exists(root):
                 os.makedirs(root)
             self.download(root)
-        csv_suffix = '.csv'
-        bin_suffix = '.csv.bin'
+        csv_suffix = ".csv"
+        bin_suffix = ".csv.bin"
         csv_files = recursive_listdir(data_dir, csv_suffix)
         bin_files = recursive_listdir(data_dir, bin_suffix)
         should_compile = len(bin_files) < len(csv_files)
         if should_compile:
-            print(f'Number of .csv.bin files ({len(bin_files)}) '
-                  f'is less than the number of .csv ({len(csv_files)}).'
-                  ' Compiling binary representation...')
+            print(
+                f"Number of .csv.bin files ({len(bin_files)}) "
+                f"is less than the number of .csv ({len(csv_files)})."
+                " Compiling binary representation..."
+            )
             self.load_from_csv(csv_files, subjects=subjects, series=series)
         else:
             self.load_from_bin(bin_files, subjects=subjects, series=series)
 
-    def load_from_csv(self,
-                      csv_files: List[str],
-                      subjects: Optional[List[int]] = None,
-                      series: Optional[List[int]] = None):
-        self.X, self.Y = self.compile_bin(
-            csv_files, subjects=subjects, series=series)
+    def load_from_csv(
+        self, csv_files: List[str], subjects: Optional[List[int]] = None, series: Optional[List[int]] = None
+    ):
+        self.X, self.Y = self.compile_bin(csv_files, subjects=subjects, series=series)
         if self.num_samples is not None:
             # Divide each example up into windows
             self.total_examples = 0
             for x in self.X:
                 self.total_examples += x.shape[1] - self.num_samples + 1
 
-    def load_from_bin(self,
-                      bin_files: List[str],
-                      subjects: Optional[List[int]] = None,
-                      series: Optional[List[int]] = None):
+    def load_from_bin(
+        self, bin_files: List[str], subjects: Optional[List[int]] = None, series: Optional[List[int]] = None
+    ):
         examples = {}
         self.total_examples = 0
         for file in bin_files:
             if subjects is not None:
                 subject = os.path.basename(file)
-                subject = int(subject[4:subject.index('_')])
+                subject = int(subject[4 : subject.index("_")])
                 if subject not in subjects:
                     continue
             if series is not None:
                 ser = os.path.basename(file)
-                ser = ser[ser.index('_series') + 7:]
-                ser = int(ser[:ser.index('_')])
+                ser = ser[ser.index("_series") + 7 :]
+                ser = int(ser[: ser.index("_")])
                 if ser not in series:
                     continue
-            is_data = file.endswith('_data.csv.bin')
-            key = file[:-len('_data.csv.bin')
-                       if is_data else -len('_events.csv.bin')]
+            is_data = file.endswith("_data.csv.bin")
+            key = file[: -len("_data.csv.bin") if is_data else -len("_events.csv.bin")]
             samples = torch.load(file)
             item = examples.get(key, [None, None])
             item[0 if is_data else 1] = samples
@@ -175,52 +174,50 @@ class GraspAndLiftEEGDetection(data.Dataset):
         self.Y = Y if len(Y) > 0 else None
 
     def download(self, root: str) -> None:
-        zip_path = os.path.join(root, 'grasp-and-lift-eeg-detection.zip')
+        zip_path = os.path.join(root, "grasp-and-lift-eeg-detection.zip")
         if not os.path.exists(zip_path) or os.path.getsize(zip_path) != self.ZIP_SIZE_BYTES:
-            print(f'Downloading from {self.ZIP_URL}')
+            print(f"Downloading from {self.ZIP_URL}")
             start = time.time()
             r = requests.get(self.ZIP_URL)
             if r.status_code != 200:
-                raise ValueError(
-                    f'Expected status code 200, got {r.status_code}')
-            with open(zip_path, 'wb') as f:
+                raise ValueError(f"Expected status code 200, got {r.status_code}")
+            with open(zip_path, "wb") as f:
                 f.write(r.content)
             delta = time.time() - start
-            print(f'Downloaded in {int(delta)} seconds')
-        print(f'Extracting {zip_path} to {root}')
+            print(f"Downloaded in {int(delta)} seconds")
+        print(f"Extracting {zip_path} to {root}")
         start = time.time()
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
             zip_ref.extractall(root)
         delta = time.time() - start
-        print(f'Unzipped in {int(delta)} seconds')
+        print(f"Unzipped in {int(delta)} seconds")
         os.remove(zip_path)
 
-    def compile_bin(self,
-                    csv_files: List[str],
-                    subjects: Optional[List[int]] = None,
-                    series: Optional[List[int]] = None):
+    def compile_bin(
+        self, csv_files: List[str], subjects: Optional[List[int]] = None, series: Optional[List[int]] = None
+    ):
         examples = {}
         for i, file in enumerate(csv_files):
             if subjects is not None:
                 subject = os.path.basename(file)
-                subject = int(subject[4:subject.index('_')])
+                subject = int(subject[4 : subject.index("_")])
                 if subject not in subjects:
                     continue
             if series is not None:
                 ser = os.path.basename(file)
-                ser = ser[ser.index('_series') + 7:]
-                ser = int(ser[:ser.index('_')])
+                ser = ser[ser.index("_series") + 7 :]
+                ser = int(ser[: ser.index("_")])
                 if ser not in series:
                     continue
-            is_data = file.endswith('_data.csv')
+            is_data = file.endswith("_data.csv")
             samples = []
-            with open(file, 'r') as f:
+            with open(file) as f:
                 hdr = f.readline()
                 expected_hdr = self.GRASPLIFT_DATA_HEADER if is_data else self.GRASPLIFT_EVENTS_HEADER
                 if hdr != expected_hdr:
-                    raise ValueError('bad header')
+                    raise ValueError("bad header")
                 for line in f:
-                    channels = line.strip().split(',')[1:]
+                    channels = line.strip().split(",")[1:]
                     if is_data:
                         # Data is converted to float eventually anyway
                         channels = [float(x) for x in channels]
@@ -230,20 +227,19 @@ class GraspAndLiftEEGDetection(data.Dataset):
                     channels = torch.Tensor(channels).unsqueeze(1)
                     samples.append(channels)
             samples = torch.cat(samples, dim=1)
-            series = file[:-len('_data.csv')
-                          if is_data else -len('_events.csv')]
+            series = file[: -len("_data.csv") if is_data else -len("_events.csv")]
             item = examples.get(series, [None, None])
             item[0 if is_data else 1] = samples
             examples[series] = item
-            print(f'Processed {i+1}/{len(csv_files)} {file}')
+            print(f"Processed {i+1}/{len(csv_files)} {file}")
         X = []
         Y = []
         for series in sorted(examples):
             x, y = examples[series]
-            torch.save(samples, series + '_data.csv.bin')
+            torch.save(samples, series + "_data.csv.bin")
             X.append(x)
             if y is not None:
-                torch.save(samples, series + '_events.csv.bin')
+                torch.save(samples, series + "_events.csv.bin")
                 Y.append(y)
         return X, Y if len(Y) > 0 else None
 
@@ -259,18 +255,18 @@ class GraspAndLiftEEGDetection(data.Dataset):
                 ofs += num_examples
                 continue
             j = index - ofs
-            x = x[:, j:j + self.num_samples]
+            x = x[:, j : j + self.num_samples]
             if self.Y is not None:
                 if self.last_label_only:
                     # Only return the label for the last sample
                     y = self.Y[i][:, j + self.num_samples - 1]
                 else:
                     # Return labels for all samples
-                    y = self.Y[i][:, j:j + self.num_samples]
+                    y = self.Y[i][:, j : j + self.num_samples]
             else:
                 y = []
             return x, y
-        raise ValueError(f'unable to seek {index}')
+        raise ValueError(f"unable to seek {index}")
 
     def __len__(self) -> int:
         if self.num_samples is None:
