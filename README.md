@@ -31,22 +31,8 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## Continuous Integration
 
-<details>
-  <summary>CI testing</summary>
-
-| System / PyTorch ver. |                                                             1.6 (min. req.)                                                              |                                                               1.8 (latest)                                                               |
-| :-------------------: | :--------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------: |
-|    Linux py3.{6,8}    | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
-|     OSX py3.{6,8}     | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
-|    Windows py3.7\*    | ![CI base testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) | ![CI base testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) |
-
-- _\* testing just the package itself, we skip full test suite - excluding `tests` folder_
-
-</details>
-
-## Install
+## Getting Started
 
 Pip / Conda
 
