@@ -77,7 +77,8 @@ Bolts provides a variety of components to extend PyTorch Lightning such as callb
 
 ## News
 
-- \[2021/08/26\] [Fine-tune Transformers Faster with Lightning Flash and Torch ORT](https://devblog.pytorchlightning.ai/fine-tune-transformers-faster-with-lightning-flash-and-torch-ort-ec2d53789dc3)
+- Sept 22: [Leverage Sparsity for Faster Inference with Lightning Flash and SparseML](https://devblog.pytorchlightning.ai/leverage-sparsity-for-faster-inference-with-lightning-flash-and-sparseml-cdda1165622b)
+- Aug 26: [Fine-tune Transformers Faster with Lightning Flash and Torch ORT](https://devblog.pytorchlightning.ai/fine-tune-transformers-faster-with-lightning-flash-and-torch-ort-ec2d53789dc3)
 
 #### Example 1: Accelerate Lightning Training with the Torch ORT Callback
 
@@ -131,9 +132,9 @@ We've deprecated a bunch of specific model research, primarily because they've g
 
 For example a callback to help train SSL models would be a great contribution, however the next greatest SSL model from your latest paper would be a good contribution to [Lightning Flash](https://github.com/PyTorchLightning/lightning-flash).
 
-We've done a better job within [Lightning Flash](https://github.com/PyTorchLightning/lightning-flash) to implement SOTA models for applied research. We suggest looking at our [VISSL](<>) Flash integration for SSL based tasks.
+Use [Lightning Flash](https://github.com/PyTorchLightning/lightning-flash) to train, predict and serve state-of-the-art models for applied research. We suggest looking at our [VISSL](https://lightning-flash.readthedocs.io/en/latest/integrations/vissl.html) Flash integration for SSL based tasks.
 
-See our [deprecated implementations](<>) for more information.
+See [Deprecated Modules](https://lightning-bolts.readthedocs.io/en/latest/deprecated.html) for more information.
 
 ## Contribute!
 
