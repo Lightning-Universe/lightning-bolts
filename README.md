@@ -163,7 +163,7 @@ import pytorch_lightning as pl
 X, y = load_diabetes(return_X_y=True)
 loaders = SklearnDataModule(X, y)
 
-model = LinearRegression(input_dim=10)
+model = LinearRegression(input_dim=13)
 
 # try with gpus=4!
 # trainer = pl.Trainer(gpus=4)
