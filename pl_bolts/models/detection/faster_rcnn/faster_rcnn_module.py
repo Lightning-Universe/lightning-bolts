@@ -99,6 +99,7 @@ class FasterRCNN(LightningModule):
         loss_dict = self.model(images, targets)
         loss = sum(loss for loss in loss_dict.values())
         self.log("loss", loss, prog_bar=True)
+        return loss
 
     def validation_step(self, batch, batch_idx):
         images, targets = batch
