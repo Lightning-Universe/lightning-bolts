@@ -27,7 +27,7 @@ Add either L1 or L2 regularization, or both, by specifying the regularization st
     X, y = load_diabetes(return_X_y=True)
     loaders = SklearnDataModule(X, y)
 
-    model = LinearRegression(input_dim=13)
+    model = LinearRegression(input_dim=10)
     trainer = pl.Trainer()
     trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
     trainer.test(test_dataloaders=loaders.test_dataloader())
