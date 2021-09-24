@@ -106,6 +106,7 @@ class FasterRCNN(LightningModule):
         outs = self.model(images)
         iou = torch.stack([_evaluate_iou(t, o) for t, o in zip(targets, outs)]).mean()
         self.log("val_iou", iou, prog_bar=True)
+        return {"val_iou": iou}
 
     def validation_epoch_end(self, outs):
         avg_iou = torch.stack([o["val_iou"] for o in outs]).mean()
