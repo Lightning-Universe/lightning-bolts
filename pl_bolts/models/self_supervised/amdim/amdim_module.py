@@ -4,7 +4,7 @@ from typing import Union
 
 import torch
 from pytorch_lightning import LightningDataModule, LightningModule, Trainer
-from torch import optim as optim
+from torch import optim
 from torch.utils.data import DataLoader
 
 from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
@@ -152,8 +152,7 @@ class AMDIM(LightningModule):
             )
             encoder.init_weights()
             return encoder
-        else:
-            return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=True)
+        return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=True)
 
     def forward(self, img_1, img_2):
         # feats for img 1

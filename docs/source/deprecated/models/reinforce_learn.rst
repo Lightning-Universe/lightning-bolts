@@ -76,7 +76,7 @@ DQN Results
 
 **DQN: Pong**
 
-.. image:: _images/rl_benchmark/pong_dqn_baseline_results.jpg
+.. image:: ../../_images/rl_benchmark/pong_dqn_baseline_results.jpg
   :width: 800
   :alt: DQN Baseline Results
 
@@ -130,7 +130,7 @@ Double DQN Results
 
 **Double DQN: Pong**
 
-.. image:: _images/rl_benchmark/pong_double_dqn_baseline_results.jpg
+.. image:: ../../_images/rl_benchmark/pong_double_dqn_baseline_results.jpg
   :width: 800
   :alt: Double DQN Result
 
@@ -140,7 +140,7 @@ orange: DQN
 
 blue: Double DQN
 
-.. image:: _images/rl_benchmark/dqn_ddqn_comparison.jpg
+.. image:: ../../_images/rl_benchmark/dqn_ddqn_comparison.jpg
   :width: 800
   :alt: Double DQN Comparison Result
 
@@ -215,7 +215,7 @@ where the agent goes from losing to winning.
 As you can see by the total rewards, the dueling network's training progression is very stable and continues to trend
 upward until it finally plateus.
 
-.. image:: _images/rl_benchmark/pong_dueling_dqn_results.jpg
+.. image:: ../../_images/rl_benchmark/pong_dueling_dqn_results.jpg
   :width: 800
   :alt: Dueling DQN Result
 
@@ -230,7 +230,7 @@ This could very well be due to the simplicity of the Pong environment.
  - Orange: DQN
  - Red: Dueling DQN
 
-.. image:: _images/rl_benchmark/pong_dueling_dqn_comparison.jpg
+.. image:: ../../_images/rl_benchmark/pong_dueling_dqn_comparison.jpg
   :width: 800
   :alt: Dueling DQN Comparison Result
 
@@ -303,7 +303,7 @@ The results below improved stability and faster performance growth.
 Similar to the other improvements, the average score of the agent reaches positive numbers around the 250k mark and
 steadily increases till convergence.
 
-.. image:: _images/rl_benchmark/pong_noisy_dqn_results.jpg
+.. image:: ../../_images/rl_benchmark/pong_noisy_dqn_results.jpg
   :width: 800
   :alt: Noisy DQN Result
 
@@ -316,7 +316,7 @@ form of exploration.
 - Orange: DQN
 - Red: Noisy DQN
 
-.. image:: _images/rl_benchmark/pong_noisy_dqn_comparison.jpg
+.. image:: ../../_images/rl_benchmark/pong_noisy_dqn_comparison.jpg
   :width: 800
   :alt: Noisy DQN Comparison Result
 
@@ -396,7 +396,7 @@ The N-Step DQN shows the greatest increase in performance with respect to the ot
 After less than 150k steps the agent begins to consistently win games and achieves the top score after ~170K steps.
 This is reflected in the sharp peak of the total episode steps and of course, the total episode rewards.
 
-.. image:: _images/rl_benchmark/pong_nstep_dqn_1.jpg
+.. image:: ../../_images/rl_benchmark/pong_nstep_dqn_1.jpg
   :width: 800
   :alt: N-Step DQN Result
 
@@ -410,7 +410,7 @@ Previous literature, listed below, shows the best results for the Pong environme
 For these experiments I opted with an N step of 4.
 
 
-.. image:: _images/rl_benchmark/pong_nstep_dqn_2.jpg
+.. image:: ../../_images/rl_benchmark/pong_nstep_dqn_2.jpg
   :width: 800
   :alt: N-Step DQN Comparison Results
 
@@ -494,7 +494,7 @@ The results below show improved stability and faster performance growth.
 Similar to the other improvements, we see that PER improves the stability of the agents training and shows to converged
 on an optimal policy faster.
 
-.. image:: _images/rl_benchmark/pong_per_dqn_baseline_v1_results.jpg
+.. image:: ../../_images/rl_benchmark/pong_per_dqn_baseline_v1_results.jpg
   :width: 800
   :alt: PER DQN Results
 
@@ -506,7 +506,7 @@ of the PER DQN is siginificantly lower. This is the main objective of PER by foc
 It is important to note that loss is not the only metric we should be looking at. Although the agent may have very
 low loss during training, it may still perform poorly due to lack of exploration.
 
-.. image:: _images/rl_benchmark/pong_per_dqn_baseline_v1_results_comp.jpg
+.. image:: ../../_images/rl_benchmark/pong_per_dqn_baseline_v1_results_comp.jpg
   :width: 800
   :alt: PER DQN Results
 
@@ -751,7 +751,7 @@ Hyperparameters:
 - Critic Beta: 0.5
 - Gamma: 0.99
 
-.. image:: _images/rl_benchmark/cartpole_a2c_results.jpg
+.. image:: ../../_images/rl_benchmark/cartpole_a2c_results.jpg
   :width: 300
   :alt: A2C Results
 
@@ -764,3 +764,79 @@ Example::
 
 .. autoclass:: pl_bolts.models.rl.AdvantageActorCritic
    :noindex:
+
+--------------
+
+
+Soft Actor Critic (SAC)
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Soft Actor Critic model introduced in `Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor <https://arxiv.org/abs/1801.01290>`__
+Paper authors: Tuomas Haarnoja, Aurick Zhou, Pieter Abbeel, Sergey Levine
+
+Original implementation by: `Jason Wang <https://github.com/blahBlahhhJ>`_
+
+Soft Actor Critic (SAC) is a powerful actor critic algorithm in reinforcement learning. Unlike A2C, SAC's policy outputs a
+special continuous distribution for actions, and its critic estimates the Q value instead of the state value, which
+means it now takes in not only states but also actions. The new actor allows SAC to support continuous action tasks such
+as controlling robots, and the new critic allows SAC to support off-policy learning which is more sample efficient.
+
+The actor has a new objective to maximize entropy to encourage exploration while maximizing the expected rewards.
+The critic uses two separate Q functions to "mitigate positive bias" during training by picking the minimum of the
+two as the predicted Q value.
+
+Since SAC is off-policy, its algorithm's training step is quite similar to DQN:
+
+1. Initialize one policy network, two Q networks, and two corresponding target Q networks.
+2. Run 1 step using action sampled from policy and store the transition into the replay buffer.
+
+.. math::
+    a \sim tanh(N(\mu_\pi(s), \sigma_\pi(s)))
+
+3. Sample transitions (states, actions, rewards, dones, next states) from the replay buffer.
+
+.. math::
+  s, a, r, d, s' \sim B
+
+4. Compute actor loss and update policy network.
+
+.. math::
+  J_\pi = \frac1n\sum_i(\log\pi(\pi(a | s_i) | s_i) - Q_{min}(s_i, \pi(a | s_i)))
+
+5. Compute Q target
+
+.. math::
+  target_i = r_i + (1 - d_i) \gamma (\min_i Q_{target,i}(s'_i, \pi(a', s'_i)) - log\pi(\pi(a | s'_i) | s'_i))
+
+5. Compute critic loss and update Q network..
+
+.. math::
+  J_{Q_i} = \frac1n \sum_i(Q_i(s_i, a_i) - target_i)^2
+
+4. Soft update the target Q network using a weighted sum of itself and the Q network.
+
+.. math::
+  Q_{target,i} := \tau Q_{target,i} + (1-\tau) Q_i
+
+SAC Benefits
+~~~~~~~~~~~~~~~~~~~
+
+- More sample efficient due to off-policy training
+
+- Supports continuous action space
+
+SAC Results
+~~~~~~~~~~~~~~~~
+
+.. image:: ../../_images/rl_benchmark/pendulum_sac_results.jpg
+  :width: 300
+  :alt: SAC Results
+
+Example::
+  from pl_bolts.models.rl import SAC
+  sac = SAC("Pendulum-v0")
+  trainer = Trainer()
+  trainer.fit(sac)
+
+.. autoclass:: pl_bolts.models.rl.SAC
+    :noindex:

@@ -64,17 +64,17 @@ def create_torchvision_backbone(model_name: str, pretrained: bool = True) -> Tup
         ft_backbone = _create_backbone_features(net, 1280)
         return ft_backbone, out_channels
 
-    elif model_name in ["vgg11", "vgg13", "vgg16", "vgg19"]:
+    if model_name in ["vgg11", "vgg13", "vgg16", "vgg19"]:
         out_channels = 512
         ft_backbone = _create_backbone_features(net, out_channels)
         return ft_backbone, out_channels
 
-    elif model_name in ["resnet18", "resnet34"]:
+    if model_name in ["resnet18", "resnet34"]:
         out_channels = 512
         ft_backbone = _create_backbone_adaptive(net, out_channels)
         return ft_backbone, out_channels
 
-    elif model_name in [
+    if model_name in [
         "resnet50",
         "resnet101",
         "resnet152",
@@ -85,10 +85,8 @@ def create_torchvision_backbone(model_name: str, pretrained: bool = True) -> Tup
         ft_backbone = _create_backbone_adaptive(net, out_channels)
         return ft_backbone, out_channels
 
-    elif model_name in ["mnasnet0_5", "mnasnet0_75", "mnasnet1_0", "mnasnet1_3"]:
+    if model_name in ["mnasnet0_5", "mnasnet0_75", "mnasnet1_0", "mnasnet1_3"]:
         out_channels = 1280
         ft_backbone = _create_backbone_adaptive(net, out_channels)
         return ft_backbone, out_channels
-
-    else:
-        raise ValueError(f"Unsupported model: '{model_name}'")
+    raise ValueError(f"Unsupported model: '{model_name}'")
