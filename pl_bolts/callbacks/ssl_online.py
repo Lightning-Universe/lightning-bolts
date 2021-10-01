@@ -37,7 +37,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         drop_p: float = 0.2,
         hidden_dim: Optional[int] = None,
         num_classes: Optional[int] = None,
-        dataset: Optional[str] = None
+        dataset: Optional[str] = None,
     ):
         """
         Args:
@@ -61,7 +61,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         self._recovered_callback_state: Optional[Dict[str, Any]] = None
 
     def setup(self, trainer: Trainer, pl_module: LightningModule, stage: Optional[str] = None) -> None:
-        if self.num_classes is None:        
+        if self.num_classes is None:
             self.num_classes = trainer.datamodule.num_classes
         if self.dataset is None:
             self.dataset = trainer.datamodule.name
