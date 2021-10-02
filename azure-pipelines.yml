@@ -75,11 +75,11 @@ jobs:
         testRunTitle: '$(Agent.OS) - $(Build.DefinitionName) - Python $(python.version)'
       condition: succeededOrFailed()
 
-#     - task: PublishCodeCoverageResults@1
-#       displayName: 'Publish coverage report'
-#       inputs:
-#         codeCoverageTool: 'Cobertura'
-#         summaryFileLocation: '$(Build.SourcesDirectory)/coverage.xml'
-#         reportDirectory: '$(Build.SourcesDirectory)/htmlcov'
-#         testRunTitle: '$(Agent.OS) - $(Build.BuildNumber)[$(Agent.JobName)] - Python $(python.version)'
-#       condition: succeededOrFailed()
+#    - task: PublishCodeCoverageResults@1
+#      displayName: 'Publish coverage report'
+#      inputs:
+#        codeCoverageTool: 'Cobertura'
+#        summaryFileLocation: '$(Build.SourcesDirectory)/coverage.xml'
+#        reportDirectory: '$(Build.SourcesDirectory)/htmlcov'
+#        testRunTitle: '$(Agent.OS) - $(Build.BuildNumber)[$(Agent.JobName)] - Python $(python.version)'
+#      condition: succeededOrFailed()
