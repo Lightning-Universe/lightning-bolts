@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+Fixed reinforcement learning models raising AttributeError: module 'ale_py.gym' has no attribute 'ALGymEnv' ([#748](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/748))
+
 
 
 ## [0.4.0] - 2021-09-09
