@@ -102,13 +102,13 @@ MNIST results:
 
     SRGAN MNIST with scale factor of 2 (left: low res, middle: generated high res, right: ground truth high res):
 
-        .. image:: _images/gans/srgan-mnist-scale_factor=2.png
+        .. image:: ../../_images/gans/srgan-mnist-scale_factor=2.png
             :width: 200
             :alt: SRGAN MNIST with scale factor of 2
 
     SRGAN MNIST with scale factor of 4:
 
-        .. image:: _images/gans/srgan-mnist-scale_factor=4.png
+        .. image:: ../../_images/gans/srgan-mnist-scale_factor=4.png
             :width: 200
             :alt: SRGAN MNIST with scale factor of 4
 
@@ -124,13 +124,13 @@ STL10 results:
 
     SRGAN STL10 with scale factor of 2:
 
-        .. image:: _images/gans/srgan-stl10-scale_factor=2.png
+        .. image:: ../../_images/gans/srgan-stl10-scale_factor=2.png
             :width: 200
             :alt: SRGAN STL10 with scale factor of 2
 
     SRGAN STL10 with scale factor of 4:
 
-        .. image:: _images/gans/srgan-stl10-scale_factor=4.png
+        .. image:: ../../_images/gans/srgan-stl10-scale_factor=4.png
             :width: 200
             :alt: SRGAN STL10 with scale factor of 4
 
@@ -146,13 +146,13 @@ CelebA results:
 
     SRGAN CelebA with scale factor of 2:
 
-        .. image:: _images/gans/srgan-celeba-scale_factor=2.png
+        .. image:: ../../_images/gans/srgan-celeba-scale_factor=2.png
             :width: 200
             :alt: SRGAN CelebA with scale factor of 2
 
     SRGAN CelebA with scale factor of 4:
 
-        .. image:: _images/gans/srgan-celeba-scale_factor=4.png
+        .. image:: ../../_images/gans/srgan-celeba-scale_factor=4.png
             :width: 200
             :alt: SRGAN CelebA with scale factor of 4
 
