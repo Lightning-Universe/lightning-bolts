@@ -23,13 +23,6 @@ class GraspAndLiftEEGDetection(data.Dataset):
     the labels were omitted because of this dataset's original use for a
     competition. Use the `subjects` or `series` arguments to create your
     own labeled test split.
-    Videos of trials being performed:
-        https://grasplifteeg.nyc3.digitaloceanspaces.com/41597_2014_BFsdata201447_MOESM69_ESM.avi
-        https://grasplifteeg.nyc3.digitaloceanspaces.com/41597_2014_BFsdata201447_MOESM70_ESM.avi
-    Diagram of the electrode cap configuration:
-        https://grasplifteeg.nyc3.digitaloceanspaces.com/EEG_Electrode_Numbering.jpg
-    Original kaggle competition:
-        https://www.kaggle.com/c/grasp-and-lift-eeg-detection/data
     Args:
         root: Path to directory containing train/ and test/ folders
         train: If true, use the train/ directory and load class labels.
@@ -45,7 +38,13 @@ class GraspAndLiftEEGDetection(data.Dataset):
         series: Optional list of integers between 1 and either 8 (train)
             or 2 (test) limiting which series for each subject to load.
             Default is None, which loads all series for the subjects.
-
+    Labels:
+        1. HandStart
+        2. FirstDigitTouch
+        3. BothStartLoadPhase
+        4. LiftOff
+        5. Replace
+        6. BothReleased
     Examples:
         # Load the first nine subjects
         # Withhold the last three (10, 11, and 12) for validation/testing
@@ -64,13 +63,13 @@ class GraspAndLiftEEGDetection(data.Dataset):
         torch.Size([32, 1024])
         >>> label.shape
         torch.Size([6, 1024])
-    Labels:
-        1. HandStart
-        2. FirstDigitTouch
-        3. BothStartLoadPhase
-        4. LiftOff
-        5. Replace
-        6. BothReleased
+    Videos of trials being performed:
+        https://grasplifteeg.nyc3.digitaloceanspaces.com/41597_2014_BFsdata201447_MOESM69_ESM.avi
+        https://grasplifteeg.nyc3.digitaloceanspaces.com/41597_2014_BFsdata201447_MOESM70_ESM.avi
+    Diagram of the electrode cap configuration:
+        https://grasplifteeg.nyc3.digitaloceanspaces.com/EEG_Electrode_Numbering.jpg
+    Original kaggle competition:
+        https://www.kaggle.com/c/grasp-and-lift-eeg-detection/data
     Reference:
         Luciw, M., Jarocka, E. & Edin, B. Multi-channel EEG recordings during 3,936
             grasp and lift trials with varying weight and friction. Sci Data 1, 140047
