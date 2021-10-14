@@ -1,4 +1,4 @@
-from typing import List
+from typing import Tuple
 
 import numpy as np
 
@@ -6,7 +6,7 @@ from pl_bolts.utils import _OPENCV_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
-    from torchvision import transforms as transforms
+    from torchvision import transforms
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
@@ -20,10 +20,10 @@ class SwAVTrainDataTransform:
     def __init__(
         self,
         normalize=None,
-        size_crops: List[int] = [96, 36],
-        nmb_crops: List[int] = [2, 4],
-        min_scale_crops: List[float] = [0.33, 0.10],
-        max_scale_crops: List[float] = [1, 0.33],
+        size_crops: Tuple[int] = (96, 36),
+        nmb_crops: Tuple[int] = (2, 4),
+        min_scale_crops: Tuple[float] = (0.33, 0.10),
+        max_scale_crops: Tuple[float] = (1, 0.33),
         gaussian_blur: bool = True,
         jitter_strength: float = 1.0,
     ):
@@ -102,10 +102,10 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
     def __init__(
         self,
         normalize=None,
-        size_crops: List[int] = [96, 36],
-        nmb_crops: List[int] = [2, 4],
-        min_scale_crops: List[float] = [0.33, 0.10],
-        max_scale_crops: List[float] = [1, 0.33],
+        size_crops: Tuple[int] = (96, 36),
+        nmb_crops: Tuple[int] = (2, 4),
+        min_scale_crops: Tuple[float] = (0.33, 0.10),
+        max_scale_crops: Tuple[float] = (1, 0.33),
         gaussian_blur: bool = True,
         jitter_strength: float = 1.0,
     ):

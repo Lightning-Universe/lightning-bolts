@@ -9,7 +9,7 @@ from typing import Optional
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.utilities import rank_zero_warn
-from torch import optim as optim
+from torch import optim
 
 from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
 from pl_bolts.losses.self_supervised_learning import CPCTask
@@ -91,8 +91,7 @@ class CPC_v2(LightningModule):
         encoder_name = self.hparams.encoder_name
         if encoder_name == "cpc_encoder":
             return cpc_resnet101(dummy_batch)
-        else:
-            return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=self.hparams.task == "amdim")
+        return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=self.hparams.task == "amdim")
 
     def __compute_final_nb_c(self, patch_size):
         dummy_batch = torch.zeros((2 * 49, 3, patch_size, patch_size))

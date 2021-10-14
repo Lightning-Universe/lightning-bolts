@@ -13,3 +13,4 @@ mypy>=0.790
 atari-py==0.2.6  # needed for RL
 scikit-learn>=0.23
 sparseml
+ale-py>=0.7
