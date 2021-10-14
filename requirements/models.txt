@@ -2,6 +2,6 @@ torchvision>=0.8.2
 scikit-learn>=0.23
 Pillow
 opencv-python-headless
-gym>=0.17.2  # needed for RL
+gym>=0.17.2, !=0.20.0  # needed for RL
 atari_py==0.2.*
 box2d-py==2.3.*
