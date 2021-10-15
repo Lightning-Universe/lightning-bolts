@@ -12,10 +12,10 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
     if _GYM_AVAILABLE:
-        from gym import Env 
-    else: # pragma: no cover 
-        warn_missing_pkg("gym") 
-        Env = object 
+        from gym import Env
+    else:  # pragma: no cover
+        warn_missing_pkg("gym")
+        Env = object
 except:
     warn_missing_pkg("gym")
     Env = object
