@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed FP16 support with vision GPT model ([#694](https://github.com/PyTorchLightning/lightning-bolts/pull/694))
 - Removing bias from linear model regularisation ([#669](https://github.com/PyTorchLightning/lightning-bolts/pull/669))
 - Fixed CPC module issue ([#680](https://github.com/PyTorchLightning/lightning-bolts/pull/680))
+- Fix doctest fails with ImportError: cannot import name 'Env' from 'gym' ([#751](https://github.com/PyTorchLightning/lightning-bolts/pull/751))
 
 
 ## [0.3.4] - 2021-06-17
