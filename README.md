@@ -2,7 +2,7 @@
 
 <img src="docs/source/_images/logos/bolts_logo.png" width="400px">
 
-**Deep Learning components for extending PyTorch Lightning**
+**The PyTorch Lightning Deep Learniing Swiss Army Knife**
 
 ______________________________________________________________________
 
@@ -31,7 +31,30 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## Getting Started
+## What is Bolts
+
+A deep learning toolbox to extend [PyTorch Lightning](https://github.com/PyTorchLightning/pytorch-lightning) for any type of Deep Learning research. Bolts contains callbacks, datasets and other components you can use out of the box.
+
+
+
+
+
+## Continuous Integration
+
+<details>
+  <summary>CI testing</summary>
+
+| System / PyTorch ver. |                                                             1.6 (min. req.)                                                              |                                                               1.8 (latest)                                                               |
+| :-------------------: | :--------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------: |
+|    Linux py3.{6,8}    | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
+|     OSX py3.{6,8}     | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
+|    Windows py3.7\*    | ![CI base testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) | ![CI base testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) |
+
+- _\* testing just the package itself, we skip full test suite - excluding `tests` folder_
+
+</details>
+
+## Install
 
 Pip / Conda
 
@@ -56,9 +79,7 @@ pip install lightning-bolts["extra"]
 
 </details>
 
-## What is Bolts
 
-Bolts provides a variety of components to extend PyTorch Lightning such as callbacks & datasets, for applied research and production.
 
 ## News
 
