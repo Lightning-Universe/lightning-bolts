@@ -35,10 +35,6 @@ ______________________________________________________________________
 
 A deep learning toolbox to extend [PyTorch Lightning](https://github.com/PyTorchLightning/pytorch-lightning) for any type of Deep Learning research. Bolts contains callbacks, datasets and other components you can use out of the box.
 
-
-
-
-
 ## Continuous Integration
 
 <details>
@@ -78,8 +74,6 @@ pip install lightning-bolts["extra"]
 ```
 
 </details>
-
-
 
 ## News
 
