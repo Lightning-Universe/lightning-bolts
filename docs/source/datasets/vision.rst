@@ -26,6 +26,11 @@ CIFAR10
 .. autoclass:: pl_bolts.datasets.cifar10_dataset.CIFAR10
     :noindex:
 
+CIFAR10Mixed
+
+.. autoclass:: pl_bolts.datasets.cifar10_dataset.CIFAR10Mixed
+    :noindex:
+
 TrialCIFAR10
 ============
 
