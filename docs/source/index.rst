@@ -35,6 +35,7 @@ Lightning-Bolts documentation
    :name: datasets
    :caption: Datasets
 
+   datasets/vision
    datasets/debug
 
 .. toctree::
