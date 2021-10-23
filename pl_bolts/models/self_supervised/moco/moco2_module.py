@@ -308,7 +308,8 @@ class Moco_v2(LightningModule):
             weight_decay=self.hparams.weight_decay,
         )
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            optimizer, self.trainer.max_epochs,
+            optimizer,
+            self.trainer.max_epochs,
         )
         return [optimizer], [scheduler]
 
