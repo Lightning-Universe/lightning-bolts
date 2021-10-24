@@ -178,7 +178,3 @@ class SSLDataModule(LightningDataModule):
         )
 
 
-if __name__ == "__main__":
-    dm = SSLDataModule("./data", "cifar100")
-    train_loader = dm.train_dataloader()
-    print(train_loader.keys())
