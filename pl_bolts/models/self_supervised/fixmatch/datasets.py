@@ -5,7 +5,6 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, SequentialSampler
 
 from pl_bolts.models.self_supervised.fixmatch.transforms import RandAugmentMC
-from pl_bolts.transforms.dataset_normalizations import cifar10_normalization, cifar100_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -14,13 +13,15 @@ if _TORCHVISION_AVAILABLE:
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
+# For FixMatch model, there have two stream for data augmentation.
+# The first stream follows the traditional training transformation, and marked as weak.
 TRANS_WEAK = transforms.Compose(
     [
         transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(32, padding=int(32 * 0.125), padding_mode="reflect"),
     ]
 )
-
+# The second stream apply Random Augmentation into the training.
 TRANS_STRONG = transforms.Compose(
     [
         transforms.RandomHorizontalFlip(),
@@ -28,6 +29,7 @@ TRANS_STRONG = transforms.Compose(
         RandAugmentMC(n=2, m=10),
     ]
 )
+# This is for CoMatch.
 TRANS_STRONG_ANOTHER = transforms.Compose(
     [
         transforms.RandomResizedCrop(32, scale=(0.2, 1.0)),
@@ -107,7 +109,7 @@ def x_u_split(dataset, labels, num_labeled=4000, eval_step=1024, expand_labels=T
 
 
 def get_train_dataset(
-    data_path, dataset, mode="fixmatch", num_labeled=4000, batch_size=128, eval_step=1024, expand_labels=True
+        data_path, dataset, mode="fixmatch", num_labeled=4000, batch_size=128, eval_step=1024, expand_labels=True
 ):
     assert mode in ["fixmatch", "comatch"]
     base_dataset = MAP_DATASET[dataset](data_path, train=True, download=True)
@@ -125,15 +127,15 @@ def get_train_dataset(
 
 class SSLDataModule(LightningDataModule):
     def __init__(
-        self,
-        data_path,
-        dataset,
-        mu=7,
-        mode="fixmatch",
-        num_labeled=4000,
-        batch_size=128,
-        eval_step=1024,
-        expand_labels=True,
+            self,
+            data_path,
+            dataset,
+            mu=7,
+            mode="fixmatch",
+            num_labeled=4000,
+            batch_size=128,
+            eval_step=1024,
+            expand_labels=True,
     ):
         super().__init__()
         self.batch_size = batch_size
