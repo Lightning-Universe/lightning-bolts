@@ -7,6 +7,7 @@ from pytorch_lightning import Trainer
 from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.models.self_supervised import AMDIM, BYOL, CPC_v2, Moco_v2, SimCLR, SimSiam, SwAV
 from pl_bolts.models.self_supervised.cpc import CPCEvalTransformsCIFAR10, CPCTrainTransformsCIFAR10
+from pl_bolts.models.self_supervised.fixmatch import FixMatch
 from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
 from pl_bolts.models.self_supervised.moco.transforms import Moco2EvalCIFAR10Transforms, Moco2TrainCIFAR10Transforms
 from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
@@ -110,5 +111,13 @@ def test_simsiam(tmpdir, datadir):
     datamodule.val_transforms = SimCLREvalDataTransform(32)
 
     model = SimSiam(batch_size=2, num_samples=datamodule.num_samples, gpus=0, nodes=1, dataset="cifar10")
+    trainer = Trainer(gpus=0, fast_dev_run=True, default_root_dir=tmpdir)
+    trainer.fit(model, datamodule=datamodule)
+
+
+def test_fixmatch(tmpdir, datadir):
+    from pl_bolts.models.self_supervised.fixmatch.datasets import SSLDataModule
+    datamodule = SSLDataModule(datadir, dataset="cifar10")
+    model = FixMatch()
     trainer = Trainer(gpus=0, fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, datamodule=datamodule)
