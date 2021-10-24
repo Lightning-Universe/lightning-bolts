@@ -45,10 +45,7 @@ class TransformSSL:
         self.strong1 = TRANS_STRONG
         self.strong2 = TRANS_STRONG_ANOTHER
         self.mode = mode
-        if dataset == "cifar10":
-            norm = cifar10_normalization()
-        elif dataset == "cifar100":
-            norm = cifar100_normalization()
+        norm = self.DATASET_NORMS[dataset]()
         self.normalize = transforms.Compose([transforms.ToTensor(), norm])
 
     def __call__(self, x):
