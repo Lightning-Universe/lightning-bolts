@@ -22,6 +22,29 @@ class Queue:
 
 
 class CoMatch(FixMatch):
+    """PyTorch Lightning implementation of CoMatch: Semi-supervised Learning with Contrastive Graph Regularization
+
+        Paper authors: Junnan Li, Caiming Xiong, Steven Hoi
+
+        Model implemented by: `Zehua Cheng <https://github.com/limberc>`_
+
+        This code is adapted to Lightning using the original author repo
+        (`the original repo <https://github.com/salesforce/CoMatch/>`_).
+        Original work is: Copyright (c) 2018, salesforce.com, inc.
+
+        Example:
+
+            >>> from pl_bolts.models.self_supervised import CoMatch
+            ...
+             >>> model = CoMatch()
+
+        Train::
+
+            trainer = Trainer()
+            trainer.fit(model)
+
+        .. _CoMatch: https://arxiv.org/abs/2011.11183
+        """
     def __init__(
         self,
         ema_eval: bool = True,
