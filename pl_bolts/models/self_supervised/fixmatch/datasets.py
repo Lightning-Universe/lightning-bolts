@@ -5,6 +5,7 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, SequentialSampler
 
 from pl_bolts.models.self_supervised.fixmatch.transforms import RandAugmentMC
+from pl_bolts.transforms.dataset_normalizations import cifar100_normalization, cifar10_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -12,6 +13,11 @@ if _TORCHVISION_AVAILABLE:
     from torchvision import datasets, transforms
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
+
+DATASET_NORMS = {
+    'cifar10': cifar10_normalization(),
+    'cifar100': cifar100_normalization(),
+}
 
 # For FixMatch model, there have two stream for data augmentation.
 # The first stream follows the traditional training transformation, and marked as weak.
@@ -41,13 +47,15 @@ TRANS_STRONG_ANOTHER = transforms.Compose(
 
 
 class TransformSSL:
-    def __init__(self, dataset, mode="fixmatch"):
+    def __init__(self, dataset, mode="fixmatch", weak_transform=TRANS_WEAK,
+                 strong_transforms=[TRANS_STRONG, TRANS_STRONG_ANOTHER]):
         self.test_transforms = transforms.Compose([transforms.Resize(32)])
-        self.weak = TRANS_WEAK
-        self.strong1 = TRANS_STRONG
-        self.strong2 = TRANS_STRONG_ANOTHER
+        self.weak = weak_transform
+        self.strong1 = strong_transforms[0]
         self.mode = mode
-        norm = self.DATASET_NORMS[dataset]()
+        norm = DATASET_NORMS[dataset]
+        if len(strong_transforms) > 1:
+            self.strong2 = strong_transforms[1]
         self.normalize = transforms.Compose([transforms.ToTensor(), norm])
 
     def __call__(self, x):
