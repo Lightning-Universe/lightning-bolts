@@ -1,5 +1,4 @@
-"""
-This implementation is: Copyright (c) PyTorch Lightning, Inc. and its affiliates. All Rights Reserved
+"""This implementation is: Copyright (c) PyTorch Lightning, Inc. and its affiliates. All Rights Reserved.
 
 This implementation is licensed under MIT License;
 You may not use this file except in compliance with the License.
@@ -18,7 +17,8 @@ from pl_bolts.models.self_supervised.fixmatch.networks import WideResnet, ema_mo
 
 
 class FixMatch(LightningModule):
-    """PyTorch Lightning implementation of FixMatch: Simplifying Semi-Supervised Learning with Consistency and Confidence.
+    """PyTorch Lightning implementation of FixMatch: Simplifying Semi-Supervised Learning with Consistency and
+    Confidence.
 
         Paper authors: Kihyuk Sohn, David Berthelot, Chun-Liang Li, Zizhao Zhang, Nicholas Carlini, Ekin D. Cubuk, Alex Kurakin, Han Zhang, Colin Raffel.
 
@@ -40,25 +40,25 @@ class FixMatch(LightningModule):
             trainer.fit(model)
 
         .. _FixMatch: https://arxiv.org/abs/2001.07685
-        """
+    """
 
     def __init__(
-            self,
-            ema_eval: bool = True,
-            batch_size: int = 16,
-            mu: int = 7,
-            wresnet_k: int = 8,
-            wresnet_n: int = 28,
-            ema_decay: float = 0.999,
-            softmax_temperature: float = 1.0,
-            distribution_alignment: bool = True,
-            coefficient_unsupervised: float = 1.0,
-            pseudo_thr: float = 0.95,
-            lr: float = 0.03,
-            weight_decay: float = 1e-3,
-            momentum: float = 0.9,
-            gpus: int = 1,
-            max_epochs: int = 300,
+        self,
+        ema_eval: bool = True,
+        batch_size: int = 16,
+        mu: int = 7,
+        wresnet_k: int = 8,
+        wresnet_n: int = 28,
+        ema_decay: float = 0.999,
+        softmax_temperature: float = 1.0,
+        distribution_alignment: bool = True,
+        coefficient_unsupervised: float = 1.0,
+        pseudo_thr: float = 0.95,
+        lr: float = 0.03,
+        weight_decay: float = 1e-3,
+        momentum: float = 0.9,
+        gpus: int = 1,
+        max_epochs: int = 300,
     ):
         """
         Args:
