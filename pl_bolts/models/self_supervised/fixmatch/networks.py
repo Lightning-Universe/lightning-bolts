@@ -5,10 +5,8 @@ import torch
 import torch.nn as nn
 from torch.nn import BatchNorm2d
 
-"""
-    As in the paper, the wide resnet only considers the resnet of the pre-activated version,
-    and it only considers the basic blocks rather than the bottleneck blocks.
-"""
+# As in the paper, the wide resnet only considers the resnet of the pre-activated version,
+# and it only considers the basic blocks rather than the bottleneck blocks.
 
 
 class BasicBlockPreAct(nn.Module):
