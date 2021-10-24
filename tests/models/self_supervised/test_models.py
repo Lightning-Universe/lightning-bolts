@@ -117,6 +117,7 @@ def test_simsiam(tmpdir, datadir):
 
 def test_fixmatch(tmpdir, datadir):
     from pl_bolts.models.self_supervised.fixmatch.datasets import SSLDataModule
+
     datamodule = SSLDataModule(datadir, dataset="cifar10")
     model = FixMatch()
     trainer = Trainer(gpus=0, fast_dev_run=True, default_root_dir=tmpdir)
