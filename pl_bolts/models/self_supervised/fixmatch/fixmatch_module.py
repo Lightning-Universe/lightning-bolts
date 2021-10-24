@@ -18,7 +18,7 @@ from pl_bolts.models.self_supervised.fixmatch.networks import WideResnet, ema_mo
 
 
 class FixMatch(LightningModule):
-    """PyTorch Lightning implementation of Augmented Multiscale Deep InfoMax (AMDIM_)
+    """PyTorch Lightning implementation of FixMatch: Simplifying Semi-Supervised Learning with Consistency and Confidence.
 
         Paper authors: Kihyuk Sohn, David Berthelot, Chun-Liang Li, Zizhao Zhang, Nicholas Carlini, Ekin D. Cubuk, Alex Kurakin, Han Zhang, Colin Raffel.
 
@@ -39,7 +39,7 @@ class FixMatch(LightningModule):
             trainer = Trainer()
             trainer.fit(model)
 
-        .. _AMDIM: https://arxiv.org/abs/1906.00910
+        .. _FixMatch: https://arxiv.org/abs/2001.07685
         """
 
     def __init__(
