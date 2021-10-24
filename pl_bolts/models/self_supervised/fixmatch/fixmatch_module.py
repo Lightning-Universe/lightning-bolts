@@ -79,7 +79,6 @@ class FixMatch(LightningModule):
             max_epochs: Maximum number of epochs.
         """
         super().__init__()
-        self.save_hyperparameters()
         self.ema_eval = ema_eval
         self.mu = mu
         self.batch_size = batch_size
@@ -98,6 +97,7 @@ class FixMatch(LightningModule):
         self.criteria_x = nn.CrossEntropyLoss()
         self.criteria_u = nn.CrossEntropyLoss(reduction="none")
         self.prob_list = []
+        self.save_hyperparameters()
 
     @staticmethod
     def interleave(x, size):
