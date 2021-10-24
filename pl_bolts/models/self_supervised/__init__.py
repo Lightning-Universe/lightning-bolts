@@ -20,6 +20,8 @@ from pl_bolts.models.self_supervised.amdim.amdim_module import AMDIM
 from pl_bolts.models.self_supervised.byol.byol_module import BYOL
 from pl_bolts.models.self_supervised.cpc.cpc_module import CPC_v2
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
+from pl_bolts.models.self_supervised.fixmatch.comatch_module import CoMatch
+from pl_bolts.models.self_supervised.fixmatch.fixmatch_module import FixMatch
 from pl_bolts.models.self_supervised.moco.moco2_module import Moco_v2
 from pl_bolts.models.self_supervised.simclr.simclr_module import SimCLR
 from pl_bolts.models.self_supervised.simsiam.simsiam_module import SimSiam

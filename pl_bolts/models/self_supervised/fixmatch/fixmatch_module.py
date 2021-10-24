@@ -1,6 +1,4 @@
-"""Adapted from: https://github.com/kekmodel/FixMatch-pytorch.
-
-Original work is: Copyright (c) 2019 Jungdae Kim, Qing Yu
+"""
 This implementation is: Copyright (c) PyTorch Lightning, Inc. and its affiliates. All Rights Reserved
 
 This implementation is licensed under MIT License;
@@ -20,24 +18,66 @@ from pl_bolts.models.self_supervised.fixmatch.networks import WideResnet, ema_mo
 
 
 class FixMatch(LightningModule):
+    """PyTorch Lightning implementation of Augmented Multiscale Deep InfoMax (AMDIM_)
+
+        Paper authors: Kihyuk Sohn, David Berthelot, Chun-Liang Li, Zizhao Zhang, Nicholas Carlini, Ekin D. Cubuk, Alex Kurakin, Han Zhang, Colin Raffel.
+
+        Model implemented by: `Zehua Cheng <https://github.com/limberc>`_
+
+        This code is adapted to Lightning using the original author repo
+        (`the original repo <https://github.com/kekmodel/FixMatch-pytorch>`_).
+        Original work is: Copyright (c) 2019 Jungdae Kim, Qing Yu
+
+        Example:
+
+            >>> from pl_bolts.models.self_supervised import FixMatch
+            ...
+            >>> model = FixMatch()
+
+        Train::
+
+            trainer = Trainer()
+            trainer.fit(model)
+
+        .. _AMDIM: https://arxiv.org/abs/1906.00910
+        """
+
     def __init__(
-        self,
-        ema_eval: bool = True,
-        batch_size: int = 16,
-        mu: int = 7,
-        wresnet_k: int = 8,
-        wresnet_n: int = 28,
-        ema_decay: float = 0.999,
-        softmax_temperature: float = 1.0,
-        distribution_alignment: bool = True,
-        coefficient_unsupervised: float = 1.0,
-        pseudo_thr: float = 0.95,
-        lr: float = 0.03,
-        weight_decay: float = 1e-3,
-        momentum: float = 0.9,
-        gpus: int = 1,
-        max_epochs: int = 300,
+            self,
+            ema_eval: bool = True,
+            batch_size: int = 16,
+            mu: int = 7,
+            wresnet_k: int = 8,
+            wresnet_n: int = 28,
+            ema_decay: float = 0.999,
+            softmax_temperature: float = 1.0,
+            distribution_alignment: bool = True,
+            coefficient_unsupervised: float = 1.0,
+            pseudo_thr: float = 0.95,
+            lr: float = 0.03,
+            weight_decay: float = 1e-3,
+            momentum: float = 0.9,
+            gpus: int = 1,
+            max_epochs: int = 300,
     ):
+        """
+        Args:
+            ema_eval: Enable EMA evaluation.
+            batch_size: Number of batch size during training.
+            mu: Coefficient of unlabeled batch size.
+            wresnet_k: k for wide resnet.
+            wresnet_n: n for wide resnet.
+            ema_decay: EMA decay rate.
+            softmax_temperature: The temperature of the softmax activation.
+            distribution_alignment: Whether to use the distribution alignment.
+            coefficient_unsupervised: the coefficient of unlabeled loss.
+            pseudo_thr: The threshold of the pseudo label.
+            lr: learning rate.
+            weight_decay: weight decay rate.
+            momentum: momentum.
+            gpu: Number of GPUs.
+            max_epochs: Maximum number of epochs.
+        """
         super().__init__()
         self.save_hyperparameters()
         self.ema_eval = ema_eval
