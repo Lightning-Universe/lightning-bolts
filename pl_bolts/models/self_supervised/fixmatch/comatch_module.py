@@ -17,57 +17,57 @@ class Queue:
         if new_value.device != self.value.device:
             # Move to the updated device.
             self.value = self.value.to(new_value.device)
-        self.value[self.ptr: self.ptr + total_batch_size, :] = new_value
+        self.value[self.ptr : self.ptr + total_batch_size, :] = new_value
         self.ptr = (self.ptr + total_batch_size) % self.size
 
 
 class CoMatch(FixMatch):
-    """PyTorch Lightning implementation of CoMatch: Semi-supervised Learning with Contrastive Graph Regularization
+    """PyTorch Lightning implementation of CoMatch: Semi-supervised Learning with Contrastive Graph Regularization.
 
-        Paper authors: Junnan Li, Caiming Xiong, Steven Hoi
+    Paper authors: Junnan Li, Caiming Xiong, Steven Hoi
 
-        Model implemented by: `Zehua Cheng <https://github.com/limberc>`_
+    Model implemented by: `Zehua Cheng <https://github.com/limberc>`_
 
-        This code is adapted to Lightning using the original author repo
-        (`the original repo <https://github.com/salesforce/CoMatch/>`_).
-        Original work is: Copyright (c) 2018, salesforce.com, inc.
+    This code is adapted to Lightning using the original author repo
+    (`the original repo <https://github.com/salesforce/CoMatch/>`_).
+    Original work is: Copyright (c) 2018, salesforce.com, inc.
 
-        Example:
+    Example:
 
-            >>> from pl_bolts.models.self_supervised import CoMatch
-            ...
-             >>> model = CoMatch()
+        >>> from pl_bolts.models.self_supervised import CoMatch
+        ...
+         >>> model = CoMatch()
 
-        Train::
+    Train::
 
-            trainer = Trainer()
-            trainer.fit(model)
+        trainer = Trainer()
+        trainer.fit(model)
 
-        .. _CoMatch: https://arxiv.org/abs/2011.11183
-        """
+    .. _CoMatch: https://arxiv.org/abs/2011.11183
+    """
 
     def __init__(
-            self,
-            ema_eval: bool = True,
-            batch_size: int = 16,
-            mu: int = 7,
-            wresnet_k: int = 8,
-            wresnet_n: int = 28,
-            ema_decay: float = 0.999,
-            softmax_temperature: float = 1.0,
-            distribution_alignment: bool = True,
-            coefficient_unsupervised: float = 1.0,
-            pseudo_thr: float = 0.95,
-            lr: float = 0.03,
-            weight_decay: float = 1e-3,
-            momentum: float = 0.9,
-            gpus: int = 1,
-            max_epochs: int = 300,
-            coefficient_contrastive: float = 1.0,
-            contrast_thr: float = 0.8,
-            alpha: float = 0.9,
-            low_ndembedd: int = 64,
-            queue_batch: int = 5,
+        self,
+        ema_eval: bool = True,
+        batch_size: int = 16,
+        mu: int = 7,
+        wresnet_k: int = 8,
+        wresnet_n: int = 28,
+        ema_decay: float = 0.999,
+        softmax_temperature: float = 1.0,
+        distribution_alignment: bool = True,
+        coefficient_unsupervised: float = 1.0,
+        pseudo_thr: float = 0.95,
+        lr: float = 0.03,
+        weight_decay: float = 1e-3,
+        momentum: float = 0.9,
+        gpus: int = 1,
+        max_epochs: int = 300,
+        coefficient_contrastive: float = 1.0,
+        contrast_thr: float = 0.8,
+        alpha: float = 0.9,
+        low_ndembedd: int = 64,
+        queue_batch: int = 5,
     ):
         """
         Args:
@@ -184,8 +184,8 @@ class CoMatch(FixMatch):
                 [
                     probs_orig,
                     torch.zeros(batch_size, self.n_classes)
-                        .to(self.device)
-                        .scatter(1, supervised_labels.view(-1, 1), 1),
+                    .to(self.device)
+                    .scatter(1, supervised_labels.view(-1, 1), 1),
                 ],
                 dim=0,
             )
@@ -210,9 +210,9 @@ class CoMatch(FixMatch):
         unsupervised_loss = unsupervised_loss.mean()
 
         loss = (
-                supervised_loss
-                + self.coefficient_unsupervised * unsupervised_loss
-                + self.coefficient_contrastive * contrastive_loss
+            supervised_loss
+            + self.coefficient_unsupervised * unsupervised_loss
+            + self.coefficient_contrastive * contrastive_loss
         )
         self.log("train/loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.log("train/supervised_loss", supervised_loss, on_step=True, on_epoch=True)
