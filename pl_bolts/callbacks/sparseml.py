@@ -78,9 +78,10 @@ class SparseMLCallback(Callback):
         return max_estimated_steps
 
     @staticmethod
-    def export_to_sparse_onnx(
-        model: LightningModule, output_dir: str, sample_batch: Optional[torch.Tensor] = None
-    ) -> None:
+    def export_to_sparse_onnx(model: LightningModule,
+                              output_dir: str,
+                              sample_batch: Optional[torch.Tensor] = None,
+                              **export_kwargs) -> None:
         """Exports the model to ONNX format."""
         with model._prevent_trainer_and_dataloaders_deepcopy():
             exporter = ModuleExporter(model, output_dir=output_dir)
@@ -91,4 +92,4 @@ class SparseMLCallback(Callback):
                     "``SparseMLCallback.export_to_sparse_onnx(model, output_dir, sample_batch=sample_batch)`` "
                     "or an ``example_input_array`` property within the LightningModule"
                 )
-            exporter.export_onnx(sample_batch=sample_batch)
+            exporter.export_onnx(sample_batch=sample_batch, **export_kwargs)
