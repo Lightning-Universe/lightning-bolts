@@ -17,7 +17,7 @@ class Queue:
         if new_value.device != self.value.device:
             # Move to the updated device.
             self.value = self.value.to(new_value.device)
-        self.value[self.ptr : self.ptr + total_batch_size, :] = new_value
+        self.value[self.ptr: self.ptr + total_batch_size, :] = new_value
         self.ptr = (self.ptr + total_batch_size) % self.size
 
 
@@ -45,29 +45,54 @@ class CoMatch(FixMatch):
 
         .. _CoMatch: https://arxiv.org/abs/2011.11183
         """
+
     def __init__(
-        self,
-        ema_eval: bool = True,
-        batch_size: int = 16,
-        mu: int = 7,
-        wresnet_k: int = 8,
-        wresnet_n: int = 28,
-        ema_decay: float = 0.999,
-        softmax_temperature: float = 1.0,
-        distribution_alignment: bool = True,
-        coefficient_unsupervised: float = 1.0,
-        pseudo_thr: float = 0.95,
-        lr: float = 0.03,
-        weight_decay: float = 1e-3,
-        momentum: float = 0.9,
-        gpus: int = 1,
-        max_epochs: int = 300,
-        coefficient_contrastive: float = 1.0,
-        contrast_thr: float = 0.8,
-        alpha: float = 0.9,
-        low_ndembedd: int = 64,
-        queue_batch: int = 5,
+            self,
+            ema_eval: bool = True,
+            batch_size: int = 16,
+            mu: int = 7,
+            wresnet_k: int = 8,
+            wresnet_n: int = 28,
+            ema_decay: float = 0.999,
+            softmax_temperature: float = 1.0,
+            distribution_alignment: bool = True,
+            coefficient_unsupervised: float = 1.0,
+            pseudo_thr: float = 0.95,
+            lr: float = 0.03,
+            weight_decay: float = 1e-3,
+            momentum: float = 0.9,
+            gpus: int = 1,
+            max_epochs: int = 300,
+            coefficient_contrastive: float = 1.0,
+            contrast_thr: float = 0.8,
+            alpha: float = 0.9,
+            low_ndembedd: int = 64,
+            queue_batch: int = 5,
     ):
+        """
+        Args:
+            ema_eval: Enable EMA evaluation.
+            batch_size: Number of batch size during training.
+            mu: Coefficient of unlabeled batch size.
+            wresnet_k: k for wide resnet.
+            wresnet_n: n for wide resnet.
+            ema_decay: EMA decay rate.
+            softmax_temperature: The temperature of the softmax activation.
+            distribution_alignment: Whether to use the distribution alignment.
+            coefficient_unsupervised: the coefficient of unlabeled loss.
+            pseudo_thr: The threshold of the pseudo label.
+            lr: learning rate.
+            weight_decay: weight decay rate.
+            momentum: momentum.
+            gpu: Number of GPUs.
+            max_epochs: Maximum number of epochs.
+            coefficient_contrastive: The coefficient of contrast loss.
+            contrast_thr: The contrast threshold.
+            alpha: the alpha of the loss in formula (6).
+            low_ndembedd: the dimension of low-dim embedding.
+            queue_batch: queue batch for memory bank.
+        """
+
         super().__init__(
             ema_eval,
             batch_size,
@@ -159,8 +184,8 @@ class CoMatch(FixMatch):
                 [
                     probs_orig,
                     torch.zeros(batch_size, self.n_classes)
-                    .to(self.device)
-                    .scatter(1, supervised_labels.view(-1, 1), 1),
+                        .to(self.device)
+                        .scatter(1, supervised_labels.view(-1, 1), 1),
                 ],
                 dim=0,
             )
@@ -185,9 +210,9 @@ class CoMatch(FixMatch):
         unsupervised_loss = unsupervised_loss.mean()
 
         loss = (
-            supervised_loss
-            + self.coefficient_unsupervised * unsupervised_loss
-            + self.coefficient_contrastive * contrastive_loss
+                supervised_loss
+                + self.coefficient_unsupervised * unsupervised_loss
+                + self.coefficient_contrastive * contrastive_loss
         )
         self.log("train/loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.log("train/supervised_loss", supervised_loss, on_step=True, on_epoch=True)
