@@ -176,5 +176,3 @@ class SSLDataModule(LightningDataModule):
         return DataLoader(
             self.test_dataset, batch_size=self.batch_size, num_workers=8, sampler=SequentialSampler(self.test_dataset)
         )
-
-
