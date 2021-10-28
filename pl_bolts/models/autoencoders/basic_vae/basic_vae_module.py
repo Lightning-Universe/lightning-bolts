@@ -105,13 +105,13 @@ class VAE(LightningModule):
         return self.load_from_checkpoint(VAE.pretrained_urls[checkpoint_name], strict=False)
 
     def forward(self, x):
+        # deterministic forward
         x = self.encoder(x)
         mu = self.fc_mu(x)
-        log_var = self.fc_var(x)
-        p, q, z = self.sample(mu, log_var)
-        return self.decoder(z)
+        return self.decoder(mu)
 
     def _run_step(self, x):
+        # stochastic forward
         x = self.encoder(x)
         mu = self.fc_mu(x)
         log_var = self.fc_var(x)
