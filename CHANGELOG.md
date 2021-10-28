@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changed VAE to use mean of encoder distributions in forward function, instead of random sampling. This follows best practice for inference ([#761](https://github.com/PyTorchLightning/lightning-bolts/pull/761))
 
 ### Deprecated
 
