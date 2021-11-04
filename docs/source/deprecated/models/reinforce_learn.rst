@@ -834,7 +834,7 @@ SAC Results
 
 Example::
   from pl_bolts.models.rl import SAC
-  sac = SAC("Pendulum-v0")
+  sac = SAC("Pendulum-v1")
   trainer = Trainer()
   trainer.fit(sac)
 

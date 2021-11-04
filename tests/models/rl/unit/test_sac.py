@@ -12,7 +12,7 @@ def test_sac_loss():
     parent_parser = SAC.add_model_specific_args(parent_parser)
     args_list = [
         "--env",
-        "Pendulum-v0",
+        "Pendulum-v1",
         "--batch_size",
         "32",
     ]
@@ -39,7 +39,7 @@ def test_sac_train_batch():
     parent_parser = SAC.add_model_specific_args(parent_parser)
     args_list = [
         "--env",
-        "Pendulum-v0",
+        "Pendulum-v1",
         "--batch_size",
         "32",
     ]
