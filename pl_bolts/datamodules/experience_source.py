@@ -10,13 +10,9 @@ from torch.utils.data import IterableDataset
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
-try:
-    if _GYM_AVAILABLE:
-        from gym import Env
-    else:  # pragma: no cover
-        warn_missing_pkg("gym")
-        Env = object
-except:
+if _GYM_AVAILABLE:
+    from gym import Env
+else:  # pragma: no cover
     warn_missing_pkg("gym")
     Env = object
 
