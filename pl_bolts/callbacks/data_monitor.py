@@ -49,8 +49,8 @@ class DataMonitorBase(Callback):
 
     def on_train_batch_start(
         self,
-        trainer,
-        pl_module,
+        trainer: Trainer,
+        pl_module: LightningModule,
         batch: Any,
         batch_idx: int,
         unused: Optional[int] = 0,
@@ -217,8 +217,8 @@ class TrainingDataMonitor(DataMonitorBase):
 
     def on_train_batch_start(
         self,
-        trainer,
-        pl_module,
+        trainer: Trainer,
+        pl_module: LightningModule,
         batch: Any,
         batch_idx: int,
         unused: Optional[int] = 0,
