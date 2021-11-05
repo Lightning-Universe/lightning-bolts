@@ -40,7 +40,7 @@ def test_sac():
         "--gpus",
         "0",
         "--env",
-        "Pendulum-v1",
+        "Pendulum-v0",
         "--batch_size",
         "10",
     ]

@@ -151,7 +151,7 @@ def test_cli_run_rl_advantage_actor_critic(cli_args):
 @pytest.mark.parametrize(
     "cli_args",
     [
-        " --env Pendulum-v1" " --max_steps 10" " --fast_dev_run 1" " --batch_size 10",
+        " --env Pendulum-v0" " --max_steps 10" " --fast_dev_run 1" " --batch_size 10",
     ],
 )
 def test_cli_run_rl_soft_actor_critic(cli_args):
