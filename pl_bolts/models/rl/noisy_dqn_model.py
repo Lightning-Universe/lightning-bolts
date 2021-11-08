@@ -31,7 +31,7 @@ class NoisyDQN(DQN):
         trainer = Trainer()
         trainer.fit(model)
 
-    .. note:: Currently only supports CPU and single GPU training with `distributed_backend=dp`
+    .. note:: Currently only supports CPU and single GPU training with `accelerator=dp`
     """
 
     def build_networks(self) -> None:
