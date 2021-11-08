@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-
+- Fix doctest fails with ImportError: cannot import name 'Env' from 'gym' ([#751](https://github.com/PyTorchLightning/lightning-bolts/pull/751))
 
 ## [0.4.0] - 2021-09-09
 
