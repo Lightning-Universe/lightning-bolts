@@ -255,14 +255,13 @@ class SAC(LightningModule):
 
         return policy_loss, q1_loss, q2_loss
 
-    def training_step(self, batch: Tuple[Tensor, Tensor], _, optimizer_idx):
+    def training_step(self, batch: Tuple[Tensor, Tensor], _):
         """Carries out a single step through the environment to update the replay buffer. Then calculates loss
         based on the minibatch recieved.
 
         Args:
             batch: current mini batch of replay data
             _: batch number, not used
-            optimizer_idx: not used
         """
         policy_optim, q1_optim, q2_optim = self.optimizers()
         policy_loss, q1_loss, q2_loss = self.loss(batch)
@@ -398,7 +397,7 @@ def cli_main():
     model = SAC(**args.__dict__)
 
     # save checkpoints based on avg_reward
-    checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True)
+    checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", verbose=True)
 
     seed_everything(123)
     trainer = Trainer.from_argparse_args(args, deterministic=True, callbacks=checkpoint_callback)

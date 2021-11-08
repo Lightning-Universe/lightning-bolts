@@ -2,17 +2,17 @@
 
 <img src="docs/source/_images/logos/bolts_logo.png" width="400px">
 
-**Pretrained SOTA Deep Learning models, callbacks and more for research and production with PyTorch Lightning and PyTorch**
+**Deep Learning components for extending PyTorch Lightning**
 
 ______________________________________________________________________
 
 <p align="center">
-  <a href="https://www.pytorchlightning.ai/">Website</a> •
   <a href="#install">Installation</a> •
-  <a href="#main-Goals-of-Bolts">Main goals</a> •
-  <a href="https://lightning-bolts.readthedocs.io/en/latest/">latest Docs</a> •
-  <a href="https://lightning-bolts.readthedocs.io/en/stable/">stable Docs</a> •
+  <a href="https://lightning-bolts.readthedocs.io/en/latest/">Latest Docs</a> •
+  <a href="https://lightning-bolts.readthedocs.io/en/stable/">Stable Docs</a> •
+  <a href="#what-is-bolts">About</a> •
   <a href="#team">Community</a> •
+  <a href="https://www.pytorchlightning.ai/">Website</a> •
   <a href="https://www.grid.ai/">Grid AI</a> •
   <a href="#licence">Licence</a>
 </p>
@@ -25,42 +25,22 @@ ______________________________________________________________________
 
 [![Documentation Status](https://readthedocs.org/projects/lightning-bolts/badge/?version=latest)](https://lightning-bolts.readthedocs.io/en/latest/)
 [![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://join.slack.com/t/pytorch-lightning/shared_invite/zt-pw5v393p-qRaDgEk24~EjiZNBpSQFgQ)
-[![Discourse status](https://img.shields.io/discourse/status?server=https%3A%2F%2Fforums.pytorchlightning.ai)](https://forums.pytorchlightning.ai/)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/PytorchLightning/lightning-bolts/blob/master/LICENSE)
-
-<!--
-[![Next Release](https://img.shields.io/badge/Next%20Release-Oct%2005-purple.svg)](https://shields.io/)
--->
 
 </div>
 
 ______________________________________________________________________
 
-## Continuous Integration
+## Getting Started
 
-<details>
-  <summary>CI testing</summary>
-
-| System / PyTorch ver. |                                                             1.6 (min. req.)                                                              |                                                               1.8 (latest)                                                               |
-| :-------------------: | :--------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------: |
-|    Linux py3.{6,8}    | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
-|     OSX py3.{6,8}     | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) | ![CI full testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20full%20testing/badge.svg?branch=master&event=push) |
-|    Windows py3.7\*    | ![CI base testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) | ![CI base testing](https://github.com/PyTorchLightning/lightning-bolts/workflows/CI%20base%20testing/badge.svg?branch=master&event=push) |
-
-- _\* testing just the package itself, we skip full test suite - excluding `tests` folder_
-
-</details>
-
-## Install
-
-<details>
-  <summary>View install</summary>
-
-Simple installation from PyPI
+Pip / Conda
 
 ```bash
 pip install lightning-bolts
 ```
+
+<details>
+  <summary>Other installations</summary>
 
 Install bleeding-edge (no guarantees)
 
@@ -68,7 +48,7 @@ Install bleeding-edge (no guarantees)
 pip install git+https://github.com/PytorchLightning/lightning-bolts.git@master --upgrade
 ```
 
-In case you want to have full experience you can install all optional packages at once
+To install all optional dependencies
 
 ```bash
 pip install lightning-bolts["extra"]
@@ -78,125 +58,76 @@ pip install lightning-bolts["extra"]
 
 ## What is Bolts
 
-Bolts is a Deep learning research and production toolbox of:
+Bolts provides a variety of components to extend PyTorch Lightning such as callbacks & datasets, for applied research and production.
 
-- SOTA pretrained models.
-- Model components.
-- Callbacks.
-- Losses.
-- Datasets.
+## News
 
-## Main Goals of Bolts
+- Sept 22: [Leverage Sparsity for Faster Inference with Lightning Flash and SparseML](https://devblog.pytorchlightning.ai/leverage-sparsity-for-faster-inference-with-lightning-flash-and-sparseml-cdda1165622b)
+- Aug 26: [Fine-tune Transformers Faster with Lightning Flash and Torch ORT](https://devblog.pytorchlightning.ai/fine-tune-transformers-faster-with-lightning-flash-and-torch-ort-ec2d53789dc3)
 
-The main goal of Bolts is to enable rapid model idea iteration.
+#### Example 1: Accelerate Lightning Training with the Torch ORT Callback
 
-#### Example 1: Finetuning on data
+Torch ORT converts your model into an optimized ONNX graph, speeding up training & inference when using NVIDIA or AMD GPUs. See the [documentation](https://lightning-bolts.readthedocs.io/en/latest/callbacks/torch_ort.html) for more details.
 
 ```python
-from pl_bolts.models.self_supervised import SimCLR
-from pl_bolts.models.self_supervised.simclr.transforms import (
-    SimCLRTrainDataTransform,
-    SimCLREvalDataTransform,
-)
-import pytorch_lightning as pl
+from pytorch_lightning import LightningModule, Trainer
+import torchvision.models as models
+from pl_bolts.callbacks import ORTCallback
 
-# data
-train_data = DataLoader(MyDataset(transforms=SimCLRTrainDataTransform(input_height=32)))
-val_data = DataLoader(MyDataset(transforms=SimCLREvalDataTransform(input_height=32)))
 
-# model
-weight_path = "https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt"
-simclr = SimCLR.load_from_checkpoint(weight_path, strict=False)
+class VisionModel(LightningModule):
+    def __init__(self):
+        super().__init__()
+        self.model = models.vgg19_bn(pretrained=True)
 
-simclr.freeze()
+    ...
 
-# finetune
+
+model = VisionModel()
+trainer = Trainer(gpus=1, callbacks=ORTCallback())
+trainer.fit(model)
 ```
 
-#### Example 2: Subclass and ideate
+#### Example 2: Introduce Sparsity with the SparseMLCallback to Accelerate Inference
+
+We can introduce sparsity during fine-tuning with [SparseML](https://github.com/neuralmagic/sparseml), which ultimately allows us to leverage the [DeepSparse](https://github.com/neuralmagic/deepsparse) engine to see performance improvements at inference time.
 
 ```python
-from pl_bolts.models import ImageGPT
-from pl_bolts.models.self_supervised import SimCLR
+from pytorch_lightning import LightningModule, Trainer
+import torchvision.models as models
+from pl_bolts.callbacks import SparseMLCallback
 
 
-class VideoGPT(ImageGPT):
-    def training_step(self, batch, batch_idx):
-        x, y = batch
-        x = _shape_input(x)
+class VisionModel(LightningModule):
+    def __init__(self):
+        super().__init__()
+        self.model = models.vgg19_bn(pretrained=True)
 
-        logits = self.gpt(x)
-        simclr_features = self.simclr(x)
+    ...
 
-        # -----------------
-        # do something new with GPT logits + simclr_features
-        # -----------------
 
-        loss = self.criterion(logits.view(-1, logits.size(-1)), x.view(-1).long())
-
-        logs = {"loss": loss}
-        return {"loss": loss, "log": logs}
+model = VisionModel()
+trainer = Trainer(gpus=1, callbacks=SparseMLCallback(recipe_path="recipe.yaml"))
+trainer.fit(model)
 ```
 
-## Who is Bolts for?
+## Are specific research implementations supported?
 
-- Corporate production teams
-- Professional researchers
-- Ph.D. students
-- Linear + Logistic regression heroes
+We've deprecated a bunch of specific model research, primarily because they've grown outdated or support for them was not possible. This also means in the future we'll not accept any model specific research. We'd like to encourage users to contribute general components that will help a broad range of problems, however components that help specifics domains will also be welcomed!
 
-## I don't need deep learning
+For example a callback to help train SSL models would be a great contribution, however the next greatest SSL model from your latest paper would be a good contribution to [Lightning Flash](https://github.com/PyTorchLightning/lightning-flash).
 
-Great!
-We have LinearRegression and LogisticRegression implementations with numpy and sklearn bridges for datasets!
-But our implementations work on multiple GPUs, TPUs and scale dramatically...
+Use [Lightning Flash](https://github.com/PyTorchLightning/lightning-flash) to train, predict and serve state-of-the-art models for applied research. We suggest looking at our [VISSL](https://lightning-flash.readthedocs.io/en/latest/integrations/vissl.html) Flash integration for SSL based tasks.
 
-[Check out our Linear Regression on TPU demo](https://colab.research.google.com/drive/13glsKiwMu1-H24cBLYaWdJ4_TxC2Z3ox?usp=sharing)
+See [Deprecated Modules](https://lightning-bolts.readthedocs.io/en/latest/deprecated.html) for more information.
 
-```python
-from pl_bolts.models.regression import LinearRegression
-from pl_bolts.datamodules import SklearnDataModule
-from sklearn.datasets import load_diabetes
-import pytorch_lightning as pl
-
-# sklearn dataset
-X, y = load_diabetes(return_X_y=True)
-loaders = SklearnDataModule(X, y)
-
-model = LinearRegression(input_dim=13)
-
-# try with gpus=4!
-# trainer = pl.Trainer(gpus=4)
-trainer = pl.Trainer()
-trainer.fit(
-    model,
-    train_dataloader=loaders.train_dataloader(),
-    val_dataloaders=loaders.val_dataloader(),
-)
-trainer.test(test_dataloaders=loaders.test_dataloader())
-```
-
-## Is this another model zoo?
-
-No!
-
-Bolts is unique because models are implemented using PyTorch Lightning and structured so that they can be easily
-subclassed and iterated on.
-
-For example, you can override the elbo loss of a VAE, or the generator_step of a GAN to quickly try out a new idea.
-The best part is that all the models are benchmarked so you won't waste time trying to "reproduce" or find the bugs
-with your implementation.
-
-## Team
+## Contribute!
 
 Bolts is supported by the PyTorch Lightning team and the PyTorch Lightning community!
 
+Join our Slack and/or read our [CONTRIBUTING](./.github/CONTRIBUTING.md) guidelines to get help becoming a contributor!
+
 ______________________________________________________________________
-
-## Licence
-
-Please observe the Apache 2.0 license that is listed in this repository.
-In addition the Lightning framework is Patent Pending.
 
 ## Citation
 
@@ -212,3 +143,8 @@ To cite bolts use:
 ```
 
 To cite other contributed models or modules, please cite the authors directly (if they don't have bibtex, ping the authors on a GH issue)
+
+## Licence
+
+Please observe the Apache 2.0 license that is listed in this repository.
+In addition the Lightning framework is Patent Pending.

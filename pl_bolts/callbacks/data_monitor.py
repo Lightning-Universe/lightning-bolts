@@ -48,7 +48,12 @@ class DataMonitorBase(Callback):
         self._trainer = trainer
 
     def on_train_batch_start(
-        self, trainer: Trainer, pl_module: LightningModule, batch: Any, batch_idx: int, dataloader_idx: int
+        self,
+        trainer: Trainer,
+        pl_module: LightningModule,
+        batch: Any,
+        batch_idx: int,
+        unused: Optional[int] = 0,
     ) -> None:
         self._train_batch_idx = batch_idx
 
@@ -215,10 +220,10 @@ class TrainingDataMonitor(DataMonitorBase):
         trainer: Trainer,
         pl_module: LightningModule,
         batch: Any,
-        *args: Any,
-        **kwargs: Any,
+        batch_idx: int,
+        unused: Optional[int] = 0,
     ) -> None:
-        super().on_train_batch_start(trainer, pl_module, batch, *args, **kwargs)
+        super().on_train_batch_start(trainer, pl_module, batch, batch_idx, unused)
         self.log_histograms(batch, group=self.GROUP_NAME)
 
 
