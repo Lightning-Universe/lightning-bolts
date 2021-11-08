@@ -22,7 +22,6 @@ def test_gan(tmpdir, datadir, dm_cls):
     model = GAN(*dm.size())
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, datamodule=dm)
-    trainer.test(datamodule=dm, ckpt_path=None)
 
 
 @pytest.mark.parametrize(
@@ -37,7 +36,6 @@ def test_dcgan(tmpdir, datadir, dm_cls):
     model = DCGAN(image_channels=dm.dims[0])
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, dm)
-    trainer.test(datamodule=dm, ckpt_path=None)
 
 
 @pytest.mark.parametrize("sr_module_cls", [SRResNet, SRGAN])
@@ -49,4 +47,3 @@ def test_sr_modules(tmpdir, datadir, sr_module_cls, scale_factor):
     model = sr_module_cls(image_channels=1, scale_factor=scale_factor)
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, dl)
-    trainer.test(test_dataloaders=dl, ckpt_path=None)
