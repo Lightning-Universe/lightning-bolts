@@ -131,10 +131,7 @@ class VAE(LightningModule):
 
         recon_loss = F.mse_loss(x_hat, x, reduction="mean")
 
-        log_qz = q.log_prob(z)
-        log_pz = p.log_prob(z)
-
-        kl = log_qz - log_pz
+        kl = torch.distributions.kl_divergence(q, p)
         kl = kl.mean()
         kl *= self.kl_coeff
 
