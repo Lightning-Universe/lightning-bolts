@@ -38,7 +38,7 @@ class PPO(LightningModule):
         `PPO2 <https://github.com/openai/baselines/blob/master/baselines/ppo2/ppo2.py>`_.
 
     Note:
-        Currently only supports CPU and single GPU training with ``distributed_backend=dp``
+        Currently only supports CPU and single GPU training with ``accelerator=dp``
     """
 
     def __init__(
