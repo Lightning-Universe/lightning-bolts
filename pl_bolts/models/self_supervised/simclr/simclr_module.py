@@ -409,7 +409,7 @@ def cli_main():
         max_steps=None if args.max_steps == -1 else args.max_steps,
         gpus=args.gpus,
         num_nodes=args.num_nodes,
-        distributed_backend="ddp" if args.gpus > 1 else None,
+        accelerator="ddp" if args.gpus > 1 else None,
         sync_batchnorm=True if args.gpus > 1 else False,
         precision=32 if args.fp32 else 16,
         callbacks=callbacks,
