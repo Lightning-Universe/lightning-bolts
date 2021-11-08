@@ -15,7 +15,5 @@ def test_mnist(tmpdir, datadir):
         default_root_dir=tmpdir,
     )
     trainer.fit(model)
-    trainer.test(model)
     loss = trainer.callback_metrics["train_loss"]
-
     assert loss <= 2.2, "mnist failed"

@@ -47,7 +47,7 @@ class VanillaPolicyGradient(LightningModule):
         https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/04_cartpole_pg.py
 
     Note:
-        Currently only supports CPU and single GPU training with `distributed_backend=dp`
+        Currently only supports CPU and single GPU training with `accelerator=dp`
 
     .. _`Vanilla Policy Gradient`:
         https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf
@@ -298,7 +298,7 @@ def cli_main():
     model = VanillaPolicyGradient(**args.__dict__)
 
     # save checkpoints based on avg_reward
-    checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True)
+    checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", verbose=True)
 
     seed_everything(123)
     trainer = Trainer.from_argparse_args(args, deterministic=True, callbacks=checkpoint_callback)

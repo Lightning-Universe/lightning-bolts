@@ -13,6 +13,7 @@ from typing import Union
 
 import torch
 from pytorch_lightning import LightningModule, Trainer
+from pytorch_lightning.plugins import DDP2Plugin, DDPPlugin
 from torch import nn
 from torch.nn import functional as F
 
@@ -25,7 +26,7 @@ from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainImagenetTransforms,
     Moco2TrainSTL10Transforms,
 )
-from pl_bolts.utils import _PL_GREATER_EQUAL_1_4, _TORCHVISION_AVAILABLE
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -335,10 +336,7 @@ class Moco_v2(LightningModule):
 
     @staticmethod
     def _use_ddp_or_ddp2(trainer: Trainer) -> bool:
-        # for backwards compatibility
-        if _PL_GREATER_EQUAL_1_4:
-            return trainer.accelerator_connector.use_ddp or trainer.accelerator_connector.use_ddp2
-        return trainer.use_ddp or trainer.use_ddp2
+        return isinstance(trainer.training_type_plugin, (DDPPlugin, DDP2Plugin))
 
 
 # utils
