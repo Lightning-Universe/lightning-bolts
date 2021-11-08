@@ -105,7 +105,7 @@ def cli_main():  # pragma: no cover
         num_nodes=1,
         precision=16,
         max_epochs=args.num_epochs,
-        distributed_backend="ddp",
+        accelerator="ddp",
         sync_batchnorm=True if args.gpus > 1 else False,
     )
 
