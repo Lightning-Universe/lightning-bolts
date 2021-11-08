@@ -22,7 +22,7 @@ Contributions by: `Donal Byrne <https://github.com/djbyrne>`_
 ------------
 
 .. note::
-    RL models currently only support CPU and single GPU training with `distributed_backend=dp`.
+    RL models currently only support CPU and single GPU training with `accelerator=dp`.
     Full GPU support will be added in later updates.
 
 ------------
