@@ -315,7 +315,7 @@ def cli_main():
     model = Reinforce(**args.__dict__)
 
     # save checkpoints based on avg_reward
-    checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", period=1, verbose=True)
+    checkpoint_callback = ModelCheckpoint(save_top_k=1, monitor="avg_reward", mode="max", verbose=True)
 
     seed_everything(123)
     trainer = Trainer.from_argparse_args(args, deterministic=True, callbacks=checkpoint_callback)
