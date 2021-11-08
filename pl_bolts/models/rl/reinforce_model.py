@@ -47,7 +47,7 @@ class Reinforce(LightningModule):
         https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter11/02_cartpole_reinforce.py
 
     Note:
-        Currently only supports CPU and single GPU training with `distributed_backend=dp`
+        Currently only supports CPU and single GPU training with `accelerator=dp`
 
     .. _REINFORCE:
         https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf

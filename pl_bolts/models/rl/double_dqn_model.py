@@ -35,7 +35,7 @@ class DoubleDQN(DQN):
         https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter08/03_dqn_double.py
 
     Note:
-        Currently only supports CPU and single GPU training with `distributed_backend=dp`
+        Currently only supports CPU and single GPU training with `accelerator=dp`
 
     .. _`Double DQN`: https://arxiv.org/pdf/1509.06461.pdf
     """
