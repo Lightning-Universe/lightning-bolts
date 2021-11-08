@@ -16,7 +16,7 @@ try:
     else:  # pragma: no cover
         warn_missing_pkg("gym")
         Env = object
-except:
+except ImportError:
     warn_missing_pkg("gym")
     Env = object
 
