@@ -82,7 +82,7 @@ def test_training_data_monitor(log_histogram, tmpdir, datadir):
 
     # single tensor
     example_data = torch.rand(2, 3, 4)
-    monitor.on_train_batch_start(trainer, model, batch=example_data, batch_idx=0, dataloader_idx=0)
+    monitor.on_train_batch_start(trainer, model, batch=example_data, batch_idx=0)
     assert log_histogram.call_args_list == [
         call(example_data, "training_step/[2, 3, 4]"),
     ]
@@ -91,7 +91,7 @@ def test_training_data_monitor(log_histogram, tmpdir, datadir):
 
     # tuple
     example_data = (torch.rand(2, 3, 4), torch.rand(5), "non-tensor")
-    monitor.on_train_batch_start(trainer, model, batch=example_data, batch_idx=0, dataloader_idx=0)
+    monitor.on_train_batch_start(trainer, model, batch=example_data, batch_idx=0)
     assert log_histogram.call_args_list == [
         call(example_data[0], "training_step/0/[2, 3, 4]"),
         call(example_data[1], "training_step/1/[5]"),
@@ -105,7 +105,7 @@ def test_training_data_monitor(log_histogram, tmpdir, datadir):
         "x1": torch.rand(5),
         "non-tensor": "non-tensor",
     }
-    monitor.on_train_batch_start(trainer, model, batch=example_data, batch_idx=0, dataloader_idx=0)
+    monitor.on_train_batch_start(trainer, model, batch=example_data, batch_idx=0)
     assert log_histogram.call_args_list == [
         call(example_data["x0"], "training_step/x0/[2, 3, 4]"),
         call(example_data["x1"], "training_step/x1/[5]"),
@@ -151,7 +151,7 @@ def test_module_data_monitor_forward(log_histogram, tmpdir):
         callbacks=[monitor],
     )
     monitor.on_train_start(trainer, model)
-    monitor.on_train_batch_start(trainer, model, batch=None, batch_idx=0, dataloader_idx=0)
+    monitor.on_train_batch_start(trainer, model, batch=None, batch_idx=0)
 
     example_input = torch.rand(2, 6, 2)
     output = model(example_input)
@@ -172,7 +172,7 @@ def test_module_data_monitor_submodules_all(log_histogram, tmpdir):
         callbacks=[monitor],
     )
     monitor.on_train_start(trainer, model)
-    monitor.on_train_batch_start(trainer, model, batch=None, batch_idx=0, dataloader_idx=0)
+    monitor.on_train_batch_start(trainer, model, batch=None, batch_idx=0)
 
     example_input = torch.rand(2, 6, 2)
     output = model(example_input)
@@ -199,7 +199,7 @@ def test_module_data_monitor_submodules_specific(log_histogram, tmpdir):
         callbacks=[monitor],
     )
     monitor.on_train_start(trainer, model)
-    monitor.on_train_batch_start(trainer, model, batch=None, batch_idx=0, dataloader_idx=0)
+    monitor.on_train_batch_start(trainer, model, batch=None, batch_idx=0)
 
     example_input = torch.rand(2, 6, 2)
     _ = model(example_input)
