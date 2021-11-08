@@ -7,6 +7,7 @@ import numpy as np
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.plugins import DataParallelPlugin, DDP2Plugin
 from torch import Tensor, optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
@@ -17,7 +18,7 @@ from pl_bolts.models.rl.common.agents import ValueAgent
 from pl_bolts.models.rl.common.gym_wrappers import make_environment
 from pl_bolts.models.rl.common.memory import MultiStepBuffer
 from pl_bolts.models.rl.common.networks import CNN
-from pl_bolts.utils import _GYM_AVAILABLE, _PL_GREATER_EQUAL_1_4
+from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
@@ -404,10 +405,7 @@ class DQN(LightningModule):
 
     @staticmethod
     def _use_dp_or_ddp2(trainer: Trainer) -> bool:
-        # for backwards compatibility
-        if _PL_GREATER_EQUAL_1_4:
-            return trainer.accelerator_connector.use_dp or trainer.accelerator_connector.use_ddp2
-        return trainer.use_dp or trainer.use_ddp2
+        return isinstance(trainer.training_type_plugin, (DataParallelPlugin, DDP2Plugin))
 
 
 def cli_main():
