@@ -26,7 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix doctest fails with ImportError: cannot import name 'Env' from 'gym' ([#751](https://github.com/PyTorchLightning/lightning-bolts/pull/751))
+- Fixed doctest fails with ImportError: cannot import name 'Env' from 'gym' ([#751](https://github.com/PyTorchLightning/lightning-bolts/pull/751))
+
+- Fixed MoCo v2 missing Cosine Annealing learning scheduler ([#757](https://github.com/PyTorchLightning/lightning-bolts/pull/757))
 
 ## [0.4.0] - 2021-09-09
 
