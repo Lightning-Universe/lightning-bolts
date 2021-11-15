@@ -1,86 +1,77 @@
 from typing import Optional, Tuple, Union
 
-import numpy as np
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
+from pytorch_lightning.accelerators import Accelerator
 from torch import Tensor
-from torch.utils.data import DataLoader
-
-from pl_bolts.utils import _SKLEARN_AVAILABLE
-from pl_bolts.utils.warnings import warn_missing_pkg
-
-if _SKLEARN_AVAILABLE:
-    from sklearn.neighbors import KNeighborsClassifier
-else:  # pragma: no cover
-    warn_missing_pkg("sklearn", pypi_name="scikit-learn")
+from torch.nn import functional as F
 
 
-class KNNOnlineEvaluator(Callback):  # pragma: no cover
-    """Evaluates self-supervised K nearest neighbors.
-
+class KNNOnlineEvaluator(Callback):
+    """Weighted KNN online evaluator for self-supervised learning.
+    The weighted KNN classifier matches sec 3.4 of https://arxiv.org/pdf/1805.01978.pdf.
+    The implementation follows:
+        1. https://github.com/zhirongw/lemniscate.pytorch/blob/master/test.py
+        2. https://github.com/leftthomas/SimCLR
+        3. https://github.com/facebookresearch/moco/blob/colab-notebook/colab/moco_cifar10_demo.ipynb
     Example::
 
-        # your model must have 1 attribute
-        model = Model()
-        model.num_classes = ... # the num of classes in the model
+        # your datamodule must have 2 attributes
+        dm = DataModule()
+        dm.num_classes = ... # the num of classes in the datamodule
+        dm.name = ... # name of the datamodule (e.g. ImageNet, STL10, CIFAR10)
 
         online_eval = KNNOnlineEvaluator(
-            num_classes=model.num_classes,
-            dataset='imagenet'
+            k=100,
+            temperature=0.1
         )
     """
 
-    def __init__(
-        self,
-        dataset: str,
-        num_classes: Optional[int] = None,
-    ) -> None:
+    def __init__(self, k=200, temperature=0.07) -> None:
         """
         Args:
-            dataset: if stl10, need to get the labeled batch
-            num_classes: Number of classes
+            k: k for k nearest neighbor
+            temperature: temperature. See tau in section 3.4 of https://arxiv.org/pdf/1805.01978.pdf.
         """
-        if not _SKLEARN_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError(
-                "You want to use `KNeighborsClassifier` function from `scikit-learn` which is not installed yet."
-            )
+        self.num_classes: Optional[int] = None
+        self.dataset: Optional[int] = None
+        self.k = k
+        self.temperature = temperature
 
-        super().__init__()
+    def setup(self, trainer: Trainer, pl_module: LightningModule, stage: Optional[str] = None) -> None:
+        self.num_classes = trainer.datamodule.num_classes
+        self.dataset = trainer.datamodule.name
 
-        self.num_classes = num_classes
-        self.dataset = dataset
+    def predict(self, query_feature: Tensor, feature_bank: Tensor, target_bank: Tensor):
+        """
+        Args:
+            query_feature: (B, D) a batch of B query vectors with dim=D
+            feature_bank: (N, D) the bank of N known vectors with dim=D
+            target_bank: (N, ) the bank of N known vectors' labels
 
-    def get_representations(self, pl_module: LightningModule, x: Tensor) -> Tensor:
-        with torch.no_grad():
-            representations = pl_module(x)
-        representations = representations.reshape(representations.size(0), -1)
-        return representations
+        Returns:
+            (B, ) the predicted labels of B query vectors
+        """
 
-    def get_all_representations(
-        self,
-        pl_module: LightningModule,
-        dataloader: DataLoader,
-    ) -> Tuple[np.ndarray, np.ndarray]:
-        all_representations = None
-        ys = None
+        B = query_feature.shape[0]
 
-        for batch in dataloader:
-            x, y = self.to_device(batch, pl_module.device)
+        # compute cos similarity between each feature vector and feature bank ---> [B, N]
+        sim_matrix = query_feature @ feature_bank.T
+        # [B, K]
+        sim_weight, sim_indices = sim_matrix.topk(k=self.k, dim=-1)
+        # [B, K]
+        sim_labels = torch.gather(target_bank.expand(B, -1), dim=-1, index=sim_indices)
+        sim_weight = (sim_weight / self.temperature).exp()
 
-            with torch.no_grad():
-                representations = self.get_representations(pl_module, x)
+        # counts for each class
+        one_hot_label = torch.zeros(B * self.k, self.num_classes, device=sim_labels.device)
+        # [B*K, C]
+        one_hot_label = one_hot_label.scatter(dim=-1, index=sim_labels.view(-1, 1), value=1.0)
+        # weighted score ---> [B, C]
+        pred_scores = torch.sum(one_hot_label.view(B, -1, self.num_classes) * sim_weight.unsqueeze(dim=-1), dim=1)
 
-            if all_representations is None:
-                all_representations = representations.detach()
-            else:
-                all_representations = torch.cat([all_representations, representations.detach()])
-
-            if ys is None:
-                ys = y
-            else:
-                ys = torch.cat([ys, y])
-
-        return all_representations.cpu().numpy(), ys.cpu().numpy()  # type: ignore[union-attr]
+        pred_labels = pred_scores.argsort(dim=-1, descending=True)
+        return pred_labels
 
     def to_device(self, batch: Tensor, device: Union[str, torch.device]) -> Tuple[Tensor, Tensor]:
         # get the labeled batch
@@ -97,24 +88,49 @@ class KNNOnlineEvaluator(Callback):  # pragma: no cover
 
         return x, y
 
+    @torch.no_grad()
     def on_validation_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
-        pl_module.knn_evaluator = KNeighborsClassifier(n_neighbors=self.num_classes)
+        assert not trainer.model.training
 
-        train_dataloader = pl_module.train_dataloader()
-        representations, y = self.get_all_representations(pl_module, train_dataloader)
+        # Skip Sanity Check as train_dataloader is not initialized during Sanity Check
+        if trainer.train_dataloader is None:
+            return
 
-        # knn fit
-        pl_module.knn_evaluator.fit(representations, y)  # type: ignore[union-attr,operator]
-        train_acc = pl_module.knn_evaluator.score(representations, y)  # type: ignore[union-attr,operator]
+        total_top1, total_num, feature_bank, target_bank = 0.0, 0, [], []
 
-        # log metrics
+        # go through train data to generate feature bank
+        for batch in trainer.train_dataloader:
+            x, target = self.to_device(batch, pl_module.device)
+            feature = pl_module(x).flatten(start_dim=1)
+            feature = F.normalize(feature, dim=1)
 
-        val_dataloader = pl_module.val_dataloader()
-        representations, y = self.get_all_representations(pl_module, val_dataloader)  # type: ignore[arg-type]
+            feature_bank.append(feature)
+            target_bank.append(target)
 
-        # knn val acc
-        val_acc = pl_module.knn_evaluator.score(representations, y)  # type: ignore[union-attr,operator]
+        # [N, D]
+        feature_bank = torch.cat(feature_bank, dim=0)
+        # [N]
+        target_bank = torch.cat(target_bank, dim=0)
 
-        # log metrics
-        pl_module.log("online_knn_train_acc", train_acc, on_step=False, on_epoch=True, sync_dist=True)
-        pl_module.log("online_knn_val_acc", val_acc, on_step=False, on_epoch=True, sync_dist=True)
+        # gather representations from other gpus
+        if trainer.accelerator_connector.is_distributed:
+            feature_bank = concat_all_gather(feature_bank, trainer.accelerator)
+            target_bank = concat_all_gather(target_bank, trainer.accelerator)
+
+        # go through val data to predict the label by weighted knn search
+        for val_dataloader in trainer.val_dataloaders:
+            for batch in val_dataloader:
+                x, target = self.to_device(batch, pl_module.device)
+                feature = pl_module(x).flatten(start_dim=1)
+                feature = F.normalize(feature, dim=1)
+
+                pred_labels = self.predict(feature, feature_bank, target_bank)
+
+                total_num += x.shape[0]
+                total_top1 += (pred_labels[:, 0] == target).float().sum().item()
+
+        pl_module.log("online_knn_val_acc", total_top1 / total_num, on_step=False, on_epoch=True, sync_dist=True)
+
+
+def concat_all_gather(tensor: Tensor, accelerator: Accelerator):
+    return accelerator.all_gather(tensor).view(-1, *tensor.shape[1:])
