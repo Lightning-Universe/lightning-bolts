@@ -14,7 +14,7 @@ ______________________________________________________________________
   <a href="#team">Community</a> •
   <a href="https://www.pytorchlightning.ai/">Website</a> •
   <a href="https://www.grid.ai/">Grid AI</a> •
-  <a href="#licence">Licence</a>
+  <a href="#license">License</a>
 </p>
 
 [![PyPI Status](https://badge.fury.io/py/lightning-bolts.svg)](https://badge.fury.io/py/lightning-bolts)
@@ -144,7 +144,7 @@ To cite bolts use:
 
 To cite other contributed models or modules, please cite the authors directly (if they don't have bibtex, ping the authors on a GH issue)
 
-## Licence
+## License
 
 Please observe the Apache 2.0 license that is listed in this repository.
 In addition the Lightning framework is Patent Pending.
