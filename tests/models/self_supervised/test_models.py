@@ -29,7 +29,8 @@ def test_cpcv2(tmpdir, datadir):
         num_classes=datamodule.num_classes,
     )
 
-    # FIXME: workaround for bug caused by https://github.com/PyTorchLightning/lightning-bolts/commit/2e903c333c37ea83394c7da2ce826de1b82fb356
+    # FIXME: workaround for bug caused by
+    # https://github.com/PyTorchLightning/lightning-bolts/commit/2e903c333c37ea83394c7da2ce826de1b82fb356
     model.datamodule = datamodule
 
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
