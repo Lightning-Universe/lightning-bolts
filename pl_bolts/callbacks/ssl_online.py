@@ -75,12 +75,14 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
             n_hidden=self.hidden_dim,
         ).to(pl_module.device)
 
-        if trainer.accelerator_connector.is_distributed:
-            if trainer.accelerator_connector.use_ddp:
+        # switch fo PL compatibility reasons
+        accel = getattr(trainer, "accelerator_connector") or getattr(trainer, "_accelerator_connector")
+        if accel.is_distributed:
+            if accel.use_ddp:
                 from torch.nn.parallel import DistributedDataParallel as DDP
 
                 self.online_evaluator = DDP(self.online_evaluator, device_ids=[pl_module.device])
-            elif trainer.accelerator_connector.use_dp:
+            elif accel.use_dp:
                 from torch.nn.parallel import DataParallel as DP
 
                 self.online_evaluator = DP(self.online_evaluator, device_ids=[pl_module.device])
