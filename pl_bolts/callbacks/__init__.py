@@ -9,6 +9,7 @@ from pl_bolts.callbacks.variational import LatentDimInterpolator
 from pl_bolts.callbacks.verification.batch_gradient import BatchGradientVerificationCallback  # type: ignore
 from pl_bolts.callbacks.vision.confused_logit import ConfusedLogitCallback
 from pl_bolts.callbacks.vision.image_generation import TensorboardGenerativeModelImageSampler
+from pl_bolts.callbacks.vision.sr_image_logger import SRImageLoggerCallback
 
 __all__ = [
     "BatchGradientVerificationCallback",
@@ -20,6 +21,7 @@ __all__ = [
     "LatentDimInterpolator",
     "ConfusedLogitCallback",
     "TensorboardGenerativeModelImageSampler",
+    "SRImageLoggerCallback",
     "ORTCallback",
     "SparseMLCallback",
 ]

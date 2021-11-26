@@ -30,6 +30,22 @@ def test_cli_run_dcgan(cli_args):
         cli_main()
 
 
+@pytest.mark.parametrize("cli_args", ["--dataset mnist --scale_factor 4" + _DEFAULT_ARGS])
+def test_cli_run_srgan(cli_args):
+    from pl_bolts.models.gans.srgan.srgan_module import cli_main
+
+    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args.strip().split()):
+        cli_main()
+
+
+@pytest.mark.parametrize("cli_args", ["--dataset mnist --scale_factor 4" + _DEFAULT_ARGS])
+def test_cli_run_srresnet(cli_args):
+    from pl_bolts.models.gans.srgan.srresnet_module import cli_main
+
+    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args.strip().split()):
+        cli_main()
+
+
 @pytest.mark.parametrize("cli_args", [_DEFAULT_ARGS])
 def test_cli_run_mnist(cli_args):
     """Test running CLI for an example with default params."""
