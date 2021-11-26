@@ -15,9 +15,7 @@ from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 from tests import _MARK_REQUIRE_GPU
 
 
-# todo: seems to be failing on GH Actions for min config
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
-@pytest.mark.skip(reason="RuntimeError: Given groups=1, weight of size [256, 2048, 1, 1], expected input[2, 1, 32, 32]")
 def test_cpcv2(tmpdir, datadir):
     datamodule = CIFAR10DataModule(data_dir=datadir, num_workers=0, batch_size=2)
     datamodule.train_transforms = CPCTrainTransformsCIFAR10()
@@ -30,7 +28,12 @@ def test_cpcv2(tmpdir, datadir):
         online_ft=True,
         num_classes=datamodule.num_classes,
     )
-    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+
+    # FIXME: workaround for bug caused by
+    # https://github.com/PyTorchLightning/lightning-bolts/commit/2e903c333c37ea83394c7da2ce826de1b82fb356
+    model.datamodule = datamodule
+
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, gpus=1 if torch.cuda.device_count() > 0 else 0)
     trainer.fit(model, datamodule=datamodule)
 
 
