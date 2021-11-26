@@ -76,7 +76,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         ).to(pl_module.device)
 
         # switch fo PL compatibility reasons
-        accel = getattr(trainer, "accelerator_connector") or getattr(trainer, "_accelerator_connector")
+        accel = trainer.accelerator_connector if hasattr(trainer, "accelerator_connector") else trainer._accelerator_connector
         if accel.is_distributed:
             if accel.use_ddp:
                 from torch.nn.parallel import DistributedDataParallel as DDP
