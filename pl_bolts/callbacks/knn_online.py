@@ -112,8 +112,14 @@ class KNNOnlineEvaluator(Callback):
         # [N]
         target_bank = torch.cat(target_bank, dim=0)
 
+        # switch fo PL compatibility reasons
+        accel = (
+            trainer.accelerator_connector
+            if hasattr(trainer, "accelerator_connector")
+            else trainer._accelerator_connector
+        )
         # gather representations from other gpus
-        if trainer.accelerator_connector.is_distributed:
+        if accel.is_distributed:
             feature_bank = concat_all_gather(feature_bank, trainer.accelerator)
             target_bank = concat_all_gather(target_bank, trainer.accelerator)
 
