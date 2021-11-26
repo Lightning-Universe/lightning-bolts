@@ -132,5 +132,5 @@ class KNNOnlineEvaluator(Callback):
         pl_module.log("online_knn_val_acc", total_top1 / total_num, on_step=False, on_epoch=True, sync_dist=True)
 
 
-def concat_all_gather(tensor: Tensor, accelerator: Accelerator):
+def concat_all_gather(tensor: Tensor, accelerator: Accelerator) -> Tensor:
     return accelerator.all_gather(tensor).view(-1, *tensor.shape[1:])

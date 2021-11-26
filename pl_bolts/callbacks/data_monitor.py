@@ -17,7 +17,6 @@ if _WANDB_AVAILABLE:
     import wandb
 else:  # pragma: no cover
     warn_missing_pkg("wandb")
-    wandb = object  # type: ignore
 
 
 class DataMonitorBase(Callback):
@@ -44,7 +43,7 @@ class DataMonitorBase(Callback):
 
     def on_train_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
         self._log = self._is_logger_available(trainer.logger)
-        self._log_every_n_steps = self._log_every_n_steps or trainer.log_every_n_steps  # type: ignore[attr-defined]
+        self._log_every_n_steps = self._log_every_n_steps or trainer.log_every_n_steps
         self._trainer = trainer
 
     def on_train_batch_start(
