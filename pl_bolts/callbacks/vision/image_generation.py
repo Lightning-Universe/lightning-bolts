@@ -69,7 +69,7 @@ class TensorboardGenerativeModelImageSampler(Callback):
         self.pad_value = pad_value
 
     def on_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
-        dim = (self.num_samples, pl_module.hparams.latent_dim)  # type: ignore[union-attr]
+        dim = (self.num_samples, pl_module.hparams.latent_dim)
         z = torch.normal(mean=0.0, std=1.0, size=dim, device=pl_module.device)
 
         # generate images

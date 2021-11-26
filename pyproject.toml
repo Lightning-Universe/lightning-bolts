@@ -18,3 +18,39 @@ known_first_party = [
 skip_glob = []
 profile = "black"
 line_length = 120
+
+[tool.mypy]
+files = ["pl_bolts"]
+disallow_untyped_defs = "True"
+ignore_missing_imports = "True"
+show_error_codes = "True"
+warn_redundant_casts = "True"
+warn_unused_configs = "True"
+warn_unused_ignores = "True"
+allow_redefinition = "True"
+# disable this rule as the Trainer attributes are defined in the connectors, not in its __init__
+disable_error_code = "attr-defined"
+# style choices
+warn_no_return = "False"
+
+# TODO: Fix typing for these modules
+[[tool.mypy.overrides]]
+module = [
+    "pl_bolts.datasets.*",
+    "pl_bolts.datamodules",
+    "pl_bolts.datamodules.experience_source",
+    "pl_bolts.datamodules.sklearn_datamodule",
+    "pl_bolts.datamodules.vocdetection_datamodule",
+    "pl_bolts.losses.*",
+    "pl_bolts.metrics.*",
+    "pl_bolts.models.mnist_module",
+    "pl_bolts.models.autoencoders.*",
+    "pl_bolts.models.detection.*",
+    "pl_bolts.models.gans.*",
+    "pl_bolts.models.rl.*",
+    "pl_bolts.models.self_supervised.*",
+    "pl_bolts.models.vision.*",
+    "pl_bolts.optimizers.*",
+    "pl_bolts.transforms.*",
+]
+ignore_errors = "True"
