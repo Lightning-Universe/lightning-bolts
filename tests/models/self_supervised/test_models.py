@@ -33,7 +33,7 @@ def test_cpcv2(tmpdir, datadir):
     # https://github.com/PyTorchLightning/lightning-bolts/commit/2e903c333c37ea83394c7da2ce826de1b82fb356
     model.datamodule = datamodule
 
-    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, gpus=torch.cuda.device_count())
     trainer.fit(model, datamodule=datamodule)
 
 
