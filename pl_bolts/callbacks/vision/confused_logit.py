@@ -77,7 +77,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
         dataloader_idx: int,
     ) -> None:
         # show images only every 20 batches
-        if (batch_idx + 1) % self.logging_batch_interval != 0:  # type: ignore[attr-defined]
+        if (batch_idx + 1) % self.logging_batch_interval != 0:
             return
 
         # pick the last batch and logits
@@ -92,9 +92,9 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
             raise AttributeError(m) from err
 
         # only check when it has opinions (ie: the logit > 5)
-        if logits.max() > self.min_logit_value:  # type: ignore[operator]
+        if logits.max() > self.min_logit_value:
             # pick the top two confused probs
-            (values, idxs) = torch.topk(logits, k=2, dim=1)  # type: ignore[arg-type]
+            (values, idxs) = torch.topk(logits, k=2, dim=1)
 
             # care about only the ones that are at most eps close to each other
             eps = self.max_logit_difference
@@ -132,7 +132,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
 
         batch_size, c, w, h = confusing_x.size()
         for logit_i, x_param in enumerate((x_param_a, x_param_b)):
-            x_param = x_param.to(model.device)  # type: ignore[assignment]
+            x_param = x_param.to(model.device)
             logits = model(x_param)
             logits[:, mask_idxs[:, logit_i]].sum().backward()
 
