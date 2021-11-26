@@ -17,7 +17,7 @@ if _WANDB_AVAILABLE:
     import wandb
 else:  # pragma: no cover
     warn_missing_pkg("wandb")
-    wandb = None  # type: ignore
+    wandb = object  # type: ignore
 
 
 class DataMonitorBase(Callback):

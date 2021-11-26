@@ -35,7 +35,7 @@ class ORTCallback(Callback):
         trainer = flash.Trainer(callbacks=ORTCallback())
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         if not _TORCH_ORT_AVAILABLE:
             raise MisconfigurationException(
                 "Torch ORT is required to use ORT. See here for installation: https://github.com/pytorch/ort"

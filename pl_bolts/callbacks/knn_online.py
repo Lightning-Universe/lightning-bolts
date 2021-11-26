@@ -27,7 +27,7 @@ class KNNOnlineEvaluator(Callback):
         )
     """
 
-    def __init__(self, k=200, temperature=0.07) -> None:
+    def __init__(self, k: int = 200, temperature: float = 0.07) -> None:
         """
         Args:
             k: k for k nearest neighbor
@@ -42,7 +42,7 @@ class KNNOnlineEvaluator(Callback):
         self.num_classes = trainer.datamodule.num_classes
         self.dataset = trainer.datamodule.name
 
-    def predict(self, query_feature: Tensor, feature_bank: Tensor, target_bank: Tensor):
+    def predict(self, query_feature: Tensor, feature_bank: Tensor, target_bank: Tensor) -> Tensor:
         """
         Args:
             query_feature: (B, D) a batch of B query vectors with dim=D
