@@ -1,5 +1,6 @@
 import importlib
 import operator
+from typing import Callable
 
 import torch
 from packaging.version import Version
@@ -10,7 +11,7 @@ from pl_bolts.callbacks.verification.batch_gradient import BatchGradientVerifica
 
 
 # Ported from https://github.com/PyTorchLightning/pytorch-lightning/blob/master/pytorch_lightning/utilities/imports.py
-def _compare_version(package: str, op, version) -> bool:
+def _compare_version(package: str, op: Callable, version: str) -> bool:
     """Compare package version with some requirements.
 
     >>> _compare_version("torch", operator.ge, "0.1")

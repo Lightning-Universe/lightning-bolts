@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional
+from typing import Any, Optional
 
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
@@ -32,7 +32,7 @@ class SparseMLCallback(Callback):
             More information at https://docs.neuralmagic.com/sparseml/source/recipes.html
     """
 
-    def __init__(self, recipe_path):
+    def __init__(self, recipe_path: str):
         if not _SPARSEML_AVAILABLE:
             if not _PL_GREATER_EQUAL_1_4_5:
                 raise MisconfigurationException("SparseML requires PyTorch Lightning 1.4.5 or greater.")
@@ -79,7 +79,7 @@ class SparseMLCallback(Callback):
 
     @staticmethod
     def export_to_sparse_onnx(
-        model: LightningModule, output_dir: str, sample_batch: Optional[torch.Tensor] = None, **export_kwargs
+        model: LightningModule, output_dir: str, sample_batch: Optional[torch.Tensor] = None, **export_kwargs: Any
     ) -> None:
         """Exports the model to ONNX format."""
         with model._prevent_trainer_and_dataloaders_deepcopy():
