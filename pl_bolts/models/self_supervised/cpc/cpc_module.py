@@ -124,7 +124,7 @@ class CPC_v2(LightningModule):
         Z = self.encoder(img_1)
 
         # non cpc resnets return a list
-        if self.hparams.encoder != "cpc_encoder":
+        if self.hparams.encoder_name != "cpc_encoder":
             Z = Z[0]
 
         # (?) -> (b, -1, nb_feats, nb_feats)
