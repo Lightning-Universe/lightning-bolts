@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
@@ -50,7 +50,7 @@ class FasterRCNN(LightningModule):
         self,
         learning_rate: float = 0.0001,
         num_classes: int = 91,
-        backbone: Optional[str] = None,
+        backbone: Optional[Union[str, torch.nn.Module]] = None,
         fpn: bool = True,
         pretrained: bool = False,
         pretrained_backbone: bool = True,
@@ -61,7 +61,7 @@ class FasterRCNN(LightningModule):
         Args:
             learning_rate: the learning rate
             num_classes: number of detection classes (including background)
-            backbone: Pretained backbone CNN architecture.
+            backbone: Pretained backbone CNN architecture or torch.nn.Module instance.
             fpn: If True, creates a Feature Pyramind Network on top of Resnet based CNNs.
             pretrained: if true, returns a model pre-trained on COCO train2017
             pretrained_backbone: if true, returns a model with backbone pre-trained on Imagenet
@@ -86,13 +86,23 @@ class FasterRCNN(LightningModule):
             self.model.roi_heads.box_predictor = FastRCNNPredictor(in_features, self.num_classes)
 
         else:
-            backbone_model = create_fasterrcnn_backbone(
-                self.backbone,
-                fpn,
-                pretrained_backbone,
-                trainable_backbone_layers,
-                **kwargs,
-            )
+            if isinstance(self.backbone, torch.nn.Module):
+                backbone_model = self.backbone
+                if pretrained_backbone:
+                    import warnings
+
+                    warnings.warn(
+                        "You would need to load the pretrained state_dict yourself if you are "
+                        "providing backbone of type torch.nn.Module / pl.LightningModule."
+                    )
+            else:
+                backbone_model = create_fasterrcnn_backbone(
+                    self.backbone,
+                    fpn,
+                    pretrained_backbone,
+                    trainable_backbone_layers,
+                    **kwargs,
+                )
             self.model = torchvision_FasterRCNN(backbone_model, num_classes=num_classes, **kwargs)
 
     def forward(self, x):

@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `SRGAN`, `SRImageLoggerCallback`, `TVTDataModule`, `SRCelebA`, `SRMNIST`, `SRSTL10` ([#466](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/466))
 
 
+- Added nn.Module support for FasterRCNN backbone ([#661](https://github.com/PyTorchLightning/lightning-bolts/pull/661))
+
+
 ### Changed
 
 - VAE now uses deterministic KL divergence during training, previously estimated KL divergence by random sampling ([#760](https://github.com/PyTorchLightning/lightning-bolts/pull/760))
@@ -26,7 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix doctest fails with ImportError: cannot import name 'Env' from 'gym' ([#751](https://github.com/PyTorchLightning/lightning-bolts/pull/751))
+- Fixed doctest fails with ImportError: cannot import name 'Env' from 'gym' ([#751](https://github.com/PyTorchLightning/lightning-bolts/pull/751))
+
+- Fixed MoCo v2 missing Cosine Annealing learning scheduler ([#757](https://github.com/PyTorchLightning/lightning-bolts/pull/757))
 
 ## [0.4.0] - 2021-09-09
 
