@@ -59,9 +59,7 @@ class LatentDimInterpolator(Callback):
 
     def on_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         if (trainer.current_epoch + 1) % self.interpolate_epoch_interval == 0:
-            images = self.interpolate_latent_space(
-                pl_module, latent_dim=pl_module.hparams.latent_dim
-            )
+            images = self.interpolate_latent_space(pl_module, latent_dim=pl_module.hparams.latent_dim)
             images = torch.cat(images, dim=0)
 
             num_rows = self.steps
