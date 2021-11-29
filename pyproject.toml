@@ -36,6 +36,7 @@ warn_no_return = "False"
 # TODO: Fix typing for these modules
 [[tool.mypy.overrides]]
 module = [
+    "pl_bolts.callbacks.ssl_online",
     "pl_bolts.datasets.*",
     "pl_bolts.datamodules",
     "pl_bolts.datamodules.experience_source",
