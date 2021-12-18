@@ -1,6 +1,13 @@
 import torch
 from torch import Tensor
-from torchvision.ops import box_iou as iou
+
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _TORCHVISION_AVAILABLE:
+    from torchvision.ops import box_iou as iou
+else:  # pragma: no cover
+    warn_missing_pkg("torchvision")
 
 
 def _evaluate_iou(preds: torch.Tensor, target: torch.Tensor):
