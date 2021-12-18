@@ -2,15 +2,6 @@ import torch
 from torch import Tensor
 
 
-def _evaluate_iou(preds: torch.Tensor, target: torch.Tensor):
-    """Evaluate intersection over union (IOU) for target from dataset and output prediction from model."""
-
-    if preds["boxes"].shape[0] == 0:
-        # no box detected, 0 IOU
-        return torch.tensor(0.0, device=preds["boxes"].device)
-    return iou(target["boxes"], preds["boxes"]).diag().mean()
-
-
 def iou(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     """Calculates the intersection over union.
 
@@ -66,12 +57,6 @@ def giou(preds: Tensor, target: Tensor) -> Tensor:
         GIoU in an NxM tensor containing the pairwise GIoU values for every element in preds and target,
         where N is the number of prediction bounding boxes and M is the number of target bounding boxes
     """
-
-    # degenerate boxes gives inf / nan results
-    # so do an early check
-    assert (preds[:, 2:] >= preds[:, :2]).all()
-    assert (target[:, 2:] >= target[:, :2]).all()
-
     x_min = torch.max(preds[:, None, 0], target[:, 0])
     y_min = torch.max(preds[:, None, 1], target[:, 1])
     x_max = torch.min(preds[:, None, 2], target[:, 2])
