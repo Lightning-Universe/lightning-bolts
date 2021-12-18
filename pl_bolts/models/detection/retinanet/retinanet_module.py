@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 from typing import Any, Optional
 
-import pytorch_lightning as pl
+from pytorch_lightning import LightningModule
 import torch
 
 from pl_bolts.metrics.object_detection import _evaluate_iou
@@ -127,11 +127,13 @@ class RetinaNet(LightningModule):
 
 
 def cli_main():
+    from pytorch_lightning import seed_everything, Trainer
+
     from pl_bolts.datamodules import VOCDetectionDataModule
 
-    pl.seed_everything(42)
+    seed_everything(42)
     parser = ArgumentParser()
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser)
     parser.add_argument("--data_dir", type=str, default=".")
     parser.add_argument("--batch_size", type=int, default=1)
     parser = RetinaNet.add_model_specific_args(parser)
@@ -150,7 +152,7 @@ def cli_main():
         pretrained_backbone=args.pretrained_backbone,
         trainable_backbone_layers=args.trainable_backbone_layers,
     )
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
     trainer.fit(model, datamodule=datamodule)
 
 
