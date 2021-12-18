@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added nn.Module support for FasterRCNN backbone ([#661](https://github.com/PyTorchLightning/lightning-bolts/pull/661))
 
 
+- Added `RetinaNet` with torchvision backbones ([#529](https://github.com/PyTorchLightning/lightning-bolts/pull/529))
+
+
 ### Changed
 
 - VAE now uses deterministic KL divergence during training, previously estimated KL divergence by random sampling ([#760](https://github.com/PyTorchLightning/lightning-bolts/pull/760))
