@@ -142,7 +142,15 @@ def cli_main():
     datamodule = VOCDetectionDataModule.from_argparse_args(args)
     args.num_classes = datamodule.num_classes
 
-    model = RetinaNet(**vars(args))
+    model = RetinaNet(
+        learning_rate=args.learning_rate,
+        num_classes=args.num_classes,
+        backbone=args.backbone,
+        fpn=args.fpn,
+        pretrained=args.pretrained,
+        pretrained_backbone=args.pretrained_backbone,
+        trainable_backbone_layers=args.trainable_backbone_layers,
+    )
     trainer = pl.Trainer.from_argparse_args(args)
     trainer.fit(model, datamodule=datamodule)
 
