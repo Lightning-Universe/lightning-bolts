@@ -102,8 +102,7 @@ class RetinaNet(LightningModule):
 
     def validation_epoch_end(self, outs):
         avg_iou = torch.stack([o["val_iou"] for o in outs]).mean()
-        logs = {"val_iou": avg_iou}
-        return {"avg_val_iou": avg_iou, "log": logs}
+        self.log("val_avg_iou", avg_iou)
 
     def configure_optimizers(self):
         return torch.optim.SGD(
