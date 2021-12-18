@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 from typing import Any, Optional
 
-from pytorch_lightning import LightningModule
 import torch
+from pytorch_lightning import LightningModule
 
 from pl_bolts.metrics.object_detection import _evaluate_iou
 from pl_bolts.models.detection.retinanet import create_retinanet_backbone
@@ -17,7 +17,8 @@ else:  # pragma: no cover
 
 
 class RetinaNet(LightningModule):
-    """PyTorch Lightning implementation of RetinaNet `Focal Loss for Dense Object Detection
+    """PyTorch Lightning implementation of RetinaNet `Focal Loss for Dense Object Detection.
+
     <https://arxiv.org/abs/1708.02002>`_.
 
     Paper authors: Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, Piotr Dollár
@@ -125,7 +126,7 @@ class RetinaNet(LightningModule):
 
 
 def cli_main():
-    from pytorch_lightning import seed_everything, Trainer
+    from pytorch_lightning import Trainer, seed_everything
 
     from pl_bolts.datamodules import VOCDetectionDataModule
 
