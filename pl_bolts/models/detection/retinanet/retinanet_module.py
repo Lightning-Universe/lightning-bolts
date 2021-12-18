@@ -4,7 +4,6 @@ from typing import Any, Optional
 import torch
 from pytorch_lightning import LightningModule
 
-from pl_bolts.metrics.object_detection import _evaluate_iou
 from pl_bolts.models.detection.retinanet import create_retinanet_backbone
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -12,6 +11,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHVISION_AVAILABLE:
     from torchvision.models.detection.retinanet import RetinaNet as torchvision_RetinaNet
     from torchvision.models.detection.retinanet import RetinaNetHead, retinanet_resnet50_fpn
+    from torchvision.ops import box_iou
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
@@ -95,14 +95,21 @@ class RetinaNet(LightningModule):
     def validation_step(self, batch, batch_idx):
         images, targets = batch
         # fasterrcnn takes only images for eval() mode
-        outs = self.model(images)
-        iou = torch.stack([_evaluate_iou(o, t) for t, o in zip(targets, outs)]).mean()
+        preds = self.model(images)
+        iou = torch.stack([self._evaluate_iou(p, t) for p, t in zip(preds, targets)]).mean()
         self.log("val_iou", iou, prog_bar=True)
         return {"val_iou": iou}
 
     def validation_epoch_end(self, outs):
         avg_iou = torch.stack([o["val_iou"] for o in outs]).mean()
         self.log("val_avg_iou", avg_iou)
+
+    def _evaluate_iou(self, preds, targets):
+        """Evaluate intersection over union (IOU) for target from dataset and output prediction from model."""
+        # no box detected, 0 IOU
+        if preds["boxes"].shape[0] == 0:
+            return torch.tensor(0.0, device=preds["boxes"].device)
+        return box_iou(preds["boxes"], targets["boxes"]).diag().mean()
 
     def configure_optimizers(self):
         return torch.optim.SGD(
