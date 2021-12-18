@@ -53,6 +53,8 @@ jobs:
     - bash: |
         # python -m pip install "pip==20.1"
         pip install --requirement ./requirements/devel.txt --upgrade-strategy only-if-needed
+        # FIXME: needs to properly adjust versions across torch, torchvision, torchtext
+        pip uninstall torchtext --yes
         pip list
       displayName: 'Install dependencies'
 
