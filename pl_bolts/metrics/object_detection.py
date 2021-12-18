@@ -2,7 +2,7 @@ import torch
 from torch import Tensor
 
 
-def iou(preds: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+def iou(preds: Tensor, target: Tensor) -> torch.Tensor:
     """Calculates the intersection over union.
 
     Args:
