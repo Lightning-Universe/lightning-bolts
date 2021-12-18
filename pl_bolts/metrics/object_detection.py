@@ -1,6 +1,5 @@
 import torch
 from torch import Tensor
-
 from torchvision.ops import box_iou as iou
 
 
