@@ -13,12 +13,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      # max-parallel: 6
       matrix:
         # PyTorch 1.5 is failing on Win and bolts requires torchvision>=0.5
         os: [ubuntu-20.04, macOS-10.15]  #, windows-2019
         python-version: [3.7, 3.9]
         requires: ['minimal', 'latest']
+        exclude:
+          # - {python-version: 3.7, requires: 'latest'}
+          - {python-version: 3.9, requires: 'minimal'}
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     # the reason for high number is MUCH slower tests on macOS and py3.8
