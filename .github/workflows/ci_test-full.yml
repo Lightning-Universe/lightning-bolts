@@ -17,7 +17,7 @@ jobs:
       matrix:
         # PyTorch 1.5 is failing on Win and bolts requires torchvision>=0.5
         os: [ubuntu-20.04, macOS-10.15]  #, windows-2019
-        python-version: [3.6, 3.8]
+        python-version: [3.7, 3.8]
         requires: ['minimal', 'latest']
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
