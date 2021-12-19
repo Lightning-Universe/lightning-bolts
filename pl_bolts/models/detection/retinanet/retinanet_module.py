@@ -128,5 +128,6 @@ def cli_main():
 
     LightningCLI(RetinaNet, VOCDetectionDataModule, seed_everything_default=42)
 
+
 if __name__ == "__main__":
     cli_main()
