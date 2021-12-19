@@ -5,6 +5,7 @@ import pytest
 from tests import _MARK_REQUIRE_GPU, DATASETS_PATH
 
 _DEFAULT_ARGS = f" --data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 2 --batch_size 4"
+_DEFAULT_LIGHTNING_CLI_ARGS = f" --data.data_dir {DATASETS_PATH} --data.batch_size 4 --trainer.max_epochs 1 --trainer.max_steps 2"
 
 
 @pytest.mark.parametrize("dataset_name", ["mnist", "cifar10"])
@@ -101,6 +102,16 @@ def test_cli_run_log_regression(cli_args):
 def test_cli_run_vision_image_gpt(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.vision.image_gpt.igpt_module import cli_main
+
+    cli_args = cli_args.strip().split(" ") if cli_args else []
+    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
+        cli_main()
+
+
+@pytest.mark.parametrize("cli_args", [_DEFAULT_LIGHTNING_CLI_ARGS + " --trainer.gpus 0"])
+def test_cli_run_retinanet(cli_args):
+    """Test running CLI for an example with default params."""
+    from pl_bolts.models.detection.retinanet.retinanet_module import cli_main
 
     cli_args = cli_args.strip().split(" ") if cli_args else []
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
