@@ -32,8 +32,8 @@ class RetinaNet(LightningModule):
 
     CLI command::
 
-        # PascalVOC
-        python retinanet_module.py --gpus 1 --pretrained True
+        # PascalVOC using LightningCLI
+        python retinanet_module.py --trainer.gpus 1 --model.pretrained True
     """
 
     def __init__(
@@ -119,48 +119,14 @@ class RetinaNet(LightningModule):
             weight_decay=0.005,
         )
 
-    @staticmethod
-    def add_model_specific_args(parent_parser):
-        parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument("--learning_rate", type=float, default=0.0001)
-        parser.add_argument("--num_classes", type=int, default=91)
-        parser.add_argument("--backbone", type=str, default=None)
-        parser.add_argument("--fpn", type=bool, default=True)
-        parser.add_argument("--pretrained", type=bool, default=False)
-        parser.add_argument("--pretrained_backbone", type=bool, default=True)
-        parser.add_argument("--trainable_backbone_layers", type=int, default=3)
-        return parser
-
 
 def cli_main():
     from pytorch_lightning import Trainer, seed_everything
+    from pytorch_lightning.utilities.cli import LightningCLI
 
     from pl_bolts.datamodules import VOCDetectionDataModule
 
-    seed_everything(42)
-    parser = ArgumentParser()
-    parser = Trainer.add_argparse_args(parser)
-    parser.add_argument("--data_dir", type=str, default=".")
-    parser.add_argument("--batch_size", type=int, default=1)
-    parser = RetinaNet.add_model_specific_args(parser)
-
-    args = parser.parse_args()
-
-    datamodule = VOCDetectionDataModule.from_argparse_args(args)
-    args.num_classes = datamodule.num_classes
-
-    model = RetinaNet(
-        learning_rate=args.learning_rate,
-        num_classes=args.num_classes,
-        backbone=args.backbone,
-        fpn=args.fpn,
-        pretrained=args.pretrained,
-        pretrained_backbone=args.pretrained_backbone,
-        trainable_backbone_layers=args.trainable_backbone_layers,
-    )
-    trainer = Trainer.from_argparse_args(args)
-    trainer.fit(model, datamodule=datamodule)
-
+    LightningCLI(RetinaNet, VOCDetectionDataModule, seed_everything_default=42)
 
 if __name__ == "__main__":
     cli_main()
