@@ -5,7 +5,9 @@ import pytest
 from tests import _MARK_REQUIRE_GPU, DATASETS_PATH
 
 _DEFAULT_ARGS = f" --data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 2 --batch_size 4"
-_DEFAULT_LIGHTNING_CLI_ARGS = f" --data.data_dir {DATASETS_PATH} --data.batch_size 4 --trainer.max_epochs 1 --trainer.max_steps 2"
+_DEFAULT_LIGHTNING_CLI_ARGS = (
+    f" --data.data_dir {DATASETS_PATH} --data.batch_size 4 --trainer.max_epochs 1 --trainer.max_steps 2"
+)
 
 
 @pytest.mark.parametrize("dataset_name", ["mnist", "cifar10"])
