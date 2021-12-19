@@ -1,4 +1,3 @@
-from argparse import ArgumentParser
 from typing import Any, Optional
 
 import torch
@@ -121,7 +120,6 @@ class RetinaNet(LightningModule):
 
 
 def cli_main():
-    from pytorch_lightning import Trainer, seed_everything
     from pytorch_lightning.utilities.cli import LightningCLI
 
     from pl_bolts.datamodules import VOCDetectionDataModule
