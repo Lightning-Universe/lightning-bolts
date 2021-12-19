@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Removed PyTorch 1.6 support ([#786](https://github.com/PyTorchLightning/lightning-bolts/pull/786))
 
 ### Fixed
 
