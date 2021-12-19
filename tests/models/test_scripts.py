@@ -108,7 +108,7 @@ def test_cli_run_vision_image_gpt(cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize("cli_args", [_DEFAULT_LIGHTNING_CLI_ARGS + " --trainer.gpus 0"])
+@pytest.mark.parametrize("cli_args", [_DEFAULT_LIGHTNING_CLI_ARGS + " --trainer.gpus 1"])
 def test_cli_run_retinanet(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.detection.retinanet.retinanet_module import cli_main
