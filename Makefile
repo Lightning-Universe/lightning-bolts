@@ -5,7 +5,7 @@ export SPHINX_MOCK_REQUIREMENTS=1
 
 clean:
 	# clean all temp runs
-	rm -rf $(shell find . -name "mlruns")
+	rm -rf $(shell find . -name "lightning_log")
 	rm -rf _ckpt_*
 	rm -rf .mypy_cache
 	rm -rf .pytest_cache
@@ -13,6 +13,7 @@ clean:
 	rm -rf ./docs/source/generated
 	rm -rf ./docs/source/*/generated
 	rm -rf ./docs/source/api
+	rm -rf ./datasets
 
 test: clean env
 
@@ -25,8 +26,9 @@ docs: clean
 	python -m sphinx -b html -W docs/source docs/build
 
 env:
-	pip install -r requirements/devel.txt
+	pip install -q -r requirements/devel.txt
 
 format:
 	isort .
 	black .
+	flake8 .
