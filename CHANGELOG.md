@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added nn.Module support for FasterRCNN backbone ([#661](https://github.com/PyTorchLightning/lightning-bolts/pull/661))
 
 
+- Added Python 3.9 support ([#786](https://github.com/PyTorchLightning/lightning-bolts/pull/786))
+
+
 ### Changed
 
 - VAE now uses deterministic KL divergence during training, previously estimated KL divergence by random sampling ([#760](https://github.com/PyTorchLightning/lightning-bolts/pull/760))
@@ -25,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Removed
+
+- Removed PyTorch 1.6 support ([#786](https://github.com/PyTorchLightning/lightning-bolts/pull/786))
+
 
 - Removed Python 3.6 support ([#785](https://github.com/PyTorchLightning/lightning-bolts/pull/785))
 
