@@ -43,7 +43,7 @@ class FasterRCNN(LightningModule):
     CLI command::
 
         # PascalVOC
-        python faster_rcnn.py --gpus 1 --pretrained True
+        python faster_rcnn_module.py --gpus 1 --pretrained True
     """
 
     def __init__(

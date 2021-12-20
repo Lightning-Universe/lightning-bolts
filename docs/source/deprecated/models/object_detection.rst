@@ -13,6 +13,14 @@ Faster R-CNN
 
 -------------
 
+RetinaNet
+---------
+
+.. autoclass:: pl_bolts.models.detection.retinanet.retinanet_module.RetinaNet
+    :noindex:
+
+-------------
+
 YOLO
 ----
 
