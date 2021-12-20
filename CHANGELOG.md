@@ -4,44 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unReleased] - 2021-MM-DD
+## [0.5.0] - 2021-12-20
 
 ### Added
 
 - Added YOLO model ([#552](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/552))
-
-
 - Added `SRGAN`, `SRImageLoggerCallback`, `TVTDataModule`, `SRCelebA`, `SRMNIST`, `SRSTL10` ([#466](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/466))
-
-
 - Added nn.Module support for FasterRCNN backbone ([#661](https://github.com/PyTorchLightning/lightning-bolts/pull/661))
-
-
 - Added `RetinaNet` with torchvision backbones ([#529](https://github.com/PyTorchLightning/lightning-bolts/pull/529))
-
-
 - Added Python 3.9 support ([#786](https://github.com/PyTorchLightning/lightning-bolts/pull/786))
-
 
 ### Changed
 
 - VAE now uses deterministic KL divergence during training, previously estimated KL divergence by random sampling ([#760](https://github.com/PyTorchLightning/lightning-bolts/pull/760))
 
-### Deprecated
-
-
 ### Removed
 
 - Removed PyTorch 1.6 support ([#786](https://github.com/PyTorchLightning/lightning-bolts/pull/786))
-
-
 - Removed Python 3.6 support ([#785](https://github.com/PyTorchLightning/lightning-bolts/pull/785))
 
 ### Fixed
 
 - Fixed doctest fails with ImportError: cannot import name 'Env' from 'gym' ([#751](https://github.com/PyTorchLightning/lightning-bolts/pull/751))
-
 - Fixed MoCo v2 missing Cosine Annealing learning scheduler ([#757](https://github.com/PyTorchLightning/lightning-bolts/pull/757))
+
 
 ## [0.4.0] - 2021-09-09
 
