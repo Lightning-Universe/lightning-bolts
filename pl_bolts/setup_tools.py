@@ -48,7 +48,7 @@ def _load_readme_description(path_dir: str, homepage: str, ver: str) -> str:
     """
     path_readme = os.path.join(path_dir, "README.md")
     text = open(path_readme, encoding="utf-8").read()
-    ver = re.sub("post\d+", "", ver)
+    ver = re.sub("post\d*", "", ver)
 
     # drop images from readme
     text = text.replace('![PT to PL](docs/source/_images/general/pl_quick_start_full_compressed.gif)', '')
