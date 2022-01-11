@@ -1,10 +1,10 @@
-__version__ = '0.3.2'
+__version__ = '0.3.2post'
 __author__ = 'PyTorchLightning et al.'
 __author_email__ = 'name@pytorchlightning.ai'
 __license__ = 'Apache-2.0'
 __copyright__ = f'Copyright (c) 2020-2021, {__author__}'
 __homepage__ = 'https://github.com/PyTorchLightning/lightning-bolts'
-__docs__ = "PyTorch Lightning Bolts is a community contribution for ML researchers."
+__docs__ = "Deprecated in favor of Lightning Bolts - https://pypi.org/project/lightning-bolts"
 __long_doc__ = """
 What is it?
 -----------

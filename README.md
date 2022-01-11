@@ -2,6 +2,8 @@
 
 <img src="docs/source/_images/logos/bolts_logo.png" width="400px">
 
+### WARNING: Deprecated in favor of Lightning Bolts - https://pypi.org/project/lightning-bolts
+
 **Pretrained SOTA Deep Learning models, callbacks and more for research and production with PyTorch Lightning and PyTorch**
 
 --- 
@@ -10,15 +12,15 @@
   <a href="https://www.pytorchlightning.ai/">Website</a> •
   <a href="#install">Installation</a> •
   <a href="#main-Goals-of-Bolts">Main goals</a> •
-  <a href="https://lightning-bolts.readthedocs.io/en/latest/">latest Docs</a> •
-  <a href="https://lightning-bolts.readthedocs.io/en/stable/">stable Docs</a> •
+  <a href="https://pytorch-lightning-bolts.readthedocs.io/en/latest/">latest Docs</a> •
+  <a href="https://pytorch-lightning-bolts.readthedocs.io/en/stable/">stable Docs</a> •
   <a href="#team">Community</a> •
   <a href="https://www.grid.ai/">Grid AI</a> •
   <a href="#licence">Licence</a>
 </p>
 
-[![PyPI Status](https://badge.fury.io/py/lightning-bolts.svg)](https://badge.fury.io/py/lightning-bolts)
-[![PyPI Status](https://pepy.tech/badge/lightning-bolts)](https://pepy.tech/project/lightning-bolts)
+[![PyPI Status](https://badge.fury.io/py/pytorch-lightning-bolts.svg)](https://badge.fury.io/py/pytorch-lightning-bolts)
+[![PyPI Status](https://pepy.tech/badge/pytorch-lightning-bolts)](https://pepy.tech/project/pytorch-lightning-bolts)
 [![Build Status](https://dev.azure.com/PytorchLightning/lightning%20Bolts/_apis/build/status/PyTorchLightning.lightning-bolts?branchName=master)](https://dev.azure.com/PytorchLightning/lightning%20Bolts/_build/latest?definitionId=5&branchName=master)
 [![codecov](https://codecov.io/gh/PyTorchLightning/lightning-bolts/branch/master/graph/badge.svg)](https://codecov.io/gh/PyTorchLightning/lightning-bolts)
 [![CodeFactor](https://www.codefactor.io/repository/github/pytorchlightning/lightning-bolts/badge)](https://www.codefactor.io/repository/github/pytorchlightning/lightning-bolts)

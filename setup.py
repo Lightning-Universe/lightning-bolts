@@ -41,7 +41,7 @@ long_description = setup_tools._load_readme_description(
 # the goal of the project is simplicity for researchers, don't want to add too much
 # engineer specific practices
 setup(
-    name='lightning-bolts',
+    name='pytorch-lightning-bolts',
     version=info.__version__,
     description=info.__docs__,
     author=info.__author__,
