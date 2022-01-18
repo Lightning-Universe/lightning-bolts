@@ -6,18 +6,6 @@ from torch import Tensor
 from pl_bolts.models.rl.ppo_model import PPO
 
 
-def test_discount_rewards():
-    """Test calculation of discounted rewards."""
-    model = PPO(env="CartPole-v0", batch_size=16, gamma=0.99)
-
-    rewards = np.ones(4)
-    gt_qvals = [3.9403989999999998, 2.9701, 1.99, 1.0]
-
-    qvals = model.discount_rewards(rewards, discount=0.99)
-
-    assert gt_qvals == qvals
-
-
 def test_critic_loss():
     """Test the critic loss function."""
 

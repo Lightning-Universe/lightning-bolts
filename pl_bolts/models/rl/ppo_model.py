@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.models.rl.common.networks import MLP, ActorCategorical, ActorContinous
+from pl_bolts.models.rl.common.rewards import discount_rewards, calc_advantage
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -133,46 +134,6 @@ class PPO(LightningModule):
 
         return pi, action, value
 
-    def discount_rewards(self, rewards: List[float], discount: float) -> List[float]:
-        """Calculate the discounted rewards of all rewards in list.
-
-        Args:
-            rewards: list of rewards/advantages
-            discount: discount factor
-
-        Returns:
-            list of discounted rewards/advantages
-        """
-        assert isinstance(rewards[0], float)
-
-        cumul_reward = []
-        sum_r = 0.0
-
-        for r in reversed(rewards):
-            sum_r = (sum_r * discount) + r
-            cumul_reward.append(sum_r)
-
-        return list(reversed(cumul_reward))
-
-    def calc_advantage(self, rewards: List[float], values: List[float], last_value: float) -> List[float]:
-        """Calculate the advantage given rewards, state values, and the last value of episode.
-
-        Args:
-            rewards: list of episode rewards
-            values: list of state values from critic
-            last_value: value of last state of episode
-
-        Returns:
-            list of advantages
-        """
-        rews = rewards + [last_value]
-        vals = values + [last_value]
-        # GAE
-        delta = [rews[i] + self.gamma * vals[i + 1] - vals[i] for i in range(len(rews) - 1)]
-        adv = self.discount_rewards(delta, self.gamma * self.lam)
-
-        return adv
-
     def generate_trajectory_samples(self) -> Tuple[List[Tensor], List[Tensor], List[Tensor]]:
         """Contains the logic for generating trajectory data to train policy and value network.
 
@@ -216,9 +177,9 @@ class PPO(LightningModule):
                     steps_before_cutoff = 0
 
                 # discounted cumulative reward
-                self.batch_qvals += self.discount_rewards(self.ep_rewards + [last_value], self.gamma)[:-1]
+                self.batch_qvals += discount_rewards(self.ep_rewards + [last_value], self.gamma)[:-1]
                 # advantage
-                self.batch_adv += self.calc_advantage(self.ep_rewards, self.ep_values, last_value)
+                self.batch_adv += calc_advantage(self.ep_rewards, self.ep_values, last_value, gamma=self.gamma, lam=self.lam)
                 # logs
                 self.epoch_rewards.append(sum(self.ep_rewards))
                 # reset params
