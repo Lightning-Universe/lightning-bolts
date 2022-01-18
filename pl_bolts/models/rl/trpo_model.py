@@ -206,7 +206,7 @@ class TRPO(LightningModule):
                     self.last_100_returns.append(cumulated_reward)
 
                 # if trajectory ends abruptly, boostrap value of next state
-                last_value = 0 if done else self.critic(state).item()
+                last_value = 0 if done else self.critic(state.to(self.device)).item()
 
                 discounted_returns = discount_rewards(episode_rewards + [last_value], discount=self.gamma)
                 batch_data["discounted_returns"].extend(discounted_returns[:-1])
@@ -430,12 +430,13 @@ class TRPO(LightningModule):
             help="Maximum allowed change in KL divergence during policy updates",
         )
         parser.add_argument("--cg-iters", type=int, default=10, help="Number of conjugate gradient iterations")
-        parser.add_argument(
-            "--normalize-states",
-            action=argparse.BooleanOptionalAction,
-            default=True,
-            help="Flag whether to normalize states using Z filter",
-        )
+
+        normalize_states_parser = parser.add_mutually_exclusive_group(required=False)
+        normalize_states_parser.add_argument('--normalize-states', dest='normalize_states', action='store_true',
+                                             help="Normalize states using Z filter")
+        normalize_states_parser.add_argument('--no-normalize-states', dest='normalize_states', action='store_false',
+                                             help="Do not normalize states using Z filter")
+        parser.set_defaults(normalize_states=True)
         return parser
 
 
