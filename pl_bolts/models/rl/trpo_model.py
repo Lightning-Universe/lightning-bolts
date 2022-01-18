@@ -7,7 +7,6 @@ import gym
 import numpy as np
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
-from pytorch_lightning.loggers import WandbLogger
 from torch import Tensor
 from torch.distributions import Normal, Categorical
 from torch.distributions.utils import clamp_probs
