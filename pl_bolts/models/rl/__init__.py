@@ -7,6 +7,7 @@ from pl_bolts.models.rl.per_dqn_model import PERDQN
 from pl_bolts.models.rl.reinforce_model import Reinforce
 from pl_bolts.models.rl.sac_model import SAC
 from pl_bolts.models.rl.vanilla_policy_gradient_model import VanillaPolicyGradient
+from pl_bolts.models.rl.trpo_model import TRPO
 
 __all__ = [
     "AdvantageActorCritic",
@@ -18,4 +19,5 @@ __all__ = [
     "Reinforce",
     "SAC",
     "VanillaPolicyGradient",
+    "TRPO",
 ]
