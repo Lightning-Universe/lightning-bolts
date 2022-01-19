@@ -247,8 +247,7 @@ class TRPO(LightningModule):
         return pi, action, value
 
     def training_step(self, batch: Tuple[Tensor, Tensor, Tensor, Tensor, Tensor], *kwargs) -> None:
-        """
-        Performs 10 epochs of updates for critic network and single TRPO step for actor network
+        """Performs 10 epochs of updates for critic network and single TRPO step for actor network.
 
         Args:
             batch: batch of trajectory data
