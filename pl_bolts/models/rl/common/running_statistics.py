@@ -1,12 +1,12 @@
-from typing import Union, List
+from typing import List, Union
 
 import numpy as np
 
+
 class RunningStatistics:
-    """
-    Keeps track of first and second moments (mean and variance) of a streaming time series.
-    Taken from https://github.com/joschu/modular_rl
-    Math in http://www.johndcook.com/blog/standard_deviation/
+    """Keeps track of first and second moments (mean and variance) of a streaming time series.
+
+    Taken from https://github.com/joschu/modular_rl Math in http://www.johndcook.com/blog/standard_deviation/
     """
 
     def __init__(self, shape: int) -> None:
@@ -35,9 +35,7 @@ class RunningStatistics:
 
 
 class ZFilter:
-    """
-    Normalizes variables using the mean and standard deviation by calculating them from running statistics.
-    """
+    """Normalizes variables using the mean and standard deviation by calculating them from running statistics."""
 
     def __init__(self, shape: int) -> None:
         self.running_statistics = RunningStatistics(shape)

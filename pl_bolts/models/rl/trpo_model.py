@@ -1,14 +1,14 @@
 import argparse
 from collections import defaultdict, deque
 from statistics import mean
-from typing import Tuple, Any, Union, Callable
+from typing import Any, Callable, Tuple, Union
 
 import gym
 import numpy as np
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch import Tensor
-from torch.distributions import Normal, Categorical
+from torch.distributions import Categorical, Normal
 from torch.distributions.utils import clamp_probs
 from torch.nn import Module
 from torch.optim.optimizer import Optimizer
@@ -17,11 +17,11 @@ from torch.utils.data import DataLoader
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.models.rl.common.conjugate_gradient import conjugate_gradient
 from pl_bolts.models.rl.common.kl_divergence import (
-    kl_divergence_between_discrete_distributions,
     kl_divergence_between_continuous_distributions,
+    kl_divergence_between_discrete_distributions,
 )
 from pl_bolts.models.rl.common.networks import MLP, ActorCategorical, ActorContinous
-from pl_bolts.models.rl.common.rewards import discount_rewards, calc_advantage
+from pl_bolts.models.rl.common.rewards import calc_advantage, discount_rewards
 from pl_bolts.models.rl.common.running_statistics import ZFilter
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -56,21 +56,20 @@ class TRPO(LightningModule):
         Paper authors: Logan Engstrom, Andrew Ilyas, Shibani Santurkar, Dimitris Tsipras,
         Firdaus Janoos, Larry Rudolph, Aleksander Madry
         <https://arxiv.org/abs/2005.12729>_
-
     """
 
     def __init__(
-            self,
-            env: str,
-            gamma: float = 0.99,
-            lam: float = 0.95,
-            lr_critic: float = 1e-4,
-            max_episode_len: int = 200,
-            batch_size: int = 2048,
-            kl_div_threshold: float = 0.07,
-            cg_iters: int = 10,
-            normalize_states: bool = True,
-            **kwargs: Any,
+        self,
+        env: str,
+        gamma: float = 0.99,
+        lam: float = 0.95,
+        lr_critic: float = 1e-4,
+        max_episode_len: int = 200,
+        batch_size: int = 2048,
+        kl_div_threshold: float = 0.07,
+        cg_iters: int = 10,
+        normalize_states: bool = True,
+        **kwargs: Any,
     ):
         """
         Args:
@@ -121,15 +120,13 @@ class TRPO(LightningModule):
         self.batch_log_dict = {}
 
     def get_critic_net(self) -> Module:
-        """
-        Override this method if you would like to use a different network than the MLP (e.g. CNN) as a critic.
-        """
+        """Override this method if you would like to use a different network than the MLP (e.g. CNN) as a
+        critic."""
         return MLP(self.state_dim, 1)
 
     def get_actor_net(self) -> Module:
-        """
-        Override this method if you would like to use a different network than the MLP (e.g. CNN) as an actor.
-        """
+        """Override this method if you would like to use a different network than the MLP (e.g. CNN) as an
+        actor."""
         return MLP(self.state_dim, self.action_dim)
 
     def _initialize_continuous_env_strategy(self) -> None:
@@ -151,8 +148,7 @@ class TRPO(LightningModule):
 
     @torch.no_grad()
     def generate_trajectory_samples(self) -> Tuple[Tensor, Tensor, float, float, float]:
-        """
-        Generates one batch, when episode length exceeds the size of batch_size the last value is bootstrapped
+        """Generates one batch, when episode length exceeds the size of batch_size the last value is bootstrapped.
 
         Yields:
             Tuple of:
@@ -246,8 +242,7 @@ class TRPO(LightningModule):
         return pi, action, value
 
     def training_step(self, batch: Tuple[Tensor, Tensor, Tensor, Tensor, Tensor], batch_idx: int) -> None:
-        """
-        Performs 10 epochs of updates for critic network and single TRPO step for actor network
+        """Performs 10 epochs of updates for critic network and single TRPO step for actor network.
 
         Args:
             batch: batch of trajectory data
@@ -304,9 +299,7 @@ class TRPO(LightningModule):
         step_direction = conjugate_gradient(fisher_product, actor_surrogate_gradient, max_iterations=self.cg_iters)
 
         # Determine the maximum step of change
-        max_length = torch.sqrt(
-            2 * self.kl_div_threshold / (step_direction @ fisher_product(step_direction))
-        )
+        max_length = torch.sqrt(2 * self.kl_div_threshold / (step_direction @ fisher_product(step_direction)))
         max_step = max_length * step_direction
 
         with torch.no_grad():
@@ -352,8 +345,7 @@ class TRPO(LightningModule):
         return loss.mean()
 
     def update_actor_weights(self, new_weights: Tensor) -> None:
-        """
-        Assigns parameters from flatten vector of weights to actor network
+        """Assigns parameters from flatten vector of weights to actor network.
 
         Args:
             new_weights: Flat tensor of weights
@@ -364,7 +356,7 @@ class TRPO(LightningModule):
         pointer = 0
         for param in self.actor.parameters():
             numel = param.numel()
-            param.data = new_weights[pointer: pointer + numel].view(param.shape).data
+            param.data = new_weights[pointer : pointer + numel].view(param.shape).data
             pointer += numel
 
     def configure_optimizers(self) -> Optimizer:
@@ -387,11 +379,10 @@ class TRPO(LightningModule):
 
     @staticmethod
     def _backtracking_line_search(
-            f: Callable, x: Any, expected_improve_rate: float, num_tries: int = 10, accept_ratio: float = 0.1
+        f: Callable, x: Any, expected_improve_rate: float, num_tries: int = 10, accept_ratio: float = 0.1
     ) -> Tensor:
-        """
-        Performs Backtracking Line Search algorithm. In each iteration of the algorithm, the step is halved,
-        and then it is verified whether the new policy meets the KL constraint.
+        """Performs Backtracking Line Search algorithm. In each iteration of the algorithm, the step is halved, and
+        then it is verified whether the new policy meets the KL constraint.
 
         Args:
             f: Objective function
@@ -432,10 +423,15 @@ class TRPO(LightningModule):
         parser.add_argument("--cg-iters", type=int, default=10, help="Number of conjugate gradient iterations")
 
         normalize_states_parser = parser.add_mutually_exclusive_group(required=False)
-        normalize_states_parser.add_argument('--normalize-states', dest='normalize_states', action='store_true',
-                                             help="Normalize states using Z filter")
-        normalize_states_parser.add_argument('--no-normalize-states', dest='normalize_states', action='store_false',
-                                             help="Do not normalize states using Z filter")
+        normalize_states_parser.add_argument(
+            "--normalize-states", dest="normalize_states", action="store_true", help="Normalize states using Z filter"
+        )
+        normalize_states_parser.add_argument(
+            "--no-normalize-states",
+            dest="normalize_states",
+            action="store_false",
+            help="Do not normalize states using Z filter",
+        )
         parser.set_defaults(normalize_states=True)
         return parser
 

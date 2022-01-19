@@ -1,8 +1,8 @@
 import torch
 
 from pl_bolts.models.rl.common.kl_divergence import (
-    kl_divergence_between_discrete_distributions,
     kl_divergence_between_continuous_distributions,
+    kl_divergence_between_discrete_distributions,
 )
 
 

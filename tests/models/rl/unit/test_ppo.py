@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 from pytorch_lightning import Trainer
 from torch import Tensor

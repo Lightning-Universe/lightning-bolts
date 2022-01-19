@@ -1,6 +1,6 @@
 import numpy as np
 
-from pl_bolts.models.rl.common.rewards import discount_rewards, calc_advantage
+from pl_bolts.models.rl.common.rewards import calc_advantage, discount_rewards
 
 
 def test_discount_rewards():

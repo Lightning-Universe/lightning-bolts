@@ -1,9 +1,8 @@
 from typing import Tuple
 
 import torch
-
-
 from torch import Tensor
+
 
 def kl_divergence_between_discrete_distributions(p: Tensor, q: Tensor) -> float:
     """

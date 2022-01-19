@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.models.rl.common.networks import MLP, ActorCategorical, ActorContinous
-from pl_bolts.models.rl.common.rewards import discount_rewards, calc_advantage
+from pl_bolts.models.rl.common.rewards import calc_advantage, discount_rewards
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -179,7 +179,9 @@ class PPO(LightningModule):
                 # discounted cumulative reward
                 self.batch_qvals += discount_rewards(self.ep_rewards + [last_value], self.gamma)[:-1]
                 # advantage
-                self.batch_adv += calc_advantage(self.ep_rewards, self.ep_values, last_value, gamma=self.gamma, lam=self.lam)
+                self.batch_adv += calc_advantage(
+                    self.ep_rewards, self.ep_values, last_value, gamma=self.gamma, lam=self.lam
+                )
                 # logs
                 self.epoch_rewards.append(sum(self.ep_rewards))
                 # reset params
