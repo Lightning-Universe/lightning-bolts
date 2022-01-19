@@ -53,5 +53,4 @@ def kl_divergence_between_continuous_distributions(p: Tuple[Tensor, Tensor], q: 
     quadratic = ((diff / q_var) * diff).sum(dim=1)
 
     kl_sum = 0.5 * (log_quot_frac - d + tr + quadratic)
-    assert kl_sum.shape == (p_mean.shape[0],)
     return kl_sum.mean()

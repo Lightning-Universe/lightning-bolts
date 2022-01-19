@@ -141,10 +141,15 @@ class TRPO(LightningModule):
         self.kl_div = kl_divergence_between_discrete_distributions
         self.get_distribution = self._distribution_from_categorical_input
 
-    def train_dataloader(self) -> DataLoader:
+    def _dataloader(self) -> DataLoader:
+        """Initialize the Replay Buffer dataset used for retrieving experiences."""
         dataset = ExperienceSourceDataset(self.generate_trajectory_samples)
         dataloader = DataLoader(dataset=dataset, batch_size=self.batch_size)
         return dataloader
+
+    def train_dataloader(self) -> DataLoader:
+        """Get train loader."""
+        return self._dataloader()
 
     @torch.no_grad()
     def generate_trajectory_samples(self) -> Tuple[Tensor, Tensor, float, float, float]:
@@ -227,26 +232,26 @@ class TRPO(LightningModule):
         for state, action, action_log_prob, discounted_return, advantage in zip(*lists_yo_yield):
             yield state, action, action_log_prob, discounted_return, advantage
 
-    def forward(self, state: Tensor) -> Tuple[Union[Categorical, Normal], Tensor, Tensor]:
+    def forward(self, x: Tensor) -> Tuple[Union[Categorical, Normal], Tensor, Tensor]:
         """
         Args:
-            state: Tensor representing the state
+            x: Tensor representing the state
 
         Returns:
             pi: Predicted distribution, instance of Categorical or Normal
             action: Tensor representing chosen action
             value: Tensor with value estimated by critic
         """
-        pi, action = self.actor(state.float())
-        value = self.critic(state.float())
+        pi, action = self.actor(x.float())
+        value = self.critic(x.float())
         return pi, action, value
 
-    def training_step(self, batch: Tuple[Tensor, Tensor, Tensor, Tensor, Tensor], batch_idx: int) -> None:
-        """Performs 10 epochs of updates for critic network and single TRPO step for actor network.
+    def training_step(self, batch: Tuple[Tensor, Tensor, Tensor, Tensor, Tensor], *kwargs) -> None:
+        """
+        Performs 10 epochs of updates for critic network and single TRPO step for actor network
 
         Args:
             batch: batch of trajectory data
-            batch_idx: not used
 
         Returns:
             None - loss is redundant as all updates are performed inside the function
@@ -292,7 +297,9 @@ class TRPO(LightningModule):
         g = self._flatten(torch.autograd.grad(kl, self.actor.parameters(), create_graph=True))
 
         def fisher_product(x):
-            contig_flat = lambda q: torch.cat([y.contiguous().view(-1) for y in q])
+            def contig_flat(q):
+                return torch.cat([y.contiguous().view(-1) for y in q])
+
             hv = torch.autograd.grad(g @ x, self.actor.parameters(), retain_graph=True)
             return contig_flat(hv).detach() + x * 0.1
 
@@ -368,14 +375,12 @@ class TRPO(LightningModule):
 
     @staticmethod
     def _distribution_from_categorical_input(pi: Categorical) -> Tensor:
-        assert isinstance(pi, Categorical)
         return clamp_probs(pi.probs)
 
     @staticmethod
     def _distribution_from_continuous_input(pi: Normal) -> Tuple[Tensor, Tensor]:
-        assert isinstance(pi, Normal)
-        mean, std = pi.mean, pi.stddev[0]
-        return mean, std
+        distribution_mean, distribution_std = pi.mean, pi.stddev[0]
+        return distribution_mean, distribution_std
 
     @staticmethod
     def _backtracking_line_search(

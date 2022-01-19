@@ -16,7 +16,6 @@ class RunningStatistics:
 
     def push(self, x: Union[List, np.array]) -> None:
         x = np.asarray(x)
-        assert x.shape == self.mean.shape
         self.n += 1
         if self.n == 1:
             self.mean[...] = x

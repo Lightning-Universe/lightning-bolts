@@ -13,7 +13,6 @@ def discount_rewards(rewards: Union[np.array, List[float]], discount: float = 0.
     Returns:
         list of discounted rewards/advantages
     """
-    assert isinstance(rewards[0], float)
 
     cumul_reward = []
     sum_r = 0.0
