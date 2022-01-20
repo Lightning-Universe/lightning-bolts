@@ -1,14 +1,21 @@
 import re
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 from warnings import warn
 
 import torch.nn as nn
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
 from pl_bolts.models.detection.yolo import yolo_layers
+from pl_bolts.models.detection.yolo.target_matching import (
+    HighestIoUMatching,
+    IoUThresholdMatching,
+    SimOTAMatching,
+    SizeRatioMatching,
+)
+from pl_bolts.models.detection.yolo.yolo_loss import LossFunction
 
 
-class YOLOConfiguration:
+class DarknetConfiguration:
     """This class can be used to parse the configuration files of the Darknet YOLOv4 implementation.
 
     The :func:`~pl_bolts.models.detection.yolo.yolo_config.YOLOConfiguration.get_network` method
@@ -32,7 +39,7 @@ class YOLOConfiguration:
         self.global_config = sections[0]
         self.layer_configs = sections[1:]
 
-    def get_network(self) -> nn.ModuleList:
+    def get_network(self, **kwargs) -> nn.ModuleList:
         """Iterates through the layers from the configuration and creates corresponding PyTorch modules. Returns
         the network structure that can be used to create a YOLO model.
 
@@ -43,7 +50,7 @@ class YOLOConfiguration:
         num_inputs = [3]  # Number of channels in the input of every layer up to the current layer
         for layer_config in self.layer_configs:
             config = {**self.global_config, **layer_config}
-            module, num_outputs = _create_layer(config, num_inputs)
+            module, num_outputs = _create_layer(config, num_inputs, **kwargs)
             result.append(module)
             num_inputs.append(num_outputs)
         return result
@@ -145,7 +152,7 @@ class YOLOConfiguration:
         return sections
 
 
-def _create_layer(config: dict, num_inputs: List[int]) -> Tuple[nn.Module, int]:
+def _create_layer(config: Dict[str, Any], num_inputs: List[int], **kwargs) -> Tuple[nn.Module, int]:
     """Calls one of the ``_create_<layertype>(config, num_inputs)`` functions to create a PyTorch module from the
     layer config.
 
@@ -165,11 +172,11 @@ def _create_layer(config: dict, num_inputs: List[int]) -> Tuple[nn.Module, int]:
         "upsample": _create_upsample,
         "yolo": _create_yolo,
     }
-    return create_func[config["type"]](config, num_inputs)
+    return create_func[config["type"]](config, num_inputs, **kwargs)
 
 
-def _create_convolutional(config, num_inputs):
-    module = nn.Sequential()
+def _create_convolutional(config: Dict[str, Any], num_inputs: List[int], **kwargs):
+    layer = nn.Sequential()
 
     batch_normalize = config.get("batch_normalize", False)
     padding = (config["size"] - 1) // 2 if config["pad"] else 0
@@ -177,40 +184,53 @@ def _create_convolutional(config, num_inputs):
     conv = nn.Conv2d(
         num_inputs[-1], config["filters"], config["size"], config["stride"], padding, bias=not batch_normalize
     )
-    module.add_module("conv", conv)
+    layer.add_module("conv", conv)
 
     if batch_normalize:
-        bn = nn.BatchNorm2d(config["filters"])
-        module.add_module("bn", bn)
+        bn = nn.BatchNorm2d(config["filters"])  # YOLOv5: eps=0.001, momentum=0.03
+        layer.add_module("bn", bn)
 
     activation_name = config["activation"]
     if activation_name == "leaky":
         leakyrelu = nn.LeakyReLU(0.1, inplace=True)
-        module.add_module("leakyrelu", leakyrelu)
+        layer.add_module("leakyrelu", leakyrelu)
     elif activation_name == "mish":
         mish = yolo_layers.Mish()
-        module.add_module("mish", mish)
+        layer.add_module("mish", mish)
     elif activation_name == "swish":
         swish = nn.SiLU(inplace=True)
-        module.add_module("swish", swish)
+        layer.add_module("swish", swish)
     elif activation_name == "logistic":
         logistic = nn.Sigmoid()
-        module.add_module("logistic", logistic)
+        layer.add_module("logistic", logistic)
     elif activation_name == "linear":
         pass
     else:
-        raise ValueError("Unknown activation: " + activation_name)
+        raise MisconfigurationException("Unknown activation: " + activation_name)
 
-    return module, config["filters"]
-
-
-def _create_maxpool(config, num_inputs):
-    padding = (config["size"] - 1) // 2
-    module = nn.MaxPool2d(config["size"], config["stride"], padding)
-    return module, num_inputs[-1]
+    return layer, config["filters"]
 
 
-def _create_route(config, num_inputs):
+def _create_maxpool(config: Dict[str, Any], num_inputs: List[int], **kwargs):
+    """Creates a max pooling layer.
+
+    Padding is added so that the output resolution will be the input resolution divided by stride, rounded upwards.
+    """
+    kernel_size = config["size"]
+    padding = (kernel_size - 1) // 2
+    maxpool = nn.MaxPool2d(kernel_size, config["stride"], padding)
+    if kernel_size % 2 == 1:
+        return maxpool, num_inputs[-1]
+
+    # If the kernel size is an even number, we need one cell of extra padding, on top of the padding
+    # added by MaxPool2d on both sides.
+    layer = nn.Sequential()
+    layer.add_module("pad", nn.ZeroPad2d((0, 1, 0, 1)))
+    layer.add_module("maxpool", maxpool)
+    return layer, num_inputs[-1]
+
+
+def _create_route(config, num_inputs: List[int], **kwargs):
     num_chunks = config.get("groups", 1)
     chunk_idx = config.get("group_id", 0)
 
@@ -218,56 +238,76 @@ def _create_route(config, num_inputs):
     last = len(num_inputs) - 1
     source_layers = [layer if layer >= 0 else last + layer for layer in config["layers"]]
 
-    module = yolo_layers.RouteLayer(source_layers, num_chunks, chunk_idx)
+    layer = yolo_layers.RouteLayer(source_layers, num_chunks, chunk_idx)
 
     # The number of outputs of a source layer is the number of inputs of the next layer.
     num_outputs = sum(num_inputs[layer + 1] // num_chunks for layer in source_layers)
 
-    return module, num_outputs
+    return layer, num_outputs
 
 
-def _create_shortcut(config, num_inputs):
-    module = yolo_layers.ShortcutLayer(config["from"])
-    return module, num_inputs[-1]
+def _create_shortcut(config: Dict[str, Any], num_inputs: List[int], **kwargs):
+    layer = yolo_layers.ShortcutLayer(config["from"])
+    return layer, num_inputs[-1]
 
 
-def _create_upsample(config, num_inputs):
-    module = nn.Upsample(scale_factor=config["stride"], mode="nearest")
-    return module, num_inputs[-1]
+def _create_upsample(config: Dict[str, Any], num_inputs: List[int], **kwargs):
+    layer = nn.Upsample(scale_factor=config["stride"], mode="nearest")
+    return layer, num_inputs[-1]
 
 
-def _create_yolo(config, num_inputs):
+def _create_yolo(
+    config: Dict[str, Any],
+    num_inputs: List[int],
+    match_sim_ota: bool = False,
+    match_size_ratio: Optional[float] = None,
+    match_iou_threshold: Optional[float] = None,
+    ignore_iou_threshold: Optional[float] = None,
+    overlap_loss: Optional[Union[str, Callable]] = None,
+    predict_overlap: Optional[float] = None,
+    overlap_loss_multiplier: Optional[float] = None,
+    class_loss_multiplier: Optional[float] = None,
+    confidence_loss_multiplier: Optional[float] = None,
+    **kwargs,
+):
     # The "anchors" list alternates width and height.
     anchor_dims = config["anchors"]
     anchor_dims = [(anchor_dims[i], anchor_dims[i + 1]) for i in range(0, len(anchor_dims), 2)]
+    anchor_ids = config["mask"]
 
     xy_scale = config.get("scale_x_y", 1.0)
     input_is_normalized = config.get("new_coords", 0) > 0
-    ignore_threshold = config.get("ignore_thresh", 1.0)
-    overlap_loss_multiplier = config.get("iou_normalizer", 1.0)
-    class_loss_multiplier = config.get("cls_normalizer", 1.0)
-    confidence_loss_multiplier = config.get("obj_normalizer", 1.0)
+    ignore_iou_threshold = config.get("ignore_thresh", 1.0) if ignore_iou_threshold is None else ignore_iou_threshold
 
-    overlap_loss_name = config.get("iou_loss", "mse")
-    if overlap_loss_name == "mse":
-        overlap_loss_func = yolo_layers.SELoss()
-    elif overlap_loss_name == "giou":
-        overlap_loss_func = yolo_layers.GIoULoss()
-    else:
-        overlap_loss_func = yolo_layers.IoULoss()
-
-    module = yolo_layers.DetectionLayer(
-        num_classes=config["classes"],
-        anchor_dims=anchor_dims,
-        anchor_ids=config["mask"],
-        xy_scale=xy_scale,
-        input_is_normalized=input_is_normalized,
-        ignore_threshold=ignore_threshold,
-        overlap_loss_func=overlap_loss_func,
-        image_space_loss=overlap_loss_name != "mse",
-        overlap_loss_multiplier=overlap_loss_multiplier,
-        class_loss_multiplier=class_loss_multiplier,
-        confidence_loss_multiplier=confidence_loss_multiplier,
+    overlap_loss = overlap_loss or config.get("iou_loss", "iou")
+    if overlap_loss_multiplier is None:
+        overlap_loss_multiplier = config.get("iou_normalizer", 1.0)
+    if class_loss_multiplier is None:
+        class_loss_multiplier = config.get("cls_normalizer", 1.0)
+    if confidence_loss_multiplier is None:
+        confidence_loss_multiplier = config.get("obj_normalizer", 1.0)
+    loss_func = LossFunction(
+        overlap_loss, predict_overlap, overlap_loss_multiplier, class_loss_multiplier, confidence_loss_multiplier
     )
 
-    return module, num_inputs[-1]
+    if sum(var is not None for var in (match_sim_ota, match_size_ratio, match_iou_threshold)) > 1:
+        raise ValueError("More than one matching algorithm specified.")
+    if match_sim_ota:
+        matching_func = SimOTAMatching(loss_func)
+    elif match_size_ratio is not None:
+        matching_func = SizeRatioMatching(match_size_ratio, anchor_dims, anchor_ids, ignore_iou_threshold)
+    elif match_iou_threshold is not None:
+        matching_func = IoUThresholdMatching(match_iou_threshold, anchor_dims, anchor_ids, ignore_iou_threshold)
+    else:
+        matching_func = HighestIoUMatching(anchor_dims, anchor_ids, ignore_iou_threshold)
+
+    layer = yolo_layers.DetectionLayer(
+        num_classes=config["classes"],
+        anchor_dims=[anchor_dims[i] for i in anchor_ids],
+        matching_func=matching_func,
+        loss_func=loss_func,
+        xy_scale=xy_scale,
+        input_is_normalized=input_is_normalized,
+    )
+
+    return layer, num_inputs[-1]
