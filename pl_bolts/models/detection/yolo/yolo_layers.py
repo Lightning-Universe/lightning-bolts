@@ -13,8 +13,19 @@ from pl_bolts.utils import _TORCHVISION_AVAILABLE
 class DetectionLayer(nn.Module):
     """A YOLO detection layer.
 
-    A YOLO model has usually 1 - 3 detection layers at different
-    resolutions. The loss should be summed from all of them.
+    A YOLO model has usually 1 - 3 detection layers at different resolutions. The loss is summed from all of them.
+
+    Args:
+        num_classes: Number of different classes that this layer predicts.
+        anchor_dims: A list of the anchor box dimensions for this layer. The list should contain (width, height) tuples
+            in the network input resolution (relative to the width and height defined in the configuration file).
+        matching_func: The matching algorithm to be used for assigning targets to anchors.
+        loss_func: ``LossFunction`` object for calculating the losses.
+        xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
+            to produce coordinate values close to one.
+        input_is_normalized: The input is normalized by logistic activation in the previous layer. In this case the
+            detection layer will not take the sigmoid of the coordinate and probability predictions, and the width and
+            height are scaled up so that the maximum value is four times the anchor dimension.
     """
 
     def __init__(
@@ -26,21 +37,6 @@ class DetectionLayer(nn.Module):
         xy_scale: float = 1.0,
         input_is_normalized: bool = False,
     ) -> None:
-        """
-        Args:
-            num_classes: Number of different classes that this layer predicts.
-            anchor_dims: A list of the anchor box dimensions for this layer. The list should
-                contain (width, height) tuples in the network input resolution (relative to the
-                width and height defined in the configuration file).
-            matching_func: The matching algorithm to be used for assigning targets to anchors.
-            loss_func: ``LossFunction`` object for calculating the losses.
-            xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor.
-                Using a value > 1.0 helps to produce coordinate values close to one.
-            input_is_normalized: The input is normalized by logistic activation in the previous
-                layer. In this case the detection layer will not take the sigmoid of the coordinate
-                and probability predictions, and the width and height are scaled up so that the
-                maximum value is four times the anchor dimension
-        """
         super().__init__()
 
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
@@ -88,9 +84,9 @@ class DetectionLayer(nn.Module):
         x = x.permute(0, 2, 3, 1)  # [batch_size, height, width, boxes_per_cell * num_attrs]
         x = x.view(batch_size, height, width, boxes_per_cell, num_attrs)
 
-        # Take the sigmoid of the bounding box coordinates, confidence score, and class
-        # probabilities, unless the input is normalized by the previous layer activation. Confidence
-        # and class losses use the unnormalized values if possible.
+        # Take the sigmoid of the bounding box coordinates, confidence score, and class probabilities, unless the input
+        # is normalized by the previous layer activation. Confidence and class losses use the unnormalized values if
+        # possible.
         norm_x = x if self.input_is_normalized else torch.sigmoid(x)
         xy = norm_x[..., :2]
         wh = x[..., 2:4]
@@ -99,9 +95,8 @@ class DetectionLayer(nn.Module):
         norm_confidence = norm_x[..., 4]
         norm_classprob = norm_x[..., 5:]
 
-        # Eliminate grid sensitivity. The previous layer should output extremely high values for
-        # the sigmoid to produce x/y coordinates close to one. YOLOv4 solves this by scaling the
-        # x/y coordinates.
+        # Eliminate grid sensitivity. The previous layer should output extremely high values for the sigmoid to produce
+        # x/y coordinates close to one. YOLOv4 solves this by scaling the x/y coordinates.
         xy = xy * self.xy_scale - 0.5 * (self.xy_scale - 1)
 
         image_xy = global_xy(xy, image_size)
@@ -183,15 +178,15 @@ class Mish(nn.Module):
 
 
 class RouteLayer(nn.Module):
-    """Route layer concatenates the output (or part of it) from given layers."""
+    """Route layer concatenates the output (or part of it) from given layers.
+
+    Args:
+        source_layers: Indices of the layers whose output will be concatenated.
+        num_chunks: Layer outputs will be split into this number of chunks.
+        chunk_idx: Only the chunks with this index will be concatenated.
+    """
 
     def __init__(self, source_layers: List[int], num_chunks: int, chunk_idx: int) -> None:
-        """
-        Args:
-            source_layers: Indices of the layers whose output will be concatenated.
-            num_chunks: Layer outputs will be split into this number of chunks.
-            chunk_idx: Only the chunks with this index will be concatenated.
-        """
         super().__init__()
         self.source_layers = source_layers
         self.num_chunks = num_chunks
@@ -203,14 +198,13 @@ class RouteLayer(nn.Module):
 
 
 class ShortcutLayer(nn.Module):
-    """Shortcut layer adds a residual connection from the source layer."""
+    """Shortcut layer adds a residual connection from the source layer.
+
+    Args:
+        source_layer: Index of the layer whose output will be added to the output of the previous layer.
+    """
 
     def __init__(self, source_layer: int) -> None:
-        """
-        Args:
-            source_layer: Index of the layer whose output will be added to the output of the
-                previous layer.
-        """
         super().__init__()
         self.source_layer = source_layer
 

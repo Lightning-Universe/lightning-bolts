@@ -18,13 +18,13 @@ from pl_bolts.models.detection.yolo.yolo_loss import LossFunction
 class DarknetConfiguration:
     """This class can be used to parse the configuration files of the Darknet YOLOv4 implementation.
 
-    The :func:`~pl_bolts.models.detection.yolo.yolo_config.YOLOConfiguration.get_network` method
-    returns a PyTorch module list that can be used to construct a YOLO model.
+    The :func:`~pl_bolts.models.detection.yolo.yolo_config.YOLOConfiguration.get_network` method returns a PyTorch
+    module list that can be used to construct a YOLO model.
     """
 
     def __init__(self, path: str) -> None:
-        """Saves the variables from the first configuration section to attributes of this object, and the rest of
-        the sections to the ``layer_configs`` list.
+        """Saves the variables from the first configuration section to attributes of this object, and the rest of the
+        sections to the ``layer_configs`` list.
 
         Args:
             path: Path to a configuration file
@@ -40,8 +40,8 @@ class DarknetConfiguration:
         self.layer_configs = sections[1:]
 
     def get_network(self, **kwargs) -> nn.ModuleList:
-        """Iterates through the layers from the configuration and creates corresponding PyTorch modules. Returns
-        the network structure that can be used to create a YOLO model.
+        """Iterates through the layers from the configuration and creates corresponding PyTorch modules. Returns the
+        network structure that can be used to create a YOLO model.
 
         Returns:
             A :class:`~torch.nn.ModuleList` that defines the YOLO network.
@@ -161,8 +161,8 @@ def _create_layer(config: Dict[str, Any], num_inputs: List[int], **kwargs) -> Tu
         num_inputs: Number of channels in the input of every layer up to this layer.
 
     Returns:
-        module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the
-        number of channels in its output.
+        module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
+        its output.
     """
     create_func = {
         "convolutional": _create_convolutional,
@@ -222,8 +222,8 @@ def _create_maxpool(config: Dict[str, Any], num_inputs: List[int], **kwargs):
     if kernel_size % 2 == 1:
         return maxpool, num_inputs[-1]
 
-    # If the kernel size is an even number, we need one cell of extra padding, on top of the padding
-    # added by MaxPool2d on both sides.
+    # If the kernel size is an even number, we need one cell of extra padding, on top of the padding added by MaxPool2d
+    # on both sides.
     layer = nn.Sequential()
     layer.add_module("pad", nn.ZeroPad2d((0, 1, 0, 1)))
     layer.add_module("maxpool", maxpool)
@@ -293,7 +293,10 @@ def _create_yolo(
     if sum(var is not None for var in (match_sim_ota, match_size_ratio, match_iou_threshold)) > 1:
         raise ValueError("More than one matching algorithm specified.")
     if match_sim_ota:
-        matching_func = SimOTAMatching(loss_func)
+        sim_ota_loss_func = LossFunction(
+            overlap_loss, None, overlap_loss_multiplier, class_loss_multiplier, confidence_loss_multiplier
+        )
+        matching_func = SimOTAMatching(sim_ota_loss_func)
     elif match_size_ratio is not None:
         matching_func = SizeRatioMatching(match_size_ratio, anchor_dims, anchor_ids, ignore_iou_threshold)
     elif match_iou_threshold is not None:

@@ -33,7 +33,8 @@ class YOLO(LightningModule):
 
     *YOLOv4 paper*: `Alexey Bochkovskiy, Chien-Yao Wang, and Hong-Yuan Mark Liao <https://arxiv.org/abs/2004.10934>`_
 
-    *Scaled-YOLOv4 paper*: `Chien-Yao Wang, Alexey Bochkovskiy, and Hong-Yuan Mark Liao <https://arxiv.org/abs/2011.08036>`_
+    *Scaled-YOLOv4 paper*: `Chien-Yao Wang, Alexey Bochkovskiy, and Hong-Yuan Mark Liao
+    <https://arxiv.org/abs/2011.08036>`_
 
     *YOLOX paper*: `Zheng Ge, Songtao Liu, Feng Wang, Zeming Li, and Jian Sun <https://arxiv.org/abs/2107.08430>`_
 
@@ -136,9 +137,26 @@ class YOLO(LightningModule):
         losses = []  # Losses from detection layers
         hits = []  # Number of targets each detection layer was responsible for
 
-        image_height = images.shape[2]
-        image_width = images.shape[3]
-        image_size = torch.tensor([image_width, image_height], device=images.device)
+        @torch.jit.script
+        def get_image_size(images: Tensor) -> Tensor:
+            """Get the image size from an input tensor.
+
+            The function needs the ``@torch.jit.script`` decorator in order for ONNX generation to work. The tracing
+            based generator will loose track of e.g. ``images.shape[1]`` and treat it as a Python variable and not a
+            tensor. This will cause the dimension to be treated as a constant in the model, which prevents dynamic
+            input sizes.
+
+            Args:
+                images: An image batch to take the width and height from.
+
+            Returns:
+                A tensor that contains the image width and height.
+            """
+            height = images.shape[2]
+            width = images.shape[3]
+            return torch.tensor([width, height], device=images.device)
+
+        image_size = get_image_size(images)
 
         x = images
         for layer in self.network:

@@ -49,6 +49,7 @@ class ShapeMatching(ABC):
         image_size: Tensor,
     ) -> Tuple[Dict[str, Tensor], Dict[str, Tensor]]:
         """For each target, selects predictions from the same grid cell, where the center of the target box is.
+
         Typically there are three predictions per grid cell. Subclasses implement ``match()``, which selects the
         predictions within the grid cell.
 
@@ -162,8 +163,7 @@ class IoUThresholdMatching(ShapeMatching):
 
 
 class SizeRatioMatching(ShapeMatching):
-    """For each target, select those prior shapes, whose width and height relative to the target is below given
-    ratio.
+    """For each target, select those prior shapes, whose width and height relative to the target is below given ratio.
 
     This is the matching rule used by Ultralytics YOLOv5 implementation.
 
