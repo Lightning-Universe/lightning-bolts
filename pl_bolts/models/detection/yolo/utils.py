@@ -16,7 +16,8 @@ else:
 # PyTorch 1.10 introduced the argument "indexing" and deprecated calling without the argument. Since we call it inside
 # a "@torch.jit.script" function, it's difficult to make this decision at call time.
 if version.parse(torch.__version__) >= version.parse("1.10.0"):
-    meshgrid = lambda *tensors: torch.meshgrid(*tensors, indexing="ij")
+    def meshgrid(x, y):
+        return torch.meshgrid((x, y), indexing="ij")
 else:
     meshgrid = torch.meshgrid
 
