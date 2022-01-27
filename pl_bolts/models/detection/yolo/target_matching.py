@@ -163,7 +163,8 @@ class IoUThresholdMatching(ShapeMatching):
 
 
 class SizeRatioMatching(ShapeMatching):
-    """For each target, select those prior shapes, whose width and height relative to the target is below given ratio.
+    """For each target, select those prior shapes, whose width and height relative to the target is below given
+    ratio.
 
     This is the matching rule used by Ultralytics YOLOv5 implementation.
 

@@ -1,6 +1,7 @@
 from typing import List
 
 import torch
+from packaging import version
 from torch import Tensor
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -10,6 +11,14 @@ if _TORCHVISION_AVAILABLE:
     from torchvision.ops import box_iou
 else:
     warn_missing_pkg("torchvision")
+
+
+# PyTorch 1.10 introduced the argument "indexing" and deprecated calling without the argument. Since we call it inside
+# a "@torch.jit.script" function, it's difficult to make this decision at call time.
+if version.parse(torch.__version__) >= version.parse("1.10.0"):
+    meshgrid = lambda *tensors: torch.meshgrid(*tensors, indexing="ij")
+else:
+    meshgrid = torch.meshgrid
 
 
 def grid_offsets(grid_size: Tensor) -> Tensor:
@@ -23,7 +32,7 @@ def grid_offsets(grid_size: Tensor) -> Tensor:
     """
     x_range = torch.arange(grid_size[0], device=grid_size.device)
     y_range = torch.arange(grid_size[1], device=grid_size.device)
-    grid_y, grid_x = torch.meshgrid(y_range, x_range)
+    grid_y, grid_x = meshgrid(y_range, x_range)
     return torch.stack((grid_x, grid_y), -1)
 
 
@@ -67,8 +76,8 @@ def global_xy(xy: Tensor, image_size: Tensor) -> Tensor:
 
 
 def aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
-    """Calculates a matrix of intersections over union from box dimensions, assuming that the boxes are located at the
-    same coordinates.
+    """Calculates a matrix of intersections over union from box dimensions, assuming that the boxes are located at
+    the same coordinates.
 
     Args:
         dims1: Width and height of `N` boxes. Tensor of size ``[N, 2]``.
@@ -88,8 +97,8 @@ def aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
 
 
 def iou_below(pred_boxes: Tensor, target_boxes: Tensor, threshold: float) -> List[Tensor]:
-    """Creates a binary mask whose value will be ``True``, unless the predicted box overlaps any target significantly
-    (IoU greater than ``threshold``).
+    """Creates a binary mask whose value will be ``True``, unless the predicted box overlaps any target
+    significantly (IoU greater than ``threshold``).
 
     Args:
         pred_boxes: The predicted corner coordinates. Tensor of size ``[height, width, boxes_per_cell, 4]``.

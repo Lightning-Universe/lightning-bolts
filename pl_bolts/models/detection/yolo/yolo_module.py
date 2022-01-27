@@ -26,8 +26,8 @@ else:
 
 
 class YOLO(LightningModule):
-    """PyTorch Lightning implementation of YOLO that supports the most important features of YOLOv3, YOLOv4, YOLOv5,
-    Scaled-YOLOv4, and YOLOX.
+    """PyTorch Lightning implementation of YOLO that supports the most important features of YOLOv3, YOLOv4,
+    YOLOv5, Scaled-YOLOv4, and YOLOX.
 
     *YOLOv3 paper*: `Joseph Redmon and Ali Farhadi <https://arxiv.org/abs/1804.02767>`_
 
@@ -517,8 +517,8 @@ class DarknetYOLO(YOLO):
 
 
 class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
-    """A subclass of VOCDetectionDataModule that resizes the images to a specific size. YOLO expectes the image size to
-    be divisible by the ratio in which the network downsamples the image.
+    """A subclass of VOCDetectionDataModule that resizes the images to a specific size. YOLO expectes the image
+    size to be divisible by the ratio in which the network downsamples the image.
 
     Args:
         width: Resize images to this width.

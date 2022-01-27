@@ -23,8 +23,8 @@ class DarknetConfiguration:
     """
 
     def __init__(self, path: str) -> None:
-        """Saves the variables from the first configuration section to attributes of this object, and the rest of the
-        sections to the ``layer_configs`` list.
+        """Saves the variables from the first configuration section to attributes of this object, and the rest of
+        the sections to the ``layer_configs`` list.
 
         Args:
             path: Path to a configuration file
@@ -40,8 +40,8 @@ class DarknetConfiguration:
         self.layer_configs = sections[1:]
 
     def get_network(self, **kwargs) -> nn.ModuleList:
-        """Iterates through the layers from the configuration and creates corresponding PyTorch modules. Returns the
-        network structure that can be used to create a YOLO model.
+        """Iterates through the layers from the configuration and creates corresponding PyTorch modules. Returns
+        the network structure that can be used to create a YOLO model.
 
         Returns:
             A :class:`~torch.nn.ModuleList` that defines the YOLO network.

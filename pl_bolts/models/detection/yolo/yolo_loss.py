@@ -16,8 +16,8 @@ def _upcast(t: Tensor) -> Tensor:
 
 
 def complete_iou(boxes1: Tensor, boxes2: Tensor, distance_only: bool = False) -> Tensor:
-    """Returns the complete intersection-over-union between two sets of boxes. Both sets of boxes are expected to be in
-    `(x1, y1, x2, y2)` format.
+    """Returns the complete intersection-over-union between two sets of boxes. Both sets of boxes are expected to
+    be in `(x1, y1, x2, y2)` format.
 
     Args:
         boxes1: Box coordinates in a tensor of size ``[N, 4]``.
