@@ -68,7 +68,7 @@ class LinearRegression(LightningModule):
 
         loss /= x.size(0)
 
-        tensorboard_logs = {"train_mse_loss": loss}
+        tensorboard_logs = {"train_mse_loss": loss.detach()}
         progress_bar_metrics = tensorboard_logs
         return {"loss": loss, "log": tensorboard_logs, "progress_bar": progress_bar_metrics}
 
