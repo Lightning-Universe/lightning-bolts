@@ -26,6 +26,7 @@ The learning rate is also found automatically using `auto_lr_find`.
     from pl_bolts.models.regression import LinearRegression
     import pytorch_lightning as pl
     from pl_bolts.datamodules import SklearnDataModule
+    from pytorch_lightning.callbacks import EarlyStopping
     from sklearn.datasets import load_diabetes
 
     X, y = load_diabetes(return_X_y=True)
