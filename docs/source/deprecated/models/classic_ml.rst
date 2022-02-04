@@ -15,7 +15,11 @@ values.
 We formulate the linear regression model as a single-layer neural network. By default we include only one neuron in
 the output layer, although you can specify the `output_dim` yourself.
 
-Add either L1 or L2 regularization, or both, by specifying the regularization strength (default 0).
+Add either L1 or L2 regularization, or both, by specifying the regularization strength (default 0). 
+
+We have also included early stopping conditions in case the loss does not improve over a certain amount of epochs.
+
+The learning rate is also found automatically using `auto_lr_find`.
 
 .. code-block:: python
 
@@ -25,12 +29,18 @@ Add either L1 or L2 regularization, or both, by specifying the regularization st
     from sklearn.datasets import load_diabetes
 
     X, y = load_diabetes(return_X_y=True)
+    y = y.reshape(-1,1)
     loaders = SklearnDataModule(X, y)
 
-    model = LinearRegression(input_dim=10)
-    trainer = pl.Trainer()
-    trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
-    trainer.test(test_dataloaders=loaders.test_dataloader())
+    model = LinearRegression(input_dim=10, l1_strength=1, l2_strength=1)
+
+    early_stop_callback = EarlyStopping(monitor='val_loss', min_delta=0.00, patience=20, verbose=True, mode='min')
+    trainer = pl.Trainer(auto_lr_find = 'learning_rate', max_epochs=400, min_epochs=1, callbacks=[early_stop_callback])
+
+    trainer.tune(model, train_dataloaders=loaders, lr_find_kwargs={'min_lr': 0.01, 'max_lr': 0.9})
+
+    trainer.fit(model, train_dataloaders=loaders)
+    trainer.test(model, dataloaders=loaders)
 
 .. autoclass:: pl_bolts.models.regression.linear_regression.LinearRegression
    :noindex:

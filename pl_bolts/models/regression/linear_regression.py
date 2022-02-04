@@ -82,18 +82,16 @@ class LinearRegression(LightningModule):
         val_loss = torch.stack([x["val_loss"] for x in outputs]).mean()
         tensorboard_logs = {"val_mse_loss": val_loss}
         progress_bar_metrics = tensorboard_logs
-        return {"val_loss": val_loss, "log": tensorboard_logs, "progress_bar": progress_bar_metrics}
+        self.log_dict({"val_loss": val_loss, "log": tensorboard_logs, "progress_bar": progress_bar_metrics})
 
     def test_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
         x, y = batch
         y_hat = self(x)
         return {"test_loss": F.mse_loss(y_hat, y)}
 
-    def test_epoch_end(self, outputs: List[Dict[str, Tensor]]) -> Dict[str, Tensor]:
+    def test_epoch_end(self, outputs: List[Dict[str, Tensor]]) -> None:
         test_loss = torch.stack([x["test_loss"] for x in outputs]).mean()
-        tensorboard_logs = {"test_mse_loss": test_loss}
-        progress_bar_metrics = tensorboard_logs
-        return {"test_loss": test_loss, "log": tensorboard_logs, "progress_bar": progress_bar_metrics}
+        self.log("test_loss", test_loss)
 
     def configure_optimizers(self) -> Optimizer:
         return self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
