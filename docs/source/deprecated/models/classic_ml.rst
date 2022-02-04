@@ -15,7 +15,7 @@ values.
 We formulate the linear regression model as a single-layer neural network. By default we include only one neuron in
 the output layer, although you can specify the `output_dim` yourself.
 
-Add either L1 or L2 regularization, or both, by specifying the regularization strength (default 0). 
+Add either L1 or L2 regularization, or both, by specifying the regularization strength (default 0).
 
 We have also included early stopping conditions in case the loss does not improve over a certain amount of epochs.
 
