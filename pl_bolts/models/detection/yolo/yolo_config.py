@@ -42,7 +42,7 @@ class YOLOConfiguration:
         result = nn.ModuleList()
         # Number of channels in the input of every layer up to the current layer,
         # use channels from configuration or default of 3
-        num_inputs = [self.global_config["channels"] if "channels" in self.global_config else 3]
+        num_inputs = [self.global_config.get("channels", 3)]
         for layer_config in self.layer_configs:
             config = {**self.global_config, **layer_config}
             module, num_outputs = _create_layer(config, num_inputs)
