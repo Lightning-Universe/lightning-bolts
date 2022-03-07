@@ -1,10 +1,16 @@
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import torch
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor, nn
 from torchvision.ops import box_convert
 
+from pl_bolts.models.detection.yolo.target_matching import (
+    HighestIoUMatching,
+    IoUThresholdMatching,
+    SimOTAMatching,
+    SizeRatioMatching,
+)
 from pl_bolts.models.detection.yolo.utils import global_xy
 from pl_bolts.models.detection.yolo.yolo_loss import LossFunction
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -17,8 +23,8 @@ class DetectionLayer(nn.Module):
 
     Args:
         num_classes: Number of different classes that this layer predicts.
-        anchor_dims: A list of the anchor box dimensions for this layer. The list should contain (width, height) tuples
-            in the network input resolution (relative to the width and height defined in the configuration file).
+        prior_shapes: A list of prior box dimensions for this layer, used for scaling the predicted dimensions. The list
+            should contain (width, height) tuples in the network input resolution.
         matching_func: The matching algorithm to be used for assigning targets to anchors.
         loss_func: ``LossFunction`` object for calculating the losses.
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
@@ -31,7 +37,7 @@ class DetectionLayer(nn.Module):
     def __init__(
         self,
         num_classes: int,
-        anchor_dims: List[Tuple[int, int]],
+        prior_shapes: List[Tuple[int, int]],
         matching_func: Callable,
         loss_func: LossFunction,
         xy_scale: float = 1.0,
@@ -43,7 +49,7 @@ class DetectionLayer(nn.Module):
             raise ModuleNotFoundError("YOLO model uses `torchvision`, which is not installed yet.")
 
         self.num_classes = num_classes
-        self.anchor_dims = anchor_dims
+        self.prior_shapes = prior_shapes
         self.matching_func = matching_func
         self.loss_func = loss_func
         self.xy_scale = xy_scale
@@ -63,7 +69,7 @@ class DetectionLayer(nn.Module):
 
         Args:
             x: The output from the previous layer. Tensor of size
-                ``[batch_size, boxes_per_cell * (num_classes + 5), height, width]``.
+                ``[batch_size, anchors_per_cell * (num_classes + 5), height, width]``.
             image_size: Image width and height in a vector (defines the scale of the predicted and target coordinates).
             targets: If set, computes losses from detection layers against these targets. A list of target dictionaries,
                 one for each image.
@@ -73,16 +79,16 @@ class DetectionLayer(nn.Module):
         """
         batch_size, num_features, height, width = x.shape
         num_attrs = self.num_classes + 5
-        boxes_per_cell = num_features // num_attrs
-        if boxes_per_cell != len(self.anchor_dims):
+        anchors_per_cell = num_features // num_attrs
+        if anchors_per_cell != len(self.prior_shapes):
             raise MisconfigurationException(
-                "The model predicts {} bounding boxes per cell, but {} anchor boxes are defined "
-                "for this layer.".format(boxes_per_cell, len(self.anchor_dims))
+                "The model predicts {} bounding boxes per cell, but {} anchor box dimensions are defined for this "
+                "layer.".format(anchors_per_cell, len(self.prior_shapes))
             )
 
         # Reshape the output to have the bounding box attributes of each grid cell on its own row.
-        x = x.permute(0, 2, 3, 1)  # [batch_size, height, width, boxes_per_cell * num_attrs]
-        x = x.view(batch_size, height, width, boxes_per_cell, num_attrs)
+        x = x.permute(0, 2, 3, 1)  # [batch_size, height, width, anchors_per_cell * num_attrs]
+        x = x.view(batch_size, height, width, anchors_per_cell, num_attrs)
 
         # Take the sigmoid of the bounding box coordinates, confidence score, and class probabilities, unless the input
         # is normalized by the previous layer activation. Confidence and class losses use the unnormalized values if
@@ -101,13 +107,13 @@ class DetectionLayer(nn.Module):
 
         image_xy = global_xy(xy, image_size)
         if self.input_is_normalized:
-            image_wh = 4 * torch.square(wh) * torch.tensor(self.anchor_dims, dtype=wh.dtype, device=wh.device)
+            image_wh = 4 * torch.square(wh) * torch.tensor(self.prior_shapes, dtype=wh.dtype, device=wh.device)
         else:
-            image_wh = torch.exp(wh) * torch.tensor(self.anchor_dims, dtype=wh.dtype, device=wh.device)
+            image_wh = torch.exp(wh) * torch.tensor(self.prior_shapes, dtype=wh.dtype, device=wh.device)
         box = torch.cat((image_xy, image_wh), -1)
         box = box_convert(box, in_fmt="cxcywh", out_fmt="xyxy")
         output = torch.cat((box, norm_confidence.unsqueeze(-1), norm_classprob), -1)
-        output = output.reshape(batch_size, height * width * boxes_per_cell, num_attrs)
+        output = output.reshape(batch_size, height * width * anchors_per_cell, num_attrs)
 
         if targets is not None:
             # We want to use binary_cross_entropy_with_logits, so we'll use the unnormalized confidence and classprob,
@@ -170,11 +176,45 @@ class DetectionLayer(nn.Module):
         self.hits = len(matched_targets["boxes"])
 
 
-class Mish(nn.Module):
-    """Mish activation."""
+class Conv(nn.Module):
+    """A convolutional layer with optional layer normalization and activation.
+
+    Args:
+        in_channels: Number of input channels that the layer expects.
+        out_channels: Number of output channels that the convolution produces.
+        kernel_size: Size of the convolving kernel.
+        stride: Stride of the convolution.
+        padding: Padding added to all four sides of the input.
+        bias: If ``True``, adds a learnable bias to the output.
+        activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
+            "linear", or "none".
+        norm: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+    """
+
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        kernel_size: int = 1,
+        stride: int = 1,
+        padding: Optional[int] = None,
+        bias: bool = False,
+        activation: Optional[str] = "silu",
+        norm: Optional[str] = "batchnorm",
+    ):
+        super().__init__()
+
+        if padding is None:
+            padding = kernel_size // 2
+
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
+        self.norm = create_normalization_module(norm, out_channels)
+        self.act = create_activation_module(activation)
 
     def forward(self, x):
-        return x * torch.tanh(nn.functional.softplus(x))
+        x = self.conv(x)
+        x = self.norm(x)
+        return self.act(x)
 
 
 class RouteLayer(nn.Module):
@@ -210,3 +250,113 @@ class ShortcutLayer(nn.Module):
 
     def forward(self, x, outputs):
         return outputs[-1] + outputs[self.source_layer]
+
+
+class Mish(nn.Module):
+    """Mish activation."""
+
+    def forward(self, x):
+        return x * torch.tanh(nn.functional.softplus(x))
+
+
+def create_activation_module(name: Optional[str]) -> nn.Module:
+    """Creates a layer activation module given its type as a string.
+
+    Args:
+        name: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic", "linear",
+            or "none".
+    """
+    if name == "relu":
+        return nn.ReLU(inplace=True)
+    if name == "leaky":
+        return nn.LeakyReLU(0.1, inplace=True)
+    if name == "mish":
+        return Mish()
+    if name == "silu" or name == "swish":
+        return nn.SiLU(inplace=True)
+    if name == "logistic":
+        return nn.Sigmoid()
+    if name == "linear" or name == "none" or name is None:
+        return nn.Identity()
+    raise ValueError(f"Activation type `{name}´ is unknown.")
+
+
+def create_normalization_module(name: Optional[str], num_channels: int) -> nn.Module:
+    """Creates a layer normalization module given its type as a string.
+
+    Group normalization uses always 8 channels. The most common network widths are divisible by this number.
+
+    Args:
+        name: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+        num_channels: The number of input channels that the module expects.
+    """
+    if name == "batchnorm":
+        return nn.BatchNorm2d(num_channels, eps=0.001)
+    if name == "groupnorm":
+        return nn.GroupNorm(8, num_channels, eps=0.001)
+    if name == "none" or name is None:
+        return nn.Identity()
+    raise ValueError(f"Normalization layer type `{name}´ is unknown.")
+
+
+def create_detection_layer(
+    prior_shapes: List[Tuple[int, int]],
+    prior_shape_idxs: List[int],
+    matching_algorithm: Optional[str] = None,
+    matching_threshold: Optional[float] = None,
+    ignore_bg_threshold: float = 0.7,
+    overlap_func: Union[str, Callable] = "ciou",
+    predict_overlap: float = 1.0,
+    overlap_loss_multiplier: float = 5.0,
+    confidence_loss_multiplier: float = 1.0,
+    class_loss_multiplier: float = 1.0,
+    **kwargs,
+) -> Tuple[Callable, LossFunction]:
+    """Creates a detection layer module and the required loss function and target matching objects.
+
+    Args:
+        prior_shapes: A list of all the prior box dimensions, used for scaling the predicted dimensions and possibly for
+            matching the targets to the anchors. The list should contain (width, height) tuples in the network input
+            resolution.
+        prior_shape_idxs: List of indices to ``prior_shapes`` that is used to select the (usually 3) prior shapes that
+            this layer uses.
+        matching_algorithm: Which algorithm to use for matching targets to anchors. "simota" (the SimOTA matching rule
+            from YOLOX), "size" (match those prior shapes, whose width and height relative to the target is below given
+            ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
+            gives the highest IoU, default).
+        matching_threshold: Threshold for "size" and "iou" matching algorithms.
+        ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
+            has IoU with some target greater than this threshold, the predictor will not be taken into account when
+            calculating the confidence loss.
+        overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
+            function that returns a tensor with as many elements as there are input boxes. Valid values for a string are
+            "iou", "giou", "diou", and "ciou" (default).
+        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
+            confidence is one if there's an object, and 1.0 means that the target confidence is the output of
+            ``overlap_func``.
+        overlap_loss_multiplier: Overlap loss will be scaled by this value.
+        class_loss_multiplier: Classification loss will be scaled by this value.
+        confidence_loss_multiplier: Confidence loss will be scaled by this value.
+        xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
+            to produce coordinate values close to one.
+    """
+    if matching_algorithm == "simota":
+        loss_func = LossFunction(
+            overlap_func, None, overlap_loss_multiplier, confidence_loss_multiplier, class_loss_multiplier
+        )
+        matching_func = SimOTAMatching(loss_func)
+    elif matching_algorithm == "size":
+        matching_func = SizeRatioMatching(prior_shapes, prior_shape_idxs, matching_threshold, ignore_bg_threshold)
+    elif matching_algorithm == "iou":
+        matching_func = IoUThresholdMatching(prior_shapes, prior_shape_idxs, matching_threshold, ignore_bg_threshold)
+    elif matching_algorithm == "maxiou" or matching_algorithm is None:
+        matching_func = HighestIoUMatching(prior_shapes, prior_shape_idxs, ignore_bg_threshold)
+    else:
+        raise ValueError(f"Matching algorithm `{matching_algorithm}´ is unknown.")
+
+    loss_func = LossFunction(
+        overlap_func, predict_overlap, overlap_loss_multiplier, confidence_loss_multiplier, class_loss_multiplier
+    )
+
+    layer_shapes = [prior_shapes[i] for i in prior_shape_idxs]
+    return DetectionLayer(prior_shapes=layer_shapes, matching_func=matching_func, loss_func=loss_func, **kwargs)

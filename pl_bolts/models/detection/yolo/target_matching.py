@@ -21,26 +21,18 @@ class ShapeMatching(ABC):
 
     Most YOLO variants match targets to anchors based on prior shapes that are assigned to the anchors in the model
     configuration. The subclasses of ``ShapeMatching`` implement matching rules that compare the width and height of
-    the targets to each prior shape, regardless of the grid cell where the target is. When the model includes multiple
+    the targets to each prior shape (regardless of the grid cell where the target is). When the model includes multiple
     detection layers, different shapes are defined for each layer. Usually there are three detection layers and three
     prior shapes per layer.
 
     Args:
-        anchor_dims: A list of all the prior shapes. The list should contain (width, height) tuples in the network input
-            resolution (relative to the width and height defined in the configuration file).
-        anchor_ids: List of indices to ``anchor_dims`` that is used to select the (usually 3) prior shapes that this
-            layer uses.
-        ignore_iou_threshold: If a predictor is not responsible for predicting any target, but the prior shape has IoU
+        ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the prior shape has IoU
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.
     """
 
-    def __init__(self, anchor_dims: List[Tuple[int, int]], anchor_ids: List[int], ignore_iou_threshold: float = 0.7):
-        self.anchor_dims = anchor_dims
-        # anchor_map maps the anchor indices to predictors in this layer, or to -1 if it's not an anchor of this layer.
-        # This layer ignores the target if all the selected anchors are in another layer.
-        self.anchor_map = [anchor_ids.index(i) if i in anchor_ids else -1 for i in range(len(anchor_dims))]
-        self.ignore_iou_threshold = ignore_iou_threshold
+    def __init__(self, ignore_bg_threshold: float = 0.7):
+        self.ignore_bg_threshold = ignore_bg_threshold
 
     def __call__(
         self,
@@ -82,7 +74,7 @@ class ShapeMatching(ABC):
         # Background mask is used to select predictors that are not responsible for predicting any object, for
         # calculating the part of the confidence loss with zero as the target confidence. It is set to False, if a
         # predicted box overlaps any target significantly, or if a prediction is matched to a target.
-        background_mask = iou_below(preds["boxes"], targets["boxes"], self.ignore_iou_threshold)
+        background_mask = iou_below(preds["boxes"], targets["boxes"], self.ignore_bg_threshold)
         background_mask[cell_j, cell_i, matched_predictors] = False
 
         preds = {
@@ -105,8 +97,8 @@ class ShapeMatching(ABC):
             wh: A matrix of predicted width and height values.
 
         Returns:
-            matched_targets, matched_predictors: A vector that can be used to select the targets that this layer
-            matched and a vector that lists the matching predictors within the grid cell.
+            matched_targets, matched_anchors: Two vectors or a `2xN` matrix. The first vector is used to select the
+            targets that this layer matched and the second one lists the matching anchors within the grid cell.
         """
         pass
 
@@ -115,13 +107,33 @@ class HighestIoUMatching(ShapeMatching):
     """For each target, select the prior shape that gives the highest IoU.
 
     This is the original YOLO matching rule.
+
+    Args:
+        prior_shapes: A list of all the prior box dimensions. The list should contain (width, height) tuples in the
+            network input resolution.
+        prior_shape_idxs: List of indices to ``prior_shapes`` that is used to select the (usually 3) prior shapes that
+            this layer uses.
+        ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the prior shape has IoU
+            with some target greater than this threshold, the predictor will not be taken into account when calculating
+            the confidence loss.
     """
 
+    def __init__(
+        self, prior_shapes: List[Tuple[int, int]], prior_shape_idxs: List[int], ignore_bg_threshold: float = 0.7
+    ):
+        super().__init__(ignore_bg_threshold)
+        self.prior_shapes = prior_shapes
+        # anchor_map maps the anchor indices to predictors in this layer, or to -1 if it's not an anchor of this layer.
+        # This layer ignores the target if all the selected anchors are in another layer.
+        self.anchor_map = [
+            prior_shape_idxs.index(idx) if idx in prior_shape_idxs else -1 for idx in range(len(prior_shapes))
+        ]
+
     def match(self, wh: Tensor) -> Tuple[Tensor, Tensor]:
-        anchor_wh = torch.tensor(self.anchor_dims, dtype=wh.dtype, device=wh.device)
+        prior_wh = torch.tensor(self.prior_shapes, dtype=wh.dtype, device=wh.device)
         anchor_map = torch.tensor(self.anchor_map, dtype=torch.int64, device=wh.device)
 
-        ious = aligned_iou(wh, anchor_wh)
+        ious = aligned_iou(wh, prior_wh)
         highest_iou_anchors = ious.max(1).indices
         highest_iou_anchors = anchor_map[highest_iou_anchors]
         matched_targets = highest_iou_anchors >= 0
@@ -133,33 +145,33 @@ class IoUThresholdMatching(ShapeMatching):
     """For each target, select all prior shapes that give a high enough IoU.
 
     Args:
+        prior_shapes: A list of all the prior box dimensions. The list should contain (width, height) tuples in the
+            network input resolution.
+        prior_shape_idxs: List of indices to ``prior_shapes`` that is used to select the (usually 3) prior shapes that
+            this layer uses.
         threshold: IoU treshold for matching.
-        anchor_dims: A list of all the prior shapes. The list should contain (width, height) tuples in the network input
-            resolution (relative to the width and height defined in the configuration file).
-        anchor_ids: List of indices to ``anchor_dims`` that is used to select the (usually 3) prior shapes that this
-            layer uses.
-        ignore_iou_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
+        ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
             has IoU with some target greater than this threshold, the predictor will not be taken into account when
             calculating the confidence loss.
     """
 
-    def __init__(self, threshold, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        prior_shapes: List[Tuple[int, int]],
+        prior_shape_idxs: List[int],
+        threshold: float,
+        ignore_bg_threshold: float = 0.7,
+    ):
+        super().__init__(ignore_bg_threshold)
+        self.prior_shapes = [prior_shapes[idx] for idx in prior_shape_idxs]
         self.threshold = threshold
 
     def match(self, wh):
-        anchor_wh = torch.tensor(self.anchor_dims, dtype=wh.dtype, device=wh.device)
-        anchor_map = torch.tensor(self.anchor_map, dtype=torch.int64, device=wh.device)
+        prior_wh = torch.tensor(self.prior_shapes, dtype=wh.dtype, device=wh.device)
 
-        ious = aligned_iou(wh, anchor_wh)
+        ious = aligned_iou(wh, prior_wh)
         above_threshold = (ious > self.threshold).nonzero()
-        targets_above_threshold = above_threshold[:, 0]
-        anchors_above_threshold = above_threshold[:, 1]
-        anchors_above_threshold = anchor_map[anchors_above_threshold]
-        local = anchors_above_threshold >= 0
-        matched_targets = targets_above_threshold[local]
-        matched_anchors = anchors_above_threshold[local]
-        return matched_targets, matched_anchors
+        return above_threshold.T
 
 
 class SizeRatioMatching(ShapeMatching):
@@ -169,35 +181,35 @@ class SizeRatioMatching(ShapeMatching):
     This is the matching rule used by Ultralytics YOLOv5 implementation.
 
     Args:
+        prior_shapes: A list of all the prior box dimensions. The list should contain (width, height) tuples in the
+            network input resolution.
+        prior_shape_idxs: List of indices to ``prior_shapes`` that is used to select the (usually 3) prior shapes that
+            this layer uses.
         threshold: Size ratio threshold for matching.
-        anchor_dims: A list of all the prior shapes. The list should contain (width, height) tuples in the network input
-            resolution (relative to the width and height defined in the configuration file).
-        anchor_ids: List of indices to ``anchor_dims`` that is used to select the (usually 3) prior shapes that this
-            layer uses.
-        ignore_iou_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
+        ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
             has IoU with some target greater than this threshold, the predictor will not be taken into account when
             calculating the confidence loss.
     """
 
-    def __init__(self, threshold, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        prior_shapes: List[Tuple[int, int]],
+        prior_shape_idxs: List[int],
+        threshold: float,
+        ignore_bg_threshold: float = 0.7,
+    ):
+        super().__init__(ignore_bg_threshold)
+        self.prior_shapes = [prior_shapes[idx] for idx in prior_shape_idxs]
         self.threshold = threshold
 
     def match(self, wh):
-        anchor_wh = torch.tensor(self.anchor_dims, dtype=wh.dtype, device=wh.device)
-        anchor_map = torch.tensor(self.anchor_map, dtype=torch.int64, device=wh.device)
+        prior_wh = torch.tensor(self.prior_shapes, dtype=wh.dtype, device=wh.device)
 
-        wh_ratio = wh[:, None, :] / anchor_wh[None, :, :]  # [num_targets, num_anchors, 2]
+        wh_ratio = wh[:, None, :] / prior_wh[None, :, :]  # [num_targets, num_anchors, 2]
         wh_ratio = torch.max(wh_ratio, 1.0 / wh_ratio)
         wh_ratio = wh_ratio.max(2).values  # [num_targets, num_anchors]
         below_threshold = (wh_ratio < self.threshold).nonzero()
-        targets_below_threshold = below_threshold[:, 0]
-        anchors_below_threshold = below_threshold[:, 1]
-        anchors_below_threshold = anchor_map[anchors_below_threshold]
-        local = anchors_below_threshold >= 0
-        matched_targets = targets_below_threshold[local]
-        matched_anchors = anchors_below_threshold[local]
-        return matched_targets, matched_anchors
+        return below_threshold.T
 
 
 def _sim_ota_match(costs, ious):

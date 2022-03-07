@@ -6,7 +6,15 @@ from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datasets import DummyDetectionDataset
-from pl_bolts.models.detection import YOLO, DarknetConfiguration, FasterRCNN, RetinaNet
+from pl_bolts.models.detection import (
+    YOLO,
+    DarknetNetwork,
+    FasterRCNN,
+    RetinaNet,
+    YOLOV4TinyNetwork,
+    YOLOV5Network,
+    YOLOXNetwork,
+)
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 from pl_bolts.models.detection.yolo.target_matching import _sim_ota_match
 from pl_bolts.models.detection.yolo.utils import (
@@ -204,22 +212,79 @@ def test_iou_below():
     assert not result[3, 5, 1]
 
 
-def test_yolo(tmpdir):
+def test_darknet(tmpdir):
     config_path = Path(TEST_ROOT) / "data" / "yolo.cfg"
-    config = DarknetConfiguration(config_path)
-    model = YOLO(config.get_network())
+    network = DarknetNetwork(config_path)
+    model = YOLO(network)
 
     image = torch.rand(1, 3, 256, 256)
     model(image)
 
 
-def test_yolo_train(tmpdir):
+def test_darknet_train(tmpdir):
     config_path = Path(TEST_ROOT) / "data" / "yolo.cfg"
-    config = DarknetConfiguration(config_path)
-    model = YOLO(config.get_network())
+    network = DarknetNetwork(config_path)
+    model = YOLO(network)
 
-    train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
-    valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
+    train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+    valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
 
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
-    trainer.fit(model, train_dataloader=train_dl, val_dataloaders=valid_dl)
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
+
+
+def test_yolov4(tmpdir):
+    network = YOLOV4TinyNetwork(num_classes=2, width=4)
+    model = YOLO(network)
+
+    image = torch.rand(1, 3, 256, 256)
+    model(image)
+
+
+def test_yolov4_train(tmpdir):
+    network = YOLOV4TinyNetwork(num_classes=2, width=4)
+    model = YOLO(network)
+
+    train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+    valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
+
+
+def test_yolov5(tmpdir):
+    network = YOLOV5Network(num_classes=2, depth=1, width=4)
+    model = YOLO(network)
+
+    image = torch.rand(1, 3, 256, 256)
+    model(image)
+
+
+def test_yolov5_train(tmpdir):
+    network = YOLOV5Network(num_classes=2, depth=1, width=4)
+    model = YOLO(network)
+
+    train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+    valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
+
+
+def test_yolox(tmpdir):
+    network = YOLOXNetwork(num_classes=2, depth=1, width=4)
+    model = YOLO(network)
+
+    image = torch.rand(1, 3, 256, 256)
+    model(image)
+
+
+def test_yolox_train(tmpdir):
+    network = YOLOXNetwork(num_classes=2, depth=1, width=4)
+    model = YOLO(network)
+
+    train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+    valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)

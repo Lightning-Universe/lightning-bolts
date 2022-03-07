@@ -1,19 +1,15 @@
-import io
 from copy import copy
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
-import numpy as np
 import torch
 import torch.nn as nn
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities.cli import LightningCLI
-from pytorch_lightning.utilities.distributed import rank_zero_debug, rank_zero_info
 from torch import Tensor, optim
 
 from pl_bolts.datamodules import VOCDetectionDataModule
 from pl_bolts.datamodules.vocdetection_datamodule import Compose
-from pl_bolts.models.detection.yolo.darknet_configuration import DarknetConfiguration
-from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, RouteLayer, ShortcutLayer
+from pl_bolts.models.detection.yolo.darknet_network import DarknetNetwork
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -40,9 +36,9 @@ class YOLO(LightningModule):
 
     *Implementation*: `Seppo Enarvi <https://github.com/senarvi>`_
 
-    The network architecture can be read from a Darknet configuration file using the
-    :class:`~pl_bolts.models.detection.yolo.darknet_configuration.DarknetConfiguration` class, or created by some other
-    means, and provided as a list of PyTorch modules.
+    The network architecture can be written in PyTorch, or read from a Darknet configuration file using the
+    :class:`~pl_bolts.models.detection.yolo.darknet_network.DarknetNetwork` class. ``DarknetNetwork`` is also able to
+    read weights from a Darknet model file.
 
     The input from the data loader is expected to be a list of images. Each image is a tensor with shape
     ``[channels, height, width]``. The images from a single batch will be stacked into a single tensor, so the sizes
@@ -70,11 +66,10 @@ class YOLO(LightningModule):
     - scores (``FloatTensor[N]``): detection confidences
     - labels (``Int64Tensor[N]``): the predicted labels for each object
 
-    Weights can be loaded from a Darknet model file using ``load_darknet_weights()``.
-
     Args:
-        network: A list of network modules. This can be obtained from a Darknet configuration using the
-            :func:`~pl_bolts.models.detection.yolo.yolo_config.YOLOConfiguration.get_network` method.
+        network: A module that represents the network layers. This can be obtained from a Darknet configuration using
+            :func:`~pl_bolts.models.detection.yolo.darknet_network.DarknetNetwork`, or it can be defined as PyTorch
+            code.
         optimizer: Which optimizer class to use for training.
         optimizer_params: Parameters to pass to the optimizer constructor. Weight decay will be applied only to
             convolutional layer weights.
@@ -132,49 +127,7 @@ class YOLO(LightningModule):
             detection layers times the number of boxes predicted by one cell. The predicted box coordinates are in
             `(x1, y1, x2, y2)` format and scaled to the input image size.
         """
-        outputs = []  # Outputs from all layers
-        detections = []  # Outputs from detection layers
-        losses = []  # Losses from detection layers
-        hits = []  # Number of targets each detection layer was responsible for
-
-        @torch.jit.script
-        def get_image_size(images: Tensor) -> Tensor:
-            """Get the image size from an input tensor.
-
-            The function needs the ``@torch.jit.script`` decorator in order for ONNX generation to work. The tracing
-            based generator will loose track of e.g. ``images.shape[1]`` and treat it as a Python variable and not a
-            tensor. This will cause the dimension to be treated as a constant in the model, which prevents dynamic
-            input sizes.
-
-            Args:
-                images: An image batch to take the width and height from.
-
-            Returns:
-                A tensor that contains the image width and height.
-            """
-            height = images.shape[2]
-            width = images.shape[3]
-            return torch.tensor([width, height], device=images.device)
-
-        image_size = get_image_size(images)
-
-        x = images
-        for layer in self.network:
-            if isinstance(layer, (RouteLayer, ShortcutLayer)):
-                x = layer(x, outputs)
-            elif isinstance(layer, DetectionLayer):
-                if targets is None:
-                    x = layer(x, image_size)
-                    detections.append(x)
-                else:
-                    x = layer(x, image_size, targets)
-                    detections.append(x)
-                    losses.append(layer.losses)
-                    hits.append(layer.hits)
-            else:
-                x = layer(x)
-
-            outputs.append(x)
+        detections, losses, hits = self.network(images, targets)
 
         detections = torch.cat(detections, 1)
         if targets is None:
@@ -293,63 +246,6 @@ class YOLO(LightningModule):
         detections = self.process_detections(detections)
         return detections[0]
 
-    def load_darknet_weights(self, weight_file):
-        """Loads weights to layer modules from a pretrained Darknet model.
-
-        One may want to continue training from pretrained weights, on a dataset with a different number of object
-        categories. The number of kernels in the convolutional layers just before each detection layer depends on the
-        number of output classes. The Darknet solution is to truncate the weight file and stop reading weights at the
-        first incompatible layer. For this reason the function silently leaves the rest of the layers unchanged, when
-        the weight file ends.
-
-        Args:
-            weight_file: A file object containing model weights in the Darknet binary format.
-        """
-        if not isinstance(weight_file, io.IOBase):
-            raise ValueError("weight_file must be a file-like object.")
-
-        version = np.fromfile(weight_file, count=3, dtype=np.int32)
-        images_seen = np.fromfile(weight_file, count=1, dtype=np.int64)
-        rank_zero_info(
-            f"Loading weights from Darknet model version {version[0]}.{version[1]}.{version[2]} "
-            f"that has been trained on {images_seen[0]} images."
-        )
-
-        def read(tensor):
-            """Reads the contents of ``tensor`` from the current position of ``weight_file``.
-
-            If there's no more data in ``weight_file``, returns without error.
-            """
-            x = np.fromfile(weight_file, count=tensor.numel(), dtype=np.float32)
-            if x.size > 0:
-                x = torch.from_numpy(x).view_as(tensor)
-                with torch.no_grad():
-                    tensor.copy_(x)
-            return x.size
-
-        for layer_idx, layer in enumerate(self.network):
-            # Weights are loaded only to convolutional layers
-            if not (isinstance(layer, nn.Sequential) and isinstance(layer[0], nn.Conv2d)):
-                continue
-
-            conv = layer[0]
-            rank_zero_debug(f"Reading weights for layer {layer_idx}: {list(conv.weight.shape)}")
-
-            # Convolution may be followed by batch normalization, in which case we read the batch
-            # normalization parameters and not the convolution bias.
-            if len(layer) > 1 and isinstance(layer[1], nn.BatchNorm2d):
-                bn = layer[1]
-                read(bn.bias)
-                read(bn.weight)
-                read(bn.running_mean)
-                read(bn.running_var)
-            else:
-                read(conv.bias)
-
-            read_count = read(conv.weight)
-            if read_count == 0:
-                return
-
     def process_detections(self, preds: Tensor) -> List[Dict[str, Tensor]]:
         """Splits the detection tensor returned by a forward pass into a list of prediction dictionaries, and
         filters them based on confidence threshold, non-maximum suppression (NMS), and maximum number of
@@ -459,7 +355,7 @@ class DarknetYOLO(YOLO):
     """A subclass of YOLO that uses a Darknet configuration file and can be configured using LightningCLI.
 
     At most one matching algorithm, ``match_sim_ota``, ``match_size_ratio``, or ``match_iou_threshold`` can be
-    specified. If none of them is given, the default algorithm is used, which matche a target to the prior shape
+    specified. If none of them is given, the default algorithm is used, which matches a target to the prior shape
     (anchor) that gives the highest IoU.
 
     CLI command::
@@ -476,10 +372,11 @@ class DarknetYOLO(YOLO):
             smaller than this ratio. If ``match_size_ratio`` or ``match_iou_threshold`` is not specified, selects for
             each target the anchor with the highest IoU.
         match_iou_threshold: If specified, matches a target to an anchor if the IoU is higher than this threshold.
-        ignore_iou_threshold: If a predictor is not responsible for predicting any target, but the prior shape has IoU
+        ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the prior shape has IoU
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.
-        overlap_loss: A function that will return the overlap loss given predicted and target boxes.
+        overlap_func: Which function to use for calculating the overlap between boxes. Valid values are "iou", "giou",
+            "diou", and "ciou".
         predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
             confidence is one if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
@@ -491,23 +388,26 @@ class DarknetYOLO(YOLO):
     def __init__(
         self,
         network_config: str,
+        darknet_weights: Optional[str] = None,
         match_sim_ota: bool = False,
         match_size_ratio: Optional[float] = None,
         match_iou_threshold: Optional[float] = None,
-        ignore_iou_threshold: Optional[float] = None,
-        overlap_loss: Optional[str] = None,
+        ignore_bg_threshold: Optional[float] = None,
+        overlap_func: Optional[str] = None,
         predict_overlap: Optional[float] = None,
         overlap_loss_multiplier: Optional[float] = None,
         class_loss_multiplier: Optional[float] = None,
         confidence_loss_multiplier: Optional[float] = None,
         **kwargs,
     ) -> None:
-        network = DarknetConfiguration(network_config).get_network(
+        network = DarknetNetwork(
+            network_config,
+            darknet_weights,
             match_sim_ota=match_sim_ota,
             match_size_ratio=match_size_ratio,
             match_iou_threshold=match_iou_threshold,
-            ignore_iou_threshold=ignore_iou_threshold,
-            overlap_loss=overlap_loss,
+            ignore_bg_threshold=ignore_bg_threshold,
+            overlap_func=overlap_func,
             predict_overlap=predict_overlap,
             overlap_loss_multiplier=overlap_loss_multiplier,
             class_loss_multiplier=class_loss_multiplier,

@@ -12,12 +12,14 @@ if _TORCHVISION_AVAILABLE:
 else:
     warn_missing_pkg("torchvision")
 
-
 # PyTorch 1.10 introduced the argument "indexing" and deprecated calling without the argument. Since we call it inside
 # a "@torch.jit.script" function, it's difficult to make this decision at call time.
 if version.parse(torch.__version__) >= version.parse("1.10.0"):
+
     def meshgrid(x, y):
         return torch.meshgrid((x, y), indexing="ij")
+
+
 else:
     meshgrid = torch.meshgrid
 
@@ -133,3 +135,22 @@ def is_inside_box(points, boxes):
     rb = boxes[..., 2:] - points  # [boxes, points, 2]
     deltas = torch.cat((lt, rb), -1)  # [boxes, points, 4]
     return deltas.min(-1).values > 0.0  # [boxes, points]
+
+
+@torch.jit.script
+def get_image_size(images: Tensor) -> Tensor:
+    """Get the image size from an input tensor.
+
+    The function needs the ``@torch.jit.script`` decorator in order for ONNX generation to work. The tracing based
+    generator will loose track of e.g. ``images.shape[1]`` and treat it as a Python variable and not a tensor. This will
+    cause the dimension to be treated as a constant in the model, which prevents dynamic input sizes.
+
+    Args:
+        images: An image batch to take the width and height from.
+
+    Returns:
+        A tensor that contains the image width and height.
+    """
+    height = images.shape[2]
+    width = images.shape[3]
+    return torch.tensor([width, height], device=images.device)

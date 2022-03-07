@@ -79,19 +79,20 @@ class LossFunction:
     """A class for calculating the YOLO losses from predictions and targets.
 
     Args:
-        overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. The function has to
-            return a tensor with as many elements as there are input boxes.
+        overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
+            function that returns a tensor with as many elements as there are input boxes. Valid values for a string are
+            "iou", "giou", "diou", and "ciou" (default).
         predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
             confidence is one if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
-        overlap_loss_multiplier: Multiply the overlap loss by this factor.
-        confidence_loss_multiplier: Multiply the confidence loss by this factor.
-        class_loss_multiplier: Multiply the classification loss by this factor.
+        overlap_loss_multiplier: Overlap loss will be scaled by this value.
+        class_loss_multiplier: Classification loss will be scaled by this value.
+        confidence_loss_multiplier: Confidence loss will be scaled by this value.
     """
 
     def __init__(
         self,
-        overlap_func: Union[str, Callable] = "iou",
+        overlap_func: Union[str, Callable] = "ciou",
         predict_overlap: Optional[float] = None,
         overlap_multiplier: float = 1.0,
         confidence_multiplier: float = 1.0,
@@ -108,7 +109,7 @@ class LossFunction:
         elif callable(overlap_func):
             self.overlap_func = overlap_func
         else:
-            raise ValueError("Unknown overlap function: " + overlap_func)
+            raise ValueError(f"Overlap function type `{overlap_func}´ is unknown.")
 
         self.predict_overlap = predict_overlap
 
