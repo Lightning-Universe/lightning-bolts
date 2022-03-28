@@ -1,6 +1,5 @@
 import io
 import re
-from collections import OrderedDict
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 from warnings import warn
 
@@ -11,7 +10,8 @@ from pytorch_lightning.utilities.distributed import rank_zero_debug, rank_zero_i
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor
 
-from pl_bolts.models.detection.yolo import yolo_layers
+from pl_bolts.models.detection.yolo import layers
+from pl_bolts.models.detection.yolo.layers import MaxPool
 from pl_bolts.models.detection.yolo.utils import get_image_size
 
 
@@ -80,9 +80,9 @@ class DarknetNetwork(nn.Module):
         image_size = get_image_size(x)
 
         for layer in self.layers:
-            if isinstance(layer, (yolo_layers.RouteLayer, yolo_layers.ShortcutLayer)):
+            if isinstance(layer, (layers.RouteLayer, layers.ShortcutLayer)):
                 x = layer(x, outputs)
-            elif isinstance(layer, yolo_layers.DetectionLayer):
+            elif isinstance(layer, layers.DetectionLayer):
                 x = layer(x, image_size, targets)
                 detections.append(x)
                 if targets is not None:
@@ -131,7 +131,7 @@ class DarknetNetwork(nn.Module):
 
         for layer_idx, layer in enumerate(self.layers):
             # Weights are loaded only to convolutional layers
-            if not isinstance(layer, yolo_layers.Conv):
+            if not isinstance(layer, layers.Conv):
                 continue
 
             rank_zero_debug(f"Reading weights for layer {layer_idx}: {list(layer.conv.weight.shape)}")
@@ -274,7 +274,7 @@ def _create_convolutional(config: Dict[str, Any], num_inputs: List[int], **kwarg
     batch_normalize = config.get("batch_normalize", False)
     padding = (config["size"] - 1) // 2 if config["pad"] else 0
 
-    layer = yolo_layers.Conv(
+    layer = layers.Conv(
         num_inputs[-1],
         config["filters"],
         kernel_size=config["size"],
@@ -292,22 +292,7 @@ def _create_maxpool(config: Dict[str, Any], num_inputs: List[int], **kwargs):
 
     Padding is added so that the output resolution will be the input resolution divided by stride, rounded upwards.
     """
-    kernel_size = config["size"]
-    padding = (kernel_size - 1) // 2
-    maxpool = nn.MaxPool2d(kernel_size, config["stride"], padding)
-    if kernel_size % 2 == 1:
-        return maxpool, num_inputs[-1]
-
-    # If the kernel size is an even number, we need one cell of extra padding, on top of the padding added by MaxPool2d
-    # on both sides.
-    layer = nn.Sequential(
-        OrderedDict(
-            [
-                ("pad", nn.ZeroPad2d((0, 1, 0, 1))),
-                ("maxpool", maxpool),
-            ]
-        )
-    )
+    layer = MaxPool(config["size"], config["stride"])
     return layer, num_inputs[-1]
 
 
@@ -319,7 +304,7 @@ def _create_route(config, num_inputs: List[int], **kwargs):
     last = len(num_inputs) - 1
     source_layers = [layer if layer >= 0 else last + layer for layer in config["layers"]]
 
-    layer = yolo_layers.RouteLayer(source_layers, num_chunks, chunk_idx)
+    layer = layers.RouteLayer(source_layers, num_chunks, chunk_idx)
 
     # The number of outputs of a source layer is the number of inputs of the next layer.
     num_outputs = sum(num_inputs[layer + 1] // num_chunks for layer in source_layers)
@@ -328,7 +313,7 @@ def _create_route(config, num_inputs: List[int], **kwargs):
 
 
 def _create_shortcut(config: Dict[str, Any], num_inputs: List[int], **kwargs):
-    layer = yolo_layers.ShortcutLayer(config["from"])
+    layer = layers.ShortcutLayer(config["from"])
     return layer, num_inputs[-1]
 
 
@@ -366,7 +351,7 @@ def _create_yolo(
     if class_loss_multiplier is None:
         class_loss_multiplier = config.get("cls_normalizer", 1.0)
 
-    layer = yolo_layers.create_detection_layer(
+    layer = layers.create_detection_layer(
         num_classes=config["classes"],
         prior_shapes=prior_shapes,
         prior_shape_idxs=config["mask"],

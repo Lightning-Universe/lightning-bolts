@@ -6,6 +6,7 @@ import torch.nn as nn
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities.cli import LightningCLI
 from torch import Tensor, optim
+from torchmetrics.detection.map import MAP
 
 from pl_bolts.datamodules import VOCDetectionDataModule
 from pl_bolts.datamodules.vocdetection_datamodule import Compose
@@ -107,12 +108,15 @@ class YOLO(LightningModule):
         self.nms_threshold = nms_threshold
         self.detections_per_image = detections_per_image
 
+        self._val_map = MAP(compute_on_step=False)
+        self._test_map = MAP(compute_on_step=False)
+
     def forward(self, images: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None) -> Tuple[Tensor, Tensor]:
         """Runs a forward pass through the network (all layers listed in ``self.network``), and if training targets
         are provided, computes the losses from the detection layers.
 
         Detections are concatenated from the detection layers. Each detection layer will produce a number of detections
-        that depends on the size of the feature map and the number of anchors per grid cell.
+        that depends on the size of the feature map and the number of anchors per feature map cell.
 
         Args:
             images: Images to be processed. Tensor of size
@@ -123,8 +127,8 @@ class YOLO(LightningModule):
         Returns:
             detections (:class:`~torch.Tensor`), losses (Dict[str, :class:`~torch.Tensor`]): Detections, and if targets
             were provided, a dictionary of losses. Detections are shaped
-            ``[batch_size, predictors, classes + 5]``, where ``predictors`` is the total number of cells in all
-            detection layers times the number of boxes predicted by one cell. The predicted box coordinates are in
+            ``[batch_size, predictors, classes + 5]``, where ``predictors`` is the total number of feature map cells in
+            all detection layers times the number of anchors per cell. The predicted box coordinates are in
             `(x1, y1, x2, y2)` format and scaled to the input image size.
         """
         detections, losses, hits = self.network(images, targets)
@@ -201,12 +205,22 @@ class YOLO(LightningModule):
             batch_idx: The index of this batch
         """
         images, targets = self._validate_batch(batch)
-        _, losses = self(images, targets)
+        detections, losses = self(images, targets)
 
         self.log("val/overlap_loss", losses[0], sync_dist=True)
         self.log("val/confidence_loss", losses[1], sync_dist=True)
         self.log("val/class_loss", losses[2], sync_dist=True)
         self.log("val/total_loss", losses.sum(), sync_dist=True)
+
+        detections = self.process_detections(detections)
+        targets = self.process_targets(targets)
+        self._val_map(detections, targets)
+
+    def validation_epoch_end(self, outputs):
+        map_scores = self._val_map.compute()
+        map_scores = {"val/" + k: v for k, v in map_scores.items()}
+        self.log_dict(map_scores, sync_dist=True)
+        self._val_map.reset()
 
     def test_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int):
         """Evaluates a batch of data from the test set.
@@ -217,12 +231,22 @@ class YOLO(LightningModule):
             batch_idx: The index of this batch.
         """
         images, targets = self._validate_batch(batch)
-        _, losses = self(images, targets)
+        detections, losses = self(images, targets)
 
         self.log("test/overlap_loss", losses[0], sync_dist=True)
         self.log("test/confidence_loss", losses[1], sync_dist=True)
         self.log("test/class_loss", losses[2], sync_dist=True)
         self.log("test/total_loss", losses.sum(), sync_dist=True)
+
+        detections = self.process_detections(detections)
+        targets = self.process_targets(targets)
+        self._test_map(detections, targets)
+
+    def test_epoch_end(self, outputs):
+        map_scores = self._test_map.compute()
+        map_scores = {"test/" + k: v for k, v in map_scores.items()}
+        self.log_dict(map_scores, sync_dist=True)
+        self._test_map.reset()
 
     def infer(self, image: Tensor) -> Dict[str, Tensor]:
         """Feeds an image to the network and returns the detected bounding boxes, confidence scores, and class

@@ -5,6 +5,7 @@ from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor, nn
 from torchvision.ops import box_convert
 
+from pl_bolts.models.detection.yolo.loss import LossFunction
 from pl_bolts.models.detection.yolo.target_matching import (
     HighestIoUMatching,
     IoUThresholdMatching,
@@ -12,8 +13,38 @@ from pl_bolts.models.detection.yolo.target_matching import (
     SizeRatioMatching,
 )
 from pl_bolts.models.detection.yolo.utils import global_xy
-from pl_bolts.models.detection.yolo.yolo_loss import LossFunction
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+
+
+def _get_padding(kernel_size, stride):
+    """Returns the amount of padding needed by convolutional and max pooling layers.
+
+    Determines the amount of padding needed to make the output size of the layer the input size divided by the stride.
+    The first value that the function returns is the amount of padding to be added to all sides of the input matrix
+    (``padding`` argument of the operation). If an uneven amount of padding is needed in different sides of the input,
+    the second variable that is returned is an ``nn.ZeroPad2d`` operation that adds an additional column and row of
+    padding. If the input size is not divisible by the stride, the output size will be rounded upwards.
+
+    Args:
+        kernel_size: Size of the kernel.
+        stride: Stride of the operation.
+
+    Returns:
+        padding, pad_op: The amount of padding to be added to all sides of the input and an ``nn.Identity`` or
+        ``nn.ZeroPad2d`` operation to add one more column and row of padding if necessary.
+    """
+    # The output size is generally (input_size + padding - max(kernel_size, stride)) / stride + 1 and we want to
+    # make it equal to input_size / stride.
+    padding, remainder = divmod(max(kernel_size, stride) - stride, 2)
+
+    # If the kernel size is an even number, we need one cell of extra padding, on top of the padding added by MaxPool2d
+    # on both sides.
+    if remainder == 0:
+        pad_op = nn.Identity()
+    else:
+        pad_op = nn.ZeroPad2d((0, 1, 0, 1))
+
+    return padding, pad_op
 
 
 class DetectionLayer(nn.Module):
@@ -82,8 +113,8 @@ class DetectionLayer(nn.Module):
         anchors_per_cell = num_features // num_attrs
         if anchors_per_cell != len(self.prior_shapes):
             raise MisconfigurationException(
-                "The model predicts {} bounding boxes per cell, but {} anchor box dimensions are defined for this "
-                "layer.".format(anchors_per_cell, len(self.prior_shapes))
+                "The model predicts {} bounding boxes per spatial location, but {} prior box dimensions are defined "
+                "for this layer.".format(anchors_per_cell, len(self.prior_shapes))
             )
 
         # Reshape the output to have the bounding box attributes of each grid cell on its own row.
@@ -179,6 +210,9 @@ class DetectionLayer(nn.Module):
 class Conv(nn.Module):
     """A convolutional layer with optional layer normalization and activation.
 
+    If ``padding`` is ``None``, the module tries to add padding so much that the output size will be the input size
+    divided by the stride. If the input size is not divisible by the stride, the output size will be rounded upwards.
+
     Args:
         in_channels: Number of input channels that the layer expects.
         out_channels: Number of output channels that the convolution produces.
@@ -205,16 +239,36 @@ class Conv(nn.Module):
         super().__init__()
 
         if padding is None:
-            padding = kernel_size // 2
+            padding, self.pad = _get_padding(kernel_size, stride)
+        else:
+            self.pad = nn.Identity()
 
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
         self.norm = create_normalization_module(norm, out_channels)
         self.act = create_activation_module(activation)
 
     def forward(self, x):
+        x = self.pad(x)
         x = self.conv(x)
         x = self.norm(x)
         return self.act(x)
+
+
+class MaxPool(nn.Module):
+    """A max pooling layer with padding.
+
+    The module tries to add padding so much that the output size will be the input size divided by the stride. If the
+    input size is not divisible by the stride, the output size will be rounded upwards.
+    """
+
+    def __init__(self, kernel_size: int, stride: int):
+        super().__init__()
+        padding, self.pad = _get_padding(kernel_size, stride)
+        self.maxpool = nn.MaxPool2d(kernel_size, stride, padding)
+
+    def forward(self, x):
+        x = self.pad(x)
+        return self.maxpool(x)
 
 
 class RouteLayer(nn.Module):

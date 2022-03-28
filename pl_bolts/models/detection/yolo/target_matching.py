@@ -4,8 +4,8 @@ from typing import Dict, List, Tuple
 import torch
 from torch import Tensor
 
+from pl_bolts.models.detection.yolo.loss import LossFunction
 from pl_bolts.models.detection.yolo.utils import aligned_iou, grid_centers, iou_below, is_inside_box
-from pl_bolts.models.detection.yolo.yolo_loss import LossFunction
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -21,7 +21,7 @@ class ShapeMatching(ABC):
 
     Most YOLO variants match targets to anchors based on prior shapes that are assigned to the anchors in the model
     configuration. The subclasses of ``ShapeMatching`` implement matching rules that compare the width and height of
-    the targets to each prior shape (regardless of the grid cell where the target is). When the model includes multiple
+    the targets to each prior shape (regardless of the location where the target is). When the model includes multiple
     detection layers, different shapes are defined for each layer. Usually there are three detection layers and three
     prior shapes per layer.
 
