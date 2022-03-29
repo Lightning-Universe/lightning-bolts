@@ -103,6 +103,7 @@ class CSPBlock(nn.Module):
         norm: Optional[str] = "batchnorm",
     ):
         super().__init__()
+
         # Instead of splitting the N output channels of a convolution into two parts, we can equivalently perform two
         # convolutions with N/2 output channels.
         hidden_channels = out_channels // 2
@@ -179,14 +180,7 @@ class YOLOV4TinyBackbone(nn.Module):
 
         def downsample(in_channels, out_channels):
             conv = Conv(in_channels, out_channels, kernel_size=3, stride=2, activation=activation, norm=normalization)
-            return nn.Sequential(
-                OrderedDict(
-                    [
-                        ("conv", conv),
-                        ("smooth", smooth(out_channels)),
-                    ]
-                )
-            )
+            return nn.Sequential(OrderedDict([("downsample", conv), ("smooth", smooth(out_channels))]))
 
         def maxpool(out_channels):
             return nn.Sequential(
@@ -448,14 +442,16 @@ class YOLOV4TinyNetwork(nn.Module):
                 raise ValueError("The number of provided prior shapes needs to be divisible by 3.")
         num_outputs = (5 + num_classes) * anchors_per_cell
 
-        def conv1x1(in_channels, out_channels):
-            return Conv(in_channels, out_channels, kernel_size=1, stride=1, activation=activation, norm=normalization)
+        def conv(in_channels, out_channels, kernel_size=1):
+            return Conv(in_channels, out_channels, kernel_size, stride=1, activation=activation, norm=normalization)
 
-        def conv3x3(in_channels, out_channels):
-            return Conv(in_channels, out_channels, kernel_size=3, stride=1, activation=activation, norm=normalization)
+        def upsample(in_channels, out_channels):
+            channels = conv(in_channels, out_channels)
+            upsample = nn.Upsample(scale_factor=2, mode="nearest")
+            return nn.Sequential(OrderedDict([("channels", channels), ("upsample", upsample)]))
 
-        def linear(in_channels, out_channels):
-            return nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, bias=True)
+        def outputs(in_channels):
+            return nn.Conv2d(in_channels, num_outputs, kernel_size=1, stride=1, bias=True)
 
         def detect(prior_shape_idxs):
             return create_detection_layer(
@@ -464,25 +460,23 @@ class YOLOV4TinyNetwork(nn.Module):
 
         self.backbone = backbone or YOLOV4TinyBackbone(width=width, normalization=normalization, activation=activation)
 
-        self.fpn5 = conv1x1(width * 16, width * 8)
+        self.fpn5 = conv(width * 16, width * 8)
         self.out5 = nn.Sequential(
-            conv3x3(width * 8, width * 16),
-            linear(width * 16, num_outputs),
+            OrderedDict(
+                [
+                    ("channels", conv(width * 8, width * 16)),
+                    (f"outputs_{num_outputs}", outputs(width * 16)),
+                ]
+            )
         )
-        self.upsample5 = nn.Sequential(
-            conv1x1(width * 8, width * 4),
-            nn.Upsample(scale_factor=2, mode="nearest"),
-        )
+        self.upsample5 = upsample(width * 8, width * 4)
 
-        self.fpn4 = conv3x3(width * 12, width * 8)
-        self.out4 = linear(width * 8, num_outputs)
-        self.upsample4 = nn.Sequential(
-            conv1x1(width * 8, width * 2),
-            nn.Upsample(scale_factor=2, mode="nearest"),
-        )
+        self.fpn4 = conv(width * 12, width * 8, kernel_size=3)
+        self.out4 = nn.Sequential(OrderedDict([(f"outputs_{num_outputs}", outputs(width * 8))]))
+        self.upsample4 = upsample(width * 8, width * 2)
 
-        self.fpn3 = conv3x3(width * 6, width * 4)
-        self.out3 = linear(width * 4, num_outputs)
+        self.fpn3 = conv(width * 6, width * 4, kernel_size=3)
+        self.out3 = nn.Sequential(OrderedDict([(f"outputs_{num_outputs}", outputs(width * 4))]))
 
         self.detect3 = detect([0, 1, 2])
         self.detect4 = detect([3, 4, 5])
@@ -593,19 +587,10 @@ class YOLOV4Network(nn.Module):
                 raise ValueError("The number of provided prior shapes needs to be divisible by 3.")
         num_outputs = (5 + num_classes) * anchors_per_cell
 
-        def downsample(in_channels, out_channels):
-            return Conv(in_channels, out_channels, kernel_size=3, stride=2, activation=activation, norm=normalization)
-
-        def conv1x1(in_channels, out_channels):
+        def conv(in_channels, out_channels):
             return Conv(in_channels, out_channels, kernel_size=1, stride=1, activation=activation, norm=normalization)
 
-        def conv3x3(in_channels, out_channels):
-            return Conv(in_channels, out_channels, kernel_size=3, stride=1, activation=activation, norm=normalization)
-
-        def linear(in_channels, out_channels):
-            return nn.Conv2d(in_channels, out_channels, kernel_size=1)
-
-        def block(in_channels, out_channels):
+        def csp(in_channels, out_channels):
             return CSPBlock(
                 in_channels,
                 out_channels,
@@ -615,6 +600,19 @@ class YOLOV4Network(nn.Module):
                 activation=activation,
             )
 
+        def out(num_channels):
+            conv = Conv(num_channels, num_channels, kernel_size=3, stride=1, activation=activation, norm=normalization)
+            outputs = nn.Conv2d(num_channels, num_outputs, kernel_size=1)
+            return nn.Sequential(OrderedDict([("conv", conv), (f"outputs_{num_outputs}", outputs)]))
+
+        def upsample(in_channels, out_channels):
+            channels = conv(in_channels, out_channels)
+            upsample = nn.Upsample(scale_factor=2, mode="nearest")
+            return nn.Sequential(OrderedDict([("channels", channels), ("upsample", upsample)]))
+
+        def downsample(in_channels, out_channels):
+            return Conv(in_channels, out_channels, kernel_size=3, stride=2, activation=activation, norm=normalization)
+
         def detect(prior_shape_idxs):
             return create_detection_layer(
                 prior_shapes, prior_shape_idxs, num_classes=num_classes, input_is_normalized=False, **kwargs
@@ -622,35 +620,20 @@ class YOLOV4Network(nn.Module):
 
         self.backbone = backbone or YOLOV4Backbone(width=width, normalization=normalization, activation=activation)
 
-        self.pre3 = conv1x1(width * 8, width * 4)
-        self.fpn3 = block(width * 8, width * 8)
-        self.out3 = nn.Sequential(
-            conv3x3(width * 8, width * 8),
-            linear(width * 8, num_outputs),
-        )
+        self.pre3 = conv(width * 8, width * 4)
+        self.fpn3 = csp(width * 8, width * 8)
+        self.out3 = out(width * 8)
 
-        self.pre4 = conv1x1(width * 16, width * 8)
-        self.fpn4 = block(width * 16, width * 16)
-        self.pan4 = block(width * 24, width * 16)
-        self.out4 = nn.Sequential(
-            conv3x3(width * 16, width * 16),
-            linear(width * 16, num_outputs),
-        )
+        self.pre4 = conv(width * 16, width * 8)
+        self.fpn4 = csp(width * 16, width * 16)
+        self.pan4 = csp(width * 24, width * 16)
+        self.out4 = out(width * 16)
 
-        self.pan5 = block(width * 48, width * 32)
-        self.out5 = nn.Sequential(
-            conv3x3(width * 32, width * 32),
-            linear(width * 32, num_outputs),
-        )
+        self.pan5 = csp(width * 48, width * 32)
+        self.out5 = out(width * 32)
 
-        self.upsample4 = nn.Sequential(
-            conv1x1(width * 16, width * 4),
-            nn.Upsample(scale_factor=2, mode="nearest"),
-        )
-        self.upsample5 = nn.Sequential(
-            conv1x1(width * 32, width * 8),
-            nn.Upsample(scale_factor=2, mode="nearest"),
-        )
+        self.upsample4 = upsample(width * 16, width * 4)
+        self.upsample5 = upsample(width * 32, width * 8)
 
         self.downsample3 = downsample(width * 8, width * 8)
         self.downsample4 = downsample(width * 16, width * 16)
@@ -778,13 +761,14 @@ class YOLOV5Network(nn.Module):
         def downsample(in_channels, out_channels):
             return Conv(in_channels, out_channels, kernel_size=3, stride=2, activation=activation, norm=normalization)
 
-        def conv1x1(in_channels, out_channels):
+        def conv(in_channels, out_channels):
             return Conv(in_channels, out_channels, kernel_size=1, stride=1, activation=activation, norm=normalization)
 
-        def linear(in_channels, out_channels):
-            return nn.Conv2d(in_channels, out_channels, kernel_size=1)
+        def out(in_channels):
+            outputs = nn.Conv2d(in_channels, num_outputs, kernel_size=1)
+            return nn.Sequential(OrderedDict([(f"outputs_{num_outputs}", outputs)]))
 
-        def block(in_channels, out_channels):
+        def csp(in_channels, out_channels):
             return CSPBlock(
                 in_channels,
                 out_channels,
@@ -803,19 +787,23 @@ class YOLOV5Network(nn.Module):
             depth=depth, width=width, normalization=normalization, activation=activation
         )
 
-        self.pan3 = block(width * 8, width * 4)
-        self.out3 = linear(width * 4, num_outputs)
+        self.pan3 = csp(width * 8, width * 4)
+        self.out3 = out(width * 4)
 
         self.fpn4 = nn.Sequential(
-            block(width * 16, width * 8),
-            conv1x1(width * 8, width * 4),
+            OrderedDict(
+                [
+                    ("csp", csp(width * 16, width * 8)),
+                    ("conv", conv(width * 8, width * 4)),
+                ]
+            )
         )
-        self.pan4 = block(width * 8, width * 8)
-        self.out4 = linear(width * 8, num_outputs)
+        self.pan4 = csp(width * 8, width * 8)
+        self.out4 = out(width * 8)
 
-        self.fpn5 = conv1x1(width * 16, width * 8)
-        self.pan5 = block(width * 16, width * 16)
-        self.out5 = linear(width * 16, num_outputs)
+        self.fpn5 = conv(width * 16, width * 8)
+        self.pan5 = csp(width * 16, width * 16)
+        self.out5 = out(width * 16)
 
         self.upsample = nn.Upsample(scale_factor=2, mode="nearest")
 
@@ -931,16 +919,13 @@ class YOLOXNetwork(nn.Module):
         def downsample(in_channels, out_channels):
             return Conv(in_channels, out_channels, kernel_size=3, stride=2, activation=activation, norm=normalization)
 
-        def conv1x1(in_channels, out_channels):
-            return Conv(in_channels, out_channels, kernel_size=1, stride=1, activation=activation, norm=normalization)
-
-        def conv3x3(in_channels, out_channels):
-            return Conv(in_channels, out_channels, kernel_size=3, stride=1, activation=activation, norm=normalization)
+        def conv(in_channels, out_channels, kernel_size=1):
+            return Conv(in_channels, out_channels, kernel_size, stride=1, activation=activation, norm=normalization)
 
         def linear(in_channels, out_channels):
             return nn.Conv2d(in_channels, out_channels, kernel_size=1)
 
-        def bottleneck(in_channels, out_channels):
+        def csp(in_channels, out_channels):
             return CSPBlock(
                 in_channels,
                 out_channels,
@@ -949,6 +934,17 @@ class YOLOXNetwork(nn.Module):
                 norm=normalization,
                 activation=activation,
             )
+
+        def features(num_channels):
+            return nn.Sequential(
+                conv(num_channels, num_channels, kernel_size=3),
+                conv(num_channels, num_channels, kernel_size=3),
+            )
+
+        def classprob(num_channels):
+            num_outputs = anchors_per_cell * num_classes
+            outputs = linear(num_channels, num_outputs)
+            return nn.Sequential(OrderedDict([("convs", features(num_channels)), (f"outputs_{num_outputs}", outputs)]))
 
         def detect(prior_shape_idxs):
             return create_detection_layer(
@@ -959,52 +955,35 @@ class YOLOXNetwork(nn.Module):
             depth=depth, width=width, normalization=normalization, activation=activation
         )
 
-        self.pan3 = bottleneck(width * 8, width * 4)
-        self.out3_stem = conv1x1(width * 4, width * 4)
-        self.out3_feat = nn.Sequential(
-            conv3x3(width * 4, width * 4),
-            conv3x3(width * 4, width * 4),
-        )
+        self.pan3 = csp(width * 8, width * 4)
+        self.out3_stem = conv(width * 4, width * 4)
+        self.out3_feat = features(width * 4)
         self.out3_box = linear(width * 4, anchors_per_cell * 4)
         self.out3_confidence = linear(width * 4, anchors_per_cell)
-        self.out3_classprob = nn.Sequential(
-            conv3x3(width * 4, width * 4),
-            conv3x3(width * 4, width * 4),
-            linear(width * 4, anchors_per_cell * num_classes),
-        )
+        self.out3_classprob = classprob(width * 4)
 
         self.fpn4 = nn.Sequential(
-            bottleneck(width * 16, width * 8),
-            conv1x1(width * 8, width * 4),
+            OrderedDict(
+                [
+                    ("csp", csp(width * 16, width * 8)),
+                    ("conv", conv(width * 8, width * 4)),
+                ]
+            )
         )
-        self.pan4 = bottleneck(width * 8, width * 8)
-        self.out4_stem = conv1x1(width * 8, width * 4)
-        self.out4_feat = nn.Sequential(
-            conv3x3(width * 4, width * 4),
-            conv3x3(width * 4, width * 4),
-        )
+        self.pan4 = csp(width * 8, width * 8)
+        self.out4_stem = conv(width * 8, width * 4)
+        self.out4_feat = features(width * 4)
         self.out4_box = linear(width * 4, anchors_per_cell * 4)
         self.out4_confidence = linear(width * 4, anchors_per_cell)
-        self.out4_classprob = nn.Sequential(
-            conv3x3(width * 4, width * 4),
-            conv3x3(width * 4, width * 4),
-            linear(width * 4, anchors_per_cell * num_classes),
-        )
+        self.out4_classprob = classprob(width * 4)
 
-        self.fpn5 = conv1x1(width * 16, width * 8)
-        self.pan5 = bottleneck(width * 16, width * 16)
-        self.out5_stem = conv1x1(width * 16, width * 4)
-        self.out5_feat = nn.Sequential(
-            conv3x3(width * 4, width * 4),
-            conv3x3(width * 4, width * 4),
-        )
+        self.fpn5 = conv(width * 16, width * 8)
+        self.pan5 = csp(width * 16, width * 16)
+        self.out5_stem = conv(width * 16, width * 4)
+        self.out5_feat = features(width * 4)
         self.out5_box = linear(width * 4, anchors_per_cell * 4)
         self.out5_confidence = linear(width * 4, anchors_per_cell)
-        self.out5_classprob = nn.Sequential(
-            conv3x3(width * 4, width * 4),
-            conv3x3(width * 4, width * 4),
-            linear(width * 4, anchors_per_cell * num_classes),
-        )
+        self.out5_classprob = classprob(width * 4)
 
         self.upsample = nn.Upsample(scale_factor=2, mode="nearest")
 

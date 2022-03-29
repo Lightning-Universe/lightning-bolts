@@ -6,14 +6,16 @@ import torch.nn as nn
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities.cli import LightningCLI
 from torch import Tensor, optim
-from torchmetrics.detection.map import MAP
 
 from pl_bolts.datamodules import VOCDetectionDataModule
 from pl_bolts.datamodules.vocdetection_datamodule import Compose
 from pl_bolts.models.detection.yolo.darknet_network import DarknetNetwork
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils import _TORCHMETRICS_DETECTION_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _TORCHMETRICS_DETECTION_AVAILABLE:
+    from torchmetrics.detection.map import MAP
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.ops import batched_nms
@@ -108,8 +110,9 @@ class YOLO(LightningModule):
         self.nms_threshold = nms_threshold
         self.detections_per_image = detections_per_image
 
-        self._val_map = MAP(compute_on_step=False)
-        self._test_map = MAP(compute_on_step=False)
+        if _TORCHMETRICS_DETECTION_AVAILABLE:
+            self._val_map = MAP(compute_on_step=False)
+            self._test_map = MAP(compute_on_step=False)
 
     def forward(self, images: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None) -> Tuple[Tensor, Tensor]:
         """Runs a forward pass through the network (all layers listed in ``self.network``), and if training targets
@@ -212,15 +215,17 @@ class YOLO(LightningModule):
         self.log("val/class_loss", losses[2], sync_dist=True)
         self.log("val/total_loss", losses.sum(), sync_dist=True)
 
-        detections = self.process_detections(detections)
-        targets = self.process_targets(targets)
-        self._val_map(detections, targets)
+        if _TORCHMETRICS_DETECTION_AVAILABLE:
+            detections = self.process_detections(detections)
+            targets = self.process_targets(targets)
+            self._val_map(detections, targets)
 
     def validation_epoch_end(self, outputs):
-        map_scores = self._val_map.compute()
-        map_scores = {"val/" + k: v for k, v in map_scores.items()}
-        self.log_dict(map_scores, sync_dist=True)
-        self._val_map.reset()
+        if _TORCHMETRICS_DETECTION_AVAILABLE:
+            map_scores = self._val_map.compute()
+            map_scores = {"val/" + k: v for k, v in map_scores.items()}
+            self.log_dict(map_scores, sync_dist=True)
+            self._val_map.reset()
 
     def test_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int):
         """Evaluates a batch of data from the test set.
@@ -238,15 +243,17 @@ class YOLO(LightningModule):
         self.log("test/class_loss", losses[2], sync_dist=True)
         self.log("test/total_loss", losses.sum(), sync_dist=True)
 
-        detections = self.process_detections(detections)
-        targets = self.process_targets(targets)
-        self._test_map(detections, targets)
+        if _TORCHMETRICS_DETECTION_AVAILABLE:
+            detections = self.process_detections(detections)
+            targets = self.process_targets(targets)
+            self._test_map(detections, targets)
 
     def test_epoch_end(self, outputs):
-        map_scores = self._test_map.compute()
-        map_scores = {"test/" + k: v for k, v in map_scores.items()}
-        self.log_dict(map_scores, sync_dist=True)
-        self._test_map.reset()
+        if _TORCHMETRICS_DETECTION_AVAILABLE:
+            map_scores = self._test_map.compute()
+            map_scores = {"test/" + k: v for k, v in map_scores.items()}
+            self.log_dict(map_scores, sync_dist=True)
+            self._test_map.reset()
 
     def infer(self, image: Tensor) -> Dict[str, Tensor]:
         """Feeds an image to the network and returns the detected bounding boxes, confidence scores, and class
