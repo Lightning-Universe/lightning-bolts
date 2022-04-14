@@ -1,11 +1,12 @@
 from collections import OrderedDict
-from typing import Dict, List, Optional, Tuple
+from typing import Any, List, Optional, Sequence, Tuple
 
 import torch
 import torch.nn as nn
 from torch import Tensor
 
-from pl_bolts.models.detection.yolo.layers import Conv, MaxPool, create_detection_layer
+from pl_bolts.models.detection.yolo.layers import Conv, DetectionLayer, MaxPool, create_detection_layer
+from pl_bolts.models.detection.yolo.types import NETWORK_OUTPUT, TARGETS
 from pl_bolts.models.detection.yolo.utils import get_image_size
 
 
@@ -25,13 +26,13 @@ class BottleneckBlock(nn.Module):
 
     def __init__(
         self,
-        in_channels,
-        out_channels,
+        in_channels: int,
+        out_channels: int,
         hidden_channels: Optional[int] = None,
         shortcut: bool = True,
         activation: Optional[str] = "silu",
         norm: Optional[str] = "batchnorm",
-    ):
+    ) -> None:
         super().__init__()
 
         if hidden_channels is None:
@@ -43,7 +44,7 @@ class BottleneckBlock(nn.Module):
         )
         self.shortcut = shortcut and in_channels == out_channels
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         y = self.convs(x)
         return x + y if self.shortcut else y
 
@@ -63,7 +64,7 @@ class TinyBlock(nn.Module):
         num_channels: int,
         activation: Optional[str] = "leaky",
         norm: Optional[str] = "batchnorm",
-    ):
+    ) -> None:
         super().__init__()
 
         hidden_channels = num_channels // 2
@@ -71,7 +72,7 @@ class TinyBlock(nn.Module):
         self.conv2 = Conv(hidden_channels, hidden_channels, kernel_size=3, stride=1, activation=activation, norm=norm)
         self.mix = Conv(num_channels, num_channels, kernel_size=1, stride=1, activation=activation, norm=norm)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         x = torch.chunk(x, 2, dim=1)[1]
         y1 = self.conv1(x)
         y2 = self.conv2(y1)
@@ -101,7 +102,7 @@ class CSPBlock(nn.Module):
         shortcut: bool = True,
         activation: Optional[str] = "silu",
         norm: Optional[str] = "batchnorm",
-    ):
+    ) -> None:
         super().__init__()
 
         # Instead of splitting the N output channels of a convolution into two parts, we can equivalently perform two
@@ -116,7 +117,7 @@ class CSPBlock(nn.Module):
         self.bottlenecks = nn.Sequential(*bottlenecks)
         self.mix = Conv(hidden_channels * 2, out_channels, kernel_size=1, stride=1, activation=activation, norm=norm)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         y1 = self.bottlenecks(self.split1(x))
         y2 = self.split2(x)
         return self.mix(torch.cat((y1, y2), dim=1))
@@ -148,7 +149,7 @@ class FastSPP(nn.Module):
         self.maxpool = MaxPool(kernel_size=kernel_size, stride=1)
         self.mix = Conv(hidden_channels * 4, out_channels, kernel_size=1, stride=1, activation=activation, norm=norm)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         y1 = self.conv(x)
         y2 = self.maxpool(y1)
         y3 = self.maxpool(y2)
@@ -175,14 +176,14 @@ class YOLOV4TinyBackbone(nn.Module):
     ):
         super().__init__()
 
-        def smooth(num_channels):
+        def smooth(num_channels: int) -> nn.Module:
             return Conv(num_channels, num_channels, kernel_size=3, stride=1, activation=activation, norm=normalization)
 
-        def downsample(in_channels, out_channels):
+        def downsample(in_channels: int, out_channels: int) -> nn.Module:
             conv = Conv(in_channels, out_channels, kernel_size=3, stride=2, activation=activation, norm=normalization)
             return nn.Sequential(OrderedDict([("downsample", conv), ("smooth", smooth(out_channels))]))
 
-        def maxpool(out_channels):
+        def maxpool(out_channels: int) -> nn.Module:
             return nn.Sequential(
                 OrderedDict(
                     [
@@ -202,7 +203,7 @@ class YOLOV4TinyBackbone(nn.Module):
         self.stage4 = TinyBlock(width * 8, activation=activation, norm=normalization)
         self.downsample5 = maxpool(width * 16)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
         c1 = self.stage1(x)
         x = self.downsample2(c1)
         c2 = self.stage2(x)
@@ -236,13 +237,13 @@ class YOLOV4Backbone(nn.Module):
     ) -> None:
         super().__init__()
 
-        def downsample(in_channels, out_channels):
+        def downsample(in_channels: int, out_channels: int) -> nn.Module:
             return Conv(in_channels, out_channels, kernel_size=3, stride=2, activation=activation, norm=normalization)
 
-        def csp(num_channels, depth):
+        def csp(num_channels: int, depth: int) -> nn.Module:
             return CSPBlock(num_channels, num_channels, depth=depth)
 
-        def spp(num_channels):
+        def spp(num_channels: int) -> nn.Module:
             return FastSPP(num_channels, num_channels, kernel_size=5, activation=activation, norm=normalization)
 
         self.stage1 = nn.Sequential(
@@ -318,15 +319,15 @@ class YOLOV5Backbone(nn.Module):
     ) -> None:
         super().__init__()
 
-        def downsample(in_channels, out_channels, kernel_size=3):
+        def downsample(in_channels: int, out_channels: int, kernel_size: int = 3) -> nn.Module:
             return Conv(
                 in_channels, out_channels, kernel_size=kernel_size, stride=2, activation=activation, norm=normalization
             )
 
-        def csp(num_channels, depth):
+        def csp(num_channels: int, depth: int) -> nn.Module:
             return CSPBlock(num_channels, num_channels, depth=depth)
 
-        def spp(num_channels):
+        def spp(num_channels: int) -> nn.Module:
             return FastSPP(num_channels, num_channels, kernel_size=5, activation=activation, norm=normalization)
 
         self.stage1 = downsample(3, width, kernel_size=6)
@@ -418,7 +419,7 @@ class YOLOV4TinyNetwork(nn.Module):
         activation: Optional[str] = "leaky",
         normalization: Optional[str] = "batchnorm",
         prior_shapes: List[Tuple[int, int]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         super().__init__()
 
@@ -442,18 +443,19 @@ class YOLOV4TinyNetwork(nn.Module):
                 raise ValueError("The number of provided prior shapes needs to be divisible by 3.")
         num_outputs = (5 + num_classes) * anchors_per_cell
 
-        def conv(in_channels, out_channels, kernel_size=1):
+        def conv(in_channels: int, out_channels: int, kernel_size: int = 1) -> nn.Module:
             return Conv(in_channels, out_channels, kernel_size, stride=1, activation=activation, norm=normalization)
 
-        def upsample(in_channels, out_channels):
+        def upsample(in_channels: int, out_channels: int) -> nn.Module:
             channels = conv(in_channels, out_channels)
             upsample = nn.Upsample(scale_factor=2, mode="nearest")
             return nn.Sequential(OrderedDict([("channels", channels), ("upsample", upsample)]))
 
-        def outputs(in_channels):
+        def outputs(in_channels: int) -> nn.Module:
             return nn.Conv2d(in_channels, num_outputs, kernel_size=1, stride=1, bias=True)
 
-        def detect(prior_shape_idxs):
+        def detect(prior_shape_idxs: Sequence[int]) -> DetectionLayer:
+            assert prior_shapes is not None
             return create_detection_layer(
                 prior_shapes, prior_shape_idxs, num_classes=num_classes, input_is_normalized=False, **kwargs
             )
@@ -482,7 +484,7 @@ class YOLOV4TinyNetwork(nn.Module):
         self.detect4 = detect([3, 4, 5])
         self.detect5 = detect([6, 7, 8])
 
-    def forward(self, x: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None) -> Tuple[Tensor, Tensor]:
+    def forward(self, x: Tensor, targets: Optional[TARGETS] = None) -> NETWORK_OUTPUT:
         detections = []  # Outputs from detection layers
         losses = []  # Losses from detection layers
         hits = []  # Number of targets each detection layer was responsible for
@@ -563,7 +565,7 @@ class YOLOV4Network(nn.Module):
         activation: Optional[str] = "silu",
         normalization: Optional[str] = "batchnorm",
         prior_shapes: List[Tuple[int, int]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         super().__init__()
 
@@ -587,10 +589,10 @@ class YOLOV4Network(nn.Module):
                 raise ValueError("The number of provided prior shapes needs to be divisible by 3.")
         num_outputs = (5 + num_classes) * anchors_per_cell
 
-        def conv(in_channels, out_channels):
+        def conv(in_channels: int, out_channels: int) -> nn.Module:
             return Conv(in_channels, out_channels, kernel_size=1, stride=1, activation=activation, norm=normalization)
 
-        def csp(in_channels, out_channels):
+        def csp(in_channels: int, out_channels: int) -> nn.Module:
             return CSPBlock(
                 in_channels,
                 out_channels,
@@ -600,20 +602,21 @@ class YOLOV4Network(nn.Module):
                 activation=activation,
             )
 
-        def out(num_channels):
+        def out(num_channels: int) -> nn.Module:
             conv = Conv(num_channels, num_channels, kernel_size=3, stride=1, activation=activation, norm=normalization)
             outputs = nn.Conv2d(num_channels, num_outputs, kernel_size=1)
             return nn.Sequential(OrderedDict([("conv", conv), (f"outputs_{num_outputs}", outputs)]))
 
-        def upsample(in_channels, out_channels):
+        def upsample(in_channels: int, out_channels: int) -> nn.Module:
             channels = conv(in_channels, out_channels)
             upsample = nn.Upsample(scale_factor=2, mode="nearest")
             return nn.Sequential(OrderedDict([("channels", channels), ("upsample", upsample)]))
 
-        def downsample(in_channels, out_channels):
+        def downsample(in_channels: int, out_channels: int) -> nn.Module:
             return Conv(in_channels, out_channels, kernel_size=3, stride=2, activation=activation, norm=normalization)
 
-        def detect(prior_shape_idxs):
+        def detect(prior_shape_idxs: Sequence[int]) -> DetectionLayer:
+            assert prior_shapes is not None
             return create_detection_layer(
                 prior_shapes, prior_shape_idxs, num_classes=num_classes, input_is_normalized=False, **kwargs
             )
@@ -642,7 +645,7 @@ class YOLOV4Network(nn.Module):
         self.detect4 = detect(range(anchors_per_cell, anchors_per_cell * 2))
         self.detect5 = detect(range(anchors_per_cell * 2, anchors_per_cell * 3))
 
-    def forward(self, x: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None) -> Tuple[Tensor, Tensor]:
+    def forward(self, x: Tensor, targets: Optional[TARGETS] = None) -> NETWORK_OUTPUT:
         detections = []  # Outputs from detection layers
         losses = []  # Losses from detection layers
         hits = []  # Number of targets each detection layer was responsible for
@@ -734,7 +737,7 @@ class YOLOV5Network(nn.Module):
         activation: Optional[str] = "silu",
         normalization: Optional[str] = "batchnorm",
         prior_shapes: List[Tuple[int, int]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         super().__init__()
 
@@ -758,17 +761,17 @@ class YOLOV5Network(nn.Module):
                 raise ValueError("The number of provided prior shapes needs to be divisible by 3.")
         num_outputs = (5 + num_classes) * anchors_per_cell
 
-        def downsample(in_channels, out_channels):
+        def downsample(in_channels: int, out_channels: int) -> nn.Module:
             return Conv(in_channels, out_channels, kernel_size=3, stride=2, activation=activation, norm=normalization)
 
-        def conv(in_channels, out_channels):
+        def conv(in_channels: int, out_channels: int) -> nn.Module:
             return Conv(in_channels, out_channels, kernel_size=1, stride=1, activation=activation, norm=normalization)
 
-        def out(in_channels):
+        def out(in_channels: int) -> nn.Module:
             outputs = nn.Conv2d(in_channels, num_outputs, kernel_size=1)
             return nn.Sequential(OrderedDict([(f"outputs_{num_outputs}", outputs)]))
 
-        def csp(in_channels, out_channels):
+        def csp(in_channels: int, out_channels: int) -> nn.Module:
             return CSPBlock(
                 in_channels,
                 out_channels,
@@ -778,7 +781,8 @@ class YOLOV5Network(nn.Module):
                 activation=activation,
             )
 
-        def detect(prior_shape_idxs):
+        def detect(prior_shape_idxs: Sequence[int]) -> DetectionLayer:
+            assert prior_shapes is not None
             return create_detection_layer(
                 prior_shapes, prior_shape_idxs, num_classes=num_classes, input_is_normalized=False, **kwargs
             )
@@ -814,7 +818,7 @@ class YOLOV5Network(nn.Module):
         self.detect4 = detect(range(anchors_per_cell, anchors_per_cell * 2))
         self.detect5 = detect(range(anchors_per_cell * 2, anchors_per_cell * 3))
 
-    def forward(self, x: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None) -> Tuple[Tensor, Tensor]:
+    def forward(self, x: Tensor, targets: Optional[TARGETS] = None) -> NETWORK_OUTPUT:
         detections = []  # Outputs from detection layers
         losses = []  # Losses from detection layers
         hits = []  # Number of targets each detection layer was responsible for
@@ -903,7 +907,7 @@ class YOLOXNetwork(nn.Module):
         activation: Optional[str] = "silu",
         normalization: Optional[str] = "batchnorm",
         prior_shapes: List[Tuple[int, int]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         super().__init__()
 
@@ -916,16 +920,16 @@ class YOLOXNetwork(nn.Module):
             if modulo != 0:
                 raise ValueError("The number of provided prior shapes needs to be divisible by 3.")
 
-        def downsample(in_channels, out_channels):
+        def downsample(in_channels: int, out_channels: int) -> nn.Module:
             return Conv(in_channels, out_channels, kernel_size=3, stride=2, activation=activation, norm=normalization)
 
-        def conv(in_channels, out_channels, kernel_size=1):
+        def conv(in_channels: int, out_channels: int, kernel_size: int = 1) -> nn.Module:
             return Conv(in_channels, out_channels, kernel_size, stride=1, activation=activation, norm=normalization)
 
-        def linear(in_channels, out_channels):
+        def linear(in_channels: int, out_channels: int) -> nn.Module:
             return nn.Conv2d(in_channels, out_channels, kernel_size=1)
 
-        def csp(in_channels, out_channels):
+        def csp(in_channels: int, out_channels: int) -> nn.Module:
             return CSPBlock(
                 in_channels,
                 out_channels,
@@ -935,18 +939,19 @@ class YOLOXNetwork(nn.Module):
                 activation=activation,
             )
 
-        def features(num_channels):
+        def features(num_channels: int) -> nn.Module:
             return nn.Sequential(
                 conv(num_channels, num_channels, kernel_size=3),
                 conv(num_channels, num_channels, kernel_size=3),
             )
 
-        def classprob(num_channels):
+        def classprob(num_channels: int) -> nn.Module:
             num_outputs = anchors_per_cell * num_classes
             outputs = linear(num_channels, num_outputs)
             return nn.Sequential(OrderedDict([("convs", features(num_channels)), (f"outputs_{num_outputs}", outputs)]))
 
-        def detect(prior_shape_idxs):
+        def detect(prior_shape_idxs: Sequence[int]) -> DetectionLayer:
+            assert prior_shapes is not None
             return create_detection_layer(
                 prior_shapes, prior_shape_idxs, num_classes=num_classes, input_is_normalized=False, **kwargs
             )
@@ -994,7 +999,7 @@ class YOLOXNetwork(nn.Module):
         self.detect4 = detect(range(anchors_per_cell, anchors_per_cell * 2))
         self.detect5 = detect(range(anchors_per_cell * 2, anchors_per_cell * 3))
 
-    def forward(self, x: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None) -> Tuple[Tensor, Tensor]:
+    def forward(self, x: Tensor, targets: Optional[TARGETS] = None) -> NETWORK_OUTPUT:
         detections = []  # Outputs from detection layers
         losses = []  # Losses from detection layers
         hits = []  # Number of targets each detection layer was responsible for

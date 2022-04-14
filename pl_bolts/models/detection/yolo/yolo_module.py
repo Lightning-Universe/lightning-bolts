@@ -1,15 +1,17 @@
 from copy import copy
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import torch
 import torch.nn as nn
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities.cli import LightningCLI
+from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
 from torch import Tensor, optim
 
 from pl_bolts.datamodules import VOCDetectionDataModule
 from pl_bolts.datamodules.vocdetection_datamodule import Compose
 from pl_bolts.models.detection.yolo.darknet_network import DarknetNetwork
+from pl_bolts.models.detection.yolo.types import TARGET, TARGETS
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.utils import _TORCHMETRICS_DETECTION_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -87,7 +89,7 @@ class YOLO(LightningModule):
 
     def __init__(
         self,
-        network: nn.ModuleList,
+        network: nn.Module,
         optimizer: Type[optim.Optimizer] = optim.SGD,
         optimizer_params: Dict[str, Any] = {"lr": 0.01, "momentum": 0.9, "weight_decay": 0.0005},
         lr_scheduler: Type[optim.lr_scheduler._LRScheduler] = LinearWarmupCosineAnnealingLR,
@@ -114,7 +116,9 @@ class YOLO(LightningModule):
             self._val_map = MAP(compute_on_step=False)
             self._test_map = MAP(compute_on_step=False)
 
-    def forward(self, images: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None) -> Tuple[Tensor, Tensor]:
+    def forward(  # type: ignore
+        self, images: Tensor, targets: Optional[TARGETS] = None
+    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         """Runs a forward pass through the network (all layers listed in ``self.network``), and if training targets
         are provided, computes the losses from the detection layers.
 
@@ -142,7 +146,7 @@ class YOLO(LightningModule):
 
         total_hits = sum(hits)
         for layer_idx, layer_hits in enumerate(hits):
-            hit_rate = torch.true_divide(layer_hits, total_hits) if total_hits > 0 else 1.0
+            hit_rate: Union[Tensor, float] = torch.true_divide(layer_hits, total_hits) if total_hits > 0 else 1.0
             self.log(f"layer_{layer_idx}_hit_rate", hit_rate, sync_dist=False)
 
         losses = torch.stack(losses).sum(0)
@@ -176,7 +180,7 @@ class YOLO(LightningModule):
         lr_scheduler = self.lr_scheduler_class(optimizer, **self.lr_scheduler_params)
         return [optimizer], [lr_scheduler]
 
-    def training_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int) -> Dict[str, Tensor]:
+    def training_step(self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int) -> STEP_OUTPUT:  # type: ignore
         """Computes the training loss.
 
         Args:
@@ -199,7 +203,9 @@ class YOLO(LightningModule):
 
         return {"loss": losses.sum()}
 
-    def validation_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int):
+    def validation_step(  # type: ignore
+        self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int
+    ) -> Optional[STEP_OUTPUT]:
         """Evaluates a batch of data from the validation set.
 
         Args:
@@ -220,14 +226,14 @@ class YOLO(LightningModule):
             targets = self.process_targets(targets)
             self._val_map(detections, targets)
 
-    def validation_epoch_end(self, outputs):
+    def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
         if _TORCHMETRICS_DETECTION_AVAILABLE:
             map_scores = self._val_map.compute()
             map_scores = {"val/" + k: v for k, v in map_scores.items()}
             self.log_dict(map_scores, sync_dist=True)
             self._val_map.reset()
 
-    def test_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int):
+    def test_step(self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int) -> Optional[STEP_OUTPUT]:  # type: ignore
         """Evaluates a batch of data from the test set.
 
         Args:
@@ -248,7 +254,7 @@ class YOLO(LightningModule):
             targets = self.process_targets(targets)
             self._test_map(detections, targets)
 
-    def test_epoch_end(self, outputs):
+    def test_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
         if _TORCHMETRICS_DETECTION_AVAILABLE:
             map_scores = self._test_map.compute()
             map_scores = {"test/" + k: v for k, v in map_scores.items()}
@@ -288,7 +294,6 @@ class YOLO(LightningModule):
         have an IoU greater than the NMS threshold with a higher scoring box.
 
         The returned detections are sorted by descending confidence. The items of the dictionaries are as follows:
-
         - boxes (``Tensor[batch_size, N, 4]``): detected bounding box `(x1, y1, x2, y2)` coordinates
         - scores (``Tensor[batch_size, N]``): detection confidences
         - labels (``Int64Tensor[batch_size, N]``): the predicted class IDs
@@ -322,7 +327,7 @@ class YOLO(LightningModule):
 
         return result
 
-    def process_targets(self, targets: List[Dict[str, Tensor]]) -> List[Dict[str, Tensor]]:
+    def process_targets(self, targets: TARGETS) -> TARGETS:
         """Duplicates multi-label targets to create one target for each label.
 
         Args:
@@ -344,9 +349,7 @@ class YOLO(LightningModule):
 
         return result
 
-    def _validate_batch(
-        self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]]
-    ) -> Tuple[Tensor, List[Dict[str, Tensor]]]:
+    def _validate_batch(self, batch: Tuple[List[Tensor], TARGETS]) -> Tuple[Tensor, TARGETS]:
         """Reads a batch of data, validates the format, and stacks the images into a single tensor.
 
         Args:
@@ -429,7 +432,7 @@ class DarknetYOLO(YOLO):
         overlap_loss_multiplier: Optional[float] = None,
         class_loss_multiplier: Optional[float] = None,
         confidence_loss_multiplier: Optional[float] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         network = DarknetNetwork(
             network_config,
@@ -456,7 +459,7 @@ class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
         height: Resize images to this height.
     """
 
-    def __init__(self, width: int = 608, height: int = 608, **kwargs):
+    def __init__(self, width: int = 608, height: int = 608, **kwargs: Any):
         super().__init__(**kwargs)
         self.image_size = (height, width)
 
@@ -474,7 +477,7 @@ class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
             ]
         return Compose(transforms)
 
-    def _resize(self, image: Tensor, target: Dict[str, Any]):
+    def _resize(self, image: Tensor, target: TARGET) -> Tuple[Tensor, TARGET]:
         """Rescales the image and target to ``self.image_size``.
 
         Args:

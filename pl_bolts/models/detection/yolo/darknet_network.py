@@ -12,13 +12,18 @@ from torch import Tensor
 
 from pl_bolts.models.detection.yolo import layers
 from pl_bolts.models.detection.yolo.layers import MaxPool
+from pl_bolts.models.detection.yolo.torch_networks import NETWORK_OUTPUT
+from pl_bolts.models.detection.yolo.types import TARGETS
 from pl_bolts.models.detection.yolo.utils import get_image_size
+
+CONFIG = Dict[str, Any]
+CREATE_LAYER_OUTPUT = Tuple[nn.Module, int]  # layer, num_outputs
 
 
 class DarknetNetwork(nn.Module):
     """This class can be used to parse the configuration files of the Darknet YOLOv4 implementation."""
 
-    def __init__(self, config_path: str, weights_path: Optional[str] = None, **kwargs) -> None:
+    def __init__(self, config_path: str, weights_path: Optional[str] = None, **kwargs: Any) -> None:
         """Parses a Darknet configuration file and creates the network structure.
 
         Iterates through the layers from the configuration and creates corresponding PyTorch modules. If
@@ -63,19 +68,19 @@ class DarknetNetwork(nn.Module):
         num_inputs = [global_config.get("channels", 3)]
         for layer_config in layer_configs:
             config = {**global_config, **layer_config}
-            module, num_outputs = _create_layer(config, num_inputs, **kwargs)
-            self.layers.append(module)
+            layer, num_outputs = _create_layer(config, num_inputs, **kwargs)
+            self.layers.append(layer)
             num_inputs.append(num_outputs)
 
         if weights_path is not None:
             with open(weights_path) as weight_file:
                 self.load_weights(weight_file)
 
-    def forward(self, x: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None) -> Tuple[Tensor, Tensor]:
-        outputs = []  # Outputs from all layers
-        detections = []  # Outputs from detection layers
-        losses = []  # Losses from detection layers
-        hits = []  # Number of targets each detection layer was responsible for
+    def forward(self, x: Tensor, targets: Optional[TARGETS] = None) -> NETWORK_OUTPUT:
+        outputs: List[Tensor] = []  # Outputs from all layers
+        detections: List[Tensor] = []  # Outputs from detection layers
+        losses: List[Tensor] = []  # Losses from detection layers
+        hits: List[int] = []  # Number of targets each detection layer was responsible for
 
         image_size = get_image_size(x)
 
@@ -95,7 +100,7 @@ class DarknetNetwork(nn.Module):
 
         return detections, losses, hits
 
-    def load_weights(self, weight_file: io.IOBase):
+    def load_weights(self, weight_file: io.IOBase) -> None:
         """Loads weights to layer modules from a pretrained Darknet model.
 
         One may want to continue training from pretrained weights, on a dataset with a different number of object
@@ -117,17 +122,18 @@ class DarknetNetwork(nn.Module):
             f"that has been trained on {images_seen[0]} images."
         )
 
-        def read(tensor):
+        def read(tensor: Tensor) -> int:
             """Reads the contents of ``tensor`` from the current position of ``weight_file``.
 
-            If there's no more data in ``weight_file``, returns without error.
+            Returns the number of elements read. If there's no more data in ``weight_file``, returns 0.
             """
             x = np.fromfile(weight_file, count=tensor.numel(), dtype=np.float32)
-            if x.size > 0:
+            num_elements = x.size
+            if num_elements > 0:
                 x = torch.from_numpy(x).view_as(tensor)
                 with torch.no_grad():
                     tensor.copy_(x)
-            return x.size
+            return num_elements
 
         for layer_idx, layer in enumerate(self.layers):
             # Weights are loaded only to convolutional layers
@@ -139,8 +145,12 @@ class DarknetNetwork(nn.Module):
             # If convolution is followed by batch normalization, read the batch normalization parameters. Otherwise we
             # read the convolution bias.
             if isinstance(layer.norm, nn.Identity):
+                assert layer.conv.bias is not None
                 read(layer.conv.bias)
             else:
+                assert isinstance(layer.norm, nn.BatchNorm2d)
+                assert layer.norm.running_mean is not None
+                assert layer.norm.running_var is not None
                 read(layer.norm.bias)
                 read(layer.norm.weight)
                 read(layer.norm.running_mean)
@@ -151,7 +161,7 @@ class DarknetNetwork(nn.Module):
                 return
 
     def _read_config(self, config_file: Iterable[str]) -> List[Dict[str, Any]]:
-        """Reads a YOLOv4 network configuration file and returns a list of configuration sections.
+        """Reads a Darnet network configuration file and returns a list of configuration sections.
 
         Args:
             config_file: The configuration file to read.
@@ -214,16 +224,15 @@ class DarknetNetwork(nn.Module):
         section = None
         sections = []
 
-        def convert(key, value):
+        def convert(key: str, value: str) -> Union[str, int, float, List[Union[str, int, float]]]:
             """Converts a value to the correct type based on key."""
             if key not in variable_types:
                 warn("Unknown YOLO configuration variable: " + key)
-                return key, value
+                return value
             if key in list_variables:
-                value = [variable_types[key](v) for v in value.split(",")]
+                return [variable_types[key](v) for v in value.split(",")]
             else:
-                value = variable_types[key](value)
-            return key, value
+                return variable_types[key](value)
 
         for line in config_file:
             line = line.strip()
@@ -236,18 +245,19 @@ class DarknetNetwork(nn.Module):
                     sections.append(section)
                 section = {"type": section_match.group(1)}
             else:
+                if section is None:
+                    raise RuntimeError("Darknet network configuration file does not start with a section header.")
                 key, value = line.split("=")
                 key = key.rstrip()
                 value = value.lstrip()
-                key, value = convert(key, value)
-                section[key] = value
+                section[key] = convert(key, value)
         if section is not None:
             sections.append(section)
 
         return sections
 
 
-def _create_layer(config: Dict[str, Any], num_inputs: List[int], **kwargs) -> Tuple[nn.Module, int]:
+def _create_layer(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREATE_LAYER_OUTPUT:
     """Calls one of the ``_create_<layertype>(config, num_inputs)`` functions to create a PyTorch module from the
     layer config.
 
@@ -259,7 +269,7 @@ def _create_layer(config: Dict[str, Any], num_inputs: List[int], **kwargs) -> Tu
         module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
         its output.
     """
-    create_func = {
+    create_func: Dict[str, Callable[..., CREATE_LAYER_OUTPUT]] = {
         "convolutional": _create_convolutional,
         "maxpool": _create_maxpool,
         "route": _create_route,
@@ -270,7 +280,7 @@ def _create_layer(config: Dict[str, Any], num_inputs: List[int], **kwargs) -> Tu
     return create_func[config["type"]](config, num_inputs, **kwargs)
 
 
-def _create_convolutional(config: Dict[str, Any], num_inputs: List[int], **kwargs):
+def _create_convolutional(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREATE_LAYER_OUTPUT:
     batch_normalize = config.get("batch_normalize", False)
     padding = (config["size"] - 1) // 2 if config["pad"] else 0
 
@@ -287,7 +297,7 @@ def _create_convolutional(config: Dict[str, Any], num_inputs: List[int], **kwarg
     return layer, config["filters"]
 
 
-def _create_maxpool(config: Dict[str, Any], num_inputs: List[int], **kwargs):
+def _create_maxpool(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREATE_LAYER_OUTPUT:
     """Creates a max pooling layer.
 
     Padding is added so that the output resolution will be the input resolution divided by stride, rounded upwards.
@@ -296,7 +306,7 @@ def _create_maxpool(config: Dict[str, Any], num_inputs: List[int], **kwargs):
     return layer, num_inputs[-1]
 
 
-def _create_route(config, num_inputs: List[int], **kwargs):
+def _create_route(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREATE_LAYER_OUTPUT:
     num_chunks = config.get("groups", 1)
     chunk_idx = config.get("group_id", 0)
 
@@ -312,44 +322,49 @@ def _create_route(config, num_inputs: List[int], **kwargs):
     return layer, num_outputs
 
 
-def _create_shortcut(config: Dict[str, Any], num_inputs: List[int], **kwargs):
+def _create_shortcut(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREATE_LAYER_OUTPUT:
     layer = layers.ShortcutLayer(config["from"])
     return layer, num_inputs[-1]
 
 
-def _create_upsample(config: Dict[str, Any], num_inputs: List[int], **kwargs):
+def _create_upsample(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREATE_LAYER_OUTPUT:
     layer = nn.Upsample(scale_factor=config["stride"], mode="nearest")
     return layer, num_inputs[-1]
 
 
 def _create_yolo(
-    config: Dict[str, Any],
+    config: CONFIG,
     num_inputs: List[int],
     prior_shapes: Optional[List[Tuple[int, int]]] = None,
     matching_algorithm: Optional[str] = None,
     matching_threshold: Optional[float] = None,
     ignore_bg_threshold: Optional[float] = None,
     overlap_func: Optional[Union[str, Callable]] = None,
-    predict_overlap: Optional[float] = None,
+    predict_overlap: float = 1.0,
     overlap_loss_multiplier: Optional[float] = None,
     confidence_loss_multiplier: Optional[float] = None,
     class_loss_multiplier: Optional[float] = None,
-    **kwargs,
-):
+    **kwargs: Any,
+) -> CREATE_LAYER_OUTPUT:
     if prior_shapes is None:
         # The "anchors" list alternates width and height.
-        prior_shapes = config["anchors"]
-        prior_shapes = [(prior_shapes[i], prior_shapes[i + 1]) for i in range(0, len(prior_shapes), 2)]
+        dims = config["anchors"]
+        prior_shapes = [(dims[i], dims[i + 1]) for i in range(0, len(dims), 2)]
     if ignore_bg_threshold is None:
         ignore_bg_threshold = config.get("ignore_thresh", 1.0)
+        assert isinstance(ignore_bg_threshold, float)
     if overlap_func is None:
         overlap_func = config.get("iou_loss", "iou")
+        assert isinstance(overlap_func, str)
     if overlap_loss_multiplier is None:
         overlap_loss_multiplier = config.get("iou_normalizer", 1.0)
+        assert isinstance(overlap_loss_multiplier, float)
     if confidence_loss_multiplier is None:
         confidence_loss_multiplier = config.get("obj_normalizer", 1.0)
+        assert isinstance(confidence_loss_multiplier, float)
     if class_loss_multiplier is None:
         class_loss_multiplier = config.get("cls_normalizer", 1.0)
+        assert isinstance(class_loss_multiplier, float)
 
     layer = layers.create_detection_layer(
         num_classes=config["classes"],
@@ -366,4 +381,4 @@ def _create_yolo(
         xy_scale=config.get("scale_x_y", 1.0),
         input_is_normalized=config.get("new_coords", 0) > 0,
     )
-    return layer, None
+    return layer, 0

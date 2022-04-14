@@ -16,12 +16,12 @@ else:
 # a "@torch.jit.script" function, it's difficult to make this decision at call time.
 if version.parse(torch.__version__) >= version.parse("1.10.0"):
 
-    def meshgrid(x, y):
-        return torch.meshgrid((x, y), indexing="ij")
+    def meshgrid(x: Tensor, y: Tensor) -> List[Tensor]:
+        return torch.meshgrid((x, y), indexing="ij")  # type: ignore
 
 
 else:
-    meshgrid = torch.meshgrid
+    meshgrid = torch.meshgrid  # type: ignore
 
 
 def grid_offsets(grid_size: Tensor) -> Tensor:
@@ -33,8 +33,8 @@ def grid_offsets(grid_size: Tensor) -> Tensor:
     Returns:
         A ``[height, width, 2]`` tensor containing the grid cell `(x, y)` offsets.
     """
-    x_range = torch.arange(grid_size[0], device=grid_size.device)
-    y_range = torch.arange(grid_size[1], device=grid_size.device)
+    x_range = torch.arange(grid_size[0].item(), device=grid_size.device)
+    y_range = torch.arange(grid_size[1].item(), device=grid_size.device)
     grid_y, grid_x = meshgrid(y_range, x_range)
     return torch.stack((grid_x, grid_y), -1)
 
@@ -99,7 +99,7 @@ def aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
     return inter / union
 
 
-def iou_below(pred_boxes: Tensor, target_boxes: Tensor, threshold: float) -> List[Tensor]:
+def iou_below(pred_boxes: Tensor, target_boxes: Tensor, threshold: float) -> Tensor:
     """Creates a binary mask whose value will be ``True``, unless the predicted box overlaps any target
     significantly (IoU greater than ``threshold``).
 
@@ -119,7 +119,7 @@ def iou_below(pred_boxes: Tensor, target_boxes: Tensor, threshold: float) -> Lis
     return below_threshold.view(shape)
 
 
-def is_inside_box(points, boxes):
+def is_inside_box(points: Tensor, boxes: Tensor) -> Tensor:
     """Get pairwise truth values of whether the point is inside the box.
 
     Args:

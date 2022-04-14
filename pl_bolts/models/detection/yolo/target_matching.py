@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple
+from typing import Dict, Sequence, Tuple, Union
 
 import torch
 from torch import Tensor
@@ -31,7 +31,7 @@ class ShapeMatching(ABC):
             the confidence loss.
     """
 
-    def __init__(self, ignore_bg_threshold: float = 0.7):
+    def __init__(self, ignore_bg_threshold: float = 0.7) -> None:
         self.ignore_bg_threshold = ignore_bg_threshold
 
     def __call__(
@@ -90,7 +90,7 @@ class ShapeMatching(ABC):
         return preds, targets
 
     @abstractmethod
-    def match(self, wh: Tensor) -> Tuple[Tensor, Tensor]:
+    def match(self, wh: Tensor) -> Union[Tuple[Tensor, Tensor], Tensor]:
         """Selects anchors for each target based on the predicted shapes. The subclasses implement this method.
 
         Args:
@@ -119,8 +119,8 @@ class HighestIoUMatching(ShapeMatching):
     """
 
     def __init__(
-        self, prior_shapes: List[Tuple[int, int]], prior_shape_idxs: List[int], ignore_bg_threshold: float = 0.7
-    ):
+        self, prior_shapes: Sequence[Tuple[int, int]], prior_shape_idxs: Sequence[int], ignore_bg_threshold: float = 0.7
+    ) -> None:
         super().__init__(ignore_bg_threshold)
         self.prior_shapes = prior_shapes
         # anchor_map maps the anchor indices to predictors in this layer, or to -1 if it's not an anchor of this layer.
@@ -129,7 +129,7 @@ class HighestIoUMatching(ShapeMatching):
             prior_shape_idxs.index(idx) if idx in prior_shape_idxs else -1 for idx in range(len(prior_shapes))
         ]
 
-    def match(self, wh: Tensor) -> Tuple[Tensor, Tensor]:
+    def match(self, wh: Tensor) -> Union[Tuple[Tensor, Tensor], Tensor]:
         prior_wh = torch.tensor(self.prior_shapes, dtype=wh.dtype, device=wh.device)
         anchor_map = torch.tensor(self.anchor_map, dtype=torch.int64, device=wh.device)
 
@@ -157,16 +157,16 @@ class IoUThresholdMatching(ShapeMatching):
 
     def __init__(
         self,
-        prior_shapes: List[Tuple[int, int]],
-        prior_shape_idxs: List[int],
+        prior_shapes: Sequence[Tuple[int, int]],
+        prior_shape_idxs: Sequence[int],
         threshold: float,
         ignore_bg_threshold: float = 0.7,
-    ):
+    ) -> None:
         super().__init__(ignore_bg_threshold)
         self.prior_shapes = [prior_shapes[idx] for idx in prior_shape_idxs]
         self.threshold = threshold
 
-    def match(self, wh):
+    def match(self, wh: Tensor) -> Union[Tuple[Tensor, Tensor], Tensor]:
         prior_wh = torch.tensor(self.prior_shapes, dtype=wh.dtype, device=wh.device)
 
         ious = aligned_iou(wh, prior_wh)
@@ -193,16 +193,16 @@ class SizeRatioMatching(ShapeMatching):
 
     def __init__(
         self,
-        prior_shapes: List[Tuple[int, int]],
-        prior_shape_idxs: List[int],
+        prior_shapes: Sequence[Tuple[int, int]],
+        prior_shape_idxs: Sequence[int],
         threshold: float,
         ignore_bg_threshold: float = 0.7,
-    ):
+    ) -> None:
         super().__init__(ignore_bg_threshold)
         self.prior_shapes = [prior_shapes[idx] for idx in prior_shape_idxs]
         self.threshold = threshold
 
-    def match(self, wh):
+    def match(self, wh: Tensor) -> Union[Tuple[Tensor, Tensor], Tensor]:
         prior_wh = torch.tensor(self.prior_shapes, dtype=wh.dtype, device=wh.device)
 
         wh_ratio = wh[:, None, :] / prior_wh[None, :, :]  # [num_targets, num_anchors, 2]
@@ -212,7 +212,7 @@ class SizeRatioMatching(ShapeMatching):
         return below_threshold.T
 
 
-def _sim_ota_match(costs, ious):
+def _sim_ota_match(costs: Tensor, ious: Tensor) -> Tuple[Tensor, Tensor]:
     """Implements the SimOTA matching rule.
 
     The number of units supplied by each supplier (training target) needs to be decided in the Optimal Transport
@@ -261,7 +261,7 @@ class SimOTAMatching:
         loss_func: A ``LossFunction`` object that can be used to calculate the pairwise costs.
     """
 
-    def __init__(self, loss_func: LossFunction):
+    def __init__(self, loss_func: LossFunction) -> None:
         self.loss_func = loss_func
 
     def __call__(

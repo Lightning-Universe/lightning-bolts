@@ -1,5 +1,5 @@
 import math
-from typing import Callable, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union
 
 import torch
 from torch import Tensor
@@ -143,7 +143,7 @@ class LossFunction:
             overlap_loss = overlap_loss * size_compensation
         return overlap, overlap_loss
 
-    def _calculate_confidence(self, preds: Tensor, overlap: Tensor, bce_func: Callable):
+    def _calculate_confidence(self, preds: Tensor, overlap: Tensor, bce_func: Callable) -> Tensor:
         """Calculates the confidence loss for foreground anchors.
 
         If ``self.predict_overlap`` is ``True``, ``overlap`` will be used as the target confidence. Otherwise the target
@@ -179,7 +179,7 @@ class LossFunction:
 
         return result
 
-    def _calculate_bg_confidence(self, preds: Tensor, bce_func: Callable):
+    def _calculate_bg_confidence(self, preds: Tensor, bce_func: Callable) -> Tensor:
         """Calculates the confidence loss for background anchors."""
         targets = torch.zeros_like(preds)
         return bce_func(preds, targets, reduction="none")
@@ -218,7 +218,13 @@ class LossFunction:
         preds, targets = torch.broadcast_tensors(preds, targets)
         return bce_func(preds, targets, reduction="none").sum(-1)
 
-    def __call__(self, preds, targets, input_is_normalized: bool, image_size: Optional[Tensor] = None):
+    def __call__(
+        self,
+        preds: Dict[str, Tensor],
+        targets: Dict[str, Tensor],
+        input_is_normalized: bool,
+        image_size: Optional[Tensor] = None,
+    ) -> None:
         """Calculates the losses for all pairs of a predictions and a target, and if `bg_confidences` appears in
         ``preds``, calculates the confidence loss for background predictions.
 
@@ -231,7 +237,10 @@ class LossFunction:
             input_is_normalized: If ``False``, input is logits, if ``True``, input is normalized to `0..1`.
             image_size: Width and height in a vector that defines the scale of the target coordinates.
         """
-        bce_func = binary_cross_entropy if input_is_normalized else binary_cross_entropy_with_logits
+        if input_is_normalized:
+            bce_func = binary_cross_entropy
+        else:
+            bce_func = binary_cross_entropy_with_logits
 
         overlap, overlap_loss = self._calculate_overlap(preds["boxes"], targets["boxes"], image_size)
         self.overlap = overlap
@@ -247,7 +256,7 @@ class LossFunction:
         class_loss = self._calculate_class(preds["classprobs"], targets["labels"], bce_func)
         self.class_loss = class_loss * self.class_multiplier
 
-    def sums(self):
+    def sums(self) -> Tuple[Tensor, Tensor, Tensor]:
         """Returns the sums of the losses over prediction/target pairs, assuming the predictions and targets have
         been matched (there are as many predictions and targets)."""
         overlap_loss = self.overlap_loss.diagonal().sum()

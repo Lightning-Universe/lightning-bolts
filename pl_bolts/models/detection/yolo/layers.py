@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import torch
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
@@ -9,6 +9,7 @@ from pl_bolts.models.detection.yolo.loss import LossFunction
 from pl_bolts.models.detection.yolo.target_matching import (
     HighestIoUMatching,
     IoUThresholdMatching,
+    ShapeMatching,
     SimOTAMatching,
     SizeRatioMatching,
 )
@@ -16,7 +17,7 @@ from pl_bolts.models.detection.yolo.utils import global_xy
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 
 
-def _get_padding(kernel_size, stride):
+def _get_padding(kernel_size: int, stride: int) -> Tuple[int, nn.Module]:
     """Returns the amount of padding needed by convolutional and max pooling layers.
 
     Determines the amount of padding needed to make the output size of the layer the input size divided by the stride.
@@ -39,10 +40,7 @@ def _get_padding(kernel_size, stride):
 
     # If the kernel size is an even number, we need one cell of extra padding, on top of the padding added by MaxPool2d
     # on both sides.
-    if remainder == 0:
-        pad_op = nn.Identity()
-    else:
-        pad_op = nn.ZeroPad2d((0, 1, 0, 1))
+    pad_op: nn.Module = nn.Identity() if remainder == 0 else nn.ZeroPad2d((0, 1, 0, 1))
 
     return padding, pad_op
 
@@ -159,7 +157,7 @@ class DetectionLayer(nn.Module):
         preds: List[Dict[str, Tensor]],
         targets: List[Dict[str, Tensor]],
         image_size: Tensor,
-    ):
+    ) -> None:
         """Matches the predictions to targets and calculates the losses. Creates the attributes ``losses`` and
         ``hits``. ``losses`` is a tensor of three elements: the overlap, confidence, and classification loss.
         ``hits`` is the number of targets that this layer was responsible for.
@@ -247,7 +245,7 @@ class Conv(nn.Module):
         self.norm = create_normalization_module(norm, out_channels)
         self.act = create_activation_module(activation)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         x = self.pad(x)
         x = self.conv(x)
         x = self.norm(x)
@@ -266,7 +264,7 @@ class MaxPool(nn.Module):
         padding, self.pad = _get_padding(kernel_size, stride)
         self.maxpool = nn.MaxPool2d(kernel_size, stride, padding)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         x = self.pad(x)
         return self.maxpool(x)
 
@@ -286,7 +284,7 @@ class RouteLayer(nn.Module):
         self.num_chunks = num_chunks
         self.chunk_idx = chunk_idx
 
-    def forward(self, x, outputs):
+    def forward(self, x: Tensor, outputs: List[Tensor]) -> Tensor:
         chunks = [torch.chunk(outputs[layer], self.num_chunks, dim=1)[self.chunk_idx] for layer in self.source_layers]
         return torch.cat(chunks, dim=1)
 
@@ -302,14 +300,14 @@ class ShortcutLayer(nn.Module):
         super().__init__()
         self.source_layer = source_layer
 
-    def forward(self, x, outputs):
+    def forward(self, x: Tensor, outputs: List[Tensor]) -> Tensor:
         return outputs[-1] + outputs[self.source_layer]
 
 
 class Mish(nn.Module):
     """Mish activation."""
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         return x * torch.tanh(nn.functional.softplus(x))
 
 
@@ -354,8 +352,8 @@ def create_normalization_module(name: Optional[str], num_channels: int) -> nn.Mo
 
 
 def create_detection_layer(
-    prior_shapes: List[Tuple[int, int]],
-    prior_shape_idxs: List[int],
+    prior_shapes: Sequence[Tuple[int, int]],
+    prior_shape_idxs: Sequence[int],
     matching_algorithm: Optional[str] = None,
     matching_threshold: Optional[float] = None,
     ignore_bg_threshold: float = 0.7,
@@ -364,8 +362,8 @@ def create_detection_layer(
     overlap_loss_multiplier: float = 5.0,
     confidence_loss_multiplier: float = 1.0,
     class_loss_multiplier: float = 1.0,
-    **kwargs,
-) -> Tuple[Callable, LossFunction]:
+    **kwargs: Any,
+) -> DetectionLayer:
     """Creates a detection layer module and the required loss function and target matching objects.
 
     Args:
@@ -394,14 +392,19 @@ def create_detection_layer(
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
             to produce coordinate values close to one.
     """
+    matching_func: Union[ShapeMatching, SimOTAMatching]
     if matching_algorithm == "simota":
         loss_func = LossFunction(
             overlap_func, None, overlap_loss_multiplier, confidence_loss_multiplier, class_loss_multiplier
         )
         matching_func = SimOTAMatching(loss_func)
     elif matching_algorithm == "size":
+        if matching_threshold is None:
+            raise ValueError("matching_threshold is required with size ratio matching.")
         matching_func = SizeRatioMatching(prior_shapes, prior_shape_idxs, matching_threshold, ignore_bg_threshold)
     elif matching_algorithm == "iou":
+        if matching_threshold is None:
+            raise ValueError("matching_threshold is required with IoU threshold matching.")
         matching_func = IoUThresholdMatching(prior_shapes, prior_shape_idxs, matching_threshold, ignore_bg_threshold)
     elif matching_algorithm == "maxiou" or matching_algorithm is None:
         matching_func = HighestIoUMatching(prior_shapes, prior_shape_idxs, ignore_bg_threshold)
