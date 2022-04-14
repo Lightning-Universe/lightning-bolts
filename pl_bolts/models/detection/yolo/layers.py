@@ -3,7 +3,6 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 import torch
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor, nn
-from torchvision.ops import box_convert
 
 from pl_bolts.models.detection.yolo.loss import LossFunction
 from pl_bolts.models.detection.yolo.target_matching import (
@@ -15,6 +14,12 @@ from pl_bolts.models.detection.yolo.target_matching import (
 )
 from pl_bolts.models.detection.yolo.utils import global_xy
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _TORCHVISION_AVAILABLE:
+    from torchvision.ops import box_convert
+else:  # pragma: no cover
+    warn_missing_pkg("torchvision")
 
 
 def _get_padding(kernel_size: int, stride: int) -> Tuple[int, nn.Module]:
