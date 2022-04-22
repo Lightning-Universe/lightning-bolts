@@ -66,14 +66,17 @@ class SparseMLCallback(Callback):
         else:
             dataset_size = len(trainer.datamodule.train_dataloader())
 
-        num_devices = max(1, trainer.num_gpus, trainer.num_processes)
-        if trainer.tpu_cores:
-            num_devices = max(num_devices, trainer.tpu_cores)
+        if hasattr(trainer, 'num_devices'):
+            num_devices = max(1, trainer.num_devices)
+        else:
+            num_devices = max(1, trainer.num_gpus, trainer.num_processes)
+            if trainer.tpu_cores:
+                num_devices = max(num_devices, trainer.tpu_cores)
 
         effective_batch_size = trainer.accumulate_grad_batches * num_devices
         max_estimated_steps = dataset_size // effective_batch_size
 
-        if trainer.max_steps and trainer.max_steps < max_estimated_steps:
+        if trainer.max_steps != -1 and trainer.max_steps < max_estimated_steps:
             return trainer.max_steps
         return max_estimated_steps
 
