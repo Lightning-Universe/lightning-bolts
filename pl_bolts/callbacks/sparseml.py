@@ -76,8 +76,10 @@ class SparseMLCallback(Callback):
         effective_batch_size = trainer.accumulate_grad_batches * num_devices
         max_estimated_steps = dataset_size // effective_batch_size
 
-        if trainer.max_steps != -1 and trainer.max_steps < max_estimated_steps:
-            return trainer.max_steps
+        # To avoid breaking changes, max_steps is set to -1 if it is not defined
+        max_steps = -1 if not trainer.max_steps else trainer.max_steps
+        if max_steps != -1 and max_steps < max_estimated_steps:
+            return max_steps
         return max_estimated_steps
 
     @staticmethod
