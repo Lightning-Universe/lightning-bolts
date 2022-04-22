@@ -67,8 +67,10 @@ class SparseMLCallback(Callback):
             dataset_size = len(trainer.datamodule.train_dataloader())
 
         if hasattr(trainer, 'num_devices'):
+            # New behavior in Lightning
             num_devices = max(1, trainer.num_devices)
         else:
+            # Old behavior deprecated in v1.6
             num_devices = max(1, trainer.num_gpus, trainer.num_processes)
             if trainer.tpu_cores:
                 num_devices = max(num_devices, trainer.tpu_cores)
