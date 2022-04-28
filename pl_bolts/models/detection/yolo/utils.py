@@ -19,7 +19,6 @@ if version.parse(torch.__version__) >= version.parse("1.10.0"):
     def meshgrid(x: Tensor, y: Tensor) -> List[Tensor]:
         return torch.meshgrid((x, y), indexing="ij")  # type: ignore
 
-
 else:
     meshgrid = torch.meshgrid  # type: ignore
 

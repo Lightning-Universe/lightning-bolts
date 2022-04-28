@@ -17,7 +17,7 @@ from pl_bolts.utils import _TORCHMETRICS_DETECTION_AVAILABLE, _TORCHVISION_AVAIL
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHMETRICS_DETECTION_AVAILABLE:
-    from torchmetrics.detection.map import MAP
+    from torchmetrics.detection import MeanAveragePrecision
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.ops import batched_nms
@@ -113,8 +113,8 @@ class YOLO(LightningModule):
         self.detections_per_image = detections_per_image
 
         if _TORCHMETRICS_DETECTION_AVAILABLE:
-            self._val_map = MAP(compute_on_step=False)
-            self._test_map = MAP(compute_on_step=False)
+            self._val_map = MeanAveragePrecision(compute_on_step=False)
+            self._test_map = MeanAveragePrecision(compute_on_step=False)
 
     def forward(  # type: ignore
         self, images: Tensor, targets: Optional[TARGETS] = None

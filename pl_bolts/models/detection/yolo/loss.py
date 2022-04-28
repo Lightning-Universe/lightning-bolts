@@ -2,9 +2,17 @@ import math
 from typing import Callable, Dict, Optional, Tuple, Union
 
 import torch
+from pytorch_lightning.utilities.rank_zero import rank_zero_warn
 from torch import Tensor
 from torch.nn.functional import binary_cross_entropy, binary_cross_entropy_with_logits
-from torchvision.ops import box_iou, generalized_box_iou
+
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _TORCHVISION_AVAILABLE:
+    from torchvision.ops import box_iou, generalized_box_iou
+else:
+    warn_missing_pkg("torchvision")
 
 
 def _upcast(t: Tensor) -> Tensor:
@@ -29,8 +37,8 @@ def complete_iou(boxes1: Tensor, boxes2: Tensor, distance_only: bool = False) ->
     """
 
     # Degenerate boxes give inf / nan results, so do an early check.
-    assert (boxes1[:, 2:] >= boxes1[:, :2]).all()
-    assert (boxes2[:, 2:] >= boxes2[:, :2]).all()
+    if not ((boxes1[:, 2:] >= boxes1[:, :2]).all() and (boxes2[:, 2:] >= boxes2[:, :2]).all()):
+        rank_zero_warn("Some boxes have negative width or height, or the coordinates contain infinite or NaN values.")
 
     iou = box_iou(boxes1, boxes2)
 
@@ -161,8 +169,7 @@ class LossFunction:
         if self.predict_overlap is not None:
             # When predicting overlap, target confidence is different for each pair of a prediction and a target. The
             # tensors have to be broadcasted to [M, N].
-            preds = preds.unsqueeze(0)
-            preds = torch.broadcast_to(preds, overlap.shape)
+            preds = preds.unsqueeze(0).expand(overlap.shape)
             targets = torch.ones_like(preds) - self.predict_overlap
             # Distance-IoU may return negative "overlaps", so we have to make sure that the targets are not negative.
             targets = targets + (self.predict_overlap * overlap.detach().clamp(min=0))
@@ -174,8 +181,7 @@ class LossFunction:
         if result.ndim == 1:
             # When not predicting overlap, target confidence is the same for every target, but we should still return a
             # matrix.
-            result = result.unsqueeze(0)
-            torch.broadcast_to(result, overlap.shape)
+            result = result.unsqueeze(0).expand(overlap.shape)
 
         return result
 
