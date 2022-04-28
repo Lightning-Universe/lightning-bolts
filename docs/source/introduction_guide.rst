@@ -128,7 +128,7 @@ with the other components of the library!
 Contribution ideas
 ^^^^^^^^^^^^^^^^^^
 Don't have something to contribute? Ping us on
-`Slack <https://join.slack.com/t/pytorch-lightning/shared_invite/zt-pw5v393p-qRaDgEk24~EjiZNBpSQFgQ>`_
+`Slack <https://www.pytorchlightning.ai/community>`_
 or look at our `Github issues <https://github.com/PyTorchLightning/lightning-bolts/
 issues?q=is%3Aissue+is%3Aopen+label%3A%22Model+to+implement%22>`_!
 
