@@ -2,7 +2,12 @@ import math
 from typing import Callable, Dict, Optional, Tuple, Union
 
 import torch
-from pytorch_lightning.utilities.rank_zero import rank_zero_warn
+
+try:
+    from pytorch_lightning.utilities.rank_zero import rank_zero_warn
+except ModuleNotFoundError:
+    from pytorch_lightning.utilities.distributed import rank_zero_warn
+
 from torch import Tensor
 from torch.nn.functional import binary_cross_entropy, binary_cross_entropy_with_logits
 

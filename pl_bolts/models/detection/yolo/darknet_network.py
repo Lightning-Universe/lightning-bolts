@@ -7,7 +7,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
-from pytorch_lightning.utilities.rank_zero import rank_zero_debug, rank_zero_info
+
+try:
+    from pytorch_lightning.utilities.rank_zero import rank_zero_debug, rank_zero_info
+except ModuleNotFoundError:
+    from pytorch_lightning.utilities.distributed import rank_zero_debug, rank_zero_info
+
 from torch import Tensor
 
 from pl_bolts.models.detection.yolo import layers
