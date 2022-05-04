@@ -131,8 +131,8 @@ class AmdimNCELoss(nn.Module):
         # -----------------------
         # STABILITY TRICKS
         # trick 1: weighted regularization term
-        raw_scores = raw_scores / emb_dim ** 0.5
-        lgt_reg = 5e-2 * (raw_scores ** 2.0).mean()
+        raw_scores = raw_scores / emb_dim**0.5
+        lgt_reg = 5e-2 * (raw_scores**2.0).mean()
 
         # trick 2: tanh clip
         raw_scores = tanh_clip(raw_scores, clip_val=self.tclip)

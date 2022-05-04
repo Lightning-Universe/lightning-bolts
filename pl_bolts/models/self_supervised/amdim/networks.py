@@ -251,7 +251,7 @@ class NopNet(nn.Module):
 
     def forward(self, x):
         if self.norm_dim is not None:
-            x_norms = torch.sum(x ** 2.0, dim=self.norm_dim, keepdim=True)
+            x_norms = torch.sum(x**2.0, dim=self.norm_dim, keepdim=True)
             x_norms = torch.sqrt(x_norms + 1e-6)
             x = x / x_norms
         return x
