@@ -37,7 +37,7 @@ class SparseMLCallback(Callback):
             if not _PL_GREATER_EQUAL_1_4_5:
                 raise MisconfigurationException("SparseML requires PyTorch Lightning 1.4.5 or greater.")
             if not _TORCH_MAX_VERSION_SPARSEML:
-                raise MisconfigurationException("SparseML requires PyTorch version lower than 1.10.0.")
+                raise MisconfigurationException("SparseML requires PyTorch version lower than 1.11.0.")
             raise MisconfigurationException("SparseML has not be installed, install with pip install sparseml")
         self.manager = ScheduledModifierManager.from_yaml(recipe_path)
 
