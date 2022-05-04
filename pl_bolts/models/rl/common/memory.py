@@ -273,7 +273,7 @@ class PERBuffer(ReplayBuffer):
             prios = self.priorities[: self.pos]
 
         # probability to the power of alpha to weight how important that probability it, 0 = normal distirbution
-        probs = prios ** self.prob_alpha
+        probs = prios**self.prob_alpha
         probs /= probs.sum()
 
         # choise sample of indices based on the priority prob distribution
