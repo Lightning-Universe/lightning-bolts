@@ -92,7 +92,7 @@ class GAN(LightningModule):
     def discriminator_loss(self, x):
         # train discriminator on real
         b = x.size(0)
-        x_real = x.view(b, -1)
+        x_real = x
         y_real = torch.ones(b, 1, device=self.device)
 
         # calculate real score
