@@ -15,7 +15,7 @@ from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 
 def generate_power_seq(lr, nb):
     half = int(nb / 2)
-    coefs = [2 ** pow for pow in range(half, -half - 1, -1)]
+    coefs = [2**pow for pow in range(half, -half - 1, -1)]
     lrs = [lr * coef for coef in coefs]
     return lrs
 
