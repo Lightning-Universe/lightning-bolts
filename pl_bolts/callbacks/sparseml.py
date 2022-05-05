@@ -66,7 +66,7 @@ class SparseMLCallback(Callback):
         else:
             dataset_size = len(trainer.datamodule.train_dataloader())
 
-        if hasattr(trainer, 'num_devices'):
+        if hasattr(trainer, "num_devices"):
             # New behavior in Lightning
             num_devices = max(1, trainer.num_devices)
         else:
