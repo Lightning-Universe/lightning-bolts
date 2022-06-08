@@ -84,7 +84,7 @@ class CSPBlock(nn.Module):
 
     Encapsulates a number of bottleneck blocks in the "fusion first" CSP structure.
 
-    `Chien-Yao Wang et al. <https://openaccess.thecvf.com/content_CVPRW_2020/html/w28/Wang_CSPNet_A_New_Backbone_That_Can_Enhance_Learning_Capability_of_CVPRW_2020_paper.html>`_
+    `Chien-Yao Wang et al. <https://arxiv.org/abs/1911.11929>`_
 
     Args:
         in_channels: Number of input channels that the CSP block expects.
