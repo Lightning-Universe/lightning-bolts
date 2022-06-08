@@ -19,10 +19,12 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _TORCHMETRICS_DETECTION_AVAILABLE:
     try:
         from torchmetrics.detection import MeanAveragePrecision  # type: ignore
-    except ImportError:
-        from torchmetrics.detection import MAP  # type: ignore
 
-        MeanAveragePrecision = MAP  # type: ignore
+        _MEAN_AVERAGE_PRECISION_AVAILABLE = True
+    except ImportError:
+        _MEAN_AVERAGE_PRECISION_AVAILABLE = False
+else:
+    _MEAN_AVERAGE_PRECISION_AVAILABLE = False
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.ops import batched_nms
@@ -117,7 +119,7 @@ class YOLO(LightningModule):
         self.nms_threshold = nms_threshold
         self.detections_per_image = detections_per_image
 
-        if _TORCHMETRICS_DETECTION_AVAILABLE:
+        if _MEAN_AVERAGE_PRECISION_AVAILABLE:
             self._val_map = MeanAveragePrecision()
             self._test_map = MeanAveragePrecision()
 
@@ -226,13 +228,13 @@ class YOLO(LightningModule):
         self.log("val/class_loss", losses[2], sync_dist=True)
         self.log("val/total_loss", losses.sum(), sync_dist=True)
 
-        if _TORCHMETRICS_DETECTION_AVAILABLE:
+        if _MEAN_AVERAGE_PRECISION_AVAILABLE:
             detections = self.process_detections(detections)
             targets = self.process_targets(targets)
             self._val_map.update(detections, targets)
 
     def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
-        if _TORCHMETRICS_DETECTION_AVAILABLE:
+        if _MEAN_AVERAGE_PRECISION_AVAILABLE:
             map_scores = self._val_map.compute()
             map_scores = {"val/" + k: v for k, v in map_scores.items()}
             self.log_dict(map_scores, sync_dist=True)
@@ -254,13 +256,13 @@ class YOLO(LightningModule):
         self.log("test/class_loss", losses[2], sync_dist=True)
         self.log("test/total_loss", losses.sum(), sync_dist=True)
 
-        if _TORCHMETRICS_DETECTION_AVAILABLE:
+        if _MEAN_AVERAGE_PRECISION_AVAILABLE:
             detections = self.process_detections(detections)
             targets = self.process_targets(targets)
             self._test_map.update(detections, targets)
 
     def test_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
-        if _TORCHMETRICS_DETECTION_AVAILABLE:
+        if _MEAN_AVERAGE_PRECISION_AVAILABLE:
             map_scores = self._test_map.compute()
             map_scores = {"test/" + k: v for k, v in map_scores.items()}
             self.log_dict(map_scores, sync_dist=True)
