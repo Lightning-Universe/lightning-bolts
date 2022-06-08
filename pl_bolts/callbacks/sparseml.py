@@ -37,7 +37,7 @@ class SparseMLCallback(Callback):
             if not _PL_GREATER_EQUAL_1_4_5:
                 raise MisconfigurationException("SparseML requires PyTorch Lightning 1.4.5 or greater.")
             if not _TORCH_MAX_VERSION_SPARSEML:
-                raise MisconfigurationException("SparseML requires PyTorch version lower than 1.10.0.")
+                raise MisconfigurationException("SparseML requires PyTorch version lower than 1.11.0.")
             raise MisconfigurationException("SparseML has not be installed, install with pip install sparseml")
         self.manager = ScheduledModifierManager.from_yaml(recipe_path)
 
@@ -66,15 +66,22 @@ class SparseMLCallback(Callback):
         else:
             dataset_size = len(trainer.datamodule.train_dataloader())
 
-        num_devices = max(1, trainer.num_gpus, trainer.num_processes)
-        if trainer.tpu_cores:
-            num_devices = max(num_devices, trainer.tpu_cores)
+        if hasattr(trainer, "num_devices"):
+            # New behavior in Lightning
+            num_devices = max(1, trainer.num_devices)
+        else:
+            # Old behavior deprecated in v1.6
+            num_devices = max(1, trainer.num_gpus, trainer.num_processes)
+            if trainer.tpu_cores:
+                num_devices = max(num_devices, trainer.tpu_cores)
 
         effective_batch_size = trainer.accumulate_grad_batches * num_devices
         max_estimated_steps = dataset_size // effective_batch_size
 
-        if trainer.max_steps and trainer.max_steps < max_estimated_steps:
-            return trainer.max_steps
+        # To avoid breaking changes, max_steps is set to -1 if it is not defined
+        max_steps = -1 if not trainer.max_steps else trainer.max_steps
+        if max_steps != -1 and max_steps < max_estimated_steps:
+            return max_steps
         return max_estimated_steps
 
     @staticmethod

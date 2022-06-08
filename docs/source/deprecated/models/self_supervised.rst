@@ -358,7 +358,7 @@ To reproduce::
         --gpus 8
         --dataset cifar10
         --batch_size 256
-        -- num_workers 16
+        --num_workers 16
         --optimizer sgd
         --learning_rate 1.5
         --exclude_bn_bias

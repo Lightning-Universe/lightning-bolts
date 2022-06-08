@@ -43,7 +43,7 @@ _TORCHVISION_LESS_THAN_0_9_1: bool = _compare_version("torchvision", operator.lt
 _PL_GREATER_EQUAL_1_4 = _compare_version("pytorch_lightning", operator.ge, "1.4.0")
 _PL_GREATER_EQUAL_1_4_5 = _compare_version("pytorch_lightning", operator.ge, "1.4.5")
 _TORCH_ORT_AVAILABLE = _module_available("torch_ort")
-_TORCH_MAX_VERSION_SPARSEML = _compare_version("torch", operator.lt, "1.10.0")
+_TORCH_MAX_VERSION_SPARSEML = _compare_version("torch", operator.lt, "1.11.0")
 _SPARSEML_AVAILABLE = _module_available("sparseml") and _PL_GREATER_EQUAL_1_4_5 and _TORCH_MAX_VERSION_SPARSEML
 
 __all__ = ["BatchGradientVerification"]
