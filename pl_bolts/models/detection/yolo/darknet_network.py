@@ -28,7 +28,9 @@ CREATE_LAYER_OUTPUT = Tuple[nn.Module, int]  # layer, num_outputs
 class DarknetNetwork(nn.Module):
     """This class can be used to parse the configuration files of the Darknet YOLOv4 implementation."""
 
-    def __init__(self, config_path: str, weights_path: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, config_path: str, weights_path: Optional[str] = None, in_channels: Optional[int] = None, **kwargs: Any
+    ) -> None:
         """Parses a Darknet configuration file and creates the network structure.
 
         Iterates through the layers from the configuration and creates corresponding PyTorch modules. If
@@ -38,6 +40,7 @@ class DarknetNetwork(nn.Module):
         Args:
             config_path: Path to a Darknet configuration file that defines the network architecture.
             weights_path: Path to a Darknet model file. If given, the model weights will be read from this file.
+            in_channels: Number of channels in the input image.
             match_sim_ota: If ``True``, matches a target to an anchor using the SimOTA algorithm from YOLOX.
             match_size_ratio: If specified, matches a target to an anchor if its width and height relative to the anchor
                 is smaller than this ratio. If ``match_size_ratio`` or ``match_iou_threshold`` is not specified, selects
@@ -67,10 +70,14 @@ class DarknetNetwork(nn.Module):
         global_config = sections[0]
         layer_configs = sections[1:]
 
+        if in_channels is None:
+            in_channels = global_config.get("channels", 3)
+            assert isinstance(in_channels, int)
+
         self.layers = nn.ModuleList()
         # num_inputs will contain the number of channels in the input of every layer up to the current layer. It is
         # initialized with the number of channels in the input image.
-        num_inputs = [global_config.get("channels", 3)]
+        num_inputs = [in_channels]
         for layer_config in layer_configs:
             config = {**global_config, **layer_config}
             layer, num_outputs = _create_layer(config, num_inputs, **kwargs)
@@ -132,12 +139,12 @@ class DarknetNetwork(nn.Module):
 
             Returns the number of elements read. If there's no more data in ``weight_file``, returns 0.
             """
-            x = np.fromfile(weight_file, count=tensor.numel(), dtype=np.float32)
-            num_elements = x.size
+            np_array = np.fromfile(weight_file, count=tensor.numel(), dtype=np.float32)
+            num_elements = np_array.size
             if num_elements > 0:
-                x = torch.from_numpy(x).view_as(tensor)
+                source = torch.from_numpy(np_array).view_as(tensor)
                 with torch.no_grad():
-                    tensor.copy_(x)
+                    tensor.copy_(source)
             return num_elements
 
         for layer_idx, layer in enumerate(self.layers):

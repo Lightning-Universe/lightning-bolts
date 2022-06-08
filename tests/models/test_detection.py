@@ -12,6 +12,7 @@ from pl_bolts.models.detection import (
     FasterRCNN,
     RetinaNet,
     YOLOV4Network,
+    YOLOV4P6Network,
     YOLOV4TinyNetwork,
     YOLOV5Network,
     YOLOXNetwork,
@@ -254,7 +255,7 @@ def test_yolov4_tiny_train(tmpdir):
 
 
 def test_yolov4(tmpdir):
-    network = YOLOV4Network(num_classes=2, width=4)
+    network = YOLOV4Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128))
     model = YOLO(network)
 
     image = torch.rand(1, 3, 256, 256)
@@ -262,7 +263,26 @@ def test_yolov4(tmpdir):
 
 
 def test_yolov4_train(tmpdir):
-    network = YOLOV4Network(num_classes=2, width=4)
+    network = YOLOV4Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128))
+    model = YOLO(network)
+
+    train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+    valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
+
+
+def test_yolov4p6(tmpdir):
+    network = YOLOV4P6Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128, 128))
+    model = YOLO(network)
+
+    image = torch.rand(1, 3, 256, 256)
+    model(image)
+
+
+def test_yolov4p6_train(tmpdir):
+    network = YOLOV4P6Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128, 128))
     model = YOLO(network)
 
     train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)

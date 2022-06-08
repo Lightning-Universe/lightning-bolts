@@ -17,7 +17,12 @@ from pl_bolts.utils import _TORCHMETRICS_DETECTION_AVAILABLE, _TORCHVISION_AVAIL
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHMETRICS_DETECTION_AVAILABLE:
-    from torchmetrics.detection import MeanAveragePrecision
+    try:
+        from torchmetrics.detection import MeanAveragePrecision  # type: ignore
+    except ImportError:
+        from torchmetrics.detection import MAP  # type: ignore
+
+        MeanAveragePrecision = MAP  # type: ignore
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.ops import batched_nms
@@ -113,8 +118,8 @@ class YOLO(LightningModule):
         self.detections_per_image = detections_per_image
 
         if _TORCHMETRICS_DETECTION_AVAILABLE:
-            self._val_map = MeanAveragePrecision(compute_on_step=False)
-            self._test_map = MeanAveragePrecision(compute_on_step=False)
+            self._val_map = MeanAveragePrecision()
+            self._test_map = MeanAveragePrecision()
 
     def forward(  # type: ignore
         self, images: Tensor, targets: Optional[TARGETS] = None
@@ -152,7 +157,7 @@ class YOLO(LightningModule):
         losses = torch.stack(losses).sum(0)
         return detections, losses
 
-    def configure_optimizers(self) -> Tuple[List, List]:
+    def configure_optimizers(self) -> Tuple[List[optim.Optimizer], List[optim.lr_scheduler._LRScheduler]]:
         """Constructs the optimizer and learning rate scheduler based on ``self.optimizer_params`` and
         ``self.lr_scheduler_params``.
 
@@ -186,7 +191,7 @@ class YOLO(LightningModule):
         Args:
             batch: A tuple of images and targets. Images is a list of 3-dimensional tensors. Targets is a list of target
                 dictionaries.
-            batch_idx: The index of this batch.
+            batch_idx: Index of the current batch.
 
         Returns:
             A dictionary that includes the training loss in 'loss'.
@@ -211,7 +216,7 @@ class YOLO(LightningModule):
         Args:
             batch: A tuple of images and targets. Images is a list of 3-dimensional tensors. Targets is a list of target
                 dictionaries.
-            batch_idx: The index of this batch
+            batch_idx: Index of the current batch.
         """
         images, targets = self._validate_batch(batch)
         detections, losses = self(images, targets)
@@ -224,7 +229,7 @@ class YOLO(LightningModule):
         if _TORCHMETRICS_DETECTION_AVAILABLE:
             detections = self.process_detections(detections)
             targets = self.process_targets(targets)
-            self._val_map(detections, targets)
+            self._val_map.update(detections, targets)
 
     def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
         if _TORCHMETRICS_DETECTION_AVAILABLE:
@@ -239,7 +244,7 @@ class YOLO(LightningModule):
         Args:
             batch: A tuple of images and targets. Images is a list of 3-dimensional tensors. Targets is a list of target
                 dictionaries.
-            batch_idx: The index of this batch.
+            batch_idx: Index of the current batch.
         """
         images, targets = self._validate_batch(batch)
         detections, losses = self(images, targets)
@@ -252,7 +257,7 @@ class YOLO(LightningModule):
         if _TORCHMETRICS_DETECTION_AVAILABLE:
             detections = self.process_detections(detections)
             targets = self.process_targets(targets)
-            self._test_map(detections, targets)
+            self._test_map.update(detections, targets)
 
     def test_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
         if _TORCHMETRICS_DETECTION_AVAILABLE:
@@ -260,6 +265,27 @@ class YOLO(LightningModule):
             map_scores = {"test/" + k: v for k, v in map_scores.items()}
             self.log_dict(map_scores, sync_dist=True)
             self._test_map.reset()
+
+    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> List[Dict[str, Tensor]]:
+        """Feeds a batch of images to the network and returns the detected bounding boxes, confidence scores, and
+        class labels.
+
+        If a prediction has a high score for more than one class, it will be duplicated.
+
+        Args:
+            batch: A tuple of images and targets. Images is a list of 3-dimensional tensors. Targets is a list of target
+                dictionaries.
+            batch_idx: Index of the current batch.
+            dataloader_idx: Index of the current dataloader.
+
+        Returns:
+            A list of dictionaries containing tensors "boxes", "scores", and "labels". "boxes" is a matrix of detected
+            bounding box `(x1, y1, x2, y2)` coordinates. "scores" is a vector of confidence scores for the bounding box
+            detections. "labels" is a vector of predicted class labels.
+        """
+        images, _ = self._validate_batch(batch)
+        detections = self(images)
+        detections = self.process_detections(detections)
 
     def infer(self, image: Tensor) -> Dict[str, Tensor]:
         """Feeds an image to the network and returns the detected bounding boxes, confidence scores, and class
@@ -304,12 +330,8 @@ class YOLO(LightningModule):
         Returns:
             Filtered detections. A list of prediction dictionaries, one for each image.
         """
-        result = []
 
-        for image_preds in preds:
-            boxes = image_preds[..., :4]
-            confidences = image_preds[..., 4]
-            classprobs = image_preds[..., 5:]
+        def process(boxes: Tensor, confidences: Tensor, classprobs: Tensor) -> Dict[str, Any]:
             scores = classprobs * confidences[:, None]
 
             # Select predictions with high scores. If a prediction has a high score for more than one class, it will be
@@ -320,12 +342,9 @@ class YOLO(LightningModule):
 
             keep = batched_nms(boxes, scores, labels, self.nms_threshold)
             keep = keep[: self.detections_per_image]
-            boxes = boxes[keep]
-            scores = scores[keep]
-            labels = labels[keep]
-            result.append({"boxes": boxes, "scores": scores, "labels": labels})
+            return {"boxes": boxes[keep], "scores": scores[keep], "labels": labels[keep]}
 
-        return result
+        return [process(p[..., :4], p[..., 4], p[..., 5:]) for p in preds]
 
     def process_targets(self, targets: TARGETS) -> TARGETS:
         """Duplicates multi-label targets to create one target for each label.
@@ -337,17 +356,14 @@ class YOLO(LightningModule):
         Returns:
             Single-label targets. A list of target dictionaries, one for each image.
         """
-        result = []
 
-        for image_targets in targets:
-            boxes = image_targets["boxes"]
-            labels = image_targets["labels"]
+        def process(boxes: Tensor, labels: Tensor, **other: Any) -> Dict[str, Any]:
             if labels.ndim == 2:
                 idxs, labels = labels.nonzero().T
                 boxes = boxes[idxs]
-            result.append({"boxes": boxes, "labels": labels})
+            return {"boxes": boxes, "labels": labels, **other}
 
-        return result
+        return [process(**t) for t in targets]
 
     def _validate_batch(self, batch: Tuple[List[Tensor], TARGETS]) -> Tuple[Tensor, TARGETS]:
         """Reads a batch of data, validates the format, and stacks the images into a single tensor.

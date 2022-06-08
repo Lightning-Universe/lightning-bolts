@@ -5,6 +5,7 @@ from pl_bolts.models.detection.yolo.darknet_network import DarknetNetwork
 from pl_bolts.models.detection.yolo.torch_networks import (
     YOLOV4Backbone,
     YOLOV4Network,
+    YOLOV4P6Network,
     YOLOV4TinyBackbone,
     YOLOV4TinyNetwork,
     YOLOV5Backbone,
@@ -20,6 +21,7 @@ __all__ = [
     "DarknetNetwork",
     "YOLOV4Backbone",
     "YOLOV4Network",
+    "YOLOV4P6Network",
     "YOLOV4TinyBackbone",
     "YOLOV4TinyNetwork",
     "YOLOV5Backbone",
