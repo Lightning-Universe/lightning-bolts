@@ -23,4 +23,4 @@ jobs:
         run: flake8 .
 
   typing-check-mypy:
-    uses: PyTorchLightning/pytorch-lightning/.github/workflows/_check-code.yml
+    uses: PyTorchLightning/pytorch-lightning/.github/workflows/_check-code.yml@ci/define-reusable-workflows
