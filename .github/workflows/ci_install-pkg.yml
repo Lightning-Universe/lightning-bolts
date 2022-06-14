@@ -9,3 +9,5 @@ on:  # Trigger the workflow on push or pull request, but only for the master bra
 jobs:
   check:
     uses: PyTorchLightning/pytorch-lightning/.github/workflows/_check-install.yml@ci/define-reusable-workflows
+    with:
+      azure-dir: ''  # disable check on Azure Pipelines configs
