@@ -8,3 +8,5 @@ on:
 jobs:
   check:
     uses: PyTorchLightning/pytorch-lightning/.github/workflows/_check-schema.yml@ci/define-reusable-workflows
+    with:
+      azure-dir: ''  # skip checks on Azure Pipelines configs
