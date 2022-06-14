@@ -8,5 +8,3 @@ on:
 jobs:
   check:
     uses: PyTorchLightning/pytorch-lightning/.github/workflows/_check-schema.yml@ci/define-reusable-workflows
-    with:
-      disable-azure: true
