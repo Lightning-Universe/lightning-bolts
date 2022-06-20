@@ -113,7 +113,7 @@ class DetectionLayer(nn.Module):
         """
         batch_size, num_features, height, width = x.shape
         num_attrs = self.num_classes + 5
-        anchors_per_cell = num_features // num_attrs
+        anchors_per_cell = torch.div(num_features, num_attrs, rounding_mode="floor")
         if anchors_per_cell != len(self.prior_shapes):
             raise MisconfigurationException(
                 "The model predicts {} bounding boxes per spatial location, but {} prior box dimensions are defined "
@@ -140,10 +140,11 @@ class DetectionLayer(nn.Module):
         xy = xy * self.xy_scale - 0.5 * (self.xy_scale - 1)
 
         image_xy = global_xy(xy, image_size)
+        prior_shapes = torch.tensor(self.prior_shapes, dtype=wh.dtype, device=wh.device)
         if self.input_is_normalized:
-            image_wh = 4 * torch.square(wh) * torch.tensor(self.prior_shapes, dtype=wh.dtype, device=wh.device)
+            image_wh = 4 * torch.square(wh) * prior_shapes
         else:
-            image_wh = torch.exp(wh) * torch.tensor(self.prior_shapes, dtype=wh.dtype, device=wh.device)
+            image_wh = torch.exp(wh) * prior_shapes
         box = torch.cat((image_xy, image_wh), -1)
         box = box_convert(box, in_fmt="cxcywh", out_fmt="xyxy")
         output = torch.cat((box, norm_confidence.unsqueeze(-1), norm_classprob), -1)
