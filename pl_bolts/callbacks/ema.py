@@ -50,7 +50,7 @@ class EMA(pl.Callback):
 
     def on_train_start(self, trainer: "pl.Trainer", pl_module: pl.LightningModule) -> None:
         # Only keep track of EMA weights in rank zero.
-        if not self._ema_state_dict_ready and pl_module.global_rank == 0:
+        if not self._ema_state_dict_ready:
             self.ema_state_dict = deepcopy(self.get_state_dict(pl_module))
             self.ema_state_dict = {k: tensor.to(device=self.ema_device) for k, tensor in self.ema_state_dict.items()}
 
@@ -61,19 +61,25 @@ class EMA(pl.Callback):
 
     @rank_zero_only
     def on_train_batch_end(self, trainer: "pl.Trainer", pl_module: pl.LightningModule, *args, **kwargs) -> None:
-        # Update EMA weights
-        with torch.no_grad():
-            for key, value in self.get_state_dict(pl_module).items():
-                ema_value = self.ema_state_dict[key]
-                ema_value.copy_(self.decay * ema_value + (1.0 - self.decay) * value, non_blocking=True)
+        # Update EMA weights for rank 0
+        if trainer.is_global_zero:
+            with torch.no_grad():
+                for key, value in self.get_state_dict(pl_module).items():
+                    ema_value = self.ema_state_dict[key]
+                    ema_value.copy_(self.decay * ema_value + (1.0 - self.decay) * value, non_blocking=True)
 
     def on_validation_start(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
         if not self._ema_state_dict_ready:
             return  # Skip Lightning sanity validation check if no ema weights has been loaded from a checkpoint.
 
         self.original_state_dict = deepcopy(self.get_state_dict(pl_module))
-        ema_state_dict = pl_module.trainer.training_type_plugin.broadcast(self.ema_state_dict, 0)
-        self.ema_state_dict = ema_state_dict
+
+        # broadcast rank 0 state to all processes.
+        # todo: find out why trainer.strategy.broadcast allocates new memory on other processes.
+        if trainer.num_devices > 1:
+            for k, v in self.ema_state_dict.items():
+                torch.distributed.broadcast(v, 0)
+        trainer.strategy.barrier()
 
     def on_validation_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
         if not self._ema_state_dict_ready:
