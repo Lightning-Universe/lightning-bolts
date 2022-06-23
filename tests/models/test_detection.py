@@ -35,6 +35,7 @@ def test_fasterrcnn_train(tmpdir):
 
 
 def test_fasterrcnn_bbone_train(tmpdir):
+    torch.manual_seed(123)
     model = FasterRCNN(backbone="resnet18", fpn=True, pretrained_backbone=False)
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
