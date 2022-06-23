@@ -2,6 +2,10 @@ Autoencoders
 ============
 This section houses autoencoders and variational autoencoders.
 
+.. note::
+
+    We rely on the community to keep these updated and working. If something doesn't work, we'd really appreciate a contribution to fix!
+
 ----------------
 
 

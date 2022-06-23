@@ -3,7 +3,12 @@
 
 Vision Callbacks
 ================
-Useful callbacks for vision models
+Useful callbacks for vision models.
+
+.. note::
+
+    We rely on the community to keep these updated and working. If something doesn't work, we'd really appreciate a contribution to fix!
+
 
 ---------------
 

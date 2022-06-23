@@ -4,6 +4,10 @@ This module implements classic machine learning models in PyTorch Lightning, inc
 regression. Unlike other libraries that implement these models, here we use PyTorch to enable multi-GPU, multi-TPU and
 half-precision training.
 
+.. note::
+
+    We rely on the community to keep these updated and working. If something doesn't work, we'd really appreciate a contribution to fix!
+
 ---------------
 
 Linear Regression

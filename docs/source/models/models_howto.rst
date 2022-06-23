@@ -4,6 +4,10 @@ Models are meant to be "bolted" onto your research or production cases.
 
 Bolts are meant to be used in the following ways
 
+.. note::
+
+    We rely on the community to keep these updated and working. If something doesn't work, we'd really appreciate a contribution to fix!
+
 ----------------
 
 Predicting on your data

@@ -5,6 +5,10 @@ Variational Callbacks
 =====================
 Useful callbacks for GANs, variational-autoencoders or anything with latent spaces.
 
+.. note::
+
+    We rely on the community to keep these updated and working. If something doesn't work, we'd really appreciate a contribution to fix!
+
 ---------------
 
 Latent Dim Interpolator
