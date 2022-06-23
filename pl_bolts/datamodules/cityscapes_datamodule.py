@@ -1,4 +1,3 @@
-# type: ignore[override]
 from typing import Any, Callable
 
 from pytorch_lightning import LightningDataModule
