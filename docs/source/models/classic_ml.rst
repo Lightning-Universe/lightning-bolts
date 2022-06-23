@@ -33,7 +33,7 @@ Add either L1 or L2 regularization, or both, by specifying the regularization st
 
     model = LinearRegression(input_dim=10)
     trainer = pl.Trainer()
-    trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
+    trainer.fit(model, train_dataloaders=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
     trainer.test(test_dataloaders=loaders.test_dataloader())
 
 .. autoclass:: pl_bolts.models.regression.linear_regression.LinearRegression
@@ -69,7 +69,7 @@ Add either L1 or L2 regularization, or both, by specifying the regularization st
 
     # fit
     trainer = pl.Trainer(tpu_cores=8, precision=16)
-    trainer.fit(model, train_dataloader=dm.train_dataloader(), val_dataloaders=dm.val_dataloader())
+    trainer.fit(model, train_dataloaders=dm.train_dataloader(), val_dataloaders=dm.val_dataloader())
 
     trainer.test(test_dataloaders=dm.test_dataloader(batch_size=12))
 

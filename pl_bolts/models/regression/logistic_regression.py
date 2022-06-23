@@ -145,7 +145,7 @@ def cli_main() -> None:
 
     # train
     trainer = Trainer.from_argparse_args(args)
-    trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
+    trainer.fit(model, train_dataloaders=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
 
 
 if __name__ == "__main__":

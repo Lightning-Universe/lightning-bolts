@@ -229,7 +229,7 @@ If you do have enough data and compute resources, then you could try training fr
 
     # fit!
     trainer = Trainer(gpus=2)
-    trainer.fit(model, train_dataloader=train_data, val_dataloaders=val_data)
+    trainer.fit(model, train_dataloaders=train_data, val_dataloaders=val_data)
 
 .. note:: For this to work well, make sure you have enough data and time to train these models!
 

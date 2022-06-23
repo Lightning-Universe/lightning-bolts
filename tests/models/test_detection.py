@@ -31,7 +31,7 @@ def test_fasterrcnn_train(tmpdir):
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
 
     trainer = Trainer(fast_dev_run=True, logger=False, checkpoint_callback=False, default_root_dir=tmpdir)
-    trainer.fit(model, train_dataloader=train_dl, val_dataloaders=valid_dl)
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
 
 
 def test_fasterrcnn_bbone_train(tmpdir):
@@ -58,7 +58,7 @@ def test_retinanet_train(tmpdir):
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
 
     trainer = Trainer(fast_dev_run=True, logger=False, checkpoint_callback=False, default_root_dir=tmpdir)
-    trainer.fit(model, train_dataloader=train_dl, val_dataloaders=valid_dl)
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
 
 
 def test_retinanet_backbone_train(tmpdir):
@@ -101,7 +101,7 @@ def test_yolo_train(tmpdir):
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
 
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
-    trainer.fit(model, train_dataloader=train_dl, val_dataloaders=valid_dl)
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
 
 
 @pytest.mark.parametrize(
