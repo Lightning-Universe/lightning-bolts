@@ -54,7 +54,7 @@ jobs:
         apt-get install swig3.0
         ln -s /usr/bin/swig3.0 /usr/bin/swig
         sudo apt-get update
-        sudo apt-get install -y cmake pandoc
+        sudo apt-get install -y cmake pandoc zlib1g-dev
         # python -m pip install "pip==20.1"
         pip install --requirement ./requirements/devel.txt --upgrade-strategy only-if-needed
         pip list
