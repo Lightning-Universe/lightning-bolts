@@ -49,6 +49,8 @@ jobs:
       displayName: 'Sanity check'
 
     - bash: |
+        sudo apt-get update
+        sudo apt-get install -y cmake pandoc
         # python -m pip install "pip==20.1"
         pip install --requirement ./requirements/devel.txt --upgrade-strategy only-if-needed
         pip list
