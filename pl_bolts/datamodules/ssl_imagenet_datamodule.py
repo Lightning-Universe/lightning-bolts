@@ -146,5 +146,5 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
         return loader
 
     def _default_transforms(self) -> Callable:
-        mnist_transforms = transform_lib.Compose([transform_lib.ToTensor(), imagenet_normalization()])
-        return mnist_transforms
+        transforms = transform_lib.Compose([transform_lib.ToTensor(), imagenet_normalization()])
+        return transforms
