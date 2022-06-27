@@ -36,7 +36,6 @@ jobs:
     steps:
 
     - bash: |
-        lspci | egrep 'VGA|3D'
         whereis nvidia
         nvidia-smi
         python --version
@@ -50,11 +49,11 @@ jobs:
 
     - bash: |
         # Box2D requirement for swig
-        apt-get remove swig
-        apt-get install swig3.0
+        apt-get remove swig -y
+        apt-get install swig3.0 -y
         ln -s /usr/bin/swig3.0 /usr/bin/swig
-        sudo apt-get update
-        sudo apt-get install -y cmake pandoc zlib1g-dev
+        apt-get update
+        apt-get install -y cmake pandoc zlib1g-dev
         # python -m pip install "pip==20.1"
         pip install --requirement ./requirements/devel.txt --upgrade-strategy only-if-needed
         pip list
