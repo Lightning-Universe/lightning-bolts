@@ -28,7 +28,7 @@ jobs:
     container:
       image: "pytorchlightning/pytorch_lightning:base-cuda-py3.9-torch1.11"
       #endpoint: azureContainerRegistryConnection
-      options: "--runtime=nvidia -e NVIDIA_VISIBLE_DEVICES=all"
+      options: "--runtime=nvidia -e NVIDIA_VISIBLE_DEVICES=all --user=root"
 
     workspace:
       clean: all
