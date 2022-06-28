@@ -67,7 +67,7 @@ class RetinaNet(LightningModule):
                 in_channels=self.model.backbone.out_channels,
                 num_anchors=self.model.head.classification_head.num_anchors,
                 num_classes=num_classes,
-                **kwargs,
+                norm_layer=kwargs.get("norm_layer"),
             )
 
         else:
