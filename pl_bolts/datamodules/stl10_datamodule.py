@@ -32,7 +32,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
 
     Transforms::
 
-        mnist_transforms = transform_lib.Compose([
+        transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transforms.Normalize(
                 mean=(0.43, 0.42, 0.39),
