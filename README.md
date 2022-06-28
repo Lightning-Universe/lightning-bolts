@@ -113,13 +113,11 @@ trainer.fit(model)
 
 ## Are specific research implementations supported?
 
-We've deprecated a bunch of specific model research, primarily because they've grown outdated or support for them was not possible. This also means in the future we'll not accept any model specific research. We'd like to encourage users to contribute general components that will help a broad range of problems, however components that help specifics domains will also be welcomed!
+We'd like to encourage users to contribute general components that will help a broad range of problems, however components that help specifics domains will also be welcomed!
 
 For example a callback to help train SSL models would be a great contribution, however the next greatest SSL model from your latest paper would be a good contribution to [Lightning Flash](https://github.com/PyTorchLightning/lightning-flash).
 
 Use [Lightning Flash](https://github.com/PyTorchLightning/lightning-flash) to train, predict and serve state-of-the-art models for applied research. We suggest looking at our [VISSL](https://lightning-flash.readthedocs.io/en/latest/integrations/vissl.html) Flash integration for SSL based tasks.
-
-See [Deprecated Modules](https://lightning-bolts.readthedocs.io/en/latest/deprecated.html) for more information.
 
 ## Contribute!
 

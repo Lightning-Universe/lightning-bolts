@@ -2,6 +2,10 @@ GANs
 ====
 Collection of Generative Adversarial Networks
 
+.. note::
+
+    We rely on the community to keep these updated and working. If something doesn't work, we'd really appreciate a contribution to fix!
+
 ------------
 
 Basic GAN
@@ -16,17 +20,17 @@ Implemented by:
 
 Example outputs:
 
-    .. image:: ../../_images/gans/basic_gan_interpolate.jpg
+    .. image:: ../_images/gans/basic_gan_interpolate.jpg
         :width: 400
         :alt: Basic GAN generated samples
 
 Loss curves:
 
-    .. image:: ../../_images/gans/basic_gan_dloss.jpg
+    .. image:: ../_images/gans/basic_gan_dloss.jpg
         :width: 200
         :alt: Basic GAN disc loss
 
-    .. image:: ../../_images/gans/basic_gan_gloss.jpg
+    .. image:: ../_images/gans/basic_gan_gloss.jpg
         :width: 200
         :alt: Basic GAN gen loss
 
@@ -54,33 +58,33 @@ Implemented by:
 
 Example MNIST outputs:
 
-    .. image:: ../../_images/gans/dcgan_mnist_outputs.png
+    .. image:: ../_images/gans/dcgan_mnist_outputs.png
         :width: 400
         :alt: DCGAN generated MNIST samples
 
 Example LSUN bedroom outputs:
 
-    .. image:: ../../_images/gans/dcgan_lsun_outputs.png
+    .. image:: ../_images/gans/dcgan_lsun_outputs.png
         :width: 400
         :alt: DCGAN generated LSUN bedroom samples
 
 MNIST Loss curves:
 
-    .. image:: ../../_images/gans/dcgan_mnist_dloss.png
+    .. image:: ../_images/gans/dcgan_mnist_dloss.png
         :width: 200
         :alt: DCGAN MNIST disc loss
 
-    .. image:: ../../_images/gans/dcgan_mnist_gloss.png
+    .. image:: ../_images/gans/dcgan_mnist_gloss.png
         :width: 200
         :alt: DCGAN MNIST gen loss
 
 LSUN Loss curves:
 
-    .. image:: ../../_images/gans/dcgan_lsun_dloss.png
+    .. image:: ../_images/gans/dcgan_lsun_dloss.png
         :width: 200
         :alt: DCGAN LSUN disc loss
 
-    .. image:: ../../_images/gans/dcgan_lsun_gloss.png
+    .. image:: ../_images/gans/dcgan_lsun_gloss.png
         :width: 200
         :alt: DCGAN LSUN gen loss
 
@@ -102,13 +106,13 @@ MNIST results:
 
     SRGAN MNIST with scale factor of 2 (left: low res, middle: generated high res, right: ground truth high res):
 
-        .. image:: ../../_images/gans/srgan-mnist-scale_factor=2.png
+        .. image:: ../_images/gans/srgan-mnist-scale_factor=2.png
             :width: 200
             :alt: SRGAN MNIST with scale factor of 2
 
     SRGAN MNIST with scale factor of 4:
 
-        .. image:: ../../_images/gans/srgan-mnist-scale_factor=4.png
+        .. image:: ../_images/gans/srgan-mnist-scale_factor=4.png
             :width: 200
             :alt: SRGAN MNIST with scale factor of 4
 
@@ -124,13 +128,13 @@ STL10 results:
 
     SRGAN STL10 with scale factor of 2:
 
-        .. image:: ../../_images/gans/srgan-stl10-scale_factor=2.png
+        .. image:: ../_images/gans/srgan-stl10-scale_factor=2.png
             :width: 200
             :alt: SRGAN STL10 with scale factor of 2
 
     SRGAN STL10 with scale factor of 4:
 
-        .. image:: ../../_images/gans/srgan-stl10-scale_factor=4.png
+        .. image:: ../_images/gans/srgan-stl10-scale_factor=4.png
             :width: 200
             :alt: SRGAN STL10 with scale factor of 4
 
@@ -146,13 +150,13 @@ CelebA results:
 
     SRGAN CelebA with scale factor of 2:
 
-        .. image:: ../../_images/gans/srgan-celeba-scale_factor=2.png
+        .. image:: ../_images/gans/srgan-celeba-scale_factor=2.png
             :width: 200
             :alt: SRGAN CelebA with scale factor of 2
 
     SRGAN CelebA with scale factor of 4:
 
-        .. image:: ../../_images/gans/srgan-celeba-scale_factor=4.png
+        .. image:: ../_images/gans/srgan-celeba-scale_factor=4.png
             :width: 200
             :alt: SRGAN CelebA with scale factor of 4
 
