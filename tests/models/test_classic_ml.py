@@ -24,7 +24,7 @@ def test_linear_regression_model(tmpdir):
         default_root_dir=tmpdir,
         progress_bar_refresh_rate=0,
         logger=False,
-        checkpoint_callback=False,
+        enable_checkpointing=False,
     )
     trainer.fit(
         model,
@@ -56,7 +56,7 @@ def test_logistic_regression_model(tmpdir, datadir):
         default_root_dir=tmpdir,
         progress_bar_refresh_rate=0,
         logger=False,
-        checkpoint_callback=False,
+        enable_checkpointing=False,
     )
     trainer.fit(model)
     trainer.test(model)

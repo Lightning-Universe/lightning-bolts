@@ -66,6 +66,7 @@ def test_actor_loss_continuous():
 
 
 def test_generate_trajectory_samples():
+    torch.manual_seed(123)
     model = PPO("CartPole-v0", batch_size=16)
 
     obs_dim = model.env.observation_space.shape[0]
@@ -74,7 +75,7 @@ def test_generate_trajectory_samples():
     state, action, logp_old, qval, adv = next(sample_gen)
 
     assert state.shape[0] == obs_dim
-    assert action
+    assert isinstance(action, torch.Tensor)
     assert logp_old
     assert qval
     assert adv

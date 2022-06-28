@@ -3,6 +3,10 @@ Reinforcement Learning
 
 This module is a collection of common RL approaches implemented in Lightning.
 
+.. note::
+
+    We rely on the community to keep these updated and working. If something doesn't work, we'd really appreciate a contribution to fix!
+
 -----------------
 
 Module authors
@@ -76,7 +80,7 @@ DQN Results
 
 **DQN: Pong**
 
-.. image:: ../../_images/rl_benchmark/pong_dqn_baseline_results.jpg
+.. image:: ../_images/rl_benchmark/pong_dqn_baseline_results.jpg
   :width: 800
   :alt: DQN Baseline Results
 
@@ -130,7 +134,7 @@ Double DQN Results
 
 **Double DQN: Pong**
 
-.. image:: ../../_images/rl_benchmark/pong_double_dqn_baseline_results.jpg
+.. image:: ../_images/rl_benchmark/pong_double_dqn_baseline_results.jpg
   :width: 800
   :alt: Double DQN Result
 
@@ -140,7 +144,7 @@ orange: DQN
 
 blue: Double DQN
 
-.. image:: ../../_images/rl_benchmark/dqn_ddqn_comparison.jpg
+.. image:: ../_images/rl_benchmark/dqn_ddqn_comparison.jpg
   :width: 800
   :alt: Double DQN Comparison Result
 
@@ -215,7 +219,7 @@ where the agent goes from losing to winning.
 As you can see by the total rewards, the dueling network's training progression is very stable and continues to trend
 upward until it finally plateus.
 
-.. image:: ../../_images/rl_benchmark/pong_dueling_dqn_results.jpg
+.. image:: ../_images/rl_benchmark/pong_dueling_dqn_results.jpg
   :width: 800
   :alt: Dueling DQN Result
 
@@ -230,7 +234,7 @@ This could very well be due to the simplicity of the Pong environment.
  - Orange: DQN
  - Red: Dueling DQN
 
-.. image:: ../../_images/rl_benchmark/pong_dueling_dqn_comparison.jpg
+.. image:: ../_images/rl_benchmark/pong_dueling_dqn_comparison.jpg
   :width: 800
   :alt: Dueling DQN Comparison Result
 
@@ -303,7 +307,7 @@ The results below improved stability and faster performance growth.
 Similar to the other improvements, the average score of the agent reaches positive numbers around the 250k mark and
 steadily increases till convergence.
 
-.. image:: ../../_images/rl_benchmark/pong_noisy_dqn_results.jpg
+.. image:: ../_images/rl_benchmark/pong_noisy_dqn_results.jpg
   :width: 800
   :alt: Noisy DQN Result
 
@@ -316,7 +320,7 @@ form of exploration.
 - Orange: DQN
 - Red: Noisy DQN
 
-.. image:: ../../_images/rl_benchmark/pong_noisy_dqn_comparison.jpg
+.. image:: ../_images/rl_benchmark/pong_noisy_dqn_comparison.jpg
   :width: 800
   :alt: Noisy DQN Comparison Result
 
@@ -396,7 +400,7 @@ The N-Step DQN shows the greatest increase in performance with respect to the ot
 After less than 150k steps the agent begins to consistently win games and achieves the top score after ~170K steps.
 This is reflected in the sharp peak of the total episode steps and of course, the total episode rewards.
 
-.. image:: ../../_images/rl_benchmark/pong_nstep_dqn_1.jpg
+.. image:: ../_images/rl_benchmark/pong_nstep_dqn_1.jpg
   :width: 800
   :alt: N-Step DQN Result
 
@@ -410,7 +414,7 @@ Previous literature, listed below, shows the best results for the Pong environme
 For these experiments I opted with an N step of 4.
 
 
-.. image:: ../../_images/rl_benchmark/pong_nstep_dqn_2.jpg
+.. image:: ../_images/rl_benchmark/pong_nstep_dqn_2.jpg
   :width: 800
   :alt: N-Step DQN Comparison Results
 
@@ -494,7 +498,7 @@ The results below show improved stability and faster performance growth.
 Similar to the other improvements, we see that PER improves the stability of the agents training and shows to converged
 on an optimal policy faster.
 
-.. image:: ../../_images/rl_benchmark/pong_per_dqn_baseline_v1_results.jpg
+.. image:: ../_images/rl_benchmark/pong_per_dqn_baseline_v1_results.jpg
   :width: 800
   :alt: PER DQN Results
 
@@ -506,7 +510,7 @@ of the PER DQN is siginificantly lower. This is the main objective of PER by foc
 It is important to note that loss is not the only metric we should be looking at. Although the agent may have very
 low loss during training, it may still perform poorly due to lack of exploration.
 
-.. image:: ../../_images/rl_benchmark/pong_per_dqn_baseline_v1_results_comp.jpg
+.. image:: ../_images/rl_benchmark/pong_per_dqn_baseline_v1_results_comp.jpg
   :width: 800
   :alt: PER DQN Results
 
@@ -751,7 +755,7 @@ Hyperparameters:
 - Critic Beta: 0.5
 - Gamma: 0.99
 
-.. image:: ../../_images/rl_benchmark/cartpole_a2c_results.jpg
+.. image:: ../_images/rl_benchmark/cartpole_a2c_results.jpg
   :width: 300
   :alt: A2C Results
 
@@ -828,7 +832,7 @@ SAC Benefits
 SAC Results
 ~~~~~~~~~~~~~~~~
 
-.. image:: ../../_images/rl_benchmark/pendulum_sac_results.jpg
+.. image:: ../_images/rl_benchmark/pendulum_sac_results.jpg
   :width: 300
   :alt: SAC Results
 

@@ -391,7 +391,7 @@ Here's an example for Linear regression
     # training runs training batches while validating against a validation set
     model = LinearRegression()
     trainer = pl.Trainer(num_gpus=8)
-    trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
+    trainer.fit(model, train_dataloaders=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
 
 Once you're done, you can run the test set if needed.
 
@@ -435,7 +435,7 @@ Here's an example for logistic regression
 
     # fit
     trainer = pl.Trainer(tpu_cores=8, precision=16)
-    trainer.fit(model, train_dataloader=dm.train_dataloader(), val_dataloaders=dm.val_dataloader())
+    trainer.fit(model, train_dataloaders=dm.train_dataloader(), val_dataloaders=dm.val_dataloader())
 
     trainer.test(test_dataloaders=dm.test_dataloader())
 

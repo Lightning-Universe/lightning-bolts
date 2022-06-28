@@ -7,6 +7,10 @@ we implement many of the current state-of-the-art self-supervised algorithms.
 
 Self-supervised models are trained with unlabeled datasets
 
+.. note::
+
+    We rely on the community to keep these updated and working. If something doesn't work, we'd really appreciate a contribution to fix!
+
 --------------
 
 Use cases
