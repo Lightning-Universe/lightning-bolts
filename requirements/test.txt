@@ -11,7 +11,7 @@ pre-commit>=1.0
 mypy>=0.790
 
 atari-py==0.2.6  # needed for RL
-scikit-learn>=0.23
+scikit-learn>=1.0.2
 sparseml
 ale-py>=0.7
 jsonargparse[signatures]  # for LightningCLI

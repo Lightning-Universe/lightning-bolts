@@ -1,5 +1,5 @@
 torchvision>=0.10.*
-scikit-learn>=0.23
+scikit-learn>=1.0.2
 Pillow
 opencv-python-headless
 gym[atari]>=0.17.2, <0.20.0  # needed for RL
