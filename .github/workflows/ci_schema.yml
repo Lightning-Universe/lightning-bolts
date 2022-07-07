@@ -6,5 +6,5 @@ on:
     branches: [master, "release/*"]
 
 jobs:
-  validate-schema:
+  check:
     uses: Lightning-AI/lightning/.github/workflows/_check-schema.yml@ci/decouple-schema.yml
