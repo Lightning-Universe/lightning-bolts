@@ -1,4 +1,4 @@
-name: Check Schema
+name: CI action schema
 
 on:
   push: {}
