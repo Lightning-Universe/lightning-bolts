@@ -18,10 +18,16 @@ jobs:
     uses: Lightning-AI/devtools/.github/workflows/check-schema.yml@main
 
   check-package:
-    uses: Lightning-AI/devtools/.github/workflows/check-package.yml@main
+    uses: Lightning-AI/devtools/.github/workflows/check-package.yml@ci/parameterize
     with:
       import-name: "pl_bolts"
       pypi-name: "lightning-bolts"
+      test-matrix: |
+        {
+          "os": ["ubuntu-20.04", "macos-11", "windows-2022"],
+          "python-version": ["3.8"]
+        }
+
 
   # TODO: Enable doctest and build
   # check-docs:
