@@ -25,5 +25,6 @@ jobs:
       import-name: "pl_bolts"
       pypi-name: "lightning-bolts"
 
-  check-docs:
-    uses: Lightning-AI/devtools/.github/workflows/check-docs.yml@main
+  # TODO: Enable doctest and build
+  # check-docs:
+  #   uses: Lightning-AI/devtools/.github/workflows/check-docs.yml@main
