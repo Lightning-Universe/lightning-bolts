@@ -14,6 +14,8 @@ line_length = 120
 
 [tool.mypy]
 files = ["pl_bolts"]
+install_types = "True"
+non_interactive = "True"
 disallow_untyped_defs = "True"
 ignore_missing_imports = "True"
 install_types = "True"
