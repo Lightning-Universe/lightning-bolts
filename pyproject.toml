@@ -28,8 +28,11 @@ disable_error_code = "attr-defined"
 # style choices
 warn_no_return = "False"
 
-# TODO: Fix typing for these modules
+# Ignore mypy errors for these files
+# TODO: the goal is for this to be empty
 [[tool.mypy.overrides]]
+# the list can be generated with:
+# mypy --no-error-summary 2>&1 | tr ':' ' ' | awk '{print $1}' | sort | uniq | sed 's/\.py//g; s|src/||g;  s|\/|\.|g' | xargs -I {} echo '"{}",'
 module = [
     "pl_bolts.callbacks.byol_updates",
     "pl_bolts.callbacks.data_monitor",
