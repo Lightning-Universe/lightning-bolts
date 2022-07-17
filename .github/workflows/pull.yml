@@ -1,0 +1,29 @@
+name: pull
+
+on:
+  push:
+    branches: [master, "release/*"]
+  pull_request:
+    branches: [master, "release/*"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.head_ref }}
+  cancel-in-progress: ${{ ! (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')) }}
+
+jobs:
+  check-code:
+    uses: Lightning-AI/devtools/.github/workflows/check-code.yml@main
+
+  check-schema:
+    uses: Lightning-AI/devtools/.github/workflows/check-schema.yml@main
+    with:
+      azure-dir: ""
+
+  check-package:
+    uses: Lightning-AI/devtools/.github/workflows/check-package.yml@main
+    with:
+      import-name: "pl_bolts"
+      pypi-name: "lightning-bolts"
+
+  check-docs:
+    uses: Lightning-AI/devtools/.github/workflows/check-docs.yml@main
