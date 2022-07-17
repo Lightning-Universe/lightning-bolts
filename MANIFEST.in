@@ -1,6 +1,4 @@
-# Manifest syntax https://docs.python.org/2/distutils/sourcedist.html
-graft wheelhouse
-
+# manifest syntax https://packaging.python.org/en/latest/guides/using-manifest-in/
 recursive-exclude __pycache__  *.py[cod] *.orig
 
 # Include the README and CHANGELOG
@@ -8,7 +6,7 @@ include *.md
 recursive-include pl_bolts *.md
 
 # Include the license file
-include LICENSE
+recursive-include . LICENSE
 
 exclude *.sh
 exclude *.toml
@@ -30,6 +28,7 @@ recursive-include requirements *.txt
 
 # Exclude build configs
 exclude *.yml
+exclude *.yaml
 
 # Exclude Makefile
 exclude Makefile
