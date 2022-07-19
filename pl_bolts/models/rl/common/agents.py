@@ -10,7 +10,10 @@ import torch
 from torch import Tensor, nn
 from torch.nn import functional as F
 
+from pl_bolts.utils.stability import experimental
 
+
+@experimental()
 class Agent(ABC):
     """Basic agent that always returns 0."""
 
@@ -30,6 +33,7 @@ class Agent(ABC):
         return [0]
 
 
+@experimental()
 class ValueAgent(Agent):
     """Value based agent that returns an action based on the Q values from the network."""
 
@@ -105,6 +109,7 @@ class ValueAgent(Agent):
         self.epsilon = max(self.eps_end, self.eps_start - (step + 1) / self.eps_frames)
 
 
+@experimental()
 class PolicyAgent(Agent):
     """Policy based agent that returns an action based on the networks policy."""
 
@@ -134,6 +139,7 @@ class PolicyAgent(Agent):
         return actions
 
 
+@experimental()
 class ActorCriticAgent(Agent):
     """Actor-Critic based agent that returns an action based on the networks policy."""
 
@@ -163,6 +169,7 @@ class ActorCriticAgent(Agent):
         return actions
 
 
+@experimental()
 class SoftActorCriticAgent(Agent):
     """Actor-Critic based agent that returns a continuous action based on the policy."""
 

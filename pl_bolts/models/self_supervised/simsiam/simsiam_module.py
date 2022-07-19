@@ -14,8 +14,10 @@ from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization,
     stl10_normalization,
 )
+from pl_bolts.utils.stability import experimental
 
 
+@experimental()
 class SimSiam(LightningModule):
     """PyTorch Lightning implementation of Exploring Simple Siamese Representation Learning (SimSiam_)
 
@@ -262,6 +264,7 @@ class SimSiam(LightningModule):
         return parser
 
 
+@experimental()
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule

@@ -11,6 +11,7 @@ from torch import Tensor, optim
 from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, RouteLayer, ShortcutLayer
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import experimental
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -22,6 +23,7 @@ else:
 log = logging.getLogger(__name__)
 
 
+@experimental()
 class YOLO(LightningModule):
     """PyTorch Lightning implementation of YOLOv3 and YOLOv4.
 
@@ -453,6 +455,7 @@ class YOLO(LightningModule):
         return {"boxes": out_boxes, "scores": out_scores, "classprobs": out_classprobs, "labels": out_labels}
 
 
+@experimental()
 class Resize:
     """Rescales the image and target to given dimensions.
 
@@ -483,6 +486,7 @@ class Resize:
         return image, target
 
 
+@experimental()
 def run_cli():
     from argparse import ArgumentParser
 

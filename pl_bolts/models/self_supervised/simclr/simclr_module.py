@@ -15,8 +15,10 @@ from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization,
     stl10_normalization,
 )
+from pl_bolts.utils.stability import experimental
 
 
+@experimental()
 class SyncFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, tensor):
@@ -39,6 +41,7 @@ class SyncFunction(torch.autograd.Function):
         return grad_input[idx_from:idx_to]
 
 
+@experimental()
 class Projection(nn.Module):
     def __init__(self, input_dim=2048, hidden_dim=2048, output_dim=128):
         super().__init__()
@@ -58,6 +61,7 @@ class Projection(nn.Module):
         return F.normalize(x, dim=1)
 
 
+@experimental()
 class SimCLR(LightningModule):
     def __init__(
         self,
@@ -300,6 +304,7 @@ class SimCLR(LightningModule):
         return parser
 
 
+@experimental()
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
