@@ -19,9 +19,8 @@ ______________________________________________________________________
 
 [![PyPI Status](https://badge.fury.io/py/lightning-bolts.svg)](https://badge.fury.io/py/lightning-bolts)
 [![PyPI Status](https://pepy.tech/badge/lightning-bolts)](https://pepy.tech/project/lightning-bolts)
-[![Build Status](https://dev.azure.com/PytorchLightning/lightning%20Bolts/_apis/build/status/PyTorchLightning.lightning-bolts?branchName=master)](https://dev.azure.com/PytorchLightning/lightning%20Bolts/_build/latest?definitionId=5&branchName=master)
+[![Build Status](https://dev.azure.com/Lightning-AI/lightning%20Bolts/_apis/build/status/Lightning-AI.lightning-bolts?branchName=master)](https://dev.azure.com/Lightning-AI/lightning%20Bolts/_build?definitionId=31&_a=summary&repositoryFilter=13&branchFilter=4923%2C4923)
 [![codecov](https://codecov.io/gh/PyTorchLightning/lightning-bolts/branch/master/graph/badge.svg)](https://codecov.io/gh/PyTorchLightning/lightning-bolts)
-[![CodeFactor](https://www.codefactor.io/repository/github/pytorchlightning/lightning-bolts/badge)](https://www.codefactor.io/repository/github/pytorchlightning/lightning-bolts)
 
 [![Documentation Status](https://readthedocs.org/projects/lightning-bolts/badge/?version=latest)](https://lightning-bolts.readthedocs.io/en/latest/)
 [![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://www.pytorchlightning.ai/community)

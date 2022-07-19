@@ -302,7 +302,7 @@ def package_list_from_file(file):
     mocked_packages = []
     with open(file) as fp:
         for ln in fp.readlines():
-            found = [ln.index(ch) for ch in list(",=<>#") if ch in ln]
+            found = [ln.index(ch) for ch in list(",=<>#[]") if ch in ln]
             pkg = ln[: min(found)] if found else ln
             if pkg.strip():
                 mocked_packages.append(pkg.strip())
@@ -319,11 +319,14 @@ PACKAGE_MAPPING = {
 MOCK_PACKAGES = []
 if SPHINX_MOCK_REQUIREMENTS:
     # mock also base packages when we are on RTD since we don't install them there
+    MOCK_PACKAGES += ["numpy"]
     MOCK_PACKAGES += package_list_from_file(os.path.join(_PATH_ROOT, "requirements.txt"))
     MOCK_PACKAGES += package_list_from_file(os.path.join(_PATH_ROOT, "requirements", "models.txt"))
     MOCK_PACKAGES += package_list_from_file(os.path.join(_PATH_ROOT, "requirements", "loggers.txt"))
 # replace PyPI packages by importing ones
 MOCK_PACKAGES = [PACKAGE_MAPPING.get(pkg, pkg) for pkg in MOCK_PACKAGES]
+
+print(f"{MOCK_PACKAGES=}")
 
 autodoc_mock_imports = MOCK_PACKAGES
 
