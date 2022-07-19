@@ -316,7 +316,7 @@ PACKAGE_MAPPING = {
     "Pillow": "PIL",
     "opencv-python": "cv2",
 }
-MOCK_PACKAGES = ["numpy"]
+MOCK_PACKAGES = []
 if SPHINX_MOCK_REQUIREMENTS:
     # mock also base packages when we are on RTD since we don't install them there
     MOCK_PACKAGES += package_list_from_file(os.path.join(_PATH_ROOT, "requirements.txt"))
