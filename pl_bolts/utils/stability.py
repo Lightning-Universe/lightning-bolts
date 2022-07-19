@@ -18,7 +18,6 @@ from typing import Callable, Type, Union
 from pytorch_lightning.utilities import rank_zero_warn
 
 
-@functools.lru_cache()  # Trick to only warn once for each message
 def _raise_experimental_warning(message: str, stacklevel: int = 6):
     rank_zero_warn(
         f"{message} The compatibility with other Lightning projects is not guaranteed and API may change at any time."
