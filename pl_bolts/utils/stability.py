@@ -39,26 +39,24 @@ def experimental(
         message: The message to include in the warning.
     Examples
     ________
-    .. testsetup::
-        >>> import pytest
-    .. doctest::
-        >>> from pl_bolts.utils.stability import experimental
-        >>> @experimental()
-        ... class MyExperimentalFeature:
-        ...     pass
-        ...
-        >>> with pytest.warns(UserWarning, match="This feature is currently marked as experimental."):
-        ...     MyExperimentalFeature()  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        ...
-        <...>
-        >>> @experimental("This feature is currently marked as experimental with a message.")
-        ... class MyExperimentalFeatureWithCustomMessage:
-        ...     pass
-        ...
-        >>> with pytest.warns(UserWarning, match="This feature is currently marked as experimental with a message."):
-        ...     MyExperimentalFeatureWithCustomMessage()  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        ...
-        <...>
+    >>> import pytest
+    >>> from pl_bolts.utils.stability import experimental
+    >>> @experimental()
+    ... class MyExperimentalFeature:
+    ...     pass
+    ...
+    >>> with pytest.warns(UserWarning, match="This feature is currently marked as experimental."):
+    ...     MyExperimentalFeature()  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+    ...
+    <...>
+    >>> @experimental("This feature is currently marked as experimental with a message.")
+    ... class MyExperimentalFeatureWithCustomMessage:
+    ...     pass
+    ...
+    >>> with pytest.warns(UserWarning, match="This feature is currently marked as experimental with a message."):
+    ...     MyExperimentalFeatureWithCustomMessage()  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+    ...
+    <...>
     """
 
     def decorator(callable: Union[Callable, Type]):
