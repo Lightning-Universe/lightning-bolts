@@ -302,7 +302,7 @@ def package_list_from_file(file):
     mocked_packages = []
     with open(file) as fp:
         for ln in fp.readlines():
-            found = [ln.index(ch) for ch in list(",=<>#[]\n") if ch in ln]
+            found = [ln.index(ch) for ch in list(",=<>#[]") if ch in ln]
             pkg = ln[: min(found)] if found else ln
             if pkg.strip():
                 mocked_packages.append(pkg.strip())
