@@ -111,7 +111,7 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
         # use train for all of these splits
         train = split in ("val", "train", "train+unlabeled")
-        super().__init__(root, train, transform, target_transform, download)
+        super(SSLDatasetMixin, self).__init__(root, train, transform, target_transform, download)
 
         # modify only for val, train
         if split != "test":
