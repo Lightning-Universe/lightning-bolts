@@ -8,8 +8,8 @@ from pytorch_lightning import LightningDataModule, LightningModule
 from pl_bolts.utils.stability import experimental
 
 
-@dataclass(frozen=True)
 @experimental()
+@dataclass(frozen=True)
 class LitArg:
     """Dataclass to represent init args of an object."""
 
