@@ -342,8 +342,8 @@ class Moco_v2(LightningModule):
 
 
 # utils
-@experimental()
 @torch.no_grad()
+@experimental()
 def concat_all_gather(tensor):
     """Performs all_gather operation on the provided tensors.
 
