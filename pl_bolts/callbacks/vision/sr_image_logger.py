@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from pytorch_lightning import Callback
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import experimental
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -14,6 +15,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@experimental()
 class SRImageLoggerCallback(Callback):
     """Logs low-res, generated high-res, and ground truth high-res images to TensorBoard Your model must implement
     the ``forward`` function for generation.

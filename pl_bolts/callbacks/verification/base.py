@@ -9,7 +9,10 @@ from pytorch_lightning.core.lightning import LightningModule
 from pytorch_lightning.utilities import move_data_to_device, rank_zero_warn
 from pytorch_lightning.utilities.signature_utils import is_param_in_hook_signature
 
+from pl_bolts.utils.stability import experimental
 
+
+@experimental()
 class VerificationBase:
     """Base class for model verification.
 
@@ -79,6 +82,7 @@ class VerificationBase:
         return self.model(input_array)
 
 
+@experimental()
 class VerificationCallbackBase(Callback):
     """Base class for model verification in form of a callback.
 

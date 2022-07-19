@@ -97,6 +97,7 @@ Lightning-Bolts documentation
 
    CONTRIBUTING.md
    governance.md
+   stability.md
    CHANGELOG.md
 
 
