@@ -16,7 +16,7 @@ ______
 For stable features, all of the following are true:
 
 - the API isn’t expected to change
-- if anything does change, incorrect usage will give a deprecation warning for **one major release** before the breaking change is made
+- if anything does change, incorrect usage will give a deprecation warning for **one minor release** before the breaking change is made
 - the API has been tested for compatibility with latest releases of PyTorch Lightning and Flash
 
 To Review
