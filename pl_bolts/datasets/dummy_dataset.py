@@ -1,7 +1,10 @@
 import torch
 from torch.utils.data import Dataset
 
+from pl_bolts.utils.stability import to_review
 
+
+@to_review()
 class DummyDataset(Dataset):
     """Generate a dummy dataset.
 
@@ -41,6 +44,7 @@ class DummyDataset(Dataset):
         return sample
 
 
+@to_review()
 class DummyDetectionDataset(Dataset):
     """Generate a dummy dataset for detection.
 
@@ -81,6 +85,7 @@ class DummyDetectionDataset(Dataset):
         return img, {"boxes": boxes, "labels": labels}
 
 
+@to_review()
 class RandomDictDataset(Dataset):
     """Generate a dummy dataset with a dict structure.
 
@@ -109,6 +114,7 @@ class RandomDictDataset(Dataset):
         return self.len
 
 
+@to_review()
 class RandomDictStringDataset(Dataset):
     """Generate a dummy dataset with strings.
 
@@ -135,6 +141,7 @@ class RandomDictStringDataset(Dataset):
         return self.len
 
 
+@to_review()
 class RandomDataset(Dataset):
     """Generate a dummy dataset.
 

@@ -10,8 +10,10 @@ from torch.optim import Adam
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
 from pl_bolts.models.self_supervised.byol.models import SiameseArm
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
+from pl_bolts.utils.stability import to_review
 
 
+@to_review()
 class BYOL(LightningModule):
     """PyTorch Lightning implementation of Bootstrap Your Own Latent (BYOL_)_
 
@@ -176,6 +178,7 @@ class BYOL(LightningModule):
         return parser
 
 
+@to_review()
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule

@@ -1,6 +1,9 @@
 from torch.utils.data import Dataset
 
+from pl_bolts.utils.stability import to_review
 
+
+@to_review()
 class ConcatDataset(Dataset):
     def __init__(self, *datasets):
         self.datasets = datasets

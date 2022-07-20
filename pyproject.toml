@@ -53,5 +53,6 @@ module = [
     "pl_bolts.models.vision.*",
     "pl_bolts.optimizers.*",
     "pl_bolts.transforms.*",
+    "pl_bolts.utils.stability"
 ]
 ignore_errors = "True"
