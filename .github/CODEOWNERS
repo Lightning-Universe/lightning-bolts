@@ -17,8 +17,8 @@
 # CI/CD
 /.github/workflows/   @borda @ethanwharris @akihironitta
 /.github/*.yml        @borda @ethanwharris @akihironitta
-/.azure/              @borda @ethanwharris
-/*.yml                @borda @ethanwharris
+/.azure/              @borda @ethanwharris @akihironitta
+/*.yml                @borda @ethanwharris @akihironitta
 
 # Docs
 /docs/                          @edenlightning @borda
