@@ -6,7 +6,7 @@ import numpy as np
 import torch
 
 from pl_bolts.utils import _GYM_AVAILABLE, _OPENCV_AVAILABLE
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
@@ -24,7 +24,7 @@ else:  # pragma: no cover
     warn_missing_pkg("cv2", pypi_name="opencv-python")
 
 
-@experimental()
+@to_review()
 class ToTensor(Wrapper):
     """For environments where the user need to press FIRE for the game to start."""
 
@@ -44,7 +44,7 @@ class ToTensor(Wrapper):
         return torch.tensor(self.env.reset())
 
 
-@experimental()
+@to_review()
 class FireResetEnv(Wrapper):
     """For environments where the user need to press FIRE for the game to start."""
 
@@ -72,7 +72,7 @@ class FireResetEnv(Wrapper):
         return obs
 
 
-@experimental()
+@to_review()
 class MaxAndSkipEnv(Wrapper):
     """Return only every `skip`-th frame."""
 
@@ -109,7 +109,7 @@ class MaxAndSkipEnv(Wrapper):
         return obs
 
 
-@experimental()
+@to_review()
 class ProcessFrame84(ObservationWrapper):
     """preprocessing images from env."""
 
@@ -140,7 +140,7 @@ class ProcessFrame84(ObservationWrapper):
         return x_t.astype(np.uint8)
 
 
-@experimental()
+@to_review()
 class ImageToPyTorch(ObservationWrapper):
     """converts image to pytorch format."""
 
@@ -159,7 +159,7 @@ class ImageToPyTorch(ObservationWrapper):
         return np.moveaxis(observation, 2, 0)
 
 
-@experimental()
+@to_review()
 class ScaledFloatFrame(ObservationWrapper):
     """scales the pixels."""
 
@@ -168,7 +168,7 @@ class ScaledFloatFrame(ObservationWrapper):
         return np.array(obs).astype(np.float32) / 255.0
 
 
-@experimental()
+@to_review()
 class BufferWrapper(ObservationWrapper):
     """Wrapper for image stacking."""
 
@@ -195,7 +195,7 @@ class BufferWrapper(ObservationWrapper):
         return self.buffer
 
 
-@experimental()
+@to_review()
 class DataAugmentation(ObservationWrapper):
     """Carries out basic data augmentation on the env observations.
 
@@ -216,7 +216,7 @@ class DataAugmentation(ObservationWrapper):
         return ProcessFrame84.process(obs)
 
 
-@experimental()
+@to_review()
 def make_environment(env_name):
     """Convert environment with wrappers."""
     env = gym_make(env_name)

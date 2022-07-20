@@ -1,5 +1,5 @@
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -8,7 +8,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-@experimental()
+@to_review()
 def imagenet_normalization():
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError(
@@ -19,7 +19,7 @@ def imagenet_normalization():
     return normalize
 
 
-@experimental()
+@to_review()
 def cifar10_normalization():
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError(
@@ -33,7 +33,7 @@ def cifar10_normalization():
     return normalize
 
 
-@experimental()
+@to_review()
 def stl10_normalization():
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError(
@@ -44,7 +44,7 @@ def stl10_normalization():
     return normalize
 
 
-@experimental()
+@to_review()
 def emnist_normalization(split: str):
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError(

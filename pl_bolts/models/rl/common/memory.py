@@ -7,12 +7,12 @@ from typing import List, Tuple, Union
 
 import numpy as np
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 Experience = namedtuple("Experience", field_names=["state", "action", "reward", "done", "new_state"])
 
 
-@experimental()
+@to_review()
 class Buffer:
     """Basic Buffer for storing a single experience at a time."""
 
@@ -54,7 +54,7 @@ class Buffer:
         )
 
 
-@experimental()
+@to_review()
 class ReplayBuffer(Buffer):
     """Replay Buffer for storing past experiences allowing the agent to learn from them."""
 
@@ -80,7 +80,7 @@ class ReplayBuffer(Buffer):
         )
 
 
-@experimental()
+@to_review()
 class MultiStepBuffer(ReplayBuffer):
     """N Step Replay Buffer."""
 
@@ -189,7 +189,7 @@ class MultiStepBuffer(ReplayBuffer):
         return total_reward
 
 
-@experimental()
+@to_review()
 class MeanBuffer:
     """Stores a deque of items and calculates the mean."""
 
@@ -212,7 +212,7 @@ class MeanBuffer:
         return self.sum / len(self.deque)
 
 
-@experimental()
+@to_review()
 class PERBuffer(ReplayBuffer):
     """simple list based Prioritized Experience Replay Buffer Based on implementation found here:
 

@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from torch.utils.model_zoo import load_url as load_state_dict_from_url
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 __all__ = [
     "ResNet",
@@ -30,7 +30,7 @@ MODEL_URLS = {
 }
 
 
-@experimental()
+@to_review()
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding."""
     return nn.Conv2d(
@@ -45,13 +45,13 @@ def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     )
 
 
-@experimental()
+@to_review()
 def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution."""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
-@experimental()
+@to_review()
 class BasicBlock(nn.Module):
     expansion = 1
 
@@ -93,7 +93,7 @@ class BasicBlock(nn.Module):
         return out
 
 
-@experimental()
+@to_review()
 class Bottleneck(nn.Module):
     expansion = 4
 
@@ -138,7 +138,7 @@ class Bottleneck(nn.Module):
         return out
 
 
-@experimental()
+@to_review()
 class ResNet(nn.Module):
     def __init__(
         self,
@@ -276,7 +276,7 @@ class ResNet(nn.Module):
         return [x0]
 
 
-@experimental()
+@to_review()
 def _resnet(arch, block, layers, pretrained, progress, **kwargs):
     model = ResNet(block, layers, **kwargs)
     if pretrained:
@@ -285,7 +285,7 @@ def _resnet(arch, block, layers, pretrained, progress, **kwargs):
     return model
 
 
-@experimental()
+@to_review()
 def resnet18(pretrained: bool = False, progress: bool = True, **kwargs):
     r"""ResNet-18 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
@@ -297,7 +297,7 @@ def resnet18(pretrained: bool = False, progress: bool = True, **kwargs):
     return _resnet("resnet18", BasicBlock, [2, 2, 2, 2], pretrained, progress, **kwargs)
 
 
-@experimental()
+@to_review()
 def resnet34(pretrained=False, progress=True, **kwargs):
     r"""ResNet-34 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
@@ -309,7 +309,7 @@ def resnet34(pretrained=False, progress=True, **kwargs):
     return _resnet("resnet34", BasicBlock, [3, 4, 6, 3], pretrained, progress, **kwargs)
 
 
-@experimental()
+@to_review()
 def resnet50(pretrained: bool = False, progress: bool = True, **kwargs):
     r"""ResNet-50 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
@@ -321,7 +321,7 @@ def resnet50(pretrained: bool = False, progress: bool = True, **kwargs):
     return _resnet("resnet50", Bottleneck, [3, 4, 6, 3], pretrained, progress, **kwargs)
 
 
-@experimental()
+@to_review()
 def resnet101(pretrained: bool = False, progress: bool = True, **kwargs):
     r"""ResNet-101 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
@@ -333,7 +333,7 @@ def resnet101(pretrained: bool = False, progress: bool = True, **kwargs):
     return _resnet("resnet101", Bottleneck, [3, 4, 23, 3], pretrained, progress, **kwargs)
 
 
-@experimental()
+@to_review()
 def resnet152(pretrained: bool = False, progress: bool = True, **kwargs):
     r"""ResNet-152 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
@@ -345,7 +345,7 @@ def resnet152(pretrained: bool = False, progress: bool = True, **kwargs):
     return _resnet("resnet152", Bottleneck, [3, 8, 36, 3], pretrained, progress, **kwargs)
 
 
-@experimental()
+@to_review()
 def resnext50_32x4d(pretrained: bool = False, progress: bool = True, **kwargs):
     r"""ResNeXt-50 32x4d model from
     `"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_
@@ -359,7 +359,7 @@ def resnext50_32x4d(pretrained: bool = False, progress: bool = True, **kwargs):
     return _resnet("resnext50_32x4d", Bottleneck, [3, 4, 6, 3], pretrained, progress, **kwargs)
 
 
-@experimental()
+@to_review()
 def resnext101_32x8d(pretrained: bool = False, progress: bool = True, **kwargs):
     r"""ResNeXt-101 32x8d model from
     `"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_
@@ -373,7 +373,7 @@ def resnext101_32x8d(pretrained: bool = False, progress: bool = True, **kwargs):
     return _resnet("resnext101_32x8d", Bottleneck, [3, 4, 23, 3], pretrained, progress, **kwargs)
 
 
-@experimental()
+@to_review()
 def wide_resnet50_2(pretrained: bool = False, progress: bool = True, **kwargs):
     r"""Wide ResNet-50-2 model from
     `"Wide Residual Networks" <https://arxiv.org/pdf/1605.07146.pdf>`_
@@ -390,7 +390,7 @@ def wide_resnet50_2(pretrained: bool = False, progress: bool = True, **kwargs):
     return _resnet("wide_resnet50_2", Bottleneck, [3, 4, 6, 3], pretrained, progress, **kwargs)
 
 
-@experimental()
+@to_review()
 def wide_resnet101_2(pretrained: bool = False, progress: bool = True, **kwargs):
     r"""Wide ResNet-101-2 model from
     `"Wide Residual Networks" <https://arxiv.org/pdf/1605.07146.pdf>`_

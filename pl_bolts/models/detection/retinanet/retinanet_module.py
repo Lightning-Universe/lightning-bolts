@@ -5,7 +5,7 @@ from pytorch_lightning import LightningModule
 
 from pl_bolts.models.detection.retinanet import create_retinanet_backbone
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -16,7 +16,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-@experimental()
+@to_review()
 class RetinaNet(LightningModule):
     """PyTorch Lightning implementation of RetinaNet.
 
@@ -120,7 +120,7 @@ class RetinaNet(LightningModule):
         )
 
 
-@experimental()
+@to_review()
 def cli_main():
     from pytorch_lightning.utilities.cli import LightningCLI
 

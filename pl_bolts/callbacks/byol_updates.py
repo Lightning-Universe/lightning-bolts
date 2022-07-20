@@ -5,10 +5,10 @@ from pytorch_lightning import Callback, LightningModule, Trainer
 from torch import Tensor
 from torch.nn import Module
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 class BYOLMAWeightUpdate(Callback):
     """Weight update rule from BYOL.
 

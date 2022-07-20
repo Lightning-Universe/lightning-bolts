@@ -24,12 +24,12 @@ from pl_bolts.models.self_supervised.cpc.transforms import (
 )
 from pl_bolts.utils.pretrained_weights import load_pretrained
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 __all__ = ["CPC_v2"]
 
 
-@experimental()
+@to_review()
 class CPC_v2(LightningModule):
     def __init__(
         self,
@@ -204,7 +204,7 @@ class CPC_v2(LightningModule):
         return parser
 
 
-@experimental()
+@to_review()
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule

@@ -2,10 +2,10 @@ import math
 
 from pytorch_lightning import Callback
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 class MocoLRScheduler(Callback):
     def __init__(self, initial_lr=0.03, use_cosine_scheduler=False, schedule=(120, 160), max_epochs=200):
         super().__init__()

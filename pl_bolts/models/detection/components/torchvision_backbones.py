@@ -4,11 +4,11 @@ import torch.nn as nn
 
 from pl_bolts.models.detection.components._supported_models import TORCHVISION_MODEL_ZOO
 from pl_bolts.utils import _TORCHVISION_AVAILABLE  # noqa: F401
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 from pl_bolts.utils.warnings import warn_missing_pkg  # noqa: F401
 
 
-@experimental()
+@to_review()
 def _create_backbone_generic(model: nn.Module, out_channels: int) -> nn.Module:
     """Generic Backbone creater. It removes the last linear layer.
 
@@ -25,7 +25,7 @@ def _create_backbone_generic(model: nn.Module, out_channels: int) -> nn.Module:
 
 # Use this when you have Adaptive Pooling layer in End.
 # When Model.features is not applicable.
-@experimental()
+@to_review()
 def _create_backbone_adaptive(model: nn.Module, out_channels: Optional[int] = None) -> nn.Module:
     """Creates backbone by removing linear after Adaptive Pooling layer.
 
@@ -39,7 +39,7 @@ def _create_backbone_adaptive(model: nn.Module, out_channels: Optional[int] = No
     return _create_backbone_generic(model, out_channels=out_channels)
 
 
-@experimental()
+@to_review()
 def _create_backbone_features(model: nn.Module, out_channels: int) -> nn.Module:
     """Creates backbone from feature sequential block.
 
@@ -52,7 +52,7 @@ def _create_backbone_features(model: nn.Module, out_channels: int) -> nn.Module:
     return ft_backbone
 
 
-@experimental()
+@to_review()
 def create_torchvision_backbone(model_name: str, pretrained: bool = True) -> Tuple[nn.Module, int]:
     """Creates CNN backbone from Torchvision.
 

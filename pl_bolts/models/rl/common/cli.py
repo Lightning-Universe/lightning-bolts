@@ -2,10 +2,10 @@
 
 import argparse
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 def add_base_args(parent) -> argparse.ArgumentParser:
     """Adds arguments for DQN model.
 

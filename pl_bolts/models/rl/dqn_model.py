@@ -19,7 +19,7 @@ from pl_bolts.models.rl.common.gym_wrappers import make_environment
 from pl_bolts.models.rl.common.memory import MultiStepBuffer
 from pl_bolts.models.rl.common.networks import CNN
 from pl_bolts.utils import _GYM_AVAILABLE
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
@@ -29,7 +29,7 @@ else:  # pragma: no cover
     Env = object
 
 
-@experimental()
+@to_review()
 class DQN(LightningModule):
     """Basic DQN Model.
 
@@ -410,7 +410,7 @@ class DQN(LightningModule):
         return isinstance(trainer.training_type_plugin, (DataParallelPlugin, DDP2Plugin))
 
 
-@experimental()
+@to_review()
 def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 

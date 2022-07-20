@@ -7,7 +7,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -17,7 +17,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-@experimental()
+@to_review()
 class Compose:
     """Like `torchvision.transforms.compose` but works for (image, target)"""
 
@@ -62,7 +62,7 @@ CLASSES = (
 )
 
 
-@experimental()
+@to_review()
 def _prepare_voc_instance(image: Any, target: Dict[str, Any]):
     """Prepares VOC dataset into appropriate target for fasterrcnn.
 
@@ -104,7 +104,7 @@ def _prepare_voc_instance(image: Any, target: Dict[str, Any]):
     return image, target
 
 
-@experimental()
+@to_review()
 class VOCDetectionDataModule(LightningDataModule):
     """TODO(teddykoker) docstring."""
 

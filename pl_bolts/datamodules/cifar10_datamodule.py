@@ -4,7 +4,7 @@ from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.datasets import TrialCIFAR10
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -15,7 +15,7 @@ else:  # pragma: no cover
     CIFAR10 = None
 
 
-@experimental()
+@to_review()
 class CIFAR10DataModule(VisionDataModule):
     """
     .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/wp-content/uploads/2019/01/
@@ -124,7 +124,7 @@ class CIFAR10DataModule(VisionDataModule):
         return cf10_transforms
 
 
-@experimental()
+@to_review()
 class TinyCIFAR10DataModule(CIFAR10DataModule):
     """Standard CIFAR10, train, val, test splits and transforms.
 

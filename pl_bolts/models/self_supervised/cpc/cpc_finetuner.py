@@ -10,10 +10,10 @@ from pl_bolts.models.self_supervised.cpc.transforms import (
     CPCTrainTransformsCIFAR10,
     CPCTrainTransformsSTL10,
 )
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 def cli_main():  # pragma: no cover
     from pl_bolts.datamodules import CIFAR10DataModule, STL10DataModule
 

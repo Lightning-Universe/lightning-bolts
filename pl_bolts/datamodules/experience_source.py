@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import IterableDataset
 
 from pl_bolts.utils import _GYM_AVAILABLE
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 try:
@@ -24,7 +24,7 @@ except ImportError:
 Experience = namedtuple("Experience", field_names=["state", "action", "reward", "done", "new_state"])
 
 
-@experimental()
+@to_review()
 class ExperienceSourceDataset(IterableDataset):
     """Basic experience source dataset.
 
@@ -41,7 +41,7 @@ class ExperienceSourceDataset(IterableDataset):
 
 
 # Experience Sources
-@experimental()
+@to_review()
 class BaseExperienceSource(ABC):
     """Simplest form of the experience source."""
 
@@ -59,7 +59,7 @@ class BaseExperienceSource(ABC):
         raise NotImplementedError("ExperienceSource has no stepper method implemented")
 
 
-@experimental()
+@to_review()
 class ExperienceSource(BaseExperienceSource):
     """Experience source class handling single and multiple environment steps."""
 
@@ -235,7 +235,7 @@ class ExperienceSource(BaseExperienceSource):
         return res
 
 
-@experimental()
+@to_review()
 class DiscountedExperienceSource(ExperienceSource):
     """Outputs experiences with a discounted reward over N steps."""
 

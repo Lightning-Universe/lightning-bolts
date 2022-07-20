@@ -3,10 +3,10 @@ from torch.utils.data.dataset import random_split
 from pl_bolts.datasets.sr_celeba_dataset import SRCelebA
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 from pl_bolts.datasets.sr_stl10_dataset import SRSTL10
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 def prepare_sr_datasets(dataset: str, scale_factor: int, data_dir: str):
     """Creates train, val, and test datasets for training a Super Resolution GAN.
 

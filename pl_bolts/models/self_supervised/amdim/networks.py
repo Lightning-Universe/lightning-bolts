@@ -5,10 +5,10 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 class AMDIMEncoder(nn.Module):
     def __init__(
         self,
@@ -149,7 +149,7 @@ class AMDIMEncoder(nn.Module):
         return r1, r5, r7
 
 
-@experimental()
+@to_review()
 class Conv3x3(nn.Module):
     def __init__(self, n_in, n_out, n_kern, n_stride, n_pad, use_bn=True, pad_mode="constant"):
         super().__init__()
@@ -173,7 +173,7 @@ class Conv3x3(nn.Module):
         return out
 
 
-@experimental()
+@to_review()
 class ConvResBlock(nn.Module):
     def __init__(self, n_in, n_out, width, stride, pad, depth, use_bn):
         super().__init__()
@@ -193,7 +193,7 @@ class ConvResBlock(nn.Module):
         return x_out
 
 
-@experimental()
+@to_review()
 class ConvResNxN(nn.Module):
     def __init__(self, n_in, n_out, width, stride, pad, use_bn=False):
         super().__init__()
@@ -238,7 +238,7 @@ class ConvResNxN(nn.Module):
         return h23
 
 
-@experimental()
+@to_review()
 class MaybeBatchNorm2d(nn.Module):
     def __init__(self, n_ftr, affine, use_bn):
         super().__init__()
@@ -251,7 +251,7 @@ class MaybeBatchNorm2d(nn.Module):
         return x
 
 
-@experimental()
+@to_review()
 class NopNet(nn.Module):
     def __init__(self, norm_dim=None):
         super().__init__()
@@ -265,7 +265,7 @@ class NopNet(nn.Module):
         return x
 
 
-@experimental()
+@to_review()
 class FakeRKHSConvNet(nn.Module):
     def __init__(self, n_input, n_output, use_bn=False):
         super().__init__()

@@ -19,10 +19,10 @@ from pl_bolts.utils import _TORCH_ORT_AVAILABLE
 if _TORCH_ORT_AVAILABLE:
     from torch_ort import ORTModule
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 class ORTCallback(Callback):
     """Enables Torch ORT: Accelerate PyTorch models with ONNX Runtime.
 

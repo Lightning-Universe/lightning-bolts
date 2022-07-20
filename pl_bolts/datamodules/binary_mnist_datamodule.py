@@ -3,7 +3,7 @@ from typing import Any, Callable, Optional, Union
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.datasets import BinaryMNIST
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -12,7 +12,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-@experimental()
+@to_review()
 class BinaryMNISTDataModule(VisionDataModule):
     """
     .. figure:: https://miro.medium.com/max/744/1*AO2rIhzRYzFVQlFLx9DM9A.png

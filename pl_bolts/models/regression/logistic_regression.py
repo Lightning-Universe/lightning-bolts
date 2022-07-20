@@ -10,10 +10,10 @@ from torch.optim import Adam
 from torch.optim.optimizer import Optimizer
 from torchmetrics.functional import accuracy
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 class LogisticRegression(LightningModule):
     """Logistic regression model."""
 
@@ -118,7 +118,7 @@ class LogisticRegression(LightningModule):
         return parser
 
 
-@experimental()
+@to_review()
 def cli_main() -> None:
     from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
     from pl_bolts.utils import _SKLEARN_AVAILABLE

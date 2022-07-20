@@ -6,7 +6,7 @@ from pl_bolts.transforms.dataset_normalizations import (
     stl10_normalization,
 )
 from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -20,7 +20,7 @@ else:  # pragma: no cover
     warn_missing_pkg("PIL", pypi_name="Pillow")
 
 
-@experimental()
+@to_review()
 class Moco2TrainCIFAR10Transforms:
     """Moco 2 augmentation:
 
@@ -50,7 +50,7 @@ class Moco2TrainCIFAR10Transforms:
         return q, k
 
 
-@experimental()
+@to_review()
 class Moco2EvalCIFAR10Transforms:
     """Moco 2 augmentation:
 
@@ -76,7 +76,7 @@ class Moco2EvalCIFAR10Transforms:
         return q, k
 
 
-@experimental()
+@to_review()
 class Moco2TrainSTL10Transforms:
     """Moco 2 augmentation:
 
@@ -106,7 +106,7 @@ class Moco2TrainSTL10Transforms:
         return q, k
 
 
-@experimental()
+@to_review()
 class Moco2EvalSTL10Transforms:
     """Moco 2 augmentation:
 
@@ -132,7 +132,7 @@ class Moco2EvalSTL10Transforms:
         return q, k
 
 
-@experimental()
+@to_review()
 class Moco2TrainImagenetTransforms:
     """Moco 2 augmentation:
 
@@ -162,7 +162,7 @@ class Moco2TrainImagenetTransforms:
         return q, k
 
 
-@experimental()
+@to_review()
 class Moco2EvalImagenetTransforms:
     """Moco 2 augmentation:
 
@@ -188,7 +188,7 @@ class Moco2EvalImagenetTransforms:
         return q, k
 
 
-@experimental()
+@to_review()
 class GaussianBlur:
     """Gaussian blur augmentation in SimCLR https://arxiv.org/abs/2002.05709."""
 

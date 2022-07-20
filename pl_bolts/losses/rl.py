@@ -6,10 +6,10 @@ import numpy as np
 import torch
 from torch import Tensor, nn
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 def dqn_loss(batch: Tuple[Tensor, Tensor], net: nn.Module, target_net: nn.Module, gamma: float = 0.99) -> Tensor:
     """Calculates the mse loss using a mini batch from the replay buffer.
 
@@ -38,7 +38,7 @@ def dqn_loss(batch: Tuple[Tensor, Tensor], net: nn.Module, target_net: nn.Module
     return nn.MSELoss()(state_action_values, expected_state_action_values)
 
 
-@experimental()
+@to_review()
 def double_dqn_loss(
     batch: Tuple[Tensor, Tensor],
     net: nn.Module,
@@ -84,7 +84,7 @@ def double_dqn_loss(
     return nn.MSELoss()(state_action_values, expected_state_action_values)
 
 
-@experimental()
+@to_review()
 def per_dqn_loss(
     batch: Tuple[Tensor, Tensor],
     batch_weights: List,

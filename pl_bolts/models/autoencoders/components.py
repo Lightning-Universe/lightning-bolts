@@ -2,10 +2,10 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 class Interpolate(nn.Module):
     """nn.Module wrapper for F.interpolate."""
 
@@ -17,19 +17,19 @@ class Interpolate(nn.Module):
         return F.interpolate(x, size=self.size, scale_factor=self.scale_factor)
 
 
-@experimental()
+@to_review()
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding."""
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
 
 
-@experimental()
+@to_review()
 def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution."""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
-@experimental()
+@to_review()
 def resize_conv3x3(in_planes, out_planes, scale=1):
     """upsample + 3x3 convolution with padding to avoid checkerboard artifact."""
     if scale == 1:
@@ -37,7 +37,7 @@ def resize_conv3x3(in_planes, out_planes, scale=1):
     return nn.Sequential(Interpolate(scale_factor=scale), conv3x3(in_planes, out_planes))
 
 
-@experimental()
+@to_review()
 def resize_conv1x1(in_planes, out_planes, scale=1):
     """upsample + 1x1 convolution with padding to avoid checkerboard artifact."""
     if scale == 1:
@@ -45,7 +45,7 @@ def resize_conv1x1(in_planes, out_planes, scale=1):
     return nn.Sequential(Interpolate(scale_factor=scale), conv1x1(in_planes, out_planes))
 
 
-@experimental()
+@to_review()
 class EncoderBlock(nn.Module):
     """ResNet block, copied from https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py#L35."""
 
@@ -79,7 +79,7 @@ class EncoderBlock(nn.Module):
         return out
 
 
-@experimental()
+@to_review()
 class EncoderBottleneck(nn.Module):
     """ResNet bottleneck, copied from
     https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py#L75."""
@@ -121,7 +121,7 @@ class EncoderBottleneck(nn.Module):
         return out
 
 
-@experimental()
+@to_review()
 class DecoderBlock(nn.Module):
     """ResNet block, but convs replaced with resize convs, and channel increase is in second conv, not first."""
 
@@ -155,7 +155,7 @@ class DecoderBlock(nn.Module):
         return out
 
 
-@experimental()
+@to_review()
 class DecoderBottleneck(nn.Module):
     """ResNet bottleneck, but convs replaced with resize convs."""
 
@@ -196,7 +196,7 @@ class DecoderBottleneck(nn.Module):
         return out
 
 
-@experimental()
+@to_review()
 class ResNetEncoder(nn.Module):
     def __init__(self, block, layers, first_conv=False, maxpool1=False):
         super().__init__()
@@ -256,7 +256,7 @@ class ResNetEncoder(nn.Module):
         return x
 
 
-@experimental()
+@to_review()
 class ResNetDecoder(nn.Module):
     """Resnet in reverse order."""
 
@@ -329,21 +329,21 @@ class ResNetDecoder(nn.Module):
         return x
 
 
-@experimental()
+@to_review()
 def resnet18_encoder(first_conv, maxpool1):
     return ResNetEncoder(EncoderBlock, [2, 2, 2, 2], first_conv, maxpool1)
 
 
-@experimental()
+@to_review()
 def resnet18_decoder(latent_dim, input_height, first_conv, maxpool1):
     return ResNetDecoder(DecoderBlock, [2, 2, 2, 2], latent_dim, input_height, first_conv, maxpool1)
 
 
-@experimental()
+@to_review()
 def resnet50_encoder(first_conv, maxpool1):
     return ResNetEncoder(EncoderBottleneck, [3, 4, 6, 3], first_conv, maxpool1)
 
 
-@experimental()
+@to_review()
 def resnet50_decoder(latent_dim, input_height, first_conv, maxpool1):
     return ResNetDecoder(DecoderBottleneck, [3, 4, 6, 3], latent_dim, input_height, first_conv, maxpool1)

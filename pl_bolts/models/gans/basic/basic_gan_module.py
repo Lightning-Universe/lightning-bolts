@@ -5,10 +5,10 @@ from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch.nn import functional as F
 
 from pl_bolts.models.gans.basic.components import Discriminator, Generator
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 class GAN(LightningModule):
     """Vanilla GAN implementation.
 
@@ -166,7 +166,7 @@ class GAN(LightningModule):
         return parser
 
 
-@experimental()
+@to_review()
 def cli_main(args=None):
     from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, MNISTDataModule, STL10DataModule

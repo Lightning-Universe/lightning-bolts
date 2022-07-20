@@ -23,10 +23,10 @@ if _SPARSEML_AVAILABLE:
     from sparseml.pytorch.optim import ScheduledModifierManager
     from sparseml.pytorch.utils import ModuleExporter
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 class SparseMLCallback(Callback):
     """Enables SparseML aware training. Requires a recipe to run during training.
 

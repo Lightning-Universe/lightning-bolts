@@ -3,10 +3,10 @@ from typing import Any
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 class TVTDataModule(LightningDataModule):
     """Simple DataModule creating train, val, and test dataloaders from given train, val, and test dataset.
 

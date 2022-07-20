@@ -5,7 +5,7 @@ from torch.utils.data import random_split
 from pl_bolts.datasets import CIFAR10Mixed, UnlabeledImagenet
 from pl_bolts.models.self_supervised.amdim import transforms as amdim_transforms
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -14,7 +14,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-@experimental()
+@to_review()
 class AMDIMPretraining:
     """For pretraining we use the train transform for both train and val."""
 
@@ -76,7 +76,7 @@ class AMDIMPretraining:
         return datasets[datamodule](dataset_root=data_dir, split=split, **kwargs)
 
 
-@experimental()
+@to_review()
 class AMDIMPatchesPretraining:
     """For pretraining we use the train transform for both train and val."""
 

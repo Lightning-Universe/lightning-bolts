@@ -1,10 +1,10 @@
 from torch import nn
 from torch.nn import functional as F
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 class CPCResNet(nn.Module):
     def __init__(
         self,
@@ -131,17 +131,17 @@ class CPCResNet(nn.Module):
         return x
 
 
-@experimental()
+@to_review()
 def cpc_resnet101(sample_batch, **kwargs):
     return CPCResNet(sample_batch, LNBottleneck, [3, 4, 46, 3], **kwargs)
 
 
-@experimental()
+@to_review()
 def cpc_resnet50(sample_batch, **kwargs):
     return CPCResNet(sample_batch, LNBottleneck, [3, 4, 6, 3], **kwargs)
 
 
-@experimental()
+@to_review()
 class LNBottleneck(nn.Module):
     def __init__(
         self,
@@ -207,7 +207,7 @@ class LNBottleneck(nn.Module):
         return out
 
 
-@experimental()
+@to_review()
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding."""
     return nn.Conv2d(
@@ -222,7 +222,7 @@ def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     )
 
 
-@experimental()
+@to_review()
 def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution."""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)

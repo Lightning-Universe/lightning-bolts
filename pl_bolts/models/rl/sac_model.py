@@ -16,7 +16,7 @@ from pl_bolts.models.rl.common.agents import SoftActorCriticAgent
 from pl_bolts.models.rl.common.memory import MultiStepBuffer
 from pl_bolts.models.rl.common.networks import MLP, ContinuousMLP
 from pl_bolts.utils import _GYM_AVAILABLE
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
@@ -26,7 +26,7 @@ else:  # pragma: no cover
     Env = object
 
 
-@experimental()
+@to_review()
 class SAC(LightningModule):
     def __init__(
         self,
@@ -386,7 +386,7 @@ class SAC(LightningModule):
         return arg_parser
 
 
-@experimental()
+@to_review()
 def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 

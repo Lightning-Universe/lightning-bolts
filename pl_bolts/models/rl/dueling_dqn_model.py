@@ -5,10 +5,10 @@ from pytorch_lightning import Trainer
 
 from pl_bolts.models.rl.common.networks import DuelingCNN
 from pl_bolts.models.rl.dqn_model import DQN
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 class DuelingDQN(DQN):
     """PyTorch Lightning implementation of `Dueling DQN <https://arxiv.org/abs/1511.06581>`_
 
@@ -38,7 +38,7 @@ class DuelingDQN(DQN):
         self.target_net = DuelingCNN(self.obs_shape, self.n_actions)
 
 
-@experimental()
+@to_review()
 def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 

@@ -12,10 +12,10 @@ from pl_bolts.callbacks import SRImageLoggerCallback
 from pl_bolts.datamodules import TVTDataModule
 from pl_bolts.datasets.utils import prepare_sr_datasets
 from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, SRGANGenerator, VGG19FeatureExtractor
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 class SRGAN(pl.LightningModule):
     """SRGAN implementation from the paper `Photo-Realistic Single Image Super-Resolution Using a Generative
     Adversarial Network <https://arxiv.org/abs/1609.04802>`__. It uses a pretrained SRResNet model as the generator
@@ -183,7 +183,7 @@ class SRGAN(pl.LightningModule):
         return parser
 
 
-@experimental()
+@to_review()
 def cli_main(args=None):
     pl.seed_everything(1234)
 

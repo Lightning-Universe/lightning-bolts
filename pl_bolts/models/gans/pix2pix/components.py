@@ -1,10 +1,10 @@
 import torch
 from torch import nn
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 class UpSampleConv(nn.Module):
     def __init__(
         self, in_channels, out_channels, kernel=4, strides=2, padding=1, activation=True, batchnorm=True, dropout=False
@@ -35,7 +35,7 @@ class UpSampleConv(nn.Module):
         return x
 
 
-@experimental()
+@to_review()
 class DownSampleConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel=4, strides=2, padding=1, activation=True, batchnorm=True):
         """Paper details:
@@ -65,7 +65,7 @@ class DownSampleConv(nn.Module):
         return x
 
 
-@experimental()
+@to_review()
 class Generator(nn.Module):
     def __init__(self, in_channels, out_channels):
         """Paper details:
@@ -127,7 +127,7 @@ class Generator(nn.Module):
         return self.tanh(x)
 
 
-@experimental()
+@to_review()
 class PatchGAN(nn.Module):
     def __init__(self, input_channels):
         super().__init__()

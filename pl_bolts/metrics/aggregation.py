@@ -1,15 +1,15 @@
 import torch
 
-from pl_bolts.utils.stability import experimental
+from pl_bolts.utils.stability import to_review
 
 
-@experimental()
+@to_review()
 def mean(res, key):
     # recursive mean for multilevel dicts
     return torch.stack([x[key] if isinstance(x, dict) else mean(x, key) for x in res]).mean()
 
 
-@experimental()
+@to_review()
 def accuracy(preds, labels):
     preds = preds.float()
     max_lgt = torch.max(preds, 1)[1]
@@ -20,7 +20,7 @@ def accuracy(preds, labels):
     return acc
 
 
-@experimental()
+@to_review()
 def precision_at_k(output, target, top_k=(1,)):
     """Computes the accuracy over the k top predictions for the specified values of k."""
     with torch.no_grad():
