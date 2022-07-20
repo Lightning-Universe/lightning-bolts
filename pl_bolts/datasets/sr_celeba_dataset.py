@@ -3,7 +3,7 @@ from typing import Any
 
 from pl_bolts.datasets.sr_dataset_mixin import SRDatasetMixin
 from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _PIL_AVAILABLE:
@@ -18,7 +18,7 @@ else:  # pragma: no cover
     CelebA = object
 
 
-@to_review()
+@under_review()
 class SRCelebA(SRDatasetMixin, CelebA):
     """CelebA dataset that can be used to train Super Resolution models.
 

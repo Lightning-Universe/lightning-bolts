@@ -5,7 +5,7 @@ from pytorch_lightning import Callback, LightningModule, Trainer
 from torch import Tensor, nn
 
 from pl_bolts.utils import _MATPLOTLIB_AVAILABLE
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _MATPLOTLIB_AVAILABLE:
@@ -18,7 +18,7 @@ else:  # pragma: no cover
     Figure = object
 
 
-@to_review()
+@under_review()
 class ConfusedLogitCallback(Callback):  # pragma: no cover
     """Takes the logit predictions of a model and when the probabilities of two classes are very close, the model
     doesn't have high certainty that it should pick one vs the other class.

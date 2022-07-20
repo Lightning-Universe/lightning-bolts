@@ -6,10 +6,10 @@ from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.utilities import rank_zero_info
 
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 class PrintTableMetricsCallback(Callback):
     """Prints a table with the metrics in columns on every epoch end.
 
@@ -44,7 +44,7 @@ class PrintTableMetricsCallback(Callback):
         rank_zero_info(dicts_to_table(self.metrics))
 
 
-@to_review()
+@under_review()
 def dicts_to_table(
     dicts: List[Dict],
     keys: Optional[List[str]] = None,

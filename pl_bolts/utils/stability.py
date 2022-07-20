@@ -19,7 +19,7 @@ from warnings import filterwarnings
 from pytorch_lightning.utilities import rank_zero_warn
 
 
-class ReviewNeededWarning(Warning):
+class UnderReviewWarning(Warning):
     pass
 
 
@@ -44,11 +44,11 @@ def _add_message_to_docstring(callable: Union[Callable, Type], message: str) -> 
 
 
 def _raise_review_warning(message: str, stacklevel: int = 6) -> None:
-    rank_zero_warn(_create_full_message(message), stacklevel=stacklevel, category=ReviewNeededWarning)
+    rank_zero_warn(_create_full_message(message), stacklevel=stacklevel, category=UnderReviewWarning)
 
 
-def to_review():
-    """The to_review decorator is used to indicate that a particular feature is not properly reviewed and tested yet.
+def under_review():
+    """The under_review decorator is used to indicate that a particular feature is not properly reviewed and tested yet.
     A callable or type that has been marked as to_review will give a ``ReviewNeededWarning`` when it is called or
     instantiated. This designation should be used following the description given in :ref:`stability`.
     Args:
@@ -56,12 +56,12 @@ def to_review():
     Examples
     ________
     >>> from pytest import warns
-    >>> from pl_bolts.utils.stability import to_review, ReviewNeededWarning
-    >>> @to_review()
+    >>> from pl_bolts.utils.stability import under_review, UnderReviewWarning
+    >>> @under_review()
     ... class MyExperimentalFeature:
     ...     pass
     ...
-    >>> with warns(ReviewNeededWarning, match="The feature MyExperimentalFeature is currently marked for review."):
+    >>> with warns(UnderReviewWarning, match="The feature MyExperimentalFeature is currently marked under review."):
     ...     MyExperimentalFeature()  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
     ...
     <...>
@@ -71,8 +71,8 @@ def to_review():
         if message_name is None:
             message_name = callable.__qualname__
 
-        message = f"The feature {message_name} is currently marked for review."
-        filterwarnings("once", message, ReviewNeededWarning)
+        message = f"The feature {message_name} is currently marked under review."
+        filterwarnings("once", message, UnderReviewWarning)
         if inspect.isclass(callable):
             if not hasattr(callable.__init__, "__wrapped__"):
                 callable.__init__ = decorator(callable.__init__, message_name=message_name)

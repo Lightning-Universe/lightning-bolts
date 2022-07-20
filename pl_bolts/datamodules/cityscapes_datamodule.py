@@ -4,7 +4,7 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -14,7 +14,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-@to_review()
+@under_review()
 class CityscapesDataModule(LightningDataModule):
     """
     .. figure:: https://www.cityscapes-dataset.com/wordpress/wp-content/uploads/2015/07/muenster00-1024x510.png

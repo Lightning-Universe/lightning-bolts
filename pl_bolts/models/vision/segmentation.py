@@ -5,10 +5,10 @@ from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch.nn import functional as F
 
 from pl_bolts.models.vision.unet import UNet
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 class SemSegment(LightningModule):
     def __init__(
         self,
@@ -92,7 +92,7 @@ class SemSegment(LightningModule):
         return parser
 
 
-@to_review()
+@under_review()
 def cli_main():
     from pl_bolts.datamodules import KittiDataModule
 

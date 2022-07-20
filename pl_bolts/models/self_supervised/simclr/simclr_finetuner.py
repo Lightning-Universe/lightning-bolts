@@ -11,10 +11,10 @@ from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization,
     stl10_normalization,
 )
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 def cli_main():  # pragma: no cover
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
 

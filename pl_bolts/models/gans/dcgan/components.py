@@ -1,10 +1,10 @@
 # Based on https://github.com/pytorch/examples/blob/master/dcgan/main.py
 from torch import Tensor, nn
 
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 class DCGANGenerator(nn.Module):
     def __init__(self, latent_dim: int, feature_maps: int, image_channels: int) -> None:
         """
@@ -50,7 +50,7 @@ class DCGANGenerator(nn.Module):
         return self.gen(noise)
 
 
-@to_review()
+@under_review()
 class DCGANDiscriminator(nn.Module):
     def __init__(self, feature_maps: int, image_channels: int) -> None:
         """

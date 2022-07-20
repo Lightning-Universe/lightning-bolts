@@ -6,10 +6,10 @@ References:
 import torch
 from torch.optim.optimizer import Optimizer, required
 
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 class LARS(Optimizer):
     """Extends SGD in PyTorch with LARS scaling from the paper
     `Large batch training of Convolutional Networks <https://arxiv.org/pdf/1708.03888.pdf>`_.

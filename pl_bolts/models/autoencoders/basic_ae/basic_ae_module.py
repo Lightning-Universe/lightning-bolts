@@ -13,10 +13,10 @@ from pl_bolts.models.autoencoders.components import (
     resnet50_decoder,
     resnet50_encoder,
 )
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 class AE(LightningModule):
     """Standard AE.
 
@@ -152,7 +152,7 @@ class AE(LightningModule):
         return parser
 
 
-@to_review()
+@under_review()
 def cli_main(args=None):
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
 

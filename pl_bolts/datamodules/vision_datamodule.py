@@ -6,10 +6,10 @@ import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, random_split
 
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 class VisionDataModule(LightningDataModule):
 
     EXTRA_ARGS: dict = {}

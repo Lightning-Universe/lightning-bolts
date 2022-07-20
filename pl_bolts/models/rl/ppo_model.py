@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.models.rl.common.networks import MLP, ActorCategorical, ActorContinous
 from pl_bolts.utils import _GYM_AVAILABLE
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
@@ -19,7 +19,7 @@ else:  # pragma: no cover
     warn_missing_pkg("gym")
 
 
-@to_review()
+@under_review()
 class PPO(LightningModule):
     """PyTorch Lightning implementation of `Proximal Policy Optimization.
 
@@ -358,7 +358,7 @@ class PPO(LightningModule):
         return parser
 
 
-@to_review()
+@under_review()
 def cli_main() -> None:
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = Trainer.add_argparse_args(parent_parser)
