@@ -10,13 +10,14 @@
 # owners
 /.github/CODEOWNERS   @borda @ethanwharris
 # main
-/README.md            @borda @ananyahjha93
+/README.md            @borda
 # installation
 /setup.py             @borda @ethanwharris
 
 # CI/CD
-/.github/workflows/   @borda @ethanwharris
-# configs in root
+/.github/workflows/   @borda @ethanwharris @akihironitta
+/.github/*.yml        @borda @ethanwharris @akihironitta
+/.azure/              @borda @ethanwharris
 /*.yml                @borda @ethanwharris
 
 # Docs
