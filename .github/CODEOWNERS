@@ -21,7 +21,7 @@
 /*.yml                @borda @ethanwharris
 
 # Docs
-/docs/                          @edenlightning @borda @ananyahjha93
+/docs/                          @edenlightning @borda
 /.github/*.md                   @edenlightning @borda
 /.github/ISSUE_TEMPLATE/*.md    @edenlightning @borda
 /docs/source/conf.py            @borda @akihironitta
