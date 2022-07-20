@@ -2,7 +2,7 @@ import numpy as np
 from torch.nn import functional as F
 
 from pl_bolts.utils import _PIL_AVAILABLE
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _PIL_AVAILABLE:
@@ -11,7 +11,7 @@ else:  # pragma: no cover
     warn_missing_pkg("PIL", pypi_name="Pillow")
 
 
-@to_review()
+@under_review()
 class RandomTranslateWithReflect:
     """Translate image randomly Translate vertically and horizontally by n pixels where n is integer drawn
     uniformly independently for each axis from [-max_translation, max_translation].
@@ -55,7 +55,7 @@ class RandomTranslateWithReflect:
         return new_image
 
 
-@to_review()
+@under_review()
 class Patchify:
     def __init__(self, patch_size, overlap_size):
         self.patch_size = patch_size

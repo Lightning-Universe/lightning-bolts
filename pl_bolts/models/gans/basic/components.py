@@ -3,10 +3,10 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 class Generator(nn.Module):
     def __init__(self, latent_dim, img_shape, hidden_dim=256):
         super().__init__()
@@ -27,7 +27,7 @@ class Generator(nn.Module):
         return img
 
 
-@to_review()
+@under_review()
 class Discriminator(nn.Module):
     def __init__(self, img_shape, hidden_dim=1024):
         super().__init__()

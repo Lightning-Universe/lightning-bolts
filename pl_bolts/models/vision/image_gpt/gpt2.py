@@ -2,10 +2,10 @@ import torch
 from pytorch_lightning import LightningModule
 from torch import nn
 
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 class Block(nn.Module):
     def __init__(self, embed_dim, heads):
         super().__init__()
@@ -30,7 +30,7 @@ class Block(nn.Module):
         return x
 
 
-@to_review()
+@under_review()
 class GPT2(LightningModule):
     """GPT-2 from `language Models are Unsupervised Multitask Learners <https://d4mucfpksywv.cloudfront.net/
     better-language-models/language-models.pdf>`_

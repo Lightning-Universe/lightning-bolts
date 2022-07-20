@@ -8,10 +8,10 @@ from urllib.error import HTTPError
 from torch import Tensor
 from torch.utils.data import Dataset
 
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 class LightDataset(ABC, Dataset):
 
     data: Tensor

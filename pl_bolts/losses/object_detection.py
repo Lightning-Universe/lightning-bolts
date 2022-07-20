@@ -3,10 +3,10 @@
 from torch import Tensor
 
 from pl_bolts.metrics.object_detection import giou, iou
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 def iou_loss(preds: Tensor, target: Tensor) -> Tensor:
     """Calculates the intersection over union loss.
 
@@ -30,7 +30,7 @@ def iou_loss(preds: Tensor, target: Tensor) -> Tensor:
     return loss
 
 
-@to_review()
+@under_review()
 def giou_loss(preds: Tensor, target: Tensor) -> Tensor:
     """Calculates the generalized intersection over union loss.
 

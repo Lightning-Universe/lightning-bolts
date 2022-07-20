@@ -1,10 +1,10 @@
 """Distributions used in some continuous RL algorithms."""
 import torch
 
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 class TanhMultivariateNormal(torch.distributions.MultivariateNormal):
     """The distribution of X is an affine of tanh applied on a normal distribution.
 

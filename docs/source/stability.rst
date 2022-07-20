@@ -19,8 +19,8 @@ For stable features, all of the following are true:
 - if anything does change, incorrect usage will give a deprecation warning for **one minor release** before the breaking change is made
 - the API has been tested for compatibility with latest releases of PyTorch Lightning and Flash
 
-To Review
-_________
+Under Review
+____________
 
 For features to be reviewed, any or all of the following may be true:
 

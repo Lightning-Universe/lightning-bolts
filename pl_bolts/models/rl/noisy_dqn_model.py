@@ -9,10 +9,10 @@ from torch import Tensor
 from pl_bolts.datamodules.experience_source import Experience
 from pl_bolts.models.rl.common.networks import NoisyCNN
 from pl_bolts.models.rl.dqn_model import DQN
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 class NoisyDQN(DQN):
     """PyTorch Lightning implementation of `Noisy DQN <https://arxiv.org/abs/1706.10295>`_
 
@@ -91,7 +91,7 @@ class NoisyDQN(DQN):
                 break
 
 
-@to_review()
+@under_review()
 def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 

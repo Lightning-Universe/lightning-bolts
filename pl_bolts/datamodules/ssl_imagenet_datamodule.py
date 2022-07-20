@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from pl_bolts.datasets import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -16,7 +16,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-@to_review()
+@under_review()
 class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
 
     name = "imagenet"

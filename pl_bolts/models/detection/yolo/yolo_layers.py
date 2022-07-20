@@ -5,7 +5,7 @@ from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor, nn
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -21,7 +21,7 @@ else:
     warn_missing_pkg("torchvision")
 
 
-@to_review()
+@under_review()
 def _corner_coordinates(xy: Tensor, wh: Tensor) -> Tensor:
     """Converts box center points and sizes to corner coordinates.
 
@@ -38,7 +38,7 @@ def _corner_coordinates(xy: Tensor, wh: Tensor) -> Tensor:
     return torch.cat((top_left, bottom_right), -1)
 
 
-@to_review()
+@under_review()
 def _aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
     """Calculates a matrix of intersections over union from box dimensions, assuming that the boxes are located at
     the same coordinates.
@@ -61,7 +61,7 @@ def _aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
     return inter / union
 
 
-@to_review()
+@under_review()
 class SELoss(nn.MSELoss):
     def __init__(self):
         super().__init__(reduction="none")
@@ -70,13 +70,13 @@ class SELoss(nn.MSELoss):
         return super().forward(inputs, target).sum(1)
 
 
-@to_review()
+@under_review()
 class IoULoss(nn.Module):
     def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
         return 1.0 - box_iou(inputs, target).diagonal()
 
 
-@to_review()
+@under_review()
 class GIoULoss(nn.Module):
     def __init__(self) -> None:
         super().__init__()
@@ -89,7 +89,7 @@ class GIoULoss(nn.Module):
         return 1.0 - generalized_box_iou(inputs, target).diagonal()
 
 
-@to_review()
+@under_review()
 class DetectionLayer(nn.Module):
     """A YOLO detection layer.
 
@@ -468,7 +468,7 @@ class DetectionLayer(nn.Module):
         return losses, hits
 
 
-@to_review()
+@under_review()
 class Mish(nn.Module):
     """Mish activation."""
 
@@ -476,7 +476,7 @@ class Mish(nn.Module):
         return x * torch.tanh(nn.functional.softplus(x))
 
 
-@to_review()
+@under_review()
 class RouteLayer(nn.Module):
     """Route layer concatenates the output (or part of it) from given layers."""
 
@@ -497,7 +497,7 @@ class RouteLayer(nn.Module):
         return torch.cat(chunks, dim=1)
 
 
-@to_review()
+@under_review()
 class ShortcutLayer(nn.Module):
     """Shortcut layer adds a residual connection from the source layer."""
 

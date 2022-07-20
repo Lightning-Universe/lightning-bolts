@@ -9,10 +9,10 @@ from torch import Tensor
 from torch._six import string_classes
 from torch.utils.data import DataLoader, Dataset
 
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 class AsynchronousLoader:
     """Class for asynchronously loading from CPU memory to device memory with DataLoader.
 

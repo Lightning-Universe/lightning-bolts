@@ -6,10 +6,10 @@ import torch.nn as nn
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
 from pl_bolts.models.detection.yolo import yolo_layers
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 
 
-@to_review()
+@under_review()
 class YOLOConfiguration:
     """This class can be used to parse the configuration files of the Darknet YOLOv4 implementation.
 
@@ -149,7 +149,7 @@ class YOLOConfiguration:
         return sections
 
 
-@to_review()
+@under_review()
 def _create_layer(config: dict, num_inputs: List[int]) -> Tuple[nn.Module, int]:
     """Calls one of the ``_create_<layertype>(config, num_inputs)`` functions to create a PyTorch module from the
     layer config.
@@ -173,7 +173,7 @@ def _create_layer(config: dict, num_inputs: List[int]) -> Tuple[nn.Module, int]:
     return create_func[config["type"]](config, num_inputs)
 
 
-@to_review()
+@under_review()
 def _create_convolutional(config, num_inputs):
     module = nn.Sequential()
 
@@ -210,14 +210,14 @@ def _create_convolutional(config, num_inputs):
     return module, config["filters"]
 
 
-@to_review()
+@under_review()
 def _create_maxpool(config, num_inputs):
     padding = (config["size"] - 1) // 2
     module = nn.MaxPool2d(config["size"], config["stride"], padding)
     return module, num_inputs[-1]
 
 
-@to_review()
+@under_review()
 def _create_route(config, num_inputs):
     num_chunks = config.get("groups", 1)
     chunk_idx = config.get("group_id", 0)
@@ -234,19 +234,19 @@ def _create_route(config, num_inputs):
     return module, num_outputs
 
 
-@to_review()
+@under_review()
 def _create_shortcut(config, num_inputs):
     module = yolo_layers.ShortcutLayer(config["from"])
     return module, num_inputs[-1]
 
 
-@to_review()
+@under_review()
 def _create_upsample(config, num_inputs):
     module = nn.Upsample(scale_factor=config["stride"], mode="nearest")
     return module, num_inputs[-1]
 
 
-@to_review()
+@under_review()
 def _create_yolo(config, num_inputs):
     # The "anchors" list alternates width and height.
     anchor_dims = config["anchors"]

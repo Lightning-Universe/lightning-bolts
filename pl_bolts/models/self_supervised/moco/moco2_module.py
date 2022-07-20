@@ -27,7 +27,7 @@ from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainSTL10Transforms,
 )
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import to_review
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -36,7 +36,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-@to_review()
+@under_review()
 class Moco_v2(LightningModule):
     """PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
 
@@ -343,7 +343,7 @@ class Moco_v2(LightningModule):
 
 # utils
 @torch.no_grad()
-@to_review()
+@under_review()
 def concat_all_gather(tensor):
     """Performs all_gather operation on the provided tensors.
 
@@ -356,7 +356,7 @@ def concat_all_gather(tensor):
     return output
 
 
-@to_review()
+@under_review()
 def cli_main():
     from pl_bolts.datamodules import CIFAR10DataModule, SSLImagenetDataModule, STL10DataModule
 
