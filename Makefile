@@ -26,7 +26,7 @@ doctest: clean env
 	SPHINX_MOCK_REQUIREMENTS=0 make -C docs doctest
 
 docs: clean
-	pip install --quiet -r docs/requirements.txt
+	pip install --quiet -r requirements/docs.txt
 	python -m sphinx -b html -W docs/source docs/build
 
 env:
