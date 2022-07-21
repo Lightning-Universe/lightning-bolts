@@ -18,11 +18,10 @@ jobs:
     uses: Lightning-AI/devtools/.github/workflows/check-schema.yml@main
 
   check-package:
-    uses: Lightning-AI/devtools/.github/workflows/check-package.yml@ci/parameterize  # FIXME: Update to main branch or tag
+    uses: Lightning-AI/devtools/.github/workflows/check-package.yml@main
     with:
       import-name: "pl_bolts"
       pypi-name: "lightning-bolts"
 
-  # TODO: Enable doctest and build
-  # check-docs:
-  #   uses: Lightning-AI/devtools/.github/workflows/check-docs.yml@main
+  check-docs:
+    uses: Lightning-AI/devtools/.github/workflows/check-docs.yml@main
