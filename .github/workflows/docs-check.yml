@@ -1,10 +1,10 @@
 name: "Docs check"
-# https://github.com/marketplace/actions/sphinx-build
 
-on:  # Trigger the workflow on push or pull request, but only for the master branch
-  push: {}
+on:
+  push:
+    branches: [master, "release/*"]
   pull_request:
-    branches: [master]
+    branches: [master, "release/*"]
 
 jobs:
   test-docs:
