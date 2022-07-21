@@ -24,4 +24,4 @@ jobs:
       pypi-name: "lightning-bolts"
 
   check-docs:
-    uses: Lightning-AI/devtools/.github/workflows/check-docs.yml@main
+    uses: Lightning-AI/devtools/.github/workflows/check-docs.yml@ci/update-docs  # FIXME
