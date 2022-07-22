@@ -49,7 +49,7 @@ def _raise_review_warning(message: str, stacklevel: int = 6) -> None:
 
 def under_review():
     """The under_review decorator is used to indicate that a particular feature is not properly reviewed and tested yet.
-    A callable or type that has been marked as to_review will give a ``ReviewNeededWarning`` when it is called or
+    A callable or type that has been marked as under_review will give a ``UnderReviewWarning`` when it is called or
     instantiated. This designation should be used following the description given in :ref:`stability`.
     Args:
         message: The message to include in the warning.
@@ -67,23 +67,28 @@ def under_review():
     <...>
     """
 
-    def decorator(callable: Union[Callable, Type], message_name: Optional[str] = None):
-        if message_name is None:
-            message_name = callable.__qualname__
+    def decorator(cls_or_callable: Union[Callable, Type], feature_name: Optional[str] = None, was_class: bool = False):
+        if feature_name is None:
+            feature_name = cls_or_callable.__qualname__
 
-        message = f"The feature {message_name} is currently marked under review."
+        message = f"The feature {feature_name} is currently marked under review."
         filterwarnings("once", message, UnderReviewWarning)
-        if inspect.isclass(callable):
-            if not hasattr(callable.__init__, "__wrapped__"):
-                callable.__init__ = decorator(callable.__init__, message_name=message_name)
-                return _add_message_to_docstring(callable, message)
-            return callable
 
-        @functools.wraps(callable)
+        if inspect.isclass(cls_or_callable):
+            cls_or_callable.__init__ = decorator(
+                cls_or_callable.__init__, feature_name=cls_or_callable.__qualname__, was_class=True
+            )
+            cls_or_callable.__doc__ = _create_docstring_message(cls_or_callable.__doc__, message)
+            return cls_or_callable
+
+        @functools.wraps(cls_or_callable)
         def wrapper(*args, **kwargs):
             _raise_review_warning(message)
-            return callable(*args, **kwargs)
+            return cls_or_callable(*args, **kwargs)
 
-        return _add_message_to_docstring(wrapper, message)
+        if not was_class:
+            wrapper.__doc__ = _create_docstring_message(cls_or_callable.__doc__, message)
+
+        return wrapper
 
     return decorator
