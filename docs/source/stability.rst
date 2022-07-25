@@ -6,7 +6,7 @@ Bolts stability
 Currently we are going through major revision of Bolts to ensure all of the code is stable and compatible with the rest of the Lightning ecosystem.
 For this reason, all of our features are either marked as stable or in need of review. Stable features are implicit, features to be reviewed are explicitly marked.
 
-At the beginning of the aforementioned revision, **ALL** of the features currently in the project have been marked as to be reviewed and will undergo rigorous review and testing before they can be marked as stable.
+At the beginning of the aforementioned revision, **ALL** of the features currently in the project have been marked as to be reviewed and will undergo rigorous review and testing before they can be marked as stable. See `this GitHub issue <https://github.com/Lightning-AI/lightning-bolts/issues/819>`_ to check progress of the revision
 
 This document is intended to help you know what to expect and to outline our commitment to stability.
 

@@ -34,8 +34,7 @@ jobs:
       fail-fast: false
       # max-parallel: 6
       matrix:
-        # Bolts tests are failing on windows, it is necessary to debug them
-        os: [ubuntu-20.04, macOS-11] # , windows-2019
+        os: [ubuntu-20.04, macOS-11, windows-2019]
         python-version: [3.8]
 
     steps:
