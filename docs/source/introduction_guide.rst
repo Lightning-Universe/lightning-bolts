@@ -12,7 +12,7 @@ Bolts is a Deep learning research and production toolbox of:
 
 **The Main goal of Bolts is to enable trying new ideas as fast as possible!**
 
-.. note:: Currently, Bolts is going through a major revision. For more information about it, see `this GitHub issue <https://github.com/Lightning-AI/lightning-bolts/issues/819>`_ and `stability section <https://lightning-bolts.readthedocs.io/en/latest/stability.html>`_
+.. note:: Currently, Bolts is going through a major revision. For more information about it, see these GitHub issues (`#819 <https://github.com/Lightning-AI/lightning-bolts/issues/819>`_ and `#839 <https://github.com/Lightning-AI/lightning-bolts/issues/839>`_) and `stability section <https://lightning-bolts.readthedocs.io/en/latest/stability.html>`_
 
 All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, GPUs and 16-bit precision.
 
