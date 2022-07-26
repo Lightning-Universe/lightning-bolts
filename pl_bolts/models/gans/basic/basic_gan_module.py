@@ -6,7 +6,6 @@ from pytorch_lightning.callbacks.progress import TQDMProgressBar
 from torch.nn import functional as F
 
 from pl_bolts.models.gans.basic.components import Discriminator, Generator
-from pl_bolts.utils.stability import under_review
 
 
 class GAN(LightningModule):
