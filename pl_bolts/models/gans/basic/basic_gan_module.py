@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from weakref import ref
 
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
@@ -193,7 +192,8 @@ def cli_main(args=None):
 
     dm = dm_cls.from_argparse_args(args)
     model = GAN(*dm.size(), **vars(args))
-    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(interpolate_epoch_interval=5), TQDMProgressBar(refresh_rate=20)]
+    callbacks = [TensorboardGenerativeModelImageSampler(), LatentDimInterpolator(
+        interpolate_epoch_interval=5), TQDMProgressBar(refresh_rate=20)]
     trainer = Trainer.from_argparse_args(args, callbacks=callbacks)
     trainer.fit(model, datamodule=dm)
     return dm, model, trainer
