@@ -1,6 +1,6 @@
 import pytest
-from pytorch_lightning import Trainer, seed_everything
 import torch
+from pytorch_lightning import Trainer, seed_everything
 from torch.utils.data.dataloader import DataLoader
 from torchvision import transforms as transform_lib
 

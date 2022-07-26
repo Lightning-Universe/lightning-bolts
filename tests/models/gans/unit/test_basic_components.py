@@ -8,12 +8,8 @@ from pl_bolts.models.gans.basic.components import Discriminator, Generator
 @pytest.mark.parametrize(
     "latent_dim, img_shape",
     [
-        pytest.param(
-            100, (3, 28, 28), id="100-multichannel"
-        ),
-        pytest.param(
-            100, (1, 28, 28), id="100-singlechannel"
-        ),
+        pytest.param(100, (3, 28, 28), id="100-multichannel"),
+        pytest.param(100, (1, 28, 28), id="100-singlechannel"),
     ],
 )
 def test_generator(latent_dim, img_shape):
