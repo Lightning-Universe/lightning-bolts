@@ -24,12 +24,8 @@ def test_generator(latent_dim, img_shape):
 @pytest.mark.parametrize(
     "img_shape",
     [
-        pytest.param(
-            (3, 28, 28), id="discriminator-multichannel"
-        ),
-        pytest.param(
-            (1, 28, 28), id="discriminator-singlechannel"
-        ),
+        pytest.param((3, 28, 28), id="discriminator-multichannel"),
+        pytest.param((1, 28, 28), id="discriminator-singlechannel"),
     ],
 )
 def test_discriminator(img_shape):
