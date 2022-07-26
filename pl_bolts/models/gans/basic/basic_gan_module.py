@@ -10,7 +10,6 @@ from pl_bolts.models.gans.basic.components import Discriminator, Generator
 from pl_bolts.utils.stability import under_review
 
 
-@under_review()
 class GAN(LightningModule):
     """Vanilla GAN implementation.
 

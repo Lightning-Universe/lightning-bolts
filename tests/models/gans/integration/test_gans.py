@@ -1,9 +1,10 @@
 import pytest
 from pytorch_lightning import Trainer, seed_everything
+import torch
 from torch.utils.data.dataloader import DataLoader
 from torchvision import transforms as transform_lib
 
-from pl_bolts.datamodules import CIFAR10DataModule, MNISTDataModule
+from pl_bolts.datamodules import CIFAR10DataModule, MNISTDataModule, STL10DataModule
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 from pl_bolts.models.gans import DCGAN, GAN, SRGAN, SRResNet
 
@@ -13,6 +14,7 @@ from pl_bolts.models.gans import DCGAN, GAN, SRGAN, SRResNet
     [
         pytest.param(MNISTDataModule, id="mnist"),
         pytest.param(CIFAR10DataModule, id="cifar10"),
+        pytest.param(STL10DataModule, id="stl10"),
     ],
 )
 def test_gan(tmpdir, datadir, dm_cls):
