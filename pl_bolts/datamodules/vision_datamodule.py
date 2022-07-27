@@ -6,10 +6,7 @@ import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, random_split
 
-from pl_bolts.utils.stability import under_review
 
-
-@under_review()
 class VisionDataModule(LightningDataModule):
 
     EXTRA_ARGS: dict = {}
@@ -61,9 +58,6 @@ class VisionDataModule(LightningDataModule):
         self.shuffle = shuffle
         self.pin_memory = pin_memory
         self.drop_last = drop_last
-        self._train_transforms = train_transforms
-        self._val_transforms = val_transforms
-        self._test_transforms = test_transforms
 
     @property
     def train_transforms(self) -> Callable:

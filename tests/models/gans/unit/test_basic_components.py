@@ -12,7 +12,7 @@ from pl_bolts.models.gans.basic.components import Discriminator, Generator
         pytest.param(100, (1, 28, 28), id="100-singlechannel"),
     ],
 )
-def test_generator(latent_dim, img_shape):
+def test_generator(catch_warnings, latent_dim, img_shape):
     batch_dim = 10
     seed_everything()
     generator = Generator(latent_dim=latent_dim, img_shape=img_shape)
@@ -28,7 +28,7 @@ def test_generator(latent_dim, img_shape):
         pytest.param((1, 28, 28), id="discriminator-singlechannel"),
     ],
 )
-def test_discriminator(img_shape):
+def test_discriminator(catch_warnings, img_shape):
     batch_dim = 10
     seed_everything()
     discriminator = Discriminator(img_shape=img_shape)
