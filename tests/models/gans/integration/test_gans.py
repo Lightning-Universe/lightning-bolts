@@ -30,7 +30,9 @@ def test_gan(tmpdir, datadir, catch_warnings, dm_cls):
     seed_everything(1234)
     dm = dm_cls(data_dir=datadir, num_workers=0)
     model = GAN(*dm.dims)
-    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, max_epochs=-1, accelerator="gpu", log_every_n_steps=1)
+    trainer = Trainer(
+        fast_dev_run=True, default_root_dir=tmpdir, max_epochs=-1, accelerator="auto", log_every_n_steps=1
+    )
     trainer.fit(model, datamodule=dm)
 
 
