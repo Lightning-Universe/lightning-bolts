@@ -63,7 +63,7 @@ class VisionDataModule(LightningDataModule):
         self._test_transforms = test_transforms
 
     @property
-    def train_transforms(self) -> Callable:
+    def train_transforms(self) -> Optional[Callable[..., Any]]:
         """Optional transforms (or collection of transforms) you can apply to train dataset."""
         return self._train_transforms
 
@@ -72,7 +72,7 @@ class VisionDataModule(LightningDataModule):
         self._train_transforms = t
 
     @property
-    def val_transforms(self) -> Callable:
+    def val_transforms(self) -> Optional[Callable[..., Any]]:
         """Optional transforms (or collection of transforms) you can apply to validation dataset."""
         return self._val_transforms
 
@@ -81,7 +81,7 @@ class VisionDataModule(LightningDataModule):
         self._val_transforms = t
 
     @property
-    def test_transforms(self) -> Callable:
+    def test_transforms(self) -> Optional[Callable[..., Any]]:
         """Optional transforms (or collection of transforms) you can apply to test dataset."""
         return self._test_transforms
 
