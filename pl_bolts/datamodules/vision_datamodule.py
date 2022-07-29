@@ -58,6 +58,9 @@ class VisionDataModule(LightningDataModule):
         self.shuffle = shuffle
         self.pin_memory = pin_memory
         self.drop_last = drop_last
+        self._train_transforms = train_transforms
+        self._val_transforms = val_transforms
+        self._test_transforms = test_transforms
 
     @property
     def train_transforms(self) -> Callable:
@@ -65,25 +68,25 @@ class VisionDataModule(LightningDataModule):
         return self._train_transforms
 
     @train_transforms.setter
-    def train_transforms(self, t) -> None:
+    def train_transforms(self, t: Callable) -> None:
         self._train_transforms = t
 
     @property
-    def val_transforms(self):
+    def val_transforms(self) -> Callable:
         """Optional transforms (or collection of transforms) you can apply to validation dataset."""
         return self._val_transforms
 
     @val_transforms.setter
-    def val_transforms(self, t):
+    def val_transforms(self, t: Callable) -> None:
         self._val_transforms = t
 
     @property
-    def test_transforms(self):
+    def test_transforms(self) -> Callable:
         """Optional transforms (or collection of transforms) you can apply to test dataset."""
         return self._test_transforms
 
     @test_transforms.setter
-    def test_transforms(self, t):
+    def test_transforms(self, t: Callable) -> None:
         self._test_transforms = t
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
