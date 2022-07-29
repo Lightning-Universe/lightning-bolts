@@ -1,5 +1,8 @@
+import warnings
+
 import pytest
 from pytorch_lightning import Trainer, seed_everything
+from pytorch_lightning.utilities.warnings import PossibleUserWarning
 from torch.utils.data.dataloader import DataLoader
 from torchvision import transforms as transform_lib
 
@@ -10,17 +13,26 @@ from pl_bolts.models.gans import DCGAN, GAN, SRGAN, SRResNet
 
 @pytest.mark.parametrize(
     "dm_cls",
-    [
-        pytest.param(MNISTDataModule, id="mnist"),
-        pytest.param(CIFAR10DataModule, id="cifar10"),
-    ],
+    [pytest.param(MNISTDataModule, id="mnist"), pytest.param(CIFAR10DataModule, id="cifar10")],
 )
-def test_gan(tmpdir, datadir, dm_cls):
-    seed_everything()
-
+def test_gan(tmpdir, datadir, catch_warnings, dm_cls):
+    # Validation loop for GANs is not well defined!
+    warnings.filterwarnings(
+        "ignore",
+        message="You passed in a `val_dataloader` but have no `validation_step`. Skipping val loop.",
+        category=UserWarning,
+    )
+    warnings.filterwarnings(
+        "ignore",
+        message="The dataloader, train_dataloader, does not have many workers which may be a bottleneck",
+        category=PossibleUserWarning,
+    )
+    seed_everything(1234)
     dm = dm_cls(data_dir=datadir, num_workers=0)
-    model = GAN(*dm.size())
-    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    model = GAN(*dm.dims)
+    trainer = Trainer(
+        fast_dev_run=True, default_root_dir=tmpdir, max_epochs=-1, accelerator="auto", log_every_n_steps=1
+    )
     trainer.fit(model, datamodule=dm)
 
 
