@@ -3,7 +3,7 @@ from pytorch_lightning import Trainer, seed_everything
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import MNISTDataModule
-from pl_bolts.datamodules.sklearn_datamodule import SklearnDataset
+from pl_bolts.datasets import ArrayDataset
 from pl_bolts.models.regression import LinearRegression, LogisticRegression
 
 
@@ -16,7 +16,7 @@ def test_linear_regression_model(tmpdir):
     X = np.array([[1.0, 1], [1, 2], [2, 2], [2, 3], [3, 3], [3, 4], [4, 4], [4, 5]])
     y = np.dot(X, np.array([1.0, 2])) + 3
     y = y[:, np.newaxis]
-    loader = DataLoader(SklearnDataset(X, y), batch_size=2)
+    loader = DataLoader(ArrayDataset(X, y), batch_size=2)
 
     model = LinearRegression(input_dim=2, learning_rate=0.5)
     trainer = Trainer(

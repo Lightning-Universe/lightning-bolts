@@ -1,5 +1,6 @@
 import urllib
 
+from pl_bolts.datasets.array_dataset import ArrayDataset
 from pl_bolts.datasets.base_dataset import LightDataset
 from pl_bolts.datasets.cifar10_dataset import CIFAR10, TrialCIFAR10
 from pl_bolts.datasets.concat_dataset import ConcatDataset
@@ -35,6 +36,7 @@ __all__ = [
     "CIFAR10Mixed",
     "SSLDatasetMixin",
     "BinaryEMNIST",
+    "ArrayDataset",
 ]
 
 # TorchVision hotfix https://github.com/pytorch/vision/issues/1938
