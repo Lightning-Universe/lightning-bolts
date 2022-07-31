@@ -20,7 +20,6 @@ else:  # pragma: no cover
     warn_missing_pkg("wandb")
 
 
-@under_review()
 class DataMonitorBase(Callback):
 
     supported_loggers = (
@@ -105,13 +104,11 @@ class DataMonitorBase(Callback):
         if not isinstance(logger, self.supported_loggers):
             rank_zero_warn(
                 f"{self.__class__.__name__} does not support logging with {logger.__class__.__name__}."
-                f" Supported loggers are: {', '.join(map(lambda x: str(x.__name__), self.supported_loggers))}"
-            )
+                f" Supported loggers are: {', '.join(map(lambda x: str(x.__name__), self.supported_loggers))}")
             available = False
         return available
 
 
-@under_review()
 class ModuleDataMonitor(DataMonitorBase):
 
     GROUP_NAME_INPUT = "input"
@@ -120,9 +117,9 @@ class ModuleDataMonitor(DataMonitorBase):
     def __init__(
         self,
         submodules: Optional[Union[bool, List[str]]] = None,
-        log_every_n_steps: int = None,
+        log_every_n_steps: Optional[int] = None,
     ):
-        """
+        """Logs the in- and output histogram of submodules.
         Args:
             submodules: If `True`, logs the in- and output histograms of every submodule in the
                 LightningModule, including the root module itself.
@@ -157,13 +154,10 @@ class ModuleDataMonitor(DataMonitorBase):
     def on_train_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
         super().on_train_start(trainer, pl_module)
         submodule_dict = dict(pl_module.named_modules())
-        self._hook_handles = []
-        for name in self._get_submodule_names(pl_module):
+        for name in self._get_submodule_names(submodule_dict):
             if name not in submodule_dict:
-                rank_zero_warn(
-                    f"{name} is not a valid identifier for a submodule in {pl_module.__class__.__name__},"
-                    " skipping this key."
-                )
+                rank_zero_warn(f"{name} is not a valid identifier for a submodule in {pl_module.__class__.__name__},"
+                               " skipping this key.")
                 continue
             handle = self._register_hook(name, submodule_dict[name])
             self._hook_handles.append(handle)
@@ -172,7 +166,7 @@ class ModuleDataMonitor(DataMonitorBase):
         for handle in self._hook_handles:
             handle.remove()
 
-    def _get_submodule_names(self, root_module: nn.Module) -> List[str]:
+    def _get_submodule_names(self, named_modules: dict) -> List[str]:
         # default is the root module only
         names = [""]
 
@@ -180,7 +174,7 @@ class ModuleDataMonitor(DataMonitorBase):
             names = self._submodule_names
 
         if self._submodule_names is True:
-            names = [name for name, _ in root_module.named_modules()]
+            names = list(named_modules.keys())
 
         return names
 
@@ -197,12 +191,11 @@ class ModuleDataMonitor(DataMonitorBase):
         return handle
 
 
-@under_review()
 class TrainingDataMonitor(DataMonitorBase):
 
     GROUP_NAME = "training_step"
 
-    def __init__(self, log_every_n_steps: int = None):
+    def __init__(self, log_every_n_steps: Optional[int] = None):
         """Callback that logs the histogram of values in the batched data passed to `training_step`.
 
         Args:
@@ -271,4 +264,4 @@ def shape2str(tensor: Tensor) -> str:
         >>> shape2str(torch.rand(4))
         '[4]'
     """
-    return "[" + ", ".join(map(str, tensor.shape)) + "]"
+    return str(list(tensor.shape))
