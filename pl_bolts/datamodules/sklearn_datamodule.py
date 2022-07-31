@@ -1,280 +1,183 @@
-import math
-from typing import Any, Tuple
+import warnings
+from typing import Any, Optional, Union
 
-import numpy as np
-import torch
 from pytorch_lightning import LightningDataModule
-from torch import Tensor
+from pytorch_lightning.utilities import exceptions
+from sklearn import model_selection
 from torch.utils.data import DataLoader, Dataset
 
-from pl_bolts.utils import _SKLEARN_AVAILABLE
-from pl_bolts.utils.stability import under_review
-from pl_bolts.utils.warnings import warn_missing_pkg
-
-if _SKLEARN_AVAILABLE:
-    from sklearn.utils import shuffle as sk_shuffle
-else:  # pragma: no cover
-    warn_missing_pkg("sklearn")
+from pl_bolts.datasets import ArrayDataset
 
 
-@under_review()
-class SklearnDataset(Dataset):
-    """Mapping between numpy (or sklearn) datasets to PyTorch datasets.
-
-    Example:
-        >>> from sklearn.datasets import load_diabetes
-        >>> from pl_bolts.datamodules import SklearnDataset
-        ...
-        >>> X, y = load_diabetes(return_X_y=True)
-        >>> dataset = SklearnDataset(X, y)
-        >>> len(dataset)
-        442
-    """
-
-    def __init__(self, X: np.ndarray, y: np.ndarray, X_transform: Any = None, y_transform: Any = None) -> None:
-        """
-        Args:
-            X: Numpy ndarray
-            y: Numpy ndarray
-            X_transform: Any transform that works with Numpy arrays
-            y_transform: Any transform that works with Numpy arrays
-        """
-        super().__init__()
-        self.X = X
-        self.Y = y
-        self.X_transform = X_transform
-        self.y_transform = y_transform
-
-    def __len__(self) -> int:
-        return len(self.X)
-
-    def __getitem__(self, idx) -> Tuple[np.ndarray, np.ndarray]:
-        x = self.X[idx].astype(np.float32)
-        y = self.Y[idx]
-
-        # Do not convert integer to float for classification data
-        if not ((y.dtype == np.int32) or (y.dtype == np.int64)):
-            y = y.astype(np.float32)
-
-        if self.X_transform:
-            x = self.X_transform(x)
-
-        if self.y_transform:
-            y = self.y_transform(y)
-
-        return x, y
-
-
-@under_review()
-class TensorDataset(Dataset):
-    """Prepare PyTorch tensor dataset for data loaders.
-
-    Example:
-        >>> from pl_bolts.datamodules import TensorDataset
-        ...
-        >>> X = torch.rand(10, 3)
-        >>> y = torch.rand(10)
-        >>> dataset = TensorDataset(X, y)
-        >>> len(dataset)
-        10
-    """
-
-    def __init__(self, X: Tensor, y: Tensor, X_transform: Any = None, y_transform: Any = None) -> None:
-        """
-        Args:
-            X: PyTorch tensor
-            y: PyTorch tensor
-            X_transform: Any transform that works with PyTorch tensors
-            y_transform: Any transform that works with PyTorch tensors
-        """
-        super().__init__()
-        self.X = X
-        self.Y = y
-        self.X_transform = X_transform
-        self.y_transform = y_transform
-
-    def __len__(self) -> int:
-        return len(self.X)
-
-    def __getitem__(self, idx) -> Tuple[Tensor, Tensor]:
-        x = self.X[idx].float()
-        y = self.Y[idx]
-
-        if self.X_transform:
-            x = self.X_transform(x)
-
-        if self.y_transform:
-            y = self.y_transform(y)
-
-        return x, y
-
-
-@under_review()
 class SklearnDataModule(LightningDataModule):
-    """Automatically generates the train, validation and test splits for a Numpy dataset. They are set up as
-    dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
+    """Split arrays into train, val, and test dataloaders with `scikit-learn`.
 
-    Example:
+    Args:
+        data: Feature variables.
+        target: Target variables.
+        test_dataset: Test `Array Dataset`. If None, training and testing samples are created with `test_size`.
+            Default is None.
+        val_size: Size of validation sample created from training sample. If float, should be between 0.0 and 1.0
+            and represent the proportion of the dataset to include in the validation split. If int, represents the
+            absolute number of validation samples.
+        test_size: Size of test sample. Splits data and target into training and testing samples. If float, should
+            be between 0.0 and 1.0  and represent the proportion of the dataset to include in the testing split.
+                If int, represents the absolute number of testing samples. Default is None.
+        random_state: Controls the shuffling applied to the data before applying the split. Default is `None`
+        shuffle: Whether to shuffle the data before splitting. If shuffle=False then stratify must be None.
+        stratify: If not None, data is split in a stratified fashion, using this as the class labels.
+        num_workers: Number of subprocesses to use for data loading. 0 means that the data will be loaded in the
+            main process. Number of CPUs available.
+        batch_size: Batch size to use for each dataloader. Default is 1.
+        pin_memory: If `True`, the data loader will copy Tensors into device/CUDA pinned memory before returning
+            them.
+        drop_last: set to `True` to drop the last incomplete batch, if the dataset size is not divisible by the
+            batch size. If `False` and the size of dataset is not divisible by the batch size, then the last batch
+                will be smaller. Default is `False`.
+        persistent_workers: If `True`, the data loader will not shutdown the worker processes after a dataset has
+            been consumed once. This allows to maintain the workers `Dataset` instances alive. Default is `False`.
 
-        >>> from sklearn.datasets import load_diabetes
-        >>> from pl_bolts.datamodules import SklearnDataModule
-        ...
-        >>> X, y = load_diabetes(return_X_y=True)
-        >>> loaders = SklearnDataModule(X, y, batch_size=32)
-        ...
-        >>> # train set
-        >>> train_loader = loaders.train_dataloader()
-        >>> len(train_loader.dataset)
-        310
-        >>> len(train_loader)
-        10
-        >>> # validation set
-        >>> val_loader = loaders.val_dataloader()
-        >>> len(val_loader.dataset)
-        88
-        >>> len(val_loader)
-        3
-        >>> # test set
-        >>> test_loader = loaders.test_dataloader()
-        >>> len(test_loader.dataset)
-        44
-        >>> len(test_loader)
-        2
+    Raises:
+        MisconfigurationException: On initialisation, `test_dataset` and `test_size` cannot both be `None`. If a
+            `test_dataset` is provided, it will be used in to create a `test_dataloader`. If a `test_size` is
+            provided then a test `ArrayDataset` will be created from the split of `x` and `y`.
+        MisconfigurationException: On initialisation, if the sum of `val_size` and `test_size` are greater or equal
+            to 1.
+
+    Warnings:
+        `test_dataset` will be used to create the  `test_dataloader` if arguments are provided to `test_dataset` and
+            `test_size`.
+        Training sample will be smaller or equal to the addition of the validation and testing samples if the sum of
+            `val_size` and `test_size` is greater or equal to 0.5.
     """
-
-    name = "sklearn"
 
     def __init__(
         self,
-        X,
-        y,
-        x_val=None,
-        y_val=None,
-        x_test=None,
-        y_test=None,
-        val_split=0.2,
-        test_split=0.1,
-        num_workers=0,
-        random_state=1234,
-        shuffle=True,
-        batch_size: int = 16,
-        pin_memory=True,
-        drop_last=False,
-        *args,
-        **kwargs,
+        data: Any,
+        target: Any,
+        test_dataset: Optional[ArrayDataset] = None,
+        val_size: Union[float, int] = 0.2,
+        test_size: Optional[Union[float, int]] = None,
+        random_state: Optional[int] = None,
+        shuffle: bool = True,
+        stratify: bool = False,
+        num_workers: int = 0,
+        batch_size: int = 1,
+        pin_memory: bool = False,
+        drop_last: bool = False,
+        persistent_workers: bool = False,
     ) -> None:
+        super().__init__()
 
-        super().__init__(*args, **kwargs)
-        self.num_workers = num_workers
-        self.batch_size = batch_size
-        self.shuffle = shuffle
-        self.pin_memory = pin_memory
-        self.drop_last = drop_last
+        if test_size is None and test_dataset is None:
+            raise exceptions.MisconfigurationException("test_dataset is not provided, a value for test_size is needed.")
 
-        # shuffle x and y
-        if shuffle and _SKLEARN_AVAILABLE:
-            X, y = sk_shuffle(X, y, random_state=random_state)
-        elif shuffle and not _SKLEARN_AVAILABLE:  # pragma: no cover
-            raise ModuleNotFoundError(
-                "You want to use shuffle function from `scikit-learn` which is not installed yet."
+        if test_dataset is not None and not isinstance(test_dataset, ArrayDataset):
+            raise exceptions.MisconfigurationException("Not a valid type for `test_dataset`.")
+
+        if test_dataset and test_size:
+            raise warnings.warn(
+                "Arguments were provided for both `test_dataset` and test_size. The test_dataset will be used."
             )
 
-        val_split = 0 if x_val is not None or y_val is not None else val_split
-        test_split = 0 if x_test is not None or y_test is not None else test_split
+        if (val_size + test_size) >= 1.0:
+            raise exceptions.MisconfigurationException("The sum of val_size and test_size is too large.")
+        elif (val_size + test_size) >= 0.5:
+            warnings.warn("We strongly recommend you decrease val_size or test_size for more training data.")
 
-        hold_out_split = val_split + test_split
-        if hold_out_split > 0:
-            val_split = val_split / hold_out_split
-            hold_out_size = math.floor(len(X) * hold_out_split)
-            x_holdout, y_holdout = X[:hold_out_size], y[:hold_out_size]
-            test_i_start = int(val_split * hold_out_size)
-            x_val_hold_out, y_val_holdout = x_holdout[:test_i_start], y_holdout[:test_i_start]
-            x_test_hold_out, y_test_holdout = x_holdout[test_i_start:], y_holdout[test_i_start:]
-            X, y = X[hold_out_size:], y[hold_out_size:]
+        self.data = data
+        self.target = target
+        self.x_train = None
+        self.y_train = None
+        self.x_val = None
+        self.y_val = None
+        self.x_test = None
+        self.y_test = None
+        self.train_dataset = None
+        self.val_dataset = None
+        self.test_dataset = None
+        self._test_dataset = test_dataset
+        self.val_size = val_size
+        self.test_size = test_size
+        self.random_state = random_state
+        self.shuffle = shuffle
+        self.stratify = stratify
+        self.num_workers = num_workers
+        self.batch_size = batch_size
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
+        self.persistent_workers = persistent_workers and num_workers > 0
 
-        # if don't have x_val and y_val create split from X
-        if x_val is None and y_val is None and val_split > 0:
-            x_val, y_val = x_val_hold_out, y_val_holdout
+        if isinstance(self._test_dataset, ArrayDataset):
+            self.x_train, self.x_val, self.y_train, self.y_val = self._sklearn_train_test_split(
+                self.data, self.target, split=self.val_size
+            )
+        else:
+            _x, self.x_test, _y, self.y_test = self._sklearn_train_test_split(
+                self.data, self.target, split=self.test_size
+            )
+            self.x_train, self.x_val, self.y_train, self.y_val = self._sklearn_train_test_split(
+                _x, _y, split=self.val_size
+            )
 
-        # if don't have x_test, y_test create split from X
-        if x_test is None and y_test is None and test_split > 0:
-            x_test, y_test = x_test_hold_out, y_test_holdout
+    def setup(self, stage: Optional[str] = None) -> None:
+        if stage == "fit" or stage is None:
+            self.train_dataset = ArrayDataset(self.x_train, self.y_train)
 
-        self._init_datasets(X, y, x_val, y_val, x_test, y_test)
+        if stage in ("fit", "validate") or stage is None:
+            self.val_dataset = ArrayDataset(self.x_val, self.y_val)
 
-    def _init_datasets(
-        self, X: np.ndarray, y: np.ndarray, x_val: np.ndarray, y_val: np.ndarray, x_test: np.ndarray, y_test: np.ndarray
-    ) -> None:
-        self.train_dataset = SklearnDataset(X, y)
-        self.val_dataset = SklearnDataset(x_val, y_val)
-        self.test_dataset = SklearnDataset(x_test, y_test)
+        if stage == "test" or stage is None:
+            self.test_dataset = (
+                ArrayDataset(self.x_test, self.y_test)
+                if self.x_test is not None and self.y_test is not None
+                else self._test_dataset
+            )
 
     def train_dataloader(self) -> DataLoader:
-        loader = DataLoader(
-            self.train_dataset,
-            batch_size=self.batch_size,
-            shuffle=self.shuffle,
-            num_workers=self.num_workers,
-            drop_last=self.drop_last,
-            pin_memory=self.pin_memory,
-        )
-        return loader
+        return self._data_loader(self.train_dataset, shuffle=True)
 
     def val_dataloader(self) -> DataLoader:
-        loader = DataLoader(
-            self.val_dataset,
-            batch_size=self.batch_size,
-            shuffle=False,
-            num_workers=self.num_workers,
-            drop_last=self.drop_last,
-            pin_memory=self.pin_memory,
-        )
-        return loader
+        return self._data_loader(self.val_dataset)
 
     def test_dataloader(self) -> DataLoader:
-        loader = DataLoader(
-            self.test_dataset,
+        return self._data_loader(self.test_dataset)
+
+    def _sklearn_train_test_split(self, x, y, split: Optional[Union[float, int]] = None):
+        """Split arrays with  `scikit-learn` `train_test_split`.
+
+        Args:
+            x: x data.
+            y: y_data.
+            split: split size.
+
+        Returns:
+            list, length=2 * len(arrays). List containing train-test split of inputs.
+        """
+        return model_selection.train_test_split(
+            x,
+            y,
+            shuffle=self.shuffle,
+            test_size=split,
+            random_state=self.random_state,
+            stratify=y if self.stratify else None,
+        )
+
+    def _data_loader(self, dataset: Dataset, shuffle: bool = False) -> DataLoader:
+        """Create dataloader.
+
+        Args:
+            dataset: `torch` Dataset.
+            shuffle: Whether to shuffle the data.
+
+        Returns:
+            Dataloader.
+        """
+        return DataLoader(
+            dataset,
             batch_size=self.batch_size,
-            shuffle=False,
+            shuffle=shuffle,
             num_workers=self.num_workers,
             drop_last=self.drop_last,
             pin_memory=self.pin_memory,
         )
-        return loader
-
-
-# TODO: this seems to be wrong, something missing here, another inherit class?
-# class TensorDataModule(SklearnDataModule):
-#     """
-#     Automatically generates the train, validation and test splits for a PyTorch tensor dataset. They are set up as
-#     dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
-#
-#     Example:
-#
-#         >>> from pl_bolts.datamodules import TensorDataModule
-#         >>> import torch
-#         ...
-#         >>> # create dataset
-#         >>> X = torch.rand(100, 3)
-#         >>> y = torch.rand(100)
-#         >>> loaders = TensorDataModule(X, y)
-#         ...
-#         >>> # train set
-#         >>> train_loader = loaders.train_dataloader(batch_size=10)
-#         >>> len(train_loader.dataset)
-#         70
-#         >>> len(train_loader)
-#         7
-#         >>> # validation set
-#         >>> val_loader = loaders.val_dataloader(batch_size=10)
-#         >>> len(val_loader.dataset)
-#         20
-#         >>> len(val_loader)
-#         2
-#         >>> # test set
-#         >>> test_loader = loaders.test_dataloader(batch_size=10)
-#         >>> len(test_loader.dataset)
-#         10
-#         >>> len(test_loader)
-#         1
-#     """
