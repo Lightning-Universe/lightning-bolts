@@ -120,19 +120,13 @@ class SklearnDataModule(LightningDataModule):
                 _x, _y, split=self.val_size
             )
 
-    def setup(self, stage: Optional[str] = None) -> None:
-        if stage == "fit" or stage is None:
-            self.train_dataset = ArrayDataset(self.x_train, self.y_train)
-
-        if stage in ("fit", "validate") or stage is None:
-            self.val_dataset = ArrayDataset(self.x_val, self.y_val)
-
-        if stage == "test" or stage is None:
-            self.test_dataset = (
-                ArrayDataset(self.x_test, self.y_test)
-                if self.x_test is not None and self.y_test is not None
-                else self._test_dataset
-            )
+        self.train_dataset = ArrayDataset(self.x_train, self.y_train)
+        self.val_dataset = ArrayDataset(self.x_val, self.y_val)
+        self.test_dataset = (
+            ArrayDataset(self.x_test, self.y_test)
+            if self.x_test is not None and self.y_test is not None
+            else self._test_dataset
+        )
 
     def train_dataloader(self) -> DataLoader:
         return self._data_loader(self.train_dataset, shuffle=True)
