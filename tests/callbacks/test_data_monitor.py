@@ -3,7 +3,7 @@ from unittest.mock import call
 
 import pytest
 import torch
-from pytorch_lightning import Trainer
+from pytorch_lightning import Trainer, LightningModule
 from pytorch_lightning.loggers import LoggerCollection, TensorBoardLogger
 from torch import nn
 
@@ -57,7 +57,7 @@ def test_base_no_logger_warning():
     monitor = TrainingDataMonitor()
     trainer = Trainer(logger=False, callbacks=[monitor])
     with pytest.warns(UserWarning, match="Cannot log histograms because Trainer has no logger"):
-        monitor.on_train_start(trainer, pl_module=None)
+        monitor.on_train_start(trainer, pl_module=LightningModule())
 
 
 def test_base_unsupported_logger_warning(tmpdir):
@@ -65,7 +65,7 @@ def test_base_unsupported_logger_warning(tmpdir):
     monitor = TrainingDataMonitor()
     trainer = Trainer(logger=LoggerCollection([TensorBoardLogger(tmpdir)]), callbacks=[monitor])
     with pytest.warns(UserWarning, match="does not support logging with LoggerCollection"):
-        monitor.on_train_start(trainer, pl_module=None)
+        monitor.on_train_start(trainer, pl_module=LightningModule())
 
 
 @mock.patch("pl_bolts.callbacks.data_monitor.TrainingDataMonitor.log_histogram")
@@ -121,7 +121,7 @@ class SubModule(nn.Module):
         return self.sub_layer(*args, **kwargs)
 
 
-class ModuleDataMonitorModel(nn.Module):
+class ModuleDataMonitorModel(LightningModule):
     def __init__(self):
         super().__init__()
         self.layer1 = nn.Linear(12, 5)
