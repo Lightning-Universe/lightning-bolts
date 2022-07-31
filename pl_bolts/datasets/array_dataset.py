@@ -7,7 +7,7 @@ from torch.utils.data import Dataset
 
 
 class ArrayDataset(Dataset):
-    """Dataset wrapping, lists, numpy arrays, pandas dataframes.
+    """Dataset wrapping tensors, lists, numpy arrays.
 
     Args:
         data: feature variables.
