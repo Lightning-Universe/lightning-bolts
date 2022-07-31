@@ -28,7 +28,7 @@ class DataMonitorBase(Callback):
         WandbLogger,
     )
 
-    def __init__(self, log_every_n_steps: int = None):
+    def __init__(self, log_every_n_steps: Optional[int] = None):
         """Base class for monitoring data histograms in a LightningModule. This requires a logger configured in the
         Trainer, otherwise no data is logged. The specific class that inherits from this base defines what data
         gets collected.
@@ -97,7 +97,7 @@ class DataMonitorBase(Callback):
 
             logger.experiment.log(data={name: wandb.Histogram(tensor)}, commit=False)
 
-    def _is_logger_available(self, logger: LightningLoggerBase) -> bool:
+    def _is_logger_available(self, logger: Optional[LightningLoggerBase]) -> bool:
         available = True
         if not logger:
             rank_zero_warn("Cannot log histograms because Trainer has no logger.")
