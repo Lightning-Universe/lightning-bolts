@@ -1,10 +1,12 @@
+import warnings
 from unittest import mock
 from unittest.mock import call
 
 import pytest
 import torch
-from pytorch_lightning import Trainer, LightningModule
+from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.loggers import LoggerCollection, TensorBoardLogger
+from pytorch_lightning.utilities.warnings import PossibleUserWarning
 from torch import nn
 
 from pl_bolts.callbacks import ModuleDataMonitor, TrainingDataMonitor
@@ -13,8 +15,15 @@ from pl_bolts.models import LitMNIST
 
 @pytest.mark.parametrize(["log_every_n_steps", "max_steps", "expected_calls"], [pytest.param(3, 10, 3)])
 @mock.patch("pl_bolts.callbacks.data_monitor.DataMonitorBase.log_histogram")
-def test_base_log_interval_override(log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir):
+def test_base_log_interval_override(
+    log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir, catch_warnings
+):
     """Test logging interval set by log_every_n_steps argument."""
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
     monitor = TrainingDataMonitor(log_every_n_steps=log_every_n_steps)
     model = LitMNIST(data_dir=datadir, num_workers=0)
     trainer = Trainer(
@@ -22,6 +31,7 @@ def test_base_log_interval_override(log_histogram, tmpdir, log_every_n_steps, ma
         log_every_n_steps=1,
         max_steps=max_steps,
         callbacks=[monitor],
+        accelerator="auto",
     )
 
     trainer.fit(model)
@@ -38,8 +48,15 @@ def test_base_log_interval_override(log_histogram, tmpdir, log_every_n_steps, ma
     ],
 )
 @mock.patch("pl_bolts.callbacks.data_monitor.DataMonitorBase.log_histogram")
-def test_base_log_interval_fallback(log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir):
+def test_base_log_interval_fallback(
+    log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir, catch_warnings
+):
     """Test that if log_every_n_steps not set in the callback, fallback to what is defined in the Trainer."""
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
     monitor = TrainingDataMonitor()
     model = LitMNIST(data_dir=datadir, num_workers=0)
     trainer = Trainer(
@@ -47,6 +64,7 @@ def test_base_log_interval_fallback(log_histogram, tmpdir, log_every_n_steps, ma
         log_every_n_steps=log_every_n_steps,
         max_steps=max_steps,
         callbacks=[monitor],
+        accelerator="auto",
     )
     trainer.fit(model)
     assert log_histogram.call_count == (expected_calls * 2)  # 2 tensors per log call
@@ -55,7 +73,11 @@ def test_base_log_interval_fallback(log_histogram, tmpdir, log_every_n_steps, ma
 def test_base_no_logger_warning():
     """Test a warning is displayed when Trainer has no logger."""
     monitor = TrainingDataMonitor()
-    trainer = Trainer(logger=False, callbacks=[monitor])
+    trainer = Trainer(
+        logger=False,
+        callbacks=[monitor],
+        accelerator="auto",
+    )
     with pytest.warns(UserWarning, match="Cannot log histograms because Trainer has no logger"):
         monitor.on_train_start(trainer, pl_module=LightningModule())
 
@@ -63,7 +85,11 @@ def test_base_no_logger_warning():
 def test_base_unsupported_logger_warning(tmpdir):
     """Test a warning is displayed when an unsupported logger is used."""
     monitor = TrainingDataMonitor()
-    trainer = Trainer(logger=LoggerCollection([TensorBoardLogger(tmpdir)]), callbacks=[monitor])
+    trainer = Trainer(
+        logger=LoggerCollection([TensorBoardLogger(tmpdir)]),
+        callbacks=[monitor],
+        accelerator="auto",
+    )
     with pytest.warns(UserWarning, match="does not support logging with LoggerCollection"):
         monitor.on_train_start(trainer, pl_module=LightningModule())
 
@@ -77,6 +103,7 @@ def test_training_data_monitor(log_histogram, tmpdir, datadir):
         default_root_dir=tmpdir,
         log_every_n_steps=1,
         callbacks=[monitor],
+        accelerator="auto",
     )
     monitor.on_train_start(trainer, model)
 
@@ -149,6 +176,7 @@ def test_module_data_monitor_forward(log_histogram, tmpdir):
         default_root_dir=tmpdir,
         log_every_n_steps=1,
         callbacks=[monitor],
+        accelerator="auto",
     )
     monitor.on_train_start(trainer, model)
     monitor.on_train_batch_start(trainer, model, batch=None, batch_idx=0)
@@ -170,6 +198,7 @@ def test_module_data_monitor_submodules_all(log_histogram, tmpdir):
         default_root_dir=tmpdir,
         log_every_n_steps=1,
         callbacks=[monitor],
+        accelerator="auto",
     )
     monitor.on_train_start(trainer, model)
     monitor.on_train_batch_start(trainer, model, batch=None, batch_idx=0)
@@ -197,6 +226,7 @@ def test_module_data_monitor_submodules_specific(log_histogram, tmpdir):
         default_root_dir=tmpdir,
         log_every_n_steps=1,
         callbacks=[monitor],
+        accelerator="auto",
     )
     monitor.on_train_start(trainer, model)
     monitor.on_train_batch_start(trainer, model, batch=None, batch_idx=0)
