@@ -11,7 +11,6 @@ from torch.nn import Module
 from torch.utils.hooks import RemovableHandle
 
 from pl_bolts.utils import _WANDB_AVAILABLE
-from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _WANDB_AVAILABLE:
@@ -185,7 +184,7 @@ class ModuleDataMonitor(DataMonitorBase):
         input_group_name = f"{self.GROUP_NAME_INPUT}/{module_name}" if module_name else self.GROUP_NAME_INPUT
         output_group_name = f"{self.GROUP_NAME_OUTPUT}/{module_name}" if module_name else self.GROUP_NAME_OUTPUT
 
-        def hook(_: Module, inp: Sequence, out: Sequence) -> None:
+        def hook(_: Module, inp: Any, out: Any) -> None:
             inp = inp[0] if len(inp) == 1 else inp
             self.log_histograms(inp, group=input_group_name)
             self.log_histograms(out, group=output_group_name)
@@ -226,7 +225,11 @@ class TrainingDataMonitor(DataMonitorBase):
         self.log_histograms(batch, group=self.GROUP_NAME)
 
 
-def collect_and_name_tensors(data: Any, output: Dict[str, Tensor], parent_name: str = "input") -> None:
+def collect_and_name_tensors(
+    data: Union[Tensor, dict, Sequence],
+    output: Dict[str, Tensor],
+    parent_name: str = "input",
+) -> None:
     """Recursively fetches all tensors in a (nested) collection of data (depth-first search) and names them. Data
     in dictionaries get named by their corresponding keys and otherwise they get indexed by an increasing integer.
     The shape of the tensor gets appended to the name as well.
@@ -257,7 +260,6 @@ def collect_and_name_tensors(data: Any, output: Dict[str, Tensor], parent_name: 
             collect_and_name_tensors(item, output, parent_name=f"{parent_name}/{i:d}")
 
 
-@under_review()
 def shape2str(tensor: Tensor) -> str:
     """Returns the shape of a tensor in bracket notation as a string.
 
