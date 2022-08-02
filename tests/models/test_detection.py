@@ -88,8 +88,15 @@ def test_yolo(tmpdir):
     model(image)
 
 
-def test_yolo_train(tmpdir):
-    config_path = Path(TEST_ROOT) / "data" / "yolo.cfg"
+@pytest.mark.parametrize(
+    "cfg_name",
+    [
+        ("yolo"),
+        ("yolo_giou"),
+    ],
+)
+def test_yolo_train(tmpdir, cfg_name):
+    config_path = Path(TEST_ROOT) / "data" / f"{cfg_name}.cfg"
     config = YOLOConfiguration(config_path)
     model = YOLO(config.get_network())
 
