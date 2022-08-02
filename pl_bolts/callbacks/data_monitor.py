@@ -104,7 +104,8 @@ class DataMonitorBase(Callback):
         if not isinstance(logger, self.supported_loggers):
             rank_zero_warn(
                 f"{self.__class__.__name__} does not support logging with {logger.__class__.__name__}."
-                f" Supported loggers are: {', '.join(map(lambda x: str(x.__name__), self.supported_loggers))}")
+                f" Supported loggers are: {', '.join(map(lambda x: str(x.__name__), self.supported_loggers))}"
+            )
             available = False
         return available
 
@@ -156,8 +157,10 @@ class ModuleDataMonitor(DataMonitorBase):
         submodule_dict = dict(pl_module.named_modules())
         for name in self._get_submodule_names(submodule_dict):
             if name not in submodule_dict:
-                rank_zero_warn(f"{name} is not a valid identifier for a submodule in {pl_module.__class__.__name__},"
-                               " skipping this key.")
+                rank_zero_warn(
+                    f"{name} is not a valid identifier for a submodule in {pl_module.__class__.__name__},"
+                    " skipping this key."
+                )
                 continue
             handle = self._register_hook(name, submodule_dict[name])
             self._hook_handles.append(handle)
