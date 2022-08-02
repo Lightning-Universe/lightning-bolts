@@ -3,7 +3,6 @@ from typing import List, Tuple, Union
 import numpy as np
 import torch
 from pytorch_lightning.utilities import apply_func, exceptions
-from torch import Tensor
 from torch.utils.data import Dataset
 
 ARRAYS = Union[torch.Tensor, np.ndarray, List[Union[float, int]]]
@@ -31,7 +30,7 @@ class ArrayDataset(Dataset):
     def __len__(self) -> int:
         return self.tensors[0].size(0)
 
-    def __getitem__(self, idx: int) -> Tuple[Tensor, ...]:
+    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, ...]:
         return tuple(tensor[idx] for tensor in self.tensors)
 
     def _equal_size(self):
