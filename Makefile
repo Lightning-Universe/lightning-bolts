@@ -21,6 +21,10 @@ test: clean env
 	python -m coverage run --source pl_bolts -m pytest pl_bolts tests -v
 	python -m coverage report
 
+doctest: clean env
+	pip install --quiet -r docs/requirements.txt
+	SPHINX_MOCK_REQUIREMENTS=0 make -C docs doctest
+
 docs: clean
 	pip install --quiet -r docs/requirements.txt
 	python -m sphinx -b html -W docs/source docs/build
