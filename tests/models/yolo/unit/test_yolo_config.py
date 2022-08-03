@@ -8,7 +8,6 @@ from pl_bolts.models.detection.yolo.yolo_config import (
     _create_maxpool,
     _create_shortcut,
     _create_upsample,
-    _create_yolo,
 )
 from tests import TEST_ROOT
 
@@ -101,4 +100,4 @@ def test_create_upsample(config):
 def test_yolo_config(config):
     config_path = Path(TEST_ROOT) / "data" / f"{config}.cfg"
     config = YOLOConfiguration(config_path)
-    model = config.get_network()
+    config.get_network()
