@@ -46,13 +46,23 @@ class DummyDataset(Dataset):
 
 @under_review()
 class DummyDetectionDataset(Dataset):
-    """Generate a dummy dataset for detection.
+    """Generate a dummy dataset for object detection.
 
     Example:
         >>> from pl_bolts.datasets import DummyDetectionDataset
         >>> from torch.utils.data import DataLoader
         >>> ds = DummyDetectionDataset()
         >>> dl = DataLoader(ds, batch_size=7)
+        >>> # get first batch
+        >>> batch = next(iter(dl))
+        >>> x,y = batch
+        >>> x.size()
+        torch.Size([7, 3, 256, 256])
+        >>> y['boxes'].size()
+        torch.Size([7, 1, 4])
+        >>> y['labels'].size()
+        torch.Size([7, 1])
+
     """
 
     def __init__(
@@ -94,6 +104,11 @@ class RandomDictDataset(Dataset):
         >>> from torch.utils.data import DataLoader
         >>> ds = RandomDictDataset(10)
         >>> dl = DataLoader(ds, batch_size=7)
+        >>> batch = next(iter(dl))
+        >>> len(batch['a']),len(batch['a'][0])
+        (7, 10)
+        >>> len(batch['b']),len(batch['b'][0])
+        (7, 10)
     """
 
     def __init__(self, size: int, num_samples: int = 250):
@@ -116,13 +131,19 @@ class RandomDictDataset(Dataset):
 
 @under_review()
 class RandomDictStringDataset(Dataset):
-    """Generate a dummy dataset with strings.
+    """Generate a dummy dataset with in dict structure with strings as indexes.
 
     Example:
         >>> from pl_bolts.datasets import RandomDictStringDataset
         >>> from torch.utils.data import DataLoader
         >>> ds = RandomDictStringDataset(10)
         >>> dl = DataLoader(ds, batch_size=7)
+        >>> batch = next(iter(dl))
+        >>> batch['id']
+        ['0', '1', '2', '3', '4', '5', '6']
+        >>> len(batch['x'])
+        7
+
     """
 
     def __init__(self, size: int, num_samples: int = 250):
@@ -150,6 +171,9 @@ class RandomDataset(Dataset):
         >>> from torch.utils.data import DataLoader
         >>> ds = RandomDataset(10)
         >>> dl = DataLoader(ds, batch_size=7)
+        >>> batch = next(iter(dl))
+        >>> len(batch),len(batch[0])
+        (7, 10)
     """
 
     def __init__(self, size: int, num_samples: int = 250):
