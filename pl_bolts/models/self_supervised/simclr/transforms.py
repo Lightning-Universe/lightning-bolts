@@ -8,7 +8,7 @@ else:  # pragma: no cover
 
 
 class SimCLRTrainDataTransform:
-    """Transforms for SimCLR during the pre-training stage.
+    """Transforms for SimCLR during training step of the pre-training stage.
 
     Transform::
 
@@ -120,7 +120,7 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
 
 
 class SimCLRFinetuneTransform:
-    """Transforms for SimCLR during for fine-tuning stage.
+    """Transforms for SimCLR during the fine-tuning stage.
 
     Transform::
 
