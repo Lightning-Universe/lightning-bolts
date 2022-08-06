@@ -10,7 +10,7 @@ else:  # pragma: no cover
 
 @under_review()
 class SimCLRTrainDataTransform:
-    """Transforms for SimCLR.
+    """Transforms for SimCLR during the pre-training stage.
 
     Transform::
 
@@ -27,7 +27,7 @@ class SimCLRTrainDataTransform:
 
         transform = SimCLRTrainDataTransform(input_height=32)
         x = sample()
-        (xi, xj) = transform(x)
+        (xi, xj, xk) = transform(x) # xk is only for the online evaluator if used
     """
 
     def __init__(
@@ -88,7 +88,7 @@ class SimCLRTrainDataTransform:
 
 @under_review()
 class SimCLREvalDataTransform(SimCLRTrainDataTransform):
-    """Transforms for SimCLR.
+    """Transforms for SimCLR during the validation step of the pre-training stage.
 
     Transform::
 
@@ -102,7 +102,7 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
 
         transform = SimCLREvalDataTransform(input_height=32)
         x = sample()
-        (xi, xj) = transform(x)
+        (xi, xj, xk) = transform(x) # xk is only for the online evaluator if used
     """
 
     def __init__(
@@ -124,6 +124,23 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
 
 @under_review()
 class SimCLRFinetuneTransform:
+    """Transforms for SimCLR during for fine-tuning stage.
+
+    Transform::
+
+        Resize(input_height + 10, interpolation=3)
+        transforms.CenterCrop(input_height),
+        transforms.ToTensor()
+
+    Example::
+
+        from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform
+
+        transform = SimCLREvalDataTransform(input_height=32)
+        x = sample()
+        (_, _, xk) = transform(x)
+    """
+
     def __init__(
         self, input_height: int = 224, jitter_strength: float = 1.0, normalize=None, eval_transform: bool = False
     ) -> None:
