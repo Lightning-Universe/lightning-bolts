@@ -1,5 +1,4 @@
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -8,7 +7,6 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-@under_review()
 class SimCLRTrainDataTransform:
     """Transforms for SimCLR during the pre-training stage.
 
@@ -86,7 +84,6 @@ class SimCLRTrainDataTransform:
         return xi, xj, self.online_transform(sample)
 
 
-@under_review()
 class SimCLREvalDataTransform(SimCLRTrainDataTransform):
     """Transforms for SimCLR during the validation step of the pre-training stage.
 
@@ -122,7 +119,6 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
         )
 
 
-@under_review()
 class SimCLRFinetuneTransform:
     """Transforms for SimCLR during for fine-tuning stage.
 
