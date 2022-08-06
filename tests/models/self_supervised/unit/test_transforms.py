@@ -32,10 +32,10 @@ def test_simclr_train_data_transform(catch_warnings, transform_cls):
     assert len(views) == 3
 
     # all views are tensors
-    assert all([torch.is_tensor(v) for v in views])
+    assert all(torch.is_tensor(v) for v in views)
 
     # all views have expected sizes
-    assert all([v.size(1) == v.size(2) == input_height for v in views])
+    assert all(v.size(1) == v.size(2) == input_height for v in views)
 
 
 def test_simclr_finetune_transform(catch_warnings):
