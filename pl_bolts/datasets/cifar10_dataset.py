@@ -1,11 +1,12 @@
-from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE, _TORCHVISION_LESS_THAN_0_9_1
-from pl_bolts.utils.stability import under_review
-from pl_bolts.utils.warnings import warn_missing_pkg
-from typing import Callable, Optional, Sequence, Tuple
 import os
+from typing import Callable, Optional, Sequence, Tuple
+
 import torch
 from torch import Tensor
 
+from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE, _TORCHVISION_LESS_THAN_0_9_1
+from pl_bolts.utils.stability import under_review
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.datasets import CIFAR10
@@ -17,6 +18,7 @@ if _PIL_AVAILABLE:
     from PIL import Image
 else:  # pragma: no cover
     warn_missing_pkg("PIL", pypi_name="Pillow")
+
 
 @under_review()
 class TrialCIFAR10(CIFAR10):

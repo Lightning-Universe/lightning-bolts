@@ -1,12 +1,11 @@
 import pytest
 import torch
-from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
-
+from torch.utils.data import DataLoader
 
 from pl_bolts.datasets import DummyDataset, RandomDataset, RandomDictDataset, RandomDictStringDataset
-from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
+from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 
 
 def test_dummy_ds():
@@ -56,10 +55,9 @@ def test_sr_datasets(datadir, scale_factor):
     assert torch.allclose(lr_image.min(), torch.tensor(0.0), atol=atol)
     assert torch.allclose(lr_image.max(), torch.tensor(1.0), atol=atol)
 
+
 def test_cifar10_datasets(datadir):
-    transform = transforms.Compose(
-        [transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     dl = DataLoader(CIFAR10(root=datadir, download=True, transform=transform))
     hr_image, lr_image = next(iter(dl))
 
