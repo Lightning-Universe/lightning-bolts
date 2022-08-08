@@ -62,7 +62,6 @@ def test_cifar10_datasets(datadir):
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     dl = DataLoader(CIFAR10(root=datadir, download=True, transform=transform))
     hr_image, lr_image = next(iter(dl))
-    print("==============================", lr_image.size())
 
     hr_image_size = 32
     assert hr_image.size() == torch.Size([1, 3, hr_image_size, hr_image_size])
