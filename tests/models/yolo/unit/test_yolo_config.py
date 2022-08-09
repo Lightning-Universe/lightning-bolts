@@ -18,7 +18,7 @@ from pl_bolts.models.detection.yolo.yolo_config import (
     ],
 )
 def test_create_convolutional(config):
-    conv = _create_convolutional(config, [3])[0]
+    conv, _ = _create_convolutional(config, [3])
 
     assert conv.conv.out_channels == config["filters"]
     assert conv.conv.kernel_size == (config["size"], config["size"])
@@ -59,7 +59,7 @@ def test_create_convolutional(config):
 )
 def test_create_maxpool(config):
     pad_size = (config["size"] - 1) // 2
-    maxpool = _create_maxpool(config, [3])[0]
+    maxpool, _ = _create_maxpool(config, [3])
 
     assert maxpool.kernel_size == config["size"]
     assert maxpool.stride == config["stride"]
@@ -74,7 +74,7 @@ def test_create_maxpool(config):
     ],
 )
 def test_create_shortcut(config):
-    shortcut = _create_shortcut(config, [3])[0]
+    shortcut, _ = _create_shortcut(config, [3])
 
     assert shortcut.source_layer == config["from"]
 
