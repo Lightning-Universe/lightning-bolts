@@ -9,13 +9,9 @@ from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
-    from torchvision.models.detection.retinanet import ResNet50_Weights
+
     from torchvision.models.detection.retinanet import RetinaNet as torchvision_RetinaNet
-    from torchvision.models.detection.retinanet import (
-        RetinaNet_ResNet50_FPN_V2_Weights,
-        RetinaNetHead,
-        retinanet_resnet50_fpn,
-    )
+    from torchvision.models.detection.retinanet import RetinaNetHead, retinanet_resnet50_fpn
     from torchvision.ops import box_iou
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
@@ -68,8 +64,8 @@ class RetinaNet(LightningModule):
         self.num_classes = num_classes
         self.backbone = backbone
         if backbone is None:
-            weights = RetinaNet_ResNet50_FPN_V2_Weights.DEFAULT if pretrained else None
-            weights_backbone = ResNet50_Weights.DEFAULT if pretrained else None
+            weights = "DEFAULT" if pretrained else None
+            weights_backbone = "DEFAULT" if pretrained else None
             self.model = retinanet_resnet50_fpn(weights=weights, weights_backbone=weights_backbone, **kwargs)
 
             self.model.head = RetinaNetHead(
