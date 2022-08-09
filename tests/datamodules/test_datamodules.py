@@ -72,17 +72,17 @@ def test_cityscapes_datamodule(datadir):
 
 
 @pytest.mark.parametrize("val_split, train_len", [(0.2, 48_000), (5_000, 55_000)])
-def test_vision_data_module(datadir, val_split, train_len):
+def test_vision_data_module(datadir, val_split, catch_warnings, train_len):
     dm = _create_dm(MNISTDataModule, datadir, val_split=val_split)
     assert len(dm.dataset_train) == train_len
 
 
 @pytest.mark.parametrize("dm_cls", [BinaryMNISTDataModule, CIFAR10DataModule, FashionMNISTDataModule, MNISTDataModule])
-def test_data_modules(datadir, dm_cls):
+def test_data_modules(datadir, catch_warnings, dm_cls):
     dm = _create_dm(dm_cls, datadir)
     loader = dm.train_dataloader()
     img, _ = next(iter(loader))
-    assert img.size() == torch.Size([2, *dm.size()])
+    assert img.size() == torch.Size([2, *dm.dims])
 
 
 def _create_dm(dm_cls, datadir, **kwargs):
