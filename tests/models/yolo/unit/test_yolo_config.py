@@ -1,16 +1,11 @@
-from pathlib import Path
-
 import pytest
 
 from pl_bolts.models.detection.yolo.yolo_config import (
-    YOLOConfiguration,
     _create_convolutional,
     _create_maxpool,
     _create_shortcut,
     _create_upsample,
-    _create_yolo,
 )
-from tests import TEST_ROOT
 
 
 @pytest.mark.parametrize(
@@ -92,13 +87,6 @@ def test_create_shortcut(config):
     ],
 )
 def test_create_upsample(config):
-    upsample = _create_upsample(config, [3])[0]
+    upsample, _ = _create_upsample(config, [3])
 
     assert upsample.scale_factor == float(config["stride"])
-
-
-@pytest.mark.parametrize("config", [("yolo"), ("yolo_giou")])
-def test_yolo_config(config):
-    config_path = Path(TEST_ROOT) / "data" / f"{config}.cfg"
-    config = YOLOConfiguration(config_path)
-    model = config.get_network()
