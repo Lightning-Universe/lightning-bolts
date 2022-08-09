@@ -36,6 +36,10 @@ class ArrayDataset(BoltsDataset):
         super().__init__(
             *arrays, transforms=transforms, input_transform=input_transform, target_transform=target_transform
         )
+
+        self.has_transforms = transforms is not None or (
+            self.input_transform is not None or self.target_transform is not None
+        )
         self.tensors = apply_func.apply_to_collection(self.arrays, dtype=(np.ndarray, list), function=torch.tensor)
 
         if not self._equal_size():
@@ -45,16 +49,19 @@ class ArrayDataset(BoltsDataset):
         return self.tensors[0].size(0)
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, ...]:
-        data, target = self.tensors[idx][0], self.tensors[idx][1]
 
+        data = self.tensors[idx][0]
+
+        if self.input_transform is not None and self.target_transform is None:
+            return self.input_transform(data)
+
+        target = self.tensors[idx][1]
         if self.transforms is not None:
             return self.transforms(data, target)
         elif self.input_transform is not None and self.target_transform is not None:
             return self.input_transform(data), self.target_transform(target)
-        elif self.input_transform is not None:
-            return self.input_transform(data)
-        else:
-            return tuple(tensor[idx] for tensor in self.tensors)
+
+        return tuple(tensor[idx] for tensor in self.tensors)
 
     def _equal_size(self) -> bool:
         """Check the size of the tensors are equal in the first dimension."""

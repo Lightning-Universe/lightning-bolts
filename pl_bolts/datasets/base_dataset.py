@@ -76,6 +76,7 @@ class BoltsDataset(Dataset):
 
     Raises:
         MisconfigurationException: Only transforms or input_transform/target_transform can be passed as argument.
+        MisconfigurationException: transforms can only be applied to arrays of length 2.
         MisconfigurationException: input_transform and target_transform can only be applied to arrays length 2.
         MisconfigurationException: target_transform can only be applied to arrays length 2.
     """
@@ -95,12 +96,15 @@ class BoltsDataset(Dataset):
                 "Only transforms or input_transform/target_transform can be passed as argument"
             )
 
-        if input_transform and target_transform and len(arrays) != 2:
+        if has_transforms and len(arrays) != 2:
+            raise exceptions.MisconfigurationException("transforms can only be applied to arrays of length 2.")
+
+        if input_transform is not None and target_transform is not None and len(arrays) != 2:
             raise exceptions.MisconfigurationException(
                 "input_transform and target_transform can only be applied to arrays of length 2."
             )
 
-        if target_transform and len(arrays) != 2:
+        if target_transform is not None and len(arrays) != 2:
             raise exceptions.MisconfigurationException("target_transform can only be applied to arrays of length 2.")
 
         self.arrays = arrays
