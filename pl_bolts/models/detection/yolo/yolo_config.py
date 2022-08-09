@@ -170,7 +170,7 @@ def _create_layer(config: dict, num_inputs: List[int]) -> Tuple[nn.Module, int]:
     return create_func[config["type"]](config, num_inputs)
 
 
-def _create_convolutional(config, num_inputs):
+def _create_convolutional(config: dict, num_inputs: int) -> Tuple[nn.Module, int]:
     module = nn.Sequential()
 
     batch_normalize = config.get("batch_normalize", False)
@@ -206,13 +206,13 @@ def _create_convolutional(config, num_inputs):
     return module, config["filters"]
 
 
-def _create_maxpool(config, num_inputs):
+def _create_maxpool(config: dict, num_inputs: int) -> Tuple[nn.Module, int]:
     padding = (config["size"] - 1) // 2
     module = nn.MaxPool2d(config["size"], config["stride"], padding)
     return module, num_inputs[-1]
 
 
-def _create_route(config, num_inputs):
+def _create_route(config: dict, num_inputs: int) -> Tuple[nn.Module, int]:
     num_chunks = config.get("groups", 1)
     chunk_idx = config.get("group_id", 0)
 
@@ -228,17 +228,17 @@ def _create_route(config, num_inputs):
     return module, num_outputs
 
 
-def _create_shortcut(config, num_inputs):
+def _create_shortcut(config: dict, num_inputs: int) -> Tuple[nn.Module, int]:
     module = yolo_layers.ShortcutLayer(config["from"])
     return module, num_inputs[-1]
 
 
-def _create_upsample(config, num_inputs):
+def _create_upsample(config: dict, num_inputs: int) -> Tuple[nn.Module, int]:
     module = nn.Upsample(scale_factor=config["stride"], mode="nearest")
     return module, num_inputs[-1]
 
 
-def _create_yolo(config, num_inputs):
+def _create_yolo(config: dict, num_inputs: int) -> Tuple[nn.Module, int]:
     # The "anchors" list alternates width and height.
     anchor_dims = config["anchors"]
     anchor_dims = [(anchor_dims[i], anchor_dims[i + 1]) for i in range(0, len(anchor_dims), 2)]

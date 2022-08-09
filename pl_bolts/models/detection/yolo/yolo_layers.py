@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import torch
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
@@ -464,7 +464,7 @@ class DetectionLayer(nn.Module):
 class Mish(nn.Module):
     """Mish activation."""
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         return x * torch.tanh(nn.functional.softplus(x))
 
 
@@ -483,7 +483,7 @@ class RouteLayer(nn.Module):
         self.num_chunks = num_chunks
         self.chunk_idx = chunk_idx
 
-    def forward(self, x, outputs):
+    def forward(self, x, outputs: List[Union[Tensor, None]]) -> Tensor:
         chunks = [torch.chunk(outputs[layer], self.num_chunks, dim=1)[self.chunk_idx] for layer in self.source_layers]
         return torch.cat(chunks, dim=1)
 
@@ -500,5 +500,5 @@ class ShortcutLayer(nn.Module):
         super().__init__()
         self.source_layer = source_layer
 
-    def forward(self, x, outputs):
+    def forward(self, x, outputs: List[Union[Tensor, None]]) -> Tensor:
         return outputs[-1] + outputs[self.source_layer]
