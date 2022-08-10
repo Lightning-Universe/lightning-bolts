@@ -326,8 +326,6 @@ if SPHINX_MOCK_REQUIREMENTS:
 # replace PyPI packages by importing ones
 MOCK_PACKAGES = [PACKAGE_MAPPING.get(pkg, pkg) for pkg in MOCK_PACKAGES]
 
-print(f"{MOCK_PACKAGES=}")
-
 autodoc_mock_imports = MOCK_PACKAGES
 
 
