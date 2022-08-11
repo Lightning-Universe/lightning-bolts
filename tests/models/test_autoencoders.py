@@ -11,7 +11,7 @@ def test_vae(tmpdir, datadir, dm_cls):
     seed_everything()
 
     dm = dm_cls(data_dir=datadir, batch_size=4)
-    model = VAE(input_height=dm.size()[-1])
+    model = VAE(input_height=dm.dims[-1])
     trainer = Trainer(
         fast_dev_run=True,
         default_root_dir=tmpdir,
@@ -26,7 +26,7 @@ def test_ae(tmpdir, datadir, dm_cls):
     seed_everything()
 
     dm = dm_cls(data_dir=datadir, batch_size=4)
-    model = AE(input_height=dm.size()[-1])
+    model = AE(input_height=dm.dims[-1])
     trainer = Trainer(
         fast_dev_run=True,
         default_root_dir=tmpdir,

@@ -143,7 +143,6 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         outputs: Sequence,
         batch: Sequence,
         batch_idx: int,
-        dataloader_idx: int,
     ) -> None:
         train_acc, mlp_loss = self.shared_step(pl_module, batch)
 
