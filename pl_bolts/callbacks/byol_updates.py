@@ -48,7 +48,6 @@ class BYOLMAWeightUpdate(Callback):
         outputs: Sequence,
         batch: Sequence,
         batch_idx: int,
-        dataloader_idx: int,
     ) -> None:
         # get networks
         online_net = pl_module.online_network

@@ -47,7 +47,7 @@ pull_request_rules:
       - "#check-failure<5"
     actions:
       label:
-        add: [ "0:] Ready-To-Go" ]
+        add: [ "ready" ]
 
   - name: Not ready yet
     conditions:
@@ -57,7 +57,7 @@ pull_request_rules:
         - "#check-failure>=5"
     actions:
       label:
-        remove: [ "0:] Ready-To-Go" ]
+        remove: [ "ready" ]
 
   - name: update PR
     conditions:
@@ -73,7 +73,7 @@ pull_request_rules:
     conditions:
       - -conflict # skip if conflict
       - -draft # filter-out GH draft PRs
-      - label="0:] Ready-To-Go"
+      - label="ready"
       - "#approved-reviews-by<2" # number of review approvals
       - "#review-requested<2" # number of requested reviews
     actions:
