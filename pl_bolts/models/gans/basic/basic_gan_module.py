@@ -190,7 +190,7 @@ def cli_main(args=None):
     args = parser.parse_args(args)
 
     dm = dm_cls.from_argparse_args(args)
-    model = GAN(*dm.size(), **vars(args))
+    model = GAN(*dm.dims, **vars(args))
     callbacks = [
         TensorboardGenerativeModelImageSampler(),
         LatentDimInterpolator(interpolate_epoch_interval=5),
