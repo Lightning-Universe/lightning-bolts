@@ -1,5 +1,6 @@
+from typing import Any, Tuple
+
 from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE, _TORCHVISION_LESS_THAN_0_9_1
-from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -37,12 +38,15 @@ if _TORCHVISION_AVAILABLE and _TORCHVISION_LESS_THAN_0_9_1:
     ]
 
 
-@under_review()
 class BinaryMNIST(MNIST):
-    def __getitem__(self, idx):
+    threshold = 127
+    
+    """Binarizred MNIST Dataset."""        
+    def __getitem__(self, idx : int) -> Tuple[Any, Any]:
         """
         Args:
             index (int): Index
+        
         Returns:
             tuple: (image, target) where target is index of the target class.
         """
@@ -51,8 +55,11 @@ class BinaryMNIST(MNIST):
 
         img, target = self.data[idx], int(self.targets[idx])
 
-        # doing this so that it is consistent with all other datasets
-        # to return a PIL Image
+        # Binarize image according to threshold
+        img[img < self.threshold] = 0.0
+        img[img >= self.threshold] = 255.0
+
+        # Convert to PIL Image (8-bit BW)
         img = Image.fromarray(img.numpy(), mode="L")
 
         if self.transform is not None:
@@ -60,9 +67,5 @@ class BinaryMNIST(MNIST):
 
         if self.target_transform is not None:
             target = self.target_transform(target)
-
-        # binary
-        img[img < 0.5] = 0.0
-        img[img >= 0.5] = 1.0
 
         return img, target
