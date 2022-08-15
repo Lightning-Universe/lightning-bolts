@@ -27,11 +27,8 @@ def test_dummy_ds(catch_warnings, batch_size, num_samples):
         assert batch[1].shape == torch.Size([batch_size, 1])
 
     else:
-        with pytest.raises(Exception) as e:
+        with pytest.raises(ValueError, match="Provide an argument greater than 0"):
             ds = DummyDataset((1, 28, 28), (1,), num_samples=num_samples)
-
-        assert e.type == ValueError
-        assert str(e.value) == "Provide an argument greater than 0 for `num_samples`"
 
 
 @pytest.mark.parametrize("batch_size,size,num_samples", [(16, 32, 100), (1, 0, 0)])
@@ -52,14 +49,8 @@ def test_rand_dict_ds(catch_warnings, batch_size, size, num_samples):
         assert len(batch["a"]), len(batch["a"][0]) == (batch_size, size)
         assert len(batch["b"]), len(batch["b"][0]) == (batch_size, size)
     else:
-        with pytest.raises(Exception) as e:
+        with pytest.raises(ValueError, match="Provide an argument greater than 0"):
             ds = RandomDictDataset(size, num_samples=num_samples)
-
-        assert e.type == ValueError
-        assert str(e.value) in {
-            "Provide an argument greater than 0 for `num_samples`",
-            "Provide an argument greater than 0 for `size`",
-        }
 
 
 @pytest.mark.parametrize("batch_size,size,num_samples", [(16, 32, 100), (1, 0, 0)])
@@ -78,14 +69,8 @@ def test_rand_ds(catch_warnings, batch_size, size, num_samples):
         assert len(batch), len(batch[0]) == (batch_size, size)
 
     else:
-        with pytest.raises(Exception) as e:
+        with pytest.raises(ValueError, match="Provide an argument greater than 0"):
             ds = RandomDataset(size, num_samples=num_samples)
-
-        assert e.type == ValueError
-        assert str(e.value) in {
-            "Provide an argument greater than 0 for `num_samples`",
-            "Provide an argument greater than 0 for `size`",
-        }
 
 
 @pytest.mark.parametrize("batch_size,size,num_samples", [(16, 32, 100), (1, 0, 0)])
@@ -106,14 +91,8 @@ def test_rand_str_dict_ds(catch_warnings, batch_size, size, num_samples):
         assert len(batch["x"]) == batch_size
         assert len(batch["id"]) == batch_size
     else:
-        with pytest.raises(Exception) as e:
+        with pytest.raises(ValueError, match="Provide an argument greater than 0"):
             ds = RandomDictStringDataset(size, num_samples=num_samples)
-
-        assert e.type == ValueError
-        assert str(e.value) in {
-            "Provide an argument greater than 0 for `num_samples`",
-            "Provide an argument greater than 0 for `size`",
-        }
 
 
 @pytest.mark.parametrize("batch_size,img_shape,num_samples", [(16, (3, 256, 256), 100), (1, (256, 256), 0)])
@@ -132,13 +111,8 @@ def test_dummy_detection_ds(catch_warnings, batch_size, img_shape, num_samples):
         assert y["labels"].size() == torch.Size([batch_size, 3])
 
     else:
-        with pytest.raises(Exception) as e:
+        with pytest.raises(ValueError, match="Provide an argument greater than 0"):
             ds = DummyDetectionDataset(img_shape=img_shape, num_boxes=3, num_classes=3, num_samples=num_samples)
-        assert e.type == ValueError
-        assert str(e.value) in {
-            "Provide an argument greater than 0 for `num_samples`",
-            "Provide an argument greater than 0 for `size`",
-        }
 
 
 @pytest.mark.parametrize("scale_factor", [2, 4])
