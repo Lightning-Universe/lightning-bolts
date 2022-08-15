@@ -1,9 +1,6 @@
 import torch
 from torch.utils.data import Dataset
 
-from pl_bolts.utils.stability import under_review
-
-
 
 class DummyDataset(Dataset):
     """Generate a dummy dataset.
@@ -33,7 +30,7 @@ class DummyDataset(Dataset):
         self.shapes = shapes
 
         if num_samples < 1:
-            raise ValueError ('Provide an argument greater than 0 for `num_samples`')
+            raise ValueError("Provide an argument greater than 0 for `num_samples`")
 
         self.num_samples = num_samples
 
@@ -46,7 +43,6 @@ class DummyDataset(Dataset):
             spl = torch.rand(*shape)
             sample.append(spl)
         return sample
-
 
 
 class DummyDetectionDataset(Dataset):
@@ -66,7 +62,6 @@ class DummyDetectionDataset(Dataset):
         torch.Size([7, 1, 4])
         >>> y['labels'].size()
         torch.Size([7, 1])
-
     """
 
     def __init__(
@@ -79,7 +74,7 @@ class DummyDetectionDataset(Dataset):
         """
         super().__init__()
         if num_samples < 1:
-            raise ValueError ('Provide an argument greater than 0 for `num_samples`')
+            raise ValueError("Provide an argument greater than 0 for `num_samples`")
 
         self.img_shape = img_shape
         self.num_samples = num_samples
@@ -100,7 +95,6 @@ class DummyDetectionDataset(Dataset):
         boxes = torch.tensor([self._random_bbox() for _ in range(self.num_boxes)], dtype=torch.float32)
         labels = torch.randint(self.num_classes, (self.num_boxes,), dtype=torch.long)
         return img, {"boxes": boxes, "labels": labels}
-
 
 
 class RandomDictDataset(Dataset):
@@ -125,14 +119,13 @@ class RandomDictDataset(Dataset):
             num_samples: number of samples
         """
         if num_samples < 1:
-            raise ValueError ('Provide an argument greater than 0 for `num_samples`')
+            raise ValueError("Provide an argument greater than 0 for `num_samples`")
 
         if size < 1:
-            raise ValueError ('Provide an argument greater than 0 for `size`')
+            raise ValueError("Provide an argument greater than 0 for `size`")
 
         self.len = num_samples
         self.data = torch.randn(num_samples, size)
-
 
     def __getitem__(self, index):
         a = self.data[index]
@@ -141,7 +134,6 @@ class RandomDictDataset(Dataset):
 
     def __len__(self):
         return self.len
-
 
 
 class RandomDictStringDataset(Dataset):
@@ -157,7 +149,6 @@ class RandomDictStringDataset(Dataset):
         ['0', '1', '2', '3', '4', '5', '6']
         >>> len(batch['x'])
         7
-
     """
 
     def __init__(self, size: int, num_samples: int = 250):
@@ -167,7 +158,7 @@ class RandomDictStringDataset(Dataset):
             num_samples: number of samples
         """
         if num_samples < 1:
-            raise ValueError ('Provide an argument greater than 0 for `num_samples`')
+            raise ValueError("Provide an argument greater than 0 for `num_samples`")
 
         self.len = num_samples
         self.data = torch.randn(num_samples, size)
@@ -177,7 +168,6 @@ class RandomDictStringDataset(Dataset):
 
     def __len__(self):
         return self.len
-
 
 
 class RandomDataset(Dataset):
@@ -200,7 +190,7 @@ class RandomDataset(Dataset):
             num_samples: number of samples
         """
         if num_samples < 1:
-            raise ValueError ('Provide an argument greater than 0 for `num_samples`')
+            raise ValueError("Provide an argument greater than 0 for `num_samples`")
 
         self.len = num_samples
         self.data = torch.randn(num_samples, size)
