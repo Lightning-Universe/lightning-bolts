@@ -4,12 +4,12 @@ from torch.utils.data import DataLoader
 from torchvision import transforms as transform_lib
 
 from pl_bolts.datasets import (
-    BinaryMNIST,
     BinaryEMNIST,
+    BinaryMNIST,
     DummyDataset,
     RandomDataset,
     RandomDictDataset,
-    RandomDictStringDataset
+    RandomDictStringDataset,
 )
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 
@@ -65,10 +65,10 @@ def test_sr_datasets(datadir, scale_factor):
 def test_binary_mnist_dataset(datadir):
     dl = DataLoader(BinaryMNIST(root=datadir, download=True, transform=transform_lib.PILToTensor()))
     img, target = next(iter(dl))
-    
+
     assert img.size() == torch.Size([1, 1, 28, 28])
     assert target.size() == torch.Size([1])
-    
+
     assert torch.allclose(img.min(), torch.tensor(0, dtype=torch.uint8))
     assert torch.allclose(img.max(), torch.tensor(255, dtype=torch.uint8))
     assert torch.equal(torch.unique(img), torch.tensor([0, 255], dtype=torch.uint8))
@@ -78,10 +78,10 @@ def test_binary_mnist_dataset(datadir):
 def test_binary_emnist_dataset(datadir, split):
     dl = DataLoader(BinaryEMNIST(root=datadir, split=split, download=True, transform=transform_lib.PILToTensor()))
     img, target = next(iter(dl))
-    
+
     assert img.size() == torch.Size([1, 1, 28, 28])
     assert target.size() == torch.Size([1])
-    
+
     assert torch.allclose(img.min(), torch.tensor(0, dtype=torch.uint8))
     assert torch.allclose(img.max(), torch.tensor(255, dtype=torch.uint8))
     assert torch.equal(torch.unique(img), torch.tensor([0, 255], dtype=torch.uint8))

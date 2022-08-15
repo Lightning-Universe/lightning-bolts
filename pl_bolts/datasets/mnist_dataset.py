@@ -40,13 +40,14 @@ if _TORCHVISION_AVAILABLE and _TORCHVISION_LESS_THAN_0_9_1:
 
 class BinaryMNIST(MNIST):
     threshold = 127
-    
-    """Binarizred MNIST Dataset."""        
-    def __getitem__(self, idx : int) -> Tuple[Any, Any]:
+
+    """Binarizred MNIST Dataset."""
+
+    def __getitem__(self, idx: int) -> Tuple[Any, Any]:
         """
         Args:
             index (int): Index
-        
+
         Returns:
             tuple: (image, target) where target is index of the target class.
         """
