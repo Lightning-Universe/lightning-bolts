@@ -125,11 +125,12 @@ class RandomDictDataset(Dataset):
             raise ValueError("Provide an argument greater than 0 for `size`")
 
         self.len = num_samples
-        self.data = torch.randn(num_samples, size)
+        self.data_a = torch.randn(num_samples, size)
+        self.data_b = torch.randn(num_samples, size)
 
     def __getitem__(self, index):
-        a = self.data[index]
-        b = a + 2
+        a = self.data_a[index]
+        b = self.data_b[index]
         return {"a": a, "b": b}
 
     def __len__(self):
