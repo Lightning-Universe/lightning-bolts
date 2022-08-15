@@ -101,9 +101,9 @@ class BYOL(LightningModule):
         self.target_network = deepcopy(self.online_network)
         self.weight_callback = BYOLMAWeightUpdate()
 
-    def on_train_batch_end(self, outputs, batch: Any, batch_idx: int, dataloader_idx: int) -> None:
+    def on_train_batch_end(self, outputs, batch: Any, batch_idx: int) -> None:
         # Add callback for user automatically since it's key to BYOL weight update
-        self.weight_callback.on_train_batch_end(self.trainer, self, outputs, batch, batch_idx, dataloader_idx)
+        self.weight_callback.on_train_batch_end(self.trainer, self, outputs, batch, batch_idx)
 
     def forward(self, x):
         y, _, _ = self.online_network(x)
@@ -210,14 +210,14 @@ def cli_main():
         dm.train_dataloader = dm.train_dataloader_mixed
         dm.val_dataloader = dm.val_dataloader_mixed
 
-        (c, h, w) = dm.size()
+        (c, h, w) = dm.dims
         dm.train_transforms = SimCLRTrainDataTransform(h)
         dm.val_transforms = SimCLREvalDataTransform(h)
         args.num_classes = dm.num_classes
 
     elif args.dataset == "imagenet2012":
         dm = ImagenetDataModule.from_argparse_args(args, image_size=196)
-        (c, h, w) = dm.size()
+        (c, h, w) = dm.dims
         dm.train_transforms = SimCLRTrainDataTransform(h)
         dm.val_transforms = SimCLREvalDataTransform(h)
         args.num_classes = dm.num_classes

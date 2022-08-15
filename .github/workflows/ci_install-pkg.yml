@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
 
@@ -34,12 +34,12 @@ jobs:
       fail-fast: false
       # max-parallel: 6
       matrix:
-        os: [ubuntu-20.04, macOS-11, windows-2019]
+        os: [ubuntu-20.04, macOS-11, windows-2022]
         python-version: [3.8]
 
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 

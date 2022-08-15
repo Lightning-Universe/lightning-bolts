@@ -15,7 +15,6 @@ else:  # pragma: no cover
     CIFAR10 = None
 
 
-@under_review()
 class CIFAR10DataModule(VisionDataModule):
     """
     .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/wp-content/uploads/2019/01/
