@@ -2,19 +2,19 @@ import logging
 import os
 import urllib.request
 from abc import ABC
+from dataclasses import dataclass
 from typing import Callable, List, Optional, Sequence, Tuple, Union
 from urllib.error import HTTPError
 
 import numpy as np
 import torch
-from pytorch_lightning.utilities import exceptions
 from torch import Tensor
 from torch.utils.data import Dataset
 
 from pl_bolts.utils.stability import under_review
 
 # TODO: Move this to a more appropriate place.
-ARRAYS = Union[torch.Tensor, np.ndarray, List[Union[float, int]]]
+ARRAYS = Union[torch.Tensor, np.ndarray, List[Union[float, int]], List[List[Union[float, int]]]]
 
 
 @under_review()
@@ -65,55 +65,29 @@ class LightDataset(ABC, Dataset):
             raise RuntimeError(f"Failed download from {url}") from err
 
 
-class BoltsDataset(Dataset):
-    """Base class for Bolts datasets.
+@dataclass
+class DataModel:
+    """Data model dataclass.
 
-    Args:
-        arrays: Sequence of indexables.
-        transforms: A callable that takes input data and target data and returns transformed versions of both.
-        input_transform: A callable that takes input data and returns a transformed version.
-        target_transform: A callable that takes target data and returns a transformed version.
+    Ties together data and callable transforms.
 
-    Raises:
-        MisconfigurationException: Only transforms or input_transform/target_transform can be passed as argument.
-        MisconfigurationException: transforms can only be applied to arrays of length 2.
-        MisconfigurationException: input_transform and target_transform can only be applied to arrays length 2.
-        MisconfigurationException: target_transform can only be applied to arrays length 2.
+    Attributes:
+        data: Sequence of indexables.
+        transform: Callable to transform data.
     """
 
-    def __init__(
-        self,
-        *arrays: Tuple[ARRAYS],
-        transforms: Optional[Callable] = None,
-        input_transform: Optional[Callable] = None,
-        target_transform: Optional[Callable] = None,
-    ) -> None:
+    data: ARRAYS
+    transform: Optional[Callable] = None
 
-        has_transforms = transforms is not None
-        has_separate_transform = input_transform is not None or target_transform is not None
-        if has_transforms and has_separate_transform:
-            raise exceptions.MisconfigurationException(
-                "Only transforms or input_transform/target_transform can be passed as argument"
-            )
+    def process(self, data: ARRAYS) -> ARRAYS:
+        """Transforms data.
 
-        if has_transforms and len(arrays) != 2:
-            raise exceptions.MisconfigurationException("transforms can only be applied to arrays of length 2.")
+        Args:
+            data: Sequence of indexables.
 
-        if input_transform is not None and target_transform is not None and len(arrays) != 2:
-            raise exceptions.MisconfigurationException(
-                "input_transform and target_transform can only be applied to arrays of length 2."
-            )
-
-        if target_transform is not None and len(arrays) != 2:
-            raise exceptions.MisconfigurationException("target_transform can only be applied to arrays of length 2.")
-
-        self.arrays = arrays
-        self.transforms = transforms
-        self.input_transform = input_transform
-        self.target_transform = target_transform
-
-    def __getitem__(self, idx: int):
-        raise NotImplementedError
-
-    def __len__(self) -> int:
-        raise NotImplementedError
+        Returns:
+            ARRAYS: Transformed data if transform is not None.
+        """
+        if self.transform is not None:
+            data = self.transform(data)
+        return data
