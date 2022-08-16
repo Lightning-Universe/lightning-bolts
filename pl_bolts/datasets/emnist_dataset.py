@@ -16,9 +16,13 @@ else:  # pragma: no cover
 
 
 class BinaryEMNIST(EMNIST):
-    threshold = 127
+    """Binarizred EMNIST Dataset.
+    
+    EMNIST dataset binarized using a thresholding operation.
+    Threshold is set to 127.
+    """
 
-    """Binarizred EMNIST Dataset."""
+    threshold = 127.0
 
     def __getitem__(self, idx: int) -> Tuple[Any, Any]:
         """
