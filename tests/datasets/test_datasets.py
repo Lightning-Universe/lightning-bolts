@@ -11,7 +11,6 @@ from pl_bolts.datasets import (
     RandomDictDataset,
     RandomDictStringDataset,
 )
-
 from pl_bolts.datasets.dummy_dataset import DummyDetectionDataset
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 
@@ -148,9 +147,9 @@ def test_binary_mnist_dataset(datadir):
     assert img.size() == torch.Size([1, 1, 28, 28])
     assert target.size() == torch.Size([1])
 
-    assert torch.allclose(img.min(), torch.tensor(0.))
-    assert torch.allclose(img.max(), torch.tensor(1.))
-    assert torch.equal(torch.unique(img), torch.tensor([0., 1.]))
+    assert torch.allclose(img.min(), torch.tensor(0.0))
+    assert torch.allclose(img.max(), torch.tensor(1.0))
+    assert torch.equal(torch.unique(img), torch.tensor([0.0, 1.0]))
 
 
 @pytest.mark.parametrize("split", ["byclass", "bymerge", "balanced", "letters", "digits", "mnist"])
@@ -162,6 +161,6 @@ def test_binary_emnist_dataset(datadir, split):
     assert img.size() == torch.Size([1, 1, 28, 28])
     assert target.size() == torch.Size([1])
 
-    assert torch.allclose(img.min(), torch.tensor(0.))
-    assert torch.allclose(img.max(), torch.tensor(1.))
-    assert torch.equal(torch.unique(img), torch.tensor([0., 1.]))
+    assert torch.allclose(img.min(), torch.tensor(0.0))
+    assert torch.allclose(img.max(), torch.tensor(1.0))
+    assert torch.equal(torch.unique(img), torch.tensor([0.0, 1.0]))

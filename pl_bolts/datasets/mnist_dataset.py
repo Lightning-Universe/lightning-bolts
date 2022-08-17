@@ -17,11 +17,11 @@ else:  # pragma: no cover
 
 class BinaryMNIST(MNIST):
     """Binarized MNIST Dataset.
-    
-    MNIST dataset binarized using a thresholding operation. Threshold is set to 127.
-    Note that the images are binarized prior to the application of any transforms.
+
+    MNIST dataset binarized using a thresholding operation. Threshold is set to 127. Note that the images are binarized
+    prior to the application of any transforms.
     """
-    
+
     threshold = 127.0
 
     def __getitem__(self, idx: int) -> Tuple[Any, Any]:

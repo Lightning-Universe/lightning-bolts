@@ -17,9 +17,9 @@ else:  # pragma: no cover
 
 class BinaryEMNIST(EMNIST):
     """Binarized EMNIST Dataset.
-    
-    EMNIST dataset binarized using a thresholding operation. Threshold is set to 127.
-    Note that the images are binarized prior to the application of any transforms.
+
+    EMNIST dataset binarized using a thresholding operation. Threshold is set to 127. Note that the images are binarized
+    prior to the application of any transforms.
     """
 
     threshold = 127.0

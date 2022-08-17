@@ -122,7 +122,7 @@ def test_emnist_datamodules(datadir, dm_cls, split):
     val_loader = dm.val_dataloader()
     img, _ = next(iter(val_loader))
     assert img.size() == torch.Size([2, *dm.dims])
-    
+
     test_loader = dm.test_dataloader()
     img, _ = next(iter(test_loader))
     assert img.size() == torch.Size([2, *dm.dims])
