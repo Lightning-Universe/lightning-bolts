@@ -18,8 +18,8 @@ else:  # pragma: no cover
 class BinaryMNIST(MNIST):
     """Binarized MNIST Dataset.
     
-    MNIST dataset binarized using a thresholding operation.
-    Threshold is set to 127.
+    MNIST dataset binarized using a thresholding operation. Threshold is set to 127.
+    Note that the images are binarized prior to the application of any transforms.
     """
     
     threshold = 127.0
@@ -37,12 +37,11 @@ class BinaryMNIST(MNIST):
 
         img, target = self.data[idx], int(self.targets[idx])
 
-        # Binarize image according to threshold
-        img[img < self.threshold] = 0.0
-        img[img >= self.threshold] = 255.0
-
         # Convert to PIL Image (8-bit BW)
         img = Image.fromarray(img.numpy(), mode="L")
+
+        # Binarize image at threshold
+        img = img.point(lambda p: 255 if p > self.threshold else 0)
 
         if self.transform is not None:
             img = self.transform(img)
