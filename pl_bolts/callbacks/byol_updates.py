@@ -1,24 +1,24 @@
 import math
 from typing import Sequence, Union
 
+import torch.nn as nn
 from pytorch_lightning import Callback, LightningModule, Trainer
 from torch import Tensor
-from torch.nn import Module
 
 from pl_bolts.utils.stability import under_review
 
 
 @under_review()
 class BYOLMAWeightUpdate(Callback):
-    """Weight update rule from BYOL.
-
-    Your model should have:
-
-        - ``self.online_network``
-        - ``self.target_network``
+    """Weight update rule from Bootstrap Your Own Latent (BYOL).
 
     Updates the target_network params using an exponential moving average update rule weighted by tau.
     BYOL claims this keeps the online_network from collapsing.
+
+    Your PyTorch Lightning module should have:
+
+        - ``self.online_network``
+        - ``self.target_network``
 
     .. note:: Automatically increases tau from ``initial_tau`` to 1.0 with every training step
 
@@ -32,10 +32,10 @@ class BYOLMAWeightUpdate(Callback):
         trainer = Trainer(callbacks=[BYOLMAWeightUpdate()])
     """
 
-    def __init__(self, initial_tau: float = 0.996):
+    def __init__(self, initial_tau: float = 0.996) -> None:
         """
         Args:
-            initial_tau: starting tau. Auto-updates with every training step
+            initial_tau (float, optional): starting tau. Auto-updates with every training step
         """
         super().__init__()
         self.initial_tau = initial_tau
@@ -57,14 +57,13 @@ class BYOLMAWeightUpdate(Callback):
         self.update_weights(online_net, target_net)
 
         # update tau after
-        self.current_tau = self.update_tau(pl_module, trainer)
+        self.update_tau(pl_module, trainer)
 
-    def update_tau(self, pl_module: LightningModule, trainer: Trainer) -> float:
+    def update_tau(self, pl_module: LightningModule, trainer: Trainer) -> None:
         max_steps = len(trainer.train_dataloader) * trainer.max_epochs
-        tau = 1 - (1 - self.initial_tau) * (math.cos(math.pi * pl_module.global_step / max_steps) + 1) / 2
-        return tau
+        self.current_tau = 1 - (1 - self.initial_tau) * (math.cos(math.pi * pl_module.global_step / max_steps) + 1) / 2
 
-    def update_weights(self, online_net: Union[Module, Tensor], target_net: Union[Module, Tensor]) -> None:
+    def update_weights(self, online_net: Union[nn.Module, Tensor], target_net: Union[nn.Module, Tensor]) -> None:
         # apply MA weight update
         for (name, online_p), (_, target_p) in zip(
             online_net.named_parameters(),
