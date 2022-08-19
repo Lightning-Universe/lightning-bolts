@@ -12,6 +12,8 @@ Bolts is a Deep learning research and production toolbox of:
 
 **The Main goal of Bolts is to enable trying new ideas as fast as possible!**
 
+.. note:: Currently, Bolts is going through a major revision. For more information about it, see these GitHub issues (`#819 <https://github.com/Lightning-AI/lightning-bolts/issues/819>`_ and `#839 <https://github.com/Lightning-AI/lightning-bolts/issues/839>`_) and `stability section <https://lightning-bolts.readthedocs.io/en/latest/stability.html>`_
+
 All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, GPUs and 16-bit precision.
 
 **some examples!**
@@ -391,7 +393,7 @@ Here's an example for Linear regression
     # training runs training batches while validating against a validation set
     model = LinearRegression()
     trainer = pl.Trainer(num_gpus=8)
-    trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
+    trainer.fit(model, train_dataloaders=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
 
 Once you're done, you can run the test set if needed.
 
@@ -435,7 +437,7 @@ Here's an example for logistic regression
 
     # fit
     trainer = pl.Trainer(tpu_cores=8, precision=16)
-    trainer.fit(model, train_dataloader=dm.train_dataloader(), val_dataloaders=dm.val_dataloader())
+    trainer.fit(model, train_dataloaders=dm.train_dataloader(), val_dataloaders=dm.val_dataloader())
 
     trainer.test(test_dataloaders=dm.test_dataloader())
 

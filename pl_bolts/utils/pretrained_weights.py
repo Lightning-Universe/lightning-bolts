@@ -2,6 +2,8 @@ from typing import Optional
 
 from pytorch_lightning import LightningModule
 
+from pl_bolts.utils.stability import under_review
+
 vae_imagenet2012 = (
     "https://pl-bolts-weights.s3.us-east-2.amazonaws.com/" "vae/imagenet_06_22_2019/checkpoints/epoch%3D63.ckpt"
 )
@@ -10,6 +12,7 @@ cpcv2_resnet18 = "https://pl-bolts-weights.s3.us-east-2.amazonaws.com/" "cpc/res
 urls = {"vae-imagenet2012": vae_imagenet2012, "CPC_v2-resnet18": cpcv2_resnet18}
 
 
+@under_review()
 def load_pretrained(model: LightningModule, class_name: Optional[str] = None) -> None:  # pragma: no cover
     if class_name is None:
         class_name = model.__class__.__name__

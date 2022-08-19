@@ -5,7 +5,10 @@ from typing import Any, Dict, List, Optional
 
 from pytorch_lightning import LightningDataModule, LightningModule
 
+from pl_bolts.utils.stability import under_review
 
+
+@under_review()
 @dataclass(frozen=True)
 class LitArg:
     """Dataclass to represent init args of an object."""
@@ -17,6 +20,7 @@ class LitArg:
     context: Optional[str] = None
 
 
+@under_review()
 class LightningArgumentParser(ArgumentParser):
     """Extension of argparse.ArgumentParser that lets you parse arbitrary object init args.
 
@@ -72,6 +76,7 @@ class LightningArgumentParser(ArgumentParser):
         return lit_args
 
 
+@under_review()
 def gather_lit_args(cls: Any, root_cls: Optional[Any] = None) -> List[LitArg]:
 
     if root_cls is None:

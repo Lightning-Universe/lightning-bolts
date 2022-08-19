@@ -8,6 +8,7 @@ from torch import Tensor
 
 from pl_bolts.datasets import LightDataset
 from pl_bolts.utils import _PIL_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _PIL_AVAILABLE:
@@ -16,6 +17,7 @@ else:  # pragma: no cover
     warn_missing_pkg("PIL", pypi_name="Pillow")
 
 
+@under_review()
 class CIFAR10(LightDataset):
     """Customized `CIFAR10 <http://www.cs.toronto.edu/~kriz/cifar.html>`_ dataset for testing Pytorch Lightning
     without the torchvision dependency.
@@ -153,6 +155,7 @@ class CIFAR10(LightDataset):
         self._download_from_url(self.BASE_URL, data_folder, self.FILE_NAME)
 
 
+@under_review()
 class TrialCIFAR10(CIFAR10):
     """
     Customized `CIFAR10 <http://www.cs.toronto.edu/~kriz/cifar.html>`_ dataset for testing Pytorch Lightning

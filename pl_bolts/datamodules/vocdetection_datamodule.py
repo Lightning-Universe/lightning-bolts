@@ -7,6 +7,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -16,6 +17,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 class Compose:
     """Like `torchvision.transforms.compose` but works for (image, target)"""
 
@@ -60,6 +62,7 @@ CLASSES = (
 )
 
 
+@under_review()
 def _prepare_voc_instance(image: Any, target: Dict[str, Any]):
     """Prepares VOC dataset into appropriate target for fasterrcnn.
 
@@ -101,6 +104,7 @@ def _prepare_voc_instance(image: Any, target: Dict[str, Any]):
     return image, target
 
 
+@under_review()
 class VOCDetectionDataModule(LightningDataModule):
     """TODO(teddykoker) docstring."""
 
@@ -116,6 +120,10 @@ class VOCDetectionDataModule(LightningDataModule):
         shuffle: bool = True,
         pin_memory: bool = True,
         drop_last: bool = False,
+        train_transforms: Optional[Callable] = None,
+        val_transforms: Optional[Callable] = None,
+        test_transforms: Optional[Callable] = None,
+        target_transforms: Optional[Callable] = None,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -134,6 +142,10 @@ class VOCDetectionDataModule(LightningDataModule):
         self.shuffle = shuffle
         self.pin_memory = pin_memory
         self.drop_last = drop_last
+        self.train_transforms = train_transforms
+        self.val_transforms = val_transforms
+        self.test_transforms = test_transforms
+        self.target_transforms = target_transforms
 
     @property
     def num_classes(self) -> int:

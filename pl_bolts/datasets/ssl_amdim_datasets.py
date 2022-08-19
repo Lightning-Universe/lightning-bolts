@@ -4,6 +4,7 @@ from typing import Callable, Optional
 import numpy as np
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -13,6 +14,7 @@ else:  # pragma: no cover
     CIFAR10 = object
 
 
+@under_review()
 class SSLDatasetMixin(ABC):
     @classmethod
     def generate_train_val_split(cls, examples, labels, pct_val):
@@ -89,6 +91,7 @@ class SSLDatasetMixin(ABC):
         return x, y
 
 
+@under_review()
 class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
     def __init__(
         self,
@@ -108,7 +111,7 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
 
         # use train for all of these splits
         train = split in ("val", "train", "train+unlabeled")
-        super().__init__(root, train, transform, target_transform, download)
+        super(SSLDatasetMixin, self).__init__(root, train, transform, target_transform, download)
 
         # modify only for val, train
         if split != "test":

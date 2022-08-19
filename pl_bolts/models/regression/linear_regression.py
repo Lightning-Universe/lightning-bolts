@@ -8,7 +8,10 @@ from torch.nn import functional as F
 from torch.optim import Adam
 from torch.optim.optimizer import Optimizer
 
+from pl_bolts.utils.stability import under_review
 
+
+@under_review()
 class LinearRegression(LightningModule):
     """
     Linear regression model implementing - with optional L1/L2 regularization
@@ -109,6 +112,7 @@ class LinearRegression(LightningModule):
         return parser
 
 
+@under_review()
 def cli_main() -> None:
     from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
     from pl_bolts.utils import _SKLEARN_AVAILABLE
@@ -139,7 +143,7 @@ def cli_main() -> None:
 
     # train
     trainer = Trainer.from_argparse_args(args)
-    trainer.fit(model, train_dataloader=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
+    trainer.fit(model, train_dataloaders=loaders.train_dataloader(), val_dataloaders=loaders.val_dataloader())
 
 
 if __name__ == "__main__":

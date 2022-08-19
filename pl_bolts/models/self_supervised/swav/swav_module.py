@@ -17,8 +17,10 @@ from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization,
     stl10_normalization,
 )
+from pl_bolts.utils.stability import under_review
 
 
+@under_review()
 class SwAV(LightningModule):
     def __init__(
         self,
@@ -444,6 +446,7 @@ class SwAV(LightningModule):
         return parser
 
 
+@under_review()
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
@@ -510,7 +513,7 @@ def cli_main():
         dm = ImagenetDataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         args.num_samples = dm.num_samples
-        args.input_height = dm.size()[-1]
+        args.input_height = dm.dims[-1]
     else:
         raise NotImplementedError("other datasets have not been implemented till now")
 

@@ -9,8 +9,10 @@ from torch.distributions import Categorical, Normal
 from torch.nn import functional as F
 
 from pl_bolts.models.rl.common.distributions import TanhMultivariateNormal
+from pl_bolts.utils.stability import under_review
 
 
+@under_review()
 class CNN(nn.Module):
     """Simple MLP network."""
 
@@ -57,6 +59,7 @@ class CNN(nn.Module):
         return self.head(conv_out)
 
 
+@under_review()
 class MLP(nn.Module):
     """Simple MLP network."""
 
@@ -86,6 +89,7 @@ class MLP(nn.Module):
         return self.net(input_x.float())
 
 
+@under_review()
 class ContinuousMLP(nn.Module):
     """MLP network that outputs continuous value via Gaussian distribution."""
 
@@ -144,6 +148,7 @@ class ContinuousMLP(nn.Module):
         return self.action_scale * torch.tanh(batch_mean) + self.action_bias
 
 
+@under_review()
 class ActorCriticMLP(nn.Module):
     """MLP network with heads for actor and critic."""
 
@@ -175,6 +180,7 @@ class ActorCriticMLP(nn.Module):
         return a, c
 
 
+@under_review()
 class DuelingMLP(nn.Module):
     """MLP network with duel heads for val and advantage."""
 
@@ -227,6 +233,7 @@ class DuelingMLP(nn.Module):
         return self.fc_adv(base_out), self.fc_val(base_out)
 
 
+@under_review()
 class DuelingCNN(nn.Module):
     """CNN network with duel heads for val and advantage."""
 
@@ -295,6 +302,7 @@ class DuelingCNN(nn.Module):
         return self.head_adv(base_out), self.head_val(base_out)
 
 
+@under_review()
 class NoisyCNN(nn.Module):
     """CNN with Noisy Linear layers for exploration."""
 
@@ -348,6 +356,7 @@ class NoisyCNN(nn.Module):
 ###################
 
 
+@under_review()
 class NoisyLinear(nn.Linear):
     """Noisy Layer using Independent Gaussian Noise.
 
@@ -404,6 +413,7 @@ class NoisyLinear(nn.Linear):
         return F.linear(input_x, noisy_weights, bias)
 
 
+@under_review()
 class ActorCategorical(nn.Module):
     """Policy network, for discrete action spaces, which returns a distribution and an action given an
     observation."""
@@ -437,6 +447,7 @@ class ActorCategorical(nn.Module):
         return pi.log_prob(actions)
 
 
+@under_review()
 class ActorContinous(nn.Module):
     """Policy network, for continous action spaces, which returns a distribution and an action given an
     observation."""

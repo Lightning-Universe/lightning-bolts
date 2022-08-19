@@ -6,7 +6,10 @@ from pytorch_lightning.accelerators import Accelerator
 from torch import Tensor
 from torch.nn import functional as F
 
+from pl_bolts.utils.stability import under_review
 
+
+@under_review()
 class KNNOnlineEvaluator(Callback):
     """Weighted KNN online evaluator for self-supervised learning.
     The weighted KNN classifier matches sec 3.4 of https://arxiv.org/pdf/1805.01978.pdf.
@@ -138,5 +141,6 @@ class KNNOnlineEvaluator(Callback):
         pl_module.log("online_knn_val_acc", total_top1 / total_num, on_step=False, on_epoch=True, sync_dist=True)
 
 
+@under_review()
 def concat_all_gather(tensor: Tensor, accelerator: Accelerator) -> Tensor:
     return accelerator.all_gather(tensor).view(-1, *tensor.shape[1:])

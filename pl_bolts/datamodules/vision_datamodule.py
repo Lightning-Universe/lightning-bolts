@@ -27,6 +27,9 @@ class VisionDataModule(LightningDataModule):
         shuffle: bool = True,
         pin_memory: bool = True,
         drop_last: bool = False,
+        train_transforms: Optional[Callable] = None,
+        val_transforms: Optional[Callable] = None,
+        test_transforms: Optional[Callable] = None,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -42,6 +45,9 @@ class VisionDataModule(LightningDataModule):
             pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
                         returning them
             drop_last: If true drops the last incomplete batch
+            train_transforms: transformations you can apply to train dataset
+            val_transforms: transformations you can apply to validation dataset
+            test_transforms: transformations you can apply to test dataset
         """
 
         super().__init__(*args, **kwargs)
@@ -55,6 +61,36 @@ class VisionDataModule(LightningDataModule):
         self.shuffle = shuffle
         self.pin_memory = pin_memory
         self.drop_last = drop_last
+        self._train_transforms = train_transforms
+        self._val_transforms = val_transforms
+        self._test_transforms = test_transforms
+
+    @property
+    def train_transforms(self) -> Optional[Callable[..., Any]]:
+        """Optional transforms (or collection of transforms) you can apply to train dataset."""
+        return self._train_transforms
+
+    @train_transforms.setter
+    def train_transforms(self, t: Callable) -> None:
+        self._train_transforms = t
+
+    @property
+    def val_transforms(self) -> Optional[Callable[..., Any]]:
+        """Optional transforms (or collection of transforms) you can apply to validation dataset."""
+        return self._val_transforms
+
+    @val_transforms.setter
+    def val_transforms(self, t: Callable) -> None:
+        self._val_transforms = t
+
+    @property
+    def test_transforms(self) -> Optional[Callable[..., Any]]:
+        """Optional transforms (or collection of transforms) you can apply to test dataset."""
+        return self._test_transforms
+
+    @test_transforms.setter
+    def test_transforms(self, t: Callable) -> None:
+        self._test_transforms = t
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
         """Saves files to data_dir."""

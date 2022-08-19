@@ -6,6 +6,7 @@ from pytorch_lightning import LightningModule, Trainer, seed_everything
 
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -16,6 +17,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 def _evaluate_iou(target, pred):
     """Evaluate intersection over union (IOU) for target from dataset and output prediction from model."""
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
@@ -27,6 +29,7 @@ def _evaluate_iou(target, pred):
     return box_iou(target["boxes"], pred["boxes"]).diag().mean()
 
 
+@under_review()
 class FasterRCNN(LightningModule):
     """PyTorch Lightning implementation of `Faster R-CNN: Towards Real-Time Object Detection with Region Proposal
     Networks <https://arxiv.org/abs/1506.01497>`_.
@@ -152,6 +155,7 @@ class FasterRCNN(LightningModule):
         return parser
 
 
+@under_review()
 def run_cli():
     from pl_bolts.datamodules import VOCDetectionDataModule
 

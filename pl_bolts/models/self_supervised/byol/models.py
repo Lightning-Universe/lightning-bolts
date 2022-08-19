@@ -1,8 +1,10 @@
 from torch import nn
 
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
+from pl_bolts.utils.stability import under_review
 
 
+@under_review()
 class MLP(nn.Module):
     def __init__(self, input_dim=2048, hidden_size=4096, output_dim=256):
         super().__init__()
@@ -20,6 +22,7 @@ class MLP(nn.Module):
         return x
 
 
+@under_review()
 class SiameseArm(nn.Module):
     def __init__(self, encoder="resnet50", encoder_out_dim=2048, projector_hidden_size=4096, projector_out_dim=256):
         super().__init__()

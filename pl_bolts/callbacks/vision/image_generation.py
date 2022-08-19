@@ -4,6 +4,7 @@ import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -12,6 +13,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 class TensorboardGenerativeModelImageSampler(Callback):
     """Generates images and logs to tensorboard. Your model must implement the ``forward`` function for generation.
 

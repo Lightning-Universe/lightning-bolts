@@ -4,12 +4,14 @@ from copy import deepcopy
 from typing import Any, Optional
 
 import torch.nn as nn
-from pytorch_lightning import Callback
-from pytorch_lightning.core.lightning import LightningModule
+from pytorch_lightning import Callback, LightningModule
 from pytorch_lightning.utilities import move_data_to_device, rank_zero_warn
 from pytorch_lightning.utilities.signature_utils import is_param_in_hook_signature
 
+from pl_bolts.utils.stability import under_review
 
+
+@under_review()
 class VerificationBase:
     """Base class for model verification.
 
@@ -79,6 +81,7 @@ class VerificationBase:
         return self.model(input_array)
 
 
+@under_review()
 class VerificationCallbackBase(Callback):
     """Base class for model verification in form of a callback.
 

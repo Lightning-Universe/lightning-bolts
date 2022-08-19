@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
 from pl_bolts.models.gans.dcgan.components import DCGANDiscriminator, DCGANGenerator
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -18,6 +19,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 class DCGAN(LightningModule):
     """DCGAN implementation.
 
@@ -171,6 +173,7 @@ class DCGAN(LightningModule):
         return parser
 
 
+@under_review()
 def cli_main(args=None):
     seed_everything(1234)
 

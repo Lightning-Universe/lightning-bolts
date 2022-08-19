@@ -1,4 +1,3 @@
-# type: ignore[override]
 import os
 from typing import Any, Callable, Optional
 
@@ -9,6 +8,7 @@ from torch.utils.data import DataLoader, random_split
 from pl_bolts.datasets import ConcatDataset
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -18,6 +18,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 class STL10DataModule(LightningDataModule):  # pragma: no cover
     """
     .. figure:: https://samyzaf.com/ML/cifar10/cifar1.jpg
@@ -33,7 +34,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
 
     Transforms::
 
-        mnist_transforms = transform_lib.Compose([
+        transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transforms.Normalize(
                 mean=(0.43, 0.42, 0.39),
@@ -52,6 +53,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
     """
 
     name = "stl10"
+    dims = (3, 96, 96)
 
     def __init__(
         self,
@@ -87,7 +89,6 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
                 "You want to use STL10 dataset loaded from `torchvision` which is not installed yet."
             )
 
-        self.dims = (3, 96, 96)
         self.data_dir = data_dir if data_dir is not None else os.getcwd()
         self.unlabeled_val_split = unlabeled_val_split
         self.train_val_split = train_val_split

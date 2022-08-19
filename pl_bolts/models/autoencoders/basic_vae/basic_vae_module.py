@@ -13,8 +13,10 @@ from pl_bolts.models.autoencoders.components import (
     resnet50_decoder,
     resnet50_encoder,
 )
+from pl_bolts.utils.stability import under_review
 
 
+@under_review()
 class VAE(LightningModule):
     """Standard VAE with Gaussian Prior and approx posterior.
 
@@ -182,6 +184,7 @@ class VAE(LightningModule):
         return parser
 
 
+@under_review()
 def cli_main(args=None):
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
 
@@ -205,7 +208,7 @@ def cli_main(args=None):
     args = parser.parse_args(args)
 
     dm = dm_cls.from_argparse_args(args)
-    args.input_height = dm.size()[-1]
+    args.input_height = dm.dims[-1]
 
     if args.max_steps == -1:
         args.max_steps = None

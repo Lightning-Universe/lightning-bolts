@@ -19,9 +19,8 @@ ______________________________________________________________________
 
 [![PyPI Status](https://badge.fury.io/py/lightning-bolts.svg)](https://badge.fury.io/py/lightning-bolts)
 [![PyPI Status](https://pepy.tech/badge/lightning-bolts)](https://pepy.tech/project/lightning-bolts)
-[![Build Status](https://dev.azure.com/PytorchLightning/lightning%20Bolts/_apis/build/status/PyTorchLightning.lightning-bolts?branchName=master)](https://dev.azure.com/PytorchLightning/lightning%20Bolts/_build/latest?definitionId=5&branchName=master)
-[![codecov](https://codecov.io/gh/PyTorchLightning/lightning-bolts/branch/master/graph/badge.svg)](https://codecov.io/gh/PyTorchLightning/lightning-bolts)
-[![CodeFactor](https://www.codefactor.io/repository/github/pytorchlightning/lightning-bolts/badge)](https://www.codefactor.io/repository/github/pytorchlightning/lightning-bolts)
+[![Build Status](https://dev.azure.com/Lightning-AI/lightning%20Bolts/_apis/build/status/Lightning-AI.lightning-bolts?branchName=master)](https://dev.azure.com/Lightning-AI/lightning%20Bolts/_build?definitionId=31&_a=summary&repositoryFilter=13&branchFilter=4923%2C4923)
+[![codecov](https://codecov.io/gh/Lightning-AI/lightning-bolts/branch/master/graph/badge.svg?token=O8p0qhvj90)](https://codecov.io/gh/Lightning-AI/lightning-bolts)
 
 [![Documentation Status](https://readthedocs.org/projects/lightning-bolts/badge/?version=latest)](https://lightning-bolts.readthedocs.io/en/latest/)
 [![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://www.pytorchlightning.ai/community)
@@ -113,13 +112,11 @@ trainer.fit(model)
 
 ## Are specific research implementations supported?
 
-We've deprecated a bunch of specific model research, primarily because they've grown outdated or support for them was not possible. This also means in the future we'll not accept any model specific research. We'd like to encourage users to contribute general components that will help a broad range of problems, however components that help specifics domains will also be welcomed!
+We'd like to encourage users to contribute general components that will help a broad range of problems, however components that help specifics domains will also be welcomed!
 
 For example a callback to help train SSL models would be a great contribution, however the next greatest SSL model from your latest paper would be a good contribution to [Lightning Flash](https://github.com/PyTorchLightning/lightning-flash).
 
 Use [Lightning Flash](https://github.com/PyTorchLightning/lightning-flash) to train, predict and serve state-of-the-art models for applied research. We suggest looking at our [VISSL](https://lightning-flash.readthedocs.io/en/latest/integrations/vissl.html) Flash integration for SSL based tasks.
-
-See [Deprecated Modules](https://lightning-bolts.readthedocs.io/en/latest/deprecated.html) for more information.
 
 ## Contribute!
 

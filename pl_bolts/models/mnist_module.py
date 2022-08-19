@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader, random_split
 
 from pl_bolts.datasets import MNIST
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -15,6 +16,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 class LitMNIST(LightningModule):
     def __init__(self, hidden_dim=128, learning_rate=1e-3, batch_size=32, num_workers=4, data_dir="", **kwargs):
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
@@ -88,6 +90,7 @@ class LitMNIST(LightningModule):
         return parser
 
 
+@under_review()
 def cli_main():
     # args
     parser = ArgumentParser()

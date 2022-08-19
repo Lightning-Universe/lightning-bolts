@@ -8,6 +8,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 
 from pl_bolts.utils import _SKLEARN_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _SKLEARN_AVAILABLE:
@@ -16,6 +17,7 @@ else:  # pragma: no cover
     warn_missing_pkg("sklearn")
 
 
+@under_review()
 class SklearnDataset(Dataset):
     """Mapping between numpy (or sklearn) datasets to PyTorch datasets.
 
@@ -63,6 +65,7 @@ class SklearnDataset(Dataset):
         return x, y
 
 
+@under_review()
 class TensorDataset(Dataset):
     """Prepare PyTorch tensor dataset for data loaders.
 
@@ -106,6 +109,7 @@ class TensorDataset(Dataset):
         return x, y
 
 
+@under_review()
 class SklearnDataModule(LightningDataModule):
     """Automatically generates the train, validation and test splits for a Numpy dataset. They are set up as
     dataloaders for convenience. Optionally, you can pass in your own validation and test splits.

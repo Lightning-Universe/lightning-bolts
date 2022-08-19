@@ -15,6 +15,7 @@ from pl_bolts.datamodules.experience_source import Experience
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.utils import _GYM_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
@@ -23,6 +24,7 @@ else:  # pragma: no cover
     warn_missing_pkg("gym")
 
 
+@under_review()
 class Reinforce(LightningModule):
     r"""PyTorch Lightning implementation of REINFORCE_.
 
@@ -302,6 +304,7 @@ class Reinforce(LightningModule):
         return arg_parser
 
 
+@under_review()
 def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 

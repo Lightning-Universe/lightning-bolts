@@ -1,4 +1,3 @@
-# type: ignore[override]
 import os
 from typing import Any, Callable, Optional
 
@@ -8,6 +7,7 @@ from torch.utils.data import DataLoader
 from pl_bolts.datasets import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -16,6 +16,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 class ImagenetDataModule(LightningDataModule):
     """
     .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/wp-content/uploads/2017/08/

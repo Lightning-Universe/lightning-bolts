@@ -3,8 +3,10 @@ import torch
 from torch import nn
 
 from pl_bolts.models.vision.pixel_cnn import PixelCNN
+from pl_bolts.utils.stability import under_review
 
 
+@under_review()
 def nt_xent_loss(out_1, out_2, temperature):
     """Loss used in SimCLR."""
     out = torch.cat([out_1, out_2], dim=0)
@@ -26,6 +28,7 @@ def nt_xent_loss(out_1, out_2, temperature):
     return loss
 
 
+@under_review()
 class CPCTask(nn.Module):
     """Loss used in CPC."""
 
@@ -87,6 +90,7 @@ class CPCTask(nn.Module):
         return loss
 
 
+@under_review()
 class AmdimNCELoss(nn.Module):
     """Compute the NCE scores for predicting r_src->r_trg."""
 
@@ -181,6 +185,7 @@ class AmdimNCELoss(nn.Module):
         return nce_scores, lgt_reg
 
 
+@under_review()
 class FeatureMapContrastiveTask(nn.Module):
     """Performs an anchor, positive negative pair comparison for each each tuple of feature maps passed.
 
@@ -365,6 +370,7 @@ class FeatureMapContrastiveTask(nn.Module):
         return torch.stack(losses), regularizer
 
 
+@under_review()
 def tanh_clip(x, clip_val=10.0):
     """soft clip values to the range [-clip_val, +clip_val]"""
     if clip_val is not None:

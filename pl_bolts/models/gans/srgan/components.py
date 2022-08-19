@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -11,6 +12,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 class ResidualBlock(nn.Module):
     def __init__(self, feature_maps: int = 64) -> None:
         super().__init__()
@@ -27,6 +29,7 @@ class ResidualBlock(nn.Module):
         return x + self.block(x)
 
 
+@under_review()
 class SRGANGenerator(nn.Module):
     def __init__(
         self,
@@ -78,6 +81,7 @@ class SRGANGenerator(nn.Module):
         return x
 
 
+@under_review()
 class SRGANDiscriminator(nn.Module):
     def __init__(self, image_channels: int, feature_maps: int = 64) -> None:
         super().__init__()
@@ -131,6 +135,7 @@ class SRGANDiscriminator(nn.Module):
         return x
 
 
+@under_review()
 class VGG19FeatureExtractor(nn.Module):
     def __init__(self, image_channels: int = 3) -> None:
         super().__init__()

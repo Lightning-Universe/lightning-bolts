@@ -11,8 +11,10 @@ from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
+from pl_bolts.utils.stability import under_review
 
 
+@under_review()
 def generate_power_seq(lr, nb):
     half = int(nb / 2)
     coefs = [2**pow for pow in range(half, -half - 1, -1)]
@@ -59,6 +61,7 @@ DATASET_IMAGENET2012 = {
 }
 
 
+@under_review()
 class AMDIM(LightningModule):
     """PyTorch Lightning implementation of Augmented Multiscale Deep InfoMax (AMDIM_)
 
@@ -318,6 +321,7 @@ class AMDIM(LightningModule):
         return parser
 
 
+@under_review()
 def cli_main():
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)

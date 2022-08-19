@@ -3,7 +3,12 @@
 
 Vision Callbacks
 ================
-Useful callbacks for vision models
+Useful callbacks for vision models.
+
+.. note::
+
+    We rely on the community to keep these updated and working. If something doesn't work, we'd really appreciate a contribution to fix!
+
 
 ---------------
 
@@ -14,7 +19,7 @@ Shows how the input would have to change to move the prediction from one logit t
 
 Example outputs:
 
-    .. image:: ../../_images/vision/confused_logit.png
+    .. image:: ../_images/vision/confused_logit.png
         :width: 400
         :alt: Example of prediction confused between 5 and 8
 

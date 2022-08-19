@@ -10,8 +10,10 @@ from torch.optim import Optimizer
 from torchmetrics.functional import accuracy
 
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
+from pl_bolts.utils.stability import under_review
 
 
+@under_review()
 class SSLOnlineEvaluator(Callback):  # pragma: no cover
     """Attaches a MLP for fine-tuning using the standard self-supervised protocol.
 
@@ -141,7 +143,6 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         outputs: Sequence,
         batch: Sequence,
         batch_idx: int,
-        dataloader_idx: int,
     ) -> None:
         train_acc, mlp_loss = self.shared_step(pl_module, batch)
 
@@ -173,6 +174,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         self._recovered_callback_state = callback_state
 
 
+@under_review()
 @contextmanager
 def set_training(module: nn.Module, mode: bool):
     """Context manager to set training mode.

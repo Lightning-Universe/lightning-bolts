@@ -12,6 +12,7 @@ import numpy as np
 import torch
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 PY3 = sys.version_info[0] == 3
@@ -24,6 +25,7 @@ else:  # pragma: no cover
     ImageNet = object
 
 
+@under_review()
 class UnlabeledImagenet(ImageNet):
     """Official train set gets split into train, val. (using nb_imgs_per_val_class for each class). Official
     validation becomes test set.
@@ -158,6 +160,7 @@ class UnlabeledImagenet(ImageNet):
         print(f"meta.bin generated at {devkit_dir}/meta.bin")
 
 
+@under_review()
 def _verify_archive(root, file, md5):
     if not _check_integrity(os.path.join(root, file), md5):
         raise RuntimeError(
@@ -166,6 +169,7 @@ def _verify_archive(root, file, md5):
         )
 
 
+@under_review()
 def _check_integrity(fpath, md5=None):
     if not os.path.isfile(fpath):
         return False
@@ -174,10 +178,12 @@ def _check_integrity(fpath, md5=None):
     return _check_md5(fpath, md5)
 
 
+@under_review()
 def _check_md5(fpath, md5, **kwargs):
     return md5 == _calculate_md5(fpath, **kwargs)
 
 
+@under_review()
 def _calculate_md5(fpath, chunk_size=1024 * 1024):
     md5 = hashlib.md5()
     with open(fpath, "rb") as f:
@@ -186,6 +192,7 @@ def _calculate_md5(fpath, chunk_size=1024 * 1024):
     return md5.hexdigest()
 
 
+@under_review()
 def parse_devkit_archive(root, file=None):
     """Parse the devkit archive of the ImageNet2012 classification dataset and save the meta information in a
     binary file.
@@ -242,6 +249,7 @@ def parse_devkit_archive(root, file=None):
         torch.save((wnid_to_classes, val_wnids), os.path.join(root, META_FILE))
 
 
+@under_review()
 def extract_archive(from_path, to_path=None, remove_finished=False):
     if to_path is None:
         to_path = os.path.dirname(from_path)
@@ -272,21 +280,26 @@ def extract_archive(from_path, to_path=None, remove_finished=False):
         os.remove(from_path)
 
 
+@under_review()
 def _is_targz(filename):
     return filename.endswith(".tar.gz")
 
 
+@under_review()
 def _is_tarxz(filename):
     return filename.endswith(".tar.xz")
 
 
+@under_review()
 def _is_gzip(filename):
     return filename.endswith(".gz") and not filename.endswith(".tar.gz")
 
 
+@under_review()
 def _is_tar(filename):
     return filename.endswith(".tar")
 
 
+@under_review()
 def _is_zip(filename):
     return filename.endswith(".zip")

@@ -12,8 +12,10 @@ from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.losses.rl import per_dqn_loss
 from pl_bolts.models.rl.common.memory import Experience, PERBuffer
 from pl_bolts.models.rl.dqn_model import DQN
+from pl_bolts.utils.stability import under_review
 
 
+@under_review()
 class PERDQN(DQN):
     """PyTorch Lightning implementation of `DQN With Prioritized Experience Replay`_.
 
@@ -145,6 +147,7 @@ class PERDQN(DQN):
         return DataLoader(dataset=self.dataset, batch_size=self.batch_size)
 
 
+@under_review()
 def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 

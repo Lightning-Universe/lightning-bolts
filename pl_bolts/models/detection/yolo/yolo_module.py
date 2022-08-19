@@ -14,6 +14,7 @@ from pl_bolts.models.detection.yolo.darknet_network import DarknetNetwork
 from pl_bolts.models.detection.yolo.types import TARGET, TARGETS
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.utils import _TORCHMETRICS_DETECTION_AVAILABLE, _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHMETRICS_DETECTION_AVAILABLE:
@@ -33,6 +34,7 @@ else:
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 class YOLO(LightningModule):
     """PyTorch Lightning implementation of YOLO that supports the most important features of YOLOv3, YOLOv4,
     YOLOv5, Scaled-YOLOv4, and YOLOX.

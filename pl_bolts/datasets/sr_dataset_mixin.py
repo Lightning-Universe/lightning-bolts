@@ -4,6 +4,7 @@ from typing import Any, Tuple
 import torch
 
 from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _PIL_AVAILABLE:
@@ -17,6 +18,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 class SRDatasetMixin:
     """Mixin for Super Resolution datasets.
 

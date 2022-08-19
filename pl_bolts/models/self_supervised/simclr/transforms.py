@@ -1,6 +1,7 @@
 import numpy as np
 
 from pl_bolts.utils import _OPENCV_AVAILABLE, _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -14,6 +15,7 @@ else:  # pragma: no cover
     warn_missing_pkg("cv2", pypi_name="opencv-python")
 
 
+@under_review()
 class SimCLRTrainDataTransform:
     """Transforms for SimCLR.
 
@@ -91,6 +93,7 @@ class SimCLRTrainDataTransform:
         return xi, xj, self.online_transform(sample)
 
 
+@under_review()
 class SimCLREvalDataTransform(SimCLRTrainDataTransform):
     """Transforms for SimCLR.
 
@@ -126,6 +129,7 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
         )
 
 
+@under_review()
 class SimCLRFinetuneTransform:
     def __init__(
         self, input_height: int = 224, jitter_strength: float = 1.0, normalize=None, eval_transform: bool = False
@@ -167,6 +171,7 @@ class SimCLRFinetuneTransform:
         return self.transform(sample)
 
 
+@under_review()
 class GaussianBlur:
     # Implements Gaussian blur as described in the SimCLR paper
     def __init__(self, kernel_size, p=0.5, min=0.1, max=2.0):

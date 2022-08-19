@@ -10,8 +10,10 @@ from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor
 
 from pl_bolts.callbacks.verification.base import VerificationBase, VerificationCallbackBase
+from pl_bolts.utils.stability import under_review
 
 
+@under_review()
 class BatchGradientVerification(VerificationBase):
     """Checks if a model mixes data across the batch dimension.
 
@@ -82,6 +84,7 @@ class BatchGradientVerification(VerificationBase):
         return not any(has_grad_outside_sample) and all(has_grad_inside_sample)
 
 
+@under_review()
 class BatchGradientVerificationCallback(VerificationCallbackBase):
     """The callback version of the :class:`BatchGradientVerification` test.
 
@@ -130,6 +133,7 @@ class BatchGradientVerificationCallback(VerificationCallbackBase):
             self._raise()
 
 
+@under_review()
 def default_input_mapping(data: Any) -> List[Tensor]:
     """Finds all tensors in a (nested) collection that have the same batch size.
 
@@ -157,6 +161,7 @@ def default_input_mapping(data: Any) -> List[Tensor]:
     return batches
 
 
+@under_review()
 def default_output_mapping(data: Any) -> Tensor:
     """Pulls out all tensors in a output collection and combines them into one big batch for verification.
 
@@ -188,6 +193,7 @@ def default_output_mapping(data: Any) -> Tensor:
     return combined
 
 
+@under_review()
 def collect_tensors(data: Any) -> List[Tensor]:
     """Filters all tensors in a collection and returns them in a list."""
     tensors = []
@@ -200,6 +206,7 @@ def collect_tensors(data: Any) -> List[Tensor]:
     return tensors
 
 
+@under_review()
 @contextmanager
 def selective_eval(model: nn.Module, layer_types: Iterable[Type[nn.Module]]) -> None:
     """A context manager that sets all requested types of layers to eval mode. This method uses an ``isinstance``

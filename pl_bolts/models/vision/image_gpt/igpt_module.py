@@ -6,8 +6,10 @@ from pytorch_lightning import LightningModule, Trainer
 from torch import nn
 
 from pl_bolts.models.vision.image_gpt.gpt2 import GPT2
+from pl_bolts.utils.stability import under_review
 
 
+@under_review()
 def _shape_input(x):
     """shape batch of images for input into GPT2 model."""
     x = x.view(x.shape[0], -1)  # flatten images into sequences
@@ -15,6 +17,7 @@ def _shape_input(x):
     return x
 
 
+@under_review()
 class ImageGPT(LightningModule):
     """
     **Paper**: `Generative Pretraining from Pixels
@@ -238,6 +241,7 @@ class ImageGPT(LightningModule):
         return parser
 
 
+@under_review()
 def cli_main():
     from pl_bolts.datamodules import FashionMNISTDataModule, ImagenetDataModule
 

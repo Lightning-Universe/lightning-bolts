@@ -3,6 +3,7 @@ from typing import Any, Callable, Optional, Union
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.transforms.dataset_normalizations import emnist_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -13,6 +14,7 @@ else:  # pragma: no cover
     EMNIST = object
 
 
+@under_review()
 class EMNISTDataModule(VisionDataModule):
     """
     .. figure:: https://user-images.githubusercontent.com/4632336/123210742-4d6b3380-d477-11eb-80da-3e9a74a18a07.png

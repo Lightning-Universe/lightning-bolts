@@ -11,6 +11,7 @@ from torch.nn import Module
 from torch.utils.hooks import RemovableHandle
 
 from pl_bolts.utils import _WANDB_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _WANDB_AVAILABLE:
@@ -19,6 +20,7 @@ else:  # pragma: no cover
     warn_missing_pkg("wandb")
 
 
+@under_review()
 class DataMonitorBase(Callback):
 
     supported_loggers = (
@@ -109,6 +111,7 @@ class DataMonitorBase(Callback):
         return available
 
 
+@under_review()
 class ModuleDataMonitor(DataMonitorBase):
 
     GROUP_NAME_INPUT = "input"
@@ -194,6 +197,7 @@ class ModuleDataMonitor(DataMonitorBase):
         return handle
 
 
+@under_review()
 class TrainingDataMonitor(DataMonitorBase):
 
     GROUP_NAME = "training_step"
@@ -257,6 +261,7 @@ def collect_and_name_tensors(data: Any, output: Dict[str, Tensor], parent_name: 
             collect_and_name_tensors(item, output, parent_name=f"{parent_name}/{i:d}")
 
 
+@under_review()
 def shape2str(tensor: Tensor) -> str:
     """Returns the shape of a tensor in bracket notation as a string.
 

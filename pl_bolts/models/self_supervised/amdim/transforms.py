@@ -1,5 +1,6 @@
 from pl_bolts.transforms.self_supervised import RandomTranslateWithReflect
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -8,6 +9,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 class AMDIMTrainTransformsCIFAR10:
     """Transforms applied to AMDIM.
 
@@ -52,6 +54,7 @@ class AMDIMTrainTransformsCIFAR10:
         return out1, out2
 
 
+@under_review()
 class AMDIMEvalTransformsCIFAR10:
     """Transforms applied to AMDIM.
 
@@ -88,6 +91,7 @@ class AMDIMEvalTransformsCIFAR10:
         return out1
 
 
+@under_review()
 class AMDIMTrainTransformsSTL10:
     """Transforms applied to AMDIM.
 
@@ -128,6 +132,7 @@ class AMDIMTrainTransformsSTL10:
         return out1, out2
 
 
+@under_review()
 class AMDIMEvalTransformsSTL10:
     """Transforms applied to AMDIM.
 
@@ -170,6 +175,7 @@ class AMDIMEvalTransformsSTL10:
         return out1
 
 
+@under_review()
 class AMDIMTrainTransformsImageNet128:
     """Transforms applied to AMDIM.
 
@@ -213,6 +219,7 @@ class AMDIMTrainTransformsImageNet128:
         return out1, out2
 
 
+@under_review()
 class AMDIMEvalTransformsImageNet128:
     """Transforms applied to AMDIM.
 

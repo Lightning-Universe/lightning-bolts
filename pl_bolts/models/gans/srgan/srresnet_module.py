@@ -10,8 +10,10 @@ from pl_bolts.callbacks import SRImageLoggerCallback
 from pl_bolts.datamodules import TVTDataModule
 from pl_bolts.datasets.utils import prepare_sr_datasets
 from pl_bolts.models.gans.srgan.components import SRGANGenerator
+from pl_bolts.utils.stability import under_review
 
 
+@under_review()
 class SRResNet(pl.LightningModule):
     """SRResNet implementation from the paper `Photo-Realistic Single Image Super-Resolution Using a Generative
     Adversarial Network <https://arxiv.org/abs/1609.04802>`__. A pretrained SRResNet model is used as the generator
@@ -108,6 +110,7 @@ class SRResNet(pl.LightningModule):
         return parser
 
 
+@under_review()
 def cli_main(args=None):
     pl.seed_everything(1234)
 

@@ -4,6 +4,7 @@ from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.datasets import TrialCIFAR10
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -29,7 +30,7 @@ class CIFAR10DataModule(VisionDataModule):
 
     Transforms::
 
-        mnist_transforms = transform_lib.Compose([
+        transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transforms.Normalize(
                 mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -122,12 +123,13 @@ class CIFAR10DataModule(VisionDataModule):
         return cf10_transforms
 
 
+@under_review()
 class TinyCIFAR10DataModule(CIFAR10DataModule):
     """Standard CIFAR10, train, val, test splits and transforms.
 
     Transforms::
 
-        mnist_transforms = transform_lib.Compose([
+        transforms = transform_lib.Compose([
             transform_lib.ToTensor(),
             transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
                                  std=[x / 255.0 for x in [63.0, 62.1, 66.7]])

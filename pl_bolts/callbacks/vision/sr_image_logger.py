@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from pytorch_lightning import Callback
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -14,6 +15,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 class SRImageLoggerCallback(Callback):
     """Logs low-res, generated high-res, and ground truth high-res images to TensorBoard Your model must implement
     the ``forward`` function for generation.
@@ -49,7 +51,6 @@ class SRImageLoggerCallback(Callback):
         outputs: torch.Tensor,
         batch: Tuple[torch.Tensor, torch.Tensor],
         batch_idx: int,
-        dataloader_idx: int,
     ) -> None:
         global_step = trainer.global_step
         if global_step % self.log_interval == 0:

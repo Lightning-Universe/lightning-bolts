@@ -8,8 +8,10 @@ from torch import Tensor
 
 from pl_bolts.losses.rl import double_dqn_loss
 from pl_bolts.models.rl.dqn_model import DQN
+from pl_bolts.utils.stability import under_review
 
 
+@under_review()
 class DoubleDQN(DQN):
     """Double Deep Q-network (DDQN) PyTorch Lightning implementation of `Double DQN`_.
 
@@ -79,6 +81,7 @@ class DoubleDQN(DQN):
         )
 
 
+@under_review()
 def cli_main():
     parser = argparse.ArgumentParser(add_help=False)
 

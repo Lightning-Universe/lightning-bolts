@@ -7,6 +7,7 @@ from pytorch_lightning.callbacks import Callback
 from torch import Tensor
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -15,6 +16,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 class LatentDimInterpolator(Callback):
     """Interpolates the latent space for a model by setting all dims to zero and stepping through the first two
     dims increasing one unit at a time.

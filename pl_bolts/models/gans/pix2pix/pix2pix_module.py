@@ -3,8 +3,10 @@ from pytorch_lightning import LightningModule
 from torch import nn
 
 from pl_bolts.models.gans.pix2pix.components import Generator, PatchGAN
+from pl_bolts.utils.stability import under_review
 
 
+@under_review()
 def _weights_init(m):
     if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d)):
         torch.nn.init.normal_(m.weight, 0.0, 0.02)
@@ -13,6 +15,7 @@ def _weights_init(m):
         torch.nn.init.constant_(m.bias, 0)
 
 
+@under_review()
 class Pix2Pix(LightningModule):
     def __init__(self, in_channels, out_channels, learning_rate=0.0002, lambda_recon=200):
 

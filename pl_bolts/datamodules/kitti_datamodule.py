@@ -1,4 +1,3 @@
-# type: ignore[override]
 import os
 from typing import Any, Callable, Optional
 
@@ -9,6 +8,7 @@ from torch.utils.data.dataset import random_split
 
 from pl_bolts.datasets import KittiDataset
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -17,6 +17,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 class KittiDataModule(LightningDataModule):
 
     name = "kitti"

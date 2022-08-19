@@ -6,6 +6,7 @@ import torch
 from torch import Tensor
 
 from pl_bolts.utils import _SKLEARN_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _SKLEARN_AVAILABLE:
@@ -14,6 +15,7 @@ else:  # pragma: no cover
     warn_missing_pkg("sklearn", pypi_name="scikit-learn")
 
 
+@under_review()
 class Identity(torch.nn.Module):
     """An identity class to replace arbitrary layers in pretrained models.
 
@@ -32,6 +34,7 @@ class Identity(torch.nn.Module):
         return x
 
 
+@under_review()
 def balance_classes(
     X: Union[Tensor, np.ndarray], Y: Union[Tensor, np.ndarray, Sequence[int]], batch_size: int
 ) -> Tuple[np.ndarray, np.ndarray]:
@@ -95,6 +98,7 @@ def balance_classes(
     return final_batches_x, final_batches_y
 
 
+@under_review()
 def generate_half_labeled_batches(
     smaller_set_X: np.ndarray,
     smaller_set_Y: np.ndarray,

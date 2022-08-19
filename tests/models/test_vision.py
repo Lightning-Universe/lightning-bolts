@@ -4,6 +4,7 @@ from packaging import version
 from pytorch_lightning import LightningDataModule, Trainer
 from pytorch_lightning import __version__ as pl_version
 from pytorch_lightning import seed_everything
+from pytorch_lightning.callbacks.progress import TQDMProgressBar
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import FashionMNISTDataModule, MNISTDataModule
@@ -43,7 +44,7 @@ def test_igpt(tmpdir, datadir):
         limit_test_batches=2,
         max_epochs=1,
         logger=False,
-        checkpoint_callback=False,
+        enable_checkpointing=False,
     )
     trainer.fit(model, datamodule=dm)
 
@@ -79,9 +80,10 @@ def test_semantic_segmentation(tmpdir):
     dm = DummyDataModule()
 
     model = SemSegment(num_classes=19)
+    progress_bar = TQDMProgressBar()
 
-    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, callbacks=[progress_bar])
     trainer.fit(model, datamodule=dm)
-    loss = trainer.progress_bar_dict["loss"]
+    loss = progress_bar.get_metrics(trainer, model)["loss"]
 
     assert float(loss) > 0

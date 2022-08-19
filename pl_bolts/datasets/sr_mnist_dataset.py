@@ -3,6 +3,7 @@ from typing import Any
 from pl_bolts.datasets.mnist_dataset import MNIST
 from pl_bolts.datasets.sr_dataset_mixin import SRDatasetMixin
 from pl_bolts.utils import _PIL_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _PIL_AVAILABLE:
@@ -11,6 +12,7 @@ else:  # pragma: no cover
     warn_missing_pkg("PIL", pypi_name="Pillow")
 
 
+@under_review()
 class SRMNIST(SRDatasetMixin, MNIST):
     """MNIST dataset that can be used to train Super Resolution models.
 

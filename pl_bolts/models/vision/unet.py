@@ -2,7 +2,10 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+from pl_bolts.utils.stability import under_review
 
+
+@under_review()
 class UNet(nn.Module):
     """
     Paper: `U-Net: Convolutional Networks for Biomedical Image Segmentation
@@ -64,6 +67,7 @@ class UNet(nn.Module):
         return self.layers[-1](xi[-1])
 
 
+@under_review()
 class DoubleConv(nn.Module):
     """[ Conv2d => BatchNorm (optional) => ReLU ] x 2."""
 
@@ -82,6 +86,7 @@ class DoubleConv(nn.Module):
         return self.net(x)
 
 
+@under_review()
 class Down(nn.Module):
     """Downscale with MaxPool => DoubleConvolution block."""
 
@@ -93,6 +98,7 @@ class Down(nn.Module):
         return self.net(x)
 
 
+@under_review()
 class Up(nn.Module):
     """Upsampling (by either bilinear interpolation or transpose convolutions) followed by concatenation of feature
     map from contracting path, followed by DoubleConv."""
