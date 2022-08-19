@@ -41,16 +41,17 @@ class DarknetNetwork(nn.Module):
             config_path: Path to a Darknet configuration file that defines the network architecture.
             weights_path: Path to a Darknet model file. If given, the model weights will be read from this file.
             in_channels: Number of channels in the input image.
-            match_sim_ota: If ``True``, matches a target to an anchor using the SimOTA algorithm from YOLOX.
-            match_size_ratio: If specified, matches a target to an anchor if its width and height relative to the anchor
-                is smaller than this ratio. If ``match_size_ratio`` or ``match_iou_threshold`` is not specified, selects
-                for each target the anchor with the highest IoU.
-            match_iou_threshold: If specified, matches a target to an anchor if the IoU is higher than this threshold.
-            ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the prior shape has
-                IoU with some target greater than this threshold, the predictor will not be taken into account when
-                calculating the confidence loss.
-            overlap_func: Which function to use for calculating the overlap between boxes. Valid values are "iou",
-                "giou", "diou", and "ciou".
+            matching_algorithm: Which algorithm to use for matching targets to anchors. "simota" (the SimOTA matching
+                rule from YOLOX), "size" (match those prior shapes, whose width and height relative to the target is
+                below given ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the
+                prior shape that gives the highest IoU, default).
+            matching_threshold: Threshold for "size" and "iou" matching algorithms.
+            ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding
+                anchor has IoU with some target greater than this threshold, the predictor will not be taken into
+                account when calculating the confidence loss.
+            overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or
+                a function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou",
+                and "ciou".
             predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
                 confidence is one if there's an object, and 1.0 means that the target confidence is the output of
                 ``overlap_func``.
@@ -293,6 +294,16 @@ def _create_layer(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREAT
 
 
 def _create_convolutional(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREATE_LAYER_OUTPUT:
+    """Creates a convolutional layer.
+
+    Args:
+        config: Dictionary of configuration options for this layer.
+        num_inputs: Number of channels in the input of every layer up to this layer.
+
+    Returns:
+        module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
+        its output.
+    """
     batch_normalize = config.get("batch_normalize", False)
     padding = (config["size"] - 1) // 2 if config["pad"] else 0
 
@@ -313,12 +324,33 @@ def _create_maxpool(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CRE
     """Creates a max pooling layer.
 
     Padding is added so that the output resolution will be the input resolution divided by stride, rounded upwards.
+
+    Args:
+        config: Dictionary of configuration options for this layer.
+        num_inputs: Number of channels in the input of every layer up to this layer.
+
+    Returns:
+        module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
+        its output.
     """
     layer = MaxPool(config["size"], config["stride"])
     return layer, num_inputs[-1]
 
 
 def _create_route(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREATE_LAYER_OUTPUT:
+    """Creates a routing layer.
+
+    A routing layer concatenates the output (or part of it) from the layers specified by the "layers" configuration
+    option.
+
+    Args:
+        config: Dictionary of configuration options for this layer.
+        num_inputs: Number of channels in the input of every layer up to this layer.
+
+    Returns:
+        module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
+        its output.
+    """
     num_chunks = config.get("groups", 1)
     chunk_idx = config.get("group_id", 0)
 
@@ -335,11 +367,33 @@ def _create_route(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREAT
 
 
 def _create_shortcut(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREATE_LAYER_OUTPUT:
+    """Creates a shortcut layer.
+
+    A shortcut layer adds a residual connection from the layer specified by the "from" configuration option.
+
+    Args:
+        config: Dictionary of configuration options for this layer.
+        num_inputs: Number of channels in the input of every layer up to this layer.
+
+    Returns:
+        module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
+        its output.
+    """
     layer = layers.ShortcutLayer(config["from"])
     return layer, num_inputs[-1]
 
 
 def _create_upsample(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREATE_LAYER_OUTPUT:
+    """Creates a layer that upsamples the data.
+
+    Args:
+        config: Dictionary of configuration options for this layer.
+        num_inputs: Number of channels in the input of every layer up to this layer.
+
+    Returns:
+        module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
+        its output.
+    """
     layer = nn.Upsample(scale_factor=config["stride"], mode="nearest")
     return layer, num_inputs[-1]
 
@@ -358,6 +412,38 @@ def _create_yolo(
     class_loss_multiplier: Optional[float] = None,
     **kwargs: Any,
 ) -> CREATE_LAYER_OUTPUT:
+    """Creates a YOLO detection layer.
+
+    Args:
+        config: Dictionary of configuration options for this layer.
+        num_inputs: Number of channels in the input of every layer up to this layer. Not used by the detection layer.
+        prior_shapes: A list of prior box dimensions, used for scaling the predicted dimensions and possibly for
+            matching the targets to the anchors. The list should contain (width, height) tuples in the network input
+            resolution. There should be `3N` tuples, where `N` defines the number of anchors per spatial location. They
+            are assigned to the layers from the lowest (high-resolution) to the highest (low-resolution) layer, meaning
+            that you typically want to sort the shapes from the smallest to the largest.
+        matching_algorithm: Which algorithm to use for matching targets to anchors. "simota" (the SimOTA matching rule
+            from YOLOX), "size" (match those prior shapes, whose width and height relative to the target is below given
+            ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
+            gives the highest IoU, default).
+        matching_threshold: Threshold for "size" and "iou" matching algorithms.
+        ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
+            has IoU with some target greater than this threshold, the predictor will not be taken into account when
+            calculating the confidence loss.
+        overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
+            function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
+            "ciou".
+        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
+            confidence is one if there's an object, and 1.0 means that the target confidence is the output of
+            ``overlap_func``.
+        overlap_loss_multiplier: Overlap loss will be scaled by this value.
+        confidence_loss_multiplier: Confidence loss will be scaled by this value.
+        class_loss_multiplier: Classification loss will be scaled by this value.
+
+    Returns:
+        module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
+        its output (always 0 for a detection layer).
+    """
     if prior_shapes is None:
         # The "anchors" list alternates width and height.
         dims = config["anchors"]

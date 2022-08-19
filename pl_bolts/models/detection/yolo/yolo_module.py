@@ -406,10 +406,6 @@ class YOLO(LightningModule):
 class DarknetYOLO(YOLO):
     """A subclass of YOLO that uses a Darknet configuration file and can be configured using LightningCLI.
 
-    At most one matching algorithm, ``match_sim_ota``, ``match_size_ratio``, or ``match_iou_threshold`` can be
-    specified. If none of them is given, the default algorithm is used, which matches a target to the prior shape
-    (anchor) that gives the highest IoU.
-
     CLI command::
 
         # PascalVOC using LightningCLI
@@ -419,51 +415,50 @@ class DarknetYOLO(YOLO):
 
     Args:
         network_config: Path to a Darknet configuration file that defines the network architecture.
-        match_sim_ota: If ``True``, matches a target to an anchor using the SimOTA algorithm from YOLOX.
-        match_size_ratio: If specified, matches a target to an anchor if its width and height relative to the anchor is
-            smaller than this ratio. If ``match_size_ratio`` or ``match_iou_threshold`` is not specified, selects for
-            each target the anchor with the highest IoU.
-        match_iou_threshold: If specified, matches a target to an anchor if the IoU is higher than this threshold.
-        ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the prior shape has IoU
-            with some target greater than this threshold, the predictor will not be taken into account when calculating
-            the confidence loss.
-        overlap_func: Which function to use for calculating the overlap between boxes. Valid values are "iou", "giou",
-            "diou", and "ciou".
+        matching_algorithm: Which algorithm to use for matching targets to anchors. "simota" (the SimOTA matching rule
+            from YOLOX), "size" (match those prior shapes, whose width and height relative to the target is below given
+            ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
+            gives the highest IoU, default).
+        matching_threshold: Threshold for "size" and "iou" matching algorithms.
+        ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
+            has IoU with some target greater than this threshold, the predictor will not be taken into account when
+            calculating the confidence loss.
+        overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
+            function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
+            "ciou".
         predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
             confidence is one if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
-        class_loss_multiplier: Classification loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
+        class_loss_multiplier: Classification loss will be scaled by this value.
     """
 
     def __init__(
         self,
         network_config: str,
         darknet_weights: Optional[str] = None,
-        match_sim_ota: bool = False,
-        match_size_ratio: Optional[float] = None,
-        match_iou_threshold: Optional[float] = None,
+        matching_algorithm: Optional[str] = None,
+        matching_threshold: Optional[float] = None,
         ignore_bg_threshold: Optional[float] = None,
         overlap_func: Optional[str] = None,
         predict_overlap: Optional[float] = None,
         overlap_loss_multiplier: Optional[float] = None,
-        class_loss_multiplier: Optional[float] = None,
         confidence_loss_multiplier: Optional[float] = None,
+        class_loss_multiplier: Optional[float] = None,
         **kwargs: Any,
     ) -> None:
         network = DarknetNetwork(
             network_config,
             darknet_weights,
-            match_sim_ota=match_sim_ota,
-            match_size_ratio=match_size_ratio,
-            match_iou_threshold=match_iou_threshold,
+            matching_algorithm=matching_algorithm,
+            matching_threshold=matching_threshold,
             ignore_bg_threshold=ignore_bg_threshold,
             overlap_func=overlap_func,
             predict_overlap=predict_overlap,
             overlap_loss_multiplier=overlap_loss_multiplier,
-            class_loss_multiplier=class_loss_multiplier,
             confidence_loss_multiplier=confidence_loss_multiplier,
+            class_loss_multiplier=class_loss_multiplier,
         )
         super().__init__(**kwargs, network=network)
 

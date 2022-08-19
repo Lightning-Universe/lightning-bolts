@@ -371,14 +371,14 @@ class YOLOV4TinyNetwork(nn.Module):
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
-            function that returns a tensor with as many elements as there are input boxes. Valid values for a string are
-            "iou", "giou", "diou", and "ciou" (default).
+            function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
+            "ciou" (default).
         predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
             confidence is one if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
-        class_loss_multiplier: Classification loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
+        class_loss_multiplier: Classification loss will be scaled by this value.
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
             to produce coordinate values close to one.
     """
@@ -390,7 +390,7 @@ class YOLOV4TinyNetwork(nn.Module):
         width: int = 32,
         activation: Optional[str] = "leaky",
         normalization: Optional[str] = "batchnorm",
-        prior_shapes: List[Tuple[int, int]] = None,
+        prior_shapes: Optional[List[Tuple[int, int]]] = None,
         **kwargs: Any,
     ) -> None:
         super().__init__()
@@ -432,7 +432,7 @@ class YOLOV4TinyNetwork(nn.Module):
                 prior_shapes, prior_shape_idxs, num_classes=num_classes, input_is_normalized=False, **kwargs
             )
 
-        self.backbone = backbone or YOLOV4TinyBackbone(width=width, normalization=normalization, activation=activation)
+        self.backbone = backbone or YOLOV4TinyBackbone(width=width, activation=activation, normalization=normalization)
 
         self.fpn5 = conv(width * 16, width * 8)
         self.out5 = nn.Sequential(
@@ -516,14 +516,14 @@ class YOLOV4Network(nn.Module):
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
-            function that returns a tensor with as many elements as there are input boxes. Valid values for a string are
-            "iou", "giou", "diou", and "ciou" (default).
+            function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
+            "ciou" (default).
         predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
             confidence is one if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
-        class_loss_multiplier: Classification loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
+        class_loss_multiplier: Classification loss will be scaled by this value.
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
             to produce coordinate values close to one.
     """
@@ -535,7 +535,7 @@ class YOLOV4Network(nn.Module):
         widths: Sequence[int] = (32, 64, 128, 256, 512, 1024),
         activation: Optional[str] = "silu",
         normalization: Optional[str] = "batchnorm",
-        prior_shapes: List[Tuple[int, int]] = None,
+        prior_shapes: Optional[List[Tuple[int, int]]] = None,
         **kwargs: Any,
     ) -> None:
         super().__init__()
@@ -598,7 +598,7 @@ class YOLOV4Network(nn.Module):
         if backbone is not None:
             self.backbone = backbone
         else:
-            self.backbone = YOLOV4Backbone(widths=widths, normalization=normalization, activation=activation)
+            self.backbone = YOLOV4Backbone(widths=widths, activation=activation, normalization=normalization)
 
         w3 = widths[-3]
         w4 = widths[-2]
@@ -692,14 +692,14 @@ class YOLOV4P6Network(nn.Module):
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
-            function that returns a tensor with as many elements as there are input boxes. Valid values for a string are
-            "iou", "giou", "diou", and "ciou" (default).
+            function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
+            "ciou" (default).
         predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
             confidence is one if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
-        class_loss_multiplier: Classification loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
+        class_loss_multiplier: Classification loss will be scaled by this value.
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
             to produce coordinate values close to one.
     """
@@ -711,7 +711,7 @@ class YOLOV4P6Network(nn.Module):
         widths: Sequence[int] = (32, 64, 128, 256, 512, 1024, 1024),
         activation: Optional[str] = "silu",
         normalization: Optional[str] = "batchnorm",
-        prior_shapes: List[Tuple[int, int]] = None,
+        prior_shapes: Optional[List[Tuple[int, int]]] = None,
         **kwargs: Any,
     ) -> None:
         super().__init__()
@@ -782,7 +782,7 @@ class YOLOV4P6Network(nn.Module):
             self.backbone = backbone
         else:
             self.backbone = YOLOV4Backbone(
-                widths=widths, depths=(1, 1, 3, 15, 15, 7, 7), normalization=normalization, activation=activation
+                widths=widths, depths=(1, 1, 3, 15, 15, 7, 7), activation=activation, normalization=normalization
             )
 
         w3 = widths[-4]
@@ -900,14 +900,14 @@ class YOLOV5Network(nn.Module):
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
-            function that returns a tensor with as many elements as there are input boxes. Valid values for a string are
-            "iou", "giou", "diou", and "ciou" (default).
+            function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
+            "ciou" (default).
         predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
             confidence is one if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
-        class_loss_multiplier: Classification loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
+        class_loss_multiplier: Classification loss will be scaled by this value.
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
             to produce coordinate values close to one.
     """
@@ -920,7 +920,7 @@ class YOLOV5Network(nn.Module):
         depth: int = 3,
         activation: Optional[str] = "silu",
         normalization: Optional[str] = "batchnorm",
-        prior_shapes: List[Tuple[int, int]] = None,
+        prior_shapes: Optional[List[Tuple[int, int]]] = None,
         **kwargs: Any,
     ) -> None:
         super().__init__()
@@ -975,7 +975,7 @@ class YOLOV5Network(nn.Module):
             )
 
         self.backbone = backbone or YOLOV5Backbone(
-            depth=depth, width=width, normalization=normalization, activation=activation
+            depth=depth, width=width, activation=activation, normalization=normalization
         )
 
         self.spp = spp(width * 16, width * 16)
@@ -1049,6 +1049,50 @@ class YOLOV5Network(nn.Module):
         return detections, losses, hits
 
 
+class YOLOXHead(nn.Module):
+    def __init__(
+        self,
+        in_channels: int,
+        hidden_channels: int,
+        anchors_per_cell: int,
+        num_classes: int,
+        activation: Optional[str] = "silu",
+        normalization: Optional[str] = "batchnorm",
+    ) -> None:
+        super().__init__()
+
+        def conv(in_channels: int, out_channels: int, kernel_size: int = 1) -> nn.Module:
+            return Conv(in_channels, out_channels, kernel_size, stride=1, activation=activation, norm=normalization)
+
+        def linear(in_channels: int, out_channels: int) -> nn.Module:
+            return nn.Conv2d(in_channels, out_channels, kernel_size=1)
+
+        def features(num_channels: int) -> nn.Module:
+            return nn.Sequential(
+                conv(num_channels, num_channels, kernel_size=3),
+                conv(num_channels, num_channels, kernel_size=3),
+            )
+
+        def classprob(num_channels: int) -> nn.Module:
+            num_outputs = anchors_per_cell * num_classes
+            outputs = linear(num_channels, num_outputs)
+            return nn.Sequential(OrderedDict([("convs", features(num_channels)), (f"outputs_{num_outputs}", outputs)]))
+
+        self.stem = conv(in_channels, hidden_channels)
+        self.feat = features(hidden_channels)
+        self.box = linear(hidden_channels, anchors_per_cell * 4)
+        self.confidence = linear(hidden_channels, anchors_per_cell)
+        self.classprob = classprob(hidden_channels)
+
+    def forward(self, x: Tensor) -> Tensor:
+        x = self.stem(x)
+        features = self.feat(x)
+        box = self.box(features)
+        confidence = self.confidence(features)
+        classprob = self.classprob(x)
+        return torch.cat((box, confidence, classprob), dim=1)
+
+
 class YOLOXNetwork(nn.Module):
     """The YOLOX network architecture. Different variants (nano/tiny/s/m/l/x) can be achieved by adjusting the
     ``depth`` and ``width`` parameters.
@@ -1076,14 +1120,14 @@ class YOLOXNetwork(nn.Module):
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
-            function that returns a tensor with as many elements as there are input boxes. Valid values for a string are
-            "iou", "giou", "diou", and "ciou" (default).
+            function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
+            "ciou" (default).
         predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
             confidence is one if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
-        class_loss_multiplier: Classification loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
+        class_loss_multiplier: Classification loss will be scaled by this value.
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
             to produce coordinate values close to one.
     """
@@ -1096,7 +1140,7 @@ class YOLOXNetwork(nn.Module):
         depth: int = 3,
         activation: Optional[str] = "silu",
         normalization: Optional[str] = "batchnorm",
-        prior_shapes: List[Tuple[int, int]] = None,
+        prior_shapes: Optional[List[Tuple[int, int]]] = None,
         **kwargs: Any,
     ) -> None:
         super().__init__()
@@ -1119,9 +1163,6 @@ class YOLOXNetwork(nn.Module):
         def conv(in_channels: int, out_channels: int, kernel_size: int = 1) -> nn.Module:
             return Conv(in_channels, out_channels, kernel_size, stride=1, activation=activation, norm=normalization)
 
-        def linear(in_channels: int, out_channels: int) -> nn.Module:
-            return nn.Conv2d(in_channels, out_channels, kernel_size=1)
-
         def csp(in_channels: int, out_channels: int) -> nn.Module:
             return CSPBlock(
                 in_channels,
@@ -1132,16 +1173,15 @@ class YOLOXNetwork(nn.Module):
                 activation=activation,
             )
 
-        def features(num_channels: int) -> nn.Module:
-            return nn.Sequential(
-                conv(num_channels, num_channels, kernel_size=3),
-                conv(num_channels, num_channels, kernel_size=3),
+        def head(in_channels: int, hidden_channels: int) -> YOLOXHead:
+            return YOLOXHead(
+                in_channels,
+                hidden_channels,
+                anchors_per_cell,
+                num_classes,
+                activation=activation,
+                normalization=normalization,
             )
-
-        def classprob(num_channels: int) -> nn.Module:
-            num_outputs = anchors_per_cell * num_classes
-            outputs = linear(num_channels, num_outputs)
-            return nn.Sequential(OrderedDict([("convs", features(num_channels)), (f"outputs_{num_outputs}", outputs)]))
 
         def detect(prior_shape_idxs: Sequence[int]) -> DetectionLayer:
             assert prior_shapes is not None
@@ -1150,17 +1190,13 @@ class YOLOXNetwork(nn.Module):
             )
 
         self.backbone = backbone or YOLOV5Backbone(
-            depth=depth, width=width, normalization=normalization, activation=activation
+            depth=depth, width=width, activation=activation, normalization=normalization
         )
 
         self.spp = spp(width * 16, width * 16)
 
         self.pan3 = csp(width * 8, width * 4)
-        self.out3_stem = conv(width * 4, width * 4)
-        self.out3_feat = features(width * 4)
-        self.out3_box = linear(width * 4, anchors_per_cell * 4)
-        self.out3_confidence = linear(width * 4, anchors_per_cell)
-        self.out3_classprob = classprob(width * 4)
+        self.out3 = head(width * 4, width * 4)
 
         self.fpn4 = nn.Sequential(
             OrderedDict(
@@ -1171,19 +1207,11 @@ class YOLOXNetwork(nn.Module):
             )
         )
         self.pan4 = csp(width * 8, width * 8)
-        self.out4_stem = conv(width * 8, width * 4)
-        self.out4_feat = features(width * 4)
-        self.out4_box = linear(width * 4, anchors_per_cell * 4)
-        self.out4_confidence = linear(width * 4, anchors_per_cell)
-        self.out4_classprob = classprob(width * 4)
+        self.out4 = head(width * 8, width * 4)
 
         self.fpn5 = conv(width * 16, width * 8)
         self.pan5 = csp(width * 16, width * 16)
-        self.out5_stem = conv(width * 16, width * 4)
-        self.out5_feat = features(width * 4)
-        self.out5_box = linear(width * 4, anchors_per_cell * 4)
-        self.out5_confidence = linear(width * 4, anchors_per_cell)
-        self.out5_classprob = classprob(width * 4)
+        self.out5 = head(width * 16, width * 4)
 
         self.upsample = nn.Upsample(scale_factor=2, mode="nearest")
 
@@ -1215,34 +1243,19 @@ class YOLOXNetwork(nn.Module):
         x = torch.cat((self.downsample4(n4), p5), dim=1)
         n5 = self.pan5(x)
 
-        x = self.out3_stem(n3)
-        features = self.out3_feat(x)
-        box = self.out3_box(features)
-        confidence = self.out3_confidence(features)
-        classprob = self.out3_classprob(x)
-        y = self.detect3(torch.cat((box, confidence, classprob), dim=1), image_size, targets)
+        y = self.detect3(self.out3(n3), image_size, targets)
         detections.append(y)
         if targets is not None:
             losses.append(self.detect3.losses)
             hits.append(self.detect3.hits)
 
-        x = self.out4_stem(n4)
-        features = self.out4_feat(x)
-        box = self.out4_box(features)
-        confidence = self.out4_confidence(features)
-        classprob = self.out4_classprob(x)
-        y = self.detect4(torch.cat((box, confidence, classprob), dim=1), image_size, targets)
+        y = self.detect4(self.out4(n4), image_size, targets)
         detections.append(y)
         if targets is not None:
             losses.append(self.detect4.losses)
             hits.append(self.detect4.hits)
 
-        x = self.out5_stem(n5)
-        features = self.out5_feat(x)
-        box = self.out5_box(features)
-        confidence = self.out5_confidence(features)
-        classprob = self.out5_classprob(x)
-        y = self.detect5(torch.cat((box, confidence, classprob), dim=1), image_size, targets)
+        y = self.detect5(self.out5(n5), image_size, targets)
         detections.append(y)
         if targets is not None:
             losses.append(self.detect5.losses)

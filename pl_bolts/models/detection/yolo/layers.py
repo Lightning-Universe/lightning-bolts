@@ -113,7 +113,7 @@ class DetectionLayer(nn.Module):
         """
         batch_size, num_features, height, width = x.shape
         num_attrs = self.num_classes + 5
-        anchors_per_cell = torch.div(num_features, num_attrs, rounding_mode="floor")
+        anchors_per_cell = int(torch.div(num_features, num_attrs, rounding_mode="floor"))
         if anchors_per_cell != len(self.prior_shapes):
             raise MisconfigurationException(
                 "The model predicts {} bounding boxes per spatial location, but {} prior box dimensions are defined "
@@ -205,9 +205,8 @@ class DetectionLayer(nn.Module):
             "boxes": torch.cat(tuple(m[1]["boxes"] for m in matches)),
             "labels": torch.cat(tuple(m[1]["labels"] for m in matches)),
         }
-        self.loss_func(matched_preds, matched_targets, self.input_is_normalized, image_size)
-        overlap_loss, confidence_loss, class_loss = self.loss_func.sums()
-        self.losses = torch.stack((overlap_loss, confidence_loss, class_loss)) / batch_size
+        losses = self.loss_func.elementwise_sums(matched_preds, matched_targets, self.input_is_normalized, image_size)
+        self.losses = torch.stack((losses.overlap, losses.confidence, losses.classification)) / batch_size
         self.hits = len(matched_targets["boxes"])
 
 
@@ -276,7 +275,7 @@ class MaxPool(nn.Module):
 
 
 class RouteLayer(nn.Module):
-    """Route layer concatenates the output (or part of it) from given layers.
+    """A routing layer concatenates the output (or part of it) from given layers.
 
     Args:
         source_layers: Indices of the layers whose output will be concatenated.
@@ -296,7 +295,7 @@ class RouteLayer(nn.Module):
 
 
 class ShortcutLayer(nn.Module):
-    """Shortcut layer adds a residual connection from the source layer.
+    """A shortcut layer adds a residual connection from the source layer.
 
     Args:
         source_layer: Index of the layer whose output will be added to the output of the previous layer.
@@ -387,16 +386,20 @@ def create_detection_layer(
             has IoU with some target greater than this threshold, the predictor will not be taken into account when
             calculating the confidence loss.
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
-            function that returns a tensor with as many elements as there are input boxes. Valid values for a string are
-            "iou", "giou", "diou", and "ciou" (default).
+            function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
+            "ciou" (default).
         predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
             confidence is one if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
-        class_loss_multiplier: Classification loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
+        class_loss_multiplier: Classification loss will be scaled by this value.
+        num_classes: Number of different classes that this layer predicts.
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
             to produce coordinate values close to one.
+        input_is_normalized: The input is normalized by logistic activation in the previous layer. In this case the
+            detection layer will not take the sigmoid of the coordinate and probability predictions, and the width and
+            height are scaled up so that the maximum value is four times the anchor dimension.
     """
     matching_func: Union[ShapeMatching, SimOTAMatching]
     if matching_algorithm == "simota":

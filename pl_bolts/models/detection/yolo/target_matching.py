@@ -314,10 +314,10 @@ class SimOTAMatching:
         }
         bg_confidences = preds["confidences"].view(shape)[bg_mask].view(-1)
 
-        self.loss_func(fg_preds, targets, input_is_normalized=False)
-        costs = self.loss_func.overlap_loss + self.loss_func.confidence_loss + self.loss_func.class_loss
+        losses, ious = self.loss_func.pairwise(fg_preds, targets, input_is_normalized=False)
+        costs = losses.overlap + losses.confidence + losses.classification
         costs += 100000.0 * ~inside_matrix[:, fg_mask].repeat_interleave(boxes_per_cell, 1)
-        matched_preds, matched_targets = _sim_ota_match(costs, self.loss_func.overlap)
+        matched_preds, matched_targets = _sim_ota_match(costs, ious)
 
         preds = {
             "boxes": fg_preds["boxes"][matched_preds],
