@@ -3,18 +3,14 @@ import os
 import urllib.request
 from abc import ABC
 from dataclasses import dataclass
-from typing import Callable, List, Optional, Sequence, Tuple, Union
+from typing import Callable, Optional, Sequence, Tuple
 from urllib.error import HTTPError
 
-import numpy as np
-import torch
 from torch import Tensor
 from torch.utils.data import Dataset
 
 from pl_bolts.utils.stability import under_review
-
-# TODO: Move this to a more appropriate place.
-ARRAYS = Union[torch.Tensor, np.ndarray, List[Union[float, int]], List[List[Union[float, int]]]]
+from pl_bolts.utils.types import ARRAYS
 
 
 @under_review()
@@ -86,7 +82,7 @@ class DataModel:
             data: Sequence of indexables.
 
         Returns:
-            ARRAYS: Transformed data if transform is not None.
+            data: Transformed data if transform is not None.
         """
         if self.transform is not None:
             data = self.transform(data)
