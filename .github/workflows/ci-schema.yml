@@ -7,5 +7,5 @@ on:
     branches: [master, "release/*"]
 
 jobs:
-  check:
+  validate-schema:
     uses: Lightning-AI/devtools/.github/workflows/check-schema.yml@v0.1.0
