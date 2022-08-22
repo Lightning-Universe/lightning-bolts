@@ -8,4 +8,4 @@ on:
 
 jobs:
   check:
-    uses: Lightning-AI/devtools/.github/workflows/check-schema.yml@main  # FIXME: Use v0.1.0
+    uses: Lightning-AI/devtools/.github/workflows/check-schema.yml@v0.1.0
