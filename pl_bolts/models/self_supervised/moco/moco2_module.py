@@ -19,13 +19,9 @@ from torch.nn import functional as F
 
 from pl_bolts.metrics import mean, precision_at_k
 from pl_bolts.models.self_supervised.moco.transforms import (
-    Moco2EvalCIFAR10Transforms,
-    Moco2EvalImagenetTransforms,
-    Moco2EvalSTL10Transforms,
-    Moco2TrainCIFAR10Transforms,
-    Moco2TrainImagenetTransforms,
-    Moco2TrainSTL10Transforms,
-)
+    Moco2EvalCIFAR10Transforms, Moco2EvalImagenetTransforms,
+    Moco2EvalSTL10Transforms, Moco2TrainCIFAR10Transforms,
+    Moco2TrainImagenetTransforms, Moco2TrainSTL10Transforms)
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -358,7 +354,8 @@ def concat_all_gather(tensor):
 
 @under_review()
 def cli_main():
-    from pl_bolts.datamodules import CIFAR10DataModule, SSLImagenetDataModule, STL10DataModule
+    from pl_bolts.datamodules import (CIFAR10DataModule, SSLImagenetDataModule,
+                                      STL10DataModule)
 
     parser = ArgumentParser()
 

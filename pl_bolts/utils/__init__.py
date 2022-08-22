@@ -7,7 +7,8 @@ from packaging.version import Version
 from pkg_resources import DistributionNotFound
 from pytorch_lightning.utilities import _module_available
 
-from pl_bolts.callbacks.verification.batch_gradient import BatchGradientVerification  # type: ignore
+from pl_bolts.callbacks.verification.batch_gradient import \
+    BatchGradientVerification  # type: ignore
 
 
 # Ported from https://github.com/PyTorchLightning/pytorch-lightning/blob/master/pytorch_lightning/utilities/imports.py

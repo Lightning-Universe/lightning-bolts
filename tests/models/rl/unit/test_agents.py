@@ -7,7 +7,8 @@ import numpy as np
 import torch
 from torch import Tensor
 
-from pl_bolts.models.rl.common.agents import ActorCriticAgent, Agent, PolicyAgent, ValueAgent
+from pl_bolts.models.rl.common.agents import (ActorCriticAgent, Agent,
+                                              PolicyAgent, ValueAgent)
 
 
 class TestAgents(TestCase):

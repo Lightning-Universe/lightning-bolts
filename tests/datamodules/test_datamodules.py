@@ -5,15 +5,10 @@ import pytest
 import torch
 from PIL import Image
 
-from pl_bolts.datamodules import (
-    BinaryEMNISTDataModule,
-    BinaryMNISTDataModule,
-    CIFAR10DataModule,
-    CityscapesDataModule,
-    EMNISTDataModule,
-    FashionMNISTDataModule,
-    MNISTDataModule,
-)
+from pl_bolts.datamodules import (BinaryEMNISTDataModule,
+                                  BinaryMNISTDataModule, CIFAR10DataModule,
+                                  CityscapesDataModule, EMNISTDataModule,
+                                  FashionMNISTDataModule, MNISTDataModule)
 from pl_bolts.datamodules.sr_datamodule import TVTDataModule
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST

@@ -11,7 +11,9 @@ import torch.nn.functional as F
 from pl_bolts.callbacks import SRImageLoggerCallback
 from pl_bolts.datamodules import TVTDataModule
 from pl_bolts.datasets.utils import prepare_sr_datasets
-from pl_bolts.models.gans.srgan.components import SRGANDiscriminator, SRGANGenerator, VGG19FeatureExtractor
+from pl_bolts.models.gans.srgan.components import (SRGANDiscriminator,
+                                                   SRGANGenerator,
+                                                   VGG19FeatureExtractor)
 from pl_bolts.utils.stability import under_review
 
 

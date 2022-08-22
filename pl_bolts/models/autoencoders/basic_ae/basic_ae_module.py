@@ -7,12 +7,10 @@ from torch import nn
 from torch.nn import functional as F
 
 from pl_bolts import _HTTPS_AWS_HUB
-from pl_bolts.models.autoencoders.components import (
-    resnet18_decoder,
-    resnet18_encoder,
-    resnet50_decoder,
-    resnet50_encoder,
-)
+from pl_bolts.models.autoencoders.components import (resnet18_decoder,
+                                                     resnet18_encoder,
+                                                     resnet50_decoder,
+                                                     resnet50_encoder)
 from pl_bolts.utils.stability import under_review
 
 
@@ -154,7 +152,8 @@ class AE(LightningModule):
 
 @under_review()
 def cli_main(args=None):
-    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
+    from pl_bolts.datamodules import (CIFAR10DataModule, ImagenetDataModule,
+                                      STL10DataModule)
 
     parser = ArgumentParser()
     parser.add_argument("--dataset", default="cifar10", type=str, choices=["cifar10", "stl10", "imagenet"])

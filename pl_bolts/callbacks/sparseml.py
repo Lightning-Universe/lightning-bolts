@@ -17,7 +17,8 @@ import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
-from pl_bolts.utils import _PL_GREATER_EQUAL_1_4_5, _SPARSEML_AVAILABLE, _TORCH_MAX_VERSION_SPARSEML
+from pl_bolts.utils import (_PL_GREATER_EQUAL_1_4_5, _SPARSEML_AVAILABLE,
+                            _TORCH_MAX_VERSION_SPARSEML)
 
 if _SPARSEML_AVAILABLE:
     from sparseml.pytorch.optim import ScheduledModifierManager

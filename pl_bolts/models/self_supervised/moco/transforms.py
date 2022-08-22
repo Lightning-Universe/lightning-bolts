@@ -1,10 +1,8 @@
 import random
 
-from pl_bolts.transforms.dataset_normalizations import (
-    cifar10_normalization,
-    imagenet_normalization,
-    stl10_normalization,
-)
+from pl_bolts.transforms.dataset_normalizations import (cifar10_normalization,
+                                                        imagenet_normalization,
+                                                        stl10_normalization)
 from pl_bolts.utils import _PIL_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg

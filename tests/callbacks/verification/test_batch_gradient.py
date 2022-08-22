@@ -7,7 +7,8 @@ from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor, nn
 
 from pl_bolts.callbacks import BatchGradientVerificationCallback
-from pl_bolts.callbacks.verification.batch_gradient import default_input_mapping, default_output_mapping, selective_eval
+from pl_bolts.callbacks.verification.batch_gradient import (
+    default_input_mapping, default_output_mapping, selective_eval)
 from pl_bolts.utils import BatchGradientVerification
 from tests import _MARK_REQUIRE_GPU
 

@@ -6,7 +6,8 @@ from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader
 
 from pl_bolts.datasets import DummyDetectionDataset
-from pl_bolts.models.detection import YOLO, FasterRCNN, RetinaNet, YOLOConfiguration
+from pl_bolts.models.detection import (YOLO, FasterRCNN, RetinaNet,
+                                       YOLOConfiguration)
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 from pl_bolts.models.detection.yolo.yolo_layers import _aligned_iou
 from tests import TEST_ROOT

@@ -9,11 +9,9 @@ from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
 from pl_bolts.models.self_supervised.simsiam.models import SiameseArm
 from pl_bolts.optimizers.lars import LARS
 from pl_bolts.optimizers.lr_scheduler import linear_warmup_decay
-from pl_bolts.transforms.dataset_normalizations import (
-    cifar10_normalization,
-    imagenet_normalization,
-    stl10_normalization,
-)
+from pl_bolts.transforms.dataset_normalizations import (cifar10_normalization,
+                                                        imagenet_normalization,
+                                                        stl10_normalization)
 from pl_bolts.utils.stability import under_review
 
 
@@ -267,8 +265,10 @@ class SimSiam(LightningModule):
 @under_review()
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
-    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
-    from pl_bolts.models.self_supervised.simclr import SimCLREvalDataTransform, SimCLRTrainDataTransform
+    from pl_bolts.datamodules import (CIFAR10DataModule, ImagenetDataModule,
+                                      STL10DataModule)
+    from pl_bolts.models.self_supervised.simclr import (
+        SimCLREvalDataTransform, SimCLRTrainDataTransform)
 
     seed_everything(1234)
 

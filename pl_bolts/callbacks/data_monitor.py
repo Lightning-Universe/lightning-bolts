@@ -3,7 +3,8 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 import numpy as np
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
-from pytorch_lightning.loggers import LightningLoggerBase, TensorBoardLogger, WandbLogger
+from pytorch_lightning.loggers import (LightningLoggerBase, TensorBoardLogger,
+                                       WandbLogger)
 from pytorch_lightning.utilities import rank_zero_warn
 from pytorch_lightning.utilities.apply_func import apply_to_collection
 from torch import Tensor, nn

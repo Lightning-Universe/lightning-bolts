@@ -6,8 +6,10 @@ from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch import Tensor, nn
 from torch.utils.data import DataLoader
 
-from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
-from pl_bolts.models.gans.dcgan.components import DCGANDiscriminator, DCGANGenerator
+from pl_bolts.callbacks import (LatentDimInterpolator,
+                                TensorboardGenerativeModelImageSampler)
+from pl_bolts.models.gans.dcgan.components import (DCGANDiscriminator,
+                                                   DCGANGenerator)
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg

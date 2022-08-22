@@ -12,7 +12,8 @@ from torch import Tensor, optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from pl_bolts.datamodules.experience_source import Experience, ExperienceSourceDataset
+from pl_bolts.datamodules.experience_source import (Experience,
+                                                    ExperienceSourceDataset)
 from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common.agents import ValueAgent
 from pl_bolts.models.rl.common.gym_wrappers import make_environment

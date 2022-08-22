@@ -9,7 +9,8 @@ from pytorch_lightning.utilities.apply_func import apply_to_collection
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor
 
-from pl_bolts.callbacks.verification.base import VerificationBase, VerificationCallbackBase
+from pl_bolts.callbacks.verification.base import (VerificationBase,
+                                                  VerificationCallbackBase)
 from pl_bolts.utils.stability import under_review
 
 

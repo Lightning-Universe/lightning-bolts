@@ -8,7 +8,9 @@ from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities import rank_zero_info
 from torch import Tensor, optim
 
-from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, RouteLayer, ShortcutLayer
+from pl_bolts.models.detection.yolo.yolo_layers import (DetectionLayer,
+                                                        RouteLayer,
+                                                        ShortcutLayer)
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review

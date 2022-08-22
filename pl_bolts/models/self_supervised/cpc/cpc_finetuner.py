@@ -5,11 +5,8 @@ from pytorch_lightning import Trainer, seed_everything
 
 from pl_bolts.models.self_supervised import CPC_v2, SSLFineTuner
 from pl_bolts.models.self_supervised.cpc.transforms import (
-    CPCEvalTransformsCIFAR10,
-    CPCEvalTransformsSTL10,
-    CPCTrainTransformsCIFAR10,
-    CPCTrainTransformsSTL10,
-)
+    CPCEvalTransformsCIFAR10, CPCEvalTransformsSTL10,
+    CPCTrainTransformsCIFAR10, CPCTrainTransformsSTL10)
 from pl_bolts.utils.stability import under_review
 
 

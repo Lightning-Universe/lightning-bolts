@@ -12,30 +12,19 @@ except ImportError:
     )
 
 from pl_bolts.models.self_supervised.amdim.transforms import (
-    AMDIMEvalTransformsCIFAR10,
-    AMDIMEvalTransformsImageNet128,
-    AMDIMEvalTransformsSTL10,
-    AMDIMTrainTransformsCIFAR10,
-    AMDIMTrainTransformsImageNet128,
-    AMDIMTrainTransformsSTL10,
-)
+    AMDIMEvalTransformsCIFAR10, AMDIMEvalTransformsImageNet128,
+    AMDIMEvalTransformsSTL10, AMDIMTrainTransformsCIFAR10,
+    AMDIMTrainTransformsImageNet128, AMDIMTrainTransformsSTL10)
 from pl_bolts.models.self_supervised.cpc.transforms import (
-    CPCEvalTransformsCIFAR10,
-    CPCEvalTransformsImageNet128,
-    CPCEvalTransformsSTL10,
-    CPCTrainTransformsCIFAR10,
-    CPCTrainTransformsImageNet128,
-    CPCTrainTransformsSTL10,
-)
+    CPCEvalTransformsCIFAR10, CPCEvalTransformsImageNet128,
+    CPCEvalTransformsSTL10, CPCTrainTransformsCIFAR10,
+    CPCTrainTransformsImageNet128, CPCTrainTransformsSTL10)
 from pl_bolts.models.self_supervised.moco.transforms import (
-    Moco2EvalCIFAR10Transforms,
-    Moco2EvalImagenetTransforms,
-    Moco2EvalSTL10Transforms,
-    Moco2TrainCIFAR10Transforms,
-    Moco2TrainImagenetTransforms,
-    Moco2TrainSTL10Transforms,
-)
-from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
+    Moco2EvalCIFAR10Transforms, Moco2EvalImagenetTransforms,
+    Moco2EvalSTL10Transforms, Moco2TrainCIFAR10Transforms,
+    Moco2TrainImagenetTransforms, Moco2TrainSTL10Transforms)
+from pl_bolts.models.self_supervised.simclr.transforms import (
+    SimCLREvalDataTransform, SimCLRTrainDataTransform)
 
 
 @pytest.mark.parametrize(

@@ -10,8 +10,10 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
 
-    from torchvision.models.detection.retinanet import RetinaNet as torchvision_RetinaNet
-    from torchvision.models.detection.retinanet import RetinaNetHead, retinanet_resnet50_fpn
+    from torchvision.models.detection.retinanet import \
+        RetinaNet as torchvision_RetinaNet
+    from torchvision.models.detection.retinanet import (RetinaNetHead,
+                                                        retinanet_resnet50_fpn)
     from torchvision.ops import box_iou
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")

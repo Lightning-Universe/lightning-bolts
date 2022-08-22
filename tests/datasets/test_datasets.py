@@ -2,7 +2,8 @@ import pytest
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from pl_bolts.datasets import DummyDataset, RandomDataset, RandomDictDataset, RandomDictStringDataset
+from pl_bolts.datasets import (DummyDataset, RandomDataset, RandomDictDataset,
+                               RandomDictStringDataset)
 from pl_bolts.datasets.dummy_dataset import DummyDetectionDataset
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 

@@ -15,13 +15,9 @@ from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
 from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc.networks import cpc_resnet101
 from pl_bolts.models.self_supervised.cpc.transforms import (
-    CPCEvalTransformsCIFAR10,
-    CPCEvalTransformsImageNet128,
-    CPCEvalTransformsSTL10,
-    CPCTrainTransformsCIFAR10,
-    CPCTrainTransformsImageNet128,
-    CPCTrainTransformsSTL10,
-)
+    CPCEvalTransformsCIFAR10, CPCEvalTransformsImageNet128,
+    CPCEvalTransformsSTL10, CPCTrainTransformsCIFAR10,
+    CPCTrainTransformsImageNet128, CPCTrainTransformsSTL10)
 from pl_bolts.utils.pretrained_weights import load_pretrained
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 from pl_bolts.utils.stability import under_review
@@ -208,7 +204,8 @@ class CPC_v2(LightningModule):
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule
-    from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
+    from pl_bolts.datamodules.ssl_imagenet_datamodule import \
+        SSLImagenetDataModule
 
     seed_everything(1234)
     parser = ArgumentParser()

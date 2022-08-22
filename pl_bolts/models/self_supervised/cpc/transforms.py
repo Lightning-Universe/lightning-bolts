@@ -1,4 +1,5 @@
-from pl_bolts.transforms.self_supervised import Patchify, RandomTranslateWithReflect
+from pl_bolts.transforms.self_supervised import (Patchify,
+                                                 RandomTranslateWithReflect)
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg

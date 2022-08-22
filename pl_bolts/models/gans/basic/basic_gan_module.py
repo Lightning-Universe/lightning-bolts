@@ -166,8 +166,10 @@ class GAN(LightningModule):
 
 
 def cli_main(args=None):
-    from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
-    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, MNISTDataModule, STL10DataModule
+    from pl_bolts.callbacks import (LatentDimInterpolator,
+                                    TensorboardGenerativeModelImageSampler)
+    from pl_bolts.datamodules import (CIFAR10DataModule, ImagenetDataModule,
+                                      MNISTDataModule, STL10DataModule)
 
     seed_everything(1234)
 

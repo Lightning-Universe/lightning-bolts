@@ -11,7 +11,8 @@ from torch.nn import functional as F
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from pl_bolts.datamodules.experience_source import Experience, ExperienceSourceDataset
+from pl_bolts.datamodules.experience_source import (Experience,
+                                                    ExperienceSourceDataset)
 from pl_bolts.models.rl.common.agents import SoftActorCriticAgent
 from pl_bolts.models.rl.common.memory import MultiStepBuffer
 from pl_bolts.models.rl.common.networks import MLP, ContinuousMLP

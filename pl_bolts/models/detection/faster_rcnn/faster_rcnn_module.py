@@ -10,8 +10,10 @@ from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
-    from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
-    from torchvision.models.detection.faster_rcnn import FastRCNNPredictor, fasterrcnn_resnet50_fpn
+    from torchvision.models.detection.faster_rcnn import \
+        FasterRCNN as torchvision_FasterRCNN
+    from torchvision.models.detection.faster_rcnn import (
+        FastRCNNPredictor, fasterrcnn_resnet50_fpn)
     from torchvision.ops import box_iou
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
