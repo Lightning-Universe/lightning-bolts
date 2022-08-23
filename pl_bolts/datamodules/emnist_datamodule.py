@@ -74,6 +74,23 @@ class EMNISTDataModule(VisionDataModule):
 
     |
 
+    Args:
+        data_dir: Root directory of dataset.
+        split: The dataset has 6 different splits: ``byclass``, ``bymerge``,
+            ``balanced``, ``letters``, ``digits`` and ``mnist``.
+            This argument is passed to :class:`torchvision.datasets.EMNIST`.
+        val_split: Percent (float) or number (int) of samples to use for the validation split.
+        num_workers: How many workers to use for loading data
+        normalize: If ``True``, applies image normalize.
+        batch_size: How many samples per batch to load.
+        seed: Random seed to be used for train/val/test splits.
+        shuffle: If ``True``, shuffles the train data every epoch.
+        pin_memory: If ``True``, the data loader will copy Tensors into
+            CUDA pinned memory before returning them.
+        drop_last: If ``True``, drops the last incomplete batch.
+        strict_val_split: If ``True``, uses the validation split defined in the paper and ignores ``val_split``.
+            Note that it only works with ``"balanced"``, ``"digits"``, ``"letters"``, ``"mnist"`` splits.
+
     Here is the default EMNIST, train, val, test-splits and transforms.
 
     Transforms::
@@ -119,25 +136,6 @@ class EMNISTDataModule(VisionDataModule):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        """
-        Args:
-            data_dir: Where to save/load the data.
-            split: The dataset has 6 different splits: ``byclass``, ``bymerge``,
-                ``balanced``, ``letters``, ``digits`` and ``mnist``.
-                This argument is passed to :class:`torchvision.datasets.EMNIST`.
-            val_split: Percent (float) or number (int) of samples
-                to use for the validation split.
-            num_workers: How many workers to use for loading data
-            normalize: If ``True``, applies image normalize.
-            batch_size: How many samples per batch to load.
-            seed: Random seed to be used for train/val/test splits.
-            shuffle: If ``True``, shuffles the train data every epoch.
-            pin_memory: If ``True``, the data loader will copy Tensors into
-                CUDA pinned memory before returning them.
-            drop_last: If ``True``, drops the last incomplete batch.
-            strict_val_split: If ``True``, uses the validation split defined in the paper and ignores ``val_split``.
-                Note that it only works with ``"balanced"``, ``"digits"``, ``"letters"``, ``"mnist"`` splits.
-        """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
                 "You want to use MNIST dataset loaded from `torchvision` which is not installed yet."
