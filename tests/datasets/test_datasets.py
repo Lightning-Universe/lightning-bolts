@@ -1,20 +1,11 @@
 import pytest
 import torch
-
-<<<<<<< HEAD
 import torchvision.transforms as transforms
-from torch.utils.data import DataLoader
-
-from pl_bolts.datasets import DummyDataset, RandomDataset, RandomDictDataset, RandomDictStringDataset
-from pl_bolts.datasets.cifar10_dataset import CIFAR10
-
-=======
 from torch.utils.data import DataLoader, Dataset
 
 from pl_bolts.datasets import DummyDataset, RandomDataset, RandomDictDataset, RandomDictStringDataset
+from pl_bolts.datasets.cifar10_dataset import CIFAR10
 from pl_bolts.datasets.dummy_dataset import DummyDetectionDataset
-
->>>>>>> upstream/master
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 
 
