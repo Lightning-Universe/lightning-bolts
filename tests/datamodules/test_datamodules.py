@@ -79,9 +79,18 @@ def test_vision_data_module(datadir, val_split, catch_warnings, train_len):
 
 @pytest.mark.parametrize("dm_cls", [BinaryMNISTDataModule, CIFAR10DataModule, FashionMNISTDataModule, MNISTDataModule])
 def test_data_modules(datadir, catch_warnings, dm_cls):
+    """Test datamodules train, val, and test dataloaders outputs have correct shape."""
     dm = _create_dm(dm_cls, datadir)
-    loader = dm.train_dataloader()
-    img, _ = next(iter(loader))
+    train_loader = dm.train_dataloader()
+    img, _ = next(iter(train_loader))
+    assert img.size() == torch.Size([2, *dm.dims])
+
+    val_loader = dm.val_dataloader()
+    img, _ = next(iter(val_loader))
+    assert img.size() == torch.Size([2, *dm.dims])
+
+    test_loader = dm.test_dataloader()
+    img, _ = next(iter(test_loader))
     assert img.size() == torch.Size([2, *dm.dims])
 
 
@@ -104,12 +113,19 @@ def test_sr_datamodule(datadir):
 @pytest.mark.parametrize("split", ["byclass", "bymerge", "balanced", "letters", "digits", "mnist"])
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
 def test_emnist_datamodules(datadir, dm_cls, split):
-    """Test EMNIST datamodules download data and have the correct shape."""
-
+    """Test BinaryEMNIST and EMNIST datamodules download data and have the correct shape."""
     dm = _create_dm(dm_cls, datadir, split=split)
-    loader = dm.train_dataloader()
-    img, _ = next(iter(loader))
-    assert img.size() == torch.Size([2, 1, 28, 28])
+    train_loader = dm.train_dataloader()
+    img, _ = next(iter(train_loader))
+    assert img.size() == torch.Size([2, *dm.dims])
+
+    val_loader = dm.val_dataloader()
+    img, _ = next(iter(val_loader))
+    assert img.size() == torch.Size([2, *dm.dims])
+
+    test_loader = dm.test_dataloader()
+    img, _ = next(iter(test_loader))
+    assert img.size() == torch.Size([2, *dm.dims])
 
 
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
