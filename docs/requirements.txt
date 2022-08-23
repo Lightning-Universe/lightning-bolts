@@ -1,5 +1,6 @@
 sphinx==4.2  # fails with sphinx.ext.viewcode  # fails with sphinx_paramlinks
 recommonmark  # fails with badges
+mistune < 2.0
 m2r  # fails with multi-line text
 nbsphinx>=0.8
 pandoc>=1.0
