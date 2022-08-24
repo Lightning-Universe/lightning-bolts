@@ -2,13 +2,15 @@ import logging
 import os
 import urllib.request
 from abc import ABC
-from typing import Sequence, Tuple
+from dataclasses import dataclass
+from typing import Callable, Optional, Sequence, Tuple
 from urllib.error import HTTPError
 
 from torch import Tensor
 from torch.utils.data import Dataset
 
 from pl_bolts.utils.stability import under_review
+from pl_bolts.utils.types import ARRAYS
 
 
 @under_review()
@@ -58,3 +60,31 @@ class LightDataset(ABC, Dataset):
             urllib.request.urlretrieve(url, fpath)
         except HTTPError as err:
             raise RuntimeError(f"Failed download from {url}") from err
+
+
+@dataclass
+class DataModel:
+    """Data model dataclass.
+
+    Ties together data and callable transforms.
+
+    Attributes:
+        data: Sequence of indexables.
+        transform: Callable to transform data.
+    """
+
+    data: ARRAYS
+    transform: Optional[Callable] = None
+
+    def process(self, subset: ARRAYS) -> ARRAYS:
+        """Transforms a subset of data.
+
+        Args:
+            subset: Sequence of indexables.
+
+        Returns:
+            data: Transformed data if transform is not None.
+        """
+        if self.transform is not None:
+            subset = self.transform(subset)
+        return subset

@@ -1,3 +1,6 @@
+from typing import List
+
+import torch
 from torch.utils.data.dataset import random_split
 
 from pl_bolts.datasets.sr_celeba_dataset import SRCelebA
@@ -39,3 +42,16 @@ def prepare_sr_datasets(dataset: str, scale_factor: int, data_dir: str):
         dataset_test = dataset_cls(scale_factor, root=data_dir, split="test", download=True)
 
     return (dataset_train, dataset_val, dataset_test)
+
+
+def to_tensor(integers: List[int]) -> torch.Tensor:
+    """Takes a list of integers and returns a tensor.
+
+    This function serves as a use case for the ArrayDataset.
+
+    Args:
+        integers: List of integers
+    Returns:
+        A  tensor of the integers
+    """
+    return torch.tensor(integers)
