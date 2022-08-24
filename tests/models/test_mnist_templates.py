@@ -1,12 +1,14 @@
 from pytorch_lightning import Trainer, seed_everything
 
+from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models import LitMNIST
 
 
 def test_mnist(tmpdir, datadir):
-    seed_everything()
+    seed_everything(1234)
 
-    model = LitMNIST(data_dir=datadir, num_workers=0)
+    datamodule = MNISTDataModule(data_dir=datadir, num_workers=0)
+    model = LitMNIST()
     trainer = Trainer(
         limit_train_batches=0.01,
         limit_val_batches=0.01,
@@ -14,6 +16,6 @@ def test_mnist(tmpdir, datadir):
         limit_test_batches=0.01,
         default_root_dir=tmpdir,
     )
-    trainer.fit(model)
+    trainer.fit(model, datamodule=datamodule)
     loss = trainer.callback_metrics["train_loss"]
     assert loss <= 2.2, "mnist failed"
