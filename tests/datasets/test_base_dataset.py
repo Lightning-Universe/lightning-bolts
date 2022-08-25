@@ -1,14 +1,9 @@
 import numpy as np
 import pytest
+import torch
 
 from pl_bolts.datasets.base_dataset import DataModel
-
-
-def add_two(integers: np.ndarray) -> np.ndarray:
-    output = []
-    for data in integers:
-        output.append(data + 2)
-    return np.array(output)
+from pl_bolts.datasets.utils import to_tensor
 
 
 class TestDataModel:
@@ -22,6 +17,6 @@ class TestDataModel:
         np.testing.assert_array_equal(dm.process(data[1]), data[1])
 
     def test_process_transform_is_not_none(self, data):
-        dm = DataModel(data=data, transform=add_two)
-        np.testing.assert_array_equal(dm.process(data[0]), np.array([3, 2, 2, 3]))
-        np.testing.assert_array_equal(dm.process(data[1]), np.array([2, 3, 3, 2]))
+        dm = DataModel(data=data, transform=to_tensor)
+        torch.testing.assert_close(dm.process(data[0]), torch.tensor([1, 0, 0, 1]))
+        torch.testing.assert_close(dm.process(data[1]), torch.tensor([0, 1, 1, 0]))
