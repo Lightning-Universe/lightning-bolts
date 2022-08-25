@@ -1,19 +1,18 @@
 from argparse import ArgumentParser
 from copy import deepcopy
-from typing import Any, Union
+from typing import Any, Tuple, Union
 
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
+from torch import Tensor
 from torch.nn import functional as F
 from torch.optim import Adam
 
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
 from pl_bolts.models.self_supervised.byol.models import SiameseArm
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-from pl_bolts.utils.stability import under_review
 
 
-@under_review()
 class BYOL(LightningModule):
     """PyTorch Lightning implementation of Bootstrap Your Own Latent (BYOL_)_
 
@@ -21,10 +20,19 @@ class BYOL(LightningModule):
     Elena Buchatskaya, Carl Doersch, Bernardo Avila Pires, Zhaohan Daniel Guo, Mohammad Gheshlaghi Azar, \
     Bilal Piot, Koray Kavukcuoglu, Rémi Munos, Michal Valko.
 
-    Model implemented by:
-        - `Annika Brundyn <https://github.com/annikabrundyn>`_
-
-    .. warning:: Work in progress. This implementation is still being verified.
+    Args:
+        num_classes (int): number of classes
+        learning_rate (float, optional): optimizer learning rate. Defaults to 0.2.
+        weight_decay (float, optional): optimizer weight decay. Defaults to 1.5e-6.
+        input_height (int, optional): data input height. Defaults to 32.
+        batch_size (int, optional): number of samples per batch. Defaults to 32.
+        num_workers (int, optional): number of subprocesses used in loading data. Defaults to 0.
+        warmup_epochs (int, optional): number of epochs for scheduler warmup. Defaults to 10.
+        max_epochs (int, optional): maximum number of epochs for scheduler. Defaults to 1000.
+        base_encoder (Union[str, torch.nn.Module], optional): base encoder architecture. Defaults to "resnet50".
+        encoder_out_dim (int, optional): base encoder output dimension. Defaults to 2048.
+        projector_hidden_size (int, optional): projector MLP hidden dimension. Defaults to 4096.
+        projector_out_dim (int, optional): projector MLP output dimension. Defaults to 256.
 
     TODOs:
         - verify on CIFAR-10
@@ -41,11 +49,6 @@ class BYOL(LightningModule):
 
         trainer = pl.Trainer()
         trainer.fit(model, datamodule=dm)
-
-    Train::
-
-        trainer = Trainer()
-        trainer.fit(model)
 
     CLI command::
 
@@ -65,7 +68,7 @@ class BYOL(LightningModule):
 
     def __init__(
         self,
-        num_classes,
+        num_classes: int,
         learning_rate: float = 0.2,
         weight_decay: float = 1.5e-6,
         input_height: int = 32,
@@ -79,21 +82,6 @@ class BYOL(LightningModule):
         projector_out_dim: int = 256,
         **kwargs
     ):
-        """
-        Args:
-            datamodule: The datamodule
-            learning_rate: the learning rate
-            weight_decay: optimizer weight decay
-            input_height: image input height
-            batch_size: the batch size
-            num_workers: number of workers
-            warmup_epochs: num of epochs for scheduler warm up
-            max_epochs: max epochs for scheduler
-            base_encoder: the base encoder module or resnet name
-            encoder_out_dim: output dimension of base_encoder
-            projector_hidden_size: hidden layer size of projector MLP
-            projector_out_dim: output size of projector MLP
-        """
         super().__init__()
         self.save_hyperparameters(ignore="base_encoder")
 
@@ -101,15 +89,15 @@ class BYOL(LightningModule):
         self.target_network = deepcopy(self.online_network)
         self.weight_callback = BYOLMAWeightUpdate()
 
-    def on_train_batch_end(self, outputs, batch: Any, batch_idx: int) -> None:
-        # Add callback for user automatically since it's key to BYOL weight update
+    def on_train_batch_end(self, outputs: Any, batch: Any, batch_idx: int) -> None:
+        """Add callback to perform BYOL exponential moving average weight update on target network."""
         self.weight_callback.on_train_batch_end(self.trainer, self, outputs, batch, batch_idx)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         y, _, _ = self.online_network(x)
         return y
 
-    def shared_step(self, batch, batch_idx):
+    def shared_step(self, batch: Any, batch_idx: int) -> Tuple[Tensor, Tensor, Tensor]:
         imgs, y = batch
         img_1, img_2 = imgs[:2]
 
@@ -131,18 +119,14 @@ class BYOL(LightningModule):
 
         return loss_a, loss_b, total_loss
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch: Any, batch_idx: int) -> Tensor:
         loss_a, loss_b, total_loss = self.shared_step(batch, batch_idx)
-
-        # log results
         self.log_dict({"1_2_loss": loss_a, "2_1_loss": loss_b, "train_loss": total_loss})
 
         return total_loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch: Any, batch_idx: int) -> Tensor:
         loss_a, loss_b, total_loss = self.shared_step(batch, batch_idx)
-
-        # log results
         self.log_dict({"1_2_loss": loss_a, "2_1_loss": loss_b, "val_loss": total_loss})
 
         return total_loss
@@ -155,30 +139,29 @@ class BYOL(LightningModule):
         return [optimizer], [scheduler]
 
     @staticmethod
-    def add_model_specific_args(parent_parser):
+    def add_model_specific_args(parent_parser) -> ArgumentParser:
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--online_ft", action="store_true", help="run online finetuner")
         parser.add_argument("--dataset", type=str, default="cifar10", choices=["cifar10", "imagenet2012", "stl10"])
 
         (args, _) = parser.parse_known_args()
 
-        # Data
+        # Data params
         parser.add_argument("--data_dir", type=str, default=".")
         parser.add_argument("--num_workers", default=8, type=int)
 
-        # optim
+        # Training params
         parser.add_argument("--batch_size", type=int, default=256)
         parser.add_argument("--learning_rate", type=float, default=1e-3)
         parser.add_argument("--weight_decay", type=float, default=1.5e-6)
         parser.add_argument("--warmup_epochs", type=float, default=10)
 
-        # Model
+        # Model params
         parser.add_argument("--meta_dir", default=".", type=str, help="path to meta.bin for imagenet")
 
         return parser
 
 
-@under_review()
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
@@ -188,23 +171,18 @@ def cli_main():
 
     parser = ArgumentParser()
 
-    # trainer args
     parser = Trainer.add_argparse_args(parser)
-
-    # model args
     parser = BYOL.add_model_specific_args(parser)
+
     args = parser.parse_args()
 
-    # pick data
+    # Initialize datamodule
     dm = None
-
-    # init default datamodule
     if args.dataset == "cifar10":
         dm = CIFAR10DataModule.from_argparse_args(args)
         dm.train_transforms = SimCLRTrainDataTransform(32)
         dm.val_transforms = SimCLREvalDataTransform(32)
         args.num_classes = dm.num_classes
-
     elif args.dataset == "stl10":
         dm = STL10DataModule.from_argparse_args(args)
         dm.train_dataloader = dm.train_dataloader_mixed
@@ -214,7 +192,6 @@ def cli_main():
         dm.train_transforms = SimCLRTrainDataTransform(h)
         dm.val_transforms = SimCLREvalDataTransform(h)
         args.num_classes = dm.num_classes
-
     elif args.dataset == "imagenet2012":
         dm = ImagenetDataModule.from_argparse_args(args, image_size=196)
         (c, h, w) = dm.dims
