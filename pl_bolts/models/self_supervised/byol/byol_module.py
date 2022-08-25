@@ -34,11 +34,6 @@ class BYOL(LightningModule):
         projector_hidden_size (int, optional): projector MLP hidden dimension. Defaults to 4096.
         projector_out_dim (int, optional): projector MLP output dimension. Defaults to 256.
 
-    TODOs:
-        - verify on CIFAR-10
-        - verify on STL-10
-        - pre-train on imagenet
-
     Example::
 
         model = BYOL(num_classes=10)
@@ -80,7 +75,7 @@ class BYOL(LightningModule):
         encoder_out_dim: int = 2048,
         projector_hidden_size: int = 4096,
         projector_out_dim: int = 256,
-        **kwargs
+        **kwargs: Any,
     ):
         super().__init__()
         self.save_hyperparameters(ignore="base_encoder")
@@ -97,24 +92,28 @@ class BYOL(LightningModule):
         y, _, _ = self.online_network(x)
         return y
 
+    def calculate_loss(self, v_online: Tensor, v_target: Tensor) -> Tensor:
+        """Calculates similarity loss between the online network prediction of target network projection.
+
+        Args:
+            v_online (Tensor): Online network view
+            v_target (Tensor): Target network view
+        """
+        _, _, h1 = self.online_network(v_online)
+        with torch.no_grad():
+            _, z2, _ = self.target_network(v_target)
+        loss = -2 * F.cosine_similarity(h1, z2).mean()
+        return loss
+
     def shared_step(self, batch: Any, batch_idx: int) -> Tuple[Tensor, Tensor, Tensor]:
-        imgs, y = batch
-        img_1, img_2 = imgs[:2]
+        imgs, _ = batch
+        img1, img2 = imgs[:2]
 
-        # Image 1 to image 2 loss
-        y1, z1, h1 = self.online_network(img_1)
-        with torch.no_grad():
-            y2, z2, h2 = self.target_network(img_2)
-        loss_a = -2 * F.cosine_similarity(h1, z2).mean()
+        # Calculate similarity loss in each direction
+        loss_a = self.calculate_loss(img1, img2)
+        loss_b = self.calculate_loss(img2, img1)
 
-        # Image 2 to image 1 loss
-        y1, z1, h1 = self.online_network(img_2)
-        with torch.no_grad():
-            y2, z2, h2 = self.target_network(img_1)
-        # L2 normalize
-        loss_b = -2 * F.cosine_similarity(h1, z2).mean()
-
-        # Final loss
+        # Calculate total loss
         total_loss = loss_a + loss_b
 
         return loss_a, loss_b, total_loss
@@ -177,7 +176,6 @@ def cli_main():
     args = parser.parse_args()
 
     # Initialize datamodule
-    dm = None
     if args.dataset == "cifar10":
         dm = CIFAR10DataModule.from_argparse_args(args)
         dm.train_transforms = SimCLRTrainDataTransform(32)
@@ -198,6 +196,10 @@ def cli_main():
         dm.train_transforms = SimCLRTrainDataTransform(h)
         dm.val_transforms = SimCLREvalDataTransform(h)
         args.num_classes = dm.num_classes
+    else:
+        raise ValueError(
+            f"{args.dataset} is not a valid dataset. Dataset must be 'cifar10', 'stl10', or 'imagenet2012'."
+        )
 
     model = BYOL(**args.__dict__)
 
