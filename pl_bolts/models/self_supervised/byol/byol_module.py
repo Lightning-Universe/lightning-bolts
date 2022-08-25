@@ -9,7 +9,7 @@ from torch.nn import functional as F
 from torch.optim import Adam
 
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
-from pl_bolts.models.self_supervised.byol.models import SiameseArm
+from pl_bolts.models.self_supervised.byol.models import MLP, SiameseArm
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
@@ -33,6 +33,7 @@ class BYOL(LightningModule):
         encoder_out_dim (int, optional): base encoder output dimension. Defaults to 2048.
         projector_hidden_size (int, optional): projector MLP hidden dimension. Defaults to 4096.
         projector_out_dim (int, optional): projector MLP output dimension. Defaults to 256.
+        initial_tau (float, optional): initial value of target decay rate used. Defaults to 0.996.
 
     Example::
 
@@ -75,6 +76,7 @@ class BYOL(LightningModule):
         encoder_out_dim: int = 2048,
         projector_hidden_size: int = 4096,
         projector_out_dim: int = 256,
+        initial_tau: float = 0.996,
         **kwargs: Any,
     ):
         super().__init__()
@@ -82,14 +84,21 @@ class BYOL(LightningModule):
 
         self.online_network = SiameseArm(base_encoder, encoder_out_dim, projector_hidden_size, projector_out_dim)
         self.target_network = deepcopy(self.online_network)
-        self.weight_callback = BYOLMAWeightUpdate()
+        self.predictor = MLP(projector_out_dim, projector_hidden_size, projector_out_dim)
+
+        self.weight_callback = BYOLMAWeightUpdate(initial_tau=initial_tau)
 
     def on_train_batch_end(self, outputs: Any, batch: Any, batch_idx: int) -> None:
         """Add callback to perform BYOL exponential moving average weight update on target network."""
         self.weight_callback.on_train_batch_end(self.trainer, self, outputs, batch, batch_idx)
 
     def forward(self, x: Tensor) -> Tensor:
-        y, _, _ = self.online_network(x)
+        """Returns the encoded representation of a view.
+
+        Args:
+            x (Tensor): sample to be encoded
+        """
+        y = self.online_network.encode(x)
         return y
 
     def calculate_loss(self, v_online: Tensor, v_target: Tensor) -> Tensor:
@@ -99,9 +108,10 @@ class BYOL(LightningModule):
             v_online (Tensor): Online network view
             v_target (Tensor): Target network view
         """
-        _, _, h1 = self.online_network(v_online)
+        _, z1 = self.online_network(v_online)
+        h1 = self.predictor(z1)
         with torch.no_grad():
-            _, z2, _ = self.target_network(v_target)
+            _, z2 = self.target_network(v_target)
         loss = -2 * F.cosine_similarity(h1, z2).mean()
         return loss
 
