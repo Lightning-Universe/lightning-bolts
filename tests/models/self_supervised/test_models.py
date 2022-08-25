@@ -1,5 +1,3 @@
-from distutils.version import LooseVersion
-
 import pytest
 import torch
 from pytorch_lightning import Trainer
@@ -37,16 +35,15 @@ def test_cpcv2(tmpdir, datadir):
     trainer.fit(model, datamodule=datamodule)
 
 
-# todo: some pickling issue with min config
-@pytest.mark.skipif(LooseVersion(torch.__version__) < LooseVersion("1.7.0"), reason="Pickling issue")
 def test_byol(tmpdir, datadir):
-    datamodule = CIFAR10DataModule(data_dir=datadir, num_workers=0, batch_size=2)
-    datamodule.train_transforms = CPCTrainTransformsCIFAR10()
-    datamodule.val_transforms = CPCEvalTransformsCIFAR10()
+    """Test BYOL on CIFAR-10."""
+    dm = CIFAR10DataModule(data_dir=datadir, num_workers=0, batch_size=2)
+    dm.train_transforms = SimCLRTrainDataTransform(32)
+    dm.val_transforms = SimCLREvalDataTransform(32)
 
-    model = BYOL(data_dir=datadir, num_classes=datamodule)
+    model = BYOL(data_dir=datadir, num_classes=dm.num_classes)
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
-    trainer.fit(model, datamodule=datamodule)
+    trainer.fit(model, datamodule=dm)
 
 
 def test_amdim(tmpdir, datadir):
