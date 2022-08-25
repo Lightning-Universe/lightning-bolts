@@ -13,10 +13,6 @@ class TestToTensor:
         _array = np.array([1, 2, 3])
         torch.testing.assert_close(to_tensor(_array), torch.tensor(_array))
 
-    def test_to_tensor_sequence(self):
-        _sequence = [1.0, 2.0, 3.0]
-        torch.testing.assert_close(to_tensor(_sequence), torch.tensor(_sequence))
-
     def test_to_tensor_sequence_(self):
         _sequence = [[1.0, 2.0, 3.0]]
         torch.testing.assert_close(to_tensor(_sequence), torch.tensor(_sequence))
