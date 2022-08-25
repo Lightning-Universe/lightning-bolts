@@ -10,7 +10,7 @@ from torch import Tensor
 from torch.utils.data import Dataset
 
 from pl_bolts.utils.stability import under_review
-from pl_bolts.utils.types import ARRAYS
+from pl_bolts.utils.types import TArrays
 
 
 @under_review()
@@ -70,13 +70,13 @@ class DataModel:
 
     Attributes:
         data: Sequence of indexables.
-        transform: Callable to transform data.
+        transform: Callable to transform data. The transform is called on a subset of data.
     """
 
-    data: ARRAYS
-    transform: Optional[Callable] = None
+    data: TArrays
+    transform: Optional[Callable[[TArrays], TArrays]] = None
 
-    def process(self, subset: ARRAYS) -> ARRAYS:
+    def process(self, subset: TArrays) -> TArrays:
         """Transforms a subset of data.
 
         Args:

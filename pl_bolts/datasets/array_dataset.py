@@ -3,7 +3,7 @@ from typing import Tuple
 from pytorch_lightning.utilities import exceptions
 from torch.utils.data import Dataset
 
-from pl_bolts.datasets.base_dataset import ARRAYS, DataModel
+from pl_bolts.datasets.base_dataset import DataModel, TArrays
 
 
 class ArrayDataset(Dataset):
@@ -40,7 +40,7 @@ class ArrayDataset(Dataset):
     def __len__(self) -> int:
         return len(self.data_models[0].data)
 
-    def __getitem__(self, idx: int) -> Tuple[ARRAYS, ...]:
+    def __getitem__(self, idx: int) -> Tuple[TArrays, ...]:
         return tuple(data_model.process(data_model.data[idx]) for data_model in self.data_models)
 
     def _equal_size(self) -> bool:
@@ -49,4 +49,4 @@ class ArrayDataset(Dataset):
         Returns:
             bool: True if size of data_models are equal in the first dimension. False, if not.
         """
-        return all(len(data_model.data) == len(self.data_models[0].data) for data_model in self.data_models)
+        return len({len(data_model.data) for data_model in self.data_models}) == 1

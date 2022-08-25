@@ -1,6 +1,6 @@
-from typing import List, Union
+from typing import Sequence, Union
 
 import numpy as np
 import torch
 
-ARRAYS = Union[torch.Tensor, np.ndarray, List[Union[float, int]], List[List[Union[float, int]]]]
+TArrays = Union[torch.Tensor, np.ndarray, Sequence[Union[float, int]], Sequence["TArrays"]]
