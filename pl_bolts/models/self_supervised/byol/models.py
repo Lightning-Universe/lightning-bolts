@@ -34,7 +34,8 @@ class MLP(nn.Module):
 
 
 class SiameseArm(nn.Module):
-    """SiameseArm of BYOL.
+    """SiameseArm consolidates the encoder and projector networks of BYOL's symmetric architecture into a single
+    class.
 
     Args:
         encoder (Union[str, nn.Module], optional): _description_. Defaults to "resnet50".
@@ -59,10 +60,18 @@ class SiameseArm(nn.Module):
             self.encoder = encoder
 
         self.projector = MLP(encoder_out_dim, projector_hidden_size, projector_out_dim)
-        self.predictor = MLP(projector_out_dim, projector_hidden_size, projector_out_dim)
 
-    def forward(self, x: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
+    def forward(self, x: Tensor) -> Tuple[Tensor, Tensor]:
         y = self.encoder(x)[0]
         z = self.projector(y)
-        h = self.predictor(z)
-        return y, z, h
+        return y, z
+
+    def encode(self, x: Tensor) -> Tensor:
+        """Returns the encoded representation of a view. This method does not calculate the projection as in the
+        forward method.
+
+        Args:
+            x (Tensor): sample to be encoded
+        """
+        y = self.encoder(x)[0]
+        return y
