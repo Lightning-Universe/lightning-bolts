@@ -9,7 +9,7 @@ from pl_bolts.datamodules.fashion_mnist_datamodule import FashionMNISTDataModule
 from pl_bolts.datamodules.imagenet_datamodule import ImagenetDataModule
 from pl_bolts.datamodules.kitti_datamodule import KittiDataModule
 from pl_bolts.datamodules.mnist_datamodule import MNISTDataModule
-from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule, SklearnDataset, TensorDataset
+from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule, SklearnDataset
 from pl_bolts.datamodules.sr_datamodule import TVTDataModule
 from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
@@ -31,7 +31,6 @@ __all__ = [
     "MNISTDataModule",
     "SklearnDataModule",
     "SklearnDataset",
-    "TensorDataset",
     "TVTDataModule",
     "SSLImagenetDataModule",
     "STL10DataModule",
