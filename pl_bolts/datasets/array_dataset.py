@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 from pytorch_lightning.utilities import exceptions
 from torch.utils.data import Dataset
@@ -40,7 +40,7 @@ class ArrayDataset(Dataset):
     def __len__(self) -> int:
         return len(self.data_models[0].data)
 
-    def __getitem__(self, idx: int) -> Tuple[TArrays, ...]:
+    def __getitem__(self, idx: int) -> Tuple[Union[TArrays, float], ...]:
         return tuple(data_model.process(data_model.data[idx]) for data_model in self.data_models)
 
     def _equal_size(self) -> bool:

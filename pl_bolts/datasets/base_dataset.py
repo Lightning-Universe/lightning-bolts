@@ -3,7 +3,7 @@ import os
 import urllib.request
 from abc import ABC
 from dataclasses import dataclass
-from typing import Callable, Optional, Sequence, Tuple
+from typing import Callable, Optional, Sequence, Tuple, Union
 from urllib.error import HTTPError
 
 from torch import Tensor
@@ -76,7 +76,7 @@ class DataModel:
     data: TArrays
     transform: Optional[Callable[[TArrays], TArrays]] = None
 
-    def process(self, subset: TArrays) -> TArrays:
+    def process(self, subset: Union[TArrays, float]) -> Union[TArrays, float]:
         """Transforms a subset of data.
 
         Args:
