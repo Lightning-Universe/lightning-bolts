@@ -29,8 +29,7 @@ class MLP(nn.Module):
         )
 
     def forward(self, x: Tensor) -> Tensor:
-        x = self.model(x)
-        return x
+        return self.model(x)
 
 
 class SiameseArm(nn.Module):
@@ -38,17 +37,20 @@ class SiameseArm(nn.Module):
     class.
 
     Args:
-        encoder (Union[str, nn.Module], optional): _description_. Defaults to "resnet50".
-        encoder_out_dim (int, optional): _description_. Defaults to 2048.
-        projector_hidden_size (int, optional): _description_. Defaults to 4096.
-        projector_out_dim (int, optional): _description_. Defaults to 256.
+        encoder (Union[str, nn.Module], optional): Online and target network encoder architecture.
+            Defaults to "resnet50".
+        encoder_out_dim (int, optional): Output dimension of encoder. Defaults to 2048.
+        projector_hidden_dim (int, optional): Online and target network projector network hidden dimension.
+            Defaults to 4096.
+        projector_out_dim (int, optional): Online and target network projector network output dimension.
+            Defaults to 256.
     """
 
     def __init__(
         self,
         encoder: Union[str, nn.Module] = "resnet50",
         encoder_out_dim: int = 2048,
-        projector_hidden_size: int = 4096,
+        projector_hidden_dim: int = 4096,
         projector_out_dim: int = 256,
     ) -> None:
 
@@ -59,7 +61,7 @@ class SiameseArm(nn.Module):
         else:
             self.encoder = encoder
 
-        self.projector = MLP(encoder_out_dim, projector_hidden_size, projector_out_dim)
+        self.projector = MLP(encoder_out_dim, projector_hidden_dim, projector_out_dim)
 
     def forward(self, x: Tensor) -> Tuple[Tensor, Tensor]:
         y = self.encoder(x)[0]
@@ -73,5 +75,4 @@ class SiameseArm(nn.Module):
         Args:
             x (Tensor): sample to be encoded
         """
-        y = self.encoder(x)[0]
-        return y
+        return self.encoder(x)[0]
