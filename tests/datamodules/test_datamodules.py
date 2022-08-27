@@ -12,10 +12,12 @@ from pl_bolts.datamodules import (
     CityscapesDataModule,
     EMNISTDataModule,
     FashionMNISTDataModule,
+    KittiDataModule,
     MNISTDataModule,
 )
 from pl_bolts.datamodules.sr_datamodule import TVTDataModule
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
+from pl_bolts.datasets.kitti_dataset import KittiDataset
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 
 
@@ -146,3 +148,12 @@ def test_emnist_datamodules_with_strict_val_split(datadir, dm_cls, split, expect
         dm = _create_dm(dm_cls, datadir, split=split, strict_val_split=True)
         assert dm.val_split == expected_val_split
         assert len(dm.dataset_val) == expected_val_split
+
+
+def test_kitti_datamodules(data_dir):
+    dataset = KittiDataset(data_dir)
+    dm = KittiDataModule(dataset_train=dataset, dataset_val=dataset, dataset_test=dataset, batch_size=2)
+
+    next(iter(dm.train_dataloader()))
+    next(iter(dm.val_dataloader()))
+    next(iter(dm.test_dataloader()))
