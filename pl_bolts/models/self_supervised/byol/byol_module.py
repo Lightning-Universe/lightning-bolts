@@ -31,7 +31,7 @@ class BYOL(LightningModule):
         max_epochs (int, optional): maximum number of epochs for scheduler. Defaults to 1000.
         base_encoder (Union[str, torch.nn.Module], optional): base encoder architecture. Defaults to "resnet50".
         encoder_out_dim (int, optional): base encoder output dimension. Defaults to 2048.
-        projector_hidden_size (int, optional): projector MLP hidden dimension. Defaults to 4096.
+        projector_hidden_dim (int, optional): projector MLP hidden dimension. Defaults to 4096.
         projector_out_dim (int, optional): projector MLP output dimension. Defaults to 256.
         initial_tau (float, optional): initial value of target decay rate used. Defaults to 0.996.
 
@@ -74,7 +74,7 @@ class BYOL(LightningModule):
         max_epochs: int = 1000,
         base_encoder: Union[str, torch.nn.Module] = "resnet50",
         encoder_out_dim: int = 2048,
-        projector_hidden_size: int = 4096,
+        projector_hidden_dim: int = 4096,
         projector_out_dim: int = 256,
         initial_tau: float = 0.996,
         **kwargs: Any,
@@ -83,9 +83,9 @@ class BYOL(LightningModule):
         super().__init__()
         self.save_hyperparameters(ignore="base_encoder")
 
-        self.online_network = SiameseArm(base_encoder, encoder_out_dim, projector_hidden_size, projector_out_dim)
+        self.online_network = SiameseArm(base_encoder, encoder_out_dim, projector_hidden_dim, projector_out_dim)
         self.target_network = deepcopy(self.online_network)
-        self.predictor = MLP(projector_out_dim, projector_hidden_size, projector_out_dim)
+        self.predictor = MLP(projector_out_dim, projector_hidden_dim, projector_out_dim)
 
         self.weight_callback = BYOLMAWeightUpdate(initial_tau=initial_tau)
 
