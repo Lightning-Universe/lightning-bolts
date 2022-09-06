@@ -1,9 +1,11 @@
+import torch
 from torch.utils.data.dataset import random_split
 
 from pl_bolts.datasets.sr_celeba_dataset import SRCelebA
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 from pl_bolts.datasets.sr_stl10_dataset import SRSTL10
 from pl_bolts.utils.stability import under_review
+from pl_bolts.utils.types import TArrays
 
 
 @under_review()
@@ -39,3 +41,17 @@ def prepare_sr_datasets(dataset: str, scale_factor: int, data_dir: str):
         dataset_test = dataset_cls(scale_factor, root=data_dir, split="test", download=True)
 
     return (dataset_train, dataset_val, dataset_test)
+
+
+def to_tensor(arrays: TArrays) -> torch.Tensor:
+    """Takes a sequence of type `TArrays` and returns a tensor.
+
+    This function serves as a use case for the ArrayDataset.
+
+    Args:
+        arrays: Sequence of type `TArrays`
+
+    Returns:
+        Tensor of the integers
+    """
+    return torch.tensor(arrays)
