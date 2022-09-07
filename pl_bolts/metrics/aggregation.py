@@ -8,7 +8,6 @@ def mean(res, key):
     return torch.stack([x[key] if isinstance(x, dict) else mean(x, key) for x in res]).mean()
 
 
-@under_review()
 def accuracy(preds, labels):
     preds = preds.float()
     max_lgt = torch.max(preds, 1)[1]
