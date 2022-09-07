@@ -5,17 +5,9 @@ from torch import nn
 from typing import Any
 from pl_bolts.models.gans.pix2pix.components import Generator, PatchGAN
 
-def _weights_init(m: Any):
-    if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d)):
-        torch.nn.init.normal_(m.weight.data, 0.0, 0.02)
-    if isinstance(m, nn.BatchNorm2d):
-        torch.nn.init.normal_(m.weight, 0.0, 0.02)
-        torch.nn.init.constant_(m.bias.data, 0.0)
-
-
 class Pix2Pix(LightningModule):
-    """Pix2Pix implementation from the paper `Image-to-Image Translation with Conditional Adversarial Networks.
-    <https://arxiv.org/abs/1611.07004>`
+    """Pix2Pix implementation from the paper 
+    Paper: `Image-to-Image Translation with Conditional Adversarial Networks. <https://arxiv.org/abs/1611.07004>`
 
     Example::
         from pl_bolts.models.gans import Pix2Pix
@@ -38,8 +30,8 @@ class Pix2Pix(LightningModule):
         self.patch_gan = PatchGAN(in_channels + out_channels)
 
         # intializing weights
-        self.gen = self.gen.apply(_weights_init)
-        self.patch_gan = self.patch_gan.apply(_weights_init)
+        self.gen = self.gen.apply(self._weights_init)
+        self.patch_gan = self.patch_gan.apply(self._weights_init)
 
         # criterion
         self.adversarial_criterion = nn.BCEWithLogitsLoss()
@@ -71,7 +63,15 @@ class Pix2Pix(LightningModule):
         fake_loss = self.adversarial_criterion(fake_logits, torch.zeros_like(fake_logits))
         real_loss = self.adversarial_criterion(real_logits, torch.ones_like(real_logits))
         return (real_loss + fake_loss) / 2
-
+    
+    @staticmethod
+    def _weights_init(m):
+        if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d)):
+            torch.nn.init.normal_(m.weight, 0.0, 0.02)
+        if isinstance(m, nn.BatchNorm2d):
+            torch.nn.init.normal_(m.weight, 0.0, 0.02)
+            torch.nn.init.constant_(m.bias, 0.0)
+    
     def configure_optimizers(self):
         lr = self.hparams.learning_rate
         gen_opt = torch.optim.Adam(self.gen.parameters(), lr=lr)
