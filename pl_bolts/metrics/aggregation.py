@@ -1,6 +1,6 @@
 import torch
 
-from pl_bolts.utils.stability import under_review
+# from pl_bolts.utils.stability import under_review
 
 
 def mean(res, key):
@@ -18,7 +18,6 @@ def accuracy(preds, labels):
     return acc
 
 
-@under_review()
 def precision_at_k(output, target, top_k=(1,)):
     """Computes the accuracy over the k top predictions for the specified values of k."""
     with torch.no_grad():
