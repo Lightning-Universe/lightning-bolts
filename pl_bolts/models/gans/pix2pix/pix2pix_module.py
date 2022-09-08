@@ -46,6 +46,9 @@ class Pix2Pix(LightningModule):
         self.adversarial_criterion = nn.BCEWithLogitsLoss()
         self.recon_criterion = nn.L1Loss()
     
+    def forward(self, x):
+        return self.gen(x)
+        
     def _gen_step(self, real_images, conditioned_images):
         # discriminate fake image 
         fake_images = self.gen(conditioned_images)
