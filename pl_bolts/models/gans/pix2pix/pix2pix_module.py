@@ -4,6 +4,7 @@ from torch import nn
 
 from pl_bolts.models.gans.pix2pix.components import Generator, PatchGAN
 
+
 class Pix2Pix(LightningModule):
     """Pix2Pix implementation from the paper 
     Paper: `Image-to-Image Translation with Conditional Adversarial Networks. <https://arxiv.org/abs/1611.07004>`
@@ -21,7 +22,8 @@ class Pix2Pix(LightningModule):
             in_channels: int, 
             out_channels: int, 
             learning_rate: float = 0.0002, 
-            lambda_recon: int = 200): 
+            lambda_recon: int = 200
+        ) -> None: 
         """
         Args:
             in_channels: Number of channels of the conditional images from the dataset
@@ -32,6 +34,7 @@ class Pix2Pix(LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
+        # networks
         self.gen = Generator(in_channels, out_channels)
         self.patch_gan = PatchGAN(in_channels + out_channels)
 
@@ -42,7 +45,7 @@ class Pix2Pix(LightningModule):
         # criterion
         self.adversarial_criterion = nn.BCEWithLogitsLoss()
         self.recon_criterion = nn.L1Loss()
-
+    
     def _gen_step(self, real_images, conditioned_images):
         # discriminate fake image 
         fake_images = self.gen(conditioned_images)

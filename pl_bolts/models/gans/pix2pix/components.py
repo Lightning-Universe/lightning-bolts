@@ -22,7 +22,7 @@ class UpSampleConv(nn.Module):
 
         if dropout:
             layers.append(nn.Dropout2d(0.5))
-        self.model(*layers)
+        self.model = nn.Sequential(*layers)
 
     def forward(self, x: Tensor) -> Tensor:
         return self.model(x)
@@ -56,9 +56,9 @@ class Generator(nn.Module):
         """Paper details:
 
         - Encoder: C64-C128-C256-C512-C512-C512-C512-C512
-        - All convolutions are 4×4 spatial filters applied with stride 2
+        - All convolutions are 4x4 spatial filters applied with stride 2
         - Convolutions in the encoder downsample by a factor of 2
-        - Decoder: CD512-CD1024-CD1024-C1024-C1024-C512 -C256-C128
+        - Decoder: CD512-CD1024-CD1024-C1024-C1024-C512-C256-C128
         """
         super().__init__()
 
