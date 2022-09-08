@@ -35,11 +35,11 @@ class Pix2Pix(LightningModule):
         self.save_hyperparameters()
 
         # networks
-        self.gen = Generator(in_channels, out_channels)
+        self.generator = Generator(in_channels, out_channels)
         self.patch_gan = PatchGAN(in_channels + out_channels)
 
         # intializing weights
-        self.gen = self.gen.apply(self._weights_init)
+        self.generator = self.generator.apply(self._weights_init)
         self.patch_gan = self.patch_gan.apply(self._weights_init)
 
         # criterion
@@ -47,11 +47,11 @@ class Pix2Pix(LightningModule):
         self.recon_criterion = nn.L1Loss()
     
     def forward(self, x):
-        return self.gen(x)
+        return self.generator(x)
         
     def _gen_step(self, real_images, conditioned_images):
         # discriminate fake image 
-        fake_images = self.gen(conditioned_images)
+        fake_images = self.generator(conditioned_images)
         disc_logits = self.patch_gan(fake_images, conditioned_images)
         
         # calculate adversarial loss
@@ -65,7 +65,7 @@ class Pix2Pix(LightningModule):
 
     def _disc_step(self, real_images, conditioned_images):
         # discriminate fake image 
-        fake_images = self.gen(conditioned_images).detach()
+        fake_images = self.generator(conditioned_images).detach()
         fake_logits = self.patch_gan(fake_images, conditioned_images)
 
         # discriminate real image 
@@ -86,7 +86,7 @@ class Pix2Pix(LightningModule):
     
     def configure_optimizers(self):
         lr = self.hparams.learning_rate
-        gen_opt = torch.optim.Adam(self.gen.parameters(), lr=lr)
+        gen_opt = torch.optim.Adam(self.generator.parameters(), lr=lr)
         disc_opt = torch.optim.Adam(self.patch_gan.parameters(), lr=lr)
         return disc_opt, gen_opt
 
