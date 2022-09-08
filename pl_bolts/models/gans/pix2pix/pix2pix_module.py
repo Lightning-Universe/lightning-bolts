@@ -2,7 +2,6 @@ import torch
 from pytorch_lightning import LightningModule
 from torch import nn
 
-from typing import Any
 from pl_bolts.models.gans.pix2pix.components import Generator, PatchGAN
 
 class Pix2Pix(LightningModule):
@@ -13,9 +12,16 @@ class Pix2Pix(LightningModule):
         from pl_bolts.models.gans import Pix2Pix
 
         model = Pix2Pix()
-        Trainer(gpus=1).fit(model)
+        datamodule = CustomDataModule()
+        
+        Trainer(gpus=1).fit(model, datamodule)
     """
-    def __init__(self, in_channels: int, out_channels: int, learning_rate: float = 0.0002, lambda_recon: int = 200): 
+    def __init__(
+            self, 
+            in_channels: int, 
+            out_channels: int, 
+            learning_rate: float = 0.0002, 
+            lambda_recon: int = 200): 
         """
         Args:
             in_channels: Number of channels of the conditional images from the dataset
