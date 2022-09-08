@@ -1,5 +1,5 @@
 import torch
-from torch import nn
+from torch import Tensor, nn
 
 
 class UpSampleConv(nn.Module):
@@ -12,7 +12,7 @@ class UpSampleConv(nn.Module):
         padding: int = 1, 
         batchnorm: bool = True, 
         dropout: bool = False
-    ):
+    ) -> None:
         super().__init__()
         layers = [nn.ConvTranspose2d(in_channels, out_channels, kernel, strides, padding)]
 
@@ -24,20 +24,20 @@ class UpSampleConv(nn.Module):
             layers.append(nn.Dropout2d(0.5))
         self.model(*layers)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         return self.model(x)
 
 
 class DownSampleConv(nn.Module):
     def __init__(
         self, 
-        in_channels, 
-        out_channels, 
-        kernel=4, 
-        strides=2, 
-        padding=1, 
-        batchnorm=True
-    ):
+        in_channels: int, 
+        out_channels: int, 
+        kernel: int =4, 
+        strides: int = 2, 
+        padding: int = 1, 
+        batchnorm: bool = True
+    ) -> None:
         super().__init__()
         layers = [nn.Conv2d(in_channels, out_channels, kernel, strides, padding)]
 
@@ -47,12 +47,12 @@ class DownSampleConv(nn.Module):
         
         self.model = nn.Sequential(*layers)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         return self.model(x)
 
 
 class Generator(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels: int, out_channels: int) -> None:
         """Paper details:
 
         - Encoder: C64-C128-C256-C512-C512-C512-C512-C512
@@ -87,7 +87,7 @@ class Generator(nn.Module):
         self.final_conv = nn.ConvTranspose2d(64, out_channels, kernel_size=4, stride=2, padding=1)
         self.tanh = nn.Tanh()
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         skips_cons = []
         for encoder in self.encoders:
             x = encoder(x)
@@ -106,7 +106,7 @@ class Generator(nn.Module):
 
 
 class PatchGAN(nn.Module):
-    def __init__(self, input_channels):
+    def __init__(self, input_channels: int) -> None:
         super().__init__()
         self.d1 = DownSampleConv(input_channels, 64, batchnorm=False)
         self.d2 = DownSampleConv(64, 128)
@@ -114,7 +114,7 @@ class PatchGAN(nn.Module):
         self.d4 = DownSampleConv(256, 512)
         self.final = nn.Conv2d(512, 1, kernel_size=1)
 
-    def forward(self, x, y):
+    def forward(self, x: Tensor, y: Tensor) -> Tensor:
         x = torch.cat([x, y], axis=1)
         x0 = self.d1(x)
         x1 = self.d2(x0)
