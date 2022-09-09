@@ -1,8 +1,5 @@
 import torch
 
-# from pl_bolts.utils.stability import under_review
-
-
 def mean(res, key):
     # recursive mean for multilevel dicts
     return torch.stack([x[key] if isinstance(x, dict) else mean(x, key) for x in res]).mean()
