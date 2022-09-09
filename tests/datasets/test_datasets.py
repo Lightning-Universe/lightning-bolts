@@ -1,5 +1,6 @@
 import pytest
 import torch
+
 <<<<<<< HEAD
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
@@ -60,6 +61,7 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.datasets import DummyDataset, RandomDataset, RandomDictDataset, RandomDictStringDataset
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
+
 >>>>>>> parent of 46f224f... insert torchvision dependency and write tests for cifar10
 
         batch = next(iter(dl))
