@@ -8,7 +8,7 @@ from pl_bolts.metrics.aggregation import accuracy, mean, precision_at_k
 
 @pytest.mark.parametrize(
     "preds, expected_mean",
-    [(torch.tensor([[100.0, 100.0, 200.0, 200.0]]), 150.0)],
+    [(torch.tensor([[100.0, 100.0, 200.0, 200.0]]), torch.tensor(150.0))],
 )
 def test_mean(preds, expected_mean):
     x = {"test": preds}
