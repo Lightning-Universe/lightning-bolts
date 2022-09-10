@@ -151,8 +151,10 @@ class SimCLRFinetuneTransform(SimCLRTrainDataTransform):
                 transforms.CenterCrop(self.input_height),
             ]
 
-        self.data_transforms.append(self.final_transform)
-        self.transform = transforms.Compose(self.data_transforms)
+        self.transform = transforms.Compose([
+            self.data_transforms,
+            self.final_transform
+        ])
 
     def __call__(self, sample):
         return self.transform(sample)
