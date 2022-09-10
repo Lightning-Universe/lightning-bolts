@@ -61,14 +61,14 @@ class SimCLRTrainDataTransform:
 
             data_transforms.append(transforms.RandomApply([transforms.GaussianBlur(kernel_size=kernel_size)], p=0.5))
 
-        data_transforms = transforms.Compose(data_transforms)
+        self.data_transforms = transforms.Compose(data_transforms)
 
         if normalize is None:
             self.final_transform = transforms.ToTensor()
         else:
             self.final_transform = transforms.Compose([transforms.ToTensor(), normalize])
 
-        self.train_transform = transforms.Compose([data_transforms, self.final_transform])
+        self.train_transform = transforms.Compose([self.data_transforms, self.final_transform])
 
         # add online train transform of the size of global view
         self.online_transform = transforms.Compose(
@@ -119,7 +119,7 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
         )
 
 
-class SimCLRFinetuneTransform:
+class SimCLRFinetuneTransform(SimCLRTrainDataTransform):
     """Transforms for SimCLR during the fine-tuning stage.
 
     Transform::
@@ -134,44 +134,25 @@ class SimCLRFinetuneTransform:
 
         transform = SimCLREvalDataTransform(input_height=32)
         x = sample()
-        (_, _, xk) = transform(x)
+        xk = transform(x)
     """
 
     def __init__(
         self, input_height: int = 224, jitter_strength: float = 1.0, normalize=None, eval_transform: bool = False
     ) -> None:
 
-        self.jitter_strength = jitter_strength
-        self.input_height = input_height
-        self.normalize = normalize
-
-        self.color_jitter = transforms.ColorJitter(
-            0.8 * self.jitter_strength,
-            0.8 * self.jitter_strength,
-            0.8 * self.jitter_strength,
-            0.2 * self.jitter_strength,
+        super().__init__(
+            normalize=normalize, input_height=input_height, gaussian_blur=None, jitter_strength=jitter_strength
         )
 
-        if not eval_transform:
-            data_transforms = [
-                transforms.RandomResizedCrop(size=self.input_height),
-                transforms.RandomHorizontalFlip(p=0.5),
-                transforms.RandomApply([self.color_jitter], p=0.8),
-                transforms.RandomGrayscale(p=0.2),
-            ]
-        else:
-            data_transforms = [
+        if eval_transform:
+            self.data_transforms = [
                 transforms.Resize(int(self.input_height + 0.1 * self.input_height)),
                 transforms.CenterCrop(self.input_height),
             ]
 
-        if normalize is None:
-            final_transform = transforms.ToTensor()
-        else:
-            final_transform = transforms.Compose([transforms.ToTensor(), normalize])
-
-        data_transforms.append(final_transform)
-        self.transform = transforms.Compose(data_transforms)
+        self.data_transforms.append(self.final_transform)
+        self.transform = transforms.Compose(self.data_transforms)
 
     def __call__(self, sample):
         return self.transform(sample)
