@@ -122,9 +122,6 @@ def test_semantic_segmentation(tmpdir, catch_warnings):
     progress_bar = TQDMProgressBar()
 
     trainer = Trainer(
-        fast_dev_run=True, default_root_dir=tmpdir, accelerator="auto", log_every_n_steps=1, callbacks=[progress_bar]
+        fast_dev_run=True, default_root_dir=tmpdir, logger=False, accelerator="auto", callbacks=[progress_bar]
     )
     trainer.fit(model, datamodule=dm)
-    loss = progress_bar.get_metrics(trainer, model)["loss"]
-
-    assert float(loss) > 0
