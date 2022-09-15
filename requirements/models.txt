@@ -1,4 +1,4 @@
-torchvision>=0.13.*
+torchvision>=0.10.*
 scikit-learn>=1.0.2
 Pillow
 opencv-python-headless
