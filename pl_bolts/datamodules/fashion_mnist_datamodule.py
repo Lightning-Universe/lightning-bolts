@@ -2,7 +2,6 @@ from typing import Any, Callable, Optional, Union
 
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -13,13 +12,24 @@ else:  # pragma: no cover
     FashionMNIST = None
 
 
-@under_review()
 class FashionMNISTDataModule(VisionDataModule):
     """
     .. figure:: https://3qeqpr26caki16dnhd19sv6by6v-wpengine.netdna-ssl.com/
         wp-content/uploads/2019/02/Plot-of-a-Subset-of-Images-from-the-Fashion-MNIST-Dataset.png
         :width: 400
         :alt: Fashion MNIST
+
+    Args:
+        data_dir: Root directory of dataset.
+        val_split: Percent (float) or number (int) of samples to use for the validation split.
+        num_workers: Number of workers to use for loading data.
+        normalize: If ``True``, applies image normalization.
+        batch_size: Number of samples per batch to load.
+        seed: Random seed to be used for train/val/test splits.
+        shuffle: If ``True``, shuffles the train data every epoch.
+        pin_memory: If ``True``, the data loader will copy Tensors into CUDA pinned memory before
+                    returning them.
+        drop_last: If ``True``, drops the last incomplete batch.
 
     Specs:
         - 10 classes (1 per type)
@@ -61,19 +71,6 @@ class FashionMNISTDataModule(VisionDataModule):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        """
-        Args:
-            data_dir: Where to save/load the data
-            val_split: Percent (float) or number (int) of samples to use for the validation split
-            num_workers: How many workers to use for loading data
-            normalize: If true applies image normalize
-            batch_size: How many samples per batch to load
-            seed: Random seed to be used for train/val/test splits
-            shuffle: If true shuffles the train data every epoch
-            pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
-                        returning them
-            drop_last: If true drops the last incomplete batch
-        """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
                 "You want to use FashionMNIST dataset loaded from `torchvision` which is not installed yet."
@@ -95,10 +92,7 @@ class FashionMNISTDataModule(VisionDataModule):
 
     @property
     def num_classes(self) -> int:
-        """
-        Return:
-            10
-        """
+        """Returns the number of classes."""
         return 10
 
     def default_transforms(self) -> Callable:
