@@ -27,6 +27,7 @@ def catch_warnings():
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         warnings.simplefilter("ignore", UnderReviewWarning)
+        warnings.filterwarnings("ignore", "To copy construct from a tensor, it is recommended to use", UserWarning)
         yield
 
 
