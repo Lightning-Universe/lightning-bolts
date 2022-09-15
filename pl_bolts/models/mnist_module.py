@@ -78,7 +78,6 @@ class LitMNIST(LightningModule):
         parser.add_argument("--batch_size", type=int, default=32)
         parser.add_argument("--num_workers", type=int, default=4)
         parser.add_argument("--hidden_dim", type=int, default=128)
-        parser.add_argument("--data_dir", type=str, default="")
         parser.add_argument("--learning_rate", type=float, default=1e-3)
         return parser
 

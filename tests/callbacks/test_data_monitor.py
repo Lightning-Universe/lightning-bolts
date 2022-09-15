@@ -17,7 +17,7 @@ from pl_bolts.models import LitMNIST
 def test_base_log_interval_override(log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir):
     """Test logging interval set by log_every_n_steps argument."""
     monitor = TrainingDataMonitor(log_every_n_steps=log_every_n_steps)
-    model = LitMNIST(data_dir=datadir, num_workers=0)
+    model = LitMNIST(num_workers=0)
     datamodule = MNISTDataModule(data_dir=datadir)
     trainer = Trainer(
         default_root_dir=tmpdir,
@@ -43,7 +43,7 @@ def test_base_log_interval_override(log_histogram, tmpdir, log_every_n_steps, ma
 def test_base_log_interval_fallback(log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir):
     """Test that if log_every_n_steps not set in the callback, fallback to what is defined in the Trainer."""
     monitor = TrainingDataMonitor()
-    model = LitMNIST(data_dir=datadir, num_workers=0)
+    model = LitMNIST(num_workers=0)
     datamodule = MNISTDataModule(data_dir=datadir)
     trainer = Trainer(
         default_root_dir=tmpdir,
