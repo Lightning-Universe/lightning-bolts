@@ -8,6 +8,7 @@ import torch
 from pytorch_lightning.trainer.connectors.signal_connector import SignalConnector
 from pytorch_lightning.utilities.imports import _IS_WINDOWS
 
+from pl_bolts.utils import _TORCHVISION_AVAILABLE, _TORCHVISION_LESS_THAN_0_13
 from pl_bolts.utils.stability import UnderReviewWarning
 
 # GitHub Actions use this path to cache datasets.
@@ -27,6 +28,8 @@ def catch_warnings():
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         warnings.simplefilter("ignore", UnderReviewWarning)
+        if _TORCHVISION_AVAILABLE and _TORCHVISION_LESS_THAN_0_13:
+            warnings.filterwarnings("ignore", "FLIP_LEFT_RIGHT is deprecated", DeprecationWarning)
         yield
 
 
