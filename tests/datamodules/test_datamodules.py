@@ -112,7 +112,7 @@ def test_sr_datamodule(datadir):
 
 @pytest.mark.parametrize("split", ["byclass", "bymerge", "balanced", "letters", "digits", "mnist"])
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
-def test_emnist_datamodules(datadir, dm_cls, split):
+def test_emnist_datamodules(datadir, catch_warnings, dm_cls, split):
     """Test BinaryEMNIST and EMNIST datamodules download data and have the correct shape."""
     dm = _create_dm(dm_cls, datadir, split=split)
     train_loader = dm.train_dataloader()
@@ -129,7 +129,7 @@ def test_emnist_datamodules(datadir, dm_cls, split):
 
 
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
-def test_emnist_datamodules_with_invalid_split(datadir, dm_cls):
+def test_emnist_datamodules_with_invalid_split(datadir, catch_warnings, dm_cls):
     """Test EMNIST datamodules raise an exception if the provided `split` doesn't exist."""
 
     with pytest.raises(ValueError, match="Unknown value"):
@@ -148,7 +148,7 @@ def test_emnist_datamodules_with_invalid_split(datadir, dm_cls):
         ("mnist", 10_000),
     ],
 )
-def test_emnist_datamodules_with_strict_val_split(datadir, dm_cls, split, expected_val_split):
+def test_emnist_datamodules_with_strict_val_split(datadir, catch_warnings, dm_cls, split, expected_val_split):
     """Test EMNIST datamodules when strict_val_split is specified to use the validation set defined in the paper.
 
     Refer to https://arxiv.org/abs/1702.05373 for `expected_val_split` values.
