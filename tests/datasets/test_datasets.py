@@ -1,7 +1,5 @@
 import pytest
 import torch
-<<<<<<< HEAD
-import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms as transform_lib
 
@@ -13,7 +11,6 @@ from pl_bolts.datasets import (
     RandomDictDataset,
     RandomDictStringDataset,
 )
-from pl_bolts.datasets.cifar10_dataset import CIFAR10
 from pl_bolts.datasets.dummy_dataset import DummyDetectionDataset
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 
@@ -55,12 +52,6 @@ def test_rand_dict_ds(catch_warnings, batch_size, size, num_samples):
         x = next(iter(ds))
         assert x["a"].shape == torch.Size([size])
         assert x["b"].shape == torch.Size([size])
-=======
-from torch.utils.data import DataLoader
-
-from pl_bolts.datasets import DummyDataset, RandomDataset, RandomDictDataset, RandomDictStringDataset
-from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
->>>>>>> parent of 46f224f... insert torchvision dependency and write tests for cifar10
 
         batch = next(iter(dl))
         assert len(batch["a"]), len(batch["a"][0]) == (batch_size, size)
@@ -146,23 +137,6 @@ def test_sr_datasets(datadir, scale_factor):
     assert torch.allclose(hr_image.max(), torch.tensor(1.0), atol=atol)
     assert torch.allclose(lr_image.min(), torch.tensor(0.0), atol=atol)
     assert torch.allclose(lr_image.max(), torch.tensor(1.0), atol=atol)
-<<<<<<< HEAD
-
-
-def test_cifar10_datasets(datadir):
-    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    dl = DataLoader(CIFAR10(root=datadir, download=True, transform=transform))
-    hr_image, lr_image = next(iter(dl))
-
-    hr_image_size = 32
-    assert hr_image.size() == torch.Size([1, 3, hr_image_size, hr_image_size])
-    assert lr_image.size() == torch.Size([1])
-
-    atol = 0.3
-    assert torch.allclose(hr_image.min(), torch.tensor(-1.0), atol=atol)
-    assert torch.allclose(hr_image.max(), torch.tensor(1.0), atol=atol)
-    assert torch.greater_equal(lr_image.min(), torch.tensor(0))
-    assert torch.less_equal(lr_image.max(), torch.tensor(9))
 
 
 def test_binary_mnist_dataset(datadir):
@@ -190,5 +164,3 @@ def test_binary_emnist_dataset(datadir, split):
     assert torch.allclose(img.min(), torch.tensor(0.0))
     assert torch.allclose(img.max(), torch.tensor(1.0))
     assert torch.equal(torch.unique(img), torch.tensor([0.0, 1.0]))
-=======
->>>>>>> parent of 46f224f... insert torchvision dependency and write tests for cifar10
