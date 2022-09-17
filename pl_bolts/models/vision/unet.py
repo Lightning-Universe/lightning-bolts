@@ -2,13 +2,11 @@ import torch
 from torch import Tensor, nn
 from torch.nn import functional as F
 
-from pl_bolts.utils.stability import under_review
 
-
-@under_review()
 class UNet(nn.Module):
-    """Implementation of `U-Net: Convolutional Networks for Biomedical Image Segmentation.
+    """Pytorch Lightning implementation of U-Net.
 
+    Paper: `U-Net: Convolutional Networks for Biomedical Image Segmentation
     <https://arxiv.org/abs/1505.04597>`_
 
     Paper authors: Olaf Ronneberger, Philipp Fischer, Thomas Brox
