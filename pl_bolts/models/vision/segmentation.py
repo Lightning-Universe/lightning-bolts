@@ -51,6 +51,7 @@ class SemSegment(LightningModule):
             num_layers: number of layers in each side of U-net (default 5)
             features_start: number of features in first layer (default 64)
             bilinear: whether to use bilinear interpolation (True) or transposed convolutions (default) for upsampling.
+            ignore_index: target value to be ignored in cross_entropy (default 250)
             lr: learning rate (default 0.01)
         """
 
