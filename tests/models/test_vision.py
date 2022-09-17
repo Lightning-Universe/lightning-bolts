@@ -122,6 +122,11 @@ def test_semantic_segmentation(tmpdir, catch_warnings):
     progress_bar = TQDMProgressBar()
 
     trainer = Trainer(
-        fast_dev_run=True, default_root_dir=tmpdir, logger=False, accelerator="auto", callbacks=[progress_bar]
+        fast_dev_run=True,
+        max_epochs=-1,
+        default_root_dir=tmpdir,
+        logger=False,
+        accelerator="auto",
+        callbacks=[progress_bar],
     )
     trainer.fit(model, datamodule=dm)
