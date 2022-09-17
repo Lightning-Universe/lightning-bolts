@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
@@ -41,6 +41,7 @@ class SemSegment(LightningModule):
         num_layers: int = 5,
         features_start: int = 64,
         bilinear: bool = False,
+        ignore_index: Optional[int] = 250,
         lr: float = 0.01,
         **kwargs: Any
     ):
@@ -59,6 +60,11 @@ class SemSegment(LightningModule):
         self.num_layers = num_layers
         self.features_start = features_start
         self.bilinear = bilinear
+        if ignore_index is None:
+            # set ignore_index to default value of F.cross_entropy if it is None.
+            self.ignore_index = -100
+        else:
+            self.ignore_index = ignore_index
         self.lr = lr
 
         self.net = UNet(
@@ -76,7 +82,7 @@ class SemSegment(LightningModule):
         img = img.float()
         mask = mask.long()
         out = self(img)
-        loss_val = F.cross_entropy(out, mask, ignore_index=250)
+        loss_val = F.cross_entropy(out, mask, ignore_index=self.ignore_index)
         log_dict = {"train_loss": loss_val}
         return {"loss": loss_val, "log": log_dict, "progress_bar": log_dict}
 
@@ -85,7 +91,7 @@ class SemSegment(LightningModule):
         img = img.float()
         mask = mask.long()
         out = self(img)
-        loss_val = F.cross_entropy(out, mask, ignore_index=250)
+        loss_val = F.cross_entropy(out, mask, ignore_index=self.ignore_index)
         return {"val_loss": loss_val}
 
     def validation_epoch_end(self, outputs):
