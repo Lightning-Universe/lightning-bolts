@@ -30,6 +30,7 @@ class UpSampleConv(nn.Module):
 
 class DownSampleConv(nn.Module):
     def __init__(
+<<<<<<< HEAD
         self,
         in_channels: int,
         out_channels: int,
@@ -37,6 +38,15 @@ class DownSampleConv(nn.Module):
         strides: int = 2,
         padding: int = 1,
         batchnorm: bool = True,
+=======
+        self, 
+        in_channels: int, 
+        out_channels: int, 
+        kernel: int = 4, 
+        strides: int = 2, 
+        padding: int = 1, 
+        batchnorm: bool = True
+>>>>>>> 9a8ce2f (add test_pix2pix_components)
     ) -> None:
         super().__init__()
         layers = [nn.Conv2d(in_channels, out_channels, kernel, strides, padding)]
