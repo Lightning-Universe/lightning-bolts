@@ -18,7 +18,7 @@ def test_generator(catch_warnings, in_shape, out_shape):
     out_channels = out_shape.size(0)
     seed_everything(1234)
     generator = Generator(in_channels=in_channels, out_channels=out_channels)
-    conditional_image = torch.randn(batch_dim, in_shape)
+    conditional_image = torch.randn(batch_dim, *in_shape)
     samples = generator(conditional_image)
     assert samples.shape == (batch_dim, *out_shape)
 
