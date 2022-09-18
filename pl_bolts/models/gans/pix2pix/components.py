@@ -4,14 +4,14 @@ from torch import Tensor, nn
 
 class UpSampleConv(nn.Module):
     def __init__(
-        self, 
-        in_channels: int, 
-        out_channels: int, 
-        kernel: int = 4, 
-        strides: int = 2, 
-        padding: int = 1, 
-        batchnorm: bool = True, 
-        dropout: bool = False
+        self,
+        in_channels: int,
+        out_channels: int,
+        kernel: int = 4,
+        strides: int = 2,
+        padding: int = 1,
+        batchnorm: bool = True,
+        dropout: bool = False,
     ) -> None:
         super().__init__()
         layers = [nn.ConvTranspose2d(in_channels, out_channels, kernel, strides, padding)]
@@ -30,13 +30,13 @@ class UpSampleConv(nn.Module):
 
 class DownSampleConv(nn.Module):
     def __init__(
-        self, 
-        in_channels: int, 
-        out_channels: int, 
-        kernel: int =4, 
-        strides: int = 2, 
-        padding: int = 1, 
-        batchnorm: bool = True
+        self,
+        in_channels: int,
+        out_channels: int,
+        kernel: int = 4,
+        strides: int = 2,
+        padding: int = 1,
+        batchnorm: bool = True,
     ) -> None:
         super().__init__()
         layers = [nn.Conv2d(in_channels, out_channels, kernel, strides, padding)]
@@ -44,7 +44,7 @@ class DownSampleConv(nn.Module):
         if batchnorm:
             layers.append(nn.BatchNorm2d(out_channels))
         layers.append(nn.LeakyReLU(0.2))
-        
+
         self.model = nn.Sequential(*layers)
 
     def forward(self, x: Tensor) -> Tensor:
@@ -63,27 +63,31 @@ class Generator(nn.Module):
         super().__init__()
 
         # encoder/donwsample convs
-        self.encoders = nn.ModuleList([
-            DownSampleConv(in_channels, 64, batchnorm=False),  # bs x 64 x 128 x 128
-            DownSampleConv(64, 128),  # bs x 128 x 64 x 64
-            DownSampleConv(128, 256),  # bs x 256 x 32 x 32
-            DownSampleConv(256, 512),  # bs x 512 x 16 x 16
-            DownSampleConv(512, 512),  # bs x 512 x 8 x 8
-            DownSampleConv(512, 512),  # bs x 512 x 4 x 4
-            DownSampleConv(512, 512),  # bs x 512 x 2 x 2
-            DownSampleConv(512, 512, batchnorm=False),  # bs x 512 x 1 x 1
-        ])
+        self.encoders = nn.ModuleList(
+            [
+                DownSampleConv(in_channels, 64, batchnorm=False),  # bs x 64 x 128 x 128
+                DownSampleConv(64, 128),  # bs x 128 x 64 x 64
+                DownSampleConv(128, 256),  # bs x 256 x 32 x 32
+                DownSampleConv(256, 512),  # bs x 512 x 16 x 16
+                DownSampleConv(512, 512),  # bs x 512 x 8 x 8
+                DownSampleConv(512, 512),  # bs x 512 x 4 x 4
+                DownSampleConv(512, 512),  # bs x 512 x 2 x 2
+                DownSampleConv(512, 512, batchnorm=False),  # bs x 512 x 1 x 1
+            ]
+        )
 
         # decoder/upsample convs
-        self.decoders = nn.ModuleList([
-            UpSampleConv(512, 512, dropout=True),  # bs x 512 x 2 x 2
-            UpSampleConv(1024, 512, dropout=True),  # bs x 512 x 4 x 4
-            UpSampleConv(1024, 512, dropout=True),  # bs x 512 x 8 x 8
-            UpSampleConv(1024, 512),  # bs x 512 x 16 x 16
-            UpSampleConv(1024, 256),  # bs x 256 x 32 x 32
-            UpSampleConv(512, 128),  # bs x 128 x 64 x 64
-            UpSampleConv(256, 64),  # bs x 64 x 128 x 128
-        ])
+        self.decoders = nn.ModuleList(
+            [
+                UpSampleConv(512, 512, dropout=True),  # bs x 512 x 2 x 2
+                UpSampleConv(1024, 512, dropout=True),  # bs x 512 x 4 x 4
+                UpSampleConv(1024, 512, dropout=True),  # bs x 512 x 8 x 8
+                UpSampleConv(1024, 512),  # bs x 512 x 16 x 16
+                UpSampleConv(1024, 256),  # bs x 256 x 32 x 32
+                UpSampleConv(512, 128),  # bs x 128 x 64 x 64
+                UpSampleConv(256, 64),  # bs x 64 x 128 x 128
+            ]
+        )
         self.final_conv = nn.ConvTranspose2d(64, out_channels, kernel_size=4, stride=2, padding=1)
         self.tanh = nn.Tanh()
 
