@@ -4,7 +4,7 @@ import torch
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor, nn
 
-from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils import _TORCH_MESHGRID_REQUIRES_INDEXING, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -256,7 +256,10 @@ class DetectionLayer(nn.Module):
 
         x_range = torch.arange(width, device=xy.device)
         y_range = torch.arange(height, device=xy.device)
-        grid_y, grid_x = torch.meshgrid(y_range, x_range, indexing="ij")
+        if _TORCH_MESHGRID_REQUIRES_INDEXING:
+            grid_y, grid_x = torch.meshgrid(y_range, x_range, indexing="ij")
+        else:
+            grid_y, grid_x = torch.meshgrid(y_range, x_range)
         offset = torch.stack((grid_x, grid_y), -1)  # [height, width, 2]
         offset = offset.unsqueeze(2)  # [height, width, 1, 2]
 

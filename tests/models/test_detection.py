@@ -133,4 +133,4 @@ def test_aligned_iou(dims1, dims2, expected_ious, catch_warnings):
         category=PossibleUserWarning,
     )
 
-    torch.testing.assert_allclose(_aligned_iou(dims1, dims2), expected_ious)
+    torch.testing.assert_close(_aligned_iou(dims1, dims2), expected_ious)
