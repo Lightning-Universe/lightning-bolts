@@ -9,7 +9,7 @@ from torchvision import transforms as transform_lib
 from pl_bolts.datamodules import CIFAR10DataModule, MNISTDataModule
 from pl_bolts.datasets.dummy_dataset import DummyDataset
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
-from pl_bolts.models.gans import DCGAN, GAN, SRGAN, SRResNet, Pix2Pix
+from pl_bolts.models.gans import DCGAN, GAN, SRGAN, Pix2Pix, SRResNet
 
 
 @pytest.mark.parametrize(
