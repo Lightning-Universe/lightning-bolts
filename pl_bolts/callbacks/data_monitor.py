@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 import numpy as np
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
-from pytorch_lightning.loggers import LightningLoggerBase, TensorBoardLogger, WandbLogger
+from pytorch_lightning.loggers import Logger, TensorBoardLogger, WandbLogger
 from pytorch_lightning.utilities import rank_zero_warn
 from pytorch_lightning.utilities.apply_func import apply_to_collection
 from torch import Tensor, nn
@@ -95,7 +95,7 @@ class DataMonitorBase(Callback):
 
             logger.experiment.log(data={name: wandb.Histogram(tensor)}, commit=False)
 
-    def _is_logger_available(self, logger: Optional[LightningLoggerBase]) -> bool:
+    def _is_logger_available(self, logger: Optional[Logger]) -> bool:
         available = True
         if not logger:
             rank_zero_warn("Cannot log histograms because Trainer has no logger.")
@@ -154,6 +154,7 @@ class ModuleDataMonitor(DataMonitorBase):
     def on_train_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
         super().on_train_start(trainer, pl_module)
         submodule_dict = dict(pl_module.named_modules())
+        self._hook_handles = []
         for name in self._get_submodule_names(submodule_dict):
             if name not in submodule_dict:
                 rank_zero_warn(
@@ -168,7 +169,7 @@ class ModuleDataMonitor(DataMonitorBase):
         for handle in self._hook_handles:
             handle.remove()
 
-    def _get_submodule_names(self, named_modules: dict) -> List[str]:
+    def _get_submodule_names(self, named_modules: Dict[str, nn.Module]) -> List[str]:
         # default is the root module only
         names = [""]
 
@@ -176,7 +177,7 @@ class ModuleDataMonitor(DataMonitorBase):
             names = self._submodule_names
 
         if self._submodule_names is True:
-            names = list(named_modules.keys())
+            names = list(named_modules)
 
         return names
 
