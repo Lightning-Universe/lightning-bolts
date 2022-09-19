@@ -117,6 +117,7 @@ class PatchGAN(nn.Module):
         self.d3 = DownSampleConv(128, 256)
         self.d4 = DownSampleConv(256, 512)
         self.final = nn.Conv2d(512, 1, kernel_size=1)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x: Tensor, y: Tensor) -> Tensor:
         x = torch.cat([x, y], axis=1)
@@ -125,4 +126,4 @@ class PatchGAN(nn.Module):
         x2 = self.d3(x1)
         x3 = self.d4(x2)
         xn = self.final(x3)
-        return xn
+        return self.sigmoid(xn)
