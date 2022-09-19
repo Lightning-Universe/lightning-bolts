@@ -177,7 +177,7 @@ class YOLO(LightningModule):
             )
         for layer_idx, layer_hits in enumerate(hits):
             hit_rate = torch.true_divide(layer_hits, total_hits) if total_hits > 0 else 1.0
-            self.log(f"layer_{layer_idx}_hit_rate", hit_rate, sync_dist=False)
+            self.log(f"layer_{layer_idx}_hit_rate", hit_rate, sync_dist=False, batch_size=images.size(0))
 
         def total_loss(loss_name):
             """Returns the sum of the loss over detection layers."""
@@ -231,8 +231,8 @@ class YOLO(LightningModule):
         total_loss = torch.stack(tuple(losses.values())).sum()
 
         for name, value in losses.items():
-            self.log(f"val/{name}_loss", value, sync_dist=True)
-        self.log("val/total_loss", total_loss, sync_dist=True)
+            self.log(f"val/{name}_loss", value, sync_dist=True, batch_size=images.size(0))
+        self.log("val/total_loss", total_loss, sync_dist=True, batch_size=images.size(0))
 
     def test_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int):
         """Evaluates a batch of data from the test set.
