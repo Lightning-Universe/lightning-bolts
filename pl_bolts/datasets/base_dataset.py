@@ -1,5 +1,6 @@
 import logging
 import os
+import urllib.parse
 import urllib.request
 from abc import ABC
 from dataclasses import dataclass
@@ -53,7 +54,7 @@ class LightDataset(ABC, Dataset):
         return data, targets
 
     def _download_from_url(self, base_url: str, data_folder: str, file_name: str):
-        url = os.path.join(base_url, file_name)
+        url = urllib.parse.urljoin(base_url, file_name)
         logging.info(f"Downloading {url}")
         fpath = os.path.join(data_folder, file_name)
         try:

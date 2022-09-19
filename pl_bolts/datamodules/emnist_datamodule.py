@@ -3,7 +3,6 @@ from typing import Any, Callable, Optional, Union
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
 from pl_bolts.transforms.dataset_normalizations import emnist_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -14,7 +13,6 @@ else:  # pragma: no cover
     EMNIST = object
 
 
-@under_review()
 class EMNISTDataModule(VisionDataModule):
     """
     .. figure:: https://user-images.githubusercontent.com/4632336/123210742-4d6b3380-d477-11eb-80da-3e9a74a18a07.png
@@ -76,6 +74,23 @@ class EMNISTDataModule(VisionDataModule):
 
     |
 
+    Args:
+        data_dir: Root directory of dataset.
+        split: The dataset has 6 different splits: ``byclass``, ``bymerge``,
+            ``balanced``, ``letters``, ``digits`` and ``mnist``.
+            This argument is passed to :class:`torchvision.datasets.EMNIST`.
+        val_split: Percent (float) or number (int) of samples to use for the validation split.
+        num_workers: How many workers to use for loading data
+        normalize: If ``True``, applies image normalize.
+        batch_size: How many samples per batch to load.
+        seed: Random seed to be used for train/val/test splits.
+        shuffle: If ``True``, shuffles the train data every epoch.
+        pin_memory: If ``True``, the data loader will copy Tensors into
+            CUDA pinned memory before returning them.
+        drop_last: If ``True``, drops the last incomplete batch.
+        strict_val_split: If ``True``, uses the validation split defined in the paper and ignores ``val_split``.
+            Note that it only works with ``"balanced"``, ``"digits"``, ``"letters"``, ``"mnist"`` splits.
+
     Here is the default EMNIST, train, val, test-splits and transforms.
 
     Transforms::
@@ -87,8 +102,10 @@ class EMNISTDataModule(VisionDataModule):
     Example::
 
         from pl_bolts.datamodules import EMNISTDataModule
+
         dm = EMNISTDataModule('.')
         model = LitModel()
+
         Trainer().fit(model, datamodule=dm)
     """
 
@@ -119,25 +136,6 @@ class EMNISTDataModule(VisionDataModule):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        """
-        Args:
-            data_dir: Where to save/load the data.
-            split: The dataset has 6 different splits: ``byclass``, ``bymerge``,
-                ``balanced``, ``letters``, ``digits`` and ``mnist``.
-                This argument is passed to :class:`torchvision.datasets.EMNIST`.
-            val_split: Percent (float) or number (int) of samples
-                to use for the validation split.
-            num_workers: How many workers to use for loading data
-            normalize: If ``True``, applies image normalize.
-            batch_size: How many samples per batch to load.
-            seed: Random seed to be used for train/val/test splits.
-            shuffle: If ``True``, shuffles the train data every epoch.
-            pin_memory: If ``True``, the data loader will copy Tensors into
-                CUDA pinned memory before returning them.
-            drop_last: If ``True``, drops the last incomplete batch.
-            strict_val_split: If ``True``, uses the validation split defined in the paper and ignores ``val_split``.
-                Note that it only works with ``"balanced"``, ``"digits"``, ``"letters"``, ``"mnist"`` splits.
-        """
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
                 "You want to use MNIST dataset loaded from `torchvision` which is not installed yet."
@@ -183,13 +181,11 @@ class EMNISTDataModule(VisionDataModule):
 
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
         """Saves files to ``data_dir``."""
-
         self.dataset_cls(self.data_dir, split=self.split, train=True, download=True)
         self.dataset_cls(self.data_dir, split=self.split, train=False, download=True)
 
     def setup(self, stage: Optional[str] = None) -> None:
         """Creates train, val, and test dataset."""
-
         if stage == "fit" or stage is None:
             train_transforms = self.default_transforms() if self.train_transforms is None else self.train_transforms
             val_transforms = self.default_transforms() if self.val_transforms is None else self.val_transforms
@@ -212,14 +208,9 @@ class EMNISTDataModule(VisionDataModule):
             )
 
     def default_transforms(self) -> Callable:
+        if self.normalize:
+            emnist_transforms = transform_lib.Compose([transform_lib.ToTensor(), emnist_normalization(self.split)])
+        else:
+            emnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
 
-        return (
-            transform_lib.Compose(
-                [
-                    transform_lib.ToTensor(),
-                    emnist_normalization(self.split),
-                ]
-            )
-            if self.normalize
-            else transform_lib.Compose([transform_lib.ToTensor()])
-        )
+        return emnist_transforms
