@@ -1,4 +1,7 @@
 import pytest
+import warnings
+
+from pytorch_lightning.utilities.warnings import PossibleUserWarning
 
 from pl_bolts.models.detection.yolo.yolo_config import (
     _create_convolutional,
@@ -17,7 +20,13 @@ from pl_bolts.models.detection.yolo.yolo_config import (
         ({"batch_normalize": 0, "filters": 4, "size": 3, "stride": 2, "pad": 0, "activation": "linear"}),
     ],
 )
-def test_create_convolutional(config):
+def test_create_convolutional(config, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
     conv, _ = _create_convolutional(config, [3])
 
     assert conv.conv.out_channels == config["filters"]
@@ -57,7 +66,13 @@ def test_create_convolutional(config):
         ),
     ],
 )
-def test_create_maxpool(config):
+def test_create_maxpool(config, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
     pad_size = (config["size"] - 1) // 2
     maxpool, _ = _create_maxpool(config, [3])
 
@@ -73,7 +88,13 @@ def test_create_maxpool(config):
         ({"from": 3, "activation": "linear"}),
     ],
 )
-def test_create_shortcut(config):
+def test_create_shortcut(config, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
     shortcut, _ = _create_shortcut(config, [3])
 
     assert shortcut.source_layer == config["from"]
@@ -86,7 +107,13 @@ def test_create_shortcut(config):
         ({"stride": 4}),
     ],
 )
-def test_create_upsample(config):
+def test_create_upsample(config, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
     upsample, _ = _create_upsample(config, [3])
 
     assert upsample.scale_factor == float(config["stride"])

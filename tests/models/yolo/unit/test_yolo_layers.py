@@ -1,7 +1,9 @@
 import pytest
 import torch
+import warnings
 
 from pl_bolts.models.detection.yolo.yolo_layers import GIoULoss, IoULoss, SELoss, _corner_coordinates
+from pytorch_lightning.utilities.warnings import PossibleUserWarning
 
 
 @pytest.mark.parametrize(
@@ -11,7 +13,13 @@ from pl_bolts.models.detection.yolo.yolo_layers import GIoULoss, IoULoss, SELoss
         ([5.0, 5.0], [2.0, 2.0], [4.0, 4.0, 6.0, 6.0]),
     ],
 )
-def test_corner_coordinates(xy, wh, expected):
+def test_corner_coordinates(xy, wh, expected, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
     xy = torch.tensor(xy)
     wh = torch.tensor(wh)
     corners = _corner_coordinates(xy, wh)
@@ -26,7 +34,13 @@ def test_corner_coordinates(xy, wh, expected):
         (SELoss, [[0.0, 0.0, 120.0, 200.0]], [[189.0, 93.0, 242.0, 215.0]], 59479.0),
     ],
 )
-def test_loss_functions(loss_func, bbox1, bbox2, expected):
+def test_loss_functions(loss_func, bbox1, bbox2, expected, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
     loss_func = loss_func()
     tensor1 = torch.tensor(bbox1, dtype=torch.float32)
     tensor2 = torch.tensor(bbox2, dtype=torch.float32)

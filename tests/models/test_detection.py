@@ -2,8 +2,11 @@ from pathlib import Path
 
 import pytest
 import torch
-from pytorch_lightning import Trainer
+import warnings
+
 from torch.utils.data import DataLoader
+from pytorch_lightning import Trainer
+from pytorch_lightning.utilities.warnings import PossibleUserWarning
 
 from pl_bolts.datasets import DummyDetectionDataset
 from pl_bolts.models.detection import YOLO, FasterRCNN, RetinaNet, YOLOConfiguration
@@ -96,7 +99,13 @@ def test_yolo(config):
         ("yolo_giou"),
     ],
 )
-def test_yolo_train(tmpdir, cfg_name):
+def test_yolo_train(tmpdir, cfg_name, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
     config_path = Path(TEST_ROOT) / "data" / f"{cfg_name}.cfg"
     config = YOLOConfiguration(config_path)
     model = YOLO(config.get_network())
@@ -118,5 +127,11 @@ def test_yolo_train(tmpdir, cfg_name):
         )
     ],
 )
-def test_aligned_iou(dims1, dims2, expected_ious):
+def test_aligned_iou(dims1, dims2, expected_ious, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
     torch.testing.assert_allclose(_aligned_iou(dims1, dims2), expected_ious)
