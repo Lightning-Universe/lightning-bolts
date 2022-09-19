@@ -1,12 +1,11 @@
+import warnings
 from pathlib import Path
 
 import pytest
 import torch
-import warnings
-
-from torch.utils.data import DataLoader
 from pytorch_lightning import Trainer
 from pytorch_lightning.utilities.warnings import PossibleUserWarning
+from torch.utils.data import DataLoader
 
 from pl_bolts.datasets import DummyDetectionDataset
 from pl_bolts.models.detection import YOLO, FasterRCNN, RetinaNet, YOLOConfiguration

@@ -1,9 +1,10 @@
-import pytest
-import torch
 import warnings
 
-from pl_bolts.models.detection.yolo.yolo_layers import GIoULoss, IoULoss, SELoss, _corner_coordinates
+import pytest
+import torch
 from pytorch_lightning.utilities.warnings import PossibleUserWarning
+
+from pl_bolts.models.detection.yolo.yolo_layers import GIoULoss, IoULoss, SELoss, _corner_coordinates
 
 
 @pytest.mark.parametrize(

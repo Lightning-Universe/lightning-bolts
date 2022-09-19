@@ -1,6 +1,6 @@
-import pytest
 import warnings
 
+import pytest
 from pytorch_lightning.utilities.warnings import PossibleUserWarning
 
 from pl_bolts.models.detection.yolo.yolo_config import (
