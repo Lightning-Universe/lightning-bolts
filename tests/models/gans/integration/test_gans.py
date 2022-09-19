@@ -7,8 +7,9 @@ from torch.utils.data.dataloader import DataLoader
 from torchvision import transforms as transform_lib
 
 from pl_bolts.datamodules import CIFAR10DataModule, MNISTDataModule
+from pl_bolts.datasets.dummy_dataset import DummyDataset
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
-from pl_bolts.models.gans import DCGAN, GAN, SRGAN, SRResNet
+from pl_bolts.models.gans import DCGAN, GAN, SRGAN, SRResNet, Pix2Pix
 
 
 @pytest.mark.parametrize(
@@ -65,5 +66,22 @@ def test_sr_modules(tmpdir, datadir, sr_module_cls, scale_factor):
 
     dl = DataLoader(SRMNIST(scale_factor, root=datadir, download=True))
     model = sr_module_cls(image_channels=1, scale_factor=scale_factor)
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer.fit(model, dl)
+
+
+@pytest.mark.parametrize("dataset_cls", [DummyDataset])
+@pytest.mark.parametrize(
+    "in_shape, out_shape",
+    [
+        pytest.param((3, 256, 256), (3, 256, 256), id="img shape (3, 256, 256), (3, 256, 256)"),
+        pytest.param((1, 256, 256), (3, 256, 256), id="img shape (1, 256, 256), (3, 256, 256)"),
+    ],
+)
+def test_pix2pix(tmpdir, datadir, dataset_cls, in_shape, out_shape):
+    seed_everything(42)
+
+    dl = DataLoader(dataset_cls(in_shape, out_shape))
+    model = Pix2Pix(in_channels=in_shape[0], out_channels=out_shape[0])
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, dl)
