@@ -4,7 +4,7 @@ from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models import LitMNIST
 
 
-def test_mnist(tmpdir, datadir):
+def test_mnist(tmpdir, datadir, catch_warnings):
     seed_everything(1234)
 
     datamodule = MNISTDataModule(data_dir=datadir, num_workers=0)

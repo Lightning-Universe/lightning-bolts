@@ -1,8 +1,9 @@
 from argparse import ArgumentParser
-from typing import Any
+from typing import Any, Literal
 
 import torch
 from pytorch_lightning import LightningModule, Trainer
+from torch import Tensor
 from torch.nn import functional as F
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -35,6 +36,7 @@ class LitMNIST(LightningModule):
         num_workers: int = 4,
         **kwargs: Any
     ) -> None:
+
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `torchvision` which is not installed yet.")
 
@@ -44,36 +46,40 @@ class LitMNIST(LightningModule):
         self.l1 = torch.nn.Linear(28 * 28, self.hparams.hidden_dim)
         self.l2 = torch.nn.Linear(self.hparams.hidden_dim, 10)
 
-    def forward(self, x):
-        x = x.view(x.size(0), -1)
-        x = torch.relu(self.l1(x))
-        x = torch.relu(self.l2(x))
-        return x
+    def forward(self, x: Tensor) -> Tensor:
+        out = x.view(x.size(0), -1)
+        out = torch.relu(self.l1(x))
+        out = torch.relu(self.l2(x))
+        return out
 
-    def shared_step(self, batch, batch_idx):
+    def shared_step(self, batch: Any, batch_idx: int, step: Literal["train", "val", "test"]) -> Tensor:
         x, y = batch
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
+
+        if step == "train":
+            self.log("train_loss", loss)
+        elif step == "val":
+            self.log("val_loss", loss)
+        else:
+            self.log("test_loss", loss)
+
         return loss
 
-    def training_step(self, batch, batch_idx):
-        loss = self.shared_step(batch, batch_idx)
-        self.log("train_loss", loss)
-        return loss
+    def training_step(self, batch: Any, batch_idx: int) -> Tensor:
+        return self.shared_step(batch, batch_idx, "train")
 
-    def validation_step(self, batch, batch_idx):
-        loss = self.shared_step(batch, batch_idx)
-        self.log("val_loss", loss)
+    def validation_step(self, batch: Any, batch_idx: int) -> None:
+        self.shared_step(batch, batch_idx, "val")
 
-    def test_step(self, batch, batch_idx):
-        loss = self.shared_step(batch, batch_idx)
-        self.log("test_loss", loss)
+    def test_step(self, batch: Any, batch_idx: int) -> None:
+        self.shared_step(batch, batch_idx, "test")
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
     @staticmethod
-    def add_model_specific_args(parent_parser):
+    def add_model_specific_args(parent_parser) -> ArgumentParser:
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--batch_size", type=int, default=32)
         parser.add_argument("--num_workers", type=int, default=4)
