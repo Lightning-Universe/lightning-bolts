@@ -1,6 +1,7 @@
 import torch
 from torch import Tensor
 
+
 def iou(preds: Tensor, target: Tensor) -> Tensor:
     """Calculates the intersection over union.
 
@@ -31,6 +32,7 @@ def iou(preds: Tensor, target: Tensor) -> Tensor:
     union = pred_area[:, None] + target_area - intersection
     iou = torch.true_divide(intersection, union)
     return iou
+
 
 def giou(preds: Tensor, target: Tensor) -> Tensor:
     """Calculates the generalized intersection over union.
