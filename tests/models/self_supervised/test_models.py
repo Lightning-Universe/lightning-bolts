@@ -35,7 +35,7 @@ def test_cpcv2(tmpdir, datadir):
     trainer.fit(model, datamodule=datamodule)
 
 
-def test_byol(tmpdir, datadir):
+def test_byol(tmpdir, datadir, catch_warnings):
     """Test BYOL on CIFAR-10."""
     dm = CIFAR10DataModule(data_dir=datadir, num_workers=0, batch_size=2)
     dm.train_transforms = SimCLRTrainDataTransform(32)

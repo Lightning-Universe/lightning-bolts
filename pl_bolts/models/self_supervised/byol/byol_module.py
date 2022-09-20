@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from copy import deepcopy
-from typing import Any, Tuple, Union
+from typing import Any, Union
 
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
@@ -35,6 +35,9 @@ class BYOL(LightningModule):
         projector_out_dim (int, optional): projector MLP output dimension. Defaults to 256.
         initial_tau (float, optional): initial value of target decay rate used. Defaults to 0.996.
 
+    Model implemented by:
+        - `Annika Brundyn <https://github.com/annikabrundyn>`_
+
     Example::
 
         model = BYOL(num_classes=10)
@@ -64,12 +67,8 @@ class BYOL(LightningModule):
 
     def __init__(
         self,
-        num_classes: int,
         learning_rate: float = 0.2,
         weight_decay: float = 1.5e-6,
-        input_height: int = 32,
-        batch_size: int = 32,
-        num_workers: int = 0,
         warmup_epochs: int = 10,
         max_epochs: int = 1000,
         base_encoder: Union[str, torch.nn.Module] = "resnet50",
@@ -101,6 +100,36 @@ class BYOL(LightningModule):
         """
         return self.online_network.encode(x)
 
+    def training_step(self, batch: Any, batch_idx: int) -> Tensor:
+        """Complete training loop."""
+        return self._shared_step(batch, batch_idx, "train")
+
+    def validation_step(self, batch: Any, batch_idx: int) -> Tensor:
+        """Complete validation loop."""
+        return self._shared_step(batch, batch_idx, "val")
+
+    def _shared_step(self, batch: Any, batch_idx: int, step: str) -> Tensor:
+        """Shared evaluation step for training and validation loop."""
+        imgs, _ = batch
+        img1, img2 = imgs[:2]
+
+        # Calculate similarity loss in each direction
+        loss_12 = self.calculate_loss(img1, img2)
+        loss_21 = self.calculate_loss(img2, img1)
+
+        # Calculate total loss
+        total_loss = loss_12 + loss_21
+
+        # Log losses
+        if step == "train":
+            self.log_dict({"train_loss_12": loss_12, "train_loss_21": loss_21, "train_loss": total_loss})
+        elif step == "val":
+            self.log_dict({"val_loss_12": loss_12, "val_loss_21": loss_21, "val_loss": total_loss})
+        else:
+            raise ValueError(f"Step '{step}' is invalid. Must be 'train' or 'val'.")
+
+        return total_loss
+
     def calculate_loss(self, v_online: Tensor, v_target: Tensor) -> Tensor:
         """Calculates similarity loss between the online network prediction of target network projection.
 
@@ -114,30 +143,6 @@ class BYOL(LightningModule):
             _, z2 = self.target_network(v_target)
         loss = -2 * F.cosine_similarity(h1, z2).mean()
         return loss
-
-    def training_step(self, batch: Any, batch_idx: int) -> Tensor:
-        loss_12, loss_21, total_loss = self._shared_step(batch, batch_idx)
-        self.log_dict({"loss_12": loss_12, "loss_21": loss_21, "train_loss": total_loss})
-        return total_loss
-
-    def validation_step(self, batch: Any, batch_idx: int) -> Tensor:
-        loss_12, loss_21, total_loss = self._shared_step(batch, batch_idx)
-        self.log_dict({"loss_12": loss_12, "loss_21": loss_21, "val_loss": total_loss})
-        return total_loss
-
-    def _shared_step(self, batch: Any, batch_idx: int) -> Tuple[Tensor, Tensor, Tensor]:
-        """Shared evaluation step for training and validation loop."""
-        imgs, _ = batch
-        img1, img2 = imgs[:2]
-
-        # Calculate similarity loss in each direction
-        loss_12 = self.calculate_loss(img1, img2)
-        loss_21 = self.calculate_loss(img2, img1)
-
-        # Calculate total loss
-        total_loss = loss_12 + loss_21
-
-        return loss_12, loss_21, total_loss
 
     def configure_optimizers(self):
         optimizer = Adam(self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
@@ -210,7 +215,7 @@ def cli_main():
             f"{args.dataset} is not a valid dataset. Dataset must be 'cifar10', 'stl10', or 'imagenet2012'."
         )
 
-    model = BYOL(**args.__dict__)
+    model = BYOL(**vars(args))
 
     # finetune in real-time
     online_eval = SSLOnlineEvaluator(dataset=args.dataset, z_dim=2048, num_classes=dm.num_classes)
