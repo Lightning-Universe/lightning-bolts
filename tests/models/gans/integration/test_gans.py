@@ -81,7 +81,7 @@ def test_sr_modules(tmpdir, datadir, sr_module_cls, scale_factor):
 def test_pix2pix(tmpdir, datadir, dataset_cls, in_shape, out_shape):
     seed_everything(42)
 
-    dl = DataLoader(dataset_cls(in_shape, out_shape))
+    dl = DataLoader(dataset_cls(out_shape, in_shape))
     model = Pix2Pix(in_channels=in_shape[0], out_channels=out_shape[0])
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, dl)
