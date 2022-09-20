@@ -16,7 +16,6 @@ class LitMNIST(LightningModule):
         hidden_dim (int, optional): dimension of hidden layer (default: ``128``).
         learning_rate (float, optional): optimizer learning rate (default: ``1e-3``).
         batch_size (int, optional): samples per batch to load (default: ``32``).
-        num_workers (int, optional): subprocesses to use for data loading (default: ``4``).
 
     Example::
 
@@ -28,14 +27,7 @@ class LitMNIST(LightningModule):
         trainer.fit(model, datamodule=datamodule)
     """
 
-    def __init__(
-        self,
-        hidden_dim: int = 128,
-        learning_rate: float = 1e-3,
-        batch_size: int = 32,
-        num_workers: int = 4,
-        **kwargs: Any
-    ) -> None:
+    def __init__(self, hidden_dim: int = 128, learning_rate: float = 1e-3, **kwargs: Any) -> None:
 
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `torchvision` which is not installed yet.")
@@ -48,8 +40,8 @@ class LitMNIST(LightningModule):
 
     def forward(self, x: Tensor) -> Tensor:
         out = x.view(x.size(0), -1)
-        out = torch.relu(self.l1(x))
-        out = torch.relu(self.l2(x))
+        out = torch.relu(self.l1(out))
+        out = torch.relu(self.l2(out))
         return out
 
     def shared_step(self, batch: Any, batch_idx: int, step: Literal["train", "val", "test"]) -> Tensor:
@@ -81,8 +73,6 @@ class LitMNIST(LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser) -> ArgumentParser:
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument("--batch_size", type=int, default=32)
-        parser.add_argument("--num_workers", type=int, default=4)
         parser.add_argument("--hidden_dim", type=int, default=128)
         parser.add_argument("--learning_rate", type=float, default=1e-3)
         return parser
@@ -94,15 +84,18 @@ def cli_main():
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
     parser = LitMNIST.add_model_specific_args(parser)
+    parser.add_argument("--data_dir", type=str, default=".")
+    parser.add_argument("--batch_size", type=int, default=4)
+
     args = parser.parse_args()
 
-    # datamodule
+    # Initialize MNISTDatamodule
     datamodule = MNISTDataModule.from_argparse_args(args)
 
-    # model
+    # Initialize LitMNIST model
     model = LitMNIST(**vars(args))
 
-    # training
+    # Train LitMNIST model
     trainer = Trainer.from_argparse_args(args)
     trainer.fit(model, datamodule=datamodule)
 
