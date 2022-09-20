@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from typing import Any, Literal
+from typing import Any
 
 import torch
 from pytorch_lightning import LightningModule, Trainer
@@ -15,7 +15,6 @@ class LitMNIST(LightningModule):
     Args:
         hidden_dim (int, optional): dimension of hidden layer (default: ``128``).
         learning_rate (float, optional): optimizer learning rate (default: ``1e-3``).
-        batch_size (int, optional): samples per batch to load (default: ``32``).
 
     Example::
 
@@ -44,7 +43,7 @@ class LitMNIST(LightningModule):
         out = torch.relu(self.l2(out))
         return out
 
-    def shared_step(self, batch: Any, batch_idx: int, step: Literal["train", "val", "test"]) -> Tensor:
+    def shared_step(self, batch: Any, batch_idx: int, step: str) -> Tensor:
         x, y = batch
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
@@ -53,8 +52,10 @@ class LitMNIST(LightningModule):
             self.log("train_loss", loss)
         elif step == "val":
             self.log("val_loss", loss)
-        else:
+        elif step == "test":
             self.log("test_loss", loss)
+        else:
+            raise ValueError(f"Step {step} is not recognized. Must be 'train', 'val', or 'test'.")
 
         return loss
 
