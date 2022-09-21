@@ -34,6 +34,47 @@ else:
     warn_missing_pkg("torchvision")
 
 
+def validate_batch(batch: Tuple[List[Tensor], TARGETS]) -> Tuple[Tensor, TARGETS]:
+    """Reads a batch of data, validates the format, and stacks the images into a single tensor.
+
+    Args:
+        batch: The batch of data read by the :class:`~torch.utils.data.DataLoader`.
+
+    Returns:
+        The input batch with images stacked into a single tensor.
+    """
+    images, targets = batch
+
+    if not images:
+        raise ValueError("No images in batch.")
+
+    if len(images) != len(targets):
+        raise ValueError(f"Got {len(images)} images, but targets for {len(targets)} images.")
+
+    shape = images[0].shape
+    for image in images:
+        if not isinstance(image, Tensor):
+            raise ValueError(f"Expected image to be of type Tensor, got {type(image).__name__}.")
+        if image.shape != shape:
+            raise ValueError(f"Images with different shapes in one batch: {shape} and {image.shape}")
+
+    for target in targets:
+        boxes = target["boxes"]
+        if not isinstance(boxes, Tensor):
+            raise ValueError(f"Expected target boxes to be of type Tensor, got {type(boxes).__name__}.")
+        if (boxes.ndim != 2) or (boxes.shape[-1] != 4):
+            raise ValueError(f"Expected target boxes to be tensors of shape [N, 4], got {list(boxes.shape)}.")
+        labels = target["labels"]
+        if not isinstance(labels, Tensor):
+            raise ValueError(f"Expected target labels to be of type Tensor, got {type(labels).__name__}.")
+        if (labels.ndim < 1) or (labels.ndim > 2) or (len(labels) != len(boxes)):
+            raise ValueError(
+                f"Expected target labels to be tensors of shape [N] or [N, num_classes], got {list(labels.shape)}."
+            )
+
+    return torch.stack(images), targets
+
+
 @under_review()
 class YOLO(LightningModule):
     """PyTorch Lightning implementation of YOLO that supports the most important features of YOLOv3, YOLOv4,
@@ -174,7 +215,9 @@ class YOLO(LightningModule):
             default_group = []
             wd_group = []
             for name, tensor in self.named_parameters():
-                if name.endswith(".conv.weight"):
+                if not tensor.requires_grad:
+                    continue
+                elif name.endswith(".conv.weight"):
                     wd_group.append(tensor)
                 else:
                     default_group.append(tensor)
@@ -200,7 +243,7 @@ class YOLO(LightningModule):
         Returns:
             A dictionary that includes the training loss in 'loss'.
         """
-        images, targets = self._validate_batch(batch)
+        images, targets = validate_batch(batch)
         _, losses = self(images, targets)
 
         # sync_dist=True is broken in some versions of Lightning and may cause the sum of the loss
@@ -222,7 +265,7 @@ class YOLO(LightningModule):
                 dictionaries.
             batch_idx: Index of the current batch.
         """
-        images, targets = self._validate_batch(batch)
+        images, targets = validate_batch(batch)
         detections, losses = self(images, targets)
 
         self.log("val/overlap_loss", losses[0], sync_dist=True)
@@ -250,7 +293,7 @@ class YOLO(LightningModule):
                 dictionaries.
             batch_idx: Index of the current batch.
         """
-        images, targets = self._validate_batch(batch)
+        images, targets = validate_batch(batch)
         detections, losses = self(images, targets)
 
         self.log("test/overlap_loss", losses[0], sync_dist=True)
@@ -287,7 +330,7 @@ class YOLO(LightningModule):
             bounding box `(x1, y1, x2, y2)` coordinates. "scores" is a vector of confidence scores for the bounding box
             detections. "labels" is a vector of predicted class labels.
         """
-        images, _ = self._validate_batch(batch)
+        images, _ = validate_batch(batch)
         detections = self(images)
         detections = self.process_detections(detections)
 
@@ -368,41 +411,6 @@ class YOLO(LightningModule):
             return {"boxes": boxes, "labels": labels, **other}
 
         return [process(**t) for t in targets]
-
-    def _validate_batch(self, batch: Tuple[List[Tensor], TARGETS]) -> Tuple[Tensor, TARGETS]:
-        """Reads a batch of data, validates the format, and stacks the images into a single tensor.
-
-        Args:
-            batch: The batch of data read by the :class:`~torch.utils.data.DataLoader`.
-
-        Returns:
-            The input batch with images stacked into a single tensor.
-        """
-        images, targets = batch
-
-        if len(images) != len(targets):
-            raise ValueError(f"Got {len(images)} images, but targets for {len(targets)} images.")
-
-        for image in images:
-            if not isinstance(image, Tensor):
-                raise ValueError(f"Expected image to be of type Tensor, got {type(image)}.")
-
-        for target in targets:
-            boxes = target["boxes"]
-            if not isinstance(boxes, Tensor):
-                raise ValueError(f"Expected target boxes to be of type Tensor, got {type(boxes)}.")
-            if (boxes.ndim != 2) or (boxes.shape[-1] != 4):
-                raise ValueError(f"Expected target boxes to be tensors of shape [N, 4], got {list(boxes.shape)}.")
-            labels = target["labels"]
-            if not isinstance(labels, Tensor):
-                raise ValueError(f"Expected target labels to be of type Tensor, got {type(labels)}.")
-            if (labels.ndim < 1) or (labels.ndim > 2) or (len(labels) != len(boxes)):
-                raise ValueError(
-                    f"Expected target labels to be tensors of shape [N] or [N, num_classes], got {list(labels.shape)}."
-                )
-
-        images = torch.stack(images)
-        return images, targets
 
 
 class DarknetYOLO(YOLO):
