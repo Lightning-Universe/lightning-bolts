@@ -7,14 +7,11 @@ class UpSampleConv(nn.Module):
         self,
         in_channels: int,
         out_channels: int,
-        kernel: int = 4,
-        strides: int = 2,
-        padding: int = 1,
         batchnorm: bool = True,
         dropout: bool = False,
     ) -> None:
         super().__init__()
-        layers = [nn.ConvTranspose2d(in_channels, out_channels, kernel, strides, padding)]
+        layers = [nn.ConvTranspose2d(in_channels, out_channels, kernel=4, strides=2, padding=1)]
 
         if batchnorm:
             layers.append(nn.BatchNorm2d(out_channels))
@@ -33,13 +30,10 @@ class DownSampleConv(nn.Module):
         self,
         in_channels: int,
         out_channels: int,
-        kernel: int = 4,
-        strides: int = 2,
-        padding: int = 1,
         batchnorm: bool = True,
     ) -> None:
         super().__init__()
-        layers = [nn.Conv2d(in_channels, out_channels, kernel, strides, padding)]
+        layers = [nn.Conv2d(in_channels, out_channels, kernel=4, strides=2, padding=1)]
 
         if batchnorm:
             layers.append(nn.BatchNorm2d(out_channels))
