@@ -30,7 +30,6 @@ def iou(preds: Tensor, target: Tensor) -> Tensor:
     return iou_value
 
 
-
 def giou(preds: Tensor, target: Tensor) -> Tensor:
     """Calculates the generalized intersection over union.
     It has been proposed in `Generalized Intersection over Union: A Metric and A
