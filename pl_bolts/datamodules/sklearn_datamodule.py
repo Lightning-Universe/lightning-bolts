@@ -2,9 +2,7 @@ import math
 from typing import Any, Tuple
 
 import numpy as np
-import torch
 from pytorch_lightning import LightningDataModule
-from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 
 from pl_bolts.utils import _SKLEARN_AVAILABLE
@@ -55,50 +53,6 @@ class SklearnDataset(Dataset):
         # Do not convert integer to float for classification data
         if not ((y.dtype == np.int32) or (y.dtype == np.int64)):
             y = y.astype(np.float32)
-
-        if self.X_transform:
-            x = self.X_transform(x)
-
-        if self.y_transform:
-            y = self.y_transform(y)
-
-        return x, y
-
-
-@under_review()
-class TensorDataset(Dataset):
-    """Prepare PyTorch tensor dataset for data loaders.
-
-    Example:
-        >>> from pl_bolts.datamodules import TensorDataset
-        ...
-        >>> X = torch.rand(10, 3)
-        >>> y = torch.rand(10)
-        >>> dataset = TensorDataset(X, y)
-        >>> len(dataset)
-        10
-    """
-
-    def __init__(self, X: Tensor, y: Tensor, X_transform: Any = None, y_transform: Any = None) -> None:
-        """
-        Args:
-            X: PyTorch tensor
-            y: PyTorch tensor
-            X_transform: Any transform that works with PyTorch tensors
-            y_transform: Any transform that works with PyTorch tensors
-        """
-        super().__init__()
-        self.X = X
-        self.Y = y
-        self.X_transform = X_transform
-        self.y_transform = y_transform
-
-    def __len__(self) -> int:
-        return len(self.X)
-
-    def __getitem__(self, idx) -> Tuple[Tensor, Tensor]:
-        x = self.X[idx].float()
-        y = self.Y[idx]
 
         if self.X_transform:
             x = self.X_transform(x)
@@ -241,40 +195,3 @@ class SklearnDataModule(LightningDataModule):
             pin_memory=self.pin_memory,
         )
         return loader
-
-
-# TODO: this seems to be wrong, something missing here, another inherit class?
-# class TensorDataModule(SklearnDataModule):
-#     """
-#     Automatically generates the train, validation and test splits for a PyTorch tensor dataset. They are set up as
-#     dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
-#
-#     Example:
-#
-#         >>> from pl_bolts.datamodules import TensorDataModule
-#         >>> import torch
-#         ...
-#         >>> # create dataset
-#         >>> X = torch.rand(100, 3)
-#         >>> y = torch.rand(100)
-#         >>> loaders = TensorDataModule(X, y)
-#         ...
-#         >>> # train set
-#         >>> train_loader = loaders.train_dataloader(batch_size=10)
-#         >>> len(train_loader.dataset)
-#         70
-#         >>> len(train_loader)
-#         7
-#         >>> # validation set
-#         >>> val_loader = loaders.val_dataloader(batch_size=10)
-#         >>> len(val_loader.dataset)
-#         20
-#         >>> len(val_loader)
-#         2
-#         >>> # test set
-#         >>> test_loader = loaders.test_dataloader(batch_size=10)
-#         >>> len(test_loader.dataset)
-#         10
-#         >>> len(test_loader)
-#         1
-#     """

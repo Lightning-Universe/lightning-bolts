@@ -1,6 +1,7 @@
 import urllib
 
-from pl_bolts.datasets.base_dataset import LightDataset
+from pl_bolts.datasets.array_dataset import ArrayDataset
+from pl_bolts.datasets.base_dataset import DataModel, LightDataset
 from pl_bolts.datasets.cifar10_dataset import CIFAR10, TrialCIFAR10
 from pl_bolts.datasets.concat_dataset import ConcatDataset
 from pl_bolts.datasets.dummy_dataset import (
@@ -17,6 +18,8 @@ from pl_bolts.datasets.mnist_dataset import MNIST, BinaryMNIST
 from pl_bolts.datasets.ssl_amdim_datasets import CIFAR10Mixed, SSLDatasetMixin
 
 __all__ = [
+    "ArrayDataset",
+    "DataModel",
     "LightDataset",
     "CIFAR10",
     "TrialCIFAR10",

@@ -1,8 +1,16 @@
 import pytest
 import torch
 from torch.utils.data import DataLoader, Dataset
+from torchvision import transforms as transform_lib
 
-from pl_bolts.datasets import DummyDataset, RandomDataset, RandomDictDataset, RandomDictStringDataset
+from pl_bolts.datasets import (
+    BinaryEMNIST,
+    BinaryMNIST,
+    DummyDataset,
+    RandomDataset,
+    RandomDictDataset,
+    RandomDictStringDataset,
+)
 from pl_bolts.datasets.dummy_dataset import DummyDetectionDataset
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 
@@ -129,3 +137,30 @@ def test_sr_datasets(datadir, scale_factor):
     assert torch.allclose(hr_image.max(), torch.tensor(1.0), atol=atol)
     assert torch.allclose(lr_image.min(), torch.tensor(0.0), atol=atol)
     assert torch.allclose(lr_image.max(), torch.tensor(1.0), atol=atol)
+
+
+def test_binary_mnist_dataset(datadir):
+    """Check BinaryMNIST image and target dimensions and value range."""
+    dl = DataLoader(BinaryMNIST(root=datadir, download=True, transform=transform_lib.ToTensor()))
+    img, target = next(iter(dl))
+
+    assert img.size() == torch.Size([1, 1, 28, 28])
+    assert target.size() == torch.Size([1])
+
+    assert torch.allclose(img.min(), torch.tensor(0.0))
+    assert torch.allclose(img.max(), torch.tensor(1.0))
+    assert torch.equal(torch.unique(img), torch.tensor([0.0, 1.0]))
+
+
+@pytest.mark.parametrize("split", ["byclass", "bymerge", "balanced", "letters", "digits", "mnist"])
+def test_binary_emnist_dataset(datadir, split):
+    """Check BinaryEMNIST image and target dimensions and value range for each split."""
+    dl = DataLoader(BinaryEMNIST(root=datadir, split=split, download=True, transform=transform_lib.ToTensor()))
+    img, target = next(iter(dl))
+
+    assert img.size() == torch.Size([1, 1, 28, 28])
+    assert target.size() == torch.Size([1])
+
+    assert torch.allclose(img.min(), torch.tensor(0.0))
+    assert torch.allclose(img.max(), torch.tensor(1.0))
+    assert torch.equal(torch.unique(img), torch.tensor([0.0, 1.0]))

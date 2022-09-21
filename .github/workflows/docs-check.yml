@@ -82,7 +82,7 @@ jobs:
           make html --debug --jobs 2 SPHINXOPTS="-W"
 
       - name: Upload built docs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: docs-results-${{ github.sha }}
           path: docs/build/html/
