@@ -65,3 +65,4 @@ def giou(preds: Tensor, target: Tensor) -> Tensor:
     iou_value = torch.true_divide(intersection, union)
     giou_value = iou_value - torch.true_divide((C_area - union), C_area)
     return giou_value
+    
