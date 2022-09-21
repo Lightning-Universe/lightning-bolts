@@ -1,4 +1,4 @@
-"""Test Object Detection Metric Functions."""
+"""Test Aggregation Metric Functions."""
 
 import pytest
 import torch
