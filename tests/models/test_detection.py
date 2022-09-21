@@ -112,8 +112,8 @@ def test_yolo_train(tmpdir, cfg_name, catch_warnings):
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
 
-    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, logger=False)
-    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl, max_expochs=10)
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, logger=False, max_epochs=10, accelerator="auto")
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
 
 
 @pytest.mark.parametrize(
