@@ -11,7 +11,7 @@ from pl_bolts.metrics.object_detection import giou, iou
     [(torch.tensor([[100, 100, 200, 200]]), torch.tensor([[100, 100, 200, 200]]), torch.tensor([[1.0]]))],
 )
 def test_iou_complete_overlap(preds, target, expected_iou):
-    torch.testing.assert_allclose(iou(preds, target), expected_iou)
+    torch.testing.assert_close(iou(preds, target), expected_iou)
 
 
 @pytest.mark.parametrize(
@@ -22,7 +22,7 @@ def test_iou_complete_overlap(preds, target, expected_iou):
     ],
 )
 def test_iou_no_overlap(preds, target, expected_iou):
-    torch.testing.assert_allclose(iou(preds, target), expected_iou)
+    torch.testing.assert_close(iou(preds, target), expected_iou)
 
 
 @pytest.mark.parametrize(
@@ -36,7 +36,7 @@ def test_iou_no_overlap(preds, target, expected_iou):
     ],
 )
 def test_iou_multi(preds, target, expected_iou):
-    torch.testing.assert_allclose(iou(preds, target), expected_iou)
+    torch.testing.assert_close(iou(preds, target), expected_iou)
 
 
 @pytest.mark.parametrize(
@@ -44,7 +44,7 @@ def test_iou_multi(preds, target, expected_iou):
     [(torch.tensor([[100, 100, 200, 200]]), torch.tensor([[100, 100, 200, 200]]), torch.tensor([[1.0]]))],
 )
 def test_complete_overlap(preds, target, expected_giou):
-    torch.testing.assert_allclose(giou(preds, target), expected_giou)
+    torch.testing.assert_close(giou(preds, target), expected_giou)
 
 
 @pytest.mark.parametrize(
@@ -55,7 +55,7 @@ def test_complete_overlap(preds, target, expected_giou):
     ],
 )
 def test_no_overlap(preds, target, expected_giou):
-    torch.testing.assert_allclose(giou(preds, target), expected_giou)
+    torch.testing.assert_close(giou(preds, target), expected_giou)
 
 
 @pytest.mark.parametrize(
@@ -69,4 +69,4 @@ def test_no_overlap(preds, target, expected_giou):
     ],
 )
 def test_giou_multi(preds, target, expected_giou):
-    torch.testing.assert_allclose(giou(preds, target), expected_giou)
+    torch.testing.assert_close(giou(preds, target), expected_giou, atol=.0001, rtol=.0001)
