@@ -109,7 +109,7 @@ class MNISTDataModule(VisionDataModule):
         return mnist_transforms
 
     @staticmethod
-    def add_dataset_specific_args(parent_parser) -> ArgumentParser:
+    def add_dataset_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
 
         parser.add_argument("--data_dir", type=str, default=".")
