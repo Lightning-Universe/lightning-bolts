@@ -1,10 +1,19 @@
+import warnings
+
 from pytorch_lightning import Trainer, seed_everything
+from pytorch_lightning.utilities.warnings import PossibleUserWarning
 
 from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models import LitMNIST
 
 
 def test_mnist(tmpdir, datadir, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message="does not have many workers which may be a bottleneck",
+        category=PossibleUserWarning,
+    )
+
     seed_everything(1234)
 
     datamodule = MNISTDataModule(data_dir=datadir, num_workers=0)
