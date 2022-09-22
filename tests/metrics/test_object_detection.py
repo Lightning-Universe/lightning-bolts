@@ -69,4 +69,4 @@ def test_no_overlap(preds, target, expected_giou):
     ],
 )
 def test_giou_multi(preds, target, expected_giou):
-    torch.testing.assert_close(giou(preds, target), expected_giou, atol=.0001, rtol=.0001)
+    torch.testing.assert_close(giou(preds, target), expected_giou, atol=0.0001, rtol=0.0001)
