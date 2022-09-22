@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from typing import Any, Callable, Optional, Union
 
 from pl_bolts.datamodules.vision_datamodule import VisionDataModule
@@ -106,3 +107,13 @@ class MNISTDataModule(VisionDataModule):
             mnist_transforms = transform_lib.Compose([transform_lib.ToTensor()])
 
         return mnist_transforms
+
+    @staticmethod
+    def add_dataset_specific_args(parent_parser) -> ArgumentParser:
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+
+        parser.add_argument("--data_dir", type=str, default=".")
+        parser.add_argument("--num_workers", type=int, default=0)
+        parser.add_argument("--batch_size", type=int, default=32)
+
+        return parser

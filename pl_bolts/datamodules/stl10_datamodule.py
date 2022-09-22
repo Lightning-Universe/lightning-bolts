@@ -1,4 +1,5 @@
 import os
+from argparse import ArgumentParser
 from typing import Any, Callable, Optional
 
 import torch
@@ -304,3 +305,13 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
     def _default_transforms(self) -> Callable:
         data_transforms = transform_lib.Compose([transform_lib.ToTensor(), stl10_normalization()])
         return data_transforms
+
+    @staticmethod
+    def add_dataset_specific_args(parent_parser) -> ArgumentParser:
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+
+        parser.add_argument("--data_dir", type=str, default=".")
+        parser.add_argument("--num_workers", type=int, default=0)
+        parser.add_argument("--batch_size", type=int, default=32)
+
+        return parser
