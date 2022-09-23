@@ -19,10 +19,10 @@ def test_mnist(tmpdir, datadir, catch_warnings):
     datamodule = MNISTDataModule(data_dir=datadir, num_workers=0)
     model = LitMNIST()
     trainer = Trainer(
-        limit_train_batches=0.01,
-        limit_val_batches=0.01,
+        limit_train_batches=0.02,
+        limit_val_batches=0.02,
         max_epochs=1,
-        limit_test_batches=0.01,
+        limit_test_batches=0.02,
         default_root_dir=tmpdir,
         log_every_n_steps=5,
         accelerator="auto",
