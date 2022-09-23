@@ -1,10 +1,7 @@
 import torch
 from torch import Tensor
 
-from pl_bolts.utils.stability import under_review
 
-
-@under_review()
 def iou(preds: Tensor, target: Tensor) -> Tensor:
     """Calculates the intersection over union.
 
@@ -33,11 +30,10 @@ def iou(preds: Tensor, target: Tensor) -> Tensor:
     pred_area = (preds[:, 2] - preds[:, 0]) * (preds[:, 3] - preds[:, 1])
     target_area = (target[:, 2] - target[:, 0]) * (target[:, 3] - target[:, 1])
     union = pred_area[:, None] + target_area - intersection
-    iou = torch.true_divide(intersection, union)
-    return iou
+    iou_value = torch.true_divide(intersection, union)
+    return iou_value
 
 
-@under_review()
 def giou(preds: Tensor, target: Tensor) -> Tensor:
     """Calculates the generalized intersection over union.
 
@@ -74,6 +70,6 @@ def giou(preds: Tensor, target: Tensor) -> Tensor:
     C_x_max = torch.max(preds[:, None, 2], target[:, 2])
     C_y_max = torch.max(preds[:, None, 3], target[:, 3])
     C_area = (C_x_max - C_x_min).clamp(min=0) * (C_y_max - C_y_min).clamp(min=0)
-    iou = torch.true_divide(intersection, union)
-    giou = iou - torch.true_divide((C_area - union), C_area)
-    return giou
+    iou_value = torch.true_divide(intersection, union)
+    giou_value = iou_value - torch.true_divide((C_area - union), C_area)
+    return giou_value
