@@ -11,6 +11,7 @@ from pytorch_lightning.utilities.warnings import PossibleUserWarning
 from torch import nn
 
 from pl_bolts.callbacks import ModuleDataMonitor, TrainingDataMonitor
+from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models import LitMNIST
 
 
@@ -32,7 +33,8 @@ def test_base_log_interval_override(
         category=PossibleUserWarning,
     )
     monitor = TrainingDataMonitor(log_every_n_steps=log_every_n_steps)
-    model = LitMNIST(data_dir=datadir, num_workers=0)
+    model = LitMNIST(num_workers=0)
+    datamodule = MNISTDataModule(data_dir=datadir)
     trainer = Trainer(
         default_root_dir=tmpdir,
         log_every_n_steps=1,
@@ -41,7 +43,7 @@ def test_base_log_interval_override(
         accelerator="auto",
     )
 
-    trainer.fit(model)
+    trainer.fit(model, datamodule=datamodule)
     assert log_histogram.call_count == (expected_calls * 2)  # 2 tensors per log call
 
 
@@ -71,7 +73,8 @@ def test_base_log_interval_fallback(
         category=PossibleUserWarning,
     )
     monitor = TrainingDataMonitor()
-    model = LitMNIST(data_dir=datadir, num_workers=0)
+    model = LitMNIST(num_workers=0)
+    datamodule = MNISTDataModule(data_dir=datadir)
     trainer = Trainer(
         default_root_dir=tmpdir,
         log_every_n_steps=log_every_n_steps,
@@ -79,7 +82,7 @@ def test_base_log_interval_fallback(
         callbacks=[monitor],
         accelerator="auto",
     )
-    trainer.fit(model)
+    trainer.fit(model, datamodule=datamodule)
     assert log_histogram.call_count == (expected_calls * 2)  # 2 tensors per log call
 
 
