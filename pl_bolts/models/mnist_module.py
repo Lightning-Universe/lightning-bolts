@@ -85,8 +85,7 @@ def cli_main():
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
     parser = LitMNIST.add_model_specific_args(parser)
-    parser.add_argument("--data_dir", type=str, default=".")
-    parser.add_argument("--batch_size", type=int, default=4)
+    parser = MNISTDataModule.add_dataset_specific_args(parser)
 
     args = parser.parse_args()
 
