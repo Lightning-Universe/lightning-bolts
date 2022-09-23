@@ -10,7 +10,7 @@ from pl_bolts.models import LitMNIST
 def test_mnist(tmpdir, datadir, catch_warnings):
     warnings.filterwarnings(
         "ignore",
-        message="does not have many workers which may be a bottleneck",
+        message=".+does not have many workers which may be a bottleneck.+",
         category=PossibleUserWarning,
     )
 
