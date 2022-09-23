@@ -25,6 +25,7 @@ def test_mnist(tmpdir, datadir, catch_warnings):
         limit_test_batches=0.01,
         default_root_dir=tmpdir,
         log_every_n_steps=5,
+        accelerator="auto",
     )
     trainer.fit(model, datamodule=datamodule)
     loss = trainer.callback_metrics["train_loss"]
