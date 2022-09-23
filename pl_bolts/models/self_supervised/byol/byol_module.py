@@ -21,12 +21,8 @@ class BYOL(LightningModule):
     Bilal Piot, Koray Kavukcuoglu, Rémi Munos, Michal Valko.
 
     Args:
-        num_classes (int): number of classes
         learning_rate (float, optional): optimizer learning rate. Defaults to 0.2.
         weight_decay (float, optional): optimizer weight decay. Defaults to 1.5e-6.
-        input_height (int, optional): data input height. Defaults to 32.
-        batch_size (int, optional): number of samples per batch. Defaults to 32.
-        num_workers (int, optional): number of subprocesses used in loading data. Defaults to 0.
         warmup_epochs (int, optional): number of epochs for scheduler warmup. Defaults to 10.
         max_epochs (int, optional): maximum number of epochs for scheduler. Defaults to 1000.
         base_encoder (Union[str, torch.nn.Module], optional): base encoder architecture. Defaults to "resnet50".
@@ -154,22 +150,10 @@ class BYOL(LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser) -> ArgumentParser:
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument("--online_ft", action="store_true", help="run online finetuner")
-        parser.add_argument("--dataset", type=str, default="cifar10", choices=["cifar10", "imagenet2012", "stl10"])
-
-        (args, _) = parser.parse_known_args()
-
-        # Data params
-        parser.add_argument("--data_dir", type=str, default=".")
-        parser.add_argument("--num_workers", default=8, type=int)
-
-        # Training params
-        parser.add_argument("--batch_size", type=int, default=256)
-        parser.add_argument("--learning_rate", type=float, default=1e-3)
+        parser.add_argument("--learning_rate", type=float, default=0.2)
         parser.add_argument("--weight_decay", type=float, default=1.5e-6)
-        parser.add_argument("--warmup_epochs", type=float, default=10)
-
-        # Model params
+        parser.add_argument("--warmup_epochs", type=int, default=10)
+        parser.add_argument("--max_epochs", type=int, default=1000)
         parser.add_argument("--meta_dir", default=".", type=str, help="path to meta.bin for imagenet")
 
         return parser
@@ -186,6 +170,8 @@ def cli_main():
 
     parser = Trainer.add_argparse_args(parser)
     parser = BYOL.add_model_specific_args(parser)
+    parser = CIFAR10DataModule.add_dataset_specific_args(parser)
+    parser.add_argument("--dataset", type=str, default="cifar10", choices=["cifar10", "imagenet2012", "stl10"])
 
     args = parser.parse_args()
 
@@ -215,6 +201,7 @@ def cli_main():
             f"{args.dataset} is not a valid dataset. Dataset must be 'cifar10', 'stl10', or 'imagenet2012'."
         )
 
+    # Initialize BYOL module
     model = BYOL(**vars(args))
 
     # finetune in real-time
