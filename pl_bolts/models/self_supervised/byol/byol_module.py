@@ -148,7 +148,7 @@ class BYOL(LightningModule):
         return [optimizer], [scheduler]
 
     @staticmethod
-    def add_model_specific_args(parent_parser) -> ArgumentParser:
+    def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--learning_rate", type=float, default=0.2)
         parser.add_argument("--weight_decay", type=float, default=1.5e-6)
