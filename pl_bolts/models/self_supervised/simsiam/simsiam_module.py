@@ -1,37 +1,28 @@
 from argparse import ArgumentParser
+from copy import deepcopy
+from typing import Any, Union
 
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
-from torch.nn import functional as F
+from torch import Tensor
 
-from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
-from pl_bolts.models.self_supervised.simsiam.models import SiameseArm
+from pl_bolts.models.self_supervised.simsiam.models import MLP, SiameseArm
 from pl_bolts.optimizers.lars import LARS
 from pl_bolts.optimizers.lr_scheduler import linear_warmup_decay
-from pl_bolts.transforms.dataset_normalizations import (
-    cifar10_normalization,
-    imagenet_normalization,
-    stl10_normalization,
-)
-from pl_bolts.utils.stability import under_review
 
 
-@under_review()
 class SimSiam(LightningModule):
-    """PyTorch Lightning implementation of Exploring Simple Siamese Representation Learning (SimSiam_)
+    """PyTorch Lightning implementation of Exploring Simple Siamese Representation Learning (SimSiam_)_
 
     Paper authors: Xinlei Chen, Kaiming He.
 
+    Args:
+
     Model implemented by:
         - `Zvi Lapp <https://github.com/zlapp>`_
-
-    .. warning:: Work in progress. This implementation is still being verified.
-
-    TODOs:
-        - verify on CIFAR-10
-        - verify on STL-10
-        - pre-train on imagenet
 
     Example::
 
@@ -43,11 +34,6 @@ class SimSiam(LightningModule):
 
         trainer = Trainer()
         trainer.fit(model, datamodule=dm)
-
-    Train::
-
-        trainer = Trainer()
-        trainer.fit(model)
 
     CLI command::
 
@@ -67,117 +53,71 @@ class SimSiam(LightningModule):
 
     def __init__(
         self,
-        gpus: int,
-        num_samples: int,
-        batch_size: int,
-        dataset: str,
-        num_nodes: int = 1,
-        arch: str = "resnet50",
-        hidden_mlp: int = 2048,
-        feat_dim: int = 128,
+        base_learning_rate: float = 0.05,
+        weight_decay: float = 1e-4,
         warmup_epochs: int = 10,
         max_epochs: int = 100,
-        temperature: float = 0.1,
-        first_conv: bool = True,
-        maxpool1: bool = True,
-        optimizer: str = "adam",
-        exclude_bn_bias: bool = False,
-        start_lr: float = 0.0,
-        learning_rate: float = 1e-3,
-        final_lr: float = 0.0,
-        weight_decay: float = 1e-6,
-        **kwargs
-    ):
-        """
-        Args:
-            datamodule: The datamodule
-            learning_rate: the learning rate
-            weight_decay: optimizer weight decay
-            input_height: image input height
-            batch_size: the batch size
-            num_workers: number of workers
-            warmup_epochs: num of epochs for scheduler warm up
-            max_epochs: max epochs for scheduler
-        """
+        base_encoder: Union[str, nn.Module] = "resnet50",
+        encoder_out_dim: int = 2048,
+        projector_hidden_dim: int = 2048,
+        projector_out_dim: int = 2048,
+        predictor_hidden_dim: int = 512,
+        **kwargs,
+    ) -> None:
+
         super().__init__()
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore="base_encoder")
 
-        self.gpus = gpus
-        self.num_nodes = num_nodes
-        self.arch = arch
-        self.dataset = dataset
-        self.num_samples = num_samples
-        self.batch_size = batch_size
+        self.online_network = SiameseArm(base_encoder, encoder_out_dim, projector_hidden_dim, projector_out_dim)
+        self.target_network = deepcopy(self.online_network)
+        self.predictor = MLP(projector_out_dim, predictor_hidden_dim, projector_out_dim)
 
-        self.hidden_mlp = hidden_mlp
-        self.feat_dim = feat_dim
-        self.first_conv = first_conv
-        self.maxpool1 = maxpool1
-
-        self.optim = optimizer
-        self.exclude_bn_bias = exclude_bn_bias
-        self.weight_decay = weight_decay
-        self.temperature = temperature
-
-        self.start_lr = start_lr
-        self.final_lr = final_lr
-        self.learning_rate = learning_rate
-        self.warmup_epochs = warmup_epochs
-        self.max_epochs = max_epochs
-
-        self.init_model()
-
-        # compute iters per epoch
-        nb_gpus = len(self.gpus) if isinstance(gpus, (list, tuple)) else self.gpus
-        assert isinstance(nb_gpus, int)
-        global_batch_size = self.num_nodes * nb_gpus * self.batch_size if nb_gpus > 0 else self.batch_size
-        self.train_iters_per_epoch = self.num_samples // global_batch_size
-
-    def init_model(self):
-        if self.arch == "resnet18":
-            backbone = resnet18
-        elif self.arch == "resnet50":
-            backbone = resnet50
-
-        encoder = backbone(first_conv=self.first_conv, maxpool1=self.maxpool1, return_all_feature_maps=False)
-        self.online_network = SiameseArm(
-            encoder, input_dim=self.hidden_mlp, hidden_size=self.hidden_mlp, output_dim=self.feat_dim
-        )
-
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
+        """Returns encoded representation of a view."""
         y, _, _ = self.online_network(x)
         return y
 
-    def cosine_similarity(self, a, b):
-        b = b.detach()  # stop gradient of backbone + projection mlp
-        a = F.normalize(a, dim=-1)
-        b = F.normalize(b, dim=-1)
-        sim = -1 * (a * b).sum(-1).mean()
-        return sim
+    def training_step(self, batch: Any, batch_idx: int) -> Tensor:
+        """Complete training loop."""
+        return self._shared_step(batch, batch_idx, "train")
 
-    def training_step(self, batch, batch_idx):
-        (img_1, img_2, _), y = batch
+    def validation_step(self, batch: Any, batch_idx: int) -> Tensor:
+        """Complete validation loop."""
+        return self._shared_step(batch, batch_idx, "val")
 
-        # Image 1 to image 2 loss
-        _, z1, h1 = self.online_network(img_1)
-        _, z2, h2 = self.online_network(img_2)
-        loss = self.cosine_similarity(h1, z2) / 2 + self.cosine_similarity(h2, z1) / 2
+    def _shared_step(self, batch: Any, batch_idx: int, step: str) -> Tensor:
+        """Shared evaluation step for training and validation loops."""
+        (img1, img2), _ = batch
 
-        # log results
-        self.log_dict({"train_loss": loss})
+        # Calculate similarity loss in each direction
+        loss_12 = self.calculate_loss(img1, img2)
+        loss_21 = self.calculate_loss(img2, img1)
 
-        return loss
+        # Calculate total loss
+        total_loss = loss_12 + loss_21
 
-    def validation_step(self, batch, batch_idx):
-        (img_1, img_2, _), y = batch
+        # Log loss
+        if step == "train":
+            self.log_dict({"train_loss_12": loss_12, "train_loss_21": loss_21, "train_loss": total_loss})
+        elif step == "val":
+            self.log_dict({"val_loss_12": loss_12, "val_loss_21": loss_21, "val_loss": total_loss})
+        else:
+            raise ValueError(f"Step '{step}' is invalid. Must be 'train' or 'val'.")
 
-        # Image 1 to image 2 loss
-        _, z1, h1 = self.online_network(img_1)
-        _, z2, h2 = self.online_network(img_2)
-        loss = self.cosine_similarity(h1, z2) / 2 + self.cosine_similarity(h2, z1) / 2
+        return total_loss
 
-        # log results
-        self.log_dict({"val_loss": loss})
+    def calculate_loss(self, v_online: Tensor, v_target: Tensor) -> Tensor:
+        """Calculates similarity loss between the online network prediction of target network projection.
+
+        Args:
+            v_online (Tensor): Online network view
+            v_target (Tensor): Target network view
+        """
+        _, z1 = self.online_network(v_online)
+        h1 = self.predictor(z1)
+        with torch.no_grad():
+            _, z2 = self.target_network(v_target)
+        loss = -0.5 * F.cosine_similarity(h1, z2).mean()
 
         return loss
 
@@ -199,24 +139,31 @@ class SimSiam(LightningModule):
         ]
 
     def configure_optimizers(self):
+        """Configure optimizer and learning rate scheduler."""
         if self.exclude_bn_bias:
-            params = self.exclude_from_wt_decay(self.named_parameters(), weight_decay=self.weight_decay)
+            params = self.exclude_from_wt_decay(self.named_parameters(), weight_decay=self.hparams.weight_decay)
         else:
             params = self.parameters()
 
-        if self.optim == "lars":
+        if self.optim == "sgd":
+            optimizer = torch.optim.SGD(
+                params, lr=self.hparams.learning_rate, momentum=0.9, weight_decay=self.hparams.weight_decay
+            )
+        elif self.optim == "lars":
             optimizer = LARS(
                 params,
-                lr=self.learning_rate,
+                lr=self.hparams.learning_rate,
                 momentum=0.9,
-                weight_decay=self.weight_decay,
+                weight_decay=self.hparams.weight_decay,
                 trust_coefficient=0.001,
             )
         elif self.optim == "adam":
-            optimizer = torch.optim.Adam(params, lr=self.learning_rate, weight_decay=self.weight_decay)
+            optimizer = torch.optim.Adam(params, lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
+        else:
+            raise ValueError(f"Optimizer {self.optim} is not supported.")
 
-        warmup_steps = self.train_iters_per_epoch * self.warmup_epochs
-        total_steps = self.train_iters_per_epoch * self.max_epochs
+        warmup_steps = self.train_iters_per_epoch * self.hparams.warmup_epochs
+        total_steps = self.train_iters_per_epoch * self.hparams.max_epochs
 
         scheduler = {
             "scheduler": torch.optim.lr_scheduler.LambdaLR(
@@ -230,41 +177,18 @@ class SimSiam(LightningModule):
         return [optimizer], [scheduler]
 
     @staticmethod
-    def add_model_specific_args(parent_parser):
+    def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        # model params
-        parser.add_argument("--arch", default="resnet50", type=str, help="convnet architecture")
-        # specify flags to store false
-        parser.add_argument("--first_conv", action="store_false")
-        parser.add_argument("--maxpool1", action="store_false")
-        parser.add_argument("--hidden_mlp", default=2048, type=int, help="hidden layer dimension in projection head")
-        parser.add_argument("--feat_dim", default=128, type=int, help="feature dimension")
-        parser.add_argument("--online_ft", action="store_true")
-        parser.add_argument("--fp32", action="store_true")
 
-        # transform params
-        parser.add_argument("--gaussian_blur", action="store_true", help="add gaussian blur")
-        parser.add_argument("--jitter_strength", type=float, default=1.0, help="jitter strength")
-        parser.add_argument("--dataset", type=str, default="cifar10", help="stl10, cifar10")
-        parser.add_argument("--data_dir", type=str, default=".", help="path to download data")
-
-        # training params
-        parser.add_argument("--num_workers", default=8, type=int, help="num of workers per GPU")
-        parser.add_argument("--optimizer", default="adam", type=str, help="choose between adam/lars")
-        parser.add_argument("--exclude_bn_bias", action="store_true", help="exclude bn/bias from weight decay")
-        parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
-        parser.add_argument("--batch_size", default=128, type=int, help="batch size per gpu")
-
-        parser.add_argument("--temperature", default=0.1, type=float, help="temperature parameter in training loss")
+        parser.add_argument("--base_encoder", default="resnet50", type=str, help="encoder backbone")
+        parser.add_argument("--base_learning_rate", default=0.05, type=float, help="base learning rate")
         parser.add_argument("--weight_decay", default=1e-6, type=float, help="weight decay")
-        parser.add_argument("--learning_rate", default=1e-3, type=float, help="base learning rate")
-        parser.add_argument("--start_lr", default=0, type=float, help="initial warmup learning rate")
-        parser.add_argument("--final_lr", type=float, default=1e-6, help="final learning rate")
+        parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
+        parser.add_argument("--max_epochs", default=100, type=int, help="number of max epochs")
 
         return parser
 
 
-@under_review()
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
@@ -274,17 +198,13 @@ def cli_main():
 
     parser = ArgumentParser()
 
-    # trainer args
     parser = Trainer.add_argparse_args(parser)
-
-    # model args
     parser = SimSiam.add_model_specific_args(parser)
+    parser = CIFAR10DataModule.add_dataset_specific_args(parser)
+
     args = parser.parse_args()
 
-    # pick data
-    dm = None
-
-    # init datamodule
+    # Initialize datamodule
     if args.dataset == "stl10":
         dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
@@ -295,8 +215,6 @@ def cli_main():
         args.maxpool1 = False
         args.first_conv = True
         args.input_height = dm.dims[-1]
-
-        normalization = stl10_normalization()
 
         args.gaussian_blur = True
         args.jitter_strength = 1.0
@@ -319,14 +237,11 @@ def cli_main():
         args.input_height = dm.dims[-1]
         args.temperature = 0.5
 
-        normalization = cifar10_normalization()
-
         args.gaussian_blur = False
         args.jitter_strength = 0.5
     elif args.dataset == "imagenet":
         args.maxpool1 = True
         args.first_conv = True
-        normalization = imagenet_normalization()
 
         args.gaussian_blur = True
         args.jitter_strength = 1.0
@@ -354,22 +269,19 @@ def cli_main():
         input_height=args.input_height,
         gaussian_blur=args.gaussian_blur,
         jitter_strength=args.jitter_strength,
-        normalize=normalization,
     )
 
     dm.val_transforms = SimCLREvalDataTransform(
         input_height=args.input_height,
         gaussian_blur=args.gaussian_blur,
         jitter_strength=args.jitter_strength,
-        normalize=normalization,
     )
 
-    model = SimSiam(**args.__dict__)
+    model = SimSiam(**vars(args))
 
-    # finetune in real-time
+    # Finetune in real-time
     online_evaluator = None
     if args.online_ft:
-        # online eval
         online_evaluator = SSLOnlineEvaluator(
             drop_p=0.0,
             hidden_dim=None,

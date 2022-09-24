@@ -3,10 +3,8 @@ from typing import Optional, Tuple
 from torch import Tensor, nn
 
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
-from pl_bolts.utils.stability import under_review
 
 
-@under_review()
 class MLP(nn.Module):
     def __init__(self, input_dim: int = 2048, hidden_size: int = 4096, output_dim: int = 256) -> None:
         super().__init__()
@@ -24,7 +22,6 @@ class MLP(nn.Module):
         return x
 
 
-@under_review()
 class SiameseArm(nn.Module):
     def __init__(
         self,
