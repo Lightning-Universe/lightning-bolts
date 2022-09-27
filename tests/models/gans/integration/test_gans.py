@@ -76,6 +76,10 @@ def test_sr_modules(tmpdir, datadir, sr_module_cls, scale_factor):
     [
         pytest.param((3, 256, 256), (3, 256, 256), id="img shape (3, 256, 256), (3, 256, 256)"),
         pytest.param((1, 256, 256), (3, 256, 256), id="img shape (1, 256, 256), (3, 256, 256)"),
+        pytest.param((3, 128, 128), (3, 128, 128), id="img shape (3, 128, 128), (3, 128, 128)"),
+        pytest.param((1, 128, 128), (3, 128, 128), id="img shape (1, 128, 128), (3, 128, 128)"),
+        pytest.param((3, 64, 64), (3, 64, 64), id="img shape (3, 64, 64), (3, 64, 64)"),
+        pytest.param((1, 64, 64), (3, 64, 64), id="img shape (1, 64, 64), (3, 64, 64)"),
     ],
 )
 def test_pix2pix(tmpdir, datadir, dataset_cls, in_shape, out_shape):

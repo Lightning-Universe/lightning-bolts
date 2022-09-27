@@ -10,6 +10,10 @@ from pl_bolts.models.gans.pix2pix.components import Generator, PatchGAN
     [
         pytest.param((3, 256, 256), (3, 256, 256), id="multichannel"),
         pytest.param((1, 256, 256), (3, 256, 256), id="singlechannel"),
+        pytest.param((3, 128, 128), (3, 128, 128), id="img shape (3, 128, 128), (3, 128, 128)"),
+        pytest.param((1, 128, 128), (3, 128, 128), id="img shape (1, 128, 128), (3, 128, 128)"),
+        pytest.param((3, 64, 64), (3, 64, 64), id="img shape (3, 64, 64), (3, 64, 64)"),
+        pytest.param((1, 64, 64), (3, 64, 64), id="img shape (1, 64, 64), (3, 64, 64)"),
     ],
 )
 def test_generator(catch_warnings, in_shape, out_shape):
@@ -29,6 +33,10 @@ def test_generator(catch_warnings, in_shape, out_shape):
     [
         pytest.param((3, 256, 256), (3, 256, 256), id="discriminator-multichannel"),
         pytest.param((1, 256, 256), (3, 256, 256), id="discriminator-singlechannel"),
+        pytest.param((3, 128, 128), (3, 128, 128), id="img shape (3, 128, 128), (3, 128, 128)"),
+        pytest.param((1, 128, 128), (3, 128, 128), id="img shape (1, 128, 128), (3, 128, 128)"),
+        pytest.param((3, 64, 64), (3, 64, 64), id="img shape (3, 64, 64), (3, 64, 64)"),
+        pytest.param((1, 64, 64), (3, 64, 64), id="img shape (1, 64, 64), (3, 64, 64)"),
     ],
 )
 def test_discriminator(catch_warnings, in_shape, out_shape):
