@@ -76,8 +76,6 @@ def test_cli_run_ssl_simclr(cli_args):
         cli_main()
 
 
-# todo: seems to take too long
-# @pytest.mark.skip(reason="FIXME: seems to take too long")
 @pytest.mark.parametrize(
     "cli_args",
     [
