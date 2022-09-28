@@ -150,10 +150,16 @@ class BYOL(LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        args = parser.parse_args([])
+
+        if "max_epochs" in args:
+            parser.set_defaults(max_epochs=1000)
+        else:
+            parser.add_argument("--max_epochs", type=int, default=1000)
+
         parser.add_argument("--learning_rate", type=float, default=0.2)
         parser.add_argument("--weight_decay", type=float, default=1.5e-6)
         parser.add_argument("--warmup_epochs", type=int, default=10)
-        parser.add_argument("--max_epochs", type=int, default=1000)
         parser.add_argument("--meta_dir", default=".", type=str, help="path to meta.bin for imagenet")
 
         return parser
