@@ -9,7 +9,7 @@ from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from torch import Tensor
 
-from pl_bolts.models.self_supervised.simsiam.models import MLP, SiameseArm
+from pl_bolts.models.self_supervised.byol import MLP, SiameseArm
 from pl_bolts.optimizers.lars import LARS
 from pl_bolts.optimizers.lr_scheduler import linear_warmup_decay
 
@@ -74,8 +74,7 @@ class SimSiam(LightningModule):
 
     def forward(self, x: Tensor) -> Tensor:
         """Returns encoded representation of a view."""
-        y, _, _ = self.online_network(x)
-        return y
+        return self.online_network.encode(x)
 
     def training_step(self, batch: Any, batch_idx: int) -> Tensor:
         """Complete training loop."""
