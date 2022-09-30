@@ -76,12 +76,10 @@ def test_cli_run_ssl_simclr(cli_args):
         cli_main()
 
 
-# todo: seems to take too long
-@pytest.mark.skip(reason="FIXME: seems to take too long")
 @pytest.mark.parametrize(
     "cli_args",
     [
-        _DEFAULT_ARGS + " --online_ft" " --gpus 1",
+        _DEFAULT_ARGS + " --gpus 1",
     ],
 )
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
