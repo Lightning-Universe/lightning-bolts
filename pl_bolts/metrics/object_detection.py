@@ -1,4 +1,3 @@
-import torch
 from torch import Tensor
 from torchvision.ops import box_iou, generalized_box_iou
 
