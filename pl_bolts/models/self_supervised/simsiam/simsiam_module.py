@@ -10,8 +10,7 @@ from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from torch import Tensor
 
 from pl_bolts.models.self_supervised.byol import MLP, SiameseArm
-from pl_bolts.optimizers.lars import LARS
-from pl_bolts.optimizers.lr_scheduler import linear_warmup_decay
+from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
 class SimSiam(LightningModule):
@@ -20,6 +19,18 @@ class SimSiam(LightningModule):
     Paper authors: Xinlei Chen, Kaiming He.
 
     Args:
+        learning_rate (float, optional): optimizer leaning rate. Defaults to 0.05.
+        weight_decay (float, optional): optimizer weight decay. Defaults to 1e-4.
+        momentum (float, optional): optimizer momentum. Defaults to 0.9.
+        warmup_epochs (int, optional): number of epochs for scheduler warmup. Defaults to 10.
+        max_epochs (int, optional): maximum number of epochs for scheduler. Defaults to 100.
+        base_encoder (Union[str, nn.Module], optional): base encoder architecture. Defaults to "resnet50".
+        encoder_out_dim (int, optional): base encoder output dimension. Defaults to 2048.
+        projector_hidden_dim (int, optional): projector MLP hidden dimension. Defaults to 2048.
+        projector_out_dim (int, optional): project MLP output dimension. Defaults to 2048.
+        predictor_hidden_dim (int, optional): predictor MLP hidden dimension. Defaults to 512.
+        exclude_bn_bias (bool, optional): option to exclude batchnorm and bias terms from weight decay.
+            Defaults to False.
 
     Model implemented by:
         - `Zvi Lapp <https://github.com/zlapp>`_
@@ -53,8 +64,9 @@ class SimSiam(LightningModule):
 
     def __init__(
         self,
-        base_learning_rate: float = 0.05,
+        learning_rate: float = 0.05,
         weight_decay: float = 1e-4,
+        momentum: float = 0.9,
         warmup_epochs: int = 10,
         max_epochs: int = 100,
         base_encoder: Union[str, nn.Module] = "resnet50",
@@ -62,6 +74,7 @@ class SimSiam(LightningModule):
         projector_hidden_dim: int = 2048,
         projector_out_dim: int = 2048,
         predictor_hidden_dim: int = 512,
+        exclude_bn_bias: bool = False,
         **kwargs,
     ) -> None:
 
@@ -86,7 +99,8 @@ class SimSiam(LightningModule):
 
     def _shared_step(self, batch: Any, batch_idx: int, step: str) -> Tensor:
         """Shared evaluation step for training and validation loops."""
-        (img1, img2), _ = batch
+        imgs, _ = batch
+        img1, img2 = imgs[:2]
 
         # Calculate similarity loss in each direction
         loss_12 = self.calculate_loss(img1, img2)
@@ -117,17 +131,35 @@ class SimSiam(LightningModule):
         with torch.no_grad():
             _, z2 = self.target_network(v_target)
         loss = -0.5 * F.cosine_similarity(h1, z2).mean()
-
         return loss
 
-    def exclude_from_wt_decay(self, named_params, weight_decay, skip_list=("bias", "bn")):
+    def configure_optimizers(self):
+        """Configure optimizer and learning rate scheduler."""
+        if self.exclude_bn_bias:
+            params = self.exclude_from_weight_decay(self.named_parameters(), weight_decay=self.hparams.weight_decay)
+        else:
+            params = self.parameters()
+
+        optimizer = torch.optim.SGD(
+            params,
+            lr=self.hparams.learning_rate,
+            momentum=self.hparams.momentum,
+            weight_decay=self.hparams.weight_decay,
+        )
+        scheduler = LinearWarmupCosineAnnealingLR(
+            optimizer, warmup_epochs=self.hparams.warmup_epochs, max_epochs=self.hparams.max_epochs
+        )
+
+        return [optimizer], [scheduler]
+
+    def exclude_from_weight_decay(self, named_params, weight_decay, skip_list=("bias", "bn")):
         params = []
         excluded_params = []
 
         for name, param in named_params:
             if not param.requires_grad:
                 continue
-            elif any(layer_name in name for layer_name in skip_list):
+            elif param.ndim == 1 or name in skip_list:
                 excluded_params.append(param)
             else:
                 params.append(param)
@@ -137,53 +169,20 @@ class SimSiam(LightningModule):
             {"params": excluded_params, "weight_decay": 0.0},
         ]
 
-    def configure_optimizers(self):
-        """Configure optimizer and learning rate scheduler."""
-        if self.exclude_bn_bias:
-            params = self.exclude_from_wt_decay(self.named_parameters(), weight_decay=self.hparams.weight_decay)
-        else:
-            params = self.parameters()
-
-        if self.optim == "sgd":
-            optimizer = torch.optim.SGD(
-                params, lr=self.hparams.learning_rate, momentum=0.9, weight_decay=self.hparams.weight_decay
-            )
-        elif self.optim == "lars":
-            optimizer = LARS(
-                params,
-                lr=self.hparams.learning_rate,
-                momentum=0.9,
-                weight_decay=self.hparams.weight_decay,
-                trust_coefficient=0.001,
-            )
-        elif self.optim == "adam":
-            optimizer = torch.optim.Adam(params, lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)
-        else:
-            raise ValueError(f"Optimizer {self.optim} is not supported.")
-
-        warmup_steps = self.train_iters_per_epoch * self.hparams.warmup_epochs
-        total_steps = self.train_iters_per_epoch * self.hparams.max_epochs
-
-        scheduler = {
-            "scheduler": torch.optim.lr_scheduler.LambdaLR(
-                optimizer,
-                linear_warmup_decay(warmup_steps, total_steps, cosine=True),
-            ),
-            "interval": "step",
-            "frequency": 1,
-        }
-
-        return [optimizer], [scheduler]
-
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        args = parser.parse_args([])
+
+        if "max_epochs" in args:
+            parser.set_defaults(max_epochs=1000)
+        else:
+            parser.add_argument("--max_epochs", type=int, default=1000)
 
         parser.add_argument("--base_encoder", default="resnet50", type=str, help="encoder backbone")
         parser.add_argument("--base_learning_rate", default=0.05, type=float, help="base learning rate")
         parser.add_argument("--weight_decay", default=1e-6, type=float, help="weight decay")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
-        parser.add_argument("--max_epochs", default=100, type=int, help="number of max epochs")
 
         return parser
 
@@ -200,6 +199,7 @@ def cli_main():
     parser = Trainer.add_argparse_args(parser)
     parser = SimSiam.add_model_specific_args(parser)
     parser = CIFAR10DataModule.add_dataset_specific_args(parser)
+    parser.add_argument("--dataset", type=str, default="cifar10", choices=["cifar10", "imagenet2012", "stl10"])
 
     args = parser.parse_args()
 
