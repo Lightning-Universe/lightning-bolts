@@ -385,7 +385,6 @@ class SwAV(LightningModule):
         return parser
 
 
-@under_review()
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
