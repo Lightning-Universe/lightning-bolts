@@ -9,7 +9,6 @@ from pl_bolts.models.self_supervised import SSLEvaluator
 from pl_bolts.utils.stability import under_review
 
 
-@under_review()
 class SSLFineTuner(LightningModule):
     """Finetunes a self-supervised learning backbone using the standard evaluation protocol of a singler layer MLP
     with 1024 units.
