@@ -118,7 +118,26 @@ class CIFAR10(LightDataset):
     def _extract_archive_save_torch(self, download_path):
         # extract achieve
         with tarfile.open(os.path.join(download_path, self.FILE_NAME), "r:gz") as tar:
-            tar.extractall(path=download_path)
+            def is_within_directory(directory, target):
+                
+                abs_directory = os.path.abspath(directory)
+                abs_target = os.path.abspath(target)
+            
+                prefix = os.path.commonprefix([abs_directory, abs_target])
+                
+                return prefix == abs_directory
+            
+            def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+            
+                for member in tar.getmembers():
+                    member_path = os.path.join(path, member.name)
+                    if not is_within_directory(path, member_path):
+                        raise Exception("Attempted Path Traversal in Tar File")
+            
+                tar.extractall(path, members, numeric_owner) 
+                
+            
+            safe_extract(tar, path=download_path)
         # this is internal path in the archive
         path_content = os.path.join(download_path, "cifar-10-batches-py")
 
