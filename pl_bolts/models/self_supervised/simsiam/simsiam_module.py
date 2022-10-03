@@ -1,15 +1,14 @@
 from argparse import ArgumentParser
 from copy import deepcopy
-from typing import Any, Union
+from typing import Any, Dict, List, Union
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from pytorch_lightning import LightningModule, Trainer, seed_everything
-from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from torch import Tensor
 
-from pl_bolts.models.self_supervised.byol import MLP, SiameseArm
+from pl_bolts.models.self_supervised.byol.models import MLP, SiameseArm
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
@@ -152,7 +151,8 @@ class SimSiam(LightningModule):
 
         return [optimizer], [scheduler]
 
-    def exclude_from_weight_decay(self, named_params, weight_decay, skip_list=("bias", "bn")):
+    def exclude_from_weight_decay(self, named_params, weight_decay, skip_list=("bias", "bn")) -> List[Dict]:
+        """Exclude parameters from weight decay."""
         params = []
         excluded_params = []
 
@@ -276,29 +276,19 @@ def cli_main():
         jitter_strength=args.jitter_strength,
     )
 
+    # Initialize SimSiam module
     model = SimSiam(**vars(args))
 
     # Finetune in real-time
-    online_evaluator = None
-    if args.online_ft:
-        online_evaluator = SSLOnlineEvaluator(
-            drop_p=0.0,
-            hidden_dim=None,
-            z_dim=args.hidden_mlp,
-            num_classes=dm.num_classes,
-            dataset=args.dataset,
-        )
-
-    lr_monitor = LearningRateMonitor(logging_interval="step")
-    model_checkpoint = ModelCheckpoint(save_last=True, save_top_k=1, monitor="val_loss")
-    callbacks = [model_checkpoint, online_evaluator] if args.online_ft else [model_checkpoint]
-    callbacks.append(lr_monitor)
-
-    trainer = Trainer.from_argparse_args(
-        args,
-        sync_batchnorm=True if args.gpus > 1 else False,
-        callbacks=callbacks,
+    online_eval = SSLOnlineEvaluator(
+        drop_p=0.0,
+        hidden_dim=None,
+        z_dim=args.hidden_mlp,
+        num_classes=dm.num_classes,
+        dataset=args.dataset,
     )
+
+    trainer = Trainer.from_argparse_args(args, callbacks=[online_eval])
 
     trainer.fit(model, datamodule=dm)
 
