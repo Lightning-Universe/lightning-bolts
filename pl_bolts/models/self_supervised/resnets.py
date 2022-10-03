@@ -287,8 +287,8 @@ def _resnet(arch, block, layers, pretrained, progress, **kwargs):
 
 @under_review()
 def resnet18(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""ResNet-18 model from
-    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+    r"""ResNet-18 model from `"Deep Residual Learning for Image Recognition"
+    <https://arxiv.org/pdf/1512.03385.pdf>`_
 
     Args:
         pretrained: If True, returns a model pre-trained on ImageNet
@@ -299,8 +299,8 @@ def resnet18(pretrained: bool = False, progress: bool = True, **kwargs):
 
 @under_review()
 def resnet34(pretrained=False, progress=True, **kwargs):
-    r"""ResNet-34 model from
-    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+    r"""ResNet-34 model from `"Deep Residual Learning for Image Recognition"
+    <https://arxiv.org/pdf/1512.03385.pdf>`_
 
     Args:
         pretrained: If True, returns a model pre-trained on ImageNet
@@ -311,8 +311,8 @@ def resnet34(pretrained=False, progress=True, **kwargs):
 
 @under_review()
 def resnet50(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""ResNet-50 model from
-    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+    r"""ResNet-50 model from `"Deep Residual Learning for Image Recognition"
+    <https://arxiv.org/pdf/1512.03385.pdf>`_
 
     Args:
         pretrained: If True, returns a model pre-trained on ImageNet
@@ -323,8 +323,8 @@ def resnet50(pretrained: bool = False, progress: bool = True, **kwargs):
 
 @under_review()
 def resnet101(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""ResNet-101 model from
-    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+    r"""ResNet-101 model from `"Deep Residual Learning for Image Recognition"
+    <https://arxiv.org/pdf/1512.03385.pdf>`_
 
     Args:
         pretrained: If True, returns a model pre-trained on ImageNet
@@ -335,8 +335,8 @@ def resnet101(pretrained: bool = False, progress: bool = True, **kwargs):
 
 @under_review()
 def resnet152(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""ResNet-152 model from
-    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+    r"""ResNet-152 model from `"Deep Residual Learning for Image Recognition"
+    <https://arxiv.org/pdf/1512.03385.pdf>`_
 
     Args:
         pretrained: If True, returns a model pre-trained on ImageNet
@@ -347,8 +347,8 @@ def resnet152(pretrained: bool = False, progress: bool = True, **kwargs):
 
 @under_review()
 def resnext50_32x4d(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""ResNeXt-50 32x4d model from
-    `"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_
+    r"""ResNeXt-50 32x4d model from `"Aggregated Residual Transformation for Deep Neural Networks"
+    <https://arxiv.org/pdf/1611.05431.pdf>`_
 
     Args:
         pretrained: If True, returns a model pre-trained on ImageNet
@@ -361,8 +361,8 @@ def resnext50_32x4d(pretrained: bool = False, progress: bool = True, **kwargs):
 
 @under_review()
 def resnext101_32x8d(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""ResNeXt-101 32x8d model from
-    `"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_
+    r"""ResNeXt-101 32x8d model from `"Aggregated Residual Transformation for Deep Neural Networks"
+    <https://arxiv.org/pdf/1611.05431.pdf>`_
 
     Args:
         pretrained: If True, returns a model pre-trained on ImageNet
@@ -375,11 +375,9 @@ def resnext101_32x8d(pretrained: bool = False, progress: bool = True, **kwargs):
 
 @under_review()
 def wide_resnet50_2(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""Wide ResNet-50-2 model from
-    `"Wide Residual Networks" <https://arxiv.org/pdf/1605.07146.pdf>`_
-    The model is the same as ResNet except for the bottleneck number of channels
-    which is twice larger in every block. The number of channels in outer 1x1
-    convolutions is the same, e.g. last block in ResNet-50 has 2048-512-2048
+    r"""Wide ResNet-50-2 model from `"Wide Residual Networks" <https://arxiv.org/pdf/1605.07146.pdf>`_ The model is
+    the same as ResNet except for the bottleneck number of channels which is twice larger in every block. The
+    number of channels in outer 1x1 convolutions is the same, e.g. last block in ResNet-50 has 2048-512-2048
     channels, and in Wide ResNet-50-2 has 2048-1024-2048.
 
     Args:
@@ -392,11 +390,9 @@ def wide_resnet50_2(pretrained: bool = False, progress: bool = True, **kwargs):
 
 @under_review()
 def wide_resnet101_2(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""Wide ResNet-101-2 model from
-    `"Wide Residual Networks" <https://arxiv.org/pdf/1605.07146.pdf>`_
-    The model is the same as ResNet except for the bottleneck number of channels
-    which is twice larger in every block. The number of channels in outer 1x1
-    convolutions is the same, e.g. last block in ResNet-50 has 2048-512-2048
+    r"""Wide ResNet-101-2 model from `"Wide Residual Networks" <https://arxiv.org/pdf/1605.07146.pdf>`_ The model is
+    the same as ResNet except for the bottleneck number of channels which is twice larger in every block. The
+    number of channels in outer 1x1 convolutions is the same, e.g. last block in ResNet-50 has 2048-512-2048
     channels, and in Wide ResNet-50-2 has 2048-1024-2048.
 
     Args:
