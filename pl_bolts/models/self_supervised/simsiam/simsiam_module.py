@@ -175,13 +175,14 @@ class SimSiam(LightningModule):
         args = parser.parse_args([])
 
         if "max_epochs" in args:
-            parser.set_defaults(max_epochs=1000)
+            parser.set_defaults(max_epochs=100)
         else:
-            parser.add_argument("--max_epochs", type=int, default=1000)
+            parser.add_argument("--max_epochs", type=int, default=100)
 
+        parser.add_argument("--learning_rate", default=0.05, type=float, help="base learning rate")
+        parser.add_argument("--weight_decay", default=1e-4, type=float, help="weight decay")
+        parser.add_argument("--momentum", default=0.9, type=float, help="momentum")
         parser.add_argument("--base_encoder", default="resnet50", type=str, help="encoder backbone")
-        parser.add_argument("--base_learning_rate", default=0.05, type=float, help="base learning rate")
-        parser.add_argument("--weight_decay", default=1e-6, type=float, help="weight decay")
         parser.add_argument("--warmup_epochs", default=10, type=int, help="number of warmup epochs")
 
         return parser
