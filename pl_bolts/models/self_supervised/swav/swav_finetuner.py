@@ -10,7 +10,6 @@ from pl_bolts.transforms.dataset_normalizations import imagenet_normalization, s
 from pl_bolts.utils.stability import under_review
 
 
-@under_review()
 def cli_main():  # pragma: no cover
     from pl_bolts.datamodules import ImagenetDataModule, STL10DataModule
 
