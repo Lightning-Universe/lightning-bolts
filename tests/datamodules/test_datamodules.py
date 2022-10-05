@@ -20,7 +20,6 @@ from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 
 
 def test_dev_datasets(datadir):
-
     ds = CIFAR10(data_dir=datadir)
     for _ in ds:
         pass
@@ -48,7 +47,6 @@ def _create_synth_Cityscapes_dataset(path_dir):
 
 
 def test_cityscapes_datamodule(datadir):
-
     _create_synth_Cityscapes_dataset(datadir)
 
     batch_size = 1

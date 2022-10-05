@@ -17,7 +17,6 @@ from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 
 @pytest.mark.parametrize("batch_size,num_samples", [(16, 100), (1, 0)])
 def test_dummy_ds(catch_warnings, batch_size, num_samples):
-
     if num_samples > 0:
 
         ds = DummyDataset((1, 28, 28), (1,), num_samples=num_samples)
@@ -41,7 +40,6 @@ def test_dummy_ds(catch_warnings, batch_size, num_samples):
 
 @pytest.mark.parametrize("batch_size,size,num_samples", [(16, 32, 100), (1, 0, 0)])
 def test_rand_dict_ds(catch_warnings, batch_size, size, num_samples):
-
     if num_samples > 0 or size > 0:
         ds = RandomDictDataset(size, num_samples=num_samples)
         dl = DataLoader(ds, batch_size=batch_size)
@@ -83,7 +81,6 @@ def test_rand_ds(catch_warnings, batch_size, size, num_samples):
 
 @pytest.mark.parametrize("batch_size,size,num_samples", [(16, 32, 100), (1, 0, 0)])
 def test_rand_str_dict_ds(catch_warnings, batch_size, size, num_samples):
-
     if num_samples > 0 and size > 0:
         ds = RandomDictStringDataset(size=size, num_samples=100)
         dl = DataLoader(ds, batch_size=batch_size)
