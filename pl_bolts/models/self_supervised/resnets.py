@@ -285,10 +285,12 @@ def _resnet(arch, block, layers, pretrained, progress, **kwargs):
     return model
 
 
+RESNET_PAPER = '`"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_'
+
+
 @under_review()
 def resnet18(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""ResNet-18 model from `"Deep Residual Learning for Image Recognition"
-    <https://arxiv.org/pdf/1512.03385.pdf>`_
+    f"""ResNet-18 model from {RESNET_PAPER}
 
     Args:
         pretrained: If True, returns a model pre-trained on ImageNet
@@ -299,8 +301,7 @@ def resnet18(pretrained: bool = False, progress: bool = True, **kwargs):
 
 @under_review()
 def resnet34(pretrained=False, progress=True, **kwargs):
-    r"""ResNet-34 model from `"Deep Residual Learning for Image Recognition"
-    <https://arxiv.org/pdf/1512.03385.pdf>`_
+    f"""ResNet-34 model from {RESNET_PAPER}
 
     Args:
         pretrained: If True, returns a model pre-trained on ImageNet
@@ -311,8 +312,7 @@ def resnet34(pretrained=False, progress=True, **kwargs):
 
 @under_review()
 def resnet50(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""ResNet-50 model from `"Deep Residual Learning for Image Recognition"
-    <https://arxiv.org/pdf/1512.03385.pdf>`_
+    f"""ResNet-50 model from {RESNET_PAPER}
 
     Args:
         pretrained: If True, returns a model pre-trained on ImageNet
@@ -323,8 +323,7 @@ def resnet50(pretrained: bool = False, progress: bool = True, **kwargs):
 
 @under_review()
 def resnet101(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""ResNet-101 model from `"Deep Residual Learning for Image Recognition"
-    <https://arxiv.org/pdf/1512.03385.pdf>`_
+    f"""ResNet-101 model from {RESNET_PAPER}
 
     Args:
         pretrained: If True, returns a model pre-trained on ImageNet
@@ -335,8 +334,7 @@ def resnet101(pretrained: bool = False, progress: bool = True, **kwargs):
 
 @under_review()
 def resnet152(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""ResNet-152 model from `"Deep Residual Learning for Image Recognition"
-    <https://arxiv.org/pdf/1512.03385.pdf>`_
+    f"""ResNet-34 model from {RESNET_PAPER}
 
     Args:
         pretrained: If True, returns a model pre-trained on ImageNet
@@ -345,10 +343,14 @@ def resnet152(pretrained: bool = False, progress: bool = True, **kwargs):
     return _resnet("resnet152", Bottleneck, [3, 8, 36, 3], pretrained, progress, **kwargs)
 
 
+AGGREGATED_RESNET_PAPER = (
+    '`"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_'
+)
+
+
 @under_review()
 def resnext50_32x4d(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""ResNeXt-50 32x4d model from `"Aggregated Residual Transformation for Deep Neural Networks"
-    <https://arxiv.org/pdf/1611.05431.pdf>`_
+    f"""ResNeXt-50 32x4d model from {AGGREGATED_RESNET_PAPER}
 
     Args:
         pretrained: If True, returns a model pre-trained on ImageNet
@@ -361,8 +363,7 @@ def resnext50_32x4d(pretrained: bool = False, progress: bool = True, **kwargs):
 
 @under_review()
 def resnext101_32x8d(pretrained: bool = False, progress: bool = True, **kwargs):
-    r"""ResNeXt-101 32x8d model from `"Aggregated Residual Transformation for Deep Neural Networks"
-    <https://arxiv.org/pdf/1611.05431.pdf>`_
+    f"""ResNeXt-101 32x8d model from {AGGREGATED_RESNET_PAPER}
 
     Args:
         pretrained: If True, returns a model pre-trained on ImageNet
