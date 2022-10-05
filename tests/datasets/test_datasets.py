@@ -184,7 +184,7 @@ def test_kitti_dataset(datadir, catch_warnings):
     training_mask_dir = os.path.join(kitti_dir, "training/semantic")
 
     if not os.path.exists(kitti_dir):
-        os.mkdir(kitti_dir)
+        os.makedirs(kitti_dir)
     if not os.path.exists(training_image_dir):
         os.makedirs(training_image_dir)
     if not os.path.exists(training_mask_dir):
