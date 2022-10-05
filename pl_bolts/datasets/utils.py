@@ -1,3 +1,9 @@
+import gzip
+import os
+import tarfile
+import zipfile
+from typing import List, Optional
+
 import torch
 from torch.utils.data.dataset import random_split
 
@@ -55,3 +61,63 @@ def to_tensor(arrays: TArrays) -> torch.Tensor:
         Tensor of the integers
     """
     return torch.tensor(arrays)
+
+
+def is_within_directory(directory, target):
+    abs_directory = os.path.abspath(directory)
+    abs_target = os.path.abspath(target)
+
+    prefix = os.path.commonprefix([abs_directory, abs_target])
+
+    return prefix == abs_directory
+
+
+def safe_extract_tarfile(
+    tar: tarfile.TarFile,
+    path: str = ".",
+    members: Optional[List[tarfile.TarInfo]] = None,
+    *,
+    numeric_owner: bool = False,
+):
+    for member in tar.getmembers():
+        member_path = os.path.join(path, member.name)
+        if not is_within_directory(path, member_path):
+            raise RuntimeError(f"Attempted Path Traversal in Tar File {tar.name} with member: {member.name}")
+
+    tar.extractall(path, members, numeric_owner=numeric_owner)
+
+
+def extract_archive(from_path: str, to_path: Optional[str] = None, remove_finished: bool = False):
+    if to_path is None:
+        to_path = os.path.dirname(from_path)
+
+    extracted = False
+    for fn in (_extract_tar, _extract_gzip, _extract_zip):
+        try:
+            fn(from_path, to_path)
+            extracted = True
+            break
+        except (tarfile.TarError, zipfile.BadZipfile, OSError):
+            continue
+
+    if not extracted:
+        raise ValueError(f"Extraction of {from_path} not supported")
+
+    if remove_finished:
+        os.remove(from_path)
+
+
+def _extract_tar(from_path: str, to_path: str):
+    with tarfile.open(from_path, "r:*") as tar:
+        safe_extract_tarfile(tar, path=to_path)
+
+
+def _extract_gzip(from_path: str, to_path: str):
+    to_path = os.path.join(to_path, os.path.splitext(os.path.basename(from_path))[0])
+    with open(to_path, "wb") as out_f, gzip.GzipFile(from_path) as zip_f:
+        out_f.write(zip_f.read())
+
+
+def _extract_zip(from_path: str, to_path: str):
+    with zipfile.ZipFile(from_path, "r") as z:
+        z.extractall(to_path)
