@@ -87,7 +87,7 @@ def safe_extract_tarfile(
     tar.extractall(path, members, numeric_owner=numeric_owner)
 
 
-def extract_archive(from_path: str, to_path: Optional[str] = None, remove_finished: bool = False):
+def extract_archive(from_path: str, to_path: Optional[str] = None, remove_finished: bool = False) -> None:
     if to_path is None:
         to_path = os.path.dirname(from_path)
 
