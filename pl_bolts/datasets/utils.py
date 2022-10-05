@@ -63,7 +63,7 @@ def to_tensor(arrays: TArrays) -> torch.Tensor:
     return torch.tensor(arrays)
 
 
-def is_within_directory(directory, target):
+def is_within_directory(directory: str, target: str) -> bool:
     abs_directory = os.path.abspath(directory)
     abs_target = os.path.abspath(target)
 
@@ -107,17 +107,17 @@ def extract_archive(from_path: str, to_path: Optional[str] = None, remove_finish
         os.remove(from_path)
 
 
-def _extract_tar(from_path: str, to_path: str):
+def _extract_tar(from_path: str, to_path: str) -> None:
     with tarfile.open(from_path, "r:*") as tar:
         safe_extract_tarfile(tar, path=to_path)
 
 
-def _extract_gzip(from_path: str, to_path: str):
+def _extract_gzip(from_path: str, to_path: str) -> None:
     to_path = os.path.join(to_path, os.path.splitext(os.path.basename(from_path))[0])
     with open(to_path, "wb") as out_f, gzip.GzipFile(from_path) as zip_f:
         out_f.write(zip_f.read())
 
 
-def _extract_zip(from_path: str, to_path: str):
+def _extract_zip(from_path: str, to_path: str) -> None:
     with zipfile.ZipFile(from_path, "r") as z:
         z.extractall(to_path)
