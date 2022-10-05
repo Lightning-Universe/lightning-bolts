@@ -1,3 +1,6 @@
+import os
+
+import numpy as np
 import pytest
 import torch
 from torch.utils.data import DataLoader, Dataset
@@ -7,12 +10,20 @@ from pl_bolts.datasets import (
     BinaryEMNIST,
     BinaryMNIST,
     DummyDataset,
+    KittiDataset,
     RandomDataset,
     RandomDictDataset,
     RandomDictStringDataset,
 )
 from pl_bolts.datasets.dummy_dataset import DummyDetectionDataset
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
+from pl_bolts.utils import _PIL_AVAILABLE
+from pl_bolts.utils.warnings import warn_missing_pkg
+
+if _PIL_AVAILABLE:
+    from PIL import Image
+else:  # pragma: no cover
+    warn_missing_pkg("PIL", pypi_name="Pillow")
 
 
 @pytest.mark.parametrize("batch_size,num_samples", [(16, 100), (1, 0)])
@@ -161,3 +172,36 @@ def test_binary_emnist_dataset(datadir, split):
     assert torch.allclose(img.min(), torch.tensor(0.0))
     assert torch.allclose(img.max(), torch.tensor(1.0))
     assert torch.equal(torch.unique(img), torch.tensor([0.0, 1.0]))
+
+
+def test_kitti_dataset(datadir, catch_warnings):
+    """Test KittiDataset with random generated image."""
+    kitti_dir = os.path.join(datadir, "data_semantics")
+    training_image_dir = os.path.join(kitti_dir, "training/image_2")
+    training_mask_dir = os.path.join(kitti_dir, "training/semantic")
+
+    if not os.path.exists(kitti_dir):
+        os.makedirs(kitti_dir)
+    if not os.path.exists(training_image_dir):
+        os.makedirs(training_image_dir)
+    if not os.path.exists(training_mask_dir):
+        os.makedirs(training_mask_dir)
+
+    img_rand = np.random.rand(377, 1243, 3) * 255
+    img_rand = Image.fromarray(img_rand.astype("uint8")).convert("RGB")
+    img_rand.save(os.path.join(training_image_dir, "000000_10.png"))
+
+    mask_rand = np.random.rand(377, 1243) * 33
+    mask_rand = Image.fromarray(mask_rand.astype("uint8")).convert("L")
+    mask_rand.save(os.path.join(training_mask_dir, "000000_10.png"))
+
+    dl = DataLoader(KittiDataset(data_dir=kitti_dir, transform=transform_lib.ToTensor()))
+    img, target = next(iter(dl))
+    target_idx = list(range(0, 19)) + [250]
+
+    assert img.size() == torch.Size([1, 3, 376, 1242])
+    assert target.size() == torch.Size([1, 376, 1242])
+
+    assert torch.allclose(img.min(), torch.tensor(0.0), atol=0.01)
+    assert torch.allclose(img.max(), torch.tensor(1.0), atol=0.01)
+    assert torch.equal(torch.unique(target), torch.tensor(target_idx).to(dtype=torch.uint8))
