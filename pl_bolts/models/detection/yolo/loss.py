@@ -182,7 +182,7 @@ class LossFunction:
         self,
         overlap_func: Union[str, Callable] = "ciou",
         predict_overlap: Optional[float] = None,
-        overlap_multiplier: float = 1.0,
+        overlap_multiplier: float = 5.0,
         confidence_multiplier: float = 1.0,
         class_multiplier: float = 1.0,
     ):
@@ -200,7 +200,10 @@ class LossFunction:
             overlap_loss_func = complete_box_iou_loss
 
         if not callable(overlap_func):
-            raise ValueError("Unsupported overlap function. Try upgrading Torcvision or using another IoU algorithm.")
+            raise ValueError(
+                f"Unsupported overlap function '{overlap_func}'. Try upgrading Torcvision or using another IoU "
+                "algorithm."
+            )
         self._pairwise_overlap = overlap_func
 
         if callable(overlap_loss_func):

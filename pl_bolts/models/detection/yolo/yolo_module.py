@@ -4,13 +4,14 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 import torch
 import torch.nn as nn
 from pytorch_lightning import LightningModule
-from pytorch_lightning.utilities.cli import LightningCLI
+from pytorch_lightning.cli import LightningCLI
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
 from torch import Tensor, optim
 
 from pl_bolts.datamodules import VOCDetectionDataModule
 from pl_bolts.datamodules.vocdetection_datamodule import Compose
 from pl_bolts.models.detection.yolo.darknet_network import DarknetNetwork
+from pl_bolts.models.detection.yolo.torch_networks import YOLOV4Network
 from pl_bolts.models.detection.yolo.types import TARGET, TARGETS
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.utils import _TORCHMETRICS_DETECTION_AVAILABLE, _TORCHVISION_AVAILABLE
@@ -425,11 +426,15 @@ class YOLO(LightningModule):
         return [process(**t) for t in targets]
 
 
-class DarknetYOLO(YOLO):
-    """A subclass of YOLO that uses a Darknet configuration file and can be configured using LightningCLI.
+class CLIYOLO(YOLO):
+    """A subclass of YOLO that can be easily configured using LightningCLI.
+
+    Either loads a Darknet configuration file, or constructs a YOLOv4 network. This is just an example of how to use the
+    model. Various other network architectures from ``torch_networks.py`` can be used.
 
     CLI command::
 
+        # Darknet network configuration
         wget https://raw.githubusercontent.com/AlexeyAB/darknet/master/cfg/yolov4-tiny-3l.cfg
         python yolo_module.py fit \
             --model.network_config yolov4-tiny-3l.cfg \
@@ -441,8 +446,19 @@ class DarknetYOLO(YOLO):
             --trainer.gradient_clip_val 5.0 \
             --trainer.max_epochs=100
 
+        # YOLOv4
+        python yolo_module.py fit \
+            --data.batch_size 8 \
+            --data.num_workers 4 \
+            --trainer.accelerator gpu \
+            --trainer.devices 8 \
+            --trainer.accumulate_grad_batches 2 \
+            --trainer.gradient_clip_val 5.0 \
+            --trainer.max_epochs=100
+
     Args:
-        network_config: Path to a Darknet configuration file that defines the network architecture.
+        network_config: Path to a Darknet configuration file that defines the network architecture. If not given, a
+            YOLOv4 network will be constructed.
         matching_algorithm: Which algorithm to use for matching targets to anchors. "simota" (the SimOTA matching rule
             from YOLOX), "size" (match those prior shapes, whose width and height relative to the target is below given
             ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
@@ -451,9 +467,8 @@ class DarknetYOLO(YOLO):
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
             has IoU with some target greater than this threshold, the predictor will not be taken into account when
             calculating the confidence loss.
-        overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
-            function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
-            "ciou".
+        overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Valid values are
+            "iou", "giou", "diou", and "ciou".
         predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
             confidence is one if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
@@ -464,7 +479,7 @@ class DarknetYOLO(YOLO):
 
     def __init__(
         self,
-        network_config: str,
+        network_config: Optional[str] = None,
         darknet_weights: Optional[str] = None,
         matching_algorithm: Optional[str] = None,
         matching_threshold: Optional[float] = None,
@@ -476,18 +491,43 @@ class DarknetYOLO(YOLO):
         class_loss_multiplier: Optional[float] = None,
         **kwargs: Any,
     ) -> None:
-        network = DarknetNetwork(
-            network_config,
-            darknet_weights,
-            matching_algorithm=matching_algorithm,
-            matching_threshold=matching_threshold,
-            ignore_bg_threshold=ignore_bg_threshold,
-            overlap_func=overlap_func,
-            predict_overlap=predict_overlap,
-            overlap_loss_multiplier=overlap_loss_multiplier,
-            confidence_loss_multiplier=confidence_loss_multiplier,
-            class_loss_multiplier=class_loss_multiplier,
-        )
+        if network_config is not None:
+            network = DarknetNetwork(
+                network_config,
+                darknet_weights,
+                matching_algorithm=matching_algorithm,
+                matching_threshold=matching_threshold,
+                ignore_bg_threshold=ignore_bg_threshold,
+                overlap_func=overlap_func,
+                predict_overlap=predict_overlap,
+                overlap_loss_multiplier=overlap_loss_multiplier,
+                confidence_loss_multiplier=confidence_loss_multiplier,
+                class_loss_multiplier=class_loss_multiplier,
+            )
+        else:
+            # We need to set some defaults, since we don't get the default values from a configuration file.
+            if ignore_bg_threshold is None:
+                ignore_bg_threshold = 0.7
+            if overlap_func is None:
+                overlap_func = "ciou"
+            if overlap_loss_multiplier is None:
+                overlap_loss_multiplier = 5.0
+            if confidence_loss_multiplier is None:
+                confidence_loss_multiplier = 1.0
+            if class_loss_multiplier is None:
+                class_loss_multiplier = 1.0
+
+            network = YOLOV4Network(
+                num_classes=21,  # The number of classes in Pascal VOC dataset.
+                matching_algorithm=matching_algorithm,
+                matching_threshold=matching_threshold,
+                ignore_bg_threshold=ignore_bg_threshold,
+                overlap_func=overlap_func,
+                predict_overlap=predict_overlap,
+                overlap_loss_multiplier=overlap_loss_multiplier,
+                confidence_loss_multiplier=confidence_loss_multiplier,
+                class_loss_multiplier=class_loss_multiplier,
+            )
         super().__init__(**kwargs, network=network)
 
 
@@ -539,4 +579,4 @@ class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
 
 
 if __name__ == "__main__":
-    LightningCLI(DarknetYOLO, ResizedVOCDetectionDataModule, seed_everything_default=42)
+    LightningCLI(CLIYOLO, ResizedVOCDetectionDataModule, seed_everything_default=42)
