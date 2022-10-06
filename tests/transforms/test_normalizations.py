@@ -19,6 +19,8 @@ def test_normalizations(normalization, catch_warnings):
     seed_everything(1234)
     x = torch.rand(3, 32, 32)
     assert normalization()(x).shape == (3, 32, 32)
+    assert x.min() >= 0.0
+    assert x.max() <= 1.0
 
 
 @pytest.mark.parametrize(
@@ -29,3 +31,5 @@ def test_emnist_normalizations(split, catch_warnings):
     """Test normalizations for each EMNIST dataset split."""
     x = torch.rand(1, 28, 28)
     assert emnist_normalization(split)(x).shape == (1, 28, 28)
+    assert x.min() >= 0.0
+    assert x.max() <= 1.0
