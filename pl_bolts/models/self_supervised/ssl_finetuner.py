@@ -6,7 +6,6 @@ from torch.nn import functional as F
 from torchmetrics import Accuracy
 
 from pl_bolts.models.self_supervised import SSLEvaluator
-from pl_bolts.utils.stability import under_review
 
 
 class SSLFineTuner(LightningModule):

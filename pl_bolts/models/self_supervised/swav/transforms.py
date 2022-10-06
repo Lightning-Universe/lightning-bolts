@@ -2,8 +2,7 @@ from typing import Tuple
 
 import numpy as np
 
-from pl_bolts.utils import _OPENCV_AVAILABLE, _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import under_review
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:

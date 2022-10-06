@@ -18,7 +18,6 @@ from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization,
     stl10_normalization,
 )
-from pl_bolts.utils.stability import under_review
 
 
 class SwAV(LightningModule):

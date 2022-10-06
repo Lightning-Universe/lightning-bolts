@@ -2,7 +2,6 @@
 import torch
 from torch import nn
 
-from pl_bolts.utils.stability import under_review
 
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):

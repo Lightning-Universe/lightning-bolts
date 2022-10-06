@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 import numpy as np
 import torch
@@ -51,7 +51,7 @@ class SWAVLoss(nn.Module):
         batch_size: int,
         queue: Optional[torch.Tensor] = None,
         use_queue: bool = False,
-    ):
+    ) -> List[torch.Tensor, torch.Tensor, bool]:
         loss = 0
         for i, crop_id in enumerate(self.crops_for_assign):
             with torch.no_grad():
@@ -123,7 +123,7 @@ class SWAVLoss(nn.Module):
             curr_sum = torch.sum(Q, dim=1)
             dist.all_reduce(curr_sum)
 
-            for it in range(nmb_iters):
+            for _ in range(nmb_iters):
                 u = curr_sum
                 Q *= (r / u).unsqueeze(1)
                 Q *= (c / torch.sum(Q, dim=0)).unsqueeze(0)
