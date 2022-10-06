@@ -136,13 +136,11 @@ class SwAV(LightningModule):
             sinkhorn_iterations=self.sinkhorn_iterations,
             epsilon=self.epsilon,
         )
-
+        self.use_the_queue = None
         # compute iters per epoch
         global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
-
         self.queue = None
-        # self.softmax = nn.Softmax(dim=1)
 
     def setup(self, stage):
         if self.queue_length > 0:
