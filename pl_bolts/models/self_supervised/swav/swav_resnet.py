@@ -3,7 +3,6 @@ import torch
 from torch import nn
 
 
-
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding."""
     return nn.Conv2d(
