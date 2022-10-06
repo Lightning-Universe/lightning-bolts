@@ -4,6 +4,7 @@ from torch import nn
 
 from pl_bolts.utils.stability import under_review
 
+
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding."""
     return nn.Conv2d(
@@ -72,6 +73,7 @@ class BasicBlock(nn.Module):
 
         return out
 
+
 class Bottleneck(nn.Module):
     expansion = 4
     __constants__ = ["downsample"]
@@ -123,6 +125,7 @@ class Bottleneck(nn.Module):
         out = self.relu(out)
 
         return out
+
 
 class ResNet(nn.Module):
     def __init__(

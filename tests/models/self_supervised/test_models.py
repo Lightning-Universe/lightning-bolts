@@ -93,7 +93,7 @@ def test_swav(tmpdir, datadir, catch_warnings):
         message=".+does not have many workers which may be a bottleneck.+",
         category=PossibleUserWarning,
     )
-    batch_size=2
+    batch_size = 2
     datamodule = CIFAR10DataModule(data_dir=datadir, batch_size=batch_size, num_workers=0)
 
     datamodule.train_transforms = SwAVTrainDataTransform(

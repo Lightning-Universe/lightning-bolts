@@ -12,8 +12,6 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-
-
 class SwAVTrainDataTransform:
     def __init__(
         self,
@@ -51,7 +49,7 @@ class SwAVTrainDataTransform:
             kernel_size = int(0.1 * self.size_crops[0])
             if kernel_size % 2 == 0:
                 kernel_size += 1
-            #Resort to torchvision gaussian blur instead of custom implementation
+            # Resort to torchvision gaussian blur instead of custom implementation
             color_transform.append(transforms.RandomApply([transforms.GaussianBlur(kernel_size=kernel_size)], p=0.5))
 
         self.color_transform = transforms.Compose(color_transform)
@@ -169,4 +167,3 @@ class SwAVFinetuneTransform:
 
     def __call__(self, sample):
         return self.transform(sample)
-

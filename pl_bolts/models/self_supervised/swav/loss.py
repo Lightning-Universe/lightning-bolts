@@ -1,12 +1,22 @@
-import torch
-import numpy as np
-import torch.nn as nn
-from torch import distributed as dist
 from typing import Optional
 
+import numpy as np
+import torch
+import torch.nn as nn
+from torch import distributed as dist
+
+
 class SWAVLoss(nn.Module):
-    def __init__(self, temperature: float, crops_for_assign:tuple, nmb_crops: tuple, sinkhorn_iterations : int, epsilon: float,
-                gpus: int, num_nodes : int):
+    def __init__(
+        self,
+        temperature: float,
+        crops_for_assign: tuple,
+        nmb_crops: tuple,
+        sinkhorn_iterations: int,
+        epsilon: float,
+        gpus: int,
+        num_nodes: int,
+    ):
         """Implementation for SWAV loss function.
 
         Args:
@@ -22,19 +32,26 @@ class SWAVLoss(nn.Module):
         super().__init__()
         self.temperature = temperature
         self.crops_for_assign = crops_for_assign
-        self.softmax = nn.Softmax(dim = 1)
+        self.softmax = nn.Softmax(dim=1)
         self.sinkhorn_iterations = sinkhorn_iterations
         self.epsilon = epsilon
         self.nmb_crops = nmb_crops
         self.gpus = gpus
         self.num_nodes = num_nodes
-        if self.gpus * self.num_nodes > 1: 
+        if self.gpus * self.num_nodes > 1:
             self.assignment_fn = self.distributed_sinkhorn
         else:
             self.assignment_fn = self.sinkhorn
-    
-    def forward(self, output: torch.Tensor, embedding: torch.Tensor, prototype_weights: torch.Tensor, batch_size:int, queue:Optional[torch.Tensor]=None, 
-                use_queue: bool = False):
+
+    def forward(
+        self,
+        output: torch.Tensor,
+        embedding: torch.Tensor,
+        prototype_weights: torch.Tensor,
+        batch_size: int,
+        queue: Optional[torch.Tensor] = None,
+        use_queue: bool = False,
+    ):
         loss = 0
         for i, crop_id in enumerate(self.crops_for_assign):
             with torch.no_grad():
@@ -63,7 +80,7 @@ class SWAVLoss(nn.Module):
         return loss, queue, use_queue
 
     def sinkhorn(self, Q, nmb_iters):
-        """Implementation of Sinkhorn clustering"""
+        """Implementation of Sinkhorn clustering."""
         with torch.no_grad():
             sum_Q = torch.sum(Q)
             Q /= sum_Q
@@ -88,7 +105,7 @@ class SWAVLoss(nn.Module):
             return (Q / torch.sum(Q, dim=0, keepdim=True)).t().float()
 
     def distributed_sinkhorn(self, Q, nmb_iters):
-        """Implementation of Distributed Sinkhorn"""
+        """Implementation of Distributed Sinkhorn."""
         with torch.no_grad():
             sum_Q = torch.sum(Q)
             dist.all_reduce(sum_Q)
@@ -113,4 +130,3 @@ class SWAVLoss(nn.Module):
                 curr_sum = torch.sum(Q, dim=1)
                 dist.all_reduce(curr_sum)
             return (Q / torch.sum(Q, dim=0, keepdim=True)).t().float()
-        

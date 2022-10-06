@@ -17,16 +17,16 @@ from pl_bolts.models.self_supervised.swav.transforms import (
 
 @pytest.mark.parametrize(
     "transform_cls",
-    [pytest.param(SwAVTrainDataTransform, id="train-data"), pytest.param(SwAVEvalDataTransform, id="eval-data")]
+    [pytest.param(SwAVTrainDataTransform, id="train-data"), pytest.param(SwAVEvalDataTransform, id="eval-data")],
 )
 def test_swav_train_data_transform(catch_warnings, transform_cls):
     # dummy image
     img = np.random.randint(low=0, high=255, size=(32, 32, 3), dtype=np.uint8)
     img = Image.fromarray(img)
-    crop_sizes = (96,36)
+    crop_sizes = (96, 36)
 
     # size of the generated views
-    transform = transform_cls(size_crops = crop_sizes)
+    transform = transform_cls(size_crops=crop_sizes)
     views = transform(img)
 
     # the transform must output a list or a tuple of images
@@ -41,8 +41,8 @@ def test_swav_train_data_transform(catch_warnings, transform_cls):
 
     # Global Views have equal size
     assert all(v.size(1) == v.size(2) == crop_sizes[0] for v in views[:2])
-    #Check local views have same size
-    assert all(v.size(1) == v.size(2) == crop_sizes[1] for v in views[2: len(views) - 1]) #Ignore online transform
+    # Check local views have same size
+    assert all(v.size(1) == v.size(2) == crop_sizes[1] for v in views[2 : len(views) - 1])  # Ignore online transform
 
 
 def test_swav_finetune_transform(catch_warnings):
@@ -50,9 +50,9 @@ def test_swav_finetune_transform(catch_warnings):
     img = np.random.randint(low=0, high=255, size=(32, 32, 3), dtype=np.uint8)
     img = Image.fromarray(img)
 
-    #size of the generated views
+    # size of the generated views
     input_height = 96
-    transform = SwAVFinetuneTransform(input_height = input_height)
+    transform = SwAVFinetuneTransform(input_height=input_height)
     view = transform(img)
 
     # the view generator is a tensor

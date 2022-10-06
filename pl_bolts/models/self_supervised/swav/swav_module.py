@@ -9,8 +9,8 @@ from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from torch import distributed as dist
 from torch import nn
 
-from pl_bolts.models.self_supervised.swav.swav_resnet import resnet18, resnet50
 from pl_bolts.models.self_supervised.swav.loss import SWAVLoss
+from pl_bolts.models.self_supervised.swav.swav_resnet import resnet18, resnet50
 from pl_bolts.optimizers.lars import LARS
 from pl_bolts.optimizers.lr_scheduler import linear_warmup_decay
 from pl_bolts.transforms.dataset_normalizations import (
@@ -19,7 +19,6 @@ from pl_bolts.transforms.dataset_normalizations import (
     stl10_normalization,
 )
 from pl_bolts.utils.stability import under_review
-
 
 
 class SwAV(LightningModule):
@@ -115,8 +114,6 @@ class SwAV(LightningModule):
         self.crops_for_assign = crops_for_assign
         self.nmb_crops = nmb_crops
 
-        
-        
         self.first_conv = first_conv
         self.maxpool1 = maxpool1
 
@@ -133,20 +130,22 @@ class SwAV(LightningModule):
         self.max_epochs = max_epochs
 
         self.model = self.init_model()
-        self.criterion = SWAVLoss(gpus = self.gpus,
-                                num_nodes=self.num_nodes,
-                                temperature=self.temperature,
-                                crops_for_assign=self.crops_for_assign,
-                                nmb_crops=self.nmb_crops,
-                                sinkhorn_iterations=self.sinkhorn_iterations,
-                                epsilon=self.epsilon)
+        self.criterion = SWAVLoss(
+            gpus=self.gpus,
+            num_nodes=self.num_nodes,
+            temperature=self.temperature,
+            crops_for_assign=self.crops_for_assign,
+            nmb_crops=self.nmb_crops,
+            sinkhorn_iterations=self.sinkhorn_iterations,
+            epsilon=self.epsilon,
+        )
 
         # compute iters per epoch
         global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
         self.queue = None
-        #self.softmax = nn.Softmax(dim=1)
+        # self.softmax = nn.Softmax(dim=1)
 
     def setup(self, stage):
         if self.queue_length > 0:
@@ -221,13 +220,15 @@ class SwAV(LightningModule):
         embedding = embedding.detach()
         bs = inputs[0].size(0)
 
-        #SWAV loss computation
-        loss, queue, use_queue = self.criterion(output = output,
-                                        embedding = embedding,
-                                        prototype_weights = self.model.prototypes.weight,
-                                        batch_size = bs,
-                                        queue = self.queue,
-                                        use_queue = self.use_the_queue)
+        # SWAV loss computation
+        loss, queue, use_queue = self.criterion(
+            output=output,
+            embedding=embedding,
+            prototype_weights=self.model.prototypes.weight,
+            batch_size=bs,
+            queue=self.queue,
+            use_queue=self.use_the_queue,
+        )
         self.queue = queue
         self.use_the_queue = use_queue
         return loss
@@ -288,8 +289,6 @@ class SwAV(LightningModule):
         }
 
         return [optimizer], [scheduler]
-
-    
 
     @staticmethod
     def add_model_specific_args(parent_parser):
