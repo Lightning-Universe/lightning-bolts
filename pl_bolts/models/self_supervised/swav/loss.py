@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import numpy as np
 import torch
@@ -51,7 +51,7 @@ class SWAVLoss(nn.Module):
         batch_size: int,
         queue: Optional[torch.Tensor] = None,
         use_queue: bool = False,
-    ) -> List[torch.Tensor, torch.Tensor, bool]:
+    ) -> List[Union[torch.Tensor, torch.Tensor, bool]]:
         loss = 0
         for i, crop_id in enumerate(self.crops_for_assign):
             with torch.no_grad():

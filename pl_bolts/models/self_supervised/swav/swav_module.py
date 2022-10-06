@@ -2,11 +2,9 @@
 import os
 from argparse import ArgumentParser
 
-import numpy as np
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
-from torch import distributed as dist
 from torch import nn
 
 from pl_bolts.models.self_supervised.swav.loss import SWAVLoss

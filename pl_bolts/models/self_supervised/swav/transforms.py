@@ -1,7 +1,5 @@
 from typing import Tuple
 
-import numpy as np
-
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
