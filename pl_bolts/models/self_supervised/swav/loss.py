@@ -19,14 +19,15 @@ class SWAVLoss(nn.Module):
                 to manage the queue and select distributed sinkhorn
             num_nodes:  num_nodes: number of nodes to train on
         """
-        self.temeprature = temperature
+        super().__init__()
+        self.temperature = temperature
         self.crops_for_assign = crops_for_assign
         self.softmax = nn.Softmax(dim = 1)
         self.sinkhorn_iterations = sinkhorn_iterations
         self.epsilon = epsilon
         self.nmb_crops = nmb_crops
         self.gpus = gpus
-        self.num_node = num_nodes
+        self.num_nodes = num_nodes
         if self.gpus * self.num_nodes > 1: 
             self.assignment_fn = self.distributed_sinkhorn
         else:

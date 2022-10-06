@@ -5,7 +5,7 @@ from pl_bolts.models.self_supervised.swav.transforms import (
     SwAVFinetuneTransform,
     SwAVTrainDataTransform,
 )
-from pl_bolts.self_supervised.swav.loss import SWAVLoss
+from pl_bolts.models.self_supervised.swav.loss import SWAVLoss
 
 __all__ = [
     "SwAV",

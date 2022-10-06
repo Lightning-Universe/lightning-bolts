@@ -52,7 +52,7 @@ class SwAVTrainDataTransform:
             if kernel_size % 2 == 0:
                 kernel_size += 1
             #Resort to torchvision gaussian blur instead of custom implementation
-            color_transform.append(transforms.GaussianBlur(kernel_size=kernel_size, p=0.5))
+            color_transform.append(transforms.RandomApply([transforms.GaussianBlur(kernel_size=kernel_size)], p=0.5))
 
         self.color_transform = transforms.Compose(color_transform)
 
