@@ -289,7 +289,7 @@ class RouteLayer(nn.Module):
         self.num_chunks = num_chunks
         self.chunk_idx = chunk_idx
 
-    def forward(self, x: Tensor, outputs: List[Tensor]) -> Tensor:
+    def forward(self, outputs: List[Tensor]) -> Tensor:
         chunks = [torch.chunk(outputs[layer], self.num_chunks, dim=1)[self.chunk_idx] for layer in self.source_layers]
         return torch.cat(chunks, dim=1)
 
@@ -305,7 +305,7 @@ class ShortcutLayer(nn.Module):
         super().__init__()
         self.source_layer = source_layer
 
-    def forward(self, x: Tensor, outputs: List[Tensor]) -> Tensor:
+    def forward(self, outputs: List[Tensor]) -> Tensor:
         return outputs[-1] + outputs[self.source_layer]
 
 

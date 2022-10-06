@@ -141,9 +141,9 @@ class YOLO(LightningModule):
         self,
         network: nn.Module,
         optimizer: Type[optim.Optimizer] = optim.SGD,
-        optimizer_params: Dict[str, Any] = {"lr": 0.01, "momentum": 0.9, "weight_decay": 0.0005},
+        optimizer_params: Optional[Dict[str, Any]] = None,
         lr_scheduler: Type[optim.lr_scheduler._LRScheduler] = LinearWarmupCosineAnnealingLR,
-        lr_scheduler_params: Dict[str, Any] = {"warmup_epochs": 5, "max_epochs": 300, "warmup_start_lr": 0.0},
+        lr_scheduler_params: Optional[Dict[str, Any]] = None,
         confidence_threshold: float = 0.2,
         nms_threshold: float = 0.45,
         detections_per_image: int = 300,
@@ -155,9 +155,15 @@ class YOLO(LightningModule):
 
         self.network = network
         self.optimizer_class = optimizer
-        self.optimizer_params = optimizer_params
+        if optimizer_params is not None:
+            self.optimizer_params = optimizer_params
+        else:
+            self.optimizer_params = {"lr": 0.01, "momentum": 0.9, "weight_decay": 0.0005}
         self.lr_scheduler_class = lr_scheduler
-        self.lr_scheduler_params = lr_scheduler_params
+        if lr_scheduler_params is not None:
+            self.lr_scheduler_params = lr_scheduler_params
+        else:
+            self.lr_scheduler_params = {"warmup_epochs": 5, "max_epochs": 300, "warmup_start_lr": 0.0}
         self.confidence_threshold = confidence_threshold
         self.nms_threshold = nms_threshold
         self.detections_per_image = detections_per_image
@@ -351,10 +357,16 @@ class YOLO(LightningModule):
         if not isinstance(image, torch.Tensor):
             image = F.to_tensor(image)
 
+        was_training = self.training
         self.eval()
+
         detections = self(image.unsqueeze(0))
         detections = self.process_detections(detections)
-        return detections[0]
+        detections = detections[0]
+
+        if was_training:
+            self.train()
+        return detections
 
     def process_detections(self, preds: Tensor) -> List[Dict[str, Tensor]]:
         """Splits the detection tensor returned by a forward pass into a list of prediction dictionaries, and
@@ -418,10 +430,16 @@ class DarknetYOLO(YOLO):
 
     CLI command::
 
-        # PascalVOC using LightningCLI
         wget https://raw.githubusercontent.com/AlexeyAB/darknet/master/cfg/yolov4-tiny-3l.cfg
-        python yolo_module.py fit --model.network_config yolov4-tiny-3l.cfg --data.batch_size 8 --trainer.gpus 8 \
-            --trainer.accumulate_grad_batches 2
+        python yolo_module.py fit \
+            --model.network_config yolov4-tiny-3l.cfg \
+            --data.batch_size 8 \
+            --data.num_workers 4 \
+            --trainer.accelerator gpu \
+            --trainer.devices 8 \
+            --trainer.accumulate_grad_batches 2 \
+            --trainer.gradient_clip_val 5.0 \
+            --trainer.max_epochs=100
 
     Args:
         network_config: Path to a Darknet configuration file that defines the network architecture.

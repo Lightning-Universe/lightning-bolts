@@ -99,7 +99,7 @@ class DarknetNetwork(nn.Module):
 
         for layer in self.layers:
             if isinstance(layer, (layers.RouteLayer, layers.ShortcutLayer)):
-                x = layer(x, outputs)
+                x = layer(outputs)
             elif isinstance(layer, layers.DetectionLayer):
                 x = layer(x, image_size, targets)
                 detections.append(x)
