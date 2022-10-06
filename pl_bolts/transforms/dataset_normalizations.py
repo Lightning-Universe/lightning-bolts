@@ -1,4 +1,4 @@
-from typing import Callable, Literal
+from typing import Callable
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -42,7 +42,7 @@ def stl10_normalization() -> Callable:
     return normalize
 
 
-def emnist_normalization(split: Literal["balanced", "byclass", "bymerge", "digits", "letters", "mnist"]) -> Callable:
+def emnist_normalization(split: str) -> Callable:
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError(
             "You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`."
