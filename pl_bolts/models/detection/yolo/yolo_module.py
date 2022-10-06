@@ -94,7 +94,9 @@ class YOLO(LightningModule):
 
     The network architecture can be written in PyTorch, or read from a Darknet configuration file using the
     :class:`~pl_bolts.models.detection.yolo.darknet_network.DarknetNetwork` class. ``DarknetNetwork`` is also able to
-    read weights from a Darknet model file.
+    read weights from a Darknet model file. See the CLI application and the
+    :class:`~pl_bolts.models.detection.yolo.yolo_module.CLIYOLO` class for an example of how to specify a network
+    architecture.
 
     The input from the data loader is expected to be a list of images. Each image is a tensor with shape
     ``[channels, height, width]``. The images from a single batch will be stacked into a single tensor, so the sizes
@@ -430,7 +432,9 @@ class CLIYOLO(YOLO):
     """A subclass of YOLO that can be easily configured using LightningCLI.
 
     Either loads a Darknet configuration file, or constructs a YOLOv4 network. This is just an example of how to use the
-    model. Various other network architectures from ``torch_networks.py`` can be used.
+    model. Various other network architectures from ``torch_networks.py`` can be used. Note that if you change the
+    resolution of the input images, you should also scale the prior shapes (a.k.a. anchors). They are specified in the
+    Darknet configuration file or provided in the network constructor parameters.
 
     CLI command::
 
