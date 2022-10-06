@@ -78,7 +78,6 @@ class LightningArgumentParser(ArgumentParser):
 
 @under_review()
 def gather_lit_args(cls: Any, root_cls: Optional[Any] = None) -> List[LitArg]:
-
     if root_cls is None:
         if issubclass(cls, LightningModule):
             root_cls = LightningModule
