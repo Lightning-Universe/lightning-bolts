@@ -118,9 +118,13 @@ def test_swav(tmpdir, datadir, catch_warnings):
         first_conv=False,
         dataset="cifar10",
     )
-
-    trainer = Trainer(gpus=0, fast_dev_run=True, default_root_dir=tmpdir)
-
+    trainer = Trainer(
+        fast_dev_run=True,
+        default_root_dir=tmpdir,
+        max_epochs=1,
+        accelerator="auto",
+        log_every_n_steps=1,
+    )
     trainer.fit(model, datamodule=datamodule)
 
 
