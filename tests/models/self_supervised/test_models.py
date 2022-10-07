@@ -107,7 +107,7 @@ def test_swav(tmpdir, datadir, catch_warnings):
         arch="resnet18",
         hidden_mlp=512,
         nodes=1,
-        gpus = 1,
+        gpus=1,
         num_samples=datamodule.num_samples,
         batch_size=batch_size,
         nmb_crops=[2, 1],
