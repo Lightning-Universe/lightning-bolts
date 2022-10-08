@@ -51,7 +51,7 @@ class SWAVLoss(nn.Module):
         batch_size: int,
         queue: Optional[torch.Tensor] = None,
         use_queue: bool = False,
-    ) -> Tuple[int, Optional[Tensor], bool]:
+    ) -> Tuple[int, Optional[torch.Tensor], bool]:
         loss = 0
         for i, crop_id in enumerate(self.crops_for_assign):
             with torch.no_grad():
