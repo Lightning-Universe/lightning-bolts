@@ -134,7 +134,7 @@ class SimSiam(LightningModule):
 
     def configure_optimizers(self):
         """Configure optimizer and learning rate scheduler."""
-        if self.exclude_bn_bias:
+        if self.params.exclude_bn_bias:
             params = self.exclude_from_weight_decay(self.named_parameters(), weight_decay=self.hparams.weight_decay)
         else:
             params = self.parameters()
