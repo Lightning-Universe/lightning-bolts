@@ -49,7 +49,7 @@ def test_byol(tmpdir, datadir, catch_warnings):
     dm.train_transforms = SimCLRTrainDataTransform(32)
     dm.val_transforms = SimCLREvalDataTransform(32)
 
-    model = BYOL(data_dir=datadir)
+    model = BYOL()
     trainer = Trainer(
         fast_dev_run=True,
         default_root_dir=tmpdir,

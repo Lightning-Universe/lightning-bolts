@@ -36,7 +36,7 @@ class BYOL(LightningModule):
 
     Example::
 
-        model = BYOL(num_classes=10)
+        model = BYOL()
 
         dm = CIFAR10DataModule(num_workers=0)
         dm.train_transforms = SimCLRTrainDataTransform(32)
@@ -54,7 +54,6 @@ class BYOL(LightningModule):
         python byol_module.py
             --gpus 8
             --dataset imagenet2012
-            --data_dir /path/to/imagenet/
             --meta_dir /path/to/folder/with/meta.bin/
             --batch_size 32
 
