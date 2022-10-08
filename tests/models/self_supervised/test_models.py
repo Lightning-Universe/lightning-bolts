@@ -102,7 +102,7 @@ def test_swav(tmpdir, datadir, catch_warnings):
         arch="resnet18",
         hidden_mlp=512,
         nodes=1,
-        gpus=0,
+        gpus=torch.cuda.device_count(),
         num_samples=datamodule.num_samples,
         batch_size=batch_size,
         nmb_crops=[2, 1],
@@ -113,7 +113,7 @@ def test_swav(tmpdir, datadir, catch_warnings):
         first_conv=False,
         dataset="cifar10",
     )
-    trainer = Trainer(accelerator="cpu", devices="auto", fast_dev_run=True, default_root_dir=tmpdir)
+    trainer = Trainer(accelerator="gpu", devices="auto", fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model, datamodule=datamodule)
 
 
