@@ -88,6 +88,11 @@ def test_simclr(tmpdir, datadir):
 
 def test_swav(tmpdir, datadir, catch_warnings):
     """Test SWAV on CIFAR-10."""
+    warnings.filterwarnings(
+        "ignore",
+        message=".+does not have many workers which may be a bottleneck.+",
+        category=PossibleUserWarning,
+    )
     batch_size = 2
     datamodule = CIFAR10DataModule(data_dir=datadir, batch_size=batch_size, num_workers=0)
 
@@ -119,7 +124,7 @@ def test_swav(tmpdir, datadir, catch_warnings):
         first_conv=False,
         dataset="cifar10",
     )
-    trainer = Trainer(accelerator=accelerator, devices=devices, fast_dev_run=True, default_root_dir=tmpdir)
+    trainer = Trainer(accelerator=accelerator, devices=devices, fast_dev_run=True, default_root_dir=tmpdir, log_every_n_steps=1)
     trainer.fit(model, datamodule=datamodule)
 
 
