@@ -134,7 +134,7 @@ class SimSiam(LightningModule):
 
     def configure_optimizers(self):
         """Configure optimizer and learning rate scheduler."""
-        if self.params.exclude_bn_bias:
+        if self.hparams.exclude_bn_bias:
             params = self.exclude_from_weight_decay(self.named_parameters(), weight_decay=self.hparams.weight_decay)
         else:
             params = self.parameters()
@@ -281,13 +281,7 @@ def cli_main():
     model = SimSiam(**vars(args))
 
     # Finetune in real-time
-    online_eval = SSLOnlineEvaluator(
-        drop_p=0.0,
-        hidden_dim=None,
-        z_dim=args.hidden_mlp,
-        num_classes=dm.num_classes,
-        dataset=args.dataset,
-    )
+    online_eval = SSLOnlineEvaluator(dataset=args.dataset, z_dim=2048, num_classes=dm.num_classes)
 
     trainer = Trainer.from_argparse_args(args, callbacks=[online_eval])
 
