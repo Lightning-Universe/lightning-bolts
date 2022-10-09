@@ -206,79 +206,30 @@ def cli_main():
     args = parser.parse_args()
 
     # Initialize datamodule
-    if args.dataset == "stl10":
-        dm = STL10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
-
+    if args.dataset == "cifar10":
+        dm = CIFAR10DataModule.from_argparse_args(args)
+        dm.train_transforms = SimCLRTrainDataTransform(32)
+        dm.val_transforms = SimCLREvalDataTransform(32)
+        args.num_classes = dm.num_classes
+    elif args.dataset == "stl10":
+        dm = STL10DataModule.from_argparse_args(args)
         dm.train_dataloader = dm.train_dataloader_mixed
         dm.val_dataloader = dm.val_dataloader_mixed
-        args.num_samples = dm.num_unlabeled_samples
 
-        args.maxpool1 = False
-        args.first_conv = True
-        args.input_height = dm.dims[-1]
-
-        args.gaussian_blur = True
-        args.jitter_strength = 1.0
-    elif args.dataset == "cifar10":
-        val_split = 5000
-        if args.num_nodes * args.gpus * args.batch_size > val_split:
-            val_split = args.num_nodes * args.gpus * args.batch_size
-
-        dm = CIFAR10DataModule(
-            data_dir=args.data_dir,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers,
-            val_split=val_split,
-        )
-
-        args.num_samples = dm.num_samples
-
-        args.maxpool1 = False
-        args.first_conv = False
-        args.input_height = dm.dims[-1]
-        args.temperature = 0.5
-
-        args.gaussian_blur = False
-        args.jitter_strength = 0.5
-    elif args.dataset == "imagenet":
-        args.maxpool1 = True
-        args.first_conv = True
-
-        args.gaussian_blur = True
-        args.jitter_strength = 1.0
-
-        args.batch_size = 64
-        args.num_nodes = 8
-        args.gpus = 8  # per-node
-        args.max_epochs = 800
-
-        args.optimizer = "lars"
-        args.lars_wrapper = True
-        args.learning_rate = 4.8
-        args.final_lr = 0.0048
-        args.start_lr = 0.3
-        args.online_ft = True
-
-        dm = ImagenetDataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
-
-        args.num_samples = dm.num_samples
-        args.input_height = dm.dims[-1]
+        (c, h, w) = dm.dims
+        dm.train_transforms = SimCLRTrainDataTransform(h)
+        dm.val_transforms = SimCLREvalDataTransform(h)
+        args.num_classes = dm.num_classes
+    elif args.dataset == "imagenet2012":
+        dm = ImagenetDataModule.from_argparse_args(args, image_size=196)
+        (c, h, w) = dm.dims
+        dm.train_transforms = SimCLRTrainDataTransform(h)
+        dm.val_transforms = SimCLREvalDataTransform(h)
+        args.num_classes = dm.num_classes
     else:
         raise ValueError(
             f"{args.dataset} is not a valid dataset. Dataset must be 'cifar10', 'stl10', or 'imagenet2012'."
         )
-
-    dm.train_transforms = SimCLRTrainDataTransform(
-        input_height=args.input_height,
-        gaussian_blur=args.gaussian_blur,
-        jitter_strength=args.jitter_strength,
-    )
-
-    dm.val_transforms = SimCLREvalDataTransform(
-        input_height=args.input_height,
-        gaussian_blur=args.gaussian_blur,
-        jitter_strength=args.jitter_strength,
-    )
 
     # Initialize SimSiam module
     model = SimSiam(**vars(args))
