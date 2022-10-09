@@ -63,9 +63,9 @@ class SWAVLoss(nn.Module):
                         use_queue = True
                         out = torch.cat((torch.mm(queue[i], prototype_weights.t()), out))
                     # fill the queue
-                    queue[i, batch_size:] = self.queue[i, :-batch_size].clone() # type: ignore
-                    
-                    queue[i, :batch_size] = embedding[crop_id * batch_size : (crop_id + 1) * batch_size]# type: ignore
+                    queue[i, batch_size:] = self.queue[i, :-batch_size].clone()  # type: ignore
+
+                    queue[i, :batch_size] = embedding[crop_id * batch_size : (crop_id + 1) * batch_size]  # type: ignore
 
                 # get assignments
                 q = torch.exp(out / self.epsilon).t()
@@ -76,10 +76,10 @@ class SWAVLoss(nn.Module):
             for v in np.delete(np.arange(np.sum(self.nmb_crops)), crop_id):
                 p = self.softmax(output[batch_size * v : batch_size * (v + 1)] / self.temperature)
                 subloss -= torch.mean(torch.sum(q * torch.log(p), dim=1))
-            loss += subloss / (np.sum(self.nmb_crops) - 1)# type: ignore
-            
-        loss /= len(self.crops_for_assign)# type: ignore
-        
+            loss += subloss / (np.sum(self.nmb_crops) - 1)  # type: ignore
+
+        loss /= len(self.crops_for_assign)  # type: ignore
+
         return loss, queue, use_queue
 
     def sinkhorn(self, Q: torch.Tensor, nmb_iters: int) -> torch.Tensor:
