@@ -151,7 +151,8 @@ class SimSiam(LightningModule):
 
         return [optimizer], [scheduler]
 
-    def exclude_from_weight_decay(self, named_params, weight_decay, skip_list=("bias", "bn")) -> List[Dict]:
+    @staticmethod
+    def exclude_from_weight_decay(named_params, weight_decay, skip_list=("bias", "bn")) -> List[Dict]:
         """Exclude parameters from weight decay."""
         params = []
         excluded_params = []
@@ -263,7 +264,9 @@ def cli_main():
         args.num_samples = dm.num_samples
         args.input_height = dm.dims[-1]
     else:
-        raise NotImplementedError("other datasets have not been implemented till now")
+        raise ValueError(
+            f"{args.dataset} is not a valid dataset. Dataset must be 'cifar10', 'stl10', or 'imagenet2012'."
+        )
 
     dm.train_transforms = SimCLRTrainDataTransform(
         input_height=args.input_height,
