@@ -107,7 +107,7 @@ class SWAVLoss(nn.Module):
 
             return (Q / torch.sum(Q, dim=0, keepdim=True)).t().float()
 
-    def distributed_sinkhorn(self, Q: torch.Tensors, nmb_iters: int) -> torch.Tensor:
+    def distributed_sinkhorn(self, Q: torch.Tensor, nmb_iters: int) -> torch.Tensor:
         """Implementation of Distributed Sinkhorn."""
         with torch.no_grad():
             sum_Q = torch.sum(Q)
