@@ -54,7 +54,6 @@ class SimSiam(LightningModule):
         python simsiam_module.py
             --gpus 8
             --dataset imagenet2012
-            --data_dir /path/to/imagenet/
             --meta_dir /path/to/folder/with/meta.bin/
             --batch_size 32
 
