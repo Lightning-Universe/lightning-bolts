@@ -64,8 +64,7 @@ class SWAVLoss(nn.Module):
                         out = torch.cat((torch.mm(queue[i], prototype_weights.t()), out))
                     # fill the queue
                     queue[i, batch_size:] = self.queue[i, :-batch_size].clone()  # type: ignore
-                    queue[i, :batch_size] = embedding[crop_id * batch_size : (crop_id + 1) * batch_size]  # type: ignore
-
+                    queue[i, :batch_size] = embedding[crop_id * batch_size : (crop_id + 1) * batch_size] 
                 # get assignments
                 q = torch.exp(out / self.epsilon).t()
                 q = self.assignment_fn(q, self.sinkhorn_iterations)[-batch_size:]
