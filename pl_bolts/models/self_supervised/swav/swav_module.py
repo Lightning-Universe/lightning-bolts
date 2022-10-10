@@ -126,6 +126,7 @@ class SwAV(LightningModule):
         self.warmup_epochs = warmup_epochs
         self.max_epochs = max_epochs
 
+        self.model = self.init_model()
         self.criterion = SWAVLoss(
             gpus=self.gpus,
             num_nodes=self.num_nodes,
@@ -139,7 +140,6 @@ class SwAV(LightningModule):
         # compute iters per epoch
         global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
-
         self.queue = None
 
     def setup(self, stage):
@@ -215,7 +215,7 @@ class SwAV(LightningModule):
         embedding = embedding.detach()
         bs = inputs[0].size(0)
 
-        # 3. swav loss computation
+        # SWAV loss computation
         loss, queue, use_queue = self.criterion(
             output=output,
             embedding=embedding,
@@ -226,7 +226,6 @@ class SwAV(LightningModule):
         )
         self.queue = queue
         self.use_the_queue = use_queue
-
         return loss
 
     def training_step(self, batch, batch_idx):
