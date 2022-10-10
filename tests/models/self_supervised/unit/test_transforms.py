@@ -14,6 +14,7 @@ from pl_bolts.models.self_supervised.swav.transforms import (
     SwAVTrainDataTransform,
 )
 
+
 @pytest.mark.parametrize(
     "transform_cls",
     [pytest.param(SwAVTrainDataTransform, id="train-data"), pytest.param(SwAVEvalDataTransform, id="eval-data")],
@@ -59,6 +60,7 @@ def test_swav_finetune_transform(catch_warnings):
 
     # view has expected size
     assert view.size(1) == view.size(2) == input_height
+
 
 @pytest.mark.parametrize(
     "transform_cls",

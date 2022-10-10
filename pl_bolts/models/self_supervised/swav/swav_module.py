@@ -2,11 +2,11 @@
 import os
 from argparse import ArgumentParser
 
-
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from torch import nn
+
 from pl_bolts.models.self_supervised.swav.loss import SWAVLoss
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet18, resnet50
 from pl_bolts.optimizers.lars import LARS

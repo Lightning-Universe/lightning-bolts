@@ -135,7 +135,6 @@ def test_swav(tmpdir, datadir, catch_warnings):
     trainer.fit(model, datamodule=datamodule)
 
 
-
 def test_simsiam(tmpdir, datadir):
     datamodule = CIFAR10DataModule(data_dir=datadir, num_workers=0, batch_size=2)
     datamodule.train_transforms = SimCLRTrainDataTransform(32)
