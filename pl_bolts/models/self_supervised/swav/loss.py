@@ -75,7 +75,7 @@ class SWAVLoss(nn.Module):
             for v in np.delete(np.arange(np.sum(self.nmb_crops)), crop_id):
                 p = self.softmax(output[batch_size * v : batch_size * (v + 1)] / self.temperature)
                 subloss -= torch.mean(torch.sum(q * torch.log(p), dim=1))
-            loss += subloss / (np.sum(self.nmb_crops) - 1)  # type: ignore
+            loss += subloss / (np.sum(self.nmb_crops) - 1)
         loss /= len(self.crops_for_assign)  # type: ignore
         return loss, queue, use_queue
 
