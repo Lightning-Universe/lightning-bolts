@@ -77,7 +77,6 @@ class SWAVLoss(nn.Module):
                 subloss -= torch.mean(torch.sum(q * torch.log(p), dim=1))
             loss += subloss / (np.sum(self.nmb_crops) - 1)  # type: ignore
         loss /= len(self.crops_for_assign)  # type: ignore
-
         return loss, queue, use_queue
 
     def sinkhorn(self, Q: torch.Tensor, nmb_iters: int) -> torch.Tensor:
