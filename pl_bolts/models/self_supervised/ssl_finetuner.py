@@ -7,6 +7,7 @@ from torchmetrics import Accuracy
 
 from pl_bolts.models.self_supervised import SSLEvaluator
 
+
 class SSLFineTuner(LightningModule):
     """Finetunes a self-supervised learning backbone using the standard evaluation protocol of a singler layer MLP
     with 1024 units.
