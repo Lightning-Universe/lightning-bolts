@@ -2,10 +2,7 @@
 import torch
 from torch import nn
 
-from pl_bolts.utils.stability import under_review
 
-
-@under_review()
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding."""
     return nn.Conv2d(
@@ -20,13 +17,12 @@ def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     )
 
 
-@under_review()
+
 def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution."""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
-@under_review()
 class BasicBlock(nn.Module):
     expansion = 1
     __constants__ = ["downsample"]
@@ -77,7 +73,6 @@ class BasicBlock(nn.Module):
         return out
 
 
-@under_review()
 class Bottleneck(nn.Module):
     expansion = 4
     __constants__ = ["downsample"]
@@ -131,7 +126,7 @@ class Bottleneck(nn.Module):
         return out
 
 
-@under_review()
+
 class ResNet(nn.Module):
     def __init__(
         self,
@@ -343,7 +338,6 @@ class ResNet(nn.Module):
         return self.forward_head(output)
 
 
-@under_review()
 class MultiPrototypes(nn.Module):
     def __init__(self, output_dim, nmb_prototypes):
         super().__init__()
@@ -358,26 +352,25 @@ class MultiPrototypes(nn.Module):
         return out
 
 
-@under_review()
+
 def resnet18(**kwargs):
     return ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
 
 
-@under_review()
+
 def resnet50(**kwargs):
     return ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
 
 
-@under_review()
+
 def resnet50w2(**kwargs):
     return ResNet(Bottleneck, [3, 4, 6, 3], widen=2, **kwargs)
 
 
-@under_review()
+
 def resnet50w4(**kwargs):
     return ResNet(Bottleneck, [3, 4, 6, 3], widen=4, **kwargs)
 
 
-@under_review()
 def resnet50w5(**kwargs):
     return ResNet(Bottleneck, [3, 4, 6, 3], widen=5, **kwargs)

@@ -286,56 +286,6 @@ class SwAV(LightningModule):
 
         return [optimizer], [scheduler]
 
-    def sinkhorn(self, Q, nmb_iters):
-        with torch.no_grad():
-            sum_Q = torch.sum(Q)
-            Q /= sum_Q
-
-            K, B = Q.shape
-
-            if self.gpus > 0:
-                u = torch.zeros(K).cuda()
-                r = torch.ones(K).cuda() / K
-                c = torch.ones(B).cuda() / B
-            else:
-                u = torch.zeros(K)
-                r = torch.ones(K) / K
-                c = torch.ones(B) / B
-
-            for _ in range(nmb_iters):
-                u = torch.sum(Q, dim=1)
-
-                Q *= (r / u).unsqueeze(1)
-                Q *= (c / torch.sum(Q, dim=0)).unsqueeze(0)
-
-            return (Q / torch.sum(Q, dim=0, keepdim=True)).t().float()
-
-    def distributed_sinkhorn(self, Q, nmb_iters):
-        with torch.no_grad():
-            sum_Q = torch.sum(Q)
-            dist.all_reduce(sum_Q)
-            Q /= sum_Q
-
-            if self.gpus > 0:
-                u = torch.zeros(Q.shape[0]).cuda(non_blocking=True)
-                r = torch.ones(Q.shape[0]).cuda(non_blocking=True) / Q.shape[0]
-                c = torch.ones(Q.shape[1]).cuda(non_blocking=True) / (self.gpus * Q.shape[1])
-            else:
-                u = torch.zeros(Q.shape[0])
-                r = torch.ones(Q.shape[0]) / Q.shape[0]
-                c = torch.ones(Q.shape[1]) / (self.gpus * Q.shape[1])
-
-            curr_sum = torch.sum(Q, dim=1)
-            dist.all_reduce(curr_sum)
-
-            for it in range(nmb_iters):
-                u = curr_sum
-                Q *= (r / u).unsqueeze(1)
-                Q *= (c / torch.sum(Q, dim=0)).unsqueeze(0)
-                curr_sum = torch.sum(Q, dim=1)
-                dist.all_reduce(curr_sum)
-            return (Q / torch.sum(Q, dim=0, keepdim=True)).t().float()
-
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
