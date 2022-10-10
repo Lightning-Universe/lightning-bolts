@@ -18,6 +18,12 @@ from tests import _MARK_REQUIRE_GPU
 
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_cpcv2(tmpdir, datadir):
+    """Test CPC on CIFAR-10."""
+    warnings.filterwarnings(
+        "ignore",
+        message=".+does not have many workers which may be a bottleneck.+",
+        category=PossibleUserWarning,
+    )
     datamodule = CIFAR10DataModule(data_dir=datadir, num_workers=0, batch_size=2)
     datamodule.train_transforms = CPCTrainTransformsCIFAR10()
     datamodule.val_transforms = CPCEvalTransformsCIFAR10()

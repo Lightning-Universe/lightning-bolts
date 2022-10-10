@@ -1,15 +1,13 @@
-"""
-CPC V2
-======
-"""
 import math
 from argparse import ArgumentParser
-from typing import Optional
+from typing import Any, Union
 
 import torch
+import torch.nn as nn
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.utilities import rank_zero_warn
-from torch import optim
+from torch import Tensor
+from torch.optim import Adam
 
 from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
 from pl_bolts.losses.self_supervised_learning import CPCTask
@@ -24,60 +22,67 @@ from pl_bolts.models.self_supervised.cpc.transforms import (
 )
 from pl_bolts.utils.pretrained_weights import load_pretrained
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
-from pl_bolts.utils.stability import under_review
-
-__all__ = ["CPC_v2"]
 
 
-@under_review()
-class CPC_v2(LightningModule):
+class CPC(LightningModule):
+    """PyTorch Lightning implementation of Contrastive Predictive Coding v2 (CPC_)_
+
+    Paper authors: Olivier J. Hénaff, Aravind Srinivas, Jeffrey De Fauw, Ali Razavi,
+    Carl Doersch, S.M. Ali Eslami, Aaron van den Oord.
+
+    Args:
+        encoder_name: A string for any of the resnets in torchvision, or the original CPC encoder,
+            or a custon nn.Module encoder
+        patch_size: How big to make the image patches
+        patch_overlap: How much overlap each patch should have
+        online_ft: If True, enables a 1024-unit MLP to fine-tune online
+        task: Which self-supervised task to use ('cpc', 'amdim', etc...)
+        num_workers: number of dataloader workers
+        num_classes: number of classes
+        learning_rate: learning rate
+        pretrained: If true, will use the weights pretrained (using CPC) on Imagenet
+
+    Example::
+
+        model = CPC()
+
+        dm = CIFAR10DataModule()
+        dm.train_transforms = CPCTrainDataTransform()
+        dm.val_transforms = CPCEvalDataTransform()
+
+        trainer = pl.Trainer()
+        trainer.fit(model, dm)
+
+    CLI command::
+
+        # CIFAR-10
+        python cpc_module.py --gpus 1
+
+    .. _CPC: https://arxiv.org/pdf/1905.09272v3.pdf
+    """
+
     def __init__(
         self,
-        encoder_name: str = "cpc_encoder",
+        learning_rate: float = 1e-4,
+        weight_decay: float = 1e-6,
+        warmup_epochs: int = 10,
+        max_epochs: int = 100,
+        encoder: Union[str, nn.Module] = "cpc_encoder",
         patch_size: int = 8,
         patch_overlap: int = 4,
-        online_ft: bool = True,
         task: str = "cpc",
-        num_workers: int = 4,
-        num_classes: int = 10,
-        learning_rate: float = 1e-4,
-        pretrained: Optional[str] = None,
         **kwargs,
-    ):
-        """
-        Args:
-            encoder_name: A string for any of the resnets in torchvision, or the original CPC encoder,
-                or a custon nn.Module encoder
-            patch_size: How big to make the image patches
-            patch_overlap: How much overlap each patch should have
-            online_ft: If True, enables a 1024-unit MLP to fine-tune online
-            task: Which self-supervised task to use ('cpc', 'amdim', etc...)
-            num_workers: number of dataloader workers
-            num_classes: number of classes
-            learning_rate: learning rate
-            pretrained: If true, will use the weights pretrained (using CPC) on Imagenet
-        """
+    ) -> None:
 
         super().__init__()
-        self.save_hyperparameters()
-
-        self.online_evaluator = online_ft
-
-        if pretrained:
-            self.hparams.dataset = pretrained
-            self.online_evaluator = True
+        self.save_hyperparameters(ignore="encoder")
 
         self.encoder = self.init_encoder()
 
         # info nce loss
         c, h = self.__compute_final_nb_c(patch_size)
         self.contrastive_task = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
-
         self.z_dim = c * h * h
-        self.num_classes = num_classes
-
-        if pretrained:
-            self.load_pretrained(encoder_name)
 
     def load_pretrained(self, encoder_name):
         available_weights = {"resnet18"}
@@ -117,7 +122,7 @@ class CPC_v2(LightningModule):
 
         return Z
 
-    def forward(self, img_1):
+    def forward(self, img_1: Tensor) -> Tensor:
         # put all patches on the batch dim for simultaneous processing
         b, _, c, w, h = img_1.size()
         img_1 = img_1.view(-1, c, w, h)
@@ -134,23 +139,23 @@ class CPC_v2(LightningModule):
 
         return Z
 
-    def training_step(self, batch, batch_nb):
+    def training_step(self, batch: Any, batch_idx: int) -> Tensor:
         # calculate loss
-        nce_loss = self.shared_step(batch)
+        nce_loss = self._shared_step(batch)
 
         # result
         self.log("train_nce_loss", nce_loss)
         return nce_loss
 
-    def validation_step(self, batch, batch_nb):
+    def validation_step(self, batch: Any, batch_idx: int) -> Tensor:
         # calculate loss
-        nce_loss = self.shared_step(batch)
+        nce_loss = self._shared_step(batch)
 
         # result
         self.log("val_nce", nce_loss, prog_bar=True)
         return nce_loss
 
-    def shared_step(self, batch):
+    def _shared_step(self, batch: Any, batch_idx: int) -> Tensor:
         if isinstance(self.datamodule, STL10DataModule):
             # unlabeled batch
             batch = batch[0]
@@ -166,23 +171,14 @@ class CPC_v2(LightningModule):
         return nce_loss
 
     def configure_optimizers(self):
-        opt = optim.Adam(
-            params=self.parameters(),
-            lr=self.hparams.learning_rate,
-            betas=(0.8, 0.999),
-            weight_decay=1e-5,
-            eps=1e-7,
+        optimizer = Adam(
+            params=self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay
         )
-
-        # if self.hparams.dataset in ['cifar10', 'stl10']:
-        #     lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
-        # elif self.hparams.dataset == 'imagenet2012':
-        #     lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
-
-        return [opt]  # , [lr_scheduler]
+        scheduler = None
+        return [optimizer], [scheduler]
 
     @staticmethod
-    def add_model_specific_args(parent_parser):
+    def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
         possible_resnets = [
             "resnet18",
             "resnet34",
@@ -195,25 +191,31 @@ class CPC_v2(LightningModule):
             "wide_resnet101_2",
         ]
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        parser.add_argument("--learning_rate", type=float, default=1e-5)
+        parser.add_argument("--weight_decay", type=float, default=1e-5)
+        parser.add_argument("--warmup_epochs", type=float, default=1e-5)
+        parser.add_argument("--max_epochs", type=float, default=1e-5)
+        parser.add_argument("--encoder", default="cpc_encoder", type=str, choices=possible_resnets)
         parser.add_argument("--online_ft", action="store_true")
         parser.add_argument("--task", type=str, default="cpc")
-        parser.add_argument("--encoder", default="cpc_encoder", type=str, choices=possible_resnets)
         # cifar10: 1e-5, stl10: 3e-5, imagenet: 4e-4
-        parser.add_argument("--learning_rate", type=float, default=1e-5)
 
         return parser
 
 
-@under_review()
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule
     from pl_bolts.datamodules.ssl_imagenet_datamodule import SSLImagenetDataModule
 
     seed_everything(1234)
+
     parser = ArgumentParser()
+
     parser = Trainer.add_argparse_args(parser)
-    parser = CPC_v2.add_model_specific_args(parser)
+    parser = CPC.add_model_specific_args(parser)
+    parser = CIFAR10DataModule.add_dataset_specific_args(parser)
+
     parser.add_argument("--dataset", default="cifar10", type=str)
     parser.add_argument("--data_dir", default=".", type=str)
     parser.add_argument("--meta_dir", default=".", type=str, help="path to meta.bin for imagenet")
@@ -223,7 +225,7 @@ def cli_main():
 
     args = parser.parse_args()
 
-    datamodule = None
+    # Initialize datamodule
     if args.dataset == "cifar10":
         datamodule = CIFAR10DataModule.from_argparse_args(args)
         datamodule.train_transforms = CPCTrainTransformsCIFAR10()
@@ -244,6 +246,7 @@ def cli_main():
         datamodule.val_transforms = CPCEvalTransformsImageNet128()
         args.patch_size = 32
 
+    # Initialize online evaluator for fine-tuning
     online_evaluator = SSLOnlineEvaluator(
         drop_p=0.0,
         hidden_dim=None,
@@ -264,7 +267,9 @@ def cli_main():
 
         online_evaluator.to_device = to_device
 
-    model = CPC_v2(**vars(args))
+    # Initialize CPC module
+    model = CPC(**vars(args))
+
     trainer = Trainer.from_argparse_args(args, callbacks=[online_evaluator])
     trainer.fit(model, datamodule=datamodule)
 
