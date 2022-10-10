@@ -2,7 +2,7 @@ from typing import Tuple
 
 import numpy as np
 
-from pl_bolts.utils import _OPENCV_AVAILABLE, _TORCHVISION_AVAILABLE
+from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -11,13 +11,9 @@ if _TORCHVISION_AVAILABLE:
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
-if _OPENCV_AVAILABLE:
-    import cv2
-else:  # pragma: no cover
-    warn_missing_pkg("cv2", pypi_name="opencv-python")
 
 
-@under_review()
+
 class SwAVTrainDataTransform:
     def __init__(
         self,
@@ -56,7 +52,8 @@ class SwAVTrainDataTransform:
             if kernel_size % 2 == 0:
                 kernel_size += 1
 
-            color_transform.append(GaussianBlur(kernel_size=kernel_size, p=0.5))
+            #Resort to torchvision gaussian blur instead of custom implementation
+            color_transform.append(transforms.RandomApply([transforms.GaussianBlur(kernel_size=kernel_size)], p=0.5))
 
         self.color_transform = transforms.Compose(color_transform)
 
@@ -100,7 +97,6 @@ class SwAVTrainDataTransform:
         return multi_crops
 
 
-@under_review()
 class SwAVEvalDataTransform(SwAVTrainDataTransform):
     def __init__(
         self,
@@ -135,7 +131,6 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
         self.transform[-1] = test_transform
 
 
-@under_review()
 class SwAVFinetuneTransform:
     def __init__(
         self, input_height: int = 224, jitter_strength: float = 1.0, normalize=None, eval_transform: bool = False
@@ -176,26 +171,3 @@ class SwAVFinetuneTransform:
     def __call__(self, sample):
         return self.transform(sample)
 
-
-@under_review()
-class GaussianBlur:
-    # Implements Gaussian blur as described in the SimCLR paper
-    def __init__(self, kernel_size, p=0.5, min=0.1, max=2.0):
-        self.min = min
-        self.max = max
-
-        # kernel size is set to be 10% of the image height/width
-        self.kernel_size = kernel_size
-        self.p = p
-
-    def __call__(self, sample):
-        sample = np.array(sample)
-
-        # blur the image with a 50% chance
-        prob = np.random.random_sample()
-
-        if prob < self.p:
-            sigma = (self.max - self.min) * np.random.random_sample() + self.min
-            sample = cv2.GaussianBlur(sample, (self.kernel_size, self.kernel_size), sigma)
-
-        return sample

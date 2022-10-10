@@ -2,13 +2,12 @@
 import os
 from argparse import ArgumentParser
 
-import numpy as np
+
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
-from torch import distributed as dist
 from torch import nn
-
+from pl_bolts.models.self_supervised.swav.loss import SWAVLoss
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet18, resnet50
 from pl_bolts.optimizers.lars import LARS
 from pl_bolts.optimizers.lr_scheduler import linear_warmup_decay
@@ -17,10 +16,8 @@ from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization,
     stl10_normalization,
 )
-from pl_bolts.utils.stability import under_review
 
 
-@under_review()
 class SwAV(LightningModule):
     def __init__(
         self,
@@ -129,19 +126,21 @@ class SwAV(LightningModule):
         self.warmup_epochs = warmup_epochs
         self.max_epochs = max_epochs
 
-        if self.gpus * self.num_nodes > 1:
-            self.get_assignments = self.distributed_sinkhorn
-        else:
-            self.get_assignments = self.sinkhorn
-
-        self.model = self.init_model()
-
+        self.criterion = SWAVLoss(
+            gpus=self.gpus,
+            num_nodes=self.num_nodes,
+            temperature=self.temperature,
+            crops_for_assign=self.crops_for_assign,
+            nmb_crops=self.nmb_crops,
+            sinkhorn_iterations=self.sinkhorn_iterations,
+            epsilon=self.epsilon,
+        )
+        self.use_the_queue = None
         # compute iters per epoch
         global_batch_size = self.num_nodes * self.gpus * self.batch_size if self.gpus > 0 else self.batch_size
         self.train_iters_per_epoch = self.num_samples // global_batch_size
 
         self.queue = None
-        self.softmax = nn.Softmax(dim=1)
 
     def setup(self, stage):
         if self.queue_length > 0:
@@ -217,31 +216,16 @@ class SwAV(LightningModule):
         bs = inputs[0].size(0)
 
         # 3. swav loss computation
-        loss = 0
-        for i, crop_id in enumerate(self.crops_for_assign):
-            with torch.no_grad():
-                out = output[bs * crop_id : bs * (crop_id + 1)]
-
-                # 4. time to use the queue
-                if self.queue is not None:
-                    if self.use_the_queue or not torch.all(self.queue[i, -1, :] == 0):
-                        self.use_the_queue = True
-                        out = torch.cat((torch.mm(self.queue[i], self.model.prototypes.weight.t()), out))
-                    # fill the queue
-                    self.queue[i, bs:] = self.queue[i, :-bs].clone()
-                    self.queue[i, :bs] = embedding[crop_id * bs : (crop_id + 1) * bs]
-
-                # 5. get assignments
-                q = torch.exp(out / self.epsilon).t()
-                q = self.get_assignments(q, self.sinkhorn_iterations)[-bs:]
-
-            # cluster assignment prediction
-            subloss = 0
-            for v in np.delete(np.arange(np.sum(self.nmb_crops)), crop_id):
-                p = self.softmax(output[bs * v : bs * (v + 1)] / self.temperature)
-                subloss -= torch.mean(torch.sum(q * torch.log(p), dim=1))
-            loss += subloss / (np.sum(self.nmb_crops) - 1)
-        loss /= len(self.crops_for_assign)
+        loss, queue, use_queue = self.criterion(
+            output=output,
+            embedding=embedding,
+            prototype_weights=self.model.prototypes.weight,
+            batch_size=bs,
+            queue=self.queue,
+            use_queue=self.use_the_queue,
+        )
+        self.queue = queue
+        self.use_the_queue = use_queue
 
         return loss
 
@@ -446,7 +430,6 @@ class SwAV(LightningModule):
         return parser
 
 
-@under_review()
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
