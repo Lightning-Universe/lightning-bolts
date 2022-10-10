@@ -17,7 +17,6 @@ def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     )
 
 
-
 def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution."""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
@@ -124,7 +123,6 @@ class Bottleneck(nn.Module):
         out = self.relu(out)
 
         return out
-
 
 
 class ResNet(nn.Module):
@@ -352,20 +350,16 @@ class MultiPrototypes(nn.Module):
         return out
 
 
-
 def resnet18(**kwargs):
     return ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
-
 
 
 def resnet50(**kwargs):
     return ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
 
 
-
 def resnet50w2(**kwargs):
     return ResNet(Bottleneck, [3, 4, 6, 3], widen=2, **kwargs)
-
 
 
 def resnet50w4(**kwargs):
