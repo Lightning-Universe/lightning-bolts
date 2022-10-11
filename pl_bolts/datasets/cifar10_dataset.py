@@ -7,6 +7,7 @@ import torch
 from torch import Tensor
 
 from pl_bolts.datasets import LightDataset
+from pl_bolts.datasets.utils import safe_extract_tarfile
 from pl_bolts.utils import _PIL_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -118,7 +119,7 @@ class CIFAR10(LightDataset):
     def _extract_archive_save_torch(self, download_path):
         # extract achieve
         with tarfile.open(os.path.join(download_path, self.FILE_NAME), "r:gz") as tar:
-            tar.extractall(path=download_path)
+            safe_extract_tarfile(tar, path=download_path)
         # this is internal path in the archive
         path_content = os.path.join(download_path, "cifar-10-batches-py")
 
