@@ -135,11 +135,23 @@ def test_swav(tmpdir, datadir, catch_warnings):
     trainer.fit(model, datamodule=datamodule)
 
 
-def test_simsiam(tmpdir, datadir):
-    datamodule = CIFAR10DataModule(data_dir=datadir, num_workers=0, batch_size=2)
-    datamodule.train_transforms = SimCLRTrainDataTransform(32)
-    datamodule.val_transforms = SimCLREvalDataTransform(32)
+def test_simsiam(tmpdir, datadir, catch_warnings):
+    """Test SimSiam on CIFAR-10."""
+    warnings.filterwarnings(
+        "ignore",
+        message=".+does not have many workers which may be a bottleneck.+",
+        category=PossibleUserWarning,
+    )
+    dm = CIFAR10DataModule(data_dir=datadir, num_workers=0, batch_size=2)
+    dm.train_transforms = SimCLRTrainDataTransform(32)
+    dm.val_transforms = SimCLREvalDataTransform(32)
 
-    model = SimSiam(batch_size=2, num_samples=datamodule.num_samples, gpus=0, nodes=1, dataset="cifar10")
-    trainer = Trainer(gpus=0, fast_dev_run=True, default_root_dir=tmpdir)
-    trainer.fit(model, datamodule=datamodule)
+    model = SimSiam()
+    trainer = Trainer(
+        fast_dev_run=True,
+        default_root_dir=tmpdir,
+        max_epochs=1,
+        accelerator="auto",
+        log_every_n_steps=1,
+    )
+    trainer.fit(model, datamodule=dm)
