@@ -1,5 +1,6 @@
+from typing import Callable
+
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -8,19 +9,17 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-@under_review()
-def imagenet_normalization():
+def imagenet_normalization() -> Callable:
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError(
             "You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`."
         )
 
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    normalize = transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
     return normalize
 
 
-@under_review()
-def cifar10_normalization():
+def cifar10_normalization() -> Callable:
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError(
             "You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`."
@@ -33,8 +32,7 @@ def cifar10_normalization():
     return normalize
 
 
-@under_review()
-def stl10_normalization():
+def stl10_normalization() -> Callable:
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError(
             "You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`."
@@ -44,8 +42,7 @@ def stl10_normalization():
     return normalize
 
 
-@under_review()
-def emnist_normalization(split: str):
+def emnist_normalization(split: str) -> Callable:
     if not _TORCHVISION_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError(
             "You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`."
