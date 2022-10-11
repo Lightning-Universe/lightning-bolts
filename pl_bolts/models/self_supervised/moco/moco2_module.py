@@ -18,7 +18,7 @@ from torch import nn
 from torch.nn import functional as F
 
 from pl_bolts.metrics import mean, precision_at_k
-from pl_bolts.models.self_supervised.moco.transforms import (
+from pl_bolts.transforms.self_supervised.moco_transforms import (
     Moco2EvalCIFAR10Transforms,
     Moco2EvalImagenetTransforms,
     Moco2EvalSTL10Transforms,

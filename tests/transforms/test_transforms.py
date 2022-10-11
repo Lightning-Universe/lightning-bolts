@@ -11,7 +11,7 @@ except ImportError:
         "You want to use `torchvision` which is not installed yet, install it with `pip install torchvision`."
     )
 
-from pl_bolts.models.self_supervised.amdim.transforms import (
+from pl_bolts.transforms.self_supervised.amdim_transforms import (
     AMDIMEvalTransformsCIFAR10,
     AMDIMEvalTransformsImageNet128,
     AMDIMEvalTransformsSTL10,
@@ -19,7 +19,7 @@ from pl_bolts.models.self_supervised.amdim.transforms import (
     AMDIMTrainTransformsImageNet128,
     AMDIMTrainTransformsSTL10,
 )
-from pl_bolts.models.self_supervised.cpc.transforms import (
+from pl_bolts.transforms.self_supervised.cpc_transforms import (
     CPCEvalTransformsCIFAR10,
     CPCEvalTransformsImageNet128,
     CPCEvalTransformsSTL10,
@@ -27,7 +27,7 @@ from pl_bolts.models.self_supervised.cpc.transforms import (
     CPCTrainTransformsImageNet128,
     CPCTrainTransformsSTL10,
 )
-from pl_bolts.models.self_supervised.moco.transforms import (
+from pl_bolts.transforms.self_supervised.moco_transforms import (
     Moco2EvalCIFAR10Transforms,
     Moco2EvalImagenetTransforms,
     Moco2EvalSTL10Transforms,
@@ -35,7 +35,7 @@ from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainImagenetTransforms,
     Moco2TrainSTL10Transforms,
 )
-from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
+from pl_bolts.transforms.self_supervised.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
 
 @pytest.mark.parametrize(
