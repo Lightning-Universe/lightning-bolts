@@ -20,17 +20,17 @@ Transforms used for CPC
 CIFAR-10 Train (c)
 ^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCTrainTransformsCIFAR10
+.. autoclass:: pl_bolts.transforms.self_supervised.cpc_transforms.CPCTrainTransformsCIFAR10
     :noindex:
 
 CIFAR-10 Eval (c)
 ^^^^^^^^^^^^^^^^^^^
-.. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCEvalTransformsCIFAR10
+.. autoclass:: pl_bolts.transforms.self_supervised.cpc_transforms.CPCEvalTransformsCIFAR10
     :noindex:
 
 Imagenet Train (c)
 ^^^^^^^^^^^^^^^^^^^^
-.. autoclass:: pl_bolts.models.self_supervised.cpc.transforms.CPCTrainTransformsImageNet128
+.. autoclass:: pl_bolts.transforms.self_supervised.cpc_transforms.CPCTrainTransformsImageNet128
     :noindex:
 
 Imagenet Eval (c)
