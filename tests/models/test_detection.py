@@ -82,7 +82,7 @@ def test_fasterrcnn_pyt_module_bbone_train(tmpdir):
 
 
 @pytest.mark.parametrize("config", [("yolo"), ("yolo_giou")])
-def test_yolo(config):
+def test_yolo(config, catch_warnings):
     config_path = Path(TEST_ROOT) / "data" / f"{config}.cfg"
     config = YOLOConfiguration(config_path)
     model = YOLO(config.get_network())
