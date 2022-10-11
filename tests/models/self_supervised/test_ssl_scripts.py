@@ -118,7 +118,7 @@ def test_cli_run_ssl_swav(cli_args):
 @pytest.mark.parametrize(
     "cli_args",
     [
-        _DEFAULT_ARGS + " --dataset cifar10" " --online_ft" " --gpus 1" " --fp32",
+        _DEFAULT_ARGS + " --gpus 1",
     ],
 )
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
