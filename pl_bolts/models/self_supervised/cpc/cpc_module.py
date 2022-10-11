@@ -1,6 +1,6 @@
 import math
 from argparse import ArgumentParser
-from typing import Any, Union
+from typing import Any, List, Tuple, Union
 
 import torch
 import torch.nn as nn
@@ -63,7 +63,7 @@ class CPC(LightningModule):
 
     def __init__(
         self,
-        learning_rate: float = 1e-4,
+        learning_rate: float = 2e-4,
         weight_decay: float = 1e-6,
         warmup_epochs: int = 10,
         max_epochs: int = 100,
@@ -122,13 +122,13 @@ class CPC(LightningModule):
 
         return Z
 
-    def forward(self, img_1: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         # put all patches on the batch dim for simultaneous processing
-        b, _, c, w, h = img_1.size()
-        img_1 = img_1.view(-1, c, w, h)
+        b, _, c, w, h = x.size()
+        x = x.view(-1, c, w, h)
 
         # Z are the latent vars
-        Z = self.encoder(img_1)
+        Z = self.encoder(x)
 
         # non cpc resnets return a list
         if self.hparams.encoder_name != "cpc_encoder":
@@ -140,37 +140,34 @@ class CPC(LightningModule):
         return Z
 
     def training_step(self, batch: Any, batch_idx: int) -> Tensor:
-        # calculate loss
-        nce_loss = self._shared_step(batch)
-
-        # result
-        self.log("train_nce_loss", nce_loss)
-        return nce_loss
+        """Complete training loop."""
+        return self._shared_step(batch, batch_idx, "train")
 
     def validation_step(self, batch: Any, batch_idx: int) -> Tensor:
-        # calculate loss
-        nce_loss = self._shared_step(batch)
+        """Complete validation loop."""
+        return self._shared_step(batch, batch_idx, "val")
 
-        # result
-        self.log("val_nce", nce_loss, prog_bar=True)
-        return nce_loss
+    def _shared_step(self, batch: Any, batch_idx: int, step: str) -> Tensor:
+        """Shared evaluation step for training and validation loop."""
+        x, _ = batch
 
-    def _shared_step(self, batch: Any, batch_idx: int) -> Tensor:
-        if isinstance(self.datamodule, STL10DataModule):
-            # unlabeled batch
-            batch = batch[0]
+        # Calculate latent representation
+        z = self(x)
 
-        img_1, y = batch
+        # Calculate InfoNCE loss
+        loss = self.contrastive_task(z)
 
-        # generate features
-        # Latent features
-        Z = self(img_1)
+        # Log loss
+        if step == "train":
+            self.log("train_loss", loss)
+        elif step == "val":
+            self.log("val_loss", loss)
+        else:
+            raise ValueError(f"Step '{step}' is invalid. Must be 'train' or 'val'.")
 
-        # infoNCE loss
-        nce_loss = self.contrastive_task(Z)
-        return nce_loss
+        return loss
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> Tuple[List, List]:
         optimizer = Adam(
             params=self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay
         )
