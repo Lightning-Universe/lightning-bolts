@@ -201,7 +201,7 @@ class LossFunction:
 
         if not callable(overlap_func):
             raise ValueError(
-                f"Unsupported overlap function '{overlap_func}'. Try upgrading Torcvision or using another IoU "
+                f"Unsupported overlap function '{overlap_func}'. Try upgrading Torchvision or using another IoU "
                 "algorithm."
             )
         self._pairwise_overlap = overlap_func
