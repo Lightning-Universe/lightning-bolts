@@ -1,101 +1,154 @@
-import logging
-from typing import Any, Dict, List, Optional, Tuple, Type
+from copy import copy
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
-import numpy as np
 import torch
 import torch.nn as nn
 from pytorch_lightning import LightningModule
-from pytorch_lightning.utilities import rank_zero_info
+from pytorch_lightning.cli import LightningCLI
+from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
 from torch import Tensor, optim
 
-from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, RouteLayer, ShortcutLayer
+from pl_bolts.datamodules import VOCDetectionDataModule
+from pl_bolts.datamodules.vocdetection_datamodule import Compose
+from pl_bolts.models.detection.yolo.darknet_network import DarknetNetwork
+from pl_bolts.models.detection.yolo.torch_networks import YOLOV4Network
+from pl_bolts.models.detection.yolo.types import TARGET, TARGETS
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils import _TORCHMETRICS_DETECTION_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
+if _TORCHMETRICS_DETECTION_AVAILABLE:
+    try:
+        from torchmetrics.detection import MeanAveragePrecision  # type: ignore
+
+        _MEAN_AVERAGE_PRECISION_AVAILABLE = True
+    except ImportError:
+        _MEAN_AVERAGE_PRECISION_AVAILABLE = False
+else:
+    _MEAN_AVERAGE_PRECISION_AVAILABLE = False
+
 if _TORCHVISION_AVAILABLE:
-    from torchvision.ops import nms
+    from torchvision.ops import batched_nms
     from torchvision.transforms import functional as F
 else:
     warn_missing_pkg("torchvision")
 
-log = logging.getLogger(__name__)
+
+def validate_batch(batch: Tuple[List[Tensor], TARGETS]) -> Tuple[Tensor, TARGETS]:
+    """Reads a batch of data, validates the format, and stacks the images into a single tensor.
+
+    Args:
+        batch: The batch of data read by the :class:`~torch.utils.data.DataLoader`.
+
+    Returns:
+        The input batch with images stacked into a single tensor.
+    """
+    images, targets = batch
+
+    if not images:
+        raise ValueError("No images in batch.")
+
+    if len(images) != len(targets):
+        raise ValueError(f"Got {len(images)} images, but targets for {len(targets)} images.")
+
+    shape = images[0].shape
+    for image in images:
+        if not isinstance(image, Tensor):
+            raise ValueError(f"Expected image to be of type Tensor, got {type(image).__name__}.")
+        if image.shape != shape:
+            raise ValueError(f"Images with different shapes in one batch: {shape} and {image.shape}")
+
+    for target in targets:
+        boxes = target["boxes"]
+        if not isinstance(boxes, Tensor):
+            raise ValueError(f"Expected target boxes to be of type Tensor, got {type(boxes).__name__}.")
+        if (boxes.ndim != 2) or (boxes.shape[-1] != 4):
+            raise ValueError(f"Expected target boxes to be tensors of shape [N, 4], got {list(boxes.shape)}.")
+        labels = target["labels"]
+        if not isinstance(labels, Tensor):
+            raise ValueError(f"Expected target labels to be of type Tensor, got {type(labels).__name__}.")
+        if (labels.ndim < 1) or (labels.ndim > 2) or (len(labels) != len(boxes)):
+            raise ValueError(
+                f"Expected target labels to be tensors of shape [N] or [N, num_classes], got {list(labels.shape)}."
+            )
+
+    return torch.stack(images), targets
 
 
 class YOLO(LightningModule):
-    """PyTorch Lightning implementation of YOLOv3 and YOLOv4.
+    """PyTorch Lightning implementation of YOLO that supports the most important features of YOLOv3, YOLOv4,
+    YOLOv5, Scaled-YOLOv4, and YOLOX.
 
     *YOLOv3 paper*: `Joseph Redmon and Ali Farhadi <https://arxiv.org/abs/1804.02767>`_
 
     *YOLOv4 paper*: `Alexey Bochkovskiy, Chien-Yao Wang, and Hong-Yuan Mark Liao <https://arxiv.org/abs/2004.10934>`_
 
+    *Scaled-YOLOv4 paper*: `Chien-Yao Wang, Alexey Bochkovskiy, and Hong-Yuan Mark Liao
+    <https://arxiv.org/abs/2011.08036>`_
+
+    *YOLOX paper*: `Zheng Ge, Songtao Liu, Feng Wang, Zeming Li, and Jian Sun <https://arxiv.org/abs/2107.08430>`_
+
     *Implementation*: `Seppo Enarvi <https://github.com/senarvi>`_
 
-    The network architecture can be read from a Darknet configuration file using the
-    :class:`~pl_bolts.models.detection.yolo.yolo_config.YOLOConfiguration` class, or created by
-    some other means, and provided as a list of PyTorch modules.
+    The network architecture can be written in PyTorch, or read from a Darknet configuration file using the
+    :class:`~pl_bolts.models.detection.yolo.darknet_network.DarknetNetwork` class. ``DarknetNetwork`` is also able to
+    read weights from a Darknet model file. See the CLI application and the
+    :class:`~pl_bolts.models.detection.yolo.yolo_module.CLIYOLO` class for an example of how to specify a network
+    architecture.
 
-    The input from the data loader is expected to be a list of images. Each image is a tensor with
-    shape ``[channels, height, width]``. The images from a single batch will be stacked into a
-    single tensor, so the sizes have to match. Different batches can have different image sizes, as
-    long as the size is divisible by the ratio in which the network downsamples the input.
+    The input from the data loader is expected to be a list of images. Each image is a tensor with shape
+    ``[channels, height, width]``. The images from a single batch will be stacked into a single tensor, so the sizes
+    have to match. Different batches can have different image sizes, as long as the size is divisible by the ratio in
+    which the network downsamples the input.
 
-    During training, the model expects both the input tensors and a list of targets. *Each target is
-    a dictionary containing*:
+    During training, the model expects both the input tensors and a list of targets. *Each target is a dictionary
+    containing the following tensors*:
 
     - boxes (``FloatTensor[N, 4]``): the ground-truth boxes in `(x1, y1, x2, y2)` format
-    - labels (``Int64Tensor[N]``): the class label for each ground-truth box
+    - labels (``Int64Tensor[N]`` or ``BoolTensor[N, classes]``): the class label or a boolean class mask for each
+      ground-truth box
 
-    :func:`~pl_bolts.models.detection.yolo.yolo_module.YOLO.forward` method returns all
-    predictions from all detection layers in all images in one tensor with shape
-    ``[images, predictors, classes + 5]``. The coordinates are scaled to the input image size.
-    During training it also returns a dictionary containing the classification, box overlap, and
-    confidence losses.
+    :func:`~pl_bolts.models.detection.yolo.yolo_module.YOLO.forward` method returns all predictions from all detection
+    layers in one tensor with shape ``[images, predictors, classes + 5]``. The coordinates are scaled to the input image
+    size. During training it also returns a dictionary containing the classification, box overlap, and confidence
+    losses.
 
-    During inference, the model requires only the input tensors.
-    :func:`~pl_bolts.models.detection.yolo.yolo_module.YOLO.infer` method filters and processes the
-    predictions. *The processed output includes the following tensors*:
+    During inference, the model requires only the image tensors.
+    :func:`~pl_bolts.models.detection.yolo.yolo_module.YOLO.infer` method filters and processes the predictions. If a
+    prediction has a high score for more than one class, it will be duplicated. *The processed output is returned in a
+    dictionary containing the following tensors*:
 
     - boxes (``FloatTensor[N, 4]``): predicted bounding box `(x1, y1, x2, y2)` coordinates in image space
     - scores (``FloatTensor[N]``): detection confidences
-    - labels (``Int64Tensor[N]``): the predicted labels for each image
+    - labels (``Int64Tensor[N]``): the predicted labels for each object
 
-    Weights can be loaded from a Darknet model file using ``load_darknet_weights()``.
-
-    CLI command::
-
-        # PascalVOC
-        wget https://raw.githubusercontent.com/AlexeyAB/darknet/master/cfg/yolov4-tiny-3l.cfg
-        python yolo_module.py --config yolov4-tiny-3l.cfg --data_dir . --gpus 8 --batch_size 8
+    Args:
+        network: A module that represents the network layers. This can be obtained from a Darknet configuration using
+            :func:`~pl_bolts.models.detection.yolo.darknet_network.DarknetNetwork`, or it can be defined as PyTorch
+            code.
+        optimizer: Which optimizer class to use for training.
+        optimizer_params: Parameters to pass to the optimizer constructor. Weight decay will be applied only to
+            convolutional layer weights.
+        lr_scheduler: Which learning rate scheduler class to use for training.
+        lr_scheduler_params: Parameters to pass to the learning rate scheduler constructor.
+        confidence_threshold: Postprocessing will remove bounding boxes whose confidence score is not higher than this
+            threshold.
+        nms_threshold: Non-maximum suppression will remove bounding boxes whose IoU with a higher confidence box is
+            higher than this threshold, if the predicted categories are equal.
+        detections_per_image: Keep at most this number of highest-confidence detections per image.
     """
 
     def __init__(
         self,
-        network: nn.ModuleList,
+        network: nn.Module,
         optimizer: Type[optim.Optimizer] = optim.SGD,
-        optimizer_params: Dict[str, Any] = {"lr": 0.001, "momentum": 0.9, "weight_decay": 0.0005},
+        optimizer_params: Optional[Dict[str, Any]] = None,
         lr_scheduler: Type[optim.lr_scheduler._LRScheduler] = LinearWarmupCosineAnnealingLR,
-        lr_scheduler_params: Dict[str, Any] = {"warmup_epochs": 1, "max_epochs": 300, "warmup_start_lr": 0.0},
+        lr_scheduler_params: Optional[Dict[str, Any]] = None,
         confidence_threshold: float = 0.2,
         nms_threshold: float = 0.45,
-        max_predictions_per_image: int = -1,
+        detections_per_image: int = 300,
     ) -> None:
-        """
-        Args:
-            network: A list of network modules. This can be obtained from a Darknet configuration
-                using the :func:`~pl_bolts.models.detection.yolo.yolo_config.YOLOConfiguration.get_network`
-                method.
-            optimizer: Which optimizer class to use for training.
-            optimizer_params: Parameters to pass to the optimizer constructor.
-            lr_scheduler: Which learning rate scheduler class to use for training.
-            lr_scheduler_params: Parameters to pass to the learning rate scheduler constructor.
-            confidence_threshold: Postprocessing will remove bounding boxes whose
-                confidence score is not higher than this threshold.
-            nms_threshold: Non-maximum suppression will remove bounding boxes whose IoU with a higher
-                confidence box is higher than this threshold, if the predicted categories are equal.
-            max_predictions_per_image: If non-negative, keep at most this number of
-                highest-confidence predictions per image.
-        """
         super().__init__()
 
         if not _TORCHVISION_AVAILABLE:
@@ -103,507 +156,429 @@ class YOLO(LightningModule):
 
         self.network = network
         self.optimizer_class = optimizer
-        self.optimizer_params = optimizer_params
+        if optimizer_params is not None:
+            self.optimizer_params = optimizer_params
+        else:
+            self.optimizer_params = {"lr": 0.01, "momentum": 0.9, "weight_decay": 0.0005}
         self.lr_scheduler_class = lr_scheduler
-        self.lr_scheduler_params = lr_scheduler_params
+        if lr_scheduler_params is not None:
+            self.lr_scheduler_params = lr_scheduler_params
+        else:
+            self.lr_scheduler_params = {"warmup_epochs": 5, "max_epochs": 300, "warmup_start_lr": 0.0}
         self.confidence_threshold = confidence_threshold
         self.nms_threshold = nms_threshold
-        self.max_predictions_per_image = max_predictions_per_image
+        self.detections_per_image = detections_per_image
 
-    def forward(
-        self, images: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None
-    ) -> Tuple[Tensor, Dict[str, Tensor]]:
+        if _MEAN_AVERAGE_PRECISION_AVAILABLE:
+            self._val_map = MeanAveragePrecision()
+            self._test_map = MeanAveragePrecision()
+
+    def forward(  # type: ignore
+        self, images: Tensor, targets: Optional[TARGETS] = None
+    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         """Runs a forward pass through the network (all layers listed in ``self.network``), and if training targets
         are provided, computes the losses from the detection layers.
 
-        Detections are concatenated from the detection layers. Each image will produce
-        `N * num_anchors * grid_height * grid_width` detections, where `N` depends on the number of
-        detection layers. For one detection layer `N = 1`, and each detection layer increases it by
-        a number that depends on the size of the feature map on that layer. For example, if the
-        feature map is twice as wide and high as the grid, the layer will add four times more
-        features.
+        Detections are concatenated from the detection layers. Each detection layer will produce a number of detections
+        that depends on the size of the feature map and the number of anchors per feature map cell.
 
         Args:
             images: Images to be processed. Tensor of size
-                ``[batch_size, num_channels, height, width]``.
+                ``[batch_size, channels, height, width]``.
             targets: If set, computes losses from detection layers against these targets. A list of
-                dictionaries, one for each image.
+                target dictionaries, one for each image.
 
         Returns:
-            detections (:class:`~torch.Tensor`), losses (Dict[str, :class:`~torch.Tensor`]):
-            Detections, and if targets were provided, a dictionary of losses. Detections are shaped
-            ``[batch_size, num_predictors, num_classes + 5]``, where ``num_predictors`` is the
-            total number of cells in all detection layers times the number of boxes predicted by
-            one cell. The predicted box coordinates are in `(x1, y1, x2, y2)` format and scaled to
-            the input image size.
+            detections (:class:`~torch.Tensor`), losses (Dict[str, :class:`~torch.Tensor`]): Detections, and if targets
+            were provided, a dictionary of losses. Detections are shaped
+            ``[batch_size, predictors, classes + 5]``, where ``predictors`` is the total number of feature map cells in
+            all detection layers times the number of anchors per cell. The predicted box coordinates are in
+            `(x1, y1, x2, y2)` format and scaled to the input image size.
         """
-        outputs = []  # Outputs from all layers
-        detections = []  # Outputs from detection layers
-        losses = []  # Losses from detection layers
-        hits = []  # Number of targets each detection layer was responsible for
-
-        image_height = images.shape[2]
-        image_width = images.shape[3]
-        image_size = torch.tensor([image_width, image_height], device=images.device)
-
-        x = images
-        for module in self.network:
-            if isinstance(module, (RouteLayer, ShortcutLayer)):
-                x = module(x, outputs)
-            elif isinstance(module, DetectionLayer):
-                if targets is None:
-                    x = module(x, image_size)
-                    detections.append(x)
-                else:
-                    x, layer_losses, layer_hits = module(x, image_size, targets)
-                    detections.append(x)
-                    losses.append(layer_losses)
-                    hits.append(layer_hits)
-            else:
-                x = module(x)
-
-            outputs.append(x)
+        detections, losses, hits = self.network(images, targets)
 
         detections = torch.cat(detections, 1)
         if targets is None:
             return detections
 
         total_hits = sum(hits)
-        num_targets = sum(len(image_targets["boxes"]) for image_targets in targets)
-        if total_hits != num_targets:
-            log.warning(
-                f"{num_targets} training targets were matched a total of {total_hits} times by detection layers. "
-                "Anchors may have been configured incorrectly."
-            )
         for layer_idx, layer_hits in enumerate(hits):
-            hit_rate = torch.true_divide(layer_hits, total_hits) if total_hits > 0 else 1.0
+            hit_rate: Union[Tensor, float] = torch.true_divide(layer_hits, total_hits) if total_hits > 0 else 1.0
             self.log(f"layer_{layer_idx}_hit_rate", hit_rate, sync_dist=False, batch_size=images.size(0))
 
-        def total_loss(loss_name):
-            """Returns the sum of the loss over detection layers."""
-            loss_tuple = tuple(layer_losses[loss_name] for layer_losses in losses)
-            return torch.stack(loss_tuple).sum()
-
-        losses = {loss_name: total_loss(loss_name) for loss_name in losses[0].keys()}
+        losses = torch.stack(losses).sum(0)
         return detections, losses
 
-    def configure_optimizers(self) -> Tuple[List, List]:
-        """Constructs the optimizer and learning rate scheduler."""
-        optimizer = self.optimizer_class(self.parameters(), **self.optimizer_params)
+    def configure_optimizers(self) -> Tuple[List[optim.Optimizer], List[optim.lr_scheduler._LRScheduler]]:
+        """Constructs the optimizer and learning rate scheduler based on ``self.optimizer_params`` and
+        ``self.lr_scheduler_params``.
+
+        If weight decay is specified, it will be applied only to convolutional layer weights.
+        """
+        if ("weight_decay" in self.optimizer_params) and (self.optimizer_params["weight_decay"] != 0):
+            defaults = copy(self.optimizer_params)
+            weight_decay = defaults.pop("weight_decay")
+
+            default_group = []
+            wd_group = []
+            for name, tensor in self.named_parameters():
+                if not tensor.requires_grad:
+                    continue
+                elif name.endswith(".conv.weight"):
+                    wd_group.append(tensor)
+                else:
+                    default_group.append(tensor)
+
+            params = [
+                {"params": default_group, "weight_decay": 0.0},
+                {"params": wd_group, "weight_decay": weight_decay},
+            ]
+            optimizer = self.optimizer_class(params, **defaults)
+        else:
+            optimizer = self.optimizer_class(self.parameters(), **self.optimizer_params)
         lr_scheduler = self.lr_scheduler_class(optimizer, **self.lr_scheduler_params)
         return [optimizer], [lr_scheduler]
 
-    def training_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int) -> Dict[str, Tensor]:
+    def training_step(self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int) -> STEP_OUTPUT:  # type: ignore
         """Computes the training loss.
 
         Args:
-            batch: A tuple of images and targets. Images is a list of 3-dimensional tensors.
-                Targets is a list of dictionaries that contain ground-truth boxes, labels, etc.
-            batch_idx: The index of this batch.
+            batch: A tuple of images and targets. Images is a list of 3-dimensional tensors. Targets is a list of target
+                dictionaries.
+            batch_idx: Index of the current batch.
 
         Returns:
             A dictionary that includes the training loss in 'loss'.
         """
-        images, targets = self._validate_batch(batch)
+        images, targets = validate_batch(batch)
         _, losses = self(images, targets)
-        total_loss = torch.stack(tuple(losses.values())).sum()
 
         # sync_dist=True is broken in some versions of Lightning and may cause the sum of the loss
         # across GPUs to be returned.
-        for name, value in losses.items():
-            self.log(f"train/{name}_loss", value, prog_bar=True, sync_dist=False)
-        self.log("train/total_loss", total_loss, sync_dist=False)
+        self.log("train/overlap_loss", losses[0], prog_bar=True, sync_dist=False)
+        self.log("train/confidence_loss", losses[1], prog_bar=True, sync_dist=False)
+        self.log("train/class_loss", losses[2], prog_bar=True, sync_dist=False)
+        self.log("train/total_loss", losses.sum(), sync_dist=False)
 
-        return {"loss": total_loss}
+        return {"loss": losses.sum()}
 
-    def validation_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int):
+    def validation_step(  # type: ignore
+        self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int
+    ) -> Optional[STEP_OUTPUT]:
         """Evaluates a batch of data from the validation set.
 
         Args:
-            batch: A tuple of images and targets. Images is a list of 3-dimensional tensors.
-                Targets is a list of dictionaries that contain ground-truth boxes, labels, etc.
-            batch_idx: The index of this batch
+            batch: A tuple of images and targets. Images is a list of 3-dimensional tensors. Targets is a list of target
+                dictionaries.
+            batch_idx: Index of the current batch.
         """
-        images, targets = self._validate_batch(batch)
+        images, targets = validate_batch(batch)
         detections, losses = self(images, targets)
-        detections = self._split_detections(detections)
-        detections = self._filter_detections(detections)
-        total_loss = torch.stack(tuple(losses.values())).sum()
 
-        for name, value in losses.items():
-            self.log(f"val/{name}_loss", value, sync_dist=True, batch_size=images.size(0))
-        self.log("val/total_loss", total_loss, sync_dist=True, batch_size=images.size(0))
+        self.log("val/overlap_loss", losses[0], sync_dist=True, batch_size=images.size(0))
+        self.log("val/confidence_loss", losses[1], sync_dist=True, batch_size=images.size(0))
+        self.log("val/class_loss", losses[2], sync_dist=True, batch_size=images.size(0))
+        self.log("val/total_loss", losses.sum(), sync_dist=True, batch_size=images.size(0))
 
-    def test_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int):
+        if _MEAN_AVERAGE_PRECISION_AVAILABLE:
+            detections = self.process_detections(detections)
+            targets = self.process_targets(targets)
+            self._val_map.update(detections, targets)
+
+    def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
+        if _MEAN_AVERAGE_PRECISION_AVAILABLE:
+            map_scores = self._val_map.compute()
+            map_scores = {"val/" + k: v for k, v in map_scores.items()}
+            self.log_dict(map_scores, sync_dist=True)
+            self._val_map.reset()
+
+    def test_step(self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int) -> Optional[STEP_OUTPUT]:  # type: ignore
         """Evaluates a batch of data from the test set.
 
         Args:
-            batch: A tuple of images and targets. Images is a list of 3-dimensional tensors.
-                Targets is a list of dictionaries that contain ground-truth boxes, labels, etc.
-            batch_idx: The index of this batch.
+            batch: A tuple of images and targets. Images is a list of 3-dimensional tensors. Targets is a list of target
+                dictionaries.
+            batch_idx: Index of the current batch.
         """
-        images, targets = self._validate_batch(batch)
+        images, targets = validate_batch(batch)
         detections, losses = self(images, targets)
-        detections = self._split_detections(detections)
-        detections = self._filter_detections(detections)
-        total_loss = torch.stack(tuple(losses.values())).sum()
 
-        for name, value in losses.items():
-            self.log(f"test/{name}_loss", value, sync_dist=True)
-        self.log("test/total_loss", total_loss, sync_dist=True)
+        self.log("test/overlap_loss", losses[0], sync_dist=True)
+        self.log("test/confidence_loss", losses[1], sync_dist=True)
+        self.log("test/class_loss", losses[2], sync_dist=True)
+        self.log("test/total_loss", losses.sum(), sync_dist=True)
 
-    def infer(self, image: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
+        if _MEAN_AVERAGE_PRECISION_AVAILABLE:
+            detections = self.process_detections(detections)
+            targets = self.process_targets(targets)
+            self._test_map.update(detections, targets)
+
+    def test_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
+        if _MEAN_AVERAGE_PRECISION_AVAILABLE:
+            map_scores = self._test_map.compute()
+            map_scores = {"test/" + k: v for k, v in map_scores.items()}
+            self.log_dict(map_scores, sync_dist=True)
+            self._test_map.reset()
+
+    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> List[Dict[str, Tensor]]:
+        """Feeds a batch of images to the network and returns the detected bounding boxes, confidence scores, and
+        class labels.
+
+        If a prediction has a high score for more than one class, it will be duplicated.
+
+        Args:
+            batch: A tuple of images and targets. Images is a list of 3-dimensional tensors. Targets is a list of target
+                dictionaries.
+            batch_idx: Index of the current batch.
+            dataloader_idx: Index of the current dataloader.
+
+        Returns:
+            A list of dictionaries containing tensors "boxes", "scores", and "labels". "boxes" is a matrix of detected
+            bounding box `(x1, y1, x2, y2)` coordinates. "scores" is a vector of confidence scores for the bounding box
+            detections. "labels" is a vector of predicted class labels.
+        """
+        images, _ = validate_batch(batch)
+        detections = self(images)
+        detections = self.process_detections(detections)
+
+    def infer(self, image: Tensor) -> Dict[str, Tensor]:
         """Feeds an image to the network and returns the detected bounding boxes, confidence scores, and class
         labels.
+
+        If a prediction has a high score for more than one class, it will be duplicated.
 
         Args:
             image: An input image, a tensor of uint8 values sized ``[channels, height, width]``.
 
         Returns:
-            boxes (:class:`~torch.Tensor`), confidences (:class:`~torch.Tensor`), labels (:class:`~torch.Tensor`):
-            A matrix of detected bounding box `(x1, y1, x2, y2)` coordinates, a vector of
-            confidences for the bounding box detections, and a vector of predicted class labels.
+            A dictionary containing tensors "boxes", "scores", and "labels". "boxes" is a matrix of detected bounding
+            box `(x1, y1, x2, y2)` coordinates. "scores" is a vector of confidence scores for the bounding box
+            detections. "labels" is a vector of predicted class labels.
         """
         if not isinstance(image, torch.Tensor):
             image = F.to_tensor(image)
 
+        was_training = self.training
         self.eval()
+
         detections = self(image.unsqueeze(0))
-        detections = self._split_detections(detections)
-        detections = self._filter_detections(detections)
-        boxes = detections["boxes"][0]
-        scores = detections["scores"][0]
-        labels = detections["labels"][0]
-        return boxes, scores, labels
+        detections = self.process_detections(detections)
+        detections = detections[0]
 
-    def load_darknet_weights(self, weight_file):
-        """Loads weights to layer modules from a pretrained Darknet model.
+        if was_training:
+            self.train()
+        return detections
 
-        One may want to continue training from the pretrained weights, on a dataset with a
-        different number of object categories. The number of kernels in the convolutional layers
-        just before each detection layer depends on the number of output classes. The Darknet
-        solution is to truncate the weight file and stop reading weights at the first incompatible
-        layer. For this reason the function silently leaves the rest of the layers unchanged, when
-        the weight file ends.
-
-        Args:
-            weight_file: A file object containing model weights in the Darknet binary format.
-        """
-        version = np.fromfile(weight_file, count=3, dtype=np.int32)
-        images_seen = np.fromfile(weight_file, count=1, dtype=np.int64)
-        rank_zero_info(
-            f"Loading weights from Darknet model version {version[0]}.{version[1]}.{version[2]} "
-            f"that has been trained on {images_seen[0]} images."
-        )
-
-        def read(tensor):
-            """Reads the contents of ``tensor`` from the current position of ``weight_file``.
-
-            If there's no more data in ``weight_file``, returns without error.
-            """
-            x = np.fromfile(weight_file, count=tensor.numel(), dtype=np.float32)
-            if x.shape[0] == 0:
-                return
-            x = torch.from_numpy(x).view_as(tensor)
-            with torch.no_grad():
-                tensor.copy_(x)
-
-        for module in self.network:
-            # Weights are loaded only to convolutional layers
-            if not isinstance(module, nn.Sequential):
-                continue
-
-            conv = module[0]
-            assert isinstance(conv, nn.Conv2d)
-
-            # Convolution may be followed by batch normalization, in which case we read the batch
-            # normalization parameters and not the convolution bias.
-            if len(module) > 1 and isinstance(module[1], nn.BatchNorm2d):
-                bn = module[1]
-                read(bn.bias)
-                read(bn.weight)
-                read(bn.running_mean)
-                read(bn.running_var)
-            else:
-                read(conv.bias)
-
-            read(conv.weight)
-
-    def _validate_batch(
-        self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]]
-    ) -> Tuple[Tensor, List[Dict[str, Tensor]]]:
-        """Reads a batch of data, validates the format, and stacks the images into a single tensor.
-
-        Args:
-            batch: The batch of data read by the :class:`~torch.utils.data.DataLoader`.
-
-        Returns:
-            The input batch with images stacked into a single tensor.
-        """
-        images, targets = batch
-
-        if len(images) != len(targets):
-            raise ValueError(f"Got {len(images)} images, but targets for {len(targets)} images.")
-
-        for image in images:
-            if not isinstance(image, Tensor):
-                raise ValueError(f"Expected image to be of type Tensor, got {type(image)}.")
-
-        for target in targets:
-            boxes = target["boxes"]
-            if not isinstance(boxes, Tensor):
-                raise ValueError(f"Expected target boxes to be of type Tensor, got {type(boxes)}.")
-            if (len(boxes.shape) != 2) or (boxes.shape[-1] != 4):
-                raise ValueError(f"Expected target boxes to be tensors of shape [N, 4], got {list(boxes.shape)}.")
-            labels = target["labels"]
-            if not isinstance(labels, Tensor):
-                raise ValueError(f"Expected target labels to be of type Tensor, got {type(labels)}.")
-            if len(labels.shape) != 1:
-                raise ValueError(f"Expected target labels to be tensors of shape [N], got {list(labels.shape)}.")
-
-        images = torch.stack(images)
-        return images, targets
-
-    def _split_detections(self, detections: Tensor) -> Dict[str, Tensor]:
-        """Splits the detection tensor returned by a forward pass into a dictionary.
-
-        The fields of the dictionary are as follows:
-            - boxes (``Tensor[batch_size, N, 4]``): detected bounding box `(x1, y1, x2, y2)` coordinates
-            - scores (``Tensor[batch_size, N]``): detection confidences
-            - classprobs (``Tensor[batch_size, N]``): probabilities of the best classes
-            - labels (``Int64Tensor[batch_size, N]``): the predicted labels for each image
-
-        Args:
-            detections: A tensor of detected bounding boxes and their attributes.
-
-        Returns:
-            A dictionary of detection results.
-        """
-        boxes = detections[..., :4]
-        scores = detections[..., 4]
-        classprobs = detections[..., 5:]
-        classprobs, labels = torch.max(classprobs, -1)
-        return {"boxes": boxes, "scores": scores, "classprobs": classprobs, "labels": labels}
-
-    def _filter_detections(self, detections: Dict[str, Tensor]) -> Dict[str, List[Tensor]]:
-        """Filters detections based on confidence threshold. Then for every class performs non-maximum suppression
-        (NMS). NMS iterates the bounding boxes that predict this class in descending order of confidence score, and
-        removes lower scoring boxes that have an IoU greater than the NMS threshold with a higher scoring box.
-        Finally the detections are sorted by descending confidence and possible truncated to the maximum number of
+    def process_detections(self, preds: Tensor) -> List[Dict[str, Tensor]]:
+        """Splits the detection tensor returned by a forward pass into a list of prediction dictionaries, and
+        filters them based on confidence threshold, non-maximum suppression (NMS), and maximum number of
         predictions.
 
+        If for any single detection there are multiple categories whose score is above the confidence threshold, the
+        detection will be duplicated to create one detection for each category. NMS processes one category at a time,
+        iterating over the bounding boxes in descending order of confidence score, and removes lower scoring boxes that
+        have an IoU greater than the NMS threshold with a higher scoring box.
+
+        The returned detections are sorted by descending confidence. The items of the dictionaries are as follows:
+        - boxes (``Tensor[batch_size, N, 4]``): detected bounding box `(x1, y1, x2, y2)` coordinates
+        - scores (``Tensor[batch_size, N]``): detection confidences
+        - labels (``Int64Tensor[batch_size, N]``): the predicted class IDs
+
         Args:
-            detections: All detections. A dictionary of tensors, each containing the predictions
-                from all images.
+            preds: A tensor of detected bounding boxes and their attributes.
 
         Returns:
-            Filtered detections. A dictionary of lists, each containing a tensor per image.
+            Filtered detections. A list of prediction dictionaries, one for each image.
         """
-        boxes = detections["boxes"]
-        scores = detections["scores"]
-        classprobs = detections["classprobs"]
-        labels = detections["labels"]
 
-        out_boxes = []
-        out_scores = []
-        out_classprobs = []
-        out_labels = []
+        def process(boxes: Tensor, confidences: Tensor, classprobs: Tensor) -> Dict[str, Any]:
+            scores = classprobs * confidences[:, None]
 
-        for img_boxes, img_scores, img_classprobs, img_labels in zip(boxes, scores, classprobs, labels):
-            # Select detections with high confidence score.
-            selected = img_scores > self.confidence_threshold
-            img_boxes = img_boxes[selected]
-            img_scores = img_scores[selected]
-            img_classprobs = img_classprobs[selected]
-            img_labels = img_labels[selected]
+            # Select predictions with high scores. If a prediction has a high score for more than one class, it will be
+            # duplicated.
+            idxs, labels = (scores > self.confidence_threshold).nonzero().T
+            boxes = boxes[idxs]
+            scores = scores[idxs, labels]
 
-            img_out_boxes = boxes.new_zeros((0, 4))
-            img_out_scores = scores.new_zeros(0)
-            img_out_classprobs = classprobs.new_zeros(0)
-            img_out_labels = labels.new_zeros(0)
+            keep = batched_nms(boxes, scores, labels, self.nms_threshold)
+            keep = keep[: self.detections_per_image]
+            return {"boxes": boxes[keep], "scores": scores[keep], "labels": labels[keep]}
 
-            # Iterate through the unique object classes detected in the image and perform non-maximum
-            # suppression for the objects of the class in question.
-            for cls_label in labels.unique():
-                selected = img_labels == cls_label
-                cls_boxes = img_boxes[selected]
-                cls_scores = img_scores[selected]
-                cls_classprobs = img_classprobs[selected]
-                cls_labels = img_labels[selected]
+        return [process(p[..., :4], p[..., 4], p[..., 5:]) for p in preds]
 
-                # NMS will crash if there are too many boxes.
-                cls_boxes = cls_boxes[:100000]
-                cls_scores = cls_scores[:100000]
-                selected = nms(cls_boxes, cls_scores, self.nms_threshold)
+    def process_targets(self, targets: TARGETS) -> TARGETS:
+        """Duplicates multi-label targets to create one target for each label.
 
-                img_out_boxes = torch.cat((img_out_boxes, cls_boxes[selected]))
-                img_out_scores = torch.cat((img_out_scores, cls_scores[selected]))
-                img_out_classprobs = torch.cat((img_out_classprobs, cls_classprobs[selected]))
-                img_out_labels = torch.cat((img_out_labels, cls_labels[selected]))
+        Args:
+            targets: List of target dictionaries. Each dictionary must contain "boxes" and "labels". "labels" is either
+                a one-dimensional list of class IDs, or a two-dimensional boolean class map.
 
-            # Sort by descending confidence and limit the maximum number of predictions.
-            indices = torch.argsort(img_out_scores, descending=True)
-            if self.max_predictions_per_image >= 0:
-                indices = indices[: self.max_predictions_per_image]
-            out_boxes.append(img_out_boxes[indices])
-            out_scores.append(img_out_scores[indices])
-            out_classprobs.append(img_out_classprobs[indices])
-            out_labels.append(img_out_labels[indices])
+        Returns:
+            Single-label targets. A list of target dictionaries, one for each image.
+        """
 
-        return {"boxes": out_boxes, "scores": out_scores, "classprobs": out_classprobs, "labels": out_labels}
+        def process(boxes: Tensor, labels: Tensor, **other: Any) -> Dict[str, Any]:
+            if labels.ndim == 2:
+                idxs, labels = labels.nonzero().T
+                boxes = boxes[idxs]
+            return {"boxes": boxes, "labels": labels, **other}
+
+        return [process(**t) for t in targets]
 
 
-class Resize:
-    """Rescales the image and target to given dimensions.
+class CLIYOLO(YOLO):
+    """A subclass of YOLO that can be easily configured using LightningCLI.
+
+    Either loads a Darknet configuration file, or constructs a YOLOv4 network. This is just an example of how to use the
+    model. Various other network architectures from ``torch_networks.py`` can be used. Note that if you change the
+    resolution of the input images, you should also scale the prior shapes (a.k.a. anchors). They are specified in the
+    Darknet configuration file or provided in the network constructor parameters.
+
+    CLI command::
+
+        # Darknet network configuration
+        wget https://raw.githubusercontent.com/AlexeyAB/darknet/master/cfg/yolov4-tiny-3l.cfg
+        python yolo_module.py fit \
+            --model.network_config yolov4-tiny-3l.cfg \
+            --data.batch_size 8 \
+            --data.num_workers 4 \
+            --trainer.accelerator gpu \
+            --trainer.devices 8 \
+            --trainer.accumulate_grad_batches 2 \
+            --trainer.gradient_clip_val 5.0 \
+            --trainer.max_epochs=100
+
+        # YOLOv4
+        python yolo_module.py fit \
+            --data.batch_size 8 \
+            --data.num_workers 4 \
+            --trainer.accelerator gpu \
+            --trainer.devices 8 \
+            --trainer.accumulate_grad_batches 2 \
+            --trainer.gradient_clip_val 5.0 \
+            --trainer.max_epochs=100
 
     Args:
-        output_size (tuple or int): Desired output size. If tuple (height, width), the output is
-            matched to ``output_size``. If int, the smaller of the image edges is matched to
-            ``output_size``, keeping the aspect ratio the same.
+        network_config: Path to a Darknet configuration file that defines the network architecture. If not given, a
+            YOLOv4 network will be constructed.
+        matching_algorithm: Which algorithm to use for matching targets to anchors. "simota" (the SimOTA matching rule
+            from YOLOX), "size" (match those prior shapes, whose width and height relative to the target is below given
+            ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
+            gives the highest IoU, default).
+        matching_threshold: Threshold for "size" and "iou" matching algorithms.
+        ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
+            has IoU with some target greater than this threshold, the predictor will not be taken into account when
+            calculating the confidence loss.
+        overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Valid values are
+            "iou", "giou", "diou", and "ciou".
+        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
+            confidence is one if there's an object, and 1.0 means that the target confidence is the output of
+            ``overlap_func``.
+        overlap_loss_multiplier: Overlap loss will be scaled by this value.
+        confidence_loss_multiplier: Confidence loss will be scaled by this value.
+        class_loss_multiplier: Classification loss will be scaled by this value.
     """
 
-    def __init__(self, output_size: tuple) -> None:
-        self.output_size = output_size
+    def __init__(
+        self,
+        network_config: Optional[str] = None,
+        darknet_weights: Optional[str] = None,
+        matching_algorithm: Optional[str] = None,
+        matching_threshold: Optional[float] = None,
+        ignore_bg_threshold: Optional[float] = None,
+        overlap_func: Optional[str] = None,
+        predict_overlap: Optional[float] = None,
+        overlap_loss_multiplier: Optional[float] = None,
+        confidence_loss_multiplier: Optional[float] = None,
+        class_loss_multiplier: Optional[float] = None,
+        **kwargs: Any,
+    ) -> None:
+        if network_config is not None:
+            network = DarknetNetwork(
+                network_config,
+                darknet_weights,
+                matching_algorithm=matching_algorithm,
+                matching_threshold=matching_threshold,
+                ignore_bg_threshold=ignore_bg_threshold,
+                overlap_func=overlap_func,
+                predict_overlap=predict_overlap,
+                overlap_loss_multiplier=overlap_loss_multiplier,
+                confidence_loss_multiplier=confidence_loss_multiplier,
+                class_loss_multiplier=class_loss_multiplier,
+            )
+        else:
+            # We need to set some defaults, since we don't get the default values from a configuration file.
+            if ignore_bg_threshold is None:
+                ignore_bg_threshold = 0.7
+            if overlap_func is None:
+                overlap_func = "ciou"
+            if overlap_loss_multiplier is None:
+                overlap_loss_multiplier = 5.0
+            if confidence_loss_multiplier is None:
+                confidence_loss_multiplier = 1.0
+            if class_loss_multiplier is None:
+                class_loss_multiplier = 1.0
 
-    def __call__(self, image: Tensor, target: Dict[str, Any]):
-        """
+            network = YOLOV4Network(
+                num_classes=21,  # The number of classes in Pascal VOC dataset.
+                matching_algorithm=matching_algorithm,
+                matching_threshold=matching_threshold,
+                ignore_bg_threshold=ignore_bg_threshold,
+                overlap_func=overlap_func,
+                predict_overlap=predict_overlap,
+                overlap_loss_multiplier=overlap_loss_multiplier,
+                confidence_loss_multiplier=confidence_loss_multiplier,
+                class_loss_multiplier=class_loss_multiplier,
+            )
+        super().__init__(**kwargs, network=network)
+
+
+class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
+    """A subclass of VOCDetectionDataModule that resizes the images to a specific size. YOLO expectes the image
+    size to be divisible by the ratio in which the network downsamples the image.
+
+    Args:
+        width: Resize images to this width.
+        height: Resize images to this height.
+    """
+
+    def __init__(self, width: int = 608, height: int = 608, **kwargs: Any):
+        super().__init__(**kwargs)
+        self.image_size = (height, width)
+
+    def default_transforms(self) -> Callable:
+        transforms = [
+            lambda image, target: (F.to_tensor(image), target),
+            self._resize,
+        ]
+        if self.normalize:
+            transforms += [
+                lambda image, target: (
+                    F.normalize(image, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                    target,
+                )
+            ]
+        return Compose(transforms)
+
+    def _resize(self, image: Tensor, target: TARGET) -> Tuple[Tensor, TARGET]:
+        """Rescales the image and target to ``self.image_size``.
+
         Args:
-            tensor: Tensor image to be resized.
+            tensor: Image tensor to be resized.
             target: Dictionary of detection targets.
 
         Returns:
-            Resized Tensor image.
+            Resized image tensor.
         """
+        device = target["boxes"].device
         height, width = image.shape[-2:]
-        original_size = torch.tensor([height, width])
-        scale_y, scale_x = torch.tensor(self.output_size) / original_size
-        scale = torch.tensor([scale_x, scale_y, scale_x, scale_y], device=target["boxes"].device)
-        image = F.resize(image, self.output_size)
+        original_size = torch.tensor([height, width], device=device)
+        scale_y, scale_x = torch.tensor(self.image_size, device=device) / original_size
+        scale = torch.tensor([scale_x, scale_y, scale_x, scale_y], device=device)
+        image = F.resize(image, self.image_size)
         target["boxes"] = target["boxes"] * scale
         return image, target
 
 
-def run_cli():
-    from argparse import ArgumentParser
-
-    from pytorch_lightning import Trainer, seed_everything
-
-    from pl_bolts.datamodules import VOCDetectionDataModule
-    from pl_bolts.datamodules.vocdetection_datamodule import Compose
-    from pl_bolts.models.detection.yolo.yolo_config import YOLOConfiguration
-
-    seed_everything(42)
-
-    parser = ArgumentParser()
-    parser.add_argument(
-        "--config",
-        type=str,
-        metavar="PATH",
-        required=True,
-        help="read model configuration from PATH",
-    )
-    parser.add_argument(
-        "--darknet-weights",
-        type=str,
-        metavar="PATH",
-        help="read the initial model weights from PATH in Darknet format",
-    )
-    parser.add_argument(
-        "--lr",
-        type=float,
-        metavar="LR",
-        default=0.0013,
-        help="learning rate after the warmup period",
-    )
-    parser.add_argument(
-        "--momentum",
-        type=float,
-        metavar="GAMMA",
-        default=0.9,
-        help="if nonzero, the optimizer uses momentum with factor GAMMA",
-    )
-    parser.add_argument(
-        "--weight-decay",
-        type=float,
-        metavar="LAMBDA",
-        default=0.0005,
-        help="if nonzero, the optimizer uses weight decay (L2 penalty) with factor LAMBDA",
-    )
-    parser.add_argument(
-        "--warmup-epochs",
-        type=int,
-        metavar="N",
-        default=1,
-        help="learning rate warmup period is N epochs",
-    )
-    parser.add_argument(
-        "--max-epochs",
-        type=int,
-        metavar="N",
-        default=300,
-        help="train at most N epochs",
-    )
-    parser.add_argument(
-        "--initial-lr",
-        type=float,
-        metavar="LR",
-        default=0.0,
-        help="learning rate before the warmup period",
-    )
-    parser.add_argument(
-        "--confidence-threshold",
-        type=float,
-        metavar="THRESHOLD",
-        default=0.001,
-        help="keep predictions only if the confidence is above THRESHOLD",
-    )
-    parser.add_argument(
-        "--nms-threshold",
-        type=float,
-        metavar="THRESHOLD",
-        default=0.45,
-        help="non-maximum suppression removes predicted boxes that have IoU greater than "
-        "THRESHOLD with a higher scoring box",
-    )
-    parser.add_argument(
-        "--max-predictions-per-image",
-        type=int,
-        metavar="N",
-        default=100,
-        help="keep at most N best predictions",
-    )
-
-    parser = VOCDetectionDataModule.add_argparse_args(parser)
-    parser = Trainer.add_argparse_args(parser)
-    args = parser.parse_args()
-
-    config = YOLOConfiguration(args.config)
-
-    transforms = [lambda image, target: (F.to_tensor(image), target), Resize((config.height, config.width))]
-    transforms = Compose(transforms)
-    datamodule = VOCDetectionDataModule.from_argparse_args(args, train_transforms=transforms, val_transforms=transforms)
-
-    optimizer_params = {"lr": args.lr, "momentum": args.momentum, "weight_decay": args.weight_decay}
-    lr_scheduler_params = {
-        "warmup_epochs": args.warmup_epochs,
-        "max_epochs": args.max_epochs,
-        "warmup_start_lr": args.initial_lr,
-    }
-    model = YOLO(
-        network=config.get_network(),
-        optimizer_params=optimizer_params,
-        lr_scheduler_params=lr_scheduler_params,
-        confidence_threshold=args.confidence_threshold,
-        nms_threshold=args.nms_threshold,
-        max_predictions_per_image=args.max_predictions_per_image,
-    )
-    if args.darknet_weights is not None:
-        with open(args.darknet_weights) as weight_file:
-            model.load_darknet_weights(weight_file)
-
-    trainer = Trainer.from_argparse_args(args)
-    trainer.fit(model, datamodule=datamodule)
-
-
 if __name__ == "__main__":
-    run_cli()
+    LightningCLI(CLIYOLO, ResizedVOCDetectionDataModule, seed_everything_default=42)

@@ -32,6 +32,7 @@ def _compare_version(package: str, op: Callable, version: str) -> bool:
 _NATIVE_AMP_AVAILABLE: bool = _module_available("torch.cuda.amp") and hasattr(torch.cuda.amp, "autocast")
 
 _TORCHVISION_AVAILABLE: bool = _module_available("torchvision")
+_TORCHMETRICS_DETECTION_AVAILABLE: bool = _module_available("torchmetrics.detection")
 _GYM_AVAILABLE: bool = _module_available("gym")
 _SKLEARN_AVAILABLE: bool = _module_available("sklearn")
 _PIL_AVAILABLE: bool = _module_available("PIL")
