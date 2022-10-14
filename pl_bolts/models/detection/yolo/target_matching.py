@@ -67,21 +67,21 @@ class ShapeMatching(ABC):
         cell_i = grid_xy[:, 0].to(torch.int64).clamp(0, width - 1)
         cell_j = grid_xy[:, 1].to(torch.int64).clamp(0, height - 1)
 
-        matched_targets, matched_predictors = self.match(xywh[:, 2:])
+        matched_targets, matched_anchors = self.match(xywh[:, 2:])
         cell_i = cell_i[matched_targets]
         cell_j = cell_j[matched_targets]
 
-        # Background mask is used to select predictors that are not responsible for predicting any object, for
+        # Background mask is used to select anchors that are not responsible for predicting any object, for
         # calculating the part of the confidence loss with zero as the target confidence. It is set to False, if a
         # predicted box overlaps any target significantly, or if a prediction is matched to a target.
         background_mask = iou_below(preds["boxes"], targets["boxes"], self.ignore_bg_threshold)
-        background_mask[cell_j, cell_i, matched_predictors] = False
+        background_mask[cell_j, cell_i, matched_anchors] = False
 
         preds = {
-            "boxes": preds["boxes"][cell_j, cell_i, matched_predictors],
-            "confidences": preds["confidences"][cell_j, cell_i, matched_predictors],
+            "boxes": preds["boxes"][cell_j, cell_i, matched_anchors],
+            "confidences": preds["confidences"][cell_j, cell_i, matched_anchors],
             "bg_confidences": preds["confidences"][background_mask],
-            "classprobs": preds["classprobs"][cell_j, cell_i, matched_predictors],
+            "classprobs": preds["classprobs"][cell_j, cell_i, matched_anchors],
         }
         targets = {
             "boxes": targets["boxes"][matched_targets],
@@ -123,7 +123,7 @@ class HighestIoUMatching(ShapeMatching):
     ) -> None:
         super().__init__(ignore_bg_threshold)
         self.prior_shapes = prior_shapes
-        # anchor_map maps the anchor indices to predictors in this layer, or to -1 if it's not an anchor of this layer.
+        # anchor_map maps the anchor indices to anchors in this layer, or to -1 if it's not an anchor of this layer.
         # This layer ignores the target if all the selected anchors are in another layer.
         self.anchor_map = [
             prior_shape_idxs.index(idx) if idx in prior_shape_idxs else -1 for idx in range(len(prior_shapes))

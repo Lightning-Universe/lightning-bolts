@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 import torch
 import torch.nn as nn
 from pytorch_lightning import LightningModule
-from pytorch_lightning.cli import LightningCLI
+from pytorch_lightning.utilities.cli import LightningCLI
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
 from torch import Tensor, optim
 
@@ -101,7 +101,7 @@ class YOLO(LightningModule):
     have to match. Different batches can have different image sizes, as long as the size is divisible by the ratio in
     which the network downsamples the input.
 
-    During training, the model expects both the input tensors and a list of targets. *Each target is a dictionary
+    During training, the model expects both the image tensors and a list of targets. *Each target is a dictionary
     containing the following tensors*:
 
     - boxes (``FloatTensor[N, 4]``): the ground-truth boxes in `(x1, y1, x2, y2)` format
@@ -109,9 +109,9 @@ class YOLO(LightningModule):
       ground-truth box
 
     :func:`~pl_bolts.models.detection.yolo.yolo_module.YOLO.forward` method returns all predictions from all detection
-    layers in one tensor with shape ``[images, predictors, classes + 5]``. The coordinates are scaled to the input image
-    size. During training it also returns a dictionary containing the classification, box overlap, and confidence
-    losses.
+    layers in one tensor with shape ``[N, anchors, classes + 5]``, where ``anchors`` is the total number of anchors in
+    all detection layers. The coordinates are scaled to the input image size. During training it also returns a
+    dictionary containing the classification, box overlap, and confidence losses.
 
     During inference, the model requires only the image tensors.
     :func:`~pl_bolts.models.detection.yolo.yolo_module.YOLO.infer` method filters and processes the predictions. If a
@@ -191,9 +191,9 @@ class YOLO(LightningModule):
         Returns:
             detections (:class:`~torch.Tensor`), losses (Dict[str, :class:`~torch.Tensor`]): Detections, and if targets
             were provided, a dictionary of losses. Detections are shaped
-            ``[batch_size, predictors, classes + 5]``, where ``predictors`` is the total number of feature map cells in
-            all detection layers times the number of anchors per cell. The predicted box coordinates are in
-            `(x1, y1, x2, y2)` format and scaled to the input image size.
+            ``[batch_size, anchors, classes + 5]``, where ``anchors`` is the feature map size (width * height) times the
+            number of anchors per cell. The predicted box coordinates are in `(x1, y1, x2, y2)` format and scaled to the
+            input image size.
         """
         detections, losses, hits = self.network(images, targets)
 

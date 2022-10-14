@@ -228,8 +228,10 @@ class YOLOV4Backbone(nn.Module):
 
     Args:
         in_channels: Number of channels in the input image.
-        widths: Number of channels at each network stage.
-        depths: Number of bottleneck layers at each network stage.
+        widths: Number of channels at each network stage. Typically ``(32, 64, 128, 256, 512, 1024)``. The P6 variant
+            adds one more stage with 1024 channels.
+        depths: Number of bottleneck layers at each network stage. Typically ``(1, 1, 2, 8, 8, 4)``. The P6 variant uses
+            ``(1, 1, 3, 15, 15, 7, 7)``.
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         normalization: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
@@ -291,8 +293,10 @@ class YOLOV5Backbone(nn.Module):
     Args:
         in_channels: Number of channels in the input image.
         width: Number of channels in the narrowest convolutional layer. The wider convolutional layers will use a number
-            of channels that is a multiple of this value.
-        depth: Repeat the bottleneck layers this many times. Can be used to make the network deeper.
+            of channels that is a multiple of this value. The values used by the different variants are 16 (yolov5n), 32
+            (yolov5s), 48 (yolov5m), 64 (yolov5l), and 80 (yolov5x).
+        depth: Repeat the bottleneck layers this many times. Can be used to make the network deeper. The values used by
+            the different variants are 1 (yolov5n, yolov5s), 2 (yolov5m), 3 (yolov5l), and 4 (yolov5x).
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         normalization: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
@@ -880,9 +884,11 @@ class YOLOV5Network(nn.Module):
     Args:
         num_classes: Number of different classes that this model predicts.
         backbone: A backbone network that returns the output from each stage.
-        width: The number of channels in the narrowest convolutional layer. The wider convolutional layers will use a
-            number of channels that is a multiple of this value.
-        depth: Repeat the bottleneck layers this many times. Can be used to make the network deeper.
+        width: Number of channels in the narrowest convolutional layer. The wider convolutional layers will use a number
+            of channels that is a multiple of this value. The values used by the different variants are 16 (yolov5n), 32
+            (yolov5s), 48 (yolov5m), 64 (yolov5l), and 80 (yolov5x).
+        depth: Repeat the bottleneck layers this many times. Can be used to make the network deeper. The values used by
+            the different variants are 1 (yolov5n, yolov5s), 2 (yolov5m), 3 (yolov5l), and 4 (yolov5x).
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         normalization: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
@@ -1050,6 +1056,19 @@ class YOLOV5Network(nn.Module):
 
 
 class YOLOXHead(nn.Module):
+    """A module that produces features for YOLO detection layer, decoupling the classification and localization
+    features.
+
+    Args:
+        in_channels: Number of input channels that the module expects.
+        hidden_channels: Number of output channels in the hidden layers.
+        anchors_per_cell: Number of detections made at each spatial location of the feature map.
+        num_classes: Number of different classes that this model predicts.
+        activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
+            "linear", or "none".
+        norm: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+    """
+
     def __init__(
         self,
         in_channels: int,
@@ -1057,12 +1076,12 @@ class YOLOXHead(nn.Module):
         anchors_per_cell: int,
         num_classes: int,
         activation: Optional[str] = "silu",
-        normalization: Optional[str] = "batchnorm",
+        norm: Optional[str] = "batchnorm",
     ) -> None:
         super().__init__()
 
         def conv(in_channels: int, out_channels: int, kernel_size: int = 1) -> nn.Module:
-            return Conv(in_channels, out_channels, kernel_size, stride=1, activation=activation, norm=normalization)
+            return Conv(in_channels, out_channels, kernel_size, stride=1, activation=activation, norm=norm)
 
         def linear(in_channels: int, out_channels: int) -> nn.Module:
             return nn.Conv2d(in_channels, out_channels, kernel_size=1)
@@ -1100,9 +1119,11 @@ class YOLOXNetwork(nn.Module):
     Args:
         num_classes: Number of different classes that this model predicts.
         backbone: A backbone network that returns the output from each stage.
-        width: The number of channels in the narrowest convolutional layer. The wider convolutional layers will use a
-            number of channels that is a multiple of this value.
-        depth: Repeat the bottleneck layers this many times. Can be used to make the network deeper.
+        width: Number of channels in the narrowest convolutional layer. The wider convolutional layers will use a number
+            of channels that is a multiple of this value. The values used by the different variants are 24 (yolox-tiny),
+            32 (yolox-s), 48 (yolox-m), and 64 (yolox-l).
+        depth: Repeat the bottleneck layers this many times. Can be used to make the network deeper. The values used by
+            the different variants are 1 (yolox-tiny, yolox-s), 2 (yolox-m), and 3 (yolox-l).
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         normalization: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
@@ -1180,7 +1201,7 @@ class YOLOXNetwork(nn.Module):
                 anchors_per_cell,
                 num_classes,
                 activation=activation,
-                normalization=normalization,
+                norm=normalization,
             )
 
         def detect(prior_shape_idxs: Sequence[int]) -> DetectionLayer:
