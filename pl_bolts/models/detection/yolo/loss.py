@@ -1,3 +1,4 @@
+from ast import Call
 from dataclasses import dataclass
 from typing import Callable, Dict, Optional, Tuple, Union
 
@@ -39,7 +40,7 @@ else:
         complete_box_iou_loss = None
 
 
-def _get_iou_and_loss_functions(name: str):
+def _get_iou_and_loss_functions(name: str) -> Tuple[Callable, Callable]:
     """Returns functions for calculating the IoU and the IoU loss, given the IoU variant name.
 
     Args:
