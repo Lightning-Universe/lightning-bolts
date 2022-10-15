@@ -39,6 +39,40 @@ else:
         complete_box_iou_loss = None
 
 
+def _get_iou_and_loss_functions(name: str):
+    """Returns functions for calculating the IoU and the IoU loss, given the IoU variant name.
+
+    Args:
+        name: Name of the IoU variant. Either "iou", "giou", "diou", or "ciou".
+
+    Returns:
+        A tuple of two functions. The first function calculates the pairwise IoU and the second function calculates the
+        elementwise loss.
+    """
+    if name == "iou":
+        iou_func = box_iou
+        loss_func = None
+    elif name == "giou":
+        iou_func = generalized_box_iou
+        loss_func = generalized_box_iou_loss
+    elif name == "diou":
+        iou_func = distance_box_iou
+        loss_func = distance_box_iou_loss
+    elif name == "ciou":
+        iou_func = complete_box_iou
+        loss_func = complete_box_iou_loss
+    else:
+        raise ValueError(f"Unknown IoU function '{name}'.")
+
+    if not callable(iou_func):
+        raise ValueError(f"The IoU function '{name}' is not supported by the installed version of Torchvision.")
+
+    if not callable(loss_func):
+        loss_func = lambda boxes1, boxes2: 1.0 - iou_func(boxes1, boxes2).diagonal()
+
+    return iou_func, loss_func
+
+
 def _size_compensation(targets: Tensor, image_size: Tensor) -> Tuple[Tensor, Tensor]:
     """Calcuates the size compensation factor for the overlap loss.
 
@@ -186,30 +220,11 @@ class LossFunction:
         confidence_multiplier: float = 1.0,
         class_multiplier: float = 1.0,
     ):
-        overlap_loss_func = None
-        if overlap_func == "iou":
-            overlap_func = box_iou
-        elif overlap_func == "giou":
-            overlap_func = generalized_box_iou
-            overlap_loss_func = generalized_box_iou_loss
-        elif overlap_func == "diou":
-            overlap_func = distance_box_iou
-            overlap_loss_func = distance_box_iou_loss
-        elif overlap_func == "ciou":
-            overlap_func = complete_box_iou
-            overlap_loss_func = complete_box_iou_loss
-
-        if not callable(overlap_func):
-            raise ValueError(
-                f"Unsupported overlap function '{overlap_func}'. Try upgrading Torchvision or using another IoU "
-                "algorithm."
-            )
-        self._pairwise_overlap = overlap_func
-
-        if callable(overlap_loss_func):
-            self._elementwise_overlap_loss = overlap_loss_func
-        else:
+        if callable(overlap_func):
+            self._pairwise_overlap = overlap_func
             self._elementwise_overlap_loss = lambda boxes1, boxes2: 1.0 - overlap_func(boxes1, boxes2).diagonal()
+        else:
+            self._pairwise_overlap, self._elementwise_overlap_loss = _get_iou_and_loss_functions(overlap_func)
 
         self.predict_overlap = predict_overlap
         self.overlap_multiplier = overlap_multiplier
