@@ -494,7 +494,7 @@ class CLIYOLO(YOLO):
         **kwargs: Any,
     ) -> None:
         if network_config is not None:
-            network = DarknetNetwork(
+            network: nn.Module = DarknetNetwork(
                 network_config,
                 darknet_weights,
                 matching_algorithm=matching_algorithm,
