@@ -7,10 +7,8 @@ from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner
 from pl_bolts.models.self_supervised.swav.swav_module import SwAV
 from pl_bolts.models.self_supervised.swav.transforms import SwAVFinetuneTransform
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization, stl10_normalization
-from pl_bolts.utils.stability import under_review
 
 
-@under_review()
 def cli_main():  # pragma: no cover
     from pl_bolts.datamodules import ImagenetDataModule, STL10DataModule
 
