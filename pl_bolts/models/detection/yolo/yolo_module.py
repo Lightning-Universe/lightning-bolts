@@ -19,7 +19,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHMETRICS_DETECTION_AVAILABLE:
     try:
-        from torchmetrics.detection import MeanAveragePrecision  # type: ignore
+        from torchmetrics.detection import MeanAveragePrecision
 
         _MEAN_AVERAGE_PRECISION_AVAILABLE = True
     except ImportError:

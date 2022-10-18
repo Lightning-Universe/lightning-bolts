@@ -9,7 +9,6 @@ This PyTorch Lightning implementation combines features from some of the notable
 - *Scaled-YOLOv4*: [Chien-Yao Wang, Alexey Bochkovskiy, and Hong-Yuan Mark Liao](https://arxiv.org/abs/2011.08036)
 - *YOLOX*: [Zheng Ge, Songtao Liu, Feng Wang, Zeming Li, and Jian Sun](https://arxiv.org/abs/2107.08430)
 
-
 ## Network Architecture
 
 Any network can be used with YOLO detection heads as long as it produces feature maps with the correct number of features. Typically the network consists of a CNN backbone combined with a [Feature Pyramid Network](https://arxiv.org/abs/1612.03144) or a [Path Aggregation Network](https://arxiv.org/abs/1803.01534). Backbone layers reduce the size of the feature map and the network may contain multiple detection heads that operate at different resolutions.
@@ -17,7 +16,6 @@ Any network can be used with YOLO detection heads as long as it produces feature
 The user can write the network architecture in PyTorch, or construct a computational graph based on a Darknet configuration file using the [`DarknetNetwork`](https://github.com/Lightning-AI/lightning-bolts/tree/master/pl_bolts/models/detection/yolo/darknet_network.py) class. The network object is passed to the YOLO constructor in the `network` argument. `DarknetNetwork` is also able to read weights from a Darknet model file.
 
 There are several network architectures included in the [`torch_networks`](https://github.com/Lightning-AI/lightning-bolts/tree/master/pl_bolts/models/detection/yolo/torch_networks.py) module (YOLOv4, YOLOv5, YOLOX). Larger and smaller variants of these models can be created by varying the `width` and `depth` arguments.
-
 
 ## Anchors
 
@@ -32,7 +30,6 @@ With the exception of the SimOTA matching algorithm, the prior shapes are also u
 - *size*: Calculates the ratio between the width and height of the target box to the prior width and height. If both the width and the height are close enough to the prior shape, matches the target to the anchor.
 - *simota*: The SimOTA matching algorithm from YOLOX. Targets can be matched not only to anchors from the closest grid cell, but to any anchors that are inside the target bounding box. The matching algorithm is based on Optimal Transport and uses the training loss between the target and the predictions as the cost. That is, the prior shapes are not used for matching, but the predictions corresponding to the anchors.
 
-
 ## Input Data
 
 The model input is expected to be a list of images. Each image is a tensor with shape `[channels, height, width]`. The images from a single batch will be stacked into a single tensor, so the sizes have to match. Different batches can have different image sizes. The feature pyramid network introduces another constraint on the image size: the width and the height have to be divisible by the ratio in which the network downsamples the input.
@@ -42,13 +39,11 @@ During training, the model expects both the image tensors and a list of targets.
 - *boxes*: `(x1, y1, x2, y2)` coordinates of the ground-truth boxes in a matrix with shape `[N, 4]`.
 - *labels*: Either integer class labels in a vector of size `N` or a class mask for each ground-truth box in a boolean matrix with shape `[N, classes]`
 
-
 ## Training
 
 The command line application demonstrates how to train a YOLO model using PyTorch Lightning. The first step is to create a network, either from a Darknet configuration file, or using one of the included PyTorch networks. The network is passed to the YOLO model constructor.
 
 The data module needs to resize the data to a suitable size, in addition to any augmenting transforms. For example, YOLOv4 network requires that the width and the height are multiples of 32.
-
 
 ## Inference
 
