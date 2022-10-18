@@ -86,8 +86,14 @@ def test_simclr(tmpdir, datadir):
     trainer.fit(model, datamodule=datamodule)
 
 
-def test_swav(tmpdir, datadir, batch_size=2):
-    # inputs, y = batch  (doesn't receive y for some reason)
+def test_swav(tmpdir, datadir, catch_warnings):
+    """Test SWAV on CIFAR-10."""
+    warnings.filterwarnings(
+        "ignore",
+        message=".+does not have many workers which may be a bottleneck.+",
+        category=PossibleUserWarning,
+    )
+    batch_size = 2
     datamodule = CIFAR10DataModule(data_dir=datadir, batch_size=batch_size, num_workers=0)
 
     datamodule.train_transforms = SwAVTrainDataTransform(
@@ -96,12 +102,18 @@ def test_swav(tmpdir, datadir, batch_size=2):
     datamodule.val_transforms = SwAVEvalDataTransform(
         normalize=cifar10_normalization(), size_crops=[32, 16], nmb_crops=[2, 1], gaussian_blur=False
     )
+    if torch.cuda.device_count() >= 1:
+        devices = torch.cuda.device_count()
+        accelerator = "gpu"
+    else:
+        devices = None
+        accelerator = "cpu"
 
     model = SwAV(
         arch="resnet18",
         hidden_mlp=512,
-        gpus=0,
         nodes=1,
+        gpus=0 if devices is None else devices,
         num_samples=datamodule.num_samples,
         batch_size=batch_size,
         nmb_crops=[2, 1],
@@ -112,9 +124,14 @@ def test_swav(tmpdir, datadir, batch_size=2):
         first_conv=False,
         dataset="cifar10",
     )
-
-    trainer = Trainer(gpus=0, fast_dev_run=True, default_root_dir=tmpdir)
-
+    trainer = Trainer(
+        accelerator=accelerator,
+        devices=devices,
+        fast_dev_run=True,
+        default_root_dir=tmpdir,
+        log_every_n_steps=1,
+        max_epochs=1,
+    )
     trainer.fit(model, datamodule=datamodule)
 
 
