@@ -51,41 +51,12 @@ class SparseMLCallback(Callback):
             raise MisconfigurationException("SparseML only supports training with one optimizer.")
         optimizer = optimizer[0]
         optimizer = self.manager.modify(
-            pl_module, optimizer, steps_per_epoch=self._num_training_steps_per_epoch(trainer), epoch=0
+            pl_module, optimizer, steps_per_epoch=trainer.estimated_stepping_batches, epoch=0
         )
         trainer.optimizers = [optimizer]
 
     def on_fit_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         self.manager.finalize(pl_module)
-
-    def _num_training_steps_per_epoch(self, trainer: Trainer) -> int:
-        """Total training steps inferred from the datamodule and devices."""
-        if isinstance(trainer.limit_train_batches, int) and trainer.limit_train_batches != 0:
-            dataset_size = trainer.limit_train_batches
-        elif isinstance(trainer.limit_train_batches, float):
-            # limit_train_batches is a percentage of batches
-            dataset_size = len(trainer.datamodule.train_dataloader())
-            dataset_size = int(dataset_size * trainer.limit_train_batches)
-        else:
-            dataset_size = len(trainer.datamodule.train_dataloader())
-
-        if hasattr(trainer, "num_devices"):
-            # New behavior in Lightning
-            num_devices = max(1, trainer.num_devices)
-        else:
-            # Old behavior deprecated in v1.6
-            num_devices = max(1, trainer.num_gpus, trainer.num_processes)
-            if trainer.tpu_cores:
-                num_devices = max(num_devices, trainer.tpu_cores)
-
-        effective_batch_size = trainer.accumulate_grad_batches * num_devices
-        max_estimated_steps = dataset_size // effective_batch_size
-
-        # To avoid breaking changes, max_steps is set to -1 if it is not defined
-        max_steps = -1 if not trainer.max_steps else trainer.max_steps
-        if max_steps != -1 and max_steps < max_estimated_steps:
-            return max_steps
-        return max_estimated_steps
 
     @staticmethod
     def export_to_sparse_onnx(

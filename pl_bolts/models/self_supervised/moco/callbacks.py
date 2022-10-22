@@ -14,7 +14,7 @@ class MocoLRScheduler(Callback):
         self.schedule = schedule
         self.max_epochs = max_epochs
 
-    def on_epoch_start(self, trainer, pl_module):
+    def on_train_epoch_start(self, trainer, pl_module):
         epoch = trainer.current_epoch
         lr = self.lr
 
