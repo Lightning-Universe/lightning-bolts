@@ -1,2 +1,1 @@
-torch>=1.9.*
-packaging
+pytorch-lightning>=1.8.0
