@@ -19,6 +19,7 @@ import shutil
 import sys
 
 import pt_lightning_sphinx_theme
+
 import pl_bolts
 
 _PATH_HERE = os.path.abspath(os.path.dirname(__file__))
