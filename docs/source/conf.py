@@ -20,6 +20,7 @@ import sys
 from importlib.util import module_from_spec, spec_from_file_location
 
 import pt_lightning_sphinx_theme
+
 import pl_bolts
 
 _PATH_HERE = os.path.abspath(os.path.dirname(__file__))
