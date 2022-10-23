@@ -19,7 +19,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHMETRICS_DETECTION_AVAILABLE:
     try:
-        from torchmetrics.detection import MeanAveragePrecision  # type: ignore
+        from torchmetrics.detection import MeanAveragePrecision
 
         _MEAN_AVERAGE_PRECISION_AVAILABLE = True
     except ImportError:
@@ -173,9 +173,7 @@ class YOLO(LightningModule):
             self._val_map = MeanAveragePrecision()
             self._test_map = MeanAveragePrecision()
 
-    def forward(  # type: ignore
-        self, images: Tensor, targets: Optional[TARGETS] = None
-    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def forward(self, images: Tensor, targets: Optional[TARGETS] = None) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         """Runs a forward pass through the network (all layers listed in ``self.network``), and if training targets
         are provided, computes the losses from the detection layers.
 
@@ -239,7 +237,7 @@ class YOLO(LightningModule):
         lr_scheduler = self.lr_scheduler_class(optimizer, **self.lr_scheduler_params)
         return [optimizer], [lr_scheduler]
 
-    def training_step(self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int) -> STEP_OUTPUT:  # type: ignore
+    def training_step(self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int) -> STEP_OUTPUT:
         """Computes the training loss.
 
         Args:
@@ -262,9 +260,7 @@ class YOLO(LightningModule):
 
         return {"loss": losses.sum()}
 
-    def validation_step(  # type: ignore
-        self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int
-    ) -> Optional[STEP_OUTPUT]:
+    def validation_step(self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int) -> Optional[STEP_OUTPUT]:
         """Evaluates a batch of data from the validation set.
 
         Args:
@@ -292,7 +288,7 @@ class YOLO(LightningModule):
             self.log_dict(map_scores, sync_dist=True)
             self._val_map.reset()
 
-    def test_step(self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int) -> Optional[STEP_OUTPUT]:  # type: ignore
+    def test_step(self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int) -> Optional[STEP_OUTPUT]:
         """Evaluates a batch of data from the test set.
 
         Args:
@@ -340,6 +336,7 @@ class YOLO(LightningModule):
         images, _ = validate_batch(batch)
         detections = self(images)
         detections = self.process_detections(detections)
+        return detections
 
     def infer(self, image: Tensor) -> Dict[str, Tensor]:
         """Feeds an image to the network and returns the detected bounding boxes, confidence scores, and class
