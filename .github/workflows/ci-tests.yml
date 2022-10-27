@@ -60,6 +60,7 @@ jobs:
 
     - name: Test Package [only]
       run: |
+        pip install pytest -q
         python -m pytest pl_bolts -v \
           --ignore=pl_bolts/datamodules \
           --ignore=pl_bolts/datasets \
