@@ -6,7 +6,7 @@ pytest-cov>2.10, <=4.0.0
 check-manifest
 pre-commit>=1.0
 mypy==0.982
-atari-py==0.2.6  # needed for RL
+atari-py==0.2.9  # needed for RL
 scikit-learn>=1.0.2, <=1.1.3
 sparseml>=1.0.0, <=1.1.1
 ale-py>=0.7, <=0.8.0
