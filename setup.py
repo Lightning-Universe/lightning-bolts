@@ -56,7 +56,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     keywords=["deep learning", "pytorch", "AI"],
-    python_requires=">=3.8",
+    python_requires=">=3.7",
     setup_requires=["wheel"],
     install_requires=setup_tools._load_requirements(_PATH_ROOT),
     extras_require=_prepare_extras(),
