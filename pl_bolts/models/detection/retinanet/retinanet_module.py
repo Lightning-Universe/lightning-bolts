@@ -65,10 +65,20 @@ class RetinaNet(LightningModule):
         self.backbone = backbone
         if backbone is None:
             if _TORCHVISION_LESS_THAN_0_13:
-                self.model = retinanet_resnet50_fpn(pretrained=pretrained, **kwargs)
+                self.model = retinanet_resnet50_fpn(
+                    pretrained=pretrained,
+                    pretrained_backbone=pretrained_backbone,
+                    trainable_backbone_layers=trainable_backbone_layers,
+                    **kwargs,
+                )
             else:
                 weights = "DEFAULT" if pretrained else None
-                self.model = retinanet_resnet50_fpn(weights=weights, weights_backbone="DEFAULT", **kwargs)
+                self.model = retinanet_resnet50_fpn(
+                    weights=weights,
+                    weights_backbone="DEFAULT",
+                    trainable_backbone_layers=trainable_backbone_layers,
+                    **kwargs,
+                )
 
             self.model.head = RetinaNetHead(
                 in_channels=self.model.backbone.out_channels,
