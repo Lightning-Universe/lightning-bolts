@@ -24,7 +24,7 @@ jobs:
 
       - name: Check package
         run: |
-          pip install "twine>=3.2"
+          pip install "twine==4.0.1"
           twine check dist/*
           python setup.py clean
 
