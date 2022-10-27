@@ -10,6 +10,12 @@ Core Maintainers
 - Ota Jašek (`otaj <https://github.com/otaj>`_)
 - Akihiro Nitta (`akihironitta <https://github.com/akihironitta>`_)
 
+Core Contributors
+-----------------
+- Atharva Phatak (`Atharva-Phatak <https://github.com/Atharva-Phatak>`_)
+- Shion Matsumoto (`matsumotosan <https://github.com/matsumotosan>`_)
+- JongMok Lee (`lijm1358 <https://github.com/lijm1358>`_)
+
 Alumni
 ------
 - Teddy Koker (`teddykoker <https://github.com/teddykoker>`_)
