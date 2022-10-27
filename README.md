@@ -126,21 +126,6 @@ Join our Slack and/or read our [CONTRIBUTING](./.github/CONTRIBUTING.md) guideli
 
 ______________________________________________________________________
 
-## Citation
-
-To cite bolts use:
-
-```
-@article{falcon2020framework,
-  title={A Framework For Contrastive Self-Supervised Learning And Designing A New Approach},
-  author={Falcon, William and Cho, Kyunghyun},
-  journal={arXiv preprint arXiv:2009.00104},
-  year={2020}
-}
-```
-
-To cite other contributed models or modules, please cite the authors directly (if they don't have bibtex, ping the authors on a GH issue)
-
 ## License
 
 Please observe the Apache 2.0 license that is listed in this repository.
