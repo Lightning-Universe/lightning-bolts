@@ -1,25 +1,37 @@
-name: CI base testing
+name: CI testing
 
 # see: https://help.github.com/en/actions/reference/events-that-trigger-workflows
 on:  # Trigger the workflow on push or pull request, but only for the master branch
-  push: {}
+  push:
+    branches: [master]
   pull_request:
     branches: [master]
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  doctest:
+  pytest:
 
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, windows-2022, macOS-11]
-        python-version: [3.8]
+        # Something is wrong with windows tests, will need to debug separately.
+        os: [ubuntu-20.04, macOS-11]
+        # todo: seems there are some issues with py3.10 while install dependencies
+        python-version: ["3.7", "3.9"]
+        requires: ['minimal', 'latest']
+        exclude:
+          - {python-version: "3.9", requires: 'minimal'}
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
-    timeout-minutes: 20
+    # the reason for high number is MUCH slower tests on macOS and py3.8
+    timeout-minutes: 50
+
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
@@ -32,6 +44,31 @@ jobs:
         brew update  # Todo: find a better way...
         brew install libomp  # https://github.com/pytorch/pytorch/issues/20030
 
+    - name: Set min. dependencies
+      if: matrix.requires == 'minimal'
+      run: |
+        import os, glob
+        ls = ['requirements.txt'] + glob.glob(os.path.join("requirements", "*.txt"))
+        for fpath in ls:
+            req = open(fpath).read().replace('>=', '==')
+            open(fpath, 'w').write(req)
+      shell: python
+
+    - name: Install package
+      run: |
+        pip install -e . --upgrade --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
+        pip list
+
+    - name: Test Package [only]
+      run: |
+        pip install pytest -q
+        # TODO: package shall be fine to run full without any ignores
+        python -m pytest pl_bolts \
+          --ignore=pl_bolts/datamodules \
+          --ignore=pl_bolts/datasets \
+          --ignore=pl_bolts/models/self_supervised/amdim/transforms.py \
+          --ignore=pl_bolts/models/rl
+
     # Note: This uses an internal pip API and may not always work
     # https://github.com/actions/cache/blob/master/examples.md#multiple-oss-in-a-workflow
     - name: Get pip cache
@@ -43,32 +80,26 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ steps.pip-cache.outputs.dir }}
-        key: ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}-pip-${{ hashFiles('requirements.txt') }}
+        key: ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements/modules.txt') }}
         restore-keys: |
-          ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}-pip-
+          ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-
 
     - name: Install dependencies
       run: |
-        python --version
-        python -m pip install --upgrade --user pip
-        pip --version
-        pip install --requirement ./requirements.txt --quiet --find-links https://download.pytorch.org/whl/cpu/torch_stable.html --upgrade
-        pip install --requirement ./requirements/test.txt --quiet --upgrade-strategy only-if-needed
-        # pip install tox coverage
+        pip install --requirement requirements/devel.txt --upgrade --quiet \
+          --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
         pip list
-      shell: bash
 
     - name: Cache datasets
       uses: actions/cache@v3
       with:
-        path: Datasets # This path is specific to Ubuntu
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: PL-dataset
+        path: ./datasets
+        key: pl-datasets-${{ hashFiles('tests/conftest.py') }}
 
-    - name: Test Package [only]
+    - name: Tests
       run: |
-        # NOTE: run coverage on tests does not propagare faler status for Win, https://github.com/nedbat/coveragepy/issues/1003
-        python -m pytest pl_bolts -v --cov=pl_bolts --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml --ignore=pl_bolts/datamodules --ignore=pl_bolts/datasets --ignore=pl_bolts/models/self_supervised/amdim/transforms.py --ignore=pl_bolts/models/rl
+        python -m pytest tests -v --cov=pl_bolts \
+          --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@v3
@@ -93,5 +124,6 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: coverage.xml
         flags: cpu,pytest
-        name: Base-coverage
+        env_vars: OS,PYTHON
+        name: codecov-umbrella
         fail_ci_if_error: false
