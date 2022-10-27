@@ -1,1 +1,1 @@
-pytorch-lightning>=1.8.0 --pre
+pytorch-lightning==1.8.0rc1  # fixme: use normal release
