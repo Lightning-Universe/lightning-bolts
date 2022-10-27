@@ -20,11 +20,10 @@ jobs:
       matrix:
         # Something is wrong with windows tests, will need to debug separately.
         os: [ubuntu-20.04, macOS-11]
-        python-version: [3.7, 3.9]
+        python-version: ["3.8", "3.10"]
         requires: ['minimal', 'latest']
         exclude:
-          # - {python-version: 3.7, requires: 'latest'}
-          - {python-version: 3.9, requires: 'minimal'}
+          - {python-version: "3.10", requires: 'minimal'}
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     # the reason for high number is MUCH slower tests on macOS and py3.8
