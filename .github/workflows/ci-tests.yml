@@ -61,7 +61,8 @@ jobs:
     - name: Test Package [only]
       run: |
         pip install pytest -q
-        python -m pytest pl_bolts -v \
+        # TODO: package shall be fine to run full without anhy ignores
+        python -m pytest pl_bolts \
           --ignore=pl_bolts/datamodules \
           --ignore=pl_bolts/datasets \
           --ignore=pl_bolts/models/self_supervised/amdim/transforms.py \
