@@ -62,7 +62,7 @@ jobs:
     - name: Test Package [only]
       run: |
         pip install pytest -q
-        # TODO: package shall be fine to run full without anhy ignores
+        # TODO: package shall be fine to run full without any ignores
         python -m pytest pl_bolts \
           --ignore=pl_bolts/datamodules \
           --ignore=pl_bolts/datasets \
