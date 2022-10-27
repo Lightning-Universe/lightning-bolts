@@ -1,4 +1,4 @@
-name: CI full testing
+name: CI testing
 
 # see: https://help.github.com/en/actions/reference/events-that-trigger-workflows
 on:  # Trigger the workflow on push or pull request, but only for the master branch
@@ -6,6 +6,10 @@ on:  # Trigger the workflow on push or pull request, but only for the master bra
     branches: [master]
   pull_request:
     branches: [master]
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   pytest:
@@ -16,11 +20,11 @@ jobs:
       matrix:
         # Something is wrong with windows tests, will need to debug separately.
         os: [ubuntu-20.04, macOS-11]
-        python-version: [3.7, 3.9]
+        # todo: seems there are some issues with py3.10 while install dependencies
+        python-version: ["3.7", "3.9"]
         requires: ['minimal', 'latest']
         exclude:
-          # - {python-version: 3.7, requires: 'latest'}
-          - {python-version: 3.9, requires: 'minimal'}
+          - {python-version: "3.9", requires: 'minimal'}
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     # the reason for high number is MUCH slower tests on macOS and py3.8
@@ -43,10 +47,27 @@ jobs:
     - name: Set min. dependencies
       if: matrix.requires == 'minimal'
       run: |
-        python -c "fpath = 'requirements.txt' ; req = open(fpath).read().replace('>=', '==') ; open(fpath, 'w').write(req)"
-        python -c "fpath = 'requirements/models.txt' ; req = open(fpath).read().replace('>=', '==') ; open(fpath, 'w').write(req)"
-        python -c "fpath = 'requirements/loggers.txt' ; req = open(fpath).read().replace('>=', '==') ; open(fpath, 'w').write(req)"
-        python -c "fpath = 'requirements/test.txt' ; req = open(fpath).read().replace('>=', '==') ; open(fpath, 'w').write(req)"
+        import os, glob
+        ls = ['requirements.txt'] + glob.glob(os.path.join("requirements", "*.txt"))
+        for fpath in ls:
+            req = open(fpath).read().replace('>=', '==')
+            open(fpath, 'w').write(req)
+      shell: python
+
+    - name: Install package
+      run: |
+        pip install -e . --upgrade --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
+        pip list
+
+    - name: Test Package [only]
+      run: |
+        pip install pytest -q
+        # TODO: package shall be fine to run full without any ignores
+        python -m pytest pl_bolts \
+          --ignore=pl_bolts/datamodules \
+          --ignore=pl_bolts/datasets \
+          --ignore=pl_bolts/models/self_supervised/amdim/transforms.py \
+          --ignore=pl_bolts/models/rl
 
     # Note: This uses an internal pip API and may not always work
     # https://github.com/actions/cache/blob/master/examples.md#multiple-oss-in-a-workflow
@@ -65,12 +86,9 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python --version
-        pip --version
-        # python -m pip install --upgrade --user pip
-        pip install --requirement requirements/devel.txt --upgrade --quiet --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
+        pip install --requirement requirements/devel.txt --upgrade --quiet \
+          --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
         pip list
-      shell: bash
 
     - name: Cache datasets
       uses: actions/cache@v3
@@ -80,7 +98,8 @@ jobs:
 
     - name: Tests
       run: |
-        python -m pytest pl_bolts tests -v --cov=pl_bolts --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
+        python -m pytest tests -v --cov=pl_bolts \
+          --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
 
     - name: Upload pytest test results
       uses: actions/upload-artifact@v3
