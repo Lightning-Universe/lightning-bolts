@@ -23,9 +23,12 @@ class SwAVTrainDataTransform:
         self.jitter_strength = jitter_strength
         self.gaussian_blur = gaussian_blur
 
-        assert len(size_crops) == len(nmb_crops)
-        assert len(min_scale_crops) == len(nmb_crops)
-        assert len(max_scale_crops) == len(nmb_crops)
+        if len(size_crops) != len(nmb_crops):
+            raise AssertionError("len(size_crops) should equal len(nmb_crops).")
+        if len(min_scale_crops) != len(nmb_crops):
+            raise AssertionError("len(min_scale_crops) should equal len(nmb_crops).")
+        if len(max_scale_crops) != len(nmb_crops):
+            raise AssertionError("len(max_scale_crops) should equal len(nmb_crops).")
 
         self.size_crops = size_crops
         self.nmb_crops = nmb_crops
