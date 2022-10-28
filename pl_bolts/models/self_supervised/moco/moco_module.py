@@ -27,7 +27,6 @@ from pl_bolts.models.self_supervised.moco.transforms import (
     Moco2TrainSTL10Transforms,
 )
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -36,8 +35,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-@under_review()
-class Moco_v2(LightningModule):
+class MoCo(LightningModule):
     """PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
 
     Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.
@@ -47,18 +45,18 @@ class Moco_v2(LightningModule):
         - `William Falcon <https://github.com/williamFalcon>`_
 
     Example::
-        from pl_bolts.models.self_supervised import Moco_v2
-        model = Moco_v2()
+        from pl_bolts.models.self_supervised import MoCo
+        model = MoCo()
         trainer = Trainer()
         trainer.fit(model)
 
     CLI command::
 
         # cifar10
-        python moco2_module.py --gpus 1
+        python moco_module.py --gpus 1
 
         # imagenet
-        python moco2_module.py
+        python moco_module.py
             --gpus 8
             --dataset imagenet2012
             --data_dir /path/to/imagenet/
@@ -343,7 +341,6 @@ class Moco_v2(LightningModule):
 
 # utils
 @torch.no_grad()
-@under_review()
 def concat_all_gather(tensor):
     """Performs all_gather operation on the provided tensors.
 
@@ -356,7 +353,6 @@ def concat_all_gather(tensor):
     return output
 
 
-@under_review()
 def cli_main():
     from pl_bolts.datamodules import CIFAR10DataModule, SSLImagenetDataModule, STL10DataModule
 
@@ -366,7 +362,7 @@ def cli_main():
     parser = Trainer.add_argparse_args(parser)
 
     # model args
-    parser = Moco_v2.add_model_specific_args(parser)
+    parser = MoCo.add_model_specific_args(parser)
     args = parser.parse_args()
 
     if args.dataset == "cifar10":
@@ -390,7 +386,7 @@ def cli_main():
         # replace with your own dataset, otherwise CIFAR-10 will be used by default if `None` passed in
         datamodule = None
 
-    model = Moco_v2(**args.__dict__)
+    model = MoCo(**args.__dict__)
 
     trainer = Trainer.from_argparse_args(args)
     trainer.fit(model, datamodule=datamodule)

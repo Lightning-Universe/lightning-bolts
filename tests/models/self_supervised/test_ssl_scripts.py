@@ -53,7 +53,7 @@ def test_cli_run_ssl_cpc(cli_args, dataset_name):
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_cli_run_ssl_moco(cli_args):
     """Test running CLI for an example with default params."""
-    from pl_bolts.models.self_supervised.moco.moco2_module import cli_main
+    from pl_bolts.models.self_supervised.moco.moco_module import cli_main
 
     cli_args = cli_args.strip().split(" ") if cli_args else []
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
