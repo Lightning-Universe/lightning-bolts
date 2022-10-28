@@ -2,9 +2,9 @@ from argparse import ArgumentParser
 from typing import Any
 
 import torch
+import torch.nn as nn
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch import Tensor
-import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler

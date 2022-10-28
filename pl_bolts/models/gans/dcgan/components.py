@@ -1,6 +1,6 @@
 # Based on https://github.com/pytorch/examples/blob/master/dcgan/main.py
-from torch import Tensor
 import torch.nn as nn
+from torch import Tensor
 
 
 class DCGANGenerator(nn.Module):
