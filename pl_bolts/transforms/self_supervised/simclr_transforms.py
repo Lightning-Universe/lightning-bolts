@@ -90,8 +90,8 @@ class SimCLRTrainDataTransform:
         )
 
     def __call__(self, sample: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
-        xi = self.transform(sample)
-        xj = self.transform(sample)
+        xi = self.train_transform(sample)
+        xj = self.train_transform(sample)
         return xi, xj, self.online_transform(sample)
 
 
