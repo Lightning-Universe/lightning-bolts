@@ -27,7 +27,7 @@ class DCGAN(LightningModule):
         from pl_bolts.models.gans import DCGAN
 
         m = DCGAN()
-        Trainer(gpus=2).fit(m)
+        Trainer(accelerator="gpu", devices=2).fit(m)
 
     Example CLI::
 
