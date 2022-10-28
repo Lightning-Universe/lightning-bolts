@@ -8,24 +8,22 @@ You may not use this file except in compliance with the License.
 
 You may obtain a copy of the License from the LICENSE file present in this folder.
 """
-from argparse import ArgumentParser
-from typing import Union
+from copy import copy, deepcopy
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import torch
-from pytorch_lightning import LightningModule, Trainer
-from pytorch_lightning.plugins import DDP2Plugin, DDPPlugin
-from torch import nn
+from pytorch_lightning import LightningDataModule, LightningModule
+from pytorch_lightning.cli import LightningCLI
+from pytorch_lightning.strategies import DDP2Strategy, DDPStrategy
+from pytorch_lightning.utilities.types import STEP_OUTPUT
+from torch import Tensor, nn, optim
 from torch.nn import functional as F
+from torch.utils.data import DataLoader
 
-from pl_bolts.metrics import mean, precision_at_k
-from pl_bolts.models.self_supervised.moco.transforms import (
-    Moco2EvalCIFAR10Transforms,
-    Moco2EvalImagenetTransforms,
-    Moco2EvalSTL10Transforms,
-    Moco2TrainCIFAR10Transforms,
-    Moco2TrainImagenetTransforms,
-    Moco2TrainSTL10Transforms,
-)
+from pl_bolts.datasets import UnlabeledImagenet
+from pl_bolts.metrics import precision_at_k
+from pl_bolts.models.self_supervised.moco.transforms import Moco2EvalImagenetTransforms, Moco2TrainImagenetTransforms
+from pl_bolts.models.self_supervised.moco.utils import concatenate_all, shuffle_batch, sort_batch, validate_batch
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -35,361 +33,330 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+class RepresentationQueue(nn.Module):
+    """The queue is implemented as list of representations and a pointer to the location where the next batch of
+    representations will be overwritten."""
+
+    def __init__(self, representation_size: int, queue_size: int):
+        super().__init__()
+
+        self.representations: Tensor
+        self.register_buffer("representations", torch.randn(representation_size, queue_size))
+        self.representations = nn.functional.normalize(self.representations, dim=0)
+
+        self.pointer: Tensor
+        self.register_buffer("pointer", torch.zeros([], dtype=torch.long))
+
+    @torch.no_grad()
+    def dequeue_and_enqueue(self, x: Tensor) -> None:
+        """Replaces representations in the queue, starting at the current queue pointer, and advances the pointer.
+
+        Args:
+            x: A mini-batch of representations. The queue size has to be a multiple of the total number of
+                representations across all devices.
+        """
+        # Gather representations from all GPUs into a [batch_size * world_size, num_features] tensor, in case of
+        # distributed training.
+        if torch.distributed.is_available() and torch.distributed.is_initialized():
+            x = concatenate_all(x)
+
+        queue_size = self.representations.shape[1]
+        batch_size = x.shape[0]
+        if queue_size % batch_size != 0:
+            raise ValueError(f"Queue size ({queue_size}) is not a multiple of the batch size ({batch_size}).")
+
+        end = self.pointer + batch_size
+        self.representations[:, int(self.pointer) : int(end)] = x.T
+        self.pointer = end % queue_size
+
+
 class MoCo(LightningModule):
-    """PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
-
-    Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.
-
-    Code adapted from `facebookresearch/moco <https://github.com/facebookresearch/moco>`_ to Lightning by:
-
-        - `William Falcon <https://github.com/williamFalcon>`_
-
-    Example::
-        from pl_bolts.models.self_supervised import MoCo
-        model = MoCo()
-        trainer = Trainer()
-        trainer.fit(model)
-
-    CLI command::
-
-        # cifar10
-        python moco_module.py --gpus 1
-
-        # imagenet
-        python moco_module.py
-            --gpus 8
-            --dataset imagenet2012
-            --data_dir /path/to/imagenet/
-            --meta_dir /path/to/folder/with/meta.bin/
-            --batch_size 32
-    """
-
     def __init__(
         self,
-        base_encoder: Union[str, torch.nn.Module] = "resnet18",
-        emb_dim: int = 128,
+        encoder: Union[str, nn.Module] = "resnet18",
+        projector: Optional[nn.Module] = None,
+        representation_size: int = 128,
         num_negatives: int = 65536,
         encoder_momentum: float = 0.999,
-        softmax_temperature: float = 0.07,
-        learning_rate: float = 0.03,
-        momentum: float = 0.9,
-        weight_decay: float = 1e-4,
-        data_dir: str = "./",
-        batch_size: int = 256,
-        use_mlp: bool = False,
-        num_workers: int = 8,
-        *args,
-        **kwargs
-    ):
-        """
+        temperature: float = 0.07,
+        exclude_bn_bias: bool = False,
+        optimizer: Type[optim.Optimizer] = optim.SGD,
+        optimizer_params: Optional[Dict[str, Any]] = None,
+        lr_scheduler: Type[optim.lr_scheduler._LRScheduler] = optim.lr_scheduler.CosineAnnealingLR,
+        lr_scheduler_params: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        """A module that trains an encoder using Momentum Contrast.
+
+        *MoCo paper*: `Kaiming He, Haoqi Fan, Yuxin Wu, Saining Xie, and Ross Girshick <https://arxiv.org/abs/1911.05722>`_
+
+        *Moco v2 paper*: `Xinlei Chen, Haoqi Fan, Ross Girshick, and Kaiming He <https://arxiv.org/abs/2003.04297>`_
+
+        *Adapted from `facebookresearch/moco <https://github.com/facebookresearch/moco>`_ to Lightning by*:
+        `William Falcon <https://github.com/williamFalcon>`_
+
+        *Refactored by*: `Seppo Enarvi <https://github.com/senarvi>`_
+
+        Example::
+            from pl_bolts.models.self_supervised import MoCo
+            model = MoCo()
+            trainer = Trainer()
+            trainer.fit(model)
+
+        CLI command::
+            python moco_module.py fit \
+                --data.data_dir /path/to/imagenet \
+                --data.batch_size 32 \
+                --data.num_workers 4 \
+                --trainer.accelerator gpu \
+                --trainer.devices 8
+
         Args:
-            base_encoder: torchvision model name or torch.nn.Module
-            emb_dim: feature dimension (default: 128)
-            num_negatives: queue size; number of negative keys (default: 65536)
-            encoder_momentum: moco momentum of updating key encoder (default: 0.999)
-            softmax_temperature: softmax temperature (default: 0.07)
-            learning_rate: the learning rate
-            momentum: optimizer momentum
-            weight_decay: optimizer weight decay
-            datamodule: the DataModule (train, val, test dataloaders)
-            data_dir: the directory to store data
-            batch_size: batch size
-            use_mlp: add an mlp to the encoders
-            num_workers: workers for the loaders
+            encoder: The encoder module. Either a Torchvision model name or a ``torch.nn.Module``.
+            projector: An optional projector module that will be appended to the encoder during training.
+            representation_size: Size of a feature vector produced by the projector (or in case a projector is not used,
+                the encoder).
+            num_negatives: Number of negative examples to be kept in the queue.
+            encoder_momentum: Momentum for updating the key encoder.
+            temperature: The temperature parameter for the MoCo loss.
+            exclude_bn_bias: If ``True``, weight decay will be applied only to convolutional layer weights.
+            optimizer: Which optimizer class to use for training.
+            optimizer_params: Parameters to pass to the optimizer constructor.
+            lr_scheduler: Which learning rate scheduler class to use for training.
+            lr_scheduler_params: Parameters to pass to the learning rate scheduler constructor.
         """
-
         super().__init__()
-        self.save_hyperparameters()
 
-        # create the encoders
-        # num_classes is the output fc dimension
-        self.encoder_q, self.encoder_k = self.init_encoders(base_encoder)
+        self.num_negatives = num_negatives
+        self.encoder_momentum = encoder_momentum
+        self.temperature = temperature
+        self.exclude_bn_bias = exclude_bn_bias
+        self.optimizer_class = optimizer
+        if optimizer_params is not None:
+            self.optimizer_params = optimizer_params
+        else:
+            self.optimizer_params = {"lr": 0.03, "momentum": 0.9, "weight_decay": 1e-4}
+        self.lr_scheduler_class = lr_scheduler
+        if lr_scheduler_params is not None:
+            self.lr_scheduler_params = lr_scheduler_params
+        else:
+            self.lr_scheduler_params = {"T_max": 100}
 
-        if use_mlp:  # hack: brute-force replacement
-            dim_mlp = self.encoder_q.fc.weight.shape[1]
-            self.encoder_q.fc = nn.Sequential(nn.Linear(dim_mlp, dim_mlp), nn.ReLU(), self.encoder_q.fc)
-            self.encoder_k.fc = nn.Sequential(nn.Linear(dim_mlp, dim_mlp), nn.ReLU(), self.encoder_k.fc)
+        if isinstance(encoder, str):
+            template_model = getattr(torchvision.models, encoder)
+            self.encoder_q = template_model(num_classes=representation_size)
+        else:
+            self.encoder_q = encoder
+        self.encoder_k = deepcopy(self.encoder_q)
+        for param in self.encoder_k.parameters():
+            param.requires_grad = False
 
-        for param_q, param_k in zip(self.encoder_q.parameters(), self.encoder_k.parameters()):
-            param_k.data.copy_(param_q.data)  # initialize
-            param_k.requires_grad = False  # not update by gradient
+        if projector is not None:
+            self.projector_q: Optional[nn.Module] = projector
+            self.projector_k: Optional[nn.Module] = deepcopy(projector)
+            for param in self.projector_k.parameters():
+                param.requires_grad = False
+        else:
+            self.projector_q = None
+            self.projector_k = None
 
-        # create the queue
-        self.register_buffer("queue", torch.randn(emb_dim, num_negatives))
-        self.queue = nn.functional.normalize(self.queue, dim=0)
+        # Two different queues of representations are needed, one for training and one for validation data.
+        self.queue = RepresentationQueue(representation_size, num_negatives)
+        self.val_queue = RepresentationQueue(representation_size, num_negatives)
 
-        self.register_buffer("queue_ptr", torch.zeros(1, dtype=torch.long))
+    def forward(self, query_images: Tensor, key_images: Tensor) -> Tuple[Tensor, Tensor]:
+        """Computes the forward passes of both encoders and projectors.
 
-        # create the validation queue
-        self.register_buffer("val_queue", torch.randn(emb_dim, num_negatives))
-        self.val_queue = nn.functional.normalize(self.val_queue, dim=0)
+        Args:
+            query_images: A mini-batch of query images in a ``[batch_size, num_channels, height, width]`` tensor.
+            key_images: A mini-batch of key images in a ``[batch_size, num_channels, height, width]`` tensor.
 
-        self.register_buffer("val_queue_ptr", torch.zeros(1, dtype=torch.long))
-
-    def init_encoders(self, base_encoder):
-        """Override to add your own encoders."""
-
-        template_model = getattr(torchvision.models, base_encoder)
-        encoder_q = template_model(num_classes=self.hparams.emb_dim)
-        encoder_k = template_model(num_classes=self.hparams.emb_dim)
-
-        return encoder_q, encoder_k
-
-    @torch.no_grad()
-    def _momentum_update_key_encoder(self):
-        """Momentum update of the key encoder."""
-        for param_q, param_k in zip(self.encoder_q.parameters(), self.encoder_k.parameters()):
-            em = self.hparams.encoder_momentum
-            param_k.data = param_k.data * em + param_q.data * (1.0 - em)
-
-    @torch.no_grad()
-    def _dequeue_and_enqueue(self, keys, queue_ptr, queue):
-        # gather keys before updating queue
-        if self._use_ddp_or_ddp2(self.trainer):
-            keys = concat_all_gather(keys)
-
-        batch_size = keys.shape[0]
-
-        ptr = int(queue_ptr)
-        assert self.hparams.num_negatives % batch_size == 0  # for simplicity
-
-        # replace the keys at ptr (dequeue and enqueue)
-        queue[:, ptr : ptr + batch_size] = keys.T
-        ptr = (ptr + batch_size) % self.hparams.num_negatives  # move pointer
-
-        queue_ptr[0] = ptr
-
-    @torch.no_grad()
-    def _batch_shuffle_ddp(self, x):  # pragma: no cover
-        """Batch shuffle, for making use of BatchNorm.
-
-        *** Only support DistributedDataParallel (DDP) model. ***
+        Returns:
+            A tuple of query and key representations.
         """
-        # gather from all gpus
-        batch_size_this = x.shape[0]
-        x_gather = concat_all_gather(x)
-        batch_size_all = x_gather.shape[0]
-
-        num_gpus = batch_size_all // batch_size_this
-
-        # random shuffle index
-        idx_shuffle = torch.randperm(batch_size_all).cuda()
-
-        # broadcast to all gpus
-        torch.distributed.broadcast(idx_shuffle, src=0)
-
-        # index for restoring
-        idx_unshuffle = torch.argsort(idx_shuffle)
-
-        # shuffled index for this gpu
-        gpu_idx = torch.distributed.get_rank()
-        idx_this = idx_shuffle.view(num_gpus, -1)[gpu_idx]
-
-        return x_gather[idx_this], idx_unshuffle
-
-    @torch.no_grad()
-    def _batch_unshuffle_ddp(self, x, idx_unshuffle):  # pragma: no cover
-        """Undo batch shuffle.
-
-        *** Only support DistributedDataParallel (DDP) model. ***
-        """
-        # gather from all gpus
-        batch_size_this = x.shape[0]
-        x_gather = concat_all_gather(x)
-        batch_size_all = x_gather.shape[0]
-
-        num_gpus = batch_size_all // batch_size_this
-
-        # restored index for this gpu
-        gpu_idx = torch.distributed.get_rank()
-        idx_this = idx_unshuffle.view(num_gpus, -1)[gpu_idx]
-
-        return x_gather[idx_this]
-
-    def forward(self, img_q, img_k, queue):
-        """
-        Input:
-            im_q: a batch of query images
-            im_k: a batch of key images
-            queue: a queue from which to pick negative samples
-        Output:
-            logits, targets
-        """
-
-        # compute query features
-        q = self.encoder_q(img_q)  # queries: NxC
+        q = self.encoder_q(query_images)
+        if self.projector_q is not None:
+            q = self.projector_q(q)
         q = nn.functional.normalize(q, dim=1)
 
-        # compute key features
-        with torch.no_grad():  # no gradient to keys
+        with torch.no_grad():
+            # The keys are shuffled between the GPUs before encoding them, to avoid batch normalization leaking
+            # information between the samples. This works only when using the DDP or DDP2 strategy.
+            if isinstance(self.trainer.strategy, (DDPStrategy, DDP2Strategy)):
+                key_images, original_order = shuffle_batch(key_images)
 
-            # shuffle for making use of BN
-            if self._use_ddp_or_ddp2(self.trainer):
-                img_k, idx_unshuffle = self._batch_shuffle_ddp(img_k)
-
-            k = self.encoder_k(img_k)  # keys: NxC
+            k = self.encoder_k(key_images)
+            if self.projector_k is not None:
+                k = self.projector_k(k)
             k = nn.functional.normalize(k, dim=1)
 
-            # undo shuffle
-            if self._use_ddp_or_ddp2(self.trainer):
-                k = self._batch_unshuffle_ddp(k, idx_unshuffle)
+            if isinstance(self.trainer.strategy, (DDPStrategy, DDP2Strategy)):
+                k = sort_batch(k, original_order)
 
-        # compute logits
-        # Einstein sum is more intuitive
-        # positive logits: Nx1
-        l_pos = torch.einsum("nc,nc->n", [q, k]).unsqueeze(-1)
-        # negative logits: NxK
-        l_neg = torch.einsum("nc,ck->nk", [q, queue.clone().detach()])
+        return q, k
 
-        # logits: Nx(1+K)
-        logits = torch.cat([l_pos, l_neg], dim=1)
+    def training_step(self, batch: Tuple[List[List[Tensor]], List[Any]], batch_idx: int) -> STEP_OUTPUT:
+        images = validate_batch(batch)
+        self._momentum_update_key_encoder()
+        loss, acc1, acc5 = self._calculate_loss(images, self.queue)
+        self.log("train/loss", loss, sync_dist=True)
+        self.log("train/acc1", acc1, sync_dist=True)
+        self.log("train/acc5", acc5, sync_dist=True)
+        return {"loss": loss}
 
-        # apply temperature
-        logits /= self.hparams.softmax_temperature
+    def validation_step(self, batch: Tuple[List[List[Tensor]], List[Any]], batch_idx: int) -> Optional[STEP_OUTPUT]:
+        images = validate_batch(batch)
+        loss, acc1, acc5 = self._calculate_loss(images, self.val_queue)
+        self.log("val/loss", loss, sync_dist=True)
+        self.log("val/acc1", acc1, sync_dist=True)
+        self.log("val/acc5", acc5, sync_dist=True)
 
-        # labels: positive key indicators
-        labels = torch.zeros(logits.shape[0], dtype=torch.long)
-        labels = labels.type_as(logits)
+    def configure_optimizers(self) -> Tuple[List[optim.Optimizer], List[optim.lr_scheduler._LRScheduler]]:
+        """Constructs the optimizer and learning rate scheduler based on ``self.optimizer_params`` and
+        ``self.lr_scheduler_params``.
 
-        return logits, labels, k
+        If weight decay is specified, it will be applied only to convolutional layer weights.
+        """
+        if (
+            ("weight_decay" in self.optimizer_params)
+            and (self.optimizer_params["weight_decay"] != 0)
+            and self.exclude_bn_bias
+        ):
+            defaults = copy(self.optimizer_params)
+            weight_decay = defaults.pop("weight_decay")
 
-    def training_step(self, batch, batch_idx):
-        # in STL10 we pass in both lab+unl for online ft
-        if self.trainer.datamodule.name == "stl10":
-            # labeled_batch = batch[1]
-            unlabeled_batch = batch[0]
-            batch = unlabeled_batch
+            wd_group = []
+            nowd_group = []
+            for name, tensor in self.named_parameters():
+                if not tensor.requires_grad:
+                    continue
+                elif ("bias" in name) or ("bn" in name):
+                    nowd_group.append(tensor)
+                else:
+                    wd_group.append(tensor)
 
-        (img_1, img_2), _ = batch
+            params = [
+                {"params": wd_group, "weight_decay": weight_decay},
+                {"params": nowd_group, "weight_decay": 0.0},
+            ]
+            optimizer = self.optimizer_class(params, **defaults)
+        else:
+            optimizer = self.optimizer_class(self.parameters(), **self.optimizer_params)
+        lr_scheduler = self.lr_scheduler_class(optimizer, **self.lr_scheduler_params)
+        return [optimizer], [lr_scheduler]
 
-        self._momentum_update_key_encoder()  # update the key encoder
-        output, target, keys = self(img_q=img_1, img_k=img_2, queue=self.queue)
-        self._dequeue_and_enqueue(keys, queue=self.queue, queue_ptr=self.queue_ptr)  # dequeue and enqueue
+    @torch.no_grad()
+    def _momentum_update_key_encoder(self) -> None:
+        """Momentum update of the key encoder."""
+        momentum = self.encoder_momentum
+        for param_q, param_k in zip(self.encoder_q.parameters(), self.encoder_k.parameters()):
+            param_k.data = param_k.data * momentum + param_q.data * (1.0 - momentum)
 
-        loss = F.cross_entropy(output.float(), target.long())
+    def _calculate_loss(self, images: Tensor, queue: RepresentationQueue) -> Tuple[Tensor, Tensor, Tensor]:
+        """Calculates the normalized temperature-scaled cross entropy loss from a mini-batch of image pairs.
 
-        acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))
+        Args:
+            images: A mini-batch of image pairs in a ``[batch_size, 2, num_channels, height, width]`` tensor.
+            queue: The queue that the query representations will be compared against. The key representations will be
+                added to the queue.
+        """
+        if images.size(1) != 2:
+            raise ValueError(
+                f"MoCo expects two transformations of every image. Got {images.size(1)} transformations of an image."
+            )
 
-        log = {"train_loss": loss, "train_acc1": acc1, "train_acc5": acc5}
-        self.log_dict(log)
-        return loss
+        query_images = images[:, 0]
+        key_images = images[:, 1]
+        q, k = self(query_images, key_images)
 
-    def validation_step(self, batch, batch_idx):
-        # in STL10 we pass in both lab+unl for online ft
-        if self.trainer.datamodule.name == "stl10":
-            # labeled_batch = batch[1]
-            unlabeled_batch = batch[0]
-            batch = unlabeled_batch
+        # Concatenate logits from the positive pairs (batch_size x 1) and the negative pairs (batch_size x queue_size).
+        pos_logits = torch.einsum("nc,nc->n", [q, k]).unsqueeze(-1)
+        neg_logits = torch.einsum("nc,ck->nk", [q, queue.representations.clone().detach()])
+        logits = torch.cat([pos_logits, neg_logits], dim=1)
+        logits /= self.temperature
 
-        (img_1, img_2), labels = batch
+        # The correct label for every query is 0. Calculate the cross entropy of classifying each query correctly.
+        target_idxs = torch.zeros(logits.shape[0], dtype=torch.long).type_as(logits)
+        loss = F.cross_entropy(logits, target_idxs.long())
+        acc1, acc5 = precision_at_k(logits, target_idxs, top_k=(1, 5))
 
-        output, target, keys = self(img_q=img_1, img_k=img_2, queue=self.val_queue)
-        self._dequeue_and_enqueue(keys, queue=self.val_queue, queue_ptr=self.val_queue_ptr)  # dequeue and enqueue
+        queue.dequeue_and_enqueue(k)
+        return loss, acc1, acc5
 
-        loss = F.cross_entropy(output, target.long())
 
-        acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))
+class Collate:
+    def __call__(
+        self, samples: List[Tuple[Tuple[Tensor, Tensor], int]]
+    ) -> Tuple[List[Tuple[Tensor, Tensor]], List[int]]:
+        return tuple(zip(*samples))  # type: ignore
 
-        results = {"val_loss": loss, "val_acc1": acc1, "val_acc5": acc5}
-        return results
 
-    def validation_epoch_end(self, outputs):
-        val_loss = mean(outputs, "val_loss")
-        val_acc1 = mean(outputs, "val_acc1")
-        val_acc5 = mean(outputs, "val_acc5")
+class ImageNetDataModule(LightningDataModule):
+    def __init__(
+        self,
+        data_dir: str,
+        meta_dir: Optional[str] = None,
+        num_workers: int = 0,
+        batch_size: int = 32,
+        shuffle: bool = True,
+        pin_memory: bool = True,
+        drop_last: bool = False,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
 
-        log = {"val_loss": val_loss, "val_acc1": val_acc1, "val_acc5": val_acc5}
-        self.log_dict(log)
+        if not _TORCHVISION_AVAILABLE:  # pragma: no cover
+            raise ModuleNotFoundError(
+                "You want to use ImageNet dataset loaded from `torchvision` which is not installed yet."
+            )
 
-    def configure_optimizers(self):
-        optimizer = torch.optim.SGD(
-            self.parameters(),
-            self.hparams.learning_rate,
-            momentum=self.hparams.momentum,
-            weight_decay=self.hparams.weight_decay,
+        self.data_dir = data_dir
+        self.num_workers = num_workers
+        self.meta_dir = meta_dir
+        self.batch_size = batch_size
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.drop_last = drop_last
+
+    def train_dataloader(self, num_images_per_class: int = -1) -> DataLoader:
+        dataset = UnlabeledImagenet(
+            self.data_dir,
+            num_imgs_per_class=num_images_per_class,
+            meta_dir=self.meta_dir,
+            split="train",
+            transform=Moco2TrainImagenetTransforms(),
         )
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            optimizer,
-            self.trainer.max_epochs,
+        return DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            shuffle=self.shuffle,
+            num_workers=self.num_workers,
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory,
+            collate_fn=Collate(),
         )
-        return [optimizer], [scheduler]
 
-    @staticmethod
-    def add_model_specific_args(parent_parser):
-        parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument("--base_encoder", type=str, default="resnet18")
-        parser.add_argument("--emb_dim", type=int, default=128)
-        parser.add_argument("--num_workers", type=int, default=8)
-        parser.add_argument("--num_negatives", type=int, default=65536)
-        parser.add_argument("--encoder_momentum", type=float, default=0.999)
-        parser.add_argument("--softmax_temperature", type=float, default=0.07)
-        parser.add_argument("--learning_rate", type=float, default=0.03)
-        parser.add_argument("--momentum", type=float, default=0.9)
-        parser.add_argument("--weight_decay", type=float, default=1e-4)
-        parser.add_argument("--data_dir", type=str, default="./")
-        parser.add_argument("--dataset", type=str, default="cifar10", choices=["cifar10", "imagenet2012", "stl10"])
-        parser.add_argument("--batch_size", type=int, default=256)
-        parser.add_argument("--use_mlp", action="store_true")
-        parser.add_argument("--meta_dir", default=".", type=str, help="path to meta.bin for imagenet")
-
-        return parser
-
-    @staticmethod
-    def _use_ddp_or_ddp2(trainer: Trainer) -> bool:
-        return isinstance(trainer.training_type_plugin, (DDPPlugin, DDP2Plugin))
-
-
-# utils
-@torch.no_grad()
-def concat_all_gather(tensor):
-    """Performs all_gather operation on the provided tensors.
-
-    *** Warning ***: torch.distributed.all_gather has no gradient.
-    """
-    tensors_gather = [torch.ones_like(tensor) for _ in range(torch.distributed.get_world_size())]
-    torch.distributed.all_gather(tensors_gather, tensor, async_op=False)
-
-    output = torch.cat(tensors_gather, dim=0)
-    return output
+    def val_dataloader(self, num_images_per_class: int = 50) -> DataLoader:
+        dataset = UnlabeledImagenet(
+            self.data_dir,
+            num_imgs_per_class_val_split=num_images_per_class,
+            meta_dir=self.meta_dir,
+            split="val",
+            transform=Moco2EvalImagenetTransforms(),
+        )
+        return DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory,
+            collate_fn=Collate(),
+        )
 
 
 def cli_main():
-    from pl_bolts.datamodules import CIFAR10DataModule, SSLImagenetDataModule, STL10DataModule
-
-    parser = ArgumentParser()
-
-    # trainer args
-    parser = Trainer.add_argparse_args(parser)
-
-    # model args
-    parser = MoCo.add_model_specific_args(parser)
-    args = parser.parse_args()
-
-    if args.dataset == "cifar10":
-        datamodule = CIFAR10DataModule.from_argparse_args(args)
-        datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
-        datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
-
-    elif args.dataset == "stl10":
-        datamodule = STL10DataModule.from_argparse_args(args)
-        datamodule.train_dataloader = datamodule.train_dataloader_mixed
-        datamodule.val_dataloader = datamodule.val_dataloader_mixed
-        datamodule.train_transforms = Moco2TrainSTL10Transforms()
-        datamodule.val_transforms = Moco2EvalSTL10Transforms()
-
-    elif args.dataset == "imagenet2012":
-        datamodule = SSLImagenetDataModule.from_argparse_args(args)
-        datamodule.train_transforms = Moco2TrainImagenetTransforms()
-        datamodule.val_transforms = Moco2EvalImagenetTransforms()
-
-    else:
-        # replace with your own dataset, otherwise CIFAR-10 will be used by default if `None` passed in
-        datamodule = None
-
-    model = MoCo(**args.__dict__)
-
-    trainer = Trainer.from_argparse_args(args)
-    trainer.fit(model, datamodule=datamodule)
+    LightningCLI(MoCo, ImageNetDataModule, seed_everything_default=42)
 
 
 if __name__ == "__main__":
