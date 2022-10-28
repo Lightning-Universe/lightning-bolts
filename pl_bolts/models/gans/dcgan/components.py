@@ -47,6 +47,7 @@ class DCGANGenerator(nn.Module):
     def forward(self, noise: Tensor) -> Tensor:
         return self.gen(noise)
 
+
 class DCGANDiscriminator(nn.Module):
     def __init__(self, feature_maps: int, image_channels: int) -> None:
         """
