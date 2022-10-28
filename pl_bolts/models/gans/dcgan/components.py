@@ -1,10 +1,8 @@
 # Based on https://github.com/pytorch/examples/blob/master/dcgan/main.py
-from torch import Tensor, nn
+from torch import Tensor
+import torch.nn as nn
 
-from pl_bolts.utils.stability import under_review
 
-
-@under_review()
 class DCGANGenerator(nn.Module):
     def __init__(self, latent_dim: int, feature_maps: int, image_channels: int) -> None:
         """
