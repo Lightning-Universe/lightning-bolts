@@ -69,7 +69,7 @@ class RetinaNet(LightningModule):
                     pretrained=pretrained,
                     pretrained_backbone=pretrained_backbone,
                     trainable_backbone_layers=trainable_backbone_layers,
-                    **kwargs,
+                    # **kwargs, # see https://github.com/omni-us/jsonargparse/issues/187
                 )
             else:
                 weights = "DEFAULT" if pretrained else None
@@ -77,7 +77,7 @@ class RetinaNet(LightningModule):
                     weights=weights,
                     weights_backbone="DEFAULT",
                     trainable_backbone_layers=trainable_backbone_layers,
-                    **kwargs,
+                    # **kwargs, # see https://github.com/omni-us/jsonargparse/issues/187
                 )
 
             self.model.head = RetinaNetHead(
