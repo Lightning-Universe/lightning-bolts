@@ -1,5 +1,5 @@
 torch>=1.9.*
 torchmetrics>=0.4.1
 pytorch-lightning>=1.6.0
-lightning-utilities==0.3.0
+lightning-utilities==0.4.0
 packaging
