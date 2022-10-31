@@ -21,5 +21,7 @@ _PL_GREATER_EQUAL_1_4_5 = compare_version("pytorch_lightning", operator.ge, "1.4
 _TORCH_ORT_AVAILABLE = module_available("torch_ort")
 _TORCH_MAX_VERSION_SPARSEML = compare_version("torch", operator.lt, "1.11.0")
 _SPARSEML_AVAILABLE = module_available("sparseml") and _PL_GREATER_EQUAL_1_4_5 and _TORCH_MAX_VERSION_SPARSEML
+_JSONARGPARSE_GREATER_THAN_4_16_0 = compare_version("jsonargparse", operator.gt, "4.16.0")
+
 
 __all__ = ["BatchGradientVerification"]
