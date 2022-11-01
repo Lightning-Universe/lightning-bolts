@@ -38,7 +38,7 @@ class PrintTableMetricsCallback(Callback):
     def __init__(self) -> None:
         self.metrics: List = []
 
-    def on_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def on_train_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         metrics_dict = copy.copy(trainer.callback_metrics)
         self.metrics.append(metrics_dict)
         rank_zero_info(dicts_to_table(self.metrics))

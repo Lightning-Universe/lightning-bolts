@@ -68,7 +68,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         if self.dataset is None:
             self.dataset = trainer.datamodule.name
 
-    def on_pretrain_routine_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def on_fit_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
         # must move to device after setup, as during setup, pl_module is still on cpu
         self.online_evaluator = SSLEvaluator(
             n_input=self.z_dim,
@@ -167,11 +167,11 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         pl_module.log("online_val_acc", val_acc, on_step=False, on_epoch=True, sync_dist=True)
         pl_module.log("online_val_loss", mlp_loss, on_step=False, on_epoch=True, sync_dist=True)
 
-    def on_save_checkpoint(self, trainer: Trainer, pl_module: LightningModule, checkpoint: Dict[str, Any]) -> dict:
+    def state_dict(self) -> dict:
         return {"state_dict": self.online_evaluator.state_dict(), "optimizer_state": self.optimizer.state_dict()}
 
-    def on_load_checkpoint(self, trainer: Trainer, pl_module: LightningModule, callback_state: Dict[str, Any]) -> None:
-        self._recovered_callback_state = callback_state
+    def load_state_dict(self, state_dict: Dict[str, Any]) -> None:
+        self._recovered_callback_state = state_dict
 
 
 @under_review()
