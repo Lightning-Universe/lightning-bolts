@@ -175,7 +175,7 @@ class SimCLRFinetuneTransform(SimCLRTrainDataTransform):
     ) -> None:
 
         super().__init__(
-            normalize=normalize, input_height=input_height, gaussian_blur=None, jitter_strength=jitter_strength
+            input_height=input_height, gaussian_blur=False, jitter_strength=jitter_strength, normalize=normalize
         )
 
         if eval_transform:
