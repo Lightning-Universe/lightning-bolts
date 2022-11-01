@@ -7,7 +7,7 @@ import numpy as np
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.plugins import DataParallelPlugin, DDP2Plugin
+from pytorch_lightning.strategies import DataParallelStrategy
 from torch import Tensor, optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
@@ -269,7 +269,7 @@ class DQN(LightningModule):
         # calculates training loss
         loss = dqn_loss(batch, self.net, self.target_net, self.gamma)
 
-        if self._use_dp_or_ddp2(self.trainer):
+        if self._use_dp(self.trainer):
             loss = loss.unsqueeze(0)
 
         # Soft update of target network
@@ -406,8 +406,8 @@ class DQN(LightningModule):
         return arg_parser
 
     @staticmethod
-    def _use_dp_or_ddp2(trainer: Trainer) -> bool:
-        return isinstance(trainer.training_type_plugin, (DataParallelPlugin, DDP2Plugin))
+    def _use_dp(trainer: Trainer) -> bool:
+        return isinstance(trainer.strategy, DataParallelStrategy)
 
 
 @under_review()
