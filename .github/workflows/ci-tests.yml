@@ -43,7 +43,7 @@ jobs:
         brew install rar
 
     - name: Setup Ubuntu
-      if: runner.os == 'ubuntu'
+      if: runner.os == 'Linux'
       run: |
         sudo apt-get update
         sudo apt-get install -y unrar
