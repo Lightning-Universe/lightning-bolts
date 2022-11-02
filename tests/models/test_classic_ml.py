@@ -1,3 +1,6 @@
+import functools
+import operator
+
 import numpy as np
 from pytorch_lightning import Trainer, seed_everything
 from torch.utils.data import DataLoader
@@ -18,11 +21,10 @@ def test_linear_regression_model(tmpdir):
     y = y[:, np.newaxis]
     loader = DataLoader(SklearnDataset(X, y), batch_size=2)
 
-    model = LinearRegression(input_dim=2, learning_rate=0.5)
+    model = LinearRegression(input_dim=2, learning_rate=0.6)
     trainer = Trainer(
-        max_epochs=300,
+        max_epochs=400,
         default_root_dir=tmpdir,
-        progress_bar_refresh_rate=0,
         logger=False,
         enable_checkpointing=False,
     )
@@ -33,7 +35,6 @@ def test_linear_regression_model(tmpdir):
     )
 
     coeffs = model.linear.weight.detach().numpy().flatten()
-    # assert len(coeffs) == 2
     np.testing.assert_allclose(coeffs, [1, 2], rtol=1e-3)
     trainer.test(model, loader)
 
@@ -44,7 +45,9 @@ def test_logistic_regression_model(tmpdir, datadir):
     # create dataset
     dm = MNISTDataModule(num_workers=0, data_dir=datadir)
 
-    model = LogisticRegression(input_dim=28 * 28, num_classes=10, learning_rate=0.001)
+    model = LogisticRegression(
+        input_dim=functools.reduce(operator.mul, dm.dims, 1), num_classes=10, learning_rate=0.001
+    )
     model.prepare_data = dm.prepare_data
     model.setup = dm.setup
     model.train_dataloader = dm.train_dataloader
@@ -54,7 +57,6 @@ def test_logistic_regression_model(tmpdir, datadir):
     trainer = Trainer(
         max_epochs=3,
         default_root_dir=tmpdir,
-        progress_bar_refresh_rate=0,
         logger=False,
         enable_checkpointing=False,
     )

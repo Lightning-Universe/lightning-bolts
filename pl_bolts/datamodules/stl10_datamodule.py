@@ -1,4 +1,5 @@
 import os
+from argparse import ArgumentParser
 from typing import Any, Callable, Optional
 
 import torch
@@ -53,6 +54,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
     """
 
     name = "stl10"
+    dims = (3, 96, 96)
 
     def __init__(
         self,
@@ -88,7 +90,6 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
                 "You want to use STL10 dataset loaded from `torchvision` which is not installed yet."
             )
 
-        self.dims = (3, 96, 96)
         self.data_dir = data_dir if data_dir is not None else os.getcwd()
         self.unlabeled_val_split = unlabeled_val_split
         self.train_val_split = train_val_split
@@ -304,3 +305,13 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
     def _default_transforms(self) -> Callable:
         data_transforms = transform_lib.Compose([transform_lib.ToTensor(), stl10_normalization()])
         return data_transforms
+
+    @staticmethod
+    def add_dataset_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+
+        parser.add_argument("--data_dir", type=str, default=".")
+        parser.add_argument("--num_workers", type=int, default=0)
+        parser.add_argument("--batch_size", type=int, default=32)
+
+        return parser

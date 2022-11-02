@@ -3,10 +3,8 @@ from typing import Any, Optional, Union
 from pl_bolts.datamodules.emnist_datamodule import EMNISTDataModule
 from pl_bolts.datasets import BinaryEMNIST
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import under_review
 
 
-@under_review()
 class BinaryEMNISTDataModule(EMNISTDataModule):
     """
     .. figure:: https://user-images.githubusercontent.com/4632336/123210742-4d6b3380-d477-11eb-80da-3e9a74a18a07.png

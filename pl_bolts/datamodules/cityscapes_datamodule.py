@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
@@ -73,6 +73,10 @@ class CityscapesDataModule(LightningDataModule):
         shuffle: bool = True,
         pin_memory: bool = True,
         drop_last: bool = False,
+        train_transforms: Optional[Callable] = None,
+        val_transforms: Optional[Callable] = None,
+        test_transforms: Optional[Callable] = None,
+        target_transforms: Optional[Callable] = None,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -110,7 +114,10 @@ class CityscapesDataModule(LightningDataModule):
         self.shuffle = shuffle
         self.pin_memory = pin_memory
         self.drop_last = drop_last
-        self.target_transforms = None
+        self.train_transforms = train_transforms
+        self.val_transforms = val_transforms
+        self.test_transforms = test_transforms
+        self.target_transforms = target_transforms
 
     @property
     def num_classes(self) -> int:

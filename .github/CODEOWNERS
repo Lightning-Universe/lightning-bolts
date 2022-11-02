@@ -15,10 +15,10 @@
 /setup.py             @borda @ethanwharris
 
 # CI/CD
-/.github/workflows/   @borda @ethanwharris @akihironitta
-/.github/*.yml        @borda @ethanwharris @akihironitta
-/.azure/              @borda @ethanwharris @akihironitta
-/*.yml                @borda @ethanwharris @akihironitta
+/.github/workflows/   @borda @ethanwharris @otaj @akihironitta
+/.github/*.yml        @borda @ethanwharris @otaj @akihironitta
+/.azure/              @borda @ethanwharris @otaj @akihironitta
+/*.yml                @borda @ethanwharris @otaj @akihironitta
 
 # Docs
 /docs/                          @edenlightning @borda

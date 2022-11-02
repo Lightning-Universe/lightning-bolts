@@ -51,7 +51,6 @@ class SRImageLoggerCallback(Callback):
         outputs: torch.Tensor,
         batch: Tuple[torch.Tensor, torch.Tensor],
         batch_idx: int,
-        dataloader_idx: int,
     ) -> None:
         global_step = trainer.global_step
         if global_step % self.log_interval == 0:

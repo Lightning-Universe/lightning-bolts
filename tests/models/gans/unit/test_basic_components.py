@@ -14,7 +14,7 @@ from pl_bolts.models.gans.basic.components import Discriminator, Generator
 )
 def test_generator(catch_warnings, latent_dim, img_shape):
     batch_dim = 10
-    seed_everything()
+    seed_everything(1234)
     generator = Generator(latent_dim=latent_dim, img_shape=img_shape)
     noise = torch.randn(batch_dim, latent_dim)
     samples = generator(noise)
@@ -30,7 +30,7 @@ def test_generator(catch_warnings, latent_dim, img_shape):
 )
 def test_discriminator(catch_warnings, img_shape):
     batch_dim = 10
-    seed_everything()
+    seed_everything(1234)
     discriminator = Discriminator(img_shape=img_shape)
     samples = torch.randn(batch_dim, *img_shape)
     real_or_fake = discriminator(samples)

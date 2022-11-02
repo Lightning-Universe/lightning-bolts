@@ -325,7 +325,7 @@ def cli_main():
 
         args.maxpool1 = False
         args.first_conv = True
-        args.input_height = dm.size()[-1]
+        args.input_height = dm.dims[-1]
 
         normalization = stl10_normalization()
 
@@ -344,7 +344,7 @@ def cli_main():
 
         args.maxpool1 = False
         args.first_conv = False
-        args.input_height = dm.size()[-1]
+        args.input_height = dm.dims[-1]
         args.temperature = 0.5
 
         normalization = cifar10_normalization()
@@ -373,7 +373,7 @@ def cli_main():
         dm = ImagenetDataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         args.num_samples = dm.num_samples
-        args.input_height = dm.size()[-1]
+        args.input_height = dm.dims[-1]
     else:
         raise NotImplementedError("other datasets have not been implemented till now")
 

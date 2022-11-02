@@ -10,8 +10,8 @@ jobs:
   pep8-check-flake8:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
       - name: Install dependencies
@@ -25,13 +25,15 @@ jobs:
   typing-check-mypy:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
-          python-version: 3.8
-      - name: Install mypy
+          python-version: 3.9
+
+      - name: Install dependencies
         run: |
-          pip install mypy types-setuptools
+          pip install -r requirements/devel.txt --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
           pip list
-      - name: mypy
+
+      - name: Check typing
         run: mypy

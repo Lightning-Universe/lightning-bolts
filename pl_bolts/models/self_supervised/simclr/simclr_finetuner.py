@@ -46,13 +46,13 @@ def cli_main():  # pragma: no cover
         dm = CIFAR10DataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         dm.train_transforms = SimCLRFinetuneTransform(
-            normalize=cifar10_normalization(), input_height=dm.size()[-1], eval_transform=False
+            normalize=cifar10_normalization(), input_height=dm.dims[-1], eval_transform=False
         )
         dm.val_transforms = SimCLRFinetuneTransform(
-            normalize=cifar10_normalization(), input_height=dm.size()[-1], eval_transform=True
+            normalize=cifar10_normalization(), input_height=dm.dims[-1], eval_transform=True
         )
         dm.test_transforms = SimCLRFinetuneTransform(
-            normalize=cifar10_normalization(), input_height=dm.size()[-1], eval_transform=True
+            normalize=cifar10_normalization(), input_height=dm.dims[-1], eval_transform=True
         )
 
         args.maxpool1 = False
@@ -66,13 +66,13 @@ def cli_main():  # pragma: no cover
         args.num_samples = 1
 
         dm.train_transforms = SimCLRFinetuneTransform(
-            normalize=stl10_normalization(), input_height=dm.size()[-1], eval_transform=False
+            normalize=stl10_normalization(), input_height=dm.dims[-1], eval_transform=False
         )
         dm.val_transforms = SimCLRFinetuneTransform(
-            normalize=stl10_normalization(), input_height=dm.size()[-1], eval_transform=True
+            normalize=stl10_normalization(), input_height=dm.dims[-1], eval_transform=True
         )
         dm.test_transforms = SimCLRFinetuneTransform(
-            normalize=stl10_normalization(), input_height=dm.size()[-1], eval_transform=True
+            normalize=stl10_normalization(), input_height=dm.dims[-1], eval_transform=True
         )
 
         args.maxpool1 = False
@@ -81,13 +81,13 @@ def cli_main():  # pragma: no cover
         dm = ImagenetDataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
 
         dm.train_transforms = SimCLRFinetuneTransform(
-            normalize=imagenet_normalization(), input_height=dm.size()[-1], eval_transform=False
+            normalize=imagenet_normalization(), input_height=dm.dims[-1], eval_transform=False
         )
         dm.val_transforms = SimCLRFinetuneTransform(
-            normalize=imagenet_normalization(), input_height=dm.size()[-1], eval_transform=True
+            normalize=imagenet_normalization(), input_height=dm.dims[-1], eval_transform=True
         )
         dm.test_transforms = SimCLRFinetuneTransform(
-            normalize=imagenet_normalization(), input_height=dm.size()[-1], eval_transform=True
+            normalize=imagenet_normalization(), input_height=dm.dims[-1], eval_transform=True
         )
 
         args.num_samples = 1

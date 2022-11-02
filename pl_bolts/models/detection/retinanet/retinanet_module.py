@@ -4,11 +4,12 @@ import torch
 from pytorch_lightning import LightningModule
 
 from pl_bolts.models.detection.retinanet import create_retinanet_backbone
-from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils import _TORCHVISION_AVAILABLE, _TORCHVISION_LESS_THAN_0_13
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
+
     from torchvision.models.detection.retinanet import RetinaNet as torchvision_RetinaNet
     from torchvision.models.detection.retinanet import RetinaNetHead, retinanet_resnet50_fpn
     from torchvision.ops import box_iou
@@ -63,7 +64,21 @@ class RetinaNet(LightningModule):
         self.num_classes = num_classes
         self.backbone = backbone
         if backbone is None:
-            self.model = retinanet_resnet50_fpn(pretrained=pretrained, **kwargs)
+            if _TORCHVISION_LESS_THAN_0_13:
+                self.model = retinanet_resnet50_fpn(
+                    pretrained=pretrained,
+                    pretrained_backbone=pretrained_backbone,
+                    trainable_backbone_layers=trainable_backbone_layers,
+                    **kwargs,
+                )
+            else:
+                weights = "DEFAULT" if pretrained else None
+                self.model = retinanet_resnet50_fpn(
+                    weights=weights,
+                    weights_backbone="DEFAULT",
+                    trainable_backbone_layers=trainable_backbone_layers,
+                    **kwargs,
+                )
 
             self.model.head = RetinaNetHead(
                 in_channels=self.model.backbone.out_channels,

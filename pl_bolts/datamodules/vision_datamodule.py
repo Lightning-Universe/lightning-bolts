@@ -45,6 +45,9 @@ class VisionDataModule(LightningDataModule):
             pin_memory: If true, the data loader will copy Tensors into CUDA pinned memory before
                         returning them
             drop_last: If true drops the last incomplete batch
+            train_transforms: transformations you can apply to train dataset
+            val_transforms: transformations you can apply to validation dataset
+            test_transforms: transformations you can apply to test dataset
         """
 
         super().__init__(*args, **kwargs)

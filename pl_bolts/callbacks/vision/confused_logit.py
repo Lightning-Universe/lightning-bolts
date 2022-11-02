@@ -76,7 +76,6 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
         outputs: Sequence,
         batch: Sequence,
         batch_idx: int,
-        dataloader_idx: int,
     ) -> None:
         # show images only every 20 batches
         if (batch_idx + 1) % self.logging_batch_interval != 0:

@@ -1,20 +1,29 @@
+import warnings
+
 import pytest
 import torch
 from packaging import version
 from pytorch_lightning import LightningDataModule, Trainer
 from pytorch_lightning import __version__ as pl_version
 from pytorch_lightning import seed_everything
+from pytorch_lightning.callbacks.progress import TQDMProgressBar
+from pytorch_lightning.utilities.warnings import PossibleUserWarning
 from torch.utils.data import DataLoader
 
 from pl_bolts.datamodules import FashionMNISTDataModule, MNISTDataModule
 from pl_bolts.datasets import DummyDataset
 from pl_bolts.models.vision import GPT2, ImageGPT, SemSegment, UNet
+from pl_bolts.models.vision.unet import DoubleConv, Down, Up
 
 
 class DummyDataModule(LightningDataModule):
     def train_dataloader(self):
         train_ds = DummyDataset((3, 35, 120), (35, 120), num_samples=100)
         return DataLoader(train_ds, batch_size=1)
+
+    def val_dataloader(self):
+        valid_ds = DummyDataset((3, 35, 120), (35, 120), num_samples=100)
+        return DataLoader(valid_ds, batch_size=1)
 
 
 @pytest.mark.skipif(
@@ -67,21 +76,57 @@ def test_gpt2():
     model(x)
 
 
+def test_unet_component(catch_warnings):
+    x1 = torch.rand(1, 3, 28, 28)
+    x2 = torch.rand(1, 64, 28, 33)
+    x3 = torch.rand(1, 32, 64, 69)
+
+    doubleConvLayer = DoubleConv(3, 64)
+    y = doubleConvLayer(x1)
+    assert y.shape == torch.Size([1, 64, 28, 28])
+
+    downLayer = Down(3, 6)
+    y = downLayer(x1)
+    assert y.shape == torch.Size([1, 6, 14, 14])
+
+    upLayer1 = Up(64, 32, False)
+    upLayer2 = Up(64, 32, True)
+    y1 = upLayer1(x2, x3)
+    y2 = upLayer2(x2, x3)
+    assert y1.shape == torch.Size([1, 32, 64, 69])
+    assert y2.shape == torch.Size([1, 32, 64, 69])
+
+
 @torch.no_grad()
-def test_unet():
+def test_unet(catch_warnings):
     x = torch.rand(10, 3, 28, 28)
     model = UNet(num_classes=2)
     y = model(x)
     assert y.shape == torch.Size([10, 2, 28, 28])
 
 
-def test_semantic_segmentation(tmpdir):
+def test_semantic_segmentation(tmpdir, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message="The dataloader, val_dataloader 0, does not have many workers which may be a bottleneck",
+        category=PossibleUserWarning,
+    )
+    warnings.filterwarnings(
+        "ignore",
+        message="The dataloader, train_dataloader, does not have many workers which may be a bottleneck",
+        category=PossibleUserWarning,
+    )
     dm = DummyDataModule()
 
     model = SemSegment(num_classes=19)
+    progress_bar = TQDMProgressBar()
 
-    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer = Trainer(
+        fast_dev_run=True,
+        max_epochs=-1,
+        default_root_dir=tmpdir,
+        logger=False,
+        accelerator="auto",
+        callbacks=[progress_bar],
+    )
     trainer.fit(model, datamodule=dm)
-    loss = trainer.progress_bar_dict["loss"]
-
-    assert float(loss) > 0

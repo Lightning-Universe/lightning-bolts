@@ -17,9 +17,10 @@ import inspect
 import os
 import shutil
 import sys
-from importlib.util import module_from_spec, spec_from_file_location
 
 import pt_lightning_sphinx_theme
+
+import pl_bolts
 
 _PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 _PATH_ROOT = os.path.join(_PATH_HERE, "..", "..")
@@ -27,22 +28,17 @@ sys.path.insert(0, os.path.abspath(_PATH_ROOT))
 
 SPHINX_MOCK_REQUIREMENTS = int(os.environ.get("SPHINX_MOCK_REQUIREMENTS", True))
 
-# alternative https://stackoverflow.com/a/67692/4521646
-spec = spec_from_file_location("pl_bolts", os.path.join(_PATH_ROOT, "pl_bolts", "__about__.py"))
-info = module_from_spec(spec)
-spec.loader.exec_module(info)
-
 # -- Project information -----------------------------------------------------
 
 # this name shall match the project name in Github as it is used for linking to code
 project = "Lightning-Bolts"
-copyright = info.__copyright__
-author = info.__author__
+copyright = pl_bolts.__copyright__
+author = pl_bolts.__author__
 
 # The short X.Y version
-version = info.__version__
+version = pl_bolts.__version__
 # The full version, including alpha/beta/rc tags
-release = info.__version__
+release = pl_bolts.__version__
 
 # Options for the linkcode extension
 # ----------------------------------
@@ -163,8 +159,8 @@ html_theme_path = [pt_lightning_sphinx_theme.get_html_theme_path()]
 # documentation.
 
 html_theme_options = {
-    "pytorch_project": info.__homepage__,
-    "canonical_url": info.__homepage__,
+    "pytorch_project": pl_bolts.__homepage__,
+    "canonical_url": pl_bolts.__homepage__,
     "collapse_navigation": False,
     "display_version": True,
     "logo_only": False,
@@ -325,8 +321,6 @@ if SPHINX_MOCK_REQUIREMENTS:
     MOCK_PACKAGES += package_list_from_file(os.path.join(_PATH_ROOT, "requirements", "loggers.txt"))
 # replace PyPI packages by importing ones
 MOCK_PACKAGES = [PACKAGE_MAPPING.get(pkg, pkg) for pkg in MOCK_PACKAGES]
-
-print(f"{MOCK_PACKAGES=}")
 
 autodoc_mock_imports = MOCK_PACKAGES
 
