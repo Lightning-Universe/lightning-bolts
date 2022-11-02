@@ -15,9 +15,9 @@ from pl_bolts.datasets import (
     RandomDictDataset,
     RandomDictStringDataset,
 )
+from pl_bolts.datasets.cifar10_dataset import CIFAR10
 from pl_bolts.datasets.dummy_dataset import DummyDetectionDataset
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
-from pl_bolts.datasets.cifar10_dataset import CIFAR10
 from pl_bolts.utils import _PIL_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -147,10 +147,11 @@ def test_sr_datasets(datadir, scale_factor):
     assert torch.allclose(lr_image.min(), torch.tensor(0.0), atol=atol)
     assert torch.allclose(lr_image.max(), torch.tensor(1.0), atol=atol)
 
+
 def test_cifar10_datasets(datadir):
     transform = transform_lib.Compose(
-        [transform_lib.ToTensor(),
-        transform_lib.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        [transform_lib.ToTensor(), transform_lib.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+    )
     dl = DataLoader(CIFAR10(root=datadir, download=True, transform=transform))
     hr_image, lr_image = next(iter(dl))
     print("==============================", lr_image.size())
@@ -164,6 +165,7 @@ def test_cifar10_datasets(datadir):
     assert torch.allclose(hr_image.max(), torch.tensor(1.0), atol=atol)
     assert torch.greater_equal(lr_image.min(), torch.tensor(0))
     assert torch.less_equal(lr_image.max(), torch.tensor(9))
+
 
 def test_binary_mnist_dataset(datadir):
     """Check BinaryMNIST image and target dimensions and value range."""
