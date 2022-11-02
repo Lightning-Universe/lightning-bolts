@@ -4,10 +4,12 @@ from unittest.mock import call
 
 import pytest
 import torch
+
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.loggers import LoggerCollection, TensorBoardLogger
 from pytorch_lightning.utilities.rank_zero import LightningDeprecationWarning
 from pytorch_lightning.utilities.warnings import PossibleUserWarning
+
 from torch import nn
 
 from pl_bolts.callbacks import ModuleDataMonitor, TrainingDataMonitor
@@ -94,6 +96,7 @@ def test_base_no_logger_warning(catch_warnings):
         monitor.on_train_start(trainer, pl_module=LightningModule())
 
 
+
 def test_base_unsupported_logger_warning(tmpdir, catch_warnings):
     """Test a warning is displayed when an unsupported logger is used."""
     warnings.filterwarnings(
@@ -110,6 +113,7 @@ def test_base_unsupported_logger_warning(tmpdir, catch_warnings):
     )
     with pytest.warns(UserWarning, match="does not support logging with LoggerCollection"):
         monitor.on_train_start(trainer, pl_module=LightningModule())
+
 
 
 @mock.patch("pl_bolts.callbacks.data_monitor.TrainingDataMonitor.log_histogram")
