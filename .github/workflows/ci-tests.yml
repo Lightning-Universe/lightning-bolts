@@ -20,10 +20,10 @@ jobs:
         # Something is wrong with windows tests, will need to debug separately.
         os: [ubuntu-20.04, macOS-11]
         # todo: seems there are some issues with py3.10 while install dependencies
-        python-version: ["3.7", "3.9"]
+        python-version: ["3.7", "3.10"]
         requires: ['oldest', 'latest']
         exclude:
-          - {python-version: "3.9", requires: 'oldest'}
+          - {python-version: "3.10", requires: 'oldest'}
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     # the reason for high number is MUCH slower tests on macOS and py3.8
