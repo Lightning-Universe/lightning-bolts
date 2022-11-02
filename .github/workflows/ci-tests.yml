@@ -40,6 +40,13 @@ jobs:
       run: |
         brew update  # Todo: find a better way...
         brew install libomp  # https://github.com/pytorch/pytorch/issues/20030
+        brew install unrar
+
+    - name: Setup Ubuntu
+      if: runner.os == 'ubuntu'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y unrar
 
     - name: Set min. dependencies
       if: matrix.requires == 'oldest'
