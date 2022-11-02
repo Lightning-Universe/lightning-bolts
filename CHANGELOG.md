@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added Lightning 1.8 ([#910](https://github.com/Lightning-AI/lightning-bolts/pull/910))
+- Added Lightning 1.8 support ([#910](https://github.com/Lightning-AI/lightning-bolts/pull/910))
 
 
 ## [0.5.0] - 2021-12-20
