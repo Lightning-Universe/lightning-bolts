@@ -85,6 +85,13 @@ jobs:
           --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
         pip list
 
+    - name: Download ROMs
+      run: |
+        wget http://www.atarimania.com/roms/Roms.rar -O datasets/Roms.rar
+        cd datasets
+        unrar x Roms.rar
+        python -m atari_py.import_roms ROMS
+
     - name: Cache datasets
       uses: actions/cache@v3
       with:
