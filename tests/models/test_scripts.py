@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 
+from pl_bolts.utils import _JSONARGPARSE_GREATER_THAN_4_16_0
 from tests import _MARK_REQUIRE_GPU, DATASETS_PATH
 
 _DEFAULT_ARGS = f" --data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 2 --batch_size 4"
@@ -13,9 +14,7 @@ _DEFAULT_LIGHTNING_CLI_ARGS = (
 @pytest.mark.parametrize("dataset_name", ["mnist", "cifar10"])
 @pytest.mark.parametrize(
     "cli_args",
-    [
-        " --dataset %(dataset_name)s" + _DEFAULT_ARGS,
-    ],
+    [" --dataset %(dataset_name)s" + _DEFAULT_ARGS],
 )
 def test_cli_run_basic_gan(cli_args, dataset_name):
     from pl_bolts.models.gans.basic.basic_gan_module import cli_main
@@ -112,6 +111,9 @@ def test_cli_run_vision_image_gpt(cli_args):
 
 @pytest.mark.parametrize("cli_args", [_DEFAULT_LIGHTNING_CLI_ARGS + " --trainer.gpus 1"])
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
+@pytest.mark.skipif(
+    not _JSONARGPARSE_GREATER_THAN_4_16_0, reason="Failing on CI, need to be fixed"
+)  # see https://github.com/omni-us/jsonargparse/issues/187
 def test_cli_run_retinanet(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.detection.retinanet.retinanet_module import cli_main

@@ -14,4 +14,4 @@ def test_latent_dim_interpolator():
     model = GAN(3, 28, 28)
     cb = LatentDimInterpolator(interpolate_epoch_interval=2)
 
-    cb.on_epoch_end(FakeTrainer(), model)
+    cb.on_train_epoch_end(FakeTrainer(), model)

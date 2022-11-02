@@ -4,7 +4,6 @@ from unittest.mock import call
 import pytest
 import torch
 from pytorch_lightning import Trainer
-from pytorch_lightning.loggers import LoggerCollection, TensorBoardLogger
 from torch import nn
 
 from pl_bolts.callbacks import ModuleDataMonitor, TrainingDataMonitor
@@ -60,14 +59,6 @@ def test_base_no_logger_warning():
     monitor = TrainingDataMonitor()
     trainer = Trainer(logger=False, callbacks=[monitor])
     with pytest.warns(UserWarning, match="Cannot log histograms because Trainer has no logger"):
-        monitor.on_train_start(trainer, pl_module=None)
-
-
-def test_base_unsupported_logger_warning(tmpdir):
-    """Test a warning is displayed when an unsupported logger is used."""
-    monitor = TrainingDataMonitor()
-    trainer = Trainer(logger=LoggerCollection([TensorBoardLogger(tmpdir)]), callbacks=[monitor])
-    with pytest.warns(UserWarning, match="does not support logging with LoggerCollection"):
         monitor.on_train_start(trainer, pl_module=None)
 
 

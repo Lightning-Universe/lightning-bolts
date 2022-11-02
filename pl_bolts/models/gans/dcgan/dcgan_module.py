@@ -2,14 +2,14 @@ from argparse import ArgumentParser
 from typing import Any
 
 import torch
+import torch.nn as nn
 from pytorch_lightning import LightningModule, Trainer, seed_everything
-from torch import Tensor, nn
+from torch import Tensor
 from torch.utils.data import DataLoader
 
 from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
 from pl_bolts.models.gans.dcgan.components import DCGANDiscriminator, DCGANGenerator
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -19,7 +19,6 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-@under_review()
 class DCGAN(LightningModule):
     """DCGAN implementation.
 
@@ -28,7 +27,7 @@ class DCGAN(LightningModule):
         from pl_bolts.models.gans import DCGAN
 
         m = DCGAN()
-        Trainer(gpus=2).fit(m)
+        Trainer(accelerator="gpu", devices=2).fit(m)
 
     Example CLI::
 
@@ -80,10 +79,10 @@ class DCGAN(LightningModule):
     def _weights_init(m):
         classname = m.__class__.__name__
         if classname.find("Conv") != -1:
-            torch.nn.init.normal_(m.weight, 0.0, 0.02)
+            nn.init.normal_(m.weight, 0.0, 0.02)
         elif classname.find("BatchNorm") != -1:
-            torch.nn.init.normal_(m.weight, 1.0, 0.02)
-            torch.nn.init.zeros_(m.bias)
+            nn.init.normal_(m.weight, 1.0, 0.02)
+            nn.init.zeros_(m.bias)
 
     def configure_optimizers(self):
         lr = self.hparams.learning_rate
@@ -173,7 +172,6 @@ class DCGAN(LightningModule):
         return parser
 
 
-@under_review()
 def cli_main(args=None):
     seed_everything(1234)
 

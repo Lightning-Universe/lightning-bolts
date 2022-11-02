@@ -21,7 +21,7 @@ def test_linear_regression_model(tmpdir):
     y = y[:, np.newaxis]
     loader = DataLoader(SklearnDataset(X, y), batch_size=2)
 
-    model = LinearRegression(input_dim=2, learning_rate=0.5)
+    model = LinearRegression(input_dim=2, learning_rate=0.6)
     trainer = Trainer(
         max_epochs=400,
         default_root_dir=tmpdir,
