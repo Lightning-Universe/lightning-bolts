@@ -4,21 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unReleased] - 2021-MM-DD
+## [0.6.0] - 2022-11-02
 
 ### Added
 
-
-### Changed
-
-
-### Deprecated
-
-
-### Removed
-
-
-### Fixed
+- Added Lightning 1.8 ([#910](https://github.com/Lightning-AI/lightning-bolts/pull/910))
 
 
 ## [0.5.0] - 2021-12-20
