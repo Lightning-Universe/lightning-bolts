@@ -23,7 +23,7 @@ def _load_requirements(path_dir: str, file_name: str = "requirements.txt", comme
     """Load requirements from a file.
 
     >>> _load_requirements(_PROJECT_ROOT)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-    ['torch...', 'pytorch-lightning...'...]
+    ['pytorch-lightning...']
     """
     with open(os.path.join(path_dir, file_name)) as file:
         lines = [ln.strip() for ln in file.readlines()]
