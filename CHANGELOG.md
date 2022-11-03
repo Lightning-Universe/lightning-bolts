@@ -8,11 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Updated SparseML callback for latest PyTorch Lightning ([#822](https://github.com/Lightning-AI/lightning-bolts/822))
-- Updated torch version to v1.10.X ([#815](https://github.com/Lightning-AI/lightning-bolts/815))
-- Dataset specific args method to CIFAR10, ImageNet, MNIST, and STL10 ([#890](https://github.com/Lightning-AI/lightning-bolts/890))
-- Migrate to use `lightning-utilities` ([#907](https://github.com/Lightning-AI/lightning-bolts/907))
-- Support PyTorch Lightning v1.8 ([#910](https://github.com/Lightning-AI/lightning-bolts/910))
+- Updated SparseML callback for latest PyTorch Lightning ([#822](https://github.com/Lightning-AI/lightning-bolts/pull/822))
+- Updated torch version to v1.10.X ([#815](https://github.com/Lightning-AI/lightning-bolts/pull/815))
+- Dataset specific args method to CIFAR10, ImageNet, MNIST, and STL10 ([#890](https://github.com/Lightning-AI/lightning-bolts/pull/890))
+- Migrate to use `lightning-utilities` ([#907](https://github.com/Lightning-AI/lightning-bolts/pull/907))
+- Support PyTorch Lightning v1.8 ([#910](https://github.com/Lightning-AI/lightning-bolts/pull/910))
 
 - Major revision of Bolts
     * `under_review` flag ([#835](https://github.com/Lightning-AI/lightning-bolts/pull/835), [#837](https://github.com/Lightning-AI/lightning-bolts/pull/837))
