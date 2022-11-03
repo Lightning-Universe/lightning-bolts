@@ -20,7 +20,7 @@ from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 
 
 def test_dev_datasets(datadir):
-    ds = CIFAR10(data_dir=datadir)
+    ds = CIFAR10(root=datadir)
     for _ in ds:
         pass
 
