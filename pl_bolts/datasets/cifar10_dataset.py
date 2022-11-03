@@ -23,8 +23,10 @@ else:  # pragma: no cover
 class IndependentCIFAR10(LightDataset):
     """Customized `CIFAR10 <http://www.cs.toronto.edu/~kriz/cifar.html>`_ dataset for testing Pytorch Lightning
     without the torchvision dependency.
+
     Part of the code was copied from
     https://github.com/pytorch/vision/blob/build/v0.5.0/torchvision/datasets/
+
     Args:
         data_dir: Root directory of dataset where ``CIFAR10/processed/training.pt``
             and  ``CIFAR10/processed/test.pt`` exist.
@@ -33,7 +35,9 @@ class IndependentCIFAR10(LightDataset):
         download: If true, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
+
     Examples:
+
         >>> from torchvision import transforms
         >>> from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
         >>> cf10_transforms = transforms.Compose([transforms.ToTensor(), cifar10_normalization()])
@@ -47,7 +51,9 @@ class IndependentCIFAR10(LightDataset):
         torch.Size([3, 32, 32])
         >>> label
         6
+
     Labels::
+
         airplane: 0
         automobile: 1
         bird: 2
@@ -157,6 +163,7 @@ class TrialCIFAR10(CIFAR10):
     Customized `CIFAR10 <http://www.cs.toronto.edu/~kriz/cifar.html>`_ dataset for testing Pytorch Lightning
     without the torchvision dependency.
     Examples:
+
         >>> dataset = TrialCIFAR10(download=True, num_samples=150, labels=(1, 5, 8), data_dir="datasets")
         >>> len(dataset)
         450
