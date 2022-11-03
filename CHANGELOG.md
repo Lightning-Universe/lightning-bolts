@@ -35,9 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Removing extra flatten ([#809](https://github.com/Lightning-AI/lightning-bolts/809))
-- support number of channels!=3 in YOLOConfiguration ([#806](https://github.com/Lightning-AI/lightning-bolts/806))
-- CVE-2007-4559 Patch ([#894](https://github.com/Lightning-AI/lightning-bolts/894))
+- Removing extra flatten ([#809](https://github.com/Lightning-AI/lightning-bolts/pull/809))
+- support number of channels!=3 in YOLOConfiguration ([#806](https://github.com/Lightning-AI/lightning-bolts/pull/806))
+- CVE-2007-4559 Patch ([#894](https://github.com/Lightning-AI/lightning-bolts/pull/894))
 
 
 ## [0.5.0] - 2021-12-20
