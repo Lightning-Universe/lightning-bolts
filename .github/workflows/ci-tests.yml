@@ -40,6 +40,13 @@ jobs:
       run: |
         brew update  # Todo: find a better way...
         brew install libomp  # https://github.com/pytorch/pytorch/issues/20030
+        brew install rar
+
+    - name: Setup Ubuntu
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y unrar
 
     - name: Set min. dependencies
       if: matrix.requires == 'oldest'
@@ -90,6 +97,13 @@ jobs:
       with:
         path: ./datasets
         key: pl-datasets-${{ hashFiles('tests/conftest.py') }}
+
+    - name: Download ROMs
+      run: |
+        wget http://www.atarimania.com/roms/Roms.rar -O datasets/Roms.rar
+        cd datasets
+        unrar x -y Roms.rar
+        python -m atari_py.import_roms ROMS
 
     - name: Tests
       run: |
