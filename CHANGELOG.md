@@ -4,21 +4,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unReleased] - 2021-MM-DD
+## [0.6.0] - 2022-11-02
 
 ### Added
 
+- Updated SparseML callback for latest PyTorch Lightning ([#822](https://github.com/Lightning-AI/lightning-bolts/pull/822))
+- Updated torch version to v1.10.X ([#815](https://github.com/Lightning-AI/lightning-bolts/pull/815))
+- Dataset specific args method to CIFAR10, ImageNet, MNIST, and STL10 ([#890](https://github.com/Lightning-AI/lightning-bolts/pull/890))
+- Migrate to use `lightning-utilities` ([#907](https://github.com/Lightning-AI/lightning-bolts/pull/907))
+- Support PyTorch Lightning v1.8 ([#910](https://github.com/Lightning-AI/lightning-bolts/pull/910))
 
-### Changed
-
-
-### Deprecated
-
-
-### Removed
-
+- Major revision of Bolts
+    * `under_review` flag ([#835](https://github.com/Lightning-AI/lightning-bolts/pull/835), [#837](https://github.com/Lightning-AI/lightning-bolts/pull/837))
+    * Reviewing GAN basics, `VisionDataModule`, `MNISTDataModule`, `CIFAR10DataModule` ([#843](https://github.com/Lightning-AI/lightning-bolts/pull/843))
+    * Added tests, updated doc-strings for Dummy Datasets ([#865](https://github.com/Lightning-AI/lightning-bolts/pull/865))
+    * Binary MNIST/EMNIST Datasets and Datamodules ([#866](https://github.com/Lightning-AI/lightning-bolts/pull/866))
+    * FashionMNIST/EMNIST Datamodules ([#871](https://github.com/Lightning-AI/lightning-bolts/pull/871))
+    * Revision `ArrayDataset` ([#872](https://github.com/Lightning-AI/lightning-bolts/pull/872))
+    * BYOL weight update callback ([#867](https://github.com/Lightning-AI/lightning-bolts/pull/867))
+    * Revision `models.vision.unet`, `models.vision.segmentation` ([#880](https://github.com/Lightning-AI/lightning-bolts/pull/880))
+    * Revision of SimCLR transforms ([#857](https://github.com/Lightning-AI/lightning-bolts/pull/857))
+    * Revision Metrics ([#878](https://github.com/Lightning-AI/lightning-bolts/pull/878), [#887](https://github.com/Lightning-AI/lightning-bolts/pull/887))
+    * Revision of BYOL module and tests ([#874](https://github.com/Lightning-AI/lightning-bolts/pull/874))
+    * Revision of MNIST module ([#873](https://github.com/Lightning-AI/lightning-bolts/pull/873))
+    * Revision of dataset normalizations ([#898](https://github.com/Lightning-AI/lightning-bolts/pull/898))
+    * Revision of SimSiam module and tests ([#891](https://github.com/Lightning-AI/lightning-bolts/pull/891))
+    * Revision `datasets.kitti_dataset.KittiDataset` ([#896](https://github.com/Lightning-AI/lightning-bolts/pull/896))
+    * SWAV improvements ([#903](https://github.com/Lightning-AI/lightning-bolts/pull/903))
+    * minor dcgan-import fix ([#921](https://github.com/Lightning-AI/lightning-bolts/pull/921))
 
 ### Fixed
+
+- Removing extra flatten ([#809](https://github.com/Lightning-AI/lightning-bolts/pull/809))
+- support number of channels!=3 in YOLOConfiguration ([#806](https://github.com/Lightning-AI/lightning-bolts/pull/806))
+- CVE-2007-4559 Patch ([#894](https://github.com/Lightning-AI/lightning-bolts/pull/894))
 
 
 ## [0.5.0] - 2021-12-20
