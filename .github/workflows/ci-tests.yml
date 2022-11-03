@@ -4,16 +4,15 @@ name: CI testing
 on:  # Trigger the workflow on push or pull request, but only for the master branch
   push:
     branches: [master]
-  pull_request:
-    branches: [master]
+  pull_request: {}
 
 defaults:
   run:
     shell: bash
 
 jobs:
-  pytest:
 
+  pytest:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -22,9 +21,7 @@ jobs:
         os: [ubuntu-20.04, macOS-11]
         # todo: seems there are some issues with py3.10 while install dependencies
         python-version: ["3.7", "3.9"]
-        requires: ['minimal', 'latest']
-        exclude:
-          - {python-version: "3.9", requires: 'minimal'}
+        requires: ['oldest', 'latest']
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     # the reason for high number is MUCH slower tests on macOS and py3.8
@@ -45,7 +42,7 @@ jobs:
         brew install libomp  # https://github.com/pytorch/pytorch/issues/20030
 
     - name: Set min. dependencies
-      if: matrix.requires == 'minimal'
+      if: matrix.requires == 'oldest'
       run: |
         import os, glob
         ls = ['requirements.txt'] + glob.glob(os.path.join("requirements", "*.txt"))
@@ -56,6 +53,7 @@ jobs:
 
     - name: Install package
       run: |
+        pip install -U pip
         pip install -e . --upgrade --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
         pip list
 

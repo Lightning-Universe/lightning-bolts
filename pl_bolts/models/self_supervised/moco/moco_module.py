@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 import torch
 from pytorch_lightning import LightningDataModule, LightningModule
 from pytorch_lightning.cli import LightningCLI
-from pytorch_lightning.strategies import DDP2Strategy, DDPStrategy
+from pytorch_lightning.strategies import DDPStrategy
 from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch import Tensor, nn, optim
 from torch.nn import functional as F
@@ -180,8 +180,8 @@ class MoCo(LightningModule):
 
         with torch.no_grad():
             # The keys are shuffled between the GPUs before encoding them, to avoid batch normalization leaking
-            # information between the samples. This works only when using the DDP or DDP2 strategy.
-            if isinstance(self.trainer.strategy, (DDPStrategy, DDP2Strategy)):
+            # information between the samples. This works only when using the DDP strategy.
+            if isinstance(self.trainer.strategy, DDPStrategy):
                 key_images, original_order = shuffle_batch(key_images)
 
             k = self.encoder_k(key_images)
@@ -189,7 +189,7 @@ class MoCo(LightningModule):
                 k = self.projector_k(k)
             k = nn.functional.normalize(k, dim=1)
 
-            if isinstance(self.trainer.strategy, (DDPStrategy, DDP2Strategy)):
+            if isinstance(self.trainer.strategy, DDPStrategy):
                 k = sort_batch(k, original_order)
 
         return q, k
