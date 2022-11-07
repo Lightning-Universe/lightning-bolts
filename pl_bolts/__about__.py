@@ -1,10 +1,12 @@
-__version__ = "0.6.0dev"
-__author__ = "PyTorchLightning et al."
-__author_email__ = "name@pytorchlightning.ai"
+import time
+
+__version__ = "0.7.0dev"
+__author__ = "Lightning AI et al."
+__author_email__ = "pytorch@lightning.ai"
 __license__ = "Apache-2.0"
-__copyright__ = f"Copyright (c) 2020-2021, {__author__}"
-__homepage__ = "https://github.com/PyTorchLightning/lightning-bolts"
-__docs__ = "PyTorch Lightning Bolts is a community contribution for ML researchers."
+__copyright__ = f"Copyright (c) 2020-{time.strftime('%Y')}, {__author__}."
+__homepage__ = "https://github.com/Lightning-AI/lightning-bolts"
+__docs__ = "Lightning Bolts is a community contribution for ML researchers."
 __long_doc__ = """
 What is it?
 -----------
