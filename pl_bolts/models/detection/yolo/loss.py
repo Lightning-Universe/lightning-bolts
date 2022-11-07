@@ -39,7 +39,9 @@ else:
         complete_box_iou_loss = None
 
 
-box_iou_loss = lambda boxes1, boxes2: 1.0 - box_iou(boxes1, boxes2).diagonal()
+def box_iou_loss(boxes1: Tensor, boxes2: Tensor) -> Tensor:
+    return 1.0 - box_iou(boxes1, boxes2).diagonal()
+
 
 if (generalized_box_iou_loss is None) and (generalized_box_iou is not None):
 
