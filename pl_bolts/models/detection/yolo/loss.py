@@ -68,8 +68,12 @@ def _get_iou_and_loss_functions(name: str) -> Tuple[Callable, Callable]:
         raise ValueError(f"The IoU function '{name}' is not supported by the installed version of Torchvision.")
 
     if not callable(loss_func):
-        loss_func = lambda boxes1, boxes2: 1.0 - iou_func(boxes1, boxes2).diagonal()
 
+        def loss_func(boxes1: Tensor, boxes2: Tensor) -> Tensor:
+            return 1.0 - iou_func(boxes1, boxes2).diagonal()
+
+    assert callable(iou_func)
+    assert callable(loss_func)
     return iou_func, loss_func
 
 
