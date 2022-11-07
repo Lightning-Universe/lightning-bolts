@@ -39,6 +39,25 @@ else:
         complete_box_iou_loss = None
 
 
+box_iou_loss = lambda boxes1, boxes2: 1.0 - box_iou(boxes1, boxes2).diagonal()
+
+if (generalized_box_iou_loss is None) and (generalized_box_iou is not None):
+    generalized_box_iou_loss = lambda boxes1, boxes2: 1.0 - generalized_box_iou(boxes1, boxes2).diagonal()
+
+if (distance_box_iou_loss is None) and (distance_box_iou is not None):
+    distance_box_iou_loss = lambda boxes1, boxes2: 1.0 - distance_box_iou(boxes1, boxes2).diagonal()
+
+if (complete_box_iou_loss is None) and (complete_box_iou is not None):
+    complete_box_iou_loss = lambda boxes1, boxes2: 1.0 - complete_box_iou(boxes1, boxes2).diagonal()
+
+_iou_and_loss_functions = {
+    "iou": (box_iou, box_iou_loss),
+    "giou": (generalized_box_iou, generalized_box_iou_loss),
+    "diou": (distance_box_iou, distance_box_iou_loss),
+    "ciou": (complete_box_iou, complete_box_iou_loss),
+}
+
+
 def _get_iou_and_loss_functions(name: str) -> Tuple[Callable, Callable]:
     """Returns functions for calculating the IoU and the IoU loss, given the IoU variant name.
 
@@ -49,30 +68,11 @@ def _get_iou_and_loss_functions(name: str) -> Tuple[Callable, Callable]:
         A tuple of two functions. The first function calculates the pairwise IoU and the second function calculates the
         elementwise loss.
     """
-    if name == "iou":
-        iou_func = box_iou
-        loss_func = None
-    elif name == "giou":
-        iou_func = generalized_box_iou
-        loss_func = generalized_box_iou_loss
-    elif name == "diou":
-        iou_func = distance_box_iou
-        loss_func = distance_box_iou_loss
-    elif name == "ciou":
-        iou_func = complete_box_iou
-        loss_func = complete_box_iou_loss
-    else:
+    if name not in _iou_and_loss_functions:
         raise ValueError(f"Unknown IoU function '{name}'.")
-
+    iou_func, loss_func = _iou_and_loss_functions[name]
     if not callable(iou_func):
         raise ValueError(f"The IoU function '{name}' is not supported by the installed version of Torchvision.")
-
-    if not callable(loss_func):
-
-        def loss_func(boxes1: Tensor, boxes2: Tensor) -> Tensor:
-            return 1.0 - iou_func(boxes1, boxes2).diagonal()
-
-    assert callable(iou_func)
     assert callable(loss_func)
     return iou_func, loss_func
 
