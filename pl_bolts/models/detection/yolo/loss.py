@@ -42,13 +42,22 @@ else:
 box_iou_loss = lambda boxes1, boxes2: 1.0 - box_iou(boxes1, boxes2).diagonal()
 
 if (generalized_box_iou_loss is None) and (generalized_box_iou is not None):
-    generalized_box_iou_loss = lambda boxes1, boxes2: 1.0 - generalized_box_iou(boxes1, boxes2).diagonal()
+
+    def generalized_box_iou_loss(boxes1: Tensor, boxes2: Tensor) -> Tensor:
+        return 1.0 - generalized_box_iou(boxes1, boxes2).diagonal()
+
 
 if (distance_box_iou_loss is None) and (distance_box_iou is not None):
-    distance_box_iou_loss = lambda boxes1, boxes2: 1.0 - distance_box_iou(boxes1, boxes2).diagonal()
+
+    def distance_box_iou_loss(boxes1: Tensor, boxes2: Tensor) -> Tensor:
+        return 1.0 - distance_box_iou(boxes1, boxes2).diagonal()
+
 
 if (complete_box_iou_loss is None) and (complete_box_iou is not None):
-    complete_box_iou_loss = lambda boxes1, boxes2: 1.0 - complete_box_iou(boxes1, boxes2).diagonal()
+
+    def complete_box_iou_loss(boxes1: Tensor, boxes2: Tensor) -> Tensor:
+        return 1.0 - complete_box_iou(boxes1, boxes2).diagonal()
+
 
 _iou_and_loss_functions = {
     "iou": (box_iou, box_iou_loss),
