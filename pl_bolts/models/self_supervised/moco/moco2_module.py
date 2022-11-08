@@ -47,6 +47,7 @@ class Moco_v2(LightningModule):
         - `William Falcon <https://github.com/williamFalcon>`_
 
     Example::
+
         from pl_bolts.models.self_supervised import Moco_v2
         model = Moco_v2()
         trainer = Trainer()
