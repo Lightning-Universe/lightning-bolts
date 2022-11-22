@@ -68,8 +68,24 @@ def test_cli_run_ssl_moco(cli_args):
 )
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_cli_run_ssl_simclr(cli_args):
-    """Test running CLI for an example with default params."""
+    """Test running CLI for an example SimCLR training with default params."""
     from pl_bolts.models.self_supervised.simclr.simclr_module import cli_main
+
+    cli_args = cli_args.strip().split(" ") if cli_args else []
+    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
+        cli_main()
+ 
+ 
+@pytest.mark.parametrize(
+    "cli_args",
+    [
+        _DEFAULT_ARGS + " --gpus 1",
+    ],
+)
+@pytest.mark.skipif(**_MARK_REQUIRE_GPU)
+def test_cli_run_finetuner_ssl_simclr(cli_args):
+    """Test running CLI for an example SimcCLR finetuning with default params."""
+    from pl_bolts.models.self_supervised.simclr.simclr_finetuner import cli_main
 
     cli_args = cli_args.strip().split(" ") if cli_args else []
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
