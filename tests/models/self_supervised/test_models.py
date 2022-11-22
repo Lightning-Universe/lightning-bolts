@@ -93,8 +93,9 @@ def test_simclr(tmpdir, datadir, catch_warnings):
         default_root_dir=tmpdir,
         max_epochs=1,
         accelerator="auto",
-        log_every_n_steps=1,)
-    
+        log_every_n_steps=1,
+    )
+
     trainer.fit(model, datamodule=datamodule)
 
 
