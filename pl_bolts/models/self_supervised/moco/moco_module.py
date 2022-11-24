@@ -74,7 +74,7 @@ class MoCo(LightningModule):
     def __init__(
         self,
         encoder: Union[str, nn.Module] = "resnet18",
-        projector: Optional[nn.Module] = None,
+        head: Optional[nn.Module] = None,
         representation_size: int = 128,
         num_negatives: int = 65536,
         encoder_momentum: float = 0.999,
@@ -87,7 +87,8 @@ class MoCo(LightningModule):
     ) -> None:
         """A module that trains an encoder using Momentum Contrast.
 
-        *MoCo paper*: `Kaiming He, Haoqi Fan, Yuxin Wu, Saining Xie, and Ross Girshick <https://arxiv.org/abs/1911.05722>`_
+        *MoCo paper*: `Kaiming He, Haoqi Fan, Yuxin Wu, Saining Xie, and Ross Girshick
+        <https://arxiv.org/abs/1911.05722>`_
 
         *Moco v2 paper*: `Xinlei Chen, Haoqi Fan, Ross Girshick, and Kaiming He <https://arxiv.org/abs/2003.04297>`_
 
@@ -112,9 +113,9 @@ class MoCo(LightningModule):
 
         Args:
             encoder: The encoder module. Either a Torchvision model name or a ``torch.nn.Module``.
-            projector: An optional projector module that will be appended to the encoder during training.
-            representation_size: Size of a feature vector produced by the projector (or in case a projector is not used,
-                the encoder).
+            head: An optional projection head that will be appended to the encoder during training.
+            representation_size: Size of a feature vector produced by the projection head (or in case a projection head
+                is not used, the encoder).
             num_negatives: Number of negative examples to be kept in the queue.
             encoder_momentum: Momentum for updating the key encoder.
             temperature: The temperature parameter for the MoCo loss.
@@ -150,21 +151,21 @@ class MoCo(LightningModule):
         for param in self.encoder_k.parameters():
             param.requires_grad = False
 
-        if projector is not None:
-            self.projector_q: Optional[nn.Module] = projector
-            self.projector_k: Optional[nn.Module] = deepcopy(projector)
-            for param in self.projector_k.parameters():
+        if head is not None:
+            self.head_q: Optional[nn.Module] = head
+            self.head_k: Optional[nn.Module] = deepcopy(head)
+            for param in self.head_k.parameters():
                 param.requires_grad = False
         else:
-            self.projector_q = None
-            self.projector_k = None
+            self.head_q = None
+            self.head_k = None
 
         # Two different queues of representations are needed, one for training and one for validation data.
         self.queue = RepresentationQueue(representation_size, num_negatives)
         self.val_queue = RepresentationQueue(representation_size, num_negatives)
 
     def forward(self, query_images: Tensor, key_images: Tensor) -> Tuple[Tensor, Tensor]:
-        """Computes the forward passes of both encoders and projectors.
+        """Computes the forward passes of both encoders and projection heads.
 
         Args:
             query_images: A mini-batch of query images in a ``[batch_size, num_channels, height, width]`` tensor.
@@ -174,8 +175,8 @@ class MoCo(LightningModule):
             A tuple of query and key representations.
         """
         q = self.encoder_q(query_images)
-        if self.projector_q is not None:
-            q = self.projector_q(q)
+        if self.head_q is not None:
+            q = self.head_q(q)
         q = nn.functional.normalize(q, dim=1)
 
         with torch.no_grad():
@@ -185,8 +186,8 @@ class MoCo(LightningModule):
                 key_images, original_order = shuffle_batch(key_images)
 
             k = self.encoder_k(key_images)
-            if self.projector_k is not None:
-                k = self.projector_k(k)
+            if self.head_k is not None:
+                k = self.head_k(k)
             k = nn.functional.normalize(k, dim=1)
 
             if isinstance(self.trainer.strategy, DDPStrategy):
@@ -307,7 +308,7 @@ class ImageNetDataModule(LightningDataModule):
 
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
-                "You want to use ImageNet dataset loaded from `torchvision` which is not installed yet."
+                "You want to use ImageNet dataset loaded from `torchvision`, which is not installed yet."
             )
 
         self.data_dir = data_dir
@@ -355,7 +356,7 @@ class ImageNetDataModule(LightningDataModule):
         )
 
 
-def cli_main():
+def cli_main() -> None:
     LightningCLI(MoCo, ImageNetDataModule, seed_everything_default=42)
 
 
