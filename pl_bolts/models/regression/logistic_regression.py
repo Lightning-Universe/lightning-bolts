@@ -4,18 +4,15 @@ from typing import Any, Dict, List, Tuple, Type
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch import Tensor, nn
-from torch.nn import functional as F
-from torch.nn.functional import softmax
 from torch.optim import Adam
 from torch.optim.optimizer import Optimizer
-from torchmetrics.functional import accuracy
+from torchmetrics import functional
 
 from pl_bolts.utils.stability import under_review
 
 
-@under_review()
 class LogisticRegression(LightningModule):
-    """Logistic regression model."""
+    """Logistic Regression Model."""
 
     def __init__(
         self,
@@ -30,82 +27,90 @@ class LogisticRegression(LightningModule):
     ) -> None:
         """
         Args:
-            input_dim: number of dimensions of the input (at least 1)
-            num_classes: number of class labels (binary: 2, multi-class: >2)
-            bias: specifies if a constant or intercept should be fitted (equivalent to fit_intercept in sklearn)
-            learning_rate: learning_rate for the optimizer
-            optimizer: the optimizer to use (default: ``Adam``)
-            l1_strength: L1 regularization strength (default: ``0.0``)
-            l2_strength: L2 regularization strength (default: ``0.0``)
+            input_dim: Number of dimensions of the input (at least `1`).
+            num_classes: Number of class labels (binary: `2`, multi-class: > `2`).
+            bias: Specifies if a constant or intercept should be fitted (equivalent to `fit_intercept` in `sklearn`).
+            learning_rate: Learning rate for the optimizer.
+            optimizer: Model optimizer to use.
+            l1_strength: L1 regularization strength.
+            l2_strength: L2 regularization strength.
+
+        Attributes:
+            linear: Linear layer.
+            criterion: Cross-Entropy loss function.
+            optimizer: Model optimizer to use.
         """
         super().__init__()
         self.save_hyperparameters()
         self.optimizer = optimizer
-
-        self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=self.hparams.num_classes, bias=bias)
+        self.criterion: nn.CrossEntropyLoss = nn.CrossEntropyLoss()
+        self.linear: nn.Linear = nn.Linear(
+            in_features=self.hparams.input_dim, out_features=self.hparams.num_classes, bias=self.hparams.bias
+        )
 
     def forward(self, x: Tensor) -> Tensor:
-        x = self.linear(x)
-        y_hat = softmax(x)
-        return y_hat
+        return self.linear(x)
 
     def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
+        return self._shared_step(batch, "train")
+
+    def validation_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
+        return self._shared_step(batch, "val")
+
+    def test_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
+        return self._shared_step(batch, batch_idx, "test")
+
+    def validation_epoch_end(self, outputs: List[Dict[str, Tensor]]) -> Dict[str, Tensor]:
+        return self._shared_epoch_end(outputs, "val")
+
+    def test_epoch_end(self, outputs: List[Dict[str, Tensor]]) -> Dict[str, Tensor]:
+        return self._shared_epoch_end(outputs, "test")
+
+    def configure_optimizers(self) -> Optimizer:
+        return self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
+
+    def _prepare_batch(self, batch: Tuple[Tensor, Tensor]) -> Tuple[Tensor, Tensor]:
         x, y = batch
-
-        # flatten any input
         x = x.view(x.size(0), -1)
+        return self.linear(x), torch.tensor(y, dtype=torch.long)
 
-        y_hat = self.linear(x)
+    def _shared_step(self, batch: Tuple[Tensor, Tensor], stage: str) -> Dict[str, Tensor]:
+        x, y = self._prepare_batch(batch)
+        loss = self.criterion(x, y)
 
-        # PyTorch cross_entropy function combines log_softmax and nll_loss in single function
-        loss = F.cross_entropy(y_hat, y, reduction="sum")
+        if stage == "train":
+            loss = self._regularization(loss)
+            loss /= x.size(0)
+            metrics = {"loss": loss}
+            self.log_dict(metrics, on_step=True)
+            return metrics
 
-        # L1 regularizer
+        acc = self._calculate_accuracy(x, y)
+        return self._log_metrics(acc, loss, stage, on_step=True)
+
+    def _shared_epoch_end(self, outputs: List[Dict[str, Tensor]], stage: str) -> Dict[str, Tensor]:
+        acc = torch.stack([x[f"{stage}_acc"] for x in outputs]).mean()
+        loss = torch.stack([x[f"{stage}_loss"] for x in outputs]).mean()
+        return self._log_metrics(acc, loss, stage, on_epoch=True)
+
+    def _log_metrics(self, acc: Tensor, loss: Tensor, stage: str, **kwargs: bool) -> Dict[str, Tensor]:
+        metrics = {f"{stage}_loss": loss, f"{stage}_acc": acc}
+        self.log_dict(metrics, **kwargs)
+        return metrics
+
+    def _calculate_accuracy(self, x: Tensor, y: Tensor) -> Tensor:
+        _, y_hat = torch.max(x, dim=-1)
+        return functional.accuracy(y_hat, y, average="weighted", num_classes=self.hparams.num_classes)
+
+    def _regularization(self, loss: Tensor) -> Tensor:
         if self.hparams.l1_strength > 0:
             l1_reg = self.linear.weight.abs().sum()
             loss += self.hparams.l1_strength * l1_reg
 
-        # L2 regularizer
         if self.hparams.l2_strength > 0:
             l2_reg = self.linear.weight.pow(2).sum()
             loss += self.hparams.l2_strength * l2_reg
-
-        loss /= x.size(0)
-
-        tensorboard_logs = {"train_ce_loss": loss}
-        progress_bar_metrics = tensorboard_logs
-        return {"loss": loss, "log": tensorboard_logs, "progress_bar": progress_bar_metrics}
-
-    def validation_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
-        x, y = batch
-        x = x.view(x.size(0), -1)
-        y_hat = self.linear(x)
-        acc = accuracy(F.softmax(y_hat, -1), y)
-        return {"val_loss": F.cross_entropy(y_hat, y), "acc": acc}
-
-    def validation_epoch_end(self, outputs: List[Dict[str, Tensor]]) -> Dict[str, Tensor]:
-        acc = torch.stack([x["acc"] for x in outputs]).mean()
-        val_loss = torch.stack([x["val_loss"] for x in outputs]).mean()
-        tensorboard_logs = {"val_ce_loss": val_loss, "val_acc": acc}
-        progress_bar_metrics = tensorboard_logs
-        return {"val_loss": val_loss, "log": tensorboard_logs, "progress_bar": progress_bar_metrics}
-
-    def test_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
-        x, y = batch
-        x = x.view(x.size(0), -1)
-        y_hat = self.linear(x)
-        acc = accuracy(F.softmax(y_hat, -1), y)
-        return {"test_loss": F.cross_entropy(y_hat, y), "acc": acc}
-
-    def test_epoch_end(self, outputs: List[Dict[str, Tensor]]) -> Dict[str, Tensor]:
-        acc = torch.stack([x["acc"] for x in outputs]).mean()
-        test_loss = torch.stack([x["test_loss"] for x in outputs]).mean()
-        tensorboard_logs = {"test_ce_loss": test_loss, "test_acc": acc}
-        progress_bar_metrics = tensorboard_logs
-        return {"test_loss": test_loss, "log": tensorboard_logs, "progress_bar": progress_bar_metrics}
-
-    def configure_optimizers(self) -> Optimizer:
-        return self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
+        return loss
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
