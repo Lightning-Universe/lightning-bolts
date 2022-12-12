@@ -7,7 +7,7 @@ check-manifest
 pre-commit>=1.0
 mypy==0.982
 atari-py==0.2.9  # needed for RL
-scikit-learn>=1.0.2, <=1.1.3
+scikit-learn>=1.0.2, <1.2.1
 sparseml>=1.0.0, <=1.2.0
 ale-py>=0.7, <=0.8.0
 jsonargparse[signatures]  # for LightningCLI
