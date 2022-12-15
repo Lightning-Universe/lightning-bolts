@@ -202,7 +202,7 @@ class YOLO(LightningModule):
         total_hits = sum(hits)
         for layer_idx, layer_hits in enumerate(hits):
             hit_rate: Union[Tensor, float] = torch.true_divide(layer_hits, total_hits) if total_hits > 0 else 1.0
-            self.log(f"layer_{layer_idx}_hit_rate", hit_rate, sync_dist=False, batch_size=images.size(0))
+            self.log(f"layer_{layer_idx}_hit_rate", hit_rate, sync_dist=True, batch_size=images.size(0))
 
         losses = torch.stack(losses).sum(0)
         return detections, losses
@@ -251,12 +251,10 @@ class YOLO(LightningModule):
         images, targets = validate_batch(batch)
         _, losses = self(images, targets)
 
-        # sync_dist=True is broken in some versions of Lightning and may cause the sum of the loss
-        # across GPUs to be returned.
-        self.log("train/overlap_loss", losses[0], prog_bar=True, sync_dist=False)
-        self.log("train/confidence_loss", losses[1], prog_bar=True, sync_dist=False)
-        self.log("train/class_loss", losses[2], prog_bar=True, sync_dist=False)
-        self.log("train/total_loss", losses.sum(), sync_dist=False)
+        self.log("train/overlap_loss", losses[0], prog_bar=True, sync_dist=True)
+        self.log("train/confidence_loss", losses[1], prog_bar=True, sync_dist=True)
+        self.log("train/class_loss", losses[2], prog_bar=True, sync_dist=True)
+        self.log("train/total_loss", losses.sum(), sync_dist=True)
 
         return {"loss": losses.sum()}
 
@@ -282,6 +280,11 @@ class YOLO(LightningModule):
             self._val_map.update(detections, targets)
 
     def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
+        # When continuing training from a checkpoint, it may happen that epoch_end is called without outputs. In this
+        # case the metrics cannot be computed.
+        if not outputs:
+            return
+
         if _MEAN_AVERAGE_PRECISION_AVAILABLE:
             map_scores = self._val_map.compute()
             map_scores = {"val/" + k: v for k, v in map_scores.items()}
@@ -310,6 +313,11 @@ class YOLO(LightningModule):
             self._test_map.update(detections, targets)
 
     def test_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
+        # When continuing training from a checkpoint, it may happen that epoch_end is called without outputs. In this
+        # case the metrics cannot be computed.
+        if not outputs:
+            return
+
         if _MEAN_AVERAGE_PRECISION_AVAILABLE:
             map_scores = self._test_map.compute()
             map_scores = {"test/" + k: v for k, v in map_scores.items()}
@@ -531,7 +539,7 @@ class CLIYOLO(YOLO):
 
 
 class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
-    """A subclass of VOCDetectionDataModule that resizes the images to a specific size. YOLO expectes the image
+    """A subclass of ``VOCDetectionDataModule`` that resizes the images to a specific size. YOLO expectes the image
     size to be divisible by the ratio in which the network downsamples the image.
 
     Args:
