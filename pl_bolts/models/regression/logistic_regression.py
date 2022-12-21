@@ -95,7 +95,7 @@ class LogisticRegression(LightningModule):
         Returns:
             Loss tensor.
         """
-        return self._shared_step(batch, batch_idx, "test")
+        return self._shared_step(batch, "test")
 
     def validation_epoch_end(self, outputs: List[Dict[str, Tensor]]) -> Dict[str, Tensor]:
         """Validation epoch end for the model.
