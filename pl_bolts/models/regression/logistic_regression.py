@@ -1,3 +1,5 @@
+"""An implemen§ation of Logistic Regression in PyTorch-Lightning."""
+
 from argparse import ArgumentParser
 from typing import Any, Dict, List, Tuple, Type
 
@@ -49,24 +51,80 @@ class LogisticRegression(LightningModule):
         )
 
     def forward(self, x: Tensor) -> Tensor:
+        """Forward pass of the model.
+
+        Args:
+            x: Input tensor.
+
+        Returns:
+            Output tensor.
+        """
         return self.linear(x)
 
     def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
+        """Training step for the model.
+
+        Args:
+            batch: Batch of data.
+            batch_idx: Batch index.
+
+        Returns:
+            Loss tensor.
+        """
         return self._shared_step(batch, "train")
 
     def validation_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
+        """Validation step for the model.
+
+        Args:
+            batch: Batch of data.
+            batch_idx: Batch index.
+
+        Returns:
+            Loss tensor.
+        """
         return self._shared_step(batch, "val")
 
     def test_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
+        """Test step for the model.
+
+        Args:
+            batch: Batch of data.
+            batch_idx: Batch index.
+
+        Returns:
+            Loss tensor.
+        """
         return self._shared_step(batch, batch_idx, "test")
 
     def validation_epoch_end(self, outputs: List[Dict[str, Tensor]]) -> Dict[str, Tensor]:
+        """Validation epoch end for the model.
+
+        Args:
+            outputs: List of outputs from the validation step.
+
+        Returns:
+            Loss tensor.
+        """
         return self._shared_epoch_end(outputs, "val")
 
     def test_epoch_end(self, outputs: List[Dict[str, Tensor]]) -> Dict[str, Tensor]:
+        """Test epoch end for the model.
+
+        Args:
+            outputs: List of outputs from the test step.
+
+        Returns:
+            Loss tensor.
+        """
         return self._shared_epoch_end(outputs, "test")
 
     def configure_optimizers(self) -> Optimizer:
+        """Configure the optimizer for the model.
+
+        Returns:
+            Optimizer.
+        """
         return self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
 
     def _prepare_batch(self, batch: Tuple[Tensor, Tensor]) -> Tuple[Tensor, Tensor]:
@@ -114,6 +172,14 @@ class LogisticRegression(LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
+        """Adds model specific arguments to the parser.
+
+        Args:
+            parent_parser: Parent parser to which the arguments will be added.
+
+        Returns:
+            ArgumentParser with the added arguments.
+        """
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--learning_rate", type=float, default=0.0001)
         parser.add_argument("--input_dim", type=int, default=None)
