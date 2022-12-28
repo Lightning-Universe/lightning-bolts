@@ -4,7 +4,6 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -14,7 +13,6 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-@under_review()
 class CityscapesDataModule(LightningDataModule):
     """
     .. figure:: https://www.cityscapes-dataset.com/wordpress/wp-content/uploads/2015/07/muenster00-1024x510.png
@@ -85,7 +83,7 @@ class CityscapesDataModule(LightningDataModule):
             data_dir: where to load the data from path, i.e. where directory leftImg8bit and gtFine or gtCoarse
                 are located
             quality_mode: the quality mode to use, either 'fine' or 'coarse'
-            target_type: targets to use, either 'instance' or 'semantic'
+            target_type: targets to use, can be 'instance', 'semantic', 'color', or 'polygon'.
             num_workers: how many workers to use for loading data
             batch_size: number of examples per training/eval step
             seed: random seed to be used for train/val/test splits
@@ -101,8 +99,10 @@ class CityscapesDataModule(LightningDataModule):
                 "You want to use CityScapes dataset loaded from `torchvision` which is not installed yet."
             )
 
-        if target_type not in ["instance", "semantic"]:
-            raise ValueError(f'Only "semantic" and "instance" target types are supported. Got {target_type}.')
+        if target_type not in ["instance", "semantic", "color", "polygon"]:
+            raise ValueError(
+                f'Only "instance", "semantic", "color", "polygon" target types are supported. Got {target_type}.'
+            )
 
         self.dims = (3, 1024, 2048)
         self.data_dir = data_dir
@@ -121,10 +121,7 @@ class CityscapesDataModule(LightningDataModule):
 
     @property
     def num_classes(self) -> int:
-        """
-        Return:
-            30
-        """
+        """Returns the number of classes."""
         return 30
 
     def train_dataloader(self) -> DataLoader:
@@ -135,6 +132,34 @@ class CityscapesDataModule(LightningDataModule):
         dataset = Cityscapes(
             self.data_dir,
             split="train",
+            target_type=self.target_type,
+            mode=self.quality_mode,
+            transform=transforms,
+            target_transform=target_transforms,
+            **self.extra_args,
+        )
+
+        loader = DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            shuffle=self.shuffle,
+            num_workers=self.num_workers,
+            drop_last=self.drop_last,
+            pin_memory=self.pin_memory,
+        )
+        return loader
+
+    def train_extra_dataloader(self) -> DataLoader:
+        """Cityscapes extra train dataset.
+
+        Only supported in coarse quality mode.
+        """
+        transforms = self.train_transforms or self._default_transforms()
+        target_transforms = self.target_transforms or self._default_target_transforms()
+
+        dataset = Cityscapes(
+            self.data_dir,
+            split="train_extra",
             target_type=self.target_type,
             mode=self.quality_mode,
             transform=transforms,
@@ -178,7 +203,10 @@ class CityscapesDataModule(LightningDataModule):
         return loader
 
     def test_dataloader(self) -> DataLoader:
-        """Cityscapes test set."""
+        """Cityscapes test set.
+
+        Only supported in fine quality mode.
+        """
         transforms = self.test_transforms or self._default_transforms()
         target_transforms = self.target_transforms or self._default_target_transforms()
 
@@ -213,7 +241,10 @@ class CityscapesDataModule(LightningDataModule):
         return cityscapes_transforms
 
     def _default_target_transforms(self) -> Callable:
-        cityscapes_target_transforms = transform_lib.Compose(
-            [transform_lib.ToTensor(), transform_lib.Lambda(lambda t: t.squeeze())]
-        )
+        if self.target_type == "polygon":
+            cityscapes_target_transforms = None
+        else:
+            cityscapes_target_transforms = transform_lib.Compose(
+                [transform_lib.ToTensor(), transform_lib.Lambda(lambda t: t.squeeze())]
+            )
         return cityscapes_target_transforms
