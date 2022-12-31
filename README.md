@@ -25,6 +25,7 @@ ______________________________________________________________________
 [![Documentation Status](https://readthedocs.org/projects/lightning-bolts/badge/?version=latest)](https://lightning-bolts.readthedocs.io/en/latest/)
 [![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://www.pytorchlightning.ai/community)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/PytorchLightning/lightning-bolts/blob/master/LICENSE)
+[![DOI](https://zenodo.org/badge/250025410.svg)](https://zenodo.org/badge/latestdoi/250025410)
 
 </div>
 

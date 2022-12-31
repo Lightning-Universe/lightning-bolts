@@ -37,7 +37,7 @@ def test_gan(tmpdir, datadir, catch_warnings, dm_cls):
         fast_dev_run=True,
         log_every_n_steps=1,
         accelerator="auto",
-        # TODO @otaj: We need to be able to support multiple GPUs in such a simple scenario.
+        # TODO: We need to be able to support multiple GPUs in such a simple scenario.
         # But, DDP is throwing ugly errors at me at the moment
         devices=1,
     )

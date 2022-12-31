@@ -1,5 +1,5 @@
-import torch
 from torch import Tensor
+from torchvision.ops import box_iou, generalized_box_iou
 
 
 def iou(preds: Tensor, target: Tensor) -> Tensor:
@@ -22,16 +22,7 @@ def iou(preds: Tensor, target: Tensor) -> Tensor:
         IoU tensor: an NxM tensor containing the pairwise IoU values for every element in preds and target,
                     where N is the number of prediction bounding boxes and M is the number of target bounding boxes
     """
-    x_min = torch.max(preds[:, None, 0], target[:, 0])
-    y_min = torch.max(preds[:, None, 1], target[:, 1])
-    x_max = torch.min(preds[:, None, 2], target[:, 2])
-    y_max = torch.min(preds[:, None, 3], target[:, 3])
-    intersection = (x_max - x_min).clamp(min=0) * (y_max - y_min).clamp(min=0)
-    pred_area = (preds[:, 2] - preds[:, 0]) * (preds[:, 3] - preds[:, 1])
-    target_area = (target[:, 2] - target[:, 0]) * (target[:, 3] - target[:, 1])
-    union = pred_area[:, None] + target_area - intersection
-    iou_value = torch.true_divide(intersection, union)
-    return iou_value
+    return box_iou(preds, target)
 
 
 def giou(preds: Tensor, target: Tensor) -> Tensor:
@@ -57,19 +48,4 @@ def giou(preds: Tensor, target: Tensor) -> Tensor:
         GIoU in an NxM tensor containing the pairwise GIoU values for every element in preds and target,
         where N is the number of prediction bounding boxes and M is the number of target bounding boxes
     """
-    x_min = torch.max(preds[:, None, 0], target[:, 0])
-    y_min = torch.max(preds[:, None, 1], target[:, 1])
-    x_max = torch.min(preds[:, None, 2], target[:, 2])
-    y_max = torch.min(preds[:, None, 3], target[:, 3])
-    intersection = (x_max - x_min).clamp(min=0) * (y_max - y_min).clamp(min=0)
-    pred_area = (preds[:, 2] - preds[:, 0]) * (preds[:, 3] - preds[:, 1])
-    target_area = (target[:, 2] - target[:, 0]) * (target[:, 3] - target[:, 1])
-    union = pred_area[:, None] + target_area - intersection
-    C_x_min = torch.min(preds[:, None, 0], target[:, 0])
-    C_y_min = torch.min(preds[:, None, 1], target[:, 1])
-    C_x_max = torch.max(preds[:, None, 2], target[:, 2])
-    C_y_max = torch.max(preds[:, None, 3], target[:, 3])
-    C_area = (C_x_max - C_x_min).clamp(min=0) * (C_y_max - C_y_min).clamp(min=0)
-    iou_value = torch.true_divide(intersection, union)
-    giou_value = iou_value - torch.true_divide((C_area - union), C_area)
-    return giou_value
+    return generalized_box_iou(preds, target)
