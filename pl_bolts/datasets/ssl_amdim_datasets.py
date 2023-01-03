@@ -76,7 +76,6 @@ class SSLDatasetMixin(ABC):
 
     @classmethod
     def deterministic_shuffle(cls, x, y):
-
         n = len(x)
         idxs = list(range(0, n))
         np.random.seed(1234)

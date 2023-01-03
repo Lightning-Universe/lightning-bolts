@@ -19,7 +19,6 @@ else:  # pragma: no cover
 
 @under_review()
 class KittiDataModule(LightningDataModule):
-
     name = "kitti"
 
     def __init__(

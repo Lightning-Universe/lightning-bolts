@@ -140,11 +140,8 @@ class AmdimNCELoss(nn.Module):
 
         # trick 2: tanh clip
         raw_scores = tanh_clip(raw_scores, clip_val=self.tclip)
-        """
-        pos_scores includes scores for all the positive samples
-        neg_scores includes scores for all the negative samples, with
-        scores for positive samples set to the min score (-self.tclip here)
-        """
+        """pos_scores includes scores for all the positive samples neg_scores includes scores for all the negative
+        samples, with scores for positive samples set to the min score (-self.tclip here)"""
         # ----------------------
         # EXTRACT POSITIVE SCORES
         # use the index mask to pull all the diagonals which are b1 x b1
