@@ -19,12 +19,12 @@ from torch.nn import functional as F
 
 from pl_bolts.metrics import mean, precision_at_k
 from pl_bolts.transforms.self_supervised.moco_transforms import (
-    Moco2EvalCIFAR10Transforms,
-    Moco2EvalImagenetTransforms,
-    Moco2EvalSTL10Transforms,
-    Moco2TrainCIFAR10Transforms,
-    Moco2TrainImagenetTransforms,
-    Moco2TrainSTL10Transforms,
+    MoCo2EvalCIFAR10Transforms,
+    MoCo2EvalImagenetTransforms,
+    MoCo2EvalSTL10Transforms,
+    MoCo2TrainCIFAR10Transforms,
+    MoCo2TrainImagenetTransforms,
+    MoCo2TrainSTL10Transforms,
 )
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review
@@ -372,20 +372,20 @@ def cli_main():
 
     if args.dataset == "cifar10":
         datamodule = CIFAR10DataModule.from_argparse_args(args)
-        datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
-        datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
+        datamodule.train_transforms = MoCo2TrainCIFAR10Transforms()
+        datamodule.val_transforms = MoCo2EvalCIFAR10Transforms()
 
     elif args.dataset == "stl10":
         datamodule = STL10DataModule.from_argparse_args(args)
         datamodule.train_dataloader = datamodule.train_dataloader_mixed
         datamodule.val_dataloader = datamodule.val_dataloader_mixed
-        datamodule.train_transforms = Moco2TrainSTL10Transforms()
-        datamodule.val_transforms = Moco2EvalSTL10Transforms()
+        datamodule.train_transforms = MoCo2TrainSTL10Transforms()
+        datamodule.val_transforms = MoCo2EvalSTL10Transforms()
 
     elif args.dataset == "imagenet2012":
         datamodule = SSLImagenetDataModule.from_argparse_args(args)
-        datamodule.train_transforms = Moco2TrainImagenetTransforms()
-        datamodule.val_transforms = Moco2EvalImagenetTransforms()
+        datamodule.train_transforms = MoCo2TrainImagenetTransforms()
+        datamodule.val_transforms = MoCo2EvalImagenetTransforms()
 
     else:
         # replace with your own dataset, otherwise CIFAR-10 will be used by default if `None` passed in

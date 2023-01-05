@@ -28,12 +28,12 @@ from pl_bolts.transforms.self_supervised.cpc_transforms import (
     CPCTrainTransformsSTL10,
 )
 from pl_bolts.transforms.self_supervised.moco_transforms import (
-    Moco2EvalCIFAR10Transforms,
-    Moco2EvalImagenetTransforms,
-    Moco2EvalSTL10Transforms,
-    Moco2TrainCIFAR10Transforms,
-    Moco2TrainImagenetTransforms,
-    Moco2TrainSTL10Transforms,
+    MoCo2EvalCIFAR10Transforms,
+    MoCo2EvalImagenetTransforms,
+    MoCo2EvalSTL10Transforms,
+    MoCo2TrainCIFAR10Transforms,
+    MoCo2TrainImagenetTransforms,
+    MoCo2TrainSTL10Transforms,
 )
 from pl_bolts.transforms.self_supervised.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
@@ -67,8 +67,8 @@ def test_simclr_transforms(img_size):
         CPCEvalTransformsCIFAR10,
         AMDIMEvalTransformsCIFAR10,
         AMDIMTrainTransformsCIFAR10,
-        Moco2TrainCIFAR10Transforms,
-        Moco2EvalCIFAR10Transforms,
+        MoCo2TrainCIFAR10Transforms,
+        MoCo2EvalCIFAR10Transforms,
     ],
 )
 def test_cifar10_transforms(transform):
@@ -86,8 +86,8 @@ def test_cifar10_transforms(transform):
         CPCEvalTransformsSTL10,
         AMDIMTrainTransformsSTL10,
         AMDIMEvalTransformsSTL10,
-        Moco2TrainSTL10Transforms,
-        Moco2EvalSTL10Transforms,
+        MoCo2TrainSTL10Transforms,
+        MoCo2EvalSTL10Transforms,
     ],
 )
 def test_stl10_transforms(transform):
@@ -105,8 +105,8 @@ def test_stl10_transforms(transform):
         CPCEvalTransformsImageNet128,
         AMDIMTrainTransformsImageNet128,
         AMDIMEvalTransformsImageNet128,
-        Moco2TrainImagenetTransforms,
-        Moco2EvalImagenetTransforms,
+        MoCo2TrainImagenetTransforms,
+        MoCo2EvalImagenetTransforms,
     ],
 )
 def test_imagenet_transforms(transform):
