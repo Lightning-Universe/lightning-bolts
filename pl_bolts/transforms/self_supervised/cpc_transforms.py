@@ -1,6 +1,8 @@
+from torch import Tensor
+from torchvision.transforms import InterpolationMode
+
 from pl_bolts.transforms.self_supervised import Patchify, RandomTranslateWithReflect
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -9,7 +11,6 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
-@under_review()
 class CPCTrainTransformsCIFAR10:
     """Transforms used for CPC:
 
@@ -33,7 +34,7 @@ class CPCTrainTransformsCIFAR10:
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsCIFAR10())
     """
 
-    def __init__(self, patch_size=8, overlap=4):
+    def __init__(self, patch_size: int = 8, overlap: int = 4) -> None:
         """
         Args:
             patch_size: size of patches when cutting up the image into overlapping patches
@@ -65,13 +66,12 @@ class CPCTrainTransformsCIFAR10:
             ]
         )
 
-    def __call__(self, inp):
+    def __call__(self, inp: Tensor) -> Tensor:
         inp = self.flip_lr(inp)
         out1 = self.transforms(inp)
         return out1
 
 
-@under_review()
 class CPCEvalTransformsCIFAR10:
     """Transforms used for CPC:
 
@@ -92,7 +92,7 @@ class CPCEvalTransformsCIFAR10:
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsCIFAR10())
     """
 
-    def __init__(self, patch_size: int = 8, overlap: int = 4):
+    def __init__(self, patch_size: int = 8, overlap: int = 4) -> None:
         """
         Args:
             patch_size: size of patches when cutting up the image into overlapping patches
@@ -119,12 +119,11 @@ class CPCEvalTransformsCIFAR10:
             ]
         )
 
-    def __call__(self, inp):
+    def __call__(self, inp: Tensor) -> Tensor:
         out1 = self.transforms(inp)
         return out1
 
 
-@under_review()
 class CPCTrainTransformsSTL10:
     """Transforms used for CPC:
 
@@ -148,7 +147,7 @@ class CPCTrainTransformsSTL10:
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsSTL10())
     """
 
-    def __init__(self, patch_size: int = 16, overlap: int = 8):
+    def __init__(self, patch_size: int = 16, overlap: int = 8) -> None:
         """
         Args:
             patch_size: size of patches when cutting up the image into overlapping patches
@@ -166,7 +165,9 @@ class CPCTrainTransformsSTL10:
         # image augmentation functions
         col_jitter = transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.2)], p=0.8)
         rnd_gray = transforms.RandomGrayscale(p=0.25)
-        rand_crop = transforms.RandomResizedCrop(64, scale=(0.3, 1.0), ratio=(0.7, 1.4), interpolation=3)
+        rand_crop = transforms.RandomResizedCrop(
+            64, scale=(0.3, 1.0), ratio=(0.7, 1.4), interpolation=InterpolationMode.BICUBIC
+        )
 
         self.transforms = transforms.Compose(
             [
@@ -179,13 +180,12 @@ class CPCTrainTransformsSTL10:
             ]
         )
 
-    def __call__(self, inp):
+    def __call__(self, inp: Tensor) -> Tensor:
         inp = self.flip_lr(inp)
         out1 = self.transforms(inp)
         return out1
 
 
-@under_review()
 class CPCEvalTransformsSTL10:
     """Transforms used for CPC:
 
@@ -206,7 +206,7 @@ class CPCEvalTransformsSTL10:
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsSTL10())
     """
 
-    def __init__(self, patch_size: int = 16, overlap: int = 8):
+    def __init__(self, patch_size: int = 16, overlap: int = 8) -> None:
         """
         Args:
             patch_size: size of patches when cutting up the image into overlapping patches
@@ -223,7 +223,7 @@ class CPCEvalTransformsSTL10:
 
         self.transforms = transforms.Compose(
             [
-                transforms.Resize(70, interpolation=3),
+                transforms.Resize(70, interpolation=InterpolationMode.BICUBIC),
                 transforms.CenterCrop(64),
                 transforms.ToTensor(),
                 normalize,
@@ -231,12 +231,11 @@ class CPCEvalTransformsSTL10:
             ]
         )
 
-    def __call__(self, inp):
+    def __call__(self, inp: Tensor) -> Tensor:
         out1 = self.transforms(inp)
         return out1
 
 
-@under_review()
 class CPCTrainTransformsImageNet128:
     """Transforms used for CPC:
 
@@ -257,7 +256,7 @@ class CPCTrainTransformsImageNet128:
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsImageNet128())
     """
 
-    def __init__(self, patch_size: int = 32, overlap: int = 16):
+    def __init__(self, patch_size: int = 32, overlap: int = 16) -> None:
         """
         Args:
             patch_size: size of patches when cutting up the image into overlapping patches
@@ -270,7 +269,9 @@ class CPCTrainTransformsImageNet128:
         self.patch_size = patch_size
         self.overlap = overlap
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
-        rand_crop = transforms.RandomResizedCrop(128, scale=(0.3, 1.0), ratio=(0.7, 1.4), interpolation=3)
+        rand_crop = transforms.RandomResizedCrop(
+            128, scale=(0.3, 1.0), ratio=(0.7, 1.4), interpolation=InterpolationMode.BICUBIC
+        )
         col_jitter = transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8)
         rnd_gray = transforms.RandomGrayscale(p=0.25)
 
@@ -284,13 +285,12 @@ class CPCTrainTransformsImageNet128:
 
         self.transforms = transforms.Compose([rand_crop, col_jitter, rnd_gray, post_transform])
 
-    def __call__(self, inp):
+    def __call__(self, inp: Tensor) -> Tensor:
         inp = self.flip_lr(inp)
         out1 = self.transforms(inp)
         return out1
 
 
-@under_review()
 class CPCEvalTransformsImageNet128:
     """Transforms used for CPC:
 
@@ -311,7 +311,7 @@ class CPCEvalTransformsImageNet128:
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsImageNet128())
     """
 
-    def __init__(self, patch_size: int = 32, overlap: int = 16):
+    def __init__(self, patch_size: int = 32, overlap: int = 16) -> None:
         """
         Args:
             patch_size: size of patches when cutting up the image into overlapping patches
@@ -332,10 +332,14 @@ class CPCEvalTransformsImageNet128:
             ]
         )
         self.transforms = transforms.Compose(
-            [transforms.Resize(146, interpolation=3), transforms.CenterCrop(128), post_transform]
+            [
+                transforms.Resize(146, interpolation=InterpolationMode.BICUBIC),
+                transforms.CenterCrop(128),
+                post_transform,
+            ]
         )
 
-    def __call__(self, inp):
+    def __call__(self, inp: Tensor) -> Tensor:
         inp = self.flip_lr(inp)
         out1 = self.transforms(inp)
         return out1
