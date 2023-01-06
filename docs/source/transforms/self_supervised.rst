@@ -92,32 +92,32 @@ Transforms used for MOCO V2
 CIFAR-10 Train (m2)
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: pl_bolts.transforms.self_supervised.moco_transforms.Moco2TrainCIFAR10Transforms
+.. autoclass:: pl_bolts.transforms.self_supervised.moco_transforms.MoCo2TrainCIFAR10Transforms
     :noindex:
 
 CIFAR-10 Eval (m2)
 ^^^^^^^^^^^^^^^^^^^^^
-.. autoclass:: pl_bolts.transforms.self_supervised.moco_transforms.Moco2EvalCIFAR10Transforms
+.. autoclass:: pl_bolts.transforms.self_supervised.moco_transforms.MoCo2EvalCIFAR10Transforms
     :noindex:
 
 Imagenet Train (m2)
 ^^^^^^^^^^^^^^^^^^^^^^
-.. autoclass:: pl_bolts.transforms.self_supervised.moco_transforms.Moco2TrainSTL10Transforms
+.. autoclass:: pl_bolts.transforms.self_supervised.moco_transforms.MoCo2TrainSTL10Transforms
     :noindex:
 
 Imagenet Eval (m2)
 ^^^^^^^^^^^^^^^^^^^^^
-.. autoclass:: pl_bolts.transforms.self_supervised.moco_transforms.Moco2EvalSTL10Transforms
+.. autoclass:: pl_bolts.transforms.self_supervised.moco_transforms.MoCo2EvalSTL10Transforms
     :noindex:
 
 STL-10 Train (m2)
 ^^^^^^^^^^^^^^^^^^^^
-.. autoclass:: pl_bolts.transforms.self_supervised.moco_transforms.Moco2TrainImagenetTransforms
+.. autoclass:: pl_bolts.transforms.self_supervised.moco_transforms.MoCo2TrainImagenetTransforms
     :noindex:
 
 STL-10 Eval (m2)
 ^^^^^^^^^^^^^^^^^^^
-.. autoclass:: pl_bolts.transforms.self_supervised.moco_transforms.Moco2EvalImagenetTransforms
+.. autoclass:: pl_bolts.transforms.self_supervised.moco_transforms.MoCo2EvalImagenetTransforms
     :noindex:
 
 SimCLR transforms
