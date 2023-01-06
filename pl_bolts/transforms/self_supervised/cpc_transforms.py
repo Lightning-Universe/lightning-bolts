@@ -3,6 +3,7 @@ from torchvision.transforms import InterpolationMode
 
 from pl_bolts.transforms.self_supervised import Patchify, RandomTranslateWithReflect
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
+from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -11,6 +12,7 @@ else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
 
+@under_review()
 class CPCTrainTransformsCIFAR10:
     """Transforms used for CPC:
 
@@ -72,6 +74,7 @@ class CPCTrainTransformsCIFAR10:
         return out1
 
 
+@under_review()
 class CPCEvalTransformsCIFAR10:
     """Transforms used for CPC:
 
@@ -124,6 +127,7 @@ class CPCEvalTransformsCIFAR10:
         return out1
 
 
+@under_review()
 class CPCTrainTransformsSTL10:
     """Transforms used for CPC:
 
@@ -186,6 +190,7 @@ class CPCTrainTransformsSTL10:
         return out1
 
 
+@under_review()
 class CPCEvalTransformsSTL10:
     """Transforms used for CPC:
 
@@ -236,6 +241,7 @@ class CPCEvalTransformsSTL10:
         return out1
 
 
+@under_review()
 class CPCTrainTransformsImageNet128:
     """Transforms used for CPC:
 
@@ -291,6 +297,7 @@ class CPCTrainTransformsImageNet128:
         return out1
 
 
+@under_review()
 class CPCEvalTransformsImageNet128:
     """Transforms used for CPC:
 

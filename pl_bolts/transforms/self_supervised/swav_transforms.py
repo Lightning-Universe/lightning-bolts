@@ -1,4 +1,6 @@
-from typing import Tuple
+from typing import List, Tuple
+
+from torch import Tensor
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -19,7 +21,8 @@ class SwAVTrainDataTransform:
         max_scale_crops: Tuple[float] = (1, 0.33),
         gaussian_blur: bool = True,
         jitter_strength: float = 1.0,
-    ):
+    ) -> None:
+
         self.jitter_strength = jitter_strength
         self.gaussian_blur = gaussian_blur
 
@@ -89,7 +92,7 @@ class SwAVTrainDataTransform:
 
         self.transform.append(online_train_transform)
 
-    def __call__(self, sample):
+    def __call__(self, sample: Tensor) -> List[Tensor]:
         multi_crops = list(map(lambda transform: transform(sample), self.transform))
 
         return multi_crops
@@ -105,7 +108,8 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
         max_scale_crops: Tuple[float] = (1, 0.33),
         gaussian_blur: bool = True,
         jitter_strength: float = 1.0,
-    ):
+    ) -> None:
+
         super().__init__(
             normalize=normalize,
             size_crops=size_crops,
@@ -166,5 +170,5 @@ class SwAVFinetuneTransform:
         data_transforms.append(final_transform)
         self.transform = transforms.Compose(data_transforms)
 
-    def __call__(self, sample):
+    def __call__(self, sample: Tensor) -> Tensor:
         return self.transform(sample)
