@@ -1,5 +1,5 @@
 import random
-from typing import Callable, Tuple, Union
+from typing import Callable, List, Tuple, Union
 
 from torch import Tensor
 
@@ -134,7 +134,7 @@ class MoCo2TrainImagenetTransforms:
     https://arxiv.org/pdf/2003.04297.pdf
     """
 
-    def __init__(self, size: int = 224):
+    def __init__(self, size: int = 224) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -163,7 +163,7 @@ class MoCo2EvalImagenetTransforms:
     https://arxiv.org/pdf/2003.04297.pdf
     """
 
-    def __init__(self, size: int = 128):
+    def __init__(self, size: int = 128) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -188,7 +188,7 @@ class MoCo2TrainSTL10Transforms:
     https://arxiv.org/pdf/2003.04297.pdf
     """
 
-    def __init__(self, size: int = 64):
+    def __init__(self, size: int = 64) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -217,7 +217,7 @@ class MoCo2EvalSTL10Transforms:
     https://arxiv.org/pdf/2003.04297.pdf
     """
 
-    def __init__(self, size: int = 64):
+    def __init__(self, size: int = 64) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -239,7 +239,7 @@ class MoCo2EvalSTL10Transforms:
 class GaussianBlur:
     """Gaussian blur augmentation in SimCLR https://arxiv.org/abs/2002.05709."""
 
-    def __init__(self, sigma=(0.1, 2.0)):
+    def __init__(self, sigma: List[float] = [0.1, 2.0]) -> None:
         if not _PIL_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
                 "You want to use `Pillow` which is not installed yet, install it with `pip install Pillow`."
