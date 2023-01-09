@@ -1,4 +1,4 @@
-numpy<1.24.0 # todo: seeing some compatibility issues
+numpy<1.25.0 # todo: seeing some compatibility issues
 pytorch-lightning>=1.7.0
 lightning-utilities>=0.3.0, !=0.4.0  # this is needed for PL 1.7
 torchvision>=0.10.0  # todo: move to topic related extras
