@@ -19,7 +19,7 @@ from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
-    import gym
+    import gymnasium as gym
 else:  # pragma: no cover
     warn_missing_pkg("gym")
 

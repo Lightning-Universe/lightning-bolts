@@ -23,7 +23,7 @@ from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
-    from gym import Env
+    from gymnasium import Env
 else:  # pragma: no cover
     warn_missing_pkg("gym")
     Env = object
@@ -149,7 +149,7 @@ class DQN(LightningModule):
 
         self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len :]))
 
-        self.state = self.env.reset()
+        self.state, _info = self.env.reset()
 
     def run_n_episodes(self, env, n_epsiodes: int = 1, epsilon: float = 1.0) -> List[int]:
         """Carries out N episodes of the environment with the current agent.
@@ -162,14 +162,14 @@ class DQN(LightningModule):
         total_rewards = []
 
         for _ in range(n_epsiodes):
-            episode_state = env.reset()
+            episode_state, _info = env.reset()
             done = False
             episode_reward = 0
 
             while not done:
                 self.agent.epsilon = epsilon
                 action = self.agent(episode_state, self.device)
-                next_state, reward, done, _ = env.step(action[0])
+                next_state, reward, done, _truncated, _info = env.step(action[0])
                 episode_state = next_state
                 episode_reward += reward
 
@@ -180,18 +180,18 @@ class DQN(LightningModule):
     def populate(self, warm_start: int) -> None:
         """Populates the buffer with initial experience."""
         if warm_start > 0:
-            self.state = self.env.reset()
+            self.state, _info = self.env.reset()
 
             for _ in range(warm_start):
                 self.agent.epsilon = 1.0
                 action = self.agent(self.state, self.device)
-                next_state, reward, done, _ = self.env.step(action[0])
+                next_state, reward, done, _truncated, _info = self.env.step(action[0])
                 exp = Experience(state=self.state, action=action[0], reward=reward, done=done, new_state=next_state)
                 self.buffer.append(exp)
                 self.state = next_state
 
                 if done:
-                    self.state = self.env.reset()
+                    self.state, _info = self.env.reset()
 
     def build_networks(self) -> None:
         """Initializes the DQN train and target networks."""
@@ -225,7 +225,7 @@ class DQN(LightningModule):
             self.total_steps += 1
             action = self.agent(self.state, self.device)
 
-            next_state, r, is_done, _ = self.env.step(action[0])
+            next_state, r, is_done, _truncated, _info = self.env.step(action[0])
 
             episode_reward += r
             episode_steps += 1
@@ -241,7 +241,7 @@ class DQN(LightningModule):
                 self.total_rewards.append(episode_reward)
                 self.total_episode_steps.append(episode_steps)
                 self.avg_rewards = float(np.mean(self.total_rewards[-self.avg_reward_len :]))
-                self.state = self.env.reset()
+                self.state, _info = self.env.reset()
                 episode_steps = 0
                 episode_reward = 0
 

@@ -10,9 +10,9 @@ from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _GYM_AVAILABLE:
-    import gym.spaces
-    from gym import ObservationWrapper, Wrapper
-    from gym import make as gym_make
+    import gymnasium as gym
+    from gymnasium import ObservationWrapper, Wrapper
+    from gymnasium import make as gym_make
 else:  # pragma: no cover
     warn_missing_pkg("gym")
     Wrapper = object
@@ -36,12 +36,13 @@ class ToTensor(Wrapper):
 
     def step(self, action):
         """Take 1 step and cast to tensor."""
-        state, reward, done, info = self.env.step(action)
-        return torch.tensor(state), torch.tensor(reward), done, info
+        obs, reward, done, truncated, info = self.env.step(action)
+        return torch.tensor(obs), torch.tensor(reward), done, truncated, info
 
-    def reset(self):
+    def reset(self, **kwargs):
         """reset the env and cast to tensor."""
-        return torch.tensor(self.env.reset())
+        obs, info = self.env.reset(**kwargs)
+        return torch.tensor(obs), info
 
 
 @under_review()
@@ -60,16 +61,16 @@ class FireResetEnv(Wrapper):
         """Take 1 step."""
         return self.env.step(action)
 
-    def reset(self):
+    def reset(self, **kwargs):
         """reset the env."""
-        self.env.reset()
-        obs, _, done, _ = self.env.step(1)
+        obs, info = self.env.reset(**kwargs)
+        obs, _reward, done, _truncated, _info = self.env.step(1)
         if done:
-            self.env.reset()
-        obs, _, done, _ = self.env.step(2)
+            obs, info = self.env.reset(**kwargs)
+        obs, _reward, done, _truncated, _info = self.env.step(2)
         if done:
-            self.env.reset()
-        return obs
+            obs, info = self.env.reset(**kwargs)
+        return obs, info
 
 
 @under_review()
@@ -90,23 +91,23 @@ class MaxAndSkipEnv(Wrapper):
         total_reward = 0.0
         done = None
         for _ in range(self._skip):
-            obs, reward, done, info = self.env.step(action)
+            obs, reward, done, truncated, info = self.env.step(action)
             self._obs_buffer.append(obs)
             total_reward += reward
             if done:
                 break
         max_frame = np.max(np.stack(self._obs_buffer), axis=0)
-        return max_frame, total_reward, done, info
+        return max_frame, total_reward, done, truncated, info
 
-    def reset(self):
+    def reset(self, **kwargs):
         """Clear past frame buffer and init.
 
         to first obs. from inner env.
         """
         self._obs_buffer.clear()
-        obs = self.env.reset()
+        obs, info = self.env.reset(**kwargs)
         self._obs_buffer.append(obs)
-        return obs
+        return obs, info
 
 
 @under_review()
@@ -183,10 +184,11 @@ class BufferWrapper(ObservationWrapper):
             dtype=dtype,
         )
 
-    def reset(self):
+    def reset(self, **kwargs):
         """reset env."""
         self.buffer = np.zeros_like(self.observation_space.low, dtype=self.dtype)
-        return self.observation(self.env.reset())
+        obs, info = self.env.reset(**kwargs)
+        return self.observation(obs), info
 
     def observation(self, observation):
         """convert observation."""
@@ -219,7 +221,11 @@ class DataAugmentation(ObservationWrapper):
 @under_review()
 def make_environment(env_name):
     """Convert environment with wrappers."""
-    env = gym_make(env_name)
+    if isinstance(env_name, str):
+        env = gym_make(env_name)
+    else:
+        env = env_name
+
     env = MaxAndSkipEnv(env)
     env = FireResetEnv(env)
     env = ProcessFrame84(env)
