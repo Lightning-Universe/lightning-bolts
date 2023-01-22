@@ -19,6 +19,7 @@ try:
     from pytorch_lightning.loggers import Logger
 except ImportError:
     from pytorch_lightning.loggers import LightningLoggerBase
+
     Logger = LightningLoggerBase
 
 
