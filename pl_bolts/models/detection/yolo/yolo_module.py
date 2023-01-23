@@ -211,7 +211,9 @@ class YOLO(LightningModule):
         """Constructs the optimizer and learning rate scheduler based on ``self.optimizer_params`` and
         ``self.lr_scheduler_params``.
 
-        If weight decay is specified, it will be applied only to convolutional layer weights.
+        If weight decay is specified, it will be applied only to convolutional layer weights, as they contain much more
+        parameters than the biases and batch normalization parameters. Regularizing all parameters could lead to
+        underfitting.
         """
         if ("weight_decay" in self.optimizer_params) and (self.optimizer_params["weight_decay"] != 0):
             defaults = copy(self.optimizer_params)
