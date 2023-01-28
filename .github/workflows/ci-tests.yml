@@ -99,8 +99,8 @@ jobs:
         key: pl-datasets-${{ hashFiles('tests/conftest.py') }}
 
     - name: Download ROMs
-      continue-on-error: true
       run: |
+        mkdir -p datasets
         wget http://www.atarimania.com/roms/Roms.rar -O datasets/Roms.rar
         cd datasets
         unrar x -y Roms.rar
