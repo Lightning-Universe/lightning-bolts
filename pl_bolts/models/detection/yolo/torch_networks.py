@@ -49,11 +49,11 @@ class BottleneckBlock(nn.Module):
         return x + y if self.shortcut else y
 
 
-class TinyBlock(nn.Module):
+class TinyStage(nn.Module):
     """One stage of the "tiny" network architecture from YOLOv4.
 
     Args:
-        num_channels: Number of channels in the input and output of the block.
+        num_channels: Number of channels in the input and output of the stage.
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         norm: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
@@ -79,7 +79,7 @@ class TinyBlock(nn.Module):
         return self.mix(torch.cat((y2, y1), dim=1))
 
 
-class CSPBlock(nn.Module):
+class CSPStage(nn.Module):
     """One stage of a Cross Stage Partial Network (CSPNet).
 
     Encapsulates a number of bottleneck blocks in the "fusion first" CSP structure.
@@ -87,9 +87,9 @@ class CSPBlock(nn.Module):
     `Chien-Yao Wang et al. <https://arxiv.org/abs/1911.11929>`_
 
     Args:
-        in_channels: Number of input channels that the CSP block expects.
-        out_channels: Number of output channels that the CSP block produces.
-        depth: Number of bottleneck blocks that the CSP block contains.
+        in_channels: Number of input channels that the CSP stage expects.
+        out_channels: Number of output channels that the CSP stage produces.
+        depth: Number of bottleneck blocks that the CSP stage contains.
         shortcut: Whether the bottleneck blocks should include a shortcut connection.
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
@@ -201,11 +201,11 @@ class YOLOV4TinyBackbone(nn.Module):
 
         self.stage1 = Conv(in_channels, width, kernel_size=3, stride=2, activation=activation, norm=normalization)
         self.downsample2 = downsample(width, width * 2)
-        self.stage2 = TinyBlock(width * 2, activation=activation, norm=normalization)
+        self.stage2 = TinyStage(width * 2, activation=activation, norm=normalization)
         self.downsample3 = maxpool(width * 4)
-        self.stage3 = TinyBlock(width * 4, activation=activation, norm=normalization)
+        self.stage3 = TinyStage(width * 4, activation=activation, norm=normalization)
         self.downsample4 = maxpool(width * 8)
-        self.stage4 = TinyBlock(width * 8, activation=activation, norm=normalization)
+        self.stage4 = TinyStage(width * 8, activation=activation, norm=normalization)
         self.downsample5 = maxpool(width * 16)
 
     def forward(self, x: Tensor) -> List[Tensor]:
@@ -224,7 +224,7 @@ class YOLOV4TinyBackbone(nn.Module):
 
 
 class YOLOV4Backbone(nn.Module):
-    """A backbone that approximately corresponds to the Cross Stage Partial Network from YOLOv4.
+    """A backbone that corresponds approximately to the Cross Stage Partial Network from YOLOv4.
 
     Args:
         in_channels: Number of channels in the input image.
@@ -257,7 +257,7 @@ class YOLOV4Backbone(nn.Module):
             return Conv(in_channels, out_channels, kernel_size=3, stride=2, activation=activation, norm=normalization)
 
         def stage(in_channels: int, out_channels: int, depth: int) -> nn.Module:
-            csp = CSPBlock(
+            csp = CSPStage(
                 out_channels,
                 out_channels,
                 depth=depth,
@@ -276,7 +276,10 @@ class YOLOV4Backbone(nn.Module):
 
         convs = [conv3x3(in_channels, widths[0])] + [conv3x3(widths[0], widths[0]) for _ in range(depths[0] - 1)]
         self.stem = nn.Sequential(*convs)
-        self.stages = nn.ModuleList(stage(widths[n], widths[n + 1], depth) for n, depth in enumerate(depths[:-1]))
+        self.stages = nn.ModuleList(
+            stage(in_channels, out_channels, depth)
+            for in_channels, out_channels, depth in zip(widths[:-1], widths[1:], depths[1:])
+        )
 
     def forward(self, x: Tensor) -> List[Tensor]:
         x = self.stem(x)
@@ -318,7 +321,7 @@ class YOLOV5Backbone(nn.Module):
             )
 
         def stage(in_channels: int, out_channels: int, depth: int) -> nn.Module:
-            csp = CSPBlock(
+            csp = CSPStage(
                 out_channels,
                 out_channels,
                 depth=depth,
@@ -571,7 +574,7 @@ class YOLOV4Network(nn.Module):
             return Conv(in_channels, out_channels, kernel_size=1, stride=1, activation=activation, norm=normalization)
 
         def csp(in_channels: int, out_channels: int) -> nn.Module:
-            return CSPBlock(
+            return CSPStage(
                 in_channels,
                 out_channels,
                 depth=2,
@@ -754,7 +757,7 @@ class YOLOV4P6Network(nn.Module):
             return Conv(in_channels, out_channels, kernel_size=1, stride=1, activation=activation, norm=normalization)
 
         def csp(in_channels: int, out_channels: int) -> nn.Module:
-            return CSPBlock(
+            return CSPStage(
                 in_channels,
                 out_channels,
                 depth=2,
@@ -965,7 +968,7 @@ class YOLOV5Network(nn.Module):
             return nn.Sequential(OrderedDict([(f"outputs_{num_outputs}", outputs)]))
 
         def csp(in_channels: int, out_channels: int) -> nn.Module:
-            return CSPBlock(
+            return CSPStage(
                 in_channels,
                 out_channels,
                 depth=depth,
@@ -1185,7 +1188,7 @@ class YOLOXNetwork(nn.Module):
             return Conv(in_channels, out_channels, kernel_size, stride=1, activation=activation, norm=normalization)
 
         def csp(in_channels: int, out_channels: int) -> nn.Module:
-            return CSPBlock(
+            return CSPStage(
                 in_channels,
                 out_channels,
                 depth=depth,
