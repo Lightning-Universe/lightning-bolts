@@ -371,7 +371,7 @@ class ReOrg(nn.Module):
     The result is a tensor with half the width and height, and four times as many channels.
     """
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         tl = x[..., ::2, ::2]
         bl = x[..., 1::2, ::2]
         tr = x[..., ::2, 1::2]

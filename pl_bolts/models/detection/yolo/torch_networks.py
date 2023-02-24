@@ -13,7 +13,7 @@ from pl_bolts.models.detection.yolo.utils import get_image_size
 def run_detection(
     detection_layer: DetectionLayer,
     layer_input: Tensor,
-    targets: List[Dict[str, Tensor]],
+    targets: Optional[List[Dict[str, Tensor]]],
     image_size: Tensor,
     detections: List[Tensor],
     losses: List[Tensor],
@@ -46,7 +46,7 @@ def run_detection_with_aux_head(
     aux_detection_layer: DetectionLayer,
     layer_input: Tensor,
     aux_input: Tensor,
-    targets: List[Dict[str, Tensor]],
+    targets: Optional[List[Dict[str, Tensor]]],
     image_size: Tensor,
     aux_weight: float,
     detections: List[Tensor],
@@ -318,7 +318,7 @@ class CSPSPP(nn.Module):
         )
         self.mix2 = Conv(2 * out_channels, out_channels)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         x1 = self.conv1(x)
         x2 = self.maxpool1(x1)
         x3 = self.maxpool2(x1)
@@ -727,9 +727,9 @@ class YOLOV4TinyNetwork(nn.Module):
         self.detect5 = detect([6, 7, 8])
 
     def forward(self, x: Tensor, targets: Optional[TARGETS] = None) -> NETWORK_OUTPUT:
-        detections = []  # Outputs from detection layers
-        losses = []  # Losses from detection layers
-        hits = []  # Number of targets each detection layer was responsible for
+        detections: List[Tensor] = []  # Outputs from detection layers
+        losses: List[Tensor] = []  # Losses from detection layers
+        hits: List[int] = []  # Number of targets each detection layer was responsible for
 
         image_size = get_image_size(x)
 
@@ -884,9 +884,9 @@ class YOLOV4Network(nn.Module):
         self.detect5 = detect(range(anchors_per_cell * 2, anchors_per_cell * 3))
 
     def forward(self, x: Tensor, targets: Optional[TARGETS] = None) -> NETWORK_OUTPUT:
-        detections = []  # Outputs from detection layers
-        losses = []  # Losses from detection layers
-        hits = []  # Number of targets each detection layer was responsible for
+        detections: List[Tensor] = []  # Outputs from detection layers
+        losses: List[Tensor] = []  # Losses from detection layers
+        hits: List[int] = []  # Number of targets each detection layer was responsible for
 
         image_size = get_image_size(x)
 
@@ -1064,9 +1064,9 @@ class YOLOV4P6Network(nn.Module):
         self.detect6 = detect(range(anchors_per_cell * 3, anchors_per_cell * 4))
 
     def forward(self, x: Tensor, targets: Optional[TARGETS] = None) -> NETWORK_OUTPUT:
-        detections = []  # Outputs from detection layers
-        losses = []  # Losses from detection layers
-        hits = []  # Number of targets each detection layer was responsible for
+        detections: List[Tensor] = []  # Outputs from detection layers
+        losses: List[Tensor] = []  # Losses from detection layers
+        hits: List[int] = []  # Number of targets each detection layer was responsible for
 
         image_size = get_image_size(x)
 
@@ -1230,9 +1230,9 @@ class YOLOV5Network(nn.Module):
         self.detect5 = detect(range(anchors_per_cell * 2, anchors_per_cell * 3))
 
     def forward(self, x: Tensor, targets: Optional[TARGETS] = None) -> NETWORK_OUTPUT:
-        detections = []  # Outputs from detection layers
-        losses = []  # Losses from detection layers
-        hits = []  # Number of targets each detection layer was responsible for
+        detections: List[Tensor] = []  # Outputs from detection layers
+        losses: List[Tensor] = []  # Losses from detection layers
+        hits: List[int] = []  # Number of targets each detection layer was responsible for
 
         image_size = get_image_size(x)
 
@@ -1432,9 +1432,9 @@ class YOLOV7Network(nn.Module):
         self.aux_detect6 = detect(range(anchors_per_cell * 3, anchors_per_cell * 4), 3.0)
 
     def forward(self, x: Tensor, targets: Optional[TARGETS] = None) -> NETWORK_OUTPUT:
-        detections = []  # Outputs from detection layers
-        losses = []  # Losses from detection layers
-        hits = []  # Number of targets each detection layer was responsible for
+        detections: List[Tensor] = []  # Outputs from detection layers
+        losses: List[Tensor] = []  # Losses from detection layers
+        hits: List[int] = []  # Number of targets each detection layer was responsible for
 
         image_size = get_image_size(x)
 
@@ -1694,9 +1694,9 @@ class YOLOXNetwork(nn.Module):
         self.detect5 = detect(range(anchors_per_cell * 2, anchors_per_cell * 3))
 
     def forward(self, x: Tensor, targets: Optional[TARGETS] = None) -> NETWORK_OUTPUT:
-        detections = []  # Outputs from detection layers
-        losses = []  # Losses from detection layers
-        hits = []  # Number of targets each detection layer was responsible for
+        detections: List[Tensor] = []  # Outputs from detection layers
+        losses: List[Tensor] = []  # Losses from detection layers
+        hits: List[int] = []  # Number of targets each detection layer was responsible for
 
         image_size = get_image_size(x)
 

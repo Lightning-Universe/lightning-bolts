@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Sequence, Tuple, Union
+from typing import Dict, List, Sequence, Tuple, Union
 
 import torch
 from torch import Tensor
@@ -39,7 +39,7 @@ class ShapeMatching(ABC):
         preds: Dict[str, Tensor],
         targets: Dict[str, Tensor],
         image_size: Tensor,
-    ) -> Tuple[Dict[str, Tensor], Dict[str, Tensor]]:
+    ) -> Tuple[List[Tensor], Tensor, Tensor]:
         """For each target, selects predictions from the same grid cell, where the center of the target box is.
 
         Typically there are three predictions per grid cell. Subclasses implement ``match()``, which selects the
@@ -264,7 +264,7 @@ class SimOTAMatching:
         preds: Dict[str, Tensor],
         targets: Dict[str, Tensor],
         image_size: Tensor,
-    ) -> Tuple[Dict[str, Tensor], Dict[str, Tensor]]:
+    ) -> Tuple[Tensor, Tensor, Tensor]:
         """For each target, selects predictions using the SimOTA matching rule.
 
         Args:
