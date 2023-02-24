@@ -60,7 +60,9 @@ def run_detection_with_aux_head(
 
         # Match lead head predictions to targets and calculate losses from auxiliary head outputs.
         _, aux_preds = aux_detection_layer(aux_input, image_size)
-        layer_losses, layer_hits = aux_detection_layer.calculate_losses(preds, targets, image_size, loss_preds=aux_preds)
+        layer_losses, layer_hits = aux_detection_layer.calculate_losses(
+            preds, targets, image_size, loss_preds=aux_preds
+        )
         losses.append(layer_losses * aux_weight)
         hits.append(layer_hits)
 
