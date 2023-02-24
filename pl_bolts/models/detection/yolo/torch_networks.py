@@ -12,18 +12,27 @@ from pl_bolts.models.detection.yolo.utils import get_image_size
 
 def run_detection(
     detection_layer: DetectionLayer,
-    input: Tensor,
+    layer_input: Tensor,
     targets: List[Dict[str, Tensor]],
     image_size: Tensor,
     detections: List[Tensor],
     losses: List[Tensor],
     hits: List[int],
-):
+) -> None:
     """Runs the detection layer on the inputs and appends the output to the ``detections`` list.
 
     If ``targets`` is given, also calculates the losses and appends to the ``losses`` list.
+
+    Args:
+        detection_layer: The detection layer.
+        layer_input: Input to the detection layer.
+        targets: List of training targets for each image.
+        image_size: Width and height in a vector that defines the scale of the target coordinates.
+        detections: A list where a tensor containing the detections will be appended to.
+        losses: A list where a tensor containing the losses will be appended to, if ``targets`` is given.
+        hits: A list where the number of targets that matched this layer will be appended to, if ``targets`` is given.
     """
-    output, preds = detection_layer(input, image_size)
+    output, preds = detection_layer(layer_input, image_size)
     detections.append(output)
 
     if targets is not None:
@@ -35,7 +44,7 @@ def run_detection(
 def run_detection_with_aux_head(
     detection_layer: DetectionLayer,
     aux_detection_layer: DetectionLayer,
-    input: Tensor,
+    layer_input: Tensor,
     aux_input: Tensor,
     targets: List[Dict[str, Tensor]],
     image_size: Tensor,
@@ -43,13 +52,25 @@ def run_detection_with_aux_head(
     detections: List[Tensor],
     losses: List[Tensor],
     hits: List[int],
-):
+) -> None:
     """Runs the detection layer on the inputs and appends the output to the ``detections`` list.
 
     If ``targets`` is given, also runs the auxiliary detection layer on the auxiliary inputs, calculates the losses, and
     appends the losses to the ``losses`` list.
+
+    Args:
+        detection_layer: The lead detection layer.
+        aux_detection_layer: The auxiliary detection layer.
+        layer_input: Input to the lead detection layer.
+        aux_input: Input to the auxiliary detection layer.
+        targets: List of training targets for each image.
+        image_size: Width and height in a vector that defines the scale of the target coordinates.
+        aux_weight: Weight of the auxiliary loss.
+        detections: A list where a tensor containing the detections will be appended to.
+        losses: A list where a tensor containing the losses will be appended to, if ``targets`` is given.
+        hits: A list where the number of targets that matched this layer will be appended to, if ``targets`` is given.
     """
-    output, preds = detection_layer(input, image_size)
+    output, preds = detection_layer(layer_input, image_size)
     detections.append(output)
 
     if targets is not None:
