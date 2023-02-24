@@ -51,7 +51,7 @@ class ShapeMatching(ABC):
             image_size: Input image width and height.
 
         Returns:
-            preds, targets: Two dictionaries that contain the matched predictions and targets.
+            The indices of the matched predictions, background mask, and a mask for selecting the matched targets.
         """
         height, width = preds["boxes"].shape[:2]
         device = preds["boxes"].device
@@ -67,27 +67,19 @@ class ShapeMatching(ABC):
         cell_i = grid_xy[:, 0].to(torch.int64).clamp(0, width - 1)
         cell_j = grid_xy[:, 1].to(torch.int64).clamp(0, height - 1)
 
-        matched_targets, matched_anchors = self.match(xywh[:, 2:])
-        cell_i = cell_i[matched_targets]
-        cell_j = cell_j[matched_targets]
+        target_selector, anchor_selector = self.match(xywh[:, 2:])
+        cell_i = cell_i[target_selector]
+        cell_j = cell_j[target_selector]
 
         # Background mask is used to select anchors that are not responsible for predicting any object, for
         # calculating the part of the confidence loss with zero as the target confidence. It is set to False, if a
         # predicted box overlaps any target significantly, or if a prediction is matched to a target.
         background_mask = iou_below(preds["boxes"], targets["boxes"], self.ignore_bg_threshold)
-        background_mask[cell_j, cell_i, matched_anchors] = False
+        background_mask[cell_j, cell_i, anchor_selector] = False
 
-        preds = {
-            "boxes": preds["boxes"][cell_j, cell_i, matched_anchors],
-            "confidences": preds["confidences"][cell_j, cell_i, matched_anchors],
-            "bg_confidences": preds["confidences"][background_mask],
-            "classprobs": preds["classprobs"][cell_j, cell_i, matched_anchors],
-        }
-        targets = {
-            "boxes": targets["boxes"][matched_targets],
-            "labels": targets["labels"][matched_targets],
-        }
-        return preds, targets
+        pred_selector = [cell_j, cell_i, anchor_selector]
+
+        return pred_selector, background_mask, target_selector
 
     @abstractmethod
     def match(self, wh: Tensor) -> Union[Tuple[Tensor, Tensor], Tensor]:
@@ -247,9 +239,9 @@ def _sim_ota_match(costs: Tensor, ious: Tensor) -> Tuple[Tensor, Tensor]:
         matching_matrix[best_targets, more_than_one_match] = True
 
     # For those predictions that were matched, get the index of the target.
-    matched_preds = matching_matrix.sum(0) > 0
-    matched_targets = matching_matrix[:, matched_preds].int().argmax(0)
-    return matched_preds, matched_targets
+    pred_mask = matching_matrix.sum(0) > 0
+    target_selector = matching_matrix[:, pred_mask].int().argmax(0)
+    return pred_mask, target_selector
 
 
 class SimOTAMatching:
@@ -259,10 +251,13 @@ class SimOTAMatching:
 
     Args:
         loss_func: A ``LossFunction`` object that can be used to calculate the pairwise costs.
+        range: For each target, restrict to the anchors that are within an `N x N` grid cell are centered at the target,
+            where `N` is the value of this parameter.
     """
 
-    def __init__(self, loss_func: LossFunction) -> None:
+    def __init__(self, loss_func: LossFunction, range: float = 5.0) -> None:
         self.loss_func = loss_func
+        self.range = range
 
     def __call__(
         self,
@@ -278,7 +273,8 @@ class SimOTAMatching:
             image_size: Input image width and height.
 
         Returns:
-            preds, targets: Two dictionaries that contain the matched predictions and targets.
+            A mask of predictions that were matched, background mask (inverse of the first mask), and the indices of the
+            matched targets. The last tensor contains as many elements as there are ``True`` values in the first mask.
         """
         height, width, boxes_per_cell, num_classes = preds["classprobs"].shape
         device = preds["boxes"].device
@@ -291,42 +287,36 @@ class SimOTAMatching:
         centers = grid_centers(grid_size).view(-1, 2) * grid_to_image
         inside_matrix = is_inside_box(centers, targets["boxes"])
 
-        # Set the width and height of all target bounding boxes to the size of 5 grid cells and create a matrix for
+        # Set the width and height of all target bounding boxes to self.range grid cells and create a matrix for
         # selecting the anchors that are now inside the boxes. If a small target has no anchors inside its bounding
         # box, it will be matched to one of these anchors, but a high penalty will ensure that anchors that are inside
         # the bounding box will be preferred.
         xywh = box_convert(targets["boxes"], in_fmt="xyxy", out_fmt="cxcywh")
         xy = xywh[:, :2]
-        wh = 5.0 * grid_to_image * torch.ones_like(xy)
+        wh = self.range * grid_to_image * torch.ones_like(xy)
         xywh = torch.cat((xy, wh), -1)
         boxes = box_convert(xywh, in_fmt="cxcywh", out_fmt="xyxy")
         close_matrix = is_inside_box(centers, boxes)
 
-        # Flatten the prediction grids and filter them using a [height*width] boolean vector that indicates whether a
-        # cell center is inside or close enough to one or more targets.
-        fg_mask = (inside_matrix | close_matrix).sum(0) > 0
-        bg_mask = torch.logical_not(fg_mask)
+        # In the first step we restrict ourselves to the grid cells whose center is inside or close enough to one or
+        # more targets. The prediction grids are flattened and masked using a [height * width] boolean vector.
+        mask = (inside_matrix | close_matrix).sum(0) > 0
         shape = (height * width, boxes_per_cell)
         fg_preds = {
-            "boxes": preds["boxes"].view(*shape, 4)[fg_mask].view(-1, 4),
-            "confidences": preds["confidences"].view(shape)[fg_mask].view(-1),
-            "classprobs": preds["classprobs"].view(*shape, num_classes)[fg_mask].view(-1, num_classes),
+            "boxes": preds["boxes"].view(*shape, 4)[mask].view(-1, 4),
+            "confidences": preds["confidences"].view(shape)[mask].view(-1),
+            "classprobs": preds["classprobs"].view(*shape, num_classes)[mask].view(-1, num_classes),
         }
-        bg_confidences = preds["confidences"].view(shape)[bg_mask].view(-1)
 
         losses, ious = self.loss_func.pairwise(fg_preds, targets, input_is_normalized=False)
         costs = losses.overlap + losses.confidence + losses.classification
-        costs += 100000.0 * ~inside_matrix[:, fg_mask].repeat_interleave(boxes_per_cell, 1)
-        matched_preds, matched_targets = _sim_ota_match(costs, ious)
+        costs += 100000.0 * ~inside_matrix[:, mask].repeat_interleave(boxes_per_cell, 1)
+        pred_mask, target_selector = _sim_ota_match(costs, ious)
 
-        preds = {
-            "boxes": fg_preds["boxes"][matched_preds],
-            "confidences": fg_preds["confidences"][matched_preds],
-            "bg_confidences": torch.cat((bg_confidences, fg_preds["confidences"][torch.logical_not(matched_preds)])),
-            "classprobs": fg_preds["classprobs"][matched_preds],
-        }
-        targets = {
-            "boxes": targets["boxes"][matched_targets],
-            "labels": targets["labels"][matched_targets],
-        }
-        return preds, targets
+        # Add the anchor dimension to the mask and replace True values with the results of the actual SimOTA matching.
+        mask = mask.view(height, width).unsqueeze(-1).repeat(1, 1, boxes_per_cell)
+        mask[mask.nonzero().T.tolist()] = pred_mask
+
+        background_mask = torch.logical_not(mask)
+
+        return mask, background_mask, target_selector

@@ -10,6 +10,8 @@ from pl_bolts.models.detection.yolo.torch_networks import (
     YOLOV4TinyNetwork,
     YOLOV5Backbone,
     YOLOV5Network,
+    YOLOV7Backbone,
+    YOLOV7Network,
     YOLOXNetwork,
 )
 from pl_bolts.models.detection.yolo.yolo_module import YOLO
@@ -26,6 +28,8 @@ __all__ = [
     "YOLOV4TinyNetwork",
     "YOLOV5Backbone",
     "YOLOV5Network",
+    "YOLOV7Backbone",
+    "YOLOV7Network",
     "YOLOXNetwork",
     "YOLO",
 ]

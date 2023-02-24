@@ -77,11 +77,13 @@ def validate_batch(batch: Tuple[List[Tensor], TARGETS]) -> Tuple[Tensor, TARGETS
 
 class YOLO(LightningModule):
     """PyTorch Lightning implementation of YOLO that supports the most important features of YOLOv3, YOLOv4,
-    YOLOv5, Scaled-YOLOv4, and YOLOX.
+    YOLOv5, YOLOv7, Scaled-YOLOv4, and YOLOX.
 
     *YOLOv3 paper*: `Joseph Redmon and Ali Farhadi <https://arxiv.org/abs/1804.02767>`_
 
     *YOLOv4 paper*: `Alexey Bochkovskiy, Chien-Yao Wang, and Hong-Yuan Mark Liao <https://arxiv.org/abs/2004.10934>`_
+
+    *YOLOv7 paper*: `Chien-Yao Wang, Alexey Bochkovskiy, and Hong-Yuan Mark Liao <https://arxiv.org/abs/2207.02696>`_
 
     *Scaled-YOLOv4 paper*: `Chien-Yao Wang, Alexey Bochkovskiy, and Hong-Yuan Mark Liao
     <https://arxiv.org/abs/2011.08036>`_

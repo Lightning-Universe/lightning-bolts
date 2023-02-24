@@ -101,11 +101,12 @@ class DarknetNetwork(nn.Module):
             if isinstance(layer, (layers.RouteLayer, layers.ShortcutLayer)):
                 x = layer(outputs)
             elif isinstance(layer, layers.DetectionLayer):
-                x = layer(x, image_size, targets)
+                x, preds = layer(x, image_size)
                 detections.append(x)
                 if targets is not None:
-                    losses.append(layer.losses)
-                    hits.append(layer.hits)
+                    layer_losses, layer_hits = layer.calculate_losses(preds, targets, image_size)
+                    losses.append(layer_losses)
+                    hits.append(layer_hits)
             else:
                 x = layer(x)
 

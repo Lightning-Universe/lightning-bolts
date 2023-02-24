@@ -65,7 +65,8 @@ class DetectionLayer(nn.Module):
             to produce coordinate values close to one.
         input_is_normalized: The input is normalized by logistic activation in the previous layer. In this case the
             detection layer will not take the sigmoid of the coordinate and probability predictions, and the width and
-            height are scaled up so that the maximum value is four times the anchor dimension.
+            height are scaled up so that the maximum value is four times the anchor dimension. This is used by the
+            Darknet configurations of Scaled-YOLOv4.
     """
 
     def __init__(
@@ -89,7 +90,7 @@ class DetectionLayer(nn.Module):
         self.xy_scale = xy_scale
         self.input_is_normalized = input_is_normalized
 
-    def forward(self, x: Tensor, image_size: Tensor, targets: Optional[List[Dict[str, Tensor]]] = None) -> Tensor:
+    def forward(self, x: Tensor, image_size: Tensor) -> Tuple[Tensor, List[Dict[str, Tensor]]]:
         """Runs a forward pass through this YOLO detection layer.
 
         Maps cell-local coordinates to global coordinates in the image space, scales the bounding boxes with the
@@ -102,14 +103,14 @@ class DetectionLayer(nn.Module):
         for. ``losses`` is a tensor of three elements: the overlap, confidence, and classification loss.
 
         Args:
-            x: The output from the previous layer. Tensor of size
+            x: The output from the previous layer. The size of this tensor has to be
                 ``[batch_size, anchors_per_cell * (num_classes + 5), height, width]``.
             image_size: Image width and height in a vector (defines the scale of the predicted and target coordinates).
-            targets: If set, computes losses from detection layers against these targets. A list of target dictionaries,
-                one for each image.
 
         Returns:
-            Layer output tensor, sized ``[batch_size, num_anchors * height * width, num_classes + 5]``.
+            The layer output, with normalized probabilities, in a tensor sized
+            ``[batch_size, anchors_per_cell * height * width, num_classes + 5]`` and a list of dictionaries, containing
+            the same predictions, but with unnormalized probabilities (for loss calculation).
         """
         batch_size, num_features, height, width = x.shape
         num_attrs = self.num_classes + 5
@@ -150,37 +151,53 @@ class DetectionLayer(nn.Module):
         output = torch.cat((box, norm_confidence.unsqueeze(-1), norm_classprob), -1)
         output = output.reshape(batch_size, height * width * anchors_per_cell, num_attrs)
 
-        if targets is not None:
-            # We want to use binary_cross_entropy_with_logits, so we'll use the unnormalized confidence and classprob,
-            # if possible.
-            preds = [{"boxes": b, "confidences": c, "classprobs": p} for b, c, p in zip(box, confidence, classprob)]
-            self._calculate_losses(preds, targets, image_size)
+        # It's better to use binary_cross_entropy_with_logits() for loss computation, so we'll provide the unnormalized
+        # confidence and classprob, when available.
+        preds = [{"boxes": b, "confidences": c, "classprobs": p} for b, c, p in zip(box, confidence, classprob)]
 
-        return output
+        return output, preds
 
-    def _calculate_losses(
+    def match_targets(
         self,
         preds: List[Dict[str, Tensor]],
+        return_preds: List[Dict[str, Tensor]],
         targets: List[Dict[str, Tensor]],
         image_size: Tensor,
-    ) -> None:
-        """Matches the predictions to targets and calculates the losses. Creates the attributes ``losses`` and
-        ``hits``. ``losses`` is a tensor of three elements: the overlap, confidence, and classification loss.
-        ``hits`` is the number of targets that this layer was responsible for.
+    ) -> Tuple[Dict[str, Tensor], Dict[str, Tensor]]:
+        """Matches the predictions to targets.
 
         Args:
-            preds: List of predictions for each image.
+            preds: List of predictions for each image, as returned by the ``forward()`` method of this layer. These will
+                be matched to the training targets.
+            return_preds: List of predictions for each image. The matched predictions will be returned from this list.
+                When calculating the auxiliary loss for deep supervision, predictions from a different layer are used
+                for loss computation.
             targets: List of training targets for each image.
             image_size: Width and height in a vector that defines the scale of the target coordinates.
+
+        Returns:
+            Two dictionaries, the matched predictions and targets.
         """
         batch_size = len(preds)
-        if batch_size != len(targets):
+        if (len(targets) != batch_size) or (len(return_preds) != batch_size):
             raise ValueError("Different batch size for predictions and targets.")
 
         matches = []
-        for image_preds, image_targets in zip(preds, targets):
+        for image_preds, image_return_preds, image_targets in zip(preds, return_preds, targets):
             if image_targets["boxes"].shape[0] > 0:
-                matched_preds, matched_targets = self.matching_func(image_preds, image_targets, image_size)
+                pred_selector, background_selector, target_selector = self.matching_func(
+                    image_preds, image_targets, image_size
+                )
+                matched_preds = {
+                    "boxes": image_return_preds["boxes"][pred_selector],
+                    "confidences": image_return_preds["confidences"][pred_selector],
+                    "bg_confidences": image_return_preds["confidences"][background_selector],
+                    "classprobs": image_return_preds["classprobs"][pred_selector],
+                }
+                matched_targets = {
+                    "boxes": image_targets["boxes"][target_selector],
+                    "labels": image_targets["labels"][target_selector],
+                }
             else:
                 device = image_preds["confidences"].device
                 matched_preds = {
@@ -205,9 +222,41 @@ class DetectionLayer(nn.Module):
             "boxes": torch.cat(tuple(m[1]["boxes"] for m in matches)),
             "labels": torch.cat(tuple(m[1]["labels"] for m in matches)),
         }
+        return matched_preds, matched_targets
+
+    def calculate_losses(
+        self,
+        preds: List[Dict[str, Tensor]],
+        targets: List[Dict[str, Tensor]],
+        image_size: Tensor,
+        loss_preds: Optional[List[Dict[str, Tensor]]] = None,
+    ) -> Tuple[Tensor, int]:
+        """Matches the predictions to targets and computes the losses.
+
+        Args:
+            preds: List of predictions for each image, as returned by ``forward()``. These will be matched to the
+                training targets and used to compute the losses (unless another set of predictions for loss computation
+                is given in ``loss_preds``).
+            targets: List of training targets for each image.
+            image_size: Width and height in a vector that defines the scale of the target coordinates.
+            loss_preds: List of predictions for each image. If given, these will be used for loss computation, instead
+                of the same predictions that were used for matching. This is needed for deep supervision in YOLOv7.
+
+        Returns:
+            A vector of the overlap, confidence, and classification loss, normalized by batch size, and the number of
+            targets that were matched to this layer.
+        """
+        if loss_preds is None:
+            loss_preds = preds
+
+        matched_preds, matched_targets = self.match_targets(preds, loss_preds, targets, image_size)
+
         losses = self.loss_func.elementwise_sums(matched_preds, matched_targets, self.input_is_normalized, image_size)
-        self.losses = torch.stack((losses.overlap, losses.confidence, losses.classification)) / batch_size
-        self.hits = len(matched_targets["boxes"])
+        losses = torch.stack((losses.overlap, losses.confidence, losses.classification)) / len(preds)
+
+        hits = len(matched_targets["boxes"])
+
+        return losses, hits
 
 
 class Conv(nn.Module):
@@ -316,6 +365,20 @@ class Mish(nn.Module):
         return x * torch.tanh(nn.functional.softplus(x))
 
 
+class ReOrg(nn.Module):
+    """Re-organizes the tensor so that every square region of four cells is placed into four different channels.
+
+    The result is a tensor with half the width and height, and four times as many channels.
+    """
+
+    def forward(self, x):
+        tl = x[..., ::2, ::2]
+        bl = x[..., 1::2, ::2]
+        tr = x[..., ::2, 1::2]
+        br = x[..., 1::2, 1::2]
+        return torch.cat((tl, bl, tr, br), dim=1)
+
+
 def create_activation_module(name: Optional[str]) -> nn.Module:
     """Creates a layer activation module given its type as a string.
 
@@ -361,6 +424,7 @@ def create_detection_layer(
     prior_shape_idxs: Sequence[int],
     matching_algorithm: Optional[str] = None,
     matching_threshold: Optional[float] = None,
+    sim_ota_range: float = 5.0,
     ignore_bg_threshold: float = 0.7,
     overlap_func: Union[str, Callable] = "ciou",
     predict_overlap: float = 1.0,
@@ -382,6 +446,8 @@ def create_detection_layer(
             ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
             gives the highest IoU, default).
         matching_threshold: Threshold for "size" and "iou" matching algorithms.
+        sim_ota_range: The "simota" matching algorithm will restrict to the anchors that are within an `N x N` grid cell
+            area centered at the target, where `N` is the value of this parameter.
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
             has IoU with some target greater than this threshold, the predictor will not be taken into account when
             calculating the confidence loss.
@@ -399,14 +465,15 @@ def create_detection_layer(
             to produce coordinate values close to one.
         input_is_normalized: The input is normalized by logistic activation in the previous layer. In this case the
             detection layer will not take the sigmoid of the coordinate and probability predictions, and the width and
-            height are scaled up so that the maximum value is four times the anchor dimension.
+            height are scaled up so that the maximum value is four times the anchor dimension. This is used by the
+            Darknet configurations of Scaled-YOLOv4.
     """
     matching_func: Union[ShapeMatching, SimOTAMatching]
     if matching_algorithm == "simota":
         loss_func = LossFunction(
             overlap_func, None, overlap_loss_multiplier, confidence_loss_multiplier, class_loss_multiplier
         )
-        matching_func = SimOTAMatching(loss_func)
+        matching_func = SimOTAMatching(loss_func, sim_ota_range)
     elif matching_algorithm == "size":
         if matching_threshold is None:
             raise ValueError("matching_threshold is required with size ratio matching.")
