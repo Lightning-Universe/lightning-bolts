@@ -5,7 +5,7 @@ from typing import Any, Callable, Iterable, List, Optional, Type
 import torch
 import torch.nn as nn
 from pytorch_lightning import LightningModule, Trainer
-from pytorch_lightning.utilities.apply_func import apply_to_collection
+from lightning_utilities.core.apply_func import apply_to_collection
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor
 

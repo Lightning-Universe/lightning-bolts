@@ -14,7 +14,7 @@
 
 import pytest
 from pytorch_lightning import Callback, Trainer
-from pytorch_lightning.core.lightning import LightningModule
+from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
 from pl_bolts.callbacks import ORTCallback

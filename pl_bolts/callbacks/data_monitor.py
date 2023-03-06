@@ -3,9 +3,9 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 import numpy as np
 import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
-from pytorch_lightning.loggers import LightningLoggerBase, TensorBoardLogger, WandbLogger
+from pytorch_lightning.loggers import Logger, TensorBoardLogger, WandbLogger
 from pytorch_lightning.utilities import rank_zero_warn
-from pytorch_lightning.utilities.apply_func import apply_to_collection
+from lightning_utilities.core.apply_func import apply_to_collection
 from torch import Tensor, nn
 from torch.nn import Module
 from torch.utils.hooks import RemovableHandle
@@ -96,7 +96,7 @@ class DataMonitorBase(Callback):
 
             logger.experiment.log(data={name: wandb.Histogram(tensor)}, commit=False)
 
-    def _is_logger_available(self, logger: LightningLoggerBase) -> bool:
+    def _is_logger_available(self, logger: Logger) -> bool:
         available = True
         if not logger:
             rank_zero_warn("Cannot log histograms because Trainer has no logger.")

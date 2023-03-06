@@ -1,4 +1,4 @@
-from pytorch_lightning.loggers.base import DummyLogger
+from pytorch_lightning.loggers.logger import DummyLogger
 
 from pl_bolts.callbacks import LatentDimInterpolator
 from pl_bolts.models.gans import GAN
