@@ -4,13 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unReleased] - 2022-MM-DD
+## [unReleased] - 2023-03-06
 
 ### Added
 
 
 ### Changed
 
+- Updated Torchvision version to v0.13.X
+- Updated Lightning version to >=1.9.4 
+- Updated lightning-utilities version to >=0.6.0.post0, <0.7.0
+- Updated gym[atari] version to >=0.17.2, <0.27.0
 
 ### Deprecated
 
