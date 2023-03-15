@@ -20,6 +20,7 @@ from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from pl_bolts.utils import _PL_GREATER_EQUAL_1_4_5, _SPARSEML_AVAILABLE, _TORCH_MAX_VERSION_SPARSEML
 
 if _SPARSEML_AVAILABLE:
+    from sparseml.pytorch.base import _TORCH_MAX_VERSION
     from sparseml.pytorch.optim import ScheduledModifierManager
     from sparseml.pytorch.utils import ModuleExporter
 
@@ -40,7 +41,7 @@ class SparseMLCallback(Callback):
             if not _PL_GREATER_EQUAL_1_4_5:
                 raise MisconfigurationException("SparseML requires PyTorch Lightning 1.4.5 or greater.")
             if not _TORCH_MAX_VERSION_SPARSEML:
-                raise MisconfigurationException("SparseML requires PyTorch version lower than 1.11.0.")
+                raise MisconfigurationException(f"SparseML requires PyTorch version lower than {_TORCH_MAX_VERSION}.")
             raise MisconfigurationException("SparseML has not be installed, install with pip install sparseml")
         self.manager = ScheduledModifierManager.from_yaml(recipe_path)
 

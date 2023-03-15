@@ -19,8 +19,14 @@ _TORCHVISION_LESS_THAN_0_13: bool = compare_version("torchvision", operator.le, 
 _PL_GREATER_EQUAL_1_4 = compare_version("pytorch_lightning", operator.ge, "1.4.0")
 _PL_GREATER_EQUAL_1_4_5 = compare_version("pytorch_lightning", operator.ge, "1.4.5")
 _TORCH_ORT_AVAILABLE = module_available("torch_ort")
-_TORCH_MAX_VERSION_SPARSEML = compare_version("torch", operator.lt, "1.11.0")
-_SPARSEML_AVAILABLE = module_available("sparseml") and _PL_GREATER_EQUAL_1_4_5 and _TORCH_MAX_VERSION_SPARSEML
+_SPARSEML_INSTALLED = module_available("sparseml")
+
+_TORCH_MAX_VERSION_FROM_SPARSEML = "1.13.100"
+if _SPARSEML_INSTALLED:
+    from sparseml.pytorch.base import _TORCH_MAX_VERSION as _TORCH_MAX_VERSION_FROM_SPARSEML
+_TORCH_MAX_VERSION_SPARSEML = compare_version("sparseml", operator.le, _TORCH_MAX_VERSION_FROM_SPARSEML)
+
+_SPARSEML_AVAILABLE = _SPARSEML_INSTALLED and _PL_GREATER_EQUAL_1_4_5 and _TORCH_MAX_VERSION_SPARSEML
 _JSONARGPARSE_GREATER_THAN_4_16_0 = compare_version("jsonargparse", operator.gt, "4.16.0")
 
 
