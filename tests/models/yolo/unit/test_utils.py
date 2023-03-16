@@ -60,14 +60,14 @@ def test_is_inside_box(catch_warnings):
          [1,7; 3,7; 5,7; 7,7; 9,7; 11,7; 13,7; 15,7; 17,7; 19,7]
          [1,9; 3,9; 5,9; 7,9; 9,9; 11,9; 13,9; 15,9; 17,9; 19,9]]
 
-    is_inside[0]:
+    is_inside[..., 0]:
         [[F, F, F, F, F, F, F, F, F, F]
          [F, T, T, F, F, F, F, F, F, F]
          [F, T, T, F, F, F, F, F, F, F]
          [F, F, F, F, F, F, F, F, F, F]
          [F, F, F, F, F, F, F, F, F, F]]
 
-    is_inside[1]:
+    is_inside[..., 1]:
         [[F, F, F, F, F, F, F, F, F, F]
          [F, F, F, F, F, F, F, F, F, F]
          [F, F, F, F, F, F, F, F, F, F]
@@ -78,10 +78,10 @@ def test_is_inside_box(catch_warnings):
     centers = grid_centers(size) * 2.0
     centers = centers.view(-1, 2)
     boxes = torch.tensor([[2, 2, 6, 6], [14, 8, 18, 10]])
-    is_inside = is_inside_box(centers, boxes).view(2, 5, 10)
+    is_inside = is_inside_box(centers, boxes).view(5, 10, 2)
     assert torch.count_nonzero(is_inside) == 6
-    assert torch.all(is_inside[0, 1:3, 1:3])
-    assert torch.all(is_inside[1, 4, 7:9])
+    assert torch.all(is_inside[1:3, 1:3, 0])
+    assert torch.all(is_inside[4, 7:9, 1])
 
 
 @pytest.mark.parametrize(

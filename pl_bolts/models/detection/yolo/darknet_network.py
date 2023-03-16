@@ -26,39 +26,41 @@ CREATE_LAYER_OUTPUT = Tuple[nn.Module, int]  # layer, num_outputs
 
 
 class DarknetNetwork(nn.Module):
-    """This class can be used to parse the configuration files of the Darknet YOLOv4 implementation."""
+    """This class can be used to parse the configuration files of the Darknet YOLOv4 implementation.
+
+    Iterates through the layers from the configuration and creates corresponding PyTorch modules. If ``weights_path`` is
+    given and points to a Darknet model file, loads the convolutional layer weights from the file.
+
+    Args:
+        config_path: Path to a Darknet configuration file that defines the network architecture.
+        weights_path: Path to a Darknet model file. If given, the model weights will be read from this file.
+        in_channels: Number of channels in the input image.
+        matching_algorithm: Which algorithm to use for matching targets to anchors. "simota" (the SimOTA matching rule
+            from YOLOX), "size" (match those prior shapes, whose width and height relative to the target is below given
+            ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
+            gives the highest IoU, default).
+        matching_threshold: Threshold for "size" and "iou" matching algorithms.
+        spatial_range: The "simota" matching algorithm will restrict to anchors that are within an `N × N` grid cell
+            area centered at the target, where `N` is the value of this parameter.
+        size_range: The "simota" matching algorithm will restrict to anchors whose dimensions are no more than `N` and
+            no less than `1/N` times the target dimensions, where `N` is the value of this parameter.
+        ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
+            has IoU with some target greater than this threshold, the predictor will not be taken into account when
+            calculating the confidence loss.
+        overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
+            function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
+            "ciou".
+        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
+            confidence is one if there's an object, and 1.0 means that the target confidence is the output of
+            ``overlap_func``.
+        overlap_loss_multiplier: Overlap loss will be scaled by this value.
+        confidence_loss_multiplier: Confidence loss will be scaled by this value.
+        class_loss_multiplier: Classification loss will be scaled by this value.
+    """
 
     def __init__(
         self, config_path: str, weights_path: Optional[str] = None, in_channels: Optional[int] = None, **kwargs: Any
     ) -> None:
-        """Parses a Darknet configuration file and creates the network structure.
-
-        Iterates through the layers from the configuration and creates corresponding PyTorch modules. If
-        ``weights_path`` is given and points to a Darknet model file, loads the convolutional layer weights from the
-        file.
-
-        Args:
-            config_path: Path to a Darknet configuration file that defines the network architecture.
-            weights_path: Path to a Darknet model file. If given, the model weights will be read from this file.
-            in_channels: Number of channels in the input image.
-            matching_algorithm: Which algorithm to use for matching targets to anchors. "simota" (the SimOTA matching
-                rule from YOLOX), "size" (match those prior shapes, whose width and height relative to the target is
-                below given ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the
-                prior shape that gives the highest IoU, default).
-            matching_threshold: Threshold for "size" and "iou" matching algorithms.
-            ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding
-                anchor has IoU with some target greater than this threshold, the predictor will not be taken into
-                account when calculating the confidence loss.
-            overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or
-                a function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou",
-                and "ciou".
-            predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
-                confidence is one if there's an object, and 1.0 means that the target confidence is the output of
-                ``overlap_func``.
-            overlap_loss_multiplier: Overlap loss will be scaled by this value.
-            confidence_loss_multiplier: Confidence loss will be scaled by this value.
-            class_loss_multiplier: Classification loss will be scaled by this value.
-        """
         super().__init__()
 
         with open(config_path) as config_file:
@@ -405,6 +407,8 @@ def _create_yolo(
     prior_shapes: Optional[List[Tuple[int, int]]] = None,
     matching_algorithm: Optional[str] = None,
     matching_threshold: Optional[float] = None,
+    spatial_range: float = 5.0,
+    size_range: float = 4.0,
     ignore_bg_threshold: Optional[float] = None,
     overlap_func: Optional[Union[str, Callable]] = None,
     predict_overlap: float = 1.0,
@@ -428,6 +432,10 @@ def _create_yolo(
             ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
             gives the highest IoU, default).
         matching_threshold: Threshold for "size" and "iou" matching algorithms.
+        spatial_range: The "simota" matching algorithm will restrict to anchors that are within an `N × N` grid cell
+            area centered at the target, where `N` is the value of this parameter.
+        size_range: The "simota" matching algorithm will restrict to anchors whose dimensions are no more than `N` and
+            no less than `1/N` times the target dimensions, where `N` is the value of this parameter.
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
             has IoU with some target greater than this threshold, the predictor will not be taken into account when
             calculating the confidence loss.
@@ -471,6 +479,8 @@ def _create_yolo(
         prior_shape_idxs=config["mask"],
         matching_algorithm=matching_algorithm,
         matching_threshold=matching_threshold,
+        spatial_range=spatial_range,
+        size_range=size_range,
         ignore_bg_threshold=ignore_bg_threshold,
         overlap_func=overlap_func,
         predict_overlap=predict_overlap,

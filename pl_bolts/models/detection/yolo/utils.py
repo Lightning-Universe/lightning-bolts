@@ -76,21 +76,21 @@ def global_xy(xy: Tensor, image_size: Tensor) -> Tensor:
     return (xy + offset) * scale
 
 
-def aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
+def aligned_iou(wh1: Tensor, wh2: Tensor) -> Tensor:
     """Calculates a matrix of intersections over union from box dimensions, assuming that the boxes are located at
     the same coordinates.
 
     Args:
-        dims1: Width and height of `N` boxes. Tensor of size ``[N, 2]``.
-        dims2: Width and height of `M` boxes. Tensor of size ``[M, 2]``.
+        wh1: An ``[N, 2]`` matrix of box shapes (width and height).
+        wh2: An ``[M, 2]`` matrix of box shapes (width and height).
 
     Returns:
-        Tensor of size ``[N, M]`` containing the pairwise IoU values for every element in ``dims1`` and ``dims2``
+        An ``[N, M]`` matrix of pairwise IoU values for every element in ``wh1`` and ``wh2``
     """
-    area1 = dims1[:, 0] * dims1[:, 1]  # [N]
-    area2 = dims2[:, 0] * dims2[:, 1]  # [M]
+    area1 = wh1[:, 0] * wh1[:, 1]  # [N]
+    area2 = wh2[:, 0] * wh2[:, 1]  # [M]
 
-    inter_wh = torch.min(dims1[:, None, :], dims2)  # [N, M, 2]
+    inter_wh = torch.min(wh1[:, None, :], wh2)  # [N, M, 2]
     inter = inter_wh[:, :, 0] * inter_wh[:, :, 1]  # [N, M]
     union = area1[:, None] + area2 - inter  # [N, M]
 
@@ -121,18 +121,16 @@ def is_inside_box(points: Tensor, boxes: Tensor) -> Tensor:
     """Get pairwise truth values of whether the point is inside the box.
 
     Args:
-        points: point (x, y) coordinates, [points, 2]
-        boxes: box (x1, y1, x2, y2) coordinates, [boxes, 4]
+        points: Point (x, y) coordinates, a tensor shaped ``[points, 2]``.
+        boxes: Box (x1, y1, x2, y2) coordinates, a tensor shaped ``[boxes, 4]``.
 
     Returns:
-        A tensor shaped ``[boxes, points]`` containing pairwise truth values of whether the points are inside the boxes.
+        A tensor shaped ``[points, boxes]`` containing pairwise truth values of whether the points are inside the boxes.
     """
-    points = points.unsqueeze(0)  # [1, points, 2]
-    boxes = boxes.unsqueeze(1)  # [boxes, 1, 4]
-    lt = points - boxes[..., :2]  # [boxes, points, 2]
-    rb = boxes[..., 2:] - points  # [boxes, points, 2]
-    deltas = torch.cat((lt, rb), -1)  # [boxes, points, 4]
-    return deltas.min(-1).values > 0.0  # [boxes, points]
+    lt = points[:, None, :] - boxes[None, :, :2]  # [boxes, points, 2]
+    rb = boxes[None, :, 2:] - points[:, None, :]  # [boxes, points, 2]
+    deltas = torch.cat((lt, rb), -1)  # [points, boxes, 4]
+    return deltas.min(-1).values > 0.0  # [points, boxes]
 
 
 @torch.jit.script

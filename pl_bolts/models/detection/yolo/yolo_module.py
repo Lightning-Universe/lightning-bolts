@@ -93,32 +93,32 @@ class YOLO(LightningModule):
     *Implementation*: `Seppo Enarvi <https://github.com/senarvi>`_
 
     The network architecture can be written in PyTorch, or read from a Darknet configuration file using the
-    :class:`~pl_bolts.models.detection.yolo.darknet_network.DarknetNetwork` class. ``DarknetNetwork`` is also able to
-    read weights from a Darknet model file. See the CLI application and the
-    :class:`~pl_bolts.models.detection.yolo.yolo_module.CLIYOLO` class for an example of how to specify a network
-    architecture.
+    :class:`~.darknet_network.DarknetNetwork` class. ``DarknetNetwork`` is also able to read weights that have been
+    saved by Darknet. See the :class:`~.yolo_module.CLIYOLO` command-line application for an example of how to specify
+    a network architecture.
 
     The input from the data loader is expected to be a list of images. Each image is a tensor with shape
     ``[channels, height, width]``. The images from a single batch will be stacked into a single tensor, so the sizes
     have to match. Different batches can have different image sizes, as long as the size is divisible by the ratio in
     which the network downsamples the input.
 
-    During training, the model expects both the image tensors and a list of targets. *Each target is a dictionary
-    containing the following tensors*:
+    During training, the model expects both the image tensors and a list of targets. It's possible to train a model
+    using one integer class label per box, but the YOLO model supports also multiple classes per box. For multi-class
+    training, simply use a boolean matrix that indicates which classes are assigned to which boxes, in place of the
+    class labels. *Each target is a dictionary containing the following tensors*:
 
     - boxes (``FloatTensor[N, 4]``): the ground-truth boxes in `(x1, y1, x2, y2)` format
     - labels (``Int64Tensor[N]`` or ``BoolTensor[N, classes]``): the class label or a boolean class mask for each
       ground-truth box
 
-    :func:`~pl_bolts.models.detection.yolo.yolo_module.YOLO.forward` method returns all predictions from all detection
-    layers in one tensor with shape ``[N, anchors, classes + 5]``, where ``anchors`` is the total number of anchors in
-    all detection layers. The coordinates are scaled to the input image size. During training it also returns a
-    dictionary containing the classification, box overlap, and confidence losses.
+    :func:`~.yolo_module.YOLO.forward` method returns all predictions from all detection layers in one tensor with shape
+    ``[N, anchors, classes + 5]``, where ``anchors`` is the total number of anchors in all detection layers. The
+    coordinates are scaled to the input image size. During training it also returns a dictionary containing the
+    classification, box overlap, and confidence losses.
 
-    During inference, the model requires only the image tensors.
-    :func:`~pl_bolts.models.detection.yolo.yolo_module.YOLO.infer` method filters and processes the predictions. If a
-    prediction has a high score for more than one class, it will be duplicated. *The processed output is returned in a
-    dictionary containing the following tensors*:
+    During inference, the model requires only the image tensors. :func:`~.yolo_module.YOLO.infer` method filters and
+    processes the predictions. If a prediction has a high score for more than one class, it will be duplicated. *The
+    processed output is returned in a dictionary containing the following tensors*:
 
     - boxes (``FloatTensor[N, 4]``): predicted bounding box `(x1, y1, x2, y2)` coordinates in image space
     - scores (``FloatTensor[N]``): detection confidences
@@ -126,8 +126,7 @@ class YOLO(LightningModule):
 
     Args:
         network: A module that represents the network layers. This can be obtained from a Darknet configuration using
-            :func:`~pl_bolts.models.detection.yolo.darknet_network.DarknetNetwork`, or it can be defined as PyTorch
-            code.
+            :func:`~.darknet_network.DarknetNetwork`, or it can be defined as PyTorch code.
         optimizer: Which optimizer class to use for training.
         optimizer_params: Parameters to pass to the optimizer constructor. Weight decay will be applied only to
             convolutional layer weights.
@@ -189,11 +188,10 @@ class YOLO(LightningModule):
                 target dictionaries, one for each image.
 
         Returns:
-            detections (:class:`~torch.Tensor`), losses (Dict[str, :class:`~torch.Tensor`]): Detections, and if targets
-            were provided, a dictionary of losses. Detections are shaped
-            ``[batch_size, anchors, classes + 5]``, where ``anchors`` is the feature map size (width * height) times the
-            number of anchors per cell. The predicted box coordinates are in `(x1, y1, x2, y2)` format and scaled to the
-            input image size.
+            detections (:class:`~torch.Tensor`), losses (:class:`~torch.Tensor`): Detections, and if targets were
+            provided, a dictionary of losses. Detections are shaped ``[batch_size, anchors, classes + 5]``, where
+            ``anchors`` is the feature map size (width * height) times the number of anchors per cell. The predicted box
+            coordinates are in `(x1, y1, x2, y2)` format and scaled to the input image size.
         """
         detections, losses, hits = self.network(images, targets)
 
@@ -364,7 +362,7 @@ class YOLO(LightningModule):
             box `(x1, y1, x2, y2)` coordinates. "scores" is a vector of confidence scores for the bounding box
             detections. "labels" is a vector of predicted class labels.
         """
-        if not isinstance(image, torch.Tensor):
+        if not isinstance(image, Tensor):
             image = F.to_tensor(image)
 
         was_training = self.training
@@ -475,6 +473,10 @@ class CLIYOLO(YOLO):
             ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
             gives the highest IoU, default).
         matching_threshold: Threshold for "size" and "iou" matching algorithms.
+        spatial_range: The "simota" matching algorithm will restrict to anchors that are within an `N × N` grid cell
+            area centered at the target, where `N` is the value of this parameter.
+        size_range: The "simota" matching algorithm will restrict to anchors whose dimensions are no more than `N` and
+            no less than `1/N` times the target dimensions, where `N` is the value of this parameter.
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
             has IoU with some target greater than this threshold, the predictor will not be taken into account when
             calculating the confidence loss.
@@ -494,6 +496,8 @@ class CLIYOLO(YOLO):
         darknet_weights: Optional[str] = None,
         matching_algorithm: Optional[str] = None,
         matching_threshold: Optional[float] = None,
+        spatial_range: float = 5.0,
+        size_range: float = 4.0,
         ignore_bg_threshold: Optional[float] = None,
         overlap_func: Optional[str] = None,
         predict_overlap: Optional[float] = None,
@@ -508,6 +512,8 @@ class CLIYOLO(YOLO):
                 darknet_weights,
                 matching_algorithm=matching_algorithm,
                 matching_threshold=matching_threshold,
+                spatial_range=spatial_range,
+                size_range=size_range,
                 ignore_bg_threshold=ignore_bg_threshold,
                 overlap_func=overlap_func,
                 predict_overlap=predict_overlap,
@@ -532,6 +538,8 @@ class CLIYOLO(YOLO):
                 num_classes=21,  # The number of classes in Pascal VOC dataset.
                 matching_algorithm=matching_algorithm,
                 matching_threshold=matching_threshold,
+                spatial_range=spatial_range,
+                size_range=size_range,
                 ignore_bg_threshold=ignore_bg_threshold,
                 overlap_func=overlap_func,
                 predict_overlap=predict_overlap,

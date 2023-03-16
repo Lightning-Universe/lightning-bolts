@@ -75,12 +75,8 @@ def test_create_maxpool(config, catch_warnings):
         category=PossibleUserWarning,
     )
 
-    #    print("size", config["size"])
-    #    print("stride", )
     pad_size, remainder = divmod(max(config["size"], config["stride"]) - config["stride"], 2)
-    #    print("pad_size", pad_size)
     maxpool, _ = _create_maxpool(config, [3])
-    #    print("maxpool.maxpool.padding", maxpool.maxpool.padding)
 
     assert maxpool.maxpool.kernel_size == config["size"]
     assert maxpool.maxpool.stride == config["stride"]

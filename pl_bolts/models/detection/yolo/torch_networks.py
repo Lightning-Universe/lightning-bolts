@@ -637,6 +637,10 @@ class YOLOV4TinyNetwork(nn.Module):
             ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
             gives the highest IoU, default).
         matching_threshold: Threshold for "size" and "iou" matching algorithms.
+        spatial_range: The "simota" matching algorithm will restrict to anchors that are within an `N × N` grid cell
+            area centered at the target, where `N` is the value of this parameter.
+        size_range: The "simota" matching algorithm will restrict to anchors whose dimensions are no more than `N` and
+            no less than `1/N` times the target dimensions, where `N` is the value of this parameter.
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the prior shape has IoU
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.
@@ -767,6 +771,10 @@ class YOLOV4Network(nn.Module):
             ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
             gives the highest IoU, default).
         matching_threshold: Threshold for "size" and "iou" matching algorithms.
+        spatial_range: The "simota" matching algorithm will restrict to anchors that are within an `N × N` grid cell
+            area centered at the target, where `N` is the value of this parameter.
+        size_range: The "simota" matching algorithm will restrict to anchors whose dimensions are no more than `N` and
+            no less than `1/N` times the target dimensions, where `N` is the value of this parameter.
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the prior shape has IoU
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.
@@ -928,6 +936,10 @@ class YOLOV4P6Network(nn.Module):
             ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
             gives the highest IoU, default).
         matching_threshold: Threshold for "size" and "iou" matching algorithms.
+        spatial_range: The "simota" matching algorithm will restrict to anchors that are within an `N × N` grid cell
+            area centered at the target, where `N` is the value of this parameter.
+        size_range: The "simota" matching algorithm will restrict to anchors whose dimensions are no more than `N` and
+            no less than `1/N` times the target dimensions, where `N` is the value of this parameter.
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the prior shape has IoU
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.
@@ -1118,6 +1130,10 @@ class YOLOV5Network(nn.Module):
             ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
             gives the highest IoU, default).
         matching_threshold: Threshold for "size" and "iou" matching algorithms.
+        spatial_range: The "simota" matching algorithm will restrict to anchors that are within an `N × N` grid cell
+            area centered at the target, where `N` is the value of this parameter.
+        size_range: The "simota" matching algorithm will restrict to anchors whose dimensions are no more than `N` and
+            no less than `1/N` times the target dimensions, where `N` is the value of this parameter.
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the prior shape has IoU
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.
@@ -1277,6 +1293,8 @@ class YOLOV7Network(nn.Module):
             ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
             gives the highest IoU, default).
         matching_threshold: Threshold for "size" and "iou" matching algorithms.
+        size_range: The "simota" matching algorithm will restrict to anchors whose dimensions are no more than `N` and
+            no less than `1/N` times the target dimensions, where `N` is the value of this parameter.
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the prior shape has IoU
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.
@@ -1372,7 +1390,7 @@ class YOLOV7Network(nn.Module):
             return create_detection_layer(
                 prior_shapes,
                 prior_shape_idxs,
-                sim_ota_range=range,
+                spatial_range=range,
                 num_classes=num_classes,
                 input_is_normalized=False,
                 **kwargs,
@@ -1385,10 +1403,10 @@ class YOLOV7Network(nn.Module):
                 widths=widths, depth=2, block_depth=2, activation=activation, normalization=normalization
             )
 
-        w3 = widths[-4]  # 256
-        w4 = widths[-3]  # 512
-        w5 = widths[-2]  # 768
-        w6 = widths[-1]  # 1024
+        w3 = widths[-4]
+        w4 = widths[-3]
+        w5 = widths[-2]
+        w6 = widths[-1]
 
         self.spp = spp(w6, w6 // 2)
 
@@ -1587,6 +1605,10 @@ class YOLOXNetwork(nn.Module):
             ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
             gives the highest IoU, default).
         matching_threshold: Threshold for "size" and "iou" matching algorithms.
+        spatial_range: The "simota" matching algorithm will restrict to anchors that are within an `N × N` grid cell
+            area centered at the target, where `N` is the value of this parameter.
+        size_range: The "simota" matching algorithm will restrict to anchors whose dimensions are no more than `N` and
+            no less than `1/N` times the target dimensions, where `N` is the value of this parameter.
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the prior shape has IoU
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.

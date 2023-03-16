@@ -6,6 +6,7 @@ This PyTorch Lightning implementation combines features from some of the notable
 
 - *YOLOv3*: [Joseph Redmon and Ali Farhadi](https://arxiv.org/abs/1804.02767)
 - *YOLOv4*: [Alexey Bochkovskiy, Chien-Yao Wang, and Hong-Yuan Mark Liao](https://arxiv.org/abs/2004.10934)
+- *YOLOv7*: [Chien-Yao Wang, Alexey Bochkovskiy, and Hong-Yuan Mark Liao](https://arxiv.org/abs/2207.02696)
 - *Scaled-YOLOv4*: [Chien-Yao Wang, Alexey Bochkovskiy, and Hong-Yuan Mark Liao](https://arxiv.org/abs/2011.08036)
 - *YOLOX*: [Zheng Ge, Songtao Liu, Feng Wang, Zeming Li, and Jian Sun](https://arxiv.org/abs/2107.08430)
 
@@ -21,14 +22,14 @@ There are several network architectures included in the [`torch_networks`](https
 
 A detection head can try to detect objects at each of the anchor points that are spaced evenly across the image in a grid. The size of the grid is determined by the width and height of the feature map. There can be a number of anchors (typically three) per grid cell. The number of features predicted per grid cell has to be `(5 + num_classes) * anchors_per_cell`.
 
-The width and the height of a bounding box is detected relative to a prior shape. `anchors_per_cell` prior shapes per detection head are defined in the network configuration. That is, if the network uses three detection heads, and each head detects three bounding boxes per grid cell, nine prior shapes need to be defined. They are defined in the Darknet configuration file or provided to the network class constructor. The defaults values have been obtained by clustering bounding box shapes in the COCO dataset. Note that if you use a different image size, you probably want to scale the prior shapes too.
+The width and the height of a bounding box is detected relative to a prior shape. `anchors_per_cell` prior shapes per detection head are defined in the network configuration. That is, if the network uses three detection heads, and each head detects three bounding boxes per grid cell, nine prior shapes need to be defined. They are defined in the Darknet configuration file or provided to the network class constructor. The default values have been obtained by clustering bounding box shapes in the COCO dataset. Note that if you use a different image size, you probably want to scale the prior shapes too.
 
-With the exception of the SimOTA matching algorithm, the prior shapes are also used for matching the ground-truth targets to anchors during training. In this case targets are matched only to anchors from the closest grid cell. The prior shapes are used to determine, to which anchors from that cell the target is matched. The losses are computed between the target boxes and the predictions that correspond to their matched anchors. Different matching rules have been implemented:
+The prior shapes are also used for matching the ground-truth targets to anchors during training. With the exception of the SimOTA matching algorithm, targets are matched only to anchors from the closest grid cell. The prior shapes are used to determine, to which anchors from that cell the target is matched. The losses are computed between the targets boxes and the predictions that correspond to their matched anchors. Different matching rules have been implemented:
 
 - *maxiou*: The original matching rule that matches a target to the prior shape that gives the highest IoU.
 - *iou*: Matches a target to an anchor, if the IoU between the target and the prior shape is above a threshold. Multiple anchors may be matched to the same target, and the loss will be computed from a number of pairs that is generally not the same as the number of ground-truth boxes.
 - *size*: Calculates the ratio between the width and height of the target box to the prior width and height. If both the width and the height are close enough to the prior shape, matches the target to the anchor.
-- *simota*: The SimOTA matching algorithm from YOLOX. Targets can be matched not only to anchors from the closest grid cell, but to any anchors that are inside the target bounding box. The matching algorithm is based on Optimal Transport and uses the training loss between the target and the predictions as the cost. That is, the prior shapes are not used for matching, but the predictions corresponding to the anchors.
+- *simota*: The SimOTA matching algorithm from YOLOX. Targets can be matched not only to anchors from the closest grid cell, but to any anchors that are inside the target bounding box and whose prior shape is close enough to the target shape. The matching algorithm is based on Optimal Transport and uses the training loss between the target and the predictions as the cost. That is, the prior shapes are not used for matching, but the predictions corresponding to the anchors.
 
 ## Input Data
 

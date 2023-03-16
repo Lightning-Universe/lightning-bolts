@@ -424,7 +424,8 @@ def create_detection_layer(
     prior_shape_idxs: Sequence[int],
     matching_algorithm: Optional[str] = None,
     matching_threshold: Optional[float] = None,
-    sim_ota_range: float = 5.0,
+    spatial_range: float = 5.0,
+    size_range: float = 4.0,
     ignore_bg_threshold: float = 0.7,
     overlap_func: Union[str, Callable] = "ciou",
     predict_overlap: float = 1.0,
@@ -446,8 +447,10 @@ def create_detection_layer(
             ratio), "iou" (match all prior shapes that give a high enough IoU), or "maxiou" (match the prior shape that
             gives the highest IoU, default).
         matching_threshold: Threshold for "size" and "iou" matching algorithms.
-        sim_ota_range: The "simota" matching algorithm will restrict to the anchors that are within an `N x N` grid cell
+        spatial_range: The "simota" matching algorithm will restrict to anchors that are within an `N × N` grid cell
             area centered at the target, where `N` is the value of this parameter.
+        size_range: The "simota" matching algorithm will restrict to anchors whose dimensions are no more than `N` and
+            no less than `1/N` times the target dimensions, where `N` is the value of this parameter.
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
             has IoU with some target greater than this threshold, the predictor will not be taken into account when
             calculating the confidence loss.
@@ -473,7 +476,7 @@ def create_detection_layer(
         loss_func = LossFunction(
             overlap_func, None, overlap_loss_multiplier, confidence_loss_multiplier, class_loss_multiplier
         )
-        matching_func = SimOTAMatching(loss_func, sim_ota_range)
+        matching_func = SimOTAMatching(prior_shapes, prior_shape_idxs, loss_func, spatial_range, size_range)
     elif matching_algorithm == "size":
         if matching_threshold is None:
             raise ValueError("matching_threshold is required with size ratio matching.")
