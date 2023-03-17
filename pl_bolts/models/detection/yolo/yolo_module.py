@@ -8,6 +8,13 @@ from pytorch_lightning.utilities.cli import LightningCLI
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
 from torch import Tensor, optim
 
+# It seems to be impossible to avoid mypy errors if using import instead of getattr().
+# See https://github.com/python/mypy/issues/8823
+try:
+    LRScheduler: Any = getattr(optim.lr_scheduler, "LRScheduler")
+except ImportError:
+    LRScheduler = getattr(optim.lr_scheduler, "_LRScheduler")
+
 from pl_bolts.datamodules import VOCDetectionDataModule
 from pl_bolts.datamodules.vocdetection_datamodule import Compose
 from pl_bolts.models.detection.yolo.darknet_network import DarknetNetwork
@@ -144,7 +151,7 @@ class YOLO(LightningModule):
         network: nn.Module,
         optimizer: Type[optim.Optimizer] = optim.SGD,
         optimizer_params: Optional[Dict[str, Any]] = None,
-        lr_scheduler: Type[optim.lr_scheduler._LRScheduler] = LinearWarmupCosineAnnealingLR,
+        lr_scheduler: Type[LRScheduler] = LinearWarmupCosineAnnealingLR,
         lr_scheduler_params: Optional[Dict[str, Any]] = None,
         confidence_threshold: float = 0.2,
         nms_threshold: float = 0.45,
@@ -206,7 +213,7 @@ class YOLO(LightningModule):
         losses = torch.stack(losses).sum(0)
         return detections, losses
 
-    def configure_optimizers(self) -> Tuple[List[optim.Optimizer], List[optim.lr_scheduler._LRScheduler]]:
+    def configure_optimizers(self) -> Tuple[List[optim.Optimizer], List[LRScheduler]]:
         """Constructs the optimizer and learning rate scheduler based on ``self.optimizer_params`` and
         ``self.lr_scheduler_params``.
 
