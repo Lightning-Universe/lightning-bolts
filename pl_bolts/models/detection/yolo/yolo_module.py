@@ -35,10 +35,10 @@ else:
 
 
 def validate_batch(batch: Tuple[List[Tensor], TARGETS]) -> Tuple[Tensor, TARGETS]:
-    """Reads a batch of data, validates the format, and stacks the images into a single tensor.
+    """Validates the format of a batch of data and stacks the images into a single tensor.
 
     Args:
-        batch: The batch of data read by the :class:`~torch.utils.data.DataLoader`.
+        batch: A batch of data read by a :class:`~torch.utils.data.DataLoader`.
 
     Returns:
         The input batch with images stacked into a single tensor.
@@ -76,8 +76,8 @@ def validate_batch(batch: Tuple[List[Tensor], TARGETS]) -> Tuple[Tensor, TARGETS
 
 
 class YOLO(LightningModule):
-    """PyTorch Lightning implementation of YOLO that supports the most important features of YOLOv3, YOLOv4,
-    YOLOv5, YOLOv7, Scaled-YOLOv4, and YOLOX.
+    """PyTorch Lightning implementation of YOLO that supports the most important features of YOLOv3, YOLOv4, YOLOv5,
+    YOLOv7, Scaled-YOLOv4, and YOLOX.
 
     *YOLOv3 paper*: `Joseph Redmon and Ali Farhadi <https://arxiv.org/abs/1804.02767>`_
 
@@ -182,10 +182,9 @@ class YOLO(LightningModule):
         that depends on the size of the feature map and the number of anchors per feature map cell.
 
         Args:
-            images: Images to be processed. Tensor of size
-                ``[batch_size, channels, height, width]``.
-            targets: If set, computes losses from detection layers against these targets. A list of
-                target dictionaries, one for each image.
+            images: Images to be processed. Tensor of size ``[batch_size, channels, height, width]``.
+            targets: If given, computes losses from detection layers against these targets. A list of target
+                dictionaries, one for each image.
 
         Returns:
             detections (:class:`~torch.Tensor`), losses (:class:`~torch.Tensor`): Detections, and if targets were
