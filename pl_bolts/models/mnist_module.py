@@ -27,7 +27,6 @@ class LitMNIST(LightningModule):
     """
 
     def __init__(self, hidden_dim: int = 128, learning_rate: float = 1e-3, **kwargs: Any) -> None:
-
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `torchvision` which is not installed yet.")
 
