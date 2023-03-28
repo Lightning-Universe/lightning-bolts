@@ -4,5 +4,5 @@ Pillow
 opencv-python-headless
 gym[atari] >=0.17.2, <0.20.0
 atari_py >0.2, <0.3
-box2d-py >=2.3, <2.4
+box2d-py >2.3, <2.4
 opencv-python >=4.5.5.62
