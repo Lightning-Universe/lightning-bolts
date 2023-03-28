@@ -258,7 +258,7 @@ def _create_yolo(config: dict, num_inputs: int) -> Tuple[nn.Module, int]:
     elif overlap_loss_name == "iou":
         overlap_loss_func = yolo_layers.IoULoss()
     else:
-        assert False, "Unknown overlap loss: " + overlap_loss_name
+        raise ValueError("Unknown overlap loss: " + overlap_loss_name)
 
     module = yolo_layers.DetectionLayer(
         num_classes=config["classes"],
