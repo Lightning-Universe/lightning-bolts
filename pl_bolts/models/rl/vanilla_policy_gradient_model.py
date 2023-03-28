@@ -132,7 +132,6 @@ class VanillaPolicyGradient(LightningModule):
         """
 
         while True:
-
             action = self.agent(self.state, self.device)
 
             next_state, reward, done, _ = self.env.step(action[0])

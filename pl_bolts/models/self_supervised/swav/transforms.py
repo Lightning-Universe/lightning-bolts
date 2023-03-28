@@ -130,7 +130,6 @@ class SwAVFinetuneTransform:
     def __init__(
         self, input_height: int = 224, jitter_strength: float = 1.0, normalize=None, eval_transform: bool = False
     ) -> None:
-
         self.jitter_strength = jitter_strength
         self.input_height = input_height
         self.normalize = normalize
