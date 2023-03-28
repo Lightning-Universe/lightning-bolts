@@ -20,7 +20,6 @@ else:  # pragma: no cover
 
 
 class DataMonitorBase(Callback):
-
     supported_loggers = (
         TensorBoardLogger,
         WandbLogger,
@@ -110,7 +109,6 @@ class DataMonitorBase(Callback):
 
 
 class ModuleDataMonitor(DataMonitorBase):
-
     GROUP_NAME_INPUT = "input"
     GROUP_NAME_OUTPUT = "output"
 
@@ -195,7 +193,6 @@ class ModuleDataMonitor(DataMonitorBase):
 
 
 class TrainingDataMonitor(DataMonitorBase):
-
     GROUP_NAME = "training_step"
 
     def __init__(self, log_every_n_steps: Optional[int] = None):

@@ -13,7 +13,6 @@ from pl_bolts.models.rl.common.networks import CNN
 
 class TestRLLoss(TestCase):
     def setUp(self) -> None:
-
         self.state = torch.rand(32, 4, 84, 84)
         self.next_state = torch.rand(32, 4, 84, 84)
         self.action = torch.ones([32])

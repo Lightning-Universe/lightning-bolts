@@ -91,7 +91,13 @@ class PERDQN(DQN):
             states, actions, rewards, dones, new_states = samples
 
             for idx, _ in enumerate(dones):
-                yield (states[idx], actions[idx], rewards[idx], dones[idx], new_states[idx],), indices[
+                yield (
+                    states[idx],
+                    actions[idx],
+                    rewards[idx],
+                    dones[idx],
+                    new_states[idx],
+                ), indices[
                     idx
                 ], weights[idx]
 
