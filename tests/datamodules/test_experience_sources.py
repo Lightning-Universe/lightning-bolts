@@ -185,7 +185,6 @@ class TestExperienceSource(TestCase):
         self.source.histories[0].append(self.exp1)
 
         for idx, exp in enumerate(self.source.runner(self.device)):
-
             self.assertTrue(isinstance(exp, tuple))
 
             if idx == 0:
@@ -211,7 +210,6 @@ class TestExperienceSource(TestCase):
         history += [self.exp1, self.exp2, self.exp2]
 
         for idx, exp in enumerate(self.source.runner(self.device)):
-
             if idx == n_steps - 1:
                 self.assertEqual(self.source._total_rewards[0], 1)
                 self.assertEqual(self.source.total_steps[0], 1)

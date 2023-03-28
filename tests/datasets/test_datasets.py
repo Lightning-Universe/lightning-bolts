@@ -29,7 +29,6 @@ else:  # pragma: no cover
 @pytest.mark.parametrize("batch_size,num_samples", [(16, 100), (1, 0)])
 def test_dummy_ds(catch_warnings, batch_size, num_samples):
     if num_samples > 0:
-
         ds = DummyDataset((1, 28, 28), (1,), num_samples=num_samples)
         dl = DataLoader(ds, batch_size=batch_size)
 

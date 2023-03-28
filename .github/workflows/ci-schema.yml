@@ -8,4 +8,4 @@ on:
 
 jobs:
   validate-schema:
-    uses: Lightning-AI/utilities/.github/workflows/check-schema.yml@v0.1.0
+    uses: Lightning-AI/utilities/.github/workflows/check-schema.yml@v0.7.1
