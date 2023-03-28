@@ -30,7 +30,6 @@ class SSLDatasetMixin(ABC):
 
         cts = {x: 0 for x in range(nb_classes)}
         for img, class_idx in zip(examples, labels):
-
             # allow labeled
             if cts[class_idx] < nb_val_images:
                 val_x.append(img)
@@ -60,7 +59,6 @@ class SSLDatasetMixin(ABC):
 
         cts = {x: 0 for x in range(nb_classes)}
         for img_name, class_idx in zip(examples, labels):
-
             # allow labeled
             if cts[class_idx] < nb_imgs_in_val:
                 labeled.append(img_name)

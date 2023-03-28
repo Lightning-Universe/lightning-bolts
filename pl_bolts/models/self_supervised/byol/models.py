@@ -52,7 +52,6 @@ class SiameseArm(nn.Module):
         projector_hidden_dim: int = 4096,
         projector_out_dim: int = 256,
     ) -> None:
-
         super().__init__()
 
         if isinstance(encoder, str):

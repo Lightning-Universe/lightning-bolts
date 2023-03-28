@@ -334,8 +334,7 @@ class FeatureMapContrastiveTask(nn.Module):
 
         regularizer = 0
         losses = []
-        for (ai, pi) in self.map_indexes:
-
+        for ai, pi in self.map_indexes:
             # choose a random map
             if ai == -1:
                 ai = np.random.randint(0, len(anchor_maps))
