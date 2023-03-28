@@ -13,9 +13,9 @@ def test_printtable_metrics_callback():
 
     fake_trainer = FakeTrainer()
     fake_trainer.callback_metrics = metrics_a
-    callback.on_epoch_end(fake_trainer, None)
+    callback.on_train_epoch_end(fake_trainer, None)
     fake_trainer.callback_metrics = metrics_b
-    callback.on_epoch_end(fake_trainer, None)
+    callback.on_train_epoch_end(fake_trainer, None)
 
     assert len(callback.metrics) == 2
     assert callback.metrics[0] == metrics_a

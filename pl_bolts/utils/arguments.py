@@ -90,14 +90,11 @@ def gather_lit_args(cls: Any, root_cls: Optional[Any] = None) -> List[LitArg]:
     arguments: List[LitArg] = []
     argument_names = []
     for obj in inspect.getmro(cls):
-
         if obj is root_cls and len(arguments) > 0:
             break
 
         if issubclass(obj, root_cls):
-
             default_params = inspect.signature(obj.__init__).parameters  # type: ignore
-
             for arg in default_params:
                 arg_type = default_params[arg].annotation
                 arg_default = default_params[arg].default

@@ -13,7 +13,7 @@ from typing import Union
 
 import torch
 from pytorch_lightning import LightningModule, Trainer
-from pytorch_lightning.plugins import DDP2Plugin, DDPPlugin
+from pytorch_lightning.strategies import DDPStrategy
 from torch import nn
 from torch.nn import functional as F
 
@@ -47,6 +47,7 @@ class Moco_v2(LightningModule):
         - `William Falcon <https://github.com/williamFalcon>`_
 
     Example::
+
         from pl_bolts.models.self_supervised import Moco_v2
         model = Moco_v2()
         trainer = Trainer()
@@ -147,7 +148,7 @@ class Moco_v2(LightningModule):
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys, queue_ptr, queue):
         # gather keys before updating queue
-        if self._use_ddp_or_ddp2(self.trainer):
+        if self._use_ddp(self.trainer):
             keys = concat_all_gather(keys)
 
         batch_size = keys.shape[0]
@@ -224,16 +225,15 @@ class Moco_v2(LightningModule):
 
         # compute key features
         with torch.no_grad():  # no gradient to keys
-
             # shuffle for making use of BN
-            if self._use_ddp_or_ddp2(self.trainer):
+            if self._use_ddp(self.trainer):
                 img_k, idx_unshuffle = self._batch_shuffle_ddp(img_k)
 
             k = self.encoder_k(img_k)  # keys: NxC
             k = nn.functional.normalize(k, dim=1)
 
             # undo shuffle
-            if self._use_ddp_or_ddp2(self.trainer):
+            if self._use_ddp(self.trainer):
                 k = self._batch_unshuffle_ddp(k, idx_unshuffle)
 
         # compute logits
@@ -337,8 +337,8 @@ class Moco_v2(LightningModule):
         return parser
 
     @staticmethod
-    def _use_ddp_or_ddp2(trainer: Trainer) -> bool:
-        return isinstance(trainer.training_type_plugin, (DDPPlugin, DDP2Plugin))
+    def _use_ddp(trainer: Trainer) -> bool:
+        return isinstance(trainer.strategy, DDPStrategy)
 
 
 # utils

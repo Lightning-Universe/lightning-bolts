@@ -16,7 +16,6 @@ from pl_bolts.utils.types import TArrays
 
 @under_review()
 class LightDataset(ABC, Dataset):
-
     data: Tensor
     targets: Tensor
     normalize: tuple

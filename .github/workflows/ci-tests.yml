@@ -4,16 +4,15 @@ name: CI testing
 on:  # Trigger the workflow on push or pull request, but only for the master branch
   push:
     branches: [master]
-  pull_request:
-    branches: [master]
+  pull_request: {}
 
 defaults:
   run:
     shell: bash
 
 jobs:
-  pytest:
 
+  pytest:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -22,9 +21,7 @@ jobs:
         os: [ubuntu-20.04, macOS-11]
         # todo: seems there are some issues with py3.10 while install dependencies
         python-version: ["3.7", "3.9"]
-        requires: ['minimal', 'latest']
-        exclude:
-          - {python-version: "3.9", requires: 'minimal'}
+        requires: ['oldest', 'latest']
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     # the reason for high number is MUCH slower tests on macOS and py3.8
@@ -43,9 +40,16 @@ jobs:
       run: |
         brew update  # Todo: find a better way...
         brew install libomp  # https://github.com/pytorch/pytorch/issues/20030
+        brew install rar
+
+    - name: Setup Ubuntu
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y unrar
 
     - name: Set min. dependencies
-      if: matrix.requires == 'minimal'
+      if: matrix.requires == 'oldest'
       run: |
         import os, glob
         ls = ['requirements.txt'] + glob.glob(os.path.join("requirements", "*.txt"))
@@ -56,6 +60,7 @@ jobs:
 
     - name: Install package
       run: |
+        pip install -U pip
         pip install -e . --upgrade --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
         pip list
 
@@ -69,12 +74,9 @@ jobs:
           --ignore=pl_bolts/models/self_supervised/amdim/transforms.py \
           --ignore=pl_bolts/models/rl
 
-    # Note: This uses an internal pip API and may not always work
-    # https://github.com/actions/cache/blob/master/examples.md#multiple-oss-in-a-workflow
-    - name: Get pip cache
+    - name: Get pip cache dir
       id: pip-cache
-      run: |
-        python -c "from pip._internal.locations import USER_CACHE_DIR; print('::set-output name=dir::' + USER_CACHE_DIR)"
+      run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
 
     - name: Cache pip
       uses: actions/cache@v3
@@ -95,6 +97,14 @@ jobs:
       with:
         path: ./datasets
         key: pl-datasets-${{ hashFiles('tests/conftest.py') }}
+
+    - name: Download ROMs
+      continue-on-error: true
+      run: |
+        wget http://www.atarimania.com/roms/Roms.rar -O datasets/Roms.rar
+        cd datasets
+        unrar x -y Roms.rar
+        python -m atari_py.import_roms ROMS
 
     - name: Tests
       run: |

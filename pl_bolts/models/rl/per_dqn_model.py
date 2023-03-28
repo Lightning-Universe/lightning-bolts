@@ -91,7 +91,13 @@ class PERDQN(DQN):
             states, actions, rewards, dones, new_states = samples
 
             for idx, _ in enumerate(dones):
-                yield (states[idx], actions[idx], rewards[idx], dones[idx], new_states[idx],), indices[
+                yield (
+                    states[idx],
+                    actions[idx],
+                    rewards[idx],
+                    dones[idx],
+                    new_states[idx],
+                ), indices[
                     idx
                 ], weights[idx]
 
@@ -112,7 +118,7 @@ class PERDQN(DQN):
         # calculates training loss
         loss, batch_weights = per_dqn_loss(samples, weights, self.net, self.target_net, self.gamma)
 
-        if self._use_dp_or_ddp2(self.trainer):
+        if self._use_dp(self.trainer):
             loss = loss.unsqueeze(0)
 
         # update priorities in buffer

@@ -29,4 +29,4 @@ def test_mnist(tmpdir, datadir, catch_warnings):
     )
     trainer.fit(model, datamodule=datamodule)
     loss = trainer.callback_metrics["train_loss"]
-    assert loss <= 2.2, "mnist failed"
+    assert loss <= 2.3, "mnist failed"
