@@ -4,37 +4,16 @@ from typing import Dict, List, Sequence, Tuple, Union
 import torch
 from torch import Tensor
 
-from pl_bolts.models.detection.yolo.loss import LossFunction
-from pl_bolts.models.detection.yolo.utils import aligned_iou, grid_centers, iou_below, is_inside_box
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
+
+from .loss import YOLOLoss
+from .utils import aligned_iou, box_size_ratio, grid_centers, iou_below, is_inside_box
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.ops import box_convert
 else:
     warn_missing_pkg("torchvision")
-
-
-def _compare_box_sizes(wh1: Tensor, wh2: Tensor, threshold: float) -> Tensor:
-    """Compares the dimensions of the boxes pairwise and returns a mask that indicates which pairs have similar
-    sizes.
-
-    For each pair of boxes, calculates the largest ratio that can be obtained by dividing the widths with each other or
-    dividing the heights with each other. Returns a mask that indicates which pairs have a ratio less than the given
-    threshold.
-
-    Args:
-        wh1: An ``[N, 2]`` matrix of box shapes (width and height).
-        wh2: An ``[M, 2]`` matrix of box shapes (width and height).
-        threshold: A threshold for the size ratio.
-
-    Returns:
-        An ``[N, M]`` matrix of truth values indicating which box pairs have the maximum size ratio below the threshold.
-    """
-    wh_ratio = wh1[:, None, :] / wh2[None, :, :]  # [M, N, 2]
-    wh_ratio = torch.max(wh_ratio, 1.0 / wh_ratio)
-    wh_ratio = wh_ratio.max(2).values  # [M, N]
-    return wh_ratio < threshold
 
 
 class ShapeMatching(ABC):
@@ -218,7 +197,7 @@ class SizeRatioMatching(ShapeMatching):
 
     def match(self, wh: Tensor) -> Union[Tuple[Tensor, Tensor], Tensor]:
         prior_wh = torch.tensor(self.prior_shapes, dtype=wh.dtype, device=wh.device)
-        return _compare_box_sizes(wh, prior_wh, self.threshold).nonzero().T
+        return (box_size_ratio(wh, prior_wh) < self.threshold).nonzero().T
 
 
 def _sim_ota_match(costs: Tensor, ious: Tensor) -> Tuple[Tensor, Tensor]:
@@ -274,7 +253,7 @@ class SimOTAMatching:
             network input resolution.
         prior_shape_idxs: List of indices to ``prior_shapes`` that is used to select the (usually 3) prior shapes that
             this layer uses.
-        loss_func: A ``LossFunction`` object that can be used to calculate the pairwise costs.
+        loss_func: A ``YOLOLoss`` object that can be used to calculate the pairwise costs.
         spatial_range: For each target, restrict to the anchors that are within an `N × N` grid cell are centered at the
             target, where `N` is the value of this parameter.
         size_range: For each target, restrict to the anchors whose prior dimensions are not larger than the target
@@ -285,7 +264,7 @@ class SimOTAMatching:
         self,
         prior_shapes: Sequence[Tuple[int, int]],
         prior_shape_idxs: Sequence[int],
-        loss_func: LossFunction,
+        loss_func: YOLOLoss,
         spatial_range: float,
         size_range: float,
     ) -> None:
@@ -367,8 +346,8 @@ class SimOTAMatching:
 
         # Create a [boxes_per_cell, targets] tensor for selecting prior shapes that are close enough to the target
         # dimensions.
-        prior_wh = torch.tensor(self.prior_shapes, device=targets["boxes"].device)  # XXX Enable size filtering.
-        shape_selector = _compare_box_sizes(prior_wh, wh, self.size_range)  # XXX Enable size filtering.
+        prior_wh = torch.tensor(self.prior_shapes, device=targets["boxes"].device)
+        shape_selector = box_size_ratio(prior_wh, wh) < self.size_range
 
         # Create a [grid_cells, targets] tensor for selecting spatial locations that are inside target bounding boxes.
         centers = grid_centers(grid_size).view(-1, 2) * grid_to_image
@@ -377,7 +356,7 @@ class SimOTAMatching:
         # Combine the above selectors into a [grid_cells, boxes_per_cell, targets] tensor for selecting anchors that are
         # inside target bounding boxes and close enough shape.
         inside_selector = inside_selector[:, None, :].repeat(1, boxes_per_cell, 1)
-        inside_selector = torch.logical_and(inside_selector, shape_selector)  # XXX Enable size filtering.
+        inside_selector = torch.logical_and(inside_selector, shape_selector)
 
         # Set the width and height of all target bounding boxes to self.range grid cells and create a selector for
         # anchors that are now inside the boxes. If a small target has no anchors inside its bounding box, it will be
@@ -391,7 +370,7 @@ class SimOTAMatching:
         # Create a [grid_cells, boxes_per_cell, targets] tensor for selecting anchors that are spatially close to a
         # target and whose shape is close enough to the target.
         close_selector = close_selector[:, None, :].repeat(1, boxes_per_cell, 1)
-        close_selector = torch.logical_and(close_selector, shape_selector)  # XXX Enable size filtering.
+        close_selector = torch.logical_and(close_selector, shape_selector)
 
         mask = torch.logical_or(inside_selector, close_selector).sum(-1) > 0
         mask = mask.view(grid_height, grid_width, boxes_per_cell)

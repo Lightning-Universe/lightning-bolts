@@ -5,24 +5,25 @@ import torch
 import torch.nn as nn
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities.cli import LightningCLI
-from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
+from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch import Tensor, optim
 
 # It seems to be impossible to avoid mypy errors if using import instead of getattr().
 # See https://github.com/python/mypy/issues/8823
 try:
     LRScheduler: Any = getattr(optim.lr_scheduler, "LRScheduler")
-except ImportError:
+except AttributeError:
     LRScheduler = getattr(optim.lr_scheduler, "_LRScheduler")
 
 from pl_bolts.datamodules import VOCDetectionDataModule
 from pl_bolts.datamodules.vocdetection_datamodule import Compose
-from pl_bolts.models.detection.yolo.darknet_network import DarknetNetwork
-from pl_bolts.models.detection.yolo.torch_networks import YOLOV4Network
-from pl_bolts.models.detection.yolo.types import TARGET, TARGETS
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.utils import _TORCHMETRICS_DETECTION_AVAILABLE, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
+
+from .darknet_network import DarknetNetwork
+from .torch_networks import YOLOV4Network
+from .types import BATCH, IMAGES, PRED, PREDS, TARGET, TARGETS
 
 if _TORCHMETRICS_DETECTION_AVAILABLE:
     try:
@@ -41,29 +42,33 @@ else:
     warn_missing_pkg("torchvision")
 
 
-def validate_batch(batch: Tuple[List[Tensor], TARGETS]) -> Tuple[Tensor, TARGETS]:
-    """Validates the format of a batch of data and stacks the images into a single tensor.
+def validate_batch(images: Union[Tensor, IMAGES], targets: Optional[TARGETS]) -> None:
+    """Validates the format of a batch of data.
 
     Args:
-        batch: A batch of data read by a :class:`~torch.utils.data.DataLoader`.
-
-    Returns:
-        The input batch with images stacked into a single tensor.
+        images: A tensor containing a batch of images or a list of image tensors.
+        targets: A list of target dictionaries or ``None``. If a list is provided, there should be as many target
+            dictionaries as there are images.
     """
-    images, targets = batch
+    if not isinstance(images, Tensor):
+        if not isinstance(images, (tuple, list)):
+            raise TypeError(f"Expected images to be a Tensor, tuple, or a list, got {type(images).__name__}.")
+        if not images:
+            raise ValueError("No images in batch.")
+        shape = images[0].shape
+        for image in images:
+            if not isinstance(image, Tensor):
+                raise ValueError(f"Expected image to be of type Tensor, got {type(image).__name__}.")
+            if image.shape != shape:
+                raise ValueError(f"Images with different shapes in one batch: {shape} and {image.shape}")
 
-    if not images:
-        raise ValueError("No images in batch.")
+    if targets is None:
+        return
 
+    if not isinstance(targets, (tuple, list)):
+        raise TypeError(f"Expected targets to be a tuple or a list, got {type(images).__name__}.")
     if len(images) != len(targets):
         raise ValueError(f"Got {len(images)} images, but targets for {len(targets)} images.")
-
-    shape = images[0].shape
-    for image in images:
-        if not isinstance(image, Tensor):
-            raise ValueError(f"Expected image to be of type Tensor, got {type(image).__name__}.")
-        if image.shape != shape:
-            raise ValueError(f"Images with different shapes in one batch: {shape} and {image.shape}")
 
     for target in targets:
         boxes = target["boxes"]
@@ -78,8 +83,6 @@ def validate_batch(batch: Tuple[List[Tensor], TARGETS]) -> Tuple[Tensor, TARGETS
             raise ValueError(
                 f"Expected target labels to be tensors of shape [N] or [N, num_classes], got {list(labels.shape)}."
             )
-
-    return torch.stack(images), targets
 
 
 class YOLO(LightningModule):
@@ -104,13 +107,13 @@ class YOLO(LightningModule):
     saved by Darknet. See the :class:`~.yolo_module.CLIYOLO` command-line application for an example of how to specify
     a network architecture.
 
-    The input from the data loader is expected to be a list of images. Each image is a tensor with shape
-    ``[channels, height, width]``. The images from a single batch will be stacked into a single tensor, so the sizes
-    have to match. Different batches can have different image sizes, as long as the size is divisible by the ratio in
-    which the network downsamples the input.
+    The input is expected to be a list of images. Each image is a tensor with shape ``[channels, height, width]``. The
+    images from a single batch will be stacked into a single tensor, so the sizes have to match. Different batches can
+    have different image sizes, as long as the size is divisible by the ratio in which the network downsamples the
+    input.
 
     During training, the model expects both the image tensors and a list of targets. It's possible to train a model
-    using one integer class label per box, but the YOLO model supports also multiple classes per box. For multi-class
+    using one integer class label per box, but the YOLO model supports also multiple labels per box. For multi-label
     training, simply use a boolean matrix that indicates which classes are assigned to which boxes, in place of the
     class labels. *Each target is a dictionary containing the following tensors*:
 
@@ -181,7 +184,9 @@ class YOLO(LightningModule):
             self._val_map = MeanAveragePrecision()
             self._test_map = MeanAveragePrecision()
 
-    def forward(self, images: Tensor, targets: Optional[TARGETS] = None) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def forward(
+        self, images: Union[Tensor, IMAGES], targets: Optional[TARGETS] = None
+    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         """Runs a forward pass through the network (all layers listed in ``self.network``), and if training targets
         are provided, computes the losses from the detection layers.
 
@@ -189,7 +194,8 @@ class YOLO(LightningModule):
         that depends on the size of the feature map and the number of anchors per feature map cell.
 
         Args:
-            images: Images to be processed. Tensor of size ``[batch_size, channels, height, width]``.
+            images: A tensor of size ``[batch_size, channels, height, width]`` containing a batch of images or a list of
+                image tensors.
             targets: If given, computes losses from detection layers against these targets. A list of target
                 dictionaries, one for each image.
 
@@ -199,7 +205,9 @@ class YOLO(LightningModule):
             ``anchors`` is the feature map size (width * height) times the number of anchors per cell. The predicted box
             coordinates are in `(x1, y1, x2, y2)` format and scaled to the input image size.
         """
-        detections, losses, hits = self.network(images, targets)
+        validate_batch(images, targets)
+        images_tensor = images if isinstance(images, Tensor) else torch.stack(images)
+        detections, losses, hits = self.network(images_tensor, targets)
 
         detections = torch.cat(detections, 1)
         if targets is None:
@@ -208,7 +216,7 @@ class YOLO(LightningModule):
         total_hits = sum(hits)
         for layer_idx, layer_hits in enumerate(hits):
             hit_rate: Union[Tensor, float] = torch.true_divide(layer_hits, total_hits) if total_hits > 0 else 1.0
-            self.log(f"layer_{layer_idx}_hit_rate", hit_rate, sync_dist=True, batch_size=images.size(0))
+            self.log(f"layer_{layer_idx}_hit_rate", hit_rate, sync_dist=True, batch_size=len(images))
 
         losses = torch.stack(losses).sum(0)
         return detections, losses
@@ -245,7 +253,7 @@ class YOLO(LightningModule):
         lr_scheduler = self.lr_scheduler_class(optimizer, **self.lr_scheduler_params)
         return [optimizer], [lr_scheduler]
 
-    def training_step(self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int) -> STEP_OUTPUT:
+    def training_step(self, batch: BATCH, batch_idx: int) -> STEP_OUTPUT:
         """Computes the training loss.
 
         Args:
@@ -256,7 +264,7 @@ class YOLO(LightningModule):
         Returns:
             A dictionary that includes the training loss in 'loss'.
         """
-        images, targets = validate_batch(batch)
+        images, targets = batch
         _, losses = self(images, targets)
 
         self.log("train/overlap_loss", losses[0], prog_bar=True, sync_dist=True)
@@ -266,7 +274,7 @@ class YOLO(LightningModule):
 
         return {"loss": losses.sum()}
 
-    def validation_step(self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int) -> Optional[STEP_OUTPUT]:
+    def validation_step(self, batch: BATCH, batch_idx: int) -> Optional[STEP_OUTPUT]:
         """Evaluates a batch of data from the validation set.
 
         Args:
@@ -274,32 +282,31 @@ class YOLO(LightningModule):
                 dictionaries.
             batch_idx: Index of the current batch.
         """
-        images, targets = validate_batch(batch)
+        images, targets = batch
         detections, losses = self(images, targets)
 
-        self.log("val/overlap_loss", losses[0], sync_dist=True, batch_size=images.size(0))
-        self.log("val/confidence_loss", losses[1], sync_dist=True, batch_size=images.size(0))
-        self.log("val/class_loss", losses[2], sync_dist=True, batch_size=images.size(0))
-        self.log("val/total_loss", losses.sum(), sync_dist=True, batch_size=images.size(0))
+        self.log("val/overlap_loss", losses[0], sync_dist=True, batch_size=len(images))
+        self.log("val/confidence_loss", losses[1], sync_dist=True, batch_size=len(images))
+        self.log("val/class_loss", losses[2], sync_dist=True, batch_size=len(images))
+        self.log("val/total_loss", losses.sum(), sync_dist=True, batch_size=len(images))
 
         if _MEAN_AVERAGE_PRECISION_AVAILABLE:
             detections = self.process_detections(detections)
             targets = self.process_targets(targets)
             self._val_map.update(detections, targets)
 
-    def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
-        # When continuing training from a checkpoint, it may happen that epoch_end is called without outputs. In this
+    def on_validation_epoch_end(self) -> None:
+        # When continuing training from a checkpoint, it may happen that epoch_end is called without detections. In this
         # case the metrics cannot be computed.
-        if not outputs:
+        if (not _MEAN_AVERAGE_PRECISION_AVAILABLE) or (not self._val_map.detection_boxes):
             return
 
-        if _MEAN_AVERAGE_PRECISION_AVAILABLE:
-            map_scores = self._val_map.compute()
-            map_scores = {"val/" + k: v for k, v in map_scores.items()}
-            self.log_dict(map_scores, sync_dist=True)
-            self._val_map.reset()
+        map_scores = self._val_map.compute()
+        map_scores = {"val/" + k: v for k, v in map_scores.items()}
+        self.log_dict(map_scores, sync_dist=True)
+        self._val_map.reset()
 
-    def test_step(self, batch: Tuple[List[Tensor], TARGETS], batch_idx: int) -> Optional[STEP_OUTPUT]:
+    def test_step(self, batch: BATCH, batch_idx: int) -> Optional[STEP_OUTPUT]:
         """Evaluates a batch of data from the test set.
 
         Args:
@@ -307,7 +314,7 @@ class YOLO(LightningModule):
                 dictionaries.
             batch_idx: Index of the current batch.
         """
-        images, targets = validate_batch(batch)
+        images, targets = batch
         detections, losses = self(images, targets)
 
         self.log("test/overlap_loss", losses[0], sync_dist=True)
@@ -320,19 +327,18 @@ class YOLO(LightningModule):
             targets = self.process_targets(targets)
             self._test_map.update(detections, targets)
 
-    def test_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
-        # When continuing training from a checkpoint, it may happen that epoch_end is called without outputs. In this
+    def on_test_epoch_end(self) -> None:
+        # When continuing training from a checkpoint, it may happen that epoch_end is called without detections. In this
         # case the metrics cannot be computed.
-        if not outputs:
+        if (not _MEAN_AVERAGE_PRECISION_AVAILABLE) or (not self._test_map.detection_boxes):
             return
 
-        if _MEAN_AVERAGE_PRECISION_AVAILABLE:
-            map_scores = self._test_map.compute()
-            map_scores = {"test/" + k: v for k, v in map_scores.items()}
-            self.log_dict(map_scores, sync_dist=True)
-            self._test_map.reset()
+        map_scores = self._test_map.compute()
+        map_scores = {"test/" + k: v for k, v in map_scores.items()}
+        self.log_dict(map_scores, sync_dist=True)
+        self._test_map.reset()
 
-    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> List[Dict[str, Tensor]]:
+    def predict_step(self, batch: BATCH, batch_idx: int, dataloader_idx: int = 0) -> PREDS:
         """Feeds a batch of images to the network and returns the detected bounding boxes, confidence scores, and
         class labels.
 
@@ -349,12 +355,12 @@ class YOLO(LightningModule):
             bounding box `(x1, y1, x2, y2)` coordinates. "scores" is a vector of confidence scores for the bounding box
             detections. "labels" is a vector of predicted class labels.
         """
-        images, _ = validate_batch(batch)
+        images, _ = batch
         detections = self(images)
         detections = self.process_detections(detections)
         return detections
 
-    def infer(self, image: Tensor) -> Dict[str, Tensor]:
+    def infer(self, image: Tensor) -> PRED:
         """Feeds an image to the network and returns the detected bounding boxes, confidence scores, and class
         labels.
 
@@ -374,7 +380,7 @@ class YOLO(LightningModule):
         was_training = self.training
         self.eval()
 
-        detections = self(image.unsqueeze(0))
+        detections = self([image])
         detections = self.process_detections(detections)
         detections = detections[0]
 
@@ -382,7 +388,7 @@ class YOLO(LightningModule):
             self.train()
         return detections
 
-    def process_detections(self, preds: Tensor) -> List[Dict[str, Tensor]]:
+    def process_detections(self, preds: Tensor) -> PREDS:
         """Splits the detection tensor returned by a forward pass into a list of prediction dictionaries, and
         filters them based on confidence threshold, non-maximum suppression (NMS), and maximum number of
         predictions.
@@ -419,7 +425,7 @@ class YOLO(LightningModule):
 
         return [process(p[..., :4], p[..., 4], p[..., 5:]) for p in preds]
 
-    def process_targets(self, targets: TARGETS) -> TARGETS:
+    def process_targets(self, targets: TARGETS) -> List[TARGET]:
         """Duplicates multi-label targets to create one target for each label.
 
         Args:

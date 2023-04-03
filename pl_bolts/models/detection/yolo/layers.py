@@ -1,20 +1,15 @@
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, List, Optional, Sequence, Tuple, Union
 
 import torch
-from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor, nn
 
-from pl_bolts.models.detection.yolo.loss import LossFunction
-from pl_bolts.models.detection.yolo.target_matching import (
-    HighestIoUMatching,
-    IoUThresholdMatching,
-    ShapeMatching,
-    SimOTAMatching,
-    SizeRatioMatching,
-)
-from pl_bolts.models.detection.yolo.utils import global_xy
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
+
+from .loss import YOLOLoss
+from .target_matching import HighestIoUMatching, IoUThresholdMatching, ShapeMatching, SimOTAMatching, SizeRatioMatching
+from .types import PRED, PREDS, TARGET, TARGETS
+from .utils import global_xy
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.ops import box_convert
@@ -60,7 +55,7 @@ class DetectionLayer(nn.Module):
         prior_shapes: A list of prior box dimensions for this layer, used for scaling the predicted dimensions. The list
             should contain (width, height) tuples in the network input resolution.
         matching_func: The matching algorithm to be used for assigning targets to anchors.
-        loss_func: ``LossFunction`` object for calculating the losses.
+        loss_func: ``YOLOLoss`` object for calculating the losses.
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
             to produce coordinate values close to one.
         input_is_normalized: The input is normalized by logistic activation in the previous layer. In this case the
@@ -74,7 +69,7 @@ class DetectionLayer(nn.Module):
         num_classes: int,
         prior_shapes: List[Tuple[int, int]],
         matching_func: Callable,
-        loss_func: LossFunction,
+        loss_func: YOLOLoss,
         xy_scale: float = 1.0,
         input_is_normalized: bool = False,
     ) -> None:
@@ -90,7 +85,7 @@ class DetectionLayer(nn.Module):
         self.xy_scale = xy_scale
         self.input_is_normalized = input_is_normalized
 
-    def forward(self, x: Tensor, image_size: Tensor) -> Tuple[Tensor, List[Dict[str, Tensor]]]:
+    def forward(self, x: Tensor, image_size: Tensor) -> Tuple[Tensor, PREDS]:
         """Runs a forward pass through this YOLO detection layer.
 
         Maps cell-local coordinates to global coordinates in the image space, scales the bounding boxes with the
@@ -116,7 +111,7 @@ class DetectionLayer(nn.Module):
         num_attrs = self.num_classes + 5
         anchors_per_cell = int(torch.div(num_features, num_attrs, rounding_mode="floor"))
         if anchors_per_cell != len(self.prior_shapes):
-            raise MisconfigurationException(
+            raise ValueError(
                 "The model predicts {} bounding boxes per spatial location, but {} prior box dimensions are defined "
                 "for this layer.".format(anchors_per_cell, len(self.prior_shapes))
             )
@@ -159,11 +154,11 @@ class DetectionLayer(nn.Module):
 
     def match_targets(
         self,
-        preds: List[Dict[str, Tensor]],
-        return_preds: List[Dict[str, Tensor]],
-        targets: List[Dict[str, Tensor]],
+        preds: PREDS,
+        return_preds: PREDS,
+        targets: TARGETS,
         image_size: Tensor,
-    ) -> Tuple[Dict[str, Tensor], Dict[str, Tensor]]:
+    ) -> Tuple[PRED, TARGET]:
         """Matches the predictions to targets.
 
         Args:
@@ -199,16 +194,15 @@ class DetectionLayer(nn.Module):
                     "labels": image_targets["labels"][target_selector],
                 }
             else:
-                device = image_preds["confidences"].device
                 matched_preds = {
-                    "boxes": torch.empty((0, 4), device=device),
-                    "confidences": torch.empty(0, device=device),
-                    "bg_confidences": image_preds["confidences"].flatten(),
-                    "classprobs": torch.empty((0, self.num_classes), device=device),
+                    "boxes": torch.empty((0, 4), device=image_return_preds["boxes"].device),
+                    "confidences": torch.empty(0, device=image_return_preds["confidences"].device),
+                    "bg_confidences": image_return_preds["confidences"].flatten(),
+                    "classprobs": torch.empty((0, self.num_classes), device=image_return_preds["classprobs"].device),
                 }
                 matched_targets = {
-                    "boxes": torch.empty((0, 4), device=device),
-                    "labels": torch.empty(0, dtype=torch.int64, device=device),
+                    "boxes": torch.empty((0, 4), device=image_targets["boxes"].device),
+                    "labels": torch.empty(0, dtype=torch.int64, device=image_targets["labels"].device),
                 }
             matches.append((matched_preds, matched_targets))
 
@@ -226,10 +220,10 @@ class DetectionLayer(nn.Module):
 
     def calculate_losses(
         self,
-        preds: List[Dict[str, Tensor]],
-        targets: List[Dict[str, Tensor]],
+        preds: PREDS,
+        targets: TARGETS,
         image_size: Tensor,
-        loss_preds: Optional[List[Dict[str, Tensor]]] = None,
+        loss_preds: Optional[PREDS] = None,
     ) -> Tuple[Tensor, int]:
         """Matches the predictions to targets and computes the losses.
 
@@ -428,7 +422,8 @@ def create_detection_layer(
     size_range: float = 4.0,
     ignore_bg_threshold: float = 0.7,
     overlap_func: Union[str, Callable] = "ciou",
-    predict_overlap: float = 1.0,
+    predict_overlap: Optional[float] = None,
+    label_smoothing: Optional[float] = None,
     overlap_loss_multiplier: float = 5.0,
     confidence_loss_multiplier: float = 1.0,
     class_loss_multiplier: float = 1.0,
@@ -457,9 +452,11 @@ def create_detection_layer(
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
             function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
             "ciou" (default).
-        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
-            confidence is one if there's an object, and 1.0 means that the target confidence is the output of
+        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that the target
+            confidence is 1 if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
+        label_smoothing: The epsilon parameter (weight) for class label smoothing. 0.0 means no smoothing (binary
+            targets), and 1.0 means that the target probabilities are always 0.5.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
         class_loss_multiplier: Classification loss will be scaled by this value.
@@ -473,8 +470,8 @@ def create_detection_layer(
     """
     matching_func: Union[ShapeMatching, SimOTAMatching]
     if matching_algorithm == "simota":
-        loss_func = LossFunction(
-            overlap_func, None, overlap_loss_multiplier, confidence_loss_multiplier, class_loss_multiplier
+        loss_func = YOLOLoss(
+            overlap_func, None, None, overlap_loss_multiplier, confidence_loss_multiplier, class_loss_multiplier
         )
         matching_func = SimOTAMatching(prior_shapes, prior_shape_idxs, loss_func, spatial_range, size_range)
     elif matching_algorithm == "size":
@@ -490,9 +487,13 @@ def create_detection_layer(
     else:
         raise ValueError(f"Matching algorithm `{matching_algorithm}´ is unknown.")
 
-    loss_func = LossFunction(
-        overlap_func, predict_overlap, overlap_loss_multiplier, confidence_loss_multiplier, class_loss_multiplier
+    loss_func = YOLOLoss(
+        overlap_func,
+        predict_overlap,
+        label_smoothing,
+        overlap_loss_multiplier,
+        confidence_loss_multiplier,
+        class_loss_multiplier,
     )
-
     layer_shapes = [prior_shapes[i] for i in prior_shape_idxs]
     return DetectionLayer(prior_shapes=layer_shapes, matching_func=matching_func, loss_func=loss_func, **kwargs)

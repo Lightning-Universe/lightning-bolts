@@ -1,19 +1,19 @@
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, List, Optional, Sequence, Tuple
 
 import torch
 import torch.nn as nn
 from torch import Tensor
 
-from pl_bolts.models.detection.yolo.layers import Conv, DetectionLayer, MaxPool, ReOrg, create_detection_layer
-from pl_bolts.models.detection.yolo.types import NETWORK_OUTPUT, TARGETS
-from pl_bolts.models.detection.yolo.utils import get_image_size
+from .layers import Conv, DetectionLayer, MaxPool, ReOrg, create_detection_layer
+from .types import NETWORK_OUTPUT, TARGETS
+from .utils import get_image_size
 
 
 def run_detection(
     detection_layer: DetectionLayer,
     layer_input: Tensor,
-    targets: Optional[List[Dict[str, Tensor]]],
+    targets: Optional[TARGETS],
     image_size: Tensor,
     detections: List[Tensor],
     losses: List[Tensor],
@@ -46,7 +46,7 @@ def run_detection_with_aux_head(
     aux_detection_layer: DetectionLayer,
     layer_input: Tensor,
     aux_input: Tensor,
-    targets: Optional[List[Dict[str, Tensor]]],
+    targets: Optional[TARGETS],
     image_size: Tensor,
     aux_weight: float,
     detections: List[Tensor],
@@ -131,7 +131,8 @@ class TinyStage(nn.Module):
     """One stage of the "tiny" network architecture from YOLOv4.
 
     Args:
-        num_channels: Number of channels in the input and output of the stage.
+        num_channels: Number of channels in the input of the stage. Partial output will have as many channels and full
+            output will have twice as many channels.
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         norm: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
@@ -150,11 +151,13 @@ class TinyStage(nn.Module):
         self.conv2 = Conv(hidden_channels, hidden_channels, kernel_size=3, stride=1, activation=activation, norm=norm)
         self.mix = Conv(num_channels, num_channels, kernel_size=1, stride=1, activation=activation, norm=norm)
 
-    def forward(self, x: Tensor) -> Tensor:
-        x = torch.chunk(x, 2, dim=1)[1]
-        y1 = self.conv1(x)
+    def forward(self, x: Tensor) -> Tuple[Tensor, Tensor]:
+        partial = torch.chunk(x, 2, dim=1)[1]
+        y1 = self.conv1(partial)
         y2 = self.conv2(y1)
-        return self.mix(torch.cat((y2, y1), dim=1))
+        partial_output = self.mix(torch.cat((y2, y1), dim=1))
+        full_output = torch.cat((x, partial_output), dim=1)
+        return partial_output, full_output
 
 
 class CSPStage(nn.Module):
@@ -385,8 +388,10 @@ class YOLOV4TinyBackbone(nn.Module):
             return Conv(num_channels, num_channels, kernel_size=3, stride=1, activation=activation, norm=normalization)
 
         def downsample(in_channels: int, out_channels: int) -> nn.Module:
-            conv = Conv(in_channels, out_channels, kernel_size=3, stride=2, activation=activation, norm=normalization)
-            return nn.Sequential(OrderedDict([("downsample", conv), ("smooth", smooth(out_channels))]))
+            conv_module = Conv(
+                in_channels, out_channels, kernel_size=3, stride=2, activation=activation, norm=normalization
+            )
+            return nn.Sequential(OrderedDict([("downsample", conv_module), ("smooth", smooth(out_channels))]))
 
         def maxpool(out_channels: int) -> nn.Module:
             return nn.Sequential(
@@ -399,27 +404,29 @@ class YOLOV4TinyBackbone(nn.Module):
                 )
             )
 
-        self.stage1 = Conv(in_channels, width, kernel_size=3, stride=2, activation=activation, norm=normalization)
-        self.downsample2 = downsample(width, width * 2)
-        self.stage2 = TinyStage(width * 2, activation=activation, norm=normalization)
-        self.downsample3 = maxpool(width * 4)
-        self.stage3 = TinyStage(width * 4, activation=activation, norm=normalization)
-        self.downsample4 = maxpool(width * 8)
-        self.stage4 = TinyStage(width * 8, activation=activation, norm=normalization)
-        self.downsample5 = maxpool(width * 16)
+        def stage(out_channels: int, use_maxpool: bool) -> nn.Module:
+            if use_maxpool:
+                downsample_module = maxpool(out_channels)
+            else:
+                downsample_module = downsample(out_channels // 2, out_channels)
+            stage_module = TinyStage(out_channels, activation=activation, norm=normalization)
+            return nn.Sequential(OrderedDict([("downsample", downsample_module), ("stage", stage_module)]))
+
+        stages = [
+            Conv(in_channels, width, kernel_size=3, stride=2, activation=activation, norm=normalization),
+            stage(width * 2, False),
+            stage(width * 4, True),
+            stage(width * 8, True),
+            maxpool(width * 16),
+        ]
+        self.stages = nn.ModuleList(stages)
 
     def forward(self, x: Tensor) -> List[Tensor]:
-        c1 = self.stage1(x)
-        x = self.downsample2(c1)
-        c2 = self.stage2(x)
-        x = torch.cat((x, c2), dim=1)
-        x = self.downsample3(x)
-        c3 = self.stage3(x)
-        x = torch.cat((x, c3), dim=1)
-        x = self.downsample4(x)
-        c4 = self.stage4(x)
-        x = torch.cat((x, c4), dim=1)
-        c5 = self.downsample5(x)
+        c1 = self.stages[0](x)
+        c2, x = self.stages[1](c1)
+        c3, x = self.stages[2](x)
+        c4, x = self.stages[3](x)
+        c5 = self.stages[4](x)
         return [c1, c2, c3, c4, c5]
 
 
@@ -538,18 +545,21 @@ class YOLOV5Backbone(nn.Module):
                 )
             )
 
-        self.stage1 = downsample(in_channels, width, kernel_size=6)
-        self.stage2 = stage(width, width * 2, depth)
-        self.stage3 = stage(width * 2, width * 4, depth * 2)
-        self.stage4 = stage(width * 4, width * 8, depth * 3)
-        self.stage5 = stage(width * 8, width * 16, depth)
+        stages = [
+            downsample(in_channels, width, kernel_size=6),
+            stage(width, width * 2, depth),
+            stage(width * 2, width * 4, depth * 2),
+            stage(width * 4, width * 8, depth * 3),
+            stage(width * 8, width * 16, depth),
+        ]
+        self.stages = nn.ModuleList(stages)
 
     def forward(self, x: Tensor) -> List[Tensor]:
-        c1 = self.stage1(x)
-        c2 = self.stage2(c1)
-        c3 = self.stage3(c2)
-        c4 = self.stage4(c3)
-        c5 = self.stage5(c4)
+        c1 = self.stages[0](x)
+        c2 = self.stages[1](c1)
+        c3 = self.stages[2](c2)
+        c4 = self.stages[3](c3)
+        c5 = self.stages[4](c4)
         return [c1, c2, c3, c4, c5]
 
 
@@ -647,9 +657,11 @@ class YOLOV4TinyNetwork(nn.Module):
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
             function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
             "ciou" (default).
-        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
-            confidence is one if there's an object, and 1.0 means that the target confidence is the output of
+        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that the target
+            confidence is 1 if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
+        label_smoothing: The epsilon parameter (weight) for class label smoothing. 0.0 means no smoothing (binary
+            targets), and 1.0 means that the target probabilities are always 0.5.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
         class_loss_multiplier: Classification loss will be scaled by this value.
@@ -781,9 +793,11 @@ class YOLOV4Network(nn.Module):
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
             function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
             "ciou" (default).
-        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
-            confidence is one if there's an object, and 1.0 means that the target confidence is the output of
+        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that the target
+            confidence is 1 if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
+        label_smoothing: The epsilon parameter (weight) for class label smoothing. 0.0 means no smoothing (binary
+            targets), and 1.0 means that the target probabilities are always 0.5.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
         class_loss_multiplier: Classification loss will be scaled by this value.
@@ -946,9 +960,11 @@ class YOLOV4P6Network(nn.Module):
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
             function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
             "ciou" (default).
-        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
-            confidence is one if there's an object, and 1.0 means that the target confidence is the output of
+        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that the target
+            confidence is 1 if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
+        label_smoothing: The epsilon parameter (weight) for class label smoothing. 0.0 means no smoothing (binary
+            targets), and 1.0 means that the target probabilities are always 0.5.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
         class_loss_multiplier: Classification loss will be scaled by this value.
@@ -1140,9 +1156,11 @@ class YOLOV5Network(nn.Module):
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
             function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
             "ciou" (default).
-        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
-            confidence is one if there's an object, and 1.0 means that the target confidence is the output of
+        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that the target
+            confidence is 1 if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
+        label_smoothing: The epsilon parameter (weight) for class label smoothing. 0.0 means no smoothing (binary
+            targets), and 1.0 means that the target probabilities are always 0.5.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
         class_loss_multiplier: Classification loss will be scaled by this value.
@@ -1301,9 +1319,11 @@ class YOLOV7Network(nn.Module):
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
             function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
             "ciou" (default).
-        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
-            confidence is one if there's an object, and 1.0 means that the target confidence is the output of
+        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that the target
+            confidence is 1 if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
+        label_smoothing: The epsilon parameter (weight) for class label smoothing. 0.0 means no smoothing (binary
+            targets), and 1.0 means that the target probabilities are always 0.5.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
         class_loss_multiplier: Classification loss will be scaled by this value.
@@ -1315,7 +1335,7 @@ class YOLOV7Network(nn.Module):
         self,
         num_classes: int,
         backbone: Optional[nn.Module] = None,
-        widths: Sequence[int] = (32, 64, 128, 256, 512, 1024, 1024),
+        widths: Sequence[int] = (64, 128, 256, 512, 768, 1024),
         activation: Optional[str] = "silu",
         normalization: Optional[str] = "batchnorm",
         prior_shapes: Optional[List[Tuple[int, int]]] = None,
@@ -1615,9 +1635,11 @@ class YOLOXNetwork(nn.Module):
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
             function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
             "ciou" (default).
-        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
-            confidence is one if there's an object, and 1.0 means that the target confidence is the output of
+        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that the target
+            confidence is 1 if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
+        label_smoothing: The epsilon parameter (weight) for class label smoothing. 0.0 means no smoothing (binary
+            targets), and 1.0 means that the target probabilities are always 0.5.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
         class_loss_multiplier: Classification loss will be scaled by this value.

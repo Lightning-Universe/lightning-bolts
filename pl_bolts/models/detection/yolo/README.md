@@ -35,7 +35,7 @@ The prior shapes are also used for matching the ground-truth targets to anchors 
 
 The model input is expected to be a list of images. Each image is a tensor with shape `[channels, height, width]`. The images from a single batch will be stacked into a single tensor, so the sizes have to match. Different batches can have different image sizes. The feature pyramid network introduces another constraint on the image size: the width and the height have to be divisible by the ratio in which the network downsamples the input.
 
-During training, the model expects both the image tensors and a list of targets. Each target is a dictionary containing the following tensors:
+During training, the model expects both the image tensors and a list of targets. It's possible to train a model using one integer class label per box, but the YOLO model supports also multiple labels per box. For multi-label training, simply use a boolean matrix that indicates which classes are assigned to which boxes, in place of the class labels. Each target is a dictionary containing the following tensors:
 
 - *boxes*: `(x1, y1, x2, y2)` coordinates of the ground-truth boxes in a matrix with shape `[N, 4]`.
 - *labels*: Either integer class labels in a vector of size `N` or a class mask for each ground-truth box in a boolean matrix with shape `[N, classes]`

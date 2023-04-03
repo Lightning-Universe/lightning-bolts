@@ -9,17 +9,16 @@ import torch.nn as nn
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
 try:
-    from pytorch_lightning.utilities.rank_zero import rank_zero_debug, rank_zero_info
+    from pytorch_lightning.utilities.rank_zero import rank_zero_info
 except ModuleNotFoundError:
-    from pytorch_lightning.utilities.distributed import rank_zero_debug, rank_zero_info
+    from pytorch_lightning.utilities.distributed import rank_zero_info
 
 from torch import Tensor
 
-from pl_bolts.models.detection.yolo import layers
-from pl_bolts.models.detection.yolo.layers import MaxPool
-from pl_bolts.models.detection.yolo.torch_networks import NETWORK_OUTPUT
-from pl_bolts.models.detection.yolo.types import TARGETS
-from pl_bolts.models.detection.yolo.utils import get_image_size
+from .layers import Conv, DetectionLayer, MaxPool, RouteLayer, ShortcutLayer, create_detection_layer
+from .torch_networks import NETWORK_OUTPUT
+from .types import TARGETS
+from .utils import get_image_size
 
 CONFIG = Dict[str, Any]
 CREATE_LAYER_OUTPUT = Tuple[nn.Module, int]  # layer, num_outputs
@@ -50,9 +49,11 @@ class DarknetNetwork(nn.Module):
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
             function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
             "ciou".
-        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
-            confidence is one if there's an object, and 1.0 means that the target confidence is the output of
+        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that the target
+            confidence is 1 if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
+        label_smoothing: The epsilon parameter (weight) for class label smoothing. 0.0 means no smoothing (binary
+            targets), and 1.0 means that the target probabilities are always 0.5.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
         class_loss_multiplier: Classification loss will be scaled by this value.
@@ -100,9 +101,9 @@ class DarknetNetwork(nn.Module):
         image_size = get_image_size(x)
 
         for layer in self.layers:
-            if isinstance(layer, (layers.RouteLayer, layers.ShortcutLayer)):
+            if isinstance(layer, (RouteLayer, ShortcutLayer)):
                 x = layer(outputs)
-            elif isinstance(layer, layers.DetectionLayer):
+            elif isinstance(layer, DetectionLayer):
                 x, preds = layer(x, image_size)
                 detections.append(x)
                 if targets is not None:
@@ -151,12 +152,10 @@ class DarknetNetwork(nn.Module):
                     tensor.copy_(source)
             return num_elements
 
-        for layer_idx, layer in enumerate(self.layers):
+        for layer in self.layers:
             # Weights are loaded only to convolutional layers
-            if not isinstance(layer, layers.Conv):
+            if not isinstance(layer, Conv):
                 continue
-
-            rank_zero_debug(f"Reading weights for layer {layer_idx}: {list(layer.conv.weight.shape)}")
 
             # If convolution is followed by batch normalization, read the batch normalization parameters. Otherwise we
             # read the convolution bias.
@@ -310,7 +309,7 @@ def _create_convolutional(config: CONFIG, num_inputs: List[int], **kwargs: Any) 
     batch_normalize = config.get("batch_normalize", False)
     padding = (config["size"] - 1) // 2 if config["pad"] else 0
 
-    layer = layers.Conv(
+    layer = Conv(
         num_inputs[-1],
         config["filters"],
         kernel_size=config["size"],
@@ -361,7 +360,7 @@ def _create_route(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREAT
     last = len(num_inputs) - 1
     source_layers = [layer if layer >= 0 else last + layer for layer in config["layers"]]
 
-    layer = layers.RouteLayer(source_layers, num_chunks, chunk_idx)
+    layer = RouteLayer(source_layers, num_chunks, chunk_idx)
 
     # The number of outputs of a source layer is the number of inputs of the next layer.
     num_outputs = sum(num_inputs[layer + 1] // num_chunks for layer in source_layers)
@@ -382,7 +381,7 @@ def _create_shortcut(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CR
         module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
         its output.
     """
-    layer = layers.ShortcutLayer(config["from"])
+    layer = ShortcutLayer(config["from"])
     return layer, num_inputs[-1]
 
 
@@ -411,7 +410,8 @@ def _create_yolo(
     size_range: float = 4.0,
     ignore_bg_threshold: Optional[float] = None,
     overlap_func: Optional[Union[str, Callable]] = None,
-    predict_overlap: float = 1.0,
+    predict_overlap: Optional[float] = None,
+    label_smoothing: Optional[float] = None,
     overlap_loss_multiplier: Optional[float] = None,
     confidence_loss_multiplier: Optional[float] = None,
     class_loss_multiplier: Optional[float] = None,
@@ -442,9 +442,11 @@ def _create_yolo(
         overlap_func: A function for calculating the pairwise overlaps between two sets of boxes. Either a string or a
             function that returns a matrix of pairwise overlaps. Valid string values are "iou", "giou", "diou", and
             "ciou".
-        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that target
-            confidence is one if there's an object, and 1.0 means that the target confidence is the output of
+        predict_overlap: Balance between binary confidence targets and predicting the overlap. 0.0 means that the target
+            confidence is 1 if there's an object, and 1.0 means that the target confidence is the output of
             ``overlap_func``.
+        label_smoothing: The epsilon parameter (weight) for class label smoothing. 0.0 means no smoothing (binary
+            targets), and 1.0 means that the target probabilities are always 0.5.
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
         class_loss_multiplier: Classification loss will be scaled by this value.
@@ -473,7 +475,7 @@ def _create_yolo(
         class_loss_multiplier = config.get("cls_normalizer", 1.0)
         assert isinstance(class_loss_multiplier, float)
 
-    layer = layers.create_detection_layer(
+    layer = create_detection_layer(
         num_classes=config["classes"],
         prior_shapes=prior_shapes,
         prior_shape_idxs=config["mask"],
@@ -484,6 +486,7 @@ def _create_yolo(
         ignore_bg_threshold=ignore_bg_threshold,
         overlap_func=overlap_func,
         predict_overlap=predict_overlap,
+        label_smoothing=label_smoothing,
         overlap_loss_multiplier=overlap_loss_multiplier,
         confidence_loss_multiplier=confidence_loss_multiplier,
         class_loss_multiplier=class_loss_multiplier,
