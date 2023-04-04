@@ -23,7 +23,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 from .darknet_network import DarknetNetwork
 from .torch_networks import YOLOV4Network
-from .types import BATCH, IMAGES, PRED, PREDS, TARGET, TARGETS
+from .types import BATCH, IMAGES, PRED, TARGET, TARGETS
 
 if _TORCHMETRICS_DETECTION_AVAILABLE:
     try:
@@ -126,7 +126,7 @@ class YOLO(LightningModule):
     coordinates are scaled to the input image size. During training it also returns a dictionary containing the
     classification, box overlap, and confidence losses.
 
-    During inference, the model requires only the image tensors. :func:`~.yolo_module.YOLO.infer` method filters and
+    During inference, the model requires only the image tensor. :func:`~.yolo_module.YOLO.infer` method filters and
     processes the predictions. If a prediction has a high score for more than one class, it will be duplicated. *The
     processed output is returned in a dictionary containing the following tensors*:
 
@@ -338,7 +338,7 @@ class YOLO(LightningModule):
         self.log_dict(map_scores, sync_dist=True)
         self._test_map.reset()
 
-    def predict_step(self, batch: BATCH, batch_idx: int, dataloader_idx: int = 0) -> PREDS:
+    def predict_step(self, batch: BATCH, batch_idx: int, dataloader_idx: int = 0) -> List[PRED]:
         """Feeds a batch of images to the network and returns the detected bounding boxes, confidence scores, and
         class labels.
 
@@ -388,7 +388,7 @@ class YOLO(LightningModule):
             self.train()
         return detections
 
-    def process_detections(self, preds: Tensor) -> PREDS:
+    def process_detections(self, preds: Tensor) -> List[PRED]:
         """Splits the detection tensor returned by a forward pass into a list of prediction dictionaries, and
         filters them based on confidence threshold, non-maximum suppression (NMS), and maximum number of
         predictions.

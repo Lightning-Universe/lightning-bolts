@@ -17,6 +17,7 @@ from pl_bolts.models.detection import (
     YOLOV4P6Network,
     YOLOV4TinyNetwork,
     YOLOV5Network,
+    YOLOV7Network,
     YOLOXNetwork,
 )
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
@@ -96,8 +97,11 @@ def test_darknet(config, catch_warnings):
     network = DarknetNetwork(config_path)
     model = YOLO(network)
 
-    image = torch.rand(1, 3, 256, 256)
-    model(image)
+    image = torch.rand(3, 256, 256)
+    detections = model.infer(image)
+    assert "boxes" in detections
+    assert "scores" in detections
+    assert "labels" in detections
 
 
 @pytest.mark.parametrize(
@@ -129,8 +133,11 @@ def test_yolov4_tiny(catch_warnings):
     network = YOLOV4TinyNetwork(num_classes=2, width=4, overlap_func="giou")
     model = YOLO(network)
 
-    image = torch.rand(1, 3, 256, 256)
-    model(image)
+    image = torch.rand(3, 256, 256)
+    detections = model.infer(image)
+    assert "boxes" in detections
+    assert "scores" in detections
+    assert "labels" in detections
 
 
 def test_yolov4_tiny_train(tmpdir):
@@ -154,8 +161,11 @@ def test_yolov4(catch_warnings):
     network = YOLOV4Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128), overlap_func="giou")
     model = YOLO(network)
 
-    image = torch.rand(1, 3, 256, 256)
-    model(image)
+    image = torch.rand(3, 256, 256)
+    detections = model.infer(image)
+    assert "boxes" in detections
+    assert "scores" in detections
+    assert "labels" in detections
 
 
 def test_yolov4_train(tmpdir, catch_warnings):
@@ -179,8 +189,11 @@ def test_yolov4p6(catch_warnings):
     network = YOLOV4P6Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128, 128), overlap_func="giou")
     model = YOLO(network)
 
-    image = torch.rand(1, 3, 256, 256)
-    model(image)
+    image = torch.rand(3, 256, 256)
+    detections = model.infer(image)
+    assert "boxes" in detections
+    assert "scores" in detections
+    assert "labels" in detections
 
 
 def test_yolov4p6_train(tmpdir, catch_warnings):
@@ -204,8 +217,11 @@ def test_yolov5(catch_warnings):
     network = YOLOV5Network(num_classes=2, depth=1, width=4, overlap_func="giou")
     model = YOLO(network)
 
-    image = torch.rand(1, 3, 256, 256)
-    model(image)
+    image = torch.rand(3, 256, 256)
+    detections = model.infer(image)
+    assert "boxes" in detections
+    assert "scores" in detections
+    assert "labels" in detections
 
 
 def test_yolov5_train(tmpdir, catch_warnings):
@@ -225,12 +241,43 @@ def test_yolov5_train(tmpdir, catch_warnings):
     trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
 
 
+def test_yolov7(catch_warnings):
+    network = YOLOV7Network(num_classes=2, depth=1, width=4, overlap_func="giou")
+    model = YOLO(network)
+
+    image = torch.rand(3, 256, 256)
+    detections = model.infer(image)
+    assert "boxes" in detections
+    assert "scores" in detections
+    assert "labels" in detections
+
+
+def test_yolov7_train(tmpdir, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
+    network = YOLOV7Network(num_classes=2, depth=1, width=4, overlap_func="giou")
+    model = YOLO(network)
+
+    train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+    valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, logger=False, max_epochs=10, accelerator="auto")
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
+
+
 def test_yolox(catch_warnings):
     network = YOLOXNetwork(num_classes=2, depth=1, width=4, overlap_func="giou")
     model = YOLO(network)
 
-    image = torch.rand(1, 3, 256, 256)
-    model(image)
+    image = torch.rand(3, 256, 256)
+    detections = model.infer(image)
+    assert "boxes" in detections
+    assert "scores" in detections
+    assert "labels" in detections
 
 
 def test_yolox_train(tmpdir, catch_warnings):

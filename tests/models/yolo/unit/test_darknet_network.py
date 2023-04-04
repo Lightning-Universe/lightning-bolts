@@ -34,21 +34,19 @@ def test_create_convolutional(config, catch_warnings):
     assert conv.conv.kernel_size == (config["size"], config["size"])
     assert conv.conv.stride == (config["stride"], config["stride"])
 
-    activation = config["activation"]
     pad_size = (config["size"] - 1) // 2 if config["pad"] else 0
-
     if config["pad"]:
         assert conv.conv.padding == (pad_size, pad_size)
 
     if config["batch_normalize"]:
         assert isinstance(conv.norm, nn.BatchNorm2d)
 
-    if activation == "linear":
+    if config["activation"] == "linear":
         assert isinstance(conv.act, nn.Identity)
-    elif activation == "logistic":
+    elif config["activation"] == "logistic":
         assert isinstance(conv.act, nn.Sigmoid)
     else:
-        assert conv.act.__class__.__name__.lower().startswith(activation)
+        assert conv.act.__class__.__name__.lower().startswith(config["activation"])
 
 
 @pytest.mark.parametrize(
