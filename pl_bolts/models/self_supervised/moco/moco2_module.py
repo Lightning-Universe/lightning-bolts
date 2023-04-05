@@ -225,7 +225,6 @@ class Moco_v2(LightningModule):
 
         # compute key features
         with torch.no_grad():  # no gradient to keys
-
             # shuffle for making use of BN
             if self._use_ddp(self.trainer):
                 img_k, idx_unshuffle = self._batch_shuffle_ddp(img_k)
