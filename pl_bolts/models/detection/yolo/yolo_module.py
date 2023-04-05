@@ -298,7 +298,7 @@ class YOLO(LightningModule):
     def on_validation_epoch_end(self) -> None:
         # When continuing training from a checkpoint, it may happen that epoch_end is called without detections. In this
         # case the metrics cannot be computed.
-        if (not _MEAN_AVERAGE_PRECISION_AVAILABLE) or (not self._val_map.detection_boxes):
+        if (not _MEAN_AVERAGE_PRECISION_AVAILABLE) or (not self._val_map.detections):
             return
 
         map_scores = self._val_map.compute()
@@ -330,7 +330,7 @@ class YOLO(LightningModule):
     def on_test_epoch_end(self) -> None:
         # When continuing training from a checkpoint, it may happen that epoch_end is called without detections. In this
         # case the metrics cannot be computed.
-        if (not _MEAN_AVERAGE_PRECISION_AVAILABLE) or (not self._test_map.detection_boxes):
+        if (not _MEAN_AVERAGE_PRECISION_AVAILABLE) or (not self._test_map.detections):
             return
 
         map_scores = self._test_map.compute()
