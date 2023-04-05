@@ -95,7 +95,7 @@ def test_fasterrcnn_pyt_module_bbone_train(tmpdir):
 def test_darknet(config, catch_warnings):
     config_path = Path(TEST_ROOT) / "data" / f"{config}.cfg"
     network = DarknetNetwork(config_path)
-    model = YOLO(network)
+    model = YOLO(network, confidence_threshold=0.5)
 
     image = torch.rand(3, 256, 256)
     detections = model.infer(image)
@@ -120,7 +120,7 @@ def test_darknet_train(tmpdir, cfg_name, catch_warnings):
 
     config_path = Path(TEST_ROOT) / "data" / f"{cfg_name}.cfg"
     network = DarknetNetwork(config_path)
-    model = YOLO(network)
+    model = YOLO(network, confidence_threshold=0.5)
 
     train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
@@ -130,8 +130,8 @@ def test_darknet_train(tmpdir, cfg_name, catch_warnings):
 
 
 def test_yolov4_tiny(catch_warnings):
-    network = YOLOV4TinyNetwork(num_classes=2, width=4, overlap_func="giou")
-    model = YOLO(network)
+    network = YOLOV4TinyNetwork(num_classes=2, width=4)
+    model = YOLO(network, confidence_threshold=0.5)
 
     image = torch.rand(3, 256, 256)
     detections = model.infer(image)
@@ -147,8 +147,8 @@ def test_yolov4_tiny_train(tmpdir):
         category=PossibleUserWarning,
     )
 
-    network = YOLOV4TinyNetwork(num_classes=2, width=4, overlap_func="giou")
-    model = YOLO(network)
+    network = YOLOV4TinyNetwork(num_classes=2, width=4)
+    model = YOLO(network, confidence_threshold=0.5)
 
     train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
@@ -158,8 +158,8 @@ def test_yolov4_tiny_train(tmpdir):
 
 
 def test_yolov4(catch_warnings):
-    network = YOLOV4Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128), overlap_func="giou")
-    model = YOLO(network)
+    network = YOLOV4Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128))
+    model = YOLO(network, confidence_threshold=0.5)
 
     image = torch.rand(3, 256, 256)
     detections = model.infer(image)
@@ -175,8 +175,8 @@ def test_yolov4_train(tmpdir, catch_warnings):
         category=PossibleUserWarning,
     )
 
-    network = YOLOV4Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128), overlap_func="giou")
-    model = YOLO(network)
+    network = YOLOV4Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128))
+    model = YOLO(network, confidence_threshold=0.5)
 
     train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
@@ -186,8 +186,8 @@ def test_yolov4_train(tmpdir, catch_warnings):
 
 
 def test_yolov4p6(catch_warnings):
-    network = YOLOV4P6Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128, 128), overlap_func="giou")
-    model = YOLO(network)
+    network = YOLOV4P6Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128, 128))
+    model = YOLO(network, confidence_threshold=0.5)
 
     image = torch.rand(3, 256, 256)
     detections = model.infer(image)
@@ -203,8 +203,8 @@ def test_yolov4p6_train(tmpdir, catch_warnings):
         category=PossibleUserWarning,
     )
 
-    network = YOLOV4P6Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128, 128), overlap_func="giou")
-    model = YOLO(network)
+    network = YOLOV4P6Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128, 128))
+    model = YOLO(network, confidence_threshold=0.5)
 
     train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
@@ -214,8 +214,8 @@ def test_yolov4p6_train(tmpdir, catch_warnings):
 
 
 def test_yolov5(catch_warnings):
-    network = YOLOV5Network(num_classes=2, depth=1, width=4, overlap_func="giou")
-    model = YOLO(network)
+    network = YOLOV5Network(num_classes=2, depth=1, width=4)
+    model = YOLO(network, confidence_threshold=0.5)
 
     image = torch.rand(3, 256, 256)
     detections = model.infer(image)
@@ -231,8 +231,8 @@ def test_yolov5_train(tmpdir, catch_warnings):
         category=PossibleUserWarning,
     )
 
-    network = YOLOV5Network(num_classes=2, depth=1, width=4, overlap_func="giou")
-    model = YOLO(network)
+    network = YOLOV5Network(num_classes=2, depth=1, width=4)
+    model = YOLO(network, confidence_threshold=0.5)
 
     train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
@@ -242,8 +242,8 @@ def test_yolov5_train(tmpdir, catch_warnings):
 
 
 def test_yolov7(catch_warnings):
-    network = YOLOV7Network(num_classes=2, depth=1, width=4, overlap_func="giou")
-    model = YOLO(network)
+    network = YOLOV7Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128))
+    model = YOLO(network, confidence_threshold=0.5)
 
     image = torch.rand(3, 256, 256)
     detections = model.infer(image)
@@ -259,8 +259,8 @@ def test_yolov7_train(tmpdir, catch_warnings):
         category=PossibleUserWarning,
     )
 
-    network = YOLOV7Network(num_classes=2, depth=1, width=4, overlap_func="giou")
-    model = YOLO(network)
+    network = YOLOV7Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128))
+    model = YOLO(network, confidence_threshold=0.5)
 
     train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
@@ -270,8 +270,8 @@ def test_yolov7_train(tmpdir, catch_warnings):
 
 
 def test_yolox(catch_warnings):
-    network = YOLOXNetwork(num_classes=2, depth=1, width=4, overlap_func="giou")
-    model = YOLO(network)
+    network = YOLOXNetwork(num_classes=2, depth=1, width=4)
+    model = YOLO(network, confidence_threshold=0.5)
 
     image = torch.rand(3, 256, 256)
     detections = model.infer(image)
@@ -287,8 +287,8 @@ def test_yolox_train(tmpdir, catch_warnings):
         category=PossibleUserWarning,
     )
 
-    network = YOLOXNetwork(num_classes=2, depth=1, width=4, overlap_func="giou")
-    model = YOLO(network)
+    network = YOLOXNetwork(num_classes=2, depth=1, width=4)
+    model = YOLO(network, confidence_threshold=0.5)
 
     train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
