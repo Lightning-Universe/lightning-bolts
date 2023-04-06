@@ -89,18 +89,18 @@ class YOLO(LightningModule):
     """PyTorch Lightning implementation of YOLO that supports the most important features of YOLOv3, YOLOv4, YOLOv5,
     YOLOv7, Scaled-YOLOv4, and YOLOX.
 
-    *YOLOv3 paper*: `Joseph Redmon and Ali Farhadi <https://arxiv.org/abs/1804.02767>`_
+    *YOLOv3 paper*: `Joseph Redmon and Ali Farhadi <https://arxiv.org/abs/1804.02767>`__
 
-    *YOLOv4 paper*: `Alexey Bochkovskiy, Chien-Yao Wang, and Hong-Yuan Mark Liao <https://arxiv.org/abs/2004.10934>`_
+    *YOLOv4 paper*: `Alexey Bochkovskiy, Chien-Yao Wang, and Hong-Yuan Mark Liao <https://arxiv.org/abs/2004.10934>`__
 
-    *YOLOv7 paper*: `Chien-Yao Wang, Alexey Bochkovskiy, and Hong-Yuan Mark Liao <https://arxiv.org/abs/2207.02696>`_
+    *YOLOv7 paper*: `Chien-Yao Wang, Alexey Bochkovskiy, and Hong-Yuan Mark Liao <https://arxiv.org/abs/2207.02696>`__
 
     *Scaled-YOLOv4 paper*: `Chien-Yao Wang, Alexey Bochkovskiy, and Hong-Yuan Mark Liao
-    <https://arxiv.org/abs/2011.08036>`_
+    <https://arxiv.org/abs/2011.08036>`__
 
-    *YOLOX paper*: `Zheng Ge, Songtao Liu, Feng Wang, Zeming Li, and Jian Sun <https://arxiv.org/abs/2107.08430>`_
+    *YOLOX paper*: `Zheng Ge, Songtao Liu, Feng Wang, Zeming Li, and Jian Sun <https://arxiv.org/abs/2107.08430>`__
 
-    *Implementation*: `Seppo Enarvi <https://github.com/senarvi>`_
+    *Implementation*: `Seppo Enarvi <https://github.com/senarvi>`__
 
     The network architecture can be written in PyTorch, or read from a Darknet configuration file using the
     :class:`~.darknet_network.DarknetNetwork` class. ``DarknetNetwork`` is also able to read weights that have been
