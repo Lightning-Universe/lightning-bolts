@@ -1,5 +1,5 @@
 # coverage>=5.0
-codecov >=2.1, <=2.1.12
+codecov >=2.1, <=2.1.13
 pytest >=6.0, <=7.3.0
 pytest-cov >2.10, <=4.0.0
 # pytest-flake8
