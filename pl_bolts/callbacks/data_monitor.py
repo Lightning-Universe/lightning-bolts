@@ -17,8 +17,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 try:
     from pytorch_lightning.loggers import Logger
 except ImportError:
-    from pytorch_lightning.loggers import LightningLoggerBase
-    Logger = LightningLoggerBase
+    from pytorch_lightning.loggers import LightningLoggerBase as Logger
 
 if _WANDB_AVAILABLE:
     import wandb
