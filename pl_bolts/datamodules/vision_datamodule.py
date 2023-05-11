@@ -8,7 +8,6 @@ from torch.utils.data import DataLoader, Dataset, random_split
 
 
 class VisionDataModule(LightningDataModule):
-
     EXTRA_ARGS: dict = {}
     name: str = ""
     #: Dataset class to use
