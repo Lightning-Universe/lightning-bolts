@@ -113,7 +113,6 @@ class FasterRCNN(LightningModule):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
-
         images, targets = batch
         targets = [{k: v for k, v in t.items()} for t in targets]
 

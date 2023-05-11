@@ -31,7 +31,6 @@ class SimCLRTrainDataTransform:
     def __init__(
         self, input_height: int = 224, gaussian_blur: bool = True, jitter_strength: float = 1.0, normalize=None
     ) -> None:
-
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -140,7 +139,6 @@ class SimCLRFinetuneTransform(SimCLRTrainDataTransform):
     def __init__(
         self, input_height: int = 224, jitter_strength: float = 1.0, normalize=None, eval_transform: bool = False
     ) -> None:
-
         super().__init__(
             normalize=normalize, input_height=input_height, gaussian_blur=None, jitter_strength=jitter_strength
         )
