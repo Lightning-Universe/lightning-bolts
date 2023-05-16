@@ -60,7 +60,7 @@ jobs:
 
     - name: Install package
       run: |
-        pip install "pip==22.2.1"
+        pip install "pip==22.2.1"  # todo: drop after resolving extras
         pip install -e . --upgrade --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
         pip list
 

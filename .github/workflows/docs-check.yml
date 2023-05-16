@@ -26,15 +26,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install package
-        run: pip install -e . -r requirements/devel.txt --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
-        shell: bash
-
-      - name: Install dependencies
+      - name: Install package & dependencies
         run: |
-          pip --version
-          # python -m pip install --upgrade --user pip
-          pip install --requirement docs/requirements.txt --upgrade-strategy only-if-needed
+          pip install "pip==22.2.1"  # todo: drop after resolving extras
+          pip install -e . -r requirements/devel.txt -r docs/requirements.txt \
+            --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
           pip list
         shell: bash
 
@@ -72,10 +68,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip --version
-          pip install --requirement docs/requirements.txt
           # install Texlive, see https://linuxconfig.org/how-to-install-latex-on-ubuntu-20-04-focal-fossa-linux
           sudo apt-get update && sudo apt-get install -y texlive-latex-extra dvipng texlive-pictures
+          pip install "pip==22.2.1"  # todo: drop after resolving extras
+          pip install --requirement docs/requirements.txt
           pip list
         shell: bash
 
