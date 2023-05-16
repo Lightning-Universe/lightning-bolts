@@ -55,7 +55,7 @@ def _augment_requirement(ln: str, comment_char: str = "#", unfreeze: bool = True
     return req
 
 
-def _load_requirements(path_dir: str, file_name: str = "base.txt", unfreeze: bool = not _FREEZE_REQUIREMENTS) -> list:
+def _load_requirements(path_dir: str, file_name: str, unfreeze: bool = not _FREEZE_REQUIREMENTS) -> list:
     """Loading requirements from a file.
 
     >>> path_req = os.path.join(_PATH_ROOT, "requirements")
@@ -150,7 +150,7 @@ setup(
     keywords=["deep learning", "pytorch", "AI"],
     python_requires=">=3.7",
     setup_requires=["wheel"],
-    install_requires=_load_requirements(_PATH_ROOT),
+    install_requires=_load_requirements(_PATH_ROOT, "requirements.txt"),
     extras_require=_prepare_extras(),
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/lightning-bolts/issues",
