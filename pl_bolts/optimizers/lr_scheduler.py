@@ -2,8 +2,7 @@ import math
 import warnings
 from typing import List
 
-from torch import nn
-from torch.optim import Adam, Optimizer
+from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
 
 from pl_bolts.utils.stability import under_review
