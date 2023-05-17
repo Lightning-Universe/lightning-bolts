@@ -99,10 +99,10 @@ jobs:
         key: pl-datasets-${{ hashFiles('tests/conftest.py') }}
 
     - name: Download ROMs
-      continue-on-error: true
+      # continue-on-error: true
+      working-directory: ./datasets
       run: |
-        wget http://www.atarimania.com/roms/Roms.rar -O datasets/Roms.rar
-        cd datasets
+        curl http://www.atarimania.com/roms/Roms.rar -o Roms.rar
         unrar x -y Roms.rar
         python -m atari_py.import_roms ROMS
 
