@@ -100,8 +100,9 @@ jobs:
 
     - name: Download ROMs
       # continue-on-error: true
-      working-directory: ./datasets
       run: |
+        mkdir -p datasets
+        cd datasets
         curl http://www.atarimania.com/roms/Roms.rar -o Roms.rar
         unrar x -y Roms.rar
         python -m atari_py.import_roms ROMS
