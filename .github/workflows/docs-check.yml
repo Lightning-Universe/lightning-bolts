@@ -6,6 +6,10 @@ on:  # Trigger the workflow on push or pull request, but only for the master bra
   pull_request:
     branches: [master]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.head_ref }}
+  cancel-in-progress: ${{ ! (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/')) }}
+
 jobs:
   test-docs:
     runs-on: ubuntu-20.04
