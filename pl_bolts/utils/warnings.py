@@ -2,14 +2,11 @@ import os
 import warnings
 from typing import Callable, Dict, Optional
 
-from pl_bolts.utils.stability import under_review
-
 MISSING_PACKAGE_WARNINGS: Dict[str, int] = {}
 
 WARN_MISSING_PACKAGE = int(os.environ.get("WARN_MISSING_PACKAGE", False))
 
 
-@under_review()
 def warn_missing_pkg(
     pkg_name: str,
     pypi_name: Optional[str] = None,

@@ -117,7 +117,6 @@ class SklearnDataModule(LightningDataModule):
         *args,
         **kwargs,
     ) -> None:
-
         super().__init__(*args, **kwargs)
         self.num_workers = num_workers
         self.batch_size = batch_size
