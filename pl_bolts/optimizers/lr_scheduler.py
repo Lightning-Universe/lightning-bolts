@@ -2,8 +2,7 @@ import math
 import warnings
 from typing import List
 
-from torch import nn
-from torch.optim import Adam, Optimizer
+from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
 
 from pl_bolts.utils.stability import under_review
@@ -27,16 +26,17 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         train and validation methods.
 
     Example:
+        >>> import torch.nn as nn
+        >>> from torch.optim import Adam
+        >>> #
         >>> layer = nn.Linear(10, 1)
         >>> optimizer = Adam(layer.parameters(), lr=0.02)
         >>> scheduler = LinearWarmupCosineAnnealingLR(optimizer, warmup_epochs=10, max_epochs=40)
-        >>> #
         >>> # the default case
         >>> for epoch in range(40):
         ...     # train(...)
         ...     # validate(...)
         ...     scheduler.step()
-        >>> #
         >>> # passing epoch param case
         >>> for epoch in range(40):
         ...     scheduler.step(epoch)

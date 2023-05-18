@@ -103,7 +103,6 @@ class ExperienceSource(BaseExperienceSource):
 
             # step through each env
             for env_idx, (env, action) in enumerate(zip(self.pool, actions)):
-
                 exp = self.env_step(env_idx, env, action)
                 history = self.histories[env_idx]
                 history.append(exp)

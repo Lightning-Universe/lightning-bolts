@@ -18,7 +18,6 @@ class MLP(nn.Module):
     """
 
     def __init__(self, input_dim: int = 2048, hidden_dim: int = 4096, output_dim: int = 256) -> None:
-
         super().__init__()
 
         self.model = nn.Sequential(
@@ -53,7 +52,6 @@ class SiameseArm(nn.Module):
         projector_hidden_dim: int = 4096,
         projector_out_dim: int = 256,
     ) -> None:
-
         super().__init__()
 
         if isinstance(encoder, str):

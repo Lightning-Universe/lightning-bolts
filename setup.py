@@ -3,12 +3,12 @@
 import os
 import re
 from importlib.util import module_from_spec, spec_from_file_location
-from typing import List
 
 from setuptools import find_packages, setup
 
 _PATH_ROOT = os.path.realpath(os.path.dirname(__file__))
 _PATH_REQUIRE = os.path.join(_PATH_ROOT, "requirements")
+_FREEZE_REQUIREMENTS = bool(int(os.environ.get("FREEZE_REQUIREMENTS", 0)))
 
 
 def _load_py_module(fname, pkg="pl_bolts"):
@@ -18,24 +18,57 @@ def _load_py_module(fname, pkg="pl_bolts"):
     return py
 
 
-def _load_requirements(path_dir: str, file_name: str = "requirements.txt", comment_char: str = "#") -> List[str]:
-    """Load requirements from a file.
+def _augment_requirement(ln: str, comment_char: str = "#", unfreeze: bool = True) -> str:
+    """Adjust the upper version contrains.
 
-    >>> _load_requirements(_PATH_ROOT)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-    ['pytorch-lightning...']
+    >>> _augment_requirement("arrow<=1.2.2,>=1.2.0  # anything", unfreeze=False)
+    'arrow<=1.2.2,>=1.2.0'
+    >>> _augment_requirement("arrow<=1.2.2,>=1.2.0  # strict", unfreeze=False)
+    'arrow<=1.2.2,>=1.2.0  # strict'
+    >>> _augment_requirement("arrow<=1.2.2,>=1.2.0  # my name", unfreeze=True)
+    'arrow>=1.2.0'
+    >>> _augment_requirement("arrow>=1.2.0, <=1.2.2  # strict", unfreeze=True)
+    'arrow>=1.2.0, <=1.2.2  # strict'
+    >>> _augment_requirement("arrow", unfreeze=True)
+    'arrow'
+    """
+    # filer all comments
+    if comment_char in ln:
+        comment = ln[ln.index(comment_char) :]
+        ln = ln[: ln.index(comment_char)]
+        is_strict = "strict" in comment
+    else:
+        is_strict = False
+    req = ln.strip()
+    # skip directly installed dependencies
+    if not req or (unfreeze and any(c in req for c in ["http:", "https:", "@"])):
+        return ""
+
+    # remove version restrictions unless they are strict
+    if unfreeze and "<" in req and not is_strict:
+        req = re.sub(r",? *<=? *[\d\.\*]+,? *", "", req).strip()
+
+    # adding strict back to the comment
+    if is_strict:
+        req += "  # strict"
+
+    return req
+
+
+def _load_requirements(path_dir: str, file_name: str, unfreeze: bool = not _FREEZE_REQUIREMENTS) -> list:
+    """Loading requirements from a file.
+
+    >>> path_req = os.path.join(_PATH_ROOT, "requirements")
+    >>> _load_requirements(path_req, "docs.txt")  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+    ['sphinx>=4.0', ...]
     """
     with open(os.path.join(path_dir, file_name)) as file:
         lines = [ln.strip() for ln in file.readlines()]
-    reqs = []
-    for ln in lines:
-        # filer all comments
-        if comment_char in ln:
-            ln = ln[: ln.index(comment_char)].strip()
-        # skip directly installed dependencies
-        if ln.startswith("http"):
-            continue
-        if ln:  # if requirement is not empty
-            reqs.append(ln)
+    reqs = [_augment_requirement(ln, unfreeze=unfreeze) for ln in lines]
+    reqs = [str(req) for req in reqs if req and not req.startswith("-r")]
+    if unfreeze:
+        # filter empty lines and containing @ which means redirect to some git/http
+        reqs = [req for req in reqs if not any(c in req for c in ["@", "http://", "https://"])]
     return reqs
 
 
@@ -117,7 +150,7 @@ setup(
     keywords=["deep learning", "pytorch", "AI"],
     python_requires=">=3.7",
     setup_requires=["wheel"],
-    install_requires=_load_requirements(_PATH_ROOT),
+    install_requires=_load_requirements(_PATH_ROOT, "requirements.txt"),
     extras_require=_prepare_extras(),
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/lightning-bolts/issues",

@@ -74,7 +74,6 @@ class BYOL(LightningModule):
         initial_tau: float = 0.996,
         **kwargs: Any,
     ) -> None:
-
         super().__init__()
         self.save_hyperparameters(ignore="base_encoder")
 

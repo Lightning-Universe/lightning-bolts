@@ -18,7 +18,6 @@ else:  # pragma: no cover
 
 @under_review()
 class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
-
     name = "imagenet"
 
     def __init__(
