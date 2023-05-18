@@ -75,7 +75,6 @@ class SimSiam(LightningModule):
         exclude_bn_bias: bool = False,
         **kwargs,
     ) -> None:
-
         super().__init__()
         self.save_hyperparameters(ignore="base_encoder")
 

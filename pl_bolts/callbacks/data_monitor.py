@@ -18,10 +18,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 try:
     from pytorch_lightning.loggers import Logger
 except ImportError:
-    from pytorch_lightning.loggers import LightningLoggerBase
-
-    Logger = LightningLoggerBase
-
+    from pytorch_lightning.loggers import LightningLoggerBase as Logger
 
 if _WANDB_AVAILABLE:
     import wandb
@@ -31,7 +28,6 @@ else:  # pragma: no cover
 
 @under_review()
 class DataMonitorBase(Callback):
-
     supported_loggers = (
         TensorBoardLogger,
         WandbLogger,
@@ -122,7 +118,6 @@ class DataMonitorBase(Callback):
 
 @under_review()
 class ModuleDataMonitor(DataMonitorBase):
-
     GROUP_NAME_INPUT = "input"
     GROUP_NAME_OUTPUT = "output"
 
@@ -208,7 +203,6 @@ class ModuleDataMonitor(DataMonitorBase):
 
 @under_review()
 class TrainingDataMonitor(DataMonitorBase):
-
     GROUP_NAME = "training_step"
 
     def __init__(self, log_every_n_steps: int = None):
