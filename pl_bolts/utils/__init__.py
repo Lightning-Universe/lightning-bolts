@@ -1,4 +1,5 @@
 import operator
+import os
 
 import torch
 from lightning_utilities.core.imports import compare_version, module_available
@@ -6,7 +7,7 @@ from lightning_utilities.core.imports import compare_version, module_available
 from pl_bolts.callbacks.verification.batch_gradient import BatchGradientVerification  # type: ignore
 
 _NATIVE_AMP_AVAILABLE: bool = module_available("torch.cuda.amp") and hasattr(torch.cuda.amp, "autocast")
-
+_IS_WINDOWS = os.name == 'nt'
 _TORCHVISION_AVAILABLE: bool = module_available("torchvision")
 _GYM_AVAILABLE: bool = module_available("gym")
 _SKLEARN_AVAILABLE: bool = module_available("sklearn")

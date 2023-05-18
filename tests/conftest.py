@@ -6,9 +6,8 @@ from pathlib import Path
 import pytest
 import torch
 from pytorch_lightning.trainer.connectors.signal_connector import SignalConnector
-from pytorch_lightning.utilities.imports import _IS_WINDOWS
 
-from pl_bolts.utils import _TORCHVISION_AVAILABLE, _TORCHVISION_LESS_THAN_0_13
+from pl_bolts.utils import _IS_WINDOWS, _TORCHVISION_AVAILABLE, _TORCHVISION_LESS_THAN_0_13
 from pl_bolts.utils.stability import UnderReviewWarning
 
 # GitHub Actions use this path to cache datasets.
