@@ -74,7 +74,6 @@ class CPC(LightningModule):
         task: str = "cpc",
         **kwargs,
     ) -> None:
-
         super().__init__()
         self.save_hyperparameters(ignore="encoder")
 
