@@ -115,6 +115,7 @@ def _prepare_extras():
         "loggers": _load_requirements(path_dir=_PATH_REQUIRE, file_name="loggers.txt"),
         "models": _load_requirements(path_dir=_PATH_REQUIRE, file_name="models.txt"),
         "test": _load_requirements(path_dir=_PATH_REQUIRE, file_name="test.txt"),
+        "typing": _load_requirements(path_dir=_PATH_REQUIRE, file_name="typing.txt"),
     }
     extras["extra"] = extras["models"] + extras["loggers"]
     extras["dev"] = extras["extra"] + extras["test"]
