@@ -6,7 +6,6 @@ from typing import Any, Optional, Union
 
 import torch
 from torch import Tensor
-from torch._six import string_classes
 from torch.utils.data import DataLoader, Dataset
 
 from pl_bolts.utils.stability import under_review
@@ -85,7 +84,7 @@ class AsynchronousLoader:
             return {key: self.load_instance(sample[key]) for key in sample}
         elif isinstance(sample, tuple) and hasattr(sample, "_fields"):  # namedtuple
             return elem_type(*(self.load_instance(d) for d in sample))
-        elif isinstance(sample, container_abcs.Sequence) and not isinstance(sample, string_classes):
+        elif isinstance(sample, container_abcs.Sequence) and not isinstance(sample, str):
             return [self.load_instance(s) for s in sample]
         else:
             return sample

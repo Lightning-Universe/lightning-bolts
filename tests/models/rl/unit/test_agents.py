@@ -31,7 +31,6 @@ class TestValueAgent(TestCase):
         self.value_agent = ValueAgent(self.net, self.env.action_space.n)
 
     def test_value_agent(self):
-
         action = self.value_agent(self.state, self.device)
         self.assertIsInstance(action, list)
         self.assertIsInstance(action[0], int)
