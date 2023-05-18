@@ -7,7 +7,6 @@ from pl_bolts.utils.arguments import LightningArgumentParser, LitArg, gather_lit
 
 
 class DummyParentModel(LightningModule):
-
     name = "parent-model"
 
     def __init__(self, a: int, b: str, c: str = "parent_model_c"):
@@ -19,7 +18,6 @@ class DummyParentModel(LightningModule):
 
 
 class DummyParentDataModule(LightningDataModule):
-
     name = "parent-dm"
 
     def __init__(self, d: str, c: str = "parent_dm_c"):
