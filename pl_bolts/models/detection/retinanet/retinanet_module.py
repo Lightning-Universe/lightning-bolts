@@ -9,7 +9,6 @@ from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
-
     from torchvision.models.detection.retinanet import RetinaNet as torchvision_RetinaNet
     from torchvision.models.detection.retinanet import RetinaNetHead, retinanet_resnet50_fpn
     from torchvision.ops import box_iou
@@ -97,7 +96,6 @@ class RetinaNet(LightningModule):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
-
         images, targets = batch
         targets = [{k: v for k, v in t.items()} for t in targets]
 
@@ -137,7 +135,11 @@ class RetinaNet(LightningModule):
 
 @under_review()
 def cli_main():
-    from pytorch_lightning.utilities.cli import LightningCLI
+    # Backward compatibility for Lightning CLI
+    try:
+        from pytorch_lightning.utilities.cli import LightningCLI
+    except ImportError:
+        from pytorch_lightning.cli import LightningCLI
 
     from pl_bolts.datamodules import VOCDetectionDataModule
 
