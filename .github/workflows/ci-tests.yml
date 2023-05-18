@@ -69,10 +69,11 @@ jobs:
         pip list
 
     - name: Test Package [only]
+      working-directory: ./src
       run: |
         pip install pytest -q
         # TODO: package shall be fine to run full without any ignores
-        python -m pytest pl_bolts \
+        python -m pytest . \
           --ignore=pl_bolts/datamodules \
           --ignore=pl_bolts/datasets \
           --ignore=pl_bolts/models/self_supervised/amdim/transforms.py \
@@ -86,7 +87,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ steps.pip-cache.outputs.dir }}
-        key: ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements/modules.txt') }}
+        key: ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements/*.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-
 

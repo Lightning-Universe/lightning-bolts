@@ -50,7 +50,7 @@ ignore-init-module-imports = true
 unfixable = ["F401"]
 
 [tool.mypy]
-files = ["pl_bolts"]
+files = ["src/pl_bolts"]
 disallow_untyped_defs = "True"
 ignore_missing_imports = "True"
 install_types = "True"
