@@ -12,7 +12,7 @@ _FREEZE_REQUIREMENTS = bool(int(os.environ.get("FREEZE_REQUIREMENTS", 0)))
 
 
 def _load_py_module(fname, pkg="pl_bolts"):
-    spec = spec_from_file_location(os.path.join(pkg, fname), os.path.join(_PATH_ROOT, pkg, fname))
+    spec = spec_from_file_location(os.path.join(pkg, fname), os.path.join(_PATH_ROOT, "src", pkg, fname))
     py = module_from_spec(spec)
     spec.loader.exec_module(py)
     return py
