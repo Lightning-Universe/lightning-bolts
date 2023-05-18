@@ -1,5 +1,50 @@
+[metadata]
+license_file = "LICENSE"
+description-file = "README.md"
+
 [build-system]
 requires = ["setuptools", "wheel"]
+
+
+[tool.check-manifest]
+ignore = [
+    "*.yml",
+    ".github",
+    ".github/*"
+]
+
+
+[tool.pytest.ini_options]
+norecursedirs = [
+    ".git",
+    ".github",
+    "dist",
+    "build",
+    "docs",
+]
+addopts = [
+    "--strict-markers",
+    "--doctest-modules",
+    "--color=yes",
+    "--disable-pytest-warnings",
+]
+#filterwarnings = [
+#    "error::FutureWarning",
+#]
+xfail_strict = false  # todo
+junit_duration_report = "call"
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "pass",
+]
+
+[tool.coverage.run]
+parallel = true
+concurrency = "thread"
+relative_files = true
+
 
 [tool.black]
 # https://github.com/psf/black
