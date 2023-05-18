@@ -4,8 +4,7 @@ from typing import Any, Callable, List, Optional
 
 import torch
 import torch.nn.functional as F
-from torch import nn, Tensor
-
+from torch import Tensor, nn
 from torchvision.ops.misc import MLP, Permute
 from torchvision.ops.stochastic_depth import StochasticDepth
 from torchvision.utils import _log_api_usage_once
@@ -40,6 +39,7 @@ torch.fx.wrap("_get_relative_position_bias")
 
 class PatchMerging(nn.Module):
     """Patch Merging Layer.
+
     Args:
         dim (int): Number of input channels.
         norm_layer (nn.Module): Normalization layer. Default: nn.LayerNorm.
@@ -67,6 +67,7 @@ class PatchMerging(nn.Module):
 
 class PatchMergingV2(nn.Module):
     """Patch Merging Layer for Swin Transformer V2.
+
     Args:
         dim (int): Number of input channels.
         norm_layer (nn.Module): Normalization layer. Default: nn.LayerNorm.
@@ -106,8 +107,8 @@ def shifted_window_attention(
     proj_bias: Optional[Tensor] = None,
     logit_scale: Optional[torch.Tensor] = None,
 ):
-    """
-    Window based multi-head self attention (W-MSA) module with relative position bias.
+    """Window based multi-head self attention (W-MSA) module with relative position bias.
+
     It supports both of shifted and non-shifted window.
     Args:
         input (Tensor[N, H, W, C]): The input tensor or 4-dimensions.
@@ -209,9 +210,7 @@ torch.fx.wrap("shifted_window_attention")
 
 
 class ShiftedWindowAttention(nn.Module):
-    """
-    See :func:`shifted_window_attention`.
-    """
+    """See :func:`shifted_window_attention`."""
 
     def __init__(
         self,
@@ -289,9 +288,7 @@ class ShiftedWindowAttention(nn.Module):
 
 
 class ShiftedWindowAttentionV2(ShiftedWindowAttention):
-    """
-    See :func:`shifted_window_attention_v2`.
-    """
+    """See :func:`shifted_window_attention_v2`."""
 
     def __init__(
         self,
@@ -374,8 +371,8 @@ class ShiftedWindowAttentionV2(ShiftedWindowAttention):
 
 
 class SwinTransformerBlock(nn.Module):
-    """
-    Swin Transformer Block.
+    """Swin Transformer Block.
+
     Args:
         dim (int): Number of input channels.
         num_heads (int): Number of attention heads.
@@ -431,8 +428,8 @@ class SwinTransformerBlock(nn.Module):
 
 
 class SwinTransformerBlockV2(SwinTransformerBlock):
-    """
-    Swin Transformer V2 Block.
+    """Swin Transformer V2 Block.
+
     Args:
         dim (int): Number of input channels.
         num_heads (int): Number of attention heads.
@@ -480,11 +477,10 @@ class SwinTransformerBlockV2(SwinTransformerBlock):
         return x
 
 
-
 class SwinTransformer(nn.Module):
-    """
-    Implements Swin Transformer from the `"Swin Transformer: Hierarchical Vision Transformer using
-    Shifted Windows" <https://arxiv.org/pdf/2103.14030>`_ paper.
+    """Implements Swin Transformer from the `"Swin Transformer: Hierarchical Vision Transformer using Shifted
+    Windows" <https://arxiv.org/pdf/2103.14030>`_ paper.
+
     Args:
         patch_size (List[int]): Patch size.
         embed_dim (int): Patch embedding dimension.
@@ -520,7 +516,7 @@ class SwinTransformer(nn.Module):
         hidden_mlp=0,
         nmb_prototypes=0,
         eval_mode=False,
-        **kwargs: Any
+        **kwargs: Any,
     ):
         super().__init__()
         _log_api_usage_once(self)
@@ -531,10 +527,8 @@ class SwinTransformer(nn.Module):
         if norm_layer is None:
             norm_layer = partial(nn.LayerNorm, eps=1e-5)
 
-
         self.eval_mode = eval_mode
         self.padding = nn.ConstantPad2d(1, 0.0)
-
 
         layers: List[nn.Module] = []
         # split image into non-overlapping patches
@@ -582,14 +576,14 @@ class SwinTransformer(nn.Module):
         self.permute = Permute([0, 3, 1, 2])  # B H W C -> B C H W
         self.avgpool = nn.AdaptiveAvgPool2d(1)
         self.flatten = nn.Flatten(1)
-        self.l2norm = normalize       
-        
+        self.l2norm = normalize
+
         # projection head
         if output_dim == 0:
             self.projection_head = None
 
         elif hidden_mlp == 0:
-            self.projection_head = nn.Linear(num_features , output_dim)
+            self.projection_head = nn.Linear(num_features, output_dim)
         else:
             self.projection_head = nn.Sequential(
                 nn.Linear(num_features, hidden_mlp),
@@ -620,7 +614,7 @@ class SwinTransformer(nn.Module):
 
         if self.eval_mode:
             return x
-     
+
         x = self.avgpool(x)
         x = self.flatten(x)
         return x
@@ -663,8 +657,6 @@ class SwinTransformer(nn.Module):
         return self.forward_head(output)
 
 
-
-
 class MultiPrototypes(nn.Module):
     def __init__(self, output_dim, nmb_prototypes):
         super().__init__()
@@ -688,7 +680,6 @@ def _swin_transformer(
     stochastic_depth_prob: float,
     **kwargs: Any,
 ) -> SwinTransformer:
-
     model = SwinTransformer(
         patch_size=patch_size,
         embed_dim=embed_dim,
@@ -699,6 +690,7 @@ def _swin_transformer(
         **kwargs,
     )
     return model
+
 
 def swin_s(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
@@ -711,6 +703,7 @@ def swin_s(**kwargs: Any) -> SwinTransformer:
         **kwargs,
     )
 
+
 def swin_b(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
         patch_size=[4, 4],
@@ -721,6 +714,7 @@ def swin_b(**kwargs: Any) -> SwinTransformer:
         stochastic_depth_prob=0.5,
         **kwargs,
     )
+
 
 def swin_v2_t(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
@@ -735,6 +729,7 @@ def swin_v2_t(**kwargs: Any) -> SwinTransformer:
         **kwargs,
     )
 
+
 def swin_v2_s(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
         patch_size=[4, 4],
@@ -747,6 +742,7 @@ def swin_v2_s(**kwargs: Any) -> SwinTransformer:
         downsample_layer=PatchMergingV2,
         **kwargs,
     )
+
 
 def swin_v2_b(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
