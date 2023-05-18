@@ -173,5 +173,5 @@ mlruns/
 VOCdevkit/
 *.tar
 
-
+# Ruff - python checks
 .ruff_cache/
