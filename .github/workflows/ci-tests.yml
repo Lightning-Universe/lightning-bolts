@@ -26,7 +26,8 @@ jobs:
         # todo: seems there are some issues with py3.10 while install dependencies
         python-version: ["3.7", "3.9"]
         requires: ['oldest', 'latest']
-
+    env:
+      FREEZE_REQUIREMENTS: 1
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     # the reason for high number is MUCH slower tests on macOS and py3.8
     timeout-minutes: 50
@@ -65,14 +66,15 @@ jobs:
     - name: Install package
       run: |
         pip install "pip==22.2.1"  # todo: drop after resolving extras
-        pip install -e . --upgrade --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
+        pip install -e . "coverage[toml]" --upgrade --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
         pip list
 
     - name: Test Package [only]
+      working-directory: ./src
       run: |
         pip install pytest -q
         # TODO: package shall be fine to run full without any ignores
-        python -m pytest pl_bolts \
+        python -m pytest . \
           --ignore=pl_bolts/datamodules \
           --ignore=pl_bolts/datasets \
           --ignore=pl_bolts/models/self_supervised/amdim/transforms.py \
@@ -86,7 +88,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ steps.pip-cache.outputs.dir }}
-        key: ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements/modules.txt') }}
+        key: ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements/*.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-
 
@@ -113,16 +115,7 @@ jobs:
 
     - name: Tests
       run: |
-        python -m pytest tests -v --cov=pl_bolts \
-          --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
-
-    - name: Upload pytest test results
-      uses: actions/upload-artifact@v3
-      with:
-        name: pytest-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}
-        path: junit/test-results-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.requires }}.xml
-      # Use always() to always run this step to publish test results when there are test failures
-      if: always()
+        python -m pytest tests -v --cov=pl_bolts
 
     - name: Statistics
       if: success()
