@@ -494,7 +494,7 @@ To Train::
     )
 
     # fit
-    trainer = pl.Trainer(precision=16, accelerator='gpu', devices=1)
+    trainer = pl.Trainer(precision=16, accelerator='auto')
     trainer.fit(model, datamodule=dm)
 
 Pre-trained ImageNet
