@@ -14,6 +14,7 @@ from pl_bolts.utils import _WANDB_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
+# Backward compatibility for Lightning Logger
 try:
     from pytorch_lightning.loggers import Logger
 except ImportError:
