@@ -42,7 +42,7 @@ exclude_lines = [
 
 [tool.coverage.run]
 parallel = true
-concurrency = "thread"
+# concurrency = "thread"
 relative_files = true
 
 
