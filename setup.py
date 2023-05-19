@@ -12,7 +12,7 @@ _FREEZE_REQUIREMENTS = bool(int(os.environ.get("FREEZE_REQUIREMENTS", 0)))
 
 
 def _load_py_module(fname, pkg="pl_bolts"):
-    spec = spec_from_file_location(os.path.join(pkg, fname), os.path.join(_PATH_ROOT, pkg, fname))
+    spec = spec_from_file_location(os.path.join(pkg, fname), os.path.join(_PATH_ROOT, "src", pkg, fname))
     py = module_from_spec(spec)
     spec.loader.exec_module(py)
     return py
@@ -115,6 +115,7 @@ def _prepare_extras():
         "loggers": _load_requirements(path_dir=_PATH_REQUIRE, file_name="loggers.txt"),
         "models": _load_requirements(path_dir=_PATH_REQUIRE, file_name="models.txt"),
         "test": _load_requirements(path_dir=_PATH_REQUIRE, file_name="test.txt"),
+        "typing": _load_requirements(path_dir=_PATH_REQUIRE, file_name="typing.txt"),
     }
     extras["extra"] = extras["models"] + extras["loggers"]
     extras["dev"] = extras["extra"] + extras["test"]
@@ -142,7 +143,8 @@ setup(
     url=about.__homepage__,
     download_url="https://github.com/PyTorchLightning/lightning-bolts",
     license=about.__license__,
-    packages=find_packages(exclude=["tests", "docs"]),
+    package_dir={"": "src"},
+    packages=find_packages(where="src"),
     long_description=long_description,
     long_description_content_type="text/markdown",
     include_package_data=True,
