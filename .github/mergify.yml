@@ -69,14 +69,15 @@ pull_request_rules:
     actions:
       update: {}
 
-  - name: add core reviewer
-    conditions:
-      - -conflict # skip if conflict
-      - -draft # filter-out GH draft PRs
-      - label="ready"
-      - "#approved-reviews-by<2" # number of review approvals
-      - "#review-requested<2" # number of requested reviews
-    actions:
-      request_reviews:
-        teams:
-          - "@PyTorchLightning/core-bolts"
+# ToDo: enable when the team is indexed correctly
+#  - name: add core reviewer
+#    conditions:
+#      - -conflict # skip if conflict
+#      - -draft # filter-out GH draft PRs
+#      - label="ready"
+#      - "#approved-reviews-by<2" # number of review approvals
+#      - "#review-requested<2" # number of requested reviews
+#    actions:
+#      request_reviews:
+#        teams:
+#          - "@Lightning-Universe/core-bolts"
