@@ -496,12 +496,13 @@ To Train::
         gpus=1,
         num_samples=dm.num_unlabeled_samples,
         dataset='stl10',
-        batch_size=batch_size
+        batch_size=batch_size,
+        nmb_crops=(2,4)
     )
 
     # fit
-    trainer = pl.Trainer(precision=16)
-    trainer.fit(model)
+    trainer = pl.Trainer(precision=16, accelerator='auto')
+    trainer.fit(model, datamodule=dm)
 
 Pre-trained ImageNet
 ********************
