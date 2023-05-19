@@ -125,7 +125,6 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
         jitter_strength: float = 1.0,
         normalize: Union[None, Callable] = None,
     ) -> None:
-
         super().__init__(
             normalize=normalize, input_height=input_height, gaussian_blur=gaussian_blur, jitter_strength=jitter_strength
         )

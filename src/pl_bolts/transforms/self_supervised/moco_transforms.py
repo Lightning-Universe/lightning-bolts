@@ -25,7 +25,6 @@ else:  # pragma: no cover
 
 @under_review()
 class MoCoTrainTransforms:
-
     normalization: type
 
     """MoCo training transforms.
