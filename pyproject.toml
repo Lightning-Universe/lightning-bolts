@@ -1,5 +1,50 @@
+[metadata]
+license_file = "LICENSE"
+description-file = "README.md"
+
 [build-system]
 requires = ["setuptools", "wheel"]
+
+
+[tool.check-manifest]
+ignore = [
+    "*.yml",
+    ".github",
+    ".github/*"
+]
+
+
+[tool.pytest.ini_options]
+norecursedirs = [
+    ".git",
+    ".github",
+    "dist",
+    "build",
+    "docs",
+]
+addopts = [
+    "--strict-markers",
+    "--doctest-modules",
+    "--color=yes",
+    "--disable-pytest-warnings",
+]
+#filterwarnings = [
+#    "error::FutureWarning",
+#]
+xfail_strict = false  # todo
+junit_duration_report = "call"
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "pass",
+]
+
+[tool.coverage.run]
+parallel = true
+# concurrency = "thread"
+relative_files = true
+
 
 [tool.black]
 # https://github.com/psf/black
@@ -12,8 +57,45 @@ skip_glob = []
 profile = "black"
 line_length = 120
 
+
+[tool.ruff]
+line-length = 120
+# Enable Pyflakes `E` and `F` codes by default.
+select = [
+    "E", "W",  # see: https://pypi.org/project/pycodestyle
+    "F",  # see: https://pypi.org/project/pyflakes
+#    "D",  # see: https://pypi.org/project/pydocstyle
+#    "N",  # see: https://pypi.org/project/pep8-naming
+]
+# extend-select = [
+#     "C4",  # see: https://pypi.org/project/flake8-comprehensions
+#     "PT",  # see: https://pypi.org/project/flake8-pytest-style
+#     "RET",  # see: https://pypi.org/project/flake8-return
+#     "SIM",  # see: https://pypi.org/project/flake8-simplify
+#     "YTT",  # see: https://pypi.org/project/flake8-2020
+#     "ANN",  # see: https://pypi.org/project/flake8-annotations
+#     "S",  # see: https://pypi.org/project/flake8-bandit
+# ]
+ignore = [
+    "E731",  # Do not assign a lambda expression, use a def
+]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".eggs",
+    ".git",
+    ".mypy_cache",
+    ".ruff_cache",
+    "__pypackages__",
+    "_build",
+    "build",
+    "dist",
+    "docs"
+]
+ignore-init-module-imports = true
+unfixable = ["F401"]
+
 [tool.mypy]
-files = ["pl_bolts"]
+files = ["src/pl_bolts"]
 disallow_untyped_defs = "True"
 ignore_missing_imports = "True"
 install_types = "True"
