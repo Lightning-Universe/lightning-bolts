@@ -26,7 +26,7 @@ else:  # pragma: no cover
     warn_missing_pkg("PIL", pypi_name="Pillow")
 
 
-@pytest.mark.parametrize("batch_size,num_samples", [(16, 100), (1, 0)])
+@pytest.mark.parametrize(("batch_size", "num_samples"), [(16, 100), (1, 0)])
 def test_dummy_ds(catch_warnings, batch_size, num_samples):
     if num_samples > 0:
         ds = DummyDataset((1, 28, 28), (1,), num_samples=num_samples)
@@ -48,7 +48,7 @@ def test_dummy_ds(catch_warnings, batch_size, num_samples):
             ds = DummyDataset((1, 28, 28), (1,), num_samples=num_samples)
 
 
-@pytest.mark.parametrize("batch_size,size,num_samples", [(16, 32, 100), (1, 0, 0)])
+@pytest.mark.parametrize(("batch_size", "size", "num_samples"), [(16, 32, 100), (1, 0, 0)])
 def test_rand_dict_ds(catch_warnings, batch_size, size, num_samples):
     if num_samples > 0 or size > 0:
         ds = RandomDictDataset(size, num_samples=num_samples)
@@ -69,7 +69,7 @@ def test_rand_dict_ds(catch_warnings, batch_size, size, num_samples):
             ds = RandomDictDataset(size, num_samples=num_samples)
 
 
-@pytest.mark.parametrize("batch_size,size,num_samples", [(16, 32, 100), (1, 0, 0)])
+@pytest.mark.parametrize(("batch_size", "size", "num_samples"), [(16, 32, 100), (1, 0, 0)])
 def test_rand_ds(catch_warnings, batch_size, size, num_samples):
     if num_samples > 0 and size > 0:
         ds = RandomDataset(size=size, num_samples=num_samples)
@@ -89,7 +89,7 @@ def test_rand_ds(catch_warnings, batch_size, size, num_samples):
             ds = RandomDataset(size, num_samples=num_samples)
 
 
-@pytest.mark.parametrize("batch_size,size,num_samples", [(16, 32, 100), (1, 0, 0)])
+@pytest.mark.parametrize(("batch_size", "size", "num_samples"), [(16, 32, 100), (1, 0, 0)])
 def test_rand_str_dict_ds(catch_warnings, batch_size, size, num_samples):
     if num_samples > 0 and size > 0:
         ds = RandomDictStringDataset(size=size, num_samples=100)
@@ -110,7 +110,7 @@ def test_rand_str_dict_ds(catch_warnings, batch_size, size, num_samples):
             ds = RandomDictStringDataset(size, num_samples=num_samples)
 
 
-@pytest.mark.parametrize("batch_size,img_shape,num_samples", [(16, (3, 256, 256), 100), (1, (256, 256), 0)])
+@pytest.mark.parametrize(("batch_size", "img_shape", "num_samples"), [(16, (3, 256, 256), 100), (1, (256, 256), 0)])
 def test_dummy_detection_ds(catch_warnings, batch_size, img_shape, num_samples):
     if num_samples > 0:
         ds = DummyDetectionDataset(img_shape=img_shape, num_boxes=3, num_classes=3, num_samples=num_samples)

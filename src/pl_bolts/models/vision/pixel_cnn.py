@@ -1,8 +1,8 @@
-"""
-PixelCNN
-Implemented by: William Falcon
-Reference: https://arxiv.org/pdf/1905.09272.pdf (page 15)
-Accessed: May 14, 2020
+"""PixelCNN.
+
+Implemented by: William Falcon Reference
+: https: //arxiv.org/pdf/1905.09272.pdf (page 15
+Accessed: May 14, 2020.
 """
 from torch import nn
 from torch.nn import functional as F
@@ -34,7 +34,7 @@ class PixelCNN(nn.Module):
         torch.Size([5, 3, 64, 64])
     """
 
-    def __init__(self, input_channels: int, hidden_channels: int = 256, num_blocks=5):
+    def __init__(self, input_channels: int, hidden_channels: int = 256, num_blocks=5) -> None:
         super().__init__()
         self.input_channels = input_channels
         self.hidden_channels = hidden_channels

@@ -1,7 +1,4 @@
-"""
-CPC V2
-======
-"""
+"""CPC V2."""
 import math
 from argparse import ArgumentParser
 from typing import Optional
@@ -43,7 +40,7 @@ class CPC_v2(LightningModule):
         learning_rate: float = 1e-4,
         pretrained: Optional[str] = None,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             encoder_name: A string for any of the resnets in torchvision, or the original CPC encoder,

@@ -37,7 +37,7 @@ class UnlabeledImagenet(ImageNet):
         num_imgs_per_class_val_split: int = 50,
         meta_dir=None,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             root: path of dataset
@@ -84,16 +84,15 @@ class UnlabeledImagenet(ImageNet):
                 self.imgs = val
 
         # limit the number of images in train or test set since the limit was already applied to the val set
-        if split in ["train", "test"]:
-            if num_imgs_per_class != -1:
-                clean_imgs = []
-                cts = {x: 0 for x in range(len(self.classes))}
-                for img_name, idx in self.imgs:
-                    if cts[idx] < num_imgs_per_class:
-                        clean_imgs.append((img_name, idx))
-                        cts[idx] += 1
+        if split in ["train", "test"] and num_imgs_per_class != -1:
+            clean_imgs = []
+            cts = {x: 0 for x in range(len(self.classes))}
+            for img_name, idx in self.imgs:
+                if cts[idx] < num_imgs_per_class:
+                    clean_imgs.append((img_name, idx))
+                    cts[idx] += 1
 
-                self.imgs = clean_imgs
+            self.imgs = clean_imgs
 
         # limit the number of classes
         if num_classes != -1:
@@ -206,8 +205,8 @@ def parse_devkit_archive(root, file=None):
         meta = [meta[idx] for idx, num_children in enumerate(nums_children) if num_children == 0]
         idcs, wnids, classes = list(zip(*meta))[:3]
         classes = [tuple(clss.split(", ")) for clss in classes]
-        idx_to_wnid = {idx: wnid for idx, wnid in zip(idcs, wnids)}
-        wnid_to_classes = {wnid: clss for wnid, clss in zip(wnids, classes)}
+        idx_to_wnid = dict(zip(idcs, wnids))
+        wnid_to_classes = dict(zip(wnids, classes))
         return idx_to_wnid, wnid_to_classes
 
     def parse_val_groundtruth_txt(devkit_root):

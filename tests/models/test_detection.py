@@ -1,8 +1,10 @@
+import warnings
 from pathlib import Path
 
 import pytest
 import torch
 from pytorch_lightning import Trainer
+from pytorch_lightning.utilities.warnings import PossibleUserWarning
 from torch.utils.data import DataLoader
 
 from pl_bolts.datasets import DummyDetectionDataset
@@ -79,8 +81,9 @@ def test_fasterrcnn_pyt_module_bbone_train(tmpdir):
     trainer.fit(model, train_dl, valid_dl)
 
 
-def test_yolo(tmpdir):
-    config_path = Path(TEST_ROOT) / "data" / "yolo.cfg"
+@pytest.mark.parametrize("config", [("yolo"), ("yolo_giou")])
+def test_yolo(config, catch_warnings):
+    config_path = Path(TEST_ROOT) / "data" / f"{config}.cfg"
     config = YOLOConfiguration(config_path)
     model = YOLO(config.get_network())
 
@@ -88,20 +91,33 @@ def test_yolo(tmpdir):
     model(image)
 
 
-def test_yolo_train(tmpdir):
-    config_path = Path(TEST_ROOT) / "data" / "yolo.cfg"
+@pytest.mark.parametrize(
+    "cfg_name",
+    [
+        ("yolo"),
+        ("yolo_giou"),
+    ],
+)
+def test_yolo_train(tmpdir, cfg_name, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
+    config_path = Path(TEST_ROOT) / "data" / f"{cfg_name}.cfg"
     config = YOLOConfiguration(config_path)
     model = YOLO(config.get_network())
 
     train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
     valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
 
-    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, logger=False, max_epochs=10, accelerator="auto")
     trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
 
 
 @pytest.mark.parametrize(
-    "dims1, dims2, expected_ious",
+    ("dims1", "dims2", "expected_ious"),
     [
         (
             torch.tensor([[1.0, 1.0], [10.0, 1.0], [100.0, 10.0]]),
@@ -110,5 +126,11 @@ def test_yolo_train(tmpdir):
         )
     ],
 )
-def test_aligned_iou(dims1, dims2, expected_ious):
-    torch.testing.assert_allclose(_aligned_iou(dims1, dims2), expected_ious)
+def test_aligned_iou(dims1, dims2, expected_ious, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
+    torch.testing.assert_close(_aligned_iou(dims1, dims2), expected_ious)

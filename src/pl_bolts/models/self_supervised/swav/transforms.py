@@ -19,7 +19,7 @@ class SwAVTrainDataTransform:
         max_scale_crops: Tuple[float] = (1, 0.33),
         gaussian_blur: bool = True,
         jitter_strength: float = 1.0,
-    ):
+    ) -> None:
         self.jitter_strength = jitter_strength
         self.gaussian_blur = gaussian_blur
 
@@ -87,7 +87,7 @@ class SwAVTrainDataTransform:
         self.transform.append(online_train_transform)
 
     def __call__(self, sample):
-        multi_crops = list(map(lambda transform: transform(sample), self.transform))
+        multi_crops = [transform(sample) for transform in self.transform]
 
         return multi_crops
 
@@ -102,7 +102,7 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
         max_scale_crops: Tuple[float] = (1, 0.33),
         gaussian_blur: bool = True,
         jitter_strength: float = 1.0,
-    ):
+    ) -> None:
         super().__init__(
             normalize=normalize,
             size_crops=size_crops,

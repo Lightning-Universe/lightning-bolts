@@ -11,7 +11,7 @@ from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models import LitMNIST
 
 
-@pytest.mark.parametrize(["log_every_n_steps", "max_steps", "expected_calls"], [pytest.param(3, 10, 3)])
+@pytest.mark.parametrize(("log_every_n_steps", "max_steps", "expected_calls"), [pytest.param(3, 10, 3)])
 @mock.patch("pl_bolts.callbacks.data_monitor.DataMonitorBase.log_histogram")
 def test_base_log_interval_override(log_histogram, tmpdir, log_every_n_steps, max_steps, expected_calls, datadir):
     """Test logging interval set by log_every_n_steps argument."""
@@ -30,7 +30,7 @@ def test_base_log_interval_override(log_histogram, tmpdir, log_every_n_steps, ma
 
 
 @pytest.mark.parametrize(
-    ["log_every_n_steps", "max_steps", "expected_calls"],
+    ("log_every_n_steps", "max_steps", "expected_calls"),
     [
         pytest.param(1, 5, 5),
         pytest.param(2, 5, 2),
@@ -107,7 +107,7 @@ def test_training_data_monitor(log_histogram, tmpdir, datadir):
 
 
 class SubModule(nn.Module):
-    def __init__(self, inp, out):
+    def __init__(self, inp, out) -> None:
         super().__init__()
         self.sub_layer = nn.Linear(inp, out)
 
@@ -116,7 +116,7 @@ class SubModule(nn.Module):
 
 
 class ModuleDataMonitorModel(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.layer1 = nn.Linear(12, 5)
         self.layer2 = SubModule(5, 2)
