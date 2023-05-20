@@ -1,7 +1,7 @@
-"""PixelCNN
+"""PixelCNN.
 
-Implemented by: William Falcon
-Reference: https://arxiv.org/pdf/1905.09272.pdf (page 15
+Implemented by: William Falcon Reference
+: https: //arxiv.org/pdf/1905.09272.pdf (page 15
 Accessed: May 14, 2020.
 """
 from torch import nn

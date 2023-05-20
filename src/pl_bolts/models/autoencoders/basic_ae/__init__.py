@@ -1,4 +1,4 @@
-"""AE Template
+"""AE Template.
 
 This is a basic template for implementing an Autoencoder in PyTorch Lightning.
 
