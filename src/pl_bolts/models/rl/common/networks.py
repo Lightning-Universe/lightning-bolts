@@ -388,7 +388,7 @@ class NoisyLinear(nn.Linear):
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        """initializes or resets the paramseter of the layer."""
+        """Initializes or resets the paramseter of the layer."""
         std = math.sqrt(3 / self.in_features)
         self.weight.data.uniform_(-std, std)
         self.bias.data.uniform_(-std, std)
