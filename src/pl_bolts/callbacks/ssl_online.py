@@ -40,7 +40,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         hidden_dim: Optional[int] = None,
         num_classes: Optional[int] = None,
         dataset: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Args:
             z_dim: Representation dimension

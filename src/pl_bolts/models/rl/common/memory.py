@@ -193,7 +193,7 @@ class MultiStepBuffer(ReplayBuffer):
 class MeanBuffer:
     """Stores a deque of items and calculates the mean."""
 
-    def __init__(self, capacity):
+    def __init__(self, capacity) -> None:
         self.capacity = capacity
         self.deque = collections.deque(maxlen=capacity)
         self.sum = 0.0
@@ -219,7 +219,7 @@ class PERBuffer(ReplayBuffer):
     https://github.com/Shmuma/ptan/blob/master/ptan/experience.py#L371
     """
 
-    def __init__(self, buffer_size, prob_alpha=0.6, beta_start=0.4, beta_frames=100000):
+    def __init__(self, buffer_size, prob_alpha=0.6, beta_start=0.4, beta_frames=100000) -> None:
         super().__init__(capacity=buffer_size)
         self.beta_start = beta_start
         self.beta = beta_start

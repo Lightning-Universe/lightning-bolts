@@ -32,7 +32,7 @@ def nt_xent_loss(out_1, out_2, temperature):
 class CPCTask(nn.Module):
     """Loss used in CPC."""
 
-    def __init__(self, num_input_channels, target_dim=64, embed_scale=0.1):
+    def __init__(self, num_input_channels, target_dim=64, embed_scale=0.1) -> None:
         super().__init__()
         self.target_dim = target_dim
         self.embed_scale = embed_scale
@@ -94,7 +94,7 @@ class CPCTask(nn.Module):
 class AmdimNCELoss(nn.Module):
     """Compute the NCE scores for predicting r_src->r_trg."""
 
-    def __init__(self, tclip):
+    def __init__(self, tclip) -> None:
         super().__init__()
         self.tclip = tclip
 
@@ -215,7 +215,7 @@ class FeatureMapContrastiveTask(nn.Module):
         # 02: (pos_0, anc_2), (anc_0, pos_2)
     """
 
-    def __init__(self, comparisons: str = "00, 11", tclip: float = 10.0, bidirectional: bool = True):
+    def __init__(self, comparisons: str = "00, 11", tclip: float = 10.0, bidirectional: bool = True) -> None:
         """
         Args:
             comparisons: groupings of feature map indices to compare (zero indexed, 'r' means random) ex: '00, 1r'

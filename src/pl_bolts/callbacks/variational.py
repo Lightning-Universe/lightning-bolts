@@ -38,7 +38,7 @@ class LatentDimInterpolator(Callback):
         steps: int = 11,
         num_samples: int = 2,
         normalize: bool = True,
-    ):
+    ) -> None:
         """
         Args:
             interpolate_epoch_interval: default 20

@@ -97,7 +97,7 @@ class BatchGradientVerificationCallback(VerificationCallbackBase):
         output_mapping: Optional[Callable] = None,
         sample_idx: int = 0,
         **kwargs: Any,
-    ):
+    ) -> None:
         """
         Arguments:
             input_mapping: An optional input mapping that returns all batched tensors in a input collection.

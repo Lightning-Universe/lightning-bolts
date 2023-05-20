@@ -103,7 +103,7 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
 
     def __init__(
         self, input_height: int = 224, gaussian_blur: bool = True, jitter_strength: float = 1.0, normalize=None
-    ):
+    ) -> None:
         super().__init__(
             normalize=normalize, input_height=input_height, gaussian_blur=gaussian_blur, jitter_strength=jitter_strength
         )

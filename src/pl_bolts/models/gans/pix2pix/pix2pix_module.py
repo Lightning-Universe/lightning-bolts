@@ -17,7 +17,7 @@ def _weights_init(m):
 
 @under_review()
 class Pix2Pix(LightningModule):
-    def __init__(self, in_channels, out_channels, learning_rate=0.0002, lambda_recon=200):
+    def __init__(self, in_channels, out_channels, learning_rate=0.0002, lambda_recon=200) -> None:
         super().__init__()
         self.save_hyperparameters()
 

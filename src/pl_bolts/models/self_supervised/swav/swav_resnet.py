@@ -36,7 +36,7 @@ class BasicBlock(nn.Module):
         base_width=64,
         dilation=1,
         norm_layer=None,
-    ):
+    ) -> None:
         super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -86,7 +86,7 @@ class Bottleneck(nn.Module):
         base_width=64,
         dilation=1,
         norm_layer=None,
-    ):
+    ) -> None:
         super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -143,7 +143,7 @@ class ResNet(nn.Module):
         eval_mode=False,
         first_conv=True,
         maxpool1=True,
-    ):
+    ) -> None:
         super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -334,7 +334,7 @@ class ResNet(nn.Module):
 
 
 class MultiPrototypes(nn.Module):
-    def __init__(self, output_dim, nmb_prototypes):
+    def __init__(self, output_dim, nmb_prototypes) -> None:
         super().__init__()
         self.nmb_heads = len(nmb_prototypes)
         for i, k in enumerate(nmb_prototypes):

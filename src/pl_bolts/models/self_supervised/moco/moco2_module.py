@@ -84,7 +84,7 @@ class Moco_v2(LightningModule):
         num_workers: int = 8,
         *args,
         **kwargs
-    ):
+    ) -> None:
         """
         Args:
             base_encoder: torchvision model name or torch.nn.Module

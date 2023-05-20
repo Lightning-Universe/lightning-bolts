@@ -99,7 +99,7 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
         download: bool = False,
         nb_labeled_per_class: Optional[int] = None,
         val_pct: float = 0.10,
-    ):
+    ) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `torchvision` which is not installed yet.")
 

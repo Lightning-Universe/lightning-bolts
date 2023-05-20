@@ -37,7 +37,7 @@ class UnlabeledImagenet(ImageNet):
         num_imgs_per_class_val_split: int = 50,
         meta_dir=None,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             root: path of dataset

@@ -33,7 +33,7 @@ class CPCTrainTransformsCIFAR10:
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsCIFAR10())
     """
 
-    def __init__(self, patch_size=8, overlap=4):
+    def __init__(self, patch_size=8, overlap=4) -> None:
         """
         Args:
             patch_size: size of patches when cutting up the image into overlapping patches
@@ -92,7 +92,7 @@ class CPCEvalTransformsCIFAR10:
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsCIFAR10())
     """
 
-    def __init__(self, patch_size: int = 8, overlap: int = 4):
+    def __init__(self, patch_size: int = 8, overlap: int = 4) -> None:
         """
         Args:
             patch_size: size of patches when cutting up the image into overlapping patches
@@ -148,7 +148,7 @@ class CPCTrainTransformsSTL10:
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsSTL10())
     """
 
-    def __init__(self, patch_size: int = 16, overlap: int = 8):
+    def __init__(self, patch_size: int = 16, overlap: int = 8) -> None:
         """
         Args:
             patch_size: size of patches when cutting up the image into overlapping patches
@@ -206,7 +206,7 @@ class CPCEvalTransformsSTL10:
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsSTL10())
     """
 
-    def __init__(self, patch_size: int = 16, overlap: int = 8):
+    def __init__(self, patch_size: int = 16, overlap: int = 8) -> None:
         """
         Args:
             patch_size: size of patches when cutting up the image into overlapping patches
@@ -257,7 +257,7 @@ class CPCTrainTransformsImageNet128:
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCTrainTransformsImageNet128())
     """
 
-    def __init__(self, patch_size: int = 32, overlap: int = 16):
+    def __init__(self, patch_size: int = 32, overlap: int = 16) -> None:
         """
         Args:
             patch_size: size of patches when cutting up the image into overlapping patches
@@ -311,7 +311,7 @@ class CPCEvalTransformsImageNet128:
         train_loader = module.train_dataloader(batch_size=32, transforms=CPCEvalTransformsImageNet128())
     """
 
-    def __init__(self, patch_size: int = 32, overlap: int = 16):
+    def __init__(self, patch_size: int = 32, overlap: int = 16) -> None:
         """
         Args:
             patch_size: size of patches when cutting up the image into overlapping patches
