@@ -49,7 +49,7 @@ def test_lit_arg_immutable():
 
 
 @pytest.mark.parametrize(
-    "obj,expected",
+    ("obj", "expected"),
     [
         pytest.param(
             DummyParentModel,
@@ -81,7 +81,7 @@ def test_gather_lit_args(obj, expected):
 
 
 @pytest.mark.parametrize(
-    "ignore_required_init_args,dm_cls,model_cls,a,b,c,d",
+    ("ignore_required_init_args", "dm_cls", "model_cls", "a", "b", "c", "d"),
     [
         pytest.param(True, DummyParentDataModule, DummyParentModel, 999, "bbb", "ccc", "ddd", id="base"),
     ],
