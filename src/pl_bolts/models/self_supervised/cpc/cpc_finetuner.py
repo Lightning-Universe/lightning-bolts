@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from pytorch_lightning import Trainer, seed_everything
 
 from pl_bolts.models.self_supervised import CPC_v2, SSLFineTuner
-from pl_bolts.models.self_supervised.cpc.transforms import (
+from pl_bolts.transforms.self_supervised.cpc_transforms import (
     CPCEvalTransformsCIFAR10,
     CPCEvalTransformsSTL10,
     CPCTrainTransformsCIFAR10,
