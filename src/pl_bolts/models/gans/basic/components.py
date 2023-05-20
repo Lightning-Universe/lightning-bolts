@@ -5,7 +5,7 @@ from torch.nn import functional as F
 
 
 class Generator(nn.Module):
-    def __init__(self, latent_dim, img_shape, hidden_dim=256):
+    def __init__(self, latent_dim, img_shape, hidden_dim=256) -> None:
         super().__init__()
         feats = int(np.prod(img_shape))
         self.img_shape = img_shape
@@ -25,7 +25,7 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
-    def __init__(self, img_shape, hidden_dim=1024):
+    def __init__(self, img_shape, hidden_dim=1024) -> None:
         super().__init__()
         in_dim = int(np.prod(img_shape))
         self.fc1 = nn.Linear(in_dim, hidden_dim)

@@ -37,7 +37,7 @@ class GAN(LightningModule):
         latent_dim: int = 32,
         learning_rate: float = 0.0002,
         **kwargs
-    ):
+    ) -> None:
         """
         Args:
             input_channels: number of channels of an image

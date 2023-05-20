@@ -184,7 +184,7 @@ class YOLO(LightningModule):
             loss_tuple = tuple(layer_losses[loss_name] for layer_losses in losses)
             return torch.stack(loss_tuple).sum()
 
-        losses = {loss_name: total_loss(loss_name) for loss_name in losses[0].keys()}
+        losses = {loss_name: total_loss(loss_name) for loss_name in losses[0]}
         return detections, losses
 
     def configure_optimizers(self) -> Tuple[List, List]:

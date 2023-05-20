@@ -76,7 +76,7 @@ class DQN(LightningModule):
         batches_per_epoch: int = 1000,
         n_steps: int = 1,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             env: gym environment tag

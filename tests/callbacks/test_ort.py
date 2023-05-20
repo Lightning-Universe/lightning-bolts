@@ -31,7 +31,7 @@ def test_init_train_enable_ort(tmpdir):
             assert isinstance(pl_module.model, ORTModule)
 
     class TestModel(BoringModel):
-        def __init__(self):
+        def __init__(self) -> None:
             super().__init__()
             self.model = self.layer
 

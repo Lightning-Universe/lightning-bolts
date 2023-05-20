@@ -9,7 +9,7 @@ from pl_bolts.utils.arguments import LightningArgumentParser, LitArg, gather_lit
 class DummyParentModel(LightningModule):
     name = "parent-model"
 
-    def __init__(self, a: int, b: str, c: str = "parent_model_c"):
+    def __init__(self, a: int, b: str, c: str = "parent_model_c") -> None:
         super().__init__()
         self.save_hyperparameters()
 
@@ -20,7 +20,7 @@ class DummyParentModel(LightningModule):
 class DummyParentDataModule(LightningDataModule):
     name = "parent-dm"
 
-    def __init__(self, d: str, c: str = "parent_dm_c"):
+    def __init__(self, d: str, c: str = "parent_dm_c") -> None:
         super().__init__()
         self.d = d
         self.c = c

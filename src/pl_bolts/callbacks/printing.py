@@ -115,7 +115,7 @@ def dicts_to_table(
         if skip_none_lines and none_keys:
             continue
         elif replace_values:
-            for k in d.keys():
+            for k in d:
                 if k in replace_values and d[k] in replace_values[k]:
                     d[k] = replace_values[k][d[k]]
                 if d[k] is None:

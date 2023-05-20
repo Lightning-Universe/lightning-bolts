@@ -97,7 +97,7 @@ class BatchGradientVerificationCallback(VerificationCallbackBase):
         output_mapping: Optional[Callable] = None,
         sample_idx: int = 0,
         **kwargs: Any,
-    ):
+    ) -> None:
         """
         Arguments:
             input_mapping: An optional input mapping that returns all batched tensors in a input collection.
@@ -219,10 +219,9 @@ def selective_eval(model: nn.Module, layer_types: Iterable[Type[nn.Module]]) -> 
     to_revert = []
     try:
         for module in model.modules():
-            if isinstance(module, tuple(layer_types)):
-                if module.training:
-                    module.eval()
-                    to_revert.append(module)
+            if isinstance(module, tuple(layer_types)) and module.training:
+                module.eval()
+                to_revert.append(module)
         yield
     finally:
         for module in to_revert:

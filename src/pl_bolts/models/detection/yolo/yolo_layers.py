@@ -59,7 +59,7 @@ def _aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
 
 
 class SELoss(nn.MSELoss):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(reduction="none")
 
     def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
