@@ -10,7 +10,7 @@ from pl_bolts.models.rl.common.memory import Buffer, Experience, MultiStepBuffer
 class TestBuffer(TestCase):
     def train_batch(self):
         """Returns an iterator used for testing."""
-        return iter([i for i in range(100)])
+        return iter(list(range(100)))
 
     def setUp(self) -> None:
         self.state = np.random.rand(4, 84, 84)
