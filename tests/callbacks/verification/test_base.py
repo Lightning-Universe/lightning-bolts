@@ -17,7 +17,7 @@ class TrivialVerification(VerificationBase):
 
 
 class PyTorchModel(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.layer = nn.Linear(5, 2)
 
@@ -26,7 +26,7 @@ class PyTorchModel(nn.Module):
 
 
 class LitModel(LightningModule):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.example_input_array = None
         self.model = PyTorchModel()

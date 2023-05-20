@@ -16,7 +16,7 @@ class SWAVLoss(nn.Module):
         epsilon: float,
         gpus: int,
         num_nodes: int,
-    ):
+    ) -> None:
         """Implementation for SWAV loss function.
 
         Args:

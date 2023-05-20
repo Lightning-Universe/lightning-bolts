@@ -32,6 +32,12 @@ class DownSampleConv(nn.Module):
         out_channels: int,
         batchnorm: bool = True,
     ) -> None:
+        """Paper details:
+
+        - C64-C128-C256-C512-C512-C512-C512-C512
+        - All convolutions are 4×4 spatial filters applied with stride 2
+        - Convolutions in the encoder downsample by a factor of 2
+        """
         super().__init__()
         layers = [nn.Conv2d(in_channels, out_channels, kernel=4, strides=2, padding=1)]
 
