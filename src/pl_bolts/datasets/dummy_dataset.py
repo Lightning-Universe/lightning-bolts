@@ -20,7 +20,7 @@ class DummyDataset(Dataset):
         torch.Size([7, 1])
     """
 
-    def __init__(self, *shapes, num_samples: int = 10000):
+    def __init__(self, *shapes, num_samples: int = 10000) -> None:
         """
         Args:
             *shapes: list of shapes
@@ -34,7 +34,7 @@ class DummyDataset(Dataset):
 
         self.num_samples = num_samples
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.num_samples
 
     def __getitem__(self, idx: int):
@@ -66,7 +66,7 @@ class DummyDetectionDataset(Dataset):
 
     def __init__(
         self, img_shape: tuple = (3, 256, 256), num_boxes: int = 1, num_classes: int = 2, num_samples: int = 10000
-    ):
+    ) -> None:
         """
         Args:
             *shapes: list of shapes
@@ -81,7 +81,7 @@ class DummyDetectionDataset(Dataset):
         self.num_boxes = num_boxes
         self.num_classes = num_classes
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.num_samples
 
     def _random_bbox(self):
@@ -112,7 +112,7 @@ class RandomDictDataset(Dataset):
         (7, 10)
     """
 
-    def __init__(self, size: int, num_samples: int = 250):
+    def __init__(self, size: int, num_samples: int = 250) -> None:
         """
         Args:
             size: integer representing the length of a feature_vector
@@ -133,7 +133,7 @@ class RandomDictDataset(Dataset):
         b = self.data_b[index]
         return {"a": a, "b": b}
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.len
 
 
@@ -152,7 +152,7 @@ class RandomDictStringDataset(Dataset):
         7
     """
 
-    def __init__(self, size: int, num_samples: int = 250):
+    def __init__(self, size: int, num_samples: int = 250) -> None:
         """
         Args:
             size: tuple
@@ -167,7 +167,7 @@ class RandomDictStringDataset(Dataset):
     def __getitem__(self, index):
         return {"id": str(index), "x": self.data[index]}
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.len
 
 
@@ -184,7 +184,7 @@ class RandomDataset(Dataset):
         (7, 10)
     """
 
-    def __init__(self, size: int, num_samples: int = 250):
+    def __init__(self, size: int, num_samples: int = 250) -> None:
         """
         Args:
             size: tuple
@@ -199,5 +199,5 @@ class RandomDataset(Dataset):
     def __getitem__(self, index):
         return self.data[index]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.len

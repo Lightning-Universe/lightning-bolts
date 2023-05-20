@@ -59,7 +59,7 @@ def _aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
 
 
 class SELoss(nn.MSELoss):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(reduction="none")
 
     def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
@@ -420,7 +420,7 @@ class DetectionLayer(nn.Module):
             pred_classprob.append(classprob[image_idx, cell_j, cell_i, predictors])
             pred_confidence.append(confidence[image_idx, cell_j, cell_i, predictors])
 
-        losses = dict()
+        losses = {}
 
         if pred_boxes and target_xy and target_wh:
             size_compensation = torch.cat(size_compensation)

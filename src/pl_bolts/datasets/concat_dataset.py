@@ -5,7 +5,7 @@ from pl_bolts.utils.stability import under_review
 
 @under_review()
 class ConcatDataset(Dataset):
-    def __init__(self, *datasets):
+    def __init__(self, *datasets) -> None:
         self.datasets = datasets
 
     def __getitem__(self, i):
@@ -16,5 +16,5 @@ class ConcatDataset(Dataset):
 
         return tuple(result)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return max(len(d) for d in self.datasets)

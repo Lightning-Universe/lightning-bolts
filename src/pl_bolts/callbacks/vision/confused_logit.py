@@ -54,7 +54,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
         min_logit_value: float = 5.0,
         logging_batch_interval: int = 20,
         max_logit_difference: float = 0.1,
-    ):
+    ) -> None:
         """
         Args:
             top_k: How many "offending" images we should plot

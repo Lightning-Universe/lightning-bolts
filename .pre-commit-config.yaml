@@ -25,7 +25,7 @@ repos:
     rev: v3.4.0
     hooks:
       - id: pyupgrade
-        args: [--py36-plus]
+        args: [--py37-plus]
         name: Upgrade code
 
   - repo: https://github.com/PyCQA/docformatter
@@ -59,6 +59,8 @@ repos:
     rev: v1.4.0
     hooks:
       - id: yesqa
+        additional_dependencies:
+          - flake8-pytest-style
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.0.269

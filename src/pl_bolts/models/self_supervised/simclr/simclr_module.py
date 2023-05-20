@@ -43,7 +43,7 @@ class SyncFunction(torch.autograd.Function):
 
 @under_review()
 class Projection(nn.Module):
-    def __init__(self, input_dim=2048, hidden_dim=2048, output_dim=128):
+    def __init__(self, input_dim=2048, hidden_dim=2048, output_dim=128) -> None:
         super().__init__()
         self.output_dim = output_dim
         self.input_dim = input_dim
@@ -85,7 +85,7 @@ class SimCLR(LightningModule):
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
         **kwargs
-    ):
+    ) -> None:
         """
         Args:
             batch_size: the batch size
@@ -415,7 +415,7 @@ def cli_main():
         gpus=args.gpus,
         num_nodes=args.num_nodes,
         accelerator="ddp" if args.gpus > 1 else None,
-        sync_batchnorm=True if args.gpus > 1 else False,
+        sync_batchnorm=args.gpus > 1,
         precision=32 if args.fp32 else 16,
         callbacks=callbacks,
         fast_dev_run=args.fast_dev_run,

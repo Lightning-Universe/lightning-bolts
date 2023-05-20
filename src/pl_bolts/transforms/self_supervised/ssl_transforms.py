@@ -19,7 +19,7 @@ class RandomTranslateWithReflect:
     Fill the uncovered blank area with reflect padding.
     """
 
-    def __init__(self, max_translation):
+    def __init__(self, max_translation) -> None:
         if not _PIL_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `Pillow` which is not installed yet.")
 
@@ -57,7 +57,7 @@ class RandomTranslateWithReflect:
 
 @under_review()
 class Patchify:
-    def __init__(self, patch_size, overlap_size):
+    def __init__(self, patch_size, overlap_size) -> None:
         self.patch_size = patch_size
         self.overlap_size = self.patch_size - overlap_size
 

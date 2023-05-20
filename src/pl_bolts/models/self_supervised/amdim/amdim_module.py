@@ -104,7 +104,7 @@ class AMDIM(LightningModule):
         batch_size: int = 200,
         num_workers: int = 16,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             datamodule: A LightningDatamodule
@@ -253,7 +253,7 @@ class AMDIM(LightningModule):
         return opt  # [opt], [lr_scheduler]
 
     def train_dataloader(self):
-        kwargs = dict(nb_classes=self.hparams.nb_classes) if self.hparams.datamodule == "imagenet2012" else {}
+        kwargs = {"nb_classes": self.hparams.nb_classes} if self.hparams.datamodule == "imagenet2012" else {}
         dataset = AMDIMPretraining.get_dataset(self.hparams.datamodule, self.hparams.data_dir, split="train", **kwargs)
 
         # LOADER
@@ -267,7 +267,7 @@ class AMDIM(LightningModule):
         return loader
 
     def val_dataloader(self):
-        kwargs = dict(nb_classes=self.hparams.nb_classes) if self.hparams.datamodule == "imagenet2012" else {}
+        kwargs = {"nb_classes": self.hparams.nb_classes} if self.hparams.datamodule == "imagenet2012" else {}
         dataset = AMDIMPretraining.get_dataset(self.hparams.datamodule, self.hparams.data_dir, split="val", **kwargs)
 
         # LOADER
