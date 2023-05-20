@@ -40,7 +40,7 @@ class ToTensor(Wrapper):
         return torch.tensor(state), torch.tensor(reward), done, info
 
     def reset(self):
-        """reset the env and cast to tensor."""
+        """Reset the env and cast to tensor."""
         return torch.tensor(self.env.reset())
 
 
@@ -61,7 +61,7 @@ class FireResetEnv(Wrapper):
         return self.env.step(action)
 
     def reset(self):
-        """reset the env."""
+        """Reset the env."""
         self.env.reset()
         obs, _, done, _ = self.env.step(1)
         if done:
@@ -86,7 +86,7 @@ class MaxAndSkipEnv(Wrapper):
         self._skip = skip
 
     def step(self, action):
-        """take 1 step."""
+        """Take 1 step."""
         total_reward = 0.0
         done = None
         for _ in range(self._skip):
@@ -111,7 +111,7 @@ class MaxAndSkipEnv(Wrapper):
 
 @under_review()
 class ProcessFrame84(ObservationWrapper):
-    """preprocessing images from env."""
+    """Preprocessing images from env."""
 
     def __init__(self, env=None):
         if not _OPENCV_AVAILABLE:  # pragma: no cover
@@ -121,12 +121,12 @@ class ProcessFrame84(ObservationWrapper):
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
 
     def observation(self, obs):
-        """preprocess the obs."""
+        """Preprocess the obs."""
         return ProcessFrame84.process(obs)
 
     @staticmethod
     def process(frame):
-        """image preprocessing, formats to 84x84."""
+        """Image preprocessing, formats to 84x84."""
         if frame.size == 210 * 160 * 3:
             img = np.reshape(frame, [210, 160, 3]).astype(np.float32)
         elif frame.size == 250 * 160 * 3:
@@ -142,7 +142,7 @@ class ProcessFrame84(ObservationWrapper):
 
 @under_review()
 class ImageToPyTorch(ObservationWrapper):
-    """converts image to pytorch format."""
+    """Converts image to pytorch format."""
 
     def __init__(self, env):
         if not _OPENCV_AVAILABLE:  # pragma: no cover
@@ -155,13 +155,13 @@ class ImageToPyTorch(ObservationWrapper):
 
     @staticmethod
     def observation(observation):
-        """convert observation."""
+        """Convert observation."""
         return np.moveaxis(observation, 2, 0)
 
 
 @under_review()
 class ScaledFloatFrame(ObservationWrapper):
-    """scales the pixels."""
+    """Scales the pixels."""
 
     @staticmethod
     def observation(obs):
@@ -184,12 +184,12 @@ class BufferWrapper(ObservationWrapper):
         )
 
     def reset(self):
-        """reset env."""
+        """Reset env."""
         self.buffer = np.zeros_like(self.observation_space.low, dtype=self.dtype)
         return self.observation(self.env.reset())
 
     def observation(self, observation):
-        """convert observation."""
+        """Convert observation."""
         self.buffer[:-1] = self.buffer[1:]
         self.buffer[-1] = observation
         return self.buffer
@@ -212,7 +212,7 @@ class DataAugmentation(ObservationWrapper):
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
 
     def observation(self, obs):
-        """preprocess the obs."""
+        """Preprocess the obs."""
         return ProcessFrame84.process(obs)
 
 
