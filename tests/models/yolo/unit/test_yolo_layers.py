@@ -8,7 +8,7 @@ from pl_bolts.models.detection.yolo.yolo_layers import GIoULoss, IoULoss, SELoss
 
 
 @pytest.mark.parametrize(
-    "xy, wh, expected",
+    ("xy", "wh", "expected"),
     [
         ([0.0, 0.0], [1.0, 1.0], [-0.5, -0.5, 0.5, 0.5]),
         ([5.0, 5.0], [2.0, 2.0], [4.0, 4.0, 6.0, 6.0]),
@@ -28,7 +28,7 @@ def test_corner_coordinates(xy, wh, expected, catch_warnings):
 
 
 @pytest.mark.parametrize(
-    "loss_func, bbox1, bbox2, expected",
+    ("loss_func", "bbox1", "bbox2", "expected"),
     [
         (GIoULoss, [[0.0, 0.0, 120.0, 200.0]], [[189.0, 93.0, 242.0, 215.0]], 1.4144532680511475),
         (IoULoss, [[0.0, 0.0, 120.0, 200.0]], [[189.0, 93.0, 242.0, 215.0]], 1.0),

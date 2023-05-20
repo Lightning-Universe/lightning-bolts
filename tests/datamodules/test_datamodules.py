@@ -69,7 +69,7 @@ def test_cityscapes_datamodule(datadir):
     assert mask.size() == torch.Size([batch_size, 1024, 2048])
 
 
-@pytest.mark.parametrize("val_split, train_len", [(0.2, 48_000), (5_000, 55_000)])
+@pytest.mark.parametrize(("val_split", "train_len"), [(0.2, 48_000), (5_000, 55_000)])
 def test_vision_data_module(datadir, val_split, catch_warnings, train_len):
     dm = _create_dm(MNISTDataModule, datadir, val_split=val_split)
     assert len(dm.dataset_train) == train_len
@@ -136,7 +136,7 @@ def test_emnist_datamodules_with_invalid_split(datadir, catch_warnings, dm_cls):
 
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
 @pytest.mark.parametrize(
-    "split, expected_val_split",
+    ("split", "expected_val_split"),
     [
         ("byclass", None),
         ("bymerge", None),
