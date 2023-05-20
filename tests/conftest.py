@@ -23,7 +23,7 @@ def datadir():
     return Path(DATASETS_PATH)
 
 
-@pytest.fixture
+@pytest.fixture()
 def catch_warnings():
     with warnings.catch_warnings():
         warnings.simplefilter("error")
@@ -33,7 +33,7 @@ def catch_warnings():
         yield
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(autouse=True)
 def restore_env_variables():
     """Ensures that environment variables set during the test do not leak out."""
     env_backup = os.environ.copy()
@@ -75,7 +75,7 @@ def restore_env_variables():
     assert not leaked_vars, f"test is leaking environment variable(s): {set(leaked_vars)}"
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(autouse=True)
 def restore_signal_handlers():
     """Ensures that signal handlers get restored before the next test runs.
 
@@ -92,7 +92,7 @@ def restore_signal_handlers():
             signal.signal(signum, handler)
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(autouse=True)
 def teardown_process_group():
     """Ensures that the distributed process group gets closed before the next test runs."""
     yield
@@ -100,7 +100,7 @@ def teardown_process_group():
         torch.distributed.destroy_process_group()
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(autouse=True)
 def reset_deterministic_algorithm():
     """Ensures that torch determinism settings are reset before the next test runs."""
     yield

@@ -28,7 +28,7 @@ if _SPARSEML_AVAILABLE:
     from sparseml.pytorch.optim import RecipeManagerStepWrapper
 
 
-@pytest.fixture
+@pytest.fixture()
 def recipe():
     return """
     version: 0.1.0
