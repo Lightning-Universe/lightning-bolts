@@ -75,6 +75,7 @@ select = [
      "YTT",  # see: https://pypi.org/project/flake8-2020
 #     "ANN",  # see: https://pypi.org/project/flake8-annotations
 #     "S",  # see: https://pypi.org/project/flake8-bandit
+     "T10",  # see: https://pypi.org/project/flake8-debugger/
  ]
 ignore = [
     "E731",  # Do not assign a lambda expression, use a def
