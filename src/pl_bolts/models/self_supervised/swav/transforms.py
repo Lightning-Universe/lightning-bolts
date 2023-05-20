@@ -87,7 +87,7 @@ class SwAVTrainDataTransform:
         self.transform.append(online_train_transform)
 
     def __call__(self, sample):
-        multi_crops = list(map(lambda transform: transform(sample), self.transform))
+        multi_crops = [transform(sample) for transform in self.transform]
 
         return multi_crops
 

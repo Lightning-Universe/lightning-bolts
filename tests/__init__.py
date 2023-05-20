@@ -9,7 +9,7 @@ DATASETS_PATH = os.path.join(PACKAGE_ROOT, "datasets")
 # generate a list of random seeds for each test
 ROOT_SEED = 1234
 
-_MARK_REQUIRE_GPU = dict(condition=not torch.cuda.is_available(), reason="test requires GPU machine")
+_MARK_REQUIRE_GPU = {"condition": not torch.cuda.is_available(), "reason": "test requires GPU machine"}
 
 
 def reset_seed():
