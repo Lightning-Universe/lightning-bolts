@@ -190,7 +190,7 @@ class SoftActorCriticAgent(Agent):
             states = torch.tensor(states, device=device)
 
         dist = self.net(states)
-        actions = [a for a in dist.sample().cpu().numpy()]
+        actions = list(dist.sample().cpu().numpy())
 
         return actions
 
