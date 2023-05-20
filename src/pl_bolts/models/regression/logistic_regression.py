@@ -15,6 +15,9 @@ from pl_bolts.utils.stability import under_review
 
 class LogisticRegression(LightningModule):
     """Logistic Regression Model."""
+    
+    criterion: nn.CrossEntropyLoss
+    linear: nn.Linear
 
     def __init__(
         self,
@@ -27,7 +30,8 @@ class LogisticRegression(LightningModule):
         l2_strength: float = 0.0,
         **kwargs: Any,
     ) -> None:
-        """
+        """Logistic Regression
+
         Args:
             input_dim: Number of dimensions of the input (at least `1`).
             num_classes: Number of class labels (binary: `2`, multi-class: > `2`).
@@ -45,8 +49,8 @@ class LogisticRegression(LightningModule):
         super().__init__()
         self.save_hyperparameters()
         self.optimizer = optimizer
-        self.criterion: nn.CrossEntropyLoss = nn.CrossEntropyLoss()
-        self.linear: nn.Linear = nn.Linear(
+        self.criterion = nn.CrossEntropyLoss()
+        self.linear = nn.Linear(
             in_features=self.hparams.input_dim, out_features=self.hparams.num_classes, bias=self.hparams.bias
         )
 
