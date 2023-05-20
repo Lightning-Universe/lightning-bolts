@@ -1,12 +1,13 @@
-"""Adapted from: https://github.com/facebookresearch/moco.
+# Original work is: Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+# This implementation is: Copyright (c) PyTorch Lightning, Inc. and its affiliates. All Rights Reserved
+#
+# This implementation is licensed under Attribution-NonCommercial 4.0 International;
+# You may not use this file except in compliance with the License.
+#
+# You may obtain a copy of the License from the LICENSE file present in this folder.
+"""MoCo2.
 
-Original work is: Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
-This implementation is: Copyright (c) PyTorch Lightning, Inc. and its affiliates. All Rights Reserved
-
-This implementation is licensed under Attribution-NonCommercial 4.0 International;
-You may not use this file except in compliance with the License.
-
-You may obtain a copy of the License from the LICENSE file present in this folder.
+Adapted from https: //github.com/facebookresearch/moco.
 """
 from argparse import ArgumentParser
 from typing import Union

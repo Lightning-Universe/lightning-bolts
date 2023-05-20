@@ -13,7 +13,7 @@ EPSILON = 1e-12
 
 
 class SchedulerTestNet(torch.nn.Module):
-    """adapted from: https://github.com/pytorch/pytorch/blob/master/test/test_optim.py."""
+    """Adapted from: https://github.com/pytorch/pytorch/blob/master/test/test_optim.py."""
 
     def __init__(self):
         super().__init__()
@@ -25,7 +25,7 @@ class SchedulerTestNet(torch.nn.Module):
 
 
 class TestLRScheduler:
-    """adapted from: https://github.com/pytorch/pytorch/blob/master/test/test_optim.py."""
+    """Adapted from: https://github.com/pytorch/pytorch/blob/master/test/test_optim.py."""
 
     def __init__(self, base_lr=0.05, multiplier=10):
         self.base_lr = base_lr
