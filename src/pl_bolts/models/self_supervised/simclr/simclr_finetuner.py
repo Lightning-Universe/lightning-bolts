@@ -4,13 +4,13 @@ from argparse import ArgumentParser
 from pytorch_lightning import Trainer, seed_everything
 
 from pl_bolts.models.self_supervised.simclr.simclr_module import SimCLR
-from pl_bolts.models.self_supervised.simclr.transforms import SimCLRFinetuneTransform
 from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner
 from pl_bolts.transforms.dataset_normalizations import (
     cifar10_normalization,
     imagenet_normalization,
     stl10_normalization,
 )
+from pl_bolts.transforms.self_supervised.simclr_transforms import SimCLRFinetuneTransform
 from pl_bolts.utils.stability import under_review
 
 
