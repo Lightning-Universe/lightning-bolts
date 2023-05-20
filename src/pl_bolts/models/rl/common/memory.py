@@ -274,7 +274,7 @@ class PERBuffer(ReplayBuffer):
             sample of experiences chosen with ranked probability
         """
         # get list of priority rankings
-        prios = self.priorities if len(self.buffer) == self.capacity else self.priorities[:self.pos]
+        prios = self.priorities if len(self.buffer) == self.capacity else self.priorities[: self.pos]
 
         # probability to the power of alpha to weight how important that probability it, 0 = normal distirbution
         probs = prios**self.prob_alpha

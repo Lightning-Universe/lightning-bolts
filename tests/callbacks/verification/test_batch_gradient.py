@@ -29,10 +29,7 @@ class TemplateModel(nn.Module):
 
     def forward__standard(self, x):
         # x: (B, 5, 2)
-        if self.mix_data:
-            x = x.view(10, -1).permute(1, 0).view(-1, 10)  # oops!
-        else:
-            x = x.view(-1, 10)  # good!
+        x = x.view(10, -1).permute(1, 0).view(-1, 10) if self.mix_data else x.view(-1, 10)
         return self.linear(self.bn(x))
 
 

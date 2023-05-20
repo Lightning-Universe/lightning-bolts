@@ -319,7 +319,7 @@ class ResNet(nn.Module):
             )[1],
             0,
         )
-        start_idx = 0
+        start_idx, output = 0, None
         for end_idx in idx_crops:
             _out = torch.cat(inputs[start_idx:end_idx])
 
