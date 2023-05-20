@@ -6,7 +6,7 @@ from pl_bolts.models.gans.pix2pix.components import Generator, PatchGAN
 
 
 @pytest.mark.parametrize(
-    "in_shape, out_shape",
+    ("in_shape", "out_shape"),
     [
         pytest.param((3, 256, 256), (3, 256, 256), id="multichannel"),
         pytest.param((1, 256, 256), (3, 256, 256), id="singlechannel"),
@@ -29,7 +29,7 @@ def test_generator(catch_warnings, in_shape, out_shape):
 
 
 @pytest.mark.parametrize(
-    "in_shape, out_shape",
+    ("in_shape", "out_shape"),
     [
         pytest.param((3, 256, 256), (3, 256, 256), id="discriminator-multichannel"),
         pytest.param((1, 256, 256), (3, 256, 256), id="discriminator-singlechannel"),

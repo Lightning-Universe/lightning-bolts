@@ -72,7 +72,7 @@ def test_sr_modules(tmpdir, datadir, sr_module_cls, scale_factor):
 
 @pytest.mark.parametrize("dataset_cls", [DummyDataset])
 @pytest.mark.parametrize(
-    "in_shape, out_shape",
+    ("in_shape", "out_shape"),
     [
         pytest.param((3, 256, 256), (3, 256, 256), id="img shape (3, 256, 256), (3, 256, 256)"),
         pytest.param((1, 256, 256), (3, 256, 256), id="img shape (1, 256, 256), (3, 256, 256)"),
