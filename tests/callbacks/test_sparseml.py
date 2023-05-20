@@ -27,7 +27,7 @@ if _SPARSEML_AVAILABLE:
     from sparseml.pytorch.optim import RecipeManagerStepWrapper
 
 
-@pytest.fixture
+@pytest.fixture()
 def recipe():
     return """
     version: 0.1.0
@@ -81,8 +81,8 @@ def test_train_sparse_ml_callback(tmpdir, recipe):
 @pytest.mark.skipif(not _SPARSEML_AVAILABLE, reason="SparseML isn't installed.")
 def test_fail_if_no_example_input_array_or_sample_batch(tmpdir, recipe):
     model = BoringModel()
+    output_dir = Path(tmpdir) / "model_export/"
     with pytest.raises(MisconfigurationException, match="To export the model, a sample batch must be passed"):
-        output_dir = Path(tmpdir) / "model_export/"
         SparseMLCallback.export_to_sparse_onnx(model, output_dir)
 
 
