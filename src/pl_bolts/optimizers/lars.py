@@ -68,7 +68,7 @@ class LARS(Optimizer):
         nesterov=False,
         trust_coefficient=0.001,
         eps=1e-8,
-    ):
+    ) -> None:
         if lr is not required and lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
         if momentum < 0.0:

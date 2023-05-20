@@ -50,7 +50,7 @@ class SwAV(LightningModule):
         weight_decay: float = 1e-6,
         epsilon: float = 0.05,
         **kwargs
-    ):
+    ) -> None:
         """
         Args:
             gpus: number of gpus per node used in training, passed to SwAV module

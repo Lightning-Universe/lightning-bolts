@@ -33,7 +33,7 @@ class DataMonitorBase(Callback):
         WandbLogger,
     )
 
-    def __init__(self, log_every_n_steps: int = None):
+    def __init__(self, log_every_n_steps: int = None) -> None:
         """Base class for monitoring data histograms in a LightningModule. This requires a logger configured in the
         Trainer, otherwise no data is logged. The specific class that inherits from this base defines what data
         gets collected.
@@ -125,7 +125,7 @@ class ModuleDataMonitor(DataMonitorBase):
         self,
         submodules: Optional[Union[bool, List[str]]] = None,
         log_every_n_steps: int = None,
-    ):
+    ) -> None:
         """
         Args:
             submodules: If `True`, logs the in- and output histograms of every submodule in the
@@ -205,7 +205,7 @@ class ModuleDataMonitor(DataMonitorBase):
 class TrainingDataMonitor(DataMonitorBase):
     GROUP_NAME = "training_step"
 
-    def __init__(self, log_every_n_steps: int = None):
+    def __init__(self, log_every_n_steps: int = None) -> None:
         """Callback that logs the histogram of values in the batched data passed to `training_step`.
 
         Args:

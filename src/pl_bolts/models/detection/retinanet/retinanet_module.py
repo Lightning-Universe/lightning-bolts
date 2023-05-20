@@ -47,7 +47,7 @@ class RetinaNet(LightningModule):
         pretrained_backbone: bool = True,
         trainable_backbone_layers: int = 3,
         **kwargs: Any,
-    ):
+    ) -> None:
         """
         Args:
             learning_rate: the learning rate

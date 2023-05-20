@@ -13,7 +13,7 @@ from tests import _MARK_REQUIRE_GPU
 
 
 class TemplateModel(nn.Module):
-    def __init__(self, mix_data=False):
+    def __init__(self, mix_data=False) -> None:
         """Base model for testing.
 
         The setting ``mix_data=True`` simulates a wrong implementation.
@@ -39,7 +39,7 @@ class TemplateModel(nn.Module):
 class MultipleInputModel(TemplateModel):
     """Base model for testing verification when forward accepts multiple arguments."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.input_array = (torch.rand(10, 5, 2), torch.rand(10, 5, 2))
 
@@ -59,7 +59,7 @@ class MultipleOutputModel(TemplateModel):
 class DictInputDictOutputModel(TemplateModel):
     """Base model for testing verification when forward has a collection of outputs."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.input_array = {
             "w": 42,
@@ -79,7 +79,7 @@ class DictInputDictOutputModel(TemplateModel):
 class LitModel(LightningModule):
     """Base model for testing verification with LightningModules."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.model = DictInputDictOutputModel(*args, **kwargs)
         self.example_input_array = self.model.input_array
@@ -245,7 +245,7 @@ def test_default_output_mapping():
 
 
 class BatchNormModel(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.batch_norm0 = nn.BatchNorm1d(2)
         self.batch_norm1 = nn.BatchNorm1d(3)

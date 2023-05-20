@@ -13,7 +13,7 @@ class TanhMultivariateNormal(torch.distributions.MultivariateNormal):
 
     """
 
-    def __init__(self, action_bias, action_scale, **kwargs):
+    def __init__(self, action_bias, action_scale, **kwargs) -> None:
         super().__init__(**kwargs)
 
         self.action_bias = action_bias
