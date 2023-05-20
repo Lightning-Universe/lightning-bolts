@@ -52,8 +52,10 @@ These models are perfect for training from scratch when you have a huge set of u
 .. code-block:: python
 
     from pl_bolts.models.self_supervised import SimCLR
-    from pl_bolts.models.self_supervised.simclr import SimCLREvalDataTransform, SimCLRTrainDataTransform
-
+    from pl_bolts.transforms.self_supervised.simclr_transforms import (
+        SimCLREvalDataTransform,
+        SimCLRTrainDataTransform
+    )
 
     train_dataset = MyDataset(transforms=SimCLRTrainDataTransform())
     val_dataset = MyDataset(transforms=SimCLREvalDataTransform())
@@ -120,8 +122,10 @@ To Train::
     import pytorch_lightning as pl
     from pl_bolts.models.self_supervised import CPC_v2
     from pl_bolts.datamodules import CIFAR10DataModule
-    from pl_bolts.models.self_supervised.cpc import (
-        CPCTrainTransformsCIFAR10, CPCEvalTransformsCIFAR10)
+    from pl_bolts.transforms.self_supervised.cpc_transforms import (
+        CPCTrainTransformsCIFAR10,
+        CPCEvalTransformsCIFAR10
+    )
 
     # data
     dm = CIFAR10DataModule(num_workers=0)
@@ -277,7 +281,9 @@ To Train::
     from pl_bolts.models.self_supervised import SimCLR
     from pl_bolts.datamodules import CIFAR10DataModule
     from pl_bolts.models.self_supervised.simclr.transforms import (
-        SimCLREvalDataTransform, SimCLRTrainDataTransform)
+        SimCLREvalDataTransform,
+        SimCLRTrainDataTransform
+    )
 
     # data
     dm = CIFAR10DataModule(num_workers=0)
@@ -466,7 +472,8 @@ To Train::
     from pl_bolts.models.self_supervised import SwAV
     from pl_bolts.datamodules import STL10DataModule
     from pl_bolts.models.self_supervised.swav.transforms import (
-        SwAVTrainDataTransform, SwAVEvalDataTransform
+        SwAVTrainDataTransform,
+        SwAVEvalDataTransform
     )
     from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 

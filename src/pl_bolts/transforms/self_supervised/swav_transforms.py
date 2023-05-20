@@ -1,4 +1,6 @@
-from typing import Tuple
+from typing import List, Tuple
+
+from torch import Tensor
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -23,9 +25,12 @@ class SwAVTrainDataTransform:
         self.jitter_strength = jitter_strength
         self.gaussian_blur = gaussian_blur
 
-        assert len(size_crops) == len(nmb_crops)
-        assert len(min_scale_crops) == len(nmb_crops)
-        assert len(max_scale_crops) == len(nmb_crops)
+        if len(size_crops) != len(nmb_crops):
+            raise AssertionError("len(size_crops) should equal len(nmb_crops).")
+        if len(min_scale_crops) != len(nmb_crops):
+            raise AssertionError("len(min_scale_crops) should equal len(nmb_crops).")
+        if len(max_scale_crops) != len(nmb_crops):
+            raise AssertionError("len(max_scale_crops) should equal len(nmb_crops).")
 
         self.size_crops = size_crops
         self.nmb_crops = nmb_crops
@@ -86,7 +91,7 @@ class SwAVTrainDataTransform:
 
         self.transform.append(online_train_transform)
 
-    def __call__(self, sample):
+    def __call__(self, sample: Tensor) -> List[Tensor]:
         multi_crops = [transform(sample) for transform in self.transform]
 
         return multi_crops
@@ -162,5 +167,5 @@ class SwAVFinetuneTransform:
         data_transforms.append(final_transform)
         self.transform = transforms.Compose(data_transforms)
 
-    def __call__(self, sample):
+    def __call__(self, sample: Tensor) -> Tensor:
         return self.transform(sample)
