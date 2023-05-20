@@ -6,10 +6,8 @@ import torch.nn as nn
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
 from pl_bolts.models.detection.yolo import yolo_layers
-from pl_bolts.utils.stability import under_review
 
 
-@under_review()
 class YOLOConfiguration:
     """This class can be used to parse the configuration files of the Darknet YOLOv4 implementation.
 
@@ -149,7 +147,6 @@ class YOLOConfiguration:
         return sections
 
 
-@under_review()
 def _create_layer(config: dict, num_inputs: List[int]) -> Tuple[nn.Module, int]:
     """Calls one of the ``_create_<layertype>(config, num_inputs)`` functions to create a PyTorch module from the
     layer config.
@@ -173,8 +170,7 @@ def _create_layer(config: dict, num_inputs: List[int]) -> Tuple[nn.Module, int]:
     return create_func[config["type"]](config, num_inputs)
 
 
-@under_review()
-def _create_convolutional(config, num_inputs):
+def _create_convolutional(config: dict, num_inputs: int) -> Tuple[nn.Module, int]:
     module = nn.Sequential()
 
     batch_normalize = config.get("batch_normalize", False)
@@ -210,15 +206,13 @@ def _create_convolutional(config, num_inputs):
     return module, config["filters"]
 
 
-@under_review()
-def _create_maxpool(config, num_inputs):
+def _create_maxpool(config: dict, num_inputs: int) -> Tuple[nn.Module, int]:
     padding = (config["size"] - 1) // 2
     module = nn.MaxPool2d(config["size"], config["stride"], padding)
     return module, num_inputs[-1]
 
 
-@under_review()
-def _create_route(config, num_inputs):
+def _create_route(config: dict, num_inputs: int) -> Tuple[nn.Module, int]:
     num_chunks = config.get("groups", 1)
     chunk_idx = config.get("group_id", 0)
 
@@ -234,20 +228,17 @@ def _create_route(config, num_inputs):
     return module, num_outputs
 
 
-@under_review()
-def _create_shortcut(config, num_inputs):
+def _create_shortcut(config: dict, num_inputs: int) -> Tuple[nn.Module, int]:
     module = yolo_layers.ShortcutLayer(config["from"])
     return module, num_inputs[-1]
 
 
-@under_review()
-def _create_upsample(config, num_inputs):
+def _create_upsample(config: dict, num_inputs: int) -> Tuple[nn.Module, int]:
     module = nn.Upsample(scale_factor=config["stride"], mode="nearest")
     return module, num_inputs[-1]
 
 
-@under_review()
-def _create_yolo(config, num_inputs):
+def _create_yolo(config: dict, num_inputs: int) -> Tuple[nn.Module, int]:
     # The "anchors" list alternates width and height.
     anchor_dims = config["anchors"]
     anchor_dims = [(anchor_dims[i], anchor_dims[i + 1]) for i in range(0, len(anchor_dims), 2)]
@@ -264,8 +255,10 @@ def _create_yolo(config, num_inputs):
         overlap_loss_func = yolo_layers.SELoss()
     elif overlap_loss_name == "giou":
         overlap_loss_func = yolo_layers.GIoULoss()
-    else:
+    elif overlap_loss_name == "iou":
         overlap_loss_func = yolo_layers.IoULoss()
+    else:
+        raise ValueError("Unknown overlap loss: " + overlap_loss_name)
 
     module = yolo_layers.DetectionLayer(
         num_classes=config["classes"],
