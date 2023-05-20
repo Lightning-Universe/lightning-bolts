@@ -34,7 +34,7 @@ class PixelCNN(nn.Module):
         torch.Size([5, 3, 64, 64])
     """
 
-    def __init__(self, input_channels: int, hidden_channels: int = 256, num_blocks=5):
+    def __init__(self, input_channels: int, hidden_channels: int = 256, num_blocks=5) -> None:
         super().__init__()
         self.input_channels = input_channels
         self.hidden_channels = hidden_channels

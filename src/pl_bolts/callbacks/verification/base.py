@@ -19,7 +19,7 @@ class VerificationBase:
     :class: `torch.nn.Module` unless otherwise stated.
     """
 
-    def __init__(self, model: nn.Module):
+    def __init__(self, model: nn.Module) -> None:
         """
         Arguments:
             model: The model to run verification for.

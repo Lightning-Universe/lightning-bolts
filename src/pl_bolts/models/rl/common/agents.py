@@ -17,7 +17,7 @@ from pl_bolts.utils.stability import under_review
 class Agent(ABC):
     """Basic agent that always returns 0."""
 
-    def __init__(self, net: nn.Module):
+    def __init__(self, net: nn.Module) -> None:
         self.net = net
 
     def __call__(self, state: Tensor, device: str, *args, **kwargs) -> List[int]:
@@ -44,7 +44,7 @@ class ValueAgent(Agent):
         eps_start: float = 1.0,
         eps_end: float = 0.2,
         eps_frames: float = 1000,
-    ):
+    ) -> None:
         super().__init__(net)
         self.action_space = action_space
         self.eps_start = eps_start
@@ -66,10 +66,7 @@ class ValueAgent(Agent):
         if not isinstance(state, list):
             state = [state]
 
-        if np.random.random() < self.epsilon:
-            action = self.get_random_action(state)
-        else:
-            action = self.get_action(state, device)
+        action = self.get_random_action(state) if np.random.random() < self.epsilon else self.get_action(state, device)
 
         return action
 
