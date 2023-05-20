@@ -328,10 +328,7 @@ class ResNet(nn.Module):
             else:
                 _out = self.forward_backbone(_out)
 
-            if start_idx == 0:
-                output = _out
-            else:
-                output = torch.cat((output, _out))
+            output = _out if start_idx == 0 else torch.cat((output, _out))
             start_idx = end_idx
         return self.forward_head(output)
 

@@ -46,7 +46,7 @@ def test_create_convolutional(config, catch_warnings):
         if activation != "logistic":
             assert activation == conv[-1].__class__.__name__.lower()[: len(activation)]
         elif activation == "logistic":
-            assert "sigmoid" == conv[-1].__class__.__name__.lower()
+            assert conv[-1].__class__.__name__.lower() == "sigmoid"
 
 
 @pytest.mark.parametrize(
