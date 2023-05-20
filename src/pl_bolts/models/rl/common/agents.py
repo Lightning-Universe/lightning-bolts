@@ -74,7 +74,7 @@ class ValueAgent(Agent):
         return action
 
     def get_random_action(self, state: Tensor) -> int:
-        """returns a random action."""
+        """Returns a random action."""
         actions = []
 
         for i in range(len(state)):
