@@ -368,7 +368,7 @@ class FeatureMapContrastiveTask(nn.Module):
 
 @under_review()
 def tanh_clip(x, clip_val=10.0):
-    """soft clip values to the range [-clip_val, +clip_val]"""
+    """Soft clip values to the range [-clip_val, +clip_val]"""
     if clip_val is not None:
         x_clip = clip_val * torch.tanh((1.0 / clip_val) * x)
     else:

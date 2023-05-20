@@ -11,7 +11,7 @@ from pl_bolts.utils.stability import under_review
 
 @under_review()
 def _shape_input(x):
-    """shape batch of images for input into GPT2 model."""
+    """Shape batch of images for input into GPT2 model."""
     x = x.view(x.shape[0], -1)  # flatten images into sequences
     x = x.transpose(0, 1).contiguous()  # to shape [seq len, batch]
     return x
@@ -19,10 +19,9 @@ def _shape_input(x):
 
 @under_review()
 class ImageGPT(LightningModule):
-    """
-    **Paper**: `Generative Pretraining from Pixels
-    <https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf>`_
-    [original paper `code <https://github.com/openai/image-gpt>`_].
+    """**Paper**: `Generative Pretraining from Pixels
+    <https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf>`_ [original paper `code
+    <https://github.com/openai/image-gpt>`_].
 
     **Paper by:** Mark Che, Alec Radford, Rewon Child, Jeff Wu, Heewoo Jun,
     Prafulla Dhariwal, David Luan, Ilya Sutskever
