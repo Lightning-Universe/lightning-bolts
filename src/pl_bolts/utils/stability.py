@@ -48,7 +48,9 @@ def _raise_review_warning(message: str, stacklevel: int = 6) -> None:
 
 
 def under_review():
-    """The under_review decorator is used to indicate that a particular feature is not properly reviewed and tested yet.
+    """The under_review decorator is used to indicate that a particular feature is not properly reviewed and tested
+    yet.
+
     A callable or type that has been marked as under_review will give a ``UnderReviewWarning`` when it is called or
     instantiated. This designation should be used following the description given in :ref:`stability`.
     Args:

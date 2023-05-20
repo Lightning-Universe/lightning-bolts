@@ -28,7 +28,7 @@ class TestBuffer(TestCase):
             self.buffer.append(self.experience)
 
     def test_sample_batch(self):
-        """check that a sinlge sample is returned."""
+        """Check that a sinlge sample is returned."""
         sample = self.buffer.sample()
         self.assertEqual(len(sample), 5)
         self.assertEqual(sample[0].shape, (self.batch_size, 4, 84, 84))
@@ -205,7 +205,7 @@ class TestMultiStepReplayBuffer(TestCase):
         self.assertEqual(len(self.buffer.history), 2)
 
     def test_sample_single_experience(self):
-        """if there is only a single experience added, sample should return nothing."""
+        """If there is only a single experience added, sample should return nothing."""
         self.buffer.append(self.experience01)
 
         with self.assertRaises(Exception) as context:
@@ -214,7 +214,7 @@ class TestMultiStepReplayBuffer(TestCase):
         self.assertIsInstance(context.exception, Exception)
 
     def test_sample_multi_experience(self):
-        """if there is only a single experience added, sample should return nothing."""
+        """If there is only a single experience added, sample should return nothing."""
         self.buffer.append(self.experience01)
         self.buffer.append(self.experience02)
 
