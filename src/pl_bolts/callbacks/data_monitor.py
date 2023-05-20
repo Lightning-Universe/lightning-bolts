@@ -150,7 +150,6 @@ class ModuleDataMonitor(DataMonitorBase):
 
                 # specific submodules
                 trainer = Trainer(callbacks=[ModuleDataMonitor(submodules=["generator", "generator.conv1"])])
-
         """
         super().__init__(log_every_n_steps=log_every_n_steps)
         self._submodule_names = submodules
