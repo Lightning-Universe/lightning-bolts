@@ -55,7 +55,7 @@ class LightningArgumentParser(ArgumentParser):
             if arg.name in self._added_arg_names:
                 continue
             self._added_arg_names.append(arg.name)
-            kwargs = dict(type=arg.types[0])
+            kwargs = {"type": arg.types[0]}
             if arg.required and not self.ignore_required_init_args:
                 kwargs["required"] = True
             else:

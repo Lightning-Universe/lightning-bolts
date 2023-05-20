@@ -29,7 +29,7 @@ class DummyExperienceSource(BaseExperienceSource):
 class TestExperienceSourceDataset(TestCase):
     def train_batch(self):
         """Returns an iterator used for testing."""
-        return iter([i for i in range(100)])
+        return iter(list(range(100)))
 
     def test_iterator(self):
         """Tests that the iterator returns batches correctly."""
