@@ -179,7 +179,7 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
 
         self.num_samples = num_samples  # type: ignore[misc]
         self.labels = sorted(labels) if labels is not None else set(range(10))
-        self.extra_args = dict(num_samples=self.num_samples, labels=self.labels)
+        self.extra_args = {"num_samples": self.num_samples, "labels": self.labels}
 
     @property
     def num_classes(self) -> int:

@@ -420,7 +420,7 @@ class DetectionLayer(nn.Module):
             pred_classprob.append(classprob[image_idx, cell_j, cell_i, predictors])
             pred_confidence.append(confidence[image_idx, cell_j, cell_i, predictors])
 
-        losses = dict()
+        losses = {}
 
         if pred_boxes and target_xy and target_wh:
             size_compensation = torch.cat(size_compensation)
