@@ -50,7 +50,7 @@ class VAE(LightningModule):
         latent_dim: int = 256,
         lr: float = 1e-4,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             input_height: height of the images

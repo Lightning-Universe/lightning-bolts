@@ -48,7 +48,7 @@ class SAC(LightningModule):
         batches_per_epoch: int = 10000,
         n_steps: int = 1,
         **kwargs,
-    ):
+    ) -> None:
         super().__init__()
 
         # Environment

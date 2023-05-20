@@ -106,7 +106,7 @@ def cli_main():  # pragma: no cover
         precision=16,
         max_epochs=args.num_epochs,
         accelerator="ddp",
-        sync_batchnorm=True if args.gpus > 1 else False,
+        sync_batchnorm=args.gpus > 1,
     )
 
     trainer.fit(tuner, dm)
