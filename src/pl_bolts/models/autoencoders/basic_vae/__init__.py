@@ -1,4 +1,4 @@
-"""VAE Template ============
+"""VAE Template
 
 This is a basic template for implementing a Variational Autoencoder in PyTorch Lightning.
 
