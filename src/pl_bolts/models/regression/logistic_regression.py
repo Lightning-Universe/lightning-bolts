@@ -15,7 +15,7 @@ from pl_bolts.utils.stability import under_review
 
 class LogisticRegression(LightningModule):
     """Logistic Regression Model."""
-    
+
     criterion: nn.CrossEntropyLoss
     linear: nn.Linear
 
@@ -30,7 +30,7 @@ class LogisticRegression(LightningModule):
         l2_strength: float = 0.0,
         **kwargs: Any,
     ) -> None:
-        """Logistic Regression
+        """Logistic Regression.
 
         Args:
             input_dim: Number of dimensions of the input (at least `1`).
