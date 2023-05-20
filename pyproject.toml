@@ -72,7 +72,7 @@ select = [
      "PT",  # see: https://pypi.org/project/flake8-pytest-style
 #     "RET",  # see: https://pypi.org/project/flake8-return
 #     "SIM",  # see: https://pypi.org/project/flake8-simplify
-#     "YTT",  # see: https://pypi.org/project/flake8-2020
+     "YTT",  # see: https://pypi.org/project/flake8-2020
 #     "ANN",  # see: https://pypi.org/project/flake8-annotations
 #     "S",  # see: https://pypi.org/project/flake8-bandit
  ]
