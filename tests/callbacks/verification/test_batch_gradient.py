@@ -155,7 +155,8 @@ def test_batch_verification_calls_custom_input_output_mappings():
     model = MultipleInputModel()
 
     def input_mapping(inputs):
-        assert isinstance(inputs, tuple) and len(inputs) == 2
+        assert isinstance(inputs, tuple)
+        assert len(inputs) == 2
         return [inputs[0]]
 
     def output_mapping(outputs):
