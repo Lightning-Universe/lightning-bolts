@@ -11,7 +11,7 @@ from torch import optim
 from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
 from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc.networks import cpc_resnet101
-from pl_bolts.models.self_supervised.cpc.transforms import (
+from pl_bolts.transforms.self_supervised.cpc_transforms import (
     CPCEvalTransformsCIFAR10,
     CPCEvalTransformsImageNet128,
     CPCEvalTransformsSTL10,
