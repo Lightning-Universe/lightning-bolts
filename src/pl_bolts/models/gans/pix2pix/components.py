@@ -37,7 +37,9 @@ class UpSampleConv(nn.Module):
 
 @under_review()
 class DownSampleConv(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel=4, strides=2, padding=1, activation=True, batchnorm=True) -> None:
+    def __init__(
+        self, in_channels, out_channels, kernel=4, strides=2, padding=1, activation=True, batchnorm=True
+    ) -> None:
         """Paper details:
 
         - C64-C128-C256-C512-C512-C512-C512-C512
