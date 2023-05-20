@@ -62,7 +62,7 @@ def balance_classes(
     # pick chunk size for each class using the largest split
     chunk_sizes = []
     for class_i in range(nb_classes):
-        mask = Y == class_i
+        mask = class_i == Y
         y = Y[mask]
         chunk_sizes.append(math.ceil(len(y) / nb_batches))
     chunk_size = max(chunk_sizes)
@@ -72,7 +72,7 @@ def balance_classes(
 
     # divide each class into each batch
     for class_i in range(nb_classes):
-        mask = Y == class_i
+        mask = class_i == Y
         x = X[mask]
         y = Y[mask]
 

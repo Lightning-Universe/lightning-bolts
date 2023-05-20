@@ -28,7 +28,7 @@ else:  # pragma: no cover
 class ToTensor(Wrapper):
     """For environments where the user need to press FIRE for the game to start."""
 
-    def __init__(self, env=None):
+    def __init__(self, env=None) -> None:
         if not _GYM_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `gym` which is not installed yet.")
 
@@ -48,7 +48,7 @@ class ToTensor(Wrapper):
 class FireResetEnv(Wrapper):
     """For environments where the user need to press FIRE for the game to start."""
 
-    def __init__(self, env=None):
+    def __init__(self, env=None) -> None:
         if not _GYM_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `gym` which is not installed yet.")
 
@@ -76,7 +76,7 @@ class FireResetEnv(Wrapper):
 class MaxAndSkipEnv(Wrapper):
     """Return only every `skip`-th frame."""
 
-    def __init__(self, env=None, skip=4):
+    def __init__(self, env=None, skip=4) -> None:
         if not _GYM_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `gym` which is not installed yet.")
 
@@ -113,7 +113,7 @@ class MaxAndSkipEnv(Wrapper):
 class ProcessFrame84(ObservationWrapper):
     """Preprocessing images from env."""
 
-    def __init__(self, env=None):
+    def __init__(self, env=None) -> None:
         if not _OPENCV_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("This class uses OpenCV which it is not installed yet.")
 
@@ -144,7 +144,7 @@ class ProcessFrame84(ObservationWrapper):
 class ImageToPyTorch(ObservationWrapper):
     """Converts image to pytorch format."""
 
-    def __init__(self, env):
+    def __init__(self, env) -> None:
         if not _OPENCV_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("This class uses OpenCV which it is not installed yet.")
 
@@ -172,7 +172,7 @@ class ScaledFloatFrame(ObservationWrapper):
 class BufferWrapper(ObservationWrapper):
     """Wrapper for image stacking."""
 
-    def __init__(self, env, n_steps, dtype=np.float32):
+    def __init__(self, env, n_steps, dtype=np.float32) -> None:
         super().__init__(env)
         self.dtype = dtype
         self.buffer = None
@@ -204,7 +204,7 @@ class DataAugmentation(ObservationWrapper):
     - RandomCrop
     """
 
-    def __init__(self, env=None):
+    def __init__(self, env=None) -> None:
         if not _GYM_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `gym` which is not installed yet.")
 

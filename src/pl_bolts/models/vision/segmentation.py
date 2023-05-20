@@ -44,7 +44,7 @@ class SemSegment(LightningModule):
         ignore_index: Optional[int] = 250,
         lr: float = 0.01,
         **kwargs: Any
-    ):
+    ) -> None:
         """
         Args:
             num_classes: number of output classes (default 19)
