@@ -6,10 +6,10 @@ from pl_bolts.utils.stability import under_review
 
 @under_review()
 class TanhMultivariateNormal(torch.distributions.MultivariateNormal):
-    """The distribution of X is an affine of tanh applied on a normal distribution.
+    """The distribution of X is an affine of tanh applied on a normal distribution::
 
-        X = action_scale * tanh(Z) + action_bias
-        Z ~ Normal(mean, variance)
+    X = action_scale * tanh(Z) + action_bias
+    Z ~ Normal(mean, variance)
 
     """
 
