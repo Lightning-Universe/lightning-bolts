@@ -96,7 +96,7 @@ class KittiDataset(Dataset):
 
     def get_filenames(self, path: str):
         """Returns a list of absolute paths to images inside given `path`"""
-        files_list = list()
+        files_list = []
         for filename in os.listdir(path):
             files_list.append(os.path.join(path, filename))
         return files_list

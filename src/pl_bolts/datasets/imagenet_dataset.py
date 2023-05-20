@@ -206,8 +206,8 @@ def parse_devkit_archive(root, file=None):
         meta = [meta[idx] for idx, num_children in enumerate(nums_children) if num_children == 0]
         idcs, wnids, classes = list(zip(*meta))[:3]
         classes = [tuple(clss.split(", ")) for clss in classes]
-        idx_to_wnid = {idx: wnid for idx, wnid in zip(idcs, wnids)}
-        wnid_to_classes = {wnid: clss for wnid, clss in zip(wnids, classes)}
+        idx_to_wnid = dict(zip(idcs, wnids))
+        wnid_to_classes = dict(zip(wnids, classes))
         return idx_to_wnid, wnid_to_classes
 
     def parse_val_groundtruth_txt(devkit_root):
