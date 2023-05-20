@@ -124,6 +124,7 @@ class ModuleDataMonitor(DataMonitorBase):
         log_every_n_steps: Optional[int] = None,
     ):
         """Logs the in- and output histogram of submodules.
+
         Args:
             submodules: If `True`, logs the in- and output histograms of every submodule in the
                 LightningModule, including the root module itself.

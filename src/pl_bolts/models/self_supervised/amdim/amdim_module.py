@@ -104,7 +104,7 @@ class AMDIM(LightningModule):
         batch_size: int = 200,
         num_workers: int = 16,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             datamodule: A LightningDatamodule

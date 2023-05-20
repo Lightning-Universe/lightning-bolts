@@ -159,7 +159,7 @@ def test_training_data_monitor(log_histogram, tmpdir, datadir, catch_warnings):
 
 
 class SubModule(nn.Module):
-    def __init__(self, inp, out):
+    def __init__(self, inp, out) -> None:
         super().__init__()
         self.sub_layer = nn.Linear(inp, out)
 

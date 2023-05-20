@@ -114,7 +114,7 @@ class ImageGPT(LightningModule):
         data_dir: str = ".",
         num_workers: int = 8,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             embed_dim: the embedding dim

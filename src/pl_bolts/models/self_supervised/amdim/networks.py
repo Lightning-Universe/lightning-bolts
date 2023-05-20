@@ -19,7 +19,7 @@ class AMDIMEncoder(nn.Module):
         conv_block_depth=3,
         encoder_size=32,
         use_bn=False,
-    ):
+    ) -> None:
         super().__init__()
         # NDF = encoder hidden feat size
         # RKHS = output dim
@@ -151,7 +151,7 @@ class AMDIMEncoder(nn.Module):
 
 @under_review()
 class Conv3x3(nn.Module):
-    def __init__(self, n_in, n_out, n_kern, n_stride, n_pad, use_bn=True, pad_mode="constant"):
+    def __init__(self, n_in, n_out, n_kern, n_stride, n_pad, use_bn=True, pad_mode="constant") -> None:
         super().__init__()
         assert pad_mode in ["constant", "reflect"]
         self.n_pad = (n_pad, n_pad, n_pad, n_pad)
@@ -175,7 +175,7 @@ class Conv3x3(nn.Module):
 
 @under_review()
 class ConvResBlock(nn.Module):
-    def __init__(self, n_in, n_out, width, stride, pad, depth, use_bn):
+    def __init__(self, n_in, n_out, width, stride, pad, depth, use_bn) -> None:
         super().__init__()
         layer_list = [ConvResNxN(n_in, n_out, width, stride, pad, use_bn)]
         for i in range(depth - 1):
@@ -195,7 +195,7 @@ class ConvResBlock(nn.Module):
 
 @under_review()
 class ConvResNxN(nn.Module):
-    def __init__(self, n_in, n_out, width, stride, pad, use_bn=False):
+    def __init__(self, n_in, n_out, width, stride, pad, use_bn=False) -> None:
         super().__init__()
         self.n_in = n_in
         self.n_out = n_out
@@ -240,7 +240,7 @@ class ConvResNxN(nn.Module):
 
 @under_review()
 class MaybeBatchNorm2d(nn.Module):
-    def __init__(self, n_ftr, affine, use_bn):
+    def __init__(self, n_ftr, affine, use_bn) -> None:
         super().__init__()
         self.bn = nn.BatchNorm2d(n_ftr, affine=affine)
         self.use_bn = use_bn
@@ -253,7 +253,7 @@ class MaybeBatchNorm2d(nn.Module):
 
 @under_review()
 class NopNet(nn.Module):
-    def __init__(self, norm_dim=None):
+    def __init__(self, norm_dim=None) -> None:
         super().__init__()
         self.norm_dim = norm_dim
 
@@ -267,7 +267,7 @@ class NopNet(nn.Module):
 
 @under_review()
 class FakeRKHSConvNet(nn.Module):
-    def __init__(self, n_input, n_output, use_bn=False):
+    def __init__(self, n_input, n_output, use_bn=False) -> None:
         super().__init__()
         self.conv1 = nn.Conv2d(n_input, n_output, kernel_size=1, stride=1, padding=0, bias=False)
         self.bn1 = MaybeBatchNorm2d(n_output, True, use_bn)

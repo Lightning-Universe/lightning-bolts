@@ -29,7 +29,7 @@ class AMDIMTrainTransformsCIFAR10:
         (view1, view2) = transform(x)
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -71,7 +71,7 @@ class AMDIMEvalTransformsCIFAR10:
         (view1, view2) = transform(x)
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -111,7 +111,7 @@ class AMDIMTrainTransformsSTL10:
         (view1, view2) = transform(x)
     """
 
-    def __init__(self, height=64):
+    def __init__(self, height=64) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -151,7 +151,7 @@ class AMDIMEvalTransformsSTL10:
         view1 = transform(x)
     """
 
-    def __init__(self, height=64):
+    def __init__(self, height=64) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -195,7 +195,7 @@ class AMDIMTrainTransformsImageNet128:
         (view1, view2) = transform(x)
     """
 
-    def __init__(self, height=128):
+    def __init__(self, height=128) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -238,7 +238,7 @@ class AMDIMEvalTransformsImageNet128:
         view1 = transform(x)
     """
 
-    def __init__(self, height=128):
+    def __init__(self, height=128) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 

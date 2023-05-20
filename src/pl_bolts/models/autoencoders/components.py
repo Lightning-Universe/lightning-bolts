@@ -9,7 +9,7 @@ from pl_bolts.utils.stability import under_review
 class Interpolate(nn.Module):
     """nn.Module wrapper for F.interpolate."""
 
-    def __init__(self, size=None, scale_factor=None):
+    def __init__(self, size=None, scale_factor=None) -> None:
         super().__init__()
         self.size, self.scale_factor = size, scale_factor
 
@@ -51,7 +51,7 @@ class EncoderBlock(nn.Module):
 
     expansion = 1
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None):
+    def __init__(self, inplanes, planes, stride=1, downsample=None) -> None:
         super().__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = nn.BatchNorm2d(planes)
@@ -86,7 +86,7 @@ class EncoderBottleneck(nn.Module):
 
     expansion = 4
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None):
+    def __init__(self, inplanes, planes, stride=1, downsample=None) -> None:
         super().__init__()
         width = planes  # this needs to change if we want wide resnets
         self.conv1 = conv1x1(inplanes, width)
@@ -127,7 +127,7 @@ class DecoderBlock(nn.Module):
 
     expansion = 1
 
-    def __init__(self, inplanes, planes, scale=1, upsample=None):
+    def __init__(self, inplanes, planes, scale=1, upsample=None) -> None:
         super().__init__()
         self.conv1 = resize_conv3x3(inplanes, inplanes)
         self.bn1 = nn.BatchNorm2d(inplanes)
@@ -161,7 +161,7 @@ class DecoderBottleneck(nn.Module):
 
     expansion = 4
 
-    def __init__(self, inplanes, planes, scale=1, upsample=None):
+    def __init__(self, inplanes, planes, scale=1, upsample=None) -> None:
         super().__init__()
         width = planes  # this needs to change if we want wide resnets
         self.conv1 = resize_conv1x1(inplanes, width)
@@ -198,7 +198,7 @@ class DecoderBottleneck(nn.Module):
 
 @under_review()
 class ResNetEncoder(nn.Module):
-    def __init__(self, block, layers, first_conv=False, maxpool1=False):
+    def __init__(self, block, layers, first_conv=False, maxpool1=False) -> None:
         super().__init__()
 
         self.inplanes = 64
@@ -260,7 +260,7 @@ class ResNetEncoder(nn.Module):
 class ResNetDecoder(nn.Module):
     """Resnet in reverse order."""
 
-    def __init__(self, block, layers, latent_dim, input_height, first_conv=False, maxpool1=False):
+    def __init__(self, block, layers, latent_dim, input_height, first_conv=False, maxpool1=False) -> None:
         super().__init__()
 
         self.expansion = block.expansion
