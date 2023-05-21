@@ -98,10 +98,10 @@ class MLP(torch.nn.Sequential):
     Args:
         in_channels (int): Number of channels of the input
         hidden_channels (List[int]): List of the hidden channel dimensions
-        norm_layer (Callable[..., torch.nn.Module], optional): Norm layer that will be stacked on top of the linear layer. 
+        norm_layer (Callable[..., torch.nn.Module], optional): Norm layer that will be stacked on top of the linear layer.
         If ``None`` this layer won't be used.
         Default: ``None``activation_layer (Callable[..., torch.nn.Module], optional):
-             Activation function which will be stacked on top of the normalization layer (if not None), otherwise on top of the linear layer. 
+             Activation function which will be stacked on top of the normalization layer (if not None), otherwise on top of the linear layer.
         If ``None`` this layer won't be used. Default: ``torch.nn.ReLU``
         inplace (bool, optional): Parameter for the activation layer, which can optionally do the operation in-place.
             Default is ``None``, which uses the respective default values of the ``activation_layer`` and Dropout layer.
