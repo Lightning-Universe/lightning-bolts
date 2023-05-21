@@ -1,32 +1,27 @@
 import math
 from functools import partial
+from types import FunctionType
 from typing import Any, Callable, List, Optional
 
 import torch
+import torch.fx
 import torch.nn.functional as F
 from torch import Tensor, nn
-from types import FunctionType
 
 # from torchvision.ops.misc import MLP, Permute
 # from torchvision.ops.stochastic_depth import StochasticDepth
 # from torchvision.utils import _log_api_usage_once
 
-import torch
-import torch.fx
-from torch import nn, Tensor
-
 
 def _log_api_usage_once(obj: Any) -> None:
+    """Logs API usage(module and name) within an organization. In a large ecosystem, it's often useful to track the
+    PyTorch and TorchVision APIs usage. This API provides the similar functionality to the logging module in the
+    Python stdlib. It can be used for debugging purpose to log which methods are used and by default it is
+    inactive, unless the user manually subscribes a logger via the `SetAPIUsageLogger method
+    <https://github.com/pytorch/pytorch/blob/eb3b9fe719b21fae13c7a7cf3253f970290a573e/c10/util/Logging.cpp#L114>`_.
+    Please note it is triggered only once for the same API call within a process. It does not collect any data from
+    open-source users since it is no-op by default.
 
-    """
-    Logs API usage(module and name) within an organization.
-    In a large ecosystem, it's often useful to track the PyTorch and
-    TorchVision APIs usage. This API provides the similar functionality to the
-    logging module in the Python stdlib. It can be used for debugging purpose
-    to log which methods are used and by default it is inactive, unless the user
-    manually subscribes a logger via the `SetAPIUsageLogger method <https://github.com/pytorch/pytorch/blob/eb3b9fe719b21fae13c7a7cf3253f970290a573e/c10/util/Logging.cpp#L114>`_.
-    Please note it is triggered only once for the same API call within a process.
-    It does not collect any data from open-source users since it is no-op by default.
     For more information, please refer to
     * PyTorch note: https://pytorch.org/docs/stable/notes/large_scale_deployments.html#api-usage-logging;
     * Logging policy: https://github.com/pytorch/vision/issues/5052;
@@ -42,11 +37,10 @@ def _log_api_usage_once(obj: Any) -> None:
         name = obj.__name__
     torch._C._log_api_usage_once(f"{module}.{name}")
 
+
 def stochastic_depth(input: Tensor, p: float, mode: str, training: bool = True) -> Tensor:
-    """
-    Implements the Stochastic Depth from `"Deep Networks with Stochastic Depth"
-    <https://arxiv.org/abs/1603.09382>`_ used for randomly dropping residual
-    branches of residual architectures.
+    """Implements the Stochastic Depth from `"Deep Networks with Stochastic Depth"
+    <https://arxiv.org/abs/1603.09382>`_ used for randomly dropping residual branches of residual architectures.
 
     Args:
         input (Tensor[N, ...]): The input tensor or arbitrary dimensions with the first one
@@ -70,22 +64,19 @@ def stochastic_depth(input: Tensor, p: float, mode: str, training: bool = True) 
         return input
 
     survival_rate = 1.0 - p
-    if mode == "row":
-        size = [input.shape[0]] + [1] * (input.ndim - 1)
-    else:
-        size = [1] * input.ndim
+    size = [input.shape[0]] + [1] * (input.ndim - 1) if mode == "row" else [1] * input.ndim
     noise = torch.empty(size, dtype=input.dtype, device=input.device)
     noise = noise.bernoulli_(survival_rate)
     if survival_rate > 0.0:
         noise.div_(survival_rate)
     return input * noise
 
+
 torch.fx.wrap("stochastic_depth")
 
+
 class StochasticDepth(nn.Module):
-    """
-    See :func:`stochastic_depth`.
-    """
+    """See :func:`stochastic_depth`."""
 
     def __init__(self, p: float, mode: str) -> None:
         super().__init__()
@@ -99,7 +90,8 @@ class StochasticDepth(nn.Module):
     def __repr__(self) -> str:
         s = f"{self.__class__.__name__}(p={self.p}, mode={self.mode})"
         return s
-    
+
+
 class MLP(torch.nn.Sequential):
     """This block implements the multi-layer perceptron (MLP) module.
 
@@ -147,6 +139,7 @@ class MLP(torch.nn.Sequential):
         super().__init__(*layers)
         _log_api_usage_once(self)
 
+
 class Permute(torch.nn.Module):
     """This module returns a view of the tensor input with its dimensions permuted.
 
@@ -160,7 +153,8 @@ class Permute(torch.nn.Module):
 
     def forward(self, x: Tensor) -> Tensor:
         return torch.permute(x, self.dims)
-    
+
+
 def _patch_merging_pad(x: torch.Tensor) -> torch.Tensor:
     H, W, _ = x.shape[-3:]
     x = F.pad(x, (0, 0, 0, W % 2, 0, H % 2))
@@ -171,7 +165,9 @@ def _patch_merging_pad(x: torch.Tensor) -> torch.Tensor:
     x = torch.cat([x0, x1, x2, x3], -1)  # ... H/2 W/2 4*C
     return x
 
+
 torch.fx.wrap("_patch_merging_pad")
+
 
 def _get_relative_position_bias(
     relative_position_bias_table: torch.Tensor, relative_position_index: torch.Tensor, window_size: List[int]
@@ -182,7 +178,9 @@ def _get_relative_position_bias(
     relative_position_bias = relative_position_bias.permute(2, 0, 1).contiguous().unsqueeze(0)
     return relative_position_bias
 
+
 torch.fx.wrap("_get_relative_position_bias")
+
 
 class PatchMerging(nn.Module):
     """Patch Merging Layer.
@@ -210,6 +208,8 @@ class PatchMerging(nn.Module):
         x = self.norm(x)
         x = self.reduction(x)  # ... H/2 W/2 2*C
         return x
+
+
 class PatchMergingV2(nn.Module):
     """Patch Merging Layer for Swin Transformer V2.
 
@@ -788,7 +788,7 @@ class SwinTransformer(nn.Module):
         start_idx, output = 0, None
         for end_idx in idx_crops:
             _out = torch.cat(inputs[start_idx:end_idx])
-            
+
             if next(self.parameters()).is_cuda:
                 _out = self.forward_backbone(_out.cuda(non_blocking=True))
             else:
