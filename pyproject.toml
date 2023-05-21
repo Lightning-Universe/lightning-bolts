@@ -211,7 +211,10 @@ module = [
     "pl_bolts.optimizers.lars",
     "pl_bolts.optimizers.lr_scheduler",
     "pl_bolts.transforms.dataset_normalizations",
+    "pl_bolts.transforms.self_supervised.moco_transforms",
+    "pl_bolts.transforms.self_supervised.simclr_transforms",
     "pl_bolts.transforms.self_supervised.ssl_transforms",
+    "pl_bolts.transforms.self_supervised.swav_transforms",
     "pl_bolts.utils.arguments",
     "pl_bolts.utils.stability",
 ]
