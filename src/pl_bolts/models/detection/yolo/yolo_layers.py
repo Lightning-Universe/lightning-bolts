@@ -1,11 +1,10 @@
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import torch
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor, nn
 
-from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import under_review
+from pl_bolts.utils import _TORCH_MESHGRID_REQUIRES_INDEXING, _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -21,7 +20,6 @@ else:
     warn_missing_pkg("torchvision")
 
 
-@under_review()
 def _corner_coordinates(xy: Tensor, wh: Tensor) -> Tensor:
     """Converts box center points and sizes to corner coordinates.
 
@@ -38,7 +36,6 @@ def _corner_coordinates(xy: Tensor, wh: Tensor) -> Tensor:
     return torch.cat((top_left, bottom_right), -1)
 
 
-@under_review()
 def _aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
     """Calculates a matrix of intersections over union from box dimensions, assuming that the boxes are located at
     the same coordinates.
@@ -61,22 +58,19 @@ def _aligned_iou(dims1: Tensor, dims2: Tensor) -> Tensor:
     return inter / union
 
 
-@under_review()
 class SELoss(nn.MSELoss):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(reduction="none")
 
     def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
         return super().forward(inputs, target).sum(1)
 
 
-@under_review()
 class IoULoss(nn.Module):
     def forward(self, inputs: Tensor, target: Tensor) -> Tensor:
         return 1.0 - box_iou(inputs, target).diagonal()
 
 
-@under_review()
 class GIoULoss(nn.Module):
     def __init__(self) -> None:
         super().__init__()
@@ -89,7 +83,6 @@ class GIoULoss(nn.Module):
         return 1.0 - generalized_box_iou(inputs, target).diagonal()
 
 
-@under_review()
 class DetectionLayer(nn.Module):
     """A YOLO detection layer.
 
@@ -263,7 +256,10 @@ class DetectionLayer(nn.Module):
 
         x_range = torch.arange(width, device=xy.device)
         y_range = torch.arange(height, device=xy.device)
-        grid_y, grid_x = torch.meshgrid(y_range, x_range)
+        if _TORCH_MESHGRID_REQUIRES_INDEXING:
+            grid_y, grid_x = torch.meshgrid(y_range, x_range, indexing="ij")
+        else:
+            grid_y, grid_x = torch.meshgrid(y_range, x_range)
         offset = torch.stack((grid_x, grid_y), -1)  # [height, width, 2]
         offset = offset.unsqueeze(2)  # [height, width, 1, 2]
 
@@ -424,7 +420,7 @@ class DetectionLayer(nn.Module):
             pred_classprob.append(classprob[image_idx, cell_j, cell_i, predictors])
             pred_confidence.append(confidence[image_idx, cell_j, cell_i, predictors])
 
-        losses = dict()
+        losses = {}
 
         if pred_boxes and target_xy and target_wh:
             size_compensation = torch.cat(size_compensation)
@@ -468,15 +464,13 @@ class DetectionLayer(nn.Module):
         return losses, hits
 
 
-@under_review()
 class Mish(nn.Module):
     """Mish activation."""
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         return x * torch.tanh(nn.functional.softplus(x))
 
 
-@under_review()
 class RouteLayer(nn.Module):
     """Route layer concatenates the output (or part of it) from given layers."""
 
@@ -492,12 +486,11 @@ class RouteLayer(nn.Module):
         self.num_chunks = num_chunks
         self.chunk_idx = chunk_idx
 
-    def forward(self, x, outputs):
+    def forward(self, x, outputs: List[Union[Tensor, None]]) -> Tensor:
         chunks = [torch.chunk(outputs[layer], self.num_chunks, dim=1)[self.chunk_idx] for layer in self.source_layers]
         return torch.cat(chunks, dim=1)
 
 
-@under_review()
 class ShortcutLayer(nn.Module):
     """Shortcut layer adds a residual connection from the source layer."""
 
@@ -510,5 +503,5 @@ class ShortcutLayer(nn.Module):
         super().__init__()
         self.source_layer = source_layer
 
-    def forward(self, x, outputs):
+    def forward(self, x, outputs: List[Union[Tensor, None]]) -> Tensor:
         return outputs[-1] + outputs[self.source_layer]

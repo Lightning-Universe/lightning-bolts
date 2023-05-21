@@ -4,7 +4,7 @@ default_language_version:
 ci:
   autofix_prs: true
   autoupdate_commit_msg: '[pre-commit.ci] pre-commit suggestions'
-  autoupdate_schedule: quarterly
+  autoupdate_schedule: monthly
   # submodules: true
 
 repos:
@@ -22,14 +22,14 @@ repos:
       - id: detect-private-key
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.3.1
+    rev: v3.4.0
     hooks:
       - id: pyupgrade
-        args: [--py36-plus]
+        args: [--py37-plus]
         name: Upgrade code
 
   - repo: https://github.com/PyCQA/docformatter
-    rev: v1.5.1
+    rev: v1.7.1
     hooks:
       - id: docformatter
         args: [--in-place, --wrap-summaries=115, --wrap-descriptions=120]
@@ -59,9 +59,11 @@ repos:
     rev: v1.4.0
     hooks:
       - id: yesqa
+        additional_dependencies:
+          - flake8-pytest-style
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.260
+    rev: v0.0.269
     hooks:
       - id: ruff
         args: ["--fix"]

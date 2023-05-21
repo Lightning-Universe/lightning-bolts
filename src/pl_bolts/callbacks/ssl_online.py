@@ -40,7 +40,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         hidden_dim: Optional[int] = None,
         num_classes: Optional[int] = None,
         dataset: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Args:
             z_dim: Representation dimension
@@ -123,10 +123,9 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         pl_module: LightningModule,
         batch: Sequence,
     ):
-        with torch.no_grad():
-            with set_training(pl_module, False):
-                x, y = self.to_device(batch, pl_module.device)
-                representations = pl_module(x).flatten(start_dim=1)
+        with torch.no_grad(), set_training(pl_module, False):
+            x, y = self.to_device(batch, pl_module.device)
+            representations = pl_module(x).flatten(start_dim=1)
 
         # forward pass
         mlp_logits = self.online_evaluator(representations)  # type: ignore[operator]

@@ -11,7 +11,6 @@ from torch import Tensor, optim
 from pl_bolts.models.detection.yolo.yolo_layers import DetectionLayer, RouteLayer, ShortcutLayer
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
-from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
@@ -23,7 +22,6 @@ else:
 log = logging.getLogger(__name__)
 
 
-@under_review()
 class YOLO(LightningModule):
     """PyTorch Lightning implementation of YOLOv3 and YOLOv4.
 
@@ -179,14 +177,14 @@ class YOLO(LightningModule):
             )
         for layer_idx, layer_hits in enumerate(hits):
             hit_rate = torch.true_divide(layer_hits, total_hits) if total_hits > 0 else 1.0
-            self.log(f"layer_{layer_idx}_hit_rate", hit_rate, sync_dist=False)
+            self.log(f"layer_{layer_idx}_hit_rate", hit_rate, sync_dist=False, batch_size=images.size(0))
 
         def total_loss(loss_name):
             """Returns the sum of the loss over detection layers."""
             loss_tuple = tuple(layer_losses[loss_name] for layer_losses in losses)
             return torch.stack(loss_tuple).sum()
 
-        losses = {loss_name: total_loss(loss_name) for loss_name in losses[0].keys()}
+        losses = {loss_name: total_loss(loss_name) for loss_name in losses[0]}
         return detections, losses
 
     def configure_optimizers(self) -> Tuple[List, List]:
@@ -233,8 +231,8 @@ class YOLO(LightningModule):
         total_loss = torch.stack(tuple(losses.values())).sum()
 
         for name, value in losses.items():
-            self.log(f"val/{name}_loss", value, sync_dist=True)
-        self.log("val/total_loss", total_loss, sync_dist=True)
+            self.log(f"val/{name}_loss", value, sync_dist=True, batch_size=images.size(0))
+        self.log("val/total_loss", total_loss, sync_dist=True, batch_size=images.size(0))
 
     def test_step(self, batch: Tuple[List[Tensor], List[Dict[str, Tensor]]], batch_idx: int):
         """Evaluates a batch of data from the test set.
@@ -455,7 +453,6 @@ class YOLO(LightningModule):
         return {"boxes": out_boxes, "scores": out_scores, "classprobs": out_classprobs, "labels": out_labels}
 
 
-@under_review()
 class Resize:
     """Rescales the image and target to given dimensions.
 
@@ -486,7 +483,6 @@ class Resize:
         return image, target
 
 
-@under_review()
 def run_cli():
     from argparse import ArgumentParser
 

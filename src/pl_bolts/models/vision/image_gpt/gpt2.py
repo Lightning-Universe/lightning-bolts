@@ -7,7 +7,7 @@ from pl_bolts.utils.stability import under_review
 
 @under_review()
 class Block(nn.Module):
-    def __init__(self, embed_dim, heads):
+    def __init__(self, embed_dim, heads) -> None:
         super().__init__()
         self.ln_1 = nn.LayerNorm(embed_dim)
         self.ln_2 = nn.LayerNorm(embed_dim)
@@ -61,7 +61,7 @@ class GPT2(LightningModule):
         num_positions: int,
         vocab_size: int,
         num_classes: int,
-    ):
+    ) -> None:
         super().__init__()
         self.save_hyperparameters()
 
