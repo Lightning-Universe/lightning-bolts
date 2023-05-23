@@ -8,7 +8,7 @@ from pl_bolts.datasets.utils import to_tensor
 
 
 class TestArrayDataset:
-    @pytest.fixture
+    @pytest.fixture()
     def array_dataset(self):
         features_1 = DataModel(data=[[1, 0, -1, 2], [1, 0, -2, -1], [2, 5, 0, 3], [-7, 1, 2, 2]], transform=to_tensor)
         target_1 = DataModel(data=[1, 0, 0, 1], transform=to_tensor)

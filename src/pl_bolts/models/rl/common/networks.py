@@ -16,7 +16,7 @@ from pl_bolts.utils.stability import under_review
 class CNN(nn.Module):
     """Simple MLP network."""
 
-    def __init__(self, input_shape: Tuple[int], n_actions: int):
+    def __init__(self, input_shape: Tuple[int], n_actions: int) -> None:
         """
         Args:
             input_shape: observation shape of the environment
@@ -63,7 +63,7 @@ class CNN(nn.Module):
 class MLP(nn.Module):
     """Simple MLP network."""
 
-    def __init__(self, input_shape: Tuple[int], n_actions: int, hidden_size: int = 128):
+    def __init__(self, input_shape: Tuple[int], n_actions: int, hidden_size: int = 128) -> None:
         """
         Args:
             input_shape: observation shape of the environment
@@ -100,7 +100,7 @@ class ContinuousMLP(nn.Module):
         hidden_size: int = 128,
         action_bias: int = 0,
         action_scale: int = 1,
-    ):
+    ) -> None:
         """
         Args:
             input_shape: observation shape of the environment
@@ -152,7 +152,7 @@ class ContinuousMLP(nn.Module):
 class ActorCriticMLP(nn.Module):
     """MLP network with heads for actor and critic."""
 
-    def __init__(self, input_shape: Tuple[int], n_actions: int, hidden_size: int = 128):
+    def __init__(self, input_shape: Tuple[int], n_actions: int, hidden_size: int = 128) -> None:
         """
         Args:
             input_shape: observation shape of the environment
@@ -184,7 +184,7 @@ class ActorCriticMLP(nn.Module):
 class DuelingMLP(nn.Module):
     """MLP network with duel heads for val and advantage."""
 
-    def __init__(self, input_shape: Tuple[int], n_actions: int, hidden_size: int = 128):
+    def __init__(self, input_shape: Tuple[int], n_actions: int, hidden_size: int = 128) -> None:
         """
         Args:
             input_shape: observation shape of the environment
@@ -237,7 +237,7 @@ class DuelingMLP(nn.Module):
 class DuelingCNN(nn.Module):
     """CNN network with duel heads for val and advantage."""
 
-    def __init__(self, input_shape: Tuple[int], n_actions: int, _: int = 128):
+    def __init__(self, input_shape: Tuple[int], n_actions: int, _: int = 128) -> None:
         """
         Args:
             input_shape: observation shape of the environment
@@ -306,7 +306,7 @@ class DuelingCNN(nn.Module):
 class NoisyCNN(nn.Module):
     """CNN with Noisy Linear layers for exploration."""
 
-    def __init__(self, input_shape: Tuple[int], n_actions: int):
+    def __init__(self, input_shape: Tuple[int], n_actions: int) -> None:
         """
         Args:
             input_shape: observation shape of the environment
@@ -364,7 +364,7 @@ class NoisyLinear(nn.Linear):
     Chapter08/lib/dqn_extra.py#L19
     """
 
-    def __init__(self, in_features: int, out_features: int, sigma_init: float = 0.017, bias: bool = True):
+    def __init__(self, in_features: int, out_features: int, sigma_init: float = 0.017, bias: bool = True) -> None:
         """
         Args:
             in_features: number of inputs
@@ -388,7 +388,7 @@ class NoisyLinear(nn.Linear):
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        """initializes or resets the paramseter of the layer."""
+        """Initializes or resets the paramseter of the layer."""
         std = math.sqrt(3 / self.in_features)
         self.weight.data.uniform_(-std, std)
         self.bias.data.uniform_(-std, std)

@@ -6,7 +6,6 @@ from lightning_utilities.core.imports import compare_version, module_available
 from pl_bolts.callbacks.verification.batch_gradient import BatchGradientVerification  # type: ignore
 
 _NATIVE_AMP_AVAILABLE: bool = module_available("torch.cuda.amp") and hasattr(torch.cuda.amp, "autocast")
-
 _TORCHVISION_AVAILABLE: bool = module_available("torchvision")
 _TORCHMETRICS_DETECTION_AVAILABLE: bool = module_available("torchmetrics.detection")
 _GYM_AVAILABLE: bool = module_available("gym")

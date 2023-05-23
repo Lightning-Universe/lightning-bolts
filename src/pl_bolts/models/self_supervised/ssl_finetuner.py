@@ -54,7 +54,7 @@ class SSLFineTuner(LightningModule):
         decay_epochs: Tuple = (60, 80),
         gamma: float = 0.1,
         final_lr: float = 0.0,
-    ):
+    ) -> None:
         """
         Args:
             backbone: a pretrained model

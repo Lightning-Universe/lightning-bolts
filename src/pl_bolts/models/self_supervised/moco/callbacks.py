@@ -7,7 +7,7 @@ from pl_bolts.utils.stability import under_review
 
 @under_review()
 class MocoLRScheduler(Callback):
-    def __init__(self, initial_lr=0.03, use_cosine_scheduler=False, schedule=(120, 160), max_epochs=200):
+    def __init__(self, initial_lr=0.03, use_cosine_scheduler=False, schedule=(120, 160), max_epochs=200) -> None:
         super().__init__()
         self.lr = initial_lr
         self.use_cosine_scheduler = use_cosine_scheduler

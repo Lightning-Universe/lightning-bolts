@@ -68,7 +68,7 @@ class LARS(Optimizer):
         nesterov=False,
         trust_coefficient=0.001,
         eps=1e-8,
-    ):
+    ) -> None:
         if lr is not required and lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
         if momentum < 0.0:
@@ -76,15 +76,15 @@ class LARS(Optimizer):
         if weight_decay < 0.0:
             raise ValueError(f"Invalid weight_decay value: {weight_decay}")
 
-        defaults = dict(
-            lr=lr,
-            momentum=momentum,
-            dampening=dampening,
-            weight_decay=weight_decay,
-            nesterov=nesterov,
-            trust_coefficient=trust_coefficient,
-            eps=eps,
-        )
+        defaults = {
+            "lr": lr,
+            "momentum": momentum,
+            "dampening": dampening,
+            "weight_decay": weight_decay,
+            "nesterov": nesterov,
+            "trust_coefficient": trust_coefficient,
+            "eps": eps,
+        }
         if nesterov and (momentum <= 0 or dampening != 0):
             raise ValueError("Nesterov momentum requires a momentum and zero dampening")
 
@@ -125,13 +125,12 @@ class LARS(Optimizer):
                 g_norm = torch.norm(p.grad.data)
 
                 # lars scaling + weight decay part
-                if weight_decay != 0:
-                    if p_norm != 0 and g_norm != 0:
-                        lars_lr = p_norm / (g_norm + p_norm * weight_decay + group["eps"])
-                        lars_lr *= group["trust_coefficient"]
+                if weight_decay != 0 and p_norm != 0 and g_norm != 0:
+                    lars_lr = p_norm / (g_norm + p_norm * weight_decay + group["eps"])
+                    lars_lr *= group["trust_coefficient"]
 
-                        d_p = d_p.add(p, alpha=weight_decay)
-                        d_p *= lars_lr
+                    d_p = d_p.add(p, alpha=weight_decay)
+                    d_p *= lars_lr
 
                 # sgd part
                 if momentum != 0:
@@ -141,10 +140,7 @@ class LARS(Optimizer):
                     else:
                         buf = param_state["momentum_buffer"]
                         buf.mul_(momentum).add_(d_p, alpha=1 - dampening)
-                    if nesterov:
-                        d_p = d_p.add(buf, alpha=momentum)
-                    else:
-                        d_p = buf
+                    d_p = d_p.add(buf, alpha=momentum) if nesterov else buf
 
                 p.add_(d_p, alpha=-group["lr"])
 

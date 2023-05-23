@@ -45,7 +45,7 @@ class KittiDataset(Dataset):
         img_size: tuple = (1242, 376),
         valid_labels: Tuple[int] = DEFAULT_VALID_LABELS,
         transform: Optional[Callable] = None,
-    ):
+    ) -> None:
         if not _PIL_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `PIL` which is not installed yet.")
 
@@ -96,7 +96,7 @@ class KittiDataset(Dataset):
 
     def get_filenames(self, path: str):
         """Returns a list of absolute paths to images inside given `path`"""
-        files_list = list()
+        files_list = []
         for filename in os.listdir(path):
             files_list.append(os.path.join(path, filename))
         return files_list

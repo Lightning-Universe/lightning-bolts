@@ -15,10 +15,11 @@ from pl_bolts.utils.stability import under_review
 class VerificationBase:
     """Base class for model verification.
 
-    All verifications should run with any :class:`torch.nn.Module` unless otherwise stated.
+    All verifications should run with any
+    :class: `torch.nn.Module` unless otherwise stated.
     """
 
-    def __init__(self, model: nn.Module):
+    def __init__(self, model: nn.Module) -> None:
         """
         Arguments:
             model: The model to run verification for.
@@ -100,11 +101,8 @@ class VerificationCallbackBase(Callback):
         self._raise_error = error
 
     def message(self, *args: Any, **kwargs: Any) -> str:
-        """
-        The message to be printed when the model does not pass the verification.
-        If the message for warning and error differ, override the
-        :meth:`warning_message` and :meth:`error_message`
-        methods directly.
+        """The message to be printed when the model does not pass the verification. If the message for warning and
+        error differ, override the :meth:`warning_message` and :meth:`error_message` methods directly.
 
         Arguments:
             *args: Any positional arguments that are needed to construct the message.

@@ -1,3 +1,7 @@
+from typing import Callable, Tuple, Union
+
+from torch import Tensor
+
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
 
@@ -10,6 +14,12 @@ else:  # pragma: no cover
 class SimCLRTrainDataTransform:
     """Transforms for SimCLR during training step of the pre-training stage.
 
+    Args:
+        input_height (int, optional): expected output size of image. Defaults to 224.
+        gaussian_blur (bool, optional): applies Gaussian blur if True. Defaults to True.
+        jitter_strength (float, optional): color jitter multiplier. Defaults to 1.0.
+        normalize (Callable, optional): optional transform to normalize. Defaults to None.
+
     Transform::
 
         RandomResizedCrop(size=self.input_height)
@@ -21,7 +31,7 @@ class SimCLRTrainDataTransform:
 
     Example::
 
-        from pl_bolts.models.self_supervised.simclr.transforms import SimCLRTrainDataTransform
+        from pl_bolts.transforms.self_supervised.simclr_transforms import SimCLRTrainDataTransform
 
         transform = SimCLRTrainDataTransform(input_height=32)
         x = sample()
@@ -29,7 +39,11 @@ class SimCLRTrainDataTransform:
     """
 
     def __init__(
-        self, input_height: int = 224, gaussian_blur: bool = True, jitter_strength: float = 1.0, normalize=None
+        self,
+        input_height: int = 224,
+        gaussian_blur: bool = True,
+        jitter_strength: float = 1.0,
+        normalize: Union[None, Callable] = None,
     ) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
@@ -74,17 +88,20 @@ class SimCLRTrainDataTransform:
             [transforms.RandomResizedCrop(self.input_height), transforms.RandomHorizontalFlip(), self.final_transform]
         )
 
-    def __call__(self, sample):
-        transform = self.train_transform
-
-        xi = transform(sample)
-        xj = transform(sample)
-
+    def __call__(self, sample: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
+        xi = self.train_transform(sample)
+        xj = self.train_transform(sample)
         return xi, xj, self.online_transform(sample)
 
 
 class SimCLREvalDataTransform(SimCLRTrainDataTransform):
     """Transforms for SimCLR during the validation step of the pre-training stage.
+
+    Args:
+        input_height (int, optional): expected output size of image. Defaults to 224.
+        gaussian_blur (bool, optional): applies Gaussian blur if True. Defaults to True.
+        jitter_strength (float, optional): color jitter multiplier. Defaults to 1.0.
+        normalize (Callable, optional): optional transform to normalize. Defaults to None.
 
     Transform::
 
@@ -94,7 +111,7 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
 
     Example::
 
-        from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform
+        from pl_bolts.transforms.self_supervised.simclr_transforms import SimCLREvalDataTransform
 
         transform = SimCLREvalDataTransform(input_height=32)
         x = sample()
@@ -102,8 +119,12 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
     """
 
     def __init__(
-        self, input_height: int = 224, gaussian_blur: bool = True, jitter_strength: float = 1.0, normalize=None
-    ):
+        self,
+        input_height: int = 224,
+        gaussian_blur: bool = True,
+        jitter_strength: float = 1.0,
+        normalize: Union[None, Callable] = None,
+    ) -> None:
         super().__init__(
             normalize=normalize, input_height=input_height, gaussian_blur=gaussian_blur, jitter_strength=jitter_strength
         )
@@ -121,6 +142,13 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
 class SimCLRFinetuneTransform(SimCLRTrainDataTransform):
     """Transforms for SimCLR during the fine-tuning stage.
 
+    Args:
+        input_height (int, optional): expected output size of image. Defaults to 224.
+        jitter_strength (float, optional): color jitter multiplier. Defaults to 1.0.
+        normalize (Callable, optional): optional transform to normalize. Defaults to None.
+        eval_transform (bool, optional): if True, uses validation transforms.
+            Otherwise uses training transforms. Defaults to False.
+
     Transform::
 
         Resize(input_height + 10, interpolation=3)
@@ -129,7 +157,7 @@ class SimCLRFinetuneTransform(SimCLRTrainDataTransform):
 
     Example::
 
-        from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform
+        from pl_bolts.transforms.self_supervised.simclr_transforms import SimCLREvalDataTransform
 
         transform = SimCLREvalDataTransform(input_height=32)
         x = sample()
@@ -137,10 +165,14 @@ class SimCLRFinetuneTransform(SimCLRTrainDataTransform):
     """
 
     def __init__(
-        self, input_height: int = 224, jitter_strength: float = 1.0, normalize=None, eval_transform: bool = False
+        self,
+        input_height: int = 224,
+        jitter_strength: float = 1.0,
+        normalize: Union[None, Callable] = None,
+        eval_transform: bool = False,
     ) -> None:
         super().__init__(
-            normalize=normalize, input_height=input_height, gaussian_blur=None, jitter_strength=jitter_strength
+            input_height=input_height, gaussian_blur=False, jitter_strength=jitter_strength, normalize=normalize
         )
 
         if eval_transform:
@@ -151,5 +183,5 @@ class SimCLRFinetuneTransform(SimCLRTrainDataTransform):
 
         self.transform = transforms.Compose([self.data_transforms, self.final_transform])
 
-    def __call__(self, sample):
+    def __call__(self, sample: Tensor) -> Tensor:
         return self.transform(sample)

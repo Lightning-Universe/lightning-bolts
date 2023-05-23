@@ -9,7 +9,7 @@ from pl_bolts.utils.arguments import LightningArgumentParser, LitArg, gather_lit
 class DummyParentModel(LightningModule):
     name = "parent-model"
 
-    def __init__(self, a: int, b: str, c: str = "parent_model_c"):
+    def __init__(self, a: int, b: str, c: str = "parent_model_c") -> None:
         super().__init__()
         self.save_hyperparameters()
 
@@ -20,7 +20,7 @@ class DummyParentModel(LightningModule):
 class DummyParentDataModule(LightningDataModule):
     name = "parent-dm"
 
-    def __init__(self, d: str, c: str = "parent_dm_c"):
+    def __init__(self, d: str, c: str = "parent_dm_c") -> None:
         super().__init__()
         self.d = d
         self.c = c
@@ -49,7 +49,7 @@ def test_lit_arg_immutable():
 
 
 @pytest.mark.parametrize(
-    "obj,expected",
+    ("obj", "expected"),
     [
         pytest.param(
             DummyParentModel,
@@ -81,7 +81,7 @@ def test_gather_lit_args(obj, expected):
 
 
 @pytest.mark.parametrize(
-    "ignore_required_init_args,dm_cls,model_cls,a,b,c,d",
+    ("ignore_required_init_args", "dm_cls", "model_cls", "a", "b", "c", "d"),
     [
         pytest.param(True, DummyParentDataModule, DummyParentModel, 999, "bbb", "ccc", "ddd", id="base"),
     ],
