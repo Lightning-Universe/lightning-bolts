@@ -53,7 +53,7 @@ def test_global_xy(catch_warnings):
 
 
 @pytest.mark.parametrize(
-    "dims1, dims2, expected_ious",
+    ("dims1", "dims2", "expected_ious"),
     [
         (
             torch.tensor([[1.0, 1.0], [10.0, 1.0], [100.0, 10.0]]),
