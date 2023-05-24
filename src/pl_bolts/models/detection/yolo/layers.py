@@ -137,10 +137,7 @@ class DetectionLayer(nn.Module):
 
         image_xy = global_xy(xy, image_size)
         prior_shapes = torch.tensor(self.prior_shapes, dtype=wh.dtype, device=wh.device)
-        if self.input_is_normalized:
-            image_wh = 4 * torch.square(wh) * prior_shapes
-        else:
-            image_wh = torch.exp(wh) * prior_shapes
+        image_wh = 4 * torch.square(wh) * prior_shapes if self.input_is_normalized else torch.exp(wh) * prior_shapes
         box = torch.cat((image_xy, image_wh), -1)
         box = box_convert(box, in_fmt="cxcywh", out_fmt="xyxy")
         output = torch.cat((box, norm_confidence.unsqueeze(-1), norm_classprob), -1)

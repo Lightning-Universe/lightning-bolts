@@ -288,10 +288,7 @@ class YOLOLoss:
         """
         loss_shape = torch.Size([len(preds["boxes"]), len(targets["boxes"])])
 
-        if input_is_normalized:
-            bce_func = binary_cross_entropy
-        else:
-            bce_func = binary_cross_entropy_with_logits
+        bce_func = binary_cross_entropy if input_is_normalized else binary_cross_entropy_with_logits
 
         overlap = self._pairwise_overlap(preds["boxes"], targets["boxes"])
         assert overlap.shape == loss_shape
@@ -338,10 +335,7 @@ class YOLOLoss:
         Returns:
             The final losses.
         """
-        if input_is_normalized:
-            bce_func = binary_cross_entropy
-        else:
-            bce_func = binary_cross_entropy_with_logits
+        bce_func = binary_cross_entropy if input_is_normalized else binary_cross_entropy_with_logits
 
         overlap_loss = self._elementwise_overlap_loss(targets["boxes"], preds["boxes"])
         overlap = 1.0 - overlap_loss

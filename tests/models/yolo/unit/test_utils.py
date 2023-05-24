@@ -15,7 +15,7 @@ from pl_bolts.models.detection.yolo.utils import (
 )
 
 
-@pytest.mark.parametrize("width,height", [(10, 5)])
+@pytest.mark.parametrize(("width", "height"), [(10, 5)])
 def test_grid_offsets(width: int, height: int, catch_warnings):
     size = torch.tensor([width, height])
     offsets = grid_offsets(size)
@@ -26,7 +26,7 @@ def test_grid_offsets(width: int, height: int, catch_warnings):
     assert torch.equal(offsets[:, 0, 1], torch.arange(height, dtype=offsets.dtype))
 
 
-@pytest.mark.parametrize("width,height", [(10, 5)])
+@pytest.mark.parametrize(("width", "height"), [(10, 5)])
 def test_grid_centers(width: int, height: int, catch_warnings):
     size = torch.tensor([width, height])
     centers = grid_centers(size)

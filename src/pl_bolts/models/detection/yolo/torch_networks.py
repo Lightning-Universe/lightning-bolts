@@ -405,10 +405,7 @@ class YOLOV4TinyBackbone(nn.Module):
             )
 
         def stage(out_channels: int, use_maxpool: bool) -> nn.Module:
-            if use_maxpool:
-                downsample_module = maxpool(out_channels)
-            else:
-                downsample_module = downsample(out_channels // 2, out_channels)
+            downsample_module = maxpool(out_channels) if use_maxpool else downsample(out_channels // 2, out_channels)
             stage_module = TinyStage(out_channels, activation=activation, norm=normalization)
             return nn.Sequential(OrderedDict([("downsample", downsample_module), ("stage", stage_module)]))
 
