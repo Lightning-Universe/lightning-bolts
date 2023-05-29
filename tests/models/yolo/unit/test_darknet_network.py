@@ -1,9 +1,10 @@
 import warnings
 
 import pytest
+import torch.nn as nn
 from pytorch_lightning.utilities.warnings import PossibleUserWarning
 
-from pl_bolts.models.detection.yolo.yolo_config import (
+from pl_bolts.models.detection.yolo.darknet_network import (
     _create_convolutional,
     _create_maxpool,
     _create_shortcut,
@@ -33,20 +34,19 @@ def test_create_convolutional(config, catch_warnings):
     assert conv.conv.kernel_size == (config["size"], config["size"])
     assert conv.conv.stride == (config["stride"], config["stride"])
 
-    activation = config["activation"]
     pad_size = (config["size"] - 1) // 2 if config["pad"] else 0
-
     if config["pad"]:
         assert conv.conv.padding == (pad_size, pad_size)
 
     if config["batch_normalize"]:
-        assert len(conv) == 3
+        assert isinstance(conv.norm, nn.BatchNorm2d)
 
-    if activation != "linear":
-        if activation != "logistic":
-            assert activation == conv[-1].__class__.__name__.lower()[: len(activation)]
-        elif activation == "logistic":
-            assert conv[-1].__class__.__name__.lower() == "sigmoid"
+    if config["activation"] == "linear":
+        assert isinstance(conv.act, nn.Identity)
+    elif config["activation"] == "logistic":
+        assert isinstance(conv.act, nn.Sigmoid)
+    else:
+        assert conv.act.__class__.__name__.lower().startswith(config["activation"])
 
 
 @pytest.mark.parametrize(
@@ -73,12 +73,14 @@ def test_create_maxpool(config, catch_warnings):
         category=PossibleUserWarning,
     )
 
-    pad_size = (config["size"] - 1) // 2
+    pad_size, remainder = divmod(max(config["size"], config["stride"]) - config["stride"], 2)
     maxpool, _ = _create_maxpool(config, [3])
 
-    assert maxpool.kernel_size == config["size"]
-    assert maxpool.stride == config["stride"]
-    assert maxpool.padding == pad_size
+    assert maxpool.maxpool.kernel_size == config["size"]
+    assert maxpool.maxpool.stride == config["stride"]
+    assert maxpool.maxpool.padding == pad_size
+    if remainder != 0:
+        assert isinstance(maxpool.pad, nn.ZeroPad2d)
 
 
 @pytest.mark.parametrize(
