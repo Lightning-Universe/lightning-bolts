@@ -34,11 +34,10 @@ def _create_synth_Cityscapes_dataset(path_dir):
     dataset_splits = ["train", "val", "test"]
 
     for split in dataset_splits:
-        base_image_id = 0
         for city in non_existing_citites:
             (images_dir / split / city).mkdir(parents=True, exist_ok=True)
             (fine_labels_dir / split / city).mkdir(parents=True, exist_ok=True)
-            base_name = str(base_image_id).zfill(6)
+            base_name = str(uuid.uuid4())
             image_name = f"{base_name}_leftImg8bit.png"
             instance_target_name = f"{base_name}_gtFine_instanceIds.png"
             semantic_target_name = f"{base_name}_gtFine_labelIds.png"
@@ -47,7 +46,6 @@ def _create_synth_Cityscapes_dataset(path_dir):
             Image.new("L", (2048, 1024)).save(fine_labels_dir / split / city / instance_target_name)
             Image.new("L", (2048, 1024)).save(fine_labels_dir / split / city / semantic_target_name)
             Image.new("RGBA", (2048, 1024)).save(fine_labels_dir / split / city / color_target_name)
-            base_image_id += 1
 
 
 def test_cityscapes_datamodule(datadir, catch_warnings):
