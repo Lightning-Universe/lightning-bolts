@@ -8,9 +8,19 @@ from pytorch_lightning.utilities.warnings import PossibleUserWarning
 from torch.utils.data import DataLoader
 
 from pl_bolts.datasets import DummyDetectionDataset
-from pl_bolts.models.detection import YOLO, FasterRCNN, RetinaNet, YOLOConfiguration
+from pl_bolts.models.detection import (
+    YOLO,
+    DarknetNetwork,
+    FasterRCNN,
+    RetinaNet,
+    YOLOV4Network,
+    YOLOV4P6Network,
+    YOLOV4TinyNetwork,
+    YOLOV5Network,
+    YOLOV7Network,
+    YOLOXNetwork,
+)
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
-from pl_bolts.models.detection.yolo.yolo_layers import _aligned_iou
 from tests import TEST_ROOT
 
 
@@ -82,13 +92,16 @@ def test_fasterrcnn_pyt_module_bbone_train(tmpdir):
 
 
 @pytest.mark.parametrize("config", [("yolo"), ("yolo_giou")])
-def test_yolo(config, catch_warnings):
+def test_darknet(config, catch_warnings):
     config_path = Path(TEST_ROOT) / "data" / f"{config}.cfg"
-    config = YOLOConfiguration(config_path)
-    model = YOLO(config.get_network())
+    network = DarknetNetwork(config_path)
+    model = YOLO(network, confidence_threshold=0.5)
 
-    image = torch.rand(1, 3, 256, 256)
-    model(image)
+    image = torch.rand(3, 256, 256)
+    detections = model.infer(image)
+    assert "boxes" in detections
+    assert "scores" in detections
+    assert "labels" in detections
 
 
 @pytest.mark.parametrize(
@@ -98,7 +111,7 @@ def test_yolo(config, catch_warnings):
         ("yolo_giou"),
     ],
 )
-def test_yolo_train(tmpdir, cfg_name, catch_warnings):
+def test_darknet_train(tmpdir, cfg_name, catch_warnings):
     warnings.filterwarnings(
         "ignore",
         message=".*does not have many workers which may be a bottleneck.*",
@@ -106,31 +119,191 @@ def test_yolo_train(tmpdir, cfg_name, catch_warnings):
     )
 
     config_path = Path(TEST_ROOT) / "data" / f"{cfg_name}.cfg"
-    config = YOLOConfiguration(config_path)
-    model = YOLO(config.get_network())
+    network = DarknetNetwork(config_path)
+    model = YOLO(network, confidence_threshold=0.5)
 
-    train_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
-    valid_dl = DataLoader(DummyDetectionDataset(), collate_fn=_collate_fn)
+    train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+    valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
 
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, logger=False, max_epochs=10, accelerator="auto")
     trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
 
 
-@pytest.mark.parametrize(
-    ("dims1", "dims2", "expected_ious"),
-    [
-        (
-            torch.tensor([[1.0, 1.0], [10.0, 1.0], [100.0, 10.0]]),
-            torch.tensor([[1.0, 10.0], [2.0, 20.0]]),
-            torch.tensor([[1.0 / 10.0, 1.0 / 40.0], [1.0 / 19.0, 2.0 / 48.0], [10.0 / 1000.0, 20.0 / 1020.0]]),
-        )
-    ],
-)
-def test_aligned_iou(dims1, dims2, expected_ious, catch_warnings):
+def test_yolov4_tiny(catch_warnings):
+    # Using giou allows the tests to pass also with older versions of Torchvision.
+    network = YOLOV4TinyNetwork(num_classes=2, width=4, overlap_func="giou")
+    model = YOLO(network, confidence_threshold=0.5)
+
+    image = torch.rand(3, 256, 256)
+    detections = model.infer(image)
+    assert "boxes" in detections
+    assert "scores" in detections
+    assert "labels" in detections
+
+
+def test_yolov4_tiny_train(tmpdir):
     warnings.filterwarnings(
         "ignore",
         message=".*does not have many workers which may be a bottleneck.*",
         category=PossibleUserWarning,
     )
 
-    torch.testing.assert_close(_aligned_iou(dims1, dims2), expected_ious)
+    # Using giou allows the tests to pass also with older versions of Torchvision.
+    network = YOLOV4TinyNetwork(num_classes=2, width=4, overlap_func="giou")
+    model = YOLO(network, confidence_threshold=0.5)
+
+    train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+    valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, logger=False, max_epochs=10, accelerator="auto")
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
+
+
+def test_yolov4(catch_warnings):
+    # Using giou allows the tests to pass also with older versions of Torchvision.
+    network = YOLOV4Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128), overlap_func="giou")
+    model = YOLO(network, confidence_threshold=0.5)
+
+    image = torch.rand(3, 256, 256)
+    detections = model.infer(image)
+    assert "boxes" in detections
+    assert "scores" in detections
+    assert "labels" in detections
+
+
+def test_yolov4_train(tmpdir, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
+    # Using giou allows the tests to pass also with older versions of Torchvision.
+    network = YOLOV4Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128), overlap_func="giou")
+    model = YOLO(network, confidence_threshold=0.5)
+
+    train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+    valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, logger=False, max_epochs=10, accelerator="auto")
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
+
+
+def test_yolov4p6(catch_warnings):
+    # Using giou allows the tests to pass also with older versions of Torchvision.
+    network = YOLOV4P6Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128, 128), overlap_func="giou")
+    model = YOLO(network, confidence_threshold=0.5)
+
+    image = torch.rand(3, 256, 256)
+    detections = model.infer(image)
+    assert "boxes" in detections
+    assert "scores" in detections
+    assert "labels" in detections
+
+
+def test_yolov4p6_train(tmpdir, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
+    # Using giou allows the tests to pass also with older versions of Torchvision.
+    network = YOLOV4P6Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128, 128), overlap_func="giou")
+    model = YOLO(network, confidence_threshold=0.5)
+
+    train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+    valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, logger=False, max_epochs=10, accelerator="auto")
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
+
+
+def test_yolov5(catch_warnings):
+    # Using giou allows the tests to pass also with older versions of Torchvision.
+    network = YOLOV5Network(num_classes=2, depth=1, width=4, overlap_func="giou")
+    model = YOLO(network, confidence_threshold=0.5)
+
+    image = torch.rand(3, 256, 256)
+    detections = model.infer(image)
+    assert "boxes" in detections
+    assert "scores" in detections
+    assert "labels" in detections
+
+
+def test_yolov5_train(tmpdir, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
+    # Using giou allows the tests to pass also with older versions of Torchvision.
+    network = YOLOV5Network(num_classes=2, depth=1, width=4, overlap_func="giou")
+    model = YOLO(network, confidence_threshold=0.5)
+
+    train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+    valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, logger=False, max_epochs=10, accelerator="auto")
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
+
+
+def test_yolov7(catch_warnings):
+    # Using giou allows the tests to pass also with older versions of Torchvision.
+    network = YOLOV7Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128), overlap_func="giou")
+    model = YOLO(network, confidence_threshold=0.5)
+
+    image = torch.rand(3, 256, 256)
+    detections = model.infer(image)
+    assert "boxes" in detections
+    assert "scores" in detections
+    assert "labels" in detections
+
+
+def test_yolov7_train(tmpdir, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
+    # Using giou allows the tests to pass also with older versions of Torchvision.
+    network = YOLOV7Network(num_classes=2, widths=(4, 8, 16, 32, 64, 128), overlap_func="giou")
+    model = YOLO(network, confidence_threshold=0.5)
+
+    train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+    valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, logger=False, max_epochs=10, accelerator="auto")
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
+
+
+def test_yolox(catch_warnings):
+    # Using giou allows the tests to pass also with older versions of Torchvision.
+    network = YOLOXNetwork(num_classes=2, depth=1, width=4, overlap_func="giou")
+    model = YOLO(network, confidence_threshold=0.5)
+
+    image = torch.rand(3, 256, 256)
+    detections = model.infer(image)
+    assert "boxes" in detections
+    assert "scores" in detections
+    assert "labels" in detections
+
+
+def test_yolox_train(tmpdir, catch_warnings):
+    warnings.filterwarnings(
+        "ignore",
+        message=".*does not have many workers which may be a bottleneck.*",
+        category=PossibleUserWarning,
+    )
+
+    # Using giou allows the tests to pass also with older versions of Torchvision.
+    network = YOLOXNetwork(num_classes=2, depth=1, width=4, overlap_func="giou")
+    model = YOLO(network, confidence_threshold=0.5)
+
+    train_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+    valid_dl = DataLoader(DummyDetectionDataset(num_classes=2), collate_fn=_collate_fn)
+
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, logger=False, max_epochs=10, accelerator="auto")
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=valid_dl)
