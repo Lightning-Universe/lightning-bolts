@@ -7,6 +7,7 @@ from pl_bolts.callbacks.verification.batch_gradient import BatchGradientVerifica
 
 _NATIVE_AMP_AVAILABLE: bool = module_available("torch.cuda.amp") and hasattr(torch.cuda.amp, "autocast")
 _TORCHVISION_AVAILABLE: bool = module_available("torchvision")
+_TORCHMETRICS_DETECTION_AVAILABLE: bool = module_available("torchmetrics.detection")
 _GYM_AVAILABLE: bool = module_available("gym")
 _SKLEARN_AVAILABLE: bool = module_available("sklearn")
 _PIL_AVAILABLE: bool = module_available("PIL")
