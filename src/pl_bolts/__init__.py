@@ -7,7 +7,7 @@ import numpy
 from pl_bolts.__about__ import *  # noqa: F401, F403
 
 # adding compatibility for numpy >= 1.24
-for tp_name, tp_ins in [("object", object), ("int", int), ("float", float)]:
+for tp_name, tp_ins in [("object", object), ("bool", bool), ("int", int), ("float", float)]:
     if not hasattr(numpy, tp_name):
         setattr(numpy, tp_name, tp_ins)
 
