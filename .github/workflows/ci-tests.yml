@@ -24,7 +24,7 @@ jobs:
         # Something is wrong with windows tests, will need to debug separately.
         os: [ubuntu-20.04, macOS-11]
         # todo: seems there are some issues with py3.10 while install dependencies
-        python-version: ["3.7", "3.9"]
+        python-version: ["3.8", "3.9"]
         requires: ['oldest', 'latest']
     env:
       FREEZE_REQUIREMENTS: 1
