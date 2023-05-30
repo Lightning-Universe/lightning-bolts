@@ -60,20 +60,11 @@ def test_cityscapes_datamodule(datadir, catch_warnings, target_type: str, target
     _create_synth_Cityscapes_dataset(datadir)
 
     dm = CityscapesDataModule(datadir, num_workers=0, batch_size=batch_size, target_type=target_type)
-    loader = dm.train_dataloader()
-    img, mask = next(iter(loader))
-    assert img.size() == torch.Size([batch_size, 3, 1024, 2048])
-    assert mask.size() == torch.Size([batch_size, *target_size])
 
-    loader = dm.val_dataloader()
-    img, mask = next(iter(loader))
-    assert img.size() == torch.Size([batch_size, 3, 1024, 2048])
-    assert mask.size() == torch.Size([batch_size, *target_size])
-
-    loader = dm.test_dataloader()
-    img, mask = next(iter(loader))
-    assert img.size() == torch.Size([batch_size, 3, 1024, 2048])
-    assert mask.size() == torch.Size([batch_size, *target_size])
+    for loader in [dm.train_dataloader(), dm.val_dataloader(), dm.test_dataloader()]:
+        img, mask = next(iter(loader))
+        assert img.size() == torch.Size([batch_size, 3, 1024, 2048])
+        assert mask.size() == torch.Size([batch_size, *target_size])
 
 
 @pytest.mark.parametrize(("val_split", "train_len"), [(0.2, 48_000), (5_000, 55_000)])
