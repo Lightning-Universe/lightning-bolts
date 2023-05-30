@@ -102,14 +102,14 @@ jobs:
     - name: Cache datasets
       uses: actions/cache@v3
       with:
-        path: ./datasets
+        path: ./_datasets
         key: pl-datasets-${{ hashFiles('tests/conftest.py') }}
 
     - name: Download ROMs
       # continue-on-error: true
       run: |
-        mkdir -p datasets
-        cd datasets
+        mkdir -p _datasets
+        cd _datasets
         curl http://www.atarimania.com/roms/Roms.rar -o Roms.rar
         unrar x -y Roms.rar
         python -m atari_py.import_roms ROMS
