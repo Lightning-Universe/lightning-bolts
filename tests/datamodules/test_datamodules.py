@@ -50,11 +50,7 @@ def _create_synth_Cityscapes_dataset(path_dir):
 
 @pytest.mark.parametrize(
     ("target_type", "target_size"),
-    [
-        ("semantic", (1024, 2048)),
-        ("instance", (1024, 2048)),
-        ("color", (4, 1024, 2048))
-    ],
+    [("semantic", (1024, 2048)), ("instance", (1024, 2048)), ("color", (4, 1024, 2048))],
 )
 def test_cityscapes_datamodule(datadir, catch_warnings, target_type: str, target_size: tuple, batch_size: int = 1):
     _create_synth_Cityscapes_dataset(datadir)
