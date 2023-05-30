@@ -25,9 +25,8 @@ def test_dev_datasets(datadir):
         pass
 
 
-def _create_synth_Cityscapes_dataset(path_dir):
-    """Create synthetic dataset with random images, just to simulate that the dataset have been already
-    downloaded."""
+def _create_synth_Cityscapes_dataset(path_dir, img_size=(2048, 1024)):
+    """Create synthetic dataset with random images, just to simulate that the dataset have been already downloaded."""
     non_existing_citites = ["dummy_city_1", "dummy_city_2"]
     fine_labels_dir = Path(path_dir) / "gtFine"
     images_dir = Path(path_dir) / "leftImg8bit"
@@ -42,10 +41,10 @@ def _create_synth_Cityscapes_dataset(path_dir):
             instance_target_name = f"{base_name}_gtFine_instanceIds.png"
             semantic_target_name = f"{base_name}_gtFine_labelIds.png"
             color_target_name = f"{base_name}_gtFine_color.png"
-            Image.new("RGB", (2048, 1024)).save(images_dir / split / city / image_name)
-            Image.new("L", (2048, 1024)).save(fine_labels_dir / split / city / instance_target_name)
-            Image.new("L", (2048, 1024)).save(fine_labels_dir / split / city / semantic_target_name)
-            Image.new("RGBA", (2048, 1024)).save(fine_labels_dir / split / city / color_target_name)
+            Image.new("RGB", img_size).save(images_dir / split / city / image_name)
+            Image.new("L", img_size).save(fine_labels_dir / split / city / instance_target_name)
+            Image.new("L", img_size).save(fine_labels_dir / split / city / semantic_target_name)
+            Image.new("RGBA", img_size).save(fine_labels_dir / split / city / color_target_name)
 
 
 @pytest.mark.parametrize(
@@ -73,17 +72,9 @@ def test_vision_data_module(datadir, val_split, catch_warnings, train_len):
 def test_data_modules(datadir, catch_warnings, dm_cls):
     """Test datamodules train, val, and test dataloaders outputs have correct shape."""
     dm = _create_dm(dm_cls, datadir)
-    train_loader = dm.train_dataloader()
-    img, _ = next(iter(train_loader))
-    assert img.size() == torch.Size([2, *dm.dims])
-
-    val_loader = dm.val_dataloader()
-    img, _ = next(iter(val_loader))
-    assert img.size() == torch.Size([2, *dm.dims])
-
-    test_loader = dm.test_dataloader()
-    img, _ = next(iter(test_loader))
-    assert img.size() == torch.Size([2, *dm.dims])
+    for loader in [dm.train_dataloader(), dm.val_dataloader(), dm.test_dataloader()]:
+        img, _ = next(iter(loader))
+        assert img.size() == torch.Size([2, *dm.dims])
 
 
 def _create_dm(dm_cls, datadir, **kwargs):
@@ -107,17 +98,9 @@ def test_sr_datamodule(datadir):
 def test_emnist_datamodules(datadir, catch_warnings, dm_cls, split):
     """Test BinaryEMNIST and EMNIST datamodules download data and have the correct shape."""
     dm = _create_dm(dm_cls, datadir, split=split)
-    train_loader = dm.train_dataloader()
-    img, _ = next(iter(train_loader))
-    assert img.size() == torch.Size([2, *dm.dims])
-
-    val_loader = dm.val_dataloader()
-    img, _ = next(iter(val_loader))
-    assert img.size() == torch.Size([2, *dm.dims])
-
-    test_loader = dm.test_dataloader()
-    img, _ = next(iter(test_loader))
-    assert img.size() == torch.Size([2, *dm.dims])
+    for loader in [dm.train_dataloader(), dm.val_dataloader(), dm.test_dataloader()]:
+        img, _ = next(iter(loader))
+        assert img.size() == torch.Size([2, *dm.dims])
 
 
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
