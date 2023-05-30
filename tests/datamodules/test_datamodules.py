@@ -26,7 +26,8 @@ def test_dev_datasets(datadir):
 
 
 def _create_synth_Cityscapes_dataset(path_dir, img_size=(2048, 1024)):
-    """Create synthetic dataset with random images, just to simulate that the dataset have been already downloaded."""
+    """Create synthetic dataset with random images, just to simulate that the dataset have been already
+    downloaded."""
     non_existing_citites = ["dummy_city_1", "dummy_city_2"]
     fine_labels_dir = Path(path_dir) / "gtFine"
     images_dir = Path(path_dir) / "leftImg8bit"
