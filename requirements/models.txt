@@ -1,4 +1,4 @@
-torchvision >=0.10
+torchvision >=0.10.0
 scikit-learn >=1.0.2
 Pillow >9.0.0
 gym[atari] >=0.17.2, <0.20.0  # strict
