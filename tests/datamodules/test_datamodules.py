@@ -48,28 +48,32 @@ def _create_synth_Cityscapes_dataset(path_dir):
             Image.new("RGBA", (2048, 1024)).save(fine_labels_dir / split / city / color_target_name)
 
 
-def test_cityscapes_datamodule(datadir, catch_warnings):
+@pytest.mark.parametrize(
+    ("target_type", "target_size"),
+    [
+        ("semantic", (1024, 2048)),
+        ("instance", (1024, 2048)),
+        ("color", (4, 1024, 2048))
+    ],
+)
+def test_cityscapes_datamodule(datadir, catch_warnings, target_type: str, target_size: tuple, batch_size: int = 1):
     _create_synth_Cityscapes_dataset(datadir)
 
-    batch_size = 1
-    target_types = ["semantic", "instance", "color"]
-    target_sizes = [(1024, 2048), (1024, 2048), (4, 1024, 2048)]
-    for target_type, target_size in zip(target_types, target_sizes):
-        dm = CityscapesDataModule(datadir, num_workers=0, batch_size=batch_size, target_type=target_type)
-        loader = dm.train_dataloader()
-        img, mask = next(iter(loader))
-        assert img.size() == torch.Size([batch_size, 3, 1024, 2048])
-        assert mask.size() == torch.Size([batch_size, *target_size])
+    dm = CityscapesDataModule(datadir, num_workers=0, batch_size=batch_size, target_type=target_type)
+    loader = dm.train_dataloader()
+    img, mask = next(iter(loader))
+    assert img.size() == torch.Size([batch_size, 3, 1024, 2048])
+    assert mask.size() == torch.Size([batch_size, *target_size])
 
-        loader = dm.val_dataloader()
-        img, mask = next(iter(loader))
-        assert img.size() == torch.Size([batch_size, 3, 1024, 2048])
-        assert mask.size() == torch.Size([batch_size, *target_size])
+    loader = dm.val_dataloader()
+    img, mask = next(iter(loader))
+    assert img.size() == torch.Size([batch_size, 3, 1024, 2048])
+    assert mask.size() == torch.Size([batch_size, *target_size])
 
-        loader = dm.test_dataloader()
-        img, mask = next(iter(loader))
-        assert img.size() == torch.Size([batch_size, 3, 1024, 2048])
-        assert mask.size() == torch.Size([batch_size, *target_size])
+    loader = dm.test_dataloader()
+    img, mask = next(iter(loader))
+    assert img.size() == torch.Size([batch_size, 3, 1024, 2048])
+    assert mask.size() == torch.Size([batch_size, *target_size])
 
 
 @pytest.mark.parametrize(("val_split", "train_len"), [(0.2, 48_000), (5_000, 55_000)])
