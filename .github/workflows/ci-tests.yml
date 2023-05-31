@@ -53,14 +53,13 @@ jobs:
     - name: Install package
       run: |
         pip install "pip==22.2.1"  # todo: drop after resolving extras
-        pip install -e . "coverage[toml]" --upgrade --prefer-binary \
-          -f https://download.pytorch.org/whl/cpu/torch_stable.html
+        pip install -e . -U --prefer-binary -f ${TORCH_URL}
         pip list
 
     - name: Test Package [only]
       working-directory: ./src
       run: |
-        pip install pytest -q
+        pip install "coverage[toml]" pytest -q
         # TODO: package shall be fine to run full without any ignores
         python -m pytest . \
           --ignore=pl_bolts/datamodules \
@@ -75,14 +74,13 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ steps.pip-cache.outputs.dir }}
-        key: ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements/*.txt') }}
+        key: ${{ runner.os }}-pip-${{ matrix.requires }}-${{ hashFiles('requirements/*.txt') }}
         restore-keys: |
-          ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-
+          ${{ runner.os }}-pip-${{ matrix.requires }}-
 
     - name: Install dependencies
       run: |
-        pip install -r requirements/devel.txt --upgrade --quiet \
-          --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
+        pip install -r requirements/devel.txt -U -q -f ${TORCH_URL}
         pip list
 
     - name: Cache datasets
