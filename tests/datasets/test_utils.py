@@ -1,6 +1,5 @@
 import numpy as np
 import torch.testing
-
 from pl_bolts.datasets.utils import to_tensor
 
 

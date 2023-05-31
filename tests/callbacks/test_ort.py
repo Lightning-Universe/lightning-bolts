@@ -13,12 +13,12 @@
 # limitations under the License.
 
 import pytest
+from pl_bolts.callbacks import ORTCallback
+from pl_bolts.utils import _TORCH_ORT_AVAILABLE
 from pytorch_lightning import Callback, Trainer
 from pytorch_lightning.core.lightning import LightningModule
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
-from pl_bolts.callbacks import ORTCallback
-from pl_bolts.utils import _TORCH_ORT_AVAILABLE
 from tests.helpers.boring_model import BoringModel
 
 if _TORCH_ORT_AVAILABLE:

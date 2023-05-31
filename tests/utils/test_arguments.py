@@ -1,9 +1,8 @@
 from dataclasses import FrozenInstanceError
 
 import pytest
-from pytorch_lightning import LightningDataModule, LightningModule
-
 from pl_bolts.utils.arguments import LightningArgumentParser, LitArg, gather_lit_args
+from pytorch_lightning import LightningDataModule, LightningModule
 
 
 class DummyParentModel(LightningModule):
