@@ -100,13 +100,14 @@ jobs:
         pip list
 
     - name: Cache datasets
+      id: cache-datasets
       uses: actions/cache@v3
       with:
         path: ./_datasets
         key: pl-datasets-${{ hashFiles('tests/conftest.py') }}
 
     - name: Download ROMs
-      # continue-on-error: true
+      if: steps.cache-datasets.outputs.cache-hit != 'true'
       run: |
         mkdir -p _datasets
         cd _datasets
