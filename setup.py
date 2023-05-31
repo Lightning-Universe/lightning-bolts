@@ -153,7 +153,7 @@ setup(
     keywords=["deep learning", "pytorch", "AI"],
     python_requires=">=3.8",
     setup_requires=["wheel"],
-    install_requires=_load_requirements(_PATH_ROOT, "requirements.txt"),
+    install_requires=_load_requirements(_PATH_REQUIRE, "base.txt"),
     extras_require=_prepare_extras(),
     project_urls={
         "Bug Tracker": "https://github.com/PyTorchLightning/lightning-bolts/issues",
