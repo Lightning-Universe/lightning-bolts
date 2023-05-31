@@ -207,8 +207,7 @@ class DQN(LightningModule):
         Returns:
             q values
         """
-        output = self.net(x)
-        return output
+        return self.net(x)
 
     def train_batch(
         self,

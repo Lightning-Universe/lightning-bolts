@@ -114,12 +114,11 @@ class BatchGradientVerificationCallback(VerificationCallbackBase):
         self._sample_idx = sample_idx
 
     def message(self, *args: Any, **kwargs: Any) -> str:
-        message = (
+        return (
             "Your model is mixing data across the batch dimension."
             " This can lead to wrong gradient updates in the optimizer."
             " Check the operations that reshape and permute tensor dimensions in your model."
         )
-        return message
 
     def on_train_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
         verification = BatchGradientVerification(pl_module)
@@ -189,8 +188,7 @@ def default_output_mapping(data: Any) -> Tensor:
     batches = default_input_mapping(data)
     # cannot use .flatten(1) because of tensors with shape (B, )
     batches = [batch.view(batch.size(0), -1).float() for batch in batches]
-    combined = torch.cat(batches, 1)  # combined batch has shape (B, N)
-    return combined
+    return torch.cat(batches, 1)  # combined batch has shape (B, N)
 
 
 @under_review()

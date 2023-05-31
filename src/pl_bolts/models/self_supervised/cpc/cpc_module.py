@@ -159,8 +159,7 @@ class CPC_v2(LightningModule):
         Z = self(img_1)
 
         # infoNCE loss
-        nce_loss = self.contrastive_task(Z)
-        return nce_loss
+        return self.contrastive_task(Z)
 
     def configure_optimizers(self):
         opt = optim.Adam(

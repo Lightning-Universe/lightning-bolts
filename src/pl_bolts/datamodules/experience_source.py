@@ -36,8 +36,7 @@ class ExperienceSourceDataset(IterableDataset):
         self.generate_batch = generate_batch
 
     def __iter__(self) -> Iterator:
-        iterator = self.generate_batch()
-        return iterator
+        return self.generate_batch()  # iterator
 
 
 # Experience Sources
@@ -191,9 +190,7 @@ class ExperienceSource(BaseExperienceSource):
         self.cur_rewards[env_idx] += r
         self.cur_steps[env_idx] += 1
 
-        exp = Experience(state=self.states[env_idx], action=action[0], reward=r, done=is_done, new_state=next_state)
-
-        return exp
+        return Experience(state=self.states[env_idx], action=action[0], reward=r, done=is_done, new_state=next_state)
 
     def update_env_stats(self, env_idx: int) -> None:
         """To be called at the end of the history tail generation during the termination state. Updates the stats

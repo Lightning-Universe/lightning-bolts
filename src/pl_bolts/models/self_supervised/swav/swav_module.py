@@ -247,7 +247,7 @@ class SwAV(LightningModule):
         for name, param in named_params:
             if not param.requires_grad:
                 continue
-            elif any(layer_name in name for layer_name in skip_list):
+            if any(layer_name in name for layer_name in skip_list):
                 excluded_params.append(param)
             else:
                 params.append(param)
