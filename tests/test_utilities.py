@@ -1,7 +1,7 @@
 import os
 
-from tests import PACKAGE_ROOT
+from tests import PROJECT_ROOT
 
 
 def test_paths():
-    assert os.path.isdir(PACKAGE_ROOT)
+    assert os.path.isdir(PROJECT_ROOT)
