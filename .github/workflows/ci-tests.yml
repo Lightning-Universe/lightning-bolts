@@ -112,6 +112,7 @@ jobs:
         cd _datasets
         curl http://www.atarimania.com/roms/Roms.rar -o Roms.rar
         unrar x -y Roms.rar
+        rm Roms.rar
 
     - name: Init ROMs
       working-directory: ./_datasets
