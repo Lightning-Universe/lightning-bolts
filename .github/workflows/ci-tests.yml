@@ -114,6 +114,7 @@ jobs:
         unrar x -y Roms.rar
 
     - name: Init ROMs
+      working-directory: ./_datasets
       run: python -m atari_py.import_roms ROMS
 
     - name: Tests
