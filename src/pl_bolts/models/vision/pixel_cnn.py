@@ -52,13 +52,11 @@ class PixelCNN(nn.Module):
         act2 = nn.ReLU()
         c4 = nn.Conv2d(in_channels=self.hidden_channels, out_channels=input_channels, kernel_size=(1, 1))
 
-        block = nn.Sequential(c1, act1, c2, pad, c3, act2, c4)
-        return block
+        return nn.Sequential(c1, act1, c2, pad, c3, act2, c4)
 
     def forward(self, z):
         c = z
         for conv_block in self.blocks:
             c = c + conv_block(c)
 
-        c = F.relu(c)
-        return c
+        return F.relu(c)

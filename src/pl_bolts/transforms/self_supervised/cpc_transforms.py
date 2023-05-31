@@ -70,8 +70,7 @@ class CPCTrainTransformsCIFAR10:
 
     def __call__(self, inp: Tensor) -> Tensor:
         inp = self.flip_lr(inp)
-        out1 = self.transforms(inp)
-        return out1
+        return self.transforms(inp)
 
 
 @under_review()
@@ -123,8 +122,7 @@ class CPCEvalTransformsCIFAR10:
         )
 
     def __call__(self, inp: Tensor) -> Tensor:
-        out1 = self.transforms(inp)
-        return out1
+        return self.transforms(inp)
 
 
 @under_review()
@@ -186,8 +184,7 @@ class CPCTrainTransformsSTL10:
 
     def __call__(self, inp: Tensor) -> Tensor:
         inp = self.flip_lr(inp)
-        out1 = self.transforms(inp)
-        return out1
+        return self.transforms(inp)
 
 
 @under_review()
@@ -237,8 +234,7 @@ class CPCEvalTransformsSTL10:
         )
 
     def __call__(self, inp: Tensor) -> Tensor:
-        out1 = self.transforms(inp)
-        return out1
+        return self.transforms(inp)
 
 
 @under_review()
@@ -293,8 +289,7 @@ class CPCTrainTransformsImageNet128:
 
     def __call__(self, inp: Tensor) -> Tensor:
         inp = self.flip_lr(inp)
-        out1 = self.transforms(inp)
-        return out1
+        return self.transforms(inp)
 
 
 @under_review()
@@ -348,5 +343,4 @@ class CPCEvalTransformsImageNet128:
 
     def __call__(self, inp: Tensor) -> Tensor:
         inp = self.flip_lr(inp)
-        out1 = self.transforms(inp)
-        return out1
+        return self.transforms(inp)

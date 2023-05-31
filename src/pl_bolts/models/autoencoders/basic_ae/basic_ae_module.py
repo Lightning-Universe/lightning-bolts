@@ -101,8 +101,7 @@ class AE(LightningModule):
     def forward(self, x):
         feats = self.encoder(x)
         z = self.fc(feats)
-        x_hat = self.decoder(z)
-        return x_hat
+        return self.decoder(z)
 
     def step(self, batch, batch_idx):
         x, y = batch

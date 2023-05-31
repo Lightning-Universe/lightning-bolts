@@ -216,8 +216,7 @@ class DuelingMLP(nn.Module):
             Q value
         """
         adv, val = self.adv_val(input_x)
-        q_val = val + (adv - adv.mean(dim=1, keepdim=True))
-        return q_val
+        return val + (adv - adv.mean(dim=1, keepdim=True))
 
     def adv_val(self, input_x) -> Tuple[Tensor, Tensor]:
         """Gets the advantage and value by passing out of the base network through the value and advantage heads.
@@ -285,8 +284,7 @@ class DuelingCNN(nn.Module):
             Q value
         """
         adv, val = self.adv_val(input_x)
-        q_val = val + (adv - adv.mean(dim=1, keepdim=True))
-        return q_val
+        return val + (adv - adv.mean(dim=1, keepdim=True))
 
     def adv_val(self, input_x):
         """Gets the advantage and value by passing out of the base network through the value and advantage heads.

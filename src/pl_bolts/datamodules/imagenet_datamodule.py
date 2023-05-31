@@ -224,7 +224,7 @@ class ImagenetDataModule(LightningDataModule):
                 ),
             ])
         """
-        preprocessing = transform_lib.Compose(
+        return transform_lib.Compose(
             [
                 transform_lib.RandomResizedCrop(self.image_size),
                 transform_lib.RandomHorizontalFlip(),
@@ -232,8 +232,6 @@ class ImagenetDataModule(LightningDataModule):
                 imagenet_normalization(),
             ]
         )
-
-        return preprocessing
 
     def val_transform(self) -> Callable:
         """The standard imagenet transforms for validation.
@@ -251,7 +249,7 @@ class ImagenetDataModule(LightningDataModule):
             ])
         """
 
-        preprocessing = transform_lib.Compose(
+        return transform_lib.Compose(
             [
                 transform_lib.Resize(self.image_size + 32),
                 transform_lib.CenterCrop(self.image_size),
@@ -259,7 +257,6 @@ class ImagenetDataModule(LightningDataModule):
                 imagenet_normalization(),
             ]
         )
-        return preprocessing
 
     @staticmethod
     def add_dataset_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:

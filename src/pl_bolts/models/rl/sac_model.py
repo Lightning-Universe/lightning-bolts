@@ -168,8 +168,7 @@ class SAC(LightningModule):
         Returns:
             q values
         """
-        output = self.policy(x).sample()
-        return output
+        return self.policy(x).sample()
 
     def train_batch(
         self,

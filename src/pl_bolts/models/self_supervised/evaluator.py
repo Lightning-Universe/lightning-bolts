@@ -26,8 +26,7 @@ class SSLEvaluator(nn.Module):
             )
 
     def forward(self, x):
-        logits = self.block_forward(x)
-        return logits
+        return self.block_forward(x)
 
 
 @under_review()

@@ -293,8 +293,7 @@ class Moco_v2(LightningModule):
 
         acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))
 
-        results = {"val_loss": loss, "val_acc1": acc1, "val_acc5": acc5}
-        return results
+        return {"val_loss": loss, "val_acc1": acc1, "val_acc5": acc5}
 
     def validation_epoch_end(self, outputs):
         val_loss = mean(outputs, "val_loss")
@@ -353,8 +352,7 @@ def concat_all_gather(tensor):
     tensors_gather = [torch.ones_like(tensor) for _ in range(torch.distributed.get_world_size())]
     torch.distributed.all_gather(tensors_gather, tensor, async_op=False)
 
-    output = torch.cat(tensors_gather, dim=0)
-    return output
+    return torch.cat(tensors_gather, dim=0)
 
 
 @under_review()
