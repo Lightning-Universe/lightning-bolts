@@ -46,6 +46,7 @@ def restore_env_variables():  # noqa: PT004
     allowlist = {
         "CUBLAS_WORKSPACE_CONFIG",  # enabled with deterministic flag
         "CUDA_DEVICE_ORDER",
+        "CUDA_MODULE_LOADING",
         "LOCAL_RANK",
         "NODE_RANK",
         "WORLD_SIZE",
