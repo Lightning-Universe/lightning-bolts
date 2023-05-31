@@ -28,6 +28,7 @@ jobs:
         requires: ['oldest', 'latest']
     env:
       FREEZE_REQUIREMENTS: 1
+      TORCH_URL: "https://download.pytorch.org/whl/cpu/torch_stable.html"
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     # the reason for high number is MUCH slower tests on macOS and py3.8
     timeout-minutes: 50
@@ -38,20 +39,6 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-
-    # Github Actions: Run step on specific OS: https://stackoverflow.com/a/57948488/4521646
-    - name: Setup macOS
-      if: runner.os == 'macOS'
-      run: |
-        brew update  # Todo: find a better way...
-        brew install libomp  # https://github.com/pytorch/pytorch/issues/20030
-        brew install rar
-
-    - name: Setup Ubuntu
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y unrar
 
     - name: Set min. dependencies
       if: matrix.requires == 'oldest'
@@ -78,7 +65,6 @@ jobs:
         python -m pytest . \
           --ignore=pl_bolts/datamodules \
           --ignore=pl_bolts/datasets \
-          --ignore=pl_bolts/models/self_supervised/amdim/transforms.py \
           --ignore=pl_bolts/models/rl
 
     - name: Get pip cache dir
@@ -104,7 +90,20 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ./_datasets
-        key: pl-datasets-${{ hashFiles('tests/conftest.py') }}
+        # bump this date if you need update cache
+        key: datasets-20230531
+
+    - name: Setup macOS
+      if: runner.os == 'macOS' && steps.cache-datasets.outputs.cache-hit != 'true'
+      run: |
+        brew update
+        brew install rar
+
+    - name: Setup Ubuntu
+      if: runner.os == 'Linux'&& steps.cache-datasets.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y unrar
 
     - name: Download ROMs
       if: steps.cache-datasets.outputs.cache-hit != 'true'
@@ -113,11 +112,12 @@ jobs:
         cd _datasets
         curl http://www.atarimania.com/roms/Roms.rar -o Roms.rar
         unrar x -y Roms.rar
-        python -m atari_py.import_roms ROMS
+
+    - name: Init ROMs
+      run: python -m atari_py.import_roms ROMS
 
     - name: Tests
-      run: |
-        python -m pytest tests -v --cov=pl_bolts
+      run: python -m pytest tests -v --cov=pl_bolts
 
     - name: Statistics
       if: success()
