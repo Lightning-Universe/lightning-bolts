@@ -1,9 +1,8 @@
 from unittest import TestCase
 
 import gym
-from torch import Tensor
-
 from pl_bolts.models.rl.common.gym_wrappers import ToTensor
+from torch import Tensor
 
 
 class TestToTensor(TestCase):
