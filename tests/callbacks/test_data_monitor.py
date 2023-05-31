@@ -18,11 +18,7 @@ from pl_bolts.models import LitMNIST
 # @pytest.mark.parametrize(("log_every_n_steps", "max_steps", "expected_calls"), [pytest.param(3, 10, 3)])
 @mock.patch("pl_bolts.callbacks.data_monitor.DataMonitorBase.log_histogram")
 def test_base_log_interval_override(
-    log_histogram,
-    tmpdir,
-    datadir,
-    catch_warnings,
-    log_every_n_steps=3, max_steps=10, expected_calls=3
+    log_histogram, tmpdir, datadir, catch_warnings, log_every_n_steps=3, max_steps=10, expected_calls=3
 ):
     """Test logging interval set by log_every_n_steps argument."""
     warnings.filterwarnings(
