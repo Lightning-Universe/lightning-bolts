@@ -157,9 +157,7 @@ class SimCLR(LightningModule):
         z1 = self.projection(h1)
         z2 = self.projection(h2)
 
-        loss = self.nt_xent_loss(z1, z2, self.temperature)
-
-        return loss
+        return self.nt_xent_loss(z1, z2, self.temperature)
 
     def training_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
@@ -180,7 +178,7 @@ class SimCLR(LightningModule):
         for name, param in named_params:
             if not param.requires_grad:
                 continue
-            elif any(layer_name in name for layer_name in skip_list):
+            if any(layer_name in name for layer_name in skip_list):
                 excluded_params.append(param)
             else:
                 params.append(param)
@@ -259,9 +257,7 @@ class SimCLR(LightningModule):
         pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
         pos = torch.cat([pos, pos], dim=0)
 
-        loss = -torch.log(pos / (neg + eps)).mean()
-
-        return loss
+        return -torch.log(pos / (neg + eps)).mean()
 
     @staticmethod
     def add_model_specific_args(parent_parser):

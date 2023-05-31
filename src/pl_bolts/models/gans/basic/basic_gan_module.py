@@ -57,12 +57,10 @@ class GAN(LightningModule):
         self.discriminator = self.init_discriminator(self.img_dim)
 
     def init_generator(self, img_dim):
-        generator = Generator(latent_dim=self.hparams.latent_dim, img_shape=img_dim)
-        return generator
+        return Generator(latent_dim=self.hparams.latent_dim, img_shape=img_dim)
 
     def init_discriminator(self, img_dim):
-        discriminator = Discriminator(img_shape=img_dim)
-        return discriminator
+        return Discriminator(img_shape=img_dim)
 
     def forward(self, z):
         """Generates an image given input noise z.
@@ -86,9 +84,7 @@ class GAN(LightningModule):
         D_output = self.discriminator(generated_imgs)
 
         # ground truth result (ie: all real)
-        g_loss = F.binary_cross_entropy(D_output, y)
-
-        return g_loss
+        return F.binary_cross_entropy(D_output, y)
 
     def discriminator_loss(self, x):
         # train discriminator on real
@@ -110,29 +106,21 @@ class GAN(LightningModule):
         D_fake_loss = F.binary_cross_entropy(D_output, y_fake)
 
         # gradient backprop & optimize ONLY D's parameters
-        D_loss = D_real_loss + D_fake_loss
-
-        return D_loss
+        return D_real_loss + D_fake_loss
 
     def training_step(self, batch, batch_idx, optimizer_idx):
         x, _ = batch
-
         # train generator
-        result = None
         if optimizer_idx == 0:
-            result = self.generator_step(x)
-
+            return self.generator_step(x)
         # train discriminator
         if optimizer_idx == 1:
-            result = self.discriminator_step(x)
-
-        return result
+            return self.discriminator_step(x)
+        return None
 
     def generator_step(self, x):
         g_loss = self.generator_loss(x)
-
-        # log to prog bar on each step AND for the full epoch
-        # use the generator loss for checkpointing
+        # log to prog bar on each step AND for the full epoch use the generator loss for checkpointing
         self.log("g_loss", g_loss, on_epoch=True, prog_bar=True)
         return g_loss
 

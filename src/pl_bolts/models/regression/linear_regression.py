@@ -46,8 +46,7 @@ class LinearRegression(LightningModule):
         self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=self.hparams.output_dim, bias=bias)
 
     def forward(self, x: Tensor) -> Tensor:
-        y_hat = self.linear(x)
-        return y_hat
+        return self.linear(x)
 
     def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
         x, y = batch

@@ -145,5 +145,4 @@ class PatchGAN(nn.Module):
         x1 = self.d2(x0)
         x2 = self.d3(x1)
         x3 = self.d4(x2)
-        xn = self.final(x3)
-        return xn
+        return self.final(x3)

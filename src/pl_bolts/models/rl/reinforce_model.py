@@ -126,8 +126,7 @@ class Reinforce(LightningModule):
         Returns:
             q values
         """
-        output = self.net(x)
-        return output
+        return self.net(x)
 
     def calc_qvals(self, rewards: List[float]) -> List[float]:
         """Calculate the discounted rewards of all rewards in list.
@@ -213,9 +212,7 @@ class Reinforce(LightningModule):
         # policy loss
         log_prob = log_softmax(logits, dim=1)
         log_prob_actions = scaled_rewards * log_prob[range(len(log_prob)), actions]
-        loss = -log_prob_actions.mean()
-
-        return loss
+        return -log_prob_actions.mean()
 
     def training_step(self, batch: Tuple[Tensor, Tensor], _) -> OrderedDict:
         """Carries out a single step through the environment to update the replay buffer. Then calculates loss
@@ -255,8 +252,7 @@ class Reinforce(LightningModule):
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences."""
         dataset = ExperienceSourceDataset(self.train_batch)
-        dataloader = DataLoader(dataset=dataset, batch_size=self.batch_size)
-        return dataloader
+        return DataLoader(dataset=dataset, batch_size=self.batch_size)
 
     def train_dataloader(self) -> DataLoader:
         """Get train loader."""

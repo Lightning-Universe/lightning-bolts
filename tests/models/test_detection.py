@@ -3,10 +3,6 @@ from pathlib import Path
 
 import pytest
 import torch
-from pytorch_lightning import Trainer
-from pytorch_lightning.utilities.warnings import PossibleUserWarning
-from torch.utils.data import DataLoader
-
 from pl_bolts.datasets import DummyDetectionDataset
 from pl_bolts.models.detection import (
     YOLO,
@@ -21,6 +17,10 @@ from pl_bolts.models.detection import (
     YOLOXNetwork,
 )
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
+from pytorch_lightning import Trainer
+from pytorch_lightning.utilities.warnings import PossibleUserWarning
+from torch.utils.data import DataLoader
+
 from tests import TEST_ROOT
 
 

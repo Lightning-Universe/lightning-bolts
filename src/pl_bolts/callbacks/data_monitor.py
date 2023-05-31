@@ -194,8 +194,8 @@ class ModuleDataMonitor(DataMonitorBase):
             self.log_histograms(inp, group=input_group_name)
             self.log_histograms(out, group=output_group_name)
 
-        handle = module.register_forward_hook(hook)
-        return handle
+        # handler
+        return module.register_forward_hook(hook)
 
 
 class TrainingDataMonitor(DataMonitorBase):

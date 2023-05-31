@@ -1,9 +1,8 @@
 import argparse
 
 import torch
-from torch import Tensor
-
 from pl_bolts.models.rl.advantage_actor_critic_model import AdvantageActorCritic
+from torch import Tensor
 
 
 def test_a2c_loss():

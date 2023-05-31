@@ -1,9 +1,8 @@
 import argparse
 
 import torch
-from torch import Tensor
-
 from pl_bolts.models.rl.sac_model import SAC
+from torch import Tensor
 
 
 def test_sac_loss():
