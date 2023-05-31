@@ -92,9 +92,7 @@ class SwAVTrainDataTransform:
         self.transform.append(online_train_transform)
 
     def __call__(self, sample: Tensor) -> List[Tensor]:
-        multi_crops = [transform(sample) for transform in self.transform]
-
-        return multi_crops
+        return [transform(sample) for transform in self.transform]
 
 
 class SwAVEvalDataTransform(SwAVTrainDataTransform):

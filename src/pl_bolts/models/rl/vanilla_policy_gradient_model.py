@@ -119,8 +119,7 @@ class VanillaPolicyGradient(LightningModule):
         Returns:
             q values
         """
-        output = self.net(x)
-        return output
+        return self.net(x)
 
     def train_batch(
         self,
@@ -202,9 +201,7 @@ class VanillaPolicyGradient(LightningModule):
         entropy_loss = -self.entropy_beta * entropy
 
         # total loss
-        loss = policy_loss + entropy_loss
-
-        return loss
+        return policy_loss + entropy_loss
 
     def training_step(self, batch: Tuple[Tensor, Tensor], _) -> OrderedDict:
         """Carries out a single step through the environment to update the replay buffer. Then calculates loss
@@ -243,8 +240,7 @@ class VanillaPolicyGradient(LightningModule):
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences."""
         dataset = ExperienceSourceDataset(self.train_batch)
-        dataloader = DataLoader(dataset=dataset, batch_size=self.batch_size)
-        return dataloader
+        return DataLoader(dataset=dataset, batch_size=self.batch_size)
 
     def train_dataloader(self) -> DataLoader:
         """Get train loader."""

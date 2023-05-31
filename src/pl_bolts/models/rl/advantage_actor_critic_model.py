@@ -221,8 +221,7 @@ class AdvantageActorCritic(LightningModule):
         critic_loss = self.hparams.critic_beta * torch.square(targets - values).mean()
 
         # total loss (weighted sum)
-        total_loss = actor_loss + critic_loss - entropy
-        return total_loss
+        return actor_loss + critic_loss - entropy
 
     def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> OrderedDict:
         """Perform one actor-critic update using a batch of data.
@@ -255,8 +254,7 @@ class AdvantageActorCritic(LightningModule):
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences."""
         dataset = ExperienceSourceDataset(self.train_batch)
-        dataloader = DataLoader(dataset=dataset, batch_size=self.hparams.batch_size)
-        return dataloader
+        return DataLoader(dataset=dataset, batch_size=self.hparams.batch_size)
 
     def train_dataloader(self) -> DataLoader:
         """Get train loader."""

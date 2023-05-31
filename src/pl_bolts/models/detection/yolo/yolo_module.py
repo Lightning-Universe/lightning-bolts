@@ -195,7 +195,7 @@ class YOLO(LightningModule):
             for name, tensor in self.named_parameters():
                 if not tensor.requires_grad:
                     continue
-                elif name.endswith(".conv.weight"):
+                if name.endswith(".conv.weight"):
                     wd_group.append(tensor)
                 else:
                     default_group.append(tensor)
@@ -424,8 +424,7 @@ class YOLO(LightningModule):
         if targets is None:
             if self.training:
                 raise ValueError("Targets should be given in training mode.")
-            else:
-                return
+            return
 
         if not isinstance(targets, (tuple, list)):
             raise TypeError(f"Expected targets to be a tuple or a list, got {type(images).__name__}.")

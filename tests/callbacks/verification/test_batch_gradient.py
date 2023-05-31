@@ -41,8 +41,7 @@ class MultipleInputModel(TemplateModel):
         self.input_array = (torch.rand(10, 5, 2), torch.rand(10, 5, 2))
 
     def forward(self, x, y, some_kwarg=True):
-        out = super().forward(x) + super().forward(y)
-        return out
+        return super().forward(x) + super().forward(y)
 
 
 class MultipleOutputModel(TemplateModel):
@@ -69,8 +68,7 @@ class DictInputDictOutputModel(TemplateModel):
         out1 = super().forward(x["a"])
         out2 = super().forward(y)
         out3 = out1 + out2
-        out = {1: out1, 2: out2, 3: [out1, out3]}
-        return out
+        return {1: out1, 2: out2, 3: [out1, out3]}
 
 
 class LitModel(LightningModule):

@@ -23,9 +23,7 @@ def nt_xent_loss(out_1, out_2, temperature):
     # Positive similarity :
     pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
     pos = torch.cat([pos, pos], dim=0)
-    loss = -torch.log(pos / neg).mean()
-
-    return loss
+    return -torch.log(pos / neg).mean()
 
 
 @under_review()
@@ -67,8 +65,7 @@ class CPCTask(nn.Module):
         labels = labels.to(logits.device)
         labels = labels.long()
 
-        loss = nn.functional.cross_entropy(logits, labels)
-        return loss
+        return nn.functional.cross_entropy(logits, labels)
 
     def forward(self, Z):
         losses = []
@@ -273,8 +270,7 @@ class FeatureMapContrastiveTask(nn.Module):
             r_cnv = torch.masked_select(r_cnv, mask)
 
         # flatten features for use as globals in glb->lcl nce cost
-        r_vec = r_cnv.reshape(n_batch, feat_dim)
-        return r_vec
+        return r_cnv.reshape(n_batch, feat_dim)
 
     def __cache_dimension_masks(self, *args):
         # cache masks for each feature map we'll need
@@ -369,5 +365,4 @@ class FeatureMapContrastiveTask(nn.Module):
 @under_review()
 def tanh_clip(x, clip_val=10.0):
     """Soft clip values to the range [-clip_val, +clip_val]"""
-    x_clip = clip_val * torch.tanh(1.0 / clip_val * x) if clip_val is not None else x
-    return x_clip
+    return clip_val * torch.tanh(1.0 / clip_val * x) if clip_val is not None else x
