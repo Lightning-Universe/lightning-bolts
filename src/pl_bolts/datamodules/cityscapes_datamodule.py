@@ -240,6 +240,4 @@ class CityscapesDataModule(LightningDataModule):
         if self.target_type == "polygon":
             return None
 
-        return transform_lib.Compose(
-            [transform_lib.ToTensor(), transform_lib.Lambda(lambda t: t.squeeze())]
-        )
+        return transform_lib.Compose([transform_lib.ToTensor(), transform_lib.Lambda(lambda t: t.squeeze())])
