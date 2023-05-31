@@ -57,7 +57,7 @@ class LightDataset(ABC, Dataset):
         logging.info(f"Downloading {url}")
         fpath = os.path.join(data_folder, file_name)
         try:
-            urllib.request.urlretrieve(url, fpath)
+            urllib.request.urlretrieve(url, fpath)  # noqa: S310
         except HTTPError as err:
             raise RuntimeError(f"Failed download from {url}") from err
 
