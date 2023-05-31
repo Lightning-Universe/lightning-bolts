@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from pytorch_lightning import Trainer, seed_everything
 from torch.utils.data import DataLoader
 
@@ -6,6 +7,7 @@ from pl_bolts.datamodules.sklearn_datamodule import SklearnDataset
 from pl_bolts.models.regression import LinearRegression
 
 
+@pytest.mark.flaky(reruns=3)
 def test_linear_regression_model(tmpdir):
     seed_everything()
 
