@@ -10,8 +10,7 @@ updates:
     schedule:
       interval: "weekly"
     # Labels on pull requests for version updates only
-    labels:
-      - "ci/cd"
+    labels: ["ci/cd"]
     pull-request-branch-name:
       # Separate sections of the branch name with a hyphen
       # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
@@ -28,8 +27,7 @@ updates:
     schedule:
       interval: "weekly"
     # Labels on pull requests for version updates only
-    labels:
-      - "ci"
+    labels: ["ci"]
     pull-request-branch-name:
       # Separate sections of the branch name with a hyphen
       # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
