@@ -113,7 +113,7 @@ class CIFAR10(LightDataset):
 
     def _unpickle(self, path_folder: str, file_name: str) -> Tuple[Tensor, Tensor]:
         with open(os.path.join(path_folder, file_name), "rb") as fo:
-            pkl = pickle.load(fo, encoding="bytes")
+            pkl = pickle.load(fo, encoding="bytes")  # noqa: S301
         return torch.tensor(pkl[b"data"]), torch.tensor(pkl[b"labels"])
 
     def _extract_archive_save_torch(self, download_path):
