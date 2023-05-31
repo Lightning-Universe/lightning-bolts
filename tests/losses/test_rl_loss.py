@@ -4,11 +4,10 @@ from unittest import TestCase
 
 import numpy as np
 import torch
-from torch import Tensor
-
 from pl_bolts.losses.rl import double_dqn_loss, dqn_loss, per_dqn_loss
 from pl_bolts.models.rl.common.gym_wrappers import make_environment
 from pl_bolts.models.rl.common.networks import CNN
+from torch import Tensor
 
 
 class TestRLLoss(TestCase):
