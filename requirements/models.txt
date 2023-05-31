@@ -1,7 +1,7 @@
-torchvision >=0.10
+torchvision >=0.10.0
 scikit-learn >=1.0.2
 Pillow >9.0.0
 gym[atari] >=0.17.2, <0.20.0  # strict
-atari_py >0.2, <0.3  # strict
+atari-py >0.2, !=0.2.6, <0.3  # strict
 box2d-py >2.3, <2.4  # strict
 opencv-python-headless >=4.5.5.62
