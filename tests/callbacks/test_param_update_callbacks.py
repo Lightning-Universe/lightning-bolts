@@ -2,9 +2,8 @@ from copy import deepcopy
 
 import pytest
 import torch
-from torch import nn
-
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
+from torch import nn
 
 
 @pytest.mark.parametrize("initial_tau", [-0.1, 0.0, 0.996, 1.0, 1.1])

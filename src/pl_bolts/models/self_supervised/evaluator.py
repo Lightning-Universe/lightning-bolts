@@ -5,7 +5,7 @@ from pl_bolts.utils.stability import under_review
 
 @under_review()
 class SSLEvaluator(nn.Module):
-    def __init__(self, n_input, n_classes, n_hidden=512, p=0.1):
+    def __init__(self, n_input, n_classes, n_hidden=512, p=0.1) -> None:
         super().__init__()
         self.n_input = n_input
         self.n_classes = n_classes
@@ -26,13 +26,12 @@ class SSLEvaluator(nn.Module):
             )
 
     def forward(self, x):
-        logits = self.block_forward(x)
-        return logits
+        return self.block_forward(x)
 
 
 @under_review()
 class Flatten(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     def forward(self, input_tensor):

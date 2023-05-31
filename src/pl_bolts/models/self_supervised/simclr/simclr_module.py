@@ -43,7 +43,7 @@ class SyncFunction(torch.autograd.Function):
 
 @under_review()
 class Projection(nn.Module):
-    def __init__(self, input_dim=2048, hidden_dim=2048, output_dim=128):
+    def __init__(self, input_dim=2048, hidden_dim=2048, output_dim=128) -> None:
         super().__init__()
         self.output_dim = output_dim
         self.input_dim = input_dim
@@ -85,7 +85,7 @@ class SimCLR(LightningModule):
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
         **kwargs
-    ):
+    ) -> None:
         """
         Args:
             batch_size: the batch size
@@ -157,9 +157,7 @@ class SimCLR(LightningModule):
         z1 = self.projection(h1)
         z2 = self.projection(h2)
 
-        loss = self.nt_xent_loss(z1, z2, self.temperature)
-
-        return loss
+        return self.nt_xent_loss(z1, z2, self.temperature)
 
     def training_step(self, batch, batch_idx):
         loss = self.shared_step(batch)
@@ -180,7 +178,7 @@ class SimCLR(LightningModule):
         for name, param in named_params:
             if not param.requires_grad:
                 continue
-            elif any(layer_name in name for layer_name in skip_list):
+            if any(layer_name in name for layer_name in skip_list):
                 excluded_params.append(param)
             else:
                 params.append(param)
@@ -259,9 +257,7 @@ class SimCLR(LightningModule):
         pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
         pos = torch.cat([pos, pos], dim=0)
 
-        loss = -torch.log(pos / (neg + eps)).mean()
-
-        return loss
+        return -torch.log(pos / (neg + eps)).mean()
 
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -308,7 +304,7 @@ class SimCLR(LightningModule):
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
-    from pl_bolts.models.self_supervised.simclr.transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
+    from pl_bolts.transforms.self_supervised.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 
     parser = ArgumentParser()
 
@@ -415,7 +411,7 @@ def cli_main():
         gpus=args.gpus,
         num_nodes=args.num_nodes,
         accelerator="ddp" if args.gpus > 1 else None,
-        sync_batchnorm=True if args.gpus > 1 else False,
+        sync_batchnorm=args.gpus > 1,
         precision=32 if args.fp32 else 16,
         callbacks=callbacks,
         fast_dev_run=args.fast_dev_run,

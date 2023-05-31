@@ -31,7 +31,7 @@ class UNet(nn.Module):
         num_layers: int = 5,
         features_start: int = 64,
         bilinear: bool = False,
-    ):
+    ) -> None:
         if num_layers < 1:
             raise ValueError(f"num_layers = {num_layers}, expected: num_layers > 0")
 
@@ -67,7 +67,7 @@ class UNet(nn.Module):
 class DoubleConv(nn.Module):
     """[ Conv2d => BatchNorm => ReLU ] x 2."""
 
-    def __init__(self, in_ch: int, out_ch: int):
+    def __init__(self, in_ch: int, out_ch: int) -> None:
         super().__init__()
         self.net = nn.Sequential(
             nn.Conv2d(in_ch, out_ch, kernel_size=3, padding=1, bias=False),
@@ -85,7 +85,7 @@ class DoubleConv(nn.Module):
 class Down(nn.Module):
     """Downscale with MaxPool => DoubleConvolution block."""
 
-    def __init__(self, in_ch: int, out_ch: int):
+    def __init__(self, in_ch: int, out_ch: int) -> None:
         super().__init__()
         self.net = nn.Sequential(nn.MaxPool2d(kernel_size=2, stride=2), DoubleConv(in_ch, out_ch))
 
@@ -97,7 +97,7 @@ class Up(nn.Module):
     """Upsampling (by either bilinear interpolation or transpose convolutions) followed by concatenation of feature
     map from contracting path, followed by DoubleConv."""
 
-    def __init__(self, in_ch: int, out_ch: int, bilinear: bool = False):
+    def __init__(self, in_ch: int, out_ch: int, bilinear: bool = False) -> None:
         super().__init__()
         self.upsample = None
         if bilinear:

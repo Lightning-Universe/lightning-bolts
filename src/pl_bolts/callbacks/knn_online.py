@@ -73,8 +73,8 @@ class KNNOnlineEvaluator(Callback):
         # weighted score ---> [B, C]
         pred_scores = torch.sum(one_hot_label.view(B, -1, self.num_classes) * sim_weight.unsqueeze(dim=-1), dim=1)
 
-        pred_labels = pred_scores.argsort(dim=-1, descending=True)
-        return pred_labels
+        # pred_labels
+        return pred_scores.argsort(dim=-1, descending=True)
 
     def to_device(self, batch: Tensor, device: Union[str, torch.device]) -> Tuple[Tensor, Tensor]:
         # get the labeled batch

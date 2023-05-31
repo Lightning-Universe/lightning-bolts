@@ -19,7 +19,7 @@ from torch.utils.data import DataLoader, Dataset, IterableDataset, Subset
 
 
 class RandomDictDataset(Dataset):
-    def __init__(self, size: int, length: int):
+    def __init__(self, size: int, length: int) -> None:
         self.len = length
         self.data = torch.randn(length, size)
 
@@ -28,24 +28,24 @@ class RandomDictDataset(Dataset):
         b = a + 2
         return {"a": a, "b": b}
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.len
 
 
 class RandomDataset(Dataset):
-    def __init__(self, size: int, length: int):
+    def __init__(self, size: int, length: int) -> None:
         self.len = length
         self.data = torch.randn(length, size)
 
     def __getitem__(self, index):
         return self.data[index]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.len
 
 
 class RandomIterableDataset(IterableDataset):
-    def __init__(self, size: int, count: int):
+    def __init__(self, size: int, count: int) -> None:
         self.count = count
         self.size = size
 
@@ -55,7 +55,7 @@ class RandomIterableDataset(IterableDataset):
 
 
 class RandomIterableDatasetWithLen(IterableDataset):
-    def __init__(self, size: int, count: int):
+    def __init__(self, size: int, count: int) -> None:
         self.count = count
         self.size = size
 
@@ -63,12 +63,12 @@ class RandomIterableDatasetWithLen(IterableDataset):
         for _ in range(len(self)):
             yield torch.randn(self.size)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.count
 
 
 class BoringModel(LightningModule):
-    def __init__(self):
+    def __init__(self) -> None:
         """Testing PL Module.
 
         Use as follows:
@@ -96,8 +96,7 @@ class BoringModel(LightningModule):
 
     def step(self, x):
         x = self(x)
-        out = torch.nn.functional.mse_loss(x, torch.ones_like(x))
-        return out
+        return torch.nn.functional.mse_loss(x, torch.ones_like(x))
 
     def training_step(self, batch, batch_idx):
         output = self(batch)
@@ -145,7 +144,7 @@ class BoringModel(LightningModule):
 
 
 class BoringDataModule(LightningDataModule):
-    def __init__(self, data_dir: str = "./"):
+    def __init__(self, data_dir: str = "./") -> None:
         super().__init__()
         self.data_dir = data_dir
         self.non_picklable = None

@@ -1,9 +1,8 @@
 from warnings import warn
 
 import numpy as np
-from pytorch_lightning import seed_everything
-
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
+from pytorch_lightning import seed_everything
 
 try:
     from sklearn.utils import shuffle as sk_shuffle
@@ -32,10 +31,10 @@ def test_dataloader():
     train_loader = loaders.train_dataloader()
     val_loader = loaders.val_dataloader()
     test_loader = loaders.test_dataloader()
-    assert np.all(train_loader.dataset.X == shuffled_X[2:])
-    assert np.all(val_loader.dataset.X == shuffled_X[0])
-    assert np.all(test_loader.dataset.X == shuffled_X[1])
-    assert np.all(train_loader.dataset.Y == shuffled_y[2:])
+    assert np.all(shuffled_X[2:] == train_loader.dataset.X)
+    assert np.all(shuffled_X[0] == val_loader.dataset.X)
+    assert np.all(shuffled_X[1] == test_loader.dataset.X)
+    assert np.all(shuffled_y[2:] == train_loader.dataset.Y)
 
     # -----------------------------
     # train + val
@@ -44,9 +43,9 @@ def test_dataloader():
     train_loader = loaders.train_dataloader()
     val_loader = loaders.val_dataloader()
     test_loader = loaders.test_dataloader()
-    assert np.all(train_loader.dataset.X == shuffled_X[1:])
-    assert np.all(val_loader.dataset.X == x_val)
-    assert np.all(test_loader.dataset.X == shuffled_X[0])
+    assert np.all(shuffled_X[1:] == train_loader.dataset.X)
+    assert np.all(x_val == val_loader.dataset.X)
+    assert np.all(shuffled_X[0] == test_loader.dataset.X)
 
     # -----------------------------
     # train + test
@@ -57,9 +56,9 @@ def test_dataloader():
     train_loader = loaders.train_dataloader()
     val_loader = loaders.val_dataloader()
     test_loader = loaders.test_dataloader()
-    assert np.all(train_loader.dataset.X == shuffled_X[1:])
-    assert np.all(val_loader.dataset.X == shuffled_X[0])
-    assert np.all(test_loader.dataset.X == x_test)
+    assert np.all(shuffled_X[1:] == train_loader.dataset.X)
+    assert np.all(shuffled_X[0] == val_loader.dataset.X)
+    assert np.all(x_test == test_loader.dataset.X)
 
     # -----------------------------
     # train + val + test
@@ -68,6 +67,6 @@ def test_dataloader():
     train_loader = loaders.train_dataloader()
     val_loader = loaders.val_dataloader()
     test_loader = loaders.test_dataloader()
-    assert np.all(train_loader.dataset.X == shuffled_X)
-    assert np.all(val_loader.dataset.X == x_val)
-    assert np.all(test_loader.dataset.X == x_test)
+    assert np.all(shuffled_X == train_loader.dataset.X)
+    assert np.all(x_val == val_loader.dataset.X)
+    assert np.all(x_test == test_loader.dataset.X)

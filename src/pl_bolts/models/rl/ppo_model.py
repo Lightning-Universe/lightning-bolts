@@ -171,9 +171,7 @@ class PPO(LightningModule):
         vals = values + [last_value]
         # GAE
         delta = [rews[i] + self.gamma * vals[i + 1] - vals[i] for i in range(len(rews) - 1)]
-        adv = self.discount_rewards(delta, self.gamma * self.lam)
-
-        return adv
+        return self.discount_rewards(delta, self.gamma * self.lam)
 
     def generate_trajectory_samples(self) -> Tuple[List[Tensor], List[Tensor], List[Tensor]]:
         """Contains the logic for generating trajectory data to train policy and value network.
@@ -264,13 +262,11 @@ class PPO(LightningModule):
         logp = self.actor.get_log_prob(pi, action)
         ratio = torch.exp(logp - logp_old)
         clip_adv = torch.clamp(ratio, 1 - self.clip_ratio, 1 + self.clip_ratio) * adv
-        loss_actor = -(torch.min(ratio * adv, clip_adv)).mean()
-        return loss_actor
+        return -(torch.min(ratio * adv, clip_adv)).mean()
 
     def critic_loss(self, state, qval) -> Tensor:
         value = self.critic(state)
-        loss_critic = (qval - value).pow(2).mean()
-        return loss_critic
+        return (qval - value).pow(2).mean()
 
     def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx, optimizer_idx):
         """Carries out a single update to actor and critic network from a batch of replay buffer.
@@ -325,8 +321,7 @@ class PPO(LightningModule):
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences."""
         dataset = ExperienceSourceDataset(self.generate_trajectory_samples)
-        dataloader = DataLoader(dataset=dataset, batch_size=self.batch_size)
-        return dataloader
+        return DataLoader(dataset=dataset, batch_size=self.batch_size)
 
     def train_dataloader(self) -> DataLoader:
         """Get train loader."""

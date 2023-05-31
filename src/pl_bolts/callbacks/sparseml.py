@@ -36,7 +36,7 @@ class SparseMLCallback(Callback):
             More information at https://docs.neuralmagic.com/sparseml/source/recipes.html
     """
 
-    def __init__(self, recipe_path: str):
+    def __init__(self, recipe_path: str) -> None:
         if not _SPARSEML_AVAILABLE:
             if not _PL_GREATER_EQUAL_1_4_5:
                 raise MisconfigurationException("SparseML requires PyTorch Lightning 1.4.5 or greater.")

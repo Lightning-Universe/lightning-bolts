@@ -57,7 +57,7 @@ class BasicBlock(nn.Module):
 
     def __init__(
         self, inplanes, planes, stride=1, downsample=None, groups=1, base_width=64, dilation=1, norm_layer=None
-    ):
+    ) -> None:
         super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -99,7 +99,7 @@ class Bottleneck(nn.Module):
 
     def __init__(
         self, inplanes, planes, stride=1, downsample=None, groups=1, base_width=64, dilation=1, norm_layer=None
-    ):
+    ) -> None:
         super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -153,7 +153,7 @@ class ResNet(nn.Module):
         return_all_feature_maps=False,
         first_conv=True,
         maxpool1=True,
-    ):
+    ) -> None:
         super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d

@@ -33,7 +33,7 @@ class DataMonitorBase(Callback):
         WandbLogger,
     )
 
-    def __init__(self, log_every_n_steps: int = None):
+    def __init__(self, log_every_n_steps: int = None) -> None:
         """Base class for monitoring data histograms in a LightningModule. This requires a logger configured in the
         Trainer, otherwise no data is logged. The specific class that inherits from this base defines what data
         gets collected.
@@ -110,7 +110,7 @@ class DataMonitorBase(Callback):
         if not isinstance(logger, self.supported_loggers):
             rank_zero_warn(
                 f"{self.__class__.__name__} does not support logging with {logger.__class__.__name__}."
-                f" Supported loggers are: {', '.join(map(lambda x: str(x.__name__), self.supported_loggers))}"
+                f" Supported loggers are: {', '.join((str(x.__name__) for x in self.supported_loggers))}"
             )
             available = False
         return available
@@ -125,7 +125,7 @@ class ModuleDataMonitor(DataMonitorBase):
         self,
         submodules: Optional[Union[bool, List[str]]] = None,
         log_every_n_steps: int = None,
-    ):
+    ) -> None:
         """
         Args:
             submodules: If `True`, logs the in- and output histograms of every submodule in the
@@ -197,15 +197,15 @@ class ModuleDataMonitor(DataMonitorBase):
             self.log_histograms(inp, group=input_group_name)
             self.log_histograms(out, group=output_group_name)
 
-        handle = module.register_forward_hook(hook)
-        return handle
+        # handler
+        return module.register_forward_hook(hook)
 
 
 @under_review()
 class TrainingDataMonitor(DataMonitorBase):
     GROUP_NAME = "training_step"
 
-    def __init__(self, log_every_n_steps: int = None):
+    def __init__(self, log_every_n_steps: int = None) -> None:
         """Callback that logs the histogram of values in the batched data passed to `training_step`.
 
         Args:

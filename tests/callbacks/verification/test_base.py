@@ -3,11 +3,11 @@ from unittest.mock import Mock, patch
 import pytest
 import torch
 import torch.nn as nn
+from pl_bolts.callbacks.verification.base import VerificationBase
+from pl_bolts.utils import _PL_GREATER_EQUAL_1_4
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities import move_data_to_device
 
-from pl_bolts.callbacks.verification.base import VerificationBase
-from pl_bolts.utils import _PL_GREATER_EQUAL_1_4
 from tests import _MARK_REQUIRE_GPU
 
 
@@ -17,7 +17,7 @@ class TrivialVerification(VerificationBase):
 
 
 class PyTorchModel(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.layer = nn.Linear(5, 2)
 
@@ -26,7 +26,7 @@ class PyTorchModel(nn.Module):
 
 
 class LitModel(LightningModule):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.example_input_array = None
         self.model = PyTorchModel()
