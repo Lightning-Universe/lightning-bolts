@@ -89,7 +89,7 @@ jobs:
       with:
         path: ./_datasets
         # bump this date if you need update cache
-        key: datasets-20230531
+        key: datasets-20230601
 
     - name: Setup macOS
       if: runner.os == 'macOS' && steps.cache-datasets.outputs.cache-hit != 'true'
