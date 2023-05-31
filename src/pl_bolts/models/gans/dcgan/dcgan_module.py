@@ -138,25 +138,20 @@ class DCGAN(LightningModule):
         fake_gt = torch.zeros_like(fake_pred)
         fake_loss = self.criterion(fake_pred, fake_gt)
 
-        disc_loss = real_loss + fake_loss
-
-        return disc_loss
+        # disc_loss
+        return real_loss + fake_loss
 
     def _get_gen_loss(self, real: Tensor) -> Tensor:
         # Train with fake
         fake_pred = self._get_fake_pred(real)
         fake_gt = torch.ones_like(fake_pred)
-        gen_loss = self.criterion(fake_pred, fake_gt)
-
-        return gen_loss
+        return self.criterion(fake_pred, fake_gt)
 
     def _get_fake_pred(self, real: Tensor) -> Tensor:
         batch_size = len(real)
         noise = self._get_noise(batch_size, self.hparams.latent_dim)
         fake = self(noise)
-        fake_pred = self.discriminator(fake)
-
-        return fake_pred
+        return self.discriminator(fake)
 
     def _get_noise(self, n_samples: int, latent_dim: int) -> Tensor:
         return torch.randn(n_samples, latent_dim, device=self.device)

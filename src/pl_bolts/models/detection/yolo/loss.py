@@ -133,11 +133,11 @@ def _pairwise_confidence_loss(
         # Distance-IoU may return negative "overlaps", so we have to make sure that the targets are not negative.
         targets += predict_overlap * overlap.detach().clamp(min=0)
         return bce_func(preds, targets, reduction="none")
-    else:
-        # When not predicting overlap, target confidence is the same for every prediction, but we should still return a
-        # matrix.
-        targets = torch.ones_like(preds)
-        return bce_func(preds, targets, reduction="none").unsqueeze(1).expand(overlap.shape)
+
+    # When not predicting overlap, target confidence is the same for every prediction,
+    # but we should still return a matrix.
+    targets = torch.ones_like(preds)
+    return bce_func(preds, targets, reduction="none").unsqueeze(1).expand(overlap.shape)
 
 
 def _foreground_confidence_loss(
@@ -219,7 +219,7 @@ def _target_labels_to_probs(
 
 
 @dataclass
-class Losses:
+class YOLOLosses:
     overlap: Tensor
     confidence: Tensor
     classification: Tensor
@@ -272,7 +272,7 @@ class YOLOLoss:
         preds: Dict[str, Tensor],
         targets: Dict[str, Tensor],
         input_is_normalized: bool,
-    ) -> Tuple[Losses, Tensor]:
+    ) -> Tuple[YOLOLosses, Tensor]:
         """Calculates matrices containing the losses for all prediction/target pairs.
 
         This method is called for obtaining costs for SimOTA matching.
@@ -310,7 +310,7 @@ class YOLOLoss:
         class_loss = bce_func(pred_probs, target_probs, reduction="none").sum(-1)
         assert class_loss.shape == loss_shape
 
-        losses = Losses(
+        losses = YOLOLosses(
             overlap_loss * self.overlap_multiplier,
             confidence_loss * self.confidence_multiplier,
             class_loss * self.class_multiplier,
@@ -324,7 +324,7 @@ class YOLOLoss:
         targets: Dict[str, Tensor],
         input_is_normalized: bool,
         image_size: Tensor,
-    ) -> Losses:
+    ) -> YOLOLosses:
         """Calculates the sums of the losses for optimization, over prediction/target pairs, assuming the
         predictions and targets have been matched (there are as many predictions and targets).
 
@@ -354,10 +354,8 @@ class YOLOLoss:
         )
         class_loss = bce_func(pred_probs, target_probs, reduction="sum")
 
-        losses = Losses(
+        return YOLOLosses(
             overlap_loss * self.overlap_multiplier,
             confidence_loss * self.confidence_multiplier,
             class_loss * self.class_multiplier,
         )
-
-        return losses

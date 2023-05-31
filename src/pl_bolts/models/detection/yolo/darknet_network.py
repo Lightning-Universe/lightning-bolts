@@ -246,8 +246,7 @@ class DarknetNetwork(nn.Module):
                 return value
             if key in list_variables:
                 return [variable_types[key](v) for v in value.split(",")]
-            else:
-                return variable_types[key](value)
+            return variable_types[key](value)
 
         for line in config_file:
             line = line.strip()

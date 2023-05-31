@@ -2,13 +2,13 @@ from unittest.mock import Mock
 
 import pytest
 import torch
+from pl_bolts.callbacks import BatchGradientVerificationCallback
+from pl_bolts.callbacks.verification.batch_gradient import default_input_mapping, default_output_mapping, selective_eval
+from pl_bolts.utils import BatchGradientVerification
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor, nn
 
-from pl_bolts.callbacks import BatchGradientVerificationCallback
-from pl_bolts.callbacks.verification.batch_gradient import default_input_mapping, default_output_mapping, selective_eval
-from pl_bolts.utils import BatchGradientVerification
 from tests import _MARK_REQUIRE_GPU
 
 
@@ -41,8 +41,7 @@ class MultipleInputModel(TemplateModel):
         self.input_array = (torch.rand(10, 5, 2), torch.rand(10, 5, 2))
 
     def forward(self, x, y, some_kwarg=True):
-        out = super().forward(x) + super().forward(y)
-        return out
+        return super().forward(x) + super().forward(y)
 
 
 class MultipleOutputModel(TemplateModel):
@@ -69,8 +68,7 @@ class DictInputDictOutputModel(TemplateModel):
         out1 = super().forward(x["a"])
         out2 = super().forward(y)
         out3 = out1 + out2
-        out = {1: out1, 2: out2, 3: [out1, out3]}
-        return out
+        return {1: out1, 2: out2, 3: [out1, out3]}
 
 
 class LitModel(LightningModule):

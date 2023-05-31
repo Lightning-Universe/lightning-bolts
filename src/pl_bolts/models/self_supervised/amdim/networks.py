@@ -127,8 +127,7 @@ class AMDIMEncoder(nn.Module):
             layer_acts.append(layer_out)
 
         # remove input from the returned list of activations
-        return_acts = layer_acts[1:]
-        return return_acts
+        return layer_acts[1:]
 
     def forward(self, x):
         # compute activations in all layers for x
@@ -169,8 +168,7 @@ class Conv3x3(nn.Module):
         # maybe apply batchnorm
         x = self.bn(x)
         # always apply relu
-        out = self.relu(x)
-        return out
+        return self.relu(x)
 
 
 @under_review()
@@ -189,8 +187,7 @@ class ConvResBlock(nn.Module):
 
     def forward(self, x):
         # run forward pass through the list of ConvResNxN layers
-        x_out = self.layer_list(x)
-        return x_out
+        return self.layer_list(x)
 
 
 @under_review()
@@ -234,8 +231,7 @@ class ConvResNxN(nn.Module):
         else:
             h3_pool = F.avg_pool2d(x, self.width, self.stride, self.pad)
             h3 = F.pad(h3_pool, (0, 0, 0, 0, 0, self.n_grow))
-        h23 = h2 + h3
-        return h23
+        return h2 + h3
 
 
 @under_review()
@@ -294,5 +290,4 @@ class FakeRKHSConvNet(nn.Module):
 
     def forward(self, x):
         h_res = self.conv2(self.relu1(self.bn1(self.conv1(x))))
-        h = self.bn_out(h_res + self.shortcut(x))
-        return h
+        return self.bn_out(h_res + self.shortcut(x))
