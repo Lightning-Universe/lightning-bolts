@@ -1,8 +1,7 @@
 import pytest
 import torch
-from pytorch_lightning import seed_everything
-
 from pl_bolts.models.gans.pix2pix.components import Generator, PatchGAN
+from pytorch_lightning import seed_everything
 
 
 @pytest.mark.parametrize(
