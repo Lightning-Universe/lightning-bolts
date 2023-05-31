@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved YOLO model includes YOLOv4, YOLOv5, and YOLOX networks and training algorithms ([#552](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/817))
 
 
+- Bumped support of min python version to py3.8 ([#1021](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/1021))
+
+
 ### Deprecated
 
 

@@ -13,7 +13,7 @@ clean:
 	rm -rf ./docs/source/generated
 	rm -rf ./docs/source/*/generated
 	rm -rf ./docs/source/api
-	rm -rf ./datasets
+	rm -rf ./_datasets
 
 test: clean env
 
