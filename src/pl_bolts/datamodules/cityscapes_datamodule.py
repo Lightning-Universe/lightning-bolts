@@ -139,7 +139,7 @@ class CityscapesDataModule(LightningDataModule):
             **self.extra_args,
         )
 
-        loader = DataLoader(
+        return DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=self.shuffle,
@@ -147,7 +147,6 @@ class CityscapesDataModule(LightningDataModule):
             drop_last=self.drop_last,
             pin_memory=self.pin_memory,
         )
-        return loader
 
     def train_extra_dataloader(self) -> DataLoader:
         """Cityscapes extra train dataset.
@@ -192,7 +191,7 @@ class CityscapesDataModule(LightningDataModule):
             **self.extra_args,
         )
 
-        loader = DataLoader(
+        return DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=False,
@@ -200,7 +199,6 @@ class CityscapesDataModule(LightningDataModule):
             pin_memory=self.pin_memory,
             drop_last=self.drop_last,
         )
-        return loader
 
     def test_dataloader(self) -> DataLoader:
         """Cityscapes test set.
@@ -219,7 +217,7 @@ class CityscapesDataModule(LightningDataModule):
             target_transform=target_transforms,
             **self.extra_args,
         )
-        loader = DataLoader(
+        return DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=False,
@@ -227,10 +225,9 @@ class CityscapesDataModule(LightningDataModule):
             drop_last=self.drop_last,
             pin_memory=self.pin_memory,
         )
-        return loader
 
     def _default_transforms(self) -> Callable:
-        cityscapes_transforms = transform_lib.Compose(
+        return transform_lib.Compose(
             [
                 transform_lib.ToTensor(),
                 transform_lib.Normalize(
@@ -238,13 +235,11 @@ class CityscapesDataModule(LightningDataModule):
                 ),
             ]
         )
-        return cityscapes_transforms
 
     def _default_target_transforms(self) -> Callable:
         if self.target_type == "polygon":
-            cityscapes_target_transforms = None
-        else:
-            cityscapes_target_transforms = transform_lib.Compose(
-                [transform_lib.ToTensor(), transform_lib.Lambda(lambda t: t.squeeze())]
-            )
-        return cityscapes_target_transforms
+            return None
+
+        return transform_lib.Compose(
+            [transform_lib.ToTensor(), transform_lib.Lambda(lambda t: t.squeeze())]
+        )
