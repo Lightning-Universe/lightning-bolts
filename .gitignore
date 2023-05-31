@@ -145,6 +145,7 @@ dmypy.json
 .DS_Store
 
 # Datasets
+/_datasets/
 /datasets/
 MNIST/
 CIFAR10/
