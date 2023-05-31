@@ -4,16 +4,13 @@ from unittest.mock import call
 
 import pytest
 import torch
+from pl_bolts.callbacks import ModuleDataMonitor, TrainingDataMonitor
+from pl_bolts.datamodules import MNISTDataModule
+from pl_bolts.models import LitMNIST
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.loggers import LoggerCollection, TensorBoardLogger
 from pytorch_lightning.utilities.rank_zero import LightningDeprecationWarning
 from pytorch_lightning.utilities.warnings import PossibleUserWarning
-from torch import nn
-
-from pl_bolts.callbacks import ModuleDataMonitor, TrainingDataMonitor
-from pl_bolts.datamodules import MNISTDataModule
-from pl_bolts.models import LitMNIST
-from pytorch_lightning import Trainer
 from torch import nn
 
 
