@@ -166,7 +166,7 @@ class CityscapesDataModule(LightningDataModule):
             **self.extra_args,
         )
 
-        loader = DataLoader(
+        return DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=self.shuffle,
@@ -174,7 +174,6 @@ class CityscapesDataModule(LightningDataModule):
             drop_last=self.drop_last,
             pin_memory=self.pin_memory,
         )
-        return loader
 
     def val_dataloader(self) -> DataLoader:
         """Cityscapes val set."""
@@ -236,7 +235,7 @@ class CityscapesDataModule(LightningDataModule):
             ]
         )
 
-    def _default_target_transforms(self) -> Callable:
+    def _default_target_transforms(self) -> Optional[Callable]:
         if self.target_type == "polygon":
             return None
 
