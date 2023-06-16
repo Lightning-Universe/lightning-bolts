@@ -117,7 +117,7 @@ def test_batch_gradient_verification_pl_module(mix_data, device):
 
 @pytest.mark.parametrize(
     "gpus",
-    [0, pytest.param(1, marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
+    [0, pytest.param(1, marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))]
 )
 def test_batch_gradient_verification_callback(gpus):
     """Test detection of batch gradient mixing with the callback implementation."""

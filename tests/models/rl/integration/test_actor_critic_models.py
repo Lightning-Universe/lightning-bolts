@@ -1,5 +1,7 @@
 import argparse
 
+import torch.cuda
+
 from pl_bolts.models.rl.advantage_actor_critic_model import AdvantageActorCritic
 from pl_bolts.models.rl.sac_model import SAC
 from pytorch_lightning import Trainer
@@ -17,7 +19,7 @@ def test_a2c():
     hparams = parent_parser.parse_args(args_list)
 
     trainer = Trainer(
-        gpus=0,
+        gpus=int(torch.cuda.is_available()),
         max_steps=100,
         max_epochs=100,  # Set this as the same as max steps to ensure that it doesn't stop early
         val_check_interval=1,  # This just needs 'some' value, does not effect training right now
@@ -37,7 +39,7 @@ def test_sac():
         "--warm_start_size",
         "100",
         "--gpus",
-        "0",
+        str(int(torch.cuda.is_available())),
         "--env",
         "Pendulum-v0",
         "--batch_size",
