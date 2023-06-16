@@ -13,7 +13,7 @@ def test_sac_loss():
         "--env",
         "Pendulum-v0",
         "--batch_size",
-        "32",
+        "32"
     ]
     hparams = parent_parser.parse_args(args_list)
     model = SAC(**vars(hparams))
@@ -40,7 +40,7 @@ def test_sac_train_batch():
         "--env",
         "Pendulum-v0",
         "--batch_size",
-        "32",
+        "32"
     ]
     hparams = parent_parser.parse_args(args_list)
     model = SAC(**vars(hparams))

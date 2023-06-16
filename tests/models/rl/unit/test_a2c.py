@@ -13,7 +13,7 @@ def test_a2c_loss():
         "--env",
         "CartPole-v0",
         "--batch_size",
-        "32",
+        "32"
     ]
     hparams = parent_parser.parse_args(args_list)
     model = AdvantageActorCritic(**vars(hparams))
@@ -35,7 +35,7 @@ def test_a2c_train_batch():
         "--env",
         "CartPole-v0",
         "--batch_size",
-        "32",
+        "32"
     ]
     hparams = parent_parser.parse_args(args_list)
     model = AdvantageActorCritic(**vars(hparams))

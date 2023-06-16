@@ -29,7 +29,7 @@ class TestReinforce(TestCase):
             "--batch_size",
             "32",
             "--gamma",
-            "0.99",
+            "0.99"
         ]
         self.hparams = parent_parser.parse_args(args_list)
         self.model = Reinforce(**vars(self.hparams))

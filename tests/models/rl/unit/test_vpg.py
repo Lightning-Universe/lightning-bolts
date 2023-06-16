@@ -24,7 +24,7 @@ class TestPolicyGradient(TestCase):
             "--env",
             "CartPole-v0",
             "--batch_size",
-            "32",
+            "32"
         ]
         self.hparams = parent_parser.parse_args(args_list)
         self.model = VanillaPolicyGradient(**vars(self.hparams))

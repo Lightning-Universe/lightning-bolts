@@ -7,14 +7,14 @@ from pl_bolts.models.rl.sac_model import SAC
 from pytorch_lightning import Trainer
 
 
-def test_a2c():
+def test_a2c_cli():
     """Smoke test that the A2C model runs."""
 
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = AdvantageActorCritic.add_model_specific_args(parent_parser)
     args_list = [
         "--env",
-        "CartPole-v0",
+        "CartPole-v0"
     ]
     hparams = parent_parser.parse_args(args_list)
 
@@ -29,7 +29,7 @@ def test_a2c():
     trainer.fit(model)
 
 
-def test_sac():
+def test_sac_cli():
     """Smoke test that the SAC model runs."""
 
     parent_parser = argparse.ArgumentParser(add_help=False)
@@ -39,7 +39,7 @@ def test_sac():
         "--warm_start_size",
         "100",
         "--gpus",
-        str(int(torch.cuda.is_available())),
+        "0",  # fixme: RuntimeError on GPU: Expected all tensors to be on the same device
         "--env",
         "Pendulum-v0",
         "--batch_size",

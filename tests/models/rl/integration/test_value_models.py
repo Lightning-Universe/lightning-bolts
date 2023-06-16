@@ -23,7 +23,7 @@ class TestValueModels(TestCase):
             "--gpus",
             str(int(torch.cuda.is_available())),
             "--env",
-            "PongNoFrameskip-v4",
+            "PongNoFrameskip-v4"
         ]
         self.hparams = parent_parser.parse_args(args_list)
 
