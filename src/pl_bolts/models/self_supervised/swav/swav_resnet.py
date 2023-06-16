@@ -36,7 +36,7 @@ class BasicBlock(nn.Module):
         base_width=64,
         dilation=1,
         norm_layer=None,
-    ):
+    ) -> None:
         super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -86,7 +86,7 @@ class Bottleneck(nn.Module):
         base_width=64,
         dilation=1,
         norm_layer=None,
-    ):
+    ) -> None:
         super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -143,7 +143,7 @@ class ResNet(nn.Module):
         eval_mode=False,
         first_conv=True,
         maxpool1=True,
-    ):
+    ) -> None:
         super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -319,7 +319,7 @@ class ResNet(nn.Module):
             )[1],
             0,
         )
-        start_idx = 0
+        start_idx, output = 0, None
         for end_idx in idx_crops:
             _out = torch.cat(inputs[start_idx:end_idx])
 
@@ -328,16 +328,13 @@ class ResNet(nn.Module):
             else:
                 _out = self.forward_backbone(_out)
 
-            if start_idx == 0:
-                output = _out
-            else:
-                output = torch.cat((output, _out))
+            output = _out if start_idx == 0 else torch.cat((output, _out))
             start_idx = end_idx
         return self.forward_head(output)
 
 
 class MultiPrototypes(nn.Module):
-    def __init__(self, output_dim, nmb_prototypes):
+    def __init__(self, output_dim, nmb_prototypes) -> None:
         super().__init__()
         self.nmb_heads = len(nmb_prototypes)
         for i, k in enumerate(nmb_prototypes):

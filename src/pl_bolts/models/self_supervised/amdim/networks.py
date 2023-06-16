@@ -19,7 +19,7 @@ class AMDIMEncoder(nn.Module):
         conv_block_depth=3,
         encoder_size=32,
         use_bn=False,
-    ):
+    ) -> None:
         super().__init__()
         # NDF = encoder hidden feat size
         # RKHS = output dim
@@ -127,8 +127,7 @@ class AMDIMEncoder(nn.Module):
             layer_acts.append(layer_out)
 
         # remove input from the returned list of activations
-        return_acts = layer_acts[1:]
-        return return_acts
+        return layer_acts[1:]
 
     def forward(self, x):
         # compute activations in all layers for x
@@ -151,7 +150,7 @@ class AMDIMEncoder(nn.Module):
 
 @under_review()
 class Conv3x3(nn.Module):
-    def __init__(self, n_in, n_out, n_kern, n_stride, n_pad, use_bn=True, pad_mode="constant"):
+    def __init__(self, n_in, n_out, n_kern, n_stride, n_pad, use_bn=True, pad_mode="constant") -> None:
         super().__init__()
         assert pad_mode in ["constant", "reflect"]
         self.n_pad = (n_pad, n_pad, n_pad, n_pad)
@@ -169,13 +168,12 @@ class Conv3x3(nn.Module):
         # maybe apply batchnorm
         x = self.bn(x)
         # always apply relu
-        out = self.relu(x)
-        return out
+        return self.relu(x)
 
 
 @under_review()
 class ConvResBlock(nn.Module):
-    def __init__(self, n_in, n_out, width, stride, pad, depth, use_bn):
+    def __init__(self, n_in, n_out, width, stride, pad, depth, use_bn) -> None:
         super().__init__()
         layer_list = [ConvResNxN(n_in, n_out, width, stride, pad, use_bn)]
         for i in range(depth - 1):
@@ -189,13 +187,12 @@ class ConvResBlock(nn.Module):
 
     def forward(self, x):
         # run forward pass through the list of ConvResNxN layers
-        x_out = self.layer_list(x)
-        return x_out
+        return self.layer_list(x)
 
 
 @under_review()
 class ConvResNxN(nn.Module):
-    def __init__(self, n_in, n_out, width, stride, pad, use_bn=False):
+    def __init__(self, n_in, n_out, width, stride, pad, use_bn=False) -> None:
         super().__init__()
         self.n_in = n_in
         self.n_out = n_out
@@ -234,13 +231,12 @@ class ConvResNxN(nn.Module):
         else:
             h3_pool = F.avg_pool2d(x, self.width, self.stride, self.pad)
             h3 = F.pad(h3_pool, (0, 0, 0, 0, 0, self.n_grow))
-        h23 = h2 + h3
-        return h23
+        return h2 + h3
 
 
 @under_review()
 class MaybeBatchNorm2d(nn.Module):
-    def __init__(self, n_ftr, affine, use_bn):
+    def __init__(self, n_ftr, affine, use_bn) -> None:
         super().__init__()
         self.bn = nn.BatchNorm2d(n_ftr, affine=affine)
         self.use_bn = use_bn
@@ -253,7 +249,7 @@ class MaybeBatchNorm2d(nn.Module):
 
 @under_review()
 class NopNet(nn.Module):
-    def __init__(self, norm_dim=None):
+    def __init__(self, norm_dim=None) -> None:
         super().__init__()
         self.norm_dim = norm_dim
 
@@ -267,7 +263,7 @@ class NopNet(nn.Module):
 
 @under_review()
 class FakeRKHSConvNet(nn.Module):
-    def __init__(self, n_input, n_output, use_bn=False):
+    def __init__(self, n_input, n_output, use_bn=False) -> None:
         super().__init__()
         self.conv1 = nn.Conv2d(n_input, n_output, kernel_size=1, stride=1, padding=0, bias=False)
         self.bn1 = MaybeBatchNorm2d(n_output, True, use_bn)
@@ -294,5 +290,4 @@ class FakeRKHSConvNet(nn.Module):
 
     def forward(self, x):
         h_res = self.conv2(self.relu1(self.bn1(self.conv1(x))))
-        h = self.bn_out(h_res + self.shortcut(x))
-        return h
+        return self.bn_out(h_res + self.shortcut(x))

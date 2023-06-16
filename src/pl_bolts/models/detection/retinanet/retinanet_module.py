@@ -47,7 +47,7 @@ class RetinaNet(LightningModule):
         pretrained_backbone: bool = True,
         trainable_backbone_layers: int = 3,
         **kwargs: Any,
-    ):
+    ) -> None:
         """
         Args:
             learning_rate: the learning rate
@@ -97,7 +97,7 @@ class RetinaNet(LightningModule):
 
     def training_step(self, batch, batch_idx):
         images, targets = batch
-        targets = [{k: v for k, v in t.items()} for t in targets]
+        targets = [dict(t.items()) for t in targets]
 
         # fasterrcnn takes both images and targets for training, returns
         loss_dict = self.model(images, targets)

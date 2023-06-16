@@ -50,7 +50,7 @@ class SwAV(LightningModule):
         weight_decay: float = 1e-6,
         epsilon: float = 0.05,
         **kwargs
-    ):
+    ) -> None:
         """
         Args:
             gpus: number of gpus per node used in training, passed to SwAV module
@@ -247,7 +247,7 @@ class SwAV(LightningModule):
         for name, param in named_params:
             if not param.requires_grad:
                 continue
-            elif any(layer_name in name for layer_name in skip_list):
+            if any(layer_name in name for layer_name in skip_list):
                 excluded_params.append(param)
             else:
                 params.append(param)
@@ -382,7 +382,7 @@ class SwAV(LightningModule):
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
     from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
-    from pl_bolts.models.self_supervised.swav.transforms import SwAVEvalDataTransform, SwAVTrainDataTransform
+    from pl_bolts.transforms.self_supervised.swav_transforms import SwAVEvalDataTransform, SwAVTrainDataTransform
 
     parser = ArgumentParser()
 
@@ -494,7 +494,7 @@ def cli_main():
         gpus=args.gpus,
         num_nodes=args.num_nodes,
         accelerator="ddp" if args.gpus > 1 else None,
-        sync_batchnorm=True if args.gpus > 1 else False,
+        sync_batchnorm=args.gpus > 1,
         precision=32 if args.fp32 else 16,
         callbacks=callbacks,
         fast_dev_run=args.fast_dev_run,

@@ -1,7 +1,4 @@
-"""
-CPC V2
-======
-"""
+"""CPC V2."""
 import math
 from argparse import ArgumentParser
 from typing import Optional
@@ -14,7 +11,7 @@ from torch import optim
 from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
 from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc.networks import cpc_resnet101
-from pl_bolts.models.self_supervised.cpc.transforms import (
+from pl_bolts.transforms.self_supervised.cpc_transforms import (
     CPCEvalTransformsCIFAR10,
     CPCEvalTransformsImageNet128,
     CPCEvalTransformsSTL10,
@@ -43,7 +40,7 @@ class CPC_v2(LightningModule):
         learning_rate: float = 1e-4,
         pretrained: Optional[str] = None,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             encoder_name: A string for any of the resnets in torchvision, or the original CPC encoder,
@@ -162,8 +159,7 @@ class CPC_v2(LightningModule):
         Z = self(img_1)
 
         # infoNCE loss
-        nce_loss = self.contrastive_task(Z)
-        return nce_loss
+        return self.contrastive_task(Z)
 
     def configure_optimizers(self):
         opt = optim.Adam(

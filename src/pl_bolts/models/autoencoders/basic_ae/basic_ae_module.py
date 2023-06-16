@@ -45,7 +45,7 @@ class AE(LightningModule):
         latent_dim: int = 256,
         lr: float = 1e-4,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             input_height: height of the images
@@ -101,8 +101,7 @@ class AE(LightningModule):
     def forward(self, x):
         feats = self.encoder(x)
         z = self.fc(feats)
-        x_hat = self.decoder(z)
-        return x_hat
+        return self.decoder(z)
 
     def step(self, batch, batch_idx):
         x, y = batch

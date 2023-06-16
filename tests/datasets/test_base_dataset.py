@@ -1,13 +1,12 @@
 import numpy as np
 import pytest
 import torch
-
 from pl_bolts.datasets.base_dataset import DataModel
 from pl_bolts.datasets.utils import to_tensor
 
 
 class TestDataModel:
-    @pytest.fixture
+    @pytest.fixture()
     def data(self):
         return np.array([[1, 0, 0, 1], [0, 1, 1, 0]])
 

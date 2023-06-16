@@ -8,7 +8,7 @@ from pl_bolts.utils.stability import under_review
 class UpSampleConv(nn.Module):
     def __init__(
         self, in_channels, out_channels, kernel=4, strides=2, padding=1, activation=True, batchnorm=True, dropout=False
-    ):
+    ) -> None:
         super().__init__()
         self.activation = activation
         self.batchnorm = batchnorm
@@ -37,7 +37,9 @@ class UpSampleConv(nn.Module):
 
 @under_review()
 class DownSampleConv(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel=4, strides=2, padding=1, activation=True, batchnorm=True):
+    def __init__(
+        self, in_channels, out_channels, kernel=4, strides=2, padding=1, activation=True, batchnorm=True
+    ) -> None:
         """Paper details:
 
         - C64-C128-C256-C512-C512-C512-C512-C512
@@ -67,7 +69,7 @@ class DownSampleConv(nn.Module):
 
 @under_review()
 class Generator(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels) -> None:
         """Paper details:
 
         - Encoder: C64-C128-C256-C512-C512-C512-C512-C512
@@ -129,7 +131,7 @@ class Generator(nn.Module):
 
 @under_review()
 class PatchGAN(nn.Module):
-    def __init__(self, input_channels):
+    def __init__(self, input_channels) -> None:
         super().__init__()
         self.d1 = DownSampleConv(input_channels, 64, batchnorm=False)
         self.d2 = DownSampleConv(64, 128)
@@ -143,5 +145,4 @@ class PatchGAN(nn.Module):
         x1 = self.d2(x0)
         x2 = self.d3(x1)
         x3 = self.d4(x2)
-        xn = self.final(x3)
-        return xn
+        return self.final(x3)

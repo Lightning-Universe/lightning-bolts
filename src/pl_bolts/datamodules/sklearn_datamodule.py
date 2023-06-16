@@ -163,7 +163,7 @@ class SklearnDataModule(LightningDataModule):
         self.test_dataset = SklearnDataset(x_test, y_test)
 
     def train_dataloader(self) -> DataLoader:
-        loader = DataLoader(
+        return DataLoader(
             self.train_dataset,
             batch_size=self.batch_size,
             shuffle=self.shuffle,
@@ -171,10 +171,9 @@ class SklearnDataModule(LightningDataModule):
             drop_last=self.drop_last,
             pin_memory=self.pin_memory,
         )
-        return loader
 
     def val_dataloader(self) -> DataLoader:
-        loader = DataLoader(
+        return DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,
             shuffle=False,
@@ -182,10 +181,9 @@ class SklearnDataModule(LightningDataModule):
             drop_last=self.drop_last,
             pin_memory=self.pin_memory,
         )
-        return loader
 
     def test_dataloader(self) -> DataLoader:
-        loader = DataLoader(
+        return DataLoader(
             self.test_dataset,
             batch_size=self.batch_size,
             shuffle=False,
@@ -193,4 +191,3 @@ class SklearnDataModule(LightningDataModule):
             drop_last=self.drop_last,
             pin_memory=self.pin_memory,
         )
-        return loader

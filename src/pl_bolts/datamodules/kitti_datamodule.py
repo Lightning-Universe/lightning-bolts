@@ -94,7 +94,7 @@ class KittiDataModule(LightningDataModule):
         )
 
     def train_dataloader(self) -> DataLoader:
-        loader = DataLoader(
+        return DataLoader(
             self.trainset,
             batch_size=self.batch_size,
             shuffle=self.shuffle,
@@ -102,10 +102,9 @@ class KittiDataModule(LightningDataModule):
             drop_last=self.drop_last,
             pin_memory=self.pin_memory,
         )
-        return loader
 
     def val_dataloader(self) -> DataLoader:
-        loader = DataLoader(
+        return DataLoader(
             self.valset,
             batch_size=self.batch_size,
             shuffle=False,
@@ -113,10 +112,9 @@ class KittiDataModule(LightningDataModule):
             drop_last=self.drop_last,
             pin_memory=self.pin_memory,
         )
-        return loader
 
     def test_dataloader(self) -> DataLoader:
-        loader = DataLoader(
+        return DataLoader(
             self.testset,
             batch_size=self.batch_size,
             shuffle=False,
@@ -124,10 +122,9 @@ class KittiDataModule(LightningDataModule):
             drop_last=self.drop_last,
             pin_memory=self.pin_memory,
         )
-        return loader
 
     def _default_transforms(self) -> Callable:
-        kitti_transforms = transforms.Compose(
+        return transforms.Compose(
             [
                 transforms.ToTensor(),
                 transforms.Normalize(
@@ -135,4 +132,3 @@ class KittiDataModule(LightningDataModule):
                 ),
             ]
         )
-        return kitti_transforms

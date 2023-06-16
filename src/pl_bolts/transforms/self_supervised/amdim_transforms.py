@@ -1,3 +1,8 @@
+from typing import Tuple
+
+from torch import Tensor
+from torchvision.transforms import InterpolationMode
+
 from pl_bolts.transforms.self_supervised import RandomTranslateWithReflect
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review
@@ -29,7 +34,7 @@ class AMDIMTrainTransformsCIFAR10:
         (view1, view2) = transform(x)
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -47,7 +52,7 @@ class AMDIMTrainTransformsCIFAR10:
 
         self.transforms = transforms.Compose([img_jitter, col_jitter, rnd_gray, transforms.ToTensor(), normalize])
 
-    def __call__(self, inp):
+    def __call__(self, inp: Tensor) -> Tuple[Tensor, Tensor]:
         inp = self.flip_lr(inp)
         out1 = self.transforms(inp)
         out2 = self.transforms(inp)
@@ -71,7 +76,7 @@ class AMDIMEvalTransformsCIFAR10:
         (view1, view2) = transform(x)
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -85,10 +90,9 @@ class AMDIMEvalTransformsCIFAR10:
         # transform for testing
         self.transforms = transforms.Compose([transforms.ToTensor(), normalize])
 
-    def __call__(self, inp):
+    def __call__(self, inp: Tensor) -> Tensor:
         inp = self.flip_lr(inp)
-        out1 = self.transforms(inp)
-        return out1
+        return self.transforms(inp)
 
 
 @under_review()
@@ -111,7 +115,7 @@ class AMDIMTrainTransformsSTL10:
         (view1, view2) = transform(x)
     """
 
-    def __init__(self, height=64):
+    def __init__(self, height: int = 64) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -121,11 +125,13 @@ class AMDIMTrainTransformsSTL10:
         # image augmentation functions
         col_jitter = transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.2)], p=0.8)
         rnd_gray = transforms.RandomGrayscale(p=0.25)
-        rand_crop = transforms.RandomResizedCrop(height, scale=(0.3, 1.0), ratio=(0.7, 1.4), interpolation=3)
+        rand_crop = transforms.RandomResizedCrop(
+            height, scale=(0.3, 1.0), ratio=(0.7, 1.4), interpolation=InterpolationMode.BICUBIC
+        )
 
         self.transforms = transforms.Compose([rand_crop, col_jitter, rnd_gray, transforms.ToTensor(), normalize])
 
-    def __call__(self, inp):
+    def __call__(self, inp: Tensor) -> Tuple[Tensor, Tensor]:
         inp = self.flip_lr(inp)
         out1 = self.transforms(inp)
         out2 = self.transforms(inp)
@@ -138,7 +144,7 @@ class AMDIMEvalTransformsSTL10:
 
     Transforms::
 
-        transforms.Resize(height + 6, interpolation=3),
+        transforms.Resize(height + 6, interpolation=InterpolationMode.BICUBIC),
         transforms.CenterCrop(height),
         transforms.ToTensor(),
         normalize
@@ -151,28 +157,29 @@ class AMDIMEvalTransformsSTL10:
         view1 = transform(x)
     """
 
-    def __init__(self, height=64):
+    def __init__(self, height: int = 64) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
         # flipping image along vertical axis
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
         normalize = transforms.Normalize(mean=(0.43, 0.42, 0.39), std=(0.27, 0.26, 0.27))
-        transforms.RandomResizedCrop(height, scale=(0.3, 1.0), ratio=(0.7, 1.4), interpolation=3)
+        transforms.RandomResizedCrop(
+            height, scale=(0.3, 1.0), ratio=(0.7, 1.4), interpolation=InterpolationMode.BICUBIC
+        )
 
         self.transforms = transforms.Compose(
             [
-                transforms.Resize(height + 6, interpolation=3),
+                transforms.Resize(height + 6, interpolation=InterpolationMode.BICUBIC),
                 transforms.CenterCrop(height),
                 transforms.ToTensor(),
                 normalize,
             ]
         )
 
-    def __call__(self, inp):
+    def __call__(self, inp: Tensor) -> Tensor:
         inp = self.flip_lr(inp)
-        out1 = self.transforms(inp)
-        return out1
+        return self.transforms(inp)
 
 
 @under_review()
@@ -195,13 +202,15 @@ class AMDIMTrainTransformsImageNet128:
         (view1, view2) = transform(x)
     """
 
-    def __init__(self, height=128):
+    def __init__(self, height: int = 128) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
         # image augmentation functions
         self.flip_lr = transforms.RandomHorizontalFlip(p=0.5)
-        rand_crop = transforms.RandomResizedCrop(height, scale=(0.3, 1.0), ratio=(0.7, 1.4), interpolation=3)
+        rand_crop = transforms.RandomResizedCrop(
+            height, scale=(0.3, 1.0), ratio=(0.7, 1.4), interpolation=InterpolationMode.BICUBIC
+        )
         col_jitter = transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8)
         rnd_gray = transforms.RandomGrayscale(p=0.25)
         post_transform = transforms.Compose(
@@ -212,7 +221,7 @@ class AMDIMTrainTransformsImageNet128:
         )
         self.transforms = transforms.Compose([rand_crop, col_jitter, rnd_gray, post_transform])
 
-    def __call__(self, inp):
+    def __call__(self, inp: Tensor) -> Tuple[Tensor, Tensor]:
         inp = self.flip_lr(inp)
         out1 = self.transforms(inp)
         out2 = self.transforms(inp)
@@ -225,7 +234,7 @@ class AMDIMEvalTransformsImageNet128:
 
     Transforms::
 
-        transforms.Resize(height + 6, interpolation=3),
+        transforms.Resize(height + 6, interpolation=InterpolationMode.BICUBIC),
         transforms.CenterCrop(height),
         transforms.ToTensor(),
         normalize
@@ -238,7 +247,7 @@ class AMDIMEvalTransformsImageNet128:
         view1 = transform(x)
     """
 
-    def __init__(self, height=128):
+    def __init__(self, height: int = 128) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `transforms` from `torchvision` which is not installed yet.")
 
@@ -251,10 +260,12 @@ class AMDIMEvalTransformsImageNet128:
             ]
         )
         self.transforms = transforms.Compose(
-            [transforms.Resize(height + 18, interpolation=3), transforms.CenterCrop(height), post_transform]
+            [
+                transforms.Resize(height + 18, interpolation=InterpolationMode.BICUBIC),
+                transforms.CenterCrop(height),
+                post_transform,
+            ]
         )
 
-    def __call__(self, inp):
-        inp = self.flip_lr(inp)
-        out1 = self.transforms(inp)
-        return out1
+    def __call__(self, inp: Tensor) -> Tensor:
+        return self.transforms(self.flip_lr(inp))

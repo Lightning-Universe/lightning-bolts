@@ -76,7 +76,7 @@ class CIFAR10(LightDataset):
 
     def __init__(
         self, data_dir: str = ".", train: bool = True, transform: Optional[Callable] = None, download: bool = True
-    ):
+    ) -> None:
         super().__init__()
         self.dir_path = data_dir
         self.train = train  # training set or test set
@@ -113,7 +113,7 @@ class CIFAR10(LightDataset):
 
     def _unpickle(self, path_folder: str, file_name: str) -> Tuple[Tensor, Tensor]:
         with open(os.path.join(path_folder, file_name), "rb") as fo:
-            pkl = pickle.load(fo, encoding="bytes")
+            pkl = pickle.load(fo, encoding="bytes")  # noqa: S301
         return torch.tensor(pkl[b"data"]), torch.tensor(pkl[b"labels"])
 
     def _extract_archive_save_torch(self, download_path):
@@ -184,7 +184,7 @@ class TrialCIFAR10(CIFAR10):
         num_samples: int = 100,
         labels: Optional[Sequence] = (1, 5, 8),
         relabel: bool = True,
-    ):
+    ) -> None:
         """
         Args:
             data_dir: Root directory of dataset where ``CIFAR10/processed/training.pt``

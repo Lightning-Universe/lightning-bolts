@@ -76,7 +76,7 @@ class DQN(LightningModule):
         batches_per_epoch: int = 1000,
         n_steps: int = 1,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             env: gym environment tag
@@ -207,8 +207,7 @@ class DQN(LightningModule):
         Returns:
             q values
         """
-        output = self.net(x)
-        return output
+        return self.net(x)
 
     def train_batch(
         self,

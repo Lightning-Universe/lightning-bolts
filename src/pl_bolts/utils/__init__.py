@@ -9,6 +9,7 @@ from pl_bolts.callbacks.verification.batch_gradient import BatchGradientVerifica
 _NATIVE_AMP_AVAILABLE: bool = module_available("torch.cuda.amp") and hasattr(torch.cuda.amp, "autocast")
 _IS_WINDOWS = os.name == "nt"
 _TORCHVISION_AVAILABLE: bool = module_available("torchvision")
+_TORCHMETRICS_DETECTION_AVAILABLE: bool = module_available("torchmetrics.detection")
 _GYM_AVAILABLE: bool = module_available("gym")
 _SKLEARN_AVAILABLE: bool = module_available("sklearn")
 _PIL_AVAILABLE: bool = module_available("PIL")
@@ -21,6 +22,7 @@ _PL_GREATER_EQUAL_1_4 = compare_version("pytorch_lightning", operator.ge, "1.4.0
 _PL_GREATER_EQUAL_1_4_5 = compare_version("pytorch_lightning", operator.ge, "1.4.5")
 _TORCH_ORT_AVAILABLE = module_available("torch_ort")
 _TORCH_MAX_VERSION_SPARSEML = compare_version("torch", operator.lt, "1.11.0")
+_TORCH_MESHGRID_REQUIRES_INDEXING = compare_version("torch", operator.ge, "1.10.0")
 _SPARSEML_AVAILABLE = module_available("sparseml") and _PL_GREATER_EQUAL_1_4_5 and _TORCH_MAX_VERSION_SPARSEML
 _JSONARGPARSE_GREATER_THAN_4_16_0 = compare_version("jsonargparse", operator.gt, "4.16.0")
 

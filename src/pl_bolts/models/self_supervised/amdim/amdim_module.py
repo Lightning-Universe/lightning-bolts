@@ -18,8 +18,7 @@ from pl_bolts.utils.stability import under_review
 def generate_power_seq(lr, nb):
     half = int(nb / 2)
     coefs = [2**pow for pow in range(half, -half - 1, -1)]
-    lrs = [lr * coef for coef in coefs]
-    return lrs
+    return [lr * coef for coef in coefs]
 
 
 # CIFAR 10
@@ -104,7 +103,7 @@ class AMDIM(LightningModule):
         batch_size: int = 200,
         num_workers: int = 16,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             datamodule: A LightningDatamodule
@@ -186,7 +185,7 @@ class AMDIM(LightningModule):
         # _x2 from image 2
         r1_x1, r5_x1, r7_x1, r1_x2, r5_x2, r7_x2 = self.forward(img_1, img_2)
 
-        result = {
+        return {
             "r1_x1": r1_x1,
             "r5_x1": r5_x1,
             "r7_x1": r7_x1,
@@ -194,8 +193,6 @@ class AMDIM(LightningModule):
             "r5_x2": r5_x2,
             "r7_x2": r7_x2,
         }
-
-        return result
 
     def training_step_end(self, outputs):
         r1_x1 = outputs["r1_x1"]
@@ -214,9 +211,7 @@ class AMDIM(LightningModule):
         total_loss = unsupervised_loss
 
         tensorboard_logs = {"train_nce_loss": total_loss}
-        result = {"loss": total_loss, "log": tensorboard_logs}
-
-        return result
+        return {"loss": total_loss, "log": tensorboard_logs}
 
     def validation_step(self, batch, batch_nb):
         [img_1, img_2], labels = batch
@@ -228,8 +223,7 @@ class AMDIM(LightningModule):
         loss, lgt_reg = self.contrastive_task((r1_x1, r5_x1, r7_x1), (r1_x2, r5_x2, r7_x2))
         unsupervised_loss = loss.sum() + lgt_reg
 
-        result = {"val_nce": unsupervised_loss}
-        return result
+        return {"val_nce": unsupervised_loss}
 
     def validation_epoch_end(self, outputs):
         val_nce = 0
@@ -241,44 +235,39 @@ class AMDIM(LightningModule):
         return {"val_loss": val_nce, "log": tensorboard_logs}
 
     def configure_optimizers(self):
-        opt = optim.Adam(
-            params=self.parameters(), lr=self.hparams.learning_rate, betas=(0.8, 0.999), weight_decay=1e-5, eps=1e-7
-        )
-
         # if self.hparams.datamodule in ['cifar10', 'stl10', 'cifar100']:
         #     lr_scheduler = MultiStepLR(opt, milestones=[250, 280], gamma=0.2)
         # else:
         #     lr_scheduler = MultiStepLR(opt, milestones=[30, 45], gamma=0.2)
-
-        return opt  # [opt], [lr_scheduler]
+        return optim.Adam(
+            params=self.parameters(), lr=self.hparams.learning_rate, betas=(0.8, 0.999), weight_decay=1e-5, eps=1e-7
+        )
 
     def train_dataloader(self):
-        kwargs = dict(nb_classes=self.hparams.nb_classes) if self.hparams.datamodule == "imagenet2012" else {}
+        kwargs = {"nb_classes": self.hparams.nb_classes} if self.hparams.datamodule == "imagenet2012" else {}
         dataset = AMDIMPretraining.get_dataset(self.hparams.datamodule, self.hparams.data_dir, split="train", **kwargs)
 
         # LOADER
-        loader = DataLoader(
+        return DataLoader(
             dataset=dataset,
             batch_size=self.hparams.batch_size,
             pin_memory=True,
             drop_last=True,
             num_workers=self.hparams.num_workers,
         )
-        return loader
 
     def val_dataloader(self):
-        kwargs = dict(nb_classes=self.hparams.nb_classes) if self.hparams.datamodule == "imagenet2012" else {}
+        kwargs = {"nb_classes": self.hparams.nb_classes} if self.hparams.datamodule == "imagenet2012" else {}
         dataset = AMDIMPretraining.get_dataset(self.hparams.datamodule, self.hparams.data_dir, split="val", **kwargs)
 
         # LOADER
-        loader = DataLoader(
+        return DataLoader(
             dataset=dataset,
             batch_size=self.hparams.batch_size,
             pin_memory=True,
             drop_last=True,
             num_workers=self.hparams.num_workers,
         )
-        return loader
 
     @staticmethod
     def add_model_specific_args(parent_parser):

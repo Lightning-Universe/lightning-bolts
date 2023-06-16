@@ -2,13 +2,12 @@ import numpy as np
 import pytest
 import torch
 from PIL import Image
-
-from pl_bolts.models.self_supervised.simclr.transforms import (
+from pl_bolts.transforms.self_supervised.simclr_transforms import (
     SimCLREvalDataTransform,
     SimCLRFinetuneTransform,
     SimCLRTrainDataTransform,
 )
-from pl_bolts.models.self_supervised.swav.transforms import (
+from pl_bolts.transforms.self_supervised.swav_transforms import (
     SwAVEvalDataTransform,
     SwAVFinetuneTransform,
     SwAVTrainDataTransform,

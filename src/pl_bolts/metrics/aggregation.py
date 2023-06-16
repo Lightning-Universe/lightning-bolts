@@ -11,9 +11,7 @@ def accuracy(preds, labels):
     max_lgt = torch.max(preds, 1)[1]
     num_correct = (max_lgt == labels).sum().item()
     num_correct = torch.tensor(num_correct).float()
-    acc = num_correct / len(labels)
-
-    return acc
+    return num_correct / len(labels)
 
 
 def precision_at_k(output, target, top_k=(1,)):

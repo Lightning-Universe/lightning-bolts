@@ -1,12 +1,13 @@
-"""Adapted from: https://github.com/facebookresearch/moco.
+# Original work is: Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+# This implementation is: Copyright (c) PyTorch Lightning, Inc. and its affiliates. All Rights Reserved
+#
+# This implementation is licensed under Attribution-NonCommercial 4.0 International;
+# You may not use this file except in compliance with the License.
+#
+# You may obtain a copy of the License from the LICENSE file present in this folder.
+"""MoCo2.
 
-Original work is: Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
-This implementation is: Copyright (c) PyTorch Lightning, Inc. and its affiliates. All Rights Reserved
-
-This implementation is licensed under Attribution-NonCommercial 4.0 International;
-You may not use this file except in compliance with the License.
-
-You may obtain a copy of the License from the LICENSE file present in this folder.
+Adapted from https: //github.com/facebookresearch/moco.
 """
 from argparse import ArgumentParser
 from typing import Union
@@ -18,13 +19,13 @@ from torch import nn
 from torch.nn import functional as F
 
 from pl_bolts.metrics import mean, precision_at_k
-from pl_bolts.models.self_supervised.moco.transforms import (
-    Moco2EvalCIFAR10Transforms,
-    Moco2EvalImagenetTransforms,
-    Moco2EvalSTL10Transforms,
-    Moco2TrainCIFAR10Transforms,
-    Moco2TrainImagenetTransforms,
-    Moco2TrainSTL10Transforms,
+from pl_bolts.transforms.self_supervised.moco_transforms import (
+    MoCo2EvalCIFAR10Transforms,
+    MoCo2EvalImagenetTransforms,
+    MoCo2EvalSTL10Transforms,
+    MoCo2TrainCIFAR10Transforms,
+    MoCo2TrainImagenetTransforms,
+    MoCo2TrainSTL10Transforms,
 )
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review
@@ -83,7 +84,7 @@ class Moco_v2(LightningModule):
         num_workers: int = 8,
         *args,
         **kwargs
-    ):
+    ) -> None:
         """
         Args:
             base_encoder: torchvision model name or torch.nn.Module
@@ -292,8 +293,7 @@ class Moco_v2(LightningModule):
 
         acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))
 
-        results = {"val_loss": loss, "val_acc1": acc1, "val_acc5": acc5}
-        return results
+        return {"val_loss": loss, "val_acc1": acc1, "val_acc5": acc5}
 
     def validation_epoch_end(self, outputs):
         val_loss = mean(outputs, "val_loss")
@@ -352,8 +352,7 @@ def concat_all_gather(tensor):
     tensors_gather = [torch.ones_like(tensor) for _ in range(torch.distributed.get_world_size())]
     torch.distributed.all_gather(tensors_gather, tensor, async_op=False)
 
-    output = torch.cat(tensors_gather, dim=0)
-    return output
+    return torch.cat(tensors_gather, dim=0)
 
 
 @under_review()
@@ -371,20 +370,20 @@ def cli_main():
 
     if args.dataset == "cifar10":
         datamodule = CIFAR10DataModule.from_argparse_args(args)
-        datamodule.train_transforms = Moco2TrainCIFAR10Transforms()
-        datamodule.val_transforms = Moco2EvalCIFAR10Transforms()
+        datamodule.train_transforms = MoCo2TrainCIFAR10Transforms()
+        datamodule.val_transforms = MoCo2EvalCIFAR10Transforms()
 
     elif args.dataset == "stl10":
         datamodule = STL10DataModule.from_argparse_args(args)
         datamodule.train_dataloader = datamodule.train_dataloader_mixed
         datamodule.val_dataloader = datamodule.val_dataloader_mixed
-        datamodule.train_transforms = Moco2TrainSTL10Transforms()
-        datamodule.val_transforms = Moco2EvalSTL10Transforms()
+        datamodule.train_transforms = MoCo2TrainSTL10Transforms()
+        datamodule.val_transforms = MoCo2EvalSTL10Transforms()
 
     elif args.dataset == "imagenet2012":
         datamodule = SSLImagenetDataModule.from_argparse_args(args)
-        datamodule.train_transforms = Moco2TrainImagenetTransforms()
-        datamodule.val_transforms = Moco2EvalImagenetTransforms()
+        datamodule.train_transforms = MoCo2TrainImagenetTransforms()
+        datamodule.val_transforms = MoCo2EvalImagenetTransforms()
 
     else:
         # replace with your own dataset, otherwise CIFAR-10 will be used by default if `None` passed in

@@ -5,10 +5,11 @@ from pathlib import Path
 
 import pytest
 import torch
-from pytorch_lightning.trainer.connectors.signal_connector import SignalConnector
 
 from pl_bolts.utils import _IS_WINDOWS, _TORCHVISION_AVAILABLE, _TORCHVISION_LESS_THAN_0_13
 from pl_bolts.utils.stability import UnderReviewWarning
+from pytorch_lightning.trainer.connectors.signal_connector import SignalConnector
+from pytorch_lightning.utilities.imports import _IS_WINDOWS
 
 # GitHub Actions use this path to cache datasets.
 # Use `datadir` fixture where possible and use `DATASETS_PATH` in
@@ -22,8 +23,8 @@ def datadir():
     return Path(DATASETS_PATH)
 
 
-@pytest.fixture
-def catch_warnings():
+@pytest.fixture()
+def catch_warnings():  # noqa: PT004
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         warnings.simplefilter("ignore", UnderReviewWarning)
@@ -32,8 +33,8 @@ def catch_warnings():
         yield
 
 
-@pytest.fixture(scope="function", autouse=True)
-def restore_env_variables():
+@pytest.fixture(autouse=True)
+def restore_env_variables():  # noqa: PT004
     """Ensures that environment variables set during the test do not leak out."""
     env_backup = os.environ.copy()
     yield
@@ -45,6 +46,7 @@ def restore_env_variables():
     allowlist = {
         "CUBLAS_WORKSPACE_CONFIG",  # enabled with deterministic flag
         "CUDA_DEVICE_ORDER",
+        "CUDA_MODULE_LOADING",
         "LOCAL_RANK",
         "NODE_RANK",
         "WORLD_SIZE",
@@ -74,8 +76,8 @@ def restore_env_variables():
     assert not leaked_vars, f"test is leaking environment variable(s): {set(leaked_vars)}"
 
 
-@pytest.fixture(scope="function", autouse=True)
-def restore_signal_handlers():
+@pytest.fixture(autouse=True)
+def restore_signal_handlers():  # noqa: PT004
     """Ensures that signal handlers get restored before the next test runs.
 
     This is a safety net for tests that don't run Trainer's teardown.
@@ -91,16 +93,16 @@ def restore_signal_handlers():
             signal.signal(signum, handler)
 
 
-@pytest.fixture(scope="function", autouse=True)
-def teardown_process_group():
+@pytest.fixture(autouse=True)
+def teardown_process_group():  # noqa: PT004
     """Ensures that the distributed process group gets closed before the next test runs."""
     yield
     if torch.distributed.is_available() and torch.distributed.is_initialized():
         torch.distributed.destroy_process_group()
 
 
-@pytest.fixture(scope="function", autouse=True)
-def reset_deterministic_algorithm():
+@pytest.fixture(autouse=True)
+def reset_deterministic_algorithm():  # noqa: PT004
     """Ensures that torch determinism settings are reset before the next test runs."""
     yield
     torch.use_deterministic_algorithms(False)

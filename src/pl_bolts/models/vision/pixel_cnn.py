@@ -1,8 +1,8 @@
-"""
-PixelCNN
-Implemented by: William Falcon
-Reference: https://arxiv.org/pdf/1905.09272.pdf (page 15)
-Accessed: May 14, 2020
+"""PixelCNN.
+
+Implemented by: William Falcon Reference
+: https: //arxiv.org/pdf/1905.09272.pdf (page 15
+Accessed: May 14, 2020.
 """
 from torch import nn
 from torch.nn import functional as F
@@ -34,7 +34,7 @@ class PixelCNN(nn.Module):
         torch.Size([5, 3, 64, 64])
     """
 
-    def __init__(self, input_channels: int, hidden_channels: int = 256, num_blocks=5):
+    def __init__(self, input_channels: int, hidden_channels: int = 256, num_blocks=5) -> None:
         super().__init__()
         self.input_channels = input_channels
         self.hidden_channels = hidden_channels
@@ -52,13 +52,11 @@ class PixelCNN(nn.Module):
         act2 = nn.ReLU()
         c4 = nn.Conv2d(in_channels=self.hidden_channels, out_channels=input_channels, kernel_size=(1, 1))
 
-        block = nn.Sequential(c1, act1, c2, pad, c3, act2, c4)
-        return block
+        return nn.Sequential(c1, act1, c2, pad, c3, act2, c4)
 
     def forward(self, z):
         c = z
         for conv_block in self.blocks:
             c = c + conv_block(c)
 
-        c = F.relu(c)
-        return c
+        return F.relu(c)

@@ -1,0 +1,5 @@
+numpy <1.25.0
+pytorch-lightning >1.7.0, <1.9.0  # strict
+torchmetrics <0.11.0  # strict
+lightning-utilities >0.3.1  # this is needed for PL 1.7
+torchvision >=0.10.0  # todo: move to topic related extras

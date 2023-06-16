@@ -5,8 +5,8 @@ from pytorch_lightning import Trainer, seed_everything
 
 from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner
 from pl_bolts.models.self_supervised.swav.swav_module import SwAV
-from pl_bolts.models.self_supervised.swav.transforms import SwAVFinetuneTransform
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization, stl10_normalization
+from pl_bolts.transforms.self_supervised.swav_transforms import SwAVFinetuneTransform
 
 
 def cli_main():  # pragma: no cover
@@ -106,7 +106,7 @@ def cli_main():  # pragma: no cover
         precision=16,
         max_epochs=args.num_epochs,
         accelerator="ddp",
-        sync_batchnorm=True if args.gpus > 1 else False,
+        sync_batchnorm=args.gpus > 1,
     )
 
     trainer.fit(tuner, dm)
