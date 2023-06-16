@@ -1,6 +1,10 @@
 from pl_bolts.callbacks import LatentDimInterpolator
 from pl_bolts.models.gans import GAN
-from pytorch_lightning.loggers.base import DummyLogger
+
+try:
+    from pytorch_lightning.loggers.logger import DummyLogger  # PL v1.9+
+except ModuleNotFoundError:
+    from pytorch_lightning.loggers.base import DummyLogger  # PL v1.8
 
 
 def test_latent_dim_interpolator():
