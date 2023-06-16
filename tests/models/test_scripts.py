@@ -110,7 +110,9 @@ def test_cli_run_vision_image_gpt(cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize("cli_args", [_DEFAULT_LIGHTNING_CLI_ARGS + f" --trainer.gpus {int(torch.cuda.is_available())}"])
+@pytest.mark.parametrize(
+    "cli_args", [_DEFAULT_LIGHTNING_CLI_ARGS + f" --trainer.gpus {int(torch.cuda.is_available())}"]
+)
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 # FixMe; see https://github.com/omni-us/jsonargparse/issues/187
 @pytest.mark.skipif(not _JSONARGPARSE_GREATER_THAN_4_16_0, reason="Failing on CI, need to be fixed")
