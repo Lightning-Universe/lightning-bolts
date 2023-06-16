@@ -112,9 +112,7 @@ def test_cli_run_vision_image_gpt(cli_args):
 @pytest.mark.parametrize("cli_args", [_DEFAULT_LIGHTNING_CLI_ARGS + " --trainer.gpus 1"])
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 # FixMe; see https://github.com/omni-us/jsonargparse/issues/187
-@pytest.mark.skipif(
-    not _JSONARGPARSE_GREATER_THAN_4_16_0, reason="Failing on CI, need to be fixed"
-)
+@pytest.mark.skipif(not _JSONARGPARSE_GREATER_THAN_4_16_0, reason="Failing on CI, need to be fixed")
 def test_cli_run_retinanet(cli_args):
     """Test running CLI for an example with default params."""
     from pl_bolts.models.detection.retinanet.retinanet_module import cli_main

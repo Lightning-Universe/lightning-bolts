@@ -135,7 +135,7 @@ class RetinaNet(LightningModule):
 
 @under_review()
 def cli_main():
-    try: # Backward compatibility for Lightning CLI
+    try:  # Backward compatibility for Lightning CLI
         from pytorch_lightning.cli import LightningCLI  # PL v1.9+
     except ImportError:
         from pytorch_lightning.utilities.cli import LightningCLI  # PL v1.8
