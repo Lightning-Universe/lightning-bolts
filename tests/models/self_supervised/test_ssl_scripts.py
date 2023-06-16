@@ -10,12 +10,7 @@ _DEFAULT_ARGS = f"--data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 2 --batc
 
 # todo: failing for GPU as some is on CPU other on GPU
 @pytest.mark.skip(reason="FIXME: failing for GPU as some is on CPU other on GPU")
-@pytest.mark.parametrize(
-    "cli_args",
-    [
-        _DEFAULT_ARGS + f" --gpus {int(torch.cuda.is_available())}"
-    ]
-)
+@pytest.mark.parametrize("cli_args", [_DEFAULT_ARGS + f" --gpus {int(torch.cuda.is_available())}"])
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_cli_run_ssl_amdim(cli_args):
     """Test running CLI for an example with default params."""
@@ -32,8 +27,9 @@ def test_cli_run_ssl_amdim(cli_args):
 @pytest.mark.parametrize(
     "cli_args",
     [
-        _DEFAULT_ARGS + f" --dataset %(dataset_name)s --hidden_mlp 512 --encoder resnet18 --gpus {int(torch.cuda.is_available())}"
-    ]
+        _DEFAULT_ARGS
+        + f" --dataset %(dataset_name)s --hidden_mlp 512 --encoder resnet18 --gpus {int(torch.cuda.is_available())}"
+    ],
 )
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_cli_run_ssl_cpc(cli_args, dataset_name):
@@ -45,12 +41,7 @@ def test_cli_run_ssl_cpc(cli_args, dataset_name):
         cli_main()
 
 
-@pytest.mark.parametrize(
-    "cli_args",
-    [
-        _DEFAULT_ARGS + f" --gpus {int(torch.cuda.is_available())}"
-    ]
-)
+@pytest.mark.parametrize("cli_args", [_DEFAULT_ARGS + f" --gpus {int(torch.cuda.is_available())}"])
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_cli_run_ssl_moco(cli_args):
     """Test running CLI for an example with default params."""
@@ -61,12 +52,7 @@ def test_cli_run_ssl_moco(cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize(
-    "cli_args",
-    [
-        _DEFAULT_ARGS + f" --online_ft --gpus {int(torch.cuda.is_available())} --fp32"
-    ]
-)
+@pytest.mark.parametrize("cli_args", [_DEFAULT_ARGS + f" --online_ft --gpus {int(torch.cuda.is_available())} --fp32"])
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_cli_run_ssl_simclr(cli_args):
     """Test running CLI for an example with default params."""
@@ -77,12 +63,7 @@ def test_cli_run_ssl_simclr(cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize(
-    "cli_args",
-    [
-        _DEFAULT_ARGS + f" --gpus {int(torch.cuda.is_available())}"
-    ]
-)
+@pytest.mark.parametrize("cli_args", [_DEFAULT_ARGS + f" --gpus {int(torch.cuda.is_available())}"])
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_cli_run_ssl_byol(cli_args):
     """Test running CLI for an example with default params."""
@@ -104,7 +85,7 @@ def test_cli_run_ssl_byol(cli_args):
         " --nmb_prototypes 2"
         " --queue_length 0"
         f" --gpus {int(torch.cuda.is_available())}"
-    ]
+    ],
 )
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_cli_run_ssl_swav(cli_args):
@@ -116,12 +97,7 @@ def test_cli_run_ssl_swav(cli_args):
         cli_main()
 
 
-@pytest.mark.parametrize(
-    "cli_args",
-    [
-        _DEFAULT_ARGS + f" --gpus {int(torch.cuda.is_available())}"
-    ]
-)
+@pytest.mark.parametrize("cli_args", [_DEFAULT_ARGS + f" --gpus {int(torch.cuda.is_available())}"])
 @pytest.mark.skipif(**_MARK_REQUIRE_GPU)
 def test_cli_run_ssl_simsiam(cli_args):
     """Test running CLI for an example with default params."""

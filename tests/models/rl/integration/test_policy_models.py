@@ -2,7 +2,6 @@ import argparse
 from unittest import TestCase
 
 import torch
-
 from pl_bolts.models.rl.reinforce_model import Reinforce
 from pl_bolts.models.rl.vanilla_policy_gradient_model import VanillaPolicyGradient
 from pytorch_lightning import Trainer
