@@ -135,11 +135,10 @@ class RetinaNet(LightningModule):
 
 @under_review()
 def cli_main():
-    # Backward compatibility for Lightning CLI
-    try:
-        from pytorch_lightning.utilities.cli import LightningCLI
+    try: # Backward compatibility for Lightning CLI
+        from pytorch_lightning.cli import LightningCLI  # PL v1.9+
     except ImportError:
-        from pytorch_lightning.cli import LightningCLI
+        from pytorch_lightning.utilities.cli import LightningCLI  # PL v1.8
 
     from pl_bolts.datamodules import VOCDetectionDataModule
 
