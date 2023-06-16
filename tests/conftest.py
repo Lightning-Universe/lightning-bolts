@@ -5,9 +5,13 @@ from pathlib import Path
 
 import pytest
 import torch
+
 from pl_bolts.utils import _IS_WINDOWS, _TORCHVISION_AVAILABLE, _TORCHVISION_LESS_THAN_0_13
 from pl_bolts.utils.stability import UnderReviewWarning
-from pytorch_lightning.trainer.connectors.signal_connector import SignalConnector
+try:
+    from pytorch_lightning.trainer.connectors.signal_connector import SignalConnector
+except ImportError:  # patch for PL v2.0+
+    from pytorch_lightning.trainer.connectors.signal_connector import _SignalConnector as SignalConnector
 
 # GitHub Actions use this path to cache datasets.
 # Use `datadir` fixture where possible and use `DATASETS_PATH` in
