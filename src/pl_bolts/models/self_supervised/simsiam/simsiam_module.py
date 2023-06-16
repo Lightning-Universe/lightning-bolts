@@ -127,8 +127,7 @@ class SimSiam(LightningModule):
         h1 = self.predictor(z1)
         with torch.no_grad():
             _, z2 = self.target_network(v_target)
-        loss = -0.5 * F.cosine_similarity(h1, z2).mean()
-        return loss
+        return -0.5 * F.cosine_similarity(h1, z2).mean()
 
     def configure_optimizers(self):
         """Configure optimizer and learning rate scheduler."""
@@ -158,7 +157,7 @@ class SimSiam(LightningModule):
         for name, param in named_params:
             if not param.requires_grad:
                 continue
-            elif param.ndim == 1 or name in skip_list:
+            if param.ndim == 1 or name in skip_list:
                 excluded_params.append(param)
             else:
                 params.append(param)

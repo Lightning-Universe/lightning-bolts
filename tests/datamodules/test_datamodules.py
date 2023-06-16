@@ -4,7 +4,6 @@ from pathlib import Path
 import pytest
 import torch
 from PIL import Image
-
 from pl_bolts.datamodules import (
     BinaryEMNISTDataModule,
     BinaryMNISTDataModule,

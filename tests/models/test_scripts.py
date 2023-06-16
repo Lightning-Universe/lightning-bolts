@@ -1,8 +1,8 @@
 from unittest import mock
 
 import pytest
-
 from pl_bolts.utils import _JSONARGPARSE_GREATER_THAN_4_16_0
+
 from tests import _MARK_REQUIRE_GPU, DATASETS_PATH
 
 _DEFAULT_ARGS = f" --data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 2 --batch_size 4"

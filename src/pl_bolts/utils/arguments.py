@@ -121,7 +121,7 @@ def gather_lit_args(cls: Any, root_cls: Optional[Any] = None) -> List[LitArg]:
                 if do_skip_this_arg:
                     continue
 
-                elif arg_is_positional or arg_is_kwarg:
+                if arg_is_positional or arg_is_kwarg:
                     lit_arg = LitArg(
                         name=arg,
                         types=arg_types,

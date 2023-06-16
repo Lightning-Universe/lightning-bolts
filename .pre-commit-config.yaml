@@ -44,10 +44,10 @@ repos:
           - mdformat_frontmatter
         exclude: CHANGELOG.md
 
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
+  #- repo: https://github.com/PyCQA/isort
+  #  rev: 5.12.0
+  #  hooks:
+  #    - id: isort
 
   - repo: https://github.com/psf/black
     rev: 23.3.0
@@ -61,9 +61,10 @@ repos:
       - id: yesqa
         additional_dependencies:
           - flake8-pytest-style
+          - flake8-bandit
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.269
+    rev: v0.0.270
     hooks:
       - id: ruff
         args: ["--fix"]

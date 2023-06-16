@@ -4,13 +4,12 @@ from unittest import TestCase
 import gym
 import numpy as np
 import torch
-from torch import Tensor
-
 from pl_bolts.datamodules.experience_source import DiscountedExperienceSource
 from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.gym_wrappers import ToTensor
 from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.reinforce_model import Reinforce
+from torch import Tensor
 
 
 class TestReinforce(TestCase):
