@@ -11,10 +11,7 @@ def test_a2c_cli():
 
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = AdvantageActorCritic.add_model_specific_args(parent_parser)
-    args_list = [
-        "--env",
-        "CartPole-v0"
-    ]
+    args_list = ["--env", "CartPole-v0"]
     hparams = parent_parser.parse_args(args_list)
 
     trainer = Trainer(

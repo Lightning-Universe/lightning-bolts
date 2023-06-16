@@ -9,12 +9,7 @@ def test_a2c_loss():
     """Test the reinforce loss function."""
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = AdvantageActorCritic.add_model_specific_args(parent_parser)
-    args_list = [
-        "--env",
-        "CartPole-v0",
-        "--batch_size",
-        "32"
-    ]
+    args_list = ["--env", "CartPole-v0", "--batch_size", "32"]
     hparams = parent_parser.parse_args(args_list)
     model = AdvantageActorCritic(**vars(hparams))
 
@@ -31,12 +26,7 @@ def test_a2c_train_batch():
     """Tests that a single batch generates correctly."""
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = AdvantageActorCritic.add_model_specific_args(parent_parser)
-    args_list = [
-        "--env",
-        "CartPole-v0",
-        "--batch_size",
-        "32"
-    ]
+    args_list = ["--env", "CartPole-v0", "--batch_size", "32"]
     hparams = parent_parser.parse_args(args_list)
     model = AdvantageActorCritic(**vars(hparams))
 
