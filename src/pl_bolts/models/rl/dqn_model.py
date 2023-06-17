@@ -10,6 +10,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import Tensor, optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
+
 try:
     from pytorch_lightning.strategies import DataParallelStrategy  # for PL v1.X
 except ImportError:
