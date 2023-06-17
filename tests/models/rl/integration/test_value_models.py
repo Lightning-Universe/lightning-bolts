@@ -2,6 +2,7 @@ import argparse
 from unittest import TestCase
 
 import pytest
+import torch
 from pl_bolts.models.rl.double_dqn_model import DoubleDQN
 from pl_bolts.models.rl.dqn_model import DQN
 from pl_bolts.models.rl.dueling_dqn_model import DuelingDQN
@@ -19,7 +20,7 @@ class TestValueModels(TestCase):
             "--warm_start_size",
             "100",
             "--gpus",
-            "0",
+            str(int(torch.cuda.is_available())),
             "--env",
             "PongNoFrameskip-v4",
         ]
