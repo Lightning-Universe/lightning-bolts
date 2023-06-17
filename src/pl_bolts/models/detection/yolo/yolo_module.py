@@ -6,6 +6,7 @@ import torch.nn as nn
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch import Tensor, optim
+
 try:  # Backward compatibility for Lightning CLI
     from pytorch_lightning.cli import LightningCLI  # PL v1.9+
 except ImportError:
