@@ -7,10 +7,13 @@ import numpy as np
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.strategies import DataParallelStrategy
 from torch import Tensor, optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
+try:
+    from pytorch_lightning.strategies import DataParallelStrategy  # for PL v1.X
+except ImportError:
+    from lightning_fabric.strategies import DataParallelStrategy  # for PL v2.X
 
 from pl_bolts.datamodules.experience_source import Experience, ExperienceSourceDataset
 from pl_bolts.losses.rl import dqn_loss
