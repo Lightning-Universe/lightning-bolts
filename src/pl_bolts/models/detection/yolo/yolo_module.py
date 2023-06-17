@@ -4,9 +4,12 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 import torch
 import torch.nn as nn
 from pytorch_lightning import LightningModule
-from pytorch_lightning.utilities.cli import LightningCLI
 from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch import Tensor, optim
+try:  # Backward compatibility for Lightning CLI
+    from pytorch_lightning.cli import LightningCLI  # PL v1.9+
+except ImportError:
+    from pytorch_lightning.utilities.cli import LightningCLI  # PL v1.8
 
 # It seems to be impossible to avoid mypy errors if using import instead of getattr().
 # See https://github.com/python/mypy/issues/8823
