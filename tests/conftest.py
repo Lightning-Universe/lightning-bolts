@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pytest
 import torch
-
 from pl_bolts.utils import _IS_WINDOWS, _TORCHVISION_AVAILABLE, _TORCHVISION_LESS_THAN_0_13
 from pl_bolts.utils.stability import UnderReviewWarning
+
 try:
     from pytorch_lightning.trainer.connectors.signal_connector import SignalConnector
 except ImportError:  # patch for PL v2.0+
