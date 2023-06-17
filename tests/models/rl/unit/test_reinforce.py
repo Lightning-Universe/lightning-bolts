@@ -23,14 +23,7 @@ class TestReinforce(TestCase):
 
         parent_parser = argparse.ArgumentParser(add_help=False)
         parent_parser = Reinforce.add_model_specific_args(parent_parser)
-        args_list = [
-            "--env",
-            "CartPole-v0",
-            "--batch_size",
-            "32",
-            "--gamma",
-            "0.99",
-        ]
+        args_list = ["--env", "CartPole-v0", "--batch_size", "32", "--gamma", "0.99"]
         self.hparams = parent_parser.parse_args(args_list)
         self.model = Reinforce(**vars(self.hparams))
 

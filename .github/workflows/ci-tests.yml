@@ -117,7 +117,7 @@ jobs:
       run: python -m atari_py.import_roms ROMS
 
     - name: Tests
-      run: python -m pytest tests -v --cov=pl_bolts
+      run: python -m pytest tests -v --cov=pl_bolts --timeout=200
 
     - name: Statistics
       if: success()
