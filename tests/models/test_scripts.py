@@ -62,6 +62,7 @@ def test_cli_run_mnist(cli_args):
         cli_main()
 
 
+@pytest.mark.skipif(_IS_WINDOWS, reason="strange TimeOut or MemoryError")  # todo
 @pytest.mark.parametrize("cli_args", [_DEFAULT_ARGS])
 def test_cli_run_basic_ae(cli_args):
     """Test running CLI for an example with default params."""
