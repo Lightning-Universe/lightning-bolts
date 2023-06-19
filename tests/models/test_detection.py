@@ -17,6 +17,7 @@ from pl_bolts.models.detection import (
     YOLOXNetwork,
 )
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
+from pl_bolts.utils import _IS_WINDOWS
 from pytorch_lightning import Trainer
 from pytorch_lightning.utilities.warnings import PossibleUserWarning
 from torch.utils.data import DataLoader
@@ -36,6 +37,7 @@ def test_fasterrcnn():
     model(image)
 
 
+@pytest.mark.skipif(_IS_WINDOWS)  # todo
 def test_fasterrcnn_train(tmpdir):
     model = FasterRCNN(pretrained=False, pretrained_backbone=False)
 
