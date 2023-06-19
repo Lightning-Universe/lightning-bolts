@@ -101,6 +101,10 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y unrar
+    - name: Setup Windows
+      if: runner.os == 'Windows'&& steps.cache-datasets.outputs.cache-hit != 'true'
+      run: |
+        choco install unrar
 
     - name: Cache datasets
       id: cache-datasets
