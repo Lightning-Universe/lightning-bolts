@@ -29,6 +29,7 @@ jobs:
     env:
       FREEZE_REQUIREMENTS: 1
       TORCH_URL: "https://download.pytorch.org/whl/cpu/torch_stable.html"
+      TRANSFORMERS_CACHE: _hf_cache
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     # the reason for high number is MUCH slower tests on macOS and py3.8
     timeout-minutes: 50
@@ -52,7 +53,7 @@ jobs:
 
     - name: Install package
       run: |
-        pip install "pip==22.2.1"  # todo: drop after resolving extras
+        pip install "pip==22.3.1"  # todo: drop after resolving extras
         pip install -e . -U --prefer-binary -f ${TORCH_URL}
         pip list
 
@@ -69,19 +70,35 @@ jobs:
     - name: Get pip cache dir
       id: pip-cache
       run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
-
-    - name: Cache pip
-      uses: actions/cache@v3
+    - name: Restore pip cache
+      uses: actions/cache/restore@v3
+      id: restore-cache
       with:
         path: ${{ steps.pip-cache.outputs.dir }}
-        key: ${{ runner.os }}-pip-${{ matrix.requires }}-${{ hashFiles('requirements/*.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-${{ matrix.requires }}-
+        key: pip-dependencies
 
     - name: Install dependencies
       run: |
         pip install -r requirements/devel.txt -U -q -f ${TORCH_URL}
         pip list
+
+    - name: Save pip cache
+      if: github.ref == 'refs/heads/master'
+      uses: actions/cache/save@v3
+      with:
+        path: ${{ steps.pip-cache.outputs.dir }}
+        key: pip-dependencies
+
+    - name: Setup macOS
+      if: runner.os == 'macOS' && steps.cache-datasets.outputs.cache-hit != 'true'
+      run: |
+        brew update
+        brew install rar
+    - name: Setup Ubuntu
+      if: runner.os == 'Linux'&& steps.cache-datasets.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y unrar
 
     - name: Cache datasets
       id: cache-datasets
@@ -90,18 +107,6 @@ jobs:
         path: ./_datasets
         # bump this date if you need update cache
         key: datasets-20230601
-
-    - name: Setup macOS
-      if: runner.os == 'macOS' && steps.cache-datasets.outputs.cache-hit != 'true'
-      run: |
-        brew update
-        brew install rar
-
-    - name: Setup Ubuntu
-      if: runner.os == 'Linux'&& steps.cache-datasets.outputs.cache-hit != 'true'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y unrar
 
     - name: Download ROMs
       if: steps.cache-datasets.outputs.cache-hit != 'true'
@@ -116,8 +121,21 @@ jobs:
       working-directory: ./_datasets
       run: python -m atari_py.import_roms ROMS
 
-    - name: Tests
+    - name: Restore HF cache
+      uses: actions/cache/restore@v3
+      with:
+        path: ${{ env.TRANSFORMERS_CACHE }}
+        key: cache-transformers
+
+    - name: Testing
       run: python -m pytest tests -v --cov=pl_bolts --timeout=200
+
+    - name: Save HF cache
+      if: github.ref == 'refs/heads/master'
+      uses: actions/cache/save@v3
+      with:
+        path: ${{ env.TRANSFORMERS_CACHE }}
+        key: cache-transformers
 
     - name: Statistics
       if: success()
