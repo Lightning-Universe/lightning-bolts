@@ -41,7 +41,7 @@ exclude_lines = [
 ]
 
 [tool.coverage.run]
-# parallel = true
+parallel = true
 relative_files = true
 
 
