@@ -93,9 +93,9 @@ def test_fasterrcnn_pyt_module_bbone_train(tmpdir):
     trainer.fit(model, train_dl, valid_dl)
 
 
-@pytest.mark.parametrize("config", [("yolo"), ("yolo_giou")])
+@pytest.mark.parametrize("config", ["yolo", "yolo_giou"])
 def test_darknet(config, catch_warnings):
-    config_path = Path(TEST_ROOT) / "data" / f"{config}.cfg"
+    config_path = Path(TEST_ROOT) / "_data_configs" / f"{config}.cfg"
     network = DarknetNetwork(config_path)
     model = YOLO(network, confidence_threshold=0.5)
 
@@ -106,13 +106,7 @@ def test_darknet(config, catch_warnings):
     assert "labels" in detections
 
 
-@pytest.mark.parametrize(
-    "cfg_name",
-    [
-        ("yolo"),
-        ("yolo_giou"),
-    ],
-)
+@pytest.mark.parametrize("cfg_name", ["yolo", "yolo_giou"])
 def test_darknet_train(tmpdir, cfg_name, catch_warnings):
     warnings.filterwarnings(
         "ignore",
@@ -120,7 +114,7 @@ def test_darknet_train(tmpdir, cfg_name, catch_warnings):
         category=PossibleUserWarning,
     )
 
-    config_path = Path(TEST_ROOT) / "data" / f"{cfg_name}.cfg"
+    config_path = Path(TEST_ROOT) / "_data_configs" / f"{cfg_name}.cfg"
     network = DarknetNetwork(config_path)
     model = YOLO(network, confidence_threshold=0.5)
 
