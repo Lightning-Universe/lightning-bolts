@@ -16,7 +16,7 @@ import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.strategies import DDPStrategy
 from torch import nn
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 
 from pl_bolts.metrics import mean, precision_at_k
 from pl_bolts.transforms.self_supervised.moco_transforms import (

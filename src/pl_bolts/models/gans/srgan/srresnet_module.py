@@ -4,7 +4,7 @@ from typing import Any, Tuple
 
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
+import torch.nn.functional as F  # noqa: N812
 
 from pl_bolts.callbacks import SRImageLoggerCallback
 from pl_bolts.datamodules import TVTDataModule

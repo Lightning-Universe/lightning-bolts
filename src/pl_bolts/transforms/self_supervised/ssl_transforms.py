@@ -1,5 +1,5 @@
 import numpy as np
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 
 from pl_bolts.utils import _PIL_AVAILABLE
 from pl_bolts.utils.stability import under_review

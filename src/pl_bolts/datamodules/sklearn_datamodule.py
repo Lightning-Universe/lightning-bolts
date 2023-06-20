@@ -29,7 +29,7 @@ class SklearnDataset(Dataset):
         442
     """
 
-    def __init__(self, X: np.ndarray, y: np.ndarray, X_transform: Any = None, y_transform: Any = None) -> None:
+    def __init__(self, X: np.ndarray, y: np.ndarray, X_transform: Any = None, y_transform: Any = None) -> None:  # noqa: N803
         """
         Args:
             X: Numpy ndarray
@@ -38,27 +38,27 @@ class SklearnDataset(Dataset):
             y_transform: Any transform that works with Numpy arrays
         """
         super().__init__()
-        self.X = X
-        self.Y = y
-        self.X_transform = X_transform
-        self.y_transform = y_transform
+        self.data = X
+        self.labels = y
+        self.data_transform = X_transform
+        self.labels_transform = y_transform
 
     def __len__(self) -> int:
-        return len(self.X)
+        return len(self.data)
 
     def __getitem__(self, idx) -> Tuple[np.ndarray, np.ndarray]:
-        x = self.X[idx].astype(np.float32)
-        y = self.Y[idx]
+        x = self.data[idx].astype(np.float32)
+        y = self.labels[idx]
 
         # Do not convert integer to float for classification data
         if not ((y.dtype == np.int32) or (y.dtype == np.int64)):
             y = y.astype(np.float32)
 
-        if self.X_transform:
-            x = self.X_transform(x)
+        if self.data_transform:
+            x = self.data_transform(x)
 
-        if self.y_transform:
-            y = self.y_transform(y)
+        if self.labels_transform:
+            y = self.labels_transform(y)
 
         return x, y
 

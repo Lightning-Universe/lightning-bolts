@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Union
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+import torch.nn.functional as F  # noqa: N812
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch import Tensor
 

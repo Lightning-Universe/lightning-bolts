@@ -62,6 +62,7 @@ repos:
         additional_dependencies:
           - flake8-pytest-style
           - flake8-bandit
+          - pep8-naming
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.0.270

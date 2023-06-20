@@ -5,7 +5,7 @@ from typing import Any, Union
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch import Tensor
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 from torch.optim import Adam
 
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate

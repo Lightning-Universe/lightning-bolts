@@ -78,54 +78,54 @@ class SWAVLoss(nn.Module):
         loss /= len(self.crops_for_assign)  # type: ignore
         return loss, queue, use_queue
 
-    def sinkhorn(self, Q: torch.Tensor, nmb_iters: int) -> torch.Tensor:
+    def sinkhorn(self, q: torch.Tensor, nmb_iters: int) -> torch.Tensor:
         """Implementation of Sinkhorn clustering."""
         with torch.no_grad():
-            sum_Q = torch.sum(Q)
-            Q /= sum_Q
+            sum_q = torch.sum(q)
+            q /= sum_q
 
-            K, B = Q.shape
+            K, B = q.shape
 
             if self.gpus > 0:
-                u = torch.zeros(K).cuda()
+                # u = torch.zeros(K).cuda()
                 r = torch.ones(K).cuda() / K
                 c = torch.ones(B).cuda() / B
             else:
-                u = torch.zeros(K)
+                # u = torch.zeros(K)
                 r = torch.ones(K) / K
                 c = torch.ones(B) / B
 
             for _ in range(nmb_iters):
-                u = torch.sum(Q, dim=1)
+                u = torch.sum(q, dim=1)
 
-                Q *= (r / u).unsqueeze(1)
-                Q *= (c / torch.sum(Q, dim=0)).unsqueeze(0)
+                q *= (r / u).unsqueeze(1)
+                q *= (c / torch.sum(q, dim=0)).unsqueeze(0)
 
-            return (Q / torch.sum(Q, dim=0, keepdim=True)).t().float()
+            return (q / torch.sum(q, dim=0, keepdim=True)).t().float()
 
-    def distributed_sinkhorn(self, Q: torch.Tensor, nmb_iters: int) -> torch.Tensor:
+    def distributed_sinkhorn(self, q: torch.Tensor, nmb_iters: int) -> torch.Tensor:
         """Implementation of Distributed Sinkhorn."""
         with torch.no_grad():
-            sum_Q = torch.sum(Q)
-            dist.all_reduce(sum_Q)
-            Q /= sum_Q
+            sum_q = torch.sum(q)
+            dist.all_reduce(sum_q)
+            q /= sum_q
 
             if self.gpus > 0:
-                u = torch.zeros(Q.shape[0]).cuda(non_blocking=True)
-                r = torch.ones(Q.shape[0]).cuda(non_blocking=True) / Q.shape[0]
-                c = torch.ones(Q.shape[1]).cuda(non_blocking=True) / (self.gpus * Q.shape[1])
+                # u = torch.zeros(q.shape[0]).cuda(non_blocking=True)
+                r = torch.ones(q.shape[0]).cuda(non_blocking=True) / q.shape[0]
+                c = torch.ones(q.shape[1]).cuda(non_blocking=True) / (self.gpus * q.shape[1])
             else:
-                u = torch.zeros(Q.shape[0])
-                r = torch.ones(Q.shape[0]) / Q.shape[0]
-                c = torch.ones(Q.shape[1]) / (self.gpus * Q.shape[1])
+                # u = torch.zeros(q.shape[0])
+                r = torch.ones(q.shape[0]) / q.shape[0]
+                c = torch.ones(q.shape[1]) / (self.gpus * q.shape[1])
 
-            curr_sum = torch.sum(Q, dim=1)
+            curr_sum = torch.sum(q, dim=1)
             dist.all_reduce(curr_sum)
 
             for _ in range(nmb_iters):
                 u = curr_sum
-                Q *= (r / u).unsqueeze(1)
-                Q *= (c / torch.sum(Q, dim=0)).unsqueeze(0)
-                curr_sum = torch.sum(Q, dim=1)
+                q *= (r / u).unsqueeze(1)
+                q *= (c / torch.sum(q, dim=0)).unsqueeze(0)
+                curr_sum = torch.sum(q, dim=1)
                 dist.all_reduce(curr_sum)
-            return (Q / torch.sum(Q, dim=0, keepdim=True)).t().float()
+            return (q / torch.sum(q, dim=0, keepdim=True)).t().float()
