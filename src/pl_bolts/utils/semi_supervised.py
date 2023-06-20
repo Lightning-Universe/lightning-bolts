@@ -71,11 +71,11 @@ def balance_classes(
     # divide each class into each batch
     for class_i in range(num_classes):
         mask = class_i == y
-        x_sub = X[mask]  # noqa: N806
+        x_sub = X[mask]
         y_sub = y[mask]
 
         # shuffle items in the class
-        x_sub, y_sub = sk_shuffle(x_sub, y_sub, random_state=123)  # noqa: N806
+        x_sub, y_sub = sk_shuffle(x_sub, y_sub, random_state=123)
 
         # divide the class into the batches
         for i_start in range(0, len(y_sub), chunk_size):
