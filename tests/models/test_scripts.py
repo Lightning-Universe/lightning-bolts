@@ -8,6 +8,10 @@ from pl_bolts.utils import _IS_WINDOWS, _JSONARGPARSE_GREATER_THAN_4_16_0
 from tests import _MARK_REQUIRE_GPU, DATASETS_PATH
 
 _DEFAULT_ARGS = f" --data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 2 --batch_size 4 "
+_DEFAULT_ARGS_RL_PONG = (
+    " --env PongNoFrameskip-v4 --max_steps 10 --fast_dev_run 1 --warm_start_size 10 --n_steps 2 --batch_size 10"
+)
+_DEFAULT_ARGS_CARTPOLE = " --env CartPole-v0" " --max_steps 10" " --fast_dev_run 1" " --batch_size 10"
 _DEFAULT_LIGHTNING_CLI_ARGS = (
     f" fit --data.data_dir {DATASETS_PATH} --data.batch_size 4 --trainer.max_epochs 1 --trainer.max_steps 2"
 )
@@ -39,6 +43,15 @@ _DEFAULT_LIGHTNING_CLI_ARGS = (
                 pytest.mark.skipif(not _JSONARGPARSE_GREATER_THAN_4_16_0, reason="Failing on CI, need to be fixed"),
             ],
         ),
+        ("models.rl.dqn_model", _DEFAULT_ARGS_RL_PONG),
+        ("models.rl.double_dqn_model", _DEFAULT_ARGS_RL_PONG),
+        ("models.rl.dueling_dqn_model", _DEFAULT_ARGS_RL_PONG),
+        ("models.rl.noisy_dqn_model", _DEFAULT_ARGS_RL_PONG),
+        ("models.rl.per_dqn_model", _DEFAULT_ARGS_RL_PONG),
+        ("models.rl.reinforce_model", _DEFAULT_ARGS_CARTPOLE),
+        ("models.rl.vanilla_policy_gradient_model", _DEFAULT_ARGS_CARTPOLE),
+        ("models.rl.advantage_actor_critic_model", _DEFAULT_ARGS_CARTPOLE),
+        ("models.rl.sac_model", _DEFAULT_ARGS_CARTPOLE),
     ],
 )
 @pytest.mark.skipif(_IS_WINDOWS, reason="strange TimeOut or MemoryError")  # todo
