@@ -27,7 +27,7 @@ __all__ = ["CPC_v2"]
 
 
 @under_review()
-class CPC_v2(LightningModule):
+class CPC_v2(LightningModule):  # noqa: N801
     def __init__(
         self,
         encoder_name: str = "cpc_encoder",
@@ -104,32 +104,28 @@ class CPC_v2(LightningModule):
         b, c, h, w = dummy_batch.size()
         return c, h
 
-    def __recover_z_shape(self, Z, b):
+    def __recover_z_shape(self, z, b):
         # recover shape
-        Z = Z.squeeze(-1)
-        num_patches = int(math.sqrt(Z.size(0) // b))
-        Z = Z.view(b, -1, Z.size(1))
-        Z = Z.permute(0, 2, 1).contiguous()
-        Z = Z.view(b, -1, num_patches, num_patches)
+        z = z.squeeze(-1)
+        num_patches = int(math.sqrt(z.size(0) // b))
+        z = z.view(b, -1, z.size(1))
+        z = z.permute(0, 2, 1).contiguous()
+        return z.view(b, -1, num_patches, num_patches)
 
-        return Z
-
-    def forward(self, img_1):
+    def forward(self, img):
         # put all patches on the batch dim for simultaneous processing
-        b, _, c, w, h = img_1.size()
-        img_1 = img_1.view(-1, c, w, h)
+        b, _, c, w, h = img.size()
+        img = img.view(-1, c, w, h)
 
         # Z are the latent vars
-        Z = self.encoder(img_1)
+        z = self.encoder(img)
 
         # non cpc resnets return a list
         if self.hparams.encoder_name != "cpc_encoder":
-            Z = Z[0]
+            z = z[0]
 
         # (?) -> (b, -1, num_feats, num_feats)
-        Z = self.__recover_z_shape(Z, b)
-
-        return Z
+        return self.__recover_z_shape(z, b)
 
     def training_step(self, batch, batch_nb):
         # calculate loss
@@ -152,14 +148,14 @@ class CPC_v2(LightningModule):
             # unlabeled batch
             batch = batch[0]
 
-        img_1, y = batch
+        img, y = batch
 
         # generate features
         # Latent features
-        Z = self(img_1)
+        z = self(img)
 
         # infoNCE loss
-        return self.contrastive_task(Z)
+        return self.contrastive_task(z)
 
     def configure_optimizers(self):
         opt = optim.Adam(

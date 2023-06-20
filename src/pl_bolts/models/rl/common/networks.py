@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from torch import FloatTensor, Tensor, nn
 from torch.distributions import Categorical, Normal
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 
 from pl_bolts.models.rl.common.distributions import TanhMultivariateNormal
 from pl_bolts.utils.stability import under_review

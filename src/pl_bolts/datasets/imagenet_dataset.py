@@ -238,6 +238,4 @@ def parse_devkit_archive(root, file=None):
         val_idcs = parse_val_groundtruth_txt(devkit_root)
         val_wnids = [idx_to_wnid[idx] for idx in val_idcs]
 
-        META_FILE = "meta.bin"
-
-        torch.save((wnid_to_classes, val_wnids), os.path.join(root, META_FILE))
+        torch.save((wnid_to_classes, val_wnids), os.path.join(root, "meta.bin"))

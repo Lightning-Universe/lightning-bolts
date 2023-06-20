@@ -81,18 +81,18 @@ def test_unet_component(catch_warnings):
     x2 = torch.rand(1, 64, 28, 33)
     x3 = torch.rand(1, 32, 64, 69)
 
-    doubleConvLayer = DoubleConv(3, 64)
-    y = doubleConvLayer(x1)
+    double_conv_layer = DoubleConv(3, 64)
+    y = double_conv_layer(x1)
     assert y.shape == torch.Size([1, 64, 28, 28])
 
-    downLayer = Down(3, 6)
-    y = downLayer(x1)
+    down_layer = Down(3, 6)
+    y = down_layer(x1)
     assert y.shape == torch.Size([1, 6, 14, 14])
 
-    upLayer1 = Up(64, 32, False)
-    upLayer2 = Up(64, 32, True)
-    y1 = upLayer1(x2, x3)
-    y2 = upLayer2(x2, x3)
+    up_layer1 = Up(64, 32, False)
+    up_layer2 = Up(64, 32, True)
+    y1 = up_layer1(x2, x3)
+    y2 = up_layer2(x2, x3)
     assert y1.shape == torch.Size([1, 32, 64, 69])
     assert y2.shape == torch.Size([1, 32, 64, 69])
 

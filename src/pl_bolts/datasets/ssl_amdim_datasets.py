@@ -113,19 +113,19 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
         # modify only for val, train
         if split != "test":
             # limit nb of examples per class
-            X_test, y_test, X_train, y_train = self.generate_train_val_split(self.data, self.targets, val_pct)
+            data_test, lbs_test, data_train, lbs_train = self.generate_train_val_split(self.data, self.targets, val_pct)
 
             # shuffle idxs representing the data
-            X_train, y_train = self.deterministic_shuffle(X_train, y_train)
-            X_test, y_test = self.deterministic_shuffle(X_test, y_test)
+            data_train, lbs_train = self.deterministic_shuffle(data_train, lbs_train)
+            data_test, lbs_test = self.deterministic_shuffle(data_test, lbs_test)
 
             if split == "val":
-                self.data = X_test
-                self.targets = y_test
+                self.data = data_test
+                self.targets = lbs_test
 
             else:
-                self.data = X_train
-                self.targets = y_train
+                self.data = data_train
+                self.targets = lbs_train
 
             # limit the number of items per class
             if num_labeled_per_class is not None:

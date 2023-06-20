@@ -67,13 +67,13 @@ class CPCTask(nn.Module):
 
         return nn.functional.cross_entropy(logits, labels)
 
-    def forward(self, Z):
+    def forward(self, z):
         losses = []
 
-        context = self.context_cnn(Z)
-        targets = self.target_cnn(Z)
+        context = self.context_cnn(z)
+        targets = self.target_cnn(z)
 
-        _, _, h, w = Z.shape
+        _, _, h, w = z.shape
 
         # future prediction
         preds = self.pred_cnn(context)

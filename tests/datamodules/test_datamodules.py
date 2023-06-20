@@ -25,7 +25,7 @@ def test_dev_datasets(datadir):
         pass
 
 
-def _create_synth_Cityscapes_dataset(path_dir):
+def _create_synth_cityscapes_dataset(path_dir):
     """Create synthetic dataset with random images, just to simulate that the dataset have been already
     downloaded."""
     non_existing_citites = ["dummy_city_1", "dummy_city_2"]
@@ -47,7 +47,7 @@ def _create_synth_Cityscapes_dataset(path_dir):
 
 
 def test_cityscapes_datamodule(datadir):
-    _create_synth_Cityscapes_dataset(datadir)
+    _create_synth_cityscapes_dataset(datadir)
 
     batch_size = 1
     target_types = ["semantic", "instance"]
