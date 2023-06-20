@@ -107,10 +107,10 @@ def test_swav(tmpdir, datadir, catch_warnings):
     datamodule = CIFAR10DataModule(data_dir=datadir, batch_size=batch_size, num_workers=0)
 
     datamodule.train_transforms = SwAVTrainDataTransform(
-        normalize=cifar10_normalization(), size_crops=[32, 16], nmb_crops=[2, 1], gaussian_blur=False
+        normalize=cifar10_normalization(), size_crops=[32, 16], num_crops=[2, 1], gaussian_blur=False
     )
     datamodule.val_transforms = SwAVEvalDataTransform(
-        normalize=cifar10_normalization(), size_crops=[32, 16], nmb_crops=[2, 1], gaussian_blur=False
+        normalize=cifar10_normalization(), size_crops=[32, 16], num_crops=[2, 1], gaussian_blur=False
     )
     if torch.cuda.device_count() >= 1:
         devices = torch.cuda.device_count()
@@ -126,9 +126,9 @@ def test_swav(tmpdir, datadir, catch_warnings):
         gpus=0 if devices is None else devices,
         num_samples=datamodule.num_samples,
         batch_size=batch_size,
-        nmb_crops=[2, 1],
+        num_crops=[2, 1],
         sinkhorn_iterations=1,
-        nmb_prototypes=2,
+        num_prototypes=2,
         queue_length=0,
         maxpool1=False,
         first_conv=False,

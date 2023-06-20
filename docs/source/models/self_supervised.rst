@@ -497,7 +497,7 @@ To Train::
         num_samples=dm.num_unlabeled_samples,
         dataset='stl10',
         batch_size=batch_size,
-        nmb_crops=(2,4)
+        num_crops=(2,4)
     )
 
     # fit
@@ -601,7 +601,7 @@ To reproduce::
         --gaussian_blur
         --queue_length 0
         --jitter_strength 1.
-        --nmb_prototypes 512
+        --num_prototypes 512
 
     # finetune
     python swav_finetuner.py

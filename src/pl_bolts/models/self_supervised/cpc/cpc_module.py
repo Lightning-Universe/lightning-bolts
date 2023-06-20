@@ -67,7 +67,7 @@ class CPC_v2(LightningModule):  # noqa: N801
         self.encoder = self.init_encoder()
 
         # info nce loss
-        c, h = self.__compute_final_nb_c(patch_size)
+        c, h = self.__compute_final_num_c(patch_size)
         self.contrastive_task = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
 
         self.z_dim = c * h * h
@@ -92,7 +92,7 @@ class CPC_v2(LightningModule):  # noqa: N801
             return cpc_resnet101(dummy_batch)
         return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=self.hparams.task == "amdim")
 
-    def __compute_final_nb_c(self, patch_size):
+    def __compute_final_num_c(self, patch_size):
         dummy_batch = torch.zeros((2 * 49, 3, patch_size, patch_size))
         dummy_batch = self.encoder(dummy_batch)
 
@@ -107,10 +107,10 @@ class CPC_v2(LightningModule):  # noqa: N801
     def __recover_z_shape(self, z, b):
         # recover shape
         z = z.squeeze(-1)
-        nb_patches = int(math.sqrt(z.size(0) // b))
+        num_patches = int(math.sqrt(z.size(0) // b))
         z = z.view(b, -1, z.size(1))
         z = z.permute(0, 2, 1).contiguous()
-        return z.view(b, -1, nb_patches, nb_patches)
+        return z.view(b, -1, num_patches, num_patches)
 
     def forward(self, img):
         # put all patches on the batch dim for simultaneous processing
@@ -124,7 +124,7 @@ class CPC_v2(LightningModule):  # noqa: N801
         if self.hparams.encoder_name != "cpc_encoder":
             z = z[0]
 
-        # (?) -> (b, -1, nb_feats, nb_feats)
+        # (?) -> (b, -1, num_feats, num_feats)
         return self.__recover_z_shape(z, b)
 
     def training_step(self, batch, batch_nb):

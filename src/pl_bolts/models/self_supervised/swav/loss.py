@@ -11,7 +11,7 @@ class SWAVLoss(nn.Module):
         self,
         temperature: float,
         crops_for_assign: tuple,
-        nmb_crops: tuple,
+        num_crops: tuple,
         sinkhorn_iterations: int,
         epsilon: float,
         gpus: int,
@@ -22,7 +22,7 @@ class SWAVLoss(nn.Module):
         Args:
             temperature:  loss temperature
             crops_for_assign: list of crop ids for computing assignment
-            nmb_crops: number of global and local crops, ex: [2, 6]
+            num_crops: number of global and local crops, ex: [2, 6]
             sinkhorn_iterations: iterations for sinkhorn normalization
             epsilon: epsilon val for swav assignments
             gpus: number of gpus per node used in training, passed to SwAV module
@@ -35,7 +35,7 @@ class SWAVLoss(nn.Module):
         self.softmax = nn.Softmax(dim=1)
         self.sinkhorn_iterations = sinkhorn_iterations
         self.epsilon = epsilon
-        self.nmb_crops = nmb_crops
+        self.num_crops = num_crops
         self.gpus = gpus
         self.num_nodes = num_nodes
         if self.gpus * self.num_nodes > 1:
@@ -71,14 +71,14 @@ class SWAVLoss(nn.Module):
 
             # cluster assignment prediction
             subloss = 0
-            for v in np.delete(np.arange(np.sum(self.nmb_crops)), crop_id):
+            for v in np.delete(np.arange(np.sum(self.num_crops)), crop_id):
                 p = self.softmax(output[batch_size * v : batch_size * (v + 1)] / self.temperature)
                 subloss -= torch.mean(torch.sum(q * torch.log(p), dim=1))
-            loss += subloss / (np.sum(self.nmb_crops) - 1)
+            loss += subloss / (np.sum(self.num_crops) - 1)
         loss /= len(self.crops_for_assign)  # type: ignore
         return loss, queue, use_queue
 
-    def sinkhorn(self, q: torch.Tensor, nmb_iters: int) -> torch.Tensor:
+    def sinkhorn(self, q: torch.Tensor, num_iters: int) -> torch.Tensor:
         """Implementation of Sinkhorn clustering."""
         with torch.no_grad():
             sum_q = torch.sum(q)
@@ -95,7 +95,7 @@ class SWAVLoss(nn.Module):
                 r = torch.ones(dim_k) / dim_k
                 c = torch.ones(dim_b) / dim_b
 
-            for _ in range(nmb_iters):
+            for _ in range(num_iters):
                 u = torch.sum(q, dim=1)
 
                 q *= (r / u).unsqueeze(1)
@@ -103,7 +103,7 @@ class SWAVLoss(nn.Module):
 
             return (q / torch.sum(q, dim=0, keepdim=True)).t().float()
 
-    def distributed_sinkhorn(self, q: torch.Tensor, nmb_iters: int) -> torch.Tensor:
+    def distributed_sinkhorn(self, q: torch.Tensor, num_iters: int) -> torch.Tensor:
         """Implementation of Distributed Sinkhorn."""
         with torch.no_grad():
             sum_q = torch.sum(q)
@@ -122,7 +122,7 @@ class SWAVLoss(nn.Module):
             curr_sum = torch.sum(q, dim=1)
             dist.all_reduce(curr_sum)
 
-            for _ in range(nmb_iters):
+            for _ in range(num_iters):
                 u = curr_sum
                 q *= (r / u).unsqueeze(1)
                 q *= (c / torch.sum(q, dim=0)).unsqueeze(0)
