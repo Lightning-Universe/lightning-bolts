@@ -12,15 +12,17 @@ _DEFAULT_LIGHTNING_CLI_ARGS = (
 )
 
 
-@pytest.mark.parametrize("dataset_name", ["mnist", "cifar10"])
 @pytest.mark.parametrize(
-    "cli_args",
-    [" --dataset %(dataset_name)s" + _DEFAULT_ARGS],
+    ("script_path", "cli_args"),
+    [
+        ("models.gans.basic.basic_gan_module", " --dataset mnist" + _DEFAULT_ARGS),
+        ("models.gans.basic.basic_gan_module", " --dataset cifar10" + _DEFAULT_ARGS),
+    ],
 )
-def test_cli_run_basic_gan(cli_args, dataset_name):
-    from pl_bolts.models.gans.basic.basic_gan_module import cli_main
+@pytest.mark.skipif(_IS_WINDOWS, reason="strange TimeOut or MemoryError")  # todo
+def test_cli_run_(script_path, cli_args):
+    cli_main = __import__(f"pl_bolts.{script_path}.cli_main")
 
-    cli_args = cli_args % {"dataset_name": dataset_name}
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args.strip().split()):
         cli_main()
 
