@@ -53,7 +53,7 @@ _ARG_GPUS = f" --gpus={int(torch.cuda.is_available())}"
         ("models.rl.reinforce_model", _DEFAULT_ARGS_CARTPOLE),
         ("models.rl.vanilla_policy_gradient_model", _DEFAULT_ARGS_CARTPOLE),
         ("models.rl.advantage_actor_critic_model", _DEFAULT_ARGS_CARTPOLE),
-        ("models.rl.sac_model", _DEFAULT_ARGS_CARTPOLE),
+        ("models.rl.sac_model", "--env=Pendulum-v0 --max_steps=10 --fast_dev_run=1 --batch_size=10"),
         pytest.param(  # fixme
             "models.self_supervised.amdim.amdim_module",
             _DEFAULT_ARGS + f" --gpus={int(torch.cuda.is_available())}",
