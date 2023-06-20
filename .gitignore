@@ -81,7 +81,7 @@ docs/source/*.md
 target/
 
 # Jupyter Notebook
-.ipynb_checkpoints
+.ipynum_checkpoints
 
 # IPython
 profile_default/

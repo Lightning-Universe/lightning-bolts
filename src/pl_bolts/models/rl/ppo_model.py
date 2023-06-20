@@ -53,7 +53,7 @@ class PPO(LightningModule):
         max_episode_len: float = 200,
         batch_size: int = 512,
         steps_per_epoch: int = 2048,
-        nb_optim_iters: int = 4,
+        num_optim_iters: int = 4,
         clip_ratio: float = 0.2,
         **kwargs: Any,
     ) -> None:
@@ -67,7 +67,7 @@ class PPO(LightningModule):
             max_episode_len: maximum number interactions (actions) in an episode
             batch_size:  batch_size when training network- can simulate number of policy updates performed per epoch
             steps_per_epoch: how many action-state pairs to rollout for trajectory collection per epoch
-            nb_optim_iters: how many steps of gradient descent to perform on each batch
+            num_optim_iters: how many steps of gradient descent to perform on each batch
             clip_ratio: hyperparameter for clipping in the policy objective
         """
         super().__init__()
@@ -79,7 +79,7 @@ class PPO(LightningModule):
         self.lr_actor = lr_actor
         self.lr_critic = lr_critic
         self.steps_per_epoch = steps_per_epoch
-        self.nb_optim_iters = nb_optim_iters
+        self.num_optim_iters = num_optim_iters
         self.batch_size = batch_size
         self.gamma = gamma
         self.lam = lam
@@ -250,10 +250,10 @@ class PPO(LightningModule):
                     epoch_rewards = epoch_rewards[:-1]
 
                 total_epoch_reward = sum(epoch_rewards)
-                nb_episodes = len(epoch_rewards)
+                num_episodes = len(epoch_rewards)
 
-                self.avg_ep_reward = total_epoch_reward / nb_episodes
-                self.avg_ep_len = (self.steps_per_epoch - steps_before_cutoff) / nb_episodes
+                self.avg_ep_reward = total_epoch_reward / num_episodes
+                self.avg_ep_len = (self.steps_per_epoch - steps_before_cutoff) / num_episodes
 
                 self.epoch_rewards.clear()
 
@@ -313,9 +313,9 @@ class PPO(LightningModule):
         return optimizer_actor, optimizer_critic
 
     def optimizer_step(self, *args, **kwargs):
-        """Run ``nb_optim_iters`` number of iterations of gradient descent on actor and critic for each data
+        """Run ``num_optim_iters`` number of iterations of gradient descent on actor and critic for each data
         sample."""
-        for _ in range(self.nb_optim_iters):
+        for _ in range(self.num_optim_iters):
             super().optimizer_step(*args, **kwargs)
 
     def _dataloader(self) -> DataLoader:
@@ -344,7 +344,7 @@ class PPO(LightningModule):
             help="how many action-state pairs to rollout for trajectory collection per epoch",
         )
         parser.add_argument(
-            "--nb_optim_iters", type=int, default=4, help="how many steps of gradient descent to perform on each batch"
+            "--num_optim_iters", type=int, default=4, help="how many steps of gradient descent to perform on each batch"
         )
         parser.add_argument(
             "--clip_ratio", type=float, default=0.2, help="hyperparameter for clipping in the policy objective"

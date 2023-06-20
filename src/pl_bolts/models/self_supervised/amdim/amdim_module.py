@@ -30,7 +30,7 @@ DATASET_CIFAR10 = {
     "depth": 10,
     "image_height": 32,
     "batch_size": 200,
-    "nb_classes": 10,
+    "num_classes": 10,
     "lr_options": generate_power_seq(LEARNING_RATE_CIFAR, 11),
 }
 
@@ -43,7 +43,7 @@ DATASET_STL10 = {
     "depth": 8,
     "image_height": 64,
     "batch_size": 200,
-    "nb_classes": 10,
+    "num_classes": 10,
     "lr_options": generate_power_seq(LEARNING_RATE_STL, 11),
 }
 
@@ -55,7 +55,7 @@ DATASET_IMAGENET2012 = {
     "depth": 10,
     "image_height": 128,
     "batch_size": 200,
-    "nb_classes": 1000,
+    "num_classes": 1000,
     "lr_options": generate_power_seq(LEARNING_RATE_IMAGENET, 11),
 }
 
@@ -244,7 +244,7 @@ class AMDIM(LightningModule):
         )
 
     def train_dataloader(self):
-        kwargs = {"nb_classes": self.hparams.nb_classes} if self.hparams.datamodule == "imagenet2012" else {}
+        kwargs = {"num_classes": self.hparams.num_classes} if self.hparams.datamodule == "imagenet2012" else {}
         dataset = AMDIMPretraining.get_dataset(self.hparams.datamodule, self.hparams.data_dir, split="train", **kwargs)
 
         # LOADER
@@ -257,7 +257,7 @@ class AMDIM(LightningModule):
         )
 
     def val_dataloader(self):
-        kwargs = {"nb_classes": self.hparams.nb_classes} if self.hparams.datamodule == "imagenet2012" else {}
+        kwargs = {"num_classes": self.hparams.num_classes} if self.hparams.datamodule == "imagenet2012" else {}
         dataset = AMDIMPretraining.get_dataset(self.hparams.datamodule, self.hparams.data_dir, split="val", **kwargs)
 
         # LOADER
@@ -280,7 +280,7 @@ class AMDIM(LightningModule):
         dataset = DATASETS[args.datamodule]
 
         # dataset options
-        parser.add_argument("--num_classes", default=dataset["nb_classes"], type=int)
+        parser.add_argument("--num_classes", default=dataset["num_classes"], type=int)
 
         # network params
         parser.add_argument("--tclip", type=float, default=20.0, help="soft clipping range for NCE scores")

@@ -16,7 +16,7 @@ class SwAVTrainDataTransform:
         self,
         normalize=None,
         size_crops: Tuple[int] = (96, 36),
-        nmb_crops: Tuple[int] = (2, 4),
+        num_crops: Tuple[int] = (2, 4),
         min_scale_crops: Tuple[float] = (0.33, 0.10),
         max_scale_crops: Tuple[float] = (1, 0.33),
         gaussian_blur: bool = True,
@@ -25,15 +25,15 @@ class SwAVTrainDataTransform:
         self.jitter_strength = jitter_strength
         self.gaussian_blur = gaussian_blur
 
-        if len(size_crops) != len(nmb_crops):
-            raise AssertionError("len(size_crops) should equal len(nmb_crops).")
-        if len(min_scale_crops) != len(nmb_crops):
-            raise AssertionError("len(min_scale_crops) should equal len(nmb_crops).")
-        if len(max_scale_crops) != len(nmb_crops):
-            raise AssertionError("len(max_scale_crops) should equal len(nmb_crops).")
+        if len(size_crops) != len(num_crops):
+            raise AssertionError("len(size_crops) should equal len(num_crops).")
+        if len(min_scale_crops) != len(num_crops):
+            raise AssertionError("len(min_scale_crops) should equal len(num_crops).")
+        if len(max_scale_crops) != len(num_crops):
+            raise AssertionError("len(max_scale_crops) should equal len(num_crops).")
 
         self.size_crops = size_crops
-        self.nmb_crops = nmb_crops
+        self.num_crops = num_crops
         self.min_scale_crops = min_scale_crops
         self.max_scale_crops = max_scale_crops
 
@@ -79,7 +79,7 @@ class SwAVTrainDataTransform:
                         ]
                     )
                 ]
-                * self.nmb_crops[i]
+                * self.num_crops[i]
             )
 
         self.transform = transform
@@ -100,7 +100,7 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
         self,
         normalize=None,
         size_crops: Tuple[int] = (96, 36),
-        nmb_crops: Tuple[int] = (2, 4),
+        num_crops: Tuple[int] = (2, 4),
         min_scale_crops: Tuple[float] = (0.33, 0.10),
         max_scale_crops: Tuple[float] = (1, 0.33),
         gaussian_blur: bool = True,
@@ -109,7 +109,7 @@ class SwAVEvalDataTransform(SwAVTrainDataTransform):
         super().__init__(
             normalize=normalize,
             size_crops=size_crops,
-            nmb_crops=nmb_crops,
+            num_crops=num_crops,
             min_scale_crops=min_scale_crops,
             max_scale_crops=max_scale_crops,
             gaussian_blur=gaussian_blur,
