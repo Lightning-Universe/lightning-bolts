@@ -21,11 +21,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Something is wrong with windows tests, will need to debug separately.
-        os: [ubuntu-20.04, macOS-11]
-        # todo: seems there are some issues with py3.10 while install dependencies
-        python-version: ["3.8", "3.9"]
-        requires: ['oldest', 'latest']
+        os: ["ubuntu-20.04", "macOS-11"]
+        python-version: ["3.8", "3.9", "3.10"]
+        requires: ["latest"]  # + "oldest"
+        include:
+          - { os: 'windows-2022', python-version: "3.9" }
+          - { os: 'ubuntu-20.04', python-version: "3.8", requires: "oldest" }
+          - { os: 'macOS-11', python-version: "3.8", requires: "oldest" }
     env:
       FREEZE_REQUIREMENTS: 1
       TORCH_URL: "https://download.pytorch.org/whl/cpu/torch_stable.html"
@@ -51,9 +53,19 @@ jobs:
             open(fpath, 'w').write(req)
       shell: python
 
+    - name: Get pip cache dir
+      id: pip-cache
+      run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
+    - name: Restore pip cache
+      uses: actions/cache/restore@v3
+      id: restore-cache
+      with:
+        path: ${{ steps.pip-cache.outputs.dir }}
+        key: pip-dependencies
+
     - name: Install package
       run: |
-        pip install "pip==22.3.1"  # todo: drop after resolving extras
+        python -m pip install "pip==22.3.1"  # todo: drop after resolving extras
         pip install -e . -U --prefer-binary -f ${TORCH_URL}
         pip list
 
@@ -66,16 +78,6 @@ jobs:
           --ignore=pl_bolts/datamodules \
           --ignore=pl_bolts/datasets \
           --ignore=pl_bolts/models/rl
-
-    - name: Get pip cache dir
-      id: pip-cache
-      run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
-    - name: Restore pip cache
-      uses: actions/cache/restore@v3
-      id: restore-cache
-      with:
-        path: ${{ steps.pip-cache.outputs.dir }}
-        key: pip-dependencies
 
     - name: Install dependencies
       run: |
@@ -99,6 +101,10 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y unrar
+    - name: Setup Windows
+      if: runner.os == 'Windows'&& steps.cache-datasets.outputs.cache-hit != 'true'
+      run: |
+        choco install unrar
 
     - name: Cache datasets
       id: cache-datasets

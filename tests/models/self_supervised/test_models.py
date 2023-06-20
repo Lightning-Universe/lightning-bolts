@@ -10,6 +10,7 @@ from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 from pl_bolts.transforms.self_supervised.moco_transforms import MoCo2EvalCIFAR10Transforms, MoCo2TrainCIFAR10Transforms
 from pl_bolts.transforms.self_supervised.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from pl_bolts.transforms.self_supervised.swav_transforms import SwAVEvalDataTransform, SwAVTrainDataTransform
+from pl_bolts.utils import _IS_WINDOWS
 from pytorch_lightning import Trainer
 from pytorch_lightning.utilities.warnings import PossibleUserWarning
 
@@ -38,6 +39,7 @@ def test_cpcv2(tmpdir, datadir):
     trainer.fit(model, datamodule=datamodule)
 
 
+@pytest.mark.skipif(_IS_WINDOWS, reason="numpy.core._exceptions._ArrayMemoryError...")  # todo
 def test_byol(tmpdir, datadir, catch_warnings):
     """Test BYOL on CIFAR-10."""
     warnings.filterwarnings(
@@ -60,12 +62,14 @@ def test_byol(tmpdir, datadir, catch_warnings):
     trainer.fit(model, datamodule=dm)
 
 
+@pytest.mark.skipif(_IS_WINDOWS, reason="numpy.core._exceptions._ArrayMemoryError...")  # todo
 def test_amdim(tmpdir, datadir):
     model = AMDIM(data_dir=datadir, batch_size=2, online_ft=True, encoder="resnet18", num_workers=0)
     trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir)
     trainer.fit(model)
 
 
+@pytest.mark.skipif(_IS_WINDOWS, reason="numpy.core._exceptions._ArrayMemoryError...")  # todo
 def test_moco(tmpdir, datadir):
     datamodule = CIFAR10DataModule(data_dir=datadir, num_workers=0, batch_size=2)
     datamodule.train_transforms = MoCo2TrainCIFAR10Transforms()
@@ -76,6 +80,7 @@ def test_moco(tmpdir, datadir):
     trainer.fit(model, datamodule=datamodule)
 
 
+@pytest.mark.skipif(_IS_WINDOWS, reason="numpy.core._exceptions._ArrayMemoryError...")  # todo
 def test_simclr(tmpdir, datadir):
     datamodule = CIFAR10DataModule(data_dir=datadir, num_workers=0, batch_size=2)
     datamodule.train_transforms = SimCLRTrainDataTransform(32)
@@ -86,6 +91,7 @@ def test_simclr(tmpdir, datadir):
     trainer.fit(model, datamodule=datamodule)
 
 
+@pytest.mark.skipif(_IS_WINDOWS, reason="numpy.core._exceptions._ArrayMemoryError...")  # todo
 def test_swav(tmpdir, datadir, catch_warnings):
     """Test SWAV on CIFAR-10."""
     warnings.filterwarnings(
@@ -135,6 +141,7 @@ def test_swav(tmpdir, datadir, catch_warnings):
     trainer.fit(model, datamodule=datamodule)
 
 
+@pytest.mark.skipif(_IS_WINDOWS, reason="numpy.core._exceptions._ArrayMemoryError...")  # todo
 def test_simsiam(tmpdir, datadir, catch_warnings):
     """Test SimSiam on CIFAR-10."""
     warnings.filterwarnings(
