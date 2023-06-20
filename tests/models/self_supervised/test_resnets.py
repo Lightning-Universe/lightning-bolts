@@ -32,9 +32,9 @@ def test_cpc_resnet():
         resnet101,
         resnet152,
         resnext50_32x4d,
-        resnext101_32x8d,
+        pytest.param(resnext101_32x8d, marks=pytest.mark.skipif(_IS_WINDOWS, reason="strange MemoryError")),  # todo
         wide_resnet50_2,
-        pytest.param(wide_resnet101_2, marks=pytest.mark.skipif(_IS_WINDOWS, reason="failing...")),  # todo
+        pytest.param(wide_resnet101_2, marks=pytest.mark.skipif(_IS_WINDOWS, reason="strange MemoryError")),  # todo
     ],
 )
 @torch.no_grad()
