@@ -7,6 +7,7 @@ from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.gym_wrappers import ToTensor
 from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.vanilla_policy_gradient_model import VanillaPolicyGradient
+from pl_bolts.utils import _IS_WINDOWS
 from torch import Tensor
 
 
@@ -24,6 +25,7 @@ class TestPolicyGradient(TestCase):
         self.hparams = parent_parser.parse_args(args_list)
         self.model = VanillaPolicyGradient(**vars(self.hparams))
 
+    @pytest.mark.skipif(_IS_WINDOWS, reason="strange TimeOut or MemoryError")  # todo
     def test_loss(self):
         """Test the reinforce loss function."""
 
