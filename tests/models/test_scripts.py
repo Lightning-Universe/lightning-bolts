@@ -97,7 +97,7 @@ _ARG_WORKERS_0 = " --num_workers=0"
         pytest.param(
             "models.self_supervised.swav.swav_module",
             _DEFAULT_ARGS + _ARG_WORKERS_0 + _ARG_GPUS + " --dataset=cifar10 --arch=resnet18 --hidden_mlp=512 --fp32"
-            " --sinkhorn_iterations=1 --nmb_prototypes=2 --queue_length=0",
+            " --sinkhorn_iterations=1 --num_prototypes=2 --queue_length=0",
             marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU),
         ),
         pytest.param(

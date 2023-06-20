@@ -22,7 +22,7 @@ else:  # pragma: no cover
 
 @under_review()
 class UnlabeledImagenet(ImageNet):
-    """Official train set gets split into train, val. (using nb_imgs_per_val_class for each class). Official
+    """Official train set gets split into train, val. (using num_imgs_per_val_class for each class). Official
     validation becomes test set.
 
     Within each class, we further allow limiting the number of samples per class (for semi-sup lng)
@@ -126,13 +126,13 @@ class UnlabeledImagenet(ImageNet):
         self.samples = self.imgs
         self.targets = [s[1] for s in self.imgs]
 
-    def partition_train_set(self, imgs, nb_imgs_in_val):
+    def partition_train_set(self, imgs, num_imgs_in_val):
         val = []
         train = []
 
         cts = {x: 0 for x in range(len(self.classes))}
         for img_name, idx in imgs:
-            if cts[idx] < nb_imgs_in_val:
+            if cts[idx] < num_imgs_in_val:
                 val.append((img_name, idx))
                 cts[idx] += 1
             else:

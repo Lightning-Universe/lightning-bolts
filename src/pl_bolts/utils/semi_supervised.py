@@ -48,30 +48,30 @@ def balance_classes(
     if not _SKLEARN_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError("You want to use `shuffle` function from `scikit-learn` which is not installed yet.")
 
-    nb_classes = len(set(Y))
+    num_classes = len(set(Y))
 
-    nb_batches = math.ceil(len(Y) / batch_size)
+    num_batches = math.ceil(len(Y) / batch_size)
 
     # sort by classes
-    final_batches_x: List[list] = [[] for i in range(nb_batches)]
-    final_batches_y: List[list] = [[] for i in range(nb_batches)]
+    final_batches_x: List[list] = [[] for i in range(num_batches)]
+    final_batches_y: List[list] = [[] for i in range(num_batches)]
 
     # Y needs to be np arr
     Y = np.asarray(Y)
 
     # pick chunk size for each class using the largest split
     chunk_sizes = []
-    for class_i in range(nb_classes):
+    for class_i in range(num_classes):
         mask = class_i == Y
         y = Y[mask]
-        chunk_sizes.append(math.ceil(len(y) / nb_batches))
+        chunk_sizes.append(math.ceil(len(y) / num_batches))
     chunk_size = max(chunk_sizes)
     # force chunk size to be even
     if chunk_size % 2 != 0:
         chunk_size -= 1
 
     # divide each class into each batch
-    for class_i in range(nb_classes):
+    for class_i in range(num_classes):
         mask = class_i == Y
         x = X[mask]
         y = Y[mask]
