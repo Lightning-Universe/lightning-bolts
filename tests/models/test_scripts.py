@@ -1,3 +1,4 @@
+import importlib
 from unittest import mock
 
 import pytest
@@ -21,7 +22,7 @@ _DEFAULT_LIGHTNING_CLI_ARGS = (
 )
 @pytest.mark.skipif(_IS_WINDOWS, reason="strange TimeOut or MemoryError")  # todo
 def test_cli_run_(script_path, cli_args):
-    py_module = __import__(f"pl_bolts.{script_path}")
+    py_module = importlib.import_module(f"pl_bolts.{script_path}")
 
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args.strip().split()):
         py_module.cli_main()
