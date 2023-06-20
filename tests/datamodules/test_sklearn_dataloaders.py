@@ -31,10 +31,10 @@ def test_dataloader():
     train_loader = loaders.train_dataloader()
     val_loader = loaders.val_dataloader()
     test_loader = loaders.test_dataloader()
-    assert np.all(shuffled_x[2:] == train_loader.dataset.X)
-    assert np.all(shuffled_x[0] == val_loader.dataset.X)
-    assert np.all(shuffled_x[1] == test_loader.dataset.X)
-    assert np.all(shuffled_y[2:] == train_loader.dataset.Y)
+    assert np.all(shuffled_x[2:] == train_loader.dataset.data)
+    assert np.all(shuffled_x[0] == val_loader.dataset.data)
+    assert np.all(shuffled_x[1] == test_loader.dataset.data)
+    assert np.all(shuffled_y[2:] == train_loader.dataset.labels)
 
     # -----------------------------
     # train + val
@@ -43,9 +43,9 @@ def test_dataloader():
     train_loader = loaders.train_dataloader()
     val_loader = loaders.val_dataloader()
     test_loader = loaders.test_dataloader()
-    assert np.all(shuffled_x[1:] == train_loader.dataset.X)
-    assert np.all(x_val == val_loader.dataset.X)
-    assert np.all(shuffled_x[0] == test_loader.dataset.X)
+    assert np.all(shuffled_x[1:] == train_loader.dataset.data)
+    assert np.all(x_val == val_loader.dataset.data)
+    assert np.all(shuffled_x[0] == test_loader.dataset.data)
 
     # -----------------------------
     # train + test
@@ -56,9 +56,9 @@ def test_dataloader():
     train_loader = loaders.train_dataloader()
     val_loader = loaders.val_dataloader()
     test_loader = loaders.test_dataloader()
-    assert np.all(shuffled_x[1:] == train_loader.dataset.X)
-    assert np.all(shuffled_x[0] == val_loader.dataset.X)
-    assert np.all(x_test == test_loader.dataset.X)
+    assert np.all(shuffled_x[1:] == train_loader.dataset.data)
+    assert np.all(shuffled_x[0] == val_loader.dataset.data)
+    assert np.all(x_test == test_loader.dataset.data)
 
     # -----------------------------
     # train + val + test
@@ -67,6 +67,6 @@ def test_dataloader():
     train_loader = loaders.train_dataloader()
     val_loader = loaders.val_dataloader()
     test_loader = loaders.test_dataloader()
-    assert np.all(shuffled_x == train_loader.dataset.X)
-    assert np.all(x_val == val_loader.dataset.X)
-    assert np.all(x_test == test_loader.dataset.X)
+    assert np.all(shuffled_x == train_loader.dataset.data)
+    assert np.all(x_val == val_loader.dataset.data)
+    assert np.all(x_test == test_loader.dataset.data)

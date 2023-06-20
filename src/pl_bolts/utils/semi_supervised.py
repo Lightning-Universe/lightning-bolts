@@ -49,9 +49,7 @@ def balance_classes(
         raise ModuleNotFoundError("You want to use `shuffle` function from `scikit-learn` which is not installed yet.")
 
     num_classes = len(set(y))
-
     num_batches = math.ceil(len(y) / batch_size)
-
     # sort by classes
     final_batches_x: List[list] = [[] for i in range(num_batches)]
     final_batches_y: List[list] = [[] for i in range(num_batches)]
@@ -63,8 +61,8 @@ def balance_classes(
     chunk_sizes = []
     for class_i in range(num_classes):
         mask = class_i == y
-        y = y[mask]
-        chunk_sizes.append(math.ceil(len(y) / num_batches))
+        y_sub = y[mask]
+        chunk_sizes.append(math.ceil(len(y_sub) / num_batches))
     chunk_size = max(chunk_sizes)
     # force chunk size to be even
     if chunk_size % 2 != 0:
@@ -73,28 +71,24 @@ def balance_classes(
     # divide each class into each batch
     for class_i in range(num_classes):
         mask = class_i == y
-        x = X[mask]
-        y = y[mask]
+        x_sub = X[mask]  # noqa: N806
+        y_sub = y[mask]
 
         # shuffle items in the class
-        x, y = sk_shuffle(x, y, random_state=123)
+        x_sub, y_sub = sk_shuffle(x_sub, y_sub, random_state=123)  # noqa: N806
 
         # divide the class into the batches
-        for i_start in range(0, len(y), chunk_size):
+        for i_start in range(0, len(y_sub), chunk_size):
             batch_i = i_start // chunk_size
             i_end = i_start + chunk_size
 
             if len(final_batches_x) > batch_i:
-                final_batches_x[batch_i].append(x[i_start:i_end])
-                final_batches_y[batch_i].append(y[i_start:i_end])
+                final_batches_x[batch_i].append(x_sub[i_start:i_end])
+                final_batches_y[batch_i].append(y_sub[i_start:i_end])
 
     # merge into full dataset
-    final_batches_x = [np.concatenate(x, axis=0) for x in final_batches_x if len(x) > 0]
-    final_batches_x = np.concatenate(final_batches_x, axis=0)
-
-    final_batches_y = [np.concatenate(x, axis=0) for x in final_batches_y if len(x) > 0]
-    final_batches_y = np.concatenate(final_batches_y, axis=0)
-
+    final_batches_x = np.concatenate([np.concatenate(x, axis=0) for x in final_batches_x if len(x) > 0], axis=0)
+    final_batches_y = np.concatenate([np.concatenate(x, axis=0) for x in final_batches_y if len(x) > 0], axis=0)
     return final_batches_x, final_batches_y
 
 
