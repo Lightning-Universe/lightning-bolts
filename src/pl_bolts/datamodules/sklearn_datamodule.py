@@ -29,7 +29,9 @@ class SklearnDataset(Dataset):
         442
     """
 
-    def __init__(self, X: np.ndarray, y: np.ndarray, X_transform: Any = None, y_transform: Any = None) -> None:  # noqa: N803
+    def __init__(
+        self, X: np.ndarray, y: np.ndarray, X_transform: Any = None, y_transform: Any = None
+    ) -> None:
         """
         Args:
             X: Numpy ndarray
