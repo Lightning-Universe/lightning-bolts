@@ -38,7 +38,7 @@ else:  # pragma: no cover
 
 
 @under_review()
-class Moco_v2(LightningModule):
+class Moco_v2(LightningModule):  # noqa: N801
     """PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
 
     Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.

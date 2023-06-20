@@ -36,34 +36,34 @@ class Identity(torch.nn.Module):
 
 @under_review()
 def balance_classes(
-    X: Union[Tensor, np.ndarray], Y: Union[Tensor, np.ndarray, Sequence[int]], batch_size: int
+    X: Union[Tensor, np.ndarray], y: Union[Tensor, np.ndarray, Sequence[int]], batch_size: int  # noqa: N803
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Makes sure each batch has an equal amount of data from each class. Perfect balance.
 
     Args:
         X: input features
-        Y: mixed labels (ints)
+        y: mixed labels (ints)
         batch_size: the ultimate batch size
     """
     if not _SKLEARN_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError("You want to use `shuffle` function from `scikit-learn` which is not installed yet.")
 
-    nb_classes = len(set(Y))
+    nb_classes = len(set(y))
 
-    nb_batches = math.ceil(len(Y) / batch_size)
+    nb_batches = math.ceil(len(y) / batch_size)
 
     # sort by classes
     final_batches_x: List[list] = [[] for i in range(nb_batches)]
     final_batches_y: List[list] = [[] for i in range(nb_batches)]
 
     # Y needs to be np arr
-    Y = np.asarray(Y)
+    y = np.asarray(y)
 
     # pick chunk size for each class using the largest split
     chunk_sizes = []
     for class_i in range(nb_classes):
-        mask = class_i == Y
-        y = Y[mask]
+        mask = class_i == y
+        y = y[mask]
         chunk_sizes.append(math.ceil(len(y) / nb_batches))
     chunk_size = max(chunk_sizes)
     # force chunk size to be even
@@ -72,9 +72,9 @@ def balance_classes(
 
     # divide each class into each batch
     for class_i in range(nb_classes):
-        mask = class_i == Y
+        mask = class_i == y
         x = X[mask]
-        y = Y[mask]
+        y = y[mask]
 
         # shuffle items in the class
         x, y = sk_shuffle(x, y, random_state=123)
@@ -100,38 +100,38 @@ def balance_classes(
 
 @under_review()
 def generate_half_labeled_batches(
-    smaller_set_X: np.ndarray,
-    smaller_set_Y: np.ndarray,
-    larger_set_X: np.ndarray,
-    larger_set_Y: np.ndarray,
+    smaller_set_x: np.ndarray,
+    smaller_set_y: np.ndarray,
+    larger_set_x: np.ndarray,
+    larger_set_y: np.ndarray,
     batch_size: int,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Given a labeled dataset and an unlabeled dataset, this function generates a joint pair where half the
     batches are labeled and the other half is not."""
-    X = []
-    Y = []
+    x = []
+    y = []
     half_batch = batch_size // 2
 
-    n_larger = len(larger_set_X)
-    n_smaller = len(smaller_set_X)
+    n_larger = len(larger_set_x)
+    n_smaller = len(smaller_set_x)
     for i_start in range(0, n_larger, half_batch):
         i_end = i_start + half_batch
 
-        X_larger = larger_set_X[i_start:i_end]
-        Y_larger = larger_set_Y[i_start:i_end]
+        x_larger = larger_set_x[i_start:i_end]
+        y_larger = larger_set_y[i_start:i_end]
 
         # pull out labeled part
         smaller_start = i_start % (n_smaller - half_batch)
         smaller_end = smaller_start + half_batch
 
-        X_small = smaller_set_X[smaller_start:smaller_end]
-        Y_small = smaller_set_Y[smaller_start:smaller_end]
+        x_small = smaller_set_x[smaller_start:smaller_end]
+        y_small = smaller_set_y[smaller_start:smaller_end]
 
-        X.extend([X_larger, X_small])
-        Y.extend([Y_larger, Y_small])
+        x.extend([x_larger, x_small])
+        y.extend([y_larger, y_small])
 
     # aggregate reshuffled at end of shuffling
-    X = np.concatenate(X, axis=0)
-    Y = np.concatenate(Y, axis=0)
+    x = np.concatenate(x, axis=0)
+    y = np.concatenate(y, axis=0)
 
-    return X, Y
+    return x, y

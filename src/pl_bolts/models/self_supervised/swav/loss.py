@@ -84,16 +84,16 @@ class SWAVLoss(nn.Module):
             sum_q = torch.sum(q)
             q /= sum_q
 
-            K, B = q.shape
+            dim_k, dim_b = q.shape
 
             if self.gpus > 0:
                 # u = torch.zeros(K).cuda()
-                r = torch.ones(K).cuda() / K
-                c = torch.ones(B).cuda() / B
+                r = torch.ones(dim_k).cuda() / dim_k
+                c = torch.ones(dim_b).cuda() / dim_b
             else:
                 # u = torch.zeros(K)
-                r = torch.ones(K) / K
-                c = torch.ones(B) / B
+                r = torch.ones(dim_k) / dim_k
+                c = torch.ones(dim_b) / dim_b
 
             for _ in range(nmb_iters):
                 u = torch.sum(q, dim=1)

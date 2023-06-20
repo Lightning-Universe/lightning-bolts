@@ -219,8 +219,8 @@ def cli_main() -> None:
     model = LogisticRegression(input_dim=4, num_classes=3, l1_strength=0.01, learning_rate=0.01)
 
     # data
-    X, y = load_iris(return_X_y=True)
-    loaders = SklearnDataModule(X, y, batch_size=args.batch_size, num_workers=0)
+    x, y = load_iris(return_X_y=True)
+    loaders = SklearnDataModule(x, y, batch_size=args.batch_size, num_workers=0)
 
     # train
     trainer = Trainer.from_argparse_args(args)

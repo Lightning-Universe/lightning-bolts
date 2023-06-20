@@ -274,10 +274,10 @@ class AMDIM(LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--datamodule", type=str, default="cifar10")
 
-        DATASETS = {"cifar10": DATASET_CIFAR10, "stl10": DATASET_STL10, "imagenet2012": DATASET_IMAGENET2012}
+        datasets = {"cifar10": DATASET_CIFAR10, "stl10": DATASET_STL10, "imagenet2012": DATASET_IMAGENET2012}
 
         (args, _) = parser.parse_known_args()
-        dataset = DATASETS[args.datamodule]
+        dataset = datasets[args.datamodule]
 
         # dataset options
         parser.add_argument("--num_classes", default=dataset["nb_classes"], type=int)

@@ -27,7 +27,7 @@ __all__ = ["CPC_v2"]
 
 
 @under_review()
-class CPC_v2(LightningModule):
+class CPC_v2(LightningModule):  # noqa: N801
     def __init__(
         self,
         encoder_name: str = "cpc_encoder",
@@ -148,14 +148,14 @@ class CPC_v2(LightningModule):
             # unlabeled batch
             batch = batch[0]
 
-        img_1, y = batch
+        img, y = batch
 
         # generate features
         # Latent features
-        Z = self(img_1)
+        z = self(img)
 
         # infoNCE loss
-        return self.contrastive_task(Z)
+        return self.contrastive_task(z)
 
     def configure_optimizers(self):
         opt = optim.Adam(
