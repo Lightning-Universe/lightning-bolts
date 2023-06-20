@@ -2,6 +2,7 @@ import argparse
 from unittest import TestCase
 
 import gym
+import pytest
 import torch
 from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.gym_wrappers import ToTensor
