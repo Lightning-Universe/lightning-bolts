@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks.progress import TQDMProgressBar
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 
 from pl_bolts.models.gans.basic.components import Discriminator, Generator
 
@@ -81,10 +81,8 @@ class GAN(LightningModule):
         # generate images
         generated_imgs = self(z)
 
-        D_output = self.discriminator(generated_imgs)
-
         # ground truth result (ie: all real)
-        return F.binary_cross_entropy(D_output, y)
+        return F.binary_cross_entropy(self.discriminator(generated_imgs), y)
 
     def discriminator_loss(self, x):
         # train discriminator on real
@@ -93,8 +91,7 @@ class GAN(LightningModule):
         y_real = torch.ones(b, 1, device=self.device)
 
         # calculate real score
-        D_output = self.discriminator(x_real)
-        D_real_loss = F.binary_cross_entropy(D_output, y_real)
+        real_loss = F.binary_cross_entropy(self.discriminator(x_real), y_real)
 
         # train discriminator on fake
         z = torch.randn(b, self.hparams.latent_dim, device=self.device)
@@ -102,11 +99,10 @@ class GAN(LightningModule):
         y_fake = torch.zeros(b, 1, device=self.device)
 
         # calculate fake score
-        D_output = self.discriminator(x_fake)
-        D_fake_loss = F.binary_cross_entropy(D_output, y_fake)
+        fake_loss = F.binary_cross_entropy(self.discriminator(x_fake), y_fake)
 
         # gradient backprop & optimize ONLY D's parameters
-        return D_real_loss + D_fake_loss
+        return real_loss + fake_loss
 
     def training_step(self, batch, batch_idx, optimizer_idx):
         x, _ = batch

@@ -4,7 +4,7 @@ from typing import Any
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from torch import Tensor
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 

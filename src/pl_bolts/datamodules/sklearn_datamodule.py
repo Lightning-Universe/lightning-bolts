@@ -19,6 +19,12 @@ else:  # pragma: no cover
 class SklearnDataset(Dataset):
     """Mapping between numpy (or sklearn) datasets to PyTorch datasets.
 
+    Args:
+        X: Numpy ndarray
+        y: Numpy ndarray
+        x_transform: Any transform that works with Numpy arrays
+        y_transform: Any transform that works with Numpy arrays
+
     Example:
         >>> from sklearn.datasets import load_diabetes
         >>> from pl_bolts.datamodules import SklearnDataset
@@ -29,36 +35,35 @@ class SklearnDataset(Dataset):
         442
     """
 
-    def __init__(self, X: np.ndarray, y: np.ndarray, X_transform: Any = None, y_transform: Any = None) -> None:
-        """
-        Args:
-            X: Numpy ndarray
-            y: Numpy ndarray
-            X_transform: Any transform that works with Numpy arrays
-            y_transform: Any transform that works with Numpy arrays
-        """
+    def __init__(
+        self,
+        X: np.ndarray,  # noqa: N803
+        y: np.ndarray,
+        x_transform: Any = None,
+        y_transform: Any = None,
+    ) -> None:
         super().__init__()
-        self.X = X
-        self.Y = y
-        self.X_transform = X_transform
-        self.y_transform = y_transform
+        self.data = X
+        self.labels = y
+        self.data_transform = x_transform
+        self.labels_transform = y_transform
 
     def __len__(self) -> int:
-        return len(self.X)
+        return len(self.data)
 
     def __getitem__(self, idx) -> Tuple[np.ndarray, np.ndarray]:
-        x = self.X[idx].astype(np.float32)
-        y = self.Y[idx]
+        x = self.data[idx].astype(np.float32)
+        y = self.labels[idx]
 
         # Do not convert integer to float for classification data
         if not ((y.dtype == np.int32) or (y.dtype == np.int64)):
             y = y.astype(np.float32)
 
-        if self.X_transform:
-            x = self.X_transform(x)
+        if self.data_transform:
+            x = self.data_transform(x)
 
-        if self.y_transform:
-            y = self.y_transform(y)
+        if self.labels_transform:
+            y = self.labels_transform(y)
 
         return x, y
 
@@ -100,7 +105,7 @@ class SklearnDataModule(LightningDataModule):
 
     def __init__(
         self,
-        X,
+        X,  # noqa: N803
         y,
         x_val=None,
         y_val=None,
@@ -126,7 +131,7 @@ class SklearnDataModule(LightningDataModule):
 
         # shuffle x and y
         if shuffle and _SKLEARN_AVAILABLE:
-            X, y = sk_shuffle(X, y, random_state=random_state)
+            X, y = sk_shuffle(X, y, random_state=random_state)  # noqa: N806
         elif shuffle and not _SKLEARN_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError(
                 "You want to use shuffle function from `scikit-learn` which is not installed yet."
@@ -143,7 +148,7 @@ class SklearnDataModule(LightningDataModule):
             test_i_start = int(val_split * hold_out_size)
             x_val_hold_out, y_val_holdout = x_holdout[:test_i_start], y_holdout[:test_i_start]
             x_test_hold_out, y_test_holdout = x_holdout[test_i_start:], y_holdout[test_i_start:]
-            X, y = X[hold_out_size:], y[hold_out_size:]
+            X, y = X[hold_out_size:], y[hold_out_size:]  # noqa: N806
 
         # if don't have x_val and y_val create split from X
         if x_val is None and y_val is None and val_split > 0:
@@ -156,9 +161,15 @@ class SklearnDataModule(LightningDataModule):
         self._init_datasets(X, y, x_val, y_val, x_test, y_test)
 
     def _init_datasets(
-        self, X: np.ndarray, y: np.ndarray, x_val: np.ndarray, y_val: np.ndarray, x_test: np.ndarray, y_test: np.ndarray
+        self,
+        x: np.ndarray,
+        y: np.ndarray,
+        x_val: np.ndarray,
+        y_val: np.ndarray,
+        x_test: np.ndarray,
+        y_test: np.ndarray,
     ) -> None:
-        self.train_dataset = SklearnDataset(X, y)
+        self.train_dataset = SklearnDataset(x, y)
         self.val_dataset = SklearnDataset(x_val, y_val)
         self.test_dataset = SklearnDataset(x_test, y_test)
 

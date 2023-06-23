@@ -2,7 +2,7 @@ from typing import Optional, Tuple
 
 import torch
 from pytorch_lightning import LightningModule
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 from torchmetrics import Accuracy
 
 from pl_bolts.models.self_supervised import SSLEvaluator
