@@ -5,6 +5,6 @@ pytest-timeout ==2.1.0
 pytest-rerunfailures ==11.1.2
 
 scikit-learn >=1.0.2, <=1.2.2
-sparseml >1.0.0, <1.3.0
+sparseml >1.0.0, <1.6.0
 ale-py >=0.7, <=0.8.1
-jsonargparse[signatures] >4.0.0  # for LightningCLI
+jsonargparse[signatures] >4.0.0, <=4.21.2  # for LightningCLI

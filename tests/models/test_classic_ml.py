@@ -13,10 +13,10 @@ def test_linear_regression_model(tmpdir):
     # --------------------
     # numpy data
     # --------------------
-    X = np.array([[1.0, 1], [1, 2], [2, 2], [2, 3], [3, 3], [3, 4], [4, 4], [4, 5]])
-    y = np.dot(X, np.array([1.0, 2])) + 3
+    x = np.array([[1.0, 1], [1, 2], [2, 2], [2, 3], [3, 3], [3, 4], [4, 4], [4, 5]])
+    y = np.dot(x, np.array([1.0, 2])) + 3
     y = y[:, np.newaxis]
-    loader = DataLoader(SklearnDataset(X, y), batch_size=2)
+    loader = DataLoader(SklearnDataset(x, y), batch_size=2)
 
     model = LinearRegression(input_dim=2, learning_rate=0.6)
     trainer = Trainer(

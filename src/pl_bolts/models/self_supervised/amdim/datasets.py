@@ -36,15 +36,15 @@ class AMDIMPretraining:
             split=split,
             transform=amdim_transforms.AMDIMTrainTransformsCIFAR10(),
             download=True,
-            nb_labeled_per_class=50,
+            num_labeled_per_class=50,
         )
 
     @staticmethod
-    def imagenet(dataset_root, nb_classes, split: str = "train"):
+    def imagenet(dataset_root, num_classes, split: str = "train"):
         assert split in ("train", "val")
         return UnlabeledImagenet(
             dataset_root,
-            nb_classes=nb_classes,
+            num_classes=num_classes,
             split=split,
             transform=amdim_transforms.AMDIMTrainTransformsImageNet128(),
         )
@@ -106,12 +106,12 @@ class AMDIMPatchesPretraining:
         return tng_split, val_split
 
     @staticmethod
-    def imagenet(dataset_root, nb_classes, patch_size, patch_overlap, split: str = "train"):
+    def imagenet(dataset_root, num_classes, patch_size, patch_overlap, split: str = "train"):
         assert split in ("train", "val")
         train_transform = amdim_transforms.TransformsImageNet128Patches(patch_size=patch_size, overlap=patch_overlap)
         return UnlabeledImagenet(
             dataset_root,
-            nb_classes=nb_classes,
+            num_classes=num_classes,
             split=split,
             transform=train_transform,
         )
