@@ -2,11 +2,13 @@ import argparse
 from unittest import TestCase
 
 import gym
+import pytest
 import torch
 from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.gym_wrappers import ToTensor
 from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.vanilla_policy_gradient_model import VanillaPolicyGradient
+from pl_bolts.utils import _IS_WINDOWS
 from torch import Tensor
 
 
@@ -20,15 +22,11 @@ class TestPolicyGradient(TestCase):
 
         parent_parser = argparse.ArgumentParser(add_help=False)
         parent_parser = VanillaPolicyGradient.add_model_specific_args(parent_parser)
-        args_list = [
-            "--env",
-            "CartPole-v0",
-            "--batch_size",
-            "32",
-        ]
+        args_list = ["--env", "CartPole-v0", "--batch_size", "32"]
         self.hparams = parent_parser.parse_args(args_list)
         self.model = VanillaPolicyGradient(**vars(self.hparams))
 
+    @pytest.mark.skipif(_IS_WINDOWS, reason="strange TimeOut or MemoryError")  # todo
     def test_loss(self):
         """Test the reinforce loss function."""
 

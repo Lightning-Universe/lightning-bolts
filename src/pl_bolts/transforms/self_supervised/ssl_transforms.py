@@ -1,5 +1,5 @@
 import numpy as np
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 
 from pl_bolts.utils import _PIL_AVAILABLE
 from pl_bolts.utils.stability import under_review
@@ -69,7 +69,7 @@ class Patchify:
         # (b, c, h, w) -> (b, c*patch_size, L)
         x = F.unfold(x, kernel_size=self.patch_size, stride=self.overlap_size)
 
-        # (b, c*patch_size, L) -> (b, nb_patches, width, height)
+        # (b, c*patch_size, L) -> (b, num_patches, width, height)
         x = x.transpose(2, 1).contiguous().view(b, -1, self.patch_size, self.patch_size)
 
         # reshape to have (b x patches, c, h, w)

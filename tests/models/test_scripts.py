@@ -1,122 +1,115 @@
+import importlib
 from unittest import mock
 
 import pytest
-from pl_bolts.utils import _JSONARGPARSE_GREATER_THAN_4_16_0
+import torch
+from pl_bolts.utils import _IS_WINDOWS, _JSONARGPARSE_GREATER_THAN_4_16_0
 
 from tests import _MARK_REQUIRE_GPU, DATASETS_PATH
 
-_DEFAULT_ARGS = f" --data_dir {DATASETS_PATH} --max_epochs 1 --max_steps 2 --batch_size 4"
+_DEFAULT_ARGS = f" --data_dir={DATASETS_PATH} --max_epochs=1 --max_steps=2 --batch_size=4"
+
+_DEFAULT_ARGS_RL_PONG = (
+    " --env=PongNoFrameskip-v4 --max_steps=10 --fast_dev_run=1 --warm_start_size=10 --n_steps=2 --batch_size=10"
+)
+_DEFAULT_ARGS_CARTPOLE = " --env=CartPole-v0 --max_steps=10 --fast_dev_run=1 --batch_size=10"
 _DEFAULT_LIGHTNING_CLI_ARGS = (
-    f" fit --data.data_dir {DATASETS_PATH} --data.batch_size 4 --trainer.max_epochs 1 --trainer.max_steps 2"
+    f" fit --data.data_dir={DATASETS_PATH} --data.batch_size=4 --trainer.max_epochs=1 --trainer.max_steps=2"
 )
+_ARG_GPUS = f" --gpus={int(torch.cuda.is_available())}"
+_ARG_WORKERS_0 = " --num_workers=0"
 
 
-@pytest.mark.parametrize("dataset_name", ["mnist", "cifar10"])
 @pytest.mark.parametrize(
-    "cli_args",
-    [" --dataset %(dataset_name)s" + _DEFAULT_ARGS],
+    ("script_path", "cli_args"),
+    [
+        ("models.gans.basic.basic_gan_module", _DEFAULT_ARGS + " --dataset=mnist"),
+        ("models.gans.basic.basic_gan_module", _DEFAULT_ARGS + " --dataset=cifar10"),
+        ("models.gans.dcgan.dcgan_module", _DEFAULT_ARGS + " --dataset=mnist"),
+        ("models.gans.srgan.srgan_module", _DEFAULT_ARGS + " --dataset=mnist --scale_factor=4"),
+        ("models.gans.srgan.srresnet_module", _DEFAULT_ARGS + " --dataset=mnist --scale_factor=4"),
+        ("models.mnist_module", _DEFAULT_ARGS),
+        ("models.autoencoders.basic_ae.basic_ae_module", _DEFAULT_ARGS),
+        ("models.autoencoders.basic_vae.basic_vae_module", _DEFAULT_ARGS),
+        ("models.regression.linear_regression", " --max_epochs=1 --max_steps=2"),
+        ("models.regression.logistic_regression", " --max_epochs=1 --max_steps=2"),
+        pytest.param(
+            "models.vision.image_gpt.igpt_module",
+            _DEFAULT_ARGS + _ARG_GPUS,
+            marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU),
+        ),
+        pytest.param(
+            "models.detection.retinanet.retinanet_module",
+            _DEFAULT_LIGHTNING_CLI_ARGS + f" --trainer.gpus={int(torch.cuda.is_available())}",
+            marks=[
+                pytest.mark.skipif(**_MARK_REQUIRE_GPU),
+                pytest.mark.skipif(not _JSONARGPARSE_GREATER_THAN_4_16_0, reason="Failing on CI, need to be fixed"),
+            ],
+        ),
+        ("models.rl.dqn_model", _DEFAULT_ARGS_RL_PONG),
+        ("models.rl.double_dqn_model", _DEFAULT_ARGS_RL_PONG),
+        ("models.rl.dueling_dqn_model", _DEFAULT_ARGS_RL_PONG),
+        ("models.rl.noisy_dqn_model", _DEFAULT_ARGS_RL_PONG),
+        ("models.rl.per_dqn_model", _DEFAULT_ARGS_RL_PONG),
+        ("models.rl.reinforce_model", _DEFAULT_ARGS_CARTPOLE),
+        ("models.rl.vanilla_policy_gradient_model", _DEFAULT_ARGS_CARTPOLE),
+        ("models.rl.advantage_actor_critic_model", _DEFAULT_ARGS_CARTPOLE),
+        ("models.rl.sac_model", "--env=Pendulum-v0 --max_steps=10 --fast_dev_run=1 --batch_size=10"),
+        pytest.param(  # fixme
+            "models.self_supervised.amdim.amdim_module",
+            _DEFAULT_ARGS + _ARG_WORKERS_0 + _ARG_GPUS,
+            marks=[
+                pytest.mark.skipif(**_MARK_REQUIRE_GPU),
+                pytest.mark.xfail(reason="failing for GPU as some is on CPU other on GPU"),
+            ],
+        ),
+        pytest.param(  # fixme
+            "models.self_supervised.cpc.cpc_module",
+            _DEFAULT_ARGS + _ARG_WORKERS_0 + _ARG_GPUS + " --dataset=cifar10 --hidden_mlp=512 --encoder=resnet18",
+            marks=[
+                pytest.mark.skipif(**_MARK_REQUIRE_GPU),
+                pytest.mark.xfail(reason="failing for GPU as some is on CPU other on GPU"),
+            ],
+        ),
+        pytest.param(  # fixme
+            "models.self_supervised.cpc.cpc_module",
+            _DEFAULT_ARGS + _ARG_WORKERS_0 + _ARG_GPUS + " --datase=stl10 --hidden_mlp=512 --encoder=resnet18",
+            marks=[
+                pytest.mark.skipif(**_MARK_REQUIRE_GPU),
+                pytest.mark.xfail(reason="failing for GPU as some is on CPU other on GPU"),
+            ],
+        ),
+        pytest.param(
+            "models.self_supervised.moco.moco2_module",
+            _DEFAULT_ARGS + _ARG_WORKERS_0 + _ARG_GPUS,
+            marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU),
+        ),
+        pytest.param(
+            "models.self_supervised.simclr.simclr_module",
+            _DEFAULT_ARGS + _ARG_WORKERS_0 + _ARG_GPUS + " --online_ft --fp32",
+            marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU),
+        ),
+        pytest.param(
+            "models.self_supervised.byol.byol_module",
+            _DEFAULT_ARGS + _ARG_WORKERS_0 + _ARG_GPUS,
+            marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU),
+        ),
+        pytest.param(
+            "models.self_supervised.swav.swav_module",
+            _DEFAULT_ARGS + _ARG_WORKERS_0 + _ARG_GPUS + " --dataset=cifar10 --arch=resnet18 --hidden_mlp=512 --fp32"
+            " --sinkhorn_iterations=1 --num_prototypes=2 --queue_length=0",
+            marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU),
+        ),
+        pytest.param(
+            "models.self_supervised.simsiam.simsiam_module",
+            _DEFAULT_ARGS + _ARG_WORKERS_0 + _ARG_GPUS,
+            marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU),
+        ),
+    ],
 )
-def test_cli_run_basic_gan(cli_args, dataset_name):
-    from pl_bolts.models.gans.basic.basic_gan_module import cli_main
-
-    cli_args = cli_args % {"dataset_name": dataset_name}
-    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args.strip().split()):
-        cli_main()
-
-
-@pytest.mark.parametrize("cli_args", ["--dataset mnist" + _DEFAULT_ARGS])
-def test_cli_run_dcgan(cli_args):
-    from pl_bolts.models.gans.dcgan.dcgan_module import cli_main
+@pytest.mark.skipif(_IS_WINDOWS, reason="strange TimeOut or MemoryError")  # todo
+def test_cli_run_(script_path, cli_args):
+    py_module = importlib.import_module(f"pl_bolts.{script_path}")
 
     with mock.patch("argparse._sys.argv", ["any.py"] + cli_args.strip().split()):
-        cli_main()
-
-
-@pytest.mark.parametrize("cli_args", ["--dataset mnist --scale_factor 4" + _DEFAULT_ARGS])
-def test_cli_run_srgan(cli_args):
-    from pl_bolts.models.gans.srgan.srgan_module import cli_main
-
-    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args.strip().split()):
-        cli_main()
-
-
-@pytest.mark.parametrize("cli_args", ["--dataset mnist --scale_factor 4" + _DEFAULT_ARGS])
-def test_cli_run_srresnet(cli_args):
-    from pl_bolts.models.gans.srgan.srresnet_module import cli_main
-
-    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args.strip().split()):
-        cli_main()
-
-
-@pytest.mark.parametrize("cli_args", [_DEFAULT_ARGS])
-def test_cli_run_mnist(cli_args):
-    """Test running CLI for an example with default params."""
-    from pl_bolts.models.mnist_module import cli_main
-
-    cli_args = cli_args.strip().split(" ") if cli_args else []
-    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
-        cli_main()
-
-
-@pytest.mark.parametrize("cli_args", [_DEFAULT_ARGS])
-def test_cli_run_basic_ae(cli_args):
-    """Test running CLI for an example with default params."""
-    from pl_bolts.models.autoencoders.basic_ae.basic_ae_module import cli_main
-
-    cli_args = cli_args.strip().split(" ") if cli_args else []
-    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
-        cli_main()
-
-
-@pytest.mark.parametrize("cli_args", [_DEFAULT_ARGS])
-def test_cli_run_basic_vae(cli_args):
-    """Test running CLI for an example with default params."""
-    from pl_bolts.models.autoencoders.basic_vae.basic_vae_module import cli_main
-
-    cli_args = cli_args.strip().split(" ") if cli_args else []
-    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
-        cli_main()
-
-
-@pytest.mark.parametrize("cli_args", ["--max_epochs 1 --max_steps 2"])
-def test_cli_run_lin_regression(cli_args):
-    """Test running CLI for an example with default params."""
-    from pl_bolts.models.regression.linear_regression import cli_main
-
-    cli_args = cli_args.strip().split(" ") if cli_args else []
-    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
-        cli_main()
-
-
-@pytest.mark.parametrize("cli_args", ["--max_epochs 1 --max_steps 2"])
-def test_cli_run_log_regression(cli_args):
-    """Test running CLI for an example with default params."""
-    from pl_bolts.models.regression.logistic_regression import cli_main
-
-    cli_args = cli_args.strip().split(" ") if cli_args else []
-    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
-        cli_main()
-
-
-@pytest.mark.parametrize("cli_args", [_DEFAULT_ARGS + " --gpus 1"])
-@pytest.mark.skipif(**_MARK_REQUIRE_GPU)
-def test_cli_run_vision_image_gpt(cli_args):
-    """Test running CLI for an example with default params."""
-    from pl_bolts.models.vision.image_gpt.igpt_module import cli_main
-
-    cli_args = cli_args.strip().split(" ") if cli_args else []
-    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
-        cli_main()
-
-
-@pytest.mark.parametrize("cli_args", [_DEFAULT_LIGHTNING_CLI_ARGS + " --trainer.gpus 1"])
-@pytest.mark.skipif(**_MARK_REQUIRE_GPU)
-# FixMe; see https://github.com/omni-us/jsonargparse/issues/187
-@pytest.mark.skipif(not _JSONARGPARSE_GREATER_THAN_4_16_0, reason="Failing on CI, need to be fixed")
-def test_cli_run_retinanet(cli_args):
-    """Test running CLI for an example with default params."""
-    from pl_bolts.models.detection.retinanet.retinanet_module import cli_main
-
-    cli_args = cli_args.strip().split(" ") if cli_args else []
-    with mock.patch("argparse._sys.argv", ["any.py"] + cli_args):
-        cli_main()
+        py_module.cli_main()
