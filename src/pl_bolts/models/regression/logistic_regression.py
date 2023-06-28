@@ -162,7 +162,9 @@ class LogisticRegression(LightningModule):
 
     def _calculate_accuracy(self, x: Tensor, y: Tensor) -> Tensor:
         _, y_hat = torch.max(x, dim=-1)
-        return functional.accuracy(y_hat, y, task="multiclass", average="weighted", num_classes=self.hparams.num_classes)
+        return functional.accuracy(
+            y_hat, y, task="multiclass", average="weighted", num_classes=self.hparams.num_classes
+        )
 
     def _regularization(self, loss: Tensor) -> Tensor:
         if self.hparams.l1_strength > 0:
