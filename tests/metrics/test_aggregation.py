@@ -22,7 +22,7 @@ def test_mean(preds, expected_mean):
     ],
 )
 def test_accuracy(preds, target, expected_accuracy):
-    torch.testing.assert_close(accuracy(preds, target), expected_accuracy, task="multiclass")
+    torch.testing.assert_close(accuracy(preds, target), expected_accuracy)
 
 
 @pytest.mark.parametrize(
