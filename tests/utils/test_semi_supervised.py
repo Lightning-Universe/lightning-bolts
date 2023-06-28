@@ -7,7 +7,7 @@ import torch
 from pl_bolts.utils.semi_supervised import balance_classes, generate_half_labeled_batches
 
 try:
-    from sklearn.utils import shuffle as sk_shuffle
+    from sklearn.utils import shuffle as sk_shuffle  # noqa: F401
 
     _SKLEARN_AVAILABLE = True
 except ImportError:
