@@ -9,7 +9,7 @@ try:
     from sklearn.utils import shuffle as sk_shuffle
     _SKLEARN_AVAILABLE = True
 except ImportError:
-    warn("FAiling to import `sklearn` correctly")
+    warn("Failing to import `sklearn` correctly")
     _SKLEARN_AVAILABLE = False
 
 

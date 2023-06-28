@@ -1,10 +1,18 @@
 from collections import Counter
+from warnings import warn
 
 import numpy as np
+import pytest
 import torch
 from pl_bolts.utils.semi_supervised import balance_classes, generate_half_labeled_batches
+try:
+    from sklearn.utils import shuffle as sk_shuffle
+    _SKLEARN_AVAILABLE = True
+except ImportError:
+    warn("Failing to import `sklearn` correctly")
+    _SKLEARN_AVAILABLE = False
 
-
+@pytest.mark.skipif(not _SKLEARN_AVAILABLE, reason="failing to import SKLearn")
 def test_balance_classes():
     x = torch.rand(100, 3, 32, 32)
     c1 = torch.zeros(20, 1)
