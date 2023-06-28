@@ -3,13 +3,7 @@ from warnings import warn
 import numpy as np
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 from pytorch_lightning import seed_everything
-
-try:
-    from sklearn.utils import shuffle as sk_shuffle
-except ImportError:
-    warn(  # pragma: no-cover
-        "You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`."
-    )
+from sklearn.utils import shuffle as sk_shuffle
 
 
 def test_dataloader():

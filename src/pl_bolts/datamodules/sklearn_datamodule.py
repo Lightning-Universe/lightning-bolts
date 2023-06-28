@@ -12,7 +12,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 if _SKLEARN_AVAILABLE:
     from sklearn.utils import shuffle as sk_shuffle
 else:  # pragma: no cover
-    warn_missing_pkg("sklearn")
+    warn_missing_pkg("sklearn", pypi_name="scikit-learn")
 
 
 @under_review()
