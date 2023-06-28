@@ -18,6 +18,7 @@ _TORCHMETRICS_DETECTION_AVAILABLE: bool = module_available("torchmetrics.detecti
 _PL_GREATER_EQUAL_1_4 = compare_version("pytorch_lightning", operator.ge, "1.4.0")
 _PL_GREATER_EQUAL_1_4_5 = compare_version("pytorch_lightning", operator.ge, "1.4.5")
 _GYM_AVAILABLE: bool = module_available("gym")
+_GYM_GREATER_EQUAL_0_20 = compare_version("gym", operator.ge, "0.20.0")
 _SKLEARN_AVAILABLE: bool = module_available("sklearn")
 _PIL_AVAILABLE: bool = module_available("PIL")
 _OPENCV_AVAILABLE: bool = module_available("cv2")
