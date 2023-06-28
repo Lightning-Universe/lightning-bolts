@@ -78,7 +78,7 @@ class SSLFineTuner(LightningModule):
         self.linear_layer = SSLEvaluator(n_input=in_features, n_classes=num_classes, p=dropout, n_hidden=hidden_dim)
 
         # metrics
-        self.train_acc = Accuracy()
+        self.train_acc = Accuracy(task="multiclass")
         self.val_acc = Accuracy(compute_on_step=False)
         self.test_acc = Accuracy(compute_on_step=False)
 
