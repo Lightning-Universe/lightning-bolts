@@ -3,8 +3,8 @@ import argparse
 import pytest
 import torch
 from pl_bolts.models.rl.sac_model import SAC
-from torch import Tensor
 from pl_bolts.utils import _GYM_GREATER_EQUAL_0_20
+from torch import Tensor
 
 
 @pytest.mark.skipif(_GYM_GREATER_EQUAL_0_20, reason="gym.error.DeprecatedEnv: Env Pendulum-v0 not found")
