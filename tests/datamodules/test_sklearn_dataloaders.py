@@ -1,5 +1,3 @@
-from warnings import warn
-
 import numpy as np
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 from pytorch_lightning import seed_everything
