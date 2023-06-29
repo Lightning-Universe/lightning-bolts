@@ -131,7 +131,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         mlp_logits = self.online_evaluator(representations)  # type: ignore[operator]
         mlp_loss = F.cross_entropy(mlp_logits, y)
 
-        acc = accuracy(mlp_logits.softmax(-1), y)
+        acc = accuracy(mlp_logits.softmax(-1), y, task="multiclass", num_classes=self.num_classes)
 
         return acc, mlp_loss
 

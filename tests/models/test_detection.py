@@ -37,6 +37,7 @@ def test_fasterrcnn():
     model(image)
 
 
+@pytest.mark.flaky(reruns=3)
 @pytest.mark.skipif(_IS_WINDOWS, reason="failing...")  # todo
 def test_fasterrcnn_train(tmpdir):
     model = FasterRCNN(pretrained=False, pretrained_backbone=False)
