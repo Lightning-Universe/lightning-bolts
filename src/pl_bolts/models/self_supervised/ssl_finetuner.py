@@ -78,9 +78,9 @@ class SSLFineTuner(LightningModule):
         self.linear_layer = SSLEvaluator(n_input=in_features, n_classes=num_classes, p=dropout, n_hidden=hidden_dim)
 
         # metrics
-        self.train_acc = Accuracy()
-        self.val_acc = Accuracy(compute_on_step=False)
-        self.test_acc = Accuracy(compute_on_step=False)
+        self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
+        self.val_acc = Accuracy(task="multiclass", num_classes=num_classes, compute_on_step=False)
+        self.test_acc = Accuracy(task="multiclass", num_classes=num_classes, compute_on_step=False)
 
     def on_train_epoch_start(self) -> None:
         self.backbone.eval()
