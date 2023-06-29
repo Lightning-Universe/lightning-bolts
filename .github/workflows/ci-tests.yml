@@ -91,6 +91,15 @@ jobs:
         path: ${{ steps.pip-cache.outputs.dir }}
         key: pip-dependencies
 
+    - name: Cache datasets
+      id: cache-datasets
+      uses: actions/cache@v3
+      with:
+        path: ./_datasets
+        enableCrossOsArchive: true
+        # bump this date if you need update cache
+        key: datasets-20230601
+
     - name: Setup macOS
       if: runner.os == 'macOS' && steps.cache-datasets.outputs.cache-hit != 'true'
       run: |
@@ -106,14 +115,6 @@ jobs:
       run: |
         choco install unrar
 
-    - name: Cache datasets
-      id: cache-datasets
-      uses: actions/cache@v3
-      with:
-        path: ./_datasets
-        # bump this date if you need update cache
-        key: datasets-20230601
-
     - name: Download ROMs
       if: steps.cache-datasets.outputs.cache-hit != 'true'
       run: |
@@ -124,7 +125,7 @@ jobs:
         rm Roms.rar
 
     - name: Init ROMs
-      working-directory: ./_datasets
+      working-directory: _datasets/
       run: python -m atari_py.import_roms ROMS
 
     - name: Restore HF cache
