@@ -17,8 +17,15 @@ from pytorch_lightning.cli import LightningCLI
 from pytorch_lightning.strategies import DDPStrategy
 from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch import Tensor, nn, optim
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 from torch.utils.data import DataLoader
+
+# It seems to be impossible to avoid mypy errors if using import instead of getattr().
+# See https://github.com/python/mypy/issues/8823
+try:
+    LRScheduler: Any = getattr(optim.lr_scheduler, "LRScheduler")
+except AttributeError:
+    LRScheduler = getattr(optim.lr_scheduler, "_LRScheduler")
 
 from pl_bolts.datasets import UnlabeledImagenet
 from pl_bolts.metrics import precision_at_k
@@ -85,7 +92,7 @@ class MoCo(LightningModule):
         exclude_bn_bias: bool = False,
         optimizer: Type[optim.Optimizer] = optim.SGD,
         optimizer_params: Optional[Dict[str, Any]] = None,
-        lr_scheduler: Type[optim.lr_scheduler._LRScheduler] = optim.lr_scheduler.CosineAnnealingLR,
+        lr_scheduler: Type[LRScheduler] = optim.lr_scheduler.CosineAnnealingLR,
         lr_scheduler_params: Optional[Dict[str, Any]] = None,
     ) -> None:
         """A module that trains an encoder using Momentum Contrast.
@@ -233,7 +240,7 @@ class MoCo(LightningModule):
             for name, tensor in self.named_parameters():
                 if not tensor.requires_grad:
                     continue
-                elif ("bias" in name) or ("bn" in name):
+                if ("bias" in name) or ("bn" in name):
                     nowd_group.append(tensor)
                 else:
                     wd_group.append(tensor)
