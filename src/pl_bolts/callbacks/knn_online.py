@@ -4,7 +4,7 @@ import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.accelerators import Accelerator
 from torch import Tensor
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 
 from pl_bolts.utils.stability import under_review
 
@@ -56,22 +56,22 @@ class KNNOnlineEvaluator(Callback):
             (B, ) the predicted labels of B query vectors
         """
 
-        B = query_feature.shape[0]
+        dim_b = query_feature.shape[0]
 
         # compute cos similarity between each feature vector and feature bank ---> [B, N]
         sim_matrix = query_feature @ feature_bank.T
         # [B, K]
         sim_weight, sim_indices = sim_matrix.topk(k=self.k, dim=-1)
         # [B, K]
-        sim_labels = torch.gather(target_bank.expand(B, -1), dim=-1, index=sim_indices)
+        sim_labels = torch.gather(target_bank.expand(dim_b, -1), dim=-1, index=sim_indices)
         sim_weight = (sim_weight / self.temperature).exp()
 
         # counts for each class
-        one_hot_label = torch.zeros(B * self.k, self.num_classes, device=sim_labels.device)
+        one_hot_label = torch.zeros(dim_b * self.k, self.num_classes, device=sim_labels.device)
         # [B*K, C]
         one_hot_label = one_hot_label.scatter(dim=-1, index=sim_labels.view(-1, 1), value=1.0)
         # weighted score ---> [B, C]
-        pred_scores = torch.sum(one_hot_label.view(B, -1, self.num_classes) * sim_weight.unsqueeze(dim=-1), dim=1)
+        pred_scores = torch.sum(one_hot_label.view(dim_b, -1, self.num_classes) * sim_weight.unsqueeze(dim=-1), dim=1)
 
         # pred_labels
         return pred_scores.argsort(dim=-1, descending=True)

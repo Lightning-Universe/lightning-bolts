@@ -19,19 +19,19 @@ class SSLDatasetMixin(ABC):
     @classmethod
     def generate_train_val_split(cls, examples, labels, pct_val):
         """Splits dataset uniformly across classes."""
-        nb_classes = len(set(labels))
+        num_classes = len(set(labels))
 
-        nb_val_images = int(len(examples) * pct_val) // nb_classes
+        num_val_images = int(len(examples) * pct_val) // num_classes
 
         val_x = []
         val_y = []
         train_x = []
         train_y = []
 
-        cts = {x: 0 for x in range(nb_classes)}
+        cts = {x: 0 for x in range(num_classes)}
         for img, class_idx in zip(examples, labels):
             # allow labeled
-            if cts[class_idx] < nb_val_images:
+            if cts[class_idx] < num_val_images:
                 val_x.append(img)
                 val_y.append(class_idx)
                 cts[class_idx] += 1
@@ -44,23 +44,23 @@ class SSLDatasetMixin(ABC):
         return val_x, val_y, train_x, train_y
 
     @classmethod
-    def select_nb_imgs_per_class(cls, examples, labels, nb_imgs_in_val):
+    def select_num_imgs_per_class(cls, examples, labels, num_imgs_in_val):
         """Splits a dataset into two parts.
 
-        The labeled split has nb_imgs_in_val per class
+        The labeled split has num_imgs_in_val per class
         """
-        nb_classes = len(set(labels))
+        num_classes = len(set(labels))
 
-        # def partition_train_set(self, imgs, nb_imgs_in_val):
+        # def partition_train_set(self, imgs, num_imgs_in_val):
         labeled = []
         labeled_y = []
         unlabeled = []
         unlabeled_y = []
 
-        cts = {x: 0 for x in range(nb_classes)}
+        cts = {x: 0 for x in range(num_classes)}
         for img_name, class_idx in zip(examples, labels):
             # allow labeled
-            if cts[class_idx] < nb_imgs_in_val:
+            if cts[class_idx] < num_imgs_in_val:
                 labeled.append(img_name)
                 labeled_y.append(class_idx)
                 cts[class_idx] += 1
@@ -97,14 +97,14 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
         download: bool = False,
-        nb_labeled_per_class: Optional[int] = None,
+        num_labeled_per_class: Optional[int] = None,
         val_pct: float = 0.10,
     ) -> None:
         if not _TORCHVISION_AVAILABLE:  # pragma: no cover
             raise ModuleNotFoundError("You want to use `torchvision` which is not installed yet.")
 
-        if nb_labeled_per_class == -1:
-            nb_labeled_per_class = None
+        if num_labeled_per_class == -1:
+            num_labeled_per_class = None
 
         # use train for all of these splits
         train = split in ("val", "train", "train+unlabeled")
@@ -113,20 +113,20 @@ class CIFAR10Mixed(SSLDatasetMixin, CIFAR10):
         # modify only for val, train
         if split != "test":
             # limit nb of examples per class
-            X_test, y_test, X_train, y_train = self.generate_train_val_split(self.data, self.targets, val_pct)
+            data_test, lbs_test, data_train, lbs_train = self.generate_train_val_split(self.data, self.targets, val_pct)
 
             # shuffle idxs representing the data
-            X_train, y_train = self.deterministic_shuffle(X_train, y_train)
-            X_test, y_test = self.deterministic_shuffle(X_test, y_test)
+            data_train, lbs_train = self.deterministic_shuffle(data_train, lbs_train)
+            data_test, lbs_test = self.deterministic_shuffle(data_test, lbs_test)
 
             if split == "val":
-                self.data = X_test
-                self.targets = y_test
+                self.data = data_test
+                self.targets = lbs_test
 
             else:
-                self.data = X_train
-                self.targets = y_train
+                self.data = data_train
+                self.targets = lbs_train
 
             # limit the number of items per class
-            if nb_labeled_per_class is not None:
-                self.data, self.targets = self.select_nb_imgs_per_class(self.data, self.targets, nb_labeled_per_class)
+            if num_labeled_per_class is not None:
+                self.data, self.targets = self.select_num_imgs_per_class(self.data, self.targets, num_labeled_per_class)
