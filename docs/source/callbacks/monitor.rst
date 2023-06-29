@@ -24,7 +24,7 @@ Data Monitoring in LightningModule
 The data monitoring callbacks allow you to log and inspect the distribution of data that passes through
 the training step and layers of the model. When used in combination with a supported logger, the
 :class:`~pl_bolts.callbacks.data_monitor.TrainingDataMonitor` creates a histogram for each `batch` input in
-:meth:`~pytorch_lightning.core.lightning.LightningModule.training_step` and sends it to the logger:
+:meth:`~pytorch_lightning.core.LightningModule.training_step` and sends it to the logger:
 
 .. code-block:: python
 
