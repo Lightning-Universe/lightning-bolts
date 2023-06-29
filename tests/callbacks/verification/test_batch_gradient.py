@@ -2,18 +2,18 @@ from unittest.mock import Mock
 
 import pytest
 import torch
+from pl_bolts.callbacks import BatchGradientVerificationCallback
+from pl_bolts.callbacks.verification.batch_gradient import default_input_mapping, default_output_mapping, selective_eval
+from pl_bolts.utils import BatchGradientVerification
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor, nn
 
-from pl_bolts.callbacks import BatchGradientVerificationCallback
-from pl_bolts.callbacks.verification.batch_gradient import default_input_mapping, default_output_mapping, selective_eval
-from pl_bolts.utils import BatchGradientVerification
 from tests import _MARK_REQUIRE_GPU
 
 
 class TemplateModel(nn.Module):
-    def __init__(self, mix_data=False):
+    def __init__(self, mix_data=False) -> None:
         """Base model for testing.
 
         The setting ``mix_data=True`` simulates a wrong implementation.
@@ -29,23 +29,19 @@ class TemplateModel(nn.Module):
 
     def forward__standard(self, x):
         # x: (B, 5, 2)
-        if self.mix_data:
-            x = x.view(10, -1).permute(1, 0).view(-1, 10)  # oops!
-        else:
-            x = x.view(-1, 10)  # good!
+        x = x.view(10, -1).permute(1, 0).view(-1, 10) if self.mix_data else x.view(-1, 10)
         return self.linear(self.bn(x))
 
 
 class MultipleInputModel(TemplateModel):
     """Base model for testing verification when forward accepts multiple arguments."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.input_array = (torch.rand(10, 5, 2), torch.rand(10, 5, 2))
 
     def forward(self, x, y, some_kwarg=True):
-        out = super().forward(x) + super().forward(y)
-        return out
+        return super().forward(x) + super().forward(y)
 
 
 class MultipleOutputModel(TemplateModel):
@@ -59,7 +55,7 @@ class MultipleOutputModel(TemplateModel):
 class DictInputDictOutputModel(TemplateModel):
     """Base model for testing verification when forward has a collection of outputs."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.input_array = {
             "w": 42,
@@ -72,14 +68,13 @@ class DictInputDictOutputModel(TemplateModel):
         out1 = super().forward(x["a"])
         out2 = super().forward(y)
         out3 = out1 + out2
-        out = {1: out1, 2: out2, 3: [out1, out3]}
-        return out
+        return {1: out1, 2: out2, 3: [out1, out3]}
 
 
 class LitModel(LightningModule):
     """Base model for testing verification with LightningModules."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.model = DictInputDictOutputModel(*args, **kwargs)
         self.example_input_array = self.model.input_array
@@ -120,10 +115,7 @@ def test_batch_gradient_verification_pl_module(mix_data, device):
     assert result == is_valid
 
 
-@pytest.mark.parametrize(
-    "gpus",
-    [0, pytest.param(1, marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))],
-)
+@pytest.mark.parametrize("gpus", [0, pytest.param(1, marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU))])
 def test_batch_gradient_verification_callback(gpus):
     """Test detection of batch gradient mixing with the callback implementation."""
     trainer = Trainer(gpus=gpus)
@@ -155,7 +147,8 @@ def test_batch_verification_calls_custom_input_output_mappings():
     model = MultipleInputModel()
 
     def input_mapping(inputs):
-        assert isinstance(inputs, tuple) and len(inputs) == 2
+        assert isinstance(inputs, tuple)
+        assert len(inputs) == 2
         return [inputs[0]]
 
     def output_mapping(outputs):
@@ -244,7 +237,7 @@ def test_default_output_mapping():
 
 
 class BatchNormModel(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.batch_norm0 = nn.BatchNorm1d(2)
         self.batch_norm1 = nn.BatchNorm1d(3)

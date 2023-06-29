@@ -1,9 +1,8 @@
 from unittest import TestCase
 
 import gym
-from torch import Tensor
-
 from pl_bolts.models.rl.common.gym_wrappers import ToTensor
+from torch import Tensor
 
 
 class TestToTensor(TestCase):
@@ -12,7 +11,7 @@ class TestToTensor(TestCase):
 
     def test_wrapper(self):
         state = self.env.reset()
-        self.assertIsInstance(state, Tensor)
+        assert isinstance(state, Tensor)
 
         new_state, _, _, _ = self.env.step(1)
-        self.assertIsInstance(new_state, Tensor)
+        assert isinstance(new_state, Tensor)

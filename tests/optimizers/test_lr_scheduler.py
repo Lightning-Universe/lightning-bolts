@@ -2,20 +2,19 @@ import math
 
 import numpy as np
 import torch
+from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pytorch_lightning import seed_everything
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 from torch.optim import SGD
 from torch.optim.lr_scheduler import _LRScheduler
-
-from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 EPSILON = 1e-12
 
 
 class SchedulerTestNet(torch.nn.Module):
-    """adapted from: https://github.com/pytorch/pytorch/blob/master/test/test_optim.py."""
+    """Adapted from: https://github.com/pytorch/pytorch/blob/master/test/test_optim.py."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.conv1 = torch.nn.Conv2d(1, 1, 1)
         self.conv2 = torch.nn.Conv2d(1, 1, 1)
@@ -25,9 +24,9 @@ class SchedulerTestNet(torch.nn.Module):
 
 
 class TestLRScheduler:
-    """adapted from: https://github.com/pytorch/pytorch/blob/master/test/test_optim.py."""
+    """Adapted from: https://github.com/pytorch/pytorch/blob/master/test/test_optim.py."""
 
-    def __init__(self, base_lr=0.05, multiplier=10):
+    def __init__(self, base_lr=0.05, multiplier=10) -> None:
         self.base_lr = base_lr
         self.multiplier = multiplier
 

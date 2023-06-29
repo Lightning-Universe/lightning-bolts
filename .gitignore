@@ -145,6 +145,7 @@ dmypy.json
 .DS_Store
 
 # Datasets
+/_datasets/
 /datasets/
 MNIST/
 CIFAR10/
@@ -172,3 +173,6 @@ mlruns/
 # Downloaded Data through Scripts
 VOCdevkit/
 *.tar
+
+# Ruff - python checks
+.ruff_cache/

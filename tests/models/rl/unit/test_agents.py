@@ -5,9 +5,8 @@ from unittest.mock import Mock
 import gym
 import numpy as np
 import torch
-from torch import Tensor
-
 from pl_bolts.models.rl.common.agents import ActorCriticAgent, Agent, PolicyAgent, ValueAgent
+from torch import Tensor
 
 
 class TestAgents(TestCase):
@@ -19,7 +18,7 @@ class TestAgents(TestCase):
     def test_base_agent(self):
         agent = Agent(self.net)
         action = agent(self.state, "cuda:0")
-        self.assertIsInstance(action, list)
+        assert isinstance(action, list)
 
 
 class TestValueAgent(TestCase):
@@ -31,19 +30,18 @@ class TestValueAgent(TestCase):
         self.value_agent = ValueAgent(self.net, self.env.action_space.n)
 
     def test_value_agent(self):
-
         action = self.value_agent(self.state, self.device)
-        self.assertIsInstance(action, list)
-        self.assertIsInstance(action[0], int)
+        assert isinstance(action, list)
+        assert isinstance(action[0], int)
 
     def test_value_agent_get_action(self):
         action = self.value_agent.get_action(self.state, self.device)
-        self.assertIsInstance(action, np.ndarray)
-        self.assertEqual(action[0], 1)
+        assert isinstance(action, np.ndarray)
+        assert action[0] == 1
 
     def test_value_agent_random(self):
         action = self.value_agent.get_random_action(self.state)
-        self.assertIsInstance(action[0], int)
+        assert isinstance(action[0], int)
 
 
 class TestPolicyAgent(TestCase):
@@ -56,8 +54,8 @@ class TestPolicyAgent(TestCase):
     def test_policy_agent(self):
         policy_agent = PolicyAgent(self.net)
         action = policy_agent(self.states, self.device)
-        self.assertIsInstance(action, list)
-        self.assertEqual(action[0], 1)
+        assert isinstance(action, list)
+        assert action[0] == 1
 
 
 def test_a2c_agent():

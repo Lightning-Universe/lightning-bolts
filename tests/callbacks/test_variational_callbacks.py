@@ -1,12 +1,15 @@
-from pytorch_lightning.loggers.base import DummyLogger
-
 from pl_bolts.callbacks import LatentDimInterpolator
 from pl_bolts.models.gans import GAN
+
+try:
+    from pytorch_lightning.loggers.logger import DummyLogger  # PL v1.9+
+except ModuleNotFoundError:
+    from pytorch_lightning.loggers.base import DummyLogger  # PL v1.8
 
 
 def test_latent_dim_interpolator():
     class FakeTrainer:
-        def __init__(self):
+        def __init__(self) -> None:
             self.current_epoch = 1
             self.global_step = 1
             self.logger = DummyLogger()

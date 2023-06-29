@@ -45,6 +45,7 @@ pull_request_rules:
       - "#changes-requested-reviews-by=0"  # no requested changes
       - "#check-pending<=2"
       - "#check-failure<5"
+      - "#check-skipped<5"
     actions:
       label:
         add: [ "ready" ]
@@ -55,6 +56,7 @@ pull_request_rules:
         - "#approved-reviews-by=0"  # number of review approvals
         - "#changes-requested-reviews-by>=1"  # no requested changes
         - "#check-failure>=5"
+        - "#check-skipped>=5"
     actions:
       label:
         remove: [ "ready" ]
@@ -66,6 +68,8 @@ pull_request_rules:
       - base=master  # apply only on master
       - -title~=(?i)wip # skip all PR that title contains “WIP” (ignoring case)
       - "#approved-reviews-by>=1" # number of review approvals
+      - "#changes-requested-reviews-by=0" # no requested changes
+      - "#check-failure<5"
     actions:
       update: {}
 
@@ -79,4 +83,4 @@ pull_request_rules:
     actions:
       request_reviews:
         teams:
-          - "@PyTorchLightning/core-bolts"
+          - "@Lightning-Universe/core-bolts"

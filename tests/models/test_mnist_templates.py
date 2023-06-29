@@ -1,10 +1,9 @@
 import warnings
 
-from pytorch_lightning import Trainer, seed_everything
-from pytorch_lightning.utilities.warnings import PossibleUserWarning
-
 from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models import LitMNIST
+from pytorch_lightning import Trainer, seed_everything
+from pytorch_lightning.utilities.warnings import PossibleUserWarning
 
 
 def test_mnist(tmpdir, datadir, catch_warnings):

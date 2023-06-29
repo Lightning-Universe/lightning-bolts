@@ -1,5 +1,5 @@
-# test_tube>=0.7.5
-# trains>=0.14.1
-matplotlib
-wandb
-scipy
+# test_tube >=0.7.5
+# trains >=0.14.1
+matplotlib >3.0.0, <3.8.0
+wandb >0.13.0, <0.16.0
+scipy >1.5.0, <1.12.0

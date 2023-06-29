@@ -4,7 +4,6 @@ from pathlib import Path
 import pytest
 import torch
 from PIL import Image
-
 from pl_bolts.datamodules import (
     BinaryEMNISTDataModule,
     BinaryMNISTDataModule,
@@ -17,6 +16,7 @@ from pl_bolts.datamodules import (
 from pl_bolts.datamodules.sr_datamodule import TVTDataModule
 from pl_bolts.datasets.cifar10_dataset import CIFAR10
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
+from pl_bolts.utils import _IS_WINDOWS
 
 
 def test_dev_datasets(datadir):
@@ -25,7 +25,7 @@ def test_dev_datasets(datadir):
         pass
 
 
-def _create_synth_Cityscapes_dataset(path_dir):
+def _create_synth_cityscapes_dataset(path_dir):
     """Create synthetic dataset with random images, just to simulate that the dataset have been already
     downloaded."""
     non_existing_citites = ["dummy_city_1", "dummy_city_2"]
@@ -47,7 +47,7 @@ def _create_synth_Cityscapes_dataset(path_dir):
 
 
 def test_cityscapes_datamodule(datadir):
-    _create_synth_Cityscapes_dataset(datadir)
+    _create_synth_cityscapes_dataset(datadir)
 
     batch_size = 1
     target_types = ["semantic", "instance"]
@@ -69,7 +69,7 @@ def test_cityscapes_datamodule(datadir):
     assert mask.size() == torch.Size([batch_size, 1024, 2048])
 
 
-@pytest.mark.parametrize("val_split, train_len", [(0.2, 48_000), (5_000, 55_000)])
+@pytest.mark.parametrize(("val_split", "train_len"), [(0.2, 48_000), (5_000, 55_000)])
 def test_vision_data_module(datadir, val_split, catch_warnings, train_len):
     dm = _create_dm(MNISTDataModule, datadir, val_split=val_split)
     assert len(dm.dataset_train) == train_len
@@ -109,7 +109,13 @@ def test_sr_datamodule(datadir):
 
 
 @pytest.mark.parametrize("split", ["byclass", "bymerge", "balanced", "letters", "digits", "mnist"])
-@pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
+@pytest.mark.parametrize(
+    "dm_cls",
+    [
+        BinaryEMNISTDataModule,
+        pytest.param(EMNISTDataModule, marks=pytest.mark.skipif(_IS_WINDOWS, reason="strange TimeOut")),  # todo
+    ],
+)
 def test_emnist_datamodules(datadir, catch_warnings, dm_cls, split):
     """Test BinaryEMNIST and EMNIST datamodules download data and have the correct shape."""
     dm = _create_dm(dm_cls, datadir, split=split)
@@ -136,7 +142,7 @@ def test_emnist_datamodules_with_invalid_split(datadir, catch_warnings, dm_cls):
 
 @pytest.mark.parametrize("dm_cls", [BinaryEMNISTDataModule, EMNISTDataModule])
 @pytest.mark.parametrize(
-    "split, expected_val_split",
+    ("split", "expected_val_split"),
     [
         ("byclass", None),
         ("bymerge", None),
