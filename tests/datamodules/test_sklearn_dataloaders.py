@@ -1,17 +1,20 @@
 from warnings import warn
 
 import numpy as np
+import pytest
 from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 from pytorch_lightning import seed_everything
 
 try:
     from sklearn.utils import shuffle as sk_shuffle
+
+    _SKLEARN_AVAILABLE = True
 except ImportError:
-    warn(  # pragma: no-cover
-        "You want to use `sklearn` which is not installed yet, install it with `pip install sklearn`."
-    )
+    warn("Failing to import `sklearn` correctly")
+    _SKLEARN_AVAILABLE = False
 
 
+@pytest.mark.skipif(not _SKLEARN_AVAILABLE, reason="failing to import SKLearn")
 def test_dataloader():
     seed_everything()
 
