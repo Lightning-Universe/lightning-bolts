@@ -52,6 +52,7 @@ class TestValueModels(TestCase):
         model = DuelingDQN(self.hparams.env)
         self.trainer.fit(model)
 
+    @pytest.mark.skipif(_IS_WINDOWS, reason="strange TimeOut or MemoryError")  # todo
     def test_noisy_dqn(self):
         """Smoke test that the Noisy DQN model runs."""
         model = NoisyDQN(self.hparams.env)
