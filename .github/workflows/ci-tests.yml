@@ -98,7 +98,7 @@ jobs:
         path: ./_datasets
         enableCrossOsArchive: true
         # bump this date if you need update cache
-        key: datasets-20230601
+        key: datasets-20230630
 
     - name: Setup macOS
       if: runner.os == 'macOS' && steps.cache-datasets.outputs.cache-hit != 'true'
