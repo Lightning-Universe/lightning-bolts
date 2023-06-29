@@ -22,7 +22,7 @@ from torch.utils.data import DataLoader
 
 from pl_bolts.datasets import UnlabeledImagenet
 from pl_bolts.metrics import precision_at_k
-from pl_bolts.transforms.self_supervised.moco_transforms import Moco2EvalImagenetTransforms, Moco2TrainImagenetTransforms
+from pl_bolts.transforms.self_supervised.moco_transforms import MoCo2EvalImagenetTransforms, MoCo2TrainImagenetTransforms
 from pl_bolts.models.self_supervised.moco.utils import concatenate_all, shuffle_batch, sort_batch, validate_batch
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
@@ -325,7 +325,7 @@ class ImageNetDataModule(LightningDataModule):
             num_imgs_per_class=num_images_per_class,
             meta_dir=self.meta_dir,
             split="train",
-            transform=Moco2TrainImagenetTransforms(),
+            transform=MoCo2TrainImagenetTransforms(),
         )
         return DataLoader(
             dataset,
@@ -343,7 +343,7 @@ class ImageNetDataModule(LightningDataModule):
             num_imgs_per_class_val_split=num_images_per_class,
             meta_dir=self.meta_dir,
             split="val",
-            transform=Moco2EvalImagenetTransforms(),
+            transform=MoCo2EvalImagenetTransforms(),
         )
         return DataLoader(
             dataset,
