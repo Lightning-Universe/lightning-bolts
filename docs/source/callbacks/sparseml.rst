@@ -45,7 +45,7 @@ Using the helper function, we handle any quantization/pruning internally and exp
 Note this assumes either you have implemented the property ``example_input_array`` in the model or you must provide a sample batch as below.
 
 .. testcode::
-    :skipif: not _SPARSEML_AVAILABLE
+    :skipif: not _SPARSEML_TORCH_SATISFIED
 
     import torch
 
