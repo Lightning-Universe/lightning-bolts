@@ -26,10 +26,5 @@ _WANDB_AVAILABLE: bool = module_available("wandb")
 _MATPLOTLIB_AVAILABLE: bool = module_available("matplotlib")
 _JSONARGPARSE_GREATER_THAN_4_16_0 = compare_version("jsonargparse", operator.gt, "4.16.0")
 
-if _SPARSEML_AVAILABLE:
-    import sparseml.pytorch.base
-
-    _SPARSEML_AVAILABLE = compare_version("sparseml", operator.le, sparseml.pytorch.base._TORCH_MAX_VERSION)
-
 
 __all__ = ["BatchGradientVerification"]
