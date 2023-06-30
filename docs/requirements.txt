@@ -2,7 +2,7 @@ sphinx ==6.2  # fails with sphinx.ext.viewcode  # fails with sphinx_paramlinks
 recommonmark  # fails with badges
 mistune < 2.0
 m2r  # fails with multi-line text
-nbsphin x>=0.8
+nbsphinx >=0.8
 pandoc >=1.0
 docutils >=0.16
 sphinxcontrib-fulltoc >=1.0
