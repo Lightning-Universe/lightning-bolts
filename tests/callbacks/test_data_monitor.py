@@ -96,7 +96,7 @@ def test_base_unsupported_logger_warning(tmpdir, catch_warnings):
     )
     monitor = TrainingDataMonitor()
     trainer = Trainer(
-        logger=[TensorBoardLogger(tmpdir)],
+        logger=TensorBoardLogger(tmpdir),
         callbacks=[monitor],
         accelerator="auto",
         max_epochs=1,
