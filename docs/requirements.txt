@@ -4,7 +4,7 @@ mistune < 2.0
 m2r  # fails with multi-line text
 nbsphinx >0.8, <=0.9.2
 pandoc >2.0, <=2.3
-docutils >=0.16, <=0.17.1
+# docutils
 sphinxcontrib-fulltoc >1.0, <=1.2.0
 sphinxcontrib-mockautodoc
 sphinx-autodoc-typehints >1.0, <=1.17.1
