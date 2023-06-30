@@ -402,7 +402,7 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer, LightningModule
 
-from pl_bolts.utils import _SPARSEML_AVAILABLE
+from pl_bolts.utils import _SPARSEML_TORCH_SATISFIED
 
 """
 coverage_skip_undoc_in_source = True
