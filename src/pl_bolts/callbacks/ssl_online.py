@@ -5,7 +5,7 @@ import torch
 from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.utilities import rank_zero_warn
 from torch import Tensor, nn
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 from torch.optim import Optimizer
 from torchmetrics.functional import accuracy
 
@@ -85,13 +85,13 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         )
         if accel.is_distributed:
             if accel.use_ddp:
-                from torch.nn.parallel import DistributedDataParallel as DDP
+                from torch.nn.parallel import DistributedDataParallel
 
-                self.online_evaluator = DDP(self.online_evaluator, device_ids=[pl_module.device])
+                self.online_evaluator = DistributedDataParallel(self.online_evaluator, device_ids=[pl_module.device])
             elif accel.use_dp:
-                from torch.nn.parallel import DataParallel as DP
+                from torch.nn.parallel import DataParallel
 
-                self.online_evaluator = DP(self.online_evaluator, device_ids=[pl_module.device])
+                self.online_evaluator = DataParallel(self.online_evaluator, device_ids=[pl_module.device])
             else:
                 rank_zero_warn(
                     "Does not support this type of distributed accelerator. The online evaluator will not sync."
@@ -131,7 +131,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         mlp_logits = self.online_evaluator(representations)  # type: ignore[operator]
         mlp_loss = F.cross_entropy(mlp_logits, y)
 
-        acc = accuracy(mlp_logits.softmax(-1), y)
+        acc = accuracy(mlp_logits.softmax(-1), y, task="multiclass", num_classes=self.num_classes)
 
         return acc, mlp_loss
 

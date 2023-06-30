@@ -31,7 +31,7 @@ class SwAV(LightningModule):
         feat_dim: int = 128,
         warmup_epochs: int = 10,
         max_epochs: int = 100,
-        nmb_prototypes: int = 3000,
+        num_prototypes: int = 3000,
         freeze_prototypes_epochs: int = 1,
         temperature: float = 0.1,
         sinkhorn_iterations: int = 3,
@@ -39,7 +39,7 @@ class SwAV(LightningModule):
         queue_path: str = "queue",
         epoch_queue_starts: int = 15,
         crops_for_assign: tuple = (0, 1),
-        nmb_crops: tuple = (2, 6),
+        num_crops: tuple = (2, 6),
         first_conv: bool = True,
         maxpool1: bool = True,
         optimizer: str = "adam",
@@ -65,7 +65,7 @@ class SwAV(LightningModule):
             feat_dim: output dim of the projection head
             warmup_epochs: apply linear warmup for this many epochs
             max_epochs: epoch count for pre-training
-            nmb_prototypes: count of prototype vectors
+            num_prototypes: count of prototype vectors
             freeze_prototypes_epochs: epoch till which gradients of prototype layer
                 are frozen
             temperature: loss temperature
@@ -76,7 +76,7 @@ class SwAV(LightningModule):
             queue_path: folder within the logs directory
             epoch_queue_starts: start uing the queue after this epoch
             crops_for_assign: list of crop ids for computing assignment
-            nmb_crops: number of global and local crops, ex: [2, 6]
+            num_crops: number of global and local crops, ex: [2, 6]
             first_conv: keep first conv same as the original resnet architecture,
                 if set to false it is replace by a kernel 3, stride 1 conv (cifar-10)
             maxpool1: keep first maxpool layer same as the original resnet architecture,
@@ -101,7 +101,7 @@ class SwAV(LightningModule):
 
         self.hidden_mlp = hidden_mlp
         self.feat_dim = feat_dim
-        self.nmb_prototypes = nmb_prototypes
+        self.num_prototypes = num_prototypes
         self.freeze_prototypes_epochs = freeze_prototypes_epochs
         self.sinkhorn_iterations = sinkhorn_iterations
 
@@ -109,7 +109,7 @@ class SwAV(LightningModule):
         self.queue_path = queue_path
         self.epoch_queue_starts = epoch_queue_starts
         self.crops_for_assign = crops_for_assign
-        self.nmb_crops = nmb_crops
+        self.num_crops = num_crops
 
         self.first_conv = first_conv
         self.maxpool1 = maxpool1
@@ -132,7 +132,7 @@ class SwAV(LightningModule):
             num_nodes=self.num_nodes,
             temperature=self.temperature,
             crops_for_assign=self.crops_for_assign,
-            nmb_crops=self.nmb_crops,
+            num_crops=self.num_crops,
             sinkhorn_iterations=self.sinkhorn_iterations,
             epsilon=self.epsilon,
         )
@@ -163,7 +163,7 @@ class SwAV(LightningModule):
             normalize=True,
             hidden_mlp=self.hidden_mlp,
             output_dim=self.feat_dim,
-            nmb_prototypes=self.nmb_prototypes,
+            num_prototypes=self.num_prototypes,
             first_conv=self.first_conv,
             maxpool1=self.maxpool1,
         )
@@ -307,7 +307,7 @@ class SwAV(LightningModule):
         parser.add_argument("--queue_path", type=str, default="queue", help="path for queue")
 
         parser.add_argument(
-            "--nmb_crops", type=int, default=[2, 4], nargs="+", help="list of number of crops (example: [2, 6])"
+            "--num_crops", type=int, default=[2, 4], nargs="+", help="list of number of crops (example: [2, 6])"
         )
         parser.add_argument(
             "--size_crops", type=int, default=[96, 36], nargs="+", help="crops resolutions (example: [224, 96])"
@@ -359,7 +359,7 @@ class SwAV(LightningModule):
         parser.add_argument(
             "--sinkhorn_iterations", default=3, type=int, help="number of iterations in Sinkhorn-Knopp algorithm"
         )
-        parser.add_argument("--nmb_prototypes", default=512, type=int, help="number of prototypes")
+        parser.add_argument("--num_prototypes", default=512, type=int, help="number of prototypes")
         parser.add_argument(
             "--queue_length",
             type=int,
@@ -415,7 +415,7 @@ def cli_main():
 
         # cifar10 specific params
         args.size_crops = [32, 16]
-        args.nmb_crops = [2, 1]
+        args.num_crops = [2, 1]
         args.gaussian_blur = False
     elif args.dataset == "imagenet":
         args.maxpool1 = True
@@ -423,7 +423,7 @@ def cli_main():
         normalization = imagenet_normalization()
 
         args.size_crops = [224, 96]
-        args.nmb_crops = [2, 6]
+        args.num_crops = [2, 6]
         args.min_scale_crops = [0.14, 0.05]
         args.max_scale_crops = [1.0, 0.14]
         args.gaussian_blur = True
@@ -439,7 +439,7 @@ def cli_main():
         args.final_lr = 0.0048
         args.start_lr = 0.3
 
-        args.nmb_prototypes = 3000
+        args.num_prototypes = 3000
         args.online_ft = True
 
         dm = ImagenetDataModule(data_dir=args.data_dir, batch_size=args.batch_size, num_workers=args.num_workers)
@@ -452,7 +452,7 @@ def cli_main():
     dm.train_transforms = SwAVTrainDataTransform(
         normalize=normalization,
         size_crops=args.size_crops,
-        nmb_crops=args.nmb_crops,
+        num_crops=args.num_crops,
         min_scale_crops=args.min_scale_crops,
         max_scale_crops=args.max_scale_crops,
         gaussian_blur=args.gaussian_blur,
@@ -462,7 +462,7 @@ def cli_main():
     dm.val_transforms = SwAVEvalDataTransform(
         normalize=normalization,
         size_crops=args.size_crops,
-        nmb_crops=args.nmb_crops,
+        num_crops=args.num_crops,
         min_scale_crops=args.min_scale_crops,
         max_scale_crops=args.max_scale_crops,
         gaussian_blur=args.gaussian_blur,

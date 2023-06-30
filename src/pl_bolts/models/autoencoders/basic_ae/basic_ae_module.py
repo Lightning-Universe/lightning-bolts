@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from torch import nn
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 
 from pl_bolts import _HTTPS_AWS_HUB
 from pl_bolts.models.autoencoders.components import (
