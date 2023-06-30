@@ -24,7 +24,7 @@ This requires to import an ONNX model, which you can get from your ``LightningMo
 ------------------------------
 
 .. testcode::
-    :skipif: not _SPARSEML_AVAILABLE
+    :skipif: not _SPARSEML_TORCH_SATISFIED
 
     from pytorch_lightning import LightningModule, Trainer
     from pl_bolts.callbacks import SparseMLCallback
