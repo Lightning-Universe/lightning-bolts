@@ -27,7 +27,7 @@ def _log_api_usage_once(obj: Any) -> None:
     * Logging policy: https://github.com/pytorch/vision/issues/5052;
 
     Args:
-        obj (class instance or method): an object to extract info from.
+        obj: an object to extract info from.
     """
     module = obj.__module__
     if not module.startswith("torchvision"):
@@ -43,12 +43,11 @@ def stochastic_depth(input: Tensor, p: float, mode: str, training: bool = True) 
     <https://arxiv.org/abs/1603.09382>`_ used for randomly dropping residual branches of residual architectures.
 
     Args:
-        input (Tensor[N, ...]): The input tensor or arbitrary dimensions with the first one
-                    being its batch i.e. a batch with ``N`` rows.
-        p (float): probability of the input to be zeroed.
-        mode (str): ``"batch"`` or ``"row"``.
-                    ``"batch"`` randomly zeroes the entire input, ``"row"`` zeroes
-                    randomly selected rows from the batch.
+        input: The input tensor or arbitrary dimensions with the first one
+                being its batch i.e. a batch with ``N`` rows.
+        p: probability of the input to be zeroed.
+        mode: ``"batch"`` or ``"row"``.
+                ``"batch"`` randomly zeroes the entire input, ``"row"`` zeroes randomly selected rows from the batch.
         training: apply stochastic depth if is ``True``. Default: ``True``
 
     Returns:
