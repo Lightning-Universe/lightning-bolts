@@ -20,17 +20,11 @@ _GYM_AVAILABLE: bool = module_available("gym")
 _GYM_GREATER_EQUAL_0_20 = compare_version("gym", operator.ge, "0.20.0")
 _SKLEARN_AVAILABLE: bool = module_available("sklearn")
 _PIL_AVAILABLE: bool = module_available("PIL")
+_SPARSEML_AVAILABLE = module_available("sparseml")
 _OPENCV_AVAILABLE: bool = module_available("cv2")
 _WANDB_AVAILABLE: bool = module_available("wandb")
 _MATPLOTLIB_AVAILABLE: bool = module_available("matplotlib")
 _JSONARGPARSE_GREATER_THAN_4_16_0 = compare_version("jsonargparse", operator.gt, "4.16.0")
 
-_SPARSEML_INSTALLED = module_available("sparseml")
-if _SPARSEML_INSTALLED:
-    from sparseml.pytorch.base import _TORCH_MAX_VERSION as _TORCH_MAX_VERSION_FROM_SPARSEML
-else:
-    _TORCH_MAX_VERSION_FROM_SPARSEML = "1.13.100"
-_SPARSEML_TORCH_SATISFIED = compare_version("sparseml", operator.le, _TORCH_MAX_VERSION_FROM_SPARSEML)
-_SPARSEML_AVAILABLE = _SPARSEML_INSTALLED and _SPARSEML_TORCH_SATISFIED
 
 __all__ = ["BatchGradientVerification"]
