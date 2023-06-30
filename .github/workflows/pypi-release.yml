@@ -20,9 +20,11 @@ jobs:
         python-version: 3.8
 
     - name: Install dependencies
-      run: python -m pip install -U setuptools wheel build
+      run: python -m pip install -U setuptools wheel build twine
     - name: Build package
       run: python -m build
+    - name: Check package
+      run: twine check dist/*
 
     - name: Upload to release
       uses: AButler/upload-release-assets@v2.0
