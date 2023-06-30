@@ -2,13 +2,14 @@ import argparse
 from unittest import TestCase
 
 import pytest
-from pytorch_lightning import Trainer
-
+import torch
 from pl_bolts.models.rl.double_dqn_model import DoubleDQN
 from pl_bolts.models.rl.dqn_model import DQN
 from pl_bolts.models.rl.dueling_dqn_model import DuelingDQN
 from pl_bolts.models.rl.noisy_dqn_model import NoisyDQN
 from pl_bolts.models.rl.per_dqn_model import PERDQN
+from pl_bolts.utils import _IS_WINDOWS
+from pytorch_lightning import Trainer
 
 
 class TestValueModels(TestCase):
@@ -20,7 +21,7 @@ class TestValueModels(TestCase):
             "--warm_start_size",
             "100",
             "--gpus",
-            "0",
+            str(int(torch.cuda.is_available())),
             "--env",
             "PongNoFrameskip-v4",
         ]
@@ -34,6 +35,7 @@ class TestValueModels(TestCase):
             fast_dev_run=True,
         )
 
+    @pytest.mark.skipif(_IS_WINDOWS, reason="strange TimeOut or MemoryError")  # todo
     def test_dqn(self):
         """Smoke test that the DQN model runs."""
         model = DQN(self.hparams.env, num_envs=5)
@@ -44,11 +46,13 @@ class TestValueModels(TestCase):
         model = DoubleDQN(self.hparams.env)
         self.trainer.fit(model)
 
+    @pytest.mark.skipif(_IS_WINDOWS, reason="strange TimeOut or MemoryError")  # todo
     def test_dueling_dqn(self):
         """Smoke test that the Dueling DQN model runs."""
         model = DuelingDQN(self.hparams.env)
         self.trainer.fit(model)
 
+    @pytest.mark.skipif(_IS_WINDOWS, reason="strange TimeOut or MemoryError")  # todo
     def test_noisy_dqn(self):
         """Smoke test that the Noisy DQN model runs."""
         model = NoisyDQN(self.hparams.env)

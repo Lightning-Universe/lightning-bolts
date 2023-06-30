@@ -53,7 +53,7 @@ class PPO(LightningModule):
         max_episode_len: float = 200,
         batch_size: int = 512,
         steps_per_epoch: int = 2048,
-        nb_optim_iters: int = 4,
+        num_optim_iters: int = 4,
         clip_ratio: float = 0.2,
         **kwargs: Any,
     ) -> None:
@@ -67,7 +67,7 @@ class PPO(LightningModule):
             max_episode_len: maximum number interactions (actions) in an episode
             batch_size:  batch_size when training network- can simulate number of policy updates performed per epoch
             steps_per_epoch: how many action-state pairs to rollout for trajectory collection per epoch
-            nb_optim_iters: how many steps of gradient descent to perform on each batch
+            num_optim_iters: how many steps of gradient descent to perform on each batch
             clip_ratio: hyperparameter for clipping in the policy objective
         """
         super().__init__()
@@ -79,7 +79,7 @@ class PPO(LightningModule):
         self.lr_actor = lr_actor
         self.lr_critic = lr_critic
         self.steps_per_epoch = steps_per_epoch
-        self.nb_optim_iters = nb_optim_iters
+        self.num_optim_iters = num_optim_iters
         self.batch_size = batch_size
         self.gamma = gamma
         self.lam = lam
@@ -171,9 +171,7 @@ class PPO(LightningModule):
         vals = values + [last_value]
         # GAE
         delta = [rews[i] + self.gamma * vals[i + 1] - vals[i] for i in range(len(rews) - 1)]
-        adv = self.discount_rewards(delta, self.gamma * self.lam)
-
-        return adv
+        return self.discount_rewards(delta, self.gamma * self.lam)
 
     def generate_trajectory_samples(self) -> Tuple[List[Tensor], List[Tensor], List[Tensor]]:
         """Contains the logic for generating trajectory data to train policy and value network.
@@ -252,10 +250,10 @@ class PPO(LightningModule):
                     epoch_rewards = epoch_rewards[:-1]
 
                 total_epoch_reward = sum(epoch_rewards)
-                nb_episodes = len(epoch_rewards)
+                num_episodes = len(epoch_rewards)
 
-                self.avg_ep_reward = total_epoch_reward / nb_episodes
-                self.avg_ep_len = (self.steps_per_epoch - steps_before_cutoff) / nb_episodes
+                self.avg_ep_reward = total_epoch_reward / num_episodes
+                self.avg_ep_len = (self.steps_per_epoch - steps_before_cutoff) / num_episodes
 
                 self.epoch_rewards.clear()
 
@@ -264,13 +262,11 @@ class PPO(LightningModule):
         logp = self.actor.get_log_prob(pi, action)
         ratio = torch.exp(logp - logp_old)
         clip_adv = torch.clamp(ratio, 1 - self.clip_ratio, 1 + self.clip_ratio) * adv
-        loss_actor = -(torch.min(ratio * adv, clip_adv)).mean()
-        return loss_actor
+        return -(torch.min(ratio * adv, clip_adv)).mean()
 
     def critic_loss(self, state, qval) -> Tensor:
         value = self.critic(state)
-        loss_critic = (qval - value).pow(2).mean()
-        return loss_critic
+        return (qval - value).pow(2).mean()
 
     def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx, optimizer_idx):
         """Carries out a single update to actor and critic network from a batch of replay buffer.
@@ -317,16 +313,15 @@ class PPO(LightningModule):
         return optimizer_actor, optimizer_critic
 
     def optimizer_step(self, *args, **kwargs):
-        """Run ``nb_optim_iters`` number of iterations of gradient descent on actor and critic for each data
+        """Run ``num_optim_iters`` number of iterations of gradient descent on actor and critic for each data
         sample."""
-        for _ in range(self.nb_optim_iters):
+        for _ in range(self.num_optim_iters):
             super().optimizer_step(*args, **kwargs)
 
     def _dataloader(self) -> DataLoader:
         """Initialize the Replay Buffer dataset used for retrieving experiences."""
         dataset = ExperienceSourceDataset(self.generate_trajectory_samples)
-        dataloader = DataLoader(dataset=dataset, batch_size=self.batch_size)
-        return dataloader
+        return DataLoader(dataset=dataset, batch_size=self.batch_size)
 
     def train_dataloader(self) -> DataLoader:
         """Get train loader."""
@@ -349,7 +344,7 @@ class PPO(LightningModule):
             help="how many action-state pairs to rollout for trajectory collection per epoch",
         )
         parser.add_argument(
-            "--nb_optim_iters", type=int, default=4, help="how many steps of gradient descent to perform on each batch"
+            "--num_optim_iters", type=int, default=4, help="how many steps of gradient descent to perform on each batch"
         )
         parser.add_argument(
             "--clip_ratio", type=float, default=0.2, help="hyperparameter for clipping in the policy objective"

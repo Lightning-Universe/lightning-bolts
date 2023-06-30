@@ -5,7 +5,7 @@ from typing import Any, Union
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch import Tensor
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 from torch.optim import Adam
 
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
@@ -136,8 +136,7 @@ class BYOL(LightningModule):
         h1 = self.predictor(z1)
         with torch.no_grad():
             _, z2 = self.target_network(v_target)
-        loss = -2 * F.cosine_similarity(h1, z2).mean()
-        return loss
+        return -2 * F.cosine_similarity(h1, z2).mean()
 
     def configure_optimizers(self):
         optimizer = Adam(self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay)

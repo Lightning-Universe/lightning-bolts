@@ -3,9 +3,6 @@ import os
 import numpy as np
 import pytest
 import torch
-from torch.utils.data import DataLoader, Dataset
-from torchvision import transforms as transform_lib
-
 from pl_bolts.datasets import (
     BinaryEMNIST,
     BinaryMNIST,
@@ -19,6 +16,8 @@ from pl_bolts.datasets.dummy_dataset import DummyDetectionDataset
 from pl_bolts.datasets.sr_mnist_dataset import SRMNIST
 from pl_bolts.utils import _PIL_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
+from torch.utils.data import DataLoader, Dataset
+from torchvision import transforms as transform_lib
 
 if _PIL_AVAILABLE:
     from PIL import Image

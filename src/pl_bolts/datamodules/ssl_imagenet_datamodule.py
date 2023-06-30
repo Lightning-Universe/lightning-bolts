@@ -95,7 +95,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
             split="train",
             transform=transforms,
         )
-        loader: DataLoader = DataLoader(
+        return DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=self.shuffle,
@@ -103,7 +103,6 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
             drop_last=self.drop_last,
             pin_memory=self.pin_memory,
         )
-        return loader
 
     def val_dataloader(self, num_images_per_class: int = 50, add_normalize: bool = False) -> DataLoader:
         transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
@@ -115,7 +114,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
             split="val",
             transform=transforms,
         )
-        loader: DataLoader = DataLoader(
+        return DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=False,
@@ -123,7 +122,6 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
             drop_last=self.drop_last,
             pin_memory=self.pin_memory,
         )
-        return loader
 
     def test_dataloader(self, num_images_per_class: int, add_normalize: bool = False) -> DataLoader:
         transforms = self._default_transforms() if self.test_transforms is None else self.test_transforms
@@ -135,7 +133,7 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
             split="test",
             transform=transforms,
         )
-        loader: DataLoader = DataLoader(
+        return DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=False,
@@ -143,8 +141,6 @@ class SSLImagenetDataModule(LightningDataModule):  # pragma: no cover
             drop_last=self.drop_last,
             pin_memory=self.pin_memory,
         )
-        return loader
 
     def _default_transforms(self) -> Callable:
-        transforms = transform_lib.Compose([transform_lib.ToTensor(), imagenet_normalization()])
-        return transforms
+        return transform_lib.Compose([transform_lib.ToTensor(), imagenet_normalization()])

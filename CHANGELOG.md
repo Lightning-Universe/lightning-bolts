@@ -8,19 +8,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+-
+
 
 ### Changed
 
-- Improved YOLO model includes YOLOv4, YOLOv5, and YOLOX networks and training algorithms ([#552](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/817))
+-
 
 
 ### Deprecated
 
+-
+
 
 ### Removed
 
+-
+
+
+## [0.7.0] - 2022-06-30
+
+### Added
+
+- Improved YOLO model includes YOLOv4, YOLOv5, and YOLOX networks and training algorithms ([#817](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/817))
+
+### Changed
+
+- Move SSL transforms to pl_bolts/transforms ([#905](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/905))
+- Reviewed `models.detection.yolo` ([#851](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/851))
+- Reviewed `LogisticRegression` ([#950](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/950))
+- Bumped support of min python version to py3.8+ ([#1021](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/1021))
+- Update `numpy` compatibility to <1.25.0 ([#959](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/959))
+- Update `torchmetrics` compatibility to <0.12.0 ([#1016](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/1016))
+- Update `pytorch-lightning` compatibility to >1.7.0,<2.0.0 (
+  [#965](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/965),
+  [#973](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/973),
+  [#1006](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/1006)
+)
 
 ### Fixed
+
+- Dropped reference to `torch._six` ([#993](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/993))
 
 
 

@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Tuple, Type
 import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from torch import Tensor, nn
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 from torch.optim import Adam
 from torch.optim.optimizer import Optimizer
 
@@ -46,8 +46,7 @@ class LinearRegression(LightningModule):
         self.linear = nn.Linear(in_features=self.hparams.input_dim, out_features=self.hparams.output_dim, bias=bias)
 
     def forward(self, x: Tensor) -> Tensor:
-        y_hat = self.linear(x)
-        return y_hat
+        return self.linear(x)
 
     def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int) -> Dict[str, Tensor]:
         x, y = batch
@@ -138,8 +137,8 @@ def cli_main() -> None:
     # model = LinearRegression(**vars(args))
 
     # data
-    X, y = load_diabetes(return_X_y=True)  # these are numpy arrays
-    loaders = SklearnDataModule(X, y, batch_size=args.batch_size)
+    data, y = load_diabetes(return_X_y=True)  # these are numpy arrays
+    loaders = SklearnDataModule(data, y, batch_size=args.batch_size)
 
     # train
     trainer = Trainer.from_argparse_args(args)

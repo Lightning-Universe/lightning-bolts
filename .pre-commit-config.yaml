@@ -25,7 +25,7 @@ repos:
     rev: v3.4.0
     hooks:
       - id: pyupgrade
-        args: [--py37-plus]
+        args: [--py38-plus]
         name: Upgrade code
 
   - repo: https://github.com/PyCQA/docformatter
@@ -44,10 +44,10 @@ repos:
           - mdformat_frontmatter
         exclude: CHANGELOG.md
 
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
+  #- repo: https://github.com/PyCQA/isort
+  #  rev: 5.12.0
+  #  hooks:
+  #    - id: isort
 
   - repo: https://github.com/psf/black
     rev: 23.3.0
@@ -61,9 +61,11 @@ repos:
       - id: yesqa
         additional_dependencies:
           - flake8-pytest-style
+          - flake8-bandit
+          - pep8-naming
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.269
+    rev: v0.0.272
     hooks:
       - id: ruff
         args: ["--fix"]

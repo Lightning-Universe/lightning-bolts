@@ -6,7 +6,7 @@ from warnings import warn
 
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
+import torch.nn.functional as F  # noqa: N812
 
 from pl_bolts.callbacks import SRImageLoggerCallback
 from pl_bolts.datamodules import TVTDataModule
@@ -137,9 +137,7 @@ class SRGAN(pl.LightningModule):
         _, fake_pred = self._fake_pred(lr_image)
         fake_loss = self._adv_loss(fake_pred, ones=False)
 
-        disc_loss = 0.5 * (real_loss + fake_loss)
-
-        return disc_loss
+        return 0.5 * (real_loss + fake_loss)
 
     def _gen_loss(self, hr_image: torch.Tensor, lr_image: torch.Tensor) -> torch.Tensor:
         fake, fake_pred = self._fake_pred(lr_image)
@@ -148,9 +146,7 @@ class SRGAN(pl.LightningModule):
         adv_loss = self._adv_loss(fake_pred, ones=True)
         content_loss = self._content_loss(hr_image, fake)
 
-        gen_loss = 0.006 * perceptual_loss + 0.001 * adv_loss + content_loss
-
-        return gen_loss
+        return 0.006 * perceptual_loss + 0.001 * adv_loss + content_loss
 
     def _fake_pred(self, lr_image: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         fake = self(lr_image)
@@ -160,14 +156,12 @@ class SRGAN(pl.LightningModule):
     @staticmethod
     def _adv_loss(pred: torch.Tensor, ones: bool) -> torch.Tensor:
         target = torch.ones_like(pred) if ones else torch.zeros_like(pred)
-        adv_loss = F.binary_cross_entropy_with_logits(pred, target)
-        return adv_loss
+        return F.binary_cross_entropy_with_logits(pred, target)
 
     def _perceptual_loss(self, hr_image: torch.Tensor, fake: torch.Tensor) -> torch.Tensor:
         real_features = self.vgg_feature_extractor(hr_image)
         fake_features = self.vgg_feature_extractor(fake)
-        perceptual_loss = self._content_loss(real_features, fake_features)
-        return perceptual_loss
+        return self._content_loss(real_features, fake_features)
 
     @staticmethod
     def _content_loss(hr_image: torch.Tensor, fake: torch.Tensor) -> torch.Tensor:

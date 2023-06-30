@@ -1,0 +1,6 @@
+numpy <1.26.0
+pytorch-lightning >1.7.0, <2.0.0  # strict
+torchmetrics >=0.10.0, <0.12.0
+lightning-utilities >0.3.1  # this is needed for PL 1.7
+torchvision >=0.10.0  # todo: move to topic related extras
+tensorboard >=2.9.1, <2.14.0  # for `TensorBoardLogger`

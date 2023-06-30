@@ -4,13 +4,12 @@ from unittest import TestCase
 import gym
 import numpy as np
 import torch
-from torch import Tensor
-
 from pl_bolts.datamodules.experience_source import DiscountedExperienceSource
 from pl_bolts.models.rl.common.agents import Agent
 from pl_bolts.models.rl.common.gym_wrappers import ToTensor
 from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.models.rl.reinforce_model import Reinforce
+from torch import Tensor
 
 
 class TestReinforce(TestCase):
@@ -24,14 +23,7 @@ class TestReinforce(TestCase):
 
         parent_parser = argparse.ArgumentParser(add_help=False)
         parent_parser = Reinforce.add_model_specific_args(parent_parser)
-        args_list = [
-            "--env",
-            "CartPole-v0",
-            "--batch_size",
-            "32",
-            "--gamma",
-            "0.99",
-        ]
+        args_list = ["--env", "CartPole-v0", "--batch_size", "32", "--gamma", "0.99"]
         self.hparams = parent_parser.parse_args(args_list)
         self.model = Reinforce(**vars(self.hparams))
 

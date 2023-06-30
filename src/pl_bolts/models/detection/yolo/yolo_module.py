@@ -37,7 +37,7 @@ else:
 
 if _TORCHVISION_AVAILABLE:
     from torchvision.ops import batched_nms
-    from torchvision.transforms import functional as F
+    from torchvision.transforms import functional as T  # noqa: N812
 else:
     warn_missing_pkg("torchvision")
 
@@ -195,7 +195,7 @@ class YOLO(LightningModule):
             for name, tensor in self.named_parameters():
                 if not tensor.requires_grad:
                     continue
-                elif name.endswith(".conv.weight"):
+                if name.endswith(".conv.weight"):
                     wd_group.append(tensor)
                 else:
                     default_group.append(tensor)
@@ -332,7 +332,7 @@ class YOLO(LightningModule):
             detections. "labels" is a vector of predicted class labels.
         """
         if not isinstance(image, Tensor):
-            image = F.to_tensor(image)
+            image = T.to_tensor(image)
 
         was_training = self.training
         self.eval()
@@ -424,8 +424,7 @@ class YOLO(LightningModule):
         if targets is None:
             if self.training:
                 raise ValueError("Targets should be given in training mode.")
-            else:
-                return
+            return
 
         if not isinstance(targets, (tuple, list)):
             raise TypeError(f"Expected targets to be a tuple or a list, got {type(images).__name__}.")
@@ -583,13 +582,13 @@ class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
 
     def default_transforms(self) -> Callable:
         transforms = [
-            lambda image, target: (F.to_tensor(image), target),
+            lambda image, target: (T.to_tensor(image), target),
             self._resize,
         ]
         if self.normalize:
             transforms += [
                 lambda image, target: (
-                    F.normalize(image, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                    T.normalize(image, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                     target,
                 )
             ]
@@ -610,7 +609,7 @@ class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
         original_size = torch.tensor([height, width], device=device)
         scale_y, scale_x = torch.tensor(self.image_size, device=device) / original_size
         scale = torch.tensor([scale_x, scale_y, scale_x, scale_y], device=device)
-        image = F.resize(image, self.image_size)
+        image = T.resize(image, self.image_size)
         target["boxes"] = target["boxes"] * scale
         return image, target
 

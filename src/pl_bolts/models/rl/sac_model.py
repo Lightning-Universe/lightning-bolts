@@ -7,7 +7,7 @@ import torch
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import Tensor, optim
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
@@ -168,8 +168,7 @@ class SAC(LightningModule):
         Returns:
             q values
         """
-        output = self.policy(x).sample()
-        return output
+        return self.policy(x).sample()
 
     def train_batch(
         self,

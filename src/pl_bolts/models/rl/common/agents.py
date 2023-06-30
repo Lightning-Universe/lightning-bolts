@@ -8,7 +8,7 @@ from typing import List
 import numpy as np
 import torch
 from torch import Tensor, nn
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 
 from pl_bolts.utils.stability import under_review
 
@@ -66,19 +66,11 @@ class ValueAgent(Agent):
         if not isinstance(state, list):
             state = [state]
 
-        action = self.get_random_action(state) if np.random.random() < self.epsilon else self.get_action(state, device)
+        return self.get_random_action(state) if np.random.random() < self.epsilon else self.get_action(state, device)
 
-        return action
-
-    def get_random_action(self, state: Tensor) -> int:
+    def get_random_action(self, state: Tensor) -> list:
         """Returns a random action."""
-        actions = []
-
-        for i in range(len(state)):
-            action = np.random.randint(0, self.action_space)
-            actions.append(action)
-
-        return actions
+        return [np.random.randint(0, self.action_space) for i in range(len(state))]
 
     def get_action(self, state: Tensor, device: torch.device):
         """Returns the best action based on the Q values of the network.
@@ -131,9 +123,7 @@ class PolicyAgent(Agent):
         prob_np = probabilities.data.cpu().numpy()
 
         # take the numpy values and randomly select action based on prob distribution
-        actions = [np.random.choice(len(prob), p=prob) for prob in prob_np]
-
-        return actions
+        return [np.random.choice(len(prob), p=prob) for prob in prob_np]
 
 
 @under_review()
@@ -161,9 +151,7 @@ class ActorCriticAgent(Agent):
         prob_np = probabilities.data.cpu().numpy()
 
         # take the numpy values and randomly select action based on prob distribution
-        actions = [np.random.choice(len(prob), p=prob) for prob in prob_np]
-
-        return actions
+        return [np.random.choice(len(prob), p=prob) for prob in prob_np]
 
 
 @under_review()
@@ -187,9 +175,7 @@ class SoftActorCriticAgent(Agent):
             states = torch.tensor(states, device=device)
 
         dist = self.net(states)
-        actions = list(dist.sample().cpu().numpy())
-
-        return actions
+        return list(dist.sample().cpu().numpy())
 
     def get_action(self, states: Tensor, device: str) -> List[float]:
         """Get the action greedily (without sampling)
@@ -207,6 +193,4 @@ class SoftActorCriticAgent(Agent):
         if not isinstance(states, Tensor):
             states = torch.tensor(states, device=device)
 
-        actions = [self.net.get_action(states).cpu().numpy()]
-
-        return actions
+        return [self.net.get_action(states).cpu().numpy()]

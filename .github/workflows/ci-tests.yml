@@ -21,13 +21,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Something is wrong with windows tests, will need to debug separately.
-        os: [ubuntu-20.04, macOS-11]
-        # todo: seems there are some issues with py3.10 while install dependencies
-        python-version: ["3.7", "3.9"]
-        requires: ['oldest', 'latest']
+        os: ["ubuntu-20.04", "macOS-11"]
+        python-version: ["3.8", "3.9", "3.10"]
+        requires: ["latest"]  # + "oldest"
+        include:
+          - { os: 'windows-2022', python-version: "3.9" }
+          - { os: 'ubuntu-20.04', python-version: "3.8", requires: "oldest" }
+          - { os: 'macOS-11', python-version: "3.8", requires: "oldest" }
     env:
       FREEZE_REQUIREMENTS: 1
+      TORCH_URL: "https://download.pytorch.org/whl/cpu/torch_stable.html"
+      TRANSFORMERS_CACHE: _hf_cache
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     # the reason for high number is MUCH slower tests on macOS and py3.8
     timeout-minutes: 50
@@ -39,20 +43,6 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    # Github Actions: Run step on specific OS: https://stackoverflow.com/a/57948488/4521646
-    - name: Setup macOS
-      if: runner.os == 'macOS'
-      run: |
-        brew update  # Todo: find a better way...
-        brew install libomp  # https://github.com/pytorch/pytorch/issues/20030
-        brew install rar
-
-    - name: Setup Ubuntu
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y unrar
-
     - name: Set min. dependencies
       if: matrix.requires == 'oldest'
       run: |
@@ -63,59 +53,96 @@ jobs:
             open(fpath, 'w').write(req)
       shell: python
 
+    - name: Get pip cache dir
+      id: pip-cache
+      run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
+    - name: Restore pip cache
+      uses: actions/cache/restore@v3
+      id: restore-cache
+      with:
+        path: ${{ steps.pip-cache.outputs.dir }}
+        key: pip-dependencies
+
     - name: Install package
       run: |
-        pip install "pip==22.2.1"  # todo: drop after resolving extras
-        pip install -e . "coverage[toml]" --upgrade --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
+        python -m pip install "pip==22.3.1"  # todo: drop after resolving extras
+        pip install -e . -U --prefer-binary -f ${TORCH_URL}
         pip list
 
     - name: Test Package [only]
       working-directory: ./src
       run: |
-        pip install pytest -q
+        pip install "coverage[toml]" pytest -q
         # TODO: package shall be fine to run full without any ignores
         python -m pytest . \
           --ignore=pl_bolts/datamodules \
           --ignore=pl_bolts/datasets \
-          --ignore=pl_bolts/models/self_supervised/amdim/transforms.py \
           --ignore=pl_bolts/models/rl
-
-    - name: Get pip cache dir
-      id: pip-cache
-      run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
-
-    - name: Cache pip
-      uses: actions/cache@v3
-      with:
-        path: ${{ steps.pip-cache.outputs.dir }}
-        key: ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements/*.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ matrix.requires }}-
 
     - name: Install dependencies
       run: |
-        pip install --requirement requirements/devel.txt --upgrade --quiet \
-          --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
+        pip install -r requirements/devel.txt -U -q -f ${TORCH_URL}
         pip list
 
+    - name: Save pip cache
+      if: github.ref == 'refs/heads/master'
+      uses: actions/cache/save@v3
+      with:
+        path: ${{ steps.pip-cache.outputs.dir }}
+        key: pip-dependencies
+
     - name: Cache datasets
+      id: cache-datasets
       uses: actions/cache@v3
       with:
-        path: ./datasets
-        key: pl-datasets-${{ hashFiles('tests/conftest.py') }}
+        path: ./_datasets
+        enableCrossOsArchive: true
+        # bump this date if you need update cache
+        key: datasets-20230630
+
+    - name: Setup macOS
+      if: runner.os == 'macOS' && steps.cache-datasets.outputs.cache-hit != 'true'
+      run: |
+        brew update
+        brew install rar
+    - name: Setup Ubuntu
+      if: runner.os == 'Linux'&& steps.cache-datasets.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y unrar
+    - name: Setup Windows
+      if: runner.os == 'Windows'&& steps.cache-datasets.outputs.cache-hit != 'true'
+      run: |
+        choco install unrar
 
     - name: Download ROMs
-      # continue-on-error: true
+      if: steps.cache-datasets.outputs.cache-hit != 'true'
       run: |
-        mkdir -p datasets
-        cd datasets
+        mkdir -p _datasets
+        cd _datasets
         curl http://www.atarimania.com/roms/Roms.rar -o Roms.rar
         unrar x -y Roms.rar
-        python -m atari_py.import_roms ROMS
+        rm Roms.rar
 
-    - name: Tests
-      run: |
-        python -m pytest tests -v --cov=pl_bolts
+    - name: Init ROMs
+      working-directory: _datasets/
+      run: python -m atari_py.import_roms ROMS
+
+    - name: Restore HF cache
+      uses: actions/cache/restore@v3
+      with:
+        path: ${{ env.TRANSFORMERS_CACHE }}
+        key: cache-transformers
+
+    - name: Testing
+      run: python -m pytest tests -v --cov=pl_bolts --timeout=200
+
+    - name: Save HF cache
+      if: github.ref == 'refs/heads/master'
+      uses: actions/cache/save@v3
+      with:
+        path: ${{ env.TRANSFORMERS_CACHE }}
+        key: cache-transformers
 
     - name: Statistics
       if: success()

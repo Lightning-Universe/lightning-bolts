@@ -16,7 +16,7 @@ import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.strategies import DDPStrategy
 from torch import nn
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 
 from pl_bolts.metrics import mean, precision_at_k
 from pl_bolts.transforms.self_supervised.moco_transforms import (
@@ -38,7 +38,7 @@ else:  # pragma: no cover
 
 
 @under_review()
-class Moco_v2(LightningModule):
+class Moco_v2(LightningModule):  # noqa: N801
     """PyTorch Lightning implementation of `Moco <https://arxiv.org/abs/2003.04297>`_
 
     Paper authors: Xinlei Chen, Haoqi Fan, Ross Girshick, Kaiming He.
@@ -293,8 +293,7 @@ class Moco_v2(LightningModule):
 
         acc1, acc5 = precision_at_k(output, target, top_k=(1, 5))
 
-        results = {"val_loss": loss, "val_acc1": acc1, "val_acc5": acc5}
-        return results
+        return {"val_loss": loss, "val_acc1": acc1, "val_acc5": acc5}
 
     def validation_epoch_end(self, outputs):
         val_loss = mean(outputs, "val_loss")
@@ -353,8 +352,7 @@ def concat_all_gather(tensor):
     tensors_gather = [torch.ones_like(tensor) for _ in range(torch.distributed.get_world_size())]
     torch.distributed.all_gather(tensors_gather, tensor, async_op=False)
 
-    output = torch.cat(tensors_gather, dim=0)
-    return output
+    return torch.cat(tensors_gather, dim=0)
 
 
 @under_review()

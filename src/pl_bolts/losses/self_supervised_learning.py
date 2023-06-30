@@ -23,9 +23,7 @@ def nt_xent_loss(out_1, out_2, temperature):
     # Positive similarity :
     pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
     pos = torch.cat([pos, pos], dim=0)
-    loss = -torch.log(pos / neg).mean()
-
-    return loss
+    return -torch.log(pos / neg).mean()
 
 
 @under_review()
@@ -67,16 +65,15 @@ class CPCTask(nn.Module):
         labels = labels.to(logits.device)
         labels = labels.long()
 
-        loss = nn.functional.cross_entropy(logits, labels)
-        return loss
+        return nn.functional.cross_entropy(logits, labels)
 
-    def forward(self, Z):
+    def forward(self, z):
         losses = []
 
-        context = self.context_cnn(Z)
-        targets = self.target_cnn(Z)
+        context = self.context_cnn(z)
+        targets = self.target_cnn(z)
 
-        _, _, h, w = Z.shape
+        _, _, h, w = z.shape
 
         # future prediction
         preds = self.pred_cnn(context)
@@ -102,7 +99,7 @@ class AmdimNCELoss(nn.Module):
         """
         Args:
             anchor_representations: (batch_size, emb_dim)
-            positive_representations: (emb_dim, n_batch * w* h) (ie: nb_feat_vectors x embedding_dim)
+            positive_representations: (emb_dim, n_batch * w* h) (ie: num_feat_vectors x embedding_dim)
             mask_mat: (n_batch_gpu, n_batch)
 
         Output:
@@ -115,11 +112,11 @@ class AmdimNCELoss(nn.Module):
 
         # RKHS = embedding dim
         batch_size, emb_dim = r_src.size()
-        nb_feat_vectors = r_trg.size(1) // batch_size
+        num_feat_vectors = r_trg.size(1) // batch_size
 
-        # (b, b) -> (b, b, nb_feat_vectors)
+        # (b, b) -> (b, b, num_feat_vectors)
         # all zeros with ones in diagonal tensor... (ie: b1 b1 are all 1s, b1 b2 are all zeros)
-        mask_pos = mask_mat.unsqueeze(dim=2).expand(-1, -1, nb_feat_vectors).float()
+        mask_pos = mask_mat.unsqueeze(dim=2).expand(-1, -1, num_feat_vectors).float()
 
         # negative mask
         mask_neg = 1.0 - mask_pos
@@ -127,10 +124,10 @@ class AmdimNCELoss(nn.Module):
         # -------------------------------
         # ALL SCORES COMPUTATION
         # compute src->trg raw scores for batch
-        # (b, dim) x (dim, nb_feats*b) -> (b, b, nb_feats)
+        # (b, dim) x (dim, num_feats*b) -> (b, b, num_feats)
         # vector for each img in batch times all the vectors of all images in batch
         raw_scores = torch.mm(r_src, r_trg).float()
-        raw_scores = raw_scores.reshape(batch_size, batch_size, nb_feat_vectors)
+        raw_scores = raw_scores.reshape(batch_size, batch_size, num_feat_vectors)
 
         # -----------------------
         # STABILITY TRICKS
@@ -145,17 +142,17 @@ class AmdimNCELoss(nn.Module):
         # ----------------------
         # EXTRACT POSITIVE SCORES
         # use the index mask to pull all the diagonals which are b1 x b1
-        # (batch_size, nb_feat_vectors)
+        # (batch_size, num_feat_vectors)
         pos_scores = (mask_pos * raw_scores).sum(dim=1)
 
         # ----------------------
         # EXTRACT NEGATIVE SCORES
         # pull everything except diagonal and apply clipping
-        # (batch_size, batch_size, nb_feat_vectors)
+        # (batch_size, batch_size, num_feat_vectors)
         # diagonals have - clip vals. everything else has actual negative stores
         neg_scores = (mask_neg * raw_scores) - (self.tclip * mask_pos)
 
-        # (batch_size, batch_size * nb_feat_vectors) -> (batch_size, batch_size, nb_feat_vectors)
+        # (batch_size, batch_size * num_feat_vectors) -> (batch_size, batch_size, num_feat_vectors)
         neg_scores = neg_scores.reshape(batch_size, -1)
         mask_neg = mask_neg.reshape(batch_size, -1)
 
@@ -273,8 +270,7 @@ class FeatureMapContrastiveTask(nn.Module):
             r_cnv = torch.masked_select(r_cnv, mask)
 
         # flatten features for use as globals in glb->lcl nce cost
-        r_vec = r_cnv.reshape(n_batch, feat_dim)
-        return r_vec
+        return r_cnv.reshape(n_batch, feat_dim)
 
     def __cache_dimension_masks(self, *args):
         # cache masks for each feature map we'll need
@@ -369,5 +365,4 @@ class FeatureMapContrastiveTask(nn.Module):
 @under_review()
 def tanh_clip(x, clip_val=10.0):
     """Soft clip values to the range [-clip_val, +clip_val]"""
-    x_clip = clip_val * torch.tanh(1.0 / clip_val * x) if clip_val is not None else x
-    return x_clip
+    return clip_val * torch.tanh(1.0 / clip_val * x) if clip_val is not None else x

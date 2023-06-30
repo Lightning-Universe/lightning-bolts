@@ -1,21 +1,18 @@
 import argparse
 
+import pytest
 import torch
+from pl_bolts.models.rl.sac_model import SAC
+from pl_bolts.utils import _GYM_GREATER_EQUAL_0_20
 from torch import Tensor
 
-from pl_bolts.models.rl.sac_model import SAC
 
-
+@pytest.mark.skipif(_GYM_GREATER_EQUAL_0_20, reason="gym.error.DeprecatedEnv: Env Pendulum-v0 not found")
 def test_sac_loss():
     """Test the reinforce loss function."""
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = SAC.add_model_specific_args(parent_parser)
-    args_list = [
-        "--env",
-        "Pendulum-v0",
-        "--batch_size",
-        "32",
-    ]
+    args_list = ["--env", "Pendulum-v0", "--batch_size", "32"]
     hparams = parent_parser.parse_args(args_list)
     model = SAC(**vars(hparams))
 
@@ -33,16 +30,12 @@ def test_sac_loss():
     assert isinstance(q2_loss, Tensor)
 
 
+@pytest.mark.skipif(_GYM_GREATER_EQUAL_0_20, reason="gym.error.DeprecatedEnv: Env Pendulum-v0 not found")
 def test_sac_train_batch():
     """Tests that a single batch generates correctly."""
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser = SAC.add_model_specific_args(parent_parser)
-    args_list = [
-        "--env",
-        "Pendulum-v0",
-        "--batch_size",
-        "32",
-    ]
+    args_list = ["--env", "Pendulum-v0", "--batch_size", "32"]
     hparams = parent_parser.parse_args(args_list)
     model = SAC(**vars(hparams))
 

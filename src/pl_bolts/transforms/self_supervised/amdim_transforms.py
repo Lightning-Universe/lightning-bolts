@@ -92,8 +92,7 @@ class AMDIMEvalTransformsCIFAR10:
 
     def __call__(self, inp: Tensor) -> Tensor:
         inp = self.flip_lr(inp)
-        out1 = self.transforms(inp)
-        return out1
+        return self.transforms(inp)
 
 
 @under_review()
@@ -180,8 +179,7 @@ class AMDIMEvalTransformsSTL10:
 
     def __call__(self, inp: Tensor) -> Tensor:
         inp = self.flip_lr(inp)
-        out1 = self.transforms(inp)
-        return out1
+        return self.transforms(inp)
 
 
 @under_review()
@@ -270,6 +268,4 @@ class AMDIMEvalTransformsImageNet128:
         )
 
     def __call__(self, inp: Tensor) -> Tensor:
-        inp = self.flip_lr(inp)
-        out1 = self.transforms(inp)
-        return out1
+        return self.transforms(self.flip_lr(inp))

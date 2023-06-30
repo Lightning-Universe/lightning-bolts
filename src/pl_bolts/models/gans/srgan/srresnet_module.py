@@ -4,7 +4,7 @@ from typing import Any, Tuple
 
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
+import torch.nn.functional as F  # noqa: N812
 
 from pl_bolts.callbacks import SRImageLoggerCallback
 from pl_bolts.datamodules import TVTDataModule
@@ -98,8 +98,7 @@ class SRResNet(pl.LightningModule):
     def _loss(self, batch: Tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:
         hr_image, lr_image = batch
         fake = self(lr_image)
-        loss = F.mse_loss(hr_image, fake)
-        return loss
+        return F.mse_loss(hr_image, fake)
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:

@@ -5,7 +5,7 @@ Implemented by: William Falcon Reference
 Accessed: May 14, 2020.
 """
 from torch import nn
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: N812
 
 from pl_bolts.utils.stability import under_review
 
@@ -52,13 +52,11 @@ class PixelCNN(nn.Module):
         act2 = nn.ReLU()
         c4 = nn.Conv2d(in_channels=self.hidden_channels, out_channels=input_channels, kernel_size=(1, 1))
 
-        block = nn.Sequential(c1, act1, c2, pad, c3, act2, c4)
-        return block
+        return nn.Sequential(c1, act1, c2, pad, c3, act2, c4)
 
     def forward(self, z):
         c = z
         for conv_block in self.blocks:
             c = c + conv_block(c)
 
-        c = F.relu(c)
-        return c
+        return F.relu(c)
