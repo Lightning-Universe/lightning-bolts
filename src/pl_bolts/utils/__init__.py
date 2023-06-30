@@ -32,7 +32,7 @@ if _SPARSEML_AVAILABLE:
     try:
         from sparseml.pytorch.base import _TORCH_MAX_VERSION  # noqa: F401
 
-    except ImportError as err:
+    except (ImportError, ValueError) as err:
         _SPARSEML_TORCH_SATISFIED = False
         _SPARSEML_TORCH_SATISFIED_ERROR = str(err)
 
