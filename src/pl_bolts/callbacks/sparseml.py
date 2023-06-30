@@ -22,11 +22,14 @@ from pl_bolts.utils import _SPARSEML_AVAILABLE
 
 if _SPARSEML_AVAILABLE:
     try:
-        from sparseml.pytorch.optim import ScheduledModifierManager
-        from sparseml.pytorch.utils import ModuleExporter
+        import sparseml
     except ImportError as err:
         _SPARSEML_AVAILABLE = False
         rank_zero_warn(str(err))
+
+if _SPARSEML_AVAILABLE:
+    from sparseml.pytorch.optim import ScheduledModifierManager
+    from sparseml.pytorch.utils import ModuleExporter
 
 from pl_bolts.utils.stability import under_review
 
