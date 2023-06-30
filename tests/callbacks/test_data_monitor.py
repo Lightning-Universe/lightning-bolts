@@ -42,12 +42,7 @@ def test_base_log_interval_override(
 
 @pytest.mark.parametrize(
     ("log_every_n_steps", "max_steps", "expected_calls"),
-    [
-        (1, 5, 5),
-        (2, 5, 2),
-        (5, 5, 1),
-        (6, 5, 0)
-    ],
+    [(1, 5, 5), (2, 5, 2), (5, 5, 1), (6, 5, 0)],
 )
 @mock.patch("pl_bolts.callbacks.data_monitor.DataMonitorBase.log_histogram")
 def test_base_log_interval_fallback(
