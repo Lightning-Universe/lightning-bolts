@@ -14,19 +14,14 @@
 from typing import Any, Optional
 
 import torch
-from lightning_utilities.core.rank_zero import rank_zero_warn
 from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
-from pl_bolts.utils import _SPARSEML_AVAILABLE
+from pl_bolts.utils import _SPARSEML_AVAILABLE, _SPARSEML_TORCH_SATISFIED, _SPARSEML_TORCH_SATISFIED_ERROR
 
-if _SPARSEML_AVAILABLE:
-    try:
-        from sparseml.pytorch.optim import ScheduledModifierManager
-        from sparseml.pytorch.utils import ModuleExporter
-    except ImportError as err:
-        _SPARSEML_AVAILABLE = False
-        rank_zero_warn(str(err))
+if _SPARSEML_TORCH_SATISFIED:
+    from sparseml.pytorch.optim import ScheduledModifierManager
+    from sparseml.pytorch.utils import ModuleExporter
 
 from pl_bolts.utils.stability import under_review
 
@@ -43,6 +38,8 @@ class SparseMLCallback(Callback):
     def __init__(self, recipe_path: str) -> None:
         if not _SPARSEML_AVAILABLE:
             raise MisconfigurationException("SparseML has not be installed, install with pip install sparseml")
+        if not _SPARSEML_TORCH_SATISFIED:
+            raise MisconfigurationException(_SPARSEML_TORCH_SATISFIED_ERROR)
         self.manager = ScheduledModifierManager.from_yaml(recipe_path)
 
     def on_fit_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
