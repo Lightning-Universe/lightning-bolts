@@ -14,18 +14,10 @@
 from typing import Any, Optional
 
 import torch
-from lightning_utilities.core.rank_zero import rank_zero_warn
 from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
 from pl_bolts.utils import _SPARSEML_AVAILABLE
-
-if _SPARSEML_AVAILABLE:
-    try:
-        import sparseml
-    except ImportError as err:
-        _SPARSEML_AVAILABLE = False
-        rank_zero_warn(str(err))
 
 if _SPARSEML_AVAILABLE:
     from sparseml.pytorch.optim import ScheduledModifierManager
