@@ -8,7 +8,7 @@ from pl_bolts.callbacks import ModuleDataMonitor, TrainingDataMonitor
 from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models import LitMNIST
 from pytorch_lightning import LightningModule, Trainer
-from pytorch_lightning.loggers import LoggerCollection, TensorBoardLogger
+from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.utilities.rank_zero import LightningDeprecationWarning
 from pytorch_lightning.utilities.warnings import PossibleUserWarning
 from torch import nn
@@ -96,7 +96,7 @@ def test_base_unsupported_logger_warning(tmpdir, catch_warnings):
     )
     monitor = TrainingDataMonitor()
     trainer = Trainer(
-        logger=LoggerCollection([TensorBoardLogger(tmpdir)]),
+        logger=[TensorBoardLogger(tmpdir)],
         callbacks=[monitor],
         accelerator="auto",
         max_epochs=1,
