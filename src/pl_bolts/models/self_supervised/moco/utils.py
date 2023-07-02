@@ -38,7 +38,7 @@ def validate_batch(batch: Tuple[List[List[Tensor]], List[Any]]) -> Tensor:
         shape = image_transforms.shape
         for image_transforms in images[1:]:
             if not isinstance(image_transforms, Tensor):
-                raise ValueError(f"Expected transformed images in a tensor, got {type(image)}.")
+                raise ValueError(f"Expected transformed images in a tensor, got {type(image_transforms)}.")
             if image_transforms.shape != shape:
                 raise ValueError(
                     f"Different shapes for transformed images in one batch: {shape} and {image_transforms.shape}"
@@ -53,9 +53,7 @@ def validate_batch(batch: Tuple[List[List[Tensor]], List[Any]]) -> Tensor:
                 f"Contrastive training expects at least two transformations of every image, got {num_transforms}."
             )
         if not isinstance(image_transforms[0], Tensor):
-            raise ValueError(
-                f"Expected image to be of type Tensor, got {type(image_transforms[0]).__name__}."
-            )
+            raise ValueError(f"Expected image to be of type Tensor, got {type(image_transforms[0]).__name__}.")
         shape = image_transforms[0].shape
         for image_transforms in images:
             for image in image_transforms:
@@ -64,8 +62,8 @@ def validate_batch(batch: Tuple[List[List[Tensor]], List[Any]]) -> Tensor:
                 if image.shape != shape:
                     raise ValueError(f"Images with different shapes in one batch: {shape} and {image.shape}")
 
-        # PyTorch doesn't stack nested lists of tensors. Stacking the tensors in two steps would cause the data to be copied
-        # twice, so instead we'll first flatten the hierarchy and then reshape in the end.
+        # PyTorch doesn't stack nested lists of tensors. Stacking the tensors in two steps would cause the data to be
+        # copied twice, so instead we'll first flatten the hierarchy and then reshape in the end.
         flat_images = [image for image_transforms in images for image in image_transforms]
         flat_images = torch.stack(flat_images)  # [batch_size * num_transforms, channels, height, width]
         return flat_images.view(batch_size, num_transforms, *shape)
