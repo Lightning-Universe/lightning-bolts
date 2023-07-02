@@ -28,31 +28,52 @@ def validate_batch(batch: Tuple[List[List[Tensor]], List[Any]]) -> Tensor:
         raise ValueError(f"Got {batch_size} image pairs, but {len(targets)} targets.")
 
     image_transforms = images[0]
-    if not isinstance(image_transforms, (tuple, list)):
-        raise ValueError(
-            "Contrastive training expects a tuple or a list of transformed images, got "
-            f"{type(image_transforms).__name__}."
-        )
-    if len(image_transforms) < 2:
-        raise ValueError(
-            f"Contrastive training expects at least two transformations of every image, got {len(image_transforms)}."
-        )
 
-    shape = image_transforms[0].shape
-    for image_transforms in images:
-        for image in image_transforms:
-            if not isinstance(image, Tensor):
-                raise ValueError(f"Expected image to be of type Tensor, got {type(image)}.")
-            if image.shape != shape:
-                raise ValueError(f"Images with different shapes in one batch: {shape} and {image.shape}")
+    if isinstance(image_transforms, Tensor):
+        if image_transforms.ndim != 4:
+            raise ValueError(
+                "Contrastive training expects the transformed images as a tuple, a list, or a 4-dimensional tensor. "
+                f"Got a tensor with {image_transforms.ndim} dimensions."
+            )
+        shape = image_transforms.shape
+        for image_transforms in images[1:]:
+            if not isinstance(image_transforms, Tensor):
+                raise ValueError(f"Expected transformed images in a tensor, got {type(image)}.")
+            if image_transforms.shape != shape:
+                raise ValueError(
+                    f"Different shapes for transformed images in one batch: {shape} and {image_transforms.shape}"
+                )
 
-    # PyTorch doesn't stack nested lists of tensors. Stacking the tensors in two steps would cause the data to be copied
-    # twice, so instead we'll first flatten the hierarchy and then reshape in the end.
-    flat_images = [image for image_pair in images for image in image_pair]
-    flat_images = torch.stack(flat_images)  # [batch_size * 2, channels, height, width]
-    images = flat_images.view(batch_size, 2, *shape)
+        return torch.stack(images)
 
-    return images
+    if isinstance(image_transforms, (tuple, list)):
+        num_transforms = len(image_transforms)
+        if num_transforms < 2:
+            raise ValueError(
+                f"Contrastive training expects at least two transformations of every image, got {num_transforms}."
+            )
+        if not isinstance(image_transforms[0], Tensor):
+            raise ValueError(
+                f"Expected image to be of type Tensor, got {type(image_transforms[0]).__name__}."
+            )
+        shape = image_transforms[0].shape
+        for image_transforms in images:
+            for image in image_transforms:
+                if not isinstance(image, Tensor):
+                    raise ValueError(f"Expected image to be of type Tensor, got {type(image).__name__}.")
+                if image.shape != shape:
+                    raise ValueError(f"Images with different shapes in one batch: {shape} and {image.shape}")
+
+        # PyTorch doesn't stack nested lists of tensors. Stacking the tensors in two steps would cause the data to be copied
+        # twice, so instead we'll first flatten the hierarchy and then reshape in the end.
+        flat_images = [image for image_transforms in images for image in image_transforms]
+        flat_images = torch.stack(flat_images)  # [batch_size * num_transforms, channels, height, width]
+        return flat_images.view(batch_size, num_transforms, *shape)
+
+    raise ValueError(
+        "Contrastive training expects the transformed images as a tuple, a list, or a 4-dimensional tensor. Got "
+        f"{type(image_transforms).__name__}."
+    )
 
 
 class ConcatenateAll(torch.autograd.Function):
