@@ -87,7 +87,7 @@ _ARG_WORKERS_0 = " --num_workers=0"
         ),
         pytest.param(
             "models.self_supervised.moco.moco_module",
-            _DEFAULT_ARGS + _ARG_WORKERS_0 + _ARG_GPUS,
+            _DEFAULT_LIGHTNING_CLI_ARGS + f" --data.num_workers=0 --trainer.gpus={int(torch.cuda.is_available())}",
             marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU),
         ),
         pytest.param(
