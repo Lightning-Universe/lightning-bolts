@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 import torch
-from pl_bolts.utils import _IS_WINDOWS, _JSONARGPARSE_GREATER_THAN_4_16_0
+from pl_bolts.utils import _GYM_GREATER_EQUAL_0_20, _IS_WINDOWS, _JSONARGPARSE_GREATER_THAN_4_16_0
 
 from tests import _MARK_REQUIRE_GPU, DATASETS_PATH
 
@@ -54,7 +54,13 @@ _ARG_WORKERS_0 = " --num_workers=0"
         ("models.rl.reinforce_model", _DEFAULT_ARGS_CARTPOLE),
         ("models.rl.vanilla_policy_gradient_model", _DEFAULT_ARGS_CARTPOLE),
         ("models.rl.advantage_actor_critic_model", _DEFAULT_ARGS_CARTPOLE),
-        ("models.rl.sac_model", "--env=Pendulum-v0 --max_steps=10 --fast_dev_run=1 --batch_size=10"),
+        pytest.param(
+            "models.rl.sac_model",
+            "--env=Pendulum-v0 --max_steps=10 --fast_dev_run=1 --batch_size=10",
+            marks=pytest.mark.skipif(
+                _GYM_GREATER_EQUAL_0_20, reason="gym.error.DeprecatedEnv: Env Pendulum-v0 not found"
+            ),
+        ),
         pytest.param(  # fixme
             "models.self_supervised.amdim.amdim_module",
             _DEFAULT_ARGS + _ARG_WORKERS_0 + _ARG_GPUS,
