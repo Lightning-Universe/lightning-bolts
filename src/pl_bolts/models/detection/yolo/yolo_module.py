@@ -4,7 +4,6 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 import torch
 import torch.nn as nn
 from pytorch_lightning import LightningModule
-from pytorch_lightning.utilities.cli import LightningCLI
 from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch import Tensor, optim
 
@@ -615,4 +614,13 @@ class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
 
 
 if __name__ == "__main__":
-    LightningCLI(CLIYOLO, ResizedVOCDetectionDataModule, seed_everything_default=42)
+    try:  # Backward compatibility for Lightning CLI
+        import pytorch_lightning.cli
+
+        cli_class: Any = getattr(pytorch_lightning.cli, "LightningCLI")  # PL v1.9+
+    except Exception:
+        import pytorch_lightning.utilities.cli
+
+        cli_class = getattr(pytorch_lightning.utilities.cli, "LightningCLI")  # PL v1.8
+
+    cli_class(CLIYOLO, ResizedVOCDetectionDataModule, seed_everything_default=42)
