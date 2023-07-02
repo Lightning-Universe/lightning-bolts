@@ -79,7 +79,7 @@ with open(os.path.join(_PATH_HERE, "CHANGELOG.md"), "w") as fp:
 
 # If your documentation needs a minimal Sphinx version, state it here.
 
-needs_sphinx = "4.2"
+needs_sphinx = "6.2"
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -134,7 +134,7 @@ master_doc = "index"
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -402,7 +402,7 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer, LightningModule
 
-from pl_bolts.utils import _SPARSEML_AVAILABLE
+from pl_bolts.utils import _SPARSEML_TORCH_SATISFIED
 
 """
 coverage_skip_undoc_in_source = True

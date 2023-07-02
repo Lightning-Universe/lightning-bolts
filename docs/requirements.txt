@@ -1,14 +1,15 @@
-sphinx==4.2  # fails with sphinx.ext.viewcode  # fails with sphinx_paramlinks
+sphinx ==6.2
 recommonmark  # fails with badges
 mistune < 2.0
 m2r  # fails with multi-line text
-nbsphinx>=0.8
-pandoc>=1.0
-docutils>=0.16
-sphinxcontrib-fulltoc>=1.0
+nbsphinx >0.8, <=0.9.2
+pandoc >2.0, <=2.3
+# docutils
+sphinxcontrib-fulltoc >1.0, <=1.2.0
 sphinxcontrib-mockautodoc
-https://github.com/PyTorchLightning/lightning_sphinx_theme/archive/master.zip#egg=pt-lightning-sphinx-theme
-sphinx-autodoc-typehints>=1.0
-sphinx-paramlinks>=0.4.0
-sphinx-togglebutton>=0.2
-sphinx-copybutton>=0.3
+sphinx-autodoc-typehints >1.0, <=1.17.1
+sphinx-paramlinks >0.4.0, <=0.5.4
+sphinx-togglebutton >0.2, <=0.3.2
+sphinx-copybutton >0.3, <=0.5.2
+
+pt-lightning-sphinx-theme @ https://github.com/PyTorchLightning/lightning_sphinx_theme/archive/master.zip
