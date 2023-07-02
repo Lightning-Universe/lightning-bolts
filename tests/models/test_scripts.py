@@ -86,7 +86,7 @@ _ARG_WORKERS_0 = " --num_workers=0"
             ],
         ),
         pytest.param(
-            "models.self_supervised.moco.moco2_module",
+            "models.self_supervised.moco.moco_module",
             _DEFAULT_ARGS + _ARG_WORKERS_0 + _ARG_GPUS,
             marks=pytest.mark.skipif(**_MARK_REQUIRE_GPU),
         ),
