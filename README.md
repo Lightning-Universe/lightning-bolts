@@ -12,19 +12,19 @@ ______________________________________________________________________
   <a href="https://lightning-bolts.readthedocs.io/en/stable/">Stable Docs</a> •
   <a href="#what-is-bolts">About</a> •
   <a href="#team">Community</a> •
-  <a href="https://www.pytorchlightning.ai/">Website</a> •
-  <a href="https://www.grid.ai/">Grid AI</a> •
+  <a href="https://www.lightning.ai/">Website</a> •
   <a href="#license">License</a>
 </p>
 
 [![PyPI Status](https://badge.fury.io/py/lightning-bolts.svg)](https://badge.fury.io/py/lightning-bolts)
 [![PyPI Status](https://pepy.tech/badge/lightning-bolts)](https://pepy.tech/project/lightning-bolts)
-[![Build Status](https://dev.azure.com/Lightning-AI/lightning%20Bolts/_apis/build/status/Lightning-AI.lightning-bolts?branchName=master)](https://dev.azure.com/Lightning-AI/lightning%20Bolts/_build?definitionId=31&_a=summary&repositoryFilter=13&branchFilter=4923%2C4923)
-[![codecov](https://codecov.io/gh/Lightning-AI/lightning-bolts/branch/master/graph/badge.svg?token=O8p0qhvj90)](https://codecov.io/gh/Lightning-AI/lightning-bolts)
+[![Build Status](https://dev.azure.com/Lightning-AI/compatibility/_apis/build/status%2Fprojects%2FLightning-Universe.Bolts?branchName=master)](https://dev.azure.com/Lightning-AI/compatibility/_build/latest?definitionId=51&branchName=master)
+[![codecov](https://codecov.io/gh/Lightning-Universe/lightning-bolts/branch/master/graph/badge.svg?token=O8p0qhvj90)](https://codecov.io/gh/Lightning-Universe/lightning-bolts)
 
 [![Documentation Status](https://readthedocs.org/projects/lightning-bolts/badge/?version=latest)](https://lightning-bolts.readthedocs.io/en/latest/)
 [![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://www.pytorchlightning.ai/community)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/PytorchLightning/lightning-bolts/blob/master/LICENSE)
+[![DOI](https://zenodo.org/badge/250025410.svg)](https://zenodo.org/badge/latestdoi/250025410)
 
 </div>
 
@@ -125,21 +125,6 @@ Bolts is supported by the PyTorch Lightning team and the PyTorch Lightning commu
 Join our Slack and/or read our [CONTRIBUTING](./.github/CONTRIBUTING.md) guidelines to get help becoming a contributor!
 
 ______________________________________________________________________
-
-## Citation
-
-To cite bolts use:
-
-```
-@article{falcon2020framework,
-  title={A Framework For Contrastive Self-Supervised Learning And Designing A New Approach},
-  author={Falcon, William and Cho, Kyunghyun},
-  journal={arXiv preprint arXiv:2009.00104},
-  year={2020}
-}
-```
-
-To cite other contributed models or modules, please cite the authors directly (if they don't have bibtex, ping the authors on a GH issue)
 
 ## License
 
