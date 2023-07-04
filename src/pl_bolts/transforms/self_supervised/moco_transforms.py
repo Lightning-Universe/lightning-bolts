@@ -255,5 +255,4 @@ class GaussianBlur:
 
     def __call__(self, x):
         sigma = random.uniform(self.sigma[0], self.sigma[1])  # noqa: S311
-        x = x.filter(ImageFilter.GaussianBlur(radius=sigma))
-        return x
+        return x.filter(ImageFilter.GaussianBlur(radius=sigma))

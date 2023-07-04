@@ -13,8 +13,7 @@ from pl_bolts.utils.stability import under_review
 def _shape_input(x):
     """Shape batch of images for input into GPT2 model."""
     x = x.view(x.shape[0], -1)  # flatten images into sequences
-    x = x.transpose(0, 1).contiguous()  # to shape [seq len, batch]
-    return x
+    return x.transpose(0, 1).contiguous()  # to shape [seq len, batch]
 
 
 @under_review()
