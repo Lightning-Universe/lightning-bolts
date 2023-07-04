@@ -170,8 +170,7 @@ class ModuleDataMonitorModel(LightningModule):
         self.layer2_input = x
         x = self.layer2(x)
         self.layer2_output = x
-        x = torch.relu(x - 2)
-        return x
+        return torch.relu(x - 2)
 
 
 @mock.patch("pl_bolts.callbacks.data_monitor.ModuleDataMonitor.log_histogram")

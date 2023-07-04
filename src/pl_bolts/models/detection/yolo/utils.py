@@ -148,8 +148,7 @@ def box_size_ratio(wh1: Tensor, wh2: Tensor) -> Tensor:
     """
     wh_ratio = wh1[:, None, :] / wh2[None, :, :]  # [M, N, 2]
     wh_ratio = torch.max(wh_ratio, 1.0 / wh_ratio)
-    wh_ratio = wh_ratio.max(2).values  # [M, N]
-    return wh_ratio
+    return wh_ratio.max(2).values  # [M, N]
 
 
 @torch.jit.script
