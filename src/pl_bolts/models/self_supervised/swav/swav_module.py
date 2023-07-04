@@ -1,17 +1,15 @@
 """Adapted from official swav implementation: https://github.com/facebookresearch/swav."""
 import os
-
 from argparse import ArgumentParser
 
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from torch import nn
-from pl_bolts.models.self_supervised.swav.loss import SWAVLoss
 
+from pl_bolts.models.self_supervised.swav.loss import SWAVLoss
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet18, resnet50
 from pl_bolts.models.self_supervised.swav.swav_swin import swin_b, swin_s, swin_v2_b, swin_v2_s, swin_v2_t
-
 from pl_bolts.optimizers.lars import LARS
 from pl_bolts.optimizers.lr_scheduler import linear_warmup_decay
 from pl_bolts.transforms.dataset_normalizations import (
@@ -19,6 +17,7 @@ from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization,
     stl10_normalization,
 )
+
 swav_backbones = {
     "resnet18": resnet18,
     "resnet50": resnet50,
@@ -26,8 +25,9 @@ swav_backbones = {
     "swin_b": swin_b,
     "swin_v2_t": swin_v2_t,
     "swin_v2_s": swin_v2_s,
-    "swin_v2_b": swin_v2_b
+    "swin_v2_b": swin_v2_b,
 }
+
 
 class SwAV(LightningModule):
     def __init__(
@@ -406,7 +406,7 @@ def cli_main():
         args.num_samples = dm.num_unlabeled_samples
 
         args.maxpool1 = False
-        
+
         normalization = stl10_normalization()
     elif args.dataset == "cifar10":
         args.batch_size = 2

@@ -160,8 +160,7 @@ def _patch_merging_pad(x: torch.Tensor) -> torch.Tensor:
     x1 = x[..., 1::2, 0::2, :]  # ... H/2 W/2 C
     x2 = x[..., 0::2, 1::2, :]  # ... H/2 W/2 C
     x3 = x[..., 1::2, 1::2, :]  # ... H/2 W/2 C
-    x = torch.cat([x0, x1, x2, x3], -1)  # ... H/2 W/2 4*C
-    return x
+    return torch.cat([x0, x1, x2, x3], -1)  # ... H/2 W/2 4*C
 
 
 torch.fx.wrap("_patch_merging_pad")
@@ -173,8 +172,7 @@ def _get_relative_position_bias(
     n = window_size[0] * window_size[1]
     relative_position_bias = relative_position_bias_table[relative_position_index]  # type: ignore[index]
     relative_position_bias = relative_position_bias.view(n, n, -1)
-    relative_position_bias = relative_position_bias.permute(2, 0, 1).contiguous().unsqueeze(0)
-    return relative_position_bias
+    return relative_position_bias.permute(2, 0, 1).contiguous().unsqueeze(0)
 
 
 torch.fx.wrap("_get_relative_position_bias")
@@ -204,8 +202,7 @@ class PatchMerging(nn.Module):
         """
         x = _patch_merging_pad(x)
         x = self.norm(x)
-        x = self.reduction(x)  # ... H/2 W/2 2*C
-        return x
+        return self.reduction(x)  # ... H/2 W/2 2*C
 
 
 class PatchMergingV2(nn.Module):
@@ -232,8 +229,7 @@ class PatchMergingV2(nn.Module):
         """
         x = _patch_merging_pad(x)
         x = self.reduction(x)  # ... H/2 W/2 2*C
-        x = self.norm(x)
-        return x
+        return self.norm(x)
 
 
 def shifted_window_attention(
@@ -485,8 +481,7 @@ class ShiftedWindowAttentionV2(ShiftedWindowAttention):
             self.relative_position_index,  # type: ignore[arg-type]
             self.window_size,
         )
-        relative_position_bias = 16 * torch.sigmoid(relative_position_bias)
-        return relative_position_bias
+        return 16 * torch.sigmoid(relative_position_bias)
 
     def forward(self, x: Tensor):
         """
@@ -565,8 +560,7 @@ class SwinTransformerBlock(nn.Module):
 
     def forward(self, x: Tensor):
         x = x + self.stochastic_depth(self.attn(self.norm1(x)))
-        x = x + self.stochastic_depth(self.mlp(self.norm2(x)))
-        return x
+        return x + self.stochastic_depth(self.mlp(self.norm2(x)))
 
 
 class SwinTransformerBlockV2(SwinTransformerBlock):
@@ -615,8 +609,7 @@ class SwinTransformerBlockV2(SwinTransformerBlock):
         # Here is the difference, we apply norm after the attention in V2.
         # In V1 we applied norm before the attention.
         x = x + self.stochastic_depth(self.norm1(self.attn(x)))
-        x = x + self.stochastic_depth(self.norm2(self.mlp(x)))
-        return x
+        return x + self.stochastic_depth(self.norm2(self.mlp(x)))
 
 
 class SwinTransformer(nn.Module):
@@ -758,8 +751,7 @@ class SwinTransformer(nn.Module):
             return x
 
         x = self.avgpool(x)
-        x = self.flatten(x)
-        return x
+        return self.flatten(x)
 
     def forward_head(self, x):
         if self.projection_head is not None:
@@ -794,6 +786,7 @@ class SwinTransformer(nn.Module):
             output = _out if start_idx == 0 else torch.cat((output, _out))
             start_idx = end_idx
         return self.forward_head(output)
+
 
 class MultiPrototypes(nn.Module):
     def __init__(self, output_dim, nmb_prototypes):
