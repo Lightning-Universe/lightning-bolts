@@ -1,9 +1,6 @@
-import sys
-
-sys.path.append("/home/amhamdi/Desktop/lightning/lightning-bolts/src")
 import pytest
 import torch
-from pl_bolts.models.self_supervised.swav import swav_module , swav_finetuner 
+
 from pl_bolts.models.self_supervised.swav.swav_swin import swin_b, swin_s, swin_v2_b, swin_v2_s, swin_v2_t
 import torch.nn as nn
 
