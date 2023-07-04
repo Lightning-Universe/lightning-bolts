@@ -167,12 +167,11 @@ class SwAV(LightningModule):
     def init_model(self):
         backbone = swav_backbones.get(self.arch, None)
         assert backbone is not None, "backbone is not implemented!"
-
         return backbone(
             normalize=True,
             hidden_mlp=self.hidden_mlp,
             output_dim=self.feat_dim,
-            num_prototypes=self.num_prototypes,
+            nmb_prototypes=self.num_prototypes,
             first_conv=self.first_conv,
             maxpool1=self.maxpool1,
         )
@@ -407,7 +406,7 @@ def cli_main():
         args.num_samples = dm.num_unlabeled_samples
 
         args.maxpool1 = False
-
+        
         normalization = stl10_normalization()
     elif args.dataset == "cifar10":
         args.batch_size = 2

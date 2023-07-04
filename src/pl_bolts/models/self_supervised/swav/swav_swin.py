@@ -318,9 +318,9 @@ def shifted_window_attention(
         h_slices = ((0, -window_size[0]), (-window_size[0], -shift_size[0]), (-shift_size[0], None))
         w_slices = ((0, -window_size[1]), (-window_size[1], -shift_size[1]), (-shift_size[1], None))
         count = 0
-        for h in h_slices:
-            for w in w_slices:
-                attn_mask[h[0] : h[1], w[0] : w[1]] = count
+        for h_sli in h_slices:
+            for w_sli in w_slices:
+                attn_mask[h_sli[0] : h_sli[1], w_sli[0] : w_sli[1]] = count
                 count += 1
         attn_mask = attn_mask.view(pad_h // window_size[0], window_size[0], pad_w // window_size[1], window_size[1])
         attn_mask = attn_mask.permute(0, 2, 1, 3).reshape(num_windows, window_size[0] * window_size[1])
@@ -344,7 +344,6 @@ def shifted_window_attention(
     # reverse cyclic shift
     if sum(shift_size) > 0:
         x = torch.roll(x, shifts=(shift_size[0], shift_size[1]), dims=(1, 2))
-
     # unpad features
     return x[:, :h, :w, :].contiguous()
 
@@ -795,7 +794,6 @@ class SwinTransformer(nn.Module):
             output = _out if start_idx == 0 else torch.cat((output, _out))
             start_idx = end_idx
         return self.forward_head(output)
-
 
 class MultiPrototypes(nn.Module):
     def __init__(self, output_dim, nmb_prototypes):
