@@ -91,7 +91,6 @@ class BasicBlock(nn.Module):
         return self.relu(out)
 
 
-
 @under_review()
 class Bottleneck(nn.Module):
     expansion = 4
@@ -133,7 +132,6 @@ class Bottleneck(nn.Module):
 
         out += identity
         return self.relu(out)
-
 
 
 @under_review()

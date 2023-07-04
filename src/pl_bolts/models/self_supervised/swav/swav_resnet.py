@@ -70,7 +70,6 @@ class BasicBlock(nn.Module):
         return self.relu(out)
 
 
-
 class Bottleneck(nn.Module):
     expansion = 4
     __constants__ = ["downsample"]
@@ -120,7 +119,6 @@ class Bottleneck(nn.Module):
 
         out += identity
         return self.relu(out)
-
 
 
 class ResNet(nn.Module):
@@ -293,7 +291,6 @@ class ResNet(nn.Module):
 
         x = self.avgpool(x)
         return torch.flatten(x, 1)
-
 
     def forward_head(self, x):
         if self.projection_head is not None:

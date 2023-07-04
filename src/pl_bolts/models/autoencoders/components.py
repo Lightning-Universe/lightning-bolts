@@ -77,7 +77,6 @@ class EncoderBlock(nn.Module):
         return self.relu(out)
 
 
-
 @under_review()
 class EncoderBottleneck(nn.Module):
     """ResNet bottleneck, copied from
@@ -149,7 +148,6 @@ class DecoderBlock(nn.Module):
 
         out += identity
         return self.relu(out)
-
 
 
 @under_review()

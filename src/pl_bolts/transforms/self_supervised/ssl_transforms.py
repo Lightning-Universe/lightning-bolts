@@ -75,4 +75,3 @@ class Patchify:
         x = x.view(-1, c, self.patch_size, self.patch_size)
 
         return x.squeeze(0)
-

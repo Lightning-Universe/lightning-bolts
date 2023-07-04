@@ -181,7 +181,6 @@ class AdvantageActorCritic(LightningModule):
         # reverse list and stop the gradients
         return torch.tensor(returns[::-1])
 
-
     def loss(
         self,
         states: Tensor,

@@ -128,7 +128,6 @@ class CPCResNet(nn.Module):
         return self.layer4(x)
 
 
-
 @under_review()
 def cpc_resnet101(sample_batch, **kwargs):
     return CPCResNet(sample_batch, LNBottleneck, [3, 4, 46, 3], **kwargs)
@@ -201,7 +200,6 @@ class LNBottleneck(nn.Module):
 
         out += identity
         return self.relu(out)
-
 
 
 @under_review()

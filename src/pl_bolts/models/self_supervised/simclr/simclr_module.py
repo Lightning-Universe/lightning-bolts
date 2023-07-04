@@ -29,7 +29,6 @@ class SyncFunction(torch.autograd.Function):
         torch.distributed.all_gather(gathered_tensor, tensor)
         return torch.cat(gathered_tensor, 0)
 
-
     @staticmethod
     def backward(ctx, grad_output):
         grad_input = grad_output.clone()
