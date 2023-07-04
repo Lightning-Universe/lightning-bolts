@@ -102,13 +102,12 @@ def _load_readme_description(path_dir: str, homepage: str, ver: str) -> str:
     skip_begin = r"<!-- following section will be skipped from PyPI description -->"
     skip_end = r"<!-- end skipping PyPI description -->"
     # todo: wrap content as commented description
-    text = re.sub(rf"{skip_begin}.+?{skip_end}", "<!--  -->", text, flags=re.IGNORECASE + re.DOTALL)
+    return re.sub(rf"{skip_begin}.+?{skip_end}", "<!--  -->", text, flags=re.IGNORECASE + re.DOTALL)
 
     # # https://github.com/Borda/pytorch-lightning/releases/download/1.1.0a6/codecov_badge.png
     # github_release_url = os.path.join(homepage, "releases", "download", ver)
     # # download badge and replace url with local file
     # text = _parse_for_badge(text, github_release_url)
-    return text
 
 
 def _prepare_extras():

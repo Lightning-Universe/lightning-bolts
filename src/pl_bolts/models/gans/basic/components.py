@@ -20,8 +20,7 @@ class Generator(nn.Module):
         z = F.leaky_relu(self.fc2(z), 0.2)
         z = F.leaky_relu(self.fc3(z), 0.2)
         img = torch.tanh(self.fc4(z))
-        img = img.view(img.size(0), *self.img_shape)
-        return img
+        return img.view(img.size(0), *self.img_shape)
 
 
 class Discriminator(nn.Module):
