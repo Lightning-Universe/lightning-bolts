@@ -649,7 +649,7 @@ class SwinTransformer(nn.Module):
         normalize=False,
         output_dim=0,
         hidden_mlp=0,
-        nmb_prototypes=0,
+        num_prototypes=0,
         eval_mode=False,
         **kwargs: Any,
     ):
@@ -729,10 +729,10 @@ class SwinTransformer(nn.Module):
 
         # prototype layer
         self.prototypes = None
-        if isinstance(nmb_prototypes, list):
-            self.prototypes = MultiPrototypes(output_dim, nmb_prototypes)
-        elif nmb_prototypes > 0:
-            self.prototypes = nn.Linear(output_dim, nmb_prototypes, bias=False)
+        if isinstance(num_prototypes, list):
+            self.prototypes = MultiPrototypes(output_dim, num_prototypes)
+        elif num_prototypes > 0:
+            self.prototypes = nn.Linear(output_dim, num_prototypes, bias=False)
 
         for m in self.modules():
             if isinstance(m, nn.Linear):
@@ -789,10 +789,10 @@ class SwinTransformer(nn.Module):
 
 
 class MultiPrototypes(nn.Module):
-    def __init__(self, output_dim, nmb_prototypes):
+    def __init__(self, output_dim, num_prototypes):
         super().__init__()
-        self.nmb_heads = len(nmb_prototypes)
-        for i, k in enumerate(nmb_prototypes):
+        self.nmb_heads = len(num_prototypes)
+        for i, k in enumerate(num_prototypes):
             self.add_module("prototypes" + str(i), nn.Linear(output_dim, k, bias=False))
 
     def forward(self, x):

@@ -171,7 +171,7 @@ class SwAV(LightningModule):
             normalize=True,
             hidden_mlp=self.hidden_mlp,
             output_dim=self.feat_dim,
-            nmb_prototypes=self.num_prototypes,
+            num_prototypes=self.num_prototypes,
             first_conv=self.first_conv,
             maxpool1=self.maxpool1,
         )
