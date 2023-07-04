@@ -314,8 +314,7 @@ class YOLO(LightningModule):
         """
         images, _ = batch
         detections = self(images)
-        detections = self.process_detections(detections)
-        return detections
+        return self.process_detections(detections)
 
     def infer(self, image: Tensor) -> PRED:
         """Feeds an image to the network and returns the detected bounding boxes, confidence scores, and class

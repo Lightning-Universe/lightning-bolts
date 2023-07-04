@@ -114,8 +114,7 @@ class CPCResNet(nn.Module):
 
     def flatten(self, x):
         x = x.view(self.batch_size, -1)
-        x = F.avg_pool1d(x.unsqueeze(1), 4).squeeze(1)
-        return x
+        return F.avg_pool1d(x.unsqueeze(1), 4).squeeze(1)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -126,9 +125,7 @@ class CPCResNet(nn.Module):
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
-        x = self.layer4(x)
-
-        return x
+        return self.layer4(x)
 
 
 @under_review()
@@ -202,9 +199,7 @@ class LNBottleneck(nn.Module):
             identity = self.downsample(x)
 
         out += identity
-        out = self.relu(out)
-
-        return out
+        return self.relu(out)
 
 
 @under_review()
