@@ -179,9 +179,8 @@ class AdvantageActorCritic(LightningModule):
             returns.append(g)
 
         # reverse list and stop the gradients
-        returns = torch.tensor(returns[::-1])
+        return torch.tensor(returns[::-1])
 
-        return returns
 
     def loss(
         self,

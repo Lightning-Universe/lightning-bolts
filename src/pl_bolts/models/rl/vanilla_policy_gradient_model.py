@@ -172,9 +172,8 @@ class VanillaPolicyGradient(LightningModule):
             returns.insert(0, reward)
 
         returns = torch.tensor(returns)
-        returns = (returns - returns.mean()) / (returns.std() + self.eps)
+        return (returns - returns.mean()) / (returns.std() + self.eps)
 
-        return returns
 
     def loss(self, states, actions, scaled_rewards) -> Tensor:
         """Calculates the loss for VPG.

@@ -77,8 +77,7 @@ class SRGANGenerator(nn.Module):
         x_res = self.input_block(x)
         x = x_res + self.res_blocks(x_res)
         x = self.ps_blocks(x)
-        x = self.output_block(x)
-        return x
+        return self.output_block(x)
 
 
 @under_review()
@@ -131,8 +130,7 @@ class SRGANDiscriminator(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.conv_blocks(x)
-        x = self.mlp(x)
-        return x
+        return self.mlp(x)
 
 
 @under_review()

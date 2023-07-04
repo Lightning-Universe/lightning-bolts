@@ -27,9 +27,8 @@ class SyncFunction(torch.autograd.Function):
         gathered_tensor = [torch.zeros_like(tensor) for _ in range(torch.distributed.get_world_size())]
 
         torch.distributed.all_gather(gathered_tensor, tensor)
-        gathered_tensor = torch.cat(gathered_tensor, 0)
+        return torch.cat(gathered_tensor, 0)
 
-        return gathered_tensor
 
     @staticmethod
     def backward(ctx, grad_output):

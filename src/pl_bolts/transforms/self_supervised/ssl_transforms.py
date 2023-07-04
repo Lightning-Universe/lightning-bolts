@@ -49,10 +49,9 @@ class RandomTranslateWithReflect:
         new_image.paste(flipped_both, (xpad - xsize + 1, ypad + ysize - 1))
         new_image.paste(flipped_both, (xpad + xsize - 1, ypad + ysize - 1))
 
-        new_image = new_image.crop(
+        return new_image.crop(
             (xpad - xtranslation, ypad - ytranslation, xpad + xsize - xtranslation, ypad + ysize - ytranslation)
         )
-        return new_image
 
 
 @under_review()
@@ -75,6 +74,5 @@ class Patchify:
         # reshape to have (b x patches, c, h, w)
         x = x.view(-1, c, self.patch_size, self.patch_size)
 
-        x = x.squeeze(0)
+        return x.squeeze(0)
 
-        return x

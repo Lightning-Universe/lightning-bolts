@@ -88,9 +88,8 @@ class BasicBlock(nn.Module):
             identity = self.downsample(x)
 
         out += identity
-        out = self.relu(out)
+        return self.relu(out)
 
-        return out
 
 
 @under_review()
@@ -133,9 +132,8 @@ class Bottleneck(nn.Module):
             identity = self.downsample(x)
 
         out += identity
-        out = self.relu(out)
+        return self.relu(out)
 
-        return out
 
 
 @under_review()

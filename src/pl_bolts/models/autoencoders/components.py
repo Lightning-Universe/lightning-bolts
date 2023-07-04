@@ -74,9 +74,8 @@ class EncoderBlock(nn.Module):
             identity = self.downsample(x)
 
         out += identity
-        out = self.relu(out)
+        return self.relu(out)
 
-        return out
 
 
 @under_review()
@@ -117,8 +116,7 @@ class EncoderBottleneck(nn.Module):
             identity = self.downsample(x)
 
         out += identity
-        out = self.relu(out)
-        return out
+        return self.relu(out)
 
 
 @under_review()
@@ -150,9 +148,8 @@ class DecoderBlock(nn.Module):
             identity = self.upsample(x)
 
         out += identity
-        out = self.relu(out)
+        return self.relu(out)
 
-        return out
 
 
 @under_review()
@@ -192,8 +189,7 @@ class DecoderBottleneck(nn.Module):
             identity = self.upsample(x)
 
         out += identity
-        out = self.relu(out)
-        return out
+        return self.relu(out)
 
 
 @under_review()
@@ -252,8 +248,7 @@ class ResNetEncoder(nn.Module):
         x = self.layer4(x)
 
         x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-        return x
+        return torch.flatten(x, 1)
 
 
 @under_review()
@@ -325,8 +320,7 @@ class ResNetDecoder(nn.Module):
         x = self.layer4(x)
         x = self.upscale(x)
 
-        x = self.conv1(x)
-        return x
+        return self.conv1(x)
 
 
 @under_review()
