@@ -1,29 +1,23 @@
-from typing import (
-    List, Optional, Union, Any
-    )
-
 import math
 from functools import partial
 from types import FunctionType
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, Union
 
+import packaging.version as pv
 import torch
 import torch.fx
 import torch.nn.functional as F  # noqa: N812
-from torch import Tensor, nn
-import packaging.version as pv 
-
 import torchvision
+from torch import Tensor, nn
 
-# Support for functions not found in older versions of torchvision 
+# Support for functions not found in older versions of torchvision
 if pv.parse(torchvision.__version__) >= pv.parse("0.13"):
     from torchvision.ops.misc import MLP, Permute
     from torchvision.ops.stochastic_depth import StochasticDepth
     from torchvision.utils import _log_api_usage_once
 else:
-    """
-    The functions below are copied from the torchvision implementation.
-    """
+    """The functions below are copied from the torchvision implementation."""
+
     def _log_api_usage_once(obj: Any) -> None:
         """Logs API usage(module and name) within an organization. In a large ecosystem, it's often useful to track the
         PyTorch and TorchVision APIs usage. This API provides the similar functionality to the logging module in the
@@ -79,7 +73,7 @@ else:
         if survival_rate > 0.0:
             noise.div_(survival_rate)
         return input * noise
-   
+
     torch.fx.wrap("stochastic_depth")
 
     class StochasticDepth(nn.Module):
@@ -158,15 +152,15 @@ else:
         def forward(self, x: Tensor) -> Tensor:
             return torch.permute(x, self.dims)
 
+
 # Support meshgrid indexing for older versions of torch
-def meshgrid(*tensors: Union[Tensor, List[Tensor]],
-             indexing: Optional[str] = None):
+def meshgrid(*tensors: Union[Tensor, List[Tensor]], indexing: Optional[str] = None):
     if pv.parse(torch.__version__) >= pv.parse("1.10.0"):
         return torch.meshgrid(*tensors, indexing=indexing)
     else:
         return torch.meshgrid(*tensors)
 
-    
+
 def _patch_merging_pad(x: torch.Tensor) -> torch.Tensor:
     h, w, _ = x.shape[-3:]
     x = F.pad(x, (0, 0, 0, w % 2, 0, h % 2))
