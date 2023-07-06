@@ -20,20 +20,20 @@ else:
 
     def _log_api_usage_once(obj: Any) -> None:
         """Logs API usage(module and name) within an organization. In a large ecosystem,
-        it's often useful to track the PyTorch and TorchVision APIs usage. This API provides
-        the similar functionality to the logging module in the Python stdlib.It can be used
-        for debugging purpose to log which methods are used and by default it is inactive,
-        unless the user manually subscribes a logger via the `SetAPIUsageLogger method
-<https://github.com/pytorch/pytorch/blob/eb3b9fe719b21fae13c7a7cf3253f970290a573e/c10/util/Logging.cpp#L114>`_.
-        Please note it is triggered only once for the same API call within a process. 
-        It does not collect any data from open-source users since it is no-op by default.
+                it's often useful to track the PyTorch and TorchVision APIs usage. This API provides
+                the similar functionality to the logging module in the Python stdlib.It can be used
+                for debugging purpose to log which methods are used and by default it is inactive,
+                unless the user manually subscribes a logger via the `SetAPIUsageLogger method
+        <https://github.com/pytorch/pytorch/blob/eb3b9fe719b21fae13c7a7cf3253f970290a573e/c10/util/Logging.cpp#L114>`_.
+                Please note it is triggered only once for the same API call within a process.
+                It does not collect any data from open-source users since it is no-op by default.
 
-        For more information, please refer to
-        * PyTorch note: https://pytorch.org/docs/stable/notes/large_scale_deployments.html#api-usage-logging;
-        * Logging policy: https://github.com/pytorch/vision/issues/5052;
+                For more information, please refer to
+                * PyTorch note: https://pytorch.org/docs/stable/notes/large_scale_deployments.html#api-usage-logging;
+                * Logging policy: https://github.com/pytorch/vision/issues/5052;
 
-        Args:
-            obj: an object to extract info from.
+                Args:
+                    obj: an object to extract info from.
         """
         module = obj.__module__
         if not module.startswith("torchvision"):
@@ -104,10 +104,10 @@ else:
                 If ``None`` this layer won't be used.
             activation_layer:
                 Activation function which will be stacked on top of the normalization layer (if not None),
-                otherwise on top of the linear layer. 
+                otherwise on top of the linear layer.
                 If ``None`` this layer won't be used. Default: ``torch.nn.ReLU``
             inplace: Parameter for the activation layer, which can optionally do the operation in-place.
-                Default is ``None``, which uses the respective default values of the ``activation_layer`` 
+                Default is ``None``, which uses the respective default values of the ``activation_layer``
                 and Dropout layer.
             bias: Whether to use bias in the linear layer. Default ``True``
             dropout: The probability for the dropout layer. Default: 0.0
@@ -412,7 +412,7 @@ class ShiftedWindowAttention(nn.Module):
 
     def get_relative_position_bias(self) -> torch.Tensor:
         return _get_relative_position_bias(
-        self.relative_position_bias_table, self.relative_position_index, self.window_size  # type: ignore[arg-type]
+            self.relative_position_bias_table, self.relative_position_index, self.window_size  # type: ignore[arg-type]
         )
 
     def forward(self, x: Tensor):
@@ -477,7 +477,7 @@ class ShiftedWindowAttentionV2(ShiftedWindowAttention):
         relative_coords_h = torch.arange(-(self.window_size[0] - 1), self.window_size[0], dtype=torch.float32)
         relative_coords_w = torch.arange(-(self.window_size[1] - 1), self.window_size[1], dtype=torch.float32)
         relative_coords_table = torch.stack(meshgrid([relative_coords_h, relative_coords_w], indexing="ij"))
-        relative_coords_table = relative_coords_table.permute(1, 2, 0).contiguous().unsqueeze(0)# 1,2*Wh-1,2*Ww-1,2
+        relative_coords_table = relative_coords_table.permute(1, 2, 0).contiguous().unsqueeze(0)  # 1,2*Wh-1,2*Ww-1,2
 
         relative_coords_table[:, :, :, 0] /= self.window_size[0] - 1
         relative_coords_table[:, :, :, 1] /= self.window_size[1] - 1
