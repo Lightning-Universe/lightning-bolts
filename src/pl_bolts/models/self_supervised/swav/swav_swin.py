@@ -162,10 +162,8 @@ else:
 def meshgrid(*tensors: Union[Tensor, List[Tensor]], indexing: Optional[str] = None):
     if pv.parse(torch.__version__) >= pv.parse("1.10.0"):
         return torch.meshgrid(*tensors, indexing=indexing)
-    else:
-        return torch.meshgrid(*tensors)
-
-
+    return torch.meshgrid(*tensors)
+    
 def _patch_merging_pad(x: torch.Tensor) -> torch.Tensor:
     h, w, _ = x.shape[-3:]
     x = F.pad(x, (0, 0, 0, w % 2, 0, h % 2))
