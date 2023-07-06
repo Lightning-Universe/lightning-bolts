@@ -1,11 +1,12 @@
-import pytest
 import warnings
+
+import pytest
 import torch
 import torch.nn as nn
 from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.models.self_supervised import SwAV
-from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 from pl_bolts.models.self_supervised.swav.swav_swin import swin_b, swin_s, swin_v2_b, swin_v2_s, swin_v2_t
+from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 from pl_bolts.transforms.self_supervised.swav_transforms import SwAVEvalDataTransform, SwAVTrainDataTransform
 from pl_bolts.utils import _IS_WINDOWS
 from pytorch_lightning import Trainer
@@ -35,9 +36,9 @@ def test_swin_projection_head(model_architecture, hidden_mlp, prj_head_type, fea
     assert isinstance(model.projection_head, prj_head_type)
 
 
-@pytest.mark.parametrize("model",["swin_s", "swin_b", "swin_v2_t", "swin_v2_s", "swin_v2_b"])
-@pytest.mark.skipif(_IS_WINDOWS, reason="numpy.core._exceptions._ArrayMemoryError...")  
-def test_swav_swin_model(tmpdir, datadir, model,catch_warnings):
+@pytest.mark.parametrize("model", ["swin_s", "swin_b", "swin_v2_t", "swin_v2_s", "swin_v2_b"])
+@pytest.mark.skipif(_IS_WINDOWS, reason="numpy.core._exceptions._ArrayMemoryError...")
+def test_swav_swin_model(tmpdir, datadir, model, catch_warnings):
     """Test SWAV on CIFAR-10."""
     warnings.filterwarnings(
         "ignore",
@@ -45,7 +46,7 @@ def test_swav_swin_model(tmpdir, datadir, model,catch_warnings):
         category=PossibleUserWarning,
     )
     warnings.filterwarnings("ignore", category=UserWarning)
-        
+
     batch_size = 2
     datamodule = CIFAR10DataModule(data_dir=datadir, batch_size=batch_size, num_workers=0)
 
@@ -84,6 +85,6 @@ def test_swav_swin_model(tmpdir, datadir, model,catch_warnings):
         default_root_dir=tmpdir,
         log_every_n_steps=1,
         max_epochs=1,
-        logger=True
+        logger=True,
     )
     trainer.fit(model, datamodule=datamodule)
