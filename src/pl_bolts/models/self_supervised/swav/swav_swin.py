@@ -1,7 +1,7 @@
 import math
 from functools import partial
 from types import FunctionType
-from typing import Any, Callable, List, Optional, Union , Tuple
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 import packaging.version as pv
 import torch
@@ -16,28 +16,28 @@ if pv.parse(torchvision.__version__) >= pv.parse("0.13"):
     from torchvision.ops.stochastic_depth import StochasticDepth
     from torchvision.utils import _log_api_usage_once
 else:
-    
     """The functions below are copied from the torchvision implementation."""
 
     if not hasattr(torchvision.utils, "_log_api_usage_once"):
+
         def _log_api_usage_once(obj: Any) -> None:
             """Logs API usage(module and name) within an organization. In a large ecosystem,
-                    it's often useful to track the PyTorch and TorchVision APIs usage. This API provides
-                    the similar functionality to the logging module in the Python stdlib.It can be used
-                    for debugging purpose to log which methods are used and by default it is inactive,
-                    unless the user manually subscribes a logger via the `SetAPIUsageLogger method
-<https://github.com/pytorch/pytorch/blob/eb3b9fe719b21fae13c7a7cf3253f970290a573e/c10/util/Logging.cpp#L114>`_.
-                    Please note it is triggered only once for the same API call within a process.
-                    It does not collect any data from open-source users since it is no-op by default.
+                                it's often useful to track the PyTorch and TorchVision APIs usage. This API provides
+                                the similar functionality to the logging module in the Python stdlib.It can be used
+                                for debugging purpose to log which methods are used and by default it is inactive,
+                                unless the user manually subscribes a logger via the `SetAPIUsageLogger method
+            <https://github.com/pytorch/pytorch/blob/eb3b9fe719b21fae13c7a7cf3253f970290a573e/c10/util/Logging.cpp#L114>`_.
+                                Please note it is triggered only once for the same API call within a process.
+                                It does not collect any data from open-source users since it is no-op by default.
 
-                    For more information, please refer to
-                    * PyTorch note:
-                    https://pytorch.org/docs/stable/notes/large_scale_deployments.html#api-usage-logging;
-                    * Logging policy:
-                    https://github.com/pytorch/vision/issues/5052;
+                                For more information, please refer to
+                                * PyTorch note:
+                                https://pytorch.org/docs/stable/notes/large_scale_deployments.html#api-usage-logging;
+                                * Logging policy:
+                                https://github.com/pytorch/vision/issues/5052;
 
-                    Args:
-                        obj: an object to extract info from.
+                                Args:
+                                    obj: an object to extract info from.
             """
             module = obj.__module__
             if not module.startswith("torchvision"):
@@ -46,7 +46,9 @@ else:
             if isinstance(obj, FunctionType):
                 name = obj.__name__
             torch._C._log_api_usage_once(f"{module}.{name}")
+
     if not hasattr(torchvision.ops, "stochastic_depth"):
+
         def stochastic_depth(input: Tensor, p: float, mode: str, training: bool = True) -> Tensor:
             """Implements the Stochastic Depth from `"Deep Networks with Stochastic Depth"
             <https://arxiv.org/abs/1603.09382>`_ used for randomly dropping residual branches
@@ -80,7 +82,7 @@ else:
             if survival_rate > 0.0:
                 noise.div_(survival_rate)
             return input * noise
-        
+
         torch.fx.wrap("stochastic_depth")
 
         class StochasticDepth(nn.Module):
@@ -97,7 +99,9 @@ else:
 
             def __repr__(self) -> str:
                 return f"{self.__class__.__name__}(p={self.p}, mode={self.mode})"
+
     if not hasattr(torchvision.ops.misc, "MLP"):
+
         class MLP(torch.nn.Sequential):
             """This block implements the multi-layer perceptron (MLP) module.
 
@@ -126,7 +130,7 @@ else:
                 inplace: Optional[bool] = None,
                 bias: bool = True,
                 dropout: float = 0.0,
-            )-> None:
+            ) -> None:
                 # The addition of `norm_layer` is inspired from the implementation of TorchMultimodal:
                 # https://github.com/facebookresearch/multimodal/blob/5dec8a/torchmultimodal/modules/layers/mlp.py
                 params = {} if inplace is None else {"inplace": inplace}
@@ -146,7 +150,9 @@ else:
 
                 super().__init__(*layers)
                 _log_api_usage_once(self)
+
     if not hasattr(torchvision.ops.misc, "Permute"):
+
         class Permute(torch.nn.Module):
             """This module returns a view of the tensor input with its dimensions permuted.
 
@@ -236,7 +242,7 @@ class PatchMergingV2(nn.Module):
         self.reduction = nn.Linear(4 * dim, 2 * dim, bias=False)
         self.norm = norm_layer(2 * dim)  # difference
 
-    def forward(self, x: Tensor) ->Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         """
         Args:
             x: input tensor with expected layout of [..., H, W, C]
@@ -261,7 +267,7 @@ def shifted_window_attention(
     qkv_bias: Optional[Tensor] = None,
     proj_bias: Optional[Tensor] = None,
     logit_scale: Optional[torch.Tensor] = None,
-)->Tensor:
+) -> Tensor:
     """Window based multi-head self attention (W-MSA) module with relative position bias.
 
     It supports both of shifted and non-shifted window.
@@ -756,7 +762,7 @@ class SwinTransformer(nn.Module):
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
 
-    def forward_backbone(self, x) ->Tensor:
+    def forward_backbone(self, x) -> Tensor:
         x = self.padding(x)
 
         x = self.features(x)
