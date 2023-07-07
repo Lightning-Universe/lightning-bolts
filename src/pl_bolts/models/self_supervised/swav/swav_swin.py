@@ -1,7 +1,7 @@
 import math
 from functools import partial
 from types import FunctionType
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union , Tuple
 
 import packaging.version as pv
 import torch
@@ -16,150 +16,154 @@ if pv.parse(torchvision.__version__) >= pv.parse("0.13"):
     from torchvision.ops.stochastic_depth import StochasticDepth
     from torchvision.utils import _log_api_usage_once
 else:
+    
     """The functions below are copied from the torchvision implementation."""
 
-    def _log_api_usage_once(obj: Any) -> None:
-        """Logs API usage(module and name) within an organization. In a large ecosystem,
-                it's often useful to track the PyTorch and TorchVision APIs usage. This API provides
-                the similar functionality to the logging module in the Python stdlib.It can be used
-                for debugging purpose to log which methods are used and by default it is inactive,
-                unless the user manually subscribes a logger via the `SetAPIUsageLogger method
-        <https://github.com/pytorch/pytorch/blob/eb3b9fe719b21fae13c7a7cf3253f970290a573e/c10/util/Logging.cpp#L114>`_.
-                Please note it is triggered only once for the same API call within a process.
-                It does not collect any data from open-source users since it is no-op by default.
+    if not hasattr(torchvision.utils, "_log_api_usage_once"):
+        def _log_api_usage_once(obj: Any) -> None:
+            """Logs API usage(module and name) within an organization. In a large ecosystem,
+                    it's often useful to track the PyTorch and TorchVision APIs usage. This API provides
+                    the similar functionality to the logging module in the Python stdlib.It can be used
+                    for debugging purpose to log which methods are used and by default it is inactive,
+                    unless the user manually subscribes a logger via the `SetAPIUsageLogger method
+<https://github.com/pytorch/pytorch/blob/eb3b9fe719b21fae13c7a7cf3253f970290a573e/c10/util/Logging.cpp#L114>`_.
+                    Please note it is triggered only once for the same API call within a process.
+                    It does not collect any data from open-source users since it is no-op by default.
 
-                For more information, please refer to
-                * PyTorch note: https://pytorch.org/docs/stable/notes/large_scale_deployments.html#api-usage-logging;
-                * Logging policy: https://github.com/pytorch/vision/issues/5052;
+                    For more information, please refer to
+                    * PyTorch note:
+                    https://pytorch.org/docs/stable/notes/large_scale_deployments.html#api-usage-logging;
+                    * Logging policy:
+                    https://github.com/pytorch/vision/issues/5052;
 
-                Args:
-                    obj: an object to extract info from.
-        """
-        module = obj.__module__
-        if not module.startswith("torchvision"):
-            module = f"torchvision.internal.{module}"
-        name = obj.__class__.__name__
-        if isinstance(obj, FunctionType):
-            name = obj.__name__
-        torch._C._log_api_usage_once(f"{module}.{name}")
+                    Args:
+                        obj: an object to extract info from.
+            """
+            module = obj.__module__
+            if not module.startswith("torchvision"):
+                module = f"torchvision.internal.{module}"
+            name = obj.__class__.__name__
+            if isinstance(obj, FunctionType):
+                name = obj.__name__
+            torch._C._log_api_usage_once(f"{module}.{name}")
+    if not hasattr(torchvision.ops, "stochastic_depth"):
+        def stochastic_depth(input: Tensor, p: float, mode: str, training: bool = True) -> Tensor:
+            """Implements the Stochastic Depth from `"Deep Networks with Stochastic Depth"
+            <https://arxiv.org/abs/1603.09382>`_ used for randomly dropping residual branches
+            of residual architectures.
 
-    def stochastic_depth(input: Tensor, p: float, mode: str, training: bool = True) -> Tensor:
-        """Implements the Stochastic Depth from `"Deep Networks with Stochastic Depth"
-        <https://arxiv.org/abs/1603.09382>`_ used for randomly dropping residual branches
-        of residual architectures.
+            Args:
+                input: The input tensor or arbitrary dimensions with the first one
+                        being its batch i.e. a batch with ``N`` rows.
+                p: probability of the input to be zeroed.
+                mode: ``"batch"`` or ``"row"``.
+                    ``"batch"`` randomly zeroes the entire input, ``"row"`` zeroes randomly
+                    selected rows from the batch.
+                training: apply stochastic depth if is ``True``. Default: ``True``
 
-        Args:
-            input: The input tensor or arbitrary dimensions with the first one
-                    being its batch i.e. a batch with ``N`` rows.
-            p: probability of the input to be zeroed.
-            mode: ``"batch"`` or ``"row"``.
-                ``"batch"`` randomly zeroes the entire input, ``"row"`` zeroes randomly
-                  selected rows from the batch.
-            training: apply stochastic depth if is ``True``. Default: ``True``
+            Returns:
+                Tensor[N, ...]: The randomly zeroed tensor.
+            """
+            if not torch.jit.is_scripting() and not torch.jit.is_tracing():
+                _log_api_usage_once(stochastic_depth)
+            if p < 0.0 or p > 1.0:
+                raise ValueError(f"drop probability has to be between 0 and 1, but got {p}")
+            if mode not in ["batch", "row"]:
+                raise ValueError(f"mode has to be either 'batch' or 'row', but got {mode}")
+            if not training or p == 0.0:
+                return input
 
-        Returns:
-            Tensor[N, ...]: The randomly zeroed tensor.
-        """
-        if not torch.jit.is_scripting() and not torch.jit.is_tracing():
-            _log_api_usage_once(stochastic_depth)
-        if p < 0.0 or p > 1.0:
-            raise ValueError(f"drop probability has to be between 0 and 1, but got {p}")
-        if mode not in ["batch", "row"]:
-            raise ValueError(f"mode has to be either 'batch' or 'row', but got {mode}")
-        if not training or p == 0.0:
-            return input
+            survival_rate = 1.0 - p
+            size = [input.shape[0]] + [1] * (input.ndim - 1) if mode == "row" else [1] * input.ndim
+            noise = torch.empty(size, dtype=input.dtype, device=input.device)
+            noise = noise.bernoulli_(survival_rate)
+            if survival_rate > 0.0:
+                noise.div_(survival_rate)
+            return input * noise
+        
+        torch.fx.wrap("stochastic_depth")
 
-        survival_rate = 1.0 - p
-        size = [input.shape[0]] + [1] * (input.ndim - 1) if mode == "row" else [1] * input.ndim
-        noise = torch.empty(size, dtype=input.dtype, device=input.device)
-        noise = noise.bernoulli_(survival_rate)
-        if survival_rate > 0.0:
-            noise.div_(survival_rate)
-        return input * noise
+        class StochasticDepth(nn.Module):
+            """See :func:`stochastic_depth`."""
 
-    torch.fx.wrap("stochastic_depth")
+            def __init__(self, p: float, mode: str) -> None:
+                super().__init__()
+                _log_api_usage_once(self)
+                self.p = p
+                self.mode = mode
 
-    class StochasticDepth(nn.Module):
-        """See :func:`stochastic_depth`."""
+            def forward(self, input: Tensor) -> Tensor:
+                return stochastic_depth(input, self.p, self.mode, self.training)
 
-        def __init__(self, p: float, mode: str) -> None:
-            super().__init__()
-            _log_api_usage_once(self)
-            self.p = p
-            self.mode = mode
+            def __repr__(self) -> str:
+                return f"{self.__class__.__name__}(p={self.p}, mode={self.mode})"
+    if not hasattr(torchvision.ops.misc, "MLP"):
+        class MLP(torch.nn.Sequential):
+            """This block implements the multi-layer perceptron (MLP) module.
 
-        def forward(self, input: Tensor) -> Tensor:
-            return stochastic_depth(input, self.p, self.mode, self.training)
+            Args:
+                in_channels: Number of channels of the input
+                hidden_channels: List of the hidden channel dimensions
+                norm_layer: Norm layer that will be stacked on top of the linear layer.
+                    If ``None`` this layer won't be used.
+                activation_layer:
+                    Activation function which will be stacked on top of the normalization layer (if not None),
+                    otherwise on top of the linear layer.
+                    If ``None`` this layer won't be used. Default: ``torch.nn.ReLU``
+                inplace: Parameter for the activation layer, which can optionally do the operation in-place.
+                    Default is ``None``, which uses the respective default values of the ``activation_layer``
+                    and Dropout layer.
+                bias: Whether to use bias in the linear layer. Default ``True``
+                dropout: The probability for the dropout layer. Default: 0.0
+            """
 
-        def __repr__(self) -> str:
-            return f"{self.__class__.__name__}(p={self.p}, mode={self.mode})"
+            def __init__(
+                self,
+                in_channels: int,
+                hidden_channels: List[int],
+                norm_layer: Optional[Callable[..., torch.nn.Module]] = None,
+                activation_layer: Optional[Callable[..., torch.nn.Module]] = torch.nn.ReLU,
+                inplace: Optional[bool] = None,
+                bias: bool = True,
+                dropout: float = 0.0,
+            )-> None:
+                # The addition of `norm_layer` is inspired from the implementation of TorchMultimodal:
+                # https://github.com/facebookresearch/multimodal/blob/5dec8a/torchmultimodal/modules/layers/mlp.py
+                params = {} if inplace is None else {"inplace": inplace}
 
-    class MLP(torch.nn.Sequential):
-        """This block implements the multi-layer perceptron (MLP) module.
+                layers = []
+                in_dim = in_channels
+                for hidden_dim in hidden_channels[:-1]:
+                    layers.append(torch.nn.Linear(in_dim, hidden_dim, bias=bias))
+                    if norm_layer is not None:
+                        layers.append(norm_layer(hidden_dim))
+                    layers.append(activation_layer(**params))
+                    layers.append(torch.nn.Dropout(dropout, **params))
+                    in_dim = hidden_dim
 
-        Args:
-            in_channels: Number of channels of the input
-            hidden_channels: List of the hidden channel dimensions
-            norm_layer: Norm layer that will be stacked on top of the linear layer.
-                If ``None`` this layer won't be used.
-            activation_layer:
-                Activation function which will be stacked on top of the normalization layer (if not None),
-                otherwise on top of the linear layer.
-                If ``None`` this layer won't be used. Default: ``torch.nn.ReLU``
-            inplace: Parameter for the activation layer, which can optionally do the operation in-place.
-                Default is ``None``, which uses the respective default values of the ``activation_layer``
-                and Dropout layer.
-            bias: Whether to use bias in the linear layer. Default ``True``
-            dropout: The probability for the dropout layer. Default: 0.0
-        """
-
-        def __init__(
-            self,
-            in_channels: int,
-            hidden_channels: List[int],
-            norm_layer: Optional[Callable[..., torch.nn.Module]] = None,
-            activation_layer: Optional[Callable[..., torch.nn.Module]] = torch.nn.ReLU,
-            inplace: Optional[bool] = None,
-            bias: bool = True,
-            dropout: float = 0.0,
-        ):
-            # The addition of `norm_layer` is inspired from the implementation of TorchMultimodal:
-            # https://github.com/facebookresearch/multimodal/blob/5dec8a/torchmultimodal/modules/layers/mlp.py
-            params = {} if inplace is None else {"inplace": inplace}
-
-            layers = []
-            in_dim = in_channels
-            for hidden_dim in hidden_channels[:-1]:
-                layers.append(torch.nn.Linear(in_dim, hidden_dim, bias=bias))
-                if norm_layer is not None:
-                    layers.append(norm_layer(hidden_dim))
-                layers.append(activation_layer(**params))
+                layers.append(torch.nn.Linear(in_dim, hidden_channels[-1], bias=bias))
                 layers.append(torch.nn.Dropout(dropout, **params))
-                in_dim = hidden_dim
 
-            layers.append(torch.nn.Linear(in_dim, hidden_channels[-1], bias=bias))
-            layers.append(torch.nn.Dropout(dropout, **params))
+                super().__init__(*layers)
+                _log_api_usage_once(self)
+    if not hasattr(torchvision.ops.misc, "Permute"):
+        class Permute(torch.nn.Module):
+            """This module returns a view of the tensor input with its dimensions permuted.
 
-            super().__init__(*layers)
-            _log_api_usage_once(self)
+            Args:
+                dims (List[int]): The desired ordering of dimensions
+            """
 
-    class Permute(torch.nn.Module):
-        """This module returns a view of the tensor input with its dimensions permuted.
+            def __init__(self, dims: List[int]) -> None:
+                super().__init__()
+                self.dims = dims
 
-        Args:
-            dims (List[int]): The desired ordering of dimensions
-        """
-
-        def __init__(self, dims: List[int]):
-            super().__init__()
-            self.dims = dims
-
-        def forward(self, x: Tensor) -> Tensor:
-            return torch.permute(x, self.dims)
+            def forward(self, x: Tensor) -> Tensor:
+                return torch.permute(x, self.dims)
 
 
 # Support meshgrid indexing for older versions of torch
-def meshgrid(*tensors: Union[Tensor, List[Tensor]], indexing: Optional[str] = None):
+def meshgrid(*tensors: Union[Tensor, List[Tensor]], indexing: Optional[str] = None) -> Tuple:
     if pv.parse(torch.__version__) >= pv.parse("1.10.0"):
         return torch.meshgrid(*tensors, indexing=indexing)
     return torch.meshgrid(*tensors)
@@ -181,7 +185,7 @@ def _get_relative_position_bias(
     relative_position_bias_table: torch.Tensor, relative_position_index: torch.Tensor, window_size: List[int]
 ) -> torch.Tensor:
     n = window_size[0] * window_size[1]
-    relative_position_bias = relative_position_bias_table[relative_position_index]  # type: ignore[index]
+    relative_position_bias = relative_position_bias_table[relative_position_index]
     relative_position_bias = relative_position_bias.view(n, n, -1)
     return relative_position_bias.permute(2, 0, 1).contiguous().unsqueeze(0)
 
@@ -204,7 +208,7 @@ class PatchMerging(nn.Module):
         self.reduction = nn.Linear(4 * dim, 2 * dim, bias=False)
         self.norm = norm_layer(4 * dim)
 
-    def forward(self, x: Tensor):
+    def forward(self, x: Tensor) -> Tensor:
         """
         Args:
             x: input tensor with expected layout of [..., H, W, C]
@@ -224,14 +228,14 @@ class PatchMergingV2(nn.Module):
         norm_layer: Normalization layer. Default: nn.LayerNorm.
     """
 
-    def __init__(self, dim: int, norm_layer: Callable[..., nn.Module] = nn.LayerNorm):
+    def __init__(self, dim: int, norm_layer: Callable[..., nn.Module] = nn.LayerNorm) -> None:
         super().__init__()
         _log_api_usage_once(self)
         self.dim = dim
         self.reduction = nn.Linear(4 * dim, 2 * dim, bias=False)
         self.norm = norm_layer(2 * dim)  # difference
 
-    def forward(self, x: Tensor):
+    def forward(self, x: Tensor) ->Tensor:
         """
         Args:
             x: input tensor with expected layout of [..., H, W, C]
@@ -256,7 +260,7 @@ def shifted_window_attention(
     qkv_bias: Optional[Tensor] = None,
     proj_bias: Optional[Tensor] = None,
     logit_scale: Optional[torch.Tensor] = None,
-):
+)->Tensor:
     """Window based multi-head self attention (W-MSA) module with relative position bias.
 
     It supports both of shifted and non-shifted window.
@@ -371,7 +375,7 @@ class ShiftedWindowAttention(nn.Module):
         proj_bias: bool = True,
         attention_dropout: float = 0.0,
         dropout: float = 0.0,
-    ):
+    ) -> None:
         super().__init__()
         if len(window_size) != 2 or len(shift_size) != 2:
             raise ValueError("window_size and shift_size must be of length 2")
@@ -387,14 +391,14 @@ class ShiftedWindowAttention(nn.Module):
         self.define_relative_position_bias_table()
         self.define_relative_position_index()
 
-    def define_relative_position_bias_table(self):
+    def define_relative_position_bias_table(self) -> None:
         # define a parameter table of relative position bias
         self.relative_position_bias_table = nn.Parameter(
             torch.zeros((2 * self.window_size[0] - 1) * (2 * self.window_size[1] - 1), self.num_heads)
         )  # 2*Wh-1 * 2*Ww-1, nH
         nn.init.trunc_normal_(self.relative_position_bias_table, std=0.02)
 
-    def define_relative_position_index(self):
+    def define_relative_position_index(self) -> None:
         # get pair-wise relative position index for each token inside the window
         coords_h = torch.arange(self.window_size[0])
         coords_w = torch.arange(self.window_size[1])
@@ -413,7 +417,7 @@ class ShiftedWindowAttention(nn.Module):
             self.relative_position_bias_table, self.relative_position_index, self.window_size  # type: ignore[arg-type]
         )
 
-    def forward(self, x: Tensor):
+    def forward(self, x: Tensor) -> Tensor:
         """
         Args:
             x: Tensor with layout of [B, H, W, C]
@@ -449,7 +453,7 @@ class ShiftedWindowAttentionV2(ShiftedWindowAttention):
         proj_bias: bool = True,
         attention_dropout: float = 0.0,
         dropout: float = 0.0,
-    ):
+    ) -> None:
         super().__init__(
             dim,
             window_size,
@@ -470,7 +474,7 @@ class ShiftedWindowAttentionV2(ShiftedWindowAttention):
             length = self.qkv.bias.numel() // 3
             self.qkv.bias[length : 2 * length].data.zero_()
 
-    def define_relative_position_bias_table(self):
+    def define_relative_position_bias_table(self) -> None:
         # get relative_coords_table
         relative_coords_h = torch.arange(-(self.window_size[0] - 1), self.window_size[0], dtype=torch.float32)
         relative_coords_w = torch.arange(-(self.window_size[1] - 1), self.window_size[1], dtype=torch.float32)
@@ -494,7 +498,7 @@ class ShiftedWindowAttentionV2(ShiftedWindowAttention):
         )
         return 16 * torch.sigmoid(relative_position_bias)
 
-    def forward(self, x: Tensor):
+    def forward(self, x: Tensor) -> Tensor:
         """
         Args:
             x: Tensor with layout of [B, H, W, C]
@@ -546,7 +550,7 @@ class SwinTransformerBlock(nn.Module):
         stochastic_depth_prob: float = 0.0,
         norm_layer: Callable[..., nn.Module] = nn.LayerNorm,
         attn_layer: Callable[..., nn.Module] = ShiftedWindowAttention,
-    ):
+    ) -> None:
         super().__init__()
         _log_api_usage_once(self)
 
@@ -569,7 +573,7 @@ class SwinTransformerBlock(nn.Module):
                 if m.bias is not None:
                     nn.init.normal_(m.bias, std=1e-6)
 
-    def forward(self, x: Tensor):
+    def forward(self, x: Tensor) -> Tensor:
         x = x + self.stochastic_depth(self.attn(self.norm1(x)))
         return x + self.stochastic_depth(self.mlp(self.norm2(x)))
 
@@ -602,7 +606,7 @@ class SwinTransformerBlockV2(SwinTransformerBlock):
         stochastic_depth_prob: float = 0.0,
         norm_layer: Callable[..., nn.Module] = nn.LayerNorm,
         attn_layer: Callable[..., nn.Module] = ShiftedWindowAttentionV2,
-    ):
+    ) -> None:
         super().__init__(
             dim,
             num_heads,
@@ -616,7 +620,7 @@ class SwinTransformerBlockV2(SwinTransformerBlock):
             attn_layer=attn_layer,
         )
 
-    def forward(self, x: Tensor):
+    def forward(self, x: Tensor) -> Tensor:
         # Here is the difference, we apply norm after the attention in V2.
         # In V1 we applied norm before the attention.
         x = x + self.stochastic_depth(self.norm1(self.attn(x)))
@@ -663,7 +667,7 @@ class SwinTransformer(nn.Module):
         num_prototypes=0,
         eval_mode=False,
         **kwargs: Any,
-    ):
+    ) -> None:
         super().__init__()
         _log_api_usage_once(self)
         self.num_classes = output_dim
@@ -751,7 +755,7 @@ class SwinTransformer(nn.Module):
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
 
-    def forward_backbone(self, x):
+    def forward_backbone(self, x) ->Tensor:
         x = self.padding(x)
 
         x = self.features(x)
@@ -764,7 +768,7 @@ class SwinTransformer(nn.Module):
         x = self.avgpool(x)
         return self.flatten(x)
 
-    def forward_head(self, x):
+    def forward_head(self, x) -> Tensor:
         if self.projection_head is not None:
             x = self.projection_head(x)
 
@@ -775,7 +779,7 @@ class SwinTransformer(nn.Module):
             return x, self.prototypes(x)
         return x
 
-    def forward(self, inputs):
+    def forward(self, inputs) -> Tensor:
         if not isinstance(inputs, list):
             inputs = [inputs]
         idx_crops = torch.cumsum(
@@ -800,13 +804,13 @@ class SwinTransformer(nn.Module):
 
 
 class MultiPrototypes(nn.Module):
-    def __init__(self, output_dim, num_prototypes):
+    def __init__(self, output_dim, num_prototypes) -> None:
         super().__init__()
         self.nmb_heads = len(num_prototypes)
         for i, k in enumerate(num_prototypes):
             self.add_module("prototypes" + str(i), nn.Linear(output_dim, k, bias=False))
 
-    def forward(self, x):
+    def forward(self, x) -> Tensor:
         out = []
         for i in range(self.nmb_heads):
             out.append(getattr(self, "prototypes" + str(i))(x))
