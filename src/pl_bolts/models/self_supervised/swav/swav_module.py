@@ -498,7 +498,7 @@ def cli_main():
 
     trainer = Trainer(
         max_epochs=args.max_epochs,
-        max_steps=None if args.max_steps == -1 else args.max_steps,
+        max_steps=args.max_steps,
         gpus=args.gpus,
         num_nodes=args.num_nodes,
         accelerator="ddp" if args.gpus > 1 else None,
