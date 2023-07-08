@@ -26,8 +26,7 @@ class Block(nn.Module):
         a, _ = self.attn(x, x, x, attn_mask=attn_mask, need_weights=False)
         x = x + a
         m = self.mlp(self.ln_2(x))
-        x = x + m
-        return x
+        return x + m
 
 
 @under_review()

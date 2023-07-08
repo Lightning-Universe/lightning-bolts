@@ -83,8 +83,7 @@ class CPCTask(nn.Module):
                 if not torch.isnan(loss):
                     losses.append(loss)
 
-        loss = torch.stack(losses).sum()
-        return loss
+        return torch.stack(losses).sum()
 
 
 @under_review()
@@ -255,8 +254,7 @@ class FeatureMapContrastiveTask(nn.Module):
         for i in range(w):
             for j in range(w):
                 masks_r5[i, j, 0, i, j] = 1
-        masks_r5 = masks_r5.reshape(-1, 1, w, w)
-        return masks_r5
+        return masks_r5.reshape(-1, 1, w, w)
 
     def _sample_src_ftr(self, r_cnv, masks):
         # get feature dimensions
