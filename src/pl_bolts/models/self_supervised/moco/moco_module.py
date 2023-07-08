@@ -319,16 +319,9 @@ class CIFAR10ContrastiveDataModule(CIFAR10DataModule):
 
 
 def cli_main() -> None:
-    try:  # Backward compatibility for Lightning CLI
-        import pytorch_lightning.cli
+    from pytorch_lightning.utilities.cli import LightningCLI
 
-        cli_class: Any = getattr(pytorch_lightning.cli, "LightningCLI")  # PL v1.9+
-    except Exception:
-        import pytorch_lightning.utilities.cli
-
-        cli_class = getattr(pytorch_lightning.utilities.cli, "LightningCLI")  # PL v1.8
-
-    cli_class(MoCo, CIFAR10ContrastiveDataModule, seed_everything_default=42)
+    LightningCLI(MoCo, CIFAR10ContrastiveDataModule, seed_everything_default=42)
 
 
 if __name__ == "__main__":

@@ -614,13 +614,6 @@ class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
 
 
 if __name__ == "__main__":
-    try:  # Backward compatibility for Lightning CLI
-        import pytorch_lightning.cli
+    from pytorch_lightning.utilities.cli import LightningCLI
 
-        cli_class: Any = getattr(pytorch_lightning.cli, "LightningCLI")  # PL v1.9+
-    except Exception:
-        import pytorch_lightning.utilities.cli
-
-        cli_class = getattr(pytorch_lightning.utilities.cli, "LightningCLI")  # PL v1.8
-
-    cli_class(CLIYOLO, ResizedVOCDetectionDataModule, seed_everything_default=42)
+    LightningCLI(CLIYOLO, ResizedVOCDetectionDataModule, seed_everything_default=42)
