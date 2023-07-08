@@ -135,7 +135,7 @@ class RetinaNet(LightningModule):
 
 @under_review()
 def cli_main():
-    from pytorch_lightning.utilities.cli import LightningCLI
+    from pytorch_lightning.cli import LightningCLI
 
     from pl_bolts.datamodules import VOCDetectionDataModule
 

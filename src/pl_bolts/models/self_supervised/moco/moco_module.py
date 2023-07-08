@@ -319,7 +319,7 @@ class CIFAR10ContrastiveDataModule(CIFAR10DataModule):
 
 
 def cli_main() -> None:
-    from pytorch_lightning.utilities.cli import LightningCLI
+    from pytorch_lightning.cli import LightningCLI
 
     LightningCLI(MoCo, CIFAR10ContrastiveDataModule, seed_everything_default=42)
 

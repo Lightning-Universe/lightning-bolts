@@ -613,6 +613,6 @@ class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
 
 
 if __name__ == "__main__":
-    from pytorch_lightning.utilities.cli import LightningCLI
+    from pytorch_lightning.cli import LightningCLI
 
     LightningCLI(CLIYOLO, ResizedVOCDetectionDataModule, seed_everything_default=42)
