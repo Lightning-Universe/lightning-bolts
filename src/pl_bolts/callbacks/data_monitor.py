@@ -2,16 +2,15 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 
 import numpy as np
 import torch
+from lightning_utilities import apply_to_collection
+from lightning_utilities.core.rank_zero import rank_zero_warn
 from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.loggers import TensorBoardLogger, WandbLogger
-from pytorch_lightning.utilities import rank_zero_warn
-from pytorch_lightning.utilities.apply_func import apply_to_collection
 from torch import Tensor, nn
 from torch.nn import Module
 from torch.utils.hooks import RemovableHandle
 
 from pl_bolts.utils import _WANDB_AVAILABLE
-from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 # Backward compatibility for Lightning Logger
@@ -26,14 +25,13 @@ else:  # pragma: no cover
     warn_missing_pkg("wandb")
 
 
-@under_review()
 class DataMonitorBase(Callback):
     supported_loggers = (
         TensorBoardLogger,
         WandbLogger,
     )
 
-    def __init__(self, log_every_n_steps: int = None) -> None:
+    def __init__(self, log_every_n_steps: Optional[int] = None):
         """Base class for monitoring data histograms in a LightningModule. This requires a logger configured in the
         Trainer, otherwise no data is logged. The specific class that inherits from this base defines what data
         gets collected.
@@ -102,7 +100,7 @@ class DataMonitorBase(Callback):
 
             logger.experiment.log(data={name: wandb.Histogram(tensor)}, commit=False)
 
-    def _is_logger_available(self, logger: Logger) -> bool:
+    def _is_logger_available(self, logger: Optional[Logger]) -> bool:
         available = True
         if not logger:
             rank_zero_warn("Cannot log histograms because Trainer has no logger.")
@@ -116,7 +114,6 @@ class DataMonitorBase(Callback):
         return available
 
 
-@under_review()
 class ModuleDataMonitor(DataMonitorBase):
     GROUP_NAME_INPUT = "input"
     GROUP_NAME_OUTPUT = "output"
@@ -124,9 +121,10 @@ class ModuleDataMonitor(DataMonitorBase):
     def __init__(
         self,
         submodules: Optional[Union[bool, List[str]]] = None,
-        log_every_n_steps: int = None,
-    ) -> None:
-        """
+        log_every_n_steps: Optional[int] = None,
+    ):
+        """Logs the in- and output histogram of submodules.
+
         Args:
             submodules: If `True`, logs the in- and output histograms of every submodule in the
                 LightningModule, including the root module itself.
@@ -152,7 +150,6 @@ class ModuleDataMonitor(DataMonitorBase):
 
                 # specific submodules
                 trainer = Trainer(callbacks=[ModuleDataMonitor(submodules=["generator", "generator.conv1"])])
-
         """
         super().__init__(log_every_n_steps=log_every_n_steps)
         self._submodule_names = submodules
@@ -162,7 +159,7 @@ class ModuleDataMonitor(DataMonitorBase):
         super().on_train_start(trainer, pl_module)
         submodule_dict = dict(pl_module.named_modules())
         self._hook_handles = []
-        for name in self._get_submodule_names(pl_module):
+        for name in self._get_submodule_names(submodule_dict):
             if name not in submodule_dict:
                 rank_zero_warn(
                     f"{name} is not a valid identifier for a submodule in {pl_module.__class__.__name__},"
@@ -176,7 +173,7 @@ class ModuleDataMonitor(DataMonitorBase):
         for handle in self._hook_handles:
             handle.remove()
 
-    def _get_submodule_names(self, root_module: nn.Module) -> List[str]:
+    def _get_submodule_names(self, named_modules: Dict[str, nn.Module]) -> List[str]:
         # default is the root module only
         names = [""]
 
@@ -184,7 +181,7 @@ class ModuleDataMonitor(DataMonitorBase):
             names = self._submodule_names
 
         if self._submodule_names is True:
-            names = [name for name, _ in root_module.named_modules()]
+            names = list(named_modules)
 
         return names
 
@@ -192,7 +189,7 @@ class ModuleDataMonitor(DataMonitorBase):
         input_group_name = f"{self.GROUP_NAME_INPUT}/{module_name}" if module_name else self.GROUP_NAME_INPUT
         output_group_name = f"{self.GROUP_NAME_OUTPUT}/{module_name}" if module_name else self.GROUP_NAME_OUTPUT
 
-        def hook(_: Module, inp: Sequence, out: Sequence) -> None:
+        def hook(_: Module, inp: Any, out: Any) -> None:
             inp = inp[0] if len(inp) == 1 else inp
             self.log_histograms(inp, group=input_group_name)
             self.log_histograms(out, group=output_group_name)
@@ -201,11 +198,10 @@ class ModuleDataMonitor(DataMonitorBase):
         return module.register_forward_hook(hook)
 
 
-@under_review()
 class TrainingDataMonitor(DataMonitorBase):
     GROUP_NAME = "training_step"
 
-    def __init__(self, log_every_n_steps: int = None) -> None:
+    def __init__(self, log_every_n_steps: Optional[int] = None):
         """Callback that logs the histogram of values in the batched data passed to `training_step`.
 
         Args:
@@ -233,7 +229,11 @@ class TrainingDataMonitor(DataMonitorBase):
         self.log_histograms(batch, group=self.GROUP_NAME)
 
 
-def collect_and_name_tensors(data: Any, output: Dict[str, Tensor], parent_name: str = "input") -> None:
+def collect_and_name_tensors(
+    data: Union[Tensor, dict, Sequence],
+    output: Dict[str, Tensor],
+    parent_name: str = "input",
+) -> None:
     """Recursively fetches all tensors in a (nested) collection of data (depth-first search) and names them. Data
     in dictionaries get named by their corresponding keys and otherwise they get indexed by an increasing integer.
     The shape of the tensor gets appended to the name as well.
@@ -264,7 +264,6 @@ def collect_and_name_tensors(data: Any, output: Dict[str, Tensor], parent_name: 
             collect_and_name_tensors(item, output, parent_name=f"{parent_name}/{i:d}")
 
 
-@under_review()
 def shape2str(tensor: Tensor) -> str:
     """Returns the shape of a tensor in bracket notation as a string.
 
@@ -274,4 +273,4 @@ def shape2str(tensor: Tensor) -> str:
         >>> shape2str(torch.rand(4))
         '[4]'
     """
-    return "[" + ", ".join(map(str, tensor.shape)) + "]"
+    return str(list(tensor.shape))
