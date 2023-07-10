@@ -198,7 +198,6 @@ module = [
     "pl_bolts.models.self_supervised.cpc.transforms",
     "pl_bolts.models.self_supervised.evaluator",
     "pl_bolts.models.self_supervised.moco.callbacks",
-    "pl_bolts.models.self_supervised.moco.moco2_module",
     "pl_bolts.models.self_supervised.moco.transforms",
     "pl_bolts.models.self_supervised.resnets",
     "pl_bolts.models.self_supervised.simclr.simclr_finetuner",

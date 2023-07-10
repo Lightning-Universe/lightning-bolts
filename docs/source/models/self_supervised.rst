@@ -259,7 +259,7 @@ CPC (v2) API
 Moco (v2) API
 ^^^^^^^^^^^^^
 
-.. autoclass:: pl_bolts.models.self_supervised.Moco_v2
+.. autoclass:: pl_bolts.models.self_supervised.MoCo
    :noindex:
 
 SimCLR

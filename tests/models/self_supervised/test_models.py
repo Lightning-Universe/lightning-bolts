@@ -3,9 +3,9 @@ import warnings
 import pytest
 import torch
 from pl_bolts.datamodules import CIFAR10DataModule
-from pl_bolts.models.self_supervised import AMDIM, BYOL, CPC_v2, Moco_v2, SimCLR, SimSiam, SwAV
+from pl_bolts.models.self_supervised import AMDIM, BYOL, CPC_v2, MoCo, SimCLR, SimSiam, SwAV
 from pl_bolts.models.self_supervised.cpc import CPCEvalTransformsCIFAR10, CPCTrainTransformsCIFAR10
-from pl_bolts.models.self_supervised.moco.callbacks import MocoLRScheduler
+from pl_bolts.models.self_supervised.moco.callbacks import MoCoLRScheduler
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 from pl_bolts.transforms.self_supervised.moco_transforms import MoCo2EvalCIFAR10Transforms, MoCo2TrainCIFAR10Transforms
 from pl_bolts.transforms.self_supervised.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
@@ -79,8 +79,8 @@ def test_moco(tmpdir, datadir):
     datamodule.train_transforms = MoCo2TrainCIFAR10Transforms()
     datamodule.val_transforms = MoCo2EvalCIFAR10Transforms()
 
-    model = Moco_v2(data_dir=datadir, batch_size=2, online_ft=True)
-    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, callbacks=[MocoLRScheduler()])
+    model = MoCo()
+    trainer = Trainer(fast_dev_run=True, default_root_dir=tmpdir, callbacks=[MoCoLRScheduler()])
     trainer.fit(model, datamodule=datamodule)
 
 

@@ -4,7 +4,6 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 import torch
 import torch.nn as nn
 from pytorch_lightning import LightningModule
-from pytorch_lightning.utilities.cli import LightningCLI
 from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch import Tensor, optim
 
@@ -614,4 +613,6 @@ class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
 
 
 if __name__ == "__main__":
+    from pytorch_lightning.cli import LightningCLI
+
     LightningCLI(CLIYOLO, ResizedVOCDetectionDataModule, seed_everything_default=42)
