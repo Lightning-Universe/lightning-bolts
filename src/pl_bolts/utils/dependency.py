@@ -20,8 +20,8 @@ def requires(*module_path_version: str):
 
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
-                msg = os.linesep.join([r for r in reqs if not bool(r)])
-                raise ModuleNotFoundError(f"Required dependencies not available. \n{msg}")
+                msg = os.linesep.join([repr(r) for r in reqs if not bool(r)])
+                raise ModuleNotFoundError(f"Required dependencies not available: \n{msg}")
 
             return wrapper
         return func
