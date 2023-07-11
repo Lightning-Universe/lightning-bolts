@@ -1,5 +1,4 @@
 import pytest
-
 from pl_bolts.utils.dependency import requires
 
 
@@ -7,9 +6,11 @@ from pl_bolts.utils.dependency import requires
 def using_torch():
     return True
 
+
 @requires("torch.anything.wrong")
 def using_torch_wrong_path():
     return True
+
 
 @requires("torch>99.0")
 def using_torch_bad_version():
