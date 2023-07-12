@@ -177,6 +177,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
 
             batch_size: the batch size
             transforms: a sequence of transforms
+
         """
         transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
 
@@ -210,6 +211,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
 
             batch_size: the batch size
             transforms: a sequence of transforms
+
         """
         transforms = self._default_transforms() if self.val_transforms is None else self.val_transforms
         unlabeled_dataset = STL10(self.data_dir, split="unlabeled", download=False, transform=transforms)
@@ -244,6 +246,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
         Args:
             batch_size: the batch size
             transforms: the transforms
+
         """
         transforms = self._default_transforms() if self.test_transforms is None else self.test_transforms
 

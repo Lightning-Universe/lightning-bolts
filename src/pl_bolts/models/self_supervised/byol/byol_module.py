@@ -59,6 +59,7 @@ class BYOL(LightningModule):
             --batch_size 32
 
     .. _BYOL: https://arxiv.org/pdf/2006.07733.pdf
+
     """
 
     def __init__(
@@ -92,6 +93,7 @@ class BYOL(LightningModule):
 
         Args:
             x (Tensor): sample to be encoded
+
         """
         return self.online_network.encode(x)
 
@@ -131,6 +133,7 @@ class BYOL(LightningModule):
         Args:
             v_online (Tensor): Online network view
             v_target (Tensor): Target network view
+
         """
         _, z1 = self.online_network(v_online)
         h1 = self.predictor(z1)

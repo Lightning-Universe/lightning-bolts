@@ -35,6 +35,7 @@ class RetinaNet(LightningModule):
 
         # PascalVOC using LightningCLI
         python retinanet_module.py --trainer.gpus 1 --model.pretrained True
+
     """
 
     def __init__(

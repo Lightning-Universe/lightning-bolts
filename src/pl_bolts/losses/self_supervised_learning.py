@@ -209,6 +209,7 @@ class FeatureMapContrastiveTask(nn.Module):
         # will compare the following:
         # 01: (pos_0, anc_1), (anc_0, pos_1)
         # 02: (pos_0, anc_2), (anc_0, pos_2)
+
     """
 
     def __init__(self, comparisons: str = "00, 11", tclip: float = 10.0, bidirectional: bool = True) -> None:
@@ -321,6 +322,7 @@ class FeatureMapContrastiveTask(nn.Module):
             tensor([2.2351, 2.1902])
             >>> regularizer
             tensor(0.0324)
+
         """
         assert len(anchor_maps) == len(self.map_indexes), f"expected each input to have {len(self.map_indexes)} tensors"
 

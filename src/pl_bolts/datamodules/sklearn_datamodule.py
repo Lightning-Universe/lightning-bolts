@@ -33,6 +33,7 @@ class SklearnDataset(Dataset):
         >>> dataset = SklearnDataset(X, y)
         >>> len(dataset)
         442
+
     """
 
     def __init__(
@@ -70,8 +71,8 @@ class SklearnDataset(Dataset):
 
 @under_review()
 class SklearnDataModule(LightningDataModule):
-    """Automatically generates the train, validation and test splits for a Numpy dataset. They are set up as
-    dataloaders for convenience. Optionally, you can pass in your own validation and test splits.
+    """Automatically generates the train, validation and test splits for a Numpy dataset. They are set up as dataloaders
+    for convenience. Optionally, you can pass in your own validation and test splits.
 
     Example:
 
@@ -99,6 +100,7 @@ class SklearnDataModule(LightningDataModule):
         44
         >>> len(test_loader)
         2
+
     """
 
     name = "sklearn"

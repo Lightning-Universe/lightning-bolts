@@ -32,6 +32,7 @@ class VAE(LightningModule):
 
         # pretrained on stl10
         vae = VAE(input_height=32).from_pretrained('stl10-resnet18')
+
     """
 
     pretrained_urls = {

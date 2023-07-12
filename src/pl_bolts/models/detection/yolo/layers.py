@@ -33,6 +33,7 @@ def _get_padding(kernel_size: int, stride: int) -> Tuple[int, nn.Module]:
     Returns:
         padding, pad_op: The amount of padding to be added to all sides of the input and an ``nn.Identity`` or
         ``nn.ZeroPad2d`` operation to add one more column and row of padding if necessary.
+
     """
     # The output size is generally (input_size + padding - max(kernel_size, stride)) / stride + 1 and we want to
     # make it equal to input_size / stride.
@@ -62,6 +63,7 @@ class DetectionLayer(nn.Module):
             detection layer will not take the sigmoid of the coordinate and probability predictions, and the width and
             height are scaled up so that the maximum value is four times the anchor dimension. This is used by the
             Darknet configurations of Scaled-YOLOv4.
+
     """
 
     def __init__(
@@ -106,6 +108,7 @@ class DetectionLayer(nn.Module):
             The layer output, with normalized probabilities, in a tensor sized
             ``[batch_size, anchors_per_cell * height * width, num_classes + 5]`` and a list of dictionaries, containing
             the same predictions, but with unnormalized probabilities (for loss calculation).
+
         """
         batch_size, num_features, height, width = x.shape
         num_attrs = self.num_classes + 5
@@ -169,6 +172,7 @@ class DetectionLayer(nn.Module):
 
         Returns:
             Two dictionaries, the matched predictions and targets.
+
         """
         batch_size = len(preds)
         if (len(targets) != batch_size) or (len(return_preds) != batch_size):
@@ -236,6 +240,7 @@ class DetectionLayer(nn.Module):
         Returns:
             A vector of the overlap, confidence, and classification loss, normalized by batch size, and the number of
             targets that were matched to this layer.
+
         """
         if loss_preds is None:
             loss_preds = preds
@@ -266,6 +271,7 @@ class Conv(nn.Module):
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         norm: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+
     """
 
     def __init__(
@@ -302,6 +308,7 @@ class MaxPool(nn.Module):
 
     The module tries to add padding so much that the output size will be the input size divided by the stride. If the
     input size is not divisible by the stride, the output size will be rounded upwards.
+
     """
 
     def __init__(self, kernel_size: int, stride: int):
@@ -321,6 +328,7 @@ class RouteLayer(nn.Module):
         source_layers: Indices of the layers whose output will be concatenated.
         num_chunks: Layer outputs will be split into this number of chunks.
         chunk_idx: Only the chunks with this index will be concatenated.
+
     """
 
     def __init__(self, source_layers: List[int], num_chunks: int, chunk_idx: int) -> None:
@@ -339,6 +347,7 @@ class ShortcutLayer(nn.Module):
 
     Args:
         source_layer: Index of the layer whose output will be added to the output of the previous layer.
+
     """
 
     def __init__(self, source_layer: int) -> None:
@@ -360,6 +369,7 @@ class ReOrg(nn.Module):
     """Re-organizes the tensor so that every square region of four cells is placed into four different channels.
 
     The result is a tensor with half the width and height, and four times as many channels.
+
     """
 
     def forward(self, x: Tensor) -> Tensor:
@@ -376,6 +386,7 @@ def create_activation_module(name: Optional[str]) -> nn.Module:
     Args:
         name: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic", "linear",
             or "none".
+
     """
     if name == "relu":
         return nn.ReLU(inplace=True)
@@ -400,6 +411,7 @@ def create_normalization_module(name: Optional[str], num_channels: int) -> nn.Mo
     Args:
         name: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
         num_channels: The number of input channels that the module expects.
+
     """
     if name == "batchnorm":
         return nn.BatchNorm2d(num_channels, eps=0.001)
@@ -464,6 +476,7 @@ def create_detection_layer(
             detection layer will not take the sigmoid of the coordinate and probability predictions, and the width and
             height are scaled up so that the maximum value is four times the anchor dimension. This is used by the
             Darknet configurations of Scaled-YOLOv4.
+
     """
     matching_func: Union[ShapeMatching, SimOTAMatching]
     if matching_algorithm == "simota":

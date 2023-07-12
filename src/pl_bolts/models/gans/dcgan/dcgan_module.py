@@ -36,6 +36,7 @@ class DCGAN(LightningModule):
 
         # cifar10
         python dcgan_module.py --gpus 1 --dataset cifar10 --image_channels 3
+
     """
 
     def __init__(
@@ -99,6 +100,7 @@ class DCGAN(LightningModule):
             noise = torch.rand(batch_size, latent_dim)
             gan = GAN.load_from_checkpoint(PATH)
             img = gan(noise)
+
         """
         noise = noise.view(*noise.shape, 1, 1)
         return self.generator(noise)

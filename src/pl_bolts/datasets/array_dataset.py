@@ -28,6 +28,7 @@ class ArrayDataset(Dataset):
         >>> ds = ArrayDataset(features, target)
         >>> len(ds)
         3
+
     """
 
     def __init__(self, *data_models: DataModel) -> None:
@@ -48,5 +49,6 @@ class ArrayDataset(Dataset):
 
         Returns:
             bool: True if size of data_models are equal in the first dimension. False, if not.
+
         """
         return len({len(data_model.data) for data_model in self.data_models}) == 1

@@ -10,8 +10,8 @@ from pl_bolts.utils.stability import under_review
 
 @under_review()
 class LinearWarmupCosineAnnealingLR(_LRScheduler):
-    """Sets the learning rate of each parameter group to follow a linear warmup schedule between warmup_start_lr
-    and base_lr followed by a cosine annealing schedule between base_lr and eta_min.
+    """Sets the learning rate of each parameter group to follow a linear warmup schedule between warmup_start_lr and
+    base_lr followed by a cosine annealing schedule between base_lr and eta_min.
 
     .. warning::
         It is recommended to call :func:`.step()` for :class:`LinearWarmupCosineAnnealingLR`
@@ -42,6 +42,7 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         ...     scheduler.step(epoch)
         ...     # train(...)
         ...     # validate(...)
+
     """
 
     def __init__(

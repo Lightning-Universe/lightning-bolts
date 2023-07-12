@@ -41,6 +41,7 @@ class PPO(LightningModule):
 
     Note:
         Currently only supports CPU and single GPU training with ``accelerator=dp``
+
     """
 
     def __init__(
@@ -129,6 +130,7 @@ class PPO(LightningModule):
 
         Returns:
             Tuple of policy and action
+
         """
         pi, action = self.actor(x)
         value = self.critic(x)
@@ -144,6 +146,7 @@ class PPO(LightningModule):
 
         Returns:
             list of discounted rewards/advantages
+
         """
         assert isinstance(rewards[0], float)
 
@@ -166,6 +169,7 @@ class PPO(LightningModule):
 
         Returns:
             list of advantages
+
         """
         rews = rewards + [last_value]
         vals = values + [last_value]
@@ -178,6 +182,7 @@ class PPO(LightningModule):
 
         Yield:
            Tuple of Lists containing tensors for states, actions, log probs, qvals and advantage
+
         """
 
         for step in range(self.steps_per_epoch):
@@ -278,6 +283,7 @@ class PPO(LightningModule):
 
         Returns:
             loss
+
         """
         state, action, old_logp, qval, adv = batch
 

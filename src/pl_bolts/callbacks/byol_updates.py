@@ -30,6 +30,7 @@ class BYOLMAWeightUpdate(Callback):
         model.target_network = ...
 
         trainer = Trainer(callbacks=[BYOLMAWeightUpdate()])
+
     """
 
     def __init__(self, initial_tau: float = 0.996) -> None:

@@ -25,6 +25,7 @@ class Identity(torch.nn.Module):
 
         model = resnet18()
         model.fc = Identity()
+
     """
 
     def __init__(self) -> None:
@@ -44,6 +45,7 @@ def balance_classes(
         X: input features
         y: mixed labels (ints)
         batch_size: the ultimate batch size
+
     """
     if not _SKLEARN_AVAILABLE:  # pragma: no cover
         raise ModuleNotFoundError("You want to use `shuffle` function from `scikit-learn` which is not installed yet.")
@@ -100,8 +102,8 @@ def generate_half_labeled_batches(
     larger_set_y: np.ndarray,
     batch_size: int,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Given a labeled dataset and an unlabeled dataset, this function generates a joint pair where half the
-    batches are labeled and the other half is not."""
+    """Given a labeled dataset and an unlabeled dataset, this function generates a joint pair where half the batches are
+    labeled and the other half is not."""
     x = []
     y = []
     half_batch = batch_size // 2

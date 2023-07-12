@@ -18,6 +18,7 @@ class DummyDataset(Dataset):
         torch.Size([7, 1, 28, 28])
         >>> y.size()
         torch.Size([7, 1])
+
     """
 
     def __init__(self, *shapes, num_samples: int = 10000) -> None:
@@ -62,6 +63,7 @@ class DummyDetectionDataset(Dataset):
         torch.Size([7, 1, 4])
         >>> y['labels'].size()
         torch.Size([7, 1])
+
     """
 
     def __init__(
@@ -110,6 +112,7 @@ class RandomDictDataset(Dataset):
         (7, 10)
         >>> len(batch['b']),len(batch['b'][0])
         (7, 10)
+
     """
 
     def __init__(self, size: int, num_samples: int = 250) -> None:
@@ -150,6 +153,7 @@ class RandomDictStringDataset(Dataset):
         ['0', '1', '2', '3', '4', '5', '6']
         >>> len(batch['x'])
         7
+
     """
 
     def __init__(self, size: int, num_samples: int = 250) -> None:
@@ -182,6 +186,7 @@ class RandomDataset(Dataset):
         >>> batch = next(iter(dl))
         >>> len(batch),len(batch[0])
         (7, 10)
+
     """
 
     def __init__(self, size: int, num_samples: int = 250) -> None:

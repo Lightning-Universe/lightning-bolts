@@ -98,6 +98,7 @@ class SAC(LightningModule):
         Args:
             env: environment to use, either train environment or test environment
             n_epsiodes: number of episodes to run
+
         """
         total_rewards = []
 
@@ -153,6 +154,7 @@ class SAC(LightningModule):
         Args:
             q_net: the critic (q) network
             target_net: the target (q) network
+
         """
         for q_param, target_param in zip(q_net.parameters(), target_net.parameters()):
             target_param.data.copy_(
@@ -167,6 +169,7 @@ class SAC(LightningModule):
 
         Returns:
             q values
+
         """
         return self.policy(x).sample()
 
@@ -177,6 +180,7 @@ class SAC(LightningModule):
 
         Returns:
             yields a Experience tuple containing the state, action, reward, done and next_state.
+
         """
         episode_reward = 0
         episode_steps = 0
@@ -218,6 +222,7 @@ class SAC(LightningModule):
 
         Args:
             batch: a batch of states, actions, rewards, dones, and next states
+
         """
         states, actions, rewards, dones, next_states = batch
         rewards = rewards.unsqueeze(-1)
@@ -257,12 +262,13 @@ class SAC(LightningModule):
         return policy_loss, q1_loss, q2_loss
 
     def training_step(self, batch: Tuple[Tensor, Tensor], _):
-        """Carries out a single step through the environment to update the replay buffer. Then calculates loss
-        based on the minibatch recieved.
+        """Carries out a single step through the environment to update the replay buffer. Then calculates loss based on
+        the minibatch recieved.
 
         Args:
             batch: current mini batch of replay data
             _: batch number, not used
+
         """
         policy_optim, q1_optim, q2_optim = self.optimizers()
         policy_loss, q1_loss, q2_loss = self.loss(batch)
@@ -343,6 +349,7 @@ class SAC(LightningModule):
 
         Args:
             arg_parser: parent parser
+
         """
         arg_parser.add_argument(
             "--sync_rate",

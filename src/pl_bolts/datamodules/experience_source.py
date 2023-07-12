@@ -30,6 +30,7 @@ class ExperienceSourceDataset(IterableDataset):
 
     Takes a generate_batch function that returns an iterator. The logic for the experience source and how the batch is
     generated is defined the Lightning model itself
+
     """
 
     def __init__(self, generate_batch: Callable) -> None:
@@ -95,6 +96,7 @@ class ExperienceSource(BaseExperienceSource):
 
         Returns:
             Tuple of Experiences
+
         """
         while True:
             # get actions for all envs
@@ -116,14 +118,15 @@ class ExperienceSource(BaseExperienceSource):
             self.iter_idx += 1
 
     def update_history_queue(self, env_idx, exp, history) -> None:
-        """Updates the experience history queue with the lastest experiences. In the event of an experience step is
-        in the done state, the history will be incrementally appended to the queue, removing the tail of the
-        history each time.
+        """Updates the experience history queue with the lastest experiences. In the event of an experience step is in
+        the done state, the history will be incrementally appended to the queue, removing the tail of the history each
+        time.
 
         Args:
             env_idx: index of the environment
             exp: the current experience
             history: history of experience steps for this environment
+
         """
         # If there is a full history of step, append history to queue
         if len(history) == self.n_steps:
@@ -184,6 +187,7 @@ class ExperienceSource(BaseExperienceSource):
 
         Returns:
             Experience tuple
+
         """
         next_state, r, is_done, _ = env.step(action[0])
 
@@ -198,6 +202,7 @@ class ExperienceSource(BaseExperienceSource):
 
         Args:
             env_idx: index of the environment used to update stats
+
         """
         self._total_rewards.append(self.cur_rewards[env_idx])
         self.total_steps.append(self.cur_steps[env_idx])
@@ -248,6 +253,7 @@ class DiscountedExperienceSource(ExperienceSource):
 
         Yields:
             Discounted Experience
+
         """
         for experiences in super().runner(device):
             last_exp_state, tail_experiences = self.split_head_tail_exp(experiences)
@@ -263,14 +269,15 @@ class DiscountedExperienceSource(ExperienceSource):
             )
 
     def split_head_tail_exp(self, experiences: Tuple[Experience]) -> Tuple[List, Tuple[Experience]]:
-        """Takes in a tuple of experiences and returns the last state and tail experiences based on if the last
-        state is the end of an episode.
+        """Takes in a tuple of experiences and returns the last state and tail experiences based on if the last state is
+        the end of an episode.
 
         Args:
             experiences: Tuple of N Experience
 
         Returns:
             last state (Array or None) and remaining Experience
+
         """
         if experiences[-1].done and len(experiences) <= self.steps:
             last_exp_state = experiences[-1].new_state
@@ -288,6 +295,7 @@ class DiscountedExperienceSource(ExperienceSource):
 
         Returns:
             total discounted reward
+
         """
         total_reward = 0.0
         for exp in reversed(experiences):
