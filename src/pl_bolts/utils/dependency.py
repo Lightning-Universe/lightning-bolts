@@ -9,7 +9,10 @@ def requires(*module_path_version: str) -> Callable:
     """Wrapper for enforcing certain requirements for a particular class or function."""
 
     def decorator(func: Callable) -> Callable:
-        reqs = [ModuleAvailableCache(mod_ver) if "." in mod_ver else RequirementCache(mod_ver) for mod_ver in module_path_version]
+        reqs = [
+            ModuleAvailableCache(mod_ver) if "." in mod_ver else RequirementCache(mod_ver)
+            for mod_ver in module_path_version
+        ]
         available = all(map(bool, reqs))
         if not available:
 
