@@ -31,6 +31,7 @@ class SSLOnlineEvaluator(Callback):  # pragma: no cover
         online_eval = SSLOnlineEvaluator(
             z_dim=model.z_dim
         )
+
     """
 
     def __init__(
@@ -182,6 +183,7 @@ def set_training(module: nn.Module, mode: bool):
     Args:
         module: module to set training mode
         mode: whether to set training mode (True) or evaluation mode (False).
+
     """
     original_mode = module.training
 

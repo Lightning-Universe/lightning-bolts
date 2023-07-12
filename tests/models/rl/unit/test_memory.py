@@ -174,8 +174,8 @@ class TestMultiStepReplayBuffer(TestCase):
         self.experience03 = Experience(self.state_02, self.action_02, self.reward_02, self.done_02, self.next_state_02)
 
     def test_append_single_experience_less_than_n(self):
-        """If a single experience is added and n > 1 nothing should be added to the buffer as it is waiting
-        experiences to equal n."""
+        """If a single experience is added and n > 1 nothing should be added to the buffer as it is waiting experiences
+        to equal n."""
         assert len(self.buffer) == 0
 
         self.buffer.append(self.experience01)
@@ -183,8 +183,8 @@ class TestMultiStepReplayBuffer(TestCase):
         assert len(self.buffer) == 0
 
     def test_append_single_experience(self):
-        """If a single experience is added and n > 1 nothing should be added to the buffer as it is waiting
-        experiences to equal n."""
+        """If a single experience is added and n > 1 nothing should be added to the buffer as it is waiting experiences
+        to equal n."""
         assert len(self.buffer) == 0
 
         self.buffer.append(self.experience01)

@@ -152,6 +152,7 @@ class TinyCIFAR10DataModule(CIFAR10DataModule):
 
         dm = CIFAR10DataModule(PATH)
         model = LitModel(datamodule=dm)
+
     """
 
     dataset_cls = TrialCIFAR10

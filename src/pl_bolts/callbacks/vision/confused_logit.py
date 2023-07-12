@@ -46,6 +46,7 @@ class ConfusedLogitCallback(Callback):  # pragma: no cover
     Authored by:
 
         - Alfredo Canziani
+
     """
 
     def __init__(

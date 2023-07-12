@@ -31,6 +31,7 @@ class MoCoTrainTransforms:
     Args:
 
     Example::
+
     """
 
     def __init__(self, size: int, normalize: Union[str, Callable]) -> None:
@@ -79,6 +80,7 @@ class MoCo2TrainCIFAR10Transforms:
     MoCo 2 augmentation:
 
     https://arxiv.org/pdf/2003.04297.pdf
+
     """
 
     def __init__(self, size: int = 32) -> None:
@@ -165,6 +167,7 @@ class MoCo2EvalImagenetTransforms:
     """Transforms for MoCo during training step.
 
     https://arxiv.org/pdf/2003.04297.pdf
+
     """
 
     def __init__(self, size: int = 128) -> None:

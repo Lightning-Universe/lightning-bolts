@@ -24,6 +24,7 @@ class LitMNIST(LightningModule):
 
         trainer = Trainer()
         trainer.fit(model, datamodule=datamodule)
+
     """
 
     def __init__(self, hidden_dim: int = 128, learning_rate: float = 1e-3, **kwargs: Any) -> None:

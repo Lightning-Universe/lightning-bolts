@@ -23,6 +23,7 @@ class SRDatasetMixin:
     """Mixin for Super Resolution datasets.
 
     Scales range of high resolution images to [-1, 1] and range or low resolution images to [0, 1].
+
     """
 
     def __init__(self, hr_image_size: int, lr_image_size: int, image_channels: int, *args: Any, **kwargs: Any) -> None:

@@ -63,6 +63,7 @@ class RepresentationQueue(nn.Module):
         Args:
             x: A mini-batch of representations. The queue size has to be a multiple of the total number of
                 representations across all devices.
+
         """
         # Gather representations from all GPUs into a [batch_size * world_size, num_features] tensor, in case of
         # distributed training.
@@ -133,6 +134,7 @@ class MoCo(LightningModule):
             optimizer_params: Parameters to pass to the optimizer constructor.
             lr_scheduler: Which learning rate scheduler class to use for training.
             lr_scheduler_params: Parameters to pass to the learning rate scheduler constructor.
+
         """
         super().__init__()
 
@@ -182,6 +184,7 @@ class MoCo(LightningModule):
 
         Returns:
             A tuple of query and key representations.
+
         """
         q = self.encoder_q(query_images)
         if self.head_q is not None:
@@ -268,6 +271,7 @@ class MoCo(LightningModule):
             images: A mini-batch of image pairs in a ``[batch_size, 2, num_channels, height, width]`` tensor.
             queue: The queue that the query representations will be compared against. The key representations will be
                 added to the queue.
+
         """
         if images.size(1) != 2:
             raise ValueError(

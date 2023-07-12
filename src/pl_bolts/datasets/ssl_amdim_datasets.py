@@ -48,6 +48,7 @@ class SSLDatasetMixin(ABC):
         """Splits a dataset into two parts.
 
         The labeled split has num_imgs_in_val per class
+
         """
         num_classes = len(set(labels))
 

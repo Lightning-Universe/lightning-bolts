@@ -36,6 +36,7 @@ class SimCLRTrainDataTransform:
         transform = SimCLRTrainDataTransform(input_height=32)
         x = sample()
         (xi, xj, xk) = transform(x) # xk is only for the online evaluator if used
+
     """
 
     def __init__(
@@ -116,6 +117,7 @@ class SimCLREvalDataTransform(SimCLRTrainDataTransform):
         transform = SimCLREvalDataTransform(input_height=32)
         x = sample()
         (xi, xj, xk) = transform(x) # xk is only for the online evaluator if used
+
     """
 
     def __init__(
@@ -162,6 +164,7 @@ class SimCLRFinetuneTransform(SimCLRTrainDataTransform):
         transform = SimCLREvalDataTransform(input_height=32)
         x = sample()
         xk = transform(x)
+
     """
 
     def __init__(

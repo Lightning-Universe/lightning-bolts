@@ -78,6 +78,7 @@ def _get_iou_and_loss_functions(name: str) -> Tuple[Callable, Callable]:
     Returns:
         A tuple of two functions. The first function calculates the pairwise IoU and the second function calculates the
         elementwise loss.
+
     """
     if name not in _iou_and_loss_functions:
         raise ValueError(f"Unknown IoU function '{name}'.")
@@ -101,6 +102,7 @@ def _size_compensation(targets: Tensor, image_size: Tensor) -> Tuple[Tensor, Ten
 
     Returns:
         The size compensation factor.
+
     """
     unit_wh = targets[:, 2:] / image_size
     return 2 - (unit_wh[:, 0] * unit_wh[:, 1])
@@ -124,6 +126,7 @@ def _pairwise_confidence_loss(
 
     Returns:
         An ``[N, M]`` matrix of confidence losses between all predictions and targets.
+
     """
     if predict_overlap is not None:
         # When predicting overlap, target confidence is different for each pair of a prediction and a target. The
@@ -158,6 +161,7 @@ def _foreground_confidence_loss(
 
     Returns:
         The sum of the confidence losses for foreground anchors.
+
     """
     targets = torch.ones_like(preds)
     if predict_overlap is not None:
@@ -176,6 +180,7 @@ def _background_confidence_loss(preds: Tensor, bce_func: Callable) -> Tensor:
 
     Returns:
         The sum of the background confidence losses.
+
     """
     targets = torch.zeros_like(preds)
     return bce_func(preds, targets, reduction="sum")
@@ -244,6 +249,7 @@ class YOLOLoss:
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
         class_loss_multiplier: Classification loss will be scaled by this value.
+
     """
 
     def __init__(
@@ -285,6 +291,7 @@ class YOLOLoss:
 
         Returns:
             Loss matrices and an overlap matrix. Each matrix is shaped ``[N, M]``.
+
         """
         loss_shape = torch.Size([len(preds["boxes"]), len(targets["boxes"])])
 
@@ -325,8 +332,8 @@ class YOLOLoss:
         input_is_normalized: bool,
         image_size: Tensor,
     ) -> YOLOLosses:
-        """Calculates the sums of the losses for optimization, over prediction/target pairs, assuming the
-        predictions and targets have been matched (there are as many predictions and targets).
+        """Calculates the sums of the losses for optimization, over prediction/target pairs, assuming the predictions
+        and targets have been matched (there are as many predictions and targets).
 
         Args:
             preds: A dictionary of predictions, containing "boxes", "confidences", and "classprobs".
@@ -336,6 +343,7 @@ class YOLOLoss:
 
         Returns:
             The final losses.
+
         """
         bce_func: Callable[..., Tensor] = (
             binary_cross_entropy if input_is_normalized else binary_cross_entropy_with_logits  # type: ignore

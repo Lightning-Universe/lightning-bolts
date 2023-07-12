@@ -14,6 +14,7 @@ def add_base_args(parent) -> argparse.ArgumentParser:
 
     Args:
         parent
+
     """
     arg_parser = argparse.ArgumentParser(parents=[parent])
 

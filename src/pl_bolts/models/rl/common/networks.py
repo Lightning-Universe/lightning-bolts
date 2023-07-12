@@ -43,6 +43,7 @@ class CNN(nn.Module):
             shape: input dimensions
         Returns:
             size of the conv output
+
         """
         conv_out = self.conv(torch.zeros(1, *shape))
         return int(np.prod(conv_out.size()))
@@ -54,6 +55,7 @@ class CNN(nn.Module):
             x: input to network
         Returns:
             output of network
+
         """
         conv_out = self.conv(input_x).view(input_x.size()[0], -1)
         return self.head(conv_out)
@@ -85,6 +87,7 @@ class MLP(nn.Module):
 
         Returns:
             output of network
+
         """
         return self.net(input_x.float())
 
@@ -126,6 +129,7 @@ class ContinuousMLP(nn.Module):
             x: input to network
         Returns:
             action distribution
+
         """
         x = self.shared_net(x.float())
         batch_mean = self.mean_layer(x)
@@ -142,6 +146,7 @@ class ContinuousMLP(nn.Module):
             x: input to network
         Returns:
             mean action
+
         """
         x = self.shared_net(x.float())
         batch_mean = self.mean_layer(x)
@@ -173,6 +178,7 @@ class ActorCriticMLP(nn.Module):
 
         Returns:
             action log probs (logits), value
+
         """
         x = F.relu(self.fc1(x.float()))
         a = F.log_softmax(self.actor_head(x), dim=-1)
@@ -214,6 +220,7 @@ class DuelingMLP(nn.Module):
 
         Returns:
             Q value
+
         """
         adv, val = self.adv_val(input_x)
         return val + (adv - adv.mean(dim=1, keepdim=True))
@@ -226,6 +233,7 @@ class DuelingMLP(nn.Module):
 
         Returns:
             advantage, value
+
         """
         float_x = input_x.float()
         base_out = self.net(float_x)
@@ -270,6 +278,7 @@ class DuelingCNN(nn.Module):
 
         Returns:
             size of the conv output
+
         """
         conv_out = self.conv(torch.zeros(1, *shape))
         return int(np.prod(conv_out.size()))
@@ -282,6 +291,7 @@ class DuelingCNN(nn.Module):
 
         Returns:
             Q value
+
         """
         adv, val = self.adv_val(input_x)
         return val + (adv - adv.mean(dim=1, keepdim=True))
@@ -294,6 +304,7 @@ class DuelingCNN(nn.Module):
 
         Returns:
             advantage, value
+
         """
         float_x = input_x.float()
         base_out = self.conv(input_x).view(float_x.size()[0], -1)
@@ -332,6 +343,7 @@ class NoisyCNN(nn.Module):
 
         Returns:
             size of the conv output
+
         """
         conv_out = self.conv(torch.zeros(1, *shape))
         return int(np.prod(conv_out.size()))
@@ -344,6 +356,7 @@ class NoisyCNN(nn.Module):
 
         Returns:
             output of network
+
         """
         conv_out = self.conv(input_x).view(input_x.size()[0], -1)
         return self.head(conv_out)
@@ -360,6 +373,7 @@ class NoisyLinear(nn.Linear):
 
     based on https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/
     Chapter08/lib/dqn_extra.py#L19
+
     """
 
     def __init__(self, in_features: int, out_features: int, sigma_init: float = 0.017, bias: bool = True) -> None:
@@ -399,6 +413,7 @@ class NoisyLinear(nn.Linear):
 
         Returns:
             output of the layer
+
         """
         self.epsilon_weight.normal_()
         bias = self.bias
@@ -413,8 +428,7 @@ class NoisyLinear(nn.Linear):
 
 @under_review()
 class ActorCategorical(nn.Module):
-    """Policy network, for discrete action spaces, which returns a distribution and an action given an
-    observation."""
+    """Policy network, for discrete action spaces, which returns a distribution and an action given an observation."""
 
     def __init__(self, actor_net: nn.Module) -> None:
         """
@@ -441,14 +455,14 @@ class ActorCategorical(nn.Module):
 
         Returns:
             log probability of the acition under pi
+
         """
         return pi.log_prob(actions)
 
 
 @under_review()
 class ActorContinous(nn.Module):
-    """Policy network, for continous action spaces, which returns a distribution and an action given an
-    observation."""
+    """Policy network, for continous action spaces, which returns a distribution and an action given an observation."""
 
     def __init__(self, actor_net: nn.Module, act_dim: int) -> None:
         """
@@ -478,5 +492,6 @@ class ActorContinous(nn.Module):
 
         Returns:
             log probability of the acition under pi
+
         """
         return pi.log_prob(actions).sum(axis=-1)

@@ -49,11 +49,12 @@ class NoisyDQN(DQN):
         self,
     ) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
         """Contains the logic for generating a new batch of data to be passed to the DataLoader. This is the same
-        function as the standard DQN except that we dont update epsilon as it is always 0. The exploration comes
-        from the noisy network.
+        function as the standard DQN except that we dont update epsilon as it is always 0. The exploration comes from
+        the noisy network.
 
         Returns:
             yields a Experience tuple containing the state, action, reward, done and next_state.
+
         """
         episode_reward = 0
         episode_steps = 0

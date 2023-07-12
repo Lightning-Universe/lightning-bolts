@@ -17,6 +17,7 @@ def validate_batch(batch: Tuple[List[List[Tensor]], List[Any]]) -> Tensor:
 
     Returns:
         The input batch with images stacked into a single ``[N, 2, channels, height, width]`` tensor.
+
     """
     images, targets = batch
 
@@ -119,6 +120,7 @@ def shuffle_batch(x: Tensor) -> Tuple[Tensor, Tensor]:
     Returns:
         The output tensor and a list of indices that gives the original order of the combined mini-batch. The output
         tensor is the same size as the input tensor, but contains a random subset of the combined mini-batch.
+
     """
     all_x = concatenate_all(x)
 
@@ -151,6 +153,7 @@ def sort_batch(x: Tensor, order: Tensor) -> Tensor:
 
     Returns:
         The subset of the combined mini-batch that corresponds to this device.
+
     """
     all_x = concatenate_all(x)
 

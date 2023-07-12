@@ -100,6 +100,7 @@ class BottleneckBlock(nn.Module):
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         norm: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+
     """
 
     def __init__(
@@ -136,6 +137,7 @@ class TinyStage(nn.Module):
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         norm: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+
     """
 
     def __init__(
@@ -175,6 +177,7 @@ class CSPStage(nn.Module):
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         norm: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+
     """
 
     def __init__(
@@ -228,6 +231,7 @@ class ELANStage(nn.Module):
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         norm: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+
     """
 
     def __init__(
@@ -290,6 +294,7 @@ class CSPSPP(nn.Module):
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         norm: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+
     """
 
     def __init__(
@@ -340,6 +345,7 @@ class FastSPP(nn.Module):
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         norm: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+
     """
 
     def __init__(
@@ -373,6 +379,7 @@ class YOLOV4TinyBackbone(nn.Module):
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         normalization: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+
     """
 
     def __init__(
@@ -439,6 +446,7 @@ class YOLOV4Backbone(nn.Module):
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         normalization: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+
     """
 
     def __init__(
@@ -507,6 +515,7 @@ class YOLOV5Backbone(nn.Module):
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         normalization: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+
     """
 
     def __init__(
@@ -572,6 +581,7 @@ class YOLOV7Backbone(nn.Module):
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         normalization: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+
     """
 
     def __init__(
@@ -664,6 +674,7 @@ class YOLOV4TinyNetwork(nn.Module):
         class_loss_multiplier: Classification loss will be scaled by this value.
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
             to produce coordinate values close to one.
+
     """
 
     def __init__(
@@ -800,6 +811,7 @@ class YOLOV4Network(nn.Module):
         class_loss_multiplier: Classification loss will be scaled by this value.
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
             to produce coordinate values close to one.
+
     """
 
     def __init__(
@@ -967,6 +979,7 @@ class YOLOV4P6Network(nn.Module):
         class_loss_multiplier: Classification loss will be scaled by this value.
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
             to produce coordinate values close to one.
+
     """
 
     def __init__(
@@ -1326,6 +1339,7 @@ class YOLOV7Network(nn.Module):
         class_loss_multiplier: Classification loss will be scaled by this value.
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
             to produce coordinate values close to one.
+
     """
 
     def __init__(
@@ -1552,6 +1566,7 @@ class YOLOXHead(nn.Module):
         activation: Which layer activation to use. Can be "relu", "leaky", "mish", "silu" (or "swish"), "logistic",
             "linear", or "none".
         norm: Which layer normalization to use. Can be "batchnorm", "groupnorm", or "none".
+
     """
 
     def __init__(

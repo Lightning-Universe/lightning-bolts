@@ -98,6 +98,7 @@ class SRGAN(pl.LightningModule):
 
             srgan = SRGAN.load_from_checkpoint(PATH)
             hr_image = srgan(lr_image)
+
         """
         return self.generator(lr_image)
 
@@ -200,8 +201,8 @@ def cli_main(args=None):
     generator_checkpoint = Path(f"model_checkpoints/srresnet-{args.dataset}-scale_factor={args.scale_factor}.pt")
     if not generator_checkpoint.exists():
         warn(
-            "No generator checkpoint found. Training generator from scratch. \
-            Use srresnet_module.py to pretrain the generator."
+            "No generator checkpoint found. Training generator from scratch."
+            " Use srresnet_module.py to pretrain the generator."
         )
         generator_checkpoint = None
 

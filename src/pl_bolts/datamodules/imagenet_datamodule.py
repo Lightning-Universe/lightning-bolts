@@ -119,6 +119,7 @@ class ImagenetDataModule(LightningDataModule):
         """This method already assumes you have imagenet2012 downloaded. It validates the data using the meta.bin.
 
         .. warning:: Please download imagenet on your own first.
+
         """
         self._verify_splits(self.data_dir, "train")
         self._verify_splits(self.data_dir, "val")
@@ -223,6 +224,7 @@ class ImagenetDataModule(LightningDataModule):
                     std=[0.229, 0.224, 0.225]
                 ),
             ])
+
         """
         return transform_lib.Compose(
             [
@@ -247,6 +249,7 @@ class ImagenetDataModule(LightningDataModule):
                     std=[0.229, 0.224, 0.225]
                 ),
             ])
+
         """
 
         return transform_lib.Compose(

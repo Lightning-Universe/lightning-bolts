@@ -33,6 +33,7 @@ class SemSegment(LightningModule):
 
         # KITTI
         python segmentation.py --data_dir /path/to/kitti/ --accelerator=gpu
+
     """
 
     def __init__(

@@ -79,6 +79,7 @@ def restore_signal_handlers():  # noqa: PT004
     """Ensures that signal handlers get restored before the next test runs.
 
     This is a safety net for tests that don't run Trainer's teardown.
+
     """
     valid_signals = SignalConnector._valid_signals()
     if not _IS_WINDOWS:

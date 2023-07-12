@@ -53,6 +53,7 @@ class VanillaPolicyGradient(LightningModule):
 
     .. _`Vanilla Policy Gradient`:
         https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf
+
     """
 
     def __init__(
@@ -118,6 +119,7 @@ class VanillaPolicyGradient(LightningModule):
 
         Returns:
             q values
+
         """
         return self.net(x)
 
@@ -128,6 +130,7 @@ class VanillaPolicyGradient(LightningModule):
 
         Returns:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
+
         """
 
         while True:
@@ -163,6 +166,7 @@ class VanillaPolicyGradient(LightningModule):
 
         Returns:
             list of discounted rewards
+
         """
         reward = 0
         returns = []
@@ -184,6 +188,7 @@ class VanillaPolicyGradient(LightningModule):
 
         Returns:
             loss for the current batch
+
         """
 
         logits = self.net(states)
@@ -202,8 +207,8 @@ class VanillaPolicyGradient(LightningModule):
         return policy_loss + entropy_loss
 
     def training_step(self, batch: Tuple[Tensor, Tensor], _) -> OrderedDict:
-        """Carries out a single step through the environment to update the replay buffer. Then calculates loss
-        based on the minibatch recieved.
+        """Carries out a single step through the environment to update the replay buffer. Then calculates loss based on
+        the minibatch recieved.
 
         Args:
             batch: current mini batch of replay data
@@ -211,6 +216,7 @@ class VanillaPolicyGradient(LightningModule):
 
         Returns:
             Training loss and log metrics
+
         """
         states, actions, scaled_rewards = batch
 
@@ -260,6 +266,7 @@ class VanillaPolicyGradient(LightningModule):
 
         Returns:
             arg_parser with model specific cargs added
+
         """
 
         arg_parser.add_argument("--entropy_beta", type=float, default=0.01, help="entropy value")

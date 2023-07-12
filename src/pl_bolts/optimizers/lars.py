@@ -103,6 +103,7 @@ class LARS(Optimizer):
         Args:
             closure (callable, optional): A closure that reevaluates the model
                 and returns the loss.
+
         """
         loss = None
         if closure is not None:

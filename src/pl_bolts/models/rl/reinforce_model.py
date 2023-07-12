@@ -53,6 +53,7 @@ class Reinforce(LightningModule):
 
     .. _REINFORCE:
         https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf
+
     """
 
     def __init__(
@@ -125,6 +126,7 @@ class Reinforce(LightningModule):
 
         Returns:
             q values
+
         """
         return self.net(x)
 
@@ -136,6 +138,7 @@ class Reinforce(LightningModule):
 
         Returns:
             list of discounted rewards
+
         """
         assert isinstance(rewards[0], float)
 
@@ -156,6 +159,7 @@ class Reinforce(LightningModule):
 
         Returns:
             total discounted reward
+
         """
         total_reward = 0.0
         for exp in reversed(experiences):
@@ -169,6 +173,7 @@ class Reinforce(LightningModule):
 
         Yield:
             yields a tuple of Lists containing tensors for states, actions and rewards of the batch.
+
         """
 
         while True:
@@ -215,8 +220,8 @@ class Reinforce(LightningModule):
         return -log_prob_actions.mean()
 
     def training_step(self, batch: Tuple[Tensor, Tensor], _) -> OrderedDict:
-        """Carries out a single step through the environment to update the replay buffer. Then calculates loss
-        based on the minibatch recieved.
+        """Carries out a single step through the environment to update the replay buffer. Then calculates loss based on
+        the minibatch recieved.
 
         Args:
             batch: current mini batch of replay data
@@ -224,6 +229,7 @@ class Reinforce(LightningModule):
 
         Returns:
             Training loss and log metrics
+
         """
         states, actions, scaled_rewards = batch
 
@@ -274,6 +280,7 @@ class Reinforce(LightningModule):
 
         Returns:
             arg_parser with model specific cargs added
+
         """
         arg_parser.add_argument("--batches_per_epoch", type=int, default=10000, help="number of batches in an epoch")
         arg_parser.add_argument("--batch_size", type=int, default=32, help="size of the batches")
