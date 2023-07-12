@@ -1,5 +1,5 @@
 import pytest
-from pl_bolts.utils.dependency import requires
+from pl_bolts.utils._dependency import requires
 
 
 @requires("torch")
