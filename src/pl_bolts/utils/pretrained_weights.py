@@ -5,10 +5,10 @@ from pytorch_lightning import LightningModule
 from pl_bolts.utils.stability import under_review
 
 vae_imagenet2012 = (
-    "https://pl-bolts-weights.s3.us-east-2.amazonaws.com/" "vae/imagenet_06_22_2019/checkpoints/epoch%3D63.ckpt"
+    "https://pl-bolts-weights.s3.us-east-2.amazonaws.com/vae/imagenet_06_22_2019/checkpoints/epoch%3D63.ckpt"
 )
 
-cpcv2_resnet18 = "https://pl-bolts-weights.s3.us-east-2.amazonaws.com/" "cpc/resnet18-v6/epoch%3D85.ckpt"
+cpcv2_resnet18 = "https://pl-bolts-weights.s3.us-east-2.amazonaws.com/cpc/resnet18-v6/epoch%3D85.ckpt"
 urls = {"vae-imagenet2012": vae_imagenet2012, "CPC_v2-resnet18": cpcv2_resnet18}
 
 

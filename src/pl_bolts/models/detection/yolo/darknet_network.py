@@ -242,7 +242,7 @@ class DarknetNetwork(nn.Module):
         def convert(key: str, value: str) -> Union[str, int, float, List[Union[str, int, float]]]:
             """Converts a value to the correct type based on key."""
             if key not in variable_types:
-                warn("Unknown YOLO configuration variable: " + key)
+                warn(f"Unknown YOLO configuration variable: {key}")
                 return value
             if key in list_variables:
                 return [variable_types[key](v) for v in value.split(",")]
