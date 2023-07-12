@@ -5,6 +5,7 @@ from typing import Any, Callable
 from lightning_utilities.core.imports import ModuleAvailableCache, RequirementCache
 
 
+# ToDo: replace with utils wrapper after 0.10 is released
 def requires(*module_path_version: str) -> Callable:
     """Wrapper for enforcing certain requirements for a particular class or function."""
 
