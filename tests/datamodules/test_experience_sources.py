@@ -173,8 +173,8 @@ class TestExperienceSource(TestCase):
             break
 
     def test_source_is_done_2step_episode(self):
-        """Test that when done and the history is full, return the full history, then start to return the tail of
-        the history."""
+        """Test that when done and the history is full, return the full history, then start to return the tail of the
+        history."""
 
         self.env = [self.mock_env]
         self.source = ExperienceSource(self.env, self.agent, n_steps=2)
@@ -289,6 +289,7 @@ class TestDiscountedExperienceSource(TestCase):
         """Tests that the source returns a single experience with discounted rewards.
 
         discounted returns: G(t) = R(t+1) + γ*R(t+2) + γ^2*R(t+3) ... + γ^N-1*R(t+N)
+
         """
 
         self.source = DiscountedExperienceSource(self.env1, self.agent, n_steps=self.n_steps)

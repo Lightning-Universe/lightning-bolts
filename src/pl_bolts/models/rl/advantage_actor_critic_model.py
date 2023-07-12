@@ -93,14 +93,15 @@ class AdvantageActorCritic(LightningModule):
         self.state = self.env.reset()
 
     def forward(self, x: Tensor) -> Tuple[Tensor, Tensor]:
-        """Passes in a state x through the network and gets the log prob of each action and the value for the state
-        as an output.
+        """Passes in a state x through the network and gets the log prob of each action and the value for the state as
+        an output.
 
         Args:
             x: environment state
 
         Returns:
             action log probabilities, values
+
         """
         if not isinstance(x, list):
             x = [x]
@@ -123,6 +124,7 @@ class AdvantageActorCritic(LightningModule):
             states: a list of numpy array
             actions: a list of list of int
             returns: a torch tensor
+
         """
         while True:
             for _ in range(self.hparams.batch_size):
@@ -170,6 +172,7 @@ class AdvantageActorCritic(LightningModule):
 
         Returns:
             tensor of discounted rewards
+
         """
         g = last_value
         returns = []
@@ -187,13 +190,14 @@ class AdvantageActorCritic(LightningModule):
         actions: Tensor,
         returns: Tensor,
     ) -> Tensor:
-        """Calculates the loss for A2C which is a weighted sum of actor loss (MSE), critic loss (PG), and entropy
-        (for exploration)
+        """Calculates the loss for A2C which is a weighted sum of actor loss (MSE), critic loss (PG), and entropy (for
+        exploration)
 
         Args:
             states: tensor of shape (batch_size, state dimension)
             actions: tensor of shape (batch_size, )
             returns: tensor of shape (batch_size, )
+
         """
 
         logprobs, values = self.net(states)
@@ -226,6 +230,7 @@ class AdvantageActorCritic(LightningModule):
 
         Args:
             batch: a batch of (states, actions, returns)
+
         """
         states, actions, returns = batch
         loss = self.loss(states, actions, returns)
@@ -271,6 +276,7 @@ class AdvantageActorCritic(LightningModule):
 
         Returns:
             arg_parser with model specific cargs added
+
         """
 
         arg_parser.add_argument("--entropy_beta", type=float, default=0.01, help="entropy coefficient")

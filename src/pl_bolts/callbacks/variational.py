@@ -18,8 +18,8 @@ else:  # pragma: no cover
 
 @under_review()
 class LatentDimInterpolator(Callback):
-    """Interpolates the latent space for a model by setting all dims to zero and stepping through the first two
-    dims increasing one unit at a time.
+    """Interpolates the latent space for a model by setting all dims to zero and stepping through the first two dims
+    increasing one unit at a time.
 
     Default interpolates between [-5, 5] (-5, -4, -3, ..., 3, 4, 5)
 
@@ -28,6 +28,7 @@ class LatentDimInterpolator(Callback):
         from pl_bolts.callbacks import LatentDimInterpolator
 
         Trainer(callbacks=[LatentDimInterpolator()])
+
     """
 
     def __init__(

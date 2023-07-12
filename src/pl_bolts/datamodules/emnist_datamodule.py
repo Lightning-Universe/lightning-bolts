@@ -176,6 +176,7 @@ class EMNISTDataModule(VisionDataModule):
         """Returns the number of classes.
 
         See the table above.
+
         """
         return len(self.dataset_cls.classes_split_dict[self.split])
 

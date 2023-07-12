@@ -17,6 +17,7 @@ class SRMNIST(SRDatasetMixin, MNIST):
     """MNIST dataset that can be used to train Super Resolution models.
 
     Function __getitem__ (implemented in SRDatasetMixin) returns tuple of high and low resolution image.
+
     """
 
     def __init__(self, scale_factor: int, *args: Any, **kwargs: Any) -> None:

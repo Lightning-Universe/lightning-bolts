@@ -98,6 +98,7 @@ class SRGAN(pl.LightningModule):
 
             srgan = SRGAN.load_from_checkpoint(PATH)
             hr_image = srgan(lr_image)
+
         """
         return self.generator(lr_image)
 

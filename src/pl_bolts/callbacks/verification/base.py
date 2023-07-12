@@ -17,6 +17,7 @@ class VerificationBase:
 
     All verifications should run with any
     :class: `torch.nn.Module` unless otherwise stated.
+
     """
 
     def __init__(self, model: nn.Module) -> None:
@@ -39,14 +40,16 @@ class VerificationBase:
             `True` if the test passes, and `False` otherwise. Some verifications can only be performed
             with a heuristic accuracy, thus the return value may not always reflect the true state of
             the system in these cases.
+
         """
 
     def _get_input_array_copy(self, input_array: Optional[Any] = None) -> Any:
-        """Returns a deep copy of the example input array in cases where it is expected that the input changes
-        during the verification process.
+        """Returns a deep copy of the example input array in cases where it is expected that the input changes during
+        the verification process.
 
         Arguments:
             input_array: The input to clone.
+
         """
         if input_array is None and isinstance(self.model, LightningModule):
             input_array = self.model.example_input_array
@@ -89,6 +92,7 @@ class VerificationCallbackBase(Callback):
     This type of verification is expected to only work with
     :class:`~pytorch_lightning.core.lightning.LightningModule` and will take the input array
     from :attr:`~pytorch_lightning.core.lightning.LightningModule.example_input_array` if needed.
+
     """
 
     def __init__(self, warn: bool = True, error: bool = False) -> None:

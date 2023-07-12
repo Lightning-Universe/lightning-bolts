@@ -34,6 +34,7 @@ class LightningArgumentParser(ArgumentParser):
 
         # args.data -> data args
         # args.model -> model args
+
     """
 
     def __init__(self, *args: Any, ignore_required_init_args: bool = True, **kwargs: Any) -> None:

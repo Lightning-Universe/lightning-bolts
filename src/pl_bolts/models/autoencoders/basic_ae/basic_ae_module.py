@@ -29,6 +29,7 @@ class AE(LightningModule):
 
         # pretrained on cifar10
         ae = AE(input_height=32).from_pretrained('cifar10-resnet18')
+
     """
 
     pretrained_urls = {

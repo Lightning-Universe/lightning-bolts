@@ -102,6 +102,7 @@ class MaxAndSkipEnv(Wrapper):
         """Clear past frame buffer and init.
 
         to first obs. from inner env.
+
         """
         self._obs_buffer.clear()
         obs = self.env.reset()
@@ -202,6 +203,7 @@ class DataAugmentation(ObservationWrapper):
     - ToTensor
     - GrayScale
     - RandomCrop
+
     """
 
     def __init__(self, env=None) -> None:

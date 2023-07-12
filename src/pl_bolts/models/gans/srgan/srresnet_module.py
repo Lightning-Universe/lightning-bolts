@@ -77,6 +77,7 @@ class SRResNet(pl.LightningModule):
 
             srresnet = SRResNet.load_from_checkpoint(PATH)
             hr_image = srresnet(lr_image)
+
         """
         return self.srresnet(lr_image)
 

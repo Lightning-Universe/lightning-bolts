@@ -56,6 +56,7 @@ class DQN(LightningModule):
 
     Note:
         Currently only supports CPU and single GPU training with `accelerator=dp`
+
     """
 
     def __init__(
@@ -158,6 +159,7 @@ class DQN(LightningModule):
             env: environment to use, either train environment or test environment
             n_epsiodes: number of episodes to run
             epsilon: epsilon value for DQN agent
+
         """
         total_rewards = []
 
@@ -206,6 +208,7 @@ class DQN(LightningModule):
 
         Returns:
             q values
+
         """
         return self.net(x)
 
@@ -216,6 +219,7 @@ class DQN(LightningModule):
 
         Returns:
             yields a Experience tuple containing the state, action, reward, done and next_state.
+
         """
         episode_reward = 0
         episode_steps = 0
@@ -254,8 +258,8 @@ class DQN(LightningModule):
                 break
 
     def training_step(self, batch: Tuple[Tensor, Tensor], _) -> OrderedDict:
-        """Carries out a single step through the environment to update the replay buffer. Then calculates loss
-        based on the minibatch recieved.
+        """Carries out a single step through the environment to update the replay buffer. Then calculates loss based on
+        the minibatch recieved.
 
         Args:
             batch: current mini batch of replay data
@@ -263,6 +267,7 @@ class DQN(LightningModule):
 
         Returns:
             Training loss and log metrics
+
         """
 
         # calculates training loss
@@ -336,6 +341,7 @@ class DQN(LightningModule):
 
         Returns:
             gym environment
+
         """
         env = make_environment(env_name)
 
@@ -355,6 +361,7 @@ class DQN(LightningModule):
 
         Args:
             arg_parser: parent parser
+
         """
         arg_parser.add_argument(
             "--sync_rate",

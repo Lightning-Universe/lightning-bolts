@@ -29,6 +29,7 @@ class Agent(ABC):
 
         Returns:
             action
+
         """
         return [0]
 
@@ -62,6 +63,7 @@ class ValueAgent(Agent):
 
         Returns:
             action defined by policy
+
         """
         if not isinstance(state, list):
             state = [state]
@@ -81,6 +83,7 @@ class ValueAgent(Agent):
 
         Returns:
             action defined by Q values
+
         """
         if not isinstance(state, Tensor):
             state = torch.tensor(state, device=device)
@@ -94,6 +97,7 @@ class ValueAgent(Agent):
 
         Args:
             step: current global step
+
         """
         self.epsilon = max(self.eps_end, self.eps_start - (step + 1) / self.eps_frames)
 
@@ -112,6 +116,7 @@ class PolicyAgent(Agent):
 
         Returns:
             action defined by policy
+
         """
         if not isinstance(states, list):
             states = [states]
@@ -139,6 +144,7 @@ class ActorCriticAgent(Agent):
 
         Returns:
             action defined by policy
+
         """
         if not isinstance(states, list):
             states = [states]
@@ -167,6 +173,7 @@ class SoftActorCriticAgent(Agent):
 
         Returns:
             action defined by policy
+
         """
         if not isinstance(states, list):
             states = [states]
@@ -186,6 +193,7 @@ class SoftActorCriticAgent(Agent):
 
         Returns:
             action defined by policy
+
         """
         if not isinstance(states, list):
             states = [states]

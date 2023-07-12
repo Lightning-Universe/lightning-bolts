@@ -83,6 +83,7 @@ class AMDIM(LightningModule):
         trainer.fit(model)
 
     .. _AMDIM: https://arxiv.org/abs/1906.00910
+
     """
 
     def __init__(

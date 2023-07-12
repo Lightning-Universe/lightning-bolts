@@ -38,6 +38,7 @@ class BinaryMNIST(MNIST):
 
     Note:
         Documentation is based on https://pytorch.org/vision/main/generated/torchvision.datasets.EMNIST.html
+
     """
 
     def __init__(self, root: str, threshold: Union[int, float] = 127.0, **kwargs: Any) -> None:

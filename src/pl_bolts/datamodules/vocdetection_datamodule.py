@@ -67,6 +67,7 @@ def _prepare_voc_instance(image: Any, target: Dict[str, Any]):
     """Prepares VOC dataset into appropriate target for fasterrcnn.
 
     https://github.com/pytorch/vision/issues/1097#issuecomment-508917489
+
     """
     anno = target["annotation"]
     boxes = []

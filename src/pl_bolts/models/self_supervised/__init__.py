@@ -1,5 +1,5 @@
-"""These models have been pre-trained using self-supervised learning. The models can also be used without pre-
-training and overwritten for your own research.
+"""These models have been pre-trained using self-supervised learning. The models can also be used without pre- training
+and overwritten for your own research.
 
 Here's an example for using these as pretrained models.
 
@@ -15,6 +15,7 @@ Here's an example for using these as pretrained models.
 
     # use these in classification or any downstream task
     classifications = classifier(representations)
+
 """
 from pl_bolts.models.self_supervised.amdim.amdim_module import AMDIM
 from pl_bolts.models.self_supervised.byol.byol_module import BYOL

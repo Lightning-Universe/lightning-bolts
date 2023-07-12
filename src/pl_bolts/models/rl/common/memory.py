@@ -31,6 +31,7 @@ class Buffer:
 
         Args:
             experience: tuple (state, action, reward, done, new_state)
+
         """
         self.buffer.append(experience)
 
@@ -66,6 +67,7 @@ class ReplayBuffer(Buffer):
 
         Returns:
             a batch of tuple np arrays of state, action, reward, done, next_state
+
         """
 
         indices = np.random.choice(len(self.buffer), batch_size, replace=False)
@@ -103,6 +105,7 @@ class MultiStepBuffer(ReplayBuffer):
 
         Args:
             exp: tuple (state, action, reward, done, new_state)
+
         """
         self.update_history_queue(exp)  # add single step experience to history
         while self.exp_history_queue:  # go through all the n_steps that have been queued
@@ -123,14 +126,15 @@ class MultiStepBuffer(ReplayBuffer):
             self.buffer.append(n_step_exp)  # add n_step experience to buffer
 
     def update_history_queue(self, exp) -> None:
-        """Updates the experience history queue with the lastest experiences. In the event of an experience step is
-        in the done state, the history will be incrementally appended to the queue, removing the tail of the
-        history each time.
+        """Updates the experience history queue with the lastest experiences. In the event of an experience step is in
+        the done state, the history will be incrementally appended to the queue, removing the tail of the history each
+        time.
 
         Args:
             env_idx: index of the environment
             exp: the current experience
             history: history of experience steps for this environment
+
         """
         self.history.append(exp)
 
@@ -157,14 +161,15 @@ class MultiStepBuffer(ReplayBuffer):
             self.history.clear()
 
     def split_head_tail_exp(self, experiences: Tuple[Experience]) -> Tuple[List, Tuple[Experience]]:
-        """Takes in a tuple of experiences and returns the last state and tail experiences based on if the last
-        state is the end of an episode.
+        """Takes in a tuple of experiences and returns the last state and tail experiences based on if the last state is
+        the end of an episode.
 
         Args:
             experiences: Tuple of N Experience
 
         Returns:
             last state (Array or None) and remaining Experience
+
         """
         last_exp_state = experiences[-1].new_state
         tail_experiences = experiences
@@ -182,6 +187,7 @@ class MultiStepBuffer(ReplayBuffer):
 
         Returns:
             total discounted reward
+
         """
         total_reward = 0.0
         for exp in reversed(experiences):
@@ -238,6 +244,7 @@ class PERBuffer(ReplayBuffer):
 
         Returns:
             beta value for this indexed experience
+
         """
         beta_val = self.beta_start + step * (1.0 - self.beta_start) / self.beta_frames
         self.beta = min(1.0, beta_val)
@@ -249,6 +256,7 @@ class PERBuffer(ReplayBuffer):
 
         Args:
             exp: experience tuple being added to the buffer
+
         """
         # what is the max priority for new sample
         max_prio = self.priorities.max() if self.buffer else 1.0
@@ -272,6 +280,7 @@ class PERBuffer(ReplayBuffer):
 
         Returns:
             sample of experiences chosen with ranked probability
+
         """
         # get list of priority rankings
         prios = self.priorities if len(self.buffer) == self.capacity else self.priorities[: self.pos]
@@ -308,6 +317,7 @@ class PERBuffer(ReplayBuffer):
         Args:
             batch_indices: index of each datum in the batch
             batch_priorities: priority of each datum in the batch
+
         """
         for idx, prio in zip(batch_indices, batch_priorities):
             self.priorities[idx] = prio

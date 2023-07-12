@@ -35,12 +35,13 @@ class DataMonitorBase(Callback):
 
     def __init__(self, log_every_n_steps: int = None) -> None:
         """Base class for monitoring data histograms in a LightningModule. This requires a logger configured in the
-        Trainer, otherwise no data is logged. The specific class that inherits from this base defines what data
-        gets collected.
+        Trainer, otherwise no data is logged. The specific class that inherits from this base defines what data gets
+        collected.
 
         Args:
             log_every_n_steps: The interval at which histograms should be logged. This defaults to the
                 interval defined in the Trainer. Use this to override the Trainer default.
+
         """
         super().__init__()
         self._log_every_n_steps: Optional[int] = log_every_n_steps
@@ -84,12 +85,13 @@ class DataMonitorBase(Callback):
             self.log_histogram(tensor, name)
 
     def log_histogram(self, tensor: Tensor, name: str) -> None:
-        """Override this method to customize the logging of histograms. Detaches the tensor from the graph and
-        moves it to the CPU for logging.
+        """Override this method to customize the logging of histograms. Detaches the tensor from the graph and moves it
+        to the CPU for logging.
 
         Args:
             tensor: The tensor for which to log a histogram
             name: The name of the tensor as determined by the callback. Example: ``ìnput/0/[64, 1, 28, 28]``
+
         """
         logger = self._trainer.logger
         tensor = tensor.detach().cpu()
@@ -234,9 +236,9 @@ class TrainingDataMonitor(DataMonitorBase):
 
 
 def collect_and_name_tensors(data: Any, output: Dict[str, Tensor], parent_name: str = "input") -> None:
-    """Recursively fetches all tensors in a (nested) collection of data (depth-first search) and names them. Data
-    in dictionaries get named by their corresponding keys and otherwise they get indexed by an increasing integer.
-    The shape of the tensor gets appended to the name as well.
+    """Recursively fetches all tensors in a (nested) collection of data (depth-first search) and names them. Data in
+    dictionaries get named by their corresponding keys and otherwise they get indexed by an increasing integer. The
+    shape of the tensor gets appended to the name as well.
 
     Args:
         data: A collection of data (potentially nested).
@@ -249,6 +251,7 @@ def collect_and_name_tensors(data: Any, output: Dict[str, Tensor], parent_name: 
         >>> collect_and_name_tensors(data, output)
         >>> output  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         {'input/x/[2, 3]': ..., 'input/y/z/[5]': ...}
+
     """
     assert isinstance(output, dict)
     if isinstance(data, Tensor):
@@ -273,5 +276,6 @@ def shape2str(tensor: Tensor) -> str:
         '[1, 2, 3]'
         >>> shape2str(torch.rand(4))
         '[4]'
+
     """
     return "[" + ", ".join(map(str, tensor.shape)) + "]"

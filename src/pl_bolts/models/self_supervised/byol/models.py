@@ -15,6 +15,7 @@ class MLP(nn.Module):
 
     Note:
         Default values for input, hidden, and output dimensions are based on values used in BYOL.
+
     """
 
     def __init__(self, input_dim: int = 2048, hidden_dim: int = 4096, output_dim: int = 256) -> None:
@@ -32,8 +33,7 @@ class MLP(nn.Module):
 
 
 class SiameseArm(nn.Module):
-    """SiameseArm consolidates the encoder and projector networks of BYOL's symmetric architecture into a single
-    class.
+    """SiameseArm consolidates the encoder and projector networks of BYOL's symmetric architecture into a single class.
 
     Args:
         encoder (Union[str, nn.Module], optional): Online and target network encoder architecture.
@@ -43,6 +43,7 @@ class SiameseArm(nn.Module):
             Defaults to 4096.
         projector_out_dim (int, optional): Online and target network projector network output dimension.
             Defaults to 256.
+
     """
 
     def __init__(
@@ -67,10 +68,11 @@ class SiameseArm(nn.Module):
         return y, z
 
     def encode(self, x: Tensor) -> Tensor:
-        """Returns the encoded representation of a view. This method does not calculate the projection as in the
-        forward method.
+        """Returns the encoded representation of a view. This method does not calculate the projection as in the forward
+        method.
 
         Args:
             x (Tensor): sample to be encoded
+
         """
         return self.encoder(x)[0]

@@ -71,6 +71,7 @@ class DataModel:
     Attributes:
         data: Sequence of indexables.
         transform: Callable to transform data. The transform is called on a subset of data.
+
     """
 
     data: TArrays
@@ -84,6 +85,7 @@ class DataModel:
 
         Returns:
             data: Transformed data if transform is not None.
+
         """
         if self.transform is not None:
             subset = self.transform(subset)
