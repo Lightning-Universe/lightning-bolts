@@ -17,7 +17,7 @@ def using_torch_bad_version():
 
 
 def test_requires_pass():
-    assert using_torch()
+    assert using_torch() is True
 
 
 def test_requires_fail():
