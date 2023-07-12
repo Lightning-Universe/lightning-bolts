@@ -32,7 +32,10 @@ repos:
     rev: v1.7.3
     hooks:
       - id: docformatter
-        args: [--in-place, --wrap-summaries=115, --wrap-descriptions=120]
+        args:
+          - "--in-place"
+          - "--wrap-summaries=120"
+          - "--wrap-descriptions=120"
 
   - repo: https://github.com/executablebooks/mdformat
     rev: 0.7.16
@@ -43,11 +46,6 @@ repos:
           - mdformat-black
           - mdformat_frontmatter
         exclude: CHANGELOG.md
-
-  #- repo: https://github.com/PyCQA/isort
-  #  rev: 5.12.0
-  #  hooks:
-  #    - id: isort
 
   - repo: https://github.com/psf/black
     rev: 23.3.0
