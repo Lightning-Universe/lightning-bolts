@@ -1,6 +1,6 @@
 import functools
 import os
-from typing import Callable, Any
+from typing import Any, Callable
 
 from lightning_utilities.core.imports import ModuleAvailableCache, RequirementCache
 
