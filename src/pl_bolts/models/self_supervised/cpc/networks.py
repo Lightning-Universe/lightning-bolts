@@ -7,6 +7,7 @@ class CPCResNet(nn.Module):
     """CPC ResNet architecture.
 
     Args:
+
     """
 
     def __init__(
