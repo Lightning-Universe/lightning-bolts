@@ -1,4 +1,3 @@
-"""CPC V2."""
 import math
 from argparse import ArgumentParser
 from typing import Any, List, Tuple, Union
@@ -7,8 +6,7 @@ import torch
 import torch.nn as nn
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.utilities import rank_zero_warn
-from torch import Tensor
-from torch.optim import Adam
+from torch import Tensor, optim
 
 from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
 from pl_bolts.losses.self_supervised_learning import CPCTask
@@ -60,6 +58,7 @@ class CPC(LightningModule):
         python cpc_module.py --gpus 1
 
     .. _CPC: https://arxiv.org/pdf/1905.09272v3.pdf
+
     """
 
     def __init__(
@@ -84,7 +83,7 @@ class CPC(LightningModule):
         self.contrastive_task = CPCTask(num_input_channels=c, target_dim=64, embed_scale=0.1)
         self.z_dim = c * h * h
 
-    def load_pretrained(self, encoder_name):
+    def load_pretrained(self, encoder_name: str) -> None:
         available_weights = {"resnet18"}
 
         if encoder_name in available_weights:
@@ -100,7 +99,7 @@ class CPC(LightningModule):
             return cpc_resnet101(dummy_batch)
         return torchvision_ssl_encoder(encoder_name, return_all_feature_maps=self.hparams.task == "amdim")
 
-    def __compute_final_num_c(self, patch_size):
+    def __compute_final_num_c(self, patch_size: int) -> Tuple[int, int]:
         dummy_batch = torch.zeros((2 * 49, 3, patch_size, patch_size))
         dummy_batch = self.encoder(dummy_batch)
 
@@ -112,7 +111,7 @@ class CPC(LightningModule):
         b, c, h, w = dummy_batch.size()
         return c, h
 
-    def __recover_z_shape(self, z, b):
+    def __recover_z_shape(self, z: Tensor, b: int) -> Tensor:
         # recover shape
         z = z.squeeze(-1)
         num_patches = int(math.sqrt(z.size(0) // b))
@@ -123,7 +122,7 @@ class CPC(LightningModule):
     def forward(self, x: Tensor) -> Tensor:
         # put all patches on the batch dim for simultaneous processing
         b, _, c, w, h = x.size()
-        x = x.view(-1, c, w, h)
+        x.view(-1, c, w, h)
 
         # Z are the latent vars
         z = self.encoder(x)
@@ -140,32 +139,31 @@ class CPC(LightningModule):
         return self._shared_step(batch, batch_idx, "train")
 
     def validation_step(self, batch: Any, batch_idx: int) -> Tensor:
-        """Complete validation loop."""
+        """Complete training loop."""
         return self._shared_step(batch, batch_idx, "val")
 
-    def _shared_step(self, batch: Any, batch_idx: int, step: str) -> Tensor:
-        """Shared evaluation step for training and validation loop."""
+    def _shared_step(self, batch: Any, batch_idx: int, split: str) -> Tensor:
+        if isinstance(self.datamodule, STL10DataModule):
+            batch = batch[0]
+
         x, _ = batch
-
-        # Calculate latent representation
         z = self(x)
-
-        # Calculate InfoNCE loss
         loss = self.contrastive_task(z)
 
-        # Log loss
-        if step == "train":
+        if split == "train":
             self.log("train_loss", loss)
-        elif step == "val":
-            self.log("val_loss", loss)
         else:
-            raise ValueError(f"Step '{step}' is invalid. Must be 'train' or 'val'.")
+            self.log("val_loss", loss)
 
         return loss
 
     def configure_optimizers(self) -> Tuple[List, List]:
-        optimizer = Adam(
-            params=self.parameters(), lr=self.hparams.learning_rate, weight_decay=self.hparams.weight_decay
+        optimizer = optim.Adam(
+            params=self.parameters(),
+            lr=self.hparams.learning_rate,
+            betas=(0.8, 0.999),
+            weight_decay=self.hparams.weight_decay,
+            eps=1e-7,
         )
         scheduler = None
         return [optimizer], [scheduler]
@@ -191,7 +189,6 @@ class CPC(LightningModule):
         parser.add_argument("--encoder", default="cpc_encoder", type=str, choices=possible_resnets)
         parser.add_argument("--online_ft", action="store_true")
         parser.add_argument("--task", type=str, default="cpc")
-        # cifar10: 1e-5, stl10: 3e-5, imagenet: 4e-4
 
         return parser
 
