@@ -2,7 +2,10 @@ import warnings
 
 import pytest
 import torch
+import torchvision
 import torch.nn as nn
+import packaging.version as pv
+
 from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.models.self_supervised import SwAV
 from pl_bolts.models.self_supervised.swav.swav_swin import swin_b, swin_s, swin_v2_b, swin_v2_s, swin_v2_t
@@ -12,6 +15,9 @@ from pl_bolts.utils import _IS_WINDOWS
 from pytorch_lightning import Trainer
 from pytorch_lightning.utilities.warnings import PossibleUserWarning
 
+def check_compatibility():
+    return pv.parse(torchvision.__version__) >= pv.parse("0.13") 
+        
 model = [swin_s, swin_b, swin_v2_t, swin_v2_s, swin_v2_b]
 
 
@@ -30,6 +36,7 @@ model = [swin_s, swin_b, swin_v2_t, swin_v2_s, swin_v2_b]
         (swin_v2_b, 2048, nn.Sequential, 128),
     ],
 )
+@pytest.mark.skipif(not check_compatibility(), reason="Torchvision version not compatible, must be >= 0.13")
 @torch.no_grad()
 def test_swin_projection_head(model_architecture, hidden_mlp, prj_head_type, feat_dim):
     model = model_architecture(hidden_mlp=hidden_mlp, output_dim=feat_dim)
@@ -37,7 +44,8 @@ def test_swin_projection_head(model_architecture, hidden_mlp, prj_head_type, fea
 
 
 @pytest.mark.parametrize("model", ["swin_s", "swin_b", "swin_v2_t", "swin_v2_s", "swin_v2_b"])
-@pytest.mark.skipif(_IS_WINDOWS, reason="numpy.core._exceptions._ArrayMemoryError...")
+@pytest.mark.skipif(not check_compatibility(), reason="Torchvision version not compatible, must be >= 0.13")
+@pytest.mark.skipif(_IS_WINDOWS, reason="numpy.core._exceptions._ArrayMemoryError...")  # todo
 def test_swav_swin_model(tmpdir, datadir, model, catch_warnings):
     """Test SWAV on CIFAR-10."""
     warnings.filterwarnings(

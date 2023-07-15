@@ -1,177 +1,45 @@
+import os
 import math
-from functools import partial
-from types import FunctionType
-from typing import Any, Callable, List, Optional, Tuple, Union
+import functools
 
-import packaging.version as pv
 import torch
 import torch.fx
 import torch.nn.functional as F  # noqa: N812
-import torchvision
+import packaging.version as pv
+
+import torchvision.utils
+import torchvision.ops as ops
+
 from torch import Tensor, nn
+from typing import Any, Callable, List, Optional, Tuple, Union
+from lightning_utilities.core.imports import ModuleAvailableCache, RequirementCache
 
-# Support for functions not found in older versions of torchvision
-if pv.parse(torchvision.__version__) >= pv.parse("0.13"):
-    from torchvision.ops.misc import MLP, Permute
-    from torchvision.ops.stochastic_depth import StochasticDepth
-    from torchvision.utils import _log_api_usage_once
-else:
-    """The functions below are copied from the torchvision implementation."""
+# ToDo: replace with utils wrapper after 0.10 is released
+def requires(*module_path_version: str) -> Callable: 
+    """Wrapper for enforcing certain requirements for a particular class or function."""
+    def decorator(func: Callable) -> Callable:
+        reqs = [
+            RequirementCache(mod_ver) if (">" in mod_ver or "=" in mod_ver) else ModuleAvailableCache(mod_ver) 
+            for mod_ver in module_path_version
+        ]
+        available = all(map(bool, reqs))
+        if not available:
 
-    if not hasattr(torchvision.utils, "_log_api_usage_once"):
+            @functools.wraps(func)
+            def wrapper(*args: Any, **kwargs: Any) -> Any:
+                msg = os.linesep.join([repr(r) for r in reqs if not bool(r)])
+                raise ModuleNotFoundError(f"Required dependencies not available: \n{msg}")
 
-        def _log_api_usage_once(obj: Any) -> None:
-            """Logs API usage(module and name) within an organization. In a large ecosystem,
-                                it's often useful to track the PyTorch and TorchVision APIs usage. This API provides
-                                the similar functionality to the logging module in the Python stdlib.It can be used
-                                for debugging purpose to log which methods are used and by default it is inactive,
-                                unless the user manually subscribes a logger via the `SetAPIUsageLogger method
-            <https://github.com/pytorch/pytorch/blob/eb3b9fe719b21fae13c7a7cf3253f970290a573e/c10/util/Logging.cpp#L114>`_.
-                                Please note it is triggered only once for the same API call within a process.
-                                It does not collect any data from open-source users since it is no-op by default.
+            return wrapper
+        return func
 
-                                For more information, please refer to
-                                * PyTorch note:
-                                https://pytorch.org/docs/stable/notes/large_scale_deployments.html#api-usage-logging;
-                                * Logging policy:
-                                https://github.com/pytorch/vision/issues/5052;
-
-                                Args:
-                                    obj: an object to extract info from.
-            """
-            module = obj.__module__
-            if not module.startswith("torchvision"):
-                module = f"torchvision.internal.{module}"
-            name = obj.__class__.__name__
-            if isinstance(obj, FunctionType):
-                name = obj.__name__
-            torch._C._log_api_usage_once(f"{module}.{name}")
-
-    if not hasattr(torchvision.ops, "stochastic_depth"):
-        def stochastic_depth(input: Tensor, prob: float, mode: str, training: bool = True) -> Tensor:
-            """Implements the Stochastic Depth from `"Deep Networks with Stochastic Depth"
-            <https://arxiv.org/abs/1603.09382>`_ used for randomly dropping residual branches
-            of residual architectures.
-
-            Args:
-                input: The input tensor or arbitrary dimensions with the first one
-                        being its batch i.e. a batch with ``N`` rows.
-                prob: probability of the input to be zeroed.
-                mode: ``"batch"`` or ``"row"``.
-                    ``"batch"`` randomly zeroes the entire input, ``"row"`` zeroes randomly
-                    selected rows from the batch.
-                training: apply stochastic depth if is ``True``. Default: ``True``
-
-            Returns:
-                Tensor[N, ...]: The randomly zeroed tensor.
-            """
-            if not torch.jit.is_scripting() and not torch.jit.is_tracing():
-                _log_api_usage_once(stochastic_depth)
-            if prob < 0.0 or prob > 1.0:
-                raise ValueError(f"drop probability has to be between 0 and 1, but got {prob}")
-            if mode not in ["batch", "row"]:
-                raise ValueError(f"mode has to be either 'batch' or 'row', but got {mode}")
-            if not training or prob == 0.0:
-                return input
-
-            survival_rate = 1.0 - prob
-            size = [input.shape[0]] + [1] * (input.ndim - 1) if mode == "row" else [1] * input.ndim
-            noise = torch.empty(size, dtype=input.dtype, device=input.device)
-            noise = noise.bernoulli_(survival_rate)
-            if survival_rate > 0.0:
-                noise.div_(survival_rate)
-            return input * noise
-
-        torch.fx.wrap("stochastic_depth")
-
-        class StochasticDepth(nn.Module):
-            """See :func:`stochastic_depth`."""
-
-            def __init__(self, prob: float, mode: str) -> None:
-                super().__init__()
-                _log_api_usage_once(self)
-                self.prob = prob
-                self.mode = mode
-
-            def forward(self, input: Tensor) -> Tensor:
-                return stochastic_depth(input, self.prob, self.mode, self.training)
-
-            def __repr__(self) -> str:
-                return f"{self.__class__.__name__}(p={self.prob}, mode={self.mode})"
-    if not hasattr(torchvision.ops.misc, "MLP"):
-
-        class MLP(torch.nn.Sequential):
-            """This block implements the multi-layer perceptron (MLP) module.
-
-            Args:
-                in_channels: Number of channels of the input
-                hidden_channels: List of the hidden channel dimensions
-                norm_layer: Norm layer that will be stacked on top of the linear layer.
-                    If ``None`` this layer won't be used.
-                activation_layer:
-                    Activation function which will be stacked on top of the normalization layer (if not None),
-                    otherwise on top of the linear layer.
-                    If ``None`` this layer won't be used. Default: ``torch.nn.ReLU``
-                inplace: Parameter for the activation layer, which can optionally do the operation in-place.
-                    Default is ``None``, which uses the respective default values of the ``activation_layer``
-                    and Dropout layer.
-                bias: Whether to use bias in the linear layer. Default ``True``
-                dropout: The probability for the dropout layer. Default: 0.0
-            """
-
-            def __init__(
-                self,
-                in_channels: int,
-                hidden_channels: List[int],
-                norm_layer: Optional[Callable[..., torch.nn.Module]] = None,
-                activation_layer: Optional[Callable[..., torch.nn.Module]] = torch.nn.ReLU,
-                inplace: Optional[bool] = None,
-                bias: bool = True,
-                dropout: float = 0.0,
-            ) -> None:
-                # The addition of `norm_layer` is inspired from the implementation of TorchMultimodal:
-                # https://github.com/facebookresearch/multimodal/blob/5dec8a/torchmultimodal/modules/layers/mlp.py
-                params = {} if inplace is None else {"inplace": inplace}
-
-                layers = []
-                in_dim = in_channels
-                for hidden_dim in hidden_channels[:-1]:
-                    layers.append(torch.nn.Linear(in_dim, hidden_dim, bias=bias))
-                    if norm_layer is not None:
-                        layers.append(norm_layer(hidden_dim))
-                    layers.append(activation_layer(**params))
-                    layers.append(torch.nn.Dropout(dropout, **params))
-                    in_dim = hidden_dim
-
-                layers.append(torch.nn.Linear(in_dim, hidden_channels[-1], bias=bias))
-                layers.append(torch.nn.Dropout(dropout, **params))
-
-                super().__init__(*layers)
-                _log_api_usage_once(self)
-
-    if not hasattr(torchvision.ops.misc, "Permute"):
-
-        class Permute(torch.nn.Module):
-            """This module returns a view of the tensor input with its dimensions permuted.
-
-            Args:
-                dims (List[int]): The desired ordering of dimensions
-            """
-
-            def __init__(self, dims: List[int]) -> None:
-                super().__init__()
-                self.dims = dims
-
-            def forward(self, x: Tensor) -> Tensor:
-                return torch.permute(x, self.dims)
-
+    return decorator
 
 # Support meshgrid indexing for older versions of torch
 def meshgrid(*tensors: Union[Tensor, List[Tensor]], indexing: Optional[str] = None) -> Tuple:
     if pv.parse(torch.__version__) >= pv.parse("1.10.0"):
         return torch.meshgrid(*tensors, indexing=indexing)
     return torch.meshgrid(*tensors)
-
 
 def _patch_merging_pad(x: torch.Tensor) -> torch.Tensor:
     h, w, _ = x.shape[-3:]
@@ -182,9 +50,7 @@ def _patch_merging_pad(x: torch.Tensor) -> torch.Tensor:
     x3 = x[..., 1::2, 1::2, :]  # ... H/2 W/2 C
     return torch.cat([x0, x1, x2, x3], -1)  # ... H/2 W/2 4*C
 
-
 torch.fx.wrap("_patch_merging_pad")
-
 
 def _get_relative_position_bias(
     relative_position_bias_table: torch.Tensor, relative_position_index: torch.Tensor, window_size: List[int]
@@ -194,9 +60,7 @@ def _get_relative_position_bias(
     relative_position_bias = relative_position_bias.view(n, n, -1)
     return relative_position_bias.permute(2, 0, 1).contiguous().unsqueeze(0)
 
-
 torch.fx.wrap("_get_relative_position_bias")
-
 
 class PatchMerging(nn.Module):
     """Patch Merging Layer.
@@ -208,7 +72,7 @@ class PatchMerging(nn.Module):
 
     def __init__(self, dim: int, norm_layer: Callable[..., nn.Module] = nn.LayerNorm):
         super().__init__()
-        _log_api_usage_once(self)
+        torchvision.utils._log_api_usage_once(self)
         self.dim = dim
         self.reduction = nn.Linear(4 * dim, 2 * dim, bias=False)
         self.norm = norm_layer(4 * dim)
@@ -224,7 +88,6 @@ class PatchMerging(nn.Module):
         x = self.norm(x)
         return self.reduction(x)  # ... H/2 W/2 2*C
 
-
 class PatchMergingV2(nn.Module):
     """Patch Merging Layer for Swin Transformer V2.
 
@@ -235,7 +98,7 @@ class PatchMergingV2(nn.Module):
 
     def __init__(self, dim: int, norm_layer: Callable[..., nn.Module] = nn.LayerNorm) -> None:
         super().__init__()
-        _log_api_usage_once(self)
+        torchvision.utils._log_api_usage_once(self)
         self.dim = dim
         self.reduction = nn.Linear(4 * dim, 2 * dim, bias=False)
         self.norm = norm_layer(2 * dim)  # difference
@@ -250,7 +113,6 @@ class PatchMergingV2(nn.Module):
         x = _patch_merging_pad(x)
         x = self.reduction(x)  # ... H/2 W/2 2*C
         return self.norm(x)
-
 
 def shifted_window_attention(
     input: Tensor,
@@ -363,9 +225,7 @@ def shifted_window_attention(
     # unpad features
     return x[:, :h, :w, :].contiguous()
 
-
 torch.fx.wrap("shifted_window_attention")
-
 
 class ShiftedWindowAttention(nn.Module):
     """See :func:`shifted_window_attention`."""
@@ -443,7 +303,6 @@ class ShiftedWindowAttention(nn.Module):
             qkv_bias=self.qkv.bias,
             proj_bias=self.proj.bias,
         )
-
 
 class ShiftedWindowAttentionV2(ShiftedWindowAttention):
     """See :func:`shifted_window_attention_v2`."""
@@ -526,7 +385,6 @@ class ShiftedWindowAttentionV2(ShiftedWindowAttention):
             logit_scale=self.logit_scale,
         )
 
-
 class SwinTransformerBlock(nn.Module):
     """Swin Transformer Block.
 
@@ -557,7 +415,7 @@ class SwinTransformerBlock(nn.Module):
         attn_layer: Callable[..., nn.Module] = ShiftedWindowAttention,
     ) -> None:
         super().__init__()
-        _log_api_usage_once(self)
+        torchvision.utils._log_api_usage_once(self)
 
         self.norm1 = norm_layer(dim)
         self.attn = attn_layer(
@@ -568,9 +426,9 @@ class SwinTransformerBlock(nn.Module):
             attention_dropout=attention_dropout,
             dropout=dropout,
         )
-        self.stochastic_depth = StochasticDepth(stochastic_depth_prob, "row")
+        self.stochastic_depth = ops.StochasticDepth(stochastic_depth_prob, "row")
         self.norm2 = norm_layer(dim)
-        self.mlp = MLP(dim, [int(dim * mlp_ratio), dim], activation_layer=nn.GELU, inplace=None, dropout=dropout)
+        self.mlp = ops.misc.MLP(dim, [int(dim * mlp_ratio), dim], activation_layer=nn.GELU, inplace=None, dropout=dropout)
 
         for m in self.mlp.modules():
             if isinstance(m, nn.Linear):
@@ -581,7 +439,6 @@ class SwinTransformerBlock(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         x = x + self.stochastic_depth(self.attn(self.norm1(x)))
         return x + self.stochastic_depth(self.mlp(self.norm2(x)))
-
 
 class SwinTransformerBlockV2(SwinTransformerBlock):
     """Swin Transformer V2 Block.
@@ -631,7 +488,7 @@ class SwinTransformerBlockV2(SwinTransformerBlock):
         x = x + self.stochastic_depth(self.norm1(self.attn(x)))
         return x + self.stochastic_depth(self.norm2(self.mlp(x)))
 
-
+@requires("torchvision>=0.13")
 class SwinTransformer(nn.Module):
     """Implements Swin Transformer from the `"Swin Transformer: Hierarchical Vision Transformer using Shifted
     Windows" <https://arxiv.org/pdf/2103.14030>`_ paper.
@@ -674,13 +531,13 @@ class SwinTransformer(nn.Module):
         **kwargs: Any,
     ) -> None:
         super().__init__()
-        _log_api_usage_once(self)
+        torchvision.utils._log_api_usage_once(self)
         self.num_classes = output_dim
 
         if block is None:
             block = SwinTransformerBlock
         if norm_layer is None:
-            norm_layer = partial(nn.LayerNorm, eps=1e-5)
+            norm_layer = functools.partial(nn.LayerNorm, eps=1e-5)
 
         self.eval_mode = eval_mode
         self.padding = nn.ConstantPad2d(1, 0.0)
@@ -692,7 +549,7 @@ class SwinTransformer(nn.Module):
                 nn.Conv2d(
                     3, embed_dim, kernel_size=(patch_size[0], patch_size[1]), stride=(patch_size[0], patch_size[1])
                 ),
-                Permute([0, 2, 3, 1]),
+                ops.misc.Permute([0, 2, 3, 1]),
                 norm_layer(embed_dim),
             )
         )
@@ -728,7 +585,7 @@ class SwinTransformer(nn.Module):
 
         num_features = embed_dim * 2 ** (len(depths) - 1)
         self.norm = norm_layer(num_features)
-        self.permute = Permute([0, 3, 1, 2])  # B H W C -> B C H W
+        self.permute = ops.misc.Permute([0, 3, 1, 2])  # B H W C -> B C H W
         self.avgpool = nn.AdaptiveAvgPool2d(1)
         self.flatten = nn.Flatten(1)
         self.l2norm = normalize
@@ -807,7 +664,6 @@ class SwinTransformer(nn.Module):
             start_idx = end_idx
         return self.forward_head(output)
 
-
 class MultiPrototypes(nn.Module):
     def __init__(self, output_dim, num_prototypes) -> None:
         super().__init__()
@@ -820,7 +676,6 @@ class MultiPrototypes(nn.Module):
         for i in range(self.nmb_heads):
             out.append(getattr(self, "prototypes" + str(i))(x))
         return out
-
 
 def _swin_transformer(
     patch_size: List[int],
@@ -841,7 +696,6 @@ def _swin_transformer(
         **kwargs,
     )
 
-
 def swin_s(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
         patch_size=[4, 4],
@@ -853,7 +707,6 @@ def swin_s(**kwargs: Any) -> SwinTransformer:
         **kwargs,
     )
 
-
 def swin_b(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
         patch_size=[4, 4],
@@ -864,7 +717,6 @@ def swin_b(**kwargs: Any) -> SwinTransformer:
         stochastic_depth_prob=0.5,
         **kwargs,
     )
-
 
 def swin_v2_t(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
@@ -879,7 +731,6 @@ def swin_v2_t(**kwargs: Any) -> SwinTransformer:
         **kwargs,
     )
 
-
 def swin_v2_s(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
         patch_size=[4, 4],
@@ -892,7 +743,6 @@ def swin_v2_s(**kwargs: Any) -> SwinTransformer:
         downsample_layer=PatchMergingV2,
         **kwargs,
     )
-
 
 def swin_v2_b(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
