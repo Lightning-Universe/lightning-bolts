@@ -14,6 +14,7 @@ from torch import Tensor, nn
 
 from pl_bolts.utils._dependency import requires
 
+
 # Support meshgrid indexing for older versions of torch
 def meshgrid(*tensors: Union[Tensor, List[Tensor]], indexing: Optional[str] = None) -> Tuple:
     if pv.parse(torch.__version__) >= pv.parse("1.10.0"):
