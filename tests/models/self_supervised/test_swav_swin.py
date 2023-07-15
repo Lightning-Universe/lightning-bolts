@@ -1,11 +1,10 @@
 import warnings
 
+import packaging.version as pv
 import pytest
 import torch
-import torchvision
 import torch.nn as nn
-import packaging.version as pv
-
+import torchvision
 from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.models.self_supervised import SwAV
 from pl_bolts.models.self_supervised.swav.swav_swin import swin_b, swin_s, swin_v2_b, swin_v2_s, swin_v2_t
@@ -15,9 +14,11 @@ from pl_bolts.utils import _IS_WINDOWS
 from pytorch_lightning import Trainer
 from pytorch_lightning.utilities.warnings import PossibleUserWarning
 
+
 def check_compatibility():
-    return pv.parse(torchvision.__version__) >= pv.parse("0.13") 
-        
+    return pv.parse(torchvision.__version__) >= pv.parse("0.13")
+
+
 model = [swin_s, swin_b, swin_v2_t, swin_v2_s, swin_v2_b]
 
 

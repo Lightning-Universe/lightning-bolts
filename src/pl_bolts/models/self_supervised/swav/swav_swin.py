@@ -1,18 +1,16 @@
-import os
-import math
 import functools
+import math
+import os
+from typing import Any, Callable, List, Optional, Tuple, Union
 
+import packaging.version as pv
 import torch
 import torch.fx
 import torch.nn.functional as F  # noqa: N812
-import packaging.version as pv
-
-import torchvision.utils
 import torchvision.ops as ops
-
-from torch import Tensor, nn
-from typing import Any, Callable, List, Optional, Tuple, Union
+import torchvision.utils
 from lightning_utilities.core.imports import ModuleAvailableCache, RequirementCache
+from torch import Tensor, nn
 
 from pl_bolts.utils._dependency import requires
 
@@ -21,6 +19,7 @@ def meshgrid(*tensors: Union[Tensor, List[Tensor]], indexing: Optional[str] = No
     if pv.parse(torch.__version__) >= pv.parse("1.10.0"):
         return torch.meshgrid(*tensors, indexing=indexing)
     return torch.meshgrid(*tensors)
+
 
 def _patch_merging_pad(x: torch.Tensor) -> torch.Tensor:
     h, w, _ = x.shape[-3:]
@@ -31,7 +30,9 @@ def _patch_merging_pad(x: torch.Tensor) -> torch.Tensor:
     x3 = x[..., 1::2, 1::2, :]  # ... H/2 W/2 C
     return torch.cat([x0, x1, x2, x3], -1)  # ... H/2 W/2 4*C
 
+
 torch.fx.wrap("_patch_merging_pad")
+
 
 def _get_relative_position_bias(
     relative_position_bias_table: torch.Tensor, relative_position_index: torch.Tensor, window_size: List[int]
@@ -41,7 +42,9 @@ def _get_relative_position_bias(
     relative_position_bias = relative_position_bias.view(n, n, -1)
     return relative_position_bias.permute(2, 0, 1).contiguous().unsqueeze(0)
 
+
 torch.fx.wrap("_get_relative_position_bias")
+
 
 class PatchMerging(nn.Module):
     """Patch Merging Layer.
@@ -49,6 +52,7 @@ class PatchMerging(nn.Module):
     Args:
         dim: Number of input channels.
         norm_layer: Normalization layer. Default: nn.LayerNorm.
+
     """
 
     def __init__(self, dim: int, norm_layer: Callable[..., nn.Module] = nn.LayerNorm):
@@ -69,12 +73,14 @@ class PatchMerging(nn.Module):
         x = self.norm(x)
         return self.reduction(x)  # ... H/2 W/2 2*C
 
+
 class PatchMergingV2(nn.Module):
     """Patch Merging Layer for Swin Transformer V2.
 
     Args:
         dim: Number of input channels.
         norm_layer: Normalization layer. Default: nn.LayerNorm.
+
     """
 
     def __init__(self, dim: int, norm_layer: Callable[..., nn.Module] = nn.LayerNorm) -> None:
@@ -94,6 +100,7 @@ class PatchMergingV2(nn.Module):
         x = _patch_merging_pad(x)
         x = self.reduction(x)  # ... H/2 W/2 2*C
         return self.norm(x)
+
 
 def shifted_window_attention(
     input: Tensor,
@@ -128,6 +135,7 @@ def shifted_window_attention(
 
     Returns:
         Tensor[N, H, W, C]: The output tensor after shifted window attention.
+
     """
     b, h, w, c = input.shape
     # pad feature maps to multiples of window size
@@ -206,7 +214,9 @@ def shifted_window_attention(
     # unpad features
     return x[:, :h, :w, :].contiguous()
 
+
 torch.fx.wrap("shifted_window_attention")
+
 
 class ShiftedWindowAttention(nn.Module):
     """See :func:`shifted_window_attention`."""
@@ -284,6 +294,7 @@ class ShiftedWindowAttention(nn.Module):
             qkv_bias=self.qkv.bias,
             proj_bias=self.proj.bias,
         )
+
 
 class ShiftedWindowAttentionV2(ShiftedWindowAttention):
     """See :func:`shifted_window_attention_v2`."""
@@ -366,6 +377,7 @@ class ShiftedWindowAttentionV2(ShiftedWindowAttention):
             logit_scale=self.logit_scale,
         )
 
+
 class SwinTransformerBlock(nn.Module):
     """Swin Transformer Block.
 
@@ -380,6 +392,7 @@ class SwinTransformerBlock(nn.Module):
         stochastic_depth_prob: Stochastic depth rate. Default: 0.0.
         norm_layer: Normalization layer.  Default: nn.LayerNorm.
         attn_layer: Attention layer. Default: ShiftedWindowAttention
+
     """
 
     def __init__(
@@ -409,7 +422,9 @@ class SwinTransformerBlock(nn.Module):
         )
         self.stochastic_depth = ops.StochasticDepth(stochastic_depth_prob, "row")
         self.norm2 = norm_layer(dim)
-        self.mlp = ops.misc.MLP(dim, [int(dim * mlp_ratio), dim], activation_layer=nn.GELU, inplace=None, dropout=dropout)
+        self.mlp = ops.misc.MLP(
+            dim, [int(dim * mlp_ratio), dim], activation_layer=nn.GELU, inplace=None, dropout=dropout
+        )
 
         for m in self.mlp.modules():
             if isinstance(m, nn.Linear):
@@ -420,6 +435,7 @@ class SwinTransformerBlock(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         x = x + self.stochastic_depth(self.attn(self.norm1(x)))
         return x + self.stochastic_depth(self.mlp(self.norm2(x)))
+
 
 class SwinTransformerBlockV2(SwinTransformerBlock):
     """Swin Transformer V2 Block.
@@ -435,6 +451,7 @@ class SwinTransformerBlockV2(SwinTransformerBlock):
         stochastic_depth_prob: Stochastic depth rate. Default: 0.0.
         norm_layer: Normalization layer.  Default: nn.LayerNorm.
         attn_layer: Attention layer. Default: ShiftedWindowAttentionV2.
+
     """
 
     def __init__(
@@ -468,6 +485,7 @@ class SwinTransformerBlockV2(SwinTransformerBlock):
         # In V1 we applied norm before the attention.
         x = x + self.stochastic_depth(self.norm1(self.attn(x)))
         return x + self.stochastic_depth(self.norm2(self.mlp(x)))
+
 
 @requires("torchvision>=0.13")
 class SwinTransformer(nn.Module):
@@ -645,6 +663,7 @@ class SwinTransformer(nn.Module):
             start_idx = end_idx
         return self.forward_head(output)
 
+
 class MultiPrototypes(nn.Module):
     def __init__(self, output_dim, num_prototypes) -> None:
         super().__init__()
@@ -657,6 +676,7 @@ class MultiPrototypes(nn.Module):
         for i in range(self.nmb_heads):
             out.append(getattr(self, "prototypes" + str(i))(x))
         return out
+
 
 def _swin_transformer(
     patch_size: List[int],
@@ -677,6 +697,7 @@ def _swin_transformer(
         **kwargs,
     )
 
+
 def swin_s(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
         patch_size=[4, 4],
@@ -688,6 +709,7 @@ def swin_s(**kwargs: Any) -> SwinTransformer:
         **kwargs,
     )
 
+
 def swin_b(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
         patch_size=[4, 4],
@@ -698,6 +720,7 @@ def swin_b(**kwargs: Any) -> SwinTransformer:
         stochastic_depth_prob=0.5,
         **kwargs,
     )
+
 
 def swin_v2_t(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
@@ -712,6 +735,7 @@ def swin_v2_t(**kwargs: Any) -> SwinTransformer:
         **kwargs,
     )
 
+
 def swin_v2_s(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
         patch_size=[4, 4],
@@ -724,6 +748,7 @@ def swin_v2_s(**kwargs: Any) -> SwinTransformer:
         downsample_layer=PatchMergingV2,
         **kwargs,
     )
+
 
 def swin_v2_b(**kwargs: Any) -> SwinTransformer:
     return _swin_transformer(
