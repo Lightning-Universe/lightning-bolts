@@ -32,6 +32,7 @@ class AMDIMTrainTransformsCIFAR10:
 
         transform = AMDIMTrainTransformsCIFAR10()
         (view1, view2) = transform(x)
+
     """
 
     def __init__(self) -> None:
@@ -74,6 +75,7 @@ class AMDIMEvalTransformsCIFAR10:
 
         transform = AMDIMEvalTransformsCIFAR10()
         (view1, view2) = transform(x)
+
     """
 
     def __init__(self) -> None:
@@ -113,6 +115,7 @@ class AMDIMTrainTransformsSTL10:
 
         transform = AMDIMTrainTransformsSTL10()
         (view1, view2) = transform(x)
+
     """
 
     def __init__(self, height: int = 64) -> None:
@@ -155,6 +158,7 @@ class AMDIMEvalTransformsSTL10:
 
         transform = AMDIMTrainTransformsSTL10()
         view1 = transform(x)
+
     """
 
     def __init__(self, height: int = 64) -> None:
@@ -200,6 +204,7 @@ class AMDIMTrainTransformsImageNet128:
 
         transform = AMDIMTrainTransformsSTL10()
         (view1, view2) = transform(x)
+
     """
 
     def __init__(self, height: int = 128) -> None:
@@ -245,6 +250,7 @@ class AMDIMEvalTransformsImageNet128:
 
         transform = AMDIMEvalTransformsImageNet128()
         view1 = transform(x)
+
     """
 
     def __init__(self, height: int = 128) -> None:

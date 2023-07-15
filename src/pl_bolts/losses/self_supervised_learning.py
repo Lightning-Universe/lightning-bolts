@@ -83,8 +83,7 @@ class CPCTask(nn.Module):
                 if not torch.isnan(loss):
                     losses.append(loss)
 
-        loss = torch.stack(losses).sum()
-        return loss
+        return torch.stack(losses).sum()
 
 
 @under_review()
@@ -210,6 +209,7 @@ class FeatureMapContrastiveTask(nn.Module):
         # will compare the following:
         # 01: (pos_0, anc_1), (anc_0, pos_1)
         # 02: (pos_0, anc_2), (anc_0, pos_2)
+
     """
 
     def __init__(self, comparisons: str = "00, 11", tclip: float = 10.0, bidirectional: bool = True) -> None:
@@ -255,8 +255,7 @@ class FeatureMapContrastiveTask(nn.Module):
         for i in range(w):
             for j in range(w):
                 masks_r5[i, j, 0, i, j] = 1
-        masks_r5 = masks_r5.reshape(-1, 1, w, w)
-        return masks_r5
+        return masks_r5.reshape(-1, 1, w, w)
 
     def _sample_src_ftr(self, r_cnv, masks):
         # get feature dimensions
@@ -323,6 +322,7 @@ class FeatureMapContrastiveTask(nn.Module):
             tensor([2.2351, 2.1902])
             >>> regularizer
             tensor(0.0324)
+
         """
         assert len(anchor_maps) == len(self.map_indexes), f"expected each input to have {len(self.map_indexes)} tensors"
 

@@ -33,6 +33,7 @@ class PrintTableMetricsCallback(Callback):
         # loss│train_loss│val_loss│epoch
         # ──────────────────────────────
         # 2.2541470527648926│2.2541470527648926│2.2158432006835938│0
+
     """
 
     def __init__(self) -> None:

@@ -1,5 +1,5 @@
-"""These models have been pre-trained using self-supervised learning. The models can also be used without pre-
-training and overwritten for your own research.
+"""These models have been pre-trained using self-supervised learning. The models can also be used without pre- training
+and overwritten for your own research.
 
 Here's an example for using these as pretrained models.
 
@@ -15,12 +15,13 @@ Here's an example for using these as pretrained models.
 
     # use these in classification or any downstream task
     classifications = classifier(representations)
+
 """
 from pl_bolts.models.self_supervised.amdim.amdim_module import AMDIM
 from pl_bolts.models.self_supervised.byol.byol_module import BYOL
 from pl_bolts.models.self_supervised.cpc.cpc_module import CPC_v2
 from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-from pl_bolts.models.self_supervised.moco.moco2_module import Moco_v2
+from pl_bolts.models.self_supervised.moco.moco_module import MoCo
 from pl_bolts.models.self_supervised.simclr.simclr_module import SimCLR
 from pl_bolts.models.self_supervised.simsiam.simsiam_module import SimSiam
 from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner
@@ -31,7 +32,7 @@ __all__ = [
     "BYOL",
     "CPC_v2",
     "SSLEvaluator",
-    "Moco_v2",
+    "MoCo",
     "SimCLR",
     "SimSiam",
     "SSLFineTuner",

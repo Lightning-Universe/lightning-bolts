@@ -25,6 +25,7 @@ def prepare_sr_datasets(dataset: str, scale_factor: int, data_dir: str):
 
     Returns:
         sr_datasets: tuple containing train, val, and test dataset.
+
     """
     assert dataset in ["celeba", "mnist", "stl10"]
 

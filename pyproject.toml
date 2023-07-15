@@ -50,11 +50,11 @@ relative_files = true
 line-length = 120
 exclude = "(.eggs|.git|.hg|.mypy_cache|.venv|_build|buck-out|build|dist)"
 
-[tool.isort]
-known_first_party = ["pl_bolts", "tests", "notebooks"]
-skip_glob = []
-profile = "black"
-line_length = 120
+[tool.docformatter]
+recursive = true
+wrap-summaries = 120
+wrap-descriptions = 120
+blank = true
 
 
 [tool.ruff]
@@ -198,7 +198,6 @@ module = [
     "pl_bolts.models.self_supervised.cpc.transforms",
     "pl_bolts.models.self_supervised.evaluator",
     "pl_bolts.models.self_supervised.moco.callbacks",
-    "pl_bolts.models.self_supervised.moco.moco2_module",
     "pl_bolts.models.self_supervised.moco.transforms",
     "pl_bolts.models.self_supervised.resnets",
     "pl_bolts.models.self_supervised.simclr.simclr_finetuner",

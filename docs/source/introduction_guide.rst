@@ -22,7 +22,7 @@ All models are tested (daily), benchmarked, documented and work on CPUs, TPUs, G
 
     from pl_bolts.models import VAE
     from pl_bolts.models.vision import GPT2, ImageGPT, PixelCNN
-    from pl_bolts.models.self_supervised import AMDIM, CPC_v2, SimCLR, Moco_v2
+    from pl_bolts.models.self_supervised import AMDIM, CPC_v2, SimCLR, MoCo
     from pl_bolts.models import LinearRegression, LogisticRegression
     from pl_bolts.models.gans import GAN
     from pl_bolts.callbacks import PrintTableMetricsCallback

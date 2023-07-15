@@ -28,6 +28,7 @@ class SWAVLoss(nn.Module):
             gpus: number of gpus per node used in training, passed to SwAV module
                 to manage the queue and select distributed sinkhorn
             num_nodes:  num_nodes: number of nodes to train on
+
         """
         super().__init__()
         self.temperature = temperature

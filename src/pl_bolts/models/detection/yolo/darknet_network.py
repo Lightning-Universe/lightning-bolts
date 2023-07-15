@@ -57,6 +57,7 @@ class DarknetNetwork(nn.Module):
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
         class_loss_multiplier: Classification loss will be scaled by this value.
+
     """
 
     def __init__(
@@ -128,6 +129,7 @@ class DarknetNetwork(nn.Module):
 
         Args:
             weight_file: A file-like object containing model weights in the Darknet binary format.
+
         """
         if not isinstance(weight_file, io.IOBase):
             raise ValueError("weight_file must be a file-like object.")
@@ -183,6 +185,7 @@ class DarknetNetwork(nn.Module):
 
         Returns:
             A list of configuration sections.
+
         """
         section_re = re.compile(r"\[([^]]+)\]")
         list_variables = ("layers", "anchors", "mask", "scales")
@@ -242,7 +245,7 @@ class DarknetNetwork(nn.Module):
         def convert(key: str, value: str) -> Union[str, int, float, List[Union[str, int, float]]]:
             """Converts a value to the correct type based on key."""
             if key not in variable_types:
-                warn("Unknown YOLO configuration variable: " + key)
+                warn(f"Unknown YOLO configuration variable: {key}")
                 return value
             if key in list_variables:
                 return [variable_types[key](v) for v in value.split(",")]
@@ -304,6 +307,7 @@ def _create_convolutional(config: CONFIG, num_inputs: List[int], **kwargs: Any) 
     Returns:
         module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
         its output.
+
     """
     batch_normalize = config.get("batch_normalize", False)
     padding = (config["size"] - 1) // 2 if config["pad"] else 0
@@ -333,6 +337,7 @@ def _create_maxpool(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CRE
     Returns:
         module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
         its output.
+
     """
     layer = MaxPool(config["size"], config["stride"])
     return layer, num_inputs[-1]
@@ -351,6 +356,7 @@ def _create_route(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREAT
     Returns:
         module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
         its output.
+
     """
     num_chunks = config.get("groups", 1)
     chunk_idx = config.get("group_id", 0)
@@ -379,6 +385,7 @@ def _create_shortcut(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CR
     Returns:
         module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
         its output.
+
     """
     layer = ShortcutLayer(config["from"])
     return layer, num_inputs[-1]
@@ -394,6 +401,7 @@ def _create_upsample(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CR
     Returns:
         module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
         its output.
+
     """
     layer = nn.Upsample(scale_factor=config["stride"], mode="nearest")
     return layer, num_inputs[-1]
@@ -453,6 +461,7 @@ def _create_yolo(
     Returns:
         module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
         its output (always 0 for a detection layer).
+
     """
     if prior_shapes is None:
         # The "anchors" list alternates width and height.

@@ -27,6 +27,7 @@ class GAN(LightningModule):
         python  basic_gan_module.py --gpus 1 --dataset 'imagenet2012'
         --data_dir /path/to/imagenet/folder/ --meta_dir ~/path/to/meta/bin/folder
         --batch_size 256 --learning_rate 0.0001
+
     """
 
     def __init__(
@@ -70,6 +71,7 @@ class GAN(LightningModule):
             z = torch.rand(batch_size, latent_dim)
             gan = GAN.load_from_checkpoint(PATH)
             img = gan(z)
+
         """
         return self.generator(z)
 

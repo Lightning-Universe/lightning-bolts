@@ -33,6 +33,7 @@ class SparseMLCallback(Callback):
     Args:
         recipe_path: Path to a SparseML compatible yaml recipe.
             More information at https://docs.neuralmagic.com/sparseml/source/recipes.html
+
     """
 
     def __init__(self, recipe_path: str) -> None:

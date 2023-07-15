@@ -35,6 +35,7 @@ class RetinaNet(LightningModule):
 
         # PascalVOC using LightningCLI
         python retinanet_module.py --trainer.gpus 1 --model.pretrained True
+
     """
 
     def __init__(
@@ -135,10 +136,7 @@ class RetinaNet(LightningModule):
 
 @under_review()
 def cli_main():
-    try:  # Backward compatibility for Lightning CLI
-        from pytorch_lightning.cli import LightningCLI  # PL v1.9+
-    except ImportError:
-        from pytorch_lightning.utilities.cli import LightningCLI  # PL v1.8
+    from pytorch_lightning.cli import LightningCLI
 
     from pl_bolts.datamodules import VOCDetectionDataModule
 

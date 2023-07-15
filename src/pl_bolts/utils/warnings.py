@@ -23,6 +23,7 @@ def warn_missing_pkg(
 
     Returns:
         Number of warning calls
+
     """
     if not WARN_MISSING_PACKAGE:
         return -1

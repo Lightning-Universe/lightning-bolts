@@ -21,6 +21,7 @@ def dqn_loss(batch: Tuple[Tensor, Tensor], net: nn.Module, target_net: nn.Module
 
     Returns:
         loss
+
     """
     states, actions, rewards, dones, next_states = batch
 
@@ -45,9 +46,9 @@ def double_dqn_loss(
     target_net: nn.Module,
     gamma: float = 0.99,
 ) -> Tensor:
-    """Calculates the mse loss using a mini batch from the replay buffer. This uses an improvement to the original
-    DQN loss by using the double dqn. This is shown by using the actions of the train network to pick the value
-    from the target network. This code is heavily commented in order to explain the process clearly.
+    """Calculates the mse loss using a mini batch from the replay buffer. This uses an improvement to the original DQN
+    loss by using the double dqn. This is shown by using the actions of the train network to pick the value from the
+    target network. This code is heavily commented in order to explain the process clearly.
 
     Args:
         batch: current mini batch of replay data
@@ -57,6 +58,7 @@ def double_dqn_loss(
 
     Returns:
         loss
+
     """
     states, actions, rewards, dones, next_states = batch  # batch of experiences, batch_size = 16
 
@@ -103,6 +105,7 @@ def per_dqn_loss(
 
     Returns:
         loss and batch_weights
+
     """
     states, actions, rewards, dones, next_states = batch
 

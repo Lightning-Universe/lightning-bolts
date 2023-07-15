@@ -13,10 +13,11 @@ else:  # pragma: no cover
 
 @under_review()
 class RandomTranslateWithReflect:
-    """Translate image randomly Translate vertically and horizontally by n pixels where n is integer drawn
-    uniformly independently for each axis from [-max_translation, max_translation].
+    """Translate image randomly Translate vertically and horizontally by n pixels where n is integer drawn uniformly
+    independently for each axis from [-max_translation, max_translation].
 
     Fill the uncovered blank area with reflect padding.
+
     """
 
     def __init__(self, max_translation) -> None:
@@ -49,10 +50,9 @@ class RandomTranslateWithReflect:
         new_image.paste(flipped_both, (xpad - xsize + 1, ypad + ysize - 1))
         new_image.paste(flipped_both, (xpad + xsize - 1, ypad + ysize - 1))
 
-        new_image = new_image.crop(
+        return new_image.crop(
             (xpad - xtranslation, ypad - ytranslation, xpad + xsize - xtranslation, ypad + ysize - ytranslation)
         )
-        return new_image
 
 
 @under_review()
@@ -75,6 +75,4 @@ class Patchify:
         # reshape to have (b x patches, c, h, w)
         x = x.view(-1, c, self.patch_size, self.patch_size)
 
-        x = x.squeeze(0)
-
-        return x
+        return x.squeeze(0)

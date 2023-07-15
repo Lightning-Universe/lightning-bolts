@@ -34,6 +34,7 @@ class KittiDataset(Dataset):
         img_size (tuple): image dimensions (width, height)
         valid_labels (tuple): useful classes to include
         transform (callable, optional): A function/transform that takes in the numpy array and transforms it.
+
     """
 
     IMAGE_PATH = os.path.join("training", "image_2")

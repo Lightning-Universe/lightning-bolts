@@ -17,8 +17,8 @@ else:
 
 
 class ShapeMatching(ABC):
-    """Selects which anchors are used to predict each target, by comparing the shape of the target box to a set of
-    prior shapes.
+    """Selects which anchors are used to predict each target, by comparing the shape of the target box to a set of prior
+    shapes.
 
     Most YOLO variants match targets to anchors based on prior shapes that are assigned to the anchors in the model
     configuration. The subclasses of ``ShapeMatching`` implement matching rules that compare the width and height of
@@ -30,6 +30,7 @@ class ShapeMatching(ABC):
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the prior shape has IoU
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.
+
     """
 
     def __init__(self, ignore_bg_threshold: float = 0.7) -> None:
@@ -53,6 +54,7 @@ class ShapeMatching(ABC):
 
         Returns:
             The indices of the matched predictions, background mask, and a mask for selecting the matched targets.
+
         """
         height, width = preds["boxes"].shape[:2]
         device = preds["boxes"].device
@@ -92,6 +94,7 @@ class ShapeMatching(ABC):
         Returns:
             matched_targets, matched_anchors: Two vectors or a `2xN` matrix. The first vector is used to select the
             targets that this layer matched and the second one lists the matching anchors within the grid cell.
+
         """
         pass
 
@@ -109,6 +112,7 @@ class HighestIoUMatching(ShapeMatching):
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the prior shape has IoU
             with some target greater than this threshold, the predictor will not be taken into account when calculating
             the confidence loss.
+
     """
 
     def __init__(
@@ -146,6 +150,7 @@ class IoUThresholdMatching(ShapeMatching):
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
             has IoU with some target greater than this threshold, the predictor will not be taken into account when
             calculating the confidence loss.
+
     """
 
     def __init__(
@@ -168,8 +173,7 @@ class IoUThresholdMatching(ShapeMatching):
 
 
 class SizeRatioMatching(ShapeMatching):
-    """For each target, select those prior shapes, whose width and height relative to the target is below given
-    ratio.
+    """For each target, select those prior shapes, whose width and height relative to the target is below given ratio.
 
     This is the matching rule used by Ultralytics YOLOv5 implementation.
 
@@ -182,6 +186,7 @@ class SizeRatioMatching(ShapeMatching):
         ignore_bg_threshold: If a predictor is not responsible for predicting any target, but the corresponding anchor
             has IoU with some target greater than this threshold, the predictor will not be taken into account when
             calculating the confidence loss.
+
     """
 
     def __init__(
@@ -214,6 +219,7 @@ def _sim_ota_match(costs: Tensor, ious: Tensor) -> Tuple[Tensor, Tensor]:
     Returns:
         A mask of predictions that were matched, and the indices of the matched targets. The latter contains as many
         elements as there are ``True`` values in the mask.
+
     """
     num_preds, num_targets = ious.shape
 
@@ -258,6 +264,7 @@ class SimOTAMatching:
             target, where `N` is the value of this parameter.
         size_range: For each target, restrict to the anchors whose prior dimensions are not larger than the target
             dimensions multiplied by this value and not smaller than the target dimensions divided by this value.
+
     """
 
     def __init__(
@@ -289,6 +296,7 @@ class SimOTAMatching:
         Returns:
             A mask of predictions that were matched, background mask (inverse of the first mask), and the indices of the
             matched targets. The last tensor contains as many elements as there are ``True`` values in the first mask.
+
         """
         height, width, boxes_per_cell, _ = preds["boxes"].shape
         prior_mask, anchor_inside_target = self._get_prior_mask(targets, image_size, width, height, boxes_per_cell)
@@ -334,6 +342,7 @@ class SimOTAMatching:
             Two masks, a ``[grid_height, grid_width, boxes_per_cell]`` mask for selecting anchors that are close and
             similar in shape to a target, and an ``[anchors, targets]`` matrix that indicates which targets are inside
             those anchors.
+
         """
         # A multiplier for scaling feature map coordinates to image coordinates
         grid_size = torch.tensor([grid_width, grid_height], device=targets["boxes"].device)

@@ -22,10 +22,11 @@ else:  # pragma: no cover
 
 @under_review()
 class UnlabeledImagenet(ImageNet):
-    """Official train set gets split into train, val. (using num_imgs_per_val_class for each class). Official
-    validation becomes test set.
+    """Official train set gets split into train, val. (using num_imgs_per_val_class for each class). Official validation
+    becomes test set.
 
     Within each class, we further allow limiting the number of samples per class (for semi-sup lng)
+
     """
 
     def __init__(
@@ -188,13 +189,14 @@ def _calculate_md5(fpath, chunk_size=1024 * 1024):
 
 @under_review()
 def parse_devkit_archive(root, file=None):
-    """Parse the devkit archive of the ImageNet2012 classification dataset and save the meta information in a
-    binary file.
+    """Parse the devkit archive of the ImageNet2012 classification dataset and save the meta information in a binary
+    file.
 
     Args:
         root (str): Root directory containing the devkit archive
         file (str, optional): Name of devkit archive. Defaults to
             'ILSVRC2012_devkit_t12.tar.gz'
+
     """
     from scipy import io as sio
 

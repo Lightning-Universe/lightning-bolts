@@ -31,6 +31,7 @@ class MoCoTrainTransforms:
     Args:
 
     Example::
+
     """
 
     def __init__(self, size: int, normalize: Union[str, Callable]) -> None:
@@ -79,6 +80,7 @@ class MoCo2TrainCIFAR10Transforms:
     MoCo 2 augmentation:
 
     https://arxiv.org/pdf/2003.04297.pdf
+
     """
 
     def __init__(self, size: int = 32) -> None:
@@ -165,6 +167,7 @@ class MoCo2EvalImagenetTransforms:
     """Transforms for MoCo during training step.
 
     https://arxiv.org/pdf/2003.04297.pdf
+
     """
 
     def __init__(self, size: int = 128) -> None:
@@ -255,5 +258,4 @@ class GaussianBlur:
 
     def __call__(self, x):
         sigma = random.uniform(self.sigma[0], self.sigma[1])  # noqa: S311
-        x = x.filter(ImageFilter.GaussianBlur(radius=sigma))
-        return x
+        return x.filter(ImageFilter.GaussianBlur(radius=sigma))

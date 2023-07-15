@@ -31,6 +31,7 @@ def _augment_requirement(ln: str, comment_char: str = "#", unfreeze: bool = True
     'arrow>=1.2.0, <=1.2.2  # strict'
     >>> _augment_requirement("arrow", unfreeze=True)
     'arrow'
+
     """
     # filer all comments
     if comment_char in ln:
@@ -61,6 +62,7 @@ def _load_requirements(path_dir: str, file_name: str, unfreeze: bool = not _FREE
     >>> path_req = os.path.join(_PATH_ROOT, "requirements")
     >>> _load_requirements(path_req, "docs.txt")  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
     ['sphinx>=4.0', ...]
+
     """
     with open(os.path.join(path_dir, file_name)) as file:
         lines = [ln.strip() for ln in file.readlines()]
@@ -77,6 +79,7 @@ def _load_readme_description(path_dir: str, homepage: str, ver: str) -> str:
 
     >>> _load_readme_description(_PATH_ROOT, "", "")  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
     '<div align="center">...'
+
     """
     path_readme = os.path.join(path_dir, "README.md")
     with open(path_readme, encoding="utf-8") as fo:
@@ -102,13 +105,12 @@ def _load_readme_description(path_dir: str, homepage: str, ver: str) -> str:
     skip_begin = r"<!-- following section will be skipped from PyPI description -->"
     skip_end = r"<!-- end skipping PyPI description -->"
     # todo: wrap content as commented description
-    text = re.sub(rf"{skip_begin}.+?{skip_end}", "<!--  -->", text, flags=re.IGNORECASE + re.DOTALL)
+    return re.sub(rf"{skip_begin}.+?{skip_end}", "<!--  -->", text, flags=re.IGNORECASE + re.DOTALL)
 
     # # https://github.com/Borda/pytorch-lightning/releases/download/1.1.0a6/codecov_badge.png
     # github_release_url = os.path.join(homepage, "releases", "download", ver)
     # # download badge and replace url with local file
     # text = _parse_for_badge(text, github_release_url)
-    return text
 
 
 def _prepare_extras():

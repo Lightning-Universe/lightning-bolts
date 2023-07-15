@@ -45,6 +45,7 @@ class LogisticRegression(LightningModule):
             linear: Linear layer.
             criterion: Cross-Entropy loss function.
             optimizer: Model optimizer to use.
+
         """
         super().__init__()
         self.save_hyperparameters()
@@ -62,6 +63,7 @@ class LogisticRegression(LightningModule):
 
         Returns:
             Output tensor.
+
         """
         return self.linear(x)
 
@@ -74,6 +76,7 @@ class LogisticRegression(LightningModule):
 
         Returns:
             Loss tensor.
+
         """
         return self._shared_step(batch, "train")
 
@@ -86,6 +89,7 @@ class LogisticRegression(LightningModule):
 
         Returns:
             Loss tensor.
+
         """
         return self._shared_step(batch, "val")
 
@@ -98,6 +102,7 @@ class LogisticRegression(LightningModule):
 
         Returns:
             Loss tensor.
+
         """
         return self._shared_step(batch, "test")
 
@@ -109,6 +114,7 @@ class LogisticRegression(LightningModule):
 
         Returns:
             Loss tensor.
+
         """
         return self._shared_epoch_end(outputs, "val")
 
@@ -120,6 +126,7 @@ class LogisticRegression(LightningModule):
 
         Returns:
             Loss tensor.
+
         """
         return self._shared_epoch_end(outputs, "test")
 
@@ -128,6 +135,7 @@ class LogisticRegression(LightningModule):
 
         Returns:
             Optimizer.
+
         """
         return self.optimizer(self.parameters(), lr=self.hparams.learning_rate)
 
@@ -185,6 +193,7 @@ class LogisticRegression(LightningModule):
 
         Returns:
             ArgumentParser with the added arguments.
+
         """
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--learning_rate", type=float, default=0.0001)

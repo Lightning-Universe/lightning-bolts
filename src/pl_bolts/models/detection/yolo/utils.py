@@ -30,6 +30,7 @@ def grid_offsets(grid_size: Tensor) -> Tensor:
 
     Returns:
         A ``[height, width, 2]`` tensor containing the grid cell `(x, y)` offsets.
+
     """
     x_range = torch.arange(grid_size[0].item(), device=grid_size.device)
     y_range = torch.arange(grid_size[1].item(), device=grid_size.device)
@@ -42,6 +43,7 @@ def grid_centers(grid_size: Tensor) -> Tensor:
 
     Returns:
         A ``[height, width, 2]`` tensor containing coordinates to the centers of the grid cells.
+
     """
     return grid_offsets(grid_size) + 0.5
 
@@ -66,6 +68,7 @@ def global_xy(xy: Tensor, image_size: Tensor) -> Tensor:
     Returns:
         Global coordinates scaled to the size of the network input image, in a tensor with the same shape as the input
         tensor.
+
     """
     height = xy.shape[1]
     width = xy.shape[2]
@@ -77,8 +80,8 @@ def global_xy(xy: Tensor, image_size: Tensor) -> Tensor:
 
 
 def aligned_iou(wh1: Tensor, wh2: Tensor) -> Tensor:
-    """Calculates a matrix of intersections over union from box dimensions, assuming that the boxes are located at
-    the same coordinates.
+    """Calculates a matrix of intersections over union from box dimensions, assuming that the boxes are located at the
+    same coordinates.
 
     Args:
         wh1: An ``[N, 2]`` matrix of box shapes (width and height).
@@ -86,6 +89,7 @@ def aligned_iou(wh1: Tensor, wh2: Tensor) -> Tensor:
 
     Returns:
         An ``[N, M]`` matrix of pairwise IoU values for every element in ``wh1`` and ``wh2``
+
     """
     area1 = wh1[:, 0] * wh1[:, 1]  # [N]
     area2 = wh2[:, 0] * wh2[:, 1]  # [M]
@@ -126,6 +130,7 @@ def is_inside_box(points: Tensor, boxes: Tensor) -> Tensor:
 
     Returns:
         A tensor shaped ``[points, boxes]`` containing pairwise truth values of whether the points are inside the boxes.
+
     """
     lt = points[:, None, :] - boxes[None, :, :2]  # [boxes, points, 2]
     rb = boxes[None, :, 2:] - points[:, None, :]  # [boxes, points, 2]
@@ -145,11 +150,11 @@ def box_size_ratio(wh1: Tensor, wh2: Tensor) -> Tensor:
 
     Returns:
         An ``[N, M]`` matrix of ratios of width or height dimensions, whichever is larger.
+
     """
     wh_ratio = wh1[:, None, :] / wh2[None, :, :]  # [M, N, 2]
     wh_ratio = torch.max(wh_ratio, 1.0 / wh_ratio)
-    wh_ratio = wh_ratio.max(2).values  # [M, N]
-    return wh_ratio
+    return wh_ratio.max(2).values  # [M, N]
 
 
 @torch.jit.script
@@ -165,6 +170,7 @@ def get_image_size(images: Tensor) -> Tensor:
 
     Returns:
         A tensor that contains the image width and height.
+
     """
     height = images.shape[2]
     width = images.shape[3]

@@ -43,6 +43,7 @@ class PERDQN(DQN):
     .. note:: Currently only supports CPU and single GPU training with `accelerator=dp`
 
     .. _`DQN With Prioritized Experience Replay`: https://arxiv.org/abs/1511.05952
+
     """
 
     def train_batch(
@@ -52,6 +53,7 @@ class PERDQN(DQN):
 
         Returns:
             yields a Experience tuple containing the state, action, reward, done and next_state.
+
         """
         episode_reward = 0
         episode_steps = 0
@@ -102,8 +104,8 @@ class PERDQN(DQN):
                 ], weights[idx]
 
     def training_step(self, batch, _) -> OrderedDict:
-        """Carries out a single step through the environment to update the replay buffer. Then calculates loss
-        based on the minibatch recieved.
+        """Carries out a single step through the environment to update the replay buffer. Then calculates loss based on
+        the minibatch recieved.
 
         Args:
             batch: current mini batch of replay data
@@ -111,6 +113,7 @@ class PERDQN(DQN):
 
         Returns:
             Training loss and log metrics
+
         """
         samples, indices, weights = batch
         indices = indices.cpu().numpy()

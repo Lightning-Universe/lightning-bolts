@@ -58,6 +58,7 @@ class SimSiam(LightningModule):
             --batch_size 32
 
     .. _SimSiam: https://arxiv.org/pdf/2011.10566v1.pdf
+
     """
 
     def __init__(
@@ -122,6 +123,7 @@ class SimSiam(LightningModule):
         Args:
             v_online (Tensor): Online network view
             v_target (Tensor): Target network view
+
         """
         _, z1 = self.online_network(v_online)
         h1 = self.predictor(z1)

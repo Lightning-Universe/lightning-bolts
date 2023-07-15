@@ -19,6 +19,7 @@ class BatchGradientVerification(VerificationBase):
 
     This can happen if reshape- and/or permutation operations are carried out in the wrong order or on the wrong tensor
     dimensions.
+
     """
 
     NORM_LAYER_CLASSES = (
@@ -57,6 +58,7 @@ class BatchGradientVerification(VerificationBase):
 
         Returns:
              ``True`` if the data in the batch does not mix during the forward pass, and ``False`` otherwise.
+
         """
         input_mapping = input_mapping or default_input_mapping
         output_mapping = output_mapping or default_output_mapping
@@ -151,6 +153,7 @@ def default_input_mapping(data: Any) -> List[Tensor]:
     torch.Size([3, 1])
     >>> result[1].shape
     torch.Size([3, 2])
+
     """
     tensors = collect_tensors(data)
     batches: List[Tensor] = []
@@ -181,6 +184,7 @@ def default_output_mapping(data: Any) -> Tensor:
         >>> result = default_output_mapping(data)
         >>> result.shape
         torch.Size([3, 7])
+
     """
     if isinstance(data, Tensor):
         return data

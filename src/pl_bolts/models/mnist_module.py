@@ -24,6 +24,7 @@ class LitMNIST(LightningModule):
 
         trainer = Trainer()
         trainer.fit(model, datamodule=datamodule)
+
     """
 
     def __init__(self, hidden_dim: int = 128, learning_rate: float = 1e-3, **kwargs: Any) -> None:
@@ -39,8 +40,7 @@ class LitMNIST(LightningModule):
     def forward(self, x: Tensor) -> Tensor:
         out = x.view(x.size(0), -1)
         out = torch.relu(self.l1(out))
-        out = torch.relu(self.l2(out))
-        return out
+        return torch.relu(self.l2(out))
 
     def shared_step(self, batch: Any, batch_idx: int, step: str) -> Tensor:
         x, y = batch

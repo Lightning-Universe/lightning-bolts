@@ -18,4 +18,5 @@ The default encoder is a resnet18 backbone followed by linear layers which map r
     model = AE()
     trainer = pl.Trainer()
     trainer.fit(model)
+
 """

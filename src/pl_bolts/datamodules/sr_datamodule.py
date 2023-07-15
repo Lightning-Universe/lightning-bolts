@@ -18,6 +18,7 @@ class TVTDataModule(LightningDataModule):
         dataset_train, dataset_val = random_split(dataset_dev, lengths=[55_000, 5_000])
         dataset_test = SRMNIST(scale_factor=4, root=".", train=True)
         dm = TVTDataModule(dataset_train, dataset_val, dataset_test)
+
     """
 
     def __init__(

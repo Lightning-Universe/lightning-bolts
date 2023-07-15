@@ -4,7 +4,6 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 import torch
 import torch.nn as nn
 from pytorch_lightning import LightningModule
-from pytorch_lightning.utilities.cli import LightningCLI
 from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch import Tensor, optim
 
@@ -43,8 +42,8 @@ else:
 
 
 class YOLO(LightningModule):
-    """PyTorch Lightning implementation of YOLO that supports the most important features of YOLOv3, YOLOv4,
-    YOLOv5, YOLOv7, Scaled-YOLOv4, and YOLOX.
+    """PyTorch Lightning implementation of YOLO that supports the most important features of YOLOv3, YOLOv4, YOLOv5,
+    YOLOv7, Scaled-YOLOv4, and YOLOX.
 
     *YOLOv3 paper*: `Joseph Redmon and Ali Farhadi <https://arxiv.org/abs/1804.02767>`__
 
@@ -104,6 +103,7 @@ class YOLO(LightningModule):
         nms_threshold: Non-maximum suppression will remove bounding boxes whose IoU with a higher confidence box is
             higher than this threshold, if the predicted categories are equal.
         detections_per_image: Keep at most this number of highest-confidence detections per image.
+
     """
 
     def __init__(
@@ -220,6 +220,7 @@ class YOLO(LightningModule):
 
         Returns:
             A dictionary that includes the training loss in 'loss'.
+
         """
         images, targets = batch
         _, losses = self(images, targets)
@@ -238,6 +239,7 @@ class YOLO(LightningModule):
             batch: A tuple of images and targets. Images is a list of 3-dimensional tensors. Targets is a list of target
                 dictionaries.
             batch_idx: Index of the current batch.
+
         """
         images, targets = batch
         detections, losses = self(images, targets)
@@ -270,6 +272,7 @@ class YOLO(LightningModule):
             batch: A tuple of images and targets. Images is a list of 3-dimensional tensors. Targets is a list of target
                 dictionaries.
             batch_idx: Index of the current batch.
+
         """
         images, targets = batch
         detections, losses = self(images, targets)
@@ -296,8 +299,8 @@ class YOLO(LightningModule):
         self._test_map.reset()
 
     def predict_step(self, batch: BATCH, batch_idx: int, dataloader_idx: int = 0) -> List[PRED]:
-        """Feeds a batch of images to the network and returns the detected bounding boxes, confidence scores, and
-        class labels.
+        """Feeds a batch of images to the network and returns the detected bounding boxes, confidence scores, and class
+        labels.
 
         If a prediction has a high score for more than one class, it will be duplicated.
 
@@ -311,15 +314,14 @@ class YOLO(LightningModule):
             A list of dictionaries containing tensors "boxes", "scores", and "labels". "boxes" is a matrix of detected
             bounding box `(x1, y1, x2, y2)` coordinates. "scores" is a vector of confidence scores for the bounding box
             detections. "labels" is a vector of predicted class labels.
+
         """
         images, _ = batch
         detections = self(images)
-        detections = self.process_detections(detections)
-        return detections
+        return self.process_detections(detections)
 
     def infer(self, image: Tensor) -> PRED:
-        """Feeds an image to the network and returns the detected bounding boxes, confidence scores, and class
-        labels.
+        """Feeds an image to the network and returns the detected bounding boxes, confidence scores, and class labels.
 
         If a prediction has a high score for more than one class, it will be duplicated.
 
@@ -330,6 +332,7 @@ class YOLO(LightningModule):
             A dictionary containing tensors "boxes", "scores", and "labels". "boxes" is a matrix of detected bounding
             box `(x1, y1, x2, y2)` coordinates. "scores" is a vector of confidence scores for the bounding box
             detections. "labels" is a vector of predicted class labels.
+
         """
         if not isinstance(image, Tensor):
             image = T.to_tensor(image)
@@ -346,9 +349,8 @@ class YOLO(LightningModule):
         return detections
 
     def process_detections(self, preds: Tensor) -> List[PRED]:
-        """Splits the detection tensor returned by a forward pass into a list of prediction dictionaries, and
-        filters them based on confidence threshold, non-maximum suppression (NMS), and maximum number of
-        predictions.
+        """Splits the detection tensor returned by a forward pass into a list of prediction dictionaries, and filters
+        them based on confidence threshold, non-maximum suppression (NMS), and maximum number of predictions.
 
         If for any single detection there are multiple categories whose score is above the confidence threshold, the
         detection will be duplicated to create one detection for each category. NMS processes one category at a time,
@@ -365,6 +367,7 @@ class YOLO(LightningModule):
 
         Returns:
             Filtered detections. A list of prediction dictionaries, one for each image.
+
         """
 
         def process(boxes: Tensor, confidences: Tensor, classprobs: Tensor) -> Dict[str, Any]:
@@ -391,6 +394,7 @@ class YOLO(LightningModule):
 
         Returns:
             Single-label targets. A list of target dictionaries, one for each image.
+
         """
 
         def process(boxes: Tensor, labels: Tensor, **other: Any) -> Dict[str, Any]:
@@ -408,6 +412,7 @@ class YOLO(LightningModule):
             images: A tensor containing a batch of images or a list of image tensors.
             targets: A list of target dictionaries or ``None``. If a list is provided, there should be as many target
                 dictionaries as there are images.
+
         """
         if not isinstance(images, Tensor):
             if not isinstance(images, (tuple, list)):
@@ -505,6 +510,7 @@ class CLIYOLO(YOLO):
         overlap_loss_multiplier: Overlap loss will be scaled by this value.
         confidence_loss_multiplier: Confidence loss will be scaled by this value.
         class_loss_multiplier: Classification loss will be scaled by this value.
+
     """
 
     def __init__(
@@ -615,4 +621,6 @@ class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
 
 
 if __name__ == "__main__":
+    from pytorch_lightning.cli import LightningCLI
+
     LightningCLI(CLIYOLO, ResizedVOCDetectionDataModule, seed_everything_default=42)
