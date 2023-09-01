@@ -17,7 +17,7 @@ ______________________________________________________________________
 </p>
 
 [![PyPI Status](https://badge.fury.io/py/lightning-bolts.svg)](https://badge.fury.io/py/lightning-bolts)
-[![PyPI Status](https://pepy.tech/badge/lightning-bolts)](https://pepy.tech/project/lightning-bolts)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/lightning-bolts)](https://pepy.tech/project/lightning-bolts)
 [![Build Status](https://dev.azure.com/Lightning-AI/compatibility/_apis/build/status%2Fprojects%2FLightning-Universe.Bolts?branchName=master)](https://dev.azure.com/Lightning-AI/compatibility/_build/latest?definitionId=51&branchName=master)
 [![codecov](https://codecov.io/gh/Lightning-Universe/lightning-bolts/branch/master/graph/badge.svg?token=O8p0qhvj90)](https://codecov.io/gh/Lightning-Universe/lightning-bolts)
 
