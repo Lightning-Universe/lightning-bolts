@@ -14,7 +14,7 @@ from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib
-    from torchvision.datasets import LSUN, MNIST, CIFAR10
+    from torchvision.datasets import CIFAR10, LSUN, MNIST
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
 
@@ -36,6 +36,7 @@ class DCGAN(LightningModule):
 
         # cifar10
         python dcgan_module.py --gpus 1 --dataset cifar10
+
     """
 
     def __init__(
