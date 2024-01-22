@@ -30,7 +30,7 @@ jobs:
           python-version: 3.9
 
       - name: Cache pip
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: pip-${{ hashFiles('requirements/*.txt') }}
@@ -60,7 +60,7 @@ jobs:
           python-version: 3.9
 
       - name: Cache pip
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: pip-${{ hashFiles('requirements/*.txt') }}

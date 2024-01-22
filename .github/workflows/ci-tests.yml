@@ -57,7 +57,7 @@ jobs:
       id: pip-cache
       run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
     - name: Restore pip cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       id: restore-cache
       with:
         path: ${{ steps.pip-cache.outputs.dir }}
@@ -86,14 +86,14 @@ jobs:
 
     - name: Save pip cache
       if: github.ref == 'refs/heads/master'
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       with:
         path: ${{ steps.pip-cache.outputs.dir }}
         key: pip-dependencies
 
     - name: Cache datasets
       id: cache-datasets
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ./_datasets
         enableCrossOsArchive: true
@@ -129,7 +129,7 @@ jobs:
       run: python -m atari_py.import_roms ROMS
 
     - name: Restore HF cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: ${{ env.TRANSFORMERS_CACHE }}
         key: cache-transformers
@@ -139,7 +139,7 @@ jobs:
 
     - name: Save HF cache
       if: github.ref == 'refs/heads/master'
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       with:
         path: ${{ env.TRANSFORMERS_CACHE }}
         key: cache-transformers
