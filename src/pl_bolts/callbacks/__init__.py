@@ -1,4 +1,5 @@
 """Collection of PyTorchLightning callbacks."""
+
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
 from pl_bolts.callbacks.data_monitor import ModuleDataMonitor, TrainingDataMonitor
 from pl_bolts.callbacks.printing import PrintTableMetricsCallback

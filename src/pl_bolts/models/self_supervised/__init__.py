@@ -17,6 +17,7 @@ Here's an example for using these as pretrained models.
     classifications = classifier(representations)
 
 """
+
 from pl_bolts.models.self_supervised.amdim.amdim_module import AMDIM
 from pl_bolts.models.self_supervised.byol.byol_module import BYOL
 from pl_bolts.models.self_supervised.cpc.cpc_module import CPC_v2

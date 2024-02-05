@@ -1,4 +1,5 @@
 """Adapted from: https://github.com/https-deeplearning-ai/GANs-Public."""
+
 from argparse import ArgumentParser
 from typing import Any, Tuple
 

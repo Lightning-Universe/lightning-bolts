@@ -13,6 +13,5 @@ Following PR [#844](https://github.com/Lightning-AI/lightning-bolts/pull/844), a
 ### Example
 
 ```python
-def test_this_thing(catch_warnings):
-    ...
+def test_this_thing(catch_warnings): ...
 ```
