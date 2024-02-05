@@ -1,4 +1,5 @@
 """Dueling DQN."""
+
 import argparse
 
 from pytorch_lightning import Trainer

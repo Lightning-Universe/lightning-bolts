@@ -60,6 +60,7 @@ def to_tensor(arrays: TArrays) -> torch.Tensor:
 
     Returns:
         Tensor of the integers
+
     """
     return torch.tensor(arrays)
 

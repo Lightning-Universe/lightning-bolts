@@ -102,8 +102,8 @@ def aligned_iou(wh1: Tensor, wh2: Tensor) -> Tensor:
 
 
 def iou_below(pred_boxes: Tensor, target_boxes: Tensor, threshold: float) -> Tensor:
-    """Creates a binary mask whose value will be ``True``, unless the predicted box overlaps any target
-    significantly (IoU greater than ``threshold``).
+    """Creates a binary mask whose value will be ``True``, unless the predicted box overlaps any target significantly
+    (IoU greater than ``threshold``).
 
     Args:
         pred_boxes: The predicted corner coordinates. Tensor of size ``[height, width, boxes_per_cell, 4]``.
@@ -112,6 +112,7 @@ def iou_below(pred_boxes: Tensor, target_boxes: Tensor, threshold: float) -> Ten
     Returns:
         A boolean tensor sized ``[height, width, boxes_per_cell]``, with ``False`` where the predicted box overlaps a
         target significantly and ``True`` elsewhere.
+
     """
     shape = pred_boxes.shape[:-1]
     pred_boxes = pred_boxes.view(-1, 4)

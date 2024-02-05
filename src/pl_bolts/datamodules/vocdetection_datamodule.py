@@ -166,6 +166,7 @@ class VOCDetectionDataModule(LightningDataModule):
 
         Args:
             image_transforms: custom image-only transforms
+
         """
         transforms = [
             _prepare_voc_instance,
@@ -181,6 +182,7 @@ class VOCDetectionDataModule(LightningDataModule):
 
         Args:
             image_transforms: custom image-only transforms
+
         """
         transforms = [
             _prepare_voc_instance,

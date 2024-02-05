@@ -319,8 +319,7 @@ class PPO(LightningModule):
         return optimizer_actor, optimizer_critic
 
     def optimizer_step(self, *args, **kwargs):
-        """Run ``num_optim_iters`` number of iterations of gradient descent on actor and critic for each data
-        sample."""
+        """Run ``num_optim_iters`` number of iterations of gradient descent on actor and critic for each data sample."""
         for _ in range(self.num_optim_iters):
             super().optimizer_step(*args, **kwargs)
 

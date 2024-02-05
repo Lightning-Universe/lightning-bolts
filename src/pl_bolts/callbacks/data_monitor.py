@@ -73,6 +73,7 @@ class DataMonitorBase(Callback):
                 Otherwise the histograms get labelled with an integer index.
                 Each label also has the tensors's shape as suffix.
             group: Name under which the histograms will be grouped.
+
         """
         if not self._log or (self._train_batch_idx + 1) % self._log_every_n_steps != 0:  # type: ignore[operator]
             return
@@ -220,6 +221,7 @@ class TrainingDataMonitor(DataMonitorBase):
 
                 # log histogram of training data passed to `LightningModule.training_step`
                 trainer = Trainer(callbacks=[TrainingDataMonitor()])
+
         """
         super().__init__(log_every_n_steps=log_every_n_steps)
 
