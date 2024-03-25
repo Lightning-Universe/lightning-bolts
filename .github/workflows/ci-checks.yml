@@ -15,13 +15,13 @@ jobs:
   check-code:
     uses: Lightning-AI/utilities/.github/workflows/check-code.yml@v0.11.0
     with:
-      actions-ref: v0.8.0
+      actions-ref: v0.11.0
       extra-typing: typing
 
   check-package:
     uses: Lightning-AI/utilities/.github/workflows/check-package.yml@v0.11.0
     with:
-      actions-ref: v0.8.0
+      actions-ref: v0.11.0
       artifact-name: dist-packages-${{ github.sha }}
       import-name: "pl_bolts"
       testing-matrix: |
