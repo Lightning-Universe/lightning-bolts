@@ -11,7 +11,7 @@ def requires(*module_path_version: str) -> Callable:
 
     def decorator(func: Callable) -> Callable:
         reqs = [
-            ModuleAvailableCache(mod_ver) if "." in mod_ver else RequirementCache(mod_ver)
+            ModuleAvailableCache(mod_ver) if "." not in mod_ver else RequirementCache(mod_ver)
             for mod_ver in module_path_version
         ]
         available = all(map(bool, reqs))
