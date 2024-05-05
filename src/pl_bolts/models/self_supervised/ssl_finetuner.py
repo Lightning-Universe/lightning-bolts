@@ -1,11 +1,10 @@
 from typing import Optional, Tuple
 
 import torch
-from pytorch_lightning import LightningModule
+from lightning import LightningModule
+from pl_bolts.models.self_supervised import SSLEvaluator
 from torch.nn import functional as F  # noqa: N812
 from torchmetrics import Accuracy
-
-from pl_bolts.models.self_supervised import SSLEvaluator
 
 
 class SSLFineTuner(LightningModule):

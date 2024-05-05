@@ -3,14 +3,13 @@ from argparse import ArgumentParser
 from typing import Any, Callable, Optional
 
 import torch
-from pytorch_lightning import LightningDataModule
-from torch.utils.data import DataLoader, random_split
-
+from lightning import LightningDataModule
 from pl_bolts.datasets import ConcatDataset
 from pl_bolts.transforms.dataset_normalizations import stl10_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
+from torch.utils.data import DataLoader, random_split
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib

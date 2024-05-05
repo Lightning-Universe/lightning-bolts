@@ -1,11 +1,10 @@
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
-from pytorch_lightning.callbacks.progress import TQDMProgressBar
-from torch.nn import functional as F  # noqa: N812
-
+from lightning import LightningModule, Trainer, seed_everything
+from lightning.pytorch.callbacks.progress import TQDMProgressBar
 from pl_bolts.models.gans.basic.components import Discriminator, Generator
+from torch.nn import functional as F  # noqa: N812
 
 
 class GAN(LightningModule):
@@ -152,8 +151,16 @@ class GAN(LightningModule):
 
 
 def cli_main(args=None):
-    from pl_bolts.callbacks import LatentDimInterpolator, TensorboardGenerativeModelImageSampler
-    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, MNISTDataModule, STL10DataModule
+    from pl_bolts.callbacks import (
+        LatentDimInterpolator,
+        TensorboardGenerativeModelImageSampler,
+    )
+    from pl_bolts.datamodules import (
+        CIFAR10DataModule,
+        ImagenetDataModule,
+        MNISTDataModule,
+        STL10DataModule,
+    )
 
     seed_everything(1234)
 

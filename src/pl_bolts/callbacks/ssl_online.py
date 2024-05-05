@@ -2,15 +2,14 @@ from contextlib import contextmanager
 from typing import Any, Dict, Optional, Sequence, Tuple, Union
 
 import torch
-from pytorch_lightning import Callback, LightningModule, Trainer
-from pytorch_lightning.utilities import rank_zero_warn
+from lightning import Callback, LightningModule, Trainer
+from lightning.fabric.utilities import rank_zero_warn
+from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
+from pl_bolts.utils.stability import under_review
 from torch import Tensor, nn
 from torch.nn import functional as F  # noqa: N812
 from torch.optim import Optimizer
 from torchmetrics.functional import accuracy
-
-from pl_bolts.models.self_supervised.evaluator import SSLEvaluator
-from pl_bolts.utils.stability import under_review
 
 
 @under_review()

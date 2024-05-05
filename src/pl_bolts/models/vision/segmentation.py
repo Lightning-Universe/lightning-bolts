@@ -2,11 +2,10 @@ from argparse import ArgumentParser
 from typing import Any, Dict, Optional
 
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
+from lightning import LightningModule, Trainer, seed_everything
+from pl_bolts.models.vision.unet import UNet
 from torch import Tensor
 from torch.nn import functional as F  # noqa: N812
-
-from pl_bolts.models.vision.unet import UNet
 
 
 class SemSegment(LightningModule):

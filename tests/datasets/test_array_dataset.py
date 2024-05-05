@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 import torch
+from lightning.pytorch.utilities import exceptions
 from pl_bolts.datasets import ArrayDataset, DataModel
 from pl_bolts.datasets.utils import to_tensor
-from pytorch_lightning.utilities import exceptions
 
 
 class TestArrayDataset:

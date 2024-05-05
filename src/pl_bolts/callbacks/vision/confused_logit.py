@@ -1,12 +1,11 @@
 from typing import Sequence
 
 import torch
-from pytorch_lightning import Callback, LightningModule, Trainer
-from torch import Tensor, nn
-
+from lightning import Callback, LightningModule, Trainer
 from pl_bolts.utils import _MATPLOTLIB_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
+from torch import Tensor, nn
 
 if _MATPLOTLIB_AVAILABLE:
     from matplotlib import pyplot as plt

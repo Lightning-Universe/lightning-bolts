@@ -2,11 +2,8 @@ import math
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning import LightningModule, Trainer
-from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
-from torch import Tensor, nn
-from torch.nn import functional as F  # noqa: N812
-
+from lightning import LightningModule, Trainer
+from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
 from pl_bolts.optimizers.lars import LARS
 from pl_bolts.optimizers.lr_scheduler import linear_warmup_decay
@@ -16,6 +13,8 @@ from pl_bolts.transforms.dataset_normalizations import (
     stl10_normalization,
 )
 from pl_bolts.utils.stability import under_review
+from torch import Tensor, nn
+from torch.nn import functional as F  # noqa: N812
 
 
 @under_review()
@@ -301,8 +300,15 @@ class SimCLR(LightningModule):
 @under_review()
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
-    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
-    from pl_bolts.transforms.self_supervised.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
+    from pl_bolts.datamodules import (
+        CIFAR10DataModule,
+        ImagenetDataModule,
+        STL10DataModule,
+    )
+    from pl_bolts.transforms.self_supervised.simclr_transforms import (
+        SimCLREvalDataTransform,
+        SimCLRTrainDataTransform,
+    )
 
     parser = ArgumentParser()
 

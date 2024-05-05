@@ -1,9 +1,8 @@
 from typing import Any
 
-from pytorch_lightning import LightningDataModule
-from torch.utils.data import DataLoader, Dataset
-
+from lightning import LightningDataModule
 from pl_bolts.utils.stability import under_review
+from torch.utils.data import DataLoader, Dataset
 
 
 @under_review()

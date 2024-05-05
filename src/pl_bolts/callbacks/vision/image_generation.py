@@ -1,8 +1,7 @@
 from typing import Optional, Tuple
 
 import torch
-from pytorch_lightning import Callback, LightningModule, Trainer
-
+from lightning import Callback, LightningModule, Trainer
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg

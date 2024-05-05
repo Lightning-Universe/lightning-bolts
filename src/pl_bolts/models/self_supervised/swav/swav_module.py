@@ -1,12 +1,11 @@
 """Adapted from official swav implementation: https://github.com/facebookresearch/swav."""
+
 import os
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning import LightningModule, Trainer
-from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
-from torch import nn
-
+from lightning import LightningModule, Trainer
+from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from pl_bolts.models.self_supervised.swav.loss import SWAVLoss
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet18, resnet50
 from pl_bolts.optimizers.lars import LARS
@@ -16,6 +15,7 @@ from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization,
     stl10_normalization,
 )
+from torch import nn
 
 
 class SwAV(LightningModule):
@@ -381,8 +381,15 @@ class SwAV(LightningModule):
 
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
-    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
-    from pl_bolts.transforms.self_supervised.swav_transforms import SwAVEvalDataTransform, SwAVTrainDataTransform
+    from pl_bolts.datamodules import (
+        CIFAR10DataModule,
+        ImagenetDataModule,
+        STL10DataModule,
+    )
+    from pl_bolts.transforms.self_supervised.swav_transforms import (
+        SwAVEvalDataTransform,
+        SwAVTrainDataTransform,
+    )
 
     parser = ArgumentParser()
 

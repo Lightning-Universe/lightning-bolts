@@ -2,7 +2,7 @@ from warnings import warn
 
 import pytest
 import torch
-from pytorch_lightning import seed_everything
+from lightning.pytorch import seed_everything
 
 try:
     from torchvision import transforms
@@ -35,7 +35,10 @@ from pl_bolts.transforms.self_supervised.moco_transforms import (
     MoCo2TrainImagenetTransforms,
     MoCo2TrainSTL10Transforms,
 )
-from pl_bolts.transforms.self_supervised.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
+from pl_bolts.transforms.self_supervised.simclr_transforms import (
+    SimCLREvalDataTransform,
+    SimCLRTrainDataTransform,
+)
 
 
 @pytest.mark.parametrize(

@@ -2,11 +2,10 @@ import os
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning import LightningModule, Trainer
-from torch import nn
-
+from lightning import LightningModule, Trainer
 from pl_bolts.models.vision.image_gpt.gpt2 import GPT2
 from pl_bolts.utils.stability import under_review
+from torch import nn
 
 
 @under_review()

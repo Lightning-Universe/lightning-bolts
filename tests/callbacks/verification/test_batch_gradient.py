@@ -2,14 +2,17 @@ from unittest.mock import Mock
 
 import pytest
 import torch
+from lightning.pytorch import LightningModule, Trainer
+from lightning.pytorch.utilities.exceptions import MisconfigurationException
 from pl_bolts.callbacks import BatchGradientVerificationCallback
-from pl_bolts.callbacks.verification.batch_gradient import default_input_mapping, default_output_mapping, selective_eval
+from pl_bolts.callbacks.verification.batch_gradient import (
+    default_input_mapping,
+    default_output_mapping,
+    selective_eval,
+)
 from pl_bolts.utils import BatchGradientVerification
-from pytorch_lightning import LightningModule, Trainer
-from pytorch_lightning.utilities.exceptions import MisconfigurationException
-from torch import Tensor, nn
-
 from tests import _MARK_REQUIRE_GPU
+from torch import Tensor, nn
 
 
 class TemplateModel(nn.Module):

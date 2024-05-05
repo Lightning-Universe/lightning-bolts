@@ -2,6 +2,7 @@ import warnings
 
 import pytest
 import torch
+from lightning.pytorch.utilities.warnings import PossibleUserWarning
 from pl_bolts.models.detection.yolo.utils import (
     aligned_iou,
     box_size_ratio,
@@ -11,7 +12,6 @@ from pl_bolts.models.detection.yolo.utils import (
     iou_below,
     is_inside_box,
 )
-from pytorch_lightning.utilities.warnings import PossibleUserWarning
 
 
 @pytest.mark.parametrize(("width", "height"), [(10, 5)])

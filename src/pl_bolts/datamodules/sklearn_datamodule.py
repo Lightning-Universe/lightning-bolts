@@ -2,12 +2,11 @@ import math
 from typing import Any, Tuple
 
 import numpy as np
-from pytorch_lightning import LightningDataModule
-from torch.utils.data import DataLoader, Dataset
-
+from lightning import LightningDataModule
 from pl_bolts.utils import _SKLEARN_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
+from torch.utils.data import DataLoader, Dataset
 
 if _SKLEARN_AVAILABLE:
     from sklearn.utils import shuffle as sk_shuffle

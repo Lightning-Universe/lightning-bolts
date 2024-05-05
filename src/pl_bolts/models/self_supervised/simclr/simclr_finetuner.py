@@ -1,8 +1,7 @@
 import os
 from argparse import ArgumentParser
 
-from pytorch_lightning import Trainer, seed_everything
-
+from lightning import Trainer, seed_everything
 from pl_bolts.models.self_supervised.simclr.simclr_module import SimCLR
 from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner
 from pl_bolts.transforms.dataset_normalizations import (
@@ -10,13 +9,19 @@ from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization,
     stl10_normalization,
 )
-from pl_bolts.transforms.self_supervised.simclr_transforms import SimCLRFinetuneTransform
+from pl_bolts.transforms.self_supervised.simclr_transforms import (
+    SimCLRFinetuneTransform,
+)
 from pl_bolts.utils.stability import under_review
 
 
 @under_review()
 def cli_main():  # pragma: no cover
-    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
+    from pl_bolts.datamodules import (
+        CIFAR10DataModule,
+        ImagenetDataModule,
+        STL10DataModule,
+    )
 
     seed_everything(1234)
 

@@ -3,8 +3,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import torch
 import torch.nn as nn
-from pytorch_lightning import LightningModule
-from pytorch_lightning.utilities.types import STEP_OUTPUT
+from lightning import LightningModule
+from lightning.pytorch.utilities.types import STEP_OUTPUT
 from torch import Tensor, optim
 
 # It seems to be impossible to avoid mypy errors if using import instead of getattr().
@@ -621,6 +621,6 @@ class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
 
 
 if __name__ == "__main__":
-    from pytorch_lightning.cli import LightningCLI
+    from lightning.cli import LightningCLI
 
     LightningCLI(CLIYOLO, ResizedVOCDetectionDataModule, seed_everything_default=42)

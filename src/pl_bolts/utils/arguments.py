@@ -3,8 +3,7 @@ from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from pytorch_lightning import LightningDataModule, LightningModule
-
+from lightning import LightningDataModule, LightningModule
 from pl_bolts.utils.stability import under_review
 
 

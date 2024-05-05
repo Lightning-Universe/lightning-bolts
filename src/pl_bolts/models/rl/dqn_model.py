@@ -1,17 +1,14 @@
 """Deep Q Network."""
+
 import argparse
 from collections import OrderedDict
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
-from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.strategies import DataParallelStrategy
-from torch import Tensor, optim
-from torch.optim.optimizer import Optimizer
-from torch.utils.data import DataLoader
-
+from lightning import LightningModule, Trainer, seed_everything
+from lightning.pytorch.callbacks import ModelCheckpoint
+from lightning.pytorch.strategies import DataParallelStrategy
 from pl_bolts.datamodules.experience_source import Experience, ExperienceSourceDataset
 from pl_bolts.losses.rl import dqn_loss
 from pl_bolts.models.rl.common.agents import ValueAgent
@@ -21,6 +18,9 @@ from pl_bolts.models.rl.common.networks import CNN
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
+from torch import Tensor, optim
+from torch.optim.optimizer import Optimizer
+from torch.utils.data import DataLoader
 
 if _GYM_AVAILABLE:
     from gym import Env

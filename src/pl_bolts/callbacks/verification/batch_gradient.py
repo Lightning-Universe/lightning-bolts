@@ -4,13 +4,15 @@ from typing import Any, Callable, Iterable, List, Optional, Type
 
 import torch
 import torch.nn as nn
-from pytorch_lightning import LightningModule, Trainer
-from pytorch_lightning.utilities.apply_func import apply_to_collection
-from pytorch_lightning.utilities.exceptions import MisconfigurationException
-from torch import Tensor
-
-from pl_bolts.callbacks.verification.base import VerificationBase, VerificationCallbackBase
+from lightning import LightningModule, Trainer
+from lightning.fabric.utilities.apply_func import apply_to_collection
+from lightning.fabric.utilities.exceptions import MisconfigurationException
+from pl_bolts.callbacks.verification.base import (
+    VerificationBase,
+    VerificationCallbackBase,
+)
 from pl_bolts.utils.stability import under_review
+from torch import Tensor
 
 
 @under_review()

@@ -1,22 +1,22 @@
 """Advantage Actor Critic (A2C)"""
+
 from argparse import ArgumentParser
 from collections import OrderedDict
 from typing import Any, Iterator, List, Tuple
 
 import numpy as np
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
-from pytorch_lightning.callbacks import ModelCheckpoint
-from torch import Tensor, optim
-from torch.optim.optimizer import Optimizer
-from torch.utils.data import DataLoader
-
+from lightning import LightningModule, Trainer, seed_everything
+from lightning.pytorch.callbacks import ModelCheckpoint
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.models.rl.common.agents import ActorCriticAgent
 from pl_bolts.models.rl.common.networks import ActorCriticMLP
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
+from torch import Tensor, optim
+from torch.optim.optimizer import Optimizer
+from torch.utils.data import DataLoader
 
 if _GYM_AVAILABLE:
     import gym

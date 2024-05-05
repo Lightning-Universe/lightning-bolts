@@ -2,10 +2,7 @@ import urllib.parse
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
-from torch import nn
-from torch.nn import functional as F  # noqa: N812
-
+from lightning import LightningModule, Trainer, seed_everything
 from pl_bolts import _HTTPS_AWS_HUB
 from pl_bolts.models.autoencoders.components import (
     resnet18_decoder,
@@ -14,6 +11,8 @@ from pl_bolts.models.autoencoders.components import (
     resnet50_encoder,
 )
 from pl_bolts.utils.stability import under_review
+from torch import nn
+from torch.nn import functional as F  # noqa: N812
 
 
 @under_review()
@@ -187,7 +186,11 @@ class VAE(LightningModule):
 
 @under_review()
 def cli_main(args=None):
-    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
+    from pl_bolts.datamodules import (
+        CIFAR10DataModule,
+        ImagenetDataModule,
+        STL10DataModule,
+    )
 
     seed_everything()
 

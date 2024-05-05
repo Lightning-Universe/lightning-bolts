@@ -1,13 +1,12 @@
 """CPC V2."""
+
 import math
 from argparse import ArgumentParser
 from typing import Optional
 
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
-from pytorch_lightning.utilities import rank_zero_warn
-from torch import optim
-
+from lightning import LightningModule, Trainer, seed_everything
+from lightning.fabric.utilities import rank_zero_warn
 from pl_bolts.datamodules.stl10_datamodule import STL10DataModule
 from pl_bolts.losses.self_supervised_learning import CPCTask
 from pl_bolts.models.self_supervised.cpc.networks import cpc_resnet101
@@ -22,6 +21,7 @@ from pl_bolts.transforms.self_supervised.cpc_transforms import (
 from pl_bolts.utils.pretrained_weights import load_pretrained
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 from pl_bolts.utils.stability import under_review
+from torch import optim
 
 __all__ = ["CPC_v2"]
 

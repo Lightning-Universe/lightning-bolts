@@ -1,18 +1,18 @@
 """Prioritized Experience Replay DQN."""
+
 import argparse
 from collections import OrderedDict
 from typing import Tuple
 
 import numpy as np
-from pytorch_lightning import Trainer
-from torch import Tensor
-from torch.utils.data import DataLoader
-
+from lightning import Trainer
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.losses.rl import per_dqn_loss
 from pl_bolts.models.rl.common.memory import Experience, PERBuffer
 from pl_bolts.models.rl.dqn_model import DQN
 from pl_bolts.utils.stability import under_review
+from torch import Tensor
+from torch.utils.data import DataLoader
 
 
 @under_review()

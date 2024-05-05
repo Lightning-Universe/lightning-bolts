@@ -2,13 +2,12 @@ import os
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import torch
-from pytorch_lightning import LightningDataModule
-from torch import Tensor
-from torch.utils.data import DataLoader, Dataset
-
+from lightning import LightningDataModule
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
+from torch import Tensor
+from torch.utils.data import DataLoader, Dataset
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib

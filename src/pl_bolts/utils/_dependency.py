@@ -2,7 +2,10 @@ import functools
 import os
 from typing import Any, Callable
 
-from lightning_utilities.core.imports import ModuleAvailableCache, RequirementCache
+from lightning.fabric.utilities.core.imports import (
+    ModuleAvailableCache,
+    RequirementCache,
+)
 
 
 # ToDo: replace with utils wrapper after 0.10 is released

@@ -3,14 +3,13 @@ from copy import deepcopy
 from typing import Any, Union
 
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
-from torch import Tensor
-from torch.nn import functional as F  # noqa: N812
-from torch.optim import Adam
-
+from lightning import LightningModule, Trainer, seed_everything
 from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
 from pl_bolts.models.self_supervised.byol.models import MLP, SiameseArm
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
+from torch import Tensor
+from torch.nn import functional as F  # noqa: N812
+from torch.optim import Adam
 
 
 class BYOL(LightningModule):
@@ -168,8 +167,15 @@ class BYOL(LightningModule):
 
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
-    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
-    from pl_bolts.models.self_supervised.simclr import SimCLREvalDataTransform, SimCLRTrainDataTransform
+    from pl_bolts.datamodules import (
+        CIFAR10DataModule,
+        ImagenetDataModule,
+        STL10DataModule,
+    )
+    from pl_bolts.models.self_supervised.simclr import (
+        SimCLREvalDataTransform,
+        SimCLRTrainDataTransform,
+    )
 
     seed_everything(1234)
 

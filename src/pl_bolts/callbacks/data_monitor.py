@@ -2,23 +2,22 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 
 import numpy as np
 import torch
-from pytorch_lightning import Callback, LightningModule, Trainer
-from pytorch_lightning.loggers import TensorBoardLogger, WandbLogger
-from pytorch_lightning.utilities import rank_zero_warn
-from pytorch_lightning.utilities.apply_func import apply_to_collection
+from lightning import Callback, LightningModule, Trainer
+from lightning.fabric.utilities import rank_zero_warn
+from lightning.fabric.utilities.apply_func import apply_to_collection
+from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
+from pl_bolts.utils import _WANDB_AVAILABLE
+from pl_bolts.utils.stability import under_review
+from pl_bolts.utils.warnings import warn_missing_pkg
 from torch import Tensor, nn
 from torch.nn import Module
 from torch.utils.hooks import RemovableHandle
 
-from pl_bolts.utils import _WANDB_AVAILABLE
-from pl_bolts.utils.stability import under_review
-from pl_bolts.utils.warnings import warn_missing_pkg
-
 # Backward compatibility for Lightning Logger
 try:
-    from pytorch_lightning.loggers import Logger
+    from lightning.pytorch.loggers import Logger
 except ImportError:
-    from pytorch_lightning.loggers import LightningLoggerBase as Logger
+    from lightning.pytorch.loggers import LightningLoggerBase as Logger
 
 if _WANDB_AVAILABLE:
     import wandb

@@ -3,15 +3,14 @@ from argparse import ArgumentParser
 from typing import Union
 
 import torch
-from pytorch_lightning import LightningDataModule, LightningModule, Trainer
-from torch import optim
-from torch.utils.data import DataLoader
-
+from lightning import LightningDataModule, LightningModule, Trainer
 from pl_bolts.losses.self_supervised_learning import FeatureMapContrastiveTask
 from pl_bolts.models.self_supervised.amdim.datasets import AMDIMPretraining
 from pl_bolts.models.self_supervised.amdim.networks import AMDIMEncoder
 from pl_bolts.utils.self_supervised import torchvision_ssl_encoder
 from pl_bolts.utils.stability import under_review
+from torch import optim
+from torch.utils.data import DataLoader
 
 
 @under_review()

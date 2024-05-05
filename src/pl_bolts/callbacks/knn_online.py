@@ -1,12 +1,11 @@
 from typing import Optional, Tuple, Union
 
 import torch
-from pytorch_lightning import Callback, LightningModule, Trainer
-from pytorch_lightning.accelerators import Accelerator
+from lightning import Callback, LightningModule, Trainer
+from lightning.accelerators import Accelerator
+from pl_bolts.utils.stability import under_review
 from torch import Tensor
 from torch.nn import functional as F  # noqa: N812
-
-from pl_bolts.utils.stability import under_review
 
 
 @under_review()

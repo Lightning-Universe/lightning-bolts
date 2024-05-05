@@ -2,10 +2,9 @@ import copy
 from itertools import zip_longest
 from typing import Any, Callable, Dict, List, Optional
 
-from pytorch_lightning import LightningModule, Trainer
-from pytorch_lightning.callbacks import Callback
-from pytorch_lightning.utilities import rank_zero_info
-
+from lightning import LightningModule, Trainer
+from lightning.fabric.utilities import rank_zero_info
+from lightning.pytorch.callbacks import Callback
 from pl_bolts.utils.stability import under_review
 
 
