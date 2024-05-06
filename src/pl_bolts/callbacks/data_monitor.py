@@ -112,7 +112,7 @@ class DataMonitorBase(Callback):
         if not isinstance(logger, self.supported_loggers):
             rank_zero_warn(
                 f"{self.__class__.__name__} does not support logging with {logger.__class__.__name__}."
-                f" Supported loggers are: {', '.join((str(x.__name__) for x in self.supported_loggers))}"
+                f" Supported loggers are: {', '.join(str(x.__name__) for x in self.supported_loggers)}"
             )
             available = False
         return available
