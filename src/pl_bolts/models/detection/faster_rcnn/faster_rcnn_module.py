@@ -3,6 +3,7 @@ from typing import Any, Optional, Union
 
 import torch
 from lightning import LightningModule, Trainer, seed_everything
+
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review

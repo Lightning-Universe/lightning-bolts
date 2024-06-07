@@ -1,8 +1,9 @@
 import torch
 from lightning import LightningModule
+from torch import nn
+
 from pl_bolts.models.gans.pix2pix.components import Generator, PatchGAN
 from pl_bolts.utils.stability import under_review
-from torch import nn
 
 
 @under_review()

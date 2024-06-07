@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, List, Optional
 from lightning import LightningModule, Trainer
 from lightning.fabric.utilities import rank_zero_info
 from lightning.pytorch.callbacks import Callback
+
 from pl_bolts.utils.stability import under_review
 
 

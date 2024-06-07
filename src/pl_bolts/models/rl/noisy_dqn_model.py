@@ -5,11 +5,12 @@ from typing import Tuple
 
 import numpy as np
 from lightning import Trainer
+from torch import Tensor
+
 from pl_bolts.datamodules.experience_source import Experience
 from pl_bolts.models.rl.common.networks import NoisyCNN
 from pl_bolts.models.rl.dqn_model import DQN
 from pl_bolts.utils.stability import under_review
-from torch import Tensor
 
 
 @under_review()

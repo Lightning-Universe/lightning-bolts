@@ -18,6 +18,7 @@ from lightning.pytorch.core.module import LightningModule
 from lightning.pytorch.utilities.exceptions import MisconfigurationException
 from pl_bolts.callbacks import ORTCallback
 from pl_bolts.utils import _TORCH_ORT_AVAILABLE
+
 from tests.helpers.boring_model import BoringModel
 
 if _TORCH_ORT_AVAILABLE:

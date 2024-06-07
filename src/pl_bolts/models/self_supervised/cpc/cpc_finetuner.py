@@ -2,6 +2,7 @@ import os
 from argparse import ArgumentParser
 
 from lightning import Trainer, seed_everything
+
 from pl_bolts.models.self_supervised import CPC_v2, SSLFineTuner
 from pl_bolts.transforms.self_supervised.cpc_transforms import (
     CPCEvalTransformsCIFAR10,

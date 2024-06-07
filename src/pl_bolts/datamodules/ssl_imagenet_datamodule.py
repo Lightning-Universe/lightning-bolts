@@ -2,12 +2,13 @@ import os
 from typing import Any, Callable, Optional
 
 from lightning import LightningDataModule
+from torch.utils.data import DataLoader
+
 from pl_bolts.datasets import UnlabeledImagenet
 from pl_bolts.transforms.dataset_normalizations import imagenet_normalization
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
-from torch.utils.data import DataLoader
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib

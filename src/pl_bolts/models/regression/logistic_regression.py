@@ -5,11 +5,12 @@ from typing import Any, Dict, List, Tuple, Type
 
 import torch
 from lightning import LightningModule, Trainer, seed_everything
-from pl_bolts.utils.stability import under_review
 from torch import Tensor, nn
 from torch.optim import Adam
 from torch.optim.optimizer import Optimizer
 from torchmetrics import functional
+
+from pl_bolts.utils.stability import under_review
 
 
 class LogisticRegression(LightningModule):

@@ -2,6 +2,7 @@ from typing import Any, Optional
 
 import torch
 from lightning import LightningModule
+
 from pl_bolts.models.detection.retinanet import create_retinanet_backbone
 from pl_bolts.utils import _TORCHVISION_AVAILABLE, _TORCHVISION_LESS_THAN_0_13
 from pl_bolts.utils.stability import under_review
@@ -141,6 +142,7 @@ class RetinaNet(LightningModule):
 @under_review()
 def cli_main():
     from lightning.cli import LightningCLI
+
     from pl_bolts.datamodules import VOCDetectionDataModule
 
     LightningCLI(RetinaNet, VOCDetectionDataModule, seed_everything_default=42)

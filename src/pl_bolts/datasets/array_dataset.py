@@ -1,8 +1,9 @@
 from typing import Tuple, Union
 
 from lightning.fabric.utilities import exceptions
-from pl_bolts.datasets.base_dataset import DataModel, TArrays
 from torch.utils.data import Dataset
+
+from pl_bolts.datasets.base_dataset import DataModel, TArrays
 
 
 class ArrayDataset(Dataset):

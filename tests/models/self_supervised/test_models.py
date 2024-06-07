@@ -33,6 +33,7 @@ from pl_bolts.transforms.self_supervised.swav_transforms import (
     SwAVTrainDataTransform,
 )
 from pl_bolts.utils import _IS_WINDOWS
+
 from tests import _MARK_REQUIRE_GPU
 
 

@@ -3,8 +3,9 @@ from argparse import ArgumentParser
 import torch
 from lightning import LightningModule, Trainer, seed_everything
 from lightning.pytorch.callbacks.progress import TQDMProgressBar
-from pl_bolts.models.gans.basic.components import Discriminator, Generator
 from torch.nn import functional as F  # noqa: N812
+
+from pl_bolts.models.gans.basic.components import Discriminator, Generator
 
 
 class GAN(LightningModule):

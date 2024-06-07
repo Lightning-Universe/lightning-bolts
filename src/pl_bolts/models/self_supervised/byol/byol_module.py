@@ -4,12 +4,13 @@ from typing import Any, Union
 
 import torch
 from lightning import LightningModule, Trainer, seed_everything
-from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
-from pl_bolts.models.self_supervised.byol.models import MLP, SiameseArm
-from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from torch import Tensor
 from torch.nn import functional as F  # noqa: N812
 from torch.optim import Adam
+
+from pl_bolts.callbacks.byol_updates import BYOLMAWeightUpdate
+from pl_bolts.models.self_supervised.byol.models import MLP, SiameseArm
+from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
 class BYOL(LightningModule):

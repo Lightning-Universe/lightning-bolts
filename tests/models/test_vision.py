@@ -2,9 +2,8 @@ import warnings
 
 import pytest
 import torch
-from lightning.pytorch import LightningDataModule, Trainer
+from lightning.pytorch import LightningDataModule, Trainer, seed_everything
 from lightning.pytorch import __version__ as pl_version
-from lightning.pytorch import seed_everything
 from lightning.pytorch.callbacks.progress import TQDMProgressBar
 from lightning.pytorch.utilities.warnings import PossibleUserWarning
 from packaging import version

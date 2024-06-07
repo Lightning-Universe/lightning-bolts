@@ -6,16 +6,17 @@ import numpy as np
 import torch
 from lightning import LightningModule, Trainer, seed_everything
 from lightning.pytorch.callbacks import ModelCheckpoint
+from torch import Tensor, optim
+from torch.nn.functional import log_softmax, softmax
+from torch.optim.optimizer import Optimizer
+from torch.utils.data import DataLoader
+
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.models.rl.common.agents import PolicyAgent
 from pl_bolts.models.rl.common.networks import MLP
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
-from torch import Tensor, optim
-from torch.nn.functional import log_softmax, softmax
-from torch.optim.optimizer import Optimizer
-from torch.utils.data import DataLoader
 
 if _GYM_AVAILABLE:
     import gym

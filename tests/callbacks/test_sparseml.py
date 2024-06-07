@@ -20,6 +20,7 @@ from lightning.pytorch import Callback, LightningModule, Trainer
 from lightning.pytorch.utilities.exceptions import MisconfigurationException
 from pl_bolts.callbacks import SparseMLCallback
 from pl_bolts.utils import _SPARSEML_TORCH_SATISFIED
+
 from tests.helpers.boring_model import BoringModel
 
 if _SPARSEML_TORCH_SATISFIED:

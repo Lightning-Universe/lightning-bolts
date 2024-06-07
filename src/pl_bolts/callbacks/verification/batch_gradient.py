@@ -7,12 +7,13 @@ import torch.nn as nn
 from lightning import LightningModule, Trainer
 from lightning.fabric.utilities.apply_func import apply_to_collection
 from lightning.fabric.utilities.exceptions import MisconfigurationException
+from torch import Tensor
+
 from pl_bolts.callbacks.verification.base import (
     VerificationBase,
     VerificationCallbackBase,
 )
 from pl_bolts.utils.stability import under_review
-from torch import Tensor
 
 
 @under_review()

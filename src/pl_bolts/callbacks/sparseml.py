@@ -16,6 +16,7 @@ from typing import Any, Optional
 import torch
 from lightning import Callback, LightningModule, Trainer
 from lightning.fabric.utilities.exceptions import MisconfigurationException
+
 from pl_bolts.utils import (
     _SPARSEML_AVAILABLE,
     _SPARSEML_TORCH_SATISFIED,

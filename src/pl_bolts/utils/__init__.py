@@ -3,6 +3,7 @@ import platform
 
 import torch
 from lightning_utilities.core.imports import compare_version, module_available
+
 from pl_bolts.callbacks.verification.batch_gradient import (
     BatchGradientVerification,  # type: ignore
 )

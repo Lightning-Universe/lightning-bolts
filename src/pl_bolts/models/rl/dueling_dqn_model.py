@@ -3,6 +3,7 @@
 import argparse
 
 from lightning import Trainer
+
 from pl_bolts.models.rl.common.networks import DuelingCNN
 from pl_bolts.models.rl.dqn_model import DQN
 from pl_bolts.utils.stability import under_review

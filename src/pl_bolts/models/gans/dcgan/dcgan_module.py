@@ -4,6 +4,9 @@ from typing import Any
 import torch
 import torch.nn as nn
 from lightning import LightningModule, Trainer, seed_everything
+from torch import Tensor
+from torch.utils.data import DataLoader
+
 from pl_bolts.callbacks import (
     LatentDimInterpolator,
     TensorboardGenerativeModelImageSampler,
@@ -11,8 +14,6 @@ from pl_bolts.callbacks import (
 from pl_bolts.models.gans.dcgan.components import DCGANDiscriminator, DCGANGenerator
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.warnings import warn_missing_pkg
-from torch import Tensor
-from torch.utils.data import DataLoader
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms as transform_lib

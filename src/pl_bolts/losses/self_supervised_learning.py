@@ -1,8 +1,9 @@
 import numpy as np
 import torch
+from torch import nn
+
 from pl_bolts.models.vision.pixel_cnn import PixelCNN
 from pl_bolts.utils.stability import under_review
-from torch import nn
 
 
 @under_review()

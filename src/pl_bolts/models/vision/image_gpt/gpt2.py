@@ -1,7 +1,8 @@
 import torch
 from lightning import LightningModule
-from pl_bolts.utils.stability import under_review
 from torch import nn
+
+from pl_bolts.utils.stability import under_review
 
 
 @under_review()

@@ -3,9 +3,10 @@ from typing import Optional, Tuple, Union
 import torch
 from lightning import Callback, LightningModule, Trainer
 from lightning.pytorch.accelerators import Accelerator
-from pl_bolts.utils.stability import under_review
 from torch import Tensor
 from torch.nn import functional as F  # noqa: N812
+
+from pl_bolts.utils.stability import under_review
 
 
 @under_review()

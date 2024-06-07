@@ -3,12 +3,13 @@ from typing import Any, Callable, Optional
 
 import torch
 from lightning import LightningDataModule
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import random_split
+
 from pl_bolts.datasets import KittiDataset
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
-from torch.utils.data import DataLoader
-from torch.utils.data.dataset import random_split
 
 if _TORCHVISION_AVAILABLE:
     from torchvision import transforms

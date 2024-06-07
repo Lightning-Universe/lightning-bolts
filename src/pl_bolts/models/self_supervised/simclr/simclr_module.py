@@ -4,6 +4,9 @@ from argparse import ArgumentParser
 import torch
 from lightning import LightningModule, Trainer
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
+from torch import Tensor, nn
+from torch.nn import functional as F  # noqa: N812
+
 from pl_bolts.models.self_supervised.resnets import resnet18, resnet50
 from pl_bolts.optimizers.lars import LARS
 from pl_bolts.optimizers.lr_scheduler import linear_warmup_decay
@@ -13,8 +16,6 @@ from pl_bolts.transforms.dataset_normalizations import (
     stl10_normalization,
 )
 from pl_bolts.utils.stability import under_review
-from torch import Tensor, nn
-from torch.nn import functional as F  # noqa: N812
 
 
 @under_review()

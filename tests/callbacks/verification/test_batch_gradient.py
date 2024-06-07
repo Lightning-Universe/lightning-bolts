@@ -11,8 +11,9 @@ from pl_bolts.callbacks.verification.batch_gradient import (
     selective_eval,
 )
 from pl_bolts.utils import BatchGradientVerification
-from tests import _MARK_REQUIRE_GPU
 from torch import Tensor, nn
+
+from tests import _MARK_REQUIRE_GPU
 
 
 class TemplateModel(nn.Module):

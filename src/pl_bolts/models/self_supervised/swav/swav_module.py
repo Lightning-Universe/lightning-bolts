@@ -6,6 +6,8 @@ from argparse import ArgumentParser
 import torch
 from lightning import LightningModule, Trainer
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
+from torch import nn
+
 from pl_bolts.models.self_supervised.swav.loss import SWAVLoss
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet18, resnet50
 from pl_bolts.optimizers.lars import LARS
@@ -15,7 +17,6 @@ from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization,
     stl10_normalization,
 )
-from torch import nn
 
 
 class SwAV(LightningModule):

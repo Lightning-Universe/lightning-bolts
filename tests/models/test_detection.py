@@ -20,8 +20,9 @@ from pl_bolts.models.detection import (
 )
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 from pl_bolts.utils import _IS_WINDOWS
-from tests import TEST_ROOT
 from torch.utils.data import DataLoader
+
+from tests import TEST_ROOT
 
 
 def _collate_fn(batch):

@@ -6,9 +6,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F  # noqa: N812
 from lightning import LightningModule, Trainer, seed_everything
+from torch import Tensor
+
 from pl_bolts.models.self_supervised.byol.models import MLP, SiameseArm
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-from torch import Tensor
 
 
 class SimSiam(LightningModule):

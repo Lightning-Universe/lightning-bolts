@@ -2,6 +2,7 @@ import os
 from argparse import ArgumentParser
 
 from lightning import Trainer, seed_everything
+
 from pl_bolts.models.self_supervised.simclr.simclr_module import SimCLR
 from pl_bolts.models.self_supervised.ssl_finetuner import SSLFineTuner
 from pl_bolts.transforms.dataset_normalizations import (

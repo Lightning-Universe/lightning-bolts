@@ -3,14 +3,15 @@ from typing import Any, List, Tuple
 
 import torch
 from lightning import LightningModule, Trainer, seed_everything
+from torch import Tensor
+from torch.optim.optimizer import Optimizer
+from torch.utils.data import DataLoader
+
 from pl_bolts.datamodules import ExperienceSourceDataset
 from pl_bolts.models.rl.common.networks import MLP, ActorCategorical, ActorContinous
 from pl_bolts.utils import _GYM_AVAILABLE
 from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
-from torch import Tensor
-from torch.optim.optimizer import Optimizer
-from torch.utils.data import DataLoader
 
 if _GYM_AVAILABLE:
     import gym

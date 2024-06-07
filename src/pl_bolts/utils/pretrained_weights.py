@@ -1,6 +1,7 @@
 from typing import Optional
 
 from lightning import LightningModule
+
 from pl_bolts.utils.stability import under_review
 
 vae_imagenet2012 = (

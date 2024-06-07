@@ -6,12 +6,13 @@ from lightning import Callback, LightningModule, Trainer
 from lightning.fabric.utilities import rank_zero_warn
 from lightning.fabric.utilities.apply_func import apply_to_collection
 from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
-from pl_bolts.utils import _WANDB_AVAILABLE
-from pl_bolts.utils.stability import under_review
-from pl_bolts.utils.warnings import warn_missing_pkg
 from torch import Tensor, nn
 from torch.nn import Module
 from torch.utils.hooks import RemovableHandle
+
+from pl_bolts.utils import _WANDB_AVAILABLE
+from pl_bolts.utils.stability import under_review
+from pl_bolts.utils.warnings import warn_missing_pkg
 
 # Backward compatibility for Lightning Logger
 try:
@@ -111,7 +112,7 @@ class DataMonitorBase(Callback):
         if not isinstance(logger, self.supported_loggers):
             rank_zero_warn(
                 f"{self.__class__.__name__} does not support logging with {logger.__class__.__name__}."
-                f" Supported loggers are: {', '.join((str(x.__name__) for x in self.supported_loggers))}"
+                f" Supported loggers are: {', '.join(str(x.__name__) for x in self.supported_loggers)}"
             )
             available = False
         return available
