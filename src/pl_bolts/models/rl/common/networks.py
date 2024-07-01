@@ -1,4 +1,5 @@
 """Series of networks used Based on implementations found here:"""
+
 import math
 from typing import Tuple
 

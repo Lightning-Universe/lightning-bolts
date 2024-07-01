@@ -91,6 +91,7 @@ class BatchGradientVerificationCallback(VerificationCallbackBase):
     """The callback version of the :class:`BatchGradientVerification` test.
 
     Verification is performed right before training begins.
+
     """
 
     def __init__(
@@ -211,12 +212,13 @@ def collect_tensors(data: Any) -> List[Tensor]:
 @under_review()
 @contextmanager
 def selective_eval(model: nn.Module, layer_types: Iterable[Type[nn.Module]]) -> None:
-    """A context manager that sets all requested types of layers to eval mode. This method uses an ``isinstance``
-    check, so all subclasses are also affected.
+    """A context manager that sets all requested types of layers to eval mode. This method uses an ``isinstance`` check,
+    so all subclasses are also affected.
 
     Args:
         model: A model which has layers that need to be set to eval mode.
         layer_types: The list of class objects for which all layers of that type will be set to eval mode.
+
     """
     to_revert = []
     try:

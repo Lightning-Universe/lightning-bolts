@@ -139,6 +139,7 @@ class STL10DataModule(LightningDataModule):  # pragma: no cover
 
             batch_size: the batch size
             transforms: a sequence of transforms
+
         """
         transforms = self._default_transforms() if self.train_transforms is None else self.train_transforms
 
