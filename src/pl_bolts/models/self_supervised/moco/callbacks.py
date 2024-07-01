@@ -1,6 +1,6 @@
 import math
 
-from pytorch_lightning import Callback
+from lightning import Callback
 
 from pl_bolts.utils.stability import under_review
 

@@ -1,11 +1,12 @@
 """CPC V2."""
+
 import math
 from argparse import ArgumentParser
 from typing import Optional
 
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
-from pytorch_lightning.utilities import rank_zero_warn
+from lightning import LightningModule, Trainer, seed_everything
+from lightning.fabric.utilities import rank_zero_warn
 from torch import optim
 
 from pl_bolts.datamodules.stl10_datamodule import STL10DataModule

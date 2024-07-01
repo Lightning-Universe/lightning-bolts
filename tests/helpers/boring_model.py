@@ -14,7 +14,7 @@
 from typing import Optional
 
 import torch
-from pytorch_lightning import LightningDataModule, LightningModule
+from lightning.pytorch import LightningDataModule, LightningModule
 from torch.utils.data import DataLoader, Dataset, IterableDataset, Subset
 
 

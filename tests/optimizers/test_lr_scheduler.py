@@ -2,8 +2,8 @@ import math
 
 import numpy as np
 import torch
+from lightning.pytorch import seed_everything
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-from pytorch_lightning import seed_everything
 from torch.nn import functional as F  # noqa: N812
 from torch.optim import SGD
 from torch.optim.lr_scheduler import _LRScheduler

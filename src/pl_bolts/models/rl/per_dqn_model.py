@@ -1,10 +1,11 @@
 """Prioritized Experience Replay DQN."""
+
 import argparse
 from collections import OrderedDict
 from typing import Tuple
 
 import numpy as np
-from pytorch_lightning import Trainer
+from lightning import Trainer
 from torch import Tensor
 from torch.utils.data import DataLoader
 

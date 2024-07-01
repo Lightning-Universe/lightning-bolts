@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from typing import Union
 
 import torch
-from pytorch_lightning import LightningDataModule, LightningModule, Trainer
+from lightning import LightningDataModule, LightningModule, Trainer
 from torch import optim
 from torch.utils.data import DataLoader
 

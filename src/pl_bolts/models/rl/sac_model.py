@@ -1,11 +1,12 @@
 """Soft Actor Critic."""
+
 import argparse
 from typing import Dict, List, Tuple
 
 import numpy as np
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
-from pytorch_lightning.callbacks import ModelCheckpoint
+from lightning import LightningModule, Trainer, seed_everything
+from lightning.pytorch.callbacks import ModelCheckpoint
 from torch import Tensor, optim
 from torch.nn import functional as F  # noqa: N812
 from torch.optim.optimizer import Optimizer

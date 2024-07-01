@@ -3,7 +3,7 @@ from typing import Tuple
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F  # noqa: N812
-from pytorch_lightning import Callback
+from lightning import Callback
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
 from pl_bolts.utils.stability import under_review

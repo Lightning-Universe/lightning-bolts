@@ -3,7 +3,7 @@ from abc import abstractmethod
 from typing import Any, Callable, List, Optional, Union
 
 import torch
-from pytorch_lightning import LightningDataModule
+from lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, random_split
 
 

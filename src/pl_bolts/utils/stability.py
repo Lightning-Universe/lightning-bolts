@@ -16,7 +16,7 @@ import inspect
 from typing import Callable, Optional, Type, Union
 from warnings import filterwarnings
 
-from pytorch_lightning.utilities import rank_zero_warn
+from lightning.fabric.utilities import rank_zero_warn
 
 
 class UnderReviewWarning(Warning):

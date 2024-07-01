@@ -2,13 +2,13 @@ import warnings
 
 import pytest
 import torch.nn as nn
+from lightning.pytorch.utilities.warnings import PossibleUserWarning
 from pl_bolts.models.detection.yolo.darknet_network import (
     _create_convolutional,
     _create_maxpool,
     _create_shortcut,
     _create_upsample,
 )
-from pytorch_lightning.utilities.warnings import PossibleUserWarning
 
 
 @pytest.mark.parametrize(

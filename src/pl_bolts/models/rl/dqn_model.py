@@ -1,13 +1,14 @@
 """Deep Q Network."""
+
 import argparse
 from collections import OrderedDict
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
-from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.strategies import DataParallelStrategy
+from lightning import LightningModule, Trainer, seed_everything
+from lightning.pytorch.callbacks import ModelCheckpoint
+from lightning.pytorch.strategies import DataParallelStrategy
 from torch import Tensor, optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader

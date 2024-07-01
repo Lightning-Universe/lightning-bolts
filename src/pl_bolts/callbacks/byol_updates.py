@@ -2,7 +2,7 @@ import math
 from typing import Sequence, Union
 
 import torch.nn as nn
-from pytorch_lightning import Callback, LightningModule, Trainer
+from lightning import Callback, LightningModule, Trainer
 from torch import Tensor
 
 

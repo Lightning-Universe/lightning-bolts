@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from typing import Any, Dict, List, Tuple, Type
 
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
+from lightning import LightningModule, Trainer, seed_everything
 from torch import Tensor, nn
 from torch.nn import functional as F  # noqa: N812
 from torch.optim import Adam

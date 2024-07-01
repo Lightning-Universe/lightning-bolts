@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from typing import Any, Callable, Optional
 
 import torch
-from pytorch_lightning import LightningDataModule
+from lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
 
 from pl_bolts.datasets import ConcatDataset

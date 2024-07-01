@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Revision of the MoCo SSL model ([#928](https://github.com/PyTorchLightning/pytorch-lightning-bolts/pull/928))
 
+- Updated lightning dependency to support lightning 2.x ([#1094](https://github.com/Lightning-AI/pytorch-lightning/pull/2671))
+
 
 ### Deprecated
 

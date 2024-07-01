@@ -14,10 +14,14 @@
 from typing import Any, Optional
 
 import torch
-from pytorch_lightning import Callback, LightningModule, Trainer
-from pytorch_lightning.utilities.exceptions import MisconfigurationException
+from lightning import Callback, LightningModule, Trainer
+from lightning.fabric.utilities.exceptions import MisconfigurationException
 
-from pl_bolts.utils import _SPARSEML_AVAILABLE, _SPARSEML_TORCH_SATISFIED, _SPARSEML_TORCH_SATISFIED_ERROR
+from pl_bolts.utils import (
+    _SPARSEML_AVAILABLE,
+    _SPARSEML_TORCH_SATISFIED,
+    _SPARSEML_TORCH_SATISFIED_ERROR,
+)
 
 if _SPARSEML_TORCH_SATISFIED:
     from sparseml.pytorch.optim import ScheduledModifierManager

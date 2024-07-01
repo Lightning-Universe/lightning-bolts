@@ -2,16 +2,16 @@ import warnings
 
 import pytest
 import torch
+from lightning.pytorch import LightningDataModule, Trainer, seed_everything
+from lightning.pytorch import __version__ as pl_version
+from lightning.pytorch.callbacks.progress import TQDMProgressBar
+from lightning.pytorch.utilities.warnings import PossibleUserWarning
 from packaging import version
 from pl_bolts.datamodules import FashionMNISTDataModule, MNISTDataModule
 from pl_bolts.datasets import DummyDataset
 from pl_bolts.models.vision import GPT2, ImageGPT, SemSegment, UNet
 from pl_bolts.models.vision.unet import DoubleConv, Down, Up
 from pl_bolts.utils import _IS_WINDOWS
-from pytorch_lightning import LightningDataModule, Trainer, seed_everything
-from pytorch_lightning import __version__ as pl_version
-from pytorch_lightning.callbacks.progress import TQDMProgressBar
-from pytorch_lightning.utilities.warnings import PossibleUserWarning
 from torch.utils.data import DataLoader
 
 

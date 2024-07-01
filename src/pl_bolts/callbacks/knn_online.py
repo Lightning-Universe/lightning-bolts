@@ -1,8 +1,8 @@
 from typing import Optional, Tuple, Union
 
 import torch
-from pytorch_lightning import Callback, LightningModule, Trainer
-from pytorch_lightning.accelerators import Accelerator
+from lightning import Callback, LightningModule, Trainer
+from lightning.pytorch.accelerators import Accelerator
 from torch import Tensor
 from torch.nn import functional as F  # noqa: N812
 

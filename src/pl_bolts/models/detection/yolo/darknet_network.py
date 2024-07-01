@@ -6,16 +6,23 @@ from warnings import warn
 import numpy as np
 import torch
 import torch.nn as nn
-from pytorch_lightning.utilities.exceptions import MisconfigurationException
+from lightning.fabric.utilities.exceptions import MisconfigurationException
 
 try:
-    from pytorch_lightning.utilities.rank_zero import rank_zero_info
+    from lightning.fabric.utilities.rank_zero import rank_zero_info
 except ModuleNotFoundError:
-    from pytorch_lightning.utilities.distributed import rank_zero_info
+    from lightning.fabric.utilities.distributed import rank_zero_info
 
 from torch import Tensor
 
-from .layers import Conv, DetectionLayer, MaxPool, RouteLayer, ShortcutLayer, create_detection_layer
+from .layers import (
+    Conv,
+    DetectionLayer,
+    MaxPool,
+    RouteLayer,
+    ShortcutLayer,
+    create_detection_layer,
+)
 from .torch_networks import NETWORK_OUTPUT
 from .types import TARGETS
 from .utils import get_image_size

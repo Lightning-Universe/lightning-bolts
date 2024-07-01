@@ -1,7 +1,7 @@
 import numpy as np
 import torch
+from lightning.pytorch import Trainer
 from pl_bolts.models.rl.ppo_model import PPO
-from pytorch_lightning import Trainer
 from torch import Tensor
 
 

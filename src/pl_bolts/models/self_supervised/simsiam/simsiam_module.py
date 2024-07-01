@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Union
 import torch
 import torch.nn as nn
 import torch.nn.functional as F  # noqa: N812
-from pytorch_lightning import LightningModule, Trainer, seed_everything
+from lightning import LightningModule, Trainer, seed_everything
 from torch import Tensor
 
 from pl_bolts.models.self_supervised.byol.models import MLP, SiameseArm
@@ -190,8 +190,15 @@ class SimSiam(LightningModule):
 
 def cli_main():
     from pl_bolts.callbacks.ssl_online import SSLOnlineEvaluator
-    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
-    from pl_bolts.models.self_supervised.simclr import SimCLREvalDataTransform, SimCLRTrainDataTransform
+    from pl_bolts.datamodules import (
+        CIFAR10DataModule,
+        ImagenetDataModule,
+        STL10DataModule,
+    )
+    from pl_bolts.models.self_supervised.simclr import (
+        SimCLREvalDataTransform,
+        SimCLRTrainDataTransform,
+    )
 
     seed_everything(1234)
 

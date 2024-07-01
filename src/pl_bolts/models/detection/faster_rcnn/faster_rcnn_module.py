@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from typing import Any, Optional, Union
 
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
+from lightning import LightningModule, Trainer, seed_everything
 
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 from pl_bolts.utils import _TORCHVISION_AVAILABLE
@@ -10,8 +10,13 @@ from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
-    from torchvision.models.detection.faster_rcnn import FasterRCNN as torchvision_FasterRCNN
-    from torchvision.models.detection.faster_rcnn import FastRCNNPredictor, fasterrcnn_resnet50_fpn
+    from torchvision.models.detection.faster_rcnn import (
+        FasterRCNN as torchvision_FasterRCNN,
+    )
+    from torchvision.models.detection.faster_rcnn import (
+        FastRCNNPredictor,
+        fasterrcnn_resnet50_fpn,
+    )
     from torchvision.ops import box_iou
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")

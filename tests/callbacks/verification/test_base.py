@@ -3,10 +3,10 @@ from unittest.mock import Mock, patch
 import pytest
 import torch
 import torch.nn as nn
+from lightning.pytorch import LightningModule
+from lightning.pytorch.utilities import move_data_to_device
 from pl_bolts.callbacks.verification.base import VerificationBase
 from pl_bolts.utils import _PL_GREATER_EQUAL_1_4
-from pytorch_lightning import LightningModule
-from pytorch_lightning.utilities import move_data_to_device
 
 from tests import _MARK_REQUIRE_GPU
 

@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
 import torch
-from pytorch_lightning import LightningModule
+from lightning import LightningModule
 
 from pl_bolts.models.detection.retinanet import create_retinanet_backbone
 from pl_bolts.utils import _TORCHVISION_AVAILABLE, _TORCHVISION_LESS_THAN_0_13
@@ -9,8 +9,13 @@ from pl_bolts.utils.stability import under_review
 from pl_bolts.utils.warnings import warn_missing_pkg
 
 if _TORCHVISION_AVAILABLE:
-    from torchvision.models.detection.retinanet import RetinaNet as torchvision_RetinaNet
-    from torchvision.models.detection.retinanet import RetinaNetHead, retinanet_resnet50_fpn
+    from torchvision.models.detection.retinanet import (
+        RetinaNet as torchvision_RetinaNet,
+    )
+    from torchvision.models.detection.retinanet import (
+        RetinaNetHead,
+        retinanet_resnet50_fpn,
+    )
     from torchvision.ops import box_iou
 else:  # pragma: no cover
     warn_missing_pkg("torchvision")
@@ -136,7 +141,7 @@ class RetinaNet(LightningModule):
 
 @under_review()
 def cli_main():
-    from pytorch_lightning.cli import LightningCLI
+    from lightning.cli import LightningCLI
 
     from pl_bolts.datamodules import VOCDetectionDataModule
 

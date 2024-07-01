@@ -1,6 +1,6 @@
 from typing import Tuple, Union
 
-from pytorch_lightning.utilities import exceptions
+from lightning.fabric.utilities import exceptions
 from torch.utils.data import Dataset
 
 from pl_bolts.datasets.base_dataset import DataModel, TArrays
