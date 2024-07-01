@@ -73,6 +73,7 @@ class DataMonitorBase(Callback):
                 Otherwise the histograms get labelled with an integer index.
                 Each label also has the tensors's shape as suffix.
             group: Name under which the histograms will be grouped.
+
         """
         if not self._log or (self._train_batch_idx + 1) % self._log_every_n_steps != 0:  # type: ignore[operator]
             return
@@ -112,7 +113,7 @@ class DataMonitorBase(Callback):
         if not isinstance(logger, self.supported_loggers):
             rank_zero_warn(
                 f"{self.__class__.__name__} does not support logging with {logger.__class__.__name__}."
-                f" Supported loggers are: {', '.join((str(x.__name__) for x in self.supported_loggers))}"
+                f" Supported loggers are: {', '.join(str(x.__name__) for x in self.supported_loggers)}"
             )
             available = False
         return available
@@ -220,6 +221,7 @@ class TrainingDataMonitor(DataMonitorBase):
 
                 # log histogram of training data passed to `LightningModule.training_step`
                 trainer = Trainer(callbacks=[TrainingDataMonitor()])
+
         """
         super().__init__(log_every_n_steps=log_every_n_steps)
 

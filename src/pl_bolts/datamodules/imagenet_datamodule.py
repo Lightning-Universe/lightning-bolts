@@ -167,12 +167,12 @@ class ImagenetDataModule(LightningDataModule):
         return loader
 
     def val_dataloader(self) -> DataLoader:
-        """Uses the part of the train split of imagenet2012  that was not used for training via
-        `num_imgs_per_val_class`
+        """Uses the part of the train split of imagenet2012  that was not used for training via `num_imgs_per_val_class`
 
         Args:
             batch_size: the batch size
             transforms: the transforms
+
         """
         transforms = self.val_transform() if self.val_transforms is None else self.val_transforms
 
