@@ -13,7 +13,7 @@ jobs:
       azure-dir: ".azure"
 
   check-code:
-    uses: Lightning-AI/utilities/.github/workflows/check-code.yml@v0.11.4
+    uses: Lightning-AI/utilities/.github/workflows/check-typing.yml@v0.11.4
     with:
       actions-ref: v0.11.4
       extra-typing: typing
