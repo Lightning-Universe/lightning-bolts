@@ -31,6 +31,7 @@ class TensorboardGenerativeModelImageSampler(Callback):
         from pl_bolts.callbacks import TensorboardGenerativeModelImageSampler
 
         trainer = Trainer(callbacks=[TensorboardGenerativeModelImageSampler()])
+
     """
 
     def __init__(

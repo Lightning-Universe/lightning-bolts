@@ -101,6 +101,7 @@ def concatenate_all(tensor: Tensor) -> Tensor:
     """Performs ``all_gather`` operation to concatenate the provided tensor from all devices.
 
     This function has no gradient.
+
     """
     gathered_tensor = [torch.zeros_like(tensor) for _ in range(torch.distributed.get_world_size())]
     torch.distributed.all_gather(gathered_tensor, tensor.contiguous())
