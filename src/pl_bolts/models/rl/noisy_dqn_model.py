@@ -1,9 +1,10 @@
 """Noisy DQN."""
+
 import argparse
 from typing import Tuple
 
 import numpy as np
-from pytorch_lightning import Trainer
+from lightning import Trainer
 from torch import Tensor
 
 from pl_bolts.datamodules.experience_source import Experience

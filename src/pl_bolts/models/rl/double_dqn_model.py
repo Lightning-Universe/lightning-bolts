@@ -1,9 +1,10 @@
 """Double DQN."""
+
 import argparse
 from collections import OrderedDict
 from typing import Tuple
 
-from pytorch_lightning import Trainer
+from lightning import Trainer
 from torch import Tensor
 
 from pl_bolts.losses.rl import double_dqn_loss

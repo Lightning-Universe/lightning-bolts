@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from typing import Any
 
 import torch
-from pytorch_lightning import LightningModule, Trainer
+from lightning import LightningModule, Trainer
 from torch import Tensor
 from torch.nn import functional as F  # noqa: N812
 

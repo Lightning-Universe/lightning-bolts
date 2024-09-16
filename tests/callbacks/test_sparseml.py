@@ -16,10 +16,10 @@ from pathlib import Path
 
 import pytest
 import torch
+from lightning.pytorch import Callback, LightningModule, Trainer
+from lightning.pytorch.utilities.exceptions import MisconfigurationException
 from pl_bolts.callbacks import SparseMLCallback
 from pl_bolts.utils import _SPARSEML_TORCH_SATISFIED
-from pytorch_lightning import Callback, LightningModule, Trainer
-from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
 from tests.helpers.boring_model import BoringModel
 

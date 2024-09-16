@@ -1,6 +1,6 @@
 from typing import Any, Callable, Optional
 
-from pytorch_lightning import LightningDataModule
+from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE

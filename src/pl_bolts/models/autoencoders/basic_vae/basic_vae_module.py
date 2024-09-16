@@ -2,7 +2,7 @@ import urllib.parse
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
+from lightning import LightningModule, Trainer, seed_everything
 from torch import nn
 from torch.nn import functional as F  # noqa: N812
 
@@ -187,7 +187,11 @@ class VAE(LightningModule):
 
 @under_review()
 def cli_main(args=None):
-    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
+    from pl_bolts.datamodules import (
+        CIFAR10DataModule,
+        ImagenetDataModule,
+        STL10DataModule,
+    )
 
     seed_everything()
 

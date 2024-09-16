@@ -1,7 +1,7 @@
 from typing import Sequence
 
 import torch
-from pytorch_lightning import Callback, LightningModule, Trainer
+from lightning import Callback, LightningModule, Trainer
 from torch import Tensor, nn
 
 from pl_bolts.utils import _MATPLOTLIB_AVAILABLE

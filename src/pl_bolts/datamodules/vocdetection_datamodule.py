@@ -2,7 +2,7 @@ import os
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import torch
-from pytorch_lightning import LightningDataModule
+from lightning import LightningDataModule
 from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 

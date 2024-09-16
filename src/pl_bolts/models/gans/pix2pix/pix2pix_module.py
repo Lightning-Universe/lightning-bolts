@@ -1,5 +1,5 @@
 import torch
-from pytorch_lightning import LightningModule
+from lightning import LightningModule
 from torch import nn
 
 from pl_bolts.models.gans.pix2pix.components import Generator, PatchGAN

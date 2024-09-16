@@ -2,7 +2,7 @@ import urllib.parse
 from argparse import ArgumentParser
 
 import torch
-from pytorch_lightning import LightningModule, Trainer
+from lightning import LightningModule, Trainer
 from torch import nn
 from torch.nn import functional as F  # noqa: N812
 
@@ -154,7 +154,11 @@ class AE(LightningModule):
 
 @under_review()
 def cli_main(args=None):
-    from pl_bolts.datamodules import CIFAR10DataModule, ImagenetDataModule, STL10DataModule
+    from pl_bolts.datamodules import (
+        CIFAR10DataModule,
+        ImagenetDataModule,
+        STL10DataModule,
+    )
 
     parser = ArgumentParser()
     parser.add_argument("--dataset", default="cifar10", type=str, choices=["cifar10", "stl10", "imagenet"])

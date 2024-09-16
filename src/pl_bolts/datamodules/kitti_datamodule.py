@@ -2,7 +2,7 @@ import os
 from typing import Any, Callable, Optional
 
 import torch
-from pytorch_lightning import LightningDataModule
+from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import random_split
 

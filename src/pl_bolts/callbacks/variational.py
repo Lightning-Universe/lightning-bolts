@@ -2,8 +2,8 @@ from typing import List
 
 import numpy as np
 import torch
-from pytorch_lightning import LightningModule, Trainer
-from pytorch_lightning.callbacks import Callback
+from lightning import LightningModule, Trainer
+from lightning.pytorch.callbacks import Callback
 from torch import Tensor
 
 from pl_bolts.utils import _TORCHVISION_AVAILABLE

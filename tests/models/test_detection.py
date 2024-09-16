@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pytest
 import torch
+from lightning.pytorch import Trainer
+from lightning.pytorch.utilities.warnings import PossibleUserWarning
 from pl_bolts.datasets import DummyDetectionDataset
 from pl_bolts.models.detection import (
     YOLO,
@@ -18,8 +20,6 @@ from pl_bolts.models.detection import (
 )
 from pl_bolts.models.detection.faster_rcnn import create_fasterrcnn_backbone
 from pl_bolts.utils import _IS_WINDOWS
-from pytorch_lightning import Trainer
-from pytorch_lightning.utilities.warnings import PossibleUserWarning
 from torch.utils.data import DataLoader
 
 from tests import TEST_ROOT

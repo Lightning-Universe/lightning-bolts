@@ -1,12 +1,12 @@
 import pytest
 import torch
+from lightning.pytorch import seed_everything
 from pl_bolts.transforms.dataset_normalizations import (
     cifar10_normalization,
     emnist_normalization,
     imagenet_normalization,
     stl10_normalization,
 )
-from pytorch_lightning import seed_everything
 
 
 @pytest.mark.parametrize(

@@ -1,7 +1,7 @@
 import os
 
 import torch
-from pytorch_lightning import seed_everything
+from lightning.pytorch import seed_everything
 
 TEST_ROOT = os.path.realpath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.dirname(TEST_ROOT)

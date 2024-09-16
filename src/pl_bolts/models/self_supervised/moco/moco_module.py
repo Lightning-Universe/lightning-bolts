@@ -8,13 +8,14 @@ compliance with the License.
 
 You may obtain a copy of the License from the LICENSE file present in this folder.
 """
+
 from copy import copy, deepcopy
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import torch
-from pytorch_lightning import LightningModule
-from pytorch_lightning.strategies import DDPStrategy
-from pytorch_lightning.utilities.types import STEP_OUTPUT
+from lightning import LightningModule
+from lightning.pytorch.strategies import DDPStrategy
+from lightning.pytorch.utilities.types import STEP_OUTPUT
 from torch import Tensor, nn, optim
 from torch.nn import functional as F  # noqa: N812
 from torch.utils.data import DataLoader, Dataset
@@ -28,7 +29,12 @@ except AttributeError:
 
 from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.metrics import precision_at_k
-from pl_bolts.models.self_supervised.moco.utils import concatenate_all, shuffle_batch, sort_batch, validate_batch
+from pl_bolts.models.self_supervised.moco.utils import (
+    concatenate_all,
+    shuffle_batch,
+    sort_batch,
+    validate_batch,
+)
 from pl_bolts.transforms.self_supervised.moco_transforms import (
     MoCo2EvalCIFAR10Transforms,
     MoCo2TrainCIFAR10Transforms,
@@ -323,7 +329,7 @@ class CIFAR10ContrastiveDataModule(CIFAR10DataModule):
 
 
 def cli_main() -> None:
-    from pytorch_lightning.cli import LightningCLI
+    from lightning.cli import LightningCLI
 
     LightningCLI(MoCo, CIFAR10ContrastiveDataModule, seed_everything_default=42)
 

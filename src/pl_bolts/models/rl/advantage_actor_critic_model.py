@@ -1,12 +1,13 @@
 """Advantage Actor Critic (A2C)"""
+
 from argparse import ArgumentParser
 from collections import OrderedDict
 from typing import Any, Iterator, List, Tuple
 
 import numpy as np
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
-from pytorch_lightning.callbacks import ModelCheckpoint
+from lightning import LightningModule, Trainer, seed_everything
+from lightning.pytorch.callbacks import ModelCheckpoint
 from torch import Tensor, optim
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader

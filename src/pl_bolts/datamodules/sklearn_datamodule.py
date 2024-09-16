@@ -2,7 +2,7 @@ import math
 from typing import Any, Tuple
 
 import numpy as np
-from pytorch_lightning import LightningDataModule
+from lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
 
 from pl_bolts.utils import _SKLEARN_AVAILABLE

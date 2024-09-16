@@ -2,7 +2,7 @@ import argparse
 from typing import Any, List, Tuple
 
 import torch
-from pytorch_lightning import LightningModule, Trainer, seed_everything
+from lightning import LightningModule, Trainer, seed_everything
 from torch import Tensor
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
