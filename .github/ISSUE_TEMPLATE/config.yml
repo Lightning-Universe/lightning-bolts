@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a Question
+    url: https://github.com/Lightning-Universe/lightning-bolts/discussions/new
+    about: Ask and answer TorchMetrics related questions
+  - name: 💬 Chat with us
+    url: https://discord.gg/VptPCZkGNa
+    about: Live chat with experts, engineers, and users in our Discord community.
