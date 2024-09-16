@@ -26,6 +26,6 @@ jobs:
       import-name: "pl_bolts"
       testing-matrix: |
           {
-            "os": ["ubuntu-20.04", "macos-11", "windows-2022"],
+            "os": ["ubuntu-22.04", "macos-13", "windows-2022"],
             "python-version": ["3.8"]
           }

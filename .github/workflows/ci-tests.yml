@@ -21,13 +21,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-20.04", "macOS-11"]
+        os: ["ubuntu-22.04", "macOS-13"]
         python-version: ["3.8", "3.9", "3.10"]
         requires: ["latest"]  # + "oldest"
         include:
           - { os: 'windows-2022', python-version: "3.9" }
           - { os: 'ubuntu-20.04', python-version: "3.8", requires: "oldest" }
-          - { os: 'macOS-11', python-version: "3.8", requires: "oldest" }
+          - { os: 'macOS-13', python-version: "3.8", requires: "oldest" }
     env:
       FREEZE_REQUIREMENTS: 1
       TORCH_URL: "https://download.pytorch.org/whl/cpu/torch_stable.html"
