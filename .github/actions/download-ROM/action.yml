@@ -1,0 +1,33 @@
+name: Prepare env. / restore caches
+description: some more complex download-ROM - pip & hf
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Setup macOS
+      if: runner.os == 'macOS'
+      run: |
+        brew update
+        brew install rar
+      shell: bash
+    - name: Setup Ubuntu
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y unrar
+      shell: bash
+    - name: Setup Windows
+      if: runner.os == 'Windows'
+      run: |
+        choco install unrar
+      shell: bash
+
+    - name: Download ROMs
+      run: |
+        mkdir -p _datasets
+        cd _datasets
+        curl http://www.atarimania.com/roms/Roms.rar -o Roms.rar
+        unrar x -y Roms.rar
+        rm Roms.rar
+      shell: bash

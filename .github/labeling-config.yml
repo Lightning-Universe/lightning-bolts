@@ -1,0 +1,19 @@
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+        - docs/**/*
+
+callback:
+  - changed-files:
+      - any-glob-to-any-file:
+         - pl_bolts/callbacks/**/*
+
+datamodule:
+  - changed-files:
+      - any-glob-to-any-file:
+          - pl_bolts/datamodules/**/*
+
+model:
+  - changed-files:
+      - any-glob-to-any-file:
+          - pl_bolts/models/**/*

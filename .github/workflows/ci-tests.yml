@@ -100,29 +100,9 @@ jobs:
         # bump this date if you need update cache
         key: datasets-20230630
 
-    - name: Setup macOS
-      if: runner.os == 'macOS' && steps.cache-datasets.outputs.cache-hit != 'true'
-      run: |
-        brew update
-        brew install rar
-    - name: Setup Ubuntu
-      if: runner.os == 'Linux'&& steps.cache-datasets.outputs.cache-hit != 'true'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y unrar
-    - name: Setup Windows
-      if: runner.os == 'Windows'&& steps.cache-datasets.outputs.cache-hit != 'true'
-      run: |
-        choco install unrar
-
     - name: Download ROMs
       if: steps.cache-datasets.outputs.cache-hit != 'true'
-      run: |
-        mkdir -p _datasets
-        cd _datasets
-        curl http://www.atarimania.com/roms/Roms.rar -o Roms.rar
-        unrar x -y Roms.rar
-        rm Roms.rar
+      uses: ./.github/actions/download-ROM
 
     - name: Init ROMs
       working-directory: _datasets/
