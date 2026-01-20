@@ -23,7 +23,7 @@ def datadir():
 
 
 @pytest.fixture
-def catch_warnings():  # noqa: PT004
+def catch_warnings():
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         warnings.simplefilter("ignore", UnderReviewWarning)
@@ -33,7 +33,7 @@ def catch_warnings():  # noqa: PT004
 
 
 @pytest.fixture(autouse=True)
-def restore_env_variables():  # noqa: PT004
+def restore_env_variables():
     """Ensures that environment variables set during the test do not leak out."""
     env_backup = os.environ.copy()
     yield
@@ -76,7 +76,7 @@ def restore_env_variables():  # noqa: PT004
 
 
 @pytest.fixture(autouse=True)
-def restore_signal_handlers():  # noqa: PT004
+def restore_signal_handlers():
     """Ensures that signal handlers get restored before the next test runs.
 
     This is a safety net for tests that don't run Trainer's teardown.
@@ -94,7 +94,7 @@ def restore_signal_handlers():  # noqa: PT004
 
 
 @pytest.fixture(autouse=True)
-def teardown_process_group():  # noqa: PT004
+def teardown_process_group():
     """Ensures that the distributed process group gets closed before the next test runs."""
     yield
     if torch.distributed.is_available() and torch.distributed.is_initialized():
@@ -102,7 +102,7 @@ def teardown_process_group():  # noqa: PT004
 
 
 @pytest.fixture(autouse=True)
-def reset_deterministic_algorithm():  # noqa: PT004
+def reset_deterministic_algorithm():
     """Ensures that torch determinism settings are reset before the next test runs."""
     yield
     torch.use_deterministic_algorithms(False)

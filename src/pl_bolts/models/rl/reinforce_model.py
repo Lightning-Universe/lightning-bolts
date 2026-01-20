@@ -67,7 +67,7 @@ class Reinforce(LightningModule):
         entropy_beta: float = 0.01,
         epoch_len: int = 1000,
         num_batch_episodes: int = 4,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Args:

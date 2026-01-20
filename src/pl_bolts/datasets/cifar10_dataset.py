@@ -203,7 +203,7 @@ class TrialCIFAR10(CIFAR10):
         self.labels = labels if labels else list(range(10))
         self.relabel = relabel
 
-        self.cache_folder_name = f'labels-{"-".join(str(d) for d in sorted(self.labels))}_nb-{self.num_samples}'
+        self.cache_folder_name = f"labels-{'-'.join(str(d) for d in sorted(self.labels))}_nb-{self.num_samples}"
 
         super().__init__(data_dir, train=train, transform=transform, download=download)
 

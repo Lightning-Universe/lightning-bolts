@@ -50,7 +50,7 @@ class SwAV(LightningModule):
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
         epsilon: float = 0.05,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Args:

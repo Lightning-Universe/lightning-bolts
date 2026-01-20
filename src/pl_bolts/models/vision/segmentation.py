@@ -44,7 +44,7 @@ class SemSegment(LightningModule):
         bilinear: bool = False,
         ignore_index: Optional[int] = 250,
         lr: float = 0.01,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """
         Args:

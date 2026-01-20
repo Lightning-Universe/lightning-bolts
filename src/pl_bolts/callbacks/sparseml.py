@@ -64,7 +64,7 @@ class SparseMLCallback(Callback):
         """Exports the model to ONNX format."""
         with model._prevent_trainer_and_dataloaders_deepcopy():
             exporter = ModuleExporter(model, output_dir=output_dir)
-            sample_batch = sample_batch if sample_batch is not None else model.example_input_array  # type: ignore[assignment] # noqa: E501
+            sample_batch = sample_batch if sample_batch is not None else model.example_input_array  # type: ignore[assignment]
             if sample_batch is None:
                 raise MisconfigurationException(
                     "To export the model, a sample batch must be passed via "

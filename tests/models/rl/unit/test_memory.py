@@ -2,6 +2,7 @@ from unittest import TestCase
 from unittest.mock import Mock
 
 import numpy as np
+import pytest
 import torch
 
 from pl_bolts.models.rl.common.memory import Buffer, Experience, MultiStepBuffer, PERBuffer, ReplayBuffer
@@ -208,10 +209,10 @@ class TestMultiStepReplayBuffer(TestCase):
         """If there is only a single experience added, sample should return nothing."""
         self.buffer.append(self.experience01)
 
-        with self.assertRaises(Exception) as context:
+        with pytest.raises(Exception) as context:
             _ = self.buffer.sample(batch_size=1)
 
-        assert isinstance(context.exception, Exception)
+        assert isinstance(context.value, Exception)
 
     def test_sample_multi_experience(self):
         """If there is only a single experience added, sample should return nothing."""

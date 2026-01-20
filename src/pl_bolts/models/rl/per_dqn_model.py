@@ -95,14 +95,16 @@ class PERDQN(DQN):
 
             for idx, _ in enumerate(dones):
                 yield (
-                    states[idx],
-                    actions[idx],
-                    rewards[idx],
-                    dones[idx],
-                    new_states[idx],
-                ), indices[
-                    idx
-                ], weights[idx]
+                    (
+                        states[idx],
+                        actions[idx],
+                        rewards[idx],
+                        dones[idx],
+                        new_states[idx],
+                    ),
+                    indices[idx],
+                    weights[idx],
+                )
 
     def training_step(self, batch, _) -> OrderedDict:
         """Carries out a single step through the environment to update the replay buffer. Then calculates loss based on
