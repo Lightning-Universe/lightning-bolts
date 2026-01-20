@@ -144,8 +144,8 @@ class YOLO(LightningModule):
     def forward(
         self, images: Union[Tensor, IMAGES], targets: Optional[TARGETS] = None
     ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
-        """Runs a forward pass through the network (all layers listed in ``self.network``), and if training targets
-        are provided, computes the losses from the detection layers.
+        """Runs a forward pass through the network (all layers listed in ``self.network``), and if training targets are
+        provided, computes the losses from the detection layers.
 
         Detections are concatenated from the detection layers. Each detection layer will produce a number of detections
         that depends on the size of the feature map and the number of anchors per feature map cell.
@@ -161,6 +161,7 @@ class YOLO(LightningModule):
             provided, a dictionary of losses. Detections are shaped ``[batch_size, anchors, classes + 5]``, where
             ``anchors`` is the feature map size (width * height) times the number of anchors per cell. The predicted box
             coordinates are in `(x1, y1, x2, y2)` format and scaled to the input image size.
+
         """
         self.validate_batch(images, targets)
         images_tensor = images if isinstance(images, Tensor) else torch.stack(images)
@@ -185,6 +186,7 @@ class YOLO(LightningModule):
         If weight decay is specified, it will be applied only to convolutional layer weights, as they contain much more
         parameters than the biases and batch normalization parameters. Regularizing all parameters could lead to
         underfitting.
+
         """
         if ("weight_decay" in self.optimizer_params) and (self.optimizer_params["weight_decay"] != 0):
             defaults = copy(self.optimizer_params)
@@ -574,12 +576,13 @@ class CLIYOLO(YOLO):
 
 
 class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
-    """A subclass of ``VOCDetectionDataModule`` that resizes the images to a specific size. YOLO expectes the image
-    size to be divisible by the ratio in which the network downsamples the image.
+    """A subclass of ``VOCDetectionDataModule`` that resizes the images to a specific size. YOLO expectes the image size
+    to be divisible by the ratio in which the network downsamples the image.
 
     Args:
         width: Resize images to this width.
         height: Resize images to this height.
+
     """
 
     def __init__(self, width: int = 608, height: int = 608, **kwargs: Any):
@@ -609,6 +612,7 @@ class ResizedVOCDetectionDataModule(VOCDetectionDataModule):
 
         Returns:
             Resized image tensor.
+
         """
         device = target["boxes"].device
         height, width = image.shape[-2:]

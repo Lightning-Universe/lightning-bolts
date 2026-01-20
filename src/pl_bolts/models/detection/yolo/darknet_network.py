@@ -145,6 +145,7 @@ class DarknetNetwork(nn.Module):
             """Reads the contents of ``tensor`` from the current position of ``weight_file``.
 
             Returns the number of elements read. If there's no more data in ``weight_file``, returns 0.
+
             """
             np_array = np.fromfile(weight_file, count=tensor.numel(), dtype=np.float32)
             num_elements = np_array.size
@@ -275,8 +276,8 @@ class DarknetNetwork(nn.Module):
 
 
 def _create_layer(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREATE_LAYER_OUTPUT:
-    """Calls one of the ``_create_<layertype>(config, num_inputs)`` functions to create a PyTorch module from the
-    layer config.
+    """Calls one of the ``_create_<layertype>(config, num_inputs)`` functions to create a PyTorch module from the layer
+    config.
 
     Args:
         config: Dictionary of configuration options for this layer.
@@ -285,6 +286,7 @@ def _create_layer(config: CONFIG, num_inputs: List[int], **kwargs: Any) -> CREAT
     Returns:
         module (:class:`~torch.nn.Module`), num_outputs (int): The created PyTorch module and the number of channels in
         its output.
+
     """
     create_func: Dict[str, Callable[..., CREATE_LAYER_OUTPUT]] = {
         "convolutional": _create_convolutional,

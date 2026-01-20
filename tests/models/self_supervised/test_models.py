@@ -2,6 +2,9 @@ import warnings
 
 import pytest
 import torch
+from pytorch_lightning import Trainer
+from pytorch_lightning.utilities.warnings import PossibleUserWarning
+
 from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.models.self_supervised import AMDIM, BYOL, CPC_v2, MoCo, SimCLR, SimSiam, SwAV
 from pl_bolts.models.self_supervised.cpc import CPCEvalTransformsCIFAR10, CPCTrainTransformsCIFAR10
@@ -11,9 +14,6 @@ from pl_bolts.transforms.self_supervised.moco_transforms import MoCo2EvalCIFAR10
 from pl_bolts.transforms.self_supervised.simclr_transforms import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from pl_bolts.transforms.self_supervised.swav_transforms import SwAVEvalDataTransform, SwAVTrainDataTransform
 from pl_bolts.utils import _IS_WINDOWS
-from pytorch_lightning import Trainer
-from pytorch_lightning.utilities.warnings import PossibleUserWarning
-
 from tests import _MARK_REQUIRE_GPU
 
 

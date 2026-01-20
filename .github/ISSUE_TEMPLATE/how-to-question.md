@@ -25,6 +25,6 @@ assignees: ''
 
 #### What's your environment?
 
-- OS: \[e.g. iOS, Linux, Win\]
-- Packaging \[e.g. pip, conda\]
-- Version \[e.g. 0.5.2.1\]
+- OS: [e.g. iOS, Linux, Win]
+- Packaging [e.g. pip, conda]
+- Version [e.g. 0.5.2.1]

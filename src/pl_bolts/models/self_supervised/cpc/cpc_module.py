@@ -1,4 +1,5 @@
 """CPC V2."""
+
 import math
 from argparse import ArgumentParser
 from typing import Optional

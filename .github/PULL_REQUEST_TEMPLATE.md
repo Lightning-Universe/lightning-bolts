@@ -14,7 +14,7 @@ Fixes # (issue)
 - [ ] Did you read the [contributor guideline](https://github.com/PyTorchLightning/lightning-bolts/blob/master/.github/CONTRIBUTING.md), Pull Request section?
 - [ ] Did you make sure your PR does **only one thing**, instead of bundling different changes together?
 - [ ] Did you make sure to **update the documentation** with your changes?
-- [ ] Did you write any **new necessary tests**? \[not needed for typos/docs\]
+- [ ] Did you write any **new necessary tests**? [not needed for typos/docs]
 - [ ] Did you verify new and **existing tests** pass locally with your changes?
 - [ ] If you made a notable change (that affects users), did you update the [CHANGELOG](https://github.com/PyTorchLightning/lightning-bolts/blob/master/CHANGELOG.md)?
 

@@ -3,6 +3,7 @@ from unittest.mock import Mock
 
 import numpy as np
 import torch
+
 from pl_bolts.models.rl.common.memory import Buffer, Experience, MultiStepBuffer, PERBuffer, ReplayBuffer
 
 

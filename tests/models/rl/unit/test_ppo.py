@@ -1,8 +1,9 @@
 import numpy as np
 import torch
-from pl_bolts.models.rl.ppo_model import PPO
 from pytorch_lightning import Trainer
 from torch import Tensor
+
+from pl_bolts.models.rl.ppo_model import PPO
 
 
 def test_discount_rewards():

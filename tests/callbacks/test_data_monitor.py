@@ -3,11 +3,12 @@ from unittest.mock import call
 
 import pytest
 import torch
+from pytorch_lightning import Trainer
+from torch import nn
+
 from pl_bolts.callbacks import ModuleDataMonitor, TrainingDataMonitor
 from pl_bolts.datamodules import MNISTDataModule
 from pl_bolts.models import LitMNIST
-from pytorch_lightning import Trainer
-from torch import nn
 
 
 # @pytest.mark.parametrize(("log_every_n_steps", "max_steps", "expected_calls"), [pytest.param(3, 10, 3)])

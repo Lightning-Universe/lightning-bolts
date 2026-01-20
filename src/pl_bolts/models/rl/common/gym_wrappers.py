@@ -1,5 +1,6 @@
 """Set of wrapper functions for gym environments taken from
 https://github.com/Shmuma/ptan/blob/master/ptan/common/wrappers.py."""
+
 import collections
 
 import numpy as np

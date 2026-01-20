@@ -2,10 +2,11 @@ import argparse
 
 import pytest
 import torch.cuda
+from pytorch_lightning import Trainer
+
 from pl_bolts.models.rl.advantage_actor_critic_model import AdvantageActorCritic
 from pl_bolts.models.rl.sac_model import SAC
 from pl_bolts.utils import _GYM_GREATER_EQUAL_0_20
-from pytorch_lightning import Trainer
 
 
 def test_a2c_cli():

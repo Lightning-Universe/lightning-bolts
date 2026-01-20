@@ -1,4 +1,5 @@
 """Adapted from: https://github.com/facebookresearch/swav/blob/master/src/resnet50.py."""
+
 import torch
 from torch import nn
 

@@ -8,6 +8,7 @@ compliance with the License.
 
 You may obtain a copy of the License from the LICENSE file present in this folder.
 """
+
 from copy import copy, deepcopy
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
@@ -228,6 +229,7 @@ class MoCo(LightningModule):
         ``self.lr_scheduler_params``.
 
         If weight decay is specified, it will be applied only to convolutional layer weights.
+
         """
         if (
             ("weight_decay" in self.optimizer_params)

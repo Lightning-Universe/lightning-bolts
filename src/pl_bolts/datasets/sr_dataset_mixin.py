@@ -1,4 +1,5 @@
 """Adapted from: https://github.com/https-deeplearning-ai/GANs-Public."""
+
 from typing import Any, Tuple
 
 import torch

@@ -1,8 +1,9 @@
 from dataclasses import FrozenInstanceError
 
 import pytest
-from pl_bolts.utils.arguments import LightningArgumentParser, LitArg, gather_lit_args
 from pytorch_lightning import LightningDataModule, LightningModule
+
+from pl_bolts.utils.arguments import LightningArgumentParser, LitArg, gather_lit_args
 
 
 class DummyParentModel(LightningModule):
@@ -32,7 +33,7 @@ def test_lightning_argument_parser():
     assert parser.ignore_required_init_args is True
 
 
-@pytest.mark.xfail()
+@pytest.mark.xfail
 def test_parser_bad_argument():
     parser = LightningArgumentParser()
     parser.add_object_args("dm", DummyParentDataModule)

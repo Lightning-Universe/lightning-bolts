@@ -1,7 +1,8 @@
 import pytest
 import torch
-from pl_bolts.models.gans.basic.components import Discriminator, Generator
 from pytorch_lightning import seed_everything
+
+from pl_bolts.models.gans.basic.components import Discriminator, Generator
 
 
 @pytest.mark.parametrize(
