@@ -205,6 +205,7 @@ def _target_labels_to_probs(
 
     Returns:
         An ``[M, C]`` matrix of target class probabilities.
+
     """
     if targets.ndim == 1:
         # The data may contain a different number of classes than what the model predicts. In case a label is

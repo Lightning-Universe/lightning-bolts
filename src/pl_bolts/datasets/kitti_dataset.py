@@ -86,6 +86,7 @@ class KittiDataset(Dataset):
 
         It also sets all of the valid pixels to the appropriate value between 0 and `len(valid_labels)` (the number of
         valid classes), so it can be used properly by the loss function when comparing with the output.
+
         """
         for voidc in self.void_labels:
             mask[mask == voidc] = self.ignore_index

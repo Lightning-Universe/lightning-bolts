@@ -2,8 +2,9 @@ from warnings import warn
 
 import numpy as np
 import pytest
-from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 from pytorch_lightning import seed_everything
+
+from pl_bolts.datamodules.sklearn_datamodule import SklearnDataModule
 
 try:
     from sklearn.utils import shuffle as sk_shuffle

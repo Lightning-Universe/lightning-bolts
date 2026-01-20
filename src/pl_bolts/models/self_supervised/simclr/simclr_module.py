@@ -82,7 +82,7 @@ class SimCLR(LightningModule):
         learning_rate: float = 1e-3,
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Args:

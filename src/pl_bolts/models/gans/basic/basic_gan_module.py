@@ -37,7 +37,7 @@ class GAN(LightningModule):
         input_width: int,
         latent_dim: int = 32,
         learning_rate: float = 0.0002,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Args:

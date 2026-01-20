@@ -17,8 +17,8 @@ else:  # pragma: no cover
 
 @under_review()
 class SRImageLoggerCallback(Callback):
-    """Logs low-res, generated high-res, and ground truth high-res images to TensorBoard Your model must implement
-    the ``forward`` function for generation.
+    """Logs low-res, generated high-res, and ground truth high-res images to TensorBoard Your model must implement the
+    ``forward`` function for generation.
 
     Requirements::
 
@@ -30,6 +30,7 @@ class SRImageLoggerCallback(Callback):
         from pl_bolts.callbacks import SRImageLoggerCallback
 
         trainer = Trainer(callbacks=[SRImageLoggerCallback()])
+
     """
 
     def __init__(self, log_interval: int = 1000, scale_factor: int = 4, num_samples: int = 5) -> None:

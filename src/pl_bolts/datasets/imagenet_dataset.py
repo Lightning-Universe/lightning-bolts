@@ -87,7 +87,7 @@ class UnlabeledImagenet(ImageNet):
         # limit the number of images in train or test set since the limit was already applied to the val set
         if split in ["train", "test"] and num_imgs_per_class != -1:
             clean_imgs = []
-            cts = {x: 0 for x in range(len(self.classes))}
+            cts = dict.fromkeys(range(len(self.classes)), 0)
             for img_name, idx in self.imgs:
                 if cts[idx] < num_imgs_per_class:
                     clean_imgs.append((img_name, idx))
@@ -131,7 +131,7 @@ class UnlabeledImagenet(ImageNet):
         val = []
         train = []
 
-        cts = {x: 0 for x in range(len(self.classes))}
+        cts = dict.fromkeys(range(len(self.classes)), 0)
         for img_name, idx in imgs:
             if cts[idx] < num_imgs_in_val:
                 val.append((img_name, idx))

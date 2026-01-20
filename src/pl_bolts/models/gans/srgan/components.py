@@ -1,4 +1,5 @@
 """Adapted from: https://github.com/https-deeplearning-ai/GANs-Public."""
+
 import torch
 import torch.nn as nn
 

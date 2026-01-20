@@ -1,4 +1,5 @@
 """Adapted from official swav implementation: https://github.com/facebookresearch/swav."""
+
 import os
 from argparse import ArgumentParser
 
@@ -49,7 +50,7 @@ class SwAV(LightningModule):
         final_lr: float = 0.0,
         weight_decay: float = 1e-6,
         epsilon: float = 0.05,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Args:

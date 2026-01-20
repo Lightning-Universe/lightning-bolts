@@ -2,11 +2,12 @@ import math
 
 import numpy as np
 import torch
-from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from pytorch_lightning import seed_everything
 from torch.nn import functional as F  # noqa: N812
 from torch.optim import SGD
 from torch.optim.lr_scheduler import _LRScheduler
+
+from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 EPSILON = 1e-12
 
@@ -63,9 +64,9 @@ class TestLRScheduler:
             schedulers = [schedulers]
         for epoch in range(epochs):
             for param_group, target in zip(self.optimizer.param_groups, targets):
-                assert (
-                    abs(target[epoch] - param_group["lr"]) < EPSILON
-                ), "LR is wrong in epoch {}: expected {}, got {}".format(epoch, target[epoch], param_group["lr"])
+                assert abs(target[epoch] - param_group["lr"]) < EPSILON, (
+                    "LR is wrong in epoch {}: expected {}, got {}".format(epoch, target[epoch], param_group["lr"])
+                )
             for scheduler in schedulers:
                 scheduler.step()
 
@@ -77,9 +78,9 @@ class TestLRScheduler:
 
         for epoch in range(epochs):
             for i, param_group in enumerate(self.optimizer.param_groups):
-                assert (
-                    abs(targets[epoch][i] - param_group["lr"]) < EPSILON
-                ), "LR is wrong in epoch {}: expected {}, got {}".format(epoch, targets[epoch][i], param_group["lr"])
+                assert abs(targets[epoch][i] - param_group["lr"]) < EPSILON, (
+                    "LR is wrong in epoch {}: expected {}, got {}".format(epoch, targets[epoch][i], param_group["lr"])
+                )
             scheduler.step()
 
 

@@ -1,4 +1,5 @@
 import pytest
+
 from pl_bolts.utils._dependency import requires
 
 

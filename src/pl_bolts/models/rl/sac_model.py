@@ -1,4 +1,5 @@
 """Soft Actor Critic."""
+
 import argparse
 from typing import Dict, List, Tuple
 

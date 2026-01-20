@@ -3,8 +3,8 @@ from unittest import mock
 
 import pytest
 import torch
-from pl_bolts.utils import _GYM_GREATER_EQUAL_0_20, _IS_WINDOWS, _JSONARGPARSE_GREATER_THAN_4_16_0
 
+from pl_bolts.utils import _GYM_GREATER_EQUAL_0_20, _IS_WINDOWS, _JSONARGPARSE_GREATER_THAN_4_16_0
 from tests import _MARK_REQUIRE_GPU, DATASETS_PATH
 
 _DEFAULT_ARGS = f" --data_dir={DATASETS_PATH} --max_epochs=1 --max_steps=2 --batch_size=4"

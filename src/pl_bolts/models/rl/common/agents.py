@@ -2,6 +2,7 @@
 
 https://github.com/Shmuma/ptan/blob/master/ptan/agent.py.
 """
+
 from abc import ABC
 from typing import List
 

@@ -1,5 +1,6 @@
 import pytest
 import torch
+
 from pl_bolts.models.self_supervised.amdim import AMDIMEncoder
 from pl_bolts.models.self_supervised.cpc import cpc_resnet50
 from pl_bolts.models.self_supervised.resnets import (

@@ -38,7 +38,7 @@ class LightDataset(ABC, Dataset):
         labels: Sequence,
     ) -> Tuple[Tensor, Tensor]:
         """Prepare a subset of a common dataset."""
-        classes = {d: 0 for d in labels}
+        classes = dict.fromkeys(labels, 0)
         indexes = []
         for idx, target in enumerate(full_targets):
             label = target.item()

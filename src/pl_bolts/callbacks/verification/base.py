@@ -77,6 +77,7 @@ class VerificationBase:
 
         Returns:
             The output of the model.
+
         """
         if isinstance(input_array, tuple):
             return self.model(*input_array)
@@ -105,8 +106,8 @@ class VerificationCallbackBase(Callback):
         self._raise_error = error
 
     def message(self, *args: Any, **kwargs: Any) -> str:
-        """The message to be printed when the model does not pass the verification. If the message for warning and
-        error differ, override the :meth:`warning_message` and :meth:`error_message` methods directly.
+        """The message to be printed when the model does not pass the verification. If the message for warning and error
+        differ, override the :meth:`warning_message` and :meth:`error_message` methods directly.
 
         Arguments:
             *args: Any positional arguments that are needed to construct the message.
@@ -114,6 +115,7 @@ class VerificationCallbackBase(Callback):
 
         Returns:
             The message as a string.
+
         """
 
     def warning_message(self, *args: Any, **kwargs: Any) -> str:

@@ -4,6 +4,8 @@ from unittest.mock import Mock
 import gym
 import numpy as np
 import torch
+from torch.utils.data import DataLoader
+
 from pl_bolts.datamodules.experience_source import (
     BaseExperienceSource,
     DiscountedExperienceSource,
@@ -12,7 +14,6 @@ from pl_bolts.datamodules.experience_source import (
     ExperienceSourceDataset,
 )
 from pl_bolts.models.rl.common.agents import Agent
-from torch.utils.data import DataLoader
 
 
 class DummyAgent(Agent):

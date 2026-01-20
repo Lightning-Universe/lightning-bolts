@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import torch
 from PIL import Image
+
 from pl_bolts.transforms.self_supervised.simclr_transforms import (
     SimCLREvalDataTransform,
     SimCLRFinetuneTransform,

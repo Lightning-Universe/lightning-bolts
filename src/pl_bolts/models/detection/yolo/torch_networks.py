@@ -31,6 +31,7 @@ def run_detection(
         detections: A list where a tensor containing the detections will be appended to.
         losses: A list where a tensor containing the losses will be appended to, if ``targets`` is given.
         hits: A list where the number of targets that matched this layer will be appended to, if ``targets`` is given.
+
     """
     output, preds = detection_layer(layer_input, image_size)
     detections.append(output)
@@ -69,6 +70,7 @@ def run_detection_with_aux_head(
         detections: A list where a tensor containing the detections will be appended to.
         losses: A list where a tensor containing the losses will be appended to, if ``targets`` is given.
         hits: A list where the number of targets that matched this layer will be appended to, if ``targets`` is given.
+
     """
     output, preds = detection_layer(layer_input, image_size)
     detections.append(output)
@@ -1132,8 +1134,8 @@ class YOLOV4P6Network(nn.Module):
 
 
 class YOLOV5Network(nn.Module):
-    """The YOLOv5 network architecture. Different variants (n/s/m/l/x) can be achieved by adjusting the ``depth``
-    and ``width`` parameters.
+    """The YOLOv5 network architecture. Different variants (n/s/m/l/x) can be achieved by adjusting the ``depth`` and
+    ``width`` parameters.
 
     Args:
         num_classes: Number of different classes that this model predicts.
@@ -1176,6 +1178,7 @@ class YOLOV5Network(nn.Module):
         class_loss_multiplier: Classification loss will be scaled by this value.
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
             to produce coordinate values close to one.
+
     """
 
     def __init__(
@@ -1613,8 +1616,8 @@ class YOLOXHead(nn.Module):
 
 
 class YOLOXNetwork(nn.Module):
-    """The YOLOX network architecture. Different variants (nano/tiny/s/m/l/x) can be achieved by adjusting the
-    ``depth`` and ``width`` parameters.
+    """The YOLOX network architecture. Different variants (nano/tiny/s/m/l/x) can be achieved by adjusting the ``depth``
+    and ``width`` parameters.
 
     Args:
         num_classes: Number of different classes that this model predicts.
@@ -1657,6 +1660,7 @@ class YOLOXNetwork(nn.Module):
         class_loss_multiplier: Classification loss will be scaled by this value.
         xy_scale: Eliminate "grid sensitivity" by scaling the box coordinates by this factor. Using a value > 1.0 helps
             to produce coordinate values close to one.
+
     """
 
     def __init__(

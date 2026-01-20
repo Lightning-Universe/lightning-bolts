@@ -66,7 +66,7 @@ class VanillaPolicyGradient(LightningModule):
         avg_reward_len: int = 100,
         entropy_beta: float = 0.01,
         epoch_len: int = 1000,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Args:

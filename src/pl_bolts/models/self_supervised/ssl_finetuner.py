@@ -140,7 +140,9 @@ class SSLFineTuner(LightningModule):
             scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, self.decay_epochs, gamma=self.gamma)
         elif self.scheduler_type == "cosine":
             scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-                optimizer, self.epochs, eta_min=self.final_lr  # total epochs to run
+                optimizer,
+                self.epochs,
+                eta_min=self.final_lr,  # total epochs to run
             )
 
         return [optimizer], [scheduler]

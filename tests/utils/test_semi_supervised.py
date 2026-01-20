@@ -4,6 +4,7 @@ from warnings import warn
 import numpy as np
 import pytest
 import torch
+
 from pl_bolts.utils.semi_supervised import balance_classes, generate_half_labeled_batches
 
 try:

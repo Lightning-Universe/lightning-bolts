@@ -28,7 +28,7 @@ class SSLDatasetMixin(ABC):
         train_x = []
         train_y = []
 
-        cts = {x: 0 for x in range(num_classes)}
+        cts = dict.fromkeys(range(num_classes), 0)
         for img, class_idx in zip(examples, labels):
             # allow labeled
             if cts[class_idx] < num_val_images:
@@ -58,7 +58,7 @@ class SSLDatasetMixin(ABC):
         unlabeled = []
         unlabeled_y = []
 
-        cts = {x: 0 for x in range(num_classes)}
+        cts = dict.fromkeys(range(num_classes), 0)
         for img_name, class_idx in zip(examples, labels):
             # allow labeled
             if cts[class_idx] < num_imgs_in_val:
