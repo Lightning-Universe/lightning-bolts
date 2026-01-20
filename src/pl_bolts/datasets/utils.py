@@ -86,7 +86,7 @@ def safe_extract_tarfile(
         if not is_within_directory(path, member_path):
             raise RuntimeError(f"Attempted Path Traversal in Tar File {tar.name} with member: {member.name}")
 
-    tar.extractall(path, members, numeric_owner=numeric_owner)
+    tar.extractall(path, members, numeric_owner=numeric_owner)  # noqa: S202
 
 
 def extract_archive(from_path: str, to_path: Optional[str] = None, remove_finished: bool = False) -> None:
@@ -122,4 +122,4 @@ def _extract_gzip(from_path: str, to_path: str) -> None:
 
 def _extract_zip(from_path: str, to_path: str) -> None:
     with zipfile.ZipFile(from_path, "r") as z:
-        z.extractall(to_path)
+        z.extractall(to_path)  # noqa: S202

@@ -209,7 +209,7 @@ class TestMultiStepReplayBuffer(TestCase):
         """If there is only a single experience added, sample should return nothing."""
         self.buffer.append(self.experience01)
 
-        with pytest.raises(Exception) as context:
+        with pytest.raises(Exception) as context:  # noqa: PT011
             _ = self.buffer.sample(batch_size=1)
 
         assert isinstance(context.value, Exception)

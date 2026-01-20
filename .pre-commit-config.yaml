@@ -49,5 +49,7 @@ repos:
     rev: v0.14.10
     hooks:
       - id: ruff-check
+        name: Check code
         args: ["--fix"]
       - id: ruff-format
+        name: Format code

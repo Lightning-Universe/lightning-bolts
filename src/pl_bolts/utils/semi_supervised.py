@@ -37,7 +37,7 @@ class Identity(torch.nn.Module):
 
 @under_review()
 def balance_classes(
-    X: Union[Tensor, np.ndarray],
+    X: Union[Tensor, np.ndarray],  # noqa: N803
     y: Union[Tensor, np.ndarray, Sequence[int]],
     batch_size: int,
 ) -> Tuple[np.ndarray, np.ndarray]:
