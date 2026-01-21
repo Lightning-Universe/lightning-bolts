@@ -10,6 +10,7 @@ from torch import nn
 
 from pl_bolts.models.self_supervised.swav.loss import SWAVLoss
 from pl_bolts.models.self_supervised.swav.swav_resnet import resnet18, resnet50
+from pl_bolts.models.self_supervised.swav.swav_swin import swin_b, swin_s, swin_v2_b, swin_v2_s, swin_v2_t
 from pl_bolts.optimizers.lars import LARS
 from pl_bolts.optimizers.lr_scheduler import linear_warmup_decay
 from pl_bolts.transforms.dataset_normalizations import (
@@ -17,6 +18,16 @@ from pl_bolts.transforms.dataset_normalizations import (
     imagenet_normalization,
     stl10_normalization,
 )
+
+swav_backbones = {
+    "resnet18": resnet18,
+    "resnet50": resnet50,
+    "swin_s": swin_s,
+    "swin_b": swin_b,
+    "swin_v2_t": swin_v2_t,
+    "swin_v2_s": swin_v2_s,
+    "swin_v2_b": swin_v2_b,
+}
 
 
 class SwAV(LightningModule):
@@ -155,11 +166,8 @@ class SwAV(LightningModule):
                 self.queue = torch.load(self.queue_path)["queue"]
 
     def init_model(self):
-        if self.arch == "resnet18":
-            backbone = resnet18
-        elif self.arch == "resnet50":
-            backbone = resnet50
-
+        backbone = swav_backbones.get(self.arch, None)
+        assert backbone is not None, "backbone is not implemented!"
         return backbone(
             normalize=True,
             hidden_mlp=self.hidden_mlp,
@@ -491,7 +499,7 @@ def cli_main():
 
     trainer = Trainer(
         max_epochs=args.max_epochs,
-        max_steps=None if args.max_steps == -1 else args.max_steps,
+        max_steps=args.max_steps,
         gpus=args.gpus,
         num_nodes=args.num_nodes,
         accelerator="ddp" if args.gpus > 1 else None,
